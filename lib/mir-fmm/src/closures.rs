@@ -5,8 +5,9 @@ use std::collections::HashMap;
 const DROP_FUNCTION_ARGUMENT_NAME: &str = "_closure";
 const DROP_FUNCTION_ARGUMENT_TYPE: fmm::types::Primitive = fmm::types::Primitive::PointerInteger;
 
-static DUMMY_FUNCTION_TYPE: Lazy<mir::types::Function> =
-    Lazy::new(|| mir::types::Function::new(mir::types::Type::Number, mir::types::Type::Number));
+static DUMMY_FUNCTION_TYPE: Lazy<mir::types::Function> = Lazy::new(|| {
+    mir::types::Function::new(vec![mir::types::Type::Number], mir::types::Type::Number)
+});
 
 pub fn compile_entry_function_pointer(
     closure_pointer: impl Into<fmm::build::TypedExpression>,

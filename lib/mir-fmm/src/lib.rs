@@ -201,7 +201,10 @@ mod tests {
                 vec![mir::ir::ForeignDeclaration::new(
                     "f",
                     "g",
-                    mir::types::Function::new(mir::types::Type::Number, mir::types::Type::Number),
+                    mir::types::Function::new(
+                        vec![mir::types::Type::Number],
+                        mir::types::Type::Number,
+                    ),
                     mir::ir::CallingConvention::Target,
                 )],
                 vec![],
@@ -218,9 +221,9 @@ mod tests {
                     "f",
                     "g",
                     mir::types::Function::new(
-                        mir::types::Type::Number,
+                        vec![mir::types::Type::Number],
                         mir::types::Function::new(
-                            mir::types::Type::Number,
+                            vec![mir::types::Type::Number],
                             mir::types::Type::Number,
                         ),
                     ),
@@ -239,7 +242,10 @@ mod tests {
                 vec![mir::ir::ForeignDeclaration::new(
                     "f",
                     "g",
-                    mir::types::Function::new(mir::types::Type::Number, mir::types::Type::Number),
+                    mir::types::Function::new(
+                        vec![mir::types::Type::Number],
+                        mir::types::Type::Number,
+                    ),
                     mir::ir::CallingConvention::Source,
                 )],
                 vec![],
@@ -259,7 +265,10 @@ mod tests {
                 vec![mir::ir::ForeignDeclaration::new(
                     "f",
                     "g",
-                    mir::types::Function::new(mir::types::Type::Number, mir::types::Type::Number),
+                    mir::types::Function::new(
+                        vec![mir::types::Type::Number],
+                        mir::types::Type::Number,
+                    ),
                     mir::ir::CallingConvention::Target,
                 )],
                 vec![mir::ir::ForeignDefinition::new("f", "h")],
@@ -276,7 +285,10 @@ mod tests {
                 vec![mir::ir::ForeignDefinition::new("f", "g")],
                 vec![mir::ir::Declaration::new(
                     "f",
-                    mir::types::Function::new(mir::types::Type::Number, mir::types::Type::Number),
+                    mir::types::Function::new(
+                        vec![mir::types::Type::Number],
+                        mir::types::Type::Number,
+                    ),
                 )],
                 vec![],
             ));
@@ -310,7 +322,10 @@ mod tests {
                 vec![],
                 vec![mir::ir::Declaration::new(
                     "f",
-                    mir::types::Function::new(mir::types::Type::Number, mir::types::Type::Number),
+                    mir::types::Function::new(
+                        vec![mir::types::Type::Number],
+                        mir::types::Type::Number,
+                    ),
                 )],
                 vec![],
             ));
@@ -325,9 +340,9 @@ mod tests {
                 vec![mir::ir::Declaration::new(
                     "f",
                     mir::types::Function::new(
-                        mir::types::Type::Number,
+                        vec![mir::types::Type::Number],
                         mir::types::Function::new(
-                            mir::types::Type::Number,
+                            vec![mir::types::Type::Number],
                             mir::types::Type::Number,
                         ),
                     ),
@@ -385,11 +400,11 @@ mod tests {
                     vec![mir::ir::Argument::new("x", mir::types::Type::Number)],
                     mir::ir::Call::new(
                         mir::types::Function::new(
-                            mir::types::Type::Number,
+                            vec![mir::types::Type::Number],
                             mir::types::Type::Number,
                         ),
                         mir::ir::Variable::new("f"),
-                        mir::ir::Variable::new("x"),
+                        vec![mir::ir::Variable::new("x").into()],
                     ),
                     mir::types::Type::Number,
                 ),
@@ -436,11 +451,11 @@ mod tests {
                         ),
                         mir::ir::Call::new(
                             mir::types::Function::new(
-                                mir::types::Type::Number,
+                                vec![mir::types::Type::Number],
                                 mir::types::Type::Number,
                             ),
                             mir::ir::Variable::new("g"),
-                            42.0,
+                            vec![42.0.into()],
                         ),
                     ),
                     mir::types::Type::Number,
@@ -471,21 +486,21 @@ mod tests {
                                 vec![mir::ir::Argument::new("z", mir::types::Type::Number)],
                                 mir::ir::Call::new(
                                     mir::types::Function::new(
-                                        mir::types::Type::Number,
+                                        vec![mir::types::Type::Number],
                                         mir::types::Type::Number,
                                     ),
                                     mir::ir::Variable::new("g"),
-                                    mir::ir::Variable::new("z"),
+                                    vec![mir::ir::Variable::new("z").into()],
                                 ),
                                 mir::types::Type::Number,
                             ),
                             mir::ir::Call::new(
                                 mir::types::Function::new(
-                                    mir::types::Type::Number,
+                                    vec![mir::types::Type::Number],
                                     mir::types::Type::Number,
                                 ),
                                 mir::ir::Variable::new("h"),
-                                42.0,
+                                vec![42.0.into()],
                             ),
                         ),
                     ),
@@ -522,27 +537,27 @@ mod tests {
                                 mir::ir::Variable::new("h"),
                             ),
                             mir::types::Function::new(
-                                mir::types::Type::Number,
+                                vec![mir::types::Type::Number],
                                 mir::types::Type::Number,
                             ),
                         ),
                         mir::ir::Call::new(
                             mir::types::Function::new(
-                                mir::types::Type::Number,
+                                vec![mir::types::Type::Number],
                                 mir::types::Type::Number,
                             ),
                             mir::ir::Call::new(
                                 mir::types::Function::new(
-                                    mir::types::Type::Number,
+                                    vec![mir::types::Type::Number],
                                     mir::types::Function::new(
-                                        mir::types::Type::Number,
+                                        vec![mir::types::Type::Number],
                                         mir::types::Type::Number,
                                     ),
                                 ),
                                 mir::ir::Variable::new("g"),
-                                42.0,
+                                vec![42.0.into()],
                             ),
-                            42.0,
+                            vec![42.0.into()],
                         ),
                     ),
                     mir::types::Type::Number,
@@ -859,11 +874,11 @@ mod tests {
                         vec![mir::ir::Argument::new("x", mir::types::Type::Number)],
                         mir::ir::Call::new(
                             mir::types::Function::new(
-                                mir::types::Type::Number,
+                                vec![mir::types::Type::Number],
                                 mir::types::Type::Number,
                             ),
                             mir::ir::Variable::new("f"),
-                            42.0,
+                            vec![42.0.into()],
                         ),
                         mir::types::Type::Number,
                     ),
@@ -887,21 +902,11 @@ mod tests {
                         vec![mir::ir::Argument::new("x", mir::types::Type::Number)],
                         mir::ir::Call::new(
                             mir::types::Function::new(
-                                mir::types::Type::Boolean,
+                                vec![mir::types::Type::Number, mir::types::Type::Boolean],
                                 mir::types::Type::Number,
                             ),
-                            mir::ir::Call::new(
-                                mir::types::Function::new(
-                                    mir::types::Type::Number,
-                                    mir::types::Function::new(
-                                        mir::types::Type::Boolean,
-                                        mir::types::Type::Number,
-                                    ),
-                                ),
-                                mir::ir::Variable::new("f"),
-                                42.0,
-                            ),
-                            true,
+                            mir::ir::Variable::new("f"),
+                            vec![42.0.into(), true.into()],
                         ),
                         mir::types::Type::Number,
                     ),
@@ -926,159 +931,21 @@ mod tests {
                         vec![mir::ir::Argument::new("x", mir::types::Type::Number)],
                         mir::ir::Call::new(
                             mir::types::Function::new(
-                                mir::types::Type::ByteString,
-                                mir::types::Type::Number,
-                            ),
-                            mir::ir::Call::new(
-                                mir::types::Function::new(
-                                    mir::types::Type::Boolean,
-                                    mir::types::Function::new(
-                                        mir::types::Type::ByteString,
-                                        mir::types::Type::Number,
-                                    ),
-                                ),
-                                mir::ir::Call::new(
-                                    mir::types::Function::new(
-                                        mir::types::Type::Number,
-                                        mir::types::Function::new(
-                                            mir::types::Type::Boolean,
-                                            mir::types::Function::new(
-                                                mir::types::Type::ByteString,
-                                                mir::types::Type::Number,
-                                            ),
-                                        ),
-                                    ),
-                                    mir::ir::Variable::new("f"),
-                                    42.0,
-                                ),
-                                true,
-                            ),
-                            mir::ir::ByteString::new("foo"),
-                        ),
-                        mir::types::Type::Number,
-                    ),
-                ]));
-            }
-
-            #[test]
-            fn compile_1_argument_with_arity_of_2() {
-                compile_module(&create_module_with_definitions(vec![
-                    mir::ir::Definition::new(
-                        "f",
-                        vec![
-                            mir::ir::Argument::new("x", mir::types::Type::Number),
-                            mir::ir::Argument::new("y", mir::types::Type::Boolean),
-                        ],
-                        mir::ir::Variable::new("x"),
-                        mir::types::Type::Number,
-                    ),
-                    mir::ir::Definition::new(
-                        "g",
-                        vec![mir::ir::Argument::new("x", mir::types::Type::Number)],
-                        mir::ir::Call::new(
-                            mir::types::Function::new(
-                                mir::types::Type::Number,
-                                mir::types::Function::new(
-                                    mir::types::Type::Boolean,
+                                vec![
                                     mir::types::Type::Number,
-                                ),
-                            ),
-                            mir::ir::Variable::new("f"),
-                            42.0,
-                        ),
-                        mir::types::Function::new(
-                            mir::types::Type::Boolean,
-                            mir::types::Type::Number,
-                        ),
-                    ),
-                ]));
-            }
-
-            #[test]
-            fn compile_1_argument_with_arity_of_3() {
-                compile_module(&create_module_with_definitions(vec![
-                    mir::ir::Definition::new(
-                        "f",
-                        vec![
-                            mir::ir::Argument::new("x", mir::types::Type::Number),
-                            mir::ir::Argument::new("y", mir::types::Type::Boolean),
-                            mir::ir::Argument::new("z", mir::types::Type::ByteString),
-                        ],
-                        mir::ir::Variable::new("x"),
-                        mir::types::Type::Number,
-                    ),
-                    mir::ir::Definition::new(
-                        "g",
-                        vec![mir::ir::Argument::new("x", mir::types::Type::Number)],
-                        mir::ir::Call::new(
-                            mir::types::Function::new(
-                                mir::types::Type::Number,
-                                mir::types::Function::new(
                                     mir::types::Type::Boolean,
-                                    mir::types::Function::new(
-                                        mir::types::Type::ByteString,
-                                        mir::types::Type::Number,
-                                    ),
-                                ),
-                            ),
-                            mir::ir::Variable::new("f"),
-                            42.0,
-                        ),
-                        mir::types::Function::new(
-                            mir::types::Type::Boolean,
-                            mir::types::Function::new(
-                                mir::types::Type::ByteString,
-                                mir::types::Type::Number,
-                            ),
-                        ),
-                    ),
-                ]));
-            }
-
-            #[test]
-            fn compile_2_arguments_with_arity_of_3() {
-                compile_module(&create_module_with_definitions(vec![
-                    mir::ir::Definition::new(
-                        "f",
-                        vec![
-                            mir::ir::Argument::new("x", mir::types::Type::Number),
-                            mir::ir::Argument::new("y", mir::types::Type::Boolean),
-                            mir::ir::Argument::new("z", mir::types::Type::ByteString),
-                        ],
-                        mir::ir::Variable::new("x"),
-                        mir::types::Type::Number,
-                    ),
-                    mir::ir::Definition::new(
-                        "g",
-                        vec![mir::ir::Argument::new("x", mir::types::Type::Number)],
-                        mir::ir::Call::new(
-                            mir::types::Function::new(
-                                mir::types::Type::Boolean,
-                                mir::types::Function::new(
                                     mir::types::Type::ByteString,
-                                    mir::types::Type::Number,
-                                ),
+                                ],
+                                mir::types::Type::Number,
                             ),
-                            mir::ir::Call::new(
-                                mir::types::Function::new(
-                                    mir::types::Type::Number,
-                                    mir::types::Function::new(
-                                        mir::types::Type::Boolean,
-                                        mir::types::Function::new(
-                                            mir::types::Type::ByteString,
-                                            mir::types::Type::Number,
-                                        ),
-                                    ),
-                                ),
-                                mir::ir::Variable::new("f"),
-                                42.0,
-                            ),
-                            true,
+                            mir::ir::Variable::new("f"),
+                            vec![
+                                42.0.into(),
+                                true.into(),
+                                mir::ir::ByteString::new("foo").into(),
+                            ],
                         ),
-                        mir::types::Function::new(
-                            mir::types::Type::ByteString,
-                            mir::types::Type::Number,
-                        ),
+                        mir::types::Type::Number,
                     ),
                 ]));
             }
@@ -1103,7 +970,7 @@ mod tests {
                             mir::ir::Variable::new("g"),
                         ),
                         mir::types::Function::new(
-                            mir::types::Type::Number,
+                            vec![mir::types::Type::Number],
                             mir::types::Type::Number,
                         ),
                     ),
@@ -1112,21 +979,21 @@ mod tests {
                         vec![mir::ir::Argument::new("x", mir::types::Type::Number)],
                         mir::ir::Call::new(
                             mir::types::Function::new(
-                                mir::types::Type::Number,
+                                vec![mir::types::Type::Number],
                                 mir::types::Type::Number,
                             ),
                             mir::ir::Call::new(
                                 mir::types::Function::new(
-                                    mir::types::Type::Number,
+                                    vec![mir::types::Type::Number],
                                     mir::types::Function::new(
-                                        mir::types::Type::Number,
+                                        vec![mir::types::Type::Number],
                                         mir::types::Type::Number,
                                     ),
                                 ),
                                 mir::ir::Variable::new("f"),
-                                111.0,
+                                vec![111.0.into()],
                             ),
-                            222.0,
+                            vec![222.0.into()],
                         ),
                         mir::types::Type::Number,
                     ),
@@ -1167,21 +1034,14 @@ mod tests {
                     vec![mir::ir::Argument::new("x", mir::types::Type::ByteString)],
                     mir::ir::Call::new(
                         mir::types::Function::new(
-                            mir::types::Type::ByteString,
+                            vec![mir::types::Type::ByteString, mir::types::Type::ByteString],
                             mir::types::Type::Number,
                         ),
-                        mir::ir::Call::new(
-                            mir::types::Function::new(
-                                mir::types::Type::ByteString,
-                                mir::types::Function::new(
-                                    mir::types::Type::ByteString,
-                                    mir::types::Type::Number,
-                                ),
-                            ),
-                            mir::ir::Variable::new("f"),
-                            mir::ir::Variable::new("x"),
-                        ),
-                        mir::ir::Variable::new("x"),
+                        mir::ir::Variable::new("f"),
+                        vec![
+                            mir::ir::Variable::new("x").into(),
+                            mir::ir::Variable::new("x").into(),
+                        ],
                     ),
                     mir::types::Type::Number,
                 ),

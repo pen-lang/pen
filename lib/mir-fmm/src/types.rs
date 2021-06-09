@@ -128,7 +128,7 @@ pub fn compile_unsized_closure(
     compile_raw_closure(
         compile_entry_function_from_arguments_and_result(
             function.arguments(),
-            function.last_result(),
+            function.result(),
             types,
         ),
         compile_unsized_environment(),
@@ -235,7 +235,7 @@ pub fn compile_foreign_function(
             .into_iter()
             .map(|type_| compile(type_, types))
             .collect(),
-        compile(function.last_result(), types),
+        compile(function.result(), types),
         compile_calling_convention(calling_convention),
     )
 }
