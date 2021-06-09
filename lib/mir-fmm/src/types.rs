@@ -101,7 +101,7 @@ pub fn compile_sized_closure(
     types: &HashMap<String, mir::types::RecordBody>,
 ) -> fmm::types::Record {
     compile_raw_closure(
-        compile_entry_function(definition, types),
+        compile_entry_function(definition.type_(), types),
         compile_closure_payload(definition, types),
     )
 }
@@ -126,11 +126,7 @@ pub fn compile_unsized_closure(
     types: &HashMap<String, mir::types::RecordBody>,
 ) -> fmm::types::Record {
     compile_raw_closure(
-        compile_entry_function_from_arguments_and_result(
-            function.arguments(),
-            function.result(),
-            types,
-        ),
+        compile_entry_function(function, types),
         compile_unsized_environment(),
     )
 }
@@ -165,30 +161,20 @@ pub fn compile_unsized_environment() -> fmm::types::Record {
 }
 
 pub fn compile_entry_function(
-    definition: &mir::ir::Definition,
-    types: &HashMap<String, mir::types::RecordBody>,
-) -> fmm::types::Function {
-    compile_entry_function_from_arguments_and_result(
-        definition
-            .arguments()
-            .iter()
-            .map(|argument| argument.type_()),
-        definition.result_type(),
-        types,
-    )
-}
-
-fn compile_entry_function_from_arguments_and_result<'a>(
-    arguments: impl IntoIterator<Item = &'a mir::types::Type>,
-    result: &mir::types::Type,
+    type_: &mir::types::Function,
     types: &HashMap<String, mir::types::RecordBody>,
 ) -> fmm::types::Function {
     fmm::types::Function::new(
         vec![compile_untyped_closure_pointer().into()]
             .into_iter()
-            .chain(arguments.into_iter().map(|type_| compile(type_, types)))
+            .chain(
+                type_
+                    .arguments()
+                    .into_iter()
+                    .map(|type_| compile(type_, types)),
+            )
             .collect(),
-        compile(result, types),
+        compile(type_.result(), types),
         fmm::types::CallingConvention::Source,
     )
 }
