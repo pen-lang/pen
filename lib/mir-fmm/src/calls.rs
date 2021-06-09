@@ -178,8 +178,7 @@ fn compile_partially_applied_entry_function(
     mir_argument_types: &[&mir::types::Type],
     types: &HashMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    let curried_entry_function_type =
-        types::compile_curried_entry_function(entry_function_type, 1);
+    let curried_entry_function_type = types::compile_curried_entry_function(entry_function_type, 1);
     let arguments = curried_entry_function_type
         .arguments()
         .iter()

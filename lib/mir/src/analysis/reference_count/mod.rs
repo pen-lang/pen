@@ -235,14 +235,14 @@ fn convert_expression(
                 moved_variables,
             )
         }
-        Expression::Call(application) => {
+        Expression::Call(call) => {
             let (argument, moved_variables) =
-                convert_expression(application.argument(), owned_variables, moved_variables)?;
+                convert_expression(call.argument(), owned_variables, moved_variables)?;
             let (function, moved_variables) =
-                convert_expression(application.function(), owned_variables, &moved_variables)?;
+                convert_expression(call.function(), owned_variables, &moved_variables)?;
 
             (
-                Call::new(application.type_().clone(), function, argument).into(),
+                Call::new(call.type_().clone(), function, argument).into(),
                 moved_variables,
             )
         }

@@ -59,8 +59,8 @@ impl Call {
     }
 
     pub fn argument_types(&self) -> impl IntoIterator<Item = &Type> {
-        if let Expression::Call(application) = self.function.as_ref() {
-            application.argument_types().into_iter().collect::<Vec<_>>()
+        if let Expression::Call(call) = self.function.as_ref() {
+            call.argument_types().into_iter().collect::<Vec<_>>()
         } else {
             self.type_().arguments().into_iter().collect::<Vec<_>>()
         }

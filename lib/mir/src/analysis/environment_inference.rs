@@ -82,7 +82,7 @@ fn infer_in_expression(expression: &Expression, variables: &HashMap<String, Type
             infer_in_comparison_operation(operation, variables).into()
         }
         Expression::DropVariables(drop) => infer_in_drop_variables(drop, variables).into(),
-        Expression::Call(application) => infer_in_call(application, variables).into(),
+        Expression::Call(call) => infer_in_call(call, variables).into(),
         Expression::If(if_) => infer_in_if(if_, variables).into(),
         Expression::Let(let_) => infer_in_let(let_, variables).into(),
         Expression::LetRecursive(let_) => infer_in_let_recursive(let_, variables).into(),
@@ -187,11 +187,11 @@ fn infer_in_drop_variables(
     )
 }
 
-fn infer_in_call(application: &Call, variables: &HashMap<String, Type>) -> Call {
+fn infer_in_call(call: &Call, variables: &HashMap<String, Type>) -> Call {
     Call::new(
-        application.type_().clone(),
-        infer_in_expression(application.function(), variables),
-        infer_in_expression(application.argument(), variables),
+        call.type_().clone(),
+        infer_in_expression(call.function(), variables),
+        infer_in_expression(call.argument(), variables),
     )
 }
 

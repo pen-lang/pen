@@ -26,9 +26,9 @@ fn collect_from_expression(expression: &Expression) -> HashSet<Type> {
             .chain(collect_from_expression(operation.rhs()))
             .collect(),
         Expression::DropVariables(drop) => collect_from_expression(drop.expression()),
-        Expression::Call(application) => collect_from_expression(application.function())
+        Expression::Call(call) => collect_from_expression(call.function())
             .drain()
-            .chain(collect_from_expression(application.argument()))
+            .chain(collect_from_expression(call.argument()))
             .collect(),
         Expression::If(if_) => collect_from_expression(if_.condition())
             .drain()

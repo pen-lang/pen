@@ -114,17 +114,14 @@ fn check_expression(
 
             check_expression(drop.expression(), variables)?
         }
-        Expression::Call(application) => {
-            let function_type = check_expression(application.function(), variables)?
+        Expression::Call(call) => {
+            let function_type = check_expression(call.function(), variables)?
                 .into_function()
-                .ok_or_else(|| TypeCheckError::FunctionExpected(application.function().clone()))?;
+                .ok_or_else(|| TypeCheckError::FunctionExpected(call.function().clone()))?;
 
+            check_equality(&call.type_().clone().into(), &function_type.clone().into())?;
             check_equality(
-                &application.type_().clone().into(),
-                &function_type.clone().into(),
-            )?;
-            check_equality(
-                &check_expression(application.argument(), variables)?,
+                &check_expression(call.argument(), variables)?,
                 function_type.argument(),
             )?;
 
