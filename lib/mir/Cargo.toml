@@ -1,0 +1,11 @@
+[package]
+name = "mir"
+description = "Structurally-typed strict functional core language"
+version = "0.1.0"
+license = "MIT"
+authors = ["Yota Toyama <raviqqe@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+pretty_assertions = "0.7"
+once_cell = "1"

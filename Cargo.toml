@@ -1,2 +1,2 @@
 [workspace]
-members = ["cmd/pen"]
+members = ["cmd/pen", "lib/mir", "lib/mir-fmm"]
