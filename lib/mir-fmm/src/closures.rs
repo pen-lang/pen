@@ -102,7 +102,7 @@ pub fn compile_drop_function(
 
             for (index, free_variable) in definition.environment().iter().enumerate() {
                 reference_count::drop_expression(
-                    &builder,
+                    builder,
                     &builder.deconstruct_record(environment.clone(), index)?,
                     free_variable.type_(),
                     types,
@@ -124,7 +124,7 @@ pub fn compile_normal_thunk_drop_function(
         types,
         |builder, environment_pointer| -> Result<_, CompileError> {
             reference_count::drop_expression(
-                &builder,
+                builder,
                 &builder.load(fmm::build::union_address(
                     fmm::build::bit_cast(
                         fmm::types::Pointer::new(types::compile_closure_payload(definition, types)),
@@ -168,13 +168,13 @@ pub fn compile_drop_function_for_partially_applied_closure(
             ))?;
 
             reference_count::drop_function(
-                &builder,
+                builder,
                 &builder.deconstruct_record(environment.clone(), 0)?,
             )?;
 
             for (index, (_, mir_type)) in argument_types.iter().enumerate() {
                 reference_count::drop_expression(
-                    &builder,
+                    builder,
                     &builder.deconstruct_record(environment.clone(), index + 1)?,
                     mir_type,
                     types,

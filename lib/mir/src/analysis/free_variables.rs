@@ -18,7 +18,7 @@ fn find_in_expression(expression: &Expression) -> HashSet<String> {
             .chain(find_in_expression(operation.rhs()))
             .collect(),
         Expression::DropVariables(drop) => find_in_expression(drop.expression()),
-        Expression::FunctionApplication(application) => find_in_expression(application.function())
+        Expression::Call(application) => find_in_expression(application.function())
             .into_iter()
             .chain(find_in_expression(application.argument()))
             .collect(),

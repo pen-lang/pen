@@ -1,9 +1,8 @@
 use super::{
-    arithmetic_operation::ArithmeticOperation, byte_string::ByteString, case::Case,
+    arithmetic_operation::ArithmeticOperation, byte_string::ByteString, call::Call, case::Case,
     clone_variables::CloneVariables, comparison_operation::ComparisonOperation,
-    drop_variables::DropVariables, function_application::FunctionApplication, if_::If, let_::Let,
-    let_recursive::LetRecursive, record::Record, record_element::RecordElement, variable::Variable,
-    variant::Variant,
+    drop_variables::DropVariables, if_::If, let_::Let, let_recursive::LetRecursive, record::Record,
+    record_element::RecordElement, variable::Variable, variant::Variant,
 };
 
 #[derive(Clone, Debug, PartialEq)]
@@ -15,7 +14,7 @@ pub enum Expression {
     CloneVariables(CloneVariables),
     ComparisonOperation(ComparisonOperation),
     DropVariables(DropVariables),
-    FunctionApplication(FunctionApplication),
+    Call(Call),
     If(If),
     Let(Let),
     LetRecursive(LetRecursive),
@@ -56,9 +55,9 @@ impl From<DropVariables> for Expression {
     }
 }
 
-impl From<FunctionApplication> for Expression {
-    fn from(function_application: FunctionApplication) -> Self {
-        Self::FunctionApplication(function_application)
+impl From<Call> for Expression {
+    fn from(call: Call) -> Self {
+        Self::Call(call)
     }
 }
 

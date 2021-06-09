@@ -1,7 +1,5 @@
 use super::error::CompileError;
-use crate::{
-    closures, entry_functions, function_applications, records, reference_count, types, variants,
-};
+use crate::{calls, closures, entry_functions, records, reference_count, types, variants};
 use std::collections::HashMap;
 
 pub fn compile_arity(arity: usize) -> fmm::ir::Primitive {
@@ -70,7 +68,7 @@ pub fn compile(
 
             compile(drop.expression(), variables)?
         }
-        mir::ir::Expression::FunctionApplication(application) => function_applications::compile(
+        mir::ir::Expression::Call(application) => calls::compile(
             module_builder,
             instruction_builder,
             compile(application.first_function(), variables)?,
@@ -364,7 +362,7 @@ fn compile_let_recursive(
 
     instruction_builder.store(
         closures::compile_closure_content(
-            entry_functions::compile(module_builder, let_.definition(), &variables, types)?,
+            entry_functions::compile(module_builder, let_.definition(), variables, types)?,
             closures::compile_drop_function(module_builder, let_.definition(), types)?,
             let_.definition()
                 .environment()
@@ -394,7 +392,7 @@ fn compile_let_recursive(
                 .into(),
             )])
             .collect(),
-        &types,
+        types,
     )
 }
 

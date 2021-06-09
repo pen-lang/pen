@@ -72,7 +72,7 @@ pub fn compile_record_drop_function(
             if types::is_record_boxed(&record_type, types) {
                 pointers::drop_pointer(&builder, &record, |builder| {
                     drop_record_elements(
-                        &builder,
+                        builder,
                         &record,
                         &record_type,
                         definition.type_(),
@@ -104,8 +104,8 @@ fn drop_record_elements(
 ) -> Result<(), CompileError> {
     for (index, type_) in record_body_type.elements().iter().enumerate() {
         expressions::drop_expression(
-            &builder,
-            &crate::records::get_record_element(&builder, &record, &record_type, index, types)?,
+            builder,
+            &crate::records::get_record_element(builder, record, record_type, index, types)?,
             type_,
             types,
         )?;

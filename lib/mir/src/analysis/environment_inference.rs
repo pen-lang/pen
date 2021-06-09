@@ -82,9 +82,7 @@ fn infer_in_expression(expression: &Expression, variables: &HashMap<String, Type
             infer_in_comparison_operation(operation, variables).into()
         }
         Expression::DropVariables(drop) => infer_in_drop_variables(drop, variables).into(),
-        Expression::FunctionApplication(application) => {
-            infer_in_function_application(application, variables).into()
-        }
+        Expression::Call(application) => infer_in_call(application, variables).into(),
         Expression::If(if_) => infer_in_if(if_, variables).into(),
         Expression::Let(let_) => infer_in_let(let_, variables).into(),
         Expression::LetRecursive(let_) => infer_in_let_recursive(let_, variables).into(),
@@ -189,11 +187,8 @@ fn infer_in_drop_variables(
     )
 }
 
-fn infer_in_function_application(
-    application: &FunctionApplication,
-    variables: &HashMap<String, Type>,
-) -> FunctionApplication {
-    FunctionApplication::new(
+fn infer_in_call(application: &Call, variables: &HashMap<String, Type>) -> Call {
+    Call::new(
         application.type_().clone(),
         infer_in_expression(application.function(), variables),
         infer_in_expression(application.argument(), variables),
@@ -218,7 +213,7 @@ fn infer_in_let(let_: &Let, variables: &HashMap<String, Type>) -> Let {
 
 fn infer_in_let_recursive(let_: &LetRecursive, variables: &HashMap<String, Type>) -> LetRecursive {
     LetRecursive::new(
-        infer_in_local_definition(let_.definition(), &variables),
+        infer_in_local_definition(let_.definition(), variables),
         infer_in_expression(
             let_.expression(),
             &variables
@@ -347,7 +342,7 @@ mod tests {
                     Definition::new(
                         "f",
                         vec![Argument::new("x", Type::Number)],
-                        FunctionApplication::new(
+                        Call::new(
                             types::Function::new(Type::Number, Type::Number),
                             Variable::new("f"),
                             Variable::new("x")
@@ -363,7 +358,7 @@ mod tests {
                 "f",
                 vec![],
                 vec![Argument::new("x", Type::Number)],
-                FunctionApplication::new(
+                Call::new(
                     types::Function::new(Type::Number, Type::Number),
                     Variable::new("f"),
                     Variable::new("x")
@@ -388,7 +383,7 @@ mod tests {
                         Definition::new(
                             "g",
                             vec![Argument::new("x", Type::Number)],
-                            FunctionApplication::new(
+                            Call::new(
                                 types::Function::new(Type::Number, Type::Number),
                                 Variable::new("f"),
                                 Variable::new("x")
@@ -409,7 +404,7 @@ mod tests {
                         types::Function::new(Type::Number, Type::Number)
                     )],
                     vec![Argument::new("x", Type::Number)],
-                    FunctionApplication::new(
+                    Call::new(
                         types::Function::new(Type::Number, Type::Number),
                         Variable::new("f"),
                         Variable::new("x")

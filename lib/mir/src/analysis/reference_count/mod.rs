@@ -69,7 +69,7 @@ fn convert_expression(
     Ok(match expression {
         Expression::ArithmeticOperation(operation) => {
             let (rhs, moved_variables) =
-                convert_expression(operation.rhs(), owned_variables, &moved_variables)?;
+                convert_expression(operation.rhs(), owned_variables, moved_variables)?;
             let (lhs, moved_variables) =
                 convert_expression(operation.lhs(), owned_variables, &moved_variables)?;
 
@@ -226,7 +226,7 @@ fn convert_expression(
         }
         Expression::ComparisonOperation(operation) => {
             let (rhs, moved_variables) =
-                convert_expression(operation.rhs(), owned_variables, &moved_variables)?;
+                convert_expression(operation.rhs(), owned_variables, moved_variables)?;
             let (lhs, moved_variables) =
                 convert_expression(operation.lhs(), owned_variables, &moved_variables)?;
 
@@ -235,14 +235,14 @@ fn convert_expression(
                 moved_variables,
             )
         }
-        Expression::FunctionApplication(application) => {
+        Expression::Call(application) => {
             let (argument, moved_variables) =
                 convert_expression(application.argument(), owned_variables, moved_variables)?;
             let (function, moved_variables) =
                 convert_expression(application.function(), owned_variables, &moved_variables)?;
 
             (
-                FunctionApplication::new(application.type_().clone(), function, argument).into(),
+                Call::new(application.type_().clone(), function, argument).into(),
                 moved_variables,
             )
         }
@@ -302,7 +302,7 @@ fn convert_expression(
             )?;
             let (bound_expression, moved_variables) = convert_expression(
                 let_.bound_expression(),
-                &owned_variables,
+                owned_variables,
                 &moved_variables
                     .clone()
                     .into_iter()
@@ -558,7 +558,7 @@ mod tests {
         );
     }
 
-    mod function_applications {
+    mod calls {
         use super::*;
         use pretty_assertions::assert_eq;
 
@@ -566,7 +566,7 @@ mod tests {
         fn convert_single() {
             assert_eq!(
                 convert_expression(
-                    &FunctionApplication::new(
+                    &Call::new(
                         types::Function::new(Type::Number, Type::Number),
                         Variable::new("f"),
                         Variable::new("x")
@@ -585,7 +585,7 @@ mod tests {
                 )
                 .unwrap(),
                 (
-                    FunctionApplication::new(
+                    Call::new(
                         types::Function::new(Type::Number, Type::Number),
                         CloneVariables::new(
                             vec![(
@@ -611,9 +611,9 @@ mod tests {
         fn convert_multiple() {
             assert_eq!(
                 convert_expression(
-                    &FunctionApplication::new(
+                    &Call::new(
                         types::Function::new(Type::Number, Type::Number),
-                        FunctionApplication::new(
+                        Call::new(
                             types::Function::new(
                                 Type::Number,
                                 types::Function::new(Type::Number, Type::Number)
@@ -641,9 +641,9 @@ mod tests {
                 )
                 .unwrap(),
                 (
-                    FunctionApplication::new(
+                    Call::new(
                         types::Function::new(Type::Number, Type::Number),
-                        FunctionApplication::new(
+                        Call::new(
                             types::Function::new(
                                 Type::Number,
                                 types::Function::new(Type::Number, Type::Number)
@@ -892,13 +892,9 @@ mod tests {
                             42.0,
                             Type::Number
                         ),
-                        FunctionApplication::new(
+                        Call::new(
                             f_type.clone(),
-                            FunctionApplication::new(
-                                g_type.clone(),
-                                Variable::new("g"),
-                                Variable::new("f")
-                            ),
+                            Call::new(g_type.clone(), Variable::new("g"), Variable::new("f")),
                             Variable::new("f")
                         )
                     )
@@ -926,9 +922,9 @@ mod tests {
                         ),
                         Type::Number
                     ),
-                    FunctionApplication::new(
+                    Call::new(
                         f_type,
-                        FunctionApplication::new(
+                        Call::new(
                             g_type,
                             Variable::new("g"),
                             CloneVariables::new(
@@ -1059,7 +1055,7 @@ mod tests {
                             42.0,
                             Type::Number
                         ),
-                        FunctionApplication::new(
+                        Call::new(
                             types::Function::new(Type::Number, Type::Number),
                             Variable::new("f"),
                             Variable::new("y")
@@ -1093,7 +1089,7 @@ mod tests {
                                 ),
                                 Type::Number
                             ),
-                            FunctionApplication::new(
+                            Call::new(
                                 types::Function::new(Type::Number, Type::Number),
                                 Variable::new("f"),
                                 Variable::new("y")
@@ -1120,7 +1116,7 @@ mod tests {
                                 "f",
                                 vec![Argument::new("f", Type::Number)],
                                 vec![Argument::new("x", Type::Number)],
-                                FunctionApplication::new(
+                                Call::new(
                                     function_type.clone(),
                                     Variable::new("f"),
                                     Variable::new("x")
@@ -1151,7 +1147,7 @@ mod tests {
                                     "f",
                                     vec![Argument::new("f", Type::Number)],
                                     vec![Argument::new("x", Type::Number)],
-                                    FunctionApplication::new(
+                                    Call::new(
                                         function_type.clone(),
                                         Variable::new("f"),
                                         Variable::new("x")

@@ -114,7 +114,7 @@ fn check_expression(
 
             check_expression(drop.expression(), variables)?
         }
-        Expression::FunctionApplication(application) => {
+        Expression::Call(application) => {
             let function_type = check_expression(application.function(), variables)?
                 .into_function()
                 .ok_or_else(|| TypeCheckError::FunctionExpected(application.function().clone()))?;
@@ -153,7 +153,7 @@ fn check_expression(
                 )])
                 .collect();
 
-            check_definition(let_.definition(), &variables, &types)?;
+            check_definition(let_.definition(), &variables, types)?;
             check_expression(let_.expression(), &variables)?
         }
         Expression::Let(let_) => {
@@ -178,7 +178,7 @@ fn check_expression(
             }
 
             for (element, element_type) in record.elements().iter().zip(record_type.elements()) {
-                check_equality(&check_expression(element, variables)?, &element_type)?;
+                check_equality(&check_expression(element, variables)?, element_type)?;
             }
 
             record.type_().clone().into()
@@ -376,7 +376,7 @@ mod tests {
     }
 
     #[test]
-    fn check_types_of_function_applications() {
+    fn check_types_of_calls() {
         let module = create_module_from_definitions(vec![
             Definition::new(
                 "f",
@@ -387,7 +387,7 @@ mod tests {
             Definition::new(
                 "g",
                 vec![Argument::new("x", Type::Number)],
-                FunctionApplication::new(
+                Call::new(
                     types::Function::new(Type::Number, Type::Number),
                     Variable::new("f"),
                     42.0,
@@ -400,11 +400,11 @@ mod tests {
     }
 
     #[test]
-    fn fail_to_check_types_of_function_applications() {
+    fn fail_to_check_types_of_calls() {
         let module = create_module_from_definitions(vec![Definition::new(
             "f",
             vec![Argument::new("x", Type::Number)],
-            FunctionApplication::new(types::Function::new(Type::Number, Type::Number), 42.0, 42.0),
+            Call::new(types::Function::new(Type::Number, Type::Number), 42.0, 42.0),
             Type::Number,
         )]);
 
@@ -482,7 +482,7 @@ mod tests {
             vec![Definition::new(
                 "g",
                 vec![Argument::new("x", Type::Number)],
-                FunctionApplication::new(
+                Call::new(
                     types::Function::new(Type::Number, Type::Number),
                     Variable::new("f"),
                     Variable::new("x"),
@@ -831,7 +831,7 @@ mod tests {
                 vec![Definition::new(
                     "g",
                     vec![Argument::new("x", Type::Number)],
-                    FunctionApplication::new(
+                    Call::new(
                         types::Function::new(Type::Number, Type::Number),
                         Variable::new("f"),
                         Variable::new("x"),

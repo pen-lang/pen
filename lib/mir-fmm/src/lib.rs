@@ -1,3 +1,4 @@
+mod calls;
 mod closures;
 mod declarations;
 mod definitions;
@@ -6,7 +7,6 @@ mod error;
 mod expressions;
 mod foreign_declarations;
 mod foreign_definitions;
-mod function_applications;
 mod records;
 mod reference_count;
 mod type_information;
@@ -116,7 +116,7 @@ fn compile_global_variables(
                     declaration.name(),
                     fmm::types::Pointer::new(types::compile_unsized_closure(
                         declaration.type_(),
-                        &types,
+                        types,
                     )),
                 ),
             )
@@ -127,7 +127,7 @@ fn compile_global_variables(
                 fmm::build::bit_cast(
                     fmm::types::Pointer::new(types::compile_unsized_closure(
                         definition.type_(),
-                        &types,
+                        types,
                     )),
                     fmm::build::variable(
                         definition.name(),
@@ -158,7 +158,7 @@ mod tests {
         fmm::analysis::check_types(module).unwrap();
 
         fmm_llvm::compile_to_object(
-            &module,
+            module,
             &fmm_llvm::HeapConfiguration {
                 allocate_function_name: "allocate_heap".into(),
                 reallocate_function_name: "reallocate_heap".into(),
@@ -383,7 +383,7 @@ mod tests {
                 mir::ir::Definition::new(
                     "g",
                     vec![mir::ir::Argument::new("x", mir::types::Type::Number)],
-                    mir::ir::FunctionApplication::new(
+                    mir::ir::Call::new(
                         mir::types::Function::new(
                             mir::types::Type::Number,
                             mir::types::Type::Number,
@@ -434,7 +434,7 @@ mod tests {
                             ),
                             mir::types::Type::Number,
                         ),
-                        mir::ir::FunctionApplication::new(
+                        mir::ir::Call::new(
                             mir::types::Function::new(
                                 mir::types::Type::Number,
                                 mir::types::Type::Number,
@@ -469,7 +469,7 @@ mod tests {
                             mir::ir::Definition::new(
                                 "h",
                                 vec![mir::ir::Argument::new("z", mir::types::Type::Number)],
-                                mir::ir::FunctionApplication::new(
+                                mir::ir::Call::new(
                                     mir::types::Function::new(
                                         mir::types::Type::Number,
                                         mir::types::Type::Number,
@@ -479,7 +479,7 @@ mod tests {
                                 ),
                                 mir::types::Type::Number,
                             ),
-                            mir::ir::FunctionApplication::new(
+                            mir::ir::Call::new(
                                 mir::types::Function::new(
                                     mir::types::Type::Number,
                                     mir::types::Type::Number,
@@ -526,12 +526,12 @@ mod tests {
                                 mir::types::Type::Number,
                             ),
                         ),
-                        mir::ir::FunctionApplication::new(
+                        mir::ir::Call::new(
                             mir::types::Function::new(
                                 mir::types::Type::Number,
                                 mir::types::Type::Number,
                             ),
-                            mir::ir::FunctionApplication::new(
+                            mir::ir::Call::new(
                                 mir::types::Function::new(
                                     mir::types::Type::Number,
                                     mir::types::Function::new(
@@ -842,7 +842,7 @@ mod tests {
             }
         }
 
-        mod function_applications {
+        mod calls {
             use super::*;
 
             #[test]
@@ -857,7 +857,7 @@ mod tests {
                     mir::ir::Definition::new(
                         "g",
                         vec![mir::ir::Argument::new("x", mir::types::Type::Number)],
-                        mir::ir::FunctionApplication::new(
+                        mir::ir::Call::new(
                             mir::types::Function::new(
                                 mir::types::Type::Number,
                                 mir::types::Type::Number,
@@ -885,12 +885,12 @@ mod tests {
                     mir::ir::Definition::new(
                         "g",
                         vec![mir::ir::Argument::new("x", mir::types::Type::Number)],
-                        mir::ir::FunctionApplication::new(
+                        mir::ir::Call::new(
                             mir::types::Function::new(
                                 mir::types::Type::Boolean,
                                 mir::types::Type::Number,
                             ),
-                            mir::ir::FunctionApplication::new(
+                            mir::ir::Call::new(
                                 mir::types::Function::new(
                                     mir::types::Type::Number,
                                     mir::types::Function::new(
@@ -924,12 +924,12 @@ mod tests {
                     mir::ir::Definition::new(
                         "g",
                         vec![mir::ir::Argument::new("x", mir::types::Type::Number)],
-                        mir::ir::FunctionApplication::new(
+                        mir::ir::Call::new(
                             mir::types::Function::new(
                                 mir::types::Type::ByteString,
                                 mir::types::Type::Number,
                             ),
-                            mir::ir::FunctionApplication::new(
+                            mir::ir::Call::new(
                                 mir::types::Function::new(
                                     mir::types::Type::Boolean,
                                     mir::types::Function::new(
@@ -937,7 +937,7 @@ mod tests {
                                         mir::types::Type::Number,
                                     ),
                                 ),
-                                mir::ir::FunctionApplication::new(
+                                mir::ir::Call::new(
                                     mir::types::Function::new(
                                         mir::types::Type::Number,
                                         mir::types::Function::new(
@@ -975,7 +975,7 @@ mod tests {
                     mir::ir::Definition::new(
                         "g",
                         vec![mir::ir::Argument::new("x", mir::types::Type::Number)],
-                        mir::ir::FunctionApplication::new(
+                        mir::ir::Call::new(
                             mir::types::Function::new(
                                 mir::types::Type::Number,
                                 mir::types::Function::new(
@@ -1010,7 +1010,7 @@ mod tests {
                     mir::ir::Definition::new(
                         "g",
                         vec![mir::ir::Argument::new("x", mir::types::Type::Number)],
-                        mir::ir::FunctionApplication::new(
+                        mir::ir::Call::new(
                             mir::types::Function::new(
                                 mir::types::Type::Number,
                                 mir::types::Function::new(
@@ -1051,7 +1051,7 @@ mod tests {
                     mir::ir::Definition::new(
                         "g",
                         vec![mir::ir::Argument::new("x", mir::types::Type::Number)],
-                        mir::ir::FunctionApplication::new(
+                        mir::ir::Call::new(
                             mir::types::Function::new(
                                 mir::types::Type::Boolean,
                                 mir::types::Function::new(
@@ -1059,7 +1059,7 @@ mod tests {
                                     mir::types::Type::Number,
                                 ),
                             ),
-                            mir::ir::FunctionApplication::new(
+                            mir::ir::Call::new(
                                 mir::types::Function::new(
                                     mir::types::Type::Number,
                                     mir::types::Function::new(
@@ -1110,12 +1110,12 @@ mod tests {
                     mir::ir::Definition::new(
                         "g",
                         vec![mir::ir::Argument::new("x", mir::types::Type::Number)],
-                        mir::ir::FunctionApplication::new(
+                        mir::ir::Call::new(
                             mir::types::Function::new(
                                 mir::types::Type::Number,
                                 mir::types::Type::Number,
                             ),
-                            mir::ir::FunctionApplication::new(
+                            mir::ir::Call::new(
                                 mir::types::Function::new(
                                     mir::types::Type::Number,
                                     mir::types::Function::new(
@@ -1165,12 +1165,12 @@ mod tests {
                 mir::ir::Definition::new(
                     "g",
                     vec![mir::ir::Argument::new("x", mir::types::Type::ByteString)],
-                    mir::ir::FunctionApplication::new(
+                    mir::ir::Call::new(
                         mir::types::Function::new(
                             mir::types::Type::ByteString,
                             mir::types::Type::Number,
                         ),
-                        mir::ir::FunctionApplication::new(
+                        mir::ir::Call::new(
                             mir::types::Function::new(
                                 mir::types::Type::ByteString,
                                 mir::types::Function::new(

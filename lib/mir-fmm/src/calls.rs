@@ -93,7 +93,7 @@ fn compile_direct_call(
                 get_entry_function_type(&closure_pointer),
                 arguments.len(),
             ),
-            closures::compile_load_entry_function(&instruction_builder, closure_pointer.clone())?,
+            closures::compile_load_entry_function(instruction_builder, closure_pointer.clone())?,
         ),
         vec![
             fmm::build::bit_cast(types::compile_untyped_closure_pointer(), closure_pointer).into(),
@@ -133,7 +133,7 @@ fn compile_create_closure(
         compile_partially_applied_entry_function(
             module_builder,
             &target_entry_function_type,
-            &closure_pointer.type_(),
+            closure_pointer.type_(),
             &arguments
                 .iter()
                 .map(|argument| argument.type_())
@@ -143,7 +143,7 @@ fn compile_create_closure(
         )?,
         closures::compile_drop_function_for_partially_applied_closure(
             module_builder,
-            &closure_pointer.type_(),
+            closure_pointer.type_(),
             &arguments
                 .iter()
                 .map(|argument| argument.type_())
@@ -179,7 +179,7 @@ fn compile_partially_applied_entry_function(
     types: &HashMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     let curried_entry_function_type =
-        types::compile_curried_entry_function(&entry_function_type, 1);
+        types::compile_curried_entry_function(entry_function_type, 1);
     let arguments = curried_entry_function_type
         .arguments()
         .iter()
@@ -220,7 +220,7 @@ fn compile_partially_applied_entry_function(
                 .iter()
                 .zip(mir_argument_types)
             {
-                reference_count::clone_expression(&instruction_builder, &argument, type_, types)?;
+                reference_count::clone_expression(&instruction_builder, argument, type_, types)?;
             }
 
             reference_count::drop_function(

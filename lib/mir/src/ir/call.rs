@@ -3,13 +3,13 @@ use crate::types::{self, Type};
 use std::sync::Arc;
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct FunctionApplication {
+pub struct Call {
     type_: types::Function,
     function: Arc<Expression>,
     argument: Arc<Expression>,
 }
 
-impl FunctionApplication {
+impl Call {
     pub fn new(
         type_: types::Function,
         function: impl Into<Expression>,
@@ -37,8 +37,8 @@ impl FunctionApplication {
     pub fn first_function(&self) -> &Expression {
         let mut function: &Expression = &self.function;
 
-        while let Expression::FunctionApplication(function_application) = function {
-            function = function_application.function();
+        while let Expression::Call(call) = function {
+            function = call.function();
         }
 
         function
@@ -48,9 +48,9 @@ impl FunctionApplication {
         let mut arguments = vec![self.argument()];
         let mut expression = self;
 
-        while let Expression::FunctionApplication(function_application) = expression.function() {
-            arguments.push(function_application.argument());
-            expression = function_application;
+        while let Expression::Call(call) = expression.function() {
+            arguments.push(call.argument());
+            expression = call;
         }
 
         arguments.reverse();
@@ -59,7 +59,7 @@ impl FunctionApplication {
     }
 
     pub fn argument_types(&self) -> impl IntoIterator<Item = &Type> {
-        if let Expression::FunctionApplication(application) = self.function.as_ref() {
+        if let Expression::Call(application) = self.function.as_ref() {
             application.argument_types().into_iter().collect::<Vec<_>>()
         } else {
             self.type_().arguments().into_iter().collect::<Vec<_>>()
@@ -79,15 +79,14 @@ mod tests {
     #[test]
     fn first_function() {
         assert_eq!(
-            FunctionApplication::new(FAKE_FUNCTION_TYPE.clone(), Variable::new("f"), 42.0)
-                .first_function(),
+            Call::new(FAKE_FUNCTION_TYPE.clone(), Variable::new("f"), 42.0).first_function(),
             &Variable::new("f").into()
         );
 
         assert_eq!(
-            FunctionApplication::new(
+            Call::new(
                 FAKE_FUNCTION_TYPE.clone(),
-                FunctionApplication::new(FAKE_FUNCTION_TYPE.clone(), Variable::new("f"), 1.0),
+                Call::new(FAKE_FUNCTION_TYPE.clone(), Variable::new("f"), 1.0),
                 2.0
             )
             .first_function(),
@@ -98,7 +97,7 @@ mod tests {
     #[test]
     fn arguments() {
         assert_eq!(
-            FunctionApplication::new(FAKE_FUNCTION_TYPE.clone(), Variable::new("f"), 42.0)
+            Call::new(FAKE_FUNCTION_TYPE.clone(), Variable::new("f"), 42.0)
                 .arguments()
                 .into_iter()
                 .cloned()
@@ -107,9 +106,9 @@ mod tests {
         );
 
         assert_eq!(
-            FunctionApplication::new(
+            Call::new(
                 FAKE_FUNCTION_TYPE.clone(),
-                FunctionApplication::new(FAKE_FUNCTION_TYPE.clone(), Variable::new("f"), 1.0),
+                Call::new(FAKE_FUNCTION_TYPE.clone(), Variable::new("f"), 1.0),
                 2.0
             )
             .arguments()
