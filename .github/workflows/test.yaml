@@ -1,0 +1,80 @@
+name: test
+on:
+  - push
+jobs:
+  unit-test:
+    runs-on: ubuntu-latest
+    steps:
+      - run: curl -fsSL https://apt.llvm.org/llvm.sh | sudo bash -s 12
+      - uses: actions/checkout@v2
+      - uses: actions-rs/cargo@v1
+        with:
+          command: test
+        env:
+          RUST_MIN_STACK: 8388608
+  integration-test:
+    runs-on: ubuntu-20.04
+    steps:
+      - run: curl -fsSL https://apt.llvm.org/llvm.sh | sudo bash -s 12
+      - uses: actions/checkout@v2
+      - run: sudo apt install clang ruby-bundler valgrind
+      - run: bundler install
+      - uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release
+      - run: EIN_ROOT=$PWD PATH=$PWD/target/release:$PWD/tools:$PATH cucumber --publish-quiet
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/cargo@v1
+        with:
+          command: fmt
+          args: -- --check
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - run: curl -fsSL https://apt.llvm.org/llvm.sh | sudo bash -s 12
+      - uses: actions/checkout@v2
+      - uses: actions-rs/cargo@v1
+        with:
+          command: clippy
+          args: -- -D warnings
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/audit-check@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+  spell-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: streetsidesoftware/cspell-action@main
+        with:
+          files: "**/*.{feature,md,rs}"
+  code-coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - run: curl -fsSL https://apt.llvm.org/llvm.sh | sudo bash -s 12
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          override: true
+      - uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: --all-features --no-fail-fast
+        env:
+          RUST_MIN_STACK: 8388608
+          CARGO_INCREMENTAL: "0"
+          RUSTFLAGS: "-Zprofile -Ccodegen-units=1 -Cinline-threshold=0 -Clink-dead-code -Coverflow-checks=off"
+      - id: coverage
+        uses: actions-rs/grcov@v0.1
+      - uses: codecov/codecov-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          file: ${{ steps.coverage.outputs.report }}
