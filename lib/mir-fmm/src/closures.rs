@@ -48,16 +48,6 @@ pub fn compile_load_drop_function(
     Ok(builder.load(compile_drop_function_pointer(closure_pointer)?)?)
 }
 
-pub fn compile_load_arity(
-    builder: &fmm::build::InstructionBuilder,
-    closure_pointer: impl Into<fmm::build::TypedExpression>,
-) -> Result<fmm::build::TypedExpression, CompileError> {
-    Ok(builder.load(fmm::build::record_address(
-        reference_count::compile_untagged_pointer(&closure_pointer.into())?,
-        2,
-    )?)?)
-}
-
 pub fn compile_environment_pointer(
     closure_pointer: impl Into<fmm::build::TypedExpression>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
@@ -136,51 +126,6 @@ pub fn compile_normal_thunk_drop_function(
                 definition.result_type(),
                 types,
             )?;
-
-            Ok(())
-        },
-    )
-}
-
-pub fn compile_drop_function_for_partially_applied_closure(
-    module_builder: &fmm::build::ModuleBuilder,
-    closure_pointer_type: &fmm::types::Type,
-    argument_types: &[(&fmm::types::Type, &mir::types::Type)],
-    types: &HashMap<String, mir::types::RecordBody>,
-) -> Result<fmm::build::TypedExpression, CompileError> {
-    compile_drop_function_with_builder(
-        module_builder,
-        types,
-        |builder, environment_pointer| -> Result<_, CompileError> {
-            let environment = builder.load(fmm::build::bit_cast(
-                fmm::types::Pointer::new(fmm::types::Record::new(
-                    vec![closure_pointer_type.clone()]
-                        .into_iter()
-                        .chain(
-                            argument_types
-                                .iter()
-                                .map(|(fmm_type, _)| fmm_type)
-                                .cloned()
-                                .cloned(),
-                        )
-                        .collect(),
-                )),
-                environment_pointer.clone(),
-            ))?;
-
-            reference_count::drop_function(
-                builder,
-                &builder.deconstruct_record(environment.clone(), 0)?,
-            )?;
-
-            for (index, (_, mir_type)) in argument_types.iter().enumerate() {
-                reference_count::drop_expression(
-                    builder,
-                    &builder.deconstruct_record(environment.clone(), index + 1)?,
-                    mir_type,
-                    types,
-                )?;
-            }
 
             Ok(())
         },

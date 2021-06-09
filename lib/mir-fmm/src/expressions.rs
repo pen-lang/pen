@@ -69,16 +69,13 @@ pub fn compile(
             compile(drop.expression(), variables)?
         }
         mir::ir::Expression::Call(call) => calls::compile(
-            module_builder,
             instruction_builder,
-            compile(call.function(), variables)?,
+            &compile(call.function(), variables)?,
             &call
                 .arguments()
                 .into_iter()
                 .map(|argument| compile(argument, variables))
                 .collect::<Result<Vec<_>, CompileError>>()?,
-            &call.type_().arguments().into_iter().collect::<Vec<_>>(),
-            types,
         )?,
         mir::ir::Expression::If(if_) => {
             compile_if(module_builder, instruction_builder, if_, variables, types)?

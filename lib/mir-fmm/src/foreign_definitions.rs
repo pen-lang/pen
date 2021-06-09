@@ -24,15 +24,12 @@ pub fn compile_foreign_definition(
         arguments.clone(),
         |instruction_builder| -> Result<_, CompileError> {
             Ok(instruction_builder.return_(calls::compile(
-                module_builder,
                 &instruction_builder,
-                global_variable.clone(),
+                global_variable,
                 &arguments
                     .iter()
                     .map(|argument| fmm::build::variable(argument.name(), argument.type_().clone()))
                     .collect::<Vec<_>>(),
-                &function_type.arguments().into_iter().collect::<Vec<_>>(),
-                types,
             )?))
         },
         foreign_function_type.result().clone(),

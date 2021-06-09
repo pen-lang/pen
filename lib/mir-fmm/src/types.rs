@@ -164,32 +164,6 @@ pub fn compile_unsized_environment() -> fmm::types::Record {
     fmm::types::Record::new(vec![])
 }
 
-pub fn compile_curried_entry_function(
-    function: &fmm::types::Function,
-    arity: usize,
-) -> fmm::types::Function {
-    if arity == get_arity(function) {
-        function.clone()
-    } else {
-        fmm::types::Function::new(
-            function.arguments()[..arity + FUNCTION_ARGUMENT_OFFSET].to_vec(),
-            fmm::types::Pointer::new(compile_raw_closure(
-                fmm::types::Function::new(
-                    function.arguments()[..FUNCTION_ARGUMENT_OFFSET]
-                        .iter()
-                        .chain(function.arguments()[arity + FUNCTION_ARGUMENT_OFFSET..].iter())
-                        .cloned()
-                        .collect::<Vec<_>>(),
-                    function.result().clone(),
-                    fmm::types::CallingConvention::Source,
-                ),
-                compile_unsized_environment(),
-            )),
-            fmm::types::CallingConvention::Source,
-        )
-    }
-}
-
 pub fn compile_entry_function(
     definition: &mir::ir::Definition,
     types: &HashMap<String, mir::types::RecordBody>,
