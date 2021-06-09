@@ -115,17 +115,24 @@ fn check_expression(
             check_expression(drop.expression(), variables)?
         }
         Expression::Call(call) => {
-            let function_type = check_expression(call.function(), variables)?
-                .into_function()
-                .ok_or_else(|| TypeCheckError::FunctionExpected(call.function().clone()))?;
-
-            check_equality(&call.type_().clone().into(), &function_type.clone().into())?;
             check_equality(
-                &check_expression(call.argument(), variables)?,
-                function_type.argument(),
+                &call.type_().clone().into(),
+                &check_expression(call.function(), variables)?
+                    .into_function()
+                    .ok_or_else(|| TypeCheckError::FunctionExpected(call.function().clone()))?
+                    
+                    .into(),
             )?;
 
-            function_type.result().clone()
+            if call.arguments().len() != call.type_().arguments().len() {
+                return Err(TypeCheckError::WrongArgumentCount(call.clone()));
+            }
+
+            for (argument, argument_type) in call.arguments().iter().zip(call.type_().arguments()) {
+                check_equality(&check_expression(argument, variables)?, argument_type)?;
+            }
+
+            call.type_().result().clone()
         }
         Expression::If(if_) => {
             check_equality(
@@ -171,7 +178,7 @@ fn check_expression(
                 .ok_or_else(|| TypeCheckError::TypeNotFound(record.type_().clone()))?;
 
             if record.elements().len() != record_type.elements().len() {
-                return Err(TypeCheckError::WrongElementCount(expression.clone()));
+                return Err(TypeCheckError::WrongElementCount(record.clone()));
             }
 
             for (element, element_type) in record.elements().iter().zip(record_type.elements()) {
@@ -385,9 +392,36 @@ mod tests {
                 "g",
                 vec![Argument::new("x", Type::Number)],
                 Call::new(
-                    types::Function::new(Type::Number, Type::Number),
+                    types::Function::new(vec![Type::Number], Type::Number),
                     Variable::new("f"),
-                    42.0,
+                    vec![42.0.into()],
+                ),
+                Type::Number,
+            ),
+        ]);
+
+        assert_eq!(check_types(&module), Ok(()));
+    }
+
+    #[test]
+    fn check_call_with_2_arguments() {
+        let module = create_module_from_definitions(vec![
+            Definition::new(
+                "f",
+                vec![
+                    Argument::new("x", Type::Number),
+                    Argument::new("y", Type::Boolean),
+                ],
+                42.0,
+                Type::Number,
+            ),
+            Definition::new(
+                "g",
+                vec![Argument::new("x", Type::Number)],
+                Call::new(
+                    types::Function::new(vec![Type::Number, Type::Boolean], Type::Number),
+                    Variable::new("f"),
+                    vec![42.0.into(), true.into()],
                 ),
                 Type::Number,
             ),
@@ -401,7 +435,11 @@ mod tests {
         let module = create_module_from_definitions(vec![Definition::new(
             "f",
             vec![Argument::new("x", Type::Number)],
-            Call::new(types::Function::new(Type::Number, Type::Number), 42.0, 42.0),
+            Call::new(
+                types::Function::new(vec![Type::Number], Type::Number),
+                42.0,
+                vec![42.0.into()],
+            ),
             Type::Number,
         )]);
 
@@ -474,15 +512,15 @@ mod tests {
             vec![],
             vec![Declaration::new(
                 "f",
-                types::Function::new(Type::Number, Type::Number),
+                types::Function::new(vec![Type::Number], Type::Number),
             )],
             vec![Definition::new(
                 "g",
                 vec![Argument::new("x", Type::Number)],
                 Call::new(
-                    types::Function::new(Type::Number, Type::Number),
+                    types::Function::new(vec![Type::Number], Type::Number),
                     Variable::new("f"),
-                    Variable::new("x"),
+                    vec![Variable::new("x").into()],
                 ),
                 Type::Number,
             )],
@@ -498,7 +536,7 @@ mod tests {
             vec![],
             vec![Declaration::new(
                 "f",
-                types::Function::new(Type::Number, Type::Number),
+                types::Function::new(vec![Type::Number], Type::Number),
             )],
             vec![Definition::new(
                 "g",
@@ -820,7 +858,7 @@ mod tests {
                 vec![ForeignDeclaration::new(
                     "f",
                     "g",
-                    types::Function::new(Type::Number, Type::Number),
+                    types::Function::new(vec![Type::Number], Type::Number),
                     CallingConvention::Target,
                 )],
                 vec![],
@@ -829,9 +867,9 @@ mod tests {
                     "g",
                     vec![Argument::new("x", Type::Number)],
                     Call::new(
-                        types::Function::new(Type::Number, Type::Number),
+                        types::Function::new(vec![Type::Number], Type::Number),
                         Variable::new("f"),
-                        Variable::new("x"),
+                        vec![Variable::new("x").into()],
                     ),
                     Type::Number,
                 )],
@@ -846,7 +884,7 @@ mod tests {
                 vec![ForeignDeclaration::new(
                     "f",
                     "g",
-                    types::Function::new(Type::Number, Type::Number),
+                    types::Function::new(vec![Type::Number], Type::Number),
                     CallingConvention::Target,
                 )],
                 vec![],
@@ -877,7 +915,7 @@ mod tests {
                 vec![ForeignDefinition::new("f", "g")],
                 vec![Declaration::new(
                     "f",
-                    types::Function::new(Type::Number, Type::Number),
+                    types::Function::new(vec![Type::Number], Type::Number),
                 )],
                 vec![],
             );

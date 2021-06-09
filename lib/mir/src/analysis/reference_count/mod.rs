@@ -236,13 +236,25 @@ fn convert_expression(
             )
         }
         Expression::Call(call) => {
-            let (argument, moved_variables) =
-                convert_expression(call.argument(), owned_variables, moved_variables)?;
+            let (arguments, moved_variables) = call.arguments().iter().rev().fold(
+                Ok((vec![], moved_variables.clone())),
+                |result, argument| {
+                    let (arguments, moved_variables) = result?;
+                    let (argument, moved_variables) =
+                        convert_expression(argument, owned_variables, &moved_variables)?;
+
+                    Ok((
+                        vec![argument].into_iter().chain(arguments).collect(),
+                        moved_variables,
+                    ))
+                },
+            )?;
+
             let (function, moved_variables) =
                 convert_expression(call.function(), owned_variables, &moved_variables)?;
 
             (
-                Call::new(call.type_().clone(), function, argument).into(),
+                Call::new(call.type_().clone(), function, arguments).into(),
                 moved_variables,
             )
         }
@@ -567,15 +579,15 @@ mod tests {
             assert_eq!(
                 convert_expression(
                     &Call::new(
-                        types::Function::new(Type::Number, Type::Number),
+                        types::Function::new(vec![Type::Number], Type::Number),
                         Variable::new("f"),
-                        Variable::new("x")
+                        vec![Variable::new("x").into()]
                     )
                     .into(),
                     &vec![
                         (
                             "f".into(),
-                            types::Function::new(Type::Number, Type::Number).into()
+                            types::Function::new(vec![Type::Number], Type::Number).into()
                         ),
                         ("x".into(), Type::Number)
                     ]
@@ -586,20 +598,21 @@ mod tests {
                 .unwrap(),
                 (
                     Call::new(
-                        types::Function::new(Type::Number, Type::Number),
+                        types::Function::new(vec![Type::Number], Type::Number),
                         CloneVariables::new(
                             vec![(
                                 "f".into(),
-                                types::Function::new(Type::Number, Type::Number).into()
+                                types::Function::new(vec![Type::Number], Type::Number).into()
                             )]
                             .into_iter()
                             .collect(),
                             Variable::new("f")
                         ),
-                        CloneVariables::new(
+                        vec![CloneVariables::new(
                             vec![("x".into(), Type::Number)].into_iter().collect(),
                             Variable::new("x")
                         )
+                        .into()]
                     )
                     .into(),
                     vec!["f".into(), "x".into()].into_iter().collect()
@@ -608,28 +621,28 @@ mod tests {
         }
 
         #[test]
-        fn convert_multiple() {
+        fn convert_nested() {
             assert_eq!(
                 convert_expression(
                     &Call::new(
-                        types::Function::new(Type::Number, Type::Number),
+                        types::Function::new(vec![Type::Number], Type::Number),
                         Call::new(
                             types::Function::new(
-                                Type::Number,
-                                types::Function::new(Type::Number, Type::Number)
+                                vec![Type::Number],
+                                types::Function::new(vec![Type::Number], Type::Number)
                             ),
                             Variable::new("f"),
-                            Variable::new("x")
+                            vec![Variable::new("x").into()]
                         ),
-                        Variable::new("x")
+                        vec![Variable::new("x").into()]
                     )
                     .into(),
                     &vec![
                         (
                             "f".into(),
                             types::Function::new(
-                                Type::Number,
-                                types::Function::new(Type::Number, Type::Number)
+                                vec![Type::Number],
+                                types::Function::new(vec![Type::Number], Type::Number)
                             )
                             .into()
                         ),
@@ -642,22 +655,86 @@ mod tests {
                 .unwrap(),
                 (
                     Call::new(
-                        types::Function::new(Type::Number, Type::Number),
+                        types::Function::new(vec![Type::Number], Type::Number),
                         Call::new(
                             types::Function::new(
-                                Type::Number,
-                                types::Function::new(Type::Number, Type::Number)
+                                vec![Type::Number],
+                                types::Function::new(vec![Type::Number], Type::Number)
                             ),
                             Variable::new("f"),
+                            vec![CloneVariables::new(
+                                vec![("x".into(), Type::Number)].into_iter().collect(),
+                                Variable::new("x")
+                            )
+                            .into()]
+                        ),
+                        vec![Variable::new("x").into()]
+                    )
+                    .into(),
+                    vec!["f".into(), "x".into()].into_iter().collect()
+                ),
+            );
+        }
+
+        #[test]
+        fn convert_2_arguments() {
+            assert_eq!(
+                convert_expression(
+                    &Call::new(
+                        types::Function::new(vec![Type::Number, Type::Boolean], Type::Number),
+                        Variable::new("f"),
+                        vec![Variable::new("x").into(), Variable::new("y").into()]
+                    )
+                    .into(),
+                    &vec![
+                        (
+                            "f".into(),
+                            types::Function::new(vec![Type::Number, Type::Boolean], Type::Number)
+                                .into()
+                        ),
+                        ("x".into(), Type::Number),
+                        ("y".into(), Type::Boolean),
+                    ]
+                    .into_iter()
+                    .collect(),
+                    &vec!["f".into(), "x".into(), "y".into()]
+                        .into_iter()
+                        .collect(),
+                )
+                .unwrap(),
+                (
+                    Call::new(
+                        types::Function::new(vec![Type::Number, Type::Boolean], Type::Number),
+                        CloneVariables::new(
+                            vec![(
+                                "f".into(),
+                                types::Function::new(
+                                    vec![Type::Number, Type::Boolean],
+                                    Type::Number
+                                )
+                                .into()
+                            )]
+                            .into_iter()
+                            .collect(),
+                            Variable::new("f")
+                        ),
+                        vec![
                             CloneVariables::new(
                                 vec![("x".into(), Type::Number)].into_iter().collect(),
                                 Variable::new("x")
                             )
-                        ),
-                        Variable::new("x")
+                            .into(),
+                            CloneVariables::new(
+                                vec![("y".into(), Type::Boolean)].into_iter().collect(),
+                                Variable::new("y")
+                            )
+                            .into()
+                        ]
                     )
                     .into(),
-                    vec!["f".into(), "x".into()].into_iter().collect()
+                    vec!["x".into(), "y".into(), "f".into(),]
+                        .into_iter()
+                        .collect()
                 ),
             );
         }
@@ -856,7 +933,7 @@ mod tests {
                             vec![
                                 (
                                     "f".into(),
-                                    types::Function::new(Type::Number, Type::Number).into()
+                                    types::Function::new(vec![Type::Number], Type::Number).into()
                                 ),
                                 ("x".into(), Type::Number)
                             ]
@@ -874,11 +951,11 @@ mod tests {
 
         #[test]
         fn convert_with_cloned_variable() {
-            let f_type = types::Function::new(Type::Number, Type::Number);
+            let f_type = types::Function::new(vec![Type::Number], Type::Number);
             let g_type = types::Function::new(
-                types::Function::new(Type::Number, Type::Number),
+                vec![types::Function::new(vec![Type::Number], Type::Number).into()],
                 types::Function::new(
-                    types::Function::new(Type::Number, Type::Number),
+                    vec![types::Function::new(vec![Type::Number], Type::Number).into()],
                     Type::Number,
                 ),
             );
@@ -894,8 +971,12 @@ mod tests {
                         ),
                         Call::new(
                             f_type.clone(),
-                            Call::new(g_type.clone(), Variable::new("g"), Variable::new("f")),
-                            Variable::new("f")
+                            Call::new(
+                                g_type.clone(),
+                                Variable::new("g"),
+                                vec![Variable::new("f").into()]
+                            ),
+                            vec![Variable::new("f").into()]
                         )
                     )
                     .into(),
@@ -912,7 +993,7 @@ mod tests {
                             vec![
                                 (
                                     "f".into(),
-                                    types::Function::new(Type::Number, Type::Number).into()
+                                    types::Function::new(vec![Type::Number], Type::Number).into()
                                 ),
                                 ("x".into(), Type::Number)
                             ]
@@ -927,17 +1008,18 @@ mod tests {
                         Call::new(
                             g_type,
                             Variable::new("g"),
-                            CloneVariables::new(
+                            vec![CloneVariables::new(
                                 vec![(
                                     "f".into(),
-                                    types::Function::new(Type::Number, Type::Number).into()
+                                    types::Function::new(vec![Type::Number], Type::Number).into()
                                 )]
                                 .into_iter()
                                 .collect(),
                                 Variable::new("f")
                             )
+                            .into()]
                         ),
-                        Variable::new("f")
+                        vec![Variable::new("f").into()]
                     )
                 )
                 .into(),
@@ -971,7 +1053,7 @@ mod tests {
                             vec![
                                 (
                                     "f".into(),
-                                    types::Function::new(Type::Number, Type::Number).into()
+                                    types::Function::new(vec![Type::Number], Type::Number).into()
                                 ),
                                 ("x".into(), Type::Number),
                             ]
@@ -984,7 +1066,7 @@ mod tests {
                     DropVariables::new(
                         vec![(
                             "f".into(),
-                            types::Function::new(Type::Number, Type::Number).into()
+                            types::Function::new(vec![Type::Number], Type::Number).into()
                         )]
                         .into_iter()
                         .collect(),
@@ -1024,7 +1106,8 @@ mod tests {
                                 vec![
                                     (
                                         "f".into(),
-                                        types::Function::new(Type::Number, Type::Number).into()
+                                        types::Function::new(vec![Type::Number], Type::Number)
+                                            .into()
                                     ),
                                     ("x".into(), Type::Number),
                                     ("y".into(), Type::Number)
@@ -1056,9 +1139,9 @@ mod tests {
                             Type::Number
                         ),
                         Call::new(
-                            types::Function::new(Type::Number, Type::Number),
+                            types::Function::new(vec![Type::Number], Type::Number),
                             Variable::new("f"),
-                            Variable::new("y")
+                            vec![Variable::new("y").into()]
                         )
                     )
                     .into(),
@@ -1078,7 +1161,8 @@ mod tests {
                                     vec![
                                         (
                                             "f".into(),
-                                            types::Function::new(Type::Number, Type::Number).into()
+                                            types::Function::new(vec![Type::Number], Type::Number)
+                                                .into()
                                         ),
                                         ("x".into(), Type::Number),
                                         ("y".into(), Type::Number),
@@ -1090,9 +1174,9 @@ mod tests {
                                 Type::Number
                             ),
                             Call::new(
-                                types::Function::new(Type::Number, Type::Number),
+                                types::Function::new(vec![Type::Number], Type::Number),
                                 Variable::new("f"),
-                                Variable::new("y")
+                                vec![Variable::new("y").into()]
                             )
                         )
                     )
@@ -1104,7 +1188,7 @@ mod tests {
 
         #[test]
         fn convert_let_recursive_in_let() {
-            let function_type = types::Function::new(Type::Number, Type::Number);
+            let function_type = types::Function::new(vec![Type::Number], Type::Number);
 
             assert_eq!(
                 convert_expression(
@@ -1119,7 +1203,7 @@ mod tests {
                                 Call::new(
                                     function_type.clone(),
                                     Variable::new("f"),
-                                    Variable::new("x")
+                                    vec![Variable::new("x").into()]
                                 ),
                                 Type::Number
                             ),
@@ -1150,7 +1234,7 @@ mod tests {
                                     Call::new(
                                         function_type.clone(),
                                         Variable::new("f"),
-                                        Variable::new("x")
+                                        vec![Variable::new("x").into()]
                                     ),
                                     Type::Number
                                 ),
@@ -1208,7 +1292,7 @@ mod tests {
                             DropVariables::new(
                                 vec![(
                                     "x".into(),
-                                    types::Function::new(Type::Number, Type::Number).into()
+                                    types::Function::new(vec![Type::Number], Type::Number).into()
                                 )]
                                 .into_iter()
                                 .collect(),
@@ -1244,7 +1328,7 @@ mod tests {
                         vec![
                             (
                                 "f".into(),
-                                types::Function::new(Type::Number, Type::Number).into()
+                                types::Function::new(vec![Type::Number], Type::Number).into()
                             ),
                             ("x".into(), Type::Number)
                         ]
@@ -1276,7 +1360,7 @@ mod tests {
                         vec![
                             (
                                 "f".into(),
-                                types::Function::new(Type::Number, Type::Number).into()
+                                types::Function::new(vec![Type::Number], Type::Number).into()
                             ),
                             ("x".into(), Type::Number),
                             ("y".into(), Type::Number)

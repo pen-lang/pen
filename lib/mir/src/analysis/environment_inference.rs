@@ -191,7 +191,10 @@ fn infer_in_call(call: &Call, variables: &HashMap<String, Type>) -> Call {
     Call::new(
         call.type_().clone(),
         infer_in_expression(call.function(), variables),
-        infer_in_expression(call.argument(), variables),
+        call.arguments()
+            .iter()
+            .map(|argument| infer_in_expression(argument, variables))
+            .collect(),
     )
 }
 
@@ -343,9 +346,9 @@ mod tests {
                         "f",
                         vec![Argument::new("x", Type::Number)],
                         Call::new(
-                            types::Function::new(Type::Number, Type::Number),
+                            types::Function::new(vec![Type::Number], Type::Number),
                             Variable::new("f"),
-                            Variable::new("x")
+                            vec![Variable::new("x").into()]
                         ),
                         Type::Number
                     ),
@@ -359,9 +362,9 @@ mod tests {
                 vec![],
                 vec![Argument::new("x", Type::Number)],
                 Call::new(
-                    types::Function::new(Type::Number, Type::Number),
+                    types::Function::new(vec![Type::Number], Type::Number),
                     Variable::new("f"),
-                    Variable::new("x")
+                    vec![Variable::new("x").into()]
                 ),
                 Type::Number
             )
@@ -384,9 +387,9 @@ mod tests {
                             "g",
                             vec![Argument::new("x", Type::Number)],
                             Call::new(
-                                types::Function::new(Type::Number, Type::Number),
+                                types::Function::new(vec![Type::Number], Type::Number),
                                 Variable::new("f"),
-                                Variable::new("x")
+                                vec![Variable::new("x").into()]
                             ),
                             Type::Number
                         ),
@@ -401,13 +404,13 @@ mod tests {
                     "g",
                     vec![Argument::new(
                         "f",
-                        types::Function::new(Type::Number, Type::Number)
+                        types::Function::new(vec![Type::Number], Type::Number)
                     )],
                     vec![Argument::new("x", Type::Number)],
                     Call::new(
-                        types::Function::new(Type::Number, Type::Number),
+                        types::Function::new(vec![Type::Number], Type::Number),
                         Variable::new("f"),
-                        Variable::new("x")
+                        vec![Variable::new("x").into()]
                     ),
                     Type::Number,
                     false

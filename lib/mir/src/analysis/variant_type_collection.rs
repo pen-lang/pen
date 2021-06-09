@@ -28,7 +28,7 @@ fn collect_from_expression(expression: &Expression) -> HashSet<Type> {
         Expression::DropVariables(drop) => collect_from_expression(drop.expression()),
         Expression::Call(call) => collect_from_expression(call.function())
             .drain()
-            .chain(collect_from_expression(call.argument()))
+            .chain(call.arguments().iter().flat_map(collect_from_expression))
             .collect(),
         Expression::If(if_) => collect_from_expression(if_.condition())
             .drain()
