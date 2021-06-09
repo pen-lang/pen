@@ -55,7 +55,6 @@ jobs:
           command: test
           args: --all-features --no-fail-fast
         env:
-          RUST_MIN_STACK: 8388608
           CARGO_INCREMENTAL: "0"
           RUSTFLAGS: "-Zprofile -Ccodegen-units=1 -Cinline-threshold=0 -Clink-dead-code -Coverflow-checks=off"
       - id: coverage
