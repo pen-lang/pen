@@ -279,9 +279,7 @@ fn compile_entry_function_pointer(
     definition: &mir::ir::Definition,
     types: &HashMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    Ok(closures::compile_entry_function_pointer(
-        compile_closure_pointer(definition.type_(), types)?,
-    )?)
+    closures::compile_entry_function_pointer(compile_closure_pointer(definition.type_(), types)?)
 }
 
 fn compile_drop_function_pointer(

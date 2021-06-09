@@ -73,7 +73,7 @@ pub fn compile(
             &compile(call.function(), variables)?,
             &call
                 .arguments()
-                .into_iter()
+                .iter()
                 .map(|argument| compile(argument, variables))
                 .collect::<Result<Vec<_>, CompileError>>()?,
         )?,

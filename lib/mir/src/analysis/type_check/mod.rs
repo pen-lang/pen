@@ -120,7 +120,6 @@ fn check_expression(
                 &check_expression(call.function(), variables)?
                     .into_function()
                     .ok_or_else(|| TypeCheckError::FunctionExpected(call.function().clone()))?
-                    
                     .into(),
             )?;
 

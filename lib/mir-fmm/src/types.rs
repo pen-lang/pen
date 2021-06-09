@@ -167,12 +167,7 @@ pub fn compile_entry_function(
     fmm::types::Function::new(
         vec![compile_untyped_closure_pointer().into()]
             .into_iter()
-            .chain(
-                type_
-                    .arguments()
-                    .into_iter()
-                    .map(|type_| compile(type_, types)),
-            )
+            .chain(type_.arguments().iter().map(|type_| compile(type_, types)))
             .collect(),
         compile(type_.result(), types),
         fmm::types::CallingConvention::Source,
@@ -192,7 +187,7 @@ pub fn compile_foreign_function(
     fmm::types::Function::new(
         function
             .arguments()
-            .into_iter()
+            .iter()
             .map(|type_| compile(type_, types))
             .collect(),
         compile(function.result(), types),

@@ -14,7 +14,7 @@ pub fn compile_foreign_declaration(
         fmm::build::record(vec![
             compile_entry_function(module_builder, declaration, types)?,
             fmm::ir::Undefined::new(types::compile_closure_drop_function()).into(),
-            expressions::compile_arity(declaration.type_().arguments().into_iter().count()).into(),
+            expressions::compile_arity(declaration.type_().arguments().len()).into(),
             fmm::ir::Undefined::new(types::compile_unsized_environment()).into(),
         ]),
         false,
@@ -39,7 +39,7 @@ fn compile_entry_function(
         declaration
             .type_()
             .arguments()
-            .into_iter()
+            .iter()
             .enumerate()
             .map(|(index, type_)| {
                 fmm::ir::Argument::new(format!("arg_{}", index), types::compile(type_, types))
