@@ -1,4 +1,3 @@
-use super::location::Location;
 use serde::{Deserialize, Serialize};
 use std::{
     cmp::Ordering,
@@ -9,15 +8,22 @@ use std::{
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct SourceInformation {
     path: String,
-    location: Location,
+    line_number: usize,
+    column_number: usize,
     line: String,
 }
 
 impl SourceInformation {
-    pub fn new(path: impl Into<String>, location: Location, line: impl Into<String>) -> Self {
+    pub fn new(
+        path: impl Into<String>,
+        line_number: usize,
+        column_number: usize,
+        line: impl Into<String>,
+    ) -> Self {
         Self {
             path: path.into(),
-            location,
+            line_number,
+            column_number,
             line: line.into(),
         }
     }
@@ -25,11 +31,7 @@ impl SourceInformation {
 
 impl Display for SourceInformation {
     fn fmt(&self, formatter: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
-        let line_information = format!(
-            "{}:{}:",
-            self.location.line_number(),
-            self.location.column_number()
-        );
+        let line_information = format!("{}:{}:", self.line_number, self.column_number);
 
         write!(
             formatter,
@@ -38,7 +40,7 @@ impl Display for SourceInformation {
             &line_information,
             self.line,
             str::repeat(" ", line_information.len()),
-            str::repeat(" ", self.location.column_number() - 1),
+            str::repeat(" ", self.column_number - 1),
         )
     }
 }
@@ -69,23 +71,17 @@ impl Hash for SourceInformation {
 
 #[cfg(test)]
 mod tests {
-    use super::{Location, SourceInformation};
+    use super::SourceInformation;
 
     #[test]
     fn display() {
         assert_eq!(
-            format!(
-                "{}",
-                SourceInformation::new("file", Location::new(1, 1), "x")
-            ),
+            format!("{}", SourceInformation::new("file", 1, 1, "x")),
             "file\n1:1:\tx\n    \t^"
         );
 
         assert_eq!(
-            format!(
-                "{}",
-                SourceInformation::new("file", Location::new(1, 2), " x")
-            ),
+            format!("{}", SourceInformation::new("file", 1, 2, " x")),
             "file\n1:2:\t x\n    \t ^"
         );
     }
