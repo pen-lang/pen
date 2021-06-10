@@ -64,7 +64,7 @@ pub fn compile_closure_content(
     payload: impl Into<fmm::build::TypedExpression>,
 ) -> fmm::build::TypedExpression {
     fmm::build::record(vec![
-        entry_function.into().clone(),
+        entry_function.into(),
         drop_function.into(),
         payload.into(),
     ])
