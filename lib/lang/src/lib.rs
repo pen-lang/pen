@@ -1,3 +1,3 @@
 mod debug;
-mod ir;
+mod hir;
 mod types;
