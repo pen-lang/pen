@@ -1,4 +1,4 @@
-use super::{expressions, reference_count, types, CompileError};
+use super::{reference_count, types, CompileError};
 use once_cell::sync::Lazy;
 use std::collections::HashMap;
 
@@ -53,7 +53,7 @@ pub fn compile_environment_pointer(
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     Ok(fmm::build::record_address(
         reference_count::compile_untagged_pointer(&closure_pointer.into())?,
-        3,
+        2,
     )?
     .into())
 }
@@ -61,18 +61,12 @@ pub fn compile_environment_pointer(
 pub fn compile_closure_content(
     entry_function: impl Into<fmm::build::TypedExpression>,
     drop_function: impl Into<fmm::build::TypedExpression>,
-    free_variables: Vec<fmm::build::TypedExpression>,
+    payload: impl Into<fmm::build::TypedExpression>,
 ) -> fmm::build::TypedExpression {
-    let entry_function = entry_function.into();
-
     fmm::build::record(vec![
-        entry_function.clone(),
+        entry_function.into().clone(),
         drop_function.into(),
-        expressions::compile_arity(types::get_arity(
-            entry_function.type_().to_function().unwrap(),
-        ))
-        .into(),
-        fmm::build::record(free_variables).into(),
+        payload.into(),
     ])
     .into()
 }

@@ -2,10 +2,6 @@ use std::collections::HashMap;
 
 pub const FUNCTION_ARGUMENT_OFFSET: usize = 1;
 
-pub fn get_arity(type_: &fmm::types::Function) -> usize {
-    type_.arguments().len() - FUNCTION_ARGUMENT_OFFSET
-}
-
 pub fn compile(
     type_: &mir::types::Type,
     types: &HashMap<String, mir::types::RecordBody>,
@@ -138,7 +134,6 @@ pub fn compile_raw_closure(
     fmm::types::Record::new(vec![
         entry_function.into(),
         compile_closure_drop_function().into(),
-        compile_arity().into(),
         environment.into(),
     ])
 }
@@ -211,8 +206,4 @@ pub fn compile_closure_drop_function() -> fmm::types::Function {
         fmm::types::VOID_TYPE.clone(),
         fmm::types::CallingConvention::Target,
     )
-}
-
-pub fn compile_arity() -> fmm::types::Primitive {
-    fmm::types::Primitive::PointerInteger
 }

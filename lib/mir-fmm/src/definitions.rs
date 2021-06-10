@@ -1,5 +1,5 @@
 use super::error::CompileError;
-use crate::{closures, entry_functions, expressions, types};
+use crate::{closures, entry_functions, types};
 use std::collections::HashMap;
 
 pub fn compile_definition(
@@ -10,12 +10,11 @@ pub fn compile_definition(
 ) -> Result<(), CompileError> {
     module_builder.define_variable(
         definition.name(),
-        fmm::build::record(vec![
+        closures::compile_closure_content(
             entry_functions::compile(module_builder, definition, global_variables, types)?,
             closures::compile_drop_function(module_builder, definition, types)?,
-            expressions::compile_arity(definition.arguments().iter().count()).into(),
-            fmm::ir::Undefined::new(types::compile_closure_payload(definition, types)).into(),
-        ]),
+            fmm::ir::Undefined::new(types::compile_closure_payload(definition, types)),
+        ),
         definition.is_thunk(),
         fmm::ir::Linkage::External,
         None,

@@ -2,10 +2,6 @@ use super::error::CompileError;
 use crate::{calls, closures, entry_functions, records, reference_count, types, variants};
 use std::collections::HashMap;
 
-pub fn compile_arity(arity: usize) -> fmm::ir::Primitive {
-    fmm::ir::Primitive::PointerInteger(arity as i64)
-}
-
 pub fn compile(
     module_builder: &fmm::build::ModuleBuilder,
     instruction_builder: &fmm::build::InstructionBuilder,
@@ -361,11 +357,13 @@ fn compile_let_recursive(
         closures::compile_closure_content(
             entry_functions::compile(module_builder, let_.definition(), variables, types)?,
             closures::compile_drop_function(module_builder, let_.definition(), types)?,
-            let_.definition()
-                .environment()
-                .iter()
-                .map(|free_variable| variables[free_variable.name()].clone())
-                .collect(),
+            fmm::build::record(
+                let_.definition()
+                    .environment()
+                    .iter()
+                    .map(|free_variable| variables[free_variable.name()].clone())
+                    .collect(),
+            ),
         ),
         closure_pointer.clone(),
     );
