@@ -1,0 +1,37 @@
+use super::Type;
+use crate::debug::SourceInformation;
+use serde::{Deserialize, Serialize};
+use std::sync::Arc;
+
+#[derive(Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+pub struct Function {
+    arguments: Vec<Type>,
+    result: Arc<Type>,
+    source_information: SourceInformation,
+}
+
+impl Function {
+    pub fn new(
+        arguments: Vec<Type>,
+        result: impl Into<Type>,
+        source_information: SourceInformation,
+    ) -> Self {
+        Self {
+            arguments,
+            result: Arc::new(result.into()),
+            source_information,
+        }
+    }
+
+    pub fn arguments(&self) -> &[Type] {
+        &self.arguments
+    }
+
+    pub fn result(&self) -> &Type {
+        &self.result
+    }
+
+    pub fn source_information(&self) -> &SourceInformation {
+        &self.source_information
+    }
+}
