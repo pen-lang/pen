@@ -3,7 +3,7 @@ use super::{
     none::None, number::Number, record::Record, reference::Reference, union::Union,
     unknown::Unknown, variable::Variable,
 };
-use crate::debug::Position;
+use crate::position::Position;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]

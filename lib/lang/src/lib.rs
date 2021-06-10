@@ -1,3 +1,3 @@
-mod debug;
+mod position;
 mod hir;
 mod types;

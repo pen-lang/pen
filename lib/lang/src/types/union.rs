@@ -1,5 +1,5 @@
 use super::Type;
-use crate::debug::Position;
+use crate::position::Position;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 
