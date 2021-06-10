@@ -10,7 +10,6 @@ mod record_element;
 mod reference;
 mod type_;
 mod union;
-mod unknown;
 mod variable;
 
 pub use any::*;
@@ -25,5 +24,4 @@ pub use record_element::*;
 pub use reference::*;
 pub use type_::*;
 pub use union::*;
-pub use unknown::*;
 pub use variable::*;

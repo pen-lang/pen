@@ -1,7 +1,7 @@
 use super::{
     any::Any, boolean::Boolean, byte_string::ByteString, function::Function, list::List,
     none::None, number::Number, record::Record, reference::Reference, union::Union,
-    unknown::Unknown, variable::Variable,
+    variable::Variable,
 };
 use crate::position::Position;
 use serde::{Deserialize, Serialize};
@@ -17,7 +17,6 @@ pub enum Type {
     Record(Record),
     Reference(Reference),
     String(ByteString),
-    Unknown(Unknown),
     Union(Union),
     Variable(Variable),
 }
@@ -34,7 +33,6 @@ impl Type {
             Self::Record(record) => record.position(),
             Self::Reference(reference) => reference.position(),
             Self::String(string) => string.position(),
-            Self::Unknown(unknown) => unknown.position(),
             Self::Union(union) => union.position(),
             Self::Variable(variable) => variable.position(),
         }
@@ -92,12 +90,6 @@ impl From<Record> for Type {
 impl From<Reference> for Type {
     fn from(reference: Reference) -> Self {
         Self::Reference(reference)
-    }
-}
-
-impl From<Unknown> for Type {
-    fn from(unknown: Unknown) -> Self {
-        Self::Unknown(unknown)
     }
 }
 
