@@ -14,7 +14,7 @@ pub fn clone_expression(
     types: &HashMap<String, mir::types::RecordBody>,
 ) -> Result<(), CompileError> {
     match type_ {
-        mir::types::Type::ByteString => pointers::clone_pointer(builder, &expression)?,
+        mir::types::Type::ByteString => pointers::clone_pointer(builder, expression)?,
         mir::types::Type::Function(_) => functions::clone_function(builder, expression)?,
         mir::types::Type::Record(record) => {
             builder.call(

@@ -16,7 +16,8 @@ pub enum TypeCheckError {
     TypesNotMatched(Type, Type),
     VariableNotFound(Variable),
     VariantInVariant(Variant),
-    WrongElementCount(Expression),
+    WrongArgumentCount(Call),
+    WrongElementCount(Record),
 }
 
 impl Display for TypeCheckError {

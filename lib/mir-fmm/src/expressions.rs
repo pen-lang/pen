@@ -1,12 +1,6 @@
 use super::error::CompileError;
-use crate::{
-    closures, entry_functions, function_applications, records, reference_count, types, variants,
-};
+use crate::{calls, closures, entry_functions, records, reference_count, types, variants};
 use std::collections::HashMap;
-
-pub fn compile_arity(arity: usize) -> fmm::ir::Primitive {
-    fmm::ir::Primitive::PointerInteger(arity as i64)
-}
 
 pub fn compile(
     module_builder: &fmm::build::ModuleBuilder,
@@ -70,17 +64,14 @@ pub fn compile(
 
             compile(drop.expression(), variables)?
         }
-        mir::ir::Expression::FunctionApplication(application) => function_applications::compile(
-            module_builder,
+        mir::ir::Expression::Call(call) => calls::compile(
             instruction_builder,
-            compile(application.first_function(), variables)?,
-            &application
+            &compile(call.function(), variables)?,
+            &call
                 .arguments()
-                .into_iter()
+                .iter()
                 .map(|argument| compile(argument, variables))
                 .collect::<Result<Vec<_>, CompileError>>()?,
-            &application.argument_types().into_iter().collect::<Vec<_>>(),
-            types,
         )?,
         mir::ir::Expression::If(if_) => {
             compile_if(module_builder, instruction_builder, if_, variables, types)?
@@ -364,13 +355,15 @@ fn compile_let_recursive(
 
     instruction_builder.store(
         closures::compile_closure_content(
-            entry_functions::compile(module_builder, let_.definition(), &variables, types)?,
+            entry_functions::compile(module_builder, let_.definition(), variables, types)?,
             closures::compile_drop_function(module_builder, let_.definition(), types)?,
-            let_.definition()
-                .environment()
-                .iter()
-                .map(|free_variable| variables[free_variable.name()].clone())
-                .collect(),
+            fmm::build::record(
+                let_.definition()
+                    .environment()
+                    .iter()
+                    .map(|free_variable| variables[free_variable.name()].clone())
+                    .collect(),
+            ),
         ),
         closure_pointer.clone(),
     );
@@ -394,7 +387,7 @@ fn compile_let_recursive(
                 .into(),
             )])
             .collect(),
-        &types,
+        types,
     )
 }
 

@@ -1,4 +1,4 @@
-use crate::{function_applications, types, CompileError};
+use crate::{calls, types, CompileError};
 use std::collections::HashMap;
 
 pub fn compile_foreign_definition(
@@ -23,16 +23,13 @@ pub fn compile_foreign_definition(
         definition.foreign_name(),
         arguments.clone(),
         |instruction_builder| -> Result<_, CompileError> {
-            Ok(instruction_builder.return_(function_applications::compile(
-                module_builder,
+            Ok(instruction_builder.return_(calls::compile(
                 &instruction_builder,
-                global_variable.clone(),
+                global_variable,
                 &arguments
                     .iter()
                     .map(|argument| fmm::build::variable(argument.name(), argument.type_().clone()))
                     .collect::<Vec<_>>(),
-                &function_type.arguments().into_iter().collect::<Vec<_>>(),
-                types,
             )?))
         },
         foreign_function_type.result().clone(),

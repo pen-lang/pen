@@ -122,7 +122,7 @@ fn compile_initial_thunk_entry(
     types: &HashMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     let entry_function_name = module_builder.generate_name();
-    let entry_function_type = types::compile_entry_function(definition, types);
+    let entry_function_type = types::compile_entry_function(definition.type_(), types);
     let arguments = compile_arguments(definition, types);
 
     module_builder.define_function(
@@ -241,7 +241,7 @@ fn compile_locked_thunk_entry(
                         fmm::types::Primitive::PointerInteger,
                         fmm::build::variable(
                             &entry_function_name,
-                            types::compile_entry_function(definition, types),
+                            types::compile_entry_function(definition.type_(), types),
                         ),
                     ),
                 )?,
@@ -279,14 +279,7 @@ fn compile_entry_function_pointer(
     definition: &mir::ir::Definition,
     types: &HashMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    Ok(fmm::build::bit_cast(
-        fmm::types::Pointer::new(types::compile_entry_function(definition, types)),
-        closures::compile_entry_function_pointer(compile_closure_pointer(
-            definition.type_(),
-            types,
-        )?)?,
-    )
-    .into())
+    closures::compile_entry_function_pointer(compile_closure_pointer(definition.type_(), types)?)
 }
 
 fn compile_drop_function_pointer(

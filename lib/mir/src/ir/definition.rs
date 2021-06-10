@@ -54,12 +54,13 @@ impl Definition {
         is_thunk: bool,
     ) -> Self {
         Self {
-            type_: arguments.iter().rev().skip(1).fold(
-                types::Function::new(
-                    arguments.iter().last().unwrap().type_().clone(),
-                    result_type.clone(),
-                ),
-                |result, argument| types::Function::new(argument.type_().clone(), result),
+            type_: types::Function::new(
+                arguments
+                    .iter()
+                    .map(|argument| argument.type_())
+                    .cloned()
+                    .collect(),
+                result_type.clone(),
             ),
             name: name.into(),
             environment,

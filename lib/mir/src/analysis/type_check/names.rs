@@ -121,7 +121,7 @@ mod tests {
             vec![ForeignDeclaration::new(
                 "f",
                 "g",
-                types::Function::new(Type::Number, Type::Number),
+                types::Function::new(vec![Type::Number], Type::Number),
                 CallingConvention::Target,
             )],
             vec![],
@@ -148,7 +148,7 @@ mod tests {
             vec![],
             vec![Declaration::new(
                 "f",
-                types::Function::new(Type::Number, Type::Number),
+                types::Function::new(vec![Type::Number], Type::Number),
             )],
             vec![Definition::new(
                 "f",

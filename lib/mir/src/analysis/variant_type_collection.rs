@@ -26,12 +26,10 @@ fn collect_from_expression(expression: &Expression) -> HashSet<Type> {
             .chain(collect_from_expression(operation.rhs()))
             .collect(),
         Expression::DropVariables(drop) => collect_from_expression(drop.expression()),
-        Expression::FunctionApplication(application) => {
-            collect_from_expression(application.function())
-                .drain()
-                .chain(collect_from_expression(application.argument()))
-                .collect()
-        }
+        Expression::Call(call) => collect_from_expression(call.function())
+            .drain()
+            .chain(call.arguments().iter().flat_map(collect_from_expression))
+            .collect(),
         Expression::If(if_) => collect_from_expression(if_.condition())
             .drain()
             .chain(collect_from_expression(if_.then()))

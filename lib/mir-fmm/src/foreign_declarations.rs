@@ -1,5 +1,5 @@
 use crate::{
-    expressions,
+    closures,
     types::{self, FUNCTION_ARGUMENT_OFFSET},
 };
 use std::collections::HashMap;
@@ -11,12 +11,11 @@ pub fn compile_foreign_declaration(
 ) -> Result<(), fmm::build::BuildError> {
     module_builder.define_variable(
         declaration.name(),
-        fmm::build::record(vec![
+        closures::compile_closure_content(
             compile_entry_function(module_builder, declaration, types)?,
-            fmm::ir::Undefined::new(types::compile_closure_drop_function()).into(),
-            expressions::compile_arity(declaration.type_().arguments().into_iter().count()).into(),
-            fmm::ir::Undefined::new(types::compile_unsized_environment()).into(),
-        ]),
+            fmm::ir::Undefined::new(types::compile_closure_drop_function()),
+            fmm::build::record(vec![]),
+        ),
         false,
         fmm::ir::Linkage::Internal,
         None,
@@ -39,7 +38,7 @@ fn compile_entry_function(
         declaration
             .type_()
             .arguments()
-            .into_iter()
+            .iter()
             .enumerate()
             .map(|(index, type_)| {
                 fmm::ir::Argument::new(format!("arg_{}", index), types::compile(type_, types))

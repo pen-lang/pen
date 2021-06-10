@@ -2,10 +2,6 @@ use std::collections::HashMap;
 
 pub const FUNCTION_ARGUMENT_OFFSET: usize = 1;
 
-pub fn get_arity(type_: &fmm::types::Function) -> usize {
-    type_.arguments().len() - FUNCTION_ARGUMENT_OFFSET
-}
-
 pub fn compile(
     type_: &mir::types::Type,
     types: &HashMap<String, mir::types::RecordBody>,
@@ -101,7 +97,7 @@ pub fn compile_sized_closure(
     types: &HashMap<String, mir::types::RecordBody>,
 ) -> fmm::types::Record {
     compile_raw_closure(
-        compile_entry_function(definition, types),
+        compile_entry_function(definition.type_(), types),
         compile_closure_payload(definition, types),
     )
 }
@@ -126,11 +122,7 @@ pub fn compile_unsized_closure(
     types: &HashMap<String, mir::types::RecordBody>,
 ) -> fmm::types::Record {
     compile_raw_closure(
-        compile_entry_function_from_arguments_and_result(
-            function.arguments(),
-            function.last_result(),
-            types,
-        ),
+        compile_entry_function(function, types),
         compile_unsized_environment(),
     )
 }
@@ -142,7 +134,6 @@ pub fn compile_raw_closure(
     fmm::types::Record::new(vec![
         entry_function.into(),
         compile_closure_drop_function().into(),
-        compile_arity().into(),
         environment.into(),
     ])
 }
@@ -164,57 +155,16 @@ pub fn compile_unsized_environment() -> fmm::types::Record {
     fmm::types::Record::new(vec![])
 }
 
-pub fn compile_curried_entry_function(
-    function: &fmm::types::Function,
-    arity: usize,
-) -> fmm::types::Function {
-    if arity == get_arity(function) {
-        function.clone()
-    } else {
-        fmm::types::Function::new(
-            function.arguments()[..arity + FUNCTION_ARGUMENT_OFFSET].to_vec(),
-            fmm::types::Pointer::new(compile_raw_closure(
-                fmm::types::Function::new(
-                    function.arguments()[..FUNCTION_ARGUMENT_OFFSET]
-                        .iter()
-                        .chain(function.arguments()[arity + FUNCTION_ARGUMENT_OFFSET..].iter())
-                        .cloned()
-                        .collect::<Vec<_>>(),
-                    function.result().clone(),
-                    fmm::types::CallingConvention::Source,
-                ),
-                compile_unsized_environment(),
-            )),
-            fmm::types::CallingConvention::Source,
-        )
-    }
-}
-
 pub fn compile_entry_function(
-    definition: &mir::ir::Definition,
-    types: &HashMap<String, mir::types::RecordBody>,
-) -> fmm::types::Function {
-    compile_entry_function_from_arguments_and_result(
-        definition
-            .arguments()
-            .iter()
-            .map(|argument| argument.type_()),
-        definition.result_type(),
-        types,
-    )
-}
-
-fn compile_entry_function_from_arguments_and_result<'a>(
-    arguments: impl IntoIterator<Item = &'a mir::types::Type>,
-    result: &mir::types::Type,
+    type_: &mir::types::Function,
     types: &HashMap<String, mir::types::RecordBody>,
 ) -> fmm::types::Function {
     fmm::types::Function::new(
         vec![compile_untyped_closure_pointer().into()]
             .into_iter()
-            .chain(arguments.into_iter().map(|type_| compile(type_, types)))
+            .chain(type_.arguments().iter().map(|type_| compile(type_, types)))
             .collect(),
-        compile(result, types),
+        compile(type_.result(), types),
         fmm::types::CallingConvention::Source,
     )
 }
@@ -232,10 +182,10 @@ pub fn compile_foreign_function(
     fmm::types::Function::new(
         function
             .arguments()
-            .into_iter()
+            .iter()
             .map(|type_| compile(type_, types))
             .collect(),
-        compile(function.last_result(), types),
+        compile(function.result(), types),
         compile_calling_convention(calling_convention),
     )
 }
@@ -256,8 +206,4 @@ pub fn compile_closure_drop_function() -> fmm::types::Function {
         fmm::types::VOID_TYPE.clone(),
         fmm::types::CallingConvention::Target,
     )
-}
-
-pub fn compile_arity() -> fmm::types::Primitive {
-    fmm::types::Primitive::PointerInteger
 }
