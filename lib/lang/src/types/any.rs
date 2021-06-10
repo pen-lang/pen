@@ -1,17 +1,17 @@
-use crate::debug::SourceInformation;
+use crate::debug::Position;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Any {
-    source_information: SourceInformation,
+    position: Position,
 }
 
 impl Any {
-    pub fn new(source_information: SourceInformation) -> Self {
-        Self { source_information }
+    pub fn new(position: Position) -> Self {
+        Self { position }
     }
 
-    pub fn source_information(&self) -> &SourceInformation {
-        &self.source_information
+    pub fn position(&self) -> &Position {
+        &self.position
     }
 }

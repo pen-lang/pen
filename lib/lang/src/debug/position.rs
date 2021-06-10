@@ -6,14 +6,14 @@ use std::{
 };
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
-pub struct SourceInformation {
+pub struct Position {
     path: String,
     line_number: usize,
     column_number: usize,
     line: String,
 }
 
-impl SourceInformation {
+impl Position {
     pub fn new(
         path: impl Into<String>,
         line_number: usize,
@@ -29,7 +29,7 @@ impl SourceInformation {
     }
 }
 
-impl Display for SourceInformation {
+impl Display for Position {
     fn fmt(&self, formatter: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
         let line_information = format!("{}:{}:", self.line_number, self.column_number);
 
@@ -45,43 +45,43 @@ impl Display for SourceInformation {
     }
 }
 
-impl Eq for SourceInformation {}
+impl Eq for Position {}
 
-impl PartialEq for SourceInformation {
+impl PartialEq for Position {
     fn eq(&self, _: &Self) -> bool {
         true
     }
 }
 
-impl Ord for SourceInformation {
+impl Ord for Position {
     fn cmp(&self, _: &Self) -> Ordering {
         Ordering::Equal
     }
 }
 
-impl PartialOrd for SourceInformation {
+impl PartialOrd for Position {
     fn partial_cmp(&self, _: &Self) -> Option<Ordering> {
         Some(Ordering::Equal)
     }
 }
 
-impl Hash for SourceInformation {
+impl Hash for Position {
     fn hash<H: Hasher>(&self, _: &mut H) {}
 }
 
 #[cfg(test)]
 mod tests {
-    use super::SourceInformation;
+    use super::Position;
 
     #[test]
     fn display() {
         assert_eq!(
-            format!("{}", SourceInformation::new("file", 1, 1, "x")),
+            format!("{}", Position::new("file", 1, 1, "x")),
             "file\n1:1:\tx\n    \t^"
         );
 
         assert_eq!(
-            format!("{}", SourceInformation::new("file", 1, 2, " x")),
+            format!("{}", Position::new("file", 1, 2, " x")),
             "file\n1:2:\t x\n    \t ^"
         );
     }

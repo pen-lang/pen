@@ -1,25 +1,22 @@
-use crate::debug::SourceInformation;
+use crate::debug::Position;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Variable {
     id: usize,
-    source_information: SourceInformation,
+    position: Position,
 }
 
 impl Variable {
-    pub fn new(id: usize, source_information: SourceInformation) -> Self {
-        Self {
-            id,
-            source_information,
-        }
+    pub fn new(id: usize, position: Position) -> Self {
+        Self { id, position }
     }
 
     pub fn id(&self) -> usize {
         self.id
     }
 
-    pub fn source_information(&self) -> &SourceInformation {
-        &self.source_information
+    pub fn position(&self) -> &Position {
+        &self.position
     }
 }

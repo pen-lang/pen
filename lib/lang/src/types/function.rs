@@ -1,5 +1,5 @@
 use super::Type;
-use crate::debug::SourceInformation;
+use crate::debug::Position;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 
@@ -7,19 +7,15 @@ use std::sync::Arc;
 pub struct Function {
     arguments: Vec<Type>,
     result: Arc<Type>,
-    source_information: SourceInformation,
+    position: Position,
 }
 
 impl Function {
-    pub fn new(
-        arguments: Vec<Type>,
-        result: impl Into<Type>,
-        source_information: SourceInformation,
-    ) -> Self {
+    pub fn new(arguments: Vec<Type>, result: impl Into<Type>, position: Position) -> Self {
         Self {
             arguments,
             result: Arc::new(result.into()),
-            source_information,
+            position,
         }
     }
 
@@ -31,7 +27,7 @@ impl Function {
         &self.result
     }
 
-    pub fn source_information(&self) -> &SourceInformation {
-        &self.source_information
+    pub fn position(&self) -> &Position {
+        &self.position
     }
 }

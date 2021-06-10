@@ -1,5 +1,5 @@
 use super::Type;
-use crate::debug::SourceInformation;
+use crate::debug::Position;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 
@@ -7,19 +7,15 @@ use std::sync::Arc;
 pub struct Union {
     lhs: Arc<Type>,
     rhs: Arc<Type>,
-    source_information: SourceInformation,
+    position: Position,
 }
 
 impl Union {
-    pub fn new(
-        lhs: impl Into<Type>,
-        rhs: impl Into<Type>,
-        source_information: SourceInformation,
-    ) -> Self {
+    pub fn new(lhs: impl Into<Type>, rhs: impl Into<Type>, position: Position) -> Self {
         Self {
             lhs: lhs.into().into(),
             rhs: rhs.into().into(),
-            source_information,
+            position,
         }
     }
 
@@ -31,7 +27,7 @@ impl Union {
         &self.rhs
     }
 
-    pub fn source_information(&self) -> &SourceInformation {
-        &self.source_information
+    pub fn position(&self) -> &Position {
+        &self.position
     }
 }

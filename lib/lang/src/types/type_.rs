@@ -3,7 +3,7 @@ use super::{
     none::None, number::Number, record::Record, reference::Reference, union::Union,
     unknown::Unknown, variable::Variable,
 };
-use crate::debug::SourceInformation;
+use crate::debug::Position;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
@@ -23,20 +23,20 @@ pub enum Type {
 }
 
 impl Type {
-    pub fn source_information(&self) -> &SourceInformation {
+    pub fn position(&self) -> &Position {
         match self {
-            Self::Any(any) => any.source_information(),
-            Self::Boolean(boolean) => boolean.source_information(),
-            Self::Function(function) => function.source_information(),
-            Self::List(list) => list.source_information(),
-            Self::None(none) => none.source_information(),
-            Self::Number(number) => number.source_information(),
-            Self::Record(record) => record.source_information(),
-            Self::Reference(reference) => reference.source_information(),
-            Self::String(string) => string.source_information(),
-            Self::Unknown(unknown) => unknown.source_information(),
-            Self::Union(union) => union.source_information(),
-            Self::Variable(variable) => variable.source_information(),
+            Self::Any(any) => any.position(),
+            Self::Boolean(boolean) => boolean.position(),
+            Self::Function(function) => function.position(),
+            Self::List(list) => list.position(),
+            Self::None(none) => none.position(),
+            Self::Number(number) => number.position(),
+            Self::Record(record) => record.position(),
+            Self::Reference(reference) => reference.position(),
+            Self::String(string) => string.position(),
+            Self::Unknown(unknown) => unknown.position(),
+            Self::Union(union) => union.position(),
+            Self::Variable(variable) => variable.position(),
         }
     }
 }

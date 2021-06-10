@@ -1,17 +1,17 @@
-use crate::debug::SourceInformation;
+use crate::debug::Position;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Deserialize, Eq, Hash, PartialEq, PartialOrd, Ord, Serialize)]
 pub struct Record {
     name: String,
-    source_information: SourceInformation,
+    position: Position,
 }
 
 impl Record {
-    pub fn new(name: impl Into<String>, source_information: SourceInformation) -> Self {
+    pub fn new(name: impl Into<String>, position: Position) -> Self {
         Self {
             name: name.into(),
-            source_information,
+            position,
         }
     }
 
@@ -19,7 +19,7 @@ impl Record {
         &self.name
     }
 
-    pub fn source_information(&self) -> &SourceInformation {
-        &self.source_information
+    pub fn position(&self) -> &Position {
+        &self.position
     }
 }
