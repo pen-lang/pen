@@ -1,6 +1,7 @@
 use super::location::Location;
 use serde::{Deserialize, Serialize};
 use std::{
+    cmp::Ordering,
     fmt::Display,
     hash::{Hash, Hasher},
 };
@@ -47,6 +48,18 @@ impl Eq for SourceInformation {}
 impl PartialEq for SourceInformation {
     fn eq(&self, _: &Self) -> bool {
         true
+    }
+}
+
+impl Ord for SourceInformation {
+    fn cmp(&self, _: &Self) -> Ordering {
+        Ordering::Equal
+    }
+}
+
+impl PartialOrd for SourceInformation {
+    fn partial_cmp(&self, _: &Self) -> Option<Ordering> {
+        Some(Ordering::Equal)
     }
 }
 
