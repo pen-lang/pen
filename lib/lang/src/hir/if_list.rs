@@ -28,8 +28,8 @@ impl IfList {
             type_: type_.into(),
             first_name: first_name.into(),
             rest_name: rest_name.into(),
-            then: Arc::new(then.into()),
-            else_: Arc::new(else_.into()),
+            then: then.into(),
+            else_: else_.into(),
             position,
         }
     }

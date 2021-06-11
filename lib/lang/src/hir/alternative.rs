@@ -11,7 +11,7 @@ impl Alternative {
     pub fn new(type_: impl Into<Type>, block: Block) -> Self {
         Self {
             type_: type_.into(),
-            block: block.into(),
+            block,
         }
     }
 

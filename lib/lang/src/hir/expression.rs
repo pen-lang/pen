@@ -2,7 +2,7 @@ use super::{
     boolean::Boolean, call::Call, if_::If, if_list::IfList, if_type::IfType, list::List,
     none::None, number::Number, operation::Operation, record_construction::RecordConstruction,
     record_element::RecordElement, record_update::RecordUpdate, string::EinString,
-    type_coercion::TypeCoercion, variable::Variable,
+    type_coercion::TypeCoercion, variable::Variable, Lambda,
 };
 use crate::position::Position;
 
@@ -12,6 +12,7 @@ pub enum Expression {
     Boolean(Boolean),
     IfType(IfType),
     If(If),
+    Lambda(Lambda),
     List(List),
     IfList(IfList),
     None(None),
@@ -31,13 +32,14 @@ impl Expression {
             Self::Call(call) => call.position(),
             Self::Boolean(boolean) => boolean.position(),
             Self::IfType(if_) => if_.position(),
-            Self::RecordConstruction(record_construction) => record_construction.position(),
-            Self::RecordElement(operation) => operation.position(),
-            Self::RecordUpdate(record_update) => record_update.position(),
             Self::If(if_) => if_.position(),
+            Self::Lambda(lambda) => lambda.position(),
             Self::List(list) => list.position(),
             Self::IfList(if_) => if_.position(),
             Self::Operation(operation) => operation.position(),
+            Self::RecordConstruction(construction) => construction.position(),
+            Self::RecordElement(element) => element.position(),
+            Self::RecordUpdate(record_update) => record_update.position(),
             Self::String(string) => string.position(),
             Self::TypeCoercion(coercion) => coercion.position(),
             Self::None(none) => none.position(),
@@ -72,14 +74,14 @@ impl From<EinString> for Expression {
 }
 
 impl From<RecordConstruction> for Expression {
-    fn from(record_construction: RecordConstruction) -> Self {
-        Self::RecordConstruction(record_construction)
+    fn from(construction: RecordConstruction) -> Self {
+        Self::RecordConstruction(construction)
     }
 }
 
 impl From<RecordElement> for Expression {
-    fn from(operation: RecordElement) -> Self {
-        Self::RecordElement(operation)
+    fn from(element: RecordElement) -> Self {
+        Self::RecordElement(element)
     }
 }
 
@@ -92,6 +94,12 @@ impl From<RecordUpdate> for Expression {
 impl From<If> for Expression {
     fn from(if_: If) -> Self {
         Self::If(if_)
+    }
+}
+
+impl From<Lambda> for Expression {
+    fn from(lambda: Lambda) -> Self {
+        Self::Lambda(lambda)
     }
 }
 
