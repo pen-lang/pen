@@ -1,6 +1,6 @@
 use super::{type_compilation, type_context::TypeContext, CompileError};
 use crate::{
-    compile::{expressions, type_compilation::NONE_RECORD_TYPE_NAME},
+    compile::{expression_compilation, type_compilation::NONE_RECORD_TYPE_NAME},
     hir::*,
 };
 use std::collections::HashMap;
@@ -94,7 +94,7 @@ fn compile_definition(
     Ok(mir::ir::Definition::new(
         definition.name(),
         vec![],
-        expressions::compile(definition.body(), variables, type_context)?,
+        expression_compilation::compile(definition.body(), variables, type_context)?,
         type_compilation::compile(definition.type_(), type_context)?,
     ))
 }
