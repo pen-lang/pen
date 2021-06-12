@@ -26,7 +26,7 @@ pub fn infer_types(module: &Module, types: &HashMap<String, Type>) -> Result<Mod
         module
             .definitions()
             .iter()
-            .map(|definition| infer_definition(definition, &variables, &types))
+            .map(|definition| infer_definition(definition, &variables, types))
             .collect::<Result<_, _>>()?,
     ))
 }
