@@ -2,7 +2,7 @@ mod error;
 mod expressions;
 mod interfaces;
 mod list_type_configuration;
-mod modules;
+mod module_compilation;
 mod type_canonicalization;
 mod type_compilation;
 mod type_context;
@@ -26,7 +26,7 @@ pub fn compile(
 
     Ok((
         fmm_llvm::compile_to_bit_code(
-            &mir_fmm::compile(&modules::compile(&module, &type_context)?)?,
+            &mir_fmm::compile(&module_compilation::compile(&module, &type_context)?)?,
             &fmm_llvm::HeapConfiguration {
                 allocate_function_name: "malloc".into(),
                 reallocate_function_name: "realloc".into(),
