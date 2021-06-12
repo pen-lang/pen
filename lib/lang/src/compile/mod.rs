@@ -1,5 +1,7 @@
 mod error;
 mod interfaces;
+mod type_context;
+mod type_inference;
 
 use crate::{hir::Module, interface};
 pub use error::CompileError;
