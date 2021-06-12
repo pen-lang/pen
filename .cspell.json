@@ -1,6 +1,7 @@
 {
   "words": [
     "arity",
+    "canonicalization",
     "canonicalize",
     "hasher",
     "idempotently",

@@ -2,23 +2,20 @@ use super::{type_resolution, CompileError};
 use crate::types::{self, Type};
 use std::collections::{BTreeSet, HashMap};
 
-pub fn canonicalize_type(
-    type_: &Type,
-    types: &HashMap<String, Type>,
-) -> Result<Type, CompileError> {
+pub fn canonicalize(type_: &Type, types: &HashMap<String, Type>) -> Result<Type, CompileError> {
     Ok(match type_resolution::resolve_type(type_, types)? {
         Type::Function(function) => types::Function::new(
             function
                 .arguments()
                 .iter()
-                .map(|type_| canonicalize_type(type_, types))
+                .map(|type_| canonicalize(type_, types))
                 .collect::<Result<_, _>>()?,
-            canonicalize_type(function.result(), types)?,
+            canonicalize(function.result(), types)?,
             function.position().clone(),
         )
         .into(),
         Type::List(list) => types::List::new(
-            canonicalize_type(list.element(), types)?,
+            canonicalize(list.element(), types)?,
             list.position().clone(),
         )
         .into(),
@@ -59,7 +56,7 @@ fn collect_types(
         | Type::List(_)
         | Type::None(_)
         | Type::Number(_)
-        | Type::String(_) => vec![canonicalize_type(type_, types)?].into_iter().collect(),
+        | Type::String(_) => vec![canonicalize(type_, types)?].into_iter().collect(),
         Type::Reference(_) => unreachable!(),
     })
 }
@@ -72,7 +69,7 @@ mod tests {
     #[test]
     fn canonicalize_number() {
         assert_eq!(
-            canonicalize_type(
+            canonicalize(
                 &types::Number::new(Position::dummy()).into(),
                 &Default::default(),
             ),
@@ -83,7 +80,7 @@ mod tests {
     #[test]
     fn canonicalize_union_of_numbers() {
         assert_eq!(
-            canonicalize_type(
+            canonicalize(
                 &types::Union::new(
                     types::Number::new(Position::dummy()),
                     types::Number::new(Position::dummy()),
@@ -99,7 +96,7 @@ mod tests {
     #[test]
     fn canonicalize_union_of_3_types() {
         assert_eq!(
-            canonicalize_type(
+            canonicalize(
                 &types::Union::new(
                     types::Number::new(Position::dummy()),
                     types::Union::new(
@@ -128,7 +125,7 @@ mod tests {
     #[test]
     fn canonicalize_union_of_function_argument() {
         assert_eq!(
-            canonicalize_type(
+            canonicalize(
                 &types::Function::new(
                     vec![types::Union::new(
                         types::Number::new(Position::dummy()),
@@ -154,7 +151,7 @@ mod tests {
     #[test]
     fn canonicalize_union_of_function_result() {
         assert_eq!(
-            canonicalize_type(
+            canonicalize(
                 &types::Function::new(
                     vec![],
                     types::Union::new(
@@ -179,7 +176,7 @@ mod tests {
     #[test]
     fn canonicalize_union_of_list_element() {
         assert_eq!(
-            canonicalize_type(
+            canonicalize(
                 &types::List::new(
                     types::Union::new(
                         types::Number::new(Position::dummy()),
