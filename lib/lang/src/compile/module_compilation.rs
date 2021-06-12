@@ -1,5 +1,8 @@
 use super::{type_compilation, type_context::TypeContext, CompileError};
-use crate::{compile::expressions, hir::*};
+use crate::{
+    compile::{expressions, type_compilation::NONE_RECORD_TYPE_NAME},
+    hir::*,
+};
 use std::collections::HashMap;
 
 pub fn compile(
@@ -26,11 +29,19 @@ pub fn compile(
         .collect::<Result<_, CompileError>>()?;
 
     Ok(mir::ir::Module::new(
-        module
-            .type_definitions()
-            .iter()
-            .map(|type_definition| compile_type_definition(type_definition, type_context))
-            .collect::<Result<_, _>>()?,
+        vec![mir::ir::TypeDefinition::new(
+            NONE_RECORD_TYPE_NAME,
+            mir::types::RecordBody::new(vec![]),
+        )]
+        .into_iter()
+        .chain(
+            module
+                .type_definitions()
+                .iter()
+                .map(|type_definition| compile_type_definition(type_definition, type_context))
+                .collect::<Result<Vec<_>, _>>()?,
+        )
+        .collect(),
         vec![],
         vec![],
         module
