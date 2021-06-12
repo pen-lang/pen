@@ -79,4 +79,119 @@ mod tests {
             Ok(types::Number::new(Position::dummy()).into())
         );
     }
+
+    #[test]
+    fn canonicalize_union_of_numbers() {
+        assert_eq!(
+            canonicalize_type(
+                &types::Union::new(
+                    types::Number::new(Position::dummy()),
+                    types::Number::new(Position::dummy()),
+                    Position::dummy()
+                )
+                .into(),
+                &Default::default(),
+            ),
+            Ok(types::Number::new(Position::dummy()).into())
+        );
+    }
+
+    #[test]
+    fn canonicalize_union_of_3_types() {
+        assert_eq!(
+            canonicalize_type(
+                &types::Union::new(
+                    types::Number::new(Position::dummy()),
+                    types::Union::new(
+                        types::Boolean::new(Position::dummy()),
+                        types::None::new(Position::dummy()),
+                        Position::dummy()
+                    ),
+                    Position::dummy()
+                )
+                .into(),
+                &Default::default(),
+            ),
+            Ok(types::Union::new(
+                types::Union::new(
+                    types::Boolean::new(Position::dummy()),
+                    types::None::new(Position::dummy()),
+                    Position::dummy()
+                ),
+                types::Number::new(Position::dummy()),
+                Position::dummy()
+            )
+            .into())
+        );
+    }
+
+    #[test]
+    fn canonicalize_union_of_function_argument() {
+        assert_eq!(
+            canonicalize_type(
+                &types::Function::new(
+                    vec![types::Union::new(
+                        types::Number::new(Position::dummy()),
+                        types::Number::new(Position::dummy()),
+                        Position::dummy()
+                    )
+                    .into()],
+                    types::None::new(Position::dummy()),
+                    Position::dummy(),
+                )
+                .into(),
+                &Default::default(),
+            ),
+            Ok(types::Function::new(
+                vec![types::Number::new(Position::dummy()).into()],
+                types::None::new(Position::dummy()),
+                Position::dummy(),
+            )
+            .into())
+        );
+    }
+
+    #[test]
+    fn canonicalize_union_of_function_result() {
+        assert_eq!(
+            canonicalize_type(
+                &types::Function::new(
+                    vec![],
+                    types::Union::new(
+                        types::Number::new(Position::dummy()),
+                        types::Number::new(Position::dummy()),
+                        Position::dummy()
+                    ),
+                    Position::dummy(),
+                )
+                .into(),
+                &Default::default(),
+            ),
+            Ok(types::Function::new(
+                vec![],
+                types::Number::new(Position::dummy()),
+                Position::dummy(),
+            )
+            .into())
+        );
+    }
+
+    #[test]
+    fn canonicalize_union_of_list_element() {
+        assert_eq!(
+            canonicalize_type(
+                &types::List::new(
+                    types::Union::new(
+                        types::Number::new(Position::dummy()),
+                        types::Number::new(Position::dummy()),
+                        Position::dummy()
+                    ),
+                    Position::dummy(),
+                )
+                .into(),
+                &Default::default(),
+            ),
+            Ok(types::List::new(types::Number::new(Position::dummy()), Position::dummy(),).into())
+        );
+    }
 }
