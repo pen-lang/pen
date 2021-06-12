@@ -5,15 +5,25 @@ use serde::{Deserialize, Serialize};
 pub struct TypeDefinition {
     name: String,
     type_: types::Record,
+    open: bool,
     public: bool,
+    external: bool,
 }
 
 impl TypeDefinition {
-    pub fn new(name: impl Into<String>, type_: types::Record, public: bool) -> Self {
+    pub fn new(
+        name: impl Into<String>,
+        type_: types::Record,
+        public: bool,
+        open: bool,
+        external: bool,
+    ) -> Self {
         Self {
             name: name.into(),
             type_,
+            open,
             public,
+            external,
         }
     }
 
@@ -25,7 +35,15 @@ impl TypeDefinition {
         &self.type_
     }
 
+    pub fn is_open(&self) -> bool {
+        self.public
+    }
+
     pub fn is_public(&self) -> bool {
+        self.public
+    }
+
+    pub fn is_external(&self) -> bool {
         self.public
     }
 }

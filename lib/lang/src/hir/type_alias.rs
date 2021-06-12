@@ -6,14 +6,21 @@ pub struct TypeAlias {
     name: String,
     type_: Type,
     public: bool,
+    external: bool,
 }
 
 impl TypeAlias {
-    pub fn new(name: impl Into<String>, type_: impl Into<Type>, public: bool) -> Self {
+    pub fn new(
+        name: impl Into<String>,
+        type_: impl Into<Type>,
+        public: bool,
+        external: bool,
+    ) -> Self {
         Self {
             name: name.into(),
             type_: type_.into(),
             public,
+            external,
         }
     }
 
@@ -27,5 +34,9 @@ impl TypeAlias {
 
     pub fn is_public(&self) -> bool {
         self.public
+    }
+
+    pub fn is_external(&self) -> bool {
+        self.external
     }
 }

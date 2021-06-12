@@ -5,4 +5,8 @@ authors = ["Yota Toyama <raviqqe@gmail.com>"]
 edition = "2018"
 
 [dependencies]
+mir = { path = "../mir" }
+mir-fmm = { path = "../mir-fmm" }
+fmm = { git = "https://github.com/raviqqe/fmm", branch = "main" }
+fmm-llvm = { git = "https://github.com/raviqqe/fmm", branch = "main" }
 serde = { version = "1", features = ["derive", "rc"] }
