@@ -1,6 +1,6 @@
+mod canonical_types;
 mod error;
 mod interfaces;
-mod canonical_types;
 mod type_context;
 mod type_equality;
 mod type_extraction;
