@@ -32,7 +32,9 @@ pub fn extract_from_expression(
             .result_type()
             .ok_or_else(|| CompileError::TypeNotInferred(if_.position().clone()))?
             .clone(),
+        Expression::None(none) => types::None::new(none.position().clone()).into(),
         Expression::Number(number) => types::Number::new(number.position().clone()).into(),
+        Expression::String(string) => types::ByteString::new(string.position().clone()).into(),
         _ => todo!(),
     })
 }

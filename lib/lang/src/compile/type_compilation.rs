@@ -1,7 +1,7 @@
 use super::{type_context::TypeContext, CompileError};
 use crate::{compile::type_canonicalization, types::Type};
 
-const NONE_RECORD_TYPE_NAME: &str = "_pen_none";
+pub const NONE_RECORD_TYPE_NAME: &str = "_pen_none";
 
 pub fn compile(type_: &Type, type_context: &TypeContext) -> Result<mir::types::Type, CompileError> {
     let compile = |type_| compile(type_, type_context);

@@ -1,5 +1,8 @@
 use super::{type_compilation, type_context::TypeContext, CompileError};
-use crate::hir::{Block, Expression};
+use crate::{
+    compile::type_compilation::NONE_RECORD_TYPE_NAME,
+    hir::{Block, Expression},
+};
 use std::collections::HashMap;
 
 const CLOSURE_NAME: &str = "$closure";
@@ -30,7 +33,11 @@ pub fn compile(
             mir::ir::Variable::new(CLOSURE_NAME),
         )
         .into(),
+        Expression::None(_) => {
+            mir::ir::Record::new(mir::types::Record::new(NONE_RECORD_TYPE_NAME), vec![]).into()
+        }
         Expression::Number(number) => mir::ir::Expression::Number(number.value()),
+        Expression::String(string) => mir::ir::ByteString::new(string.value().clone()).into(),
         Expression::Variable(variable) => variables
             .get(variable.name())
             .cloned()

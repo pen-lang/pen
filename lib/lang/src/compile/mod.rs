@@ -13,7 +13,7 @@ mod type_resolution;
 mod union_types;
 
 use self::type_context::TypeContext;
-use crate::{hir::Module, interface};
+use crate::{hir::*, interface};
 pub use error::CompileError;
 use list_type_configuration::ListTypeConfiguration;
 
@@ -41,11 +41,96 @@ pub fn compile(
 #[cfg(test)]
 mod tests {
     use super::{list_type_configuration::LIST_TYPE_CONFIGURATION, *};
+    use crate::{position::Position, types};
 
     #[test]
     fn compile_empty_module() -> Result<(), CompileError> {
         compile(
             &Module::new(vec![], vec![], vec![], vec![]),
+            &LIST_TYPE_CONFIGURATION,
+        )?;
+
+        Ok(())
+    }
+
+    #[test]
+    fn compile_boolean() -> Result<(), CompileError> {
+        compile(
+            &Module::new(
+                vec![],
+                vec![],
+                vec![],
+                vec![Definition::new(
+                    "x",
+                    Boolean::new(false, Position::dummy()),
+                    types::Boolean::new(Position::dummy()),
+                    false,
+                    Position::dummy(),
+                )],
+            ),
+            &LIST_TYPE_CONFIGURATION,
+        )?;
+
+        Ok(())
+    }
+
+    #[test]
+    fn compile_none() -> Result<(), CompileError> {
+        compile(
+            &Module::new(
+                vec![],
+                vec![],
+                vec![],
+                vec![Definition::new(
+                    "x",
+                    None::new(Position::dummy()),
+                    types::None::new(Position::dummy()),
+                    false,
+                    Position::dummy(),
+                )],
+            ),
+            &LIST_TYPE_CONFIGURATION,
+        )?;
+
+        Ok(())
+    }
+
+    #[test]
+    fn compile_number() -> Result<(), CompileError> {
+        compile(
+            &Module::new(
+                vec![],
+                vec![],
+                vec![],
+                vec![Definition::new(
+                    "x",
+                    Number::new(42.0, Position::dummy()),
+                    types::Number::new(Position::dummy()),
+                    false,
+                    Position::dummy(),
+                )],
+            ),
+            &LIST_TYPE_CONFIGURATION,
+        )?;
+
+        Ok(())
+    }
+
+    #[test]
+    fn compile_string() -> Result<(), CompileError> {
+        compile(
+            &Module::new(
+                vec![],
+                vec![],
+                vec![],
+                vec![Definition::new(
+                    "x",
+                    ByteString::new("foo", Position::dummy()),
+                    types::ByteString::new(Position::dummy()),
+                    false,
+                    Position::dummy(),
+                )],
+            ),
             &LIST_TYPE_CONFIGURATION,
         )?;
 

@@ -154,7 +154,10 @@ fn infer_expression(
             lambda.position().clone(),
         )
         .into(),
-        Expression::Boolean(_) | Expression::Number(_) => expression.clone(),
+        Expression::Boolean(_)
+        | Expression::None(_)
+        | Expression::Number(_)
+        | Expression::String(_) => expression.clone(),
         _ => todo!(),
     })
 }

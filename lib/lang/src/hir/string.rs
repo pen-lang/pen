@@ -1,12 +1,13 @@
 use crate::position::*;
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct EinString {
+pub struct ByteString {
+    // TODO Change it to Vec<u8>.
     value: String,
     position: Position,
 }
 
-impl EinString {
+impl ByteString {
     pub fn new(value: impl Into<String>, position: Position) -> Self {
         Self {
             value: value.into(),
