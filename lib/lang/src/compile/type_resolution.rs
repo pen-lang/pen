@@ -1,11 +1,11 @@
 use super::{type_context::TypeContext, CompileError};
 use crate::types::{self, Type};
 
-pub fn resolve_to_function(
-    type_: &Type,
-    context: &TypeContext,
-) -> Result<Option<types::Function>, CompileError> {
-    Ok(resolve_type(type_, context)?.into_function())
+pub fn resolve_type(type_: &Type, context: &TypeContext) -> Result<Type, CompileError> {
+    Ok(match type_ {
+        Type::Reference(reference) => resolve_reference(reference, context)?,
+        _ => type_.clone(),
+    })
 }
 
 pub fn resolve_reference(
@@ -24,9 +24,9 @@ pub fn resolve_reference(
     )
 }
 
-fn resolve_type(type_: &Type, context: &TypeContext) -> Result<Type, CompileError> {
-    Ok(match type_ {
-        Type::Reference(reference) => resolve_reference(reference, context)?,
-        _ => type_.clone(),
-    })
+pub fn resolve_to_function(
+    type_: &Type,
+    context: &TypeContext,
+) -> Result<Option<types::Function>, CompileError> {
+    Ok(resolve_type(type_, context)?.into_function())
 }
