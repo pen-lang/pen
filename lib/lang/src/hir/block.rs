@@ -1,25 +1,25 @@
-use super::{Expression, Statement};
+use super::{Assignment, Expression};
 use std::sync::Arc;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Block {
-    statements: Vec<Statement>,
-    result: Arc<Expression>,
+    assignments: Vec<Assignment>,
+    expression: Arc<Expression>,
 }
 
 impl Block {
-    pub fn new(statements: Vec<Statement>, result: impl Into<Expression>) -> Self {
+    pub fn new(assignments: Vec<Assignment>, expression: impl Into<Expression>) -> Self {
         Self {
-            statements,
-            result: result.into().into(),
+            assignments,
+            expression: expression.into().into(),
         }
     }
 
-    pub fn statements(&self) -> &[Statement] {
-        &self.statements
+    pub fn assignments(&self) -> &[Assignment] {
+        &self.assignments
     }
 
-    pub fn result(&self) -> &Expression {
-        &self.result
+    pub fn expression(&self) -> &Expression {
+        &self.expression
     }
 }

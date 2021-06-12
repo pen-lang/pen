@@ -4,29 +4,32 @@ use std::sync::Arc;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct IfType {
-    type_: Type,
     name: String,
     argument: Arc<Expression>,
+    argument_type: Option<Type>,
     alternatives: Vec<Alternative>,
     default_alternative: Option<Block>,
+    result_type: Option<Type>,
     position: Position,
 }
 
 impl IfType {
     pub fn new(
-        type_: impl Into<Type>,
         name: impl Into<String>,
         argument: impl Into<Expression>,
+        argument_type: Option<Type>,
         alternatives: Vec<Alternative>,
-        default_alternative: Block,
+        default_alternative: Option<Block>,
+        result_type: Option<Type>,
         position: Position,
     ) -> Self {
         Self {
-            type_: type_.into(),
             name: name.into(),
             argument: argument.into().into(),
+            argument_type: argument_type.into(),
             alternatives,
             default_alternative: default_alternative.into(),
+            result_type: result_type.into(),
             position,
         }
     }
@@ -35,12 +38,12 @@ impl IfType {
         &self.name
     }
 
-    pub fn type_(&self) -> &Type {
-        &self.type_
-    }
-
     pub fn argument(&self) -> &Expression {
         &self.argument
+    }
+
+    pub fn argument_type(&self) -> Option<&Type> {
+        self.argument_type.as_ref()
     }
 
     pub fn alternatives(&self) -> &[Alternative] {
@@ -49,6 +52,10 @@ impl IfType {
 
     pub fn default_alternative(&self) -> Option<&Block> {
         self.default_alternative.as_ref()
+    }
+
+    pub fn result_type(&self) -> Option<&Type> {
+        self.result_type.as_ref()
     }
 
     pub fn position(&self) -> &Position {

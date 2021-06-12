@@ -1,7 +1,10 @@
 mod error;
 mod interfaces;
 mod type_context;
+mod type_extraction;
 mod type_inference;
+mod type_resolution;
+mod union_types;
 
 use crate::{hir::Module, interface};
 pub use error::CompileError;

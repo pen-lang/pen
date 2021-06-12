@@ -1,7 +1,6 @@
 use super::{
     any::Any, boolean::Boolean, byte_string::ByteString, function::Function, list::List,
     none::None, number::Number, record::Record, reference::Reference, union::Union,
-    variable::Variable,
 };
 use crate::position::Position;
 use serde::{Deserialize, Serialize};
@@ -18,7 +17,6 @@ pub enum Type {
     Reference(Reference),
     String(ByteString),
     Union(Union),
-    Variable(Variable),
 }
 
 impl Type {
@@ -34,7 +32,13 @@ impl Type {
             Self::Reference(reference) => reference.position(),
             Self::String(string) => string.position(),
             Self::Union(union) => union.position(),
-            Self::Variable(variable) => variable.position(),
+        }
+    }
+
+    pub fn into_function(self) -> Option<Function> {
+        match self {
+            Type::Function(function) => Some(function),
+            _ => None,
         }
     }
 }
@@ -96,11 +100,5 @@ impl From<Reference> for Type {
 impl From<Union> for Type {
     fn from(union: Union) -> Self {
         Self::Union(union)
-    }
-}
-
-impl From<Variable> for Type {
-    fn from(variable: Variable) -> Self {
-        Self::Variable(variable)
     }
 }
