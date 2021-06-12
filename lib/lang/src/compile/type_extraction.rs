@@ -1,20 +1,21 @@
-use super::{type_context::TypeContext, CompileError};
+use super::CompileError;
 use crate::{
     compile::type_resolution,
     hir::*,
     types::{self, Type},
 };
+use std::collections::HashMap;
 
 pub fn extract_from_expression(
     expression: &Expression,
-    type_context: &TypeContext,
+    types: &HashMap<String, Type>,
 ) -> Result<Type, CompileError> {
     Ok(match expression {
         Expression::Boolean(boolean) => types::Boolean::new(boolean.position().clone()).into(),
         Expression::Call(call) => type_resolution::resolve_to_function(
             call.function_type()
                 .ok_or_else(|| CompileError::TypeNotInferred(call.position().clone()))?,
-            type_context,
+            types,
         )?
         .ok_or_else(|| CompileError::FunctionExpected(call.function().position().clone()))?
         .result()
@@ -36,6 +37,9 @@ pub fn extract_from_expression(
     })
 }
 
-pub fn extract_from_block(block: &Block, type_context: &TypeContext) -> Result<Type, CompileError> {
-    extract_from_expression(block.expression(), type_context)
+pub fn extract_from_block(
+    block: &Block,
+    types: &HashMap<String, Type>,
+) -> Result<Type, CompileError> {
+    extract_from_expression(block.expression(), types)
 }

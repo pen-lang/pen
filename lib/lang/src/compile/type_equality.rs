@@ -1,11 +1,16 @@
-use super::{type_context::TypeContext, type_resolution, CompileError};
+use super::{type_resolution, CompileError};
 use crate::types::Type;
+use std::collections::HashMap;
 
-pub fn equal_types(one: &Type, other: &Type, context: &TypeContext) -> Result<bool, CompileError> {
+pub fn equal_types(
+    one: &Type,
+    other: &Type,
+    types: &HashMap<String, Type>,
+) -> Result<bool, CompileError> {
     Ok(
         match (
-            type_resolution::resolve_type(one, context)?,
-            type_resolution::resolve_type(other, context)?,
+            type_resolution::resolve_type(one, types)?,
+            type_resolution::resolve_type(other, types)?,
         ) {
             (Type::Function(one), Type::Function(other)) => {
                 one.arguments().len() == other.arguments().len()
@@ -13,18 +18,18 @@ pub fn equal_types(one: &Type, other: &Type, context: &TypeContext) -> Result<bo
                         .arguments()
                         .iter()
                         .zip(other.arguments())
-                        .map(|(one, other)| equal_types(one, other, context))
+                        .map(|(one, other)| equal_types(one, other, types))
                         .collect::<Result<Vec<_>, _>>()?
                         .iter()
                         .all(|&ok| ok)
-                    && equal_types(one.result(), other.result(), context)?
+                    && equal_types(one.result(), other.result(), types)?
             }
             (Type::List(one), Type::List(other)) => {
-                equal_types(one.element(), other.element(), context)?
+                equal_types(one.element(), other.element(), types)?
             }
             (Type::Union(one), Type::Union(other)) => {
-                equal_types(one.lhs(), other.lhs(), context)?
-                    && equal_types(one.rhs(), other.rhs(), context)?
+                equal_types(one.lhs(), other.lhs(), types)?
+                    && equal_types(one.rhs(), other.rhs(), types)?
             }
             (Type::Any(_), Type::Any(_))
             | (Type::Boolean(_), Type::Boolean(_))

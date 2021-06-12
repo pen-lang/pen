@@ -1,24 +1,24 @@
-use super::{type_context::TypeContext, CompileError};
+use super::CompileError;
 use crate::types::{self, Type};
+use std::collections::HashMap;
 
-pub fn resolve_type(type_: &Type, context: &TypeContext) -> Result<Type, CompileError> {
+pub fn resolve_type(type_: &Type, types: &HashMap<String, Type>) -> Result<Type, CompileError> {
     Ok(match type_ {
-        Type::Reference(reference) => resolve_reference(reference, context)?,
+        Type::Reference(reference) => resolve_reference(reference, types)?,
         _ => type_.clone(),
     })
 }
 
 pub fn resolve_reference(
     reference: &types::Reference,
-    context: &TypeContext,
+    types: &HashMap<String, Type>,
 ) -> Result<Type, CompileError> {
     Ok(
-        match context
-            .types()
+        match types
             .get(reference.name())
             .ok_or_else(|| CompileError::TypeNotFound(reference.clone()))?
         {
-            Type::Reference(reference) => resolve_reference(reference, context)?,
+            Type::Reference(reference) => resolve_reference(reference, types)?,
             type_ => type_.clone(),
         },
     )
@@ -26,7 +26,7 @@ pub fn resolve_reference(
 
 pub fn resolve_to_function(
     type_: &Type,
-    context: &TypeContext,
+    types: &HashMap<String, Type>,
 ) -> Result<Option<types::Function>, CompileError> {
-    Ok(resolve_type(type_, context)?.into_function())
+    Ok(resolve_type(type_, types)?.into_function())
 }

@@ -68,7 +68,7 @@ fn infer_expression(
                     .collect::<Result<_, _>>()?,
                 Some(type_extraction::extract_from_expression(
                     &function,
-                    type_context,
+                    type_context.types(),
                 )?),
                 call.position().clone(),
             )
@@ -85,8 +85,8 @@ fn infer_expression(
                 else_.clone(),
                 Some(
                     types::Union::new(
-                        type_extraction::extract_from_block(&then, type_context)?,
-                        type_extraction::extract_from_block(&else_, type_context)?,
+                        type_extraction::extract_from_block(&then, type_context.types())?,
+                        type_extraction::extract_from_block(&else_, type_context.types())?,
                         if_.position().clone(),
                     )
                     .into(),
@@ -124,7 +124,7 @@ fn infer_expression(
                 argument.clone(),
                 Some(type_extraction::extract_from_expression(
                     &argument,
-                    type_context,
+                    type_context.types(),
                 )?),
                 alternatives.clone(),
                 default_alternative.clone(),
@@ -134,7 +134,9 @@ fn infer_expression(
                             .iter()
                             .map(|alternative| alternative.block())
                             .chain(&default_alternative)
-                            .map(|block| type_extraction::extract_from_block(block, type_context))
+                            .map(|block| {
+                                type_extraction::extract_from_block(block, type_context.types())
+                            })
                             .collect::<Result<Vec<_>, _>>()?,
                         if_.position(),
                     )
@@ -199,7 +201,7 @@ fn infer_assignment(
     Ok(Assignment::new(
         assignment.name(),
         expression.clone(),
-        type_extraction::extract_from_expression(&expression, type_context)?,
+        type_extraction::extract_from_expression(&expression, type_context.types())?,
         assignment.position().clone(),
     ))
 }
