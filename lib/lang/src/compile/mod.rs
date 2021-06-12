@@ -1,10 +1,10 @@
 mod error;
-mod module_interfaces;
+mod interfaces;
 
-use crate::hir::{Module, ModuleInterface};
+use crate::{hir::Module, interface};
 pub use error::CompileError;
 
-pub fn compile(module: &Module) -> Result<(Vec<u8>, ModuleInterface), CompileError> {
+pub fn compile(module: &Module) -> Result<(Vec<u8>, interface::Module), CompileError> {
     Ok((
         fmm_llvm::compile_to_bitcode(
             &mir_fmm::compile(&mir::ir::Module::new(
@@ -21,7 +21,7 @@ pub fn compile(module: &Module) -> Result<(Vec<u8>, ModuleInterface), CompileErr
             },
             None,
         )?,
-        module_interfaces::compile(module)?,
+        interfaces::compile(module)?,
     ))
 }
 
