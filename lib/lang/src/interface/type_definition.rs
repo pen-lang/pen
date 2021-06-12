@@ -1,21 +1,29 @@
-use crate::types;
+use crate::{position::Position, types};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Deserialize, Hash, PartialEq, Serialize)]
 pub struct TypeDefinition {
     name: String,
-    type_: types::Record,
+    elements: Vec<types::RecordElement>,
     open: bool,
     public: bool,
+    position: Position,
 }
 
 impl TypeDefinition {
-    pub fn new(name: impl Into<String>, type_: types::Record, public: bool, open: bool) -> Self {
+    pub fn new(
+        name: impl Into<String>,
+        elements: Vec<types::RecordElement>,
+        open: bool,
+        public: bool,
+        position: Position,
+    ) -> Self {
         Self {
             name: name.into(),
-            type_,
+            elements,
             open,
             public,
+            position,
         }
     }
 
@@ -23,8 +31,8 @@ impl TypeDefinition {
         &self.name
     }
 
-    pub fn type_(&self) -> &types::Record {
-        &self.type_
+    pub fn elements(&self) -> &[types::RecordElement] {
+        &self.elements
     }
 
     pub fn is_open(&self) -> bool {
@@ -33,5 +41,9 @@ impl TypeDefinition {
 
     pub fn is_public(&self) -> bool {
         self.public
+    }
+
+    pub fn position(&self) -> &Position {
+        &self.position
     }
 }

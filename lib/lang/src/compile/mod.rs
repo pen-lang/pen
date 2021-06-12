@@ -7,8 +7,10 @@ use crate::{hir::Module, interface};
 pub use error::CompileError;
 
 pub fn compile(module: &Module) -> Result<(Vec<u8>, interface::Module), CompileError> {
+    let module = type_inference::infer_types(module)?;
+
     Ok((
-        fmm_llvm::compile_to_bitcode(
+        fmm_llvm::compile_to_bit_code(
             &mir_fmm::compile(&mir::ir::Module::new(
                 vec![],
                 vec![],
@@ -23,7 +25,7 @@ pub fn compile(module: &Module) -> Result<(Vec<u8>, interface::Module), CompileE
             },
             None,
         )?,
-        interfaces::compile(module)?,
+        interfaces::compile(&module)?,
     ))
 }
 
