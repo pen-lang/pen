@@ -1,9 +1,9 @@
-use super::type_context::TypeContext;
-use super::type_extraction;
-use super::CompileError;
-use crate::compile::union_types;
-use crate::hir::*;
-use crate::types::{self, Type};
+use super::{type_context::TypeContext, type_extraction, CompileError};
+use crate::{
+    compile::union_types,
+    hir::*,
+    types::{self, Type},
+};
 use std::collections::HashMap;
 
 pub fn infer_types(module: &Module) -> Result<Module, CompileError> {
@@ -138,8 +138,7 @@ fn infer_expression(
                             .collect::<Result<Vec<_>, _>>()?,
                         if_.position(),
                     )
-                    .unwrap()
-                    .into(),
+                    .unwrap(),
                 ),
                 if_.position().clone(),
             )

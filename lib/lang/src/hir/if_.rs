@@ -23,7 +23,7 @@ impl If {
             condition: Arc::new(condition.into()),
             then: then.into(),
             else_: else_.into(),
-            result_type: result_type.into(),
+            result_type,
             position,
         }
     }

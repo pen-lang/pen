@@ -26,10 +26,10 @@ impl IfType {
         Self {
             name: name.into(),
             argument: argument.into().into(),
-            argument_type: argument_type.into(),
+            argument_type,
             alternatives,
-            default_alternative: default_alternative.into(),
-            result_type: result_type.into(),
+            default_alternative,
+            result_type,
             position,
         }
     }
