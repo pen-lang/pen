@@ -9,4 +9,5 @@ mir = { path = "../mir" }
 mir-fmm = { path = "../mir-fmm" }
 fmm = { git = "https://github.com/raviqqe/fmm", branch = "main" }
 fmm-llvm = { git = "https://github.com/raviqqe/fmm", branch = "main" }
+once_cell = "1"
 serde = { version = "1", features = ["derive", "rc"] }

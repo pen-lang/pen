@@ -167,6 +167,7 @@ dependencies = [
  "fmm-llvm",
  "mir",
  "mir-fmm",
+ "once_cell",
  "serde",
 ]
 

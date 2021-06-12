@@ -1,3 +1,4 @@
+use super::list_type_configuration::ListTypeConfiguration;
 use crate::{
     hir::Module,
     types::{self, Type},
@@ -7,10 +8,11 @@ use std::collections::HashMap;
 pub struct TypeContext {
     records: HashMap<String, Vec<types::RecordElement>>,
     types: HashMap<String, Type>,
+    list_type_configuration: ListTypeConfiguration,
 }
 
 impl TypeContext {
-    pub fn new(module: &Module) -> Self {
+    pub fn new(module: &Module, list_type_configuration: &ListTypeConfiguration) -> Self {
         Self {
             records: module
                 .type_definitions()
@@ -33,6 +35,7 @@ impl TypeContext {
                         .map(|alias| (alias.name().into(), alias.type_().clone())),
                 )
                 .collect(),
+            list_type_configuration: list_type_configuration.clone(),
         }
     }
 
@@ -42,5 +45,9 @@ impl TypeContext {
 
     pub fn types(&self) -> &HashMap<String, Type> {
         &self.types
+    }
+
+    pub fn list_type_configuration(&self) -> &ListTypeConfiguration {
+        &self.list_type_configuration
     }
 }

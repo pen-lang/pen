@@ -5,15 +5,13 @@ use serde::{Deserialize, Serialize};
 pub struct Declaration {
     name: String,
     type_: Type,
-    position: Position,
 }
 
 impl Declaration {
-    pub fn new(name: impl Into<String>, type_: impl Into<Type>, position: Position) -> Self {
+    pub fn new(name: impl Into<String>, type_: impl Into<Type>) -> Self {
         Self {
             name: name.into(),
             type_: type_.into(),
-            position,
         }
     }
 
@@ -23,9 +21,5 @@ impl Declaration {
 
     pub fn type_(&self) -> &Type {
         &self.type_
-    }
-
-    pub fn position(&self) -> &Position {
-        &self.position
     }
 }

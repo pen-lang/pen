@@ -1,4 +1,4 @@
-use super::{type_context::TypeContext, type_extraction, CompileError};
+use super::{type_extraction, CompileError};
 use crate::{
     compile::union_types,
     hir::*,
@@ -6,8 +6,7 @@ use crate::{
 };
 use std::collections::HashMap;
 
-pub fn infer_types(module: &Module) -> Result<Module, CompileError> {
-    let type_context = TypeContext::new(module);
+pub fn infer_types(module: &Module, types: &HashMap<String, Type>) -> Result<Module, CompileError> {
     let variables = module
         .declarations()
         .iter()
@@ -27,7 +26,7 @@ pub fn infer_types(module: &Module) -> Result<Module, CompileError> {
         module
             .definitions()
             .iter()
-            .map(|definition| infer_definition(definition, &variables, &type_context))
+            .map(|definition| infer_definition(definition, &variables, &types))
             .collect::<Result<_, _>>()?,
     ))
 }
@@ -35,11 +34,11 @@ pub fn infer_types(module: &Module) -> Result<Module, CompileError> {
 fn infer_definition(
     definition: &Definition,
     variables: &HashMap<String, Type>,
-    type_context: &TypeContext,
+    types: &HashMap<String, Type>,
 ) -> Result<Definition, CompileError> {
     Ok(Definition::new(
         definition.name(),
-        infer_expression(definition.body(), variables, type_context)?,
+        infer_expression(definition.body(), variables, types)?,
         definition.type_().clone(),
         definition.is_public(),
         definition.position().clone(),
@@ -49,12 +48,10 @@ fn infer_definition(
 fn infer_expression(
     expression: &Expression,
     variables: &HashMap<String, Type>,
-    type_context: &TypeContext,
+    types: &HashMap<String, Type>,
 ) -> Result<Expression, CompileError> {
-    let infer_expression =
-        |expression, variables| infer_expression(expression, variables, type_context);
-    let infer_block =
-        |block, variables: &HashMap<_, _>| infer_block(block, variables, type_context);
+    let infer_expression = |expression, variables| infer_expression(expression, variables, types);
+    let infer_block = |block, variables: &HashMap<_, _>| infer_block(block, variables, types);
 
     Ok(match expression {
         Expression::Call(call) => {
@@ -66,10 +63,7 @@ fn infer_expression(
                     .iter()
                     .map(|argument| infer_expression(argument, variables))
                     .collect::<Result<_, _>>()?,
-                Some(type_extraction::extract_from_expression(
-                    &function,
-                    type_context.types(),
-                )?),
+                Some(type_extraction::extract_from_expression(&function, types)?),
                 call.position().clone(),
             )
             .into()
@@ -85,8 +79,8 @@ fn infer_expression(
                 else_.clone(),
                 Some(
                     types::Union::new(
-                        type_extraction::extract_from_block(&then, type_context.types())?,
-                        type_extraction::extract_from_block(&else_, type_context.types())?,
+                        type_extraction::extract_from_block(&then, types)?,
+                        type_extraction::extract_from_block(&else_, types)?,
                         if_.position().clone(),
                     )
                     .into(),
@@ -122,10 +116,7 @@ fn infer_expression(
             IfType::new(
                 if_.name(),
                 argument.clone(),
-                Some(type_extraction::extract_from_expression(
-                    &argument,
-                    type_context.types(),
-                )?),
+                Some(type_extraction::extract_from_expression(&argument, types)?),
                 alternatives.clone(),
                 default_alternative.clone(),
                 Some(
@@ -134,9 +125,7 @@ fn infer_expression(
                             .iter()
                             .map(|alternative| alternative.block())
                             .chain(&default_alternative)
-                            .map(|block| {
-                                type_extraction::extract_from_block(block, type_context.types())
-                            })
+                            .map(|block| type_extraction::extract_from_block(block, types))
                             .collect::<Result<Vec<_>, _>>()?,
                         if_.position(),
                     )
@@ -173,13 +162,13 @@ fn infer_expression(
 fn infer_block(
     block: &Block,
     variables: &HashMap<String, Type>,
-    type_context: &TypeContext,
+    types: &HashMap<String, Type>,
 ) -> Result<Block, CompileError> {
     let mut variables = variables.clone();
     let mut assignments = vec![];
 
     for assignment in block.assignments() {
-        let assignment = infer_assignment(assignment, &variables, type_context)?;
+        let assignment = infer_assignment(assignment, &variables, types)?;
 
         variables.insert(assignment.name().into(), assignment.type_().clone());
         assignments.push(assignment);
@@ -187,21 +176,21 @@ fn infer_block(
 
     Ok(Block::new(
         assignments,
-        infer_expression(block.expression(), &variables, type_context)?,
+        infer_expression(block.expression(), &variables, types)?,
     ))
 }
 
 fn infer_assignment(
     assignment: &Assignment,
     variables: &HashMap<String, Type>,
-    type_context: &TypeContext,
+    types: &HashMap<String, Type>,
 ) -> Result<Assignment, CompileError> {
-    let expression = infer_expression(assignment.expression(), variables, type_context)?;
+    let expression = infer_expression(assignment.expression(), variables, types)?;
 
     Ok(Assignment::new(
         assignment.name(),
         expression.clone(),
-        type_extraction::extract_from_expression(&expression, type_context.types())?,
+        type_extraction::extract_from_expression(&expression, types)?,
         assignment.position().clone(),
     ))
 }
@@ -212,7 +201,10 @@ mod tests {
 
     #[test]
     fn infer_empty_module() -> Result<(), CompileError> {
-        infer_types(&Module::new(vec![], vec![], vec![], vec![]))?;
+        infer_types(
+            &Module::new(vec![], vec![], vec![], vec![]),
+            &Default::default(),
+        )?;
 
         Ok(())
     }
