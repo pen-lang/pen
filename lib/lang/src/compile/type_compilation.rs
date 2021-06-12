@@ -1,5 +1,4 @@
-use super::type_context::TypeContext;
-use super::CompileError;
+use super::{type_context::TypeContext, CompileError};
 use crate::types::Type;
 
 const NONE_RECORD_TYPE_NAME: &str = "_pen_none";

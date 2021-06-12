@@ -1,9 +1,9 @@
-mod canonical_types;
 mod error;
 mod expressions;
 mod interfaces;
 mod list_type_configuration;
 mod modules;
+mod type_canonicalization;
 mod type_compilation;
 mod type_context;
 mod type_equality;
@@ -40,8 +40,7 @@ pub fn compile(
 
 #[cfg(test)]
 mod tests {
-    use super::list_type_configuration::LIST_TYPE_CONFIGURATION;
-    use super::*;
+    use super::{list_type_configuration::LIST_TYPE_CONFIGURATION, *};
 
     #[test]
     fn compile_empty_module() -> Result<(), CompileError> {

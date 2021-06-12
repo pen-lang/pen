@@ -1,8 +1,5 @@
-use super::type_compilation;
-use super::type_context::TypeContext;
-use super::CompileError;
-use crate::compile::expressions;
-use crate::hir::*;
+use super::{type_compilation, type_context::TypeContext, CompileError};
+use crate::{compile::expressions, hir::*};
 use std::collections::HashMap;
 
 pub fn compile(
