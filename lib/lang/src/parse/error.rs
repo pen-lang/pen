@@ -2,14 +2,14 @@ use std::{error::Error, fmt::Display};
 
 #[derive(Debug, PartialEq)]
 pub struct ParseError {
-    source_name: String,
+    path: String,
     details: String,
 }
 
 impl ParseError {
-    pub fn new(source_name: &str, errors: &impl std::error::Error) -> Self {
+    pub fn new(path: &str, errors: &impl std::error::Error) -> Self {
         Self {
-            source_name: source_name.into(),
+            path: path.into(),
             details: format!("{}", errors),
         }
     }
@@ -22,7 +22,7 @@ impl Display for ParseError {
         write!(
             formatter,
             "failed to parse module {}\n{}",
-            self.source_name, self.details
+            self.path, self.details
         )
     }
 }
