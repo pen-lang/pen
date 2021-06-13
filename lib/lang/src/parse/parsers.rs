@@ -437,14 +437,14 @@ fn operation_or_term<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
     (
         term(),
         many(
-            (position(), operator(), term())
+            (position(), binary_operator(), term())
                 .map(|(position, operator, expression)| (operator, expression, position)),
         ),
     )
         .map(|(expression, pairs): (_, Vec<_>)| reduce_operations(expression, &pairs))
 }
 
-fn operator<'a>() -> impl Parser<Stream<'a>, Output = ParsedOperator> {
+fn binary_operator<'a>() -> impl Parser<Stream<'a>, Output = ParsedOperator> {
     choice!(
         concrete_operator("+", ParsedOperator::Add),
         concrete_operator("-", ParsedOperator::Subtract),
@@ -459,7 +459,7 @@ fn operator<'a>() -> impl Parser<Stream<'a>, Output = ParsedOperator> {
         concrete_operator("&", ParsedOperator::And),
         concrete_operator("|", ParsedOperator::Or),
     )
-    .expected("operator")
+    .expected("binary operator")
 }
 
 fn concrete_operator<'a>(
@@ -2389,8 +2389,8 @@ mod tests {
 
         #[test]
         fn parse_operator() {
-            assert!(operator().parse(stream("", "")).is_err());
-            assert!(operator().parse(stream("++", "")).is_err());
+            assert!(binary_operator().parse(stream("", "")).is_err());
+            assert!(binary_operator().parse(stream("++", "")).is_err());
 
             for (source, expected) in &[
                 ("+", ParsedOperator::Add),
@@ -2404,7 +2404,10 @@ mod tests {
                 (">", ParsedOperator::GreaterThan),
                 (">=", ParsedOperator::GreaterThanOrEqual),
             ] {
-                assert_eq!(operator().parse(stream(source, "")).unwrap().0, *expected);
+                assert_eq!(
+                    binary_operator().parse(stream(source, "")).unwrap().0,
+                    *expected
+                );
             }
         }
 
