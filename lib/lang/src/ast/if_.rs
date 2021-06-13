@@ -1,36 +1,25 @@
-use super::{expression::Expression, Block};
+use super::{Block, IfBranch};
 use crate::position::Position;
 use std::sync::Arc;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct If {
-    condition: Arc<Expression>,
-    then: Arc<Block>,
+    branches: Vec<IfBranch>,
     else_: Arc<Block>,
     position: Position,
 }
 
 impl If {
-    pub fn new(
-        condition: impl Into<Expression>,
-        then: Block,
-        else_: Block,
-        position: Position,
-    ) -> Self {
+    pub fn new(branches: Vec<IfBranch>, else_: Block, position: Position) -> Self {
         Self {
-            condition: Arc::new(condition.into()),
-            then: then.into(),
+            branches,
             else_: else_.into(),
             position,
         }
     }
 
-    pub fn condition(&self) -> &Expression {
-        &self.condition
-    }
-
-    pub fn then(&self) -> &Block {
-        &self.then
+    pub fn branches(&self) -> &[IfBranch] {
+        &self.branches
     }
 
     pub fn else_(&self) -> &Block {

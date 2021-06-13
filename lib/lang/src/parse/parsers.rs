@@ -11,7 +11,7 @@ use combine::{
     easy, from_str, none_of, one_of,
     parser::{
         char::{alpha_num, char as character, letter, spaces, string},
-        combinator::{lazy, look_ahead, no_partial, not_followed_by},
+        combinator::{lazy, no_partial, not_followed_by},
         regex::find,
         sequence::between,
     },
@@ -22,7 +22,7 @@ use combine::{
     unexpected_any, value, Parser, Positioned,
 };
 use once_cell::sync::Lazy;
-use std::{collections::HashSet, sync::Arc};
+use std::collections::HashSet;
 
 const KEYWORDS: &[&str] = &["else", "if", "import", "type"];
 const OPERATOR_CHARACTERS: &str = "+-*/=<>&|";
@@ -258,83 +258,88 @@ fn if_<'a>() -> impl Parser<Stream<'a>, Output = If> {
     (
         position(),
         keyword("if"),
-        expression(),
-        block(),
-        many((keyword("else"), keyword("if"), expression(), block())),
+        if_branch(),
+        many((keyword("else"), keyword("if")).with(if_branch())),
         keyword("else"),
         block(),
     )
         .map(
-            |(position, _, condition, if_block, else_if_blocks, _, else_block)| {
-                If::new(condition, then, else_, position)
+            |(position, _, first_branch, branches, _, else_block): (_, _, _, Vec<_>, _, _)| {
+                If::new(
+                    vec![first_branch].into_iter().chain(branches).collect(),
+                    else_block,
+                    position,
+                )
             },
         )
         .expected("if expression")
 }
 
+fn if_branch<'a>() -> impl Parser<Stream<'a>, Output = IfBranch> {
+    (expression(), block()).map(|(expression, block)| IfBranch::new(expression, block))
+}
+
 fn if_list<'a>() -> impl Parser<Stream<'a>, Output = IfList> {
     (
         position(),
-        keyword("case").expected("case keyword"),
-        expression(),
-        sign("[]"),
-        sign("=>"),
-        expression(),
+        keyword("if"),
         sign("["),
         identifier(),
         sign(","),
         sign("..."),
         identifier(),
         sign("]"),
-        sign("=>"),
+        sign("="),
         expression(),
+        block(),
+        keyword("else"),
+        block(),
     )
         .map(
-            |(
-                position,
+            |(position, _, _, first_name, _, _, rest_name, _, _, argument, then, _, else_)| {
+                IfList::new(argument, first_name, rest_name, then, else_, position)
+            },
+        )
+        .expected("if-list expression")
+}
+
+fn if_type<'a>() -> impl Parser<Stream<'a>, Output = IfType> {
+    (
+        position(),
+        keyword("if"),
+        identifier(),
+        sign("="),
+        expression(),
+        sign(";"),
+        if_type_branch(),
+        many((keyword("else"), keyword("if")).with(if_type_branch())),
+        optional(keyword("else").with(block())),
+    )
+        .map(
+            |(position, _, identifier, _, argument, _, first_branch, branches, else_): (
                 _,
-                argument,
                 _,
                 _,
-                empty_alternative,
-                _,
-                first_name,
                 _,
                 _,
-                rest_name,
                 _,
                 _,
-                non_empty_alternative,
+                Vec<_>,
+                _,
             )| {
-                IfList::new(
+                IfType::new(
+                    identifier,
                     argument,
-                    first_name,
-                    rest_name,
-                    non_empty_alternative,
-                    empty_alternative,
+                    vec![first_branch].into_iter().chain(branches).collect(),
+                    else_,
                     position,
                 )
             },
         )
-        .expected("list case expression")
-}
-
-fn if_type<'a>() -> impl Parser<Stream<'a>, Output = Case> {
-    (
-        position(),
-        keyword("case").expected("case keyword"),
-        identifier(),
-        sign("="),
-        expression(),
-        many1(alternative()),
-    )
-        .map(|(position, _, identifier, _, argument, alternatives)| {
-            Case::new(identifier, argument, alternatives, position)
-        })
         .expected("type case expression")
 }
 
-fn alternative<'a>() -> impl Parser<Stream<'a>, Output = Alternative> {
+fn if_type_branch<'a>() -> impl Parser<Stream<'a>, Output = Alternative> {
     (type_(), block()).map(|(type_, block)| Alternative::new(type_, block))
 }
 
@@ -415,7 +420,7 @@ fn record_update<'a>() -> impl Parser<Stream<'a>, Output = RecordUpdate> {
 
 fn term<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
     choice!(
-        call(),
+        call().map(Expression::from),
         if_().map(Expression::from),
         if_type().map(Expression::from),
         if_list().map(Expression::from),

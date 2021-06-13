@@ -7,7 +7,7 @@ pub struct IfType {
     name: String,
     argument: Arc<Expression>,
     alternatives: Vec<Alternative>,
-    default_alternative: Option<Block>,
+    else_: Option<Block>,
     position: Position,
 }
 
@@ -16,14 +16,14 @@ impl IfType {
         name: impl Into<String>,
         argument: impl Into<Expression>,
         alternatives: Vec<Alternative>,
-        default_alternative: Option<Block>,
+        else_: Option<Block>,
         position: Position,
     ) -> Self {
         Self {
             name: name.into(),
             argument: argument.into().into(),
             alternatives,
-            default_alternative,
+            else_,
             position,
         }
     }
@@ -40,8 +40,8 @@ impl IfType {
         &self.alternatives
     }
 
-    pub fn default_alternative(&self) -> Option<&Block> {
-        self.default_alternative.as_ref()
+    pub fn else_(&self) -> Option<&Block> {
+        self.else_.as_ref()
     }
 
     pub fn position(&self) -> &Position {
