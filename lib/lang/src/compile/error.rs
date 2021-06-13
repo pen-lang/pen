@@ -9,10 +9,15 @@ pub enum CompileError {
     FmmLlvmCompile(fmm_llvm::CompileError),
     FunctionExpected(Position),
     MirFmmCompile(mir_fmm::CompileError),
+    RecordElementUnknown(Position),
+    RecordElementMissing(Position),
+    RecordExpected(Position),
+    RecordNotFound(types::Record),
     TypeNotFound(types::Reference),
     TypeNotInferred(Position),
     TypesNotMatched(Position, Position),
     VariableNotFound(Variable),
+    WrongArgumentCount(Position),
 }
 
 impl Display for CompileError {
@@ -24,9 +29,24 @@ impl Display for CompileError {
             Self::FunctionExpected(position) => {
                 write!(formatter, "function expected\n{}", position)
             }
+            Self::RecordElementUnknown(position) => {
+                write!(formatter, "uknown record element\n{}", position)
+            }
+            Self::RecordElementMissing(position) => {
+                write!(formatter, "missing record element\n{}", position)
+            }
             Self::MirFmmCompile(error) => {
                 write!(formatter, "failed to compile MIR to F--: {}", error)
             }
+            Self::RecordExpected(position) => {
+                write!(formatter, "record expected\n{}", position)
+            }
+            Self::RecordNotFound(record) => write!(
+                formatter,
+                "record type \"{}\" not found\n{}",
+                record.name(),
+                record.position()
+            ),
             Self::TypeNotFound(reference) => write!(
                 formatter,
                 "type \"{}\" not found\n{}",
@@ -47,6 +67,13 @@ impl Display for CompileError {
                 variable.name(),
                 variable.position()
             ),
+            Self::WrongArgumentCount(position) => {
+                write!(
+                    formatter,
+                    "wrong number of arguments in function call\n{}",
+                    position
+                )
+            }
         }
     }
 }

@@ -41,6 +41,13 @@ impl Type {
             _ => None,
         }
     }
+
+    pub fn into_record(self) -> Option<Record> {
+        match self {
+            Type::Record(record) => Some(record),
+            _ => None,
+        }
+    }
 }
 
 impl From<Any> for Type {

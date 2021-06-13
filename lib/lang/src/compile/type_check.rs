@@ -2,6 +2,7 @@ use super::{
     environment, type_context::TypeContext, type_extraction, type_subsumption, CompileError,
 };
 use crate::{
+    compile::type_resolution,
     hir::*,
     types::{self, Type},
 };
@@ -54,6 +55,34 @@ fn check_expression(
         Expression::Lambda(lambda) => check_lambda(lambda, variables, type_context)?.into(),
         Expression::None(none) => types::None::new(none.position().clone()).into(),
         Expression::Number(number) => types::Number::new(number.position().clone()).into(),
+        Expression::RecordConstruction(construction) => {
+            let element_types = type_resolution::resolve_record_elements(
+                construction.type_(),
+                type_context.types(),
+                type_context.records(),
+            )?
+            .ok_or_else(|| CompileError::RecordExpected(construction.type_().position().clone()))?;
+
+            for (name, element) in construction.elements() {
+                check_subsumption(
+                    &check_expression(element, variables, type_context)?,
+                    element_types.get(name).ok_or_else(|| {
+                        CompileError::RecordElementUnknown(element.position().clone())
+                    })?,
+                    type_context.types(),
+                )?;
+            }
+
+            for (name, _) in element_types {
+                if !construction.elements().contains_key(name) {
+                    return Err(CompileError::RecordElementMissing(
+                        construction.position().clone(),
+                    ));
+                }
+            }
+
+            construction.type_().clone()
+        }
         Expression::String(string) => types::ByteString::new(string.position().clone()).into(),
         Expression::Variable(variable) => variables
             .get(variable.name())
@@ -169,7 +198,7 @@ mod tests {
     }
 
     #[test]
-    fn check_subsumption_in_lambda() -> Result<(), CompileError> {
+    fn check_subsumption_of_function_result_type() -> Result<(), CompileError> {
         check_module(&Module::new(
             vec![],
             vec![],
@@ -190,5 +219,133 @@ mod tests {
                 Position::dummy(),
             )],
         ))
+    }
+
+    mod records {
+        use super::*;
+
+        #[test]
+        fn check_record() -> Result<(), CompileError> {
+            let reference_type = types::Reference::new("r", Position::dummy());
+
+            check_module(&Module::new(
+                vec![TypeDefinition::new(
+                    "r",
+                    vec![types::RecordElement::new(
+                        "x",
+                        types::None::new(Position::dummy()),
+                    )],
+                    false,
+                    false,
+                    false,
+                    Position::dummy(),
+                )],
+                vec![],
+                vec![],
+                vec![Definition::new(
+                    "x",
+                    Lambda::new(
+                        vec![],
+                        reference_type.clone(),
+                        Block::new(
+                            vec![],
+                            RecordConstruction::new(
+                                reference_type,
+                                vec![("x".into(), None::new(Position::dummy()).into())]
+                                    .into_iter()
+                                    .collect(),
+                                Position::dummy(),
+                            ),
+                        ),
+                        Position::dummy(),
+                    ),
+                    false,
+                    Position::dummy(),
+                )],
+            ))
+        }
+
+        #[test]
+        fn fail_to_check_record_with_missing_element() {
+            let reference_type = types::Reference::new("r", Position::dummy());
+
+            assert!(matches!(
+                check_module(&Module::new(
+                    vec![TypeDefinition::new(
+                        "r",
+                        vec![types::RecordElement::new(
+                            "x",
+                            types::None::new(Position::dummy()),
+                        )],
+                        false,
+                        false,
+                        false,
+                        Position::dummy(),
+                    )],
+                    vec![],
+                    vec![],
+                    vec![Definition::new(
+                        "x",
+                        Lambda::new(
+                            vec![],
+                            reference_type.clone(),
+                            Block::new(
+                                vec![],
+                                RecordConstruction::new(
+                                    reference_type,
+                                    Default::default(),
+                                    Position::dummy(),
+                                ),
+                            ),
+                            Position::dummy(),
+                        ),
+                        false,
+                        Position::dummy(),
+                    )],
+                )),
+                Err(CompileError::RecordElementMissing(_))
+            ));
+        }
+
+        #[test]
+        fn fail_to_check_record_with_unknown_element() {
+            let reference_type = types::Reference::new("r", Position::dummy());
+
+            assert!(matches!(
+                check_module(&Module::new(
+                    vec![TypeDefinition::new(
+                        "r",
+                        vec![],
+                        false,
+                        false,
+                        false,
+                        Position::dummy(),
+                    )],
+                    vec![],
+                    vec![],
+                    vec![Definition::new(
+                        "x",
+                        Lambda::new(
+                            vec![],
+                            reference_type.clone(),
+                            Block::new(
+                                vec![],
+                                RecordConstruction::new(
+                                    reference_type,
+                                    vec![("x".into(), None::new(Position::dummy()).into())]
+                                        .into_iter()
+                                        .collect(),
+                                    Position::dummy(),
+                                ),
+                            ),
+                            Position::dummy(),
+                        ),
+                        false,
+                        Position::dummy(),
+                    )],
+                )),
+                Err(CompileError::RecordElementUnknown(_))
+            ));
+        }
     }
 }

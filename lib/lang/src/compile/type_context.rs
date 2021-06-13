@@ -6,7 +6,7 @@ use crate::{
 use std::collections::HashMap;
 
 pub struct TypeContext {
-    records: HashMap<String, Vec<types::RecordElement>>,
+    records: HashMap<String, HashMap<String, Type>>,
     types: HashMap<String, Type>,
     list_type_configuration: ListTypeConfiguration,
 }
@@ -17,7 +17,16 @@ impl TypeContext {
             records: module
                 .type_definitions()
                 .iter()
-                .map(|definition| (definition.name().into(), definition.elements().to_vec()))
+                .map(|definition| {
+                    (
+                        definition.name().into(),
+                        definition
+                            .elements()
+                            .iter()
+                            .map(|element| (element.name().into(), element.type_().clone()))
+                            .collect(),
+                    )
+                })
                 .collect(),
             types: module
                 .type_definitions()
@@ -39,7 +48,7 @@ impl TypeContext {
         }
     }
 
-    pub fn records(&self) -> &HashMap<String, Vec<types::RecordElement>> {
+    pub fn records(&self) -> &HashMap<String, HashMap<String, Type>> {
         &self.records
     }
 
