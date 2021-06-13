@@ -10,7 +10,6 @@ pub enum EqualityOperator {
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct EqualityOperation {
-    type_: Type,
     operator: EqualityOperator,
     lhs: Arc<Expression>,
     rhs: Arc<Expression>,
@@ -19,23 +18,17 @@ pub struct EqualityOperation {
 
 impl EqualityOperation {
     pub fn new(
-        type_: impl Into<Type>,
         operator: EqualityOperator,
         lhs: impl Into<Expression>,
         rhs: impl Into<Expression>,
         position: Position,
     ) -> Self {
         Self {
-            type_: type_.into(),
             operator,
             lhs: Arc::new(lhs.into()),
             rhs: Arc::new(rhs.into()),
             position,
         }
-    }
-
-    pub fn type_(&self) -> &Type {
-        &self.type_
     }
 
     pub fn operator(&self) -> EqualityOperator {
