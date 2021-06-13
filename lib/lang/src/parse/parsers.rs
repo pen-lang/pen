@@ -10,7 +10,7 @@ use crate::{
 use combine::{
     easy, from_str, none_of, one_of,
     parser::{
-        char::{alpha_num, char as character, letter, string},
+        char::{alpha_num, char as character, letter, spaces, string},
         combinator::{lazy, look_ahead, no_partial, not_followed_by},
         regex::find,
         sequence::between,
@@ -54,14 +54,17 @@ pub fn stream<'a>(source: &'a str, path: &'a str) -> Stream<'a> {
 }
 
 pub fn module<'a>() -> impl Parser<Stream<'a>, Output = Module> {
-    (many(import()), many(type_definition()), many(definition()))
+    (
+        many(import()),
+        many(type_definition()),
+        many(type_alias()),
+        many(definition()),
+    )
         .skip(blank())
         .skip(eof())
-        .map(
-            |(export, export_foreign, imports, type_definitions, definitions)| {
-                Module::new(imports, type_definitions, definitions)
-            },
-        )
+        .map(|(imports, type_definitions, type_aliases, definitions)| {
+            Module::new(imports, type_definitions, type_aliases, definitions)
+        })
 }
 
 fn import<'a>() -> impl Parser<Stream<'a>, Output = Import> {
@@ -94,94 +97,14 @@ fn module_path_components<'a>() -> impl Parser<Stream<'a>, Output = Vec<String>>
 }
 
 fn definition<'a>() -> impl Parser<Stream<'a>, Output = Definition> {
-    choice!(
-        function_definition().map(Definition::from),
-        variable_definition().map(Definition::from),
-    )
-    .expected("definition")
-}
-
-fn function_definition<'a>() -> impl Parser<Stream<'a>, Output = FunctionDefinition> {
-    (
-        position(),
-        type_annotation(),
-        identifier(),
-        many1(identifier()),
-        sign("="),
-        expression(),
-    )
-        .then(
-            |(position, (typed_name, type_), name, arguments, _, expression)| {
-                if typed_name == name {
-                    value(FunctionDefinition::new(
-                        name, arguments, expression, type_, position,
-                    ))
-                    .left()
-                } else {
-                    unexpected_any("unmatched identifiers in definition").right()
-                }
-            },
-        )
-}
-
-fn variable_definition<'a>() -> impl Parser<Stream<'a>, Output = VariableDefinition> {
-    (
-        position(),
-        type_annotation(),
-        identifier(),
-        sign("="),
-        expression(),
-    )
-        .then(|(position, (typed_name, type_), name, _, expression)| {
-            if typed_name == name {
-                value(VariableDefinition::new(name, expression, type_, position)).left()
-            } else {
-                unexpected_any("unmatched identifiers in definition").right()
-            }
-        })
-}
-
-fn result_definition<'a>() -> impl Parser<Stream<'a>, Output = VariableDefinition> {
-    (
-        position(),
-        type_annotation(),
-        identifier(),
-        sign("?="),
-        expression(),
-    )
-        .then(|(position, (typed_name, type_), name, _, expression)| {
-            if typed_name == name {
-                value(VariableDefinition::new(name, expression, type_, position)).left()
-            } else {
-                unexpected_any("unmatched identifiers in definition").right()
-            }
-        })
-}
-
-fn type_annotation<'a>() -> impl Parser<Stream<'a>, Output = (String, Type)> {
-    (identifier(), sign(":").with(type_()))
-}
-
-fn untyped_variable_definition<'a>() -> impl Parser<Stream<'a>, Output = VariableDefinition> {
-    (position(), identifier(), sign("="), expression()).map(|(position, name, _, expression)| {
-        let position = Arc::new(position);
-        VariableDefinition::new(
-            name,
-            expression,
-            types::Unknown::new(position.clone()),
-            position,
-        )
-    })
+    (position(), identifier(), sign("="), lambda())
+        .map(|(position, name, _, lambda)| Definition::new(name, lambda, position))
 }
 
 fn type_definition<'a>() -> impl Parser<Stream<'a>, Output = TypeDefinition> {
-    choice!(type_alias_definition(), record_type_definition()).expected("type definition")
-}
-
-fn record_type_definition<'a>() -> impl Parser<Stream<'a>, Output = TypeDefinition> {
     (
-        keyword("type"),
         position(),
+        keyword("type"),
         identifier(),
         optional(between(
             sign("{"),
@@ -191,25 +114,22 @@ fn record_type_definition<'a>() -> impl Parser<Stream<'a>, Output = TypeDefiniti
     )
         .map(|(_, position, name, elements): (_, _, _, Option<Vec<_>>)| {
             TypeDefinition::new(
-                &name,
-                types::Record::new(
-                    &name,
-                    elements
-                        .unwrap_or_default()
-                        .into_iter()
-                        .map(|(name, type_)| types::RecordElement::new(name, type_))
-                        .collect(),
-                    position,
-                ),
+                name,
+                elements
+                    .unwrap_or_default()
+                    .into_iter()
+                    .map(|(name, type_)| types::RecordElement::new(name, type_))
+                    .collect(),
+                position,
             )
         })
-        .expected("record type definition")
+        .expected("type definition")
 }
 
-fn type_alias_definition<'a>() -> impl Parser<Stream<'a>, Output = TypeDefinition> {
+fn type_alias<'a>() -> impl Parser<Stream<'a>, Output = TypeAlias> {
     (keyword("type"), identifier(), sign("="), type_())
-        .map(|(_, name, _, type_)| TypeDefinition::new(&name, type_))
-        .expected("type alias definition")
+        .map(|(_, name, _, type_)| TypeAlias::new(&name, type_))
+        .expected("type alias")
 }
 
 fn type_<'a>() -> impl Parser<Stream<'a>, Output = Type> {
@@ -219,13 +139,15 @@ fn type_<'a>() -> impl Parser<Stream<'a>, Output = Type> {
 }
 
 fn function_type<'a>() -> impl Parser<Stream<'a>, Output = types::Function> {
-    (position(), union_type(), sign("->"), type_())
-        .map(|(position, argument, _, result)| types::Function::new(argument, result, position))
+    (position(), sign("\\("), many(type_()), sign(")"), type_())
+        .map(|(position, _, arguments, _, result)| {
+            types::Function::new(arguments, result, position)
+        })
         .expected("function type")
 }
 
 fn union_type<'a>() -> impl Parser<Stream<'a>, Output = Type> {
-    (position(), sep_end_by1(type_application(), sign("|")))
+    (position(), sep_end_by1(type_(), sign("|")))
         .map(|(position, types)| {
             let types: Vec<_> = types;
 
@@ -238,13 +160,9 @@ fn union_type<'a>() -> impl Parser<Stream<'a>, Output = Type> {
         .expected("union type")
 }
 
-fn type_application<'a>() -> impl Parser<Stream<'a>, Output = Type> {
-    choice!(list_type().map(Type::from), atomic_type())
-}
-
 fn list_type<'a>() -> impl Parser<Stream<'a>, Output = types::List> {
-    (position(), keyword("List"), atomic_type())
-        .map(|(position, _, element)| types::List::new(element, position))
+    (position(), between(sign("["), sign("]"), atomic_type()))
+        .map(|(position, element)| types::List::new(element, position))
         .expected("list type")
 }
 
@@ -330,10 +248,10 @@ fn if_<'a>() -> impl Parser<Stream<'a>, Output = If> {
         position(),
         keyword("if").expected("if keyword"),
         expression(),
-        keyword("then").expected("then keyword"),
-        expression(),
+        block(),
+        many((keyword("else"), keyword("if"), expression(), block())),
         keyword("else").expected("else keyword"),
-        expression(),
+        block(),
     )
         .map(|(position, _, condition, _, then, _, else_)| {
             If::new(condition, then, else_, position)
@@ -577,17 +495,17 @@ fn concrete_operator<'a>(
 fn boolean_literal<'a>() -> impl Parser<Stream<'a>, Output = Boolean> {
     token(choice!(
         position()
-            .skip(keyword("False"))
+            .skip(keyword("false"))
             .map(|position| Boolean::new(false, position)),
         position()
-            .skip(keyword("True"))
+            .skip(keyword("true"))
             .map(|position| Boolean::new(true, position)),
     ))
     .expected("boolean literal")
 }
 
 fn none_literal<'a>() -> impl Parser<Stream<'a>, Output = None> {
-    token(position().skip(keyword("None")))
+    token(position().skip(keyword("none")))
         .map(None::new)
         .expected("none literal")
 }
@@ -624,9 +542,13 @@ fn string_literal<'a>() -> impl Parser<Stream<'a>, Output = ByteString> {
 fn list_literal<'a>() -> impl Parser<Stream<'a>, Output = List> {
     (
         position(),
-        between(sign("["), sign("]"), sep_end_by(list_element(), sign(","))),
+        sign("["),
+        type_(),
+        sign(";"),
+        sep_end_by(list_element(), sign(",")),
+        sign("]"),
     )
-        .map(|(position, elements)| List::new(elements, position))
+        .map(|(position, _, type_, _, elements, _)| List::new(type_, elements, position))
         .expected("list literal")
 }
 
@@ -697,66 +619,39 @@ fn sign<'a>(sign: &'static str) -> impl Parser<Stream<'a>, Output = ()> {
 }
 
 fn token<'a, O, P: Parser<Stream<'a>, Output = O>>(p: P) -> impl Parser<Stream<'a>, Output = O> {
-    blank().with(p)
+    p.skip(spaces())
 }
 
 fn position<'a>() -> impl Parser<Stream<'a>, Output = Position> {
-    blank()
+    value(())
         .map_input(|_, stream: &mut Stream<'a>| {
             let position = stream.position();
+
             Position::new(
                 stream.0.state.path,
-                Location::new(position.line as usize, position.column as usize),
+                position.line as usize,
+                position.column as usize,
                 stream.0.state.lines[position.line as usize - 1],
             )
         })
         .expected("position")
 }
 
-fn blank<'a>() -> impl Parser<Stream<'a>, Output = ()> {
-    many::<Vec<_>, _, _>(choice!(spaces1(), newline()))
-        .with(value(()))
-        .expected("blank")
-}
-
-fn spaces1<'a>() -> impl Parser<Stream<'a>, Output = ()> {
-    many1::<String, _, _>(one_of(SPACE_CHARACTERS.chars())).with(value(()))
-}
-
-fn newlines1<'a>() -> impl Parser<Stream<'a>, Output = ()> {
-    choice!(
-        many1(newline()),
-        many::<Vec<_>, _, _>(newline()).with(eof()),
-    )
-}
-
-fn newline<'a>() -> impl Parser<Stream<'a>, Output = ()> {
-    optional(spaces1())
-        .with(choice!(
-            combine::parser::char::newline().with(value(())),
-            comment(),
-        ))
-        .expected("newline")
-}
-
 fn eof<'a>() -> impl Parser<Stream<'a>, Output = ()> {
-    optional(spaces1())
-        .with(combine::eof())
-        .expected("end of file")
+    spaces().with(combine::eof()).expected("end of file")
 }
 
 fn comment<'a>() -> impl Parser<Stream<'a>, Output = ()> {
     string("#")
         .with(many::<Vec<_>, _, _>(none_of("\n".chars())))
         .with(combine::parser::char::newline())
-        .with(value(()))
+        .with(spaces())
         .expected("comment")
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use indoc::indoc;
     use pretty_assertions::assert_eq;
 
     #[test]
@@ -1239,10 +1134,7 @@ mod tests {
                 ),
             ),
         ] {
-            assert_eq!(
-                &type_alias_definition().parse(stream(source, "")).unwrap().0,
-                expected
-            );
+            assert_eq!(&type_alias().parse(stream(source, "")).unwrap().0, expected);
         }
     }
 

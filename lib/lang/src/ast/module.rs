@@ -1,7 +1,8 @@
-use super::{definition::Definition, type_definition::TypeDefinition, TypeAlias};
+use super::{definition::Definition, type_definition::TypeDefinition, Import, TypeAlias};
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Module {
+    imports: Vec<Import>,
     type_definitions: Vec<TypeDefinition>,
     type_aliases: Vec<TypeAlias>,
     definitions: Vec<Definition>,
@@ -9,15 +10,21 @@ pub struct Module {
 
 impl Module {
     pub fn new(
+        imports: Vec<Import>,
         type_definitions: Vec<TypeDefinition>,
         type_aliases: Vec<TypeAlias>,
         definitions: Vec<Definition>,
     ) -> Self {
         Self {
+            imports,
             type_definitions,
             type_aliases,
             definitions,
         }
+    }
+
+    pub fn imports(&self) -> &[Import] {
+        &self.imports
     }
 
     pub fn type_definitions(&self) -> &[TypeDefinition] {
