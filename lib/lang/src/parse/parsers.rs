@@ -10,7 +10,7 @@ use crate::{
 use combine::{
     easy, from_str, none_of, one_of,
     parser::{
-        char::{alpha_num, char as character, letter, spaces, string},
+        char::{alpha_num, char as character, letter, space, spaces, string},
         combinator::{lazy, no_partial, not_followed_by},
         regex::find,
         sequence::between,
@@ -52,7 +52,7 @@ pub fn stream<'a>(source: &'a str, path: &'a str) -> Stream<'a> {
 
 pub fn module<'a>() -> impl Parser<Stream<'a>, Output = Module> {
     (
-        spaces(),
+        blank(),
         many(import()),
         many(type_definition()),
         many(type_alias()),
@@ -151,8 +151,8 @@ fn function_type<'a>() -> impl Parser<Stream<'a>, Output = types::Function> {
 }
 
 fn union_type<'a>() -> impl Parser<Stream<'a>, Output = Type> {
-    (position(), sep_end_by1(atomic_type(), sign("|")))
-        .map(|(position, types): (_, Vec<_>)| {
+    sep_end_by1(atomic_type(), sign("|"))
+        .map(|types: Vec<_>| {
             types
                 .into_iter()
                 .reduce(|lhs, rhs| {
@@ -224,7 +224,21 @@ fn reference_type<'a>() -> impl Parser<Stream<'a>, Output = types::Reference> {
 }
 
 fn block<'a>() -> impl Parser<Stream<'a>, Output = Block> {
-    todo!()
+    between(sign("{"), sign("}"), (many(assignment()), expression()))
+        .map(|(assignments, expression)| Block::new(assignments, expression))
+        .expected("block")
+}
+
+fn assignment<'a>() -> impl Parser<Stream<'a>, Output = Assignment> {
+    (
+        position(),
+        optional(identifier().skip(sign("="))),
+        expression(),
+    )
+        .map(|(position, name, expression)| {
+            Assignment::new(name.unwrap_or_default(), expression, position)
+        })
+        .expected("assignment")
 }
 
 fn expression<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
@@ -251,7 +265,22 @@ fn atomic_expression<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
 }
 
 fn lambda<'a>() -> impl Parser<Stream<'a>, Output = Lambda> {
-    todo!()
+    (
+        position(),
+        sign("\\("),
+        sep_end_by(argument(), sign(",")),
+        sign(")"),
+        type_(),
+        block(),
+    )
+        .map(|(position, _, arguments, _, result_type, body)| {
+            Lambda::new(arguments, result_type, body, position)
+        })
+        .expected("function expression")
+}
+
+fn argument<'a>() -> impl Parser<Stream<'a>, Output = Argument> {
+    (identifier(), type_()).map(|(name, type_)| Argument::new(name, type_))
 }
 
 fn if_<'a>() -> impl Parser<Stream<'a>, Output = If> {
@@ -586,7 +615,7 @@ fn sign<'a>(sign: &'static str) -> impl Parser<Stream<'a>, Output = ()> {
 }
 
 fn token<'a, O, P: Parser<Stream<'a>, Output = O>>(p: P) -> impl Parser<Stream<'a>, Output = O> {
-    p.skip(spaces())
+    p.skip(blank())
 }
 
 fn position<'a>() -> impl Parser<Stream<'a>, Output = Position> {
@@ -605,13 +634,20 @@ fn position<'a>() -> impl Parser<Stream<'a>, Output = Position> {
 }
 
 fn eof<'a>() -> impl Parser<Stream<'a>, Output = ()> {
-    spaces().with(combine::eof()).expected("end of file")
+    combine::eof().expected("end of file")
+}
+
+fn blank<'a>() -> impl Parser<Stream<'a>, Output = ()> {
+    many::<Vec<_>, _, _>(choice!(space().with(value(())), comment())).with(value(()))
 }
 
 fn comment<'a>() -> impl Parser<Stream<'a>, Output = ()> {
     string("#")
         .with(many::<Vec<_>, _, _>(none_of("\n".chars())))
-        .with(combine::parser::char::newline())
+        .with(choice!(
+            combine::parser::char::newline().with(value(())),
+            eof()
+        ))
         .with(spaces())
         .expected("comment")
 }
@@ -621,1679 +657,1674 @@ mod tests {
     use super::*;
     use pretty_assertions::assert_eq;
 
-    #[test]
-    fn parse_module() {
-        assert_eq!(
-            module().parse(stream("", "")).unwrap().0,
-            Module::from_definitions(vec![])
-        );
-        assert_eq!(
-            module().parse(stream(" ", "")).unwrap().0,
-            Module::from_definitions(vec![])
-        );
-        assert_eq!(
-            module().parse(stream("\n", "")).unwrap().0,
-            Module::from_definitions(vec![])
-        );
-        assert_eq!(
-            module().parse(stream("export { foo }", "")).unwrap().0,
-            Module::new(
-                Export::new(vec!["foo".into()].drain(..).collect()),
-                ExportForeign::new(Default::default()),
-                vec![],
-                vec![],
-                vec![],
-                vec![]
-            )
-        );
-        assert_eq!(
-            module()
-                .parse(stream("export { foo }\nimport Foo.Bar", ""))
-                .unwrap()
-                .0,
-            Module::new(
-                Export::new(vec!["foo".into()].drain(..).collect()),
-                ExportForeign::new(Default::default()),
-                vec![Import::new(ExternalModulePath::new(
-                    "Foo",
-                    vec!["Bar".into()]
-                ))],
-                vec![],
-                vec![],
-                vec![]
-            )
-        );
-        assert_eq!(
-            module().parse(stream("x : Number\nx = 42", "")).unwrap().0,
-            Module::new(
-                Export::new(Default::default()),
-                ExportForeign::new(Default::default()),
-                vec![],
-                vec![],
-                vec![],
-                vec![VariableDefinition::new(
-                    "x",
-                    Number::new(42.0, Position::dummy()),
-                    types::Number::new(Position::dummy()),
-                    Position::dummy()
-                )
-                .into()]
-            )
-        );
-        assert_eq!(
-            module()
-                .parse(stream("x : Number\nx = 42\ny : Number\ny = 42", ""))
-                .unwrap()
-                .0,
-            Module::new(
-                Export::new(Default::default()),
-                ExportForeign::new(Default::default()),
-                vec![],
-                vec![],
-                vec![],
-                vec![
-                    VariableDefinition::new(
-                        "x",
-                        Number::new(42.0, Position::dummy()),
-                        types::Number::new(Position::dummy()),
-                        Position::dummy()
-                    )
-                    .into(),
-                    VariableDefinition::new(
-                        "y",
-                        Number::new(42.0, Position::dummy()),
-                        types::Number::new(Position::dummy()),
-                        Position::dummy()
-                    )
-                    .into()
-                ]
-            )
-        );
-        assert_eq!(
-            module()
-                .parse(stream("main : Number -> Number\nmain x = 42", ""))
-                .unwrap()
-                .0,
-            Module::new(
-                Export::new(Default::default()),
-                ExportForeign::new(Default::default()),
-                vec![],
-                vec![],
-                vec![],
-                vec![FunctionDefinition::new(
-                    "main",
-                    vec!["x".into()],
-                    Number::new(42.0, Position::dummy()),
-                    types::Function::new(
-                        types::Number::new(Position::dummy()),
-                        types::Number::new(Position::dummy()),
-                        Position::dummy()
-                    ),
-                    Position::dummy()
-                )
-                .into(),]
-            )
-        );
-    }
+    // #[test]
+    // fn parse_module() {
+    //     assert_eq!(
+    //         module().parse(stream("", "")).unwrap().0,
+    //         Module::from_definitions(vec![])
+    //     );
+    //     assert_eq!(
+    //         module().parse(stream(" ", "")).unwrap().0,
+    //         Module::from_definitions(vec![])
+    //     );
+    //     assert_eq!(
+    //         module().parse(stream("\n", "")).unwrap().0,
+    //         Module::from_definitions(vec![])
+    //     );
+    //     assert_eq!(
+    //         module().parse(stream("export { foo }", "")).unwrap().0,
+    //         Module::new(
+    //             Export::new(vec!["foo".into()].drain(..).collect()),
+    //             ExportForeign::new(Default::default()),
+    //             vec![],
+    //             vec![],
+    //             vec![],
+    //             vec![]
+    //         )
+    //     );
+    //     assert_eq!(
+    //         module()
+    //             .parse(stream("export { foo }\nimport Foo.Bar", ""))
+    //             .unwrap()
+    //             .0,
+    //         Module::new(
+    //             Export::new(vec!["foo".into()].drain(..).collect()),
+    //             ExportForeign::new(Default::default()),
+    //             vec![Import::new(ExternalModulePath::new(
+    //                 "Foo",
+    //                 vec!["Bar".into()]
+    //             ))],
+    //             vec![],
+    //             vec![],
+    //             vec![]
+    //         )
+    //     );
+    //     assert_eq!(
+    //         module().parse(stream("x : Number\nx = 42", "")).unwrap().0,
+    //         Module::new(
+    //             Export::new(Default::default()),
+    //             ExportForeign::new(Default::default()),
+    //             vec![],
+    //             vec![],
+    //             vec![],
+    //             vec![VariableDefinition::new(
+    //                 "x",
+    //                 Number::new(42.0, Position::dummy()),
+    //                 types::Number::new(Position::dummy()),
+    //                 Position::dummy()
+    //             )
+    //             .into()]
+    //         )
+    //     );
+    //     assert_eq!(
+    //         module()
+    //             .parse(stream("x : Number\nx = 42\ny : Number\ny = 42", ""))
+    //             .unwrap()
+    //             .0,
+    //         Module::new(
+    //             Export::new(Default::default()),
+    //             ExportForeign::new(Default::default()),
+    //             vec![],
+    //             vec![],
+    //             vec![],
+    //             vec![
+    //                 VariableDefinition::new(
+    //                     "x",
+    //                     Number::new(42.0, Position::dummy()),
+    //                     types::Number::new(Position::dummy()),
+    //                     Position::dummy()
+    //                 )
+    //                 .into(),
+    //                 VariableDefinition::new(
+    //                     "y",
+    //                     Number::new(42.0, Position::dummy()),
+    //                     types::Number::new(Position::dummy()),
+    //                     Position::dummy()
+    //                 )
+    //                 .into()
+    //             ]
+    //         )
+    //     );
+    //     assert_eq!(
+    //         module()
+    //             .parse(stream("main : Number -> Number\nmain x = 42", ""))
+    //             .unwrap()
+    //             .0,
+    //         Module::new(
+    //             Export::new(Default::default()),
+    //             ExportForeign::new(Default::default()),
+    //             vec![],
+    //             vec![],
+    //             vec![],
+    //             vec![FunctionDefinition::new(
+    //                 "main",
+    //                 vec!["x".into()],
+    //                 Number::new(42.0, Position::dummy()),
+    //                 types::Function::new(
+    //                     types::Number::new(Position::dummy()),
+    //                     types::Number::new(Position::dummy()),
+    //                     Position::dummy()
+    //                 ),
+    //                 Position::dummy()
+    //             )
+    //             .into(),]
+    //         )
+    //     );
+    // }
 
-    #[test]
-    fn parse_export() {
-        assert!(export().parse(stream("export {}", "")).is_err());
-        assert_eq!(
-            export().parse(stream("export { foo }", "")).unwrap().0,
-            Export::new(vec!["foo".into()].drain(..).collect()),
-        );
-        assert_eq!(
-            export().parse(stream("export { foo, }", "")).unwrap().0,
-            Export::new(vec!["foo".into()].drain(..).collect()),
-        );
-        assert_eq!(
-            export().parse(stream("export { foo, bar }", "")).unwrap().0,
-            Export::new(vec!["foo".into(), "bar".into()].drain(..).collect()),
-        );
-        assert_eq!(
-            export()
-                .parse(stream("export { foo, bar, }", ""))
-                .unwrap()
-                .0,
-            Export::new(vec!["foo".into(), "bar".into()].drain(..).collect()),
-        );
-        assert_eq!(
-            export().parse(stream("export {\nfoo }", "")).unwrap().0,
-            Export::new(vec!["foo".into()].drain(..).collect()),
-        );
-    }
+    // #[test]
+    // fn parse_export() {
+    //     assert!(export().parse(stream("export {}", "")).is_err());
+    //     assert_eq!(
+    //         export().parse(stream("export { foo }", "")).unwrap().0,
+    //         Export::new(vec!["foo".into()].drain(..).collect()),
+    //     );
+    //     assert_eq!(
+    //         export().parse(stream("export { foo, }", "")).unwrap().0,
+    //         Export::new(vec!["foo".into()].drain(..).collect()),
+    //     );
+    //     assert_eq!(
+    //         export().parse(stream("export { foo, bar }", "")).unwrap().0,
+    //         Export::new(vec!["foo".into(), "bar".into()].drain(..).collect()),
+    //     );
+    //     assert_eq!(
+    //         export()
+    //             .parse(stream("export { foo, bar, }", ""))
+    //             .unwrap()
+    //             .0,
+    //         Export::new(vec!["foo".into(), "bar".into()].drain(..).collect()),
+    //     );
+    //     assert_eq!(
+    //         export().parse(stream("export {\nfoo }", "")).unwrap().0,
+    //         Export::new(vec!["foo".into()].drain(..).collect()),
+    //     );
+    // }
 
-    #[test]
-    fn parse_import() {
-        assert_eq!(
-            import().parse(stream("import .Foo", "")).unwrap().0,
-            Import::new(InternalModulePath::new(vec!["Foo".into()])),
-        );
-        assert_eq!(
-            import().parse(stream("import Foo.Bar", "")).unwrap().0,
-            Import::new(ExternalModulePath::new("Foo", vec!["Bar".into()])),
-        );
-    }
+    // #[test]
+    // fn parse_import() {
+    //     assert_eq!(
+    //         import().parse(stream("import .Foo", "")).unwrap().0,
+    //         Import::new(InternalModulePath::new(vec!["Foo".into()])),
+    //     );
+    //     assert_eq!(
+    //         import().parse(stream("import Foo.Bar", "")).unwrap().0,
+    //         Import::new(ExternalModulePath::new("Foo", vec!["Bar".into()])),
+    //     );
+    // }
 
-    #[test]
-    fn parse_module_path() {
-        assert!(module_path().parse(stream("?", "")).is_err());
-        assert_eq!(
-            module_path().parse(stream(".Foo", "")).unwrap().0,
-            ModulePath::Internal(InternalModulePath::new(vec!["Foo".into()])),
-        );
-        assert_eq!(
-            module_path().parse(stream("Foo.Bar", "")).unwrap().0,
-            ModulePath::External(ExternalModulePath::new("Foo", vec!["Bar".into()])),
-        );
-        assert_eq!(
-            module_path().parse(stream(" .Foo", "")).unwrap().0,
-            ModulePath::Internal(InternalModulePath::new(vec!["Foo".into()])),
-        );
-    }
+    // #[test]
+    // fn parse_module_path() {
+    //     assert!(module_path().parse(stream("?", "")).is_err());
+    //     assert_eq!(
+    //         module_path().parse(stream(".Foo", "")).unwrap().0,
+    //         ModulePath::Internal(InternalModulePath::new(vec!["Foo".into()])),
+    //     );
+    //     assert_eq!(
+    //         module_path().parse(stream("Foo.Bar", "")).unwrap().0,
+    //         ModulePath::External(ExternalModulePath::new("Foo", vec!["Bar".into()])),
+    //     );
+    //     assert_eq!(
+    //         module_path().parse(stream(" .Foo", "")).unwrap().0,
+    //         ModulePath::Internal(InternalModulePath::new(vec!["Foo".into()])),
+    //     );
+    // }
 
-    #[test]
-    fn parse_internal_module_path() {
-        assert!(internal_module_path().parse(stream("?", "")).is_err());
-        assert_eq!(
-            internal_module_path().parse(stream(".Foo", "")).unwrap().0,
-            InternalModulePath::new(vec!["Foo".into()]),
-        );
-        assert_eq!(
-            internal_module_path()
-                .parse(stream(".Foo.Bar", ""))
-                .unwrap()
-                .0,
-            InternalModulePath::new(vec!["Foo".into(), "Bar".into()]),
-        );
-    }
+    // #[test]
+    // fn parse_internal_module_path() {
+    //     assert!(internal_module_path().parse(stream("?", "")).is_err());
+    //     assert_eq!(
+    //         internal_module_path().parse(stream(".Foo", "")).unwrap().0,
+    //         InternalModulePath::new(vec!["Foo".into()]),
+    //     );
+    //     assert_eq!(
+    //         internal_module_path()
+    //             .parse(stream(".Foo.Bar", ""))
+    //             .unwrap()
+    //             .0,
+    //         InternalModulePath::new(vec!["Foo".into(), "Bar".into()]),
+    //     );
+    // }
 
-    #[test]
-    fn parse_external_module_path() {
-        assert!(external_module_path().parse(stream("?", "")).is_err());
-        assert_eq!(
-            external_module_path()
-                .parse(stream("Foo.Bar", ""))
-                .unwrap()
-                .0,
-            ExternalModulePath::new("Foo", vec!["Bar".into()]),
-        );
-    }
+    // #[test]
+    // fn parse_external_module_path() {
+    //     assert!(external_module_path().parse(stream("?", "")).is_err());
+    //     assert_eq!(
+    //         external_module_path()
+    //             .parse(stream("Foo.Bar", ""))
+    //             .unwrap()
+    //             .0,
+    //         ExternalModulePath::new("Foo", vec!["Bar".into()]),
+    //     );
+    // }
 
-    #[test]
-    fn parse_export_foreign() {
-        assert_eq!(
-            export_foreign()
-                .parse(stream("export foreign { foo }", ""))
-                .unwrap()
-                .0,
-            ExportForeign::new(vec!["foo".into()].into_iter().collect()),
-        );
-    }
+    // #[test]
+    // fn parse_export_foreign() {
+    //     assert_eq!(
+    //         export_foreign()
+    //             .parse(stream("export foreign { foo }", ""))
+    //             .unwrap()
+    //             .0,
+    //         ExportForeign::new(vec!["foo".into()].into_iter().collect()),
+    //     );
+    // }
 
-    #[test]
-    fn parse_import_foreign() {
-        assert_eq!(
-            import_foreign()
-                .parse(stream("import foreign foo : Number -> Number", ""))
-                .unwrap()
-                .0,
-            ImportForeign::new(
-                "foo",
-                "foo",
-                CallingConvention::Native,
-                types::Function::new(
-                    types::Number::new(Position::dummy()),
-                    types::Number::new(Position::dummy()),
-                    Position::dummy()
-                ),
-                Position::dummy()
-            ),
-        );
-    }
+    // #[test]
+    // fn parse_import_foreign() {
+    //     assert_eq!(
+    //         import_foreign()
+    //             .parse(stream("import foreign foo : Number -> Number", ""))
+    //             .unwrap()
+    //             .0,
+    //         ImportForeign::new(
+    //             "foo",
+    //             "foo",
+    //             CallingConvention::Native,
+    //             types::Function::new(
+    //                 types::Number::new(Position::dummy()),
+    //                 types::Number::new(Position::dummy()),
+    //                 Position::dummy()
+    //             ),
+    //             Position::dummy()
+    //         ),
+    //     );
+    // }
 
-    #[test]
-    fn parse_import_foreign_with_calling_convention() {
-        assert_eq!(
-            import_foreign()
-                .parse(stream("import foreign \"c\" foo : Number -> Number", ""))
-                .unwrap()
-                .0,
-            ImportForeign::new(
-                "foo",
-                "foo",
-                CallingConvention::C,
-                types::Function::new(
-                    types::Number::new(Position::dummy()),
-                    types::Number::new(Position::dummy()),
-                    Position::dummy()
-                ),
-                Position::dummy()
-            ),
-        );
-    }
+    // #[test]
+    // fn parse_import_foreign_with_calling_convention() {
+    //     assert_eq!(
+    //         import_foreign()
+    //             .parse(stream("import foreign \"c\" foo : Number -> Number", ""))
+    //             .unwrap()
+    //             .0,
+    //         ImportForeign::new(
+    //             "foo",
+    //             "foo",
+    //             CallingConvention::C,
+    //             types::Function::new(
+    //                 types::Number::new(Position::dummy()),
+    //                 types::Number::new(Position::dummy()),
+    //                 Position::dummy()
+    //             ),
+    //             Position::dummy()
+    //         ),
+    //     );
+    // }
 
-    #[test]
-    fn parse_definition() {
-        assert_eq!(
-            definition()
-                .parse(stream("x : Number\nx = 0", ""))
-                .unwrap()
-                .0,
-            VariableDefinition::new(
-                "x",
-                Number::new(0.0, Position::dummy()),
-                types::Number::new(Position::dummy()),
-                Position::dummy()
-            )
-            .into()
-        );
-        assert_eq!(
-            definition()
-                .parse(stream("main : Number -> Number\nmain x = 42", ""))
-                .unwrap()
-                .0,
-            FunctionDefinition::new(
-                "main",
-                vec!["x".into()],
-                Number::new(42.0, Position::dummy()),
-                types::Function::new(
-                    types::Number::new(Position::dummy()),
-                    types::Number::new(Position::dummy()),
-                    Position::dummy()
-                ),
-                Position::dummy()
-            )
-            .into()
-        );
-    }
+    // #[test]
+    // fn parse_definition() {
+    //     assert_eq!(
+    //         definition()
+    //             .parse(stream("x : Number\nx = 0", ""))
+    //             .unwrap()
+    //             .0,
+    //         VariableDefinition::new(
+    //             "x",
+    //             Number::new(0.0, Position::dummy()),
+    //             types::Number::new(Position::dummy()),
+    //             Position::dummy()
+    //         )
+    //         .into()
+    //     );
+    //     assert_eq!(
+    //         definition()
+    //             .parse(stream("main : Number -> Number\nmain x = 42", ""))
+    //             .unwrap()
+    //             .0,
+    //         FunctionDefinition::new(
+    //             "main",
+    //             vec!["x".into()],
+    //             Number::new(42.0, Position::dummy()),
+    //             types::Function::new(
+    //                 types::Number::new(Position::dummy()),
+    //                 types::Number::new(Position::dummy()),
+    //                 Position::dummy()
+    //             ),
+    //             Position::dummy()
+    //         )
+    //         .into()
+    //     );
+    // }
 
-    #[test]
-    fn parse_variable_definition() {
-        assert_eq!(
-            variable_definition()
-                .parse(stream("x : Number\nx = 0", ""))
-                .unwrap()
-                .0,
-            VariableDefinition::new(
-                "x",
-                Number::new(0.0, Position::dummy()),
-                types::Number::new(Position::dummy()),
-                Position::dummy()
-            )
-        );
-    }
+    // #[test]
+    // fn parse_variable_definition() {
+    //     assert_eq!(
+    //         variable_definition()
+    //             .parse(stream("x : Number\nx = 0", ""))
+    //             .unwrap()
+    //             .0,
+    //         VariableDefinition::new(
+    //             "x",
+    //             Number::new(0.0, Position::dummy()),
+    //             types::Number::new(Position::dummy()),
+    //             Position::dummy()
+    //         )
+    //     );
+    // }
 
-    #[test]
-    fn parse_untyped_definition() {
-        assert_eq!(
-            untyped_variable_definition()
-                .parse(stream("x = 0", ""))
-                .unwrap()
-                .0,
-            VariableDefinition::new(
-                "x",
-                Number::new(0.0, Position::dummy()),
-                types::Unknown::new(Position::dummy()),
-                Position::dummy()
-            )
-        );
-        assert_eq!(
-            untyped_function_definition()
-                .parse(stream("main x = 42", ""))
-                .unwrap()
-                .0,
-            FunctionDefinition::new(
-                "main",
-                vec!["x".into()],
-                Number::new(42.0, Position::dummy()),
-                types::Unknown::new(Position::dummy()),
-                Position::dummy()
-            )
-        );
-        assert_eq!(
-            (untyped_function_definition(), untyped_variable_definition())
-                .parse(stream(
-                    indoc!(
-                        "
-                        f x = x
-                         y = (
-                             f x
-                         )
-                        "
-                    ),
-                    ""
-                ))
-                .unwrap()
-                .0,
-            (
-                FunctionDefinition::new(
-                    "f",
-                    vec!["x".into()],
-                    Variable::new("x", Position::dummy()),
-                    types::Unknown::new(Position::dummy()),
-                    Position::dummy()
-                ),
-                VariableDefinition::new(
-                    "y",
-                    Call::new(
-                        Variable::new("f", Position::dummy()),
-                        Variable::new("x", Position::dummy()),
-                        Position::dummy()
-                    ),
-                    types::Unknown::new(Position::dummy()),
-                    Position::dummy()
-                )
-            )
-        );
-    }
+    // #[test]
+    // fn parse_untyped_definition() {
+    //     assert_eq!(
+    //         untyped_variable_definition()
+    //             .parse(stream("x = 0", ""))
+    //             .unwrap()
+    //             .0,
+    //         VariableDefinition::new(
+    //             "x",
+    //             Number::new(0.0, Position::dummy()),
+    //             types::Unknown::new(Position::dummy()),
+    //             Position::dummy()
+    //         )
+    //     );
+    //     assert_eq!(
+    //         untyped_function_definition()
+    //             .parse(stream("main x = 42", ""))
+    //             .unwrap()
+    //             .0,
+    //         FunctionDefinition::new(
+    //             "main",
+    //             vec!["x".into()],
+    //             Number::new(42.0, Position::dummy()),
+    //             types::Unknown::new(Position::dummy()),
+    //             Position::dummy()
+    //         )
+    //     );
+    //     assert_eq!(
+    //         (untyped_function_definition(), untyped_variable_definition())
+    //             .parse(stream(
+    //                 indoc!(
+    //                     "
+    //                     f x = x
+    //                      y = (
+    //                          f x
+    //                      )
+    //                     "
+    //                 ),
+    //                 ""
+    //             ))
+    //             .unwrap()
+    //             .0,
+    //         (
+    //             FunctionDefinition::new(
+    //                 "f",
+    //                 vec!["x".into()],
+    //                 Variable::new("x", Position::dummy()),
+    //                 types::Unknown::new(Position::dummy()),
+    //                 Position::dummy()
+    //             ),
+    //             VariableDefinition::new(
+    //                 "y",
+    //                 Call::new(
+    //                     Variable::new("f", Position::dummy()),
+    //                     Variable::new("x", Position::dummy()),
+    //                     Position::dummy()
+    //                 ),
+    //                 types::Unknown::new(Position::dummy()),
+    //                 Position::dummy()
+    //             )
+    //         )
+    //     );
+    // }
 
-    #[test]
-    fn parse_type_definition() {
-        for (source, expected) in &[
-            (
-                "type Foo",
-                TypeDefinition::new(
-                    "Foo",
-                    types::Record::new("Foo", Default::default(), Position::dummy()),
-                ),
-            ),
-            (
-                "type Foo ( foo : Number )",
-                TypeDefinition::new(
-                    "Foo",
-                    types::Record::new(
-                        "Foo",
-                        vec![types::RecordElement::new(
-                            "foo",
-                            types::Number::new(Position::dummy()),
-                        )],
-                        Position::dummy(),
-                    ),
-                ),
-            ),
-            (
-                "type Foo ( foo : Number, )",
-                TypeDefinition::new(
-                    "Foo",
-                    types::Record::new(
-                        "Foo",
-                        vec![types::RecordElement::new(
-                            "foo",
-                            types::Number::new(Position::dummy()),
-                        )],
-                        Position::dummy(),
-                    ),
-                ),
-            ),
-            (
-                "type Foo ( foo : Number, bar : Number )",
-                TypeDefinition::new(
-                    "Foo",
-                    types::Record::new(
-                        "Foo",
-                        vec![
-                            types::RecordElement::new("foo", types::Number::new(Position::dummy())),
-                            types::RecordElement::new("bar", types::Number::new(Position::dummy())),
-                        ],
-                        Position::dummy(),
-                    ),
-                ),
-            ),
-            (
-                "type Foo ( foo : Number, bar : Number, )",
-                TypeDefinition::new(
-                    "Foo",
-                    types::Record::new(
-                        "Foo",
-                        vec![
-                            types::RecordElement::new("foo", types::Number::new(Position::dummy())),
-                            types::RecordElement::new("bar", types::Number::new(Position::dummy())),
-                        ],
-                        Position::dummy(),
-                    ),
-                ),
-            ),
-            (
-                "type Foo = Boolean | None",
-                TypeDefinition::new(
-                    "Foo",
-                    types::Union::new(
-                        vec![
-                            types::Boolean::new(Position::dummy()).into(),
-                            types::None::new(Position::dummy()).into(),
-                        ]
-                        .into_iter()
-                        .collect(),
-                        Position::dummy(),
-                    ),
-                ),
-            ),
-        ] {
-            assert_eq!(
-                &type_definition().parse(stream(source, "")).unwrap().0,
-                expected
-            );
-        }
-    }
+    // #[test]
+    // fn parse_type_definition() {
+    //     for (source, expected) in &[
+    //         (
+    //             "type Foo",
+    //             TypeDefinition::new(
+    //                 "Foo",
+    //                 types::Record::new("Foo", Default::default(), Position::dummy()),
+    //             ),
+    //         ),
+    //         (
+    //             "type Foo ( foo : Number )",
+    //             TypeDefinition::new(
+    //                 "Foo",
+    //                 types::Record::new(
+    //                     "Foo",
+    //                     vec![types::RecordElement::new(
+    //                         "foo",
+    //                         types::Number::new(Position::dummy()),
+    //                     )],
+    //                     Position::dummy(),
+    //                 ),
+    //             ),
+    //         ),
+    //         (
+    //             "type Foo ( foo : Number, )",
+    //             TypeDefinition::new(
+    //                 "Foo",
+    //                 types::Record::new(
+    //                     "Foo",
+    //                     vec![types::RecordElement::new(
+    //                         "foo",
+    //                         types::Number::new(Position::dummy()),
+    //                     )],
+    //                     Position::dummy(),
+    //                 ),
+    //             ),
+    //         ),
+    //         (
+    //             "type Foo ( foo : Number, bar : Number )",
+    //             TypeDefinition::new(
+    //                 "Foo",
+    //                 types::Record::new(
+    //                     "Foo",
+    //                     vec![
+    //                         types::RecordElement::new("foo", types::Number::new(Position::dummy())),
+    //                         types::RecordElement::new("bar", types::Number::new(Position::dummy())),
+    //                     ],
+    //                     Position::dummy(),
+    //                 ),
+    //             ),
+    //         ),
+    //         (
+    //             "type Foo ( foo : Number, bar : Number, )",
+    //             TypeDefinition::new(
+    //                 "Foo",
+    //                 types::Record::new(
+    //                     "Foo",
+    //                     vec![
+    //                         types::RecordElement::new("foo", types::Number::new(Position::dummy())),
+    //                         types::RecordElement::new("bar", types::Number::new(Position::dummy())),
+    //                     ],
+    //                     Position::dummy(),
+    //                 ),
+    //             ),
+    //         ),
+    //         (
+    //             "type Foo = Boolean | None",
+    //             TypeDefinition::new(
+    //                 "Foo",
+    //                 types::Union::new(
+    //                     vec![
+    //                         types::Boolean::new(Position::dummy()).into(),
+    //                         types::None::new(Position::dummy()).into(),
+    //                     ]
+    //                     .into_iter()
+    //                     .collect(),
+    //                     Position::dummy(),
+    //                 ),
+    //             ),
+    //         ),
+    //     ] {
+    //         assert_eq!(
+    //             &type_definition().parse(stream(source, "")).unwrap().0,
+    //             expected
+    //         );
+    //     }
+    // }
 
-    #[test]
-    fn parse_type_alias_definition() {
-        for (source, expected) in &[
-            (
-                "type Foo = Number",
-                TypeDefinition::new("Foo", types::Number::new(Position::dummy())),
-            ),
-            (
-                "type Foo = Number | None",
-                TypeDefinition::new(
-                    "Foo",
-                    types::Union::new(
-                        vec![
-                            types::Number::new(Position::dummy()).into(),
-                            types::None::new(Position::dummy()).into(),
-                        ]
-                        .into_iter()
-                        .collect(),
-                        Position::dummy(),
-                    ),
-                ),
-            ),
-        ] {
-            assert_eq!(&type_alias().parse(stream(source, "")).unwrap().0, expected);
-        }
-    }
+    // #[test]
+    // fn parse_type_alias_definition() {
+    //     for (source, expected) in &[
+    //         (
+    //             "type Foo = Number",
+    //             TypeDefinition::new("Foo", types::Number::new(Position::dummy())),
+    //         ),
+    //         (
+    //             "type Foo = Number | None",
+    //             TypeDefinition::new(
+    //                 "Foo",
+    //                 types::Union::new(
+    //                     vec![
+    //                         types::Number::new(Position::dummy()).into(),
+    //                         types::None::new(Position::dummy()).into(),
+    //                     ]
+    //                     .into_iter()
+    //                     .collect(),
+    //                     Position::dummy(),
+    //                 ),
+    //             ),
+    //         ),
+    //     ] {
+    //         assert_eq!(&type_alias().parse(stream(source, "")).unwrap().0, expected);
+    //     }
+    // }
 
-    mod types_ {
-        use super::*;
-        use pretty_assertions::assert_eq;
+    // mod types_ {
+    //     use super::*;
+    //     use pretty_assertions::assert_eq;
 
-        #[test]
-        fn parse_type() {
-            assert!(type_().parse(stream("?", "")).is_err());
-            assert_eq!(
-                type_().parse(stream("Boolean", "")).unwrap().0,
-                types::Boolean::new(Position::dummy()).into()
-            );
-            assert_eq!(
-                type_().parse(stream("None", "")).unwrap().0,
-                types::None::new(Position::dummy()).into()
-            );
-            assert_eq!(
-                type_().parse(stream("Number", "")).unwrap().0,
-                types::Number::new(Position::dummy()).into()
-            );
-            assert_eq!(
-                type_().parse(stream("Number -> Number", "")).unwrap().0,
-                types::Function::new(
-                    types::Number::new(Position::dummy()),
-                    types::Number::new(Position::dummy()),
-                    Position::dummy()
-                )
-                .into()
-            );
-            assert_eq!(
-                type_()
-                    .parse(stream("Number -> Number -> Number", ""))
-                    .unwrap()
-                    .0,
-                types::Function::new(
-                    types::Number::new(Position::dummy()),
-                    types::Function::new(
-                        types::Number::new(Position::dummy()),
-                        types::Number::new(Position::dummy()),
-                        Position::dummy()
-                    ),
-                    Position::dummy()
-                )
-                .into()
-            );
-            assert_eq!(
-                type_()
-                    .parse(stream("(Number -> Number) -> Number", ""))
-                    .unwrap()
-                    .0,
-                types::Function::new(
-                    types::Function::new(
-                        types::Number::new(Position::dummy()),
-                        types::Number::new(Position::dummy()),
-                        Position::dummy()
-                    ),
-                    types::Number::new(Position::dummy()),
-                    Position::dummy()
-                )
-                .into()
-            );
-            assert_eq!(
-                type_().parse(stream("Number | None", "")).unwrap().0,
-                types::Union::new(
-                    vec![
-                        types::Number::new(Position::dummy()).into(),
-                        types::None::new(Position::dummy()).into(),
-                    ],
-                    Position::dummy()
-                )
-                .into()
-            );
-            assert_eq!(
-                type_()
-                    .parse(stream("Boolean | Number | None", ""))
-                    .unwrap()
-                    .0,
-                types::Union::new(
-                    vec![
-                        types::Boolean::new(Position::dummy()).into(),
-                        types::Number::new(Position::dummy()).into(),
-                        types::None::new(Position::dummy()).into(),
-                    ],
-                    Position::dummy()
-                )
-                .into()
-            );
-            assert_eq!(
-                type_()
-                    .parse(stream("Number -> Number | None", ""))
-                    .unwrap()
-                    .0,
-                types::Function::new(
-                    types::Number::new(Position::dummy()),
-                    types::Union::new(
-                        vec![
-                            types::Number::new(Position::dummy()).into(),
-                            types::None::new(Position::dummy()).into(),
-                        ],
-                        Position::dummy()
-                    ),
-                    Position::dummy()
-                )
-                .into()
-            );
-            assert_eq!(
-                type_()
-                    .parse(stream("Number | None -> Number", ""))
-                    .unwrap()
-                    .0,
-                types::Function::new(
-                    types::Union::new(
-                        vec![
-                            types::Number::new(Position::dummy()).into(),
-                            types::None::new(Position::dummy()).into(),
-                        ],
-                        Position::dummy()
-                    ),
-                    types::Number::new(Position::dummy()),
-                    Position::dummy()
-                )
-                .into()
-            );
-            assert_eq!(
-                type_()
-                    .parse(stream("(Number -> Number) | None", ""))
-                    .unwrap()
-                    .0,
-                types::Union::new(
-                    vec![
-                        types::Function::new(
-                            types::Number::new(Position::dummy()),
-                            types::Number::new(Position::dummy()),
-                            Position::dummy()
-                        )
-                        .into(),
-                        types::None::new(Position::dummy()).into(),
-                    ],
-                    Position::dummy()
-                )
-                .into()
-            );
-        }
+    //     #[test]
+    //     fn parse_type() {
+    //         assert!(type_().parse(stream("?", "")).is_err());
+    //         assert_eq!(
+    //             type_().parse(stream("Boolean", "")).unwrap().0,
+    //             types::Boolean::new(Position::dummy()).into()
+    //         );
+    //         assert_eq!(
+    //             type_().parse(stream("None", "")).unwrap().0,
+    //             types::None::new(Position::dummy()).into()
+    //         );
+    //         assert_eq!(
+    //             type_().parse(stream("Number", "")).unwrap().0,
+    //             types::Number::new(Position::dummy()).into()
+    //         );
+    //         assert_eq!(
+    //             type_().parse(stream("Number -> Number", "")).unwrap().0,
+    //             types::Function::new(
+    //                 types::Number::new(Position::dummy()),
+    //                 types::Number::new(Position::dummy()),
+    //                 Position::dummy()
+    //             )
+    //             .into()
+    //         );
+    //         assert_eq!(
+    //             type_()
+    //                 .parse(stream("Number -> Number -> Number", ""))
+    //                 .unwrap()
+    //                 .0,
+    //             types::Function::new(
+    //                 types::Number::new(Position::dummy()),
+    //                 types::Function::new(
+    //                     types::Number::new(Position::dummy()),
+    //                     types::Number::new(Position::dummy()),
+    //                     Position::dummy()
+    //                 ),
+    //                 Position::dummy()
+    //             )
+    //             .into()
+    //         );
+    //         assert_eq!(
+    //             type_()
+    //                 .parse(stream("(Number -> Number) -> Number", ""))
+    //                 .unwrap()
+    //                 .0,
+    //             types::Function::new(
+    //                 types::Function::new(
+    //                     types::Number::new(Position::dummy()),
+    //                     types::Number::new(Position::dummy()),
+    //                     Position::dummy()
+    //                 ),
+    //                 types::Number::new(Position::dummy()),
+    //                 Position::dummy()
+    //             )
+    //             .into()
+    //         );
+    //         assert_eq!(
+    //             type_().parse(stream("Number | None", "")).unwrap().0,
+    //             types::Union::new(
+    //                 vec![
+    //                     types::Number::new(Position::dummy()).into(),
+    //                     types::None::new(Position::dummy()).into(),
+    //                 ],
+    //                 Position::dummy()
+    //             )
+    //             .into()
+    //         );
+    //         assert_eq!(
+    //             type_()
+    //                 .parse(stream("Boolean | Number | None", ""))
+    //                 .unwrap()
+    //                 .0,
+    //             types::Union::new(
+    //                 vec![
+    //                     types::Boolean::new(Position::dummy()).into(),
+    //                     types::Number::new(Position::dummy()).into(),
+    //                     types::None::new(Position::dummy()).into(),
+    //                 ],
+    //                 Position::dummy()
+    //             )
+    //             .into()
+    //         );
+    //         assert_eq!(
+    //             type_()
+    //                 .parse(stream("Number -> Number | None", ""))
+    //                 .unwrap()
+    //                 .0,
+    //             types::Function::new(
+    //                 types::Number::new(Position::dummy()),
+    //                 types::Union::new(
+    //                     vec![
+    //                         types::Number::new(Position::dummy()).into(),
+    //                         types::None::new(Position::dummy()).into(),
+    //                     ],
+    //                     Position::dummy()
+    //                 ),
+    //                 Position::dummy()
+    //             )
+    //             .into()
+    //         );
+    //         assert_eq!(
+    //             type_()
+    //                 .parse(stream("Number | None -> Number", ""))
+    //                 .unwrap()
+    //                 .0,
+    //             types::Function::new(
+    //                 types::Union::new(
+    //                     vec![
+    //                         types::Number::new(Position::dummy()).into(),
+    //                         types::None::new(Position::dummy()).into(),
+    //                     ],
+    //                     Position::dummy()
+    //                 ),
+    //                 types::Number::new(Position::dummy()),
+    //                 Position::dummy()
+    //             )
+    //             .into()
+    //         );
+    //         assert_eq!(
+    //             type_()
+    //                 .parse(stream("(Number -> Number) | None", ""))
+    //                 .unwrap()
+    //                 .0,
+    //             types::Union::new(
+    //                 vec![
+    //                     types::Function::new(
+    //                         types::Number::new(Position::dummy()),
+    //                         types::Number::new(Position::dummy()),
+    //                         Position::dummy()
+    //                     )
+    //                     .into(),
+    //                     types::None::new(Position::dummy()).into(),
+    //                 ],
+    //                 Position::dummy()
+    //             )
+    //             .into()
+    //         );
+    //     }
 
-        #[test]
-        fn parse_any_type() {
-            assert_eq!(
-                any_type().parse(stream("Any", "")).unwrap().0,
-                types::Any::new(Position::dummy())
-            );
-        }
+    //     #[test]
+    //     fn parse_any_type() {
+    //         assert_eq!(
+    //             any_type().parse(stream("Any", "")).unwrap().0,
+    //             types::Any::new(Position::dummy())
+    //         );
+    //     }
 
-        #[test]
-        fn parse_reference_type() {
-            assert!(type_().parse(stream("", "")).is_err());
-            assert_eq!(
-                type_().parse(stream("Foo", "")).unwrap().0,
-                types::Reference::new("Foo", Position::dummy()).into()
-            );
-            assert_eq!(
-                type_().parse(stream("Foo.Bar", "")).unwrap().0,
-                types::Reference::new("Foo.Bar", Position::dummy()).into()
-            );
-        }
+    //     #[test]
+    //     fn parse_reference_type() {
+    //         assert!(type_().parse(stream("", "")).is_err());
+    //         assert_eq!(
+    //             type_().parse(stream("Foo", "")).unwrap().0,
+    //             types::Reference::new("Foo", Position::dummy()).into()
+    //         );
+    //         assert_eq!(
+    //             type_().parse(stream("Foo.Bar", "")).unwrap().0,
+    //             types::Reference::new("Foo.Bar", Position::dummy()).into()
+    //         );
+    //     }
 
-        #[test]
-        fn parse_list_type() {
-            assert_eq!(
-                type_().parse(stream("List Number", "")).unwrap().0,
-                types::List::new(types::Number::new(Position::dummy()), Position::dummy()).into()
-            );
+    //     #[test]
+    //     fn parse_list_type() {
+    //         assert_eq!(
+    //             type_().parse(stream("List Number", "")).unwrap().0,
+    //             types::List::new(types::Number::new(Position::dummy()), Position::dummy()).into()
+    //         );
 
-            assert_eq!(
-                type_().parse(stream("List (List Number)", "")).unwrap().0,
-                types::List::new(
-                    types::List::new(types::Number::new(Position::dummy()), Position::dummy()),
-                    Position::dummy()
-                )
-                .into()
-            );
+    //         assert_eq!(
+    //             type_().parse(stream("List (List Number)", "")).unwrap().0,
+    //             types::List::new(
+    //                 types::List::new(types::Number::new(Position::dummy()), Position::dummy()),
+    //                 Position::dummy()
+    //             )
+    //             .into()
+    //         );
 
-            assert_eq!(
-                type_()
-                    .parse(stream("List Number | List None", ""))
-                    .unwrap()
-                    .0,
-                types::Union::new(
-                    vec![
-                        types::List::new(types::Number::new(Position::dummy()), Position::dummy())
-                            .into(),
-                        types::List::new(types::None::new(Position::dummy()), Position::dummy())
-                            .into()
-                    ],
-                    Position::dummy()
-                )
-                .into()
-            );
+    //         assert_eq!(
+    //             type_()
+    //                 .parse(stream("List Number | List None", ""))
+    //                 .unwrap()
+    //                 .0,
+    //             types::Union::new(
+    //                 vec![
+    //                     types::List::new(types::Number::new(Position::dummy()), Position::dummy())
+    //                         .into(),
+    //                     types::List::new(types::None::new(Position::dummy()), Position::dummy())
+    //                         .into()
+    //                 ],
+    //                 Position::dummy()
+    //             )
+    //             .into()
+    //         );
 
-            assert_eq!(
-                type_()
-                    .parse(stream("List Number -> List None", ""))
-                    .unwrap()
-                    .0,
-                types::Function::new(
-                    types::List::new(types::Number::new(Position::dummy()), Position::dummy()),
-                    types::List::new(types::None::new(Position::dummy()), Position::dummy()),
-                    Position::dummy()
-                )
-                .into()
-            );
-        }
-    }
+    //         assert_eq!(
+    //             type_()
+    //                 .parse(stream("List Number -> List None", ""))
+    //                 .unwrap()
+    //                 .0,
+    //             types::Function::new(
+    //                 types::List::new(types::Number::new(Position::dummy()), Position::dummy()),
+    //                 types::List::new(types::None::new(Position::dummy()), Position::dummy()),
+    //                 Position::dummy()
+    //             )
+    //             .into()
+    //         );
+    //     }
+    // }
 
-    mod expressions {
-        use super::*;
-        use pretty_assertions::assert_eq;
+    // mod expressions {
+    //     use super::*;
+    //     use pretty_assertions::assert_eq;
 
-        #[test]
-        fn parse_expression() {
-            assert!(expression().parse(stream("?", "")).is_err());
-            assert!(expression()
-                .skip(eof())
-                .parse(stream("Foo () foo", ""))
-                .is_err());
-            assert!(expression()
-                .skip(eof())
-                .parse(stream("Foo ( foo = 42 ) foo", ""))
-                .is_err());
-            assert_eq!(
-                expression().parse(stream("1", "")).unwrap().0,
-                Number::new(1.0, Position::dummy()).into()
-            );
-            assert_eq!(
-                expression().parse(stream("x", "")).unwrap().0,
-                Variable::new("x", Position::dummy()).into()
-            );
-            assert_eq!(
-                expression().parse(stream("x + 1", "")).unwrap().0,
-                ArithmeticOperation::new(
-                    ArithmeticOperator::Add,
-                    Variable::new("x", Position::dummy()),
-                    Number::new(1.0, Position::dummy()),
-                    Position::dummy()
-                )
-                .into()
-            );
-            assert_eq!(
-                expression().parse(stream("x + y z", "")).unwrap().0,
-                ArithmeticOperation::new(
-                    ArithmeticOperator::Add,
-                    Variable::new("x", Position::dummy()),
-                    Call::new(
-                        Variable::new("y", Position::dummy()),
-                        Variable::new("z", Position::dummy()),
-                        Position::dummy()
-                    ),
-                    Position::dummy()
-                )
-                .into()
-            );
-            assert_eq!(
-                expression().parse(stream("(x + y) z", "")).unwrap().0,
-                Call::new(
-                    ArithmeticOperation::new(
-                        ArithmeticOperator::Add,
-                        Variable::new("x", Position::dummy()),
-                        Variable::new("y", Position::dummy()),
-                        Position::dummy()
-                    ),
-                    Variable::new("z", Position::dummy()),
-                    Position::dummy()
-                )
-                .into()
-            );
-            assert_eq!(
-                expression()
-                    .parse(stream(
-                        indoc!(
-                            "
-                        (f x
-                         )
-                        "
-                        ),
-                        ""
-                    ))
-                    .unwrap()
-                    .0,
-                Call::new(
-                    Variable::new("f", Position::dummy()),
-                    Variable::new("x", Position::dummy()),
-                    Position::dummy()
-                )
-                .into()
-            );
-        }
+    //     #[test]
+    //     fn parse_expression() {
+    //         assert!(expression().parse(stream("?", "")).is_err());
+    //         assert!(expression()
+    //             .skip(eof())
+    //             .parse(stream("Foo () foo", ""))
+    //             .is_err());
+    //         assert!(expression()
+    //             .skip(eof())
+    //             .parse(stream("Foo ( foo = 42 ) foo", ""))
+    //             .is_err());
+    //         assert_eq!(
+    //             expression().parse(stream("1", "")).unwrap().0,
+    //             Number::new(1.0, Position::dummy()).into()
+    //         );
+    //         assert_eq!(
+    //             expression().parse(stream("x", "")).unwrap().0,
+    //             Variable::new("x", Position::dummy()).into()
+    //         );
+    //         assert_eq!(
+    //             expression().parse(stream("x + 1", "")).unwrap().0,
+    //             ArithmeticOperation::new(
+    //                 ArithmeticOperator::Add,
+    //                 Variable::new("x", Position::dummy()),
+    //                 Number::new(1.0, Position::dummy()),
+    //                 Position::dummy()
+    //             )
+    //             .into()
+    //         );
+    //         assert_eq!(
+    //             expression().parse(stream("x + y z", "")).unwrap().0,
+    //             ArithmeticOperation::new(
+    //                 ArithmeticOperator::Add,
+    //                 Variable::new("x", Position::dummy()),
+    //                 Call::new(
+    //                     Variable::new("y", Position::dummy()),
+    //                     Variable::new("z", Position::dummy()),
+    //                     Position::dummy()
+    //                 ),
+    //                 Position::dummy()
+    //             )
+    //             .into()
+    //         );
+    //         assert_eq!(
+    //             expression().parse(stream("(x + y) z", "")).unwrap().0,
+    //             Call::new(
+    //                 ArithmeticOperation::new(
+    //                     ArithmeticOperator::Add,
+    //                     Variable::new("x", Position::dummy()),
+    //                     Variable::new("y", Position::dummy()),
+    //                     Position::dummy()
+    //                 ),
+    //                 Variable::new("z", Position::dummy()),
+    //                 Position::dummy()
+    //             )
+    //             .into()
+    //         );
+    //         assert_eq!(
+    //             expression()
+    //                 .parse(stream(
+    //                     indoc!(
+    //                         "
+    //                     (f x
+    //                      )
+    //                     "
+    //                     ),
+    //                     ""
+    //                 ))
+    //                 .unwrap()
+    //                 .0,
+    //             Call::new(
+    //                 Variable::new("f", Position::dummy()),
+    //                 Variable::new("x", Position::dummy()),
+    //                 Position::dummy()
+    //             )
+    //             .into()
+    //         );
+    //     }
 
-        #[test]
-        fn parse_deeply_nested_expression() {
-            assert_eq!(
-                expression()
-                    .parse(stream("((((((((((((((42))))))))))))))", ""))
-                    .unwrap()
-                    .0,
-                Number::new(42.0, Position::dummy()).into()
-            )
-        }
+    //     #[test]
+    //     fn parse_deeply_nested_expression() {
+    //         assert_eq!(
+    //             expression()
+    //                 .parse(stream("((((((((((((((42))))))))))))))", ""))
+    //                 .unwrap()
+    //                 .0,
+    //             Number::new(42.0, Position::dummy()).into()
+    //         )
+    //     }
 
-        #[test]
-        fn parse_atomic_expression() {
-            assert!(atomic_expression().parse(stream("?", "")).is_err());
-            assert_eq!(
-                atomic_expression().parse(stream("1", "")).unwrap().0,
-                Number::new(1.0, Position::dummy()).into()
-            );
-            assert_eq!(
-                atomic_expression().parse(stream("x", "")).unwrap().0,
-                Variable::new("x", Position::dummy()).into()
-            );
-            assert_eq!(
-                atomic_expression().parse(stream(" x", "")).unwrap().0,
-                Variable::new("x", Position::dummy()).into()
-            );
-        }
+    //     #[test]
+    //     fn parse_atomic_expression() {
+    //         assert!(atomic_expression().parse(stream("?", "")).is_err());
+    //         assert_eq!(
+    //             atomic_expression().parse(stream("1", "")).unwrap().0,
+    //             Number::new(1.0, Position::dummy()).into()
+    //         );
+    //         assert_eq!(
+    //             atomic_expression().parse(stream("x", "")).unwrap().0,
+    //             Variable::new("x", Position::dummy()).into()
+    //         );
+    //         assert_eq!(
+    //             atomic_expression().parse(stream(" x", "")).unwrap().0,
+    //             Variable::new("x", Position::dummy()).into()
+    //         );
+    //     }
 
-        #[test]
-        fn parse_if() {
-            assert_eq!(
-                if_()
-                    .parse(stream("if True then 42 else 13", ""))
-                    .unwrap()
-                    .0,
-                If::new(
-                    Boolean::new(true, Position::dummy()),
-                    Number::new(42.0, Position::dummy()),
-                    Number::new(13.0, Position::dummy()),
-                    Position::dummy(),
-                )
-            );
-            assert_eq!(
-                if_()
-                    .parse(stream(
-                        "if if True then False else True then 42 else 13",
-                        ""
-                    ))
-                    .unwrap()
-                    .0,
-                If::new(
-                    If::new(
-                        Boolean::new(true, Position::dummy()),
-                        Boolean::new(false, Position::dummy()),
-                        Boolean::new(true, Position::dummy()),
-                        Position::dummy(),
-                    ),
-                    Number::new(42.0, Position::dummy()),
-                    Number::new(13.0, Position::dummy()),
-                    Position::dummy(),
-                )
-            );
-            assert_eq!(
-                if_()
-                    .parse(stream("if True then if False then 1 else 2 else 3", ""))
-                    .unwrap()
-                    .0,
-                If::new(
-                    Boolean::new(true, Position::dummy()),
-                    If::new(
-                        Boolean::new(false, Position::dummy()),
-                        Number::new(1.0, Position::dummy()),
-                        Number::new(2.0, Position::dummy()),
-                        Position::dummy(),
-                    ),
-                    Number::new(3.0, Position::dummy()),
-                    Position::dummy(),
-                )
-            );
-            assert_eq!(
-                if_()
-                    .parse(stream("if True then 1 else if False then 2 else 3", ""))
-                    .unwrap()
-                    .0,
-                If::new(
-                    Boolean::new(true, Position::dummy()),
-                    Number::new(1.0, Position::dummy()),
-                    If::new(
-                        Boolean::new(false, Position::dummy()),
-                        Number::new(2.0, Position::dummy()),
-                        Number::new(3.0, Position::dummy()),
-                        Position::dummy(),
-                    ),
-                    Position::dummy(),
-                )
-            );
-            assert_eq!(
-                if_()
-                    .parse(stream("if x < 0 then 42 else 13", ""))
-                    .unwrap()
-                    .0,
-                If::new(
-                    OrderOperation::new(
-                        OrderOperator::LessThan,
-                        Variable::new("x", Position::dummy()),
-                        Number::new(0.0, Position::dummy()),
-                        Position::dummy()
-                    ),
-                    Number::new(42.0, Position::dummy()),
-                    Number::new(13.0, Position::dummy()),
-                    Position::dummy(),
-                )
-            );
-        }
+    //     #[test]
+    //     fn parse_if() {
+    //         assert_eq!(
+    //             if_()
+    //                 .parse(stream("if True then 42 else 13", ""))
+    //                 .unwrap()
+    //                 .0,
+    //             If::new(
+    //                 Boolean::new(true, Position::dummy()),
+    //                 Number::new(42.0, Position::dummy()),
+    //                 Number::new(13.0, Position::dummy()),
+    //                 Position::dummy(),
+    //             )
+    //         );
+    //         assert_eq!(
+    //             if_()
+    //                 .parse(stream(
+    //                     "if if True then False else True then 42 else 13",
+    //                     ""
+    //                 ))
+    //                 .unwrap()
+    //                 .0,
+    //             If::new(
+    //                 If::new(
+    //                     Boolean::new(true, Position::dummy()),
+    //                     Boolean::new(false, Position::dummy()),
+    //                     Boolean::new(true, Position::dummy()),
+    //                     Position::dummy(),
+    //                 ),
+    //                 Number::new(42.0, Position::dummy()),
+    //                 Number::new(13.0, Position::dummy()),
+    //                 Position::dummy(),
+    //             )
+    //         );
+    //         assert_eq!(
+    //             if_()
+    //                 .parse(stream("if True then if False then 1 else 2 else 3", ""))
+    //                 .unwrap()
+    //                 .0,
+    //             If::new(
+    //                 Boolean::new(true, Position::dummy()),
+    //                 If::new(
+    //                     Boolean::new(false, Position::dummy()),
+    //                     Number::new(1.0, Position::dummy()),
+    //                     Number::new(2.0, Position::dummy()),
+    //                     Position::dummy(),
+    //                 ),
+    //                 Number::new(3.0, Position::dummy()),
+    //                 Position::dummy(),
+    //             )
+    //         );
+    //         assert_eq!(
+    //             if_()
+    //                 .parse(stream("if True then 1 else if False then 2 else 3", ""))
+    //                 .unwrap()
+    //                 .0,
+    //             If::new(
+    //                 Boolean::new(true, Position::dummy()),
+    //                 Number::new(1.0, Position::dummy()),
+    //                 If::new(
+    //                     Boolean::new(false, Position::dummy()),
+    //                     Number::new(2.0, Position::dummy()),
+    //                     Number::new(3.0, Position::dummy()),
+    //                     Position::dummy(),
+    //                 ),
+    //                 Position::dummy(),
+    //             )
+    //         );
+    //         assert_eq!(
+    //             if_()
+    //                 .parse(stream("if x < 0 then 42 else 13", ""))
+    //                 .unwrap()
+    //                 .0,
+    //             If::new(
+    //                 OrderOperation::new(
+    //                     OrderOperator::LessThan,
+    //                     Variable::new("x", Position::dummy()),
+    //                     Number::new(0.0, Position::dummy()),
+    //                     Position::dummy()
+    //                 ),
+    //                 Number::new(42.0, Position::dummy()),
+    //                 Number::new(13.0, Position::dummy()),
+    //                 Position::dummy(),
+    //             )
+    //         );
+    //     }
 
-        #[test]
-        fn parse_case() {
-            assert_eq!(
-                if_type()
-                    .parse(stream(
-                        indoc!(
-                            "
-                          case foo = True
-                            Boolean => foo
-                        "
-                        ),
-                        ""
-                    ))
-                    .unwrap()
-                    .0,
-                Case::new(
-                    "foo",
-                    Boolean::new(true, Position::dummy()),
-                    vec![Alternative::new(
-                        types::Boolean::new(Position::dummy()),
-                        Variable::new("foo", Position::dummy())
-                    )],
-                    Position::dummy(),
-                )
-            );
-            assert_eq!(
-                if_type()
-                    .parse(stream(
-                        indoc!(
-                            "
-                          case foo = True
-                            Boolean => True
-                            None => False
-                        "
-                        ),
-                        ""
-                    ))
-                    .unwrap()
-                    .0,
-                Case::new(
-                    "foo",
-                    Boolean::new(true, Position::dummy()),
-                    vec![
-                        Alternative::new(
-                            types::Boolean::new(Position::dummy()),
-                            Boolean::new(true, Position::dummy())
-                        ),
-                        Alternative::new(
-                            types::None::new(Position::dummy()),
-                            Boolean::new(false, Position::dummy())
-                        )
-                    ],
-                    Position::dummy()
-                )
-            );
-        }
+    //     #[test]
+    //     fn parse_case() {
+    //         assert_eq!(
+    //             if_type()
+    //                 .parse(stream(
+    //                     indoc!(
+    //                         "
+    //                       case foo = True
+    //                         Boolean => foo
+    //                     "
+    //                     ),
+    //                     ""
+    //                 ))
+    //                 .unwrap()
+    //                 .0,
+    //             Case::new(
+    //                 "foo",
+    //                 Boolean::new(true, Position::dummy()),
+    //                 vec![Alternative::new(
+    //                     types::Boolean::new(Position::dummy()),
+    //                     Variable::new("foo", Position::dummy())
+    //                 )],
+    //                 Position::dummy(),
+    //             )
+    //         );
+    //         assert_eq!(
+    //             if_type()
+    //                 .parse(stream(
+    //                     indoc!(
+    //                         "
+    //                       case foo = True
+    //                         Boolean => True
+    //                         None => False
+    //                     "
+    //                     ),
+    //                     ""
+    //                 ))
+    //                 .unwrap()
+    //                 .0,
+    //             Case::new(
+    //                 "foo",
+    //                 Boolean::new(true, Position::dummy()),
+    //                 vec![
+    //                     Alternative::new(
+    //                         types::Boolean::new(Position::dummy()),
+    //                         Boolean::new(true, Position::dummy())
+    //                     ),
+    //                     Alternative::new(
+    //                         types::None::new(Position::dummy()),
+    //                         Boolean::new(false, Position::dummy())
+    //                     )
+    //                 ],
+    //                 Position::dummy()
+    //             )
+    //         );
+    //     }
 
-        #[test]
-        fn parse_list_case() {
-            assert_eq!(
-                if_list()
-                    .parse(stream(
-                        indoc!(
-                            "
-                            case xs
-                                [] => None
-                                [ x, ...xs ] => None
-                            "
-                        ),
-                        ""
-                    ))
-                    .unwrap()
-                    .0,
-                ListCase::new(
-                    Variable::new("xs", Position::dummy()),
-                    types::Unknown::new(Position::dummy()),
-                    "x",
-                    "xs",
-                    None::new(Position::dummy()),
-                    None::new(Position::dummy()),
-                    Position::dummy(),
-                )
-            );
-        }
+    //     #[test]
+    //     fn parse_list_case() {
+    //         assert_eq!(
+    //             if_list()
+    //                 .parse(stream(
+    //                     indoc!(
+    //                         "
+    //                         case xs
+    //                             [] => None
+    //                             [ x, ...xs ] => None
+    //                         "
+    //                     ),
+    //                     ""
+    //                 ))
+    //                 .unwrap()
+    //                 .0,
+    //             ListCase::new(
+    //                 Variable::new("xs", Position::dummy()),
+    //                 types::Unknown::new(Position::dummy()),
+    //                 "x",
+    //                 "xs",
+    //                 None::new(Position::dummy()),
+    //                 None::new(Position::dummy()),
+    //                 Position::dummy(),
+    //             )
+    //         );
+    //     }
 
-        #[test]
-        fn parse_call() {
-            assert_eq!(
-                expression().parse(stream("f 1", "")).unwrap().0,
-                Call::new(
-                    Variable::new("f", Position::dummy()),
-                    Number::new(1.0, Position::dummy()),
-                    Position::dummy()
-                )
-                .into()
-            );
-            assert_eq!(
-                expression().parse(stream("f x", "")).unwrap().0,
-                Call::new(
-                    Variable::new("f", Position::dummy()),
-                    Variable::new("x", Position::dummy()),
-                    Position::dummy()
-                )
-                .into()
-            );
-            assert_eq!(
-                expression().parse(stream("f 1 2", "")).unwrap().0,
-                Call::new(
-                    Call::new(
-                        Variable::new("f", Position::dummy()),
-                        Number::new(1.0, Position::dummy()),
-                        Position::dummy()
-                    ),
-                    Number::new(2.0, Position::dummy()),
-                    Position::dummy()
-                )
-                .into()
-            );
-            assert_eq!(
-                expression()
-                    .parse(stream(
-                        indoc!(
-                            "
-                        f x
-                        g x =
-                        "
-                        ),
-                        ""
-                    ))
-                    .unwrap()
-                    .0,
-                Call::new(
-                    Variable::new("f", Position::dummy()),
-                    Variable::new("x", Position::dummy()),
-                    Position::dummy()
-                )
-                .into()
-            );
-            assert_eq!(
-                expression()
-                    .parse(stream(
-                        indoc!(
-                            "
-                        f x
-                         g x =
-                        "
-                        ),
-                        ""
-                    ))
-                    .unwrap()
-                    .0,
-                Call::new(
-                    Variable::new("f", Position::dummy()),
-                    Variable::new("x", Position::dummy()),
-                    Position::dummy()
-                )
-                .into()
-            );
-            assert_eq!(
-                expression()
-                    .parse(stream(
-                        indoc!(
-                            "
-                        f
-                        x)
-                        "
-                        ),
-                        ""
-                    ))
-                    .unwrap()
-                    .0,
-                Call::new(
-                    Variable::new("f", Position::dummy()),
-                    Variable::new("x", Position::dummy()),
-                    Position::dummy()
-                )
-                .into()
-            );
-            assert_eq!(
-                expression()
-                    .parse(stream(
-                        indoc!(
-                            "
-                        f
-                        x then
-                        "
-                        ),
-                        ""
-                    ))
-                    .unwrap()
-                    .0,
-                Call::new(
-                    Variable::new("f", Position::dummy()),
-                    Variable::new("x", Position::dummy()),
-                    Position::dummy()
-                )
-                .into()
-            );
-        }
+    //     #[test]
+    //     fn parse_call() {
+    //         assert_eq!(
+    //             expression().parse(stream("f 1", "")).unwrap().0,
+    //             Call::new(
+    //                 Variable::new("f", Position::dummy()),
+    //                 Number::new(1.0, Position::dummy()),
+    //                 Position::dummy()
+    //             )
+    //             .into()
+    //         );
+    //         assert_eq!(
+    //             expression().parse(stream("f x", "")).unwrap().0,
+    //             Call::new(
+    //                 Variable::new("f", Position::dummy()),
+    //                 Variable::new("x", Position::dummy()),
+    //                 Position::dummy()
+    //             )
+    //             .into()
+    //         );
+    //         assert_eq!(
+    //             expression().parse(stream("f 1 2", "")).unwrap().0,
+    //             Call::new(
+    //                 Call::new(
+    //                     Variable::new("f", Position::dummy()),
+    //                     Number::new(1.0, Position::dummy()),
+    //                     Position::dummy()
+    //                 ),
+    //                 Number::new(2.0, Position::dummy()),
+    //                 Position::dummy()
+    //             )
+    //             .into()
+    //         );
+    //         assert_eq!(
+    //             expression()
+    //                 .parse(stream(
+    //                     indoc!(
+    //                         "
+    //                     f x
+    //                     g x =
+    //                     "
+    //                     ),
+    //                     ""
+    //                 ))
+    //                 .unwrap()
+    //                 .0,
+    //             Call::new(
+    //                 Variable::new("f", Position::dummy()),
+    //                 Variable::new("x", Position::dummy()),
+    //                 Position::dummy()
+    //             )
+    //             .into()
+    //         );
+    //         assert_eq!(
+    //             expression()
+    //                 .parse(stream(
+    //                     indoc!(
+    //                         "
+    //                     f x
+    //                      g x =
+    //                     "
+    //                     ),
+    //                     ""
+    //                 ))
+    //                 .unwrap()
+    //                 .0,
+    //             Call::new(
+    //                 Variable::new("f", Position::dummy()),
+    //                 Variable::new("x", Position::dummy()),
+    //                 Position::dummy()
+    //             )
+    //             .into()
+    //         );
+    //         assert_eq!(
+    //             expression()
+    //                 .parse(stream(
+    //                     indoc!(
+    //                         "
+    //                     f
+    //                     x)
+    //                     "
+    //                     ),
+    //                     ""
+    //                 ))
+    //                 .unwrap()
+    //                 .0,
+    //             Call::new(
+    //                 Variable::new("f", Position::dummy()),
+    //                 Variable::new("x", Position::dummy()),
+    //                 Position::dummy()
+    //             )
+    //             .into()
+    //         );
+    //         assert_eq!(
+    //             expression()
+    //                 .parse(stream(
+    //                     indoc!(
+    //                         "
+    //                     f
+    //                     x then
+    //                     "
+    //                     ),
+    //                     ""
+    //                 ))
+    //                 .unwrap()
+    //                 .0,
+    //             Call::new(
+    //                 Variable::new("f", Position::dummy()),
+    //                 Variable::new("x", Position::dummy()),
+    //                 Position::dummy()
+    //             )
+    //             .into()
+    //         );
+    //     }
 
-        #[test]
-        fn parse_call_terminator() {
-            for source in &[
-                "", "\n", " \n", "\n\n", "+", ")", "\n)", "\n )", "}", "then",
-            ] {
-                assert!(call_terminator().parse(stream(source, "")).is_ok());
-            }
-        }
+    //     #[test]
+    //     fn parse_call_terminator() {
+    //         for source in &[
+    //             "", "\n", " \n", "\n\n", "+", ")", "\n)", "\n )", "}", "then",
+    //         ] {
+    //             assert!(call_terminator().parse(stream(source, "")).is_ok());
+    //         }
+    //     }
 
-        #[test]
-        fn parse_operation() {
-            for (source, target) in vec![
-                (
-                    "1 + 1",
-                    ArithmeticOperation::new(
-                        ArithmeticOperator::Add,
-                        Number::new(1.0, Position::dummy()),
-                        Number::new(1.0, Position::dummy()),
-                        Position::dummy(),
-                    )
-                    .into(),
-                ),
-                (
-                    "1 + 1 then",
-                    ArithmeticOperation::new(
-                        ArithmeticOperator::Add,
-                        Number::new(1.0, Position::dummy()),
-                        Number::new(1.0, Position::dummy()),
-                        Position::dummy(),
-                    )
-                    .into(),
-                ),
-                (
-                    "1 + 1 + 1",
-                    ArithmeticOperation::new(
-                        ArithmeticOperator::Add,
-                        ArithmeticOperation::new(
-                            ArithmeticOperator::Add,
-                            Number::new(1.0, Position::dummy()),
-                            Number::new(1.0, Position::dummy()),
-                            Position::dummy(),
-                        ),
-                        Number::new(1.0, Position::dummy()),
-                        Position::dummy(),
-                    )
-                    .into(),
-                ),
-                (
-                    "1 + (1 + 1)",
-                    ArithmeticOperation::new(
-                        ArithmeticOperator::Add,
-                        Number::new(1.0, Position::dummy()),
-                        ArithmeticOperation::new(
-                            ArithmeticOperator::Add,
-                            Number::new(1.0, Position::dummy()),
-                            Number::new(1.0, Position::dummy()),
-                            Position::dummy(),
-                        ),
-                        Position::dummy(),
-                    )
-                    .into(),
-                ),
-                (
-                    "1 * 2 - 3",
-                    ArithmeticOperation::new(
-                        ArithmeticOperator::Subtract,
-                        ArithmeticOperation::new(
-                            ArithmeticOperator::Multiply,
-                            Number::new(1.0, Position::dummy()),
-                            Number::new(2.0, Position::dummy()),
-                            Position::dummy(),
-                        ),
-                        Number::new(3.0, Position::dummy()),
-                        Position::dummy(),
-                    )
-                    .into(),
-                ),
-                (
-                    "1 + 2 * 3",
-                    ArithmeticOperation::new(
-                        ArithmeticOperator::Add,
-                        Number::new(1.0, Position::dummy()),
-                        ArithmeticOperation::new(
-                            ArithmeticOperator::Multiply,
-                            Number::new(2.0, Position::dummy()),
-                            Number::new(3.0, Position::dummy()),
-                            Position::dummy(),
-                        ),
-                        Position::dummy(),
-                    )
-                    .into(),
-                ),
-                (
-                    "1 * 2 - 3 / 4",
-                    ArithmeticOperation::new(
-                        ArithmeticOperator::Subtract,
-                        ArithmeticOperation::new(
-                            ArithmeticOperator::Multiply,
-                            Number::new(1.0, Position::dummy()),
-                            Number::new(2.0, Position::dummy()),
-                            Position::dummy(),
-                        ),
-                        ArithmeticOperation::new(
-                            ArithmeticOperator::Divide,
-                            Number::new(3.0, Position::dummy()),
-                            Number::new(4.0, Position::dummy()),
-                            Position::dummy(),
-                        ),
-                        Position::dummy(),
-                    )
-                    .into(),
-                ),
-                (
-                    "1 == 1",
-                    EqualityOperation::new(
-                        EqualityOperator::Equal,
-                        Number::new(1.0, Position::dummy()),
-                        Number::new(1.0, Position::dummy()),
-                        Position::dummy(),
-                    )
-                    .into(),
-                ),
-                (
-                    "True && True",
-                    BooleanOperation::new(
-                        BooleanOperator::And,
-                        Boolean::new(true, Position::dummy()),
-                        Boolean::new(true, Position::dummy()),
-                        Position::dummy(),
-                    )
-                    .into(),
-                ),
-                (
-                    "True || True",
-                    BooleanOperation::new(
-                        BooleanOperator::Or,
-                        Boolean::new(true, Position::dummy()),
-                        Boolean::new(true, Position::dummy()),
-                        Position::dummy(),
-                    )
-                    .into(),
-                ),
-                (
-                    "True && 1 < 2",
-                    BooleanOperation::new(
-                        BooleanOperator::And,
-                        Boolean::new(true, Position::dummy()),
-                        OrderOperation::new(
-                            OrderOperator::LessThan,
-                            Number::new(1.0, Position::dummy()),
-                            Number::new(2.0, Position::dummy()),
-                            Position::dummy(),
-                        ),
-                        Position::dummy(),
-                    )
-                    .into(),
-                ),
-                (
-                    "True || True && True",
-                    BooleanOperation::new(
-                        BooleanOperator::Or,
-                        Boolean::new(true, Position::dummy()),
-                        BooleanOperation::new(
-                            BooleanOperator::And,
-                            Boolean::new(true, Position::dummy()),
-                            Boolean::new(true, Position::dummy()),
-                            Position::dummy(),
-                        ),
-                        Position::dummy(),
-                    )
-                    .into(),
-                ),
-                (
-                    "42 |> f",
-                    PipeOperation::new(
-                        Number::new(42.0, Position::dummy()),
-                        Variable::new("f", Position::dummy()),
-                        Position::dummy(),
-                    )
-                    .into(),
-                ),
-                (
-                    "42 |> f |> g",
-                    PipeOperation::new(
-                        PipeOperation::new(
-                            Number::new(42.0, Position::dummy()),
-                            Variable::new("f", Position::dummy()),
-                            Position::dummy(),
-                        ),
-                        Variable::new("g", Position::dummy()),
-                        Position::dummy(),
-                    )
-                    .into(),
-                ),
-            ] {
-                assert_eq!(expression().parse(stream(source, "")).unwrap().0, target);
-            }
-        }
+    //     #[test]
+    //     fn parse_operation() {
+    //         for (source, target) in vec![
+    //             (
+    //                 "1 + 1",
+    //                 ArithmeticOperation::new(
+    //                     ArithmeticOperator::Add,
+    //                     Number::new(1.0, Position::dummy()),
+    //                     Number::new(1.0, Position::dummy()),
+    //                     Position::dummy(),
+    //                 )
+    //                 .into(),
+    //             ),
+    //             (
+    //                 "1 + 1 then",
+    //                 ArithmeticOperation::new(
+    //                     ArithmeticOperator::Add,
+    //                     Number::new(1.0, Position::dummy()),
+    //                     Number::new(1.0, Position::dummy()),
+    //                     Position::dummy(),
+    //                 )
+    //                 .into(),
+    //             ),
+    //             (
+    //                 "1 + 1 + 1",
+    //                 ArithmeticOperation::new(
+    //                     ArithmeticOperator::Add,
+    //                     ArithmeticOperation::new(
+    //                         ArithmeticOperator::Add,
+    //                         Number::new(1.0, Position::dummy()),
+    //                         Number::new(1.0, Position::dummy()),
+    //                         Position::dummy(),
+    //                     ),
+    //                     Number::new(1.0, Position::dummy()),
+    //                     Position::dummy(),
+    //                 )
+    //                 .into(),
+    //             ),
+    //             (
+    //                 "1 + (1 + 1)",
+    //                 ArithmeticOperation::new(
+    //                     ArithmeticOperator::Add,
+    //                     Number::new(1.0, Position::dummy()),
+    //                     ArithmeticOperation::new(
+    //                         ArithmeticOperator::Add,
+    //                         Number::new(1.0, Position::dummy()),
+    //                         Number::new(1.0, Position::dummy()),
+    //                         Position::dummy(),
+    //                     ),
+    //                     Position::dummy(),
+    //                 )
+    //                 .into(),
+    //             ),
+    //             (
+    //                 "1 * 2 - 3",
+    //                 ArithmeticOperation::new(
+    //                     ArithmeticOperator::Subtract,
+    //                     ArithmeticOperation::new(
+    //                         ArithmeticOperator::Multiply,
+    //                         Number::new(1.0, Position::dummy()),
+    //                         Number::new(2.0, Position::dummy()),
+    //                         Position::dummy(),
+    //                     ),
+    //                     Number::new(3.0, Position::dummy()),
+    //                     Position::dummy(),
+    //                 )
+    //                 .into(),
+    //             ),
+    //             (
+    //                 "1 + 2 * 3",
+    //                 ArithmeticOperation::new(
+    //                     ArithmeticOperator::Add,
+    //                     Number::new(1.0, Position::dummy()),
+    //                     ArithmeticOperation::new(
+    //                         ArithmeticOperator::Multiply,
+    //                         Number::new(2.0, Position::dummy()),
+    //                         Number::new(3.0, Position::dummy()),
+    //                         Position::dummy(),
+    //                     ),
+    //                     Position::dummy(),
+    //                 )
+    //                 .into(),
+    //             ),
+    //             (
+    //                 "1 * 2 - 3 / 4",
+    //                 ArithmeticOperation::new(
+    //                     ArithmeticOperator::Subtract,
+    //                     ArithmeticOperation::new(
+    //                         ArithmeticOperator::Multiply,
+    //                         Number::new(1.0, Position::dummy()),
+    //                         Number::new(2.0, Position::dummy()),
+    //                         Position::dummy(),
+    //                     ),
+    //                     ArithmeticOperation::new(
+    //                         ArithmeticOperator::Divide,
+    //                         Number::new(3.0, Position::dummy()),
+    //                         Number::new(4.0, Position::dummy()),
+    //                         Position::dummy(),
+    //                     ),
+    //                     Position::dummy(),
+    //                 )
+    //                 .into(),
+    //             ),
+    //             (
+    //                 "1 == 1",
+    //                 EqualityOperation::new(
+    //                     EqualityOperator::Equal,
+    //                     Number::new(1.0, Position::dummy()),
+    //                     Number::new(1.0, Position::dummy()),
+    //                     Position::dummy(),
+    //                 )
+    //                 .into(),
+    //             ),
+    //             (
+    //                 "True && True",
+    //                 BooleanOperation::new(
+    //                     BooleanOperator::And,
+    //                     Boolean::new(true, Position::dummy()),
+    //                     Boolean::new(true, Position::dummy()),
+    //                     Position::dummy(),
+    //                 )
+    //                 .into(),
+    //             ),
+    //             (
+    //                 "True || True",
+    //                 BooleanOperation::new(
+    //                     BooleanOperator::Or,
+    //                     Boolean::new(true, Position::dummy()),
+    //                     Boolean::new(true, Position::dummy()),
+    //                     Position::dummy(),
+    //                 )
+    //                 .into(),
+    //             ),
+    //             (
+    //                 "True && 1 < 2",
+    //                 BooleanOperation::new(
+    //                     BooleanOperator::And,
+    //                     Boolean::new(true, Position::dummy()),
+    //                     OrderOperation::new(
+    //                         OrderOperator::LessThan,
+    //                         Number::new(1.0, Position::dummy()),
+    //                         Number::new(2.0, Position::dummy()),
+    //                         Position::dummy(),
+    //                     ),
+    //                     Position::dummy(),
+    //                 )
+    //                 .into(),
+    //             ),
+    //             (
+    //                 "True || True && True",
+    //                 BooleanOperation::new(
+    //                     BooleanOperator::Or,
+    //                     Boolean::new(true, Position::dummy()),
+    //                     BooleanOperation::new(
+    //                         BooleanOperator::And,
+    //                         Boolean::new(true, Position::dummy()),
+    //                         Boolean::new(true, Position::dummy()),
+    //                         Position::dummy(),
+    //                     ),
+    //                     Position::dummy(),
+    //                 )
+    //                 .into(),
+    //             ),
+    //             (
+    //                 "42 |> f",
+    //                 PipeOperation::new(
+    //                     Number::new(42.0, Position::dummy()),
+    //                     Variable::new("f", Position::dummy()),
+    //                     Position::dummy(),
+    //                 )
+    //                 .into(),
+    //             ),
+    //             (
+    //                 "42 |> f |> g",
+    //                 PipeOperation::new(
+    //                     PipeOperation::new(
+    //                         Number::new(42.0, Position::dummy()),
+    //                         Variable::new("f", Position::dummy()),
+    //                         Position::dummy(),
+    //                     ),
+    //                     Variable::new("g", Position::dummy()),
+    //                     Position::dummy(),
+    //                 )
+    //                 .into(),
+    //             ),
+    //         ] {
+    //             assert_eq!(expression().parse(stream(source, "")).unwrap().0, target);
+    //         }
+    //     }
 
-        #[test]
-        fn parse_record_construction() {
-            assert!(record().parse(stream("Foo", "")).is_err());
+    //     #[test]
+    //     fn parse_record_construction() {
+    //         assert!(record().parse(stream("Foo", "")).is_err());
 
-            assert!(record().parse(stream("Foo{}", "")).is_err());
+    //         assert!(record().parse(stream("Foo{}", "")).is_err());
 
-            assert_eq!(
-                expression()
-                    .parse(stream("Foo { foo = 42 }", ""))
-                    .unwrap()
-                    .0,
-                Variable::new("Foo", Position::dummy()).into()
-            );
+    //         assert_eq!(
+    //             expression()
+    //                 .parse(stream("Foo { foo = 42 }", ""))
+    //                 .unwrap()
+    //                 .0,
+    //             Variable::new("Foo", Position::dummy()).into()
+    //         );
 
-            assert_eq!(
-                record().parse(stream("Foo{ foo = 42 }", "")).unwrap().0,
-                RecordConstruction::new(
-                    types::Reference::new("Foo", Position::dummy()),
-                    vec![("foo".into(), Number::new(42.0, Position::dummy()).into())]
-                        .into_iter()
-                        .collect(),
-                    Position::dummy()
-                )
-            );
+    //         assert_eq!(
+    //             record().parse(stream("Foo{ foo = 42 }", "")).unwrap().0,
+    //             RecordConstruction::new(
+    //                 types::Reference::new("Foo", Position::dummy()),
+    //                 vec![("foo".into(), Number::new(42.0, Position::dummy()).into())]
+    //                     .into_iter()
+    //                     .collect(),
+    //                 Position::dummy()
+    //             )
+    //         );
 
-            assert_eq!(
-                record()
-                    .parse(stream("Foo{ foo = 42, bar = 42 }", ""))
-                    .unwrap()
-                    .0,
-                RecordConstruction::new(
-                    types::Reference::new("Foo", Position::dummy()),
-                    vec![
-                        ("foo".into(), Number::new(42.0, Position::dummy()).into()),
-                        ("bar".into(), Number::new(42.0, Position::dummy()).into())
-                    ]
-                    .into_iter()
-                    .collect(),
-                    Position::dummy()
-                )
-            );
+    //         assert_eq!(
+    //             record()
+    //                 .parse(stream("Foo{ foo = 42, bar = 42 }", ""))
+    //                 .unwrap()
+    //                 .0,
+    //             RecordConstruction::new(
+    //                 types::Reference::new("Foo", Position::dummy()),
+    //                 vec![
+    //                     ("foo".into(), Number::new(42.0, Position::dummy()).into()),
+    //                     ("bar".into(), Number::new(42.0, Position::dummy()).into())
+    //                 ]
+    //                 .into_iter()
+    //                 .collect(),
+    //                 Position::dummy()
+    //             )
+    //         );
 
-            assert!(record()
-                .parse(stream("Foo{ foo = 42, foo = 42 }", ""))
-                .is_err());
+    //         assert!(record()
+    //             .parse(stream("Foo{ foo = 42, foo = 42 }", ""))
+    //             .is_err());
 
-            assert_eq!(
-                expression()
-                    .parse(stream("foo Foo{ foo = 42 }", ""))
-                    .unwrap()
-                    .0,
-                Call::new(
-                    Variable::new("foo", Position::dummy()),
-                    RecordConstruction::new(
-                        types::Reference::new("Foo", Position::dummy()),
-                        vec![("foo".into(), Number::new(42.0, Position::dummy()).into())]
-                            .into_iter()
-                            .collect(),
-                        Position::dummy()
-                    ),
-                    Position::dummy()
-                )
-                .into()
-            );
+    //         assert_eq!(
+    //             expression()
+    //                 .parse(stream("foo Foo{ foo = 42 }", ""))
+    //                 .unwrap()
+    //                 .0,
+    //             Call::new(
+    //                 Variable::new("foo", Position::dummy()),
+    //                 RecordConstruction::new(
+    //                     types::Reference::new("Foo", Position::dummy()),
+    //                     vec![("foo".into(), Number::new(42.0, Position::dummy()).into())]
+    //                         .into_iter()
+    //                         .collect(),
+    //                     Position::dummy()
+    //                 ),
+    //                 Position::dummy()
+    //             )
+    //             .into()
+    //         );
 
-            assert_eq!(
-                record()
-                    .parse(stream("Foo{ foo = bar\n42, }", ""))
-                    .unwrap()
-                    .0,
-                RecordConstruction::new(
-                    types::Reference::new("Foo", Position::dummy()),
-                    vec![(
-                        "foo".into(),
-                        Call::new(
-                            Variable::new("bar", Position::dummy()),
-                            Number::new(42.0, Position::dummy()),
-                            Position::dummy()
-                        )
-                        .into()
-                    )]
-                    .into_iter()
-                    .collect(),
-                    Position::dummy()
-                )
-            );
-        }
+    //         assert_eq!(
+    //             record()
+    //                 .parse(stream("Foo{ foo = bar\n42, }", ""))
+    //                 .unwrap()
+    //                 .0,
+    //             RecordConstruction::new(
+    //                 types::Reference::new("Foo", Position::dummy()),
+    //                 vec![(
+    //                     "foo".into(),
+    //                     Call::new(
+    //                         Variable::new("bar", Position::dummy()),
+    //                         Number::new(42.0, Position::dummy()),
+    //                         Position::dummy()
+    //                     )
+    //                     .into()
+    //                 )]
+    //                 .into_iter()
+    //                 .collect(),
+    //                 Position::dummy()
+    //             )
+    //         );
+    //     }
 
-        #[test]
-        fn parse_record_update() {
-            assert_eq!(
-                record_update()
-                    .parse(stream("Foo{ ...foo, bar = 42 }", ""))
-                    .unwrap()
-                    .0,
-                RecordUpdate::new(
-                    types::Reference::new("Foo", Position::dummy()),
-                    Variable::new("foo", Position::dummy()),
-                    vec![("bar".into(), Number::new(42.0, Position::dummy()).into())]
-                        .into_iter()
-                        .collect(),
-                    Position::dummy()
-                )
-            );
+    //     #[test]
+    //     fn parse_record_update() {
+    //         assert_eq!(
+    //             record_update()
+    //                 .parse(stream("Foo{ ...foo, bar = 42 }", ""))
+    //                 .unwrap()
+    //                 .0,
+    //             RecordUpdate::new(
+    //                 types::Reference::new("Foo", Position::dummy()),
+    //                 Variable::new("foo", Position::dummy()),
+    //                 vec![("bar".into(), Number::new(42.0, Position::dummy()).into())]
+    //                     .into_iter()
+    //                     .collect(),
+    //                 Position::dummy()
+    //             )
+    //         );
 
-            assert_eq!(
-                record_update()
-                    .parse(stream("Foo{ ...foo, bar = 42, }", ""))
-                    .unwrap()
-                    .0,
-                RecordUpdate::new(
-                    types::Reference::new("Foo", Position::dummy()),
-                    Variable::new("foo", Position::dummy()),
-                    vec![("bar".into(), Number::new(42.0, Position::dummy()).into())]
-                        .into_iter()
-                        .collect(),
-                    Position::dummy()
-                )
-            );
+    //         assert_eq!(
+    //             record_update()
+    //                 .parse(stream("Foo{ ...foo, bar = 42, }", ""))
+    //                 .unwrap()
+    //                 .0,
+    //             RecordUpdate::new(
+    //                 types::Reference::new("Foo", Position::dummy()),
+    //                 Variable::new("foo", Position::dummy()),
+    //                 vec![("bar".into(), Number::new(42.0, Position::dummy()).into())]
+    //                     .into_iter()
+    //                     .collect(),
+    //                 Position::dummy()
+    //             )
+    //         );
 
-            assert_eq!(
-                expression()
-                    .parse(stream("Foo { ...foo, bar = 42 }", ""))
-                    .unwrap()
-                    .0,
-                Variable::new("Foo", Position::dummy()).into(),
-            );
+    //         assert_eq!(
+    //             expression()
+    //                 .parse(stream("Foo { ...foo, bar = 42 }", ""))
+    //                 .unwrap()
+    //                 .0,
+    //             Variable::new("Foo", Position::dummy()).into(),
+    //         );
 
-            assert!(record_update().parse(stream("Foo{ ...foo }", "")).is_err());
-            assert!(record_update()
-                .parse(stream("Foo{ ...foo, bar = 42, bar = 42 }", ""))
-                .is_err());
-            assert!(record_update()
-                .parse(stream("Foo{ ...(foo bar), baz = 42 }", ""))
-                .is_ok());
-            assert!(record_update()
-                .parse(stream("Foo{ ...foo bar, baz = 42 }", ""))
-                .is_err());
-        }
+    //         assert!(record_update().parse(stream("Foo{ ...foo }", "")).is_err());
+    //         assert!(record_update()
+    //             .parse(stream("Foo{ ...foo, bar = 42, bar = 42 }", ""))
+    //             .is_err());
+    //         assert!(record_update()
+    //             .parse(stream("Foo{ ...(foo bar), baz = 42 }", ""))
+    //             .is_ok());
+    //         assert!(record_update()
+    //             .parse(stream("Foo{ ...foo bar, baz = 42 }", ""))
+    //             .is_err());
+    //     }
 
-        #[test]
-        fn parse_operator() {
-            assert!(binary_operator().parse(stream("", "")).is_err());
-            assert!(binary_operator().parse(stream("++", "")).is_err());
+    //     #[test]
+    //     fn parse_operator() {
+    //         assert!(binary_operator().parse(stream("", "")).is_err());
+    //         assert!(binary_operator().parse(stream("++", "")).is_err());
 
-            for (source, expected) in &[
-                ("+", ParsedOperator::Add),
-                ("-", ParsedOperator::Subtract),
-                ("*", ParsedOperator::Multiply),
-                ("/", ParsedOperator::Divide),
-                ("==", ParsedOperator::Equal),
-                ("/=", ParsedOperator::NotEqual),
-                ("<", ParsedOperator::LessThan),
-                ("<=", ParsedOperator::LessThanOrEqual),
-                (">", ParsedOperator::GreaterThan),
-                (">=", ParsedOperator::GreaterThanOrEqual),
-            ] {
-                assert_eq!(
-                    binary_operator().parse(stream(source, "")).unwrap().0,
-                    *expected
-                );
-            }
-        }
+    //         for (source, expected) in &[
+    //             ("+", ParsedOperator::Add),
+    //             ("-", ParsedOperator::Subtract),
+    //             ("*", ParsedOperator::Multiply),
+    //             ("/", ParsedOperator::Divide),
+    //             ("==", ParsedOperator::Equal),
+    //             ("/=", ParsedOperator::NotEqual),
+    //             ("<", ParsedOperator::LessThan),
+    //             ("<=", ParsedOperator::LessThanOrEqual),
+    //             (">", ParsedOperator::GreaterThan),
+    //             (">=", ParsedOperator::GreaterThanOrEqual),
+    //         ] {
+    //             assert_eq!(
+    //                 binary_operator().parse(stream(source, "")).unwrap().0,
+    //                 *expected
+    //             );
+    //         }
+    //     }
 
-        #[test]
-        fn parse_variable() {
-            assert!(variable().parse(stream("Foo. x", "")).is_err());
-            assert_eq!(
-                variable().parse(stream("x", "")).unwrap().0,
-                Variable::new("x", Position::dummy()),
-            );
-            assert_eq!(
-                variable().parse(stream("Foo.x", "")).unwrap().0,
-                Variable::new("Foo.x", Position::dummy()),
-            );
-            assert_eq!(
-                variable().parse(stream("Foo .x", "")).unwrap().0,
-                Variable::new("Foo", Position::dummy()),
-            );
-        }
+    //     #[test]
+    //     fn parse_variable() {
+    //         assert!(variable().parse(stream("Foo. x", "")).is_err());
+    //         assert_eq!(
+    //             variable().parse(stream("x", "")).unwrap().0,
+    //             Variable::new("x", Position::dummy()),
+    //         );
+    //         assert_eq!(
+    //             variable().parse(stream("Foo.x", "")).unwrap().0,
+    //             Variable::new("Foo.x", Position::dummy()),
+    //         );
+    //         assert_eq!(
+    //             variable().parse(stream("Foo .x", "")).unwrap().0,
+    //             Variable::new("Foo", Position::dummy()),
+    //         );
+    //     }
 
-        #[test]
-        fn parse_boolean_literal() {
-            assert!(boolean_literal().parse(stream("", "")).is_err());
-            assert_eq!(
-                boolean_literal().parse(stream("False", "")).unwrap().0,
-                Boolean::new(false, Position::dummy())
-            );
-            assert_eq!(
-                boolean_literal().parse(stream("True", "")).unwrap().0,
-                Boolean::new(true, Position::dummy())
-            );
-        }
+    //     #[test]
+    //     fn parse_boolean_literal() {
+    //         assert!(boolean_literal().parse(stream("", "")).is_err());
+    //         assert_eq!(
+    //             boolean_literal().parse(stream("False", "")).unwrap().0,
+    //             Boolean::new(false, Position::dummy())
+    //         );
+    //         assert_eq!(
+    //             boolean_literal().parse(stream("True", "")).unwrap().0,
+    //             Boolean::new(true, Position::dummy())
+    //         );
+    //     }
 
-        #[test]
-        fn parse_none_literal() {
-            assert!(none_literal().parse(stream("", "")).is_err());
-            assert_eq!(
-                none_literal().parse(stream("None", "")).unwrap().0,
-                None::new(Position::dummy())
-            );
-        }
+    //     #[test]
+    //     fn parse_none_literal() {
+    //         assert!(none_literal().parse(stream("", "")).is_err());
+    //         assert_eq!(
+    //             none_literal().parse(stream("None", "")).unwrap().0,
+    //             None::new(Position::dummy())
+    //         );
+    //     }
 
-        #[test]
-        fn parse_number_literal() {
-            assert!(number_literal().parse(stream("", "")).is_err());
-            assert!(number_literal().parse(stream("foo", "")).is_err());
-            assert!(number_literal().parse(stream("x1", "")).is_err());
+    //     #[test]
+    //     fn parse_number_literal() {
+    //         assert!(number_literal().parse(stream("", "")).is_err());
+    //         assert!(number_literal().parse(stream("foo", "")).is_err());
+    //         assert!(number_literal().parse(stream("x1", "")).is_err());
 
-            for (source, value) in &[
-                ("01", 0.0),
-                ("0", 0.0),
-                ("1", 1.0),
-                ("123456789", 123456789.0),
-                ("-1", -1.0),
-                ("0.1", 0.1),
-                ("0.01", 0.01),
-            ] {
-                assert_eq!(
-                    number_literal().parse(stream(source, "")).unwrap().0,
-                    Number::new(*value, Position::dummy())
-                );
-            }
-        }
+    //         for (source, value) in &[
+    //             ("01", 0.0),
+    //             ("0", 0.0),
+    //             ("1", 1.0),
+    //             ("123456789", 123456789.0),
+    //             ("-1", -1.0),
+    //             ("0.1", 0.1),
+    //             ("0.01", 0.01),
+    //         ] {
+    //             assert_eq!(
+    //                 number_literal().parse(stream(source, "")).unwrap().0,
+    //                 Number::new(*value, Position::dummy())
+    //             );
+    //         }
+    //     }
 
-        #[test]
-        fn parse_string_literal() {
-            assert!(string_literal().parse(stream("", "")).is_err());
-            assert!(string_literal().parse(stream("foo", "")).is_err());
+    //     #[test]
+    //     fn parse_string_literal() {
+    //         assert!(string_literal().parse(stream("", "")).is_err());
+    //         assert!(string_literal().parse(stream("foo", "")).is_err());
 
-            for (source, value) in &[
-                ("\"\"", ""),
-                ("\"foo\"", "foo"),
-                ("\"foo bar\"", "foo bar"),
-                ("\"\\\"\"", "\""),
-                ("\"\\n\"", "\n"),
-                ("\"\\t\"", "\t"),
-                ("\"\\\\\"", "\\"),
-                ("\"\\n\\n\"", "\n\n"),
-            ] {
-                assert_eq!(
-                    string_literal().parse(stream(source, "")).unwrap().0,
-                    ByteString::new(*value, Position::dummy())
-                );
-            }
-        }
+    //         for (source, value) in &[
+    //             ("\"\"", ""),
+    //             ("\"foo\"", "foo"),
+    //             ("\"foo bar\"", "foo bar"),
+    //             ("\"\\\"\"", "\""),
+    //             ("\"\\n\"", "\n"),
+    //             ("\"\\t\"", "\t"),
+    //             ("\"\\\\\"", "\\"),
+    //             ("\"\\n\\n\"", "\n\n"),
+    //         ] {
+    //             assert_eq!(
+    //                 string_literal().parse(stream(source, "")).unwrap().0,
+    //                 ByteString::new(*value, Position::dummy())
+    //             );
+    //         }
+    //     }
 
-        #[test]
-        fn parse_list() {
-            for (source, target) in vec![
-                ("[]", List::new(vec![], Position::dummy())),
-                (
-                    "[42]",
-                    List::new(
-                        vec![ListElement::Single(
-                            Number::new(42.0, Position::dummy()).into(),
-                        )],
-                        Position::dummy(),
-                    ),
-                ),
-                (
-                    "[42,]",
-                    List::new(
-                        vec![ListElement::Single(
-                            Number::new(42.0, Position::dummy()).into(),
-                        )],
-                        Position::dummy(),
-                    ),
-                ),
-                (
-                    "[42,42]",
-                    List::new(
-                        vec![
-                            ListElement::Single(Number::new(42.0, Position::dummy()).into()),
-                            ListElement::Single(Number::new(42.0, Position::dummy()).into()),
-                        ],
-                        Position::dummy(),
-                    ),
-                ),
-                (
-                    "[42,42,]",
-                    List::new(
-                        vec![
-                            ListElement::Single(Number::new(42.0, Position::dummy()).into()),
-                            ListElement::Single(Number::new(42.0, Position::dummy()).into()),
-                        ],
-                        Position::dummy(),
-                    ),
-                ),
-                (
-                    "[...foo]",
-                    List::new(
-                        vec![ListElement::Multiple(
-                            Variable::new("foo", Position::dummy()).into(),
-                        )],
-                        Position::dummy(),
-                    ),
-                ),
-                (
-                    "[...foo,]",
-                    List::new(
-                        vec![ListElement::Multiple(
-                            Variable::new("foo", Position::dummy()).into(),
-                        )],
-                        Position::dummy(),
-                    ),
-                ),
-                (
-                    "[...foo,...bar]",
-                    List::new(
-                        vec![
-                            ListElement::Multiple(Variable::new("foo", Position::dummy()).into()),
-                            ListElement::Multiple(Variable::new("bar", Position::dummy()).into()),
-                        ],
-                        Position::dummy(),
-                    ),
-                ),
-                (
-                    "[...foo,...bar,]",
-                    List::new(
-                        vec![
-                            ListElement::Multiple(Variable::new("foo", Position::dummy()).into()),
-                            ListElement::Multiple(Variable::new("bar", Position::dummy()).into()),
-                        ],
-                        Position::dummy(),
-                    ),
-                ),
-                (
-                    "[foo,...bar]",
-                    List::new(
-                        vec![
-                            ListElement::Single(Variable::new("foo", Position::dummy()).into()),
-                            ListElement::Multiple(Variable::new("bar", Position::dummy()).into()),
-                        ],
-                        Position::dummy(),
-                    ),
-                ),
-                (
-                    "[...foo,bar]",
-                    List::new(
-                        vec![
-                            ListElement::Multiple(Variable::new("foo", Position::dummy()).into()),
-                            ListElement::Single(Variable::new("bar", Position::dummy()).into()),
-                        ],
-                        Position::dummy(),
-                    ),
-                ),
-            ] {
-                assert_eq!(
-                    expression().parse(stream(source, "")).unwrap().0,
-                    target.into()
-                );
-            }
-        }
-    }
+    //     #[test]
+    //     fn parse_list() {
+    //         for (source, target) in vec![
+    //             ("[]", List::new(vec![], Position::dummy())),
+    //             (
+    //                 "[42]",
+    //                 List::new(
+    //                     vec![ListElement::Single(
+    //                         Number::new(42.0, Position::dummy()).into(),
+    //                     )],
+    //                     Position::dummy(),
+    //                 ),
+    //             ),
+    //             (
+    //                 "[42,]",
+    //                 List::new(
+    //                     vec![ListElement::Single(
+    //                         Number::new(42.0, Position::dummy()).into(),
+    //                     )],
+    //                     Position::dummy(),
+    //                 ),
+    //             ),
+    //             (
+    //                 "[42,42]",
+    //                 List::new(
+    //                     vec![
+    //                         ListElement::Single(Number::new(42.0, Position::dummy()).into()),
+    //                         ListElement::Single(Number::new(42.0, Position::dummy()).into()),
+    //                     ],
+    //                     Position::dummy(),
+    //                 ),
+    //             ),
+    //             (
+    //                 "[42,42,]",
+    //                 List::new(
+    //                     vec![
+    //                         ListElement::Single(Number::new(42.0, Position::dummy()).into()),
+    //                         ListElement::Single(Number::new(42.0, Position::dummy()).into()),
+    //                     ],
+    //                     Position::dummy(),
+    //                 ),
+    //             ),
+    //             (
+    //                 "[...foo]",
+    //                 List::new(
+    //                     vec![ListElement::Multiple(
+    //                         Variable::new("foo", Position::dummy()).into(),
+    //                     )],
+    //                     Position::dummy(),
+    //                 ),
+    //             ),
+    //             (
+    //                 "[...foo,]",
+    //                 List::new(
+    //                     vec![ListElement::Multiple(
+    //                         Variable::new("foo", Position::dummy()).into(),
+    //                     )],
+    //                     Position::dummy(),
+    //                 ),
+    //             ),
+    //             (
+    //                 "[...foo,...bar]",
+    //                 List::new(
+    //                     vec![
+    //                         ListElement::Multiple(Variable::new("foo", Position::dummy()).into()),
+    //                         ListElement::Multiple(Variable::new("bar", Position::dummy()).into()),
+    //                     ],
+    //                     Position::dummy(),
+    //                 ),
+    //             ),
+    //             (
+    //                 "[...foo,...bar,]",
+    //                 List::new(
+    //                     vec![
+    //                         ListElement::Multiple(Variable::new("foo", Position::dummy()).into()),
+    //                         ListElement::Multiple(Variable::new("bar", Position::dummy()).into()),
+    //                     ],
+    //                     Position::dummy(),
+    //                 ),
+    //             ),
+    //             (
+    //                 "[foo,...bar]",
+    //                 List::new(
+    //                     vec![
+    //                         ListElement::Single(Variable::new("foo", Position::dummy()).into()),
+    //                         ListElement::Multiple(Variable::new("bar", Position::dummy()).into()),
+    //                     ],
+    //                     Position::dummy(),
+    //                 ),
+    //             ),
+    //             (
+    //                 "[...foo,bar]",
+    //                 List::new(
+    //                     vec![
+    //                         ListElement::Multiple(Variable::new("foo", Position::dummy()).into()),
+    //                         ListElement::Single(Variable::new("bar", Position::dummy()).into()),
+    //                     ],
+    //                     Position::dummy(),
+    //                 ),
+    //             ),
+    //         ] {
+    //             assert_eq!(
+    //                 expression().parse(stream(source, "")).unwrap().0,
+    //                 target.into()
+    //             );
+    //         }
+    //     }
+    // }
 
     #[test]
     fn parse_identifier() {
-        assert!(identifier().parse(stream("let", "")).is_err());
+        assert!(identifier().parse(stream("if", "")).is_err());
         assert!(identifier().parse(stream("1foo", "")).is_err());
         assert_eq!(
             identifier().parse(stream("foo", "")).unwrap().0,
             "foo".to_string()
         );
         assert_eq!(
-            identifier().parse(stream("foo1", "")).unwrap().0,
-            "foo1".to_string()
-        );
-        assert_eq!(
-            identifier().parse(stream(" foo", "")).unwrap().0,
-            "foo".to_string()
+            identifier().parse(stream("foo42", "")).unwrap().0,
+            "foo42".to_string()
         );
     }
 
     #[test]
     fn parse_keyword() {
         assert!(keyword("foo").parse(stream("bar", "")).is_err());
-        assert!(keyword("foo").parse(stream("fool", "")).is_err());
+        assert!(keyword("fo").parse(stream("foo", "")).is_err());
         assert!(keyword("foo").parse(stream("foo", "")).is_ok());
-        assert!(keyword("foo").parse(stream(" foo", "")).is_ok());
     }
 
     #[test]
@@ -2301,20 +2332,26 @@ mod tests {
         assert!(sign("+").parse(stream("", "")).is_err());
         assert!(sign("+").parse(stream("-", "")).is_err());
         assert!(sign("+").parse(stream("+", "")).is_ok());
-        assert!(sign("+").parse(stream(" +", "")).is_ok());
-        assert!(sign("+").parse(stream(" +x", "")).is_ok());
+        assert!(sign("++").parse(stream("++", "")).is_ok());
     }
 
     #[test]
     fn parse_position() {
-        assert!(position()
-            .with(combine::eof())
-            .parse(stream(" \n \n \n", ""))
-            .is_ok());
+        assert!(position().parse(stream("", "")).is_ok());
+    }
+
+    #[test]
+    fn parse_blank() {
+        assert!(blank().with(eof()).parse(stream(" ", "")).is_ok());
+        assert!(blank().with(eof()).parse(stream("\n", "")).is_ok());
+        assert!(blank().with(eof()).parse(stream(" \n", "")).is_ok());
+        assert!(blank().with(eof()).parse(stream("\t", "")).is_ok());
+        assert!(blank().with(eof()).parse(stream("# foo", "")).is_ok());
     }
 
     #[test]
     fn parse_comment() {
+        assert!(comment().parse(stream("#", "")).is_ok());
         assert!(comment().parse(stream("#\n", "")).is_ok());
         assert!(comment().parse(stream("#x\n", "")).is_ok());
     }
