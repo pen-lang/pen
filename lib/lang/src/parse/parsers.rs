@@ -325,13 +325,13 @@ fn alternative<'a>() -> impl Parser<Stream<'a>, Output = Alternative> {
     (type_(), block()).map(|(type_, block)| Alternative::new(type_, block))
 }
 
-fn application_or_atomic_expression<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
+fn call_or_atomic_expression<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
     (
         position(),
         atomic_expression(),
         many((
-            many(atomic_expression().skip(not_followed_by(application_terminator()))),
-            atomic_expression().skip(look_ahead(application_terminator())),
+            many(atomic_expression().skip(not_followed_by(call_terminator()))),
+            atomic_expression().skip(look_ahead(call_terminator())),
         )),
     )
         .map(|(position, function, argument_sets)| {
@@ -345,13 +345,11 @@ fn application_or_atomic_expression<'a>() -> impl Parser<Stream<'a>, Output = Ex
                 all_arguments.push(argument);
             }
 
-            all_arguments
-                .into_iter()
-                .fold(function, |application, argument| {
-                    Application::new(application, argument, position.clone()).into()
-                })
+            all_arguments.into_iter().fold(function, |call, argument| {
+                Call::new(call, argument, position.clone()).into()
+            })
         })
-        .expected("application")
+        .expected("call")
 }
 
 fn record_construction<'a>() -> impl Parser<Stream<'a>, Output = RecordConstruction> {
@@ -423,7 +421,7 @@ fn record_update<'a>() -> impl Parser<Stream<'a>, Output = RecordUpdate> {
 
 fn term<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
     choice!(
-        application_or_atomic_expression(),
+        call_or_atomic_expression(),
         if_().map(Expression::from),
         case().map(Expression::from),
         list_case().map(Expression::from),
@@ -980,7 +978,7 @@ mod tests {
                 ),
                 VariableDefinition::new(
                     "y",
-                    Application::new(
+                    Call::new(
                         Variable::new("f", Position::dummy()),
                         Variable::new("x", Position::dummy()),
                         Position::dummy()
@@ -1358,7 +1356,7 @@ mod tests {
                 ArithmeticOperation::new(
                     ArithmeticOperator::Add,
                     Variable::new("x", Position::dummy()),
-                    Application::new(
+                    Call::new(
                         Variable::new("y", Position::dummy()),
                         Variable::new("z", Position::dummy()),
                         Position::dummy()
@@ -1369,7 +1367,7 @@ mod tests {
             );
             assert_eq!(
                 expression().parse(stream("(x + y) z", "")).unwrap().0,
-                Application::new(
+                Call::new(
                     ArithmeticOperation::new(
                         ArithmeticOperator::Add,
                         Variable::new("x", Position::dummy()),
@@ -1394,7 +1392,7 @@ mod tests {
                     ))
                     .unwrap()
                     .0,
-                Application::new(
+                Call::new(
                     Variable::new("f", Position::dummy()),
                     Variable::new("x", Position::dummy()),
                     Position::dummy()
@@ -1604,10 +1602,10 @@ mod tests {
         }
 
         #[test]
-        fn parse_application() {
+        fn parse_call() {
             assert_eq!(
                 expression().parse(stream("f 1", "")).unwrap().0,
-                Application::new(
+                Call::new(
                     Variable::new("f", Position::dummy()),
                     Number::new(1.0, Position::dummy()),
                     Position::dummy()
@@ -1616,7 +1614,7 @@ mod tests {
             );
             assert_eq!(
                 expression().parse(stream("f x", "")).unwrap().0,
-                Application::new(
+                Call::new(
                     Variable::new("f", Position::dummy()),
                     Variable::new("x", Position::dummy()),
                     Position::dummy()
@@ -1625,8 +1623,8 @@ mod tests {
             );
             assert_eq!(
                 expression().parse(stream("f 1 2", "")).unwrap().0,
-                Application::new(
-                    Application::new(
+                Call::new(
+                    Call::new(
                         Variable::new("f", Position::dummy()),
                         Number::new(1.0, Position::dummy()),
                         Position::dummy()
@@ -1649,7 +1647,7 @@ mod tests {
                     ))
                     .unwrap()
                     .0,
-                Application::new(
+                Call::new(
                     Variable::new("f", Position::dummy()),
                     Variable::new("x", Position::dummy()),
                     Position::dummy()
@@ -1669,7 +1667,7 @@ mod tests {
                     ))
                     .unwrap()
                     .0,
-                Application::new(
+                Call::new(
                     Variable::new("f", Position::dummy()),
                     Variable::new("x", Position::dummy()),
                     Position::dummy()
@@ -1689,7 +1687,7 @@ mod tests {
                     ))
                     .unwrap()
                     .0,
-                Application::new(
+                Call::new(
                     Variable::new("f", Position::dummy()),
                     Variable::new("x", Position::dummy()),
                     Position::dummy()
@@ -1709,7 +1707,7 @@ mod tests {
                     ))
                     .unwrap()
                     .0,
-                Application::new(
+                Call::new(
                     Variable::new("f", Position::dummy()),
                     Variable::new("x", Position::dummy()),
                     Position::dummy()
@@ -1719,11 +1717,11 @@ mod tests {
         }
 
         #[test]
-        fn parse_application_terminator() {
+        fn parse_call_terminator() {
             for source in &[
                 "", "\n", " \n", "\n\n", "+", ")", "\n)", "\n )", "}", "then",
             ] {
-                assert!(application_terminator().parse(stream(source, "")).is_ok());
+                assert!(call_terminator().parse(stream(source, "")).is_ok());
             }
         }
 
@@ -1971,7 +1969,7 @@ mod tests {
                     .parse(stream("foo Foo{ foo = 42 }", ""))
                     .unwrap()
                     .0,
-                Application::new(
+                Call::new(
                     Variable::new("foo", Position::dummy()),
                     RecordConstruction::new(
                         types::Reference::new("Foo", Position::dummy()),
@@ -1994,7 +1992,7 @@ mod tests {
                     types::Reference::new("Foo", Position::dummy()),
                     vec![(
                         "foo".into(),
-                        Application::new(
+                        Call::new(
                             Variable::new("bar", Position::dummy()),
                             Number::new(42.0, Position::dummy()),
                             Position::dummy()
