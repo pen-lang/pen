@@ -162,40 +162,8 @@ fn type_annotation<'a>() -> impl Parser<Stream<'a>, Output = (String, Type)> {
     (identifier(), sign(":").with(type_()))
 }
 
-fn untyped_function_definition<'a>() -> impl Parser<Stream<'a>, Output = FunctionDefinition> {
-    (
-        position(),
-        identifier(),
-        many1(identifier()),
-        sign("="),
-        expression(),
-    )
-        .map(|(position, name, arguments, _, expression)| {
-            let position = Arc::new(position);
-            FunctionDefinition::new(
-                name,
-                arguments,
-                expression,
-                types::Unknown::new(position.clone()),
-                position,
-            )
-        })
-}
-
 fn untyped_variable_definition<'a>() -> impl Parser<Stream<'a>, Output = VariableDefinition> {
     (position(), identifier(), sign("="), expression()).map(|(position, name, _, expression)| {
-        let position = Arc::new(position);
-        VariableDefinition::new(
-            name,
-            expression,
-            types::Unknown::new(position.clone()),
-            position,
-        )
-    })
-}
-
-fn untyped_result_definition<'a>() -> impl Parser<Stream<'a>, Output = VariableDefinition> {
-    (position(), identifier(), sign("?="), expression()).map(|(position, name, _, expression)| {
         let position = Arc::new(position);
         VariableDefinition::new(
             name,
@@ -437,41 +405,7 @@ fn list_case<'a>() -> impl Parser<Stream<'a>, Output = ListCase> {
 }
 
 fn alternative<'a>() -> impl Parser<Stream<'a>, Output = Alternative> {
-    (type_(), sign("=>"), expression())
-        .map(|(type_, _, expression)| Alternative::new(type_, expression))
-}
-
-fn let_<'a>() -> impl Parser<Stream<'a>, Output = Let> {
-    (
-        position(),
-        keyword("let").expected("let keyword"),
-        many1(choice!(
-            variable_definition().map(From::from),
-            untyped_variable_definition().map(From::from),
-            function_definition().map(From::from),
-            untyped_function_definition().map(From::from),
-        )),
-        keyword("in").expected("in keyword"),
-        expression(),
-    )
-        .map(|(position, _, definitions, _, expression)| {
-            Let::new(definitions, expression, position)
-        })
-        .expected("let expression")
-}
-
-fn let_error<'a>() -> impl Parser<Stream<'a>, Output = LetError> {
-    (
-        position(),
-        keyword("let").expected("let keyword"),
-        many1(choice!(result_definition(), untyped_result_definition())),
-        keyword("in").expected("in keyword"),
-        expression(),
-    )
-        .map(|(position, _, definitions, _, expression)| {
-            LetError::new(definitions, expression, position)
-        })
-        .expected("let-error expression")
+    (type_(), block()).map(|(type_, block)| Alternative::new(type_, block))
 }
 
 fn application_or_atomic_expression<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
