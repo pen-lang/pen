@@ -1,3 +1,11 @@
 {
-  "words": ["arity", "idempotently"]
+  "words": [
+    "arity",
+    "canonicalization",
+    "canonicalize",
+    "hasher",
+    "idempotently",
+    "malloc",
+    "realloc"
+  ]
 }
