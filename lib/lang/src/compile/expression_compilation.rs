@@ -32,7 +32,7 @@ pub fn compile(
             mir::ir::Record::new(mir::types::Record::new(NONE_RECORD_TYPE_NAME), vec![]).into()
         }
         Expression::Number(number) => mir::ir::Expression::Number(number.value()),
-        Expression::String(string) => mir::ir::ByteString::new(string.value().clone()).into(),
+        Expression::String(string) => mir::ir::ByteString::new(string.value()).into(),
         Expression::Variable(variable) => mir::ir::Variable::new(variable.name()).into(),
         _ => todo!(),
     })

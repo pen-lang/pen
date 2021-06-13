@@ -73,7 +73,7 @@ fn check_expression(
                 )?;
             }
 
-            for (name, _) in element_types {
+            for name in element_types.keys() {
                 if !construction.elements().contains_key(name) {
                     return Err(CompileError::RecordElementMissing(
                         construction.position().clone(),
