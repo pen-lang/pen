@@ -1,3 +1,4 @@
+mod ast;
 mod compile;
 mod hir;
 mod interface;
