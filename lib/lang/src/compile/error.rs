@@ -56,10 +56,10 @@ impl Display for CompileError {
             Self::TypeNotInferred(position) => {
                 write!(formatter, "type not inferred\n{}", position)
             }
-            Self::TypesNotMatched(lhs_source_information, rhs_source_information) => write!(
+            Self::TypesNotMatched(lhs_position, rhs_position) => write!(
                 formatter,
                 "types not matched\n{}\n{}",
-                lhs_source_information, rhs_source_information
+                lhs_position, rhs_position
             ),
             Self::VariableNotFound(variable) => write!(
                 formatter,

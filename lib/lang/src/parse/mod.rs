@@ -19,7 +19,7 @@ pub fn parse(source_content: &str, source_name: &str) -> Result<ast::UnresolvedM
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{ast::*, debug::SourceInformation, path::*, types};
+    use crate::{ast::*, debug::Position, path::*, types};
     use indoc::indoc;
 
     #[test]
@@ -30,17 +30,17 @@ mod tests {
                 FunctionDefinition::new(
                     "foo",
                     vec!["x".into(), "y".into()],
-                    Number::new(42.0, SourceInformation::dummy()),
+                    Number::new(42.0, Position::dummy()),
                     types::Function::new(
-                        types::Number::new(SourceInformation::dummy()),
+                        types::Number::new(Position::dummy()),
                         types::Function::new(
-                            types::Number::new(SourceInformation::dummy()),
-                            types::Number::new(SourceInformation::dummy()),
-                            SourceInformation::dummy(),
+                            types::Number::new(Position::dummy()),
+                            types::Number::new(Position::dummy()),
+                            Position::dummy(),
                         ),
-                        SourceInformation::dummy(),
+                        Position::dummy(),
                     ),
-                    SourceInformation::dummy(),
+                    Position::dummy(),
                 )
                 .into()
             ]))
@@ -57,16 +57,16 @@ mod tests {
                     Let::new(
                         vec![VariableDefinition::new(
                             "x",
-                            Number::new(42.0, SourceInformation::dummy()),
-                            types::Unknown::new(SourceInformation::dummy()),
-                            SourceInformation::dummy(),
+                            Number::new(42.0, Position::dummy()),
+                            types::Unknown::new(Position::dummy()),
+                            Position::dummy(),
                         )
                         .into()],
-                        Variable::new("x", SourceInformation::dummy()),
-                        SourceInformation::dummy(),
+                        Variable::new("x", Position::dummy()),
+                        Position::dummy(),
                     ),
-                    types::Number::new(SourceInformation::dummy()),
-                    SourceInformation::dummy(),
+                    types::Number::new(Position::dummy()),
+                    Position::dummy(),
                 )
                 .into()
             ]))
@@ -101,37 +101,37 @@ mod tests {
                             FunctionDefinition::new(
                                 "f",
                                 vec!["x".into()],
-                                Variable::new("x", SourceInformation::dummy()),
-                                types::Unknown::new(SourceInformation::dummy()),
-                                SourceInformation::dummy(),
+                                Variable::new("x", Position::dummy()),
+                                types::Unknown::new(Position::dummy()),
+                                Position::dummy(),
                             )
                             .into(),
                             FunctionDefinition::new(
                                 "g",
                                 vec!["x".into()],
                                 Application::new(
-                                    Variable::new("f", SourceInformation::dummy()),
-                                    Variable::new("x", SourceInformation::dummy()),
-                                    SourceInformation::dummy(),
+                                    Variable::new("f", Position::dummy()),
+                                    Variable::new("x", Position::dummy()),
+                                    Position::dummy(),
                                 ),
-                                types::Unknown::new(SourceInformation::dummy()),
-                                SourceInformation::dummy(),
+                                types::Unknown::new(Position::dummy()),
+                                Position::dummy(),
                             )
                             .into(),
                         ],
                         Application::new(
-                            Variable::new("g", SourceInformation::dummy()),
-                            Variable::new("x", SourceInformation::dummy()),
-                            SourceInformation::dummy(),
+                            Variable::new("g", Position::dummy()),
+                            Variable::new("x", Position::dummy()),
+                            Position::dummy(),
                         ),
-                        SourceInformation::dummy(),
+                        Position::dummy(),
                     ),
                     types::Function::new(
-                        types::Number::new(SourceInformation::dummy()),
-                        types::Number::new(SourceInformation::dummy()),
-                        SourceInformation::dummy(),
+                        types::Number::new(Position::dummy()),
+                        types::Number::new(Position::dummy()),
+                        Position::dummy(),
                     ),
-                    SourceInformation::dummy(),
+                    Position::dummy(),
                 )
                 .into()
             ]))
@@ -164,13 +164,13 @@ mod tests {
                 vec![FunctionDefinition::new(
                     "main",
                     vec!["x".into()],
-                    Variable::new("x", SourceInformation::dummy()),
+                    Variable::new("x", Position::dummy()),
                     types::Function::new(
-                        types::Number::new(SourceInformation::dummy()),
-                        types::Number::new(SourceInformation::dummy()),
-                        SourceInformation::dummy()
+                        types::Number::new(Position::dummy()),
+                        types::Number::new(Position::dummy()),
+                        Position::dummy()
                     ),
-                    SourceInformation::dummy()
+                    Position::dummy()
                 )
                 .into()]
             ))
@@ -194,13 +194,13 @@ mod tests {
                 FunctionDefinition::new(
                     "foo",
                     vec!["x".into()],
-                    Number::new(42.0, SourceInformation::dummy()),
+                    Number::new(42.0, Position::dummy()),
                     types::Function::new(
-                        types::Number::new(SourceInformation::dummy()),
-                        types::Number::new(SourceInformation::dummy()),
-                        SourceInformation::dummy()
+                        types::Number::new(Position::dummy()),
+                        types::Number::new(Position::dummy()),
+                        Position::dummy()
                     ),
-                    SourceInformation::dummy()
+                    Position::dummy()
                 )
                 .into()
             ]))

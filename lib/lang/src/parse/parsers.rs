@@ -4,8 +4,7 @@ use super::{
 };
 use crate::{
     ast::*,
-    debug::*,
-    path::*,
+    position::Position,
     types::{self, Type},
 };
 use combine::{
@@ -132,23 +131,21 @@ fn export_foreign<'a>() -> impl Parser<Stream<'a>, Output = ExportForeign> {
 
 fn import_foreign<'a>() -> impl Parser<Stream<'a>, Output = ImportForeign> {
     (
-        source_information(),
+        position(),
         keyword("import"),
         keyword("foreign"),
         optional(calling_convention()),
         type_annotation(),
     )
-        .map(
-            |(source_information, _, _, calling_convention, (name, type_))| {
-                ImportForeign::new(
-                    &name,
-                    &name,
-                    calling_convention.unwrap_or(CallingConvention::Native),
-                    type_,
-                    source_information,
-                )
-            },
-        )
+        .map(|(position, _, _, calling_convention, (name, type_))| {
+            ImportForeign::new(
+                &name,
+                &name,
+                calling_convention.unwrap_or(CallingConvention::Native),
+                type_,
+                position,
+            )
+        })
         .expected("import foreign")
 }
 
@@ -171,7 +168,7 @@ fn definition<'a>() -> impl Parser<Stream<'a>, Output = Definition> {
 
 fn function_definition<'a>() -> impl Parser<Stream<'a>, Output = FunctionDefinition> {
     (
-        source_information(),
+        position(),
         type_annotation(),
         identifier(),
         many1(identifier()),
@@ -179,14 +176,10 @@ fn function_definition<'a>() -> impl Parser<Stream<'a>, Output = FunctionDefinit
         expression(),
     )
         .then(
-            |(source_information, (typed_name, type_), name, arguments, _, expression)| {
+            |(position, (typed_name, type_), name, arguments, _, expression)| {
                 if typed_name == name {
                     value(FunctionDefinition::new(
-                        name,
-                        arguments,
-                        expression,
-                        type_,
-                        source_information,
+                        name, arguments, expression, type_, position,
                     ))
                     .left()
                 } else {
@@ -198,52 +191,36 @@ fn function_definition<'a>() -> impl Parser<Stream<'a>, Output = FunctionDefinit
 
 fn variable_definition<'a>() -> impl Parser<Stream<'a>, Output = VariableDefinition> {
     (
-        source_information(),
+        position(),
         type_annotation(),
         identifier(),
         sign("="),
         expression(),
     )
-        .then(
-            |(source_information, (typed_name, type_), name, _, expression)| {
-                if typed_name == name {
-                    value(VariableDefinition::new(
-                        name,
-                        expression,
-                        type_,
-                        source_information,
-                    ))
-                    .left()
-                } else {
-                    unexpected_any("unmatched identifiers in definition").right()
-                }
-            },
-        )
+        .then(|(position, (typed_name, type_), name, _, expression)| {
+            if typed_name == name {
+                value(VariableDefinition::new(name, expression, type_, position)).left()
+            } else {
+                unexpected_any("unmatched identifiers in definition").right()
+            }
+        })
 }
 
 fn result_definition<'a>() -> impl Parser<Stream<'a>, Output = VariableDefinition> {
     (
-        source_information(),
+        position(),
         type_annotation(),
         identifier(),
         sign("?="),
         expression(),
     )
-        .then(
-            |(source_information, (typed_name, type_), name, _, expression)| {
-                if typed_name == name {
-                    value(VariableDefinition::new(
-                        name,
-                        expression,
-                        type_,
-                        source_information,
-                    ))
-                    .left()
-                } else {
-                    unexpected_any("unmatched identifiers in definition").right()
-                }
-            },
-        )
+        .then(|(position, (typed_name, type_), name, _, expression)| {
+            if typed_name == name {
+                value(VariableDefinition::new(name, expression, type_, position)).left()
+            } else {
+                unexpected_any("unmatched identifiers in definition").right()
+            }
+        })
 }
 
 fn type_annotation<'a>() -> impl Parser<Stream<'a>, Output = (String, Type)> {
@@ -252,50 +229,46 @@ fn type_annotation<'a>() -> impl Parser<Stream<'a>, Output = (String, Type)> {
 
 fn untyped_function_definition<'a>() -> impl Parser<Stream<'a>, Output = FunctionDefinition> {
     (
-        source_information(),
+        position(),
         identifier(),
         many1(identifier()),
         sign("="),
         expression(),
     )
-        .map(|(source_information, name, arguments, _, expression)| {
-            let source_information = Arc::new(source_information);
+        .map(|(position, name, arguments, _, expression)| {
+            let position = Arc::new(position);
             FunctionDefinition::new(
                 name,
                 arguments,
                 expression,
-                types::Unknown::new(source_information.clone()),
-                source_information,
+                types::Unknown::new(position.clone()),
+                position,
             )
         })
 }
 
 fn untyped_variable_definition<'a>() -> impl Parser<Stream<'a>, Output = VariableDefinition> {
-    (source_information(), identifier(), sign("="), expression()).map(
-        |(source_information, name, _, expression)| {
-            let source_information = Arc::new(source_information);
-            VariableDefinition::new(
-                name,
-                expression,
-                types::Unknown::new(source_information.clone()),
-                source_information,
-            )
-        },
-    )
+    (position(), identifier(), sign("="), expression()).map(|(position, name, _, expression)| {
+        let position = Arc::new(position);
+        VariableDefinition::new(
+            name,
+            expression,
+            types::Unknown::new(position.clone()),
+            position,
+        )
+    })
 }
 
 fn untyped_result_definition<'a>() -> impl Parser<Stream<'a>, Output = VariableDefinition> {
-    (source_information(), identifier(), sign("?="), expression()).map(
-        |(source_information, name, _, expression)| {
-            let source_information = Arc::new(source_information);
-            VariableDefinition::new(
-                name,
-                expression,
-                types::Unknown::new(source_information.clone()),
-                source_information,
-            )
-        },
-    )
+    (position(), identifier(), sign("?="), expression()).map(|(position, name, _, expression)| {
+        let position = Arc::new(position);
+        VariableDefinition::new(
+            name,
+            expression,
+            types::Unknown::new(position.clone()),
+            position,
+        )
+    })
 }
 
 fn type_definition<'a>() -> impl Parser<Stream<'a>, Output = TypeDefinition> {
@@ -305,7 +278,7 @@ fn type_definition<'a>() -> impl Parser<Stream<'a>, Output = TypeDefinition> {
 fn record_type_definition<'a>() -> impl Parser<Stream<'a>, Output = TypeDefinition> {
     (
         keyword("type"),
-        source_information(),
+        position(),
         identifier(),
         optional(between(
             sign("{"),
@@ -313,22 +286,20 @@ fn record_type_definition<'a>() -> impl Parser<Stream<'a>, Output = TypeDefiniti
             sep_end_by1((identifier().skip(sign(":")), type_()), sign(",")),
         )),
     )
-        .map(
-            |(_, source_information, name, elements): (_, _, _, Option<Vec<_>>)| {
-                TypeDefinition::new(
+        .map(|(_, position, name, elements): (_, _, _, Option<Vec<_>>)| {
+            TypeDefinition::new(
+                &name,
+                types::Record::new(
                     &name,
-                    types::Record::new(
-                        &name,
-                        elements
-                            .unwrap_or_default()
-                            .into_iter()
-                            .map(|(name, type_)| types::RecordElement::new(name, type_))
-                            .collect(),
-                        source_information,
-                    ),
-                )
-            },
-        )
+                    elements
+                        .unwrap_or_default()
+                        .into_iter()
+                        .map(|(name, type_)| types::RecordElement::new(name, type_))
+                        .collect(),
+                    position,
+                ),
+            )
+        })
         .expected("record type definition")
 }
 
@@ -345,25 +316,20 @@ fn type_<'a>() -> impl Parser<Stream<'a>, Output = Type> {
 }
 
 fn function_type<'a>() -> impl Parser<Stream<'a>, Output = types::Function> {
-    (source_information(), union_type(), sign("->"), type_())
-        .map(|(source_information, argument, _, result)| {
-            types::Function::new(argument, result, source_information)
-        })
+    (position(), union_type(), sign("->"), type_())
+        .map(|(position, argument, _, result)| types::Function::new(argument, result, position))
         .expected("function type")
 }
 
 fn union_type<'a>() -> impl Parser<Stream<'a>, Output = Type> {
-    (
-        source_information(),
-        sep_end_by1(type_application(), sign("|")),
-    )
-        .map(|(source_information, types)| {
+    (position(), sep_end_by1(type_application(), sign("|")))
+        .map(|(position, types)| {
             let types: Vec<_> = types;
 
             if types.len() == 1 {
                 types[0].clone()
             } else {
-                types::Union::new(types, source_information).into()
+                types::Union::new(types, position).into()
             }
         })
         .expected("union type")
@@ -374,8 +340,8 @@ fn type_application<'a>() -> impl Parser<Stream<'a>, Output = Type> {
 }
 
 fn list_type<'a>() -> impl Parser<Stream<'a>, Output = types::List> {
-    (source_information(), keyword("List"), atomic_type())
-        .map(|(source_information, _, element)| types::List::new(element, source_information))
+    (position(), keyword("List"), atomic_type())
+        .map(|(position, _, element)| types::List::new(element, position))
         .expected("list type")
 }
 
@@ -392,45 +358,43 @@ fn atomic_type<'a>() -> impl Parser<Stream<'a>, Output = Type> {
 }
 
 fn boolean_type<'a>() -> impl Parser<Stream<'a>, Output = types::Boolean> {
-    source_information()
+    position()
         .skip(keyword("Boolean"))
         .map(types::Boolean::new)
         .expected("boolean type")
 }
 
 fn none_type<'a>() -> impl Parser<Stream<'a>, Output = types::None> {
-    source_information()
+    position()
         .skip(keyword("None"))
         .map(types::None::new)
         .expected("none type")
 }
 
 fn number_type<'a>() -> impl Parser<Stream<'a>, Output = types::Number> {
-    source_information()
+    position()
         .skip(keyword("Number"))
         .map(types::Number::new)
         .expected("number type")
 }
 
 fn string_type<'a>() -> impl Parser<Stream<'a>, Output = types::ByteString> {
-    source_information()
+    position()
         .skip(keyword("String"))
         .map(types::ByteString::new)
         .expected("string type")
 }
 
 fn any_type<'a>() -> impl Parser<Stream<'a>, Output = types::Any> {
-    source_information()
+    position()
         .skip(keyword("Any"))
         .map(types::Any::new)
         .expected("any type")
 }
 
 fn reference_type<'a>() -> impl Parser<Stream<'a>, Output = types::Reference> {
-    (source_information(), qualified_identifier())
-        .map(|(source_information, identifier)| {
-            types::Reference::new(identifier, source_information)
-        })
+    (position(), qualified_identifier())
+        .map(|(position, identifier)| types::Reference::new(identifier, position))
         .expected("reference type")
 }
 
@@ -460,7 +424,7 @@ fn strict_atomic_expression<'a>() -> impl Parser<Stream<'a>, Output = Expression
 
 fn if_<'a>() -> impl Parser<Stream<'a>, Output = If> {
     (
-        source_information(),
+        position(),
         keyword("if").expected("if keyword"),
         expression(),
         keyword("then").expected("then keyword"),
@@ -468,32 +432,30 @@ fn if_<'a>() -> impl Parser<Stream<'a>, Output = If> {
         keyword("else").expected("else keyword"),
         expression(),
     )
-        .map(|(source_information, _, condition, _, then, _, else_)| {
-            If::new(condition, then, else_, source_information)
+        .map(|(position, _, condition, _, then, _, else_)| {
+            If::new(condition, then, else_, position)
         })
         .expected("if expression")
 }
 
 fn case<'a>() -> impl Parser<Stream<'a>, Output = Case> {
     (
-        source_information(),
+        position(),
         keyword("case").expected("case keyword"),
         identifier(),
         sign("="),
         expression(),
         many1(alternative()),
     )
-        .map(
-            |(source_information, _, identifier, _, argument, alternatives)| {
-                Case::new(identifier, argument, alternatives, source_information)
-            },
-        )
+        .map(|(position, _, identifier, _, argument, alternatives)| {
+            Case::new(identifier, argument, alternatives, position)
+        })
         .expected("type case expression")
 }
 
 fn list_case<'a>() -> impl Parser<Stream<'a>, Output = ListCase> {
     (
-        source_information(),
+        position(),
         keyword("case").expected("case keyword"),
         expression(),
         sign("[]"),
@@ -510,7 +472,7 @@ fn list_case<'a>() -> impl Parser<Stream<'a>, Output = ListCase> {
     )
         .map(
             |(
-                source_information,
+                position,
                 _,
                 argument,
                 _,
@@ -527,12 +489,12 @@ fn list_case<'a>() -> impl Parser<Stream<'a>, Output = ListCase> {
             )| {
                 ListCase::new(
                     argument,
-                    types::Unknown::new(source_information.clone()),
+                    types::Unknown::new(position.clone()),
                     first_name,
                     rest_name,
                     empty_alternative,
                     non_empty_alternative,
-                    source_information,
+                    position,
                 )
             },
         )
@@ -546,7 +508,7 @@ fn alternative<'a>() -> impl Parser<Stream<'a>, Output = Alternative> {
 
 fn let_<'a>() -> impl Parser<Stream<'a>, Output = Let> {
     (
-        source_information(),
+        position(),
         keyword("let").expected("let keyword"),
         many1(choice!(
             variable_definition().map(From::from),
@@ -557,37 +519,37 @@ fn let_<'a>() -> impl Parser<Stream<'a>, Output = Let> {
         keyword("in").expected("in keyword"),
         expression(),
     )
-        .map(|(source_information, _, definitions, _, expression)| {
-            Let::new(definitions, expression, source_information)
+        .map(|(position, _, definitions, _, expression)| {
+            Let::new(definitions, expression, position)
         })
         .expected("let expression")
 }
 
 fn let_error<'a>() -> impl Parser<Stream<'a>, Output = LetError> {
     (
-        source_information(),
+        position(),
         keyword("let").expected("let keyword"),
         many1(choice!(result_definition(), untyped_result_definition())),
         keyword("in").expected("in keyword"),
         expression(),
     )
-        .map(|(source_information, _, definitions, _, expression)| {
-            LetError::new(definitions, expression, source_information)
+        .map(|(position, _, definitions, _, expression)| {
+            LetError::new(definitions, expression, position)
         })
         .expected("let-error expression")
 }
 
 fn application_or_atomic_expression<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
     (
-        source_information(),
+        position(),
         atomic_expression(),
         many((
             many(atomic_expression().skip(not_followed_by(application_terminator()))),
             atomic_expression().skip(look_ahead(application_terminator())),
         )),
     )
-        .map(|(source_information, function, argument_sets)| {
-            let source_information = Arc::new(source_information);
+        .map(|(position, function, argument_sets)| {
+            let position = Arc::new(position);
             let argument_sets: Vec<(Vec<Expression>, _)> = argument_sets;
 
             let mut all_arguments = vec![];
@@ -600,7 +562,7 @@ fn application_or_atomic_expression<'a>() -> impl Parser<Stream<'a>, Output = Ex
             all_arguments
                 .into_iter()
                 .fold(function, |application, argument| {
-                    Application::new(application, argument, source_information.clone()).into()
+                    Application::new(application, argument, position.clone()).into()
                 })
         })
         .expected("application")
@@ -622,13 +584,13 @@ fn application_terminator<'a>() -> impl Parser<Stream<'a>, Output = &'static str
 
 fn record_construction<'a>() -> impl Parser<Stream<'a>, Output = RecordConstruction> {
     (
-        source_information(),
+        position(),
         reference_type(),
         string("{"),
         sep_end_by1((identifier().skip(sign("=")), expression()), sign(",")),
         sign("}"),
     )
-        .then(|(source_information, reference_type, _, elements, _)| {
+        .then(|(position, reference_type, _, elements, _)| {
             let elements: Vec<_> = elements;
 
             if elements
@@ -641,7 +603,7 @@ fn record_construction<'a>() -> impl Parser<Stream<'a>, Output = RecordConstruct
                 value(RecordConstruction::new(
                     reference_type,
                     elements.into_iter().collect(),
-                    source_information,
+                    position,
                 ))
                 .left()
             } else {
@@ -653,7 +615,7 @@ fn record_construction<'a>() -> impl Parser<Stream<'a>, Output = RecordConstruct
 
 fn record_update<'a>() -> impl Parser<Stream<'a>, Output = RecordUpdate> {
     (
-        source_information(),
+        position(),
         reference_type(),
         string("{"),
         sign("..."),
@@ -663,7 +625,7 @@ fn record_update<'a>() -> impl Parser<Stream<'a>, Output = RecordUpdate> {
         sign("}"),
     )
         .then(
-            |(source_information, reference_type, _, _, argument, _, elements, _)| {
+            |(position, reference_type, _, _, argument, _, elements, _)| {
                 let elements: Vec<_> = elements;
 
                 if elements
@@ -677,7 +639,7 @@ fn record_update<'a>() -> impl Parser<Stream<'a>, Output = RecordUpdate> {
                         reference_type,
                         argument,
                         elements.into_iter().collect(),
-                        source_information,
+                        position,
                     ))
                     .left()
                 } else {
@@ -702,9 +664,10 @@ fn term<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
 fn operation_or_term<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
     (
         term(),
-        many((source_information(), operator(), term()).map(
-            |(source_information, operator, expression)| (operator, expression, source_information),
-        )),
+        many(
+            (position(), operator(), term())
+                .map(|(position, operator, expression)| (operator, expression, position)),
+        ),
     )
         .map(|(expression, pairs): (_, Vec<_>)| reduce_operations(expression, &pairs))
 }
@@ -744,18 +707,18 @@ fn concrete_operator<'a>(
 
 fn boolean_literal<'a>() -> impl Parser<Stream<'a>, Output = Boolean> {
     token(choice!(
-        source_information()
+        position()
             .skip(keyword("False"))
-            .map(|source_information| Boolean::new(false, source_information)),
-        source_information()
+            .map(|position| Boolean::new(false, position)),
+        position()
             .skip(keyword("True"))
-            .map(|source_information| Boolean::new(true, source_information)),
+            .map(|position| Boolean::new(true, position)),
     ))
     .expected("boolean literal")
 }
 
 fn none_literal<'a>() -> impl Parser<Stream<'a>, Output = None> {
-    token(source_information().skip(keyword("None")))
+    token(position().skip(keyword("None")))
         .map(None::new)
         .expected("none literal")
 }
@@ -763,8 +726,8 @@ fn none_literal<'a>() -> impl Parser<Stream<'a>, Output = None> {
 fn number_literal<'a>() -> impl Parser<Stream<'a>, Output = Number> {
     let regex: &'static regex::Regex = &NUMBER_REGEX;
 
-    token((source_information(), from_str(find(regex))))
-        .map(|(source_information, number)| Number::new(number, source_information))
+    token((position(), from_str(find(regex))))
+        .map(|(position, number)| Number::new(number, position))
         .expected("number literal")
 }
 
@@ -772,7 +735,7 @@ fn string_literal<'a>() -> impl Parser<Stream<'a>, Output = ByteString> {
     let regex: &'static regex::Regex = &STRING_REGEX;
 
     token((
-        source_information(),
+        position(),
         character('"'),
         many(choice!(
             from_str(find(regex)),
@@ -783,20 +746,18 @@ fn string_literal<'a>() -> impl Parser<Stream<'a>, Output = ByteString> {
         )),
         character('"'),
     ))
-    .map(
-        |(source_information, _, strings, _): (_, _, Vec<String>, _)| {
-            ByteString::new(strings.join(""), source_information)
-        },
-    )
+    .map(|(position, _, strings, _): (_, _, Vec<String>, _)| {
+        ByteString::new(strings.join(""), position)
+    })
     .expected("string literal")
 }
 
 fn list_literal<'a>() -> impl Parser<Stream<'a>, Output = List> {
     (
-        source_information(),
+        position(),
         between(sign("["), sign("]"), sep_end_by(list_element(), sign(","))),
     )
-        .map(|(source_information, elements)| List::new(elements, source_information))
+        .map(|(position, elements)| List::new(elements, position))
         .expected("list literal")
 }
 
@@ -811,8 +772,8 @@ fn list_element<'a>() -> impl Parser<Stream<'a>, Output = ListElement> {
 }
 
 fn variable<'a>() -> impl Parser<Stream<'a>, Output = Variable> {
-    token((source_information(), qualified_identifier()))
-        .map(|(source_information, identifier)| Variable::new(identifier, source_information))
+    token((position(), qualified_identifier()))
+        .map(|(position, identifier)| Variable::new(identifier, position))
         .expected("variable")
 }
 
@@ -870,17 +831,17 @@ fn token<'a, O, P: Parser<Stream<'a>, Output = O>>(p: P) -> impl Parser<Stream<'
     blank().with(p)
 }
 
-fn source_information<'a>() -> impl Parser<Stream<'a>, Output = SourceInformation> {
+fn position<'a>() -> impl Parser<Stream<'a>, Output = Position> {
     blank()
         .map_input(|_, stream: &mut Stream<'a>| {
             let position = stream.position();
-            SourceInformation::new(
+            Position::new(
                 stream.0.state.source_name,
                 Location::new(position.line as usize, position.column as usize),
                 stream.0.state.lines[position.line as usize - 1],
             )
         })
-        .expected("source information")
+        .expected("position")
 }
 
 fn blank<'a>() -> impl Parser<Stream<'a>, Output = ()> {
@@ -981,9 +942,9 @@ mod tests {
                 vec![],
                 vec![VariableDefinition::new(
                     "x",
-                    Number::new(42.0, SourceInformation::dummy()),
-                    types::Number::new(SourceInformation::dummy()),
-                    SourceInformation::dummy()
+                    Number::new(42.0, Position::dummy()),
+                    types::Number::new(Position::dummy()),
+                    Position::dummy()
                 )
                 .into()]
             )
@@ -1002,16 +963,16 @@ mod tests {
                 vec![
                     VariableDefinition::new(
                         "x",
-                        Number::new(42.0, SourceInformation::dummy()),
-                        types::Number::new(SourceInformation::dummy()),
-                        SourceInformation::dummy()
+                        Number::new(42.0, Position::dummy()),
+                        types::Number::new(Position::dummy()),
+                        Position::dummy()
                     )
                     .into(),
                     VariableDefinition::new(
                         "y",
-                        Number::new(42.0, SourceInformation::dummy()),
-                        types::Number::new(SourceInformation::dummy()),
-                        SourceInformation::dummy()
+                        Number::new(42.0, Position::dummy()),
+                        types::Number::new(Position::dummy()),
+                        Position::dummy()
                     )
                     .into()
                 ]
@@ -1031,13 +992,13 @@ mod tests {
                 vec![FunctionDefinition::new(
                     "main",
                     vec!["x".into()],
-                    Number::new(42.0, SourceInformation::dummy()),
+                    Number::new(42.0, Position::dummy()),
                     types::Function::new(
-                        types::Number::new(SourceInformation::dummy()),
-                        types::Number::new(SourceInformation::dummy()),
-                        SourceInformation::dummy()
+                        types::Number::new(Position::dummy()),
+                        types::Number::new(Position::dummy()),
+                        Position::dummy()
                     ),
-                    SourceInformation::dummy()
+                    Position::dummy()
                 )
                 .into(),]
             )
@@ -1155,11 +1116,11 @@ mod tests {
                 "foo",
                 CallingConvention::Native,
                 types::Function::new(
-                    types::Number::new(SourceInformation::dummy()),
-                    types::Number::new(SourceInformation::dummy()),
-                    SourceInformation::dummy()
+                    types::Number::new(Position::dummy()),
+                    types::Number::new(Position::dummy()),
+                    Position::dummy()
                 ),
-                SourceInformation::dummy()
+                Position::dummy()
             ),
         );
     }
@@ -1176,11 +1137,11 @@ mod tests {
                 "foo",
                 CallingConvention::C,
                 types::Function::new(
-                    types::Number::new(SourceInformation::dummy()),
-                    types::Number::new(SourceInformation::dummy()),
-                    SourceInformation::dummy()
+                    types::Number::new(Position::dummy()),
+                    types::Number::new(Position::dummy()),
+                    Position::dummy()
                 ),
-                SourceInformation::dummy()
+                Position::dummy()
             ),
         );
     }
@@ -1194,9 +1155,9 @@ mod tests {
                 .0,
             VariableDefinition::new(
                 "x",
-                Number::new(0.0, SourceInformation::dummy()),
-                types::Number::new(SourceInformation::dummy()),
-                SourceInformation::dummy()
+                Number::new(0.0, Position::dummy()),
+                types::Number::new(Position::dummy()),
+                Position::dummy()
             )
             .into()
         );
@@ -1208,13 +1169,13 @@ mod tests {
             FunctionDefinition::new(
                 "main",
                 vec!["x".into()],
-                Number::new(42.0, SourceInformation::dummy()),
+                Number::new(42.0, Position::dummy()),
                 types::Function::new(
-                    types::Number::new(SourceInformation::dummy()),
-                    types::Number::new(SourceInformation::dummy()),
-                    SourceInformation::dummy()
+                    types::Number::new(Position::dummy()),
+                    types::Number::new(Position::dummy()),
+                    Position::dummy()
                 ),
-                SourceInformation::dummy()
+                Position::dummy()
             )
             .into()
         );
@@ -1229,9 +1190,9 @@ mod tests {
                 .0,
             VariableDefinition::new(
                 "x",
-                Number::new(0.0, SourceInformation::dummy()),
-                types::Number::new(SourceInformation::dummy()),
-                SourceInformation::dummy()
+                Number::new(0.0, Position::dummy()),
+                types::Number::new(Position::dummy()),
+                Position::dummy()
             )
         );
     }
@@ -1245,9 +1206,9 @@ mod tests {
                 .0,
             VariableDefinition::new(
                 "x",
-                Number::new(0.0, SourceInformation::dummy()),
-                types::Unknown::new(SourceInformation::dummy()),
-                SourceInformation::dummy()
+                Number::new(0.0, Position::dummy()),
+                types::Unknown::new(Position::dummy()),
+                Position::dummy()
             )
         );
         assert_eq!(
@@ -1258,9 +1219,9 @@ mod tests {
             FunctionDefinition::new(
                 "main",
                 vec!["x".into()],
-                Number::new(42.0, SourceInformation::dummy()),
-                types::Unknown::new(SourceInformation::dummy()),
-                SourceInformation::dummy()
+                Number::new(42.0, Position::dummy()),
+                types::Unknown::new(Position::dummy()),
+                Position::dummy()
             )
         );
         assert_eq!(
@@ -1282,19 +1243,19 @@ mod tests {
                 FunctionDefinition::new(
                     "f",
                     vec!["x".into()],
-                    Variable::new("x", SourceInformation::dummy()),
-                    types::Unknown::new(SourceInformation::dummy()),
-                    SourceInformation::dummy()
+                    Variable::new("x", Position::dummy()),
+                    types::Unknown::new(Position::dummy()),
+                    Position::dummy()
                 ),
                 VariableDefinition::new(
                     "y",
                     Application::new(
-                        Variable::new("f", SourceInformation::dummy()),
-                        Variable::new("x", SourceInformation::dummy()),
-                        SourceInformation::dummy()
+                        Variable::new("f", Position::dummy()),
+                        Variable::new("x", Position::dummy()),
+                        Position::dummy()
                     ),
-                    types::Unknown::new(SourceInformation::dummy()),
-                    SourceInformation::dummy()
+                    types::Unknown::new(Position::dummy()),
+                    Position::dummy()
                 )
             )
         );
@@ -1307,7 +1268,7 @@ mod tests {
                 "type Foo",
                 TypeDefinition::new(
                     "Foo",
-                    types::Record::new("Foo", Default::default(), SourceInformation::dummy()),
+                    types::Record::new("Foo", Default::default(), Position::dummy()),
                 ),
             ),
             (
@@ -1318,9 +1279,9 @@ mod tests {
                         "Foo",
                         vec![types::RecordElement::new(
                             "foo",
-                            types::Number::new(SourceInformation::dummy()),
+                            types::Number::new(Position::dummy()),
                         )],
-                        SourceInformation::dummy(),
+                        Position::dummy(),
                     ),
                 ),
             ),
@@ -1332,9 +1293,9 @@ mod tests {
                         "Foo",
                         vec![types::RecordElement::new(
                             "foo",
-                            types::Number::new(SourceInformation::dummy()),
+                            types::Number::new(Position::dummy()),
                         )],
-                        SourceInformation::dummy(),
+                        Position::dummy(),
                     ),
                 ),
             ),
@@ -1345,16 +1306,10 @@ mod tests {
                     types::Record::new(
                         "Foo",
                         vec![
-                            types::RecordElement::new(
-                                "foo",
-                                types::Number::new(SourceInformation::dummy()),
-                            ),
-                            types::RecordElement::new(
-                                "bar",
-                                types::Number::new(SourceInformation::dummy()),
-                            ),
+                            types::RecordElement::new("foo", types::Number::new(Position::dummy())),
+                            types::RecordElement::new("bar", types::Number::new(Position::dummy())),
                         ],
-                        SourceInformation::dummy(),
+                        Position::dummy(),
                     ),
                 ),
             ),
@@ -1365,16 +1320,10 @@ mod tests {
                     types::Record::new(
                         "Foo",
                         vec![
-                            types::RecordElement::new(
-                                "foo",
-                                types::Number::new(SourceInformation::dummy()),
-                            ),
-                            types::RecordElement::new(
-                                "bar",
-                                types::Number::new(SourceInformation::dummy()),
-                            ),
+                            types::RecordElement::new("foo", types::Number::new(Position::dummy())),
+                            types::RecordElement::new("bar", types::Number::new(Position::dummy())),
                         ],
-                        SourceInformation::dummy(),
+                        Position::dummy(),
                     ),
                 ),
             ),
@@ -1384,12 +1333,12 @@ mod tests {
                     "Foo",
                     types::Union::new(
                         vec![
-                            types::Boolean::new(SourceInformation::dummy()).into(),
-                            types::None::new(SourceInformation::dummy()).into(),
+                            types::Boolean::new(Position::dummy()).into(),
+                            types::None::new(Position::dummy()).into(),
                         ]
                         .into_iter()
                         .collect(),
-                        SourceInformation::dummy(),
+                        Position::dummy(),
                     ),
                 ),
             ),
@@ -1406,7 +1355,7 @@ mod tests {
         for (source, expected) in &[
             (
                 "type Foo = Number",
-                TypeDefinition::new("Foo", types::Number::new(SourceInformation::dummy())),
+                TypeDefinition::new("Foo", types::Number::new(Position::dummy())),
             ),
             (
                 "type Foo = Number | None",
@@ -1414,12 +1363,12 @@ mod tests {
                     "Foo",
                     types::Union::new(
                         vec![
-                            types::Number::new(SourceInformation::dummy()).into(),
-                            types::None::new(SourceInformation::dummy()).into(),
+                            types::Number::new(Position::dummy()).into(),
+                            types::None::new(Position::dummy()).into(),
                         ]
                         .into_iter()
                         .collect(),
-                        SourceInformation::dummy(),
+                        Position::dummy(),
                     ),
                 ),
             ),
@@ -1440,22 +1389,22 @@ mod tests {
             assert!(type_().parse(stream("?", "")).is_err());
             assert_eq!(
                 type_().parse(stream("Boolean", "")).unwrap().0,
-                types::Boolean::new(SourceInformation::dummy()).into()
+                types::Boolean::new(Position::dummy()).into()
             );
             assert_eq!(
                 type_().parse(stream("None", "")).unwrap().0,
-                types::None::new(SourceInformation::dummy()).into()
+                types::None::new(Position::dummy()).into()
             );
             assert_eq!(
                 type_().parse(stream("Number", "")).unwrap().0,
-                types::Number::new(SourceInformation::dummy()).into()
+                types::Number::new(Position::dummy()).into()
             );
             assert_eq!(
                 type_().parse(stream("Number -> Number", "")).unwrap().0,
                 types::Function::new(
-                    types::Number::new(SourceInformation::dummy()),
-                    types::Number::new(SourceInformation::dummy()),
-                    SourceInformation::dummy()
+                    types::Number::new(Position::dummy()),
+                    types::Number::new(Position::dummy()),
+                    Position::dummy()
                 )
                 .into()
             );
@@ -1465,13 +1414,13 @@ mod tests {
                     .unwrap()
                     .0,
                 types::Function::new(
-                    types::Number::new(SourceInformation::dummy()),
+                    types::Number::new(Position::dummy()),
                     types::Function::new(
-                        types::Number::new(SourceInformation::dummy()),
-                        types::Number::new(SourceInformation::dummy()),
-                        SourceInformation::dummy()
+                        types::Number::new(Position::dummy()),
+                        types::Number::new(Position::dummy()),
+                        Position::dummy()
                     ),
-                    SourceInformation::dummy()
+                    Position::dummy()
                 )
                 .into()
             );
@@ -1482,12 +1431,12 @@ mod tests {
                     .0,
                 types::Function::new(
                     types::Function::new(
-                        types::Number::new(SourceInformation::dummy()),
-                        types::Number::new(SourceInformation::dummy()),
-                        SourceInformation::dummy()
+                        types::Number::new(Position::dummy()),
+                        types::Number::new(Position::dummy()),
+                        Position::dummy()
                     ),
-                    types::Number::new(SourceInformation::dummy()),
-                    SourceInformation::dummy()
+                    types::Number::new(Position::dummy()),
+                    Position::dummy()
                 )
                 .into()
             );
@@ -1495,10 +1444,10 @@ mod tests {
                 type_().parse(stream("Number | None", "")).unwrap().0,
                 types::Union::new(
                     vec![
-                        types::Number::new(SourceInformation::dummy()).into(),
-                        types::None::new(SourceInformation::dummy()).into(),
+                        types::Number::new(Position::dummy()).into(),
+                        types::None::new(Position::dummy()).into(),
                     ],
-                    SourceInformation::dummy()
+                    Position::dummy()
                 )
                 .into()
             );
@@ -1509,11 +1458,11 @@ mod tests {
                     .0,
                 types::Union::new(
                     vec![
-                        types::Boolean::new(SourceInformation::dummy()).into(),
-                        types::Number::new(SourceInformation::dummy()).into(),
-                        types::None::new(SourceInformation::dummy()).into(),
+                        types::Boolean::new(Position::dummy()).into(),
+                        types::Number::new(Position::dummy()).into(),
+                        types::None::new(Position::dummy()).into(),
                     ],
-                    SourceInformation::dummy()
+                    Position::dummy()
                 )
                 .into()
             );
@@ -1523,15 +1472,15 @@ mod tests {
                     .unwrap()
                     .0,
                 types::Function::new(
-                    types::Number::new(SourceInformation::dummy()),
+                    types::Number::new(Position::dummy()),
                     types::Union::new(
                         vec![
-                            types::Number::new(SourceInformation::dummy()).into(),
-                            types::None::new(SourceInformation::dummy()).into(),
+                            types::Number::new(Position::dummy()).into(),
+                            types::None::new(Position::dummy()).into(),
                         ],
-                        SourceInformation::dummy()
+                        Position::dummy()
                     ),
-                    SourceInformation::dummy()
+                    Position::dummy()
                 )
                 .into()
             );
@@ -1543,13 +1492,13 @@ mod tests {
                 types::Function::new(
                     types::Union::new(
                         vec![
-                            types::Number::new(SourceInformation::dummy()).into(),
-                            types::None::new(SourceInformation::dummy()).into(),
+                            types::Number::new(Position::dummy()).into(),
+                            types::None::new(Position::dummy()).into(),
                         ],
-                        SourceInformation::dummy()
+                        Position::dummy()
                     ),
-                    types::Number::new(SourceInformation::dummy()),
-                    SourceInformation::dummy()
+                    types::Number::new(Position::dummy()),
+                    Position::dummy()
                 )
                 .into()
             );
@@ -1561,14 +1510,14 @@ mod tests {
                 types::Union::new(
                     vec![
                         types::Function::new(
-                            types::Number::new(SourceInformation::dummy()),
-                            types::Number::new(SourceInformation::dummy()),
-                            SourceInformation::dummy()
+                            types::Number::new(Position::dummy()),
+                            types::Number::new(Position::dummy()),
+                            Position::dummy()
                         )
                         .into(),
-                        types::None::new(SourceInformation::dummy()).into(),
+                        types::None::new(Position::dummy()).into(),
                     ],
-                    SourceInformation::dummy()
+                    Position::dummy()
                 )
                 .into()
             );
@@ -1578,7 +1527,7 @@ mod tests {
         fn parse_any_type() {
             assert_eq!(
                 any_type().parse(stream("Any", "")).unwrap().0,
-                types::Any::new(SourceInformation::dummy())
+                types::Any::new(Position::dummy())
             );
         }
 
@@ -1587,11 +1536,11 @@ mod tests {
             assert!(type_().parse(stream("", "")).is_err());
             assert_eq!(
                 type_().parse(stream("Foo", "")).unwrap().0,
-                types::Reference::new("Foo", SourceInformation::dummy()).into()
+                types::Reference::new("Foo", Position::dummy()).into()
             );
             assert_eq!(
                 type_().parse(stream("Foo.Bar", "")).unwrap().0,
-                types::Reference::new("Foo.Bar", SourceInformation::dummy()).into()
+                types::Reference::new("Foo.Bar", Position::dummy()).into()
             );
         }
 
@@ -1599,21 +1548,14 @@ mod tests {
         fn parse_list_type() {
             assert_eq!(
                 type_().parse(stream("List Number", "")).unwrap().0,
-                types::List::new(
-                    types::Number::new(SourceInformation::dummy()),
-                    SourceInformation::dummy()
-                )
-                .into()
+                types::List::new(types::Number::new(Position::dummy()), Position::dummy()).into()
             );
 
             assert_eq!(
                 type_().parse(stream("List (List Number)", "")).unwrap().0,
                 types::List::new(
-                    types::List::new(
-                        types::Number::new(SourceInformation::dummy()),
-                        SourceInformation::dummy()
-                    ),
-                    SourceInformation::dummy()
+                    types::List::new(types::Number::new(Position::dummy()), Position::dummy()),
+                    Position::dummy()
                 )
                 .into()
             );
@@ -1625,18 +1567,12 @@ mod tests {
                     .0,
                 types::Union::new(
                     vec![
-                        types::List::new(
-                            types::Number::new(SourceInformation::dummy()),
-                            SourceInformation::dummy()
-                        )
-                        .into(),
-                        types::List::new(
-                            types::None::new(SourceInformation::dummy()),
-                            SourceInformation::dummy()
-                        )
-                        .into()
+                        types::List::new(types::Number::new(Position::dummy()), Position::dummy())
+                            .into(),
+                        types::List::new(types::None::new(Position::dummy()), Position::dummy())
+                            .into()
                     ],
-                    SourceInformation::dummy()
+                    Position::dummy()
                 )
                 .into()
             );
@@ -1647,15 +1583,9 @@ mod tests {
                     .unwrap()
                     .0,
                 types::Function::new(
-                    types::List::new(
-                        types::Number::new(SourceInformation::dummy()),
-                        SourceInformation::dummy()
-                    ),
-                    types::List::new(
-                        types::None::new(SourceInformation::dummy()),
-                        SourceInformation::dummy()
-                    ),
-                    SourceInformation::dummy()
+                    types::List::new(types::Number::new(Position::dummy()), Position::dummy()),
+                    types::List::new(types::None::new(Position::dummy()), Position::dummy()),
+                    Position::dummy()
                 )
                 .into()
             );
@@ -1679,19 +1609,19 @@ mod tests {
                 .is_err());
             assert_eq!(
                 expression().parse(stream("1", "")).unwrap().0,
-                Number::new(1.0, SourceInformation::dummy()).into()
+                Number::new(1.0, Position::dummy()).into()
             );
             assert_eq!(
                 expression().parse(stream("x", "")).unwrap().0,
-                Variable::new("x", SourceInformation::dummy()).into()
+                Variable::new("x", Position::dummy()).into()
             );
             assert_eq!(
                 expression().parse(stream("x + 1", "")).unwrap().0,
                 ArithmeticOperation::new(
                     ArithmeticOperator::Add,
-                    Variable::new("x", SourceInformation::dummy()),
-                    Number::new(1.0, SourceInformation::dummy()),
-                    SourceInformation::dummy()
+                    Variable::new("x", Position::dummy()),
+                    Number::new(1.0, Position::dummy()),
+                    Position::dummy()
                 )
                 .into()
             );
@@ -1699,13 +1629,13 @@ mod tests {
                 expression().parse(stream("x + y z", "")).unwrap().0,
                 ArithmeticOperation::new(
                     ArithmeticOperator::Add,
-                    Variable::new("x", SourceInformation::dummy()),
+                    Variable::new("x", Position::dummy()),
                     Application::new(
-                        Variable::new("y", SourceInformation::dummy()),
-                        Variable::new("z", SourceInformation::dummy()),
-                        SourceInformation::dummy()
+                        Variable::new("y", Position::dummy()),
+                        Variable::new("z", Position::dummy()),
+                        Position::dummy()
                     ),
-                    SourceInformation::dummy()
+                    Position::dummy()
                 )
                 .into()
             );
@@ -1714,12 +1644,12 @@ mod tests {
                 Application::new(
                     ArithmeticOperation::new(
                         ArithmeticOperator::Add,
-                        Variable::new("x", SourceInformation::dummy()),
-                        Variable::new("y", SourceInformation::dummy()),
-                        SourceInformation::dummy()
+                        Variable::new("x", Position::dummy()),
+                        Variable::new("y", Position::dummy()),
+                        Position::dummy()
                     ),
-                    Variable::new("z", SourceInformation::dummy()),
-                    SourceInformation::dummy()
+                    Variable::new("z", Position::dummy()),
+                    Position::dummy()
                 )
                 .into()
             );
@@ -1737,9 +1667,9 @@ mod tests {
                     .unwrap()
                     .0,
                 Application::new(
-                    Variable::new("f", SourceInformation::dummy()),
-                    Variable::new("x", SourceInformation::dummy()),
-                    SourceInformation::dummy()
+                    Variable::new("f", Position::dummy()),
+                    Variable::new("x", Position::dummy()),
+                    Position::dummy()
                 )
                 .into()
             );
@@ -1752,7 +1682,7 @@ mod tests {
                     .parse(stream("((((((((((((((42))))))))))))))", ""))
                     .unwrap()
                     .0,
-                Number::new(42.0, SourceInformation::dummy()).into()
+                Number::new(42.0, Position::dummy()).into()
             )
         }
 
@@ -1761,15 +1691,15 @@ mod tests {
             assert!(atomic_expression().parse(stream("?", "")).is_err());
             assert_eq!(
                 atomic_expression().parse(stream("1", "")).unwrap().0,
-                Number::new(1.0, SourceInformation::dummy()).into()
+                Number::new(1.0, Position::dummy()).into()
             );
             assert_eq!(
                 atomic_expression().parse(stream("x", "")).unwrap().0,
-                Variable::new("x", SourceInformation::dummy()).into()
+                Variable::new("x", Position::dummy()).into()
             );
             assert_eq!(
                 atomic_expression().parse(stream(" x", "")).unwrap().0,
-                Variable::new("x", SourceInformation::dummy()).into()
+                Variable::new("x", Position::dummy()).into()
             );
         }
 
@@ -1781,10 +1711,10 @@ mod tests {
                     .unwrap()
                     .0,
                 If::new(
-                    Boolean::new(true, SourceInformation::dummy()),
-                    Number::new(42.0, SourceInformation::dummy()),
-                    Number::new(13.0, SourceInformation::dummy()),
-                    SourceInformation::dummy(),
+                    Boolean::new(true, Position::dummy()),
+                    Number::new(42.0, Position::dummy()),
+                    Number::new(13.0, Position::dummy()),
+                    Position::dummy(),
                 )
             );
             assert_eq!(
@@ -1797,14 +1727,14 @@ mod tests {
                     .0,
                 If::new(
                     If::new(
-                        Boolean::new(true, SourceInformation::dummy()),
-                        Boolean::new(false, SourceInformation::dummy()),
-                        Boolean::new(true, SourceInformation::dummy()),
-                        SourceInformation::dummy(),
+                        Boolean::new(true, Position::dummy()),
+                        Boolean::new(false, Position::dummy()),
+                        Boolean::new(true, Position::dummy()),
+                        Position::dummy(),
                     ),
-                    Number::new(42.0, SourceInformation::dummy()),
-                    Number::new(13.0, SourceInformation::dummy()),
-                    SourceInformation::dummy(),
+                    Number::new(42.0, Position::dummy()),
+                    Number::new(13.0, Position::dummy()),
+                    Position::dummy(),
                 )
             );
             assert_eq!(
@@ -1813,15 +1743,15 @@ mod tests {
                     .unwrap()
                     .0,
                 If::new(
-                    Boolean::new(true, SourceInformation::dummy()),
+                    Boolean::new(true, Position::dummy()),
                     If::new(
-                        Boolean::new(false, SourceInformation::dummy()),
-                        Number::new(1.0, SourceInformation::dummy()),
-                        Number::new(2.0, SourceInformation::dummy()),
-                        SourceInformation::dummy(),
+                        Boolean::new(false, Position::dummy()),
+                        Number::new(1.0, Position::dummy()),
+                        Number::new(2.0, Position::dummy()),
+                        Position::dummy(),
                     ),
-                    Number::new(3.0, SourceInformation::dummy()),
-                    SourceInformation::dummy(),
+                    Number::new(3.0, Position::dummy()),
+                    Position::dummy(),
                 )
             );
             assert_eq!(
@@ -1830,15 +1760,15 @@ mod tests {
                     .unwrap()
                     .0,
                 If::new(
-                    Boolean::new(true, SourceInformation::dummy()),
-                    Number::new(1.0, SourceInformation::dummy()),
+                    Boolean::new(true, Position::dummy()),
+                    Number::new(1.0, Position::dummy()),
                     If::new(
-                        Boolean::new(false, SourceInformation::dummy()),
-                        Number::new(2.0, SourceInformation::dummy()),
-                        Number::new(3.0, SourceInformation::dummy()),
-                        SourceInformation::dummy(),
+                        Boolean::new(false, Position::dummy()),
+                        Number::new(2.0, Position::dummy()),
+                        Number::new(3.0, Position::dummy()),
+                        Position::dummy(),
                     ),
-                    SourceInformation::dummy(),
+                    Position::dummy(),
                 )
             );
             assert_eq!(
@@ -1849,13 +1779,13 @@ mod tests {
                 If::new(
                     OrderOperation::new(
                         OrderOperator::LessThan,
-                        Variable::new("x", SourceInformation::dummy()),
-                        Number::new(0.0, SourceInformation::dummy()),
-                        SourceInformation::dummy()
+                        Variable::new("x", Position::dummy()),
+                        Number::new(0.0, Position::dummy()),
+                        Position::dummy()
                     ),
-                    Number::new(42.0, SourceInformation::dummy()),
-                    Number::new(13.0, SourceInformation::dummy()),
-                    SourceInformation::dummy(),
+                    Number::new(42.0, Position::dummy()),
+                    Number::new(13.0, Position::dummy()),
+                    Position::dummy(),
                 )
             );
         }
@@ -1877,12 +1807,12 @@ mod tests {
                     .0,
                 Case::new(
                     "foo",
-                    Boolean::new(true, SourceInformation::dummy()),
+                    Boolean::new(true, Position::dummy()),
                     vec![Alternative::new(
-                        types::Boolean::new(SourceInformation::dummy()),
-                        Variable::new("foo", SourceInformation::dummy())
+                        types::Boolean::new(Position::dummy()),
+                        Variable::new("foo", Position::dummy())
                     )],
-                    SourceInformation::dummy(),
+                    Position::dummy(),
                 )
             );
             assert_eq!(
@@ -1901,18 +1831,18 @@ mod tests {
                     .0,
                 Case::new(
                     "foo",
-                    Boolean::new(true, SourceInformation::dummy()),
+                    Boolean::new(true, Position::dummy()),
                     vec![
                         Alternative::new(
-                            types::Boolean::new(SourceInformation::dummy()),
-                            Boolean::new(true, SourceInformation::dummy())
+                            types::Boolean::new(Position::dummy()),
+                            Boolean::new(true, Position::dummy())
                         ),
                         Alternative::new(
-                            types::None::new(SourceInformation::dummy()),
-                            Boolean::new(false, SourceInformation::dummy())
+                            types::None::new(Position::dummy()),
+                            Boolean::new(false, Position::dummy())
                         )
                     ],
-                    SourceInformation::dummy()
+                    Position::dummy()
                 )
             );
         }
@@ -1934,13 +1864,13 @@ mod tests {
                     .unwrap()
                     .0,
                 ListCase::new(
-                    Variable::new("xs", SourceInformation::dummy()),
-                    types::Unknown::new(SourceInformation::dummy()),
+                    Variable::new("xs", Position::dummy()),
+                    types::Unknown::new(Position::dummy()),
                     "x",
                     "xs",
-                    None::new(SourceInformation::dummy()),
-                    None::new(SourceInformation::dummy()),
-                    SourceInformation::dummy(),
+                    None::new(Position::dummy()),
+                    None::new(Position::dummy()),
+                    Position::dummy(),
                 )
             );
         }
@@ -1956,13 +1886,13 @@ mod tests {
                 Let::new(
                     vec![VariableDefinition::new(
                         "x",
-                        Number::new(42.0, SourceInformation::dummy()),
-                        types::Number::new(SourceInformation::dummy()),
-                        SourceInformation::dummy()
+                        Number::new(42.0, Position::dummy()),
+                        types::Number::new(Position::dummy()),
+                        Position::dummy()
                     )
                     .into()],
-                    Variable::new("x", SourceInformation::dummy()),
-                    SourceInformation::dummy()
+                    Variable::new("x", Position::dummy()),
+                    Position::dummy()
                 )
             );
             assert_eq!(
@@ -1970,13 +1900,13 @@ mod tests {
                 Let::new(
                     vec![VariableDefinition::new(
                         "x",
-                        Number::new(42.0, SourceInformation::dummy()),
-                        types::Unknown::new(SourceInformation::dummy()),
-                        SourceInformation::dummy()
+                        Number::new(42.0, Position::dummy()),
+                        types::Unknown::new(Position::dummy()),
+                        Position::dummy()
                     )
                     .into()],
-                    Variable::new("x", SourceInformation::dummy()),
-                    SourceInformation::dummy()
+                    Variable::new("x", Position::dummy()),
+                    Position::dummy()
                 )
             );
             assert_eq!(
@@ -1984,13 +1914,13 @@ mod tests {
                 Let::new(
                     vec![VariableDefinition::new(
                         "x",
-                        Number::new(42.0, SourceInformation::dummy()),
-                        types::Unknown::new(SourceInformation::dummy()),
-                        SourceInformation::dummy()
+                        Number::new(42.0, Position::dummy()),
+                        types::Unknown::new(Position::dummy()),
+                        Position::dummy()
                     )
                     .into()],
-                    Variable::new("x", SourceInformation::dummy()),
-                    SourceInformation::dummy()
+                    Variable::new("x", Position::dummy()),
+                    Position::dummy()
                 )
             );
             assert_eq!(
@@ -1998,13 +1928,13 @@ mod tests {
                 Let::new(
                     vec![VariableDefinition::new(
                         "x",
-                        Number::new(42.0, SourceInformation::dummy()),
-                        types::Unknown::new(SourceInformation::dummy()),
-                        SourceInformation::dummy()
+                        Number::new(42.0, Position::dummy()),
+                        types::Unknown::new(Position::dummy()),
+                        Position::dummy()
                     )
                     .into()],
-                    Variable::new("x", SourceInformation::dummy()),
-                    SourceInformation::dummy()
+                    Variable::new("x", Position::dummy()),
+                    Position::dummy()
                 )
             );
             assert_eq!(
@@ -2016,21 +1946,21 @@ mod tests {
                     vec![
                         VariableDefinition::new(
                             "x",
-                            Number::new(42.0, SourceInformation::dummy()),
-                            types::Unknown::new(SourceInformation::dummy()),
-                            SourceInformation::dummy()
+                            Number::new(42.0, Position::dummy()),
+                            types::Unknown::new(Position::dummy()),
+                            Position::dummy()
                         )
                         .into(),
                         VariableDefinition::new(
                             "y",
-                            Number::new(42.0, SourceInformation::dummy()),
-                            types::Unknown::new(SourceInformation::dummy()),
-                            SourceInformation::dummy()
+                            Number::new(42.0, Position::dummy()),
+                            types::Unknown::new(Position::dummy()),
+                            Position::dummy()
                         )
                         .into(),
                     ],
-                    Variable::new("x", SourceInformation::dummy()),
-                    SourceInformation::dummy()
+                    Variable::new("x", Position::dummy()),
+                    Position::dummy()
                 )
             );
         }
@@ -2046,12 +1976,12 @@ mod tests {
                 LetError::new(
                     vec![VariableDefinition::new(
                         "x",
-                        Number::new(42.0, SourceInformation::dummy()),
-                        types::Number::new(SourceInformation::dummy()),
-                        SourceInformation::dummy()
+                        Number::new(42.0, Position::dummy()),
+                        types::Number::new(Position::dummy()),
+                        Position::dummy()
                     )],
-                    Variable::new("x", SourceInformation::dummy()),
-                    SourceInformation::dummy()
+                    Variable::new("x", Position::dummy()),
+                    Position::dummy()
                 )
             );
             assert_eq!(
@@ -2059,12 +1989,12 @@ mod tests {
                 LetError::new(
                     vec![VariableDefinition::new(
                         "x",
-                        Number::new(42.0, SourceInformation::dummy()),
-                        types::Unknown::new(SourceInformation::dummy()),
-                        SourceInformation::dummy()
+                        Number::new(42.0, Position::dummy()),
+                        types::Unknown::new(Position::dummy()),
+                        Position::dummy()
                     )],
-                    Variable::new("x", SourceInformation::dummy()),
-                    SourceInformation::dummy()
+                    Variable::new("x", Position::dummy()),
+                    Position::dummy()
                 )
             );
             assert_eq!(
@@ -2075,12 +2005,12 @@ mod tests {
                 LetError::new(
                     vec![VariableDefinition::new(
                         "x",
-                        Number::new(42.0, SourceInformation::dummy()),
-                        types::Unknown::new(SourceInformation::dummy()),
-                        SourceInformation::dummy()
+                        Number::new(42.0, Position::dummy()),
+                        types::Unknown::new(Position::dummy()),
+                        Position::dummy()
                     )],
-                    Variable::new("x", SourceInformation::dummy()),
-                    SourceInformation::dummy()
+                    Variable::new("x", Position::dummy()),
+                    Position::dummy()
                 )
             );
             assert_eq!(
@@ -2091,12 +2021,12 @@ mod tests {
                 LetError::new(
                     vec![VariableDefinition::new(
                         "x",
-                        Number::new(42.0, SourceInformation::dummy()),
-                        types::Unknown::new(SourceInformation::dummy()),
-                        SourceInformation::dummy()
+                        Number::new(42.0, Position::dummy()),
+                        types::Unknown::new(Position::dummy()),
+                        Position::dummy()
                     )],
-                    Variable::new("x", SourceInformation::dummy()),
-                    SourceInformation::dummy()
+                    Variable::new("x", Position::dummy()),
+                    Position::dummy()
                 )
             );
             assert_eq!(
@@ -2108,19 +2038,19 @@ mod tests {
                     vec![
                         VariableDefinition::new(
                             "x",
-                            Number::new(42.0, SourceInformation::dummy()),
-                            types::Unknown::new(SourceInformation::dummy()),
-                            SourceInformation::dummy()
+                            Number::new(42.0, Position::dummy()),
+                            types::Unknown::new(Position::dummy()),
+                            Position::dummy()
                         ),
                         VariableDefinition::new(
                             "y",
-                            Number::new(42.0, SourceInformation::dummy()),
-                            types::Unknown::new(SourceInformation::dummy()),
-                            SourceInformation::dummy()
+                            Number::new(42.0, Position::dummy()),
+                            types::Unknown::new(Position::dummy()),
+                            Position::dummy()
                         )
                     ],
-                    Variable::new("x", SourceInformation::dummy()),
-                    SourceInformation::dummy()
+                    Variable::new("x", Position::dummy()),
+                    Position::dummy()
                 )
             );
         }
@@ -2134,13 +2064,13 @@ mod tests {
                     vec![FunctionDefinition::new(
                         "f",
                         vec!["x".into()],
-                        Variable::new("x", SourceInformation::dummy()),
-                        types::Unknown::new(SourceInformation::dummy()),
-                        SourceInformation::dummy()
+                        Variable::new("x", Position::dummy()),
+                        types::Unknown::new(Position::dummy()),
+                        Position::dummy()
                     )
                     .into()],
-                    Variable::new("f", SourceInformation::dummy()),
-                    SourceInformation::dummy()
+                    Variable::new("f", Position::dummy()),
+                    Position::dummy()
                 )
             );
             assert_eq!(
@@ -2166,26 +2096,26 @@ mod tests {
                         FunctionDefinition::new(
                             "f",
                             vec!["x".into()],
-                            Variable::new("x", SourceInformation::dummy()),
-                            types::Unknown::new(SourceInformation::dummy()),
-                            SourceInformation::dummy()
+                            Variable::new("x", Position::dummy()),
+                            types::Unknown::new(Position::dummy()),
+                            Position::dummy()
                         )
                         .into(),
                         FunctionDefinition::new(
                             "g",
                             vec!["x".into()],
                             Application::new(
-                                Variable::new("f", SourceInformation::dummy()),
-                                Variable::new("x", SourceInformation::dummy()),
-                                SourceInformation::dummy()
+                                Variable::new("f", Position::dummy()),
+                                Variable::new("x", Position::dummy()),
+                                Position::dummy()
                             ),
-                            types::Unknown::new(SourceInformation::dummy()),
-                            SourceInformation::dummy()
+                            types::Unknown::new(Position::dummy()),
+                            Position::dummy()
                         )
                         .into(),
                     ],
-                    Variable::new("g", SourceInformation::dummy()),
-                    SourceInformation::dummy()
+                    Variable::new("g", Position::dummy()),
+                    Position::dummy()
                 )
             );
             assert_eq!(
@@ -2208,16 +2138,16 @@ mod tests {
                         "f",
                         vec!["x".into()],
                         Application::new(
-                            Variable::new("g", SourceInformation::dummy()),
-                            Variable::new("x", SourceInformation::dummy()),
-                            SourceInformation::dummy()
+                            Variable::new("g", Position::dummy()),
+                            Variable::new("x", Position::dummy()),
+                            Position::dummy()
                         ),
-                        types::Unknown::new(SourceInformation::dummy()),
-                        SourceInformation::dummy()
+                        types::Unknown::new(Position::dummy()),
+                        Position::dummy()
                     )
                     .into()],
-                    Variable::new("f", SourceInformation::dummy()),
-                    SourceInformation::dummy()
+                    Variable::new("f", Position::dummy()),
+                    Position::dummy()
                 )
             );
             assert_eq!(
@@ -2242,29 +2172,29 @@ mod tests {
                             "f",
                             vec!["x".into()],
                             Application::new(
-                                Variable::new("g", SourceInformation::dummy()),
-                                Variable::new("x", SourceInformation::dummy()),
-                                SourceInformation::dummy()
+                                Variable::new("g", Position::dummy()),
+                                Variable::new("x", Position::dummy()),
+                                Position::dummy()
                             ),
-                            types::Unknown::new(SourceInformation::dummy()),
-                            SourceInformation::dummy()
+                            types::Unknown::new(Position::dummy()),
+                            Position::dummy()
                         )
                         .into(),
                         FunctionDefinition::new(
                             "h",
                             vec!["x".into()],
                             Application::new(
-                                Variable::new("i", SourceInformation::dummy()),
-                                Variable::new("x", SourceInformation::dummy()),
-                                SourceInformation::dummy()
+                                Variable::new("i", Position::dummy()),
+                                Variable::new("x", Position::dummy()),
+                                Position::dummy()
                             ),
-                            types::Unknown::new(SourceInformation::dummy()),
-                            SourceInformation::dummy()
+                            types::Unknown::new(Position::dummy()),
+                            Position::dummy()
                         )
                         .into(),
                     ],
-                    Variable::new("f", SourceInformation::dummy()),
-                    SourceInformation::dummy()
+                    Variable::new("f", Position::dummy()),
+                    Position::dummy()
                 )
             );
         }
@@ -2274,18 +2204,18 @@ mod tests {
             assert_eq!(
                 expression().parse(stream("f 1", "")).unwrap().0,
                 Application::new(
-                    Variable::new("f", SourceInformation::dummy()),
-                    Number::new(1.0, SourceInformation::dummy()),
-                    SourceInformation::dummy()
+                    Variable::new("f", Position::dummy()),
+                    Number::new(1.0, Position::dummy()),
+                    Position::dummy()
                 )
                 .into()
             );
             assert_eq!(
                 expression().parse(stream("f x", "")).unwrap().0,
                 Application::new(
-                    Variable::new("f", SourceInformation::dummy()),
-                    Variable::new("x", SourceInformation::dummy()),
-                    SourceInformation::dummy()
+                    Variable::new("f", Position::dummy()),
+                    Variable::new("x", Position::dummy()),
+                    Position::dummy()
                 )
                 .into()
             );
@@ -2293,12 +2223,12 @@ mod tests {
                 expression().parse(stream("f 1 2", "")).unwrap().0,
                 Application::new(
                     Application::new(
-                        Variable::new("f", SourceInformation::dummy()),
-                        Number::new(1.0, SourceInformation::dummy()),
-                        SourceInformation::dummy()
+                        Variable::new("f", Position::dummy()),
+                        Number::new(1.0, Position::dummy()),
+                        Position::dummy()
                     ),
-                    Number::new(2.0, SourceInformation::dummy()),
-                    SourceInformation::dummy()
+                    Number::new(2.0, Position::dummy()),
+                    Position::dummy()
                 )
                 .into()
             );
@@ -2316,9 +2246,9 @@ mod tests {
                     .unwrap()
                     .0,
                 Application::new(
-                    Variable::new("f", SourceInformation::dummy()),
-                    Variable::new("x", SourceInformation::dummy()),
-                    SourceInformation::dummy()
+                    Variable::new("f", Position::dummy()),
+                    Variable::new("x", Position::dummy()),
+                    Position::dummy()
                 )
                 .into()
             );
@@ -2336,9 +2266,9 @@ mod tests {
                     .unwrap()
                     .0,
                 Application::new(
-                    Variable::new("f", SourceInformation::dummy()),
-                    Variable::new("x", SourceInformation::dummy()),
-                    SourceInformation::dummy()
+                    Variable::new("f", Position::dummy()),
+                    Variable::new("x", Position::dummy()),
+                    Position::dummy()
                 )
                 .into()
             );
@@ -2356,9 +2286,9 @@ mod tests {
                     .unwrap()
                     .0,
                 Application::new(
-                    Variable::new("f", SourceInformation::dummy()),
-                    Variable::new("x", SourceInformation::dummy()),
-                    SourceInformation::dummy()
+                    Variable::new("f", Position::dummy()),
+                    Variable::new("x", Position::dummy()),
+                    Position::dummy()
                 )
                 .into()
             );
@@ -2376,9 +2306,9 @@ mod tests {
                     .unwrap()
                     .0,
                 Application::new(
-                    Variable::new("f", SourceInformation::dummy()),
-                    Variable::new("x", SourceInformation::dummy()),
-                    SourceInformation::dummy()
+                    Variable::new("f", Position::dummy()),
+                    Variable::new("x", Position::dummy()),
+                    Position::dummy()
                 )
                 .into()
             );
@@ -2400,9 +2330,9 @@ mod tests {
                     "1 + 1",
                     ArithmeticOperation::new(
                         ArithmeticOperator::Add,
-                        Number::new(1.0, SourceInformation::dummy()),
-                        Number::new(1.0, SourceInformation::dummy()),
-                        SourceInformation::dummy(),
+                        Number::new(1.0, Position::dummy()),
+                        Number::new(1.0, Position::dummy()),
+                        Position::dummy(),
                     )
                     .into(),
                 ),
@@ -2410,9 +2340,9 @@ mod tests {
                     "1 + 1 then",
                     ArithmeticOperation::new(
                         ArithmeticOperator::Add,
-                        Number::new(1.0, SourceInformation::dummy()),
-                        Number::new(1.0, SourceInformation::dummy()),
-                        SourceInformation::dummy(),
+                        Number::new(1.0, Position::dummy()),
+                        Number::new(1.0, Position::dummy()),
+                        Position::dummy(),
                     )
                     .into(),
                 ),
@@ -2422,12 +2352,12 @@ mod tests {
                         ArithmeticOperator::Add,
                         ArithmeticOperation::new(
                             ArithmeticOperator::Add,
-                            Number::new(1.0, SourceInformation::dummy()),
-                            Number::new(1.0, SourceInformation::dummy()),
-                            SourceInformation::dummy(),
+                            Number::new(1.0, Position::dummy()),
+                            Number::new(1.0, Position::dummy()),
+                            Position::dummy(),
                         ),
-                        Number::new(1.0, SourceInformation::dummy()),
-                        SourceInformation::dummy(),
+                        Number::new(1.0, Position::dummy()),
+                        Position::dummy(),
                     )
                     .into(),
                 ),
@@ -2435,14 +2365,14 @@ mod tests {
                     "1 + (1 + 1)",
                     ArithmeticOperation::new(
                         ArithmeticOperator::Add,
-                        Number::new(1.0, SourceInformation::dummy()),
+                        Number::new(1.0, Position::dummy()),
                         ArithmeticOperation::new(
                             ArithmeticOperator::Add,
-                            Number::new(1.0, SourceInformation::dummy()),
-                            Number::new(1.0, SourceInformation::dummy()),
-                            SourceInformation::dummy(),
+                            Number::new(1.0, Position::dummy()),
+                            Number::new(1.0, Position::dummy()),
+                            Position::dummy(),
                         ),
-                        SourceInformation::dummy(),
+                        Position::dummy(),
                     )
                     .into(),
                 ),
@@ -2452,12 +2382,12 @@ mod tests {
                         ArithmeticOperator::Subtract,
                         ArithmeticOperation::new(
                             ArithmeticOperator::Multiply,
-                            Number::new(1.0, SourceInformation::dummy()),
-                            Number::new(2.0, SourceInformation::dummy()),
-                            SourceInformation::dummy(),
+                            Number::new(1.0, Position::dummy()),
+                            Number::new(2.0, Position::dummy()),
+                            Position::dummy(),
                         ),
-                        Number::new(3.0, SourceInformation::dummy()),
-                        SourceInformation::dummy(),
+                        Number::new(3.0, Position::dummy()),
+                        Position::dummy(),
                     )
                     .into(),
                 ),
@@ -2465,14 +2395,14 @@ mod tests {
                     "1 + 2 * 3",
                     ArithmeticOperation::new(
                         ArithmeticOperator::Add,
-                        Number::new(1.0, SourceInformation::dummy()),
+                        Number::new(1.0, Position::dummy()),
                         ArithmeticOperation::new(
                             ArithmeticOperator::Multiply,
-                            Number::new(2.0, SourceInformation::dummy()),
-                            Number::new(3.0, SourceInformation::dummy()),
-                            SourceInformation::dummy(),
+                            Number::new(2.0, Position::dummy()),
+                            Number::new(3.0, Position::dummy()),
+                            Position::dummy(),
                         ),
-                        SourceInformation::dummy(),
+                        Position::dummy(),
                     )
                     .into(),
                 ),
@@ -2482,17 +2412,17 @@ mod tests {
                         ArithmeticOperator::Subtract,
                         ArithmeticOperation::new(
                             ArithmeticOperator::Multiply,
-                            Number::new(1.0, SourceInformation::dummy()),
-                            Number::new(2.0, SourceInformation::dummy()),
-                            SourceInformation::dummy(),
+                            Number::new(1.0, Position::dummy()),
+                            Number::new(2.0, Position::dummy()),
+                            Position::dummy(),
                         ),
                         ArithmeticOperation::new(
                             ArithmeticOperator::Divide,
-                            Number::new(3.0, SourceInformation::dummy()),
-                            Number::new(4.0, SourceInformation::dummy()),
-                            SourceInformation::dummy(),
+                            Number::new(3.0, Position::dummy()),
+                            Number::new(4.0, Position::dummy()),
+                            Position::dummy(),
                         ),
-                        SourceInformation::dummy(),
+                        Position::dummy(),
                     )
                     .into(),
                 ),
@@ -2500,9 +2430,9 @@ mod tests {
                     "1 == 1",
                     EqualityOperation::new(
                         EqualityOperator::Equal,
-                        Number::new(1.0, SourceInformation::dummy()),
-                        Number::new(1.0, SourceInformation::dummy()),
-                        SourceInformation::dummy(),
+                        Number::new(1.0, Position::dummy()),
+                        Number::new(1.0, Position::dummy()),
+                        Position::dummy(),
                     )
                     .into(),
                 ),
@@ -2510,9 +2440,9 @@ mod tests {
                     "True && True",
                     BooleanOperation::new(
                         BooleanOperator::And,
-                        Boolean::new(true, SourceInformation::dummy()),
-                        Boolean::new(true, SourceInformation::dummy()),
-                        SourceInformation::dummy(),
+                        Boolean::new(true, Position::dummy()),
+                        Boolean::new(true, Position::dummy()),
+                        Position::dummy(),
                     )
                     .into(),
                 ),
@@ -2520,9 +2450,9 @@ mod tests {
                     "True || True",
                     BooleanOperation::new(
                         BooleanOperator::Or,
-                        Boolean::new(true, SourceInformation::dummy()),
-                        Boolean::new(true, SourceInformation::dummy()),
-                        SourceInformation::dummy(),
+                        Boolean::new(true, Position::dummy()),
+                        Boolean::new(true, Position::dummy()),
+                        Position::dummy(),
                     )
                     .into(),
                 ),
@@ -2530,14 +2460,14 @@ mod tests {
                     "True && 1 < 2",
                     BooleanOperation::new(
                         BooleanOperator::And,
-                        Boolean::new(true, SourceInformation::dummy()),
+                        Boolean::new(true, Position::dummy()),
                         OrderOperation::new(
                             OrderOperator::LessThan,
-                            Number::new(1.0, SourceInformation::dummy()),
-                            Number::new(2.0, SourceInformation::dummy()),
-                            SourceInformation::dummy(),
+                            Number::new(1.0, Position::dummy()),
+                            Number::new(2.0, Position::dummy()),
+                            Position::dummy(),
                         ),
-                        SourceInformation::dummy(),
+                        Position::dummy(),
                     )
                     .into(),
                 ),
@@ -2545,23 +2475,23 @@ mod tests {
                     "True || True && True",
                     BooleanOperation::new(
                         BooleanOperator::Or,
-                        Boolean::new(true, SourceInformation::dummy()),
+                        Boolean::new(true, Position::dummy()),
                         BooleanOperation::new(
                             BooleanOperator::And,
-                            Boolean::new(true, SourceInformation::dummy()),
-                            Boolean::new(true, SourceInformation::dummy()),
-                            SourceInformation::dummy(),
+                            Boolean::new(true, Position::dummy()),
+                            Boolean::new(true, Position::dummy()),
+                            Position::dummy(),
                         ),
-                        SourceInformation::dummy(),
+                        Position::dummy(),
                     )
                     .into(),
                 ),
                 (
                     "42 |> f",
                     PipeOperation::new(
-                        Number::new(42.0, SourceInformation::dummy()),
-                        Variable::new("f", SourceInformation::dummy()),
-                        SourceInformation::dummy(),
+                        Number::new(42.0, Position::dummy()),
+                        Variable::new("f", Position::dummy()),
+                        Position::dummy(),
                     )
                     .into(),
                 ),
@@ -2569,12 +2499,12 @@ mod tests {
                     "42 |> f |> g",
                     PipeOperation::new(
                         PipeOperation::new(
-                            Number::new(42.0, SourceInformation::dummy()),
-                            Variable::new("f", SourceInformation::dummy()),
-                            SourceInformation::dummy(),
+                            Number::new(42.0, Position::dummy()),
+                            Variable::new("f", Position::dummy()),
+                            Position::dummy(),
                         ),
-                        Variable::new("g", SourceInformation::dummy()),
-                        SourceInformation::dummy(),
+                        Variable::new("g", Position::dummy()),
+                        Position::dummy(),
                     )
                     .into(),
                 ),
@@ -2594,7 +2524,7 @@ mod tests {
                     .parse(stream("Foo { foo = 42 }", ""))
                     .unwrap()
                     .0,
-                Variable::new("Foo", SourceInformation::dummy()).into()
+                Variable::new("Foo", Position::dummy()).into()
             );
 
             assert_eq!(
@@ -2603,14 +2533,11 @@ mod tests {
                     .unwrap()
                     .0,
                 RecordConstruction::new(
-                    types::Reference::new("Foo", SourceInformation::dummy()),
-                    vec![(
-                        "foo".into(),
-                        Number::new(42.0, SourceInformation::dummy()).into()
-                    )]
-                    .into_iter()
-                    .collect(),
-                    SourceInformation::dummy()
+                    types::Reference::new("Foo", Position::dummy()),
+                    vec![("foo".into(), Number::new(42.0, Position::dummy()).into())]
+                        .into_iter()
+                        .collect(),
+                    Position::dummy()
                 )
             );
 
@@ -2620,20 +2547,14 @@ mod tests {
                     .unwrap()
                     .0,
                 RecordConstruction::new(
-                    types::Reference::new("Foo", SourceInformation::dummy()),
+                    types::Reference::new("Foo", Position::dummy()),
                     vec![
-                        (
-                            "foo".into(),
-                            Number::new(42.0, SourceInformation::dummy()).into()
-                        ),
-                        (
-                            "bar".into(),
-                            Number::new(42.0, SourceInformation::dummy()).into()
-                        )
+                        ("foo".into(), Number::new(42.0, Position::dummy()).into()),
+                        ("bar".into(), Number::new(42.0, Position::dummy()).into())
                     ]
                     .into_iter()
                     .collect(),
-                    SourceInformation::dummy()
+                    Position::dummy()
                 )
             );
 
@@ -2647,18 +2568,15 @@ mod tests {
                     .unwrap()
                     .0,
                 Application::new(
-                    Variable::new("foo", SourceInformation::dummy()),
+                    Variable::new("foo", Position::dummy()),
                     RecordConstruction::new(
-                        types::Reference::new("Foo", SourceInformation::dummy()),
-                        vec![(
-                            "foo".into(),
-                            Number::new(42.0, SourceInformation::dummy()).into()
-                        )]
-                        .into_iter()
-                        .collect(),
-                        SourceInformation::dummy()
+                        types::Reference::new("Foo", Position::dummy()),
+                        vec![("foo".into(), Number::new(42.0, Position::dummy()).into())]
+                            .into_iter()
+                            .collect(),
+                        Position::dummy()
                     ),
-                    SourceInformation::dummy()
+                    Position::dummy()
                 )
                 .into()
             );
@@ -2669,19 +2587,19 @@ mod tests {
                     .unwrap()
                     .0,
                 RecordConstruction::new(
-                    types::Reference::new("Foo", SourceInformation::dummy()),
+                    types::Reference::new("Foo", Position::dummy()),
                     vec![(
                         "foo".into(),
                         Application::new(
-                            Variable::new("bar", SourceInformation::dummy()),
-                            Number::new(42.0, SourceInformation::dummy()),
-                            SourceInformation::dummy()
+                            Variable::new("bar", Position::dummy()),
+                            Number::new(42.0, Position::dummy()),
+                            Position::dummy()
                         )
                         .into()
                     )]
                     .into_iter()
                     .collect(),
-                    SourceInformation::dummy()
+                    Position::dummy()
                 )
             );
         }
@@ -2694,15 +2612,12 @@ mod tests {
                     .unwrap()
                     .0,
                 RecordUpdate::new(
-                    types::Reference::new("Foo", SourceInformation::dummy()),
-                    Variable::new("foo", SourceInformation::dummy()),
-                    vec![(
-                        "bar".into(),
-                        Number::new(42.0, SourceInformation::dummy()).into()
-                    )]
-                    .into_iter()
-                    .collect(),
-                    SourceInformation::dummy()
+                    types::Reference::new("Foo", Position::dummy()),
+                    Variable::new("foo", Position::dummy()),
+                    vec![("bar".into(), Number::new(42.0, Position::dummy()).into())]
+                        .into_iter()
+                        .collect(),
+                    Position::dummy()
                 )
             );
 
@@ -2712,15 +2627,12 @@ mod tests {
                     .unwrap()
                     .0,
                 RecordUpdate::new(
-                    types::Reference::new("Foo", SourceInformation::dummy()),
-                    Variable::new("foo", SourceInformation::dummy()),
-                    vec![(
-                        "bar".into(),
-                        Number::new(42.0, SourceInformation::dummy()).into()
-                    )]
-                    .into_iter()
-                    .collect(),
-                    SourceInformation::dummy()
+                    types::Reference::new("Foo", Position::dummy()),
+                    Variable::new("foo", Position::dummy()),
+                    vec![("bar".into(), Number::new(42.0, Position::dummy()).into())]
+                        .into_iter()
+                        .collect(),
+                    Position::dummy()
                 )
             );
 
@@ -2729,7 +2641,7 @@ mod tests {
                     .parse(stream("Foo { ...foo, bar = 42 }", ""))
                     .unwrap()
                     .0,
-                Variable::new("Foo", SourceInformation::dummy()).into(),
+                Variable::new("Foo", Position::dummy()).into(),
             );
 
             assert!(record_update().parse(stream("Foo{ ...foo }", "")).is_err());
@@ -2770,15 +2682,15 @@ mod tests {
             assert!(variable().parse(stream("Foo. x", "")).is_err());
             assert_eq!(
                 variable().parse(stream("x", "")).unwrap().0,
-                Variable::new("x", SourceInformation::dummy()),
+                Variable::new("x", Position::dummy()),
             );
             assert_eq!(
                 variable().parse(stream("Foo.x", "")).unwrap().0,
-                Variable::new("Foo.x", SourceInformation::dummy()),
+                Variable::new("Foo.x", Position::dummy()),
             );
             assert_eq!(
                 variable().parse(stream("Foo .x", "")).unwrap().0,
-                Variable::new("Foo", SourceInformation::dummy()),
+                Variable::new("Foo", Position::dummy()),
             );
         }
 
@@ -2787,11 +2699,11 @@ mod tests {
             assert!(boolean_literal().parse(stream("", "")).is_err());
             assert_eq!(
                 boolean_literal().parse(stream("False", "")).unwrap().0,
-                Boolean::new(false, SourceInformation::dummy())
+                Boolean::new(false, Position::dummy())
             );
             assert_eq!(
                 boolean_literal().parse(stream("True", "")).unwrap().0,
-                Boolean::new(true, SourceInformation::dummy())
+                Boolean::new(true, Position::dummy())
             );
         }
 
@@ -2800,7 +2712,7 @@ mod tests {
             assert!(none_literal().parse(stream("", "")).is_err());
             assert_eq!(
                 none_literal().parse(stream("None", "")).unwrap().0,
-                None::new(SourceInformation::dummy())
+                None::new(Position::dummy())
             );
         }
 
@@ -2821,7 +2733,7 @@ mod tests {
             ] {
                 assert_eq!(
                     number_literal().parse(stream(source, "")).unwrap().0,
-                    Number::new(*value, SourceInformation::dummy())
+                    Number::new(*value, Position::dummy())
                 );
             }
         }
@@ -2843,7 +2755,7 @@ mod tests {
             ] {
                 assert_eq!(
                     string_literal().parse(stream(source, "")).unwrap().0,
-                    ByteString::new(*value, SourceInformation::dummy())
+                    ByteString::new(*value, Position::dummy())
                 );
             }
         }
@@ -2851,125 +2763,101 @@ mod tests {
         #[test]
         fn parse_list() {
             for (source, target) in vec![
-                ("[]", List::new(vec![], SourceInformation::dummy())),
+                ("[]", List::new(vec![], Position::dummy())),
                 (
                     "[42]",
                     List::new(
                         vec![ListElement::Single(
-                            Number::new(42.0, SourceInformation::dummy()).into(),
+                            Number::new(42.0, Position::dummy()).into(),
                         )],
-                        SourceInformation::dummy(),
+                        Position::dummy(),
                     ),
                 ),
                 (
                     "[42,]",
                     List::new(
                         vec![ListElement::Single(
-                            Number::new(42.0, SourceInformation::dummy()).into(),
+                            Number::new(42.0, Position::dummy()).into(),
                         )],
-                        SourceInformation::dummy(),
+                        Position::dummy(),
                     ),
                 ),
                 (
                     "[42,42]",
                     List::new(
                         vec![
-                            ListElement::Single(
-                                Number::new(42.0, SourceInformation::dummy()).into(),
-                            ),
-                            ListElement::Single(
-                                Number::new(42.0, SourceInformation::dummy()).into(),
-                            ),
+                            ListElement::Single(Number::new(42.0, Position::dummy()).into()),
+                            ListElement::Single(Number::new(42.0, Position::dummy()).into()),
                         ],
-                        SourceInformation::dummy(),
+                        Position::dummy(),
                     ),
                 ),
                 (
                     "[42,42,]",
                     List::new(
                         vec![
-                            ListElement::Single(
-                                Number::new(42.0, SourceInformation::dummy()).into(),
-                            ),
-                            ListElement::Single(
-                                Number::new(42.0, SourceInformation::dummy()).into(),
-                            ),
+                            ListElement::Single(Number::new(42.0, Position::dummy()).into()),
+                            ListElement::Single(Number::new(42.0, Position::dummy()).into()),
                         ],
-                        SourceInformation::dummy(),
+                        Position::dummy(),
                     ),
                 ),
                 (
                     "[...foo]",
                     List::new(
                         vec![ListElement::Multiple(
-                            Variable::new("foo", SourceInformation::dummy()).into(),
+                            Variable::new("foo", Position::dummy()).into(),
                         )],
-                        SourceInformation::dummy(),
+                        Position::dummy(),
                     ),
                 ),
                 (
                     "[...foo,]",
                     List::new(
                         vec![ListElement::Multiple(
-                            Variable::new("foo", SourceInformation::dummy()).into(),
+                            Variable::new("foo", Position::dummy()).into(),
                         )],
-                        SourceInformation::dummy(),
+                        Position::dummy(),
                     ),
                 ),
                 (
                     "[...foo,...bar]",
                     List::new(
                         vec![
-                            ListElement::Multiple(
-                                Variable::new("foo", SourceInformation::dummy()).into(),
-                            ),
-                            ListElement::Multiple(
-                                Variable::new("bar", SourceInformation::dummy()).into(),
-                            ),
+                            ListElement::Multiple(Variable::new("foo", Position::dummy()).into()),
+                            ListElement::Multiple(Variable::new("bar", Position::dummy()).into()),
                         ],
-                        SourceInformation::dummy(),
+                        Position::dummy(),
                     ),
                 ),
                 (
                     "[...foo,...bar,]",
                     List::new(
                         vec![
-                            ListElement::Multiple(
-                                Variable::new("foo", SourceInformation::dummy()).into(),
-                            ),
-                            ListElement::Multiple(
-                                Variable::new("bar", SourceInformation::dummy()).into(),
-                            ),
+                            ListElement::Multiple(Variable::new("foo", Position::dummy()).into()),
+                            ListElement::Multiple(Variable::new("bar", Position::dummy()).into()),
                         ],
-                        SourceInformation::dummy(),
+                        Position::dummy(),
                     ),
                 ),
                 (
                     "[foo,...bar]",
                     List::new(
                         vec![
-                            ListElement::Single(
-                                Variable::new("foo", SourceInformation::dummy()).into(),
-                            ),
-                            ListElement::Multiple(
-                                Variable::new("bar", SourceInformation::dummy()).into(),
-                            ),
+                            ListElement::Single(Variable::new("foo", Position::dummy()).into()),
+                            ListElement::Multiple(Variable::new("bar", Position::dummy()).into()),
                         ],
-                        SourceInformation::dummy(),
+                        Position::dummy(),
                     ),
                 ),
                 (
                     "[...foo,bar]",
                     List::new(
                         vec![
-                            ListElement::Multiple(
-                                Variable::new("foo", SourceInformation::dummy()).into(),
-                            ),
-                            ListElement::Single(
-                                Variable::new("bar", SourceInformation::dummy()).into(),
-                            ),
+                            ListElement::Multiple(Variable::new("foo", Position::dummy()).into()),
+                            ListElement::Single(Variable::new("bar", Position::dummy()).into()),
                         ],
-                        SourceInformation::dummy(),
+                        Position::dummy(),
                     ),
                 ),
             ] {
@@ -3017,8 +2905,8 @@ mod tests {
     }
 
     #[test]
-    fn parse_source_information() {
-        assert!(source_information()
+    fn parse_position() {
+        assert!(position()
             .with(combine::eof())
             .parse(stream(" \n \n \n", ""))
             .is_ok());
