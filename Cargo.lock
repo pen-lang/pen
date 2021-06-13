@@ -31,6 +31,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cf1de2fe8c75bc145a2f577add951f8134889b4795d47466a54a5c846d691693"
 
 [[package]]
+name = "bytes"
+version = "1.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b700ce4376041dcd0a327fd0097c41095743c4c8af8887265942faf1100bd040"
+
+[[package]]
 name = "cc"
 version = "1.0.68"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -41,6 +47,17 @@ name = "cfg-if"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
+
+[[package]]
+name = "combine"
+version = "4.5.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cc4369b5e4c0cddf64ad8981c0111e7df4f7078f4d6ba98fb31f2e17c4c57b7e"
+dependencies = [
+ "bytes",
+ "memchr",
+ "regex",
+]
 
 [[package]]
 name = "ctor"
@@ -163,11 +180,13 @@ dependencies = [
 name = "lang"
 version = "0.1.0"
 dependencies = [
+ "combine",
  "fmm",
  "fmm-llvm",
  "mir",
  "mir-fmm",
  "once_cell",
+ "regex",
  "serde",
 ]
 
