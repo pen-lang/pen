@@ -52,16 +52,18 @@ pub fn stream<'a>(source: &'a str, path: &'a str) -> Stream<'a> {
 
 pub fn module<'a>() -> impl Parser<Stream<'a>, Output = Module> {
     (
+        spaces(),
         many(import()),
         many(type_definition()),
         many(type_alias()),
         many(definition()),
     )
-        .skip(spaces())
         .skip(eof())
-        .map(|(imports, type_definitions, type_aliases, definitions)| {
-            Module::new(imports, type_definitions, type_aliases, definitions)
-        })
+        .map(
+            |(_, imports, type_definitions, type_aliases, definitions)| {
+                Module::new(imports, type_definitions, type_aliases, definitions)
+            },
+        )
 }
 
 fn import<'a>() -> impl Parser<Stream<'a>, Output = Import> {
