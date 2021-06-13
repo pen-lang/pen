@@ -24,11 +24,8 @@ use combine::{
 use once_cell::sync::Lazy;
 use std::{collections::HashSet, sync::Arc};
 
-const KEYWORDS: &[&str] = &[
-    "case", "else", "export", "foreign", "if", "import", "in", "let", "then", "type",
-];
+const KEYWORDS: &[&str] = &["else", "if", "import", "type"];
 const OPERATOR_CHARACTERS: &str = "+-*/=<>&|";
-const SPACE_CHARACTERS: &str = " \t\r";
 
 static NUMBER_REGEX: Lazy<regex::Regex> =
     Lazy::new(|| regex::Regex::new(r"^-?([123456789][0123456789]*|0)(\.[0123456789]+)?").unwrap());
@@ -60,7 +57,7 @@ pub fn module<'a>() -> impl Parser<Stream<'a>, Output = Module> {
         many(type_alias()),
         many(definition()),
     )
-        .skip(blank())
+        .skip(spaces())
         .skip(eof())
         .map(|(imports, type_definitions, type_aliases, definitions)| {
             Module::new(imports, type_definitions, type_aliases, definitions)
@@ -355,20 +352,6 @@ fn application_or_atomic_expression<'a>() -> impl Parser<Stream<'a>, Output = Ex
         .expected("application")
 }
 
-fn application_terminator<'a>() -> impl Parser<Stream<'a>, Output = &'static str> {
-    choice!(
-        newlines1(),
-        sign(","),
-        sign(")"),
-        sign("}"),
-        sign("]"),
-        operator().with(value(())),
-        any_keyword(),
-    )
-    .with(value("application terminator"))
-    .expected("application terminator")
-}
-
 fn record_construction<'a>() -> impl Parser<Stream<'a>, Output = RecordConstruction> {
     (
         position(),
@@ -569,11 +552,15 @@ fn variable<'a>() -> impl Parser<Stream<'a>, Output = Variable> {
 }
 
 fn qualified_identifier<'a>() -> impl Parser<Stream<'a>, Output = String> {
-    (optional((raw_identifier(), string("."))), raw_identifier()).map(|(prefix, identifier)| {
-        prefix
-            .map(|(prefix, _)| [&prefix, ".", &identifier].concat())
-            .unwrap_or(identifier)
-    })
+    (
+        optional(raw_identifier().skip(string("."))),
+        raw_identifier(),
+    )
+        .map(|(prefix, identifier)| {
+            prefix
+                .map(|prefix| [&prefix, ".", &identifier].concat())
+                .unwrap_or(identifier)
+        })
 }
 
 fn identifier<'a>() -> impl Parser<Stream<'a>, Output = String> {
@@ -581,37 +568,21 @@ fn identifier<'a>() -> impl Parser<Stream<'a>, Output = String> {
 }
 
 fn raw_identifier<'a>() -> impl Parser<Stream<'a>, Output = String> {
-    unchecked_identifier().then(|identifier| {
-        if KEYWORDS.contains(&identifier.as_str()) {
-            unexpected_any("keyword").left()
-        } else {
-            value(identifier).right()
-        }
-    })
-}
-
-fn unchecked_identifier<'a>() -> impl Parser<Stream<'a>, Output = String> {
-    choice!(
-        (letter(), many(alpha_num())).boxed(),
-        (character('_'), many(choice!(alpha_num(), character('_')))).boxed(),
-    )
-    .map(|(head, tail): (char, String)| [head.into(), tail].concat())
+    (letter(), many(alpha_num()))
+        .map(|(head, tail): (char, String)| [head.into(), tail].concat())
+        .then(|identifier| {
+            if KEYWORDS.contains(&identifier.as_str()) {
+                unexpected_any("keyword").left()
+            } else {
+                value(identifier).right()
+            }
+        })
 }
 
 fn keyword<'a>(name: &'static str) -> impl Parser<Stream<'a>, Output = ()> {
     token(string(name).skip(not_followed_by(alpha_num())))
         .with(value(()))
         .expected("keyword")
-}
-
-fn any_keyword<'a>() -> impl Parser<Stream<'a>, Output = ()> {
-    token(unchecked_identifier().then(|keyword| {
-        if KEYWORDS.contains(&keyword.as_str()) {
-            value(()).left()
-        } else {
-            unexpected_any("non-keyword").right()
-        }
-    }))
 }
 
 fn sign<'a>(sign: &'static str) -> impl Parser<Stream<'a>, Output = ()> {
@@ -2668,48 +2639,6 @@ mod tests {
             .with(combine::eof())
             .parse(stream(" \n \n \n", ""))
             .is_ok());
-    }
-
-    #[test]
-    fn parse_blank() {
-        for source in &[
-            "",
-            " ",
-            "  ",
-            "\n",
-            "\n\n",
-            " \n",
-            "\n ",
-            " \n \n \n",
-            "\n \n \n ",
-        ] {
-            assert!(blank().parse(stream(source, "")).is_ok());
-        }
-    }
-
-    #[test]
-    fn parse_spaces1() {
-        assert!(spaces1()
-            .with(combine::eof())
-            .parse(stream("", ""))
-            .is_err());
-
-        for source in &[" ", "  ", "\t", "\r"] {
-            assert!(spaces1()
-                .with(combine::eof())
-                .parse(stream(source, ""))
-                .is_ok());
-        }
-    }
-
-    #[test]
-    fn parse_newlines1() {
-        for source in &["", "\n", " \n", "\n\n", "#\n", " #\n"] {
-            assert!(newlines1()
-                .with(combine::eof())
-                .parse(stream(source, ""))
-                .is_ok());
-        }
     }
 
     #[test]

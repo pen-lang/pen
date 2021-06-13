@@ -186,6 +186,7 @@ dependencies = [
  "mir",
  "mir-fmm",
  "once_cell",
+ "pretty_assertions",
  "regex",
  "serde",
 ]
