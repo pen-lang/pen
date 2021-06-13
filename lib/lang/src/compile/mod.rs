@@ -1,15 +1,18 @@
+mod environment;
 mod error;
 mod expression_compilation;
 mod interfaces;
 mod list_type_configuration;
 mod module_compilation;
 mod type_canonicalization;
+mod type_check;
 mod type_compilation;
 mod type_context;
 mod type_equality;
 mod type_extraction;
 mod type_inference;
 mod type_resolution;
+mod type_subsumption;
 mod union_types;
 
 use self::type_context::TypeContext;
@@ -22,7 +25,9 @@ pub fn compile(
     list_type_configuration: &ListTypeConfiguration,
 ) -> Result<(Vec<u8>, interface::Module), CompileError> {
     let type_context = TypeContext::new(module, list_type_configuration);
+
     let module = type_inference::infer_types(module, type_context.types())?;
+    type_check::check_types(&module, &type_context)?;
 
     Ok((
         fmm_llvm::compile_to_bit_code(
@@ -62,8 +67,12 @@ mod tests {
                 vec![],
                 vec![Definition::new(
                     "x",
-                    Boolean::new(false, Position::dummy()),
-                    types::Boolean::new(Position::dummy()),
+                    Lambda::new(
+                        vec![],
+                        types::Boolean::new(Position::dummy()),
+                        Block::new(vec![], Boolean::new(false, Position::dummy())),
+                        Position::dummy(),
+                    ),
                     false,
                     Position::dummy(),
                 )],
@@ -83,8 +92,12 @@ mod tests {
                 vec![],
                 vec![Definition::new(
                     "x",
-                    None::new(Position::dummy()),
-                    types::None::new(Position::dummy()),
+                    Lambda::new(
+                        vec![],
+                        types::None::new(Position::dummy()),
+                        Block::new(vec![], None::new(Position::dummy())),
+                        Position::dummy(),
+                    ),
                     false,
                     Position::dummy(),
                 )],
@@ -104,8 +117,12 @@ mod tests {
                 vec![],
                 vec![Definition::new(
                     "x",
-                    Number::new(42.0, Position::dummy()),
-                    types::Number::new(Position::dummy()),
+                    Lambda::new(
+                        vec![],
+                        types::Number::new(Position::dummy()),
+                        Block::new(vec![], Number::new(42.0, Position::dummy())),
+                        Position::dummy(),
+                    ),
                     false,
                     Position::dummy(),
                 )],
@@ -125,8 +142,12 @@ mod tests {
                 vec![],
                 vec![Definition::new(
                     "x",
-                    ByteString::new("foo", Position::dummy()),
-                    types::ByteString::new(Position::dummy()),
+                    Lambda::new(
+                        vec![],
+                        types::ByteString::new(Position::dummy()),
+                        Block::new(vec![], ByteString::new("foo", Position::dummy())),
+                        Position::dummy(),
+                    ),
                     false,
                     Position::dummy(),
                 )],

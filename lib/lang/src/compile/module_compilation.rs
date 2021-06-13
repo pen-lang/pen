@@ -3,31 +3,11 @@ use crate::{
     compile::{expression_compilation, type_compilation::NONE_RECORD_TYPE_NAME},
     hir::*,
 };
-use std::collections::HashMap;
 
 pub fn compile(
     module: &Module,
     type_context: &TypeContext,
 ) -> Result<mir::ir::Module, CompileError> {
-    let variables = module
-        .definitions()
-        .iter()
-        .map(|definition| {
-            Ok((
-                definition.name().into(),
-                mir::ir::Call::new(
-                    mir::types::Function::new(
-                        vec![],
-                        type_compilation::compile(definition.type_(), type_context)?,
-                    ),
-                    mir::ir::Variable::new(definition.name()),
-                    vec![],
-                )
-                .into(),
-            ))
-        })
-        .collect::<Result<_, CompileError>>()?;
-
     Ok(mir::ir::Module::new(
         vec![mir::ir::TypeDefinition::new(
             NONE_RECORD_TYPE_NAME,
@@ -52,7 +32,7 @@ pub fn compile(
         module
             .definitions()
             .iter()
-            .map(|definition| compile_definition(definition, &variables, type_context))
+            .map(|definition| compile_definition(definition, type_context))
             .collect::<Result<Vec<_>, CompileError>>()?,
     ))
 }
@@ -79,22 +59,35 @@ fn compile_declaration(
 ) -> Result<mir::ir::Declaration, CompileError> {
     Ok(mir::ir::Declaration::new(
         declaration.name(),
-        mir::types::Function::new(
-            vec![],
-            type_compilation::compile(declaration.type_(), type_context)?,
-        ),
+        type_compilation::compile_function(declaration.type_(), type_context)?,
     ))
 }
 
 fn compile_definition(
     definition: &Definition,
-    variables: &HashMap<String, mir::ir::Expression>,
     type_context: &TypeContext,
 ) -> Result<mir::ir::Definition, CompileError> {
-    Ok(mir::ir::Definition::new(
-        definition.name(),
-        vec![],
-        expression_compilation::compile(definition.body(), variables, type_context)?,
-        type_compilation::compile(definition.type_(), type_context)?,
-    ))
+    let body = expression_compilation::compile_block(definition.lambda().body(), type_context)?;
+    let result_type = type_compilation::compile(definition.lambda().result_type(), type_context)?;
+
+    Ok(if definition.lambda().arguments().is_empty() {
+        mir::ir::Definition::thunk(definition.name(), vec![], body, result_type)
+    } else {
+        mir::ir::Definition::new(
+            definition.name(),
+            definition
+                .lambda()
+                .arguments()
+                .iter()
+                .map(|argument| -> Result<_, CompileError> {
+                    Ok(mir::ir::Argument::new(
+                        argument.name(),
+                        type_compilation::compile(argument.type_(), type_context)?,
+                    ))
+                })
+                .collect::<Result<_, _>>()?,
+            body,
+            result_type,
+        )
+    })
 }

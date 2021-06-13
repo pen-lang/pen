@@ -1,27 +1,19 @@
-use super::expression::Expression;
-use crate::{position::*, types::Type};
+use super::lambda::Lambda;
+use crate::position::Position;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Definition {
     name: String,
-    body: Expression,
-    type_: Type,
+    lambda: Lambda,
     public: bool,
     position: Position,
 }
 
 impl Definition {
-    pub fn new(
-        name: impl Into<String>,
-        body: impl Into<Expression>,
-        type_: impl Into<Type>,
-        public: bool,
-        position: Position,
-    ) -> Self {
+    pub fn new(name: impl Into<String>, lambda: Lambda, public: bool, position: Position) -> Self {
         Self {
             name: name.into(),
-            body: body.into(),
-            type_: type_.into(),
+            lambda: lambda.into(),
             public,
             position,
         }
@@ -31,12 +23,8 @@ impl Definition {
         &self.name
     }
 
-    pub fn body(&self) -> &Expression {
-        &self.body
-    }
-
-    pub fn type_(&self) -> &Type {
-        &self.type_
+    pub fn lambda(&self) -> &Lambda {
+        &self.lambda
     }
 
     pub fn is_public(&self) -> bool {

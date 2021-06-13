@@ -1,4 +1,4 @@
-use super::{type_extraction, CompileError};
+use super::{environment, type_extraction, CompileError};
 use crate::{
     compile::union_types,
     hir::*,
@@ -7,17 +7,7 @@ use crate::{
 use std::collections::HashMap;
 
 pub fn infer_types(module: &Module, types: &HashMap<String, Type>) -> Result<Module, CompileError> {
-    let variables = module
-        .declarations()
-        .iter()
-        .map(|declaration| (declaration.name().into(), declaration.type_().clone()))
-        .chain(
-            module
-                .definitions()
-                .iter()
-                .map(|definition| (definition.name().into(), definition.type_().clone())),
-        )
-        .collect();
+    let variables = environment::create_from_module(module);
 
     Ok(Module::new(
         module.type_definitions().to_vec(),
@@ -38,10 +28,35 @@ fn infer_definition(
 ) -> Result<Definition, CompileError> {
     Ok(Definition::new(
         definition.name(),
-        infer_expression(definition.body(), variables, types)?,
-        definition.type_().clone(),
+        infer_lambda(definition.lambda(), variables, types)?,
         definition.is_public(),
         definition.position().clone(),
+    ))
+}
+
+fn infer_lambda(
+    lambda: &Lambda,
+    variables: &HashMap<String, Type>,
+    types: &HashMap<String, Type>,
+) -> Result<Lambda, CompileError> {
+    Ok(Lambda::new(
+        lambda.arguments().to_vec(),
+        lambda.result_type().clone(),
+        infer_block(
+            lambda.body(),
+            &variables
+                .clone()
+                .into_iter()
+                .chain(
+                    lambda
+                        .arguments()
+                        .iter()
+                        .map(|argument| (argument.name().into(), argument.type_().clone())),
+                )
+                .collect(),
+            types,
+        )?,
+        lambda.position().clone(),
     ))
 }
 
@@ -135,25 +150,7 @@ fn infer_expression(
             )
             .into()
         }
-        Expression::Lambda(lambda) => Lambda::new(
-            lambda.arguments().to_vec(),
-            infer_block(
-                lambda.body(),
-                &variables
-                    .clone()
-                    .into_iter()
-                    .chain(
-                        lambda
-                            .arguments()
-                            .iter()
-                            .map(|argument| (argument.name().into(), argument.type_().clone())),
-                    )
-                    .collect(),
-            )?,
-            lambda.type_().clone(),
-            lambda.position().clone(),
-        )
-        .into(),
+        Expression::Lambda(lambda) => infer_lambda(lambda, variables, types)?.into(),
         Expression::Boolean(_)
         | Expression::None(_)
         | Expression::Number(_)
@@ -173,7 +170,13 @@ fn infer_block(
     for assignment in block.assignments() {
         let assignment = infer_assignment(assignment, &variables, types)?;
 
-        variables.insert(assignment.name().into(), assignment.type_().clone());
+        variables.insert(
+            assignment.name().into(),
+            assignment
+                .type_()
+                .cloned()
+                .ok_or_else(|| CompileError::TypeNotInferred(assignment.position().clone()))?,
+        );
         assignments.push(assignment);
     }
 
@@ -193,7 +196,10 @@ fn infer_assignment(
     Ok(Assignment::new(
         assignment.name(),
         expression.clone(),
-        type_extraction::extract_from_expression(&expression, types)?,
+        Some(type_extraction::extract_from_expression(
+            &expression,
+            types,
+        )?),
         assignment.position().clone(),
     ))
 }

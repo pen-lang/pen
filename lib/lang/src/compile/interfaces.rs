@@ -1,4 +1,4 @@
-use super::error::CompileError;
+use super::{error::CompileError, type_extraction};
 use crate::{hir, interface};
 
 pub fn compile(module: &hir::Module) -> Result<interface::Module, CompileError> {
@@ -31,7 +31,10 @@ pub fn compile(module: &hir::Module) -> Result<interface::Module, CompileError> 
             .definitions()
             .iter()
             .map(|definition| {
-                interface::Declaration::new(definition.name(), definition.type_().clone())
+                interface::Declaration::new(
+                    definition.name(),
+                    type_extraction::extract_from_lambda(definition.lambda()),
+                )
             })
             .collect(),
     ))

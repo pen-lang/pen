@@ -1,4 +1,4 @@
-use crate::{position::Position, types};
+use crate::{hir::*, position::Position, types};
 use std::{
     error::Error,
     fmt::{self, Display, Formatter},
@@ -12,6 +12,7 @@ pub enum CompileError {
     TypeNotFound(types::Reference),
     TypeNotInferred(Position),
     TypesNotMatched(Position, Position),
+    VariableNotFound(Variable),
 }
 
 impl Display for CompileError {
@@ -39,6 +40,12 @@ impl Display for CompileError {
                 formatter,
                 "types not matched\n{}\n{}",
                 lhs_source_information, rhs_source_information
+            ),
+            Self::VariableNotFound(variable) => write!(
+                formatter,
+                "variable \"{}\" not found\n{}",
+                variable.name(),
+                variable.position()
             ),
         }
     }

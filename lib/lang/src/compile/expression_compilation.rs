@@ -1,15 +1,10 @@
 use super::{type_compilation, type_context::TypeContext, CompileError};
-use crate::{
-    compile::type_compilation::NONE_RECORD_TYPE_NAME,
-    hir::{Block, Expression},
-};
-use std::collections::HashMap;
+use crate::{compile::type_compilation::NONE_RECORD_TYPE_NAME, hir::*};
 
 const CLOSURE_NAME: &str = "$closure";
 
 pub fn compile(
     expression: &Expression,
-    variables: &HashMap<String, mir::ir::Expression>,
     type_context: &TypeContext,
 ) -> Result<mir::ir::Expression, CompileError> {
     Ok(match expression {
@@ -27,8 +22,8 @@ pub fn compile(
                         ))
                     })
                     .collect::<Result<_, _>>()?,
-                compile_block(lambda.body(), variables, type_context)?,
-                type_compilation::compile(lambda.type_(), type_context)?,
+                compile_block(lambda.body(), type_context)?,
+                type_compilation::compile(lambda.result_type(), type_context)?,
             ),
             mir::ir::Variable::new(CLOSURE_NAME),
         )
@@ -38,26 +33,27 @@ pub fn compile(
         }
         Expression::Number(number) => mir::ir::Expression::Number(number.value()),
         Expression::String(string) => mir::ir::ByteString::new(string.value().clone()).into(),
-        Expression::Variable(variable) => variables
-            .get(variable.name())
-            .cloned()
-            .unwrap_or_else(|| mir::ir::Variable::new(variable.name()).into()),
+        Expression::Variable(variable) => mir::ir::Variable::new(variable.name()).into(),
         _ => todo!(),
     })
 }
 
 pub fn compile_block(
     block: &Block,
-    variables: &HashMap<String, mir::ir::Expression>,
     type_context: &TypeContext,
 ) -> Result<mir::ir::Expression, CompileError> {
-    let mut expression = compile(block.expression(), variables, type_context)?;
+    let mut expression = compile(block.expression(), type_context)?;
 
     for assignment in block.assignments().iter().rev() {
         expression = mir::ir::Let::new(
             assignment.name(),
-            type_compilation::compile(assignment.type_(), type_context)?,
-            compile(assignment.expression(), variables, type_context)?,
+            type_compilation::compile(
+                assignment
+                    .type_()
+                    .ok_or_else(|| CompileError::TypeNotInferred(assignment.position().clone()))?,
+                type_context,
+            )?,
+            compile(assignment.expression(), type_context)?,
             expression,
         )
         .into();
