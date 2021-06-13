@@ -53,109 +53,44 @@ pub fn stream<'a>(source: &'a str, source_name: &'a str) -> Stream<'a> {
     .into()
 }
 
-pub fn module<'a>() -> impl Parser<Stream<'a>, Output = UnresolvedModule> {
-    (
-        optional(export()),
-        optional(export_foreign()),
-        many(import()),
-        many(import_foreign()),
-        many(type_definition()),
-        many(definition()),
-    )
+pub fn module<'a>() -> impl Parser<Stream<'a>, Output = Module> {
+    (many(import()), many(type_definition()), many(definition()))
         .skip(blank())
         .skip(eof())
         .map(
-            |(export, export_foreign, imports, import_foreigns, type_definitions, definitions)| {
-                UnresolvedModule::new(
-                    export.unwrap_or_else(|| Export::new(Default::default())),
-                    export_foreign.unwrap_or_else(|| ExportForeign::new(Default::default())),
-                    imports,
-                    import_foreigns,
-                    type_definitions,
-                    definitions,
-                )
+            |(export, export_foreign, imports, type_definitions, definitions)| {
+                Module::new(imports, type_definitions, definitions)
             },
         )
 }
 
-fn export<'a>() -> impl Parser<Stream<'a>, Output = Export> {
-    keyword("export")
-        .with(between(
-            sign("{"),
-            sign("}"),
-            sep_end_by1(identifier(), sign(",")),
-        ))
-        .map(Export::new)
-        .expected("export statement")
-}
-
-fn import<'a>() -> impl Parser<Stream<'a>, Output = UnresolvedImport> {
+fn import<'a>() -> impl Parser<Stream<'a>, Output = Import> {
     keyword("import")
         .with(module_path())
-        .map(UnresolvedImport::new)
+        .map(Import::new)
         .expected("import statement")
 }
 
-fn module_path<'a>() -> impl Parser<Stream<'a>, Output = UnresolvedModulePath> {
+fn module_path<'a>() -> impl Parser<Stream<'a>, Output = ModulePath> {
     token(choice!(
-        internal_module_path().map(UnresolvedModulePath::from),
-        external_module_path().map(UnresolvedModulePath::from),
+        internal_module_path().map(ModulePath::from),
+        external_module_path().map(ModulePath::from),
     ))
     .expected("module path")
 }
 
-fn internal_module_path<'a>() -> impl Parser<Stream<'a>, Output = InternalUnresolvedModulePath> {
-    module_path_components().map(InternalUnresolvedModulePath::new)
+fn internal_module_path<'a>() -> impl Parser<Stream<'a>, Output = InternalModulePath> {
+    module_path_components().map(InternalModulePath::new)
 }
 
-fn external_module_path<'a>() -> impl Parser<Stream<'a>, Output = ExternalUnresolvedModulePath> {
+fn external_module_path<'a>() -> impl Parser<Stream<'a>, Output = ExternalModulePath> {
     (identifier(), module_path_components()).map(|(package_name, path_components)| {
-        ExternalUnresolvedModulePath::new(package_name, path_components)
+        ExternalModulePath::new(package_name, path_components)
     })
 }
 
 fn module_path_components<'a>() -> impl Parser<Stream<'a>, Output = Vec<String>> {
     many1(string(".").with(identifier()))
-}
-
-fn export_foreign<'a>() -> impl Parser<Stream<'a>, Output = ExportForeign> {
-    (keyword("export"), keyword("foreign"))
-        .with(between(
-            sign("{"),
-            sign("}"),
-            sep_end_by1(identifier(), sign(",")),
-        ))
-        .map(ExportForeign::new)
-        .expected("export foreign statement")
-}
-
-fn import_foreign<'a>() -> impl Parser<Stream<'a>, Output = ImportForeign> {
-    (
-        position(),
-        keyword("import"),
-        keyword("foreign"),
-        optional(calling_convention()),
-        type_annotation(),
-    )
-        .map(|(position, _, _, calling_convention, (name, type_))| {
-            ImportForeign::new(
-                &name,
-                &name,
-                calling_convention.unwrap_or(CallingConvention::Native),
-                type_,
-                position,
-            )
-        })
-        .expected("import foreign")
-}
-
-fn calling_convention<'a>() -> impl Parser<Stream<'a>, Output = CallingConvention> {
-    string_literal()
-        .expected("calling convention")
-        .then(|string| match string.value() {
-            "c" => value(CallingConvention::C).left(),
-            _ => unexpected_any("unknown calling convention").right(),
-        })
 }
 
 fn definition<'a>() -> impl Parser<Stream<'a>, Output = Definition> {
@@ -894,19 +829,19 @@ mod tests {
     fn parse_module() {
         assert_eq!(
             module().parse(stream("", "")).unwrap().0,
-            UnresolvedModule::from_definitions(vec![])
+            Module::from_definitions(vec![])
         );
         assert_eq!(
             module().parse(stream(" ", "")).unwrap().0,
-            UnresolvedModule::from_definitions(vec![])
+            Module::from_definitions(vec![])
         );
         assert_eq!(
             module().parse(stream("\n", "")).unwrap().0,
-            UnresolvedModule::from_definitions(vec![])
+            Module::from_definitions(vec![])
         );
         assert_eq!(
             module().parse(stream("export { foo }", "")).unwrap().0,
-            UnresolvedModule::new(
+            Module::new(
                 Export::new(vec!["foo".into()].drain(..).collect()),
                 ExportForeign::new(Default::default()),
                 vec![],
@@ -920,10 +855,10 @@ mod tests {
                 .parse(stream("export { foo }\nimport Foo.Bar", ""))
                 .unwrap()
                 .0,
-            UnresolvedModule::new(
+            Module::new(
                 Export::new(vec!["foo".into()].drain(..).collect()),
                 ExportForeign::new(Default::default()),
-                vec![UnresolvedImport::new(ExternalUnresolvedModulePath::new(
+                vec![Import::new(ExternalModulePath::new(
                     "Foo",
                     vec!["Bar".into()]
                 ))],
@@ -934,7 +869,7 @@ mod tests {
         );
         assert_eq!(
             module().parse(stream("x : Number\nx = 42", "")).unwrap().0,
-            UnresolvedModule::new(
+            Module::new(
                 Export::new(Default::default()),
                 ExportForeign::new(Default::default()),
                 vec![],
@@ -954,7 +889,7 @@ mod tests {
                 .parse(stream("x : Number\nx = 42\ny : Number\ny = 42", ""))
                 .unwrap()
                 .0,
-            UnresolvedModule::new(
+            Module::new(
                 Export::new(Default::default()),
                 ExportForeign::new(Default::default()),
                 vec![],
@@ -983,7 +918,7 @@ mod tests {
                 .parse(stream("main : Number -> Number\nmain x = 42", ""))
                 .unwrap()
                 .0,
-            UnresolvedModule::new(
+            Module::new(
                 Export::new(Default::default()),
                 ExportForeign::new(Default::default()),
                 vec![],
@@ -1037,11 +972,11 @@ mod tests {
     fn parse_import() {
         assert_eq!(
             import().parse(stream("import .Foo", "")).unwrap().0,
-            UnresolvedImport::new(InternalUnresolvedModulePath::new(vec!["Foo".into()])),
+            Import::new(InternalModulePath::new(vec!["Foo".into()])),
         );
         assert_eq!(
             import().parse(stream("import Foo.Bar", "")).unwrap().0,
-            UnresolvedImport::new(ExternalUnresolvedModulePath::new("Foo", vec!["Bar".into()])),
+            Import::new(ExternalModulePath::new("Foo", vec!["Bar".into()])),
         );
     }
 
@@ -1050,18 +985,15 @@ mod tests {
         assert!(module_path().parse(stream("?", "")).is_err());
         assert_eq!(
             module_path().parse(stream(".Foo", "")).unwrap().0,
-            UnresolvedModulePath::Internal(InternalUnresolvedModulePath::new(vec!["Foo".into()])),
+            ModulePath::Internal(InternalModulePath::new(vec!["Foo".into()])),
         );
         assert_eq!(
             module_path().parse(stream("Foo.Bar", "")).unwrap().0,
-            UnresolvedModulePath::External(ExternalUnresolvedModulePath::new(
-                "Foo",
-                vec!["Bar".into()]
-            )),
+            ModulePath::External(ExternalModulePath::new("Foo", vec!["Bar".into()])),
         );
         assert_eq!(
             module_path().parse(stream(" .Foo", "")).unwrap().0,
-            UnresolvedModulePath::Internal(InternalUnresolvedModulePath::new(vec!["Foo".into()])),
+            ModulePath::Internal(InternalModulePath::new(vec!["Foo".into()])),
         );
     }
 
@@ -1070,14 +1002,14 @@ mod tests {
         assert!(internal_module_path().parse(stream("?", "")).is_err());
         assert_eq!(
             internal_module_path().parse(stream(".Foo", "")).unwrap().0,
-            InternalUnresolvedModulePath::new(vec!["Foo".into()]),
+            InternalModulePath::new(vec!["Foo".into()]),
         );
         assert_eq!(
             internal_module_path()
                 .parse(stream(".Foo.Bar", ""))
                 .unwrap()
                 .0,
-            InternalUnresolvedModulePath::new(vec!["Foo".into(), "Bar".into()]),
+            InternalModulePath::new(vec!["Foo".into(), "Bar".into()]),
         );
     }
 
@@ -1089,7 +1021,7 @@ mod tests {
                 .parse(stream("Foo.Bar", ""))
                 .unwrap()
                 .0,
-            ExternalUnresolvedModulePath::new("Foo", vec!["Bar".into()]),
+            ExternalModulePath::new("Foo", vec!["Bar".into()]),
         );
     }
 

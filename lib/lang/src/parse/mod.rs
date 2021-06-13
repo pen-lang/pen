@@ -9,7 +9,7 @@ use combine::Parser;
 pub use error::ParseError;
 use parsers::{module, stream};
 
-pub fn parse(source_content: &str, source_name: &str) -> Result<ast::UnresolvedModule, ParseError> {
+pub fn parse(source_content: &str, source_name: &str) -> Result<ast::Module, ParseError> {
     module()
         .parse(stream(source_content, source_name))
         .map(|(module, _)| module)
@@ -26,7 +26,7 @@ mod tests {
     fn parse_function_definition() {
         assert_eq!(
             parse("foo : Number -> Number -> Number\nfoo x y = 42", ""),
-            Ok(UnresolvedModule::from_definitions(vec![
+            Ok(Module::from_definitions(vec![
                 FunctionDefinition::new(
                     "foo",
                     vec!["x".into(), "y".into()],
@@ -51,7 +51,7 @@ mod tests {
     fn parse_let_expression_with_single_definition() {
         assert_eq!(
             parse("x : Number\nx = (let x = 42\nin x)", ""),
-            Ok(UnresolvedModule::from_definitions(vec![
+            Ok(Module::from_definitions(vec![
                 VariableDefinition::new(
                     "x",
                     Let::new(
@@ -92,7 +92,7 @@ mod tests {
                 ),
                 ""
             ),
-            Ok(UnresolvedModule::from_definitions(vec![
+            Ok(Module::from_definitions(vec![
                 FunctionDefinition::new(
                     "main",
                     vec!["x".into()],
@@ -152,10 +152,10 @@ mod tests {
                 ),
                 ""
             ),
-            Ok(UnresolvedModule::new(
+            Ok(Module::new(
                 Export::new(Default::default()),
                 ExportForeign::new(Default::default()),
-                vec![UnresolvedImport::new(ExternalUnresolvedModulePath::new(
+                vec![Import::new(ExternalModulePath::new(
                     "Package",
                     vec!["Module".into()]
                 ))],
@@ -190,7 +190,7 @@ mod tests {
                 ),
                 ""
             ),
-            Ok(UnresolvedModule::from_definitions(vec![
+            Ok(Module::from_definitions(vec![
                 FunctionDefinition::new(
                     "foo",
                     vec!["x".into()],
