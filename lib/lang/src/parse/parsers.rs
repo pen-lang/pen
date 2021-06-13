@@ -456,8 +456,8 @@ fn operator<'a>() -> impl Parser<Stream<'a>, Output = ParsedOperator> {
         concrete_operator("<=", ParsedOperator::LessThanOrEqual),
         concrete_operator(">", ParsedOperator::GreaterThan),
         concrete_operator(">=", ParsedOperator::GreaterThanOrEqual),
-        concrete_operator("&&", ParsedOperator::And),
-        concrete_operator("||", ParsedOperator::Or),
+        concrete_operator("&", ParsedOperator::And),
+        concrete_operator("|", ParsedOperator::Or),
     )
     .expected("operator")
 }
