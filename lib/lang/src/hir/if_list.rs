@@ -14,7 +14,6 @@ pub struct IfList {
 }
 
 impl IfList {
-    #[allow(clippy::too_many_arguments)]
     pub fn new(
         argument: impl Into<Expression>,
         first_name: impl Into<String>,
