@@ -5,7 +5,6 @@ use std::sync::Arc;
 #[derive(Clone, Debug, PartialEq)]
 pub struct IfList {
     argument: Arc<Expression>,
-    type_: Type,
     first_name: String,
     rest_name: String,
     then: Arc<Block>,
@@ -18,7 +17,6 @@ impl IfList {
     #[allow(clippy::too_many_arguments)]
     pub fn new(
         argument: impl Into<Expression>,
-        type_: impl Into<Type>,
         first_name: impl Into<String>,
         rest_name: impl Into<String>,
         then: Block,
@@ -28,7 +26,6 @@ impl IfList {
     ) -> Self {
         Self {
             argument: Arc::new(argument.into()),
-            type_: type_.into(),
             first_name: first_name.into(),
             rest_name: rest_name.into(),
             then: then.into(),
@@ -40,10 +37,6 @@ impl IfList {
 
     pub fn argument(&self) -> &Expression {
         &self.argument
-    }
-
-    pub fn type_(&self) -> &Type {
-        &self.type_
     }
 
     pub fn first_name(&self) -> &str {
