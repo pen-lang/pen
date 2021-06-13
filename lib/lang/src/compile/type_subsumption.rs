@@ -25,8 +25,8 @@ pub fn check_subsumption(
                 && check_subsumption(lower.rhs(), &upper, types)?
         }
         (lower, Type::Union(union)) => {
-            check_subsumption(&lower, union.lhs(), types)?
-                || check_subsumption(&lower, union.rhs(), types)?
+            check_subsumption(lower, union.lhs(), types)?
+                || check_subsumption(lower, union.rhs(), types)?
         }
         _ => type_equality::check_equality(&lower, &upper, types)?,
     })

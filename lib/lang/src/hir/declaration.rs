@@ -12,7 +12,7 @@ impl Declaration {
     pub fn new(name: impl Into<String>, type_: types::Function, position: Position) -> Self {
         Self {
             name: name.into(),
-            type_: type_.into(),
+            type_,
             position,
         }
     }

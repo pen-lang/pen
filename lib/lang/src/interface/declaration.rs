@@ -11,7 +11,7 @@ impl Declaration {
     pub fn new(name: impl Into<String>, type_: types::Function) -> Self {
         Self {
             name: name.into(),
-            type_: type_.into(),
+            type_,
         }
     }
 

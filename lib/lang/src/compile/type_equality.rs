@@ -46,8 +46,7 @@ pub fn check_equality(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::position::Position;
-    use crate::types;
+    use crate::{position::Position, types};
 
     #[test]
     fn check_numbers() {

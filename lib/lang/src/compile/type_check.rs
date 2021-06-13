@@ -37,7 +37,7 @@ fn check_lambda(
                 .collect(),
             type_context,
         )?,
-        &lambda.result_type(),
+        lambda.result_type(),
         type_context.types(),
     )?;
 

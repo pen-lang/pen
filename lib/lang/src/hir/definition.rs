@@ -13,7 +13,7 @@ impl Definition {
     pub fn new(name: impl Into<String>, lambda: Lambda, public: bool, position: Position) -> Self {
         Self {
             name: name.into(),
-            lambda: lambda.into(),
+            lambda,
             public,
             position,
         }
