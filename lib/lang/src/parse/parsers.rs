@@ -86,9 +86,8 @@ fn internal_module_path<'a>() -> impl Parser<Stream<'a>, Output = InternalModule
 }
 
 fn external_module_path<'a>() -> impl Parser<Stream<'a>, Output = ExternalModulePath> {
-    (identifier(), module_path_components()).map(|(package_name, path_components)| {
-        ExternalModulePath::new(package_name, path_components)
-    })
+    (identifier(), module_path_components())
+        .map(|(package, components)| ExternalModulePath::new(package, components))
 }
 
 fn module_path_components<'a>() -> impl Parser<Stream<'a>, Output = Vec<String>> {
@@ -108,10 +107,10 @@ fn type_definition<'a>() -> impl Parser<Stream<'a>, Output = TypeDefinition> {
         optional(between(
             sign("{"),
             sign("}"),
-            sep_end_by1((identifier().skip(sign(":")), type_()), sign(",")),
+            sep_end_by1((identifier(), type_()), sign(",")),
         )),
     )
-        .map(|(_, position, name, elements): (_, _, _, Option<Vec<_>>)| {
+        .map(|(position, _, name, elements): (_, _, _, Option<Vec<_>>)| {
             TypeDefinition::new(
                 name,
                 elements
@@ -127,7 +126,7 @@ fn type_definition<'a>() -> impl Parser<Stream<'a>, Output = TypeDefinition> {
 
 fn type_alias<'a>() -> impl Parser<Stream<'a>, Output = TypeAlias> {
     (keyword("type"), identifier(), sign("="), type_())
-        .map(|(_, name, _, type_)| TypeAlias::new(&name, type_))
+        .map(|(_, name, _, type_)| TypeAlias::new(name, type_))
         .expected("type alias")
 }
 
@@ -138,7 +137,13 @@ fn type_<'a>() -> impl Parser<Stream<'a>, Output = Type> {
 }
 
 fn function_type<'a>() -> impl Parser<Stream<'a>, Output = types::Function> {
-    (position(), sign("\\("), many(type_()), sign(")"), type_())
+    (
+        position(),
+        sign("\\("),
+        sep_end_by(type_(), sign(",")),
+        sign(")"),
+        type_(),
+    )
         .map(|(position, _, arguments, _, result)| {
             types::Function::new(arguments, result, position)
         })
@@ -146,21 +151,20 @@ fn function_type<'a>() -> impl Parser<Stream<'a>, Output = types::Function> {
 }
 
 fn union_type<'a>() -> impl Parser<Stream<'a>, Output = Type> {
-    (position(), sep_end_by1(type_(), sign("|")))
-        .map(|(position, types)| {
-            let types: Vec<_> = types;
-
-            if types.len() == 1 {
-                types[0].clone()
-            } else {
-                types::Union::new(types, position).into()
-            }
+    (position(), sep_end_by1(atomic_type(), sign("|")))
+        .map(|(position, types): (_, Vec<_>)| {
+            types
+                .into_iter()
+                .reduce(|lhs, rhs| {
+                    types::Union::new(lhs.clone(), rhs, lhs.position().clone()).into()
+                })
+                .unwrap()
         })
         .expected("union type")
 }
 
 fn list_type<'a>() -> impl Parser<Stream<'a>, Output = types::List> {
-    (position(), between(sign("["), sign("]"), atomic_type()))
+    (position(), between(sign("["), sign("]"), type_()))
         .map(|(position, element)| types::List::new(element, position))
         .expected("list type")
 }
@@ -173,6 +177,7 @@ fn atomic_type<'a>() -> impl Parser<Stream<'a>, Output = Type> {
         string_type().map(Type::from),
         any_type().map(Type::from),
         reference_type().map(Type::from),
+        list_type().map(Type::from),
         between(sign("("), sign(")"), type_()),
     )
 }
@@ -218,62 +223,56 @@ fn reference_type<'a>() -> impl Parser<Stream<'a>, Output = types::Reference> {
         .expected("reference type")
 }
 
+fn block<'a>() -> impl Parser<Stream<'a>, Output = Block> {
+    todo!()
+}
+
 fn expression<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
-    lazy(|| no_partial(operation_or_term()))
+    lazy(|| no_partial(binary_operation()))
         .boxed()
         .expected("expression")
 }
 
 fn atomic_expression<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
-    lazy(|| no_partial(strict_atomic_expression())).boxed()
+    lazy(|| {
+        no_partial(choice!(
+            record().map(Expression::from),
+            record_update().map(Expression::from),
+            list_literal().map(Expression::from),
+            boolean_literal().map(Expression::from),
+            none_literal().map(Expression::from),
+            number_literal().map(Expression::from),
+            string_literal().map(Expression::from),
+            variable().map(Expression::from),
+            between(sign("("), sign(")"), expression()),
+        ))
+    })
+    .boxed()
 }
 
-fn strict_atomic_expression<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
-    choice!(
-        record_construction().map(Expression::from),
-        record_update().map(Expression::from),
-        list_literal().map(Expression::from),
-        boolean_literal().map(Expression::from),
-        none_literal().map(Expression::from),
-        number_literal().map(Expression::from),
-        string_literal().map(Expression::from),
-        variable().map(Expression::from),
-        between(sign("("), sign(")"), expression()),
-    )
+fn lambda<'a>() -> impl Parser<Stream<'a>, Output = Lambda> {
+    todo!()
 }
 
 fn if_<'a>() -> impl Parser<Stream<'a>, Output = If> {
     (
         position(),
-        keyword("if").expected("if keyword"),
+        keyword("if"),
         expression(),
         block(),
         many((keyword("else"), keyword("if"), expression(), block())),
-        keyword("else").expected("else keyword"),
+        keyword("else"),
         block(),
     )
-        .map(|(position, _, condition, _, then, _, else_)| {
-            If::new(condition, then, else_, position)
-        })
+        .map(
+            |(position, _, condition, if_block, else_if_blocks, _, else_block)| {
+                If::new(condition, then, else_, position)
+            },
+        )
         .expected("if expression")
 }
 
-fn case<'a>() -> impl Parser<Stream<'a>, Output = Case> {
-    (
-        position(),
-        keyword("case").expected("case keyword"),
-        identifier(),
-        sign("="),
-        expression(),
-        many1(alternative()),
-    )
-        .map(|(position, _, identifier, _, argument, alternatives)| {
-            Case::new(identifier, argument, alternatives, position)
-        })
-        .expected("type case expression")
-}
-
-fn list_case<'a>() -> impl Parser<Stream<'a>, Output = ListCase> {
+fn if_list<'a>() -> impl Parser<Stream<'a>, Output = IfList> {
     (
         position(),
         keyword("case").expected("case keyword"),
@@ -307,13 +306,12 @@ fn list_case<'a>() -> impl Parser<Stream<'a>, Output = ListCase> {
                 _,
                 non_empty_alternative,
             )| {
-                ListCase::new(
+                IfList::new(
                     argument,
-                    types::Unknown::new(position.clone()),
                     first_name,
                     rest_name,
-                    empty_alternative,
                     non_empty_alternative,
+                    empty_alternative,
                     position,
                 )
             },
@@ -321,43 +319,41 @@ fn list_case<'a>() -> impl Parser<Stream<'a>, Output = ListCase> {
         .expected("list case expression")
 }
 
+fn if_type<'a>() -> impl Parser<Stream<'a>, Output = Case> {
+    (
+        position(),
+        keyword("case").expected("case keyword"),
+        identifier(),
+        sign("="),
+        expression(),
+        many1(alternative()),
+    )
+        .map(|(position, _, identifier, _, argument, alternatives)| {
+            Case::new(identifier, argument, alternatives, position)
+        })
+        .expected("type case expression")
+}
+
 fn alternative<'a>() -> impl Parser<Stream<'a>, Output = Alternative> {
     (type_(), block()).map(|(type_, block)| Alternative::new(type_, block))
 }
 
-fn call_or_atomic_expression<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
+fn call<'a>() -> impl Parser<Stream<'a>, Output = Call> {
     (
         position(),
         atomic_expression(),
-        many((
-            many(atomic_expression().skip(not_followed_by(call_terminator()))),
-            atomic_expression().skip(look_ahead(call_terminator())),
-        )),
+        between(sign("("), sign(")"), sep_end_by(expression(), sign(","))),
     )
-        .map(|(position, function, argument_sets)| {
-            let position = Arc::new(position);
-            let argument_sets: Vec<(Vec<Expression>, _)> = argument_sets;
-
-            let mut all_arguments = vec![];
-
-            for (arguments, argument) in argument_sets {
-                all_arguments.extend(arguments);
-                all_arguments.push(argument);
-            }
-
-            all_arguments.into_iter().fold(function, |call, argument| {
-                Call::new(call, argument, position.clone()).into()
-            })
-        })
-        .expected("call")
+        .map(|(position, function, arguments)| Call::new(function, arguments, position))
+        .expected("function call")
 }
 
-fn record_construction<'a>() -> impl Parser<Stream<'a>, Output = RecordConstruction> {
+fn record<'a>() -> impl Parser<Stream<'a>, Output = RecordConstruction> {
     (
         position(),
         reference_type(),
         string("{"),
-        sep_end_by1((identifier().skip(sign("=")), expression()), sign(",")),
+        sep_end_by1((identifier().skip(sign(":")), expression()), sign(",")),
         sign("}"),
     )
         .then(|(position, reference_type, _, elements, _)| {
@@ -380,7 +376,7 @@ fn record_construction<'a>() -> impl Parser<Stream<'a>, Output = RecordConstruct
                 unexpected_any("duplicate keys in record construction").right()
             }
         })
-        .expected("record construction")
+        .expected("record")
 }
 
 fn record_update<'a>() -> impl Parser<Stream<'a>, Output = RecordUpdate> {
@@ -391,44 +387,42 @@ fn record_update<'a>() -> impl Parser<Stream<'a>, Output = RecordUpdate> {
         sign("..."),
         atomic_expression(),
         sign(","),
-        sep_end_by1((identifier().skip(sign("=")), expression()), sign(",")),
+        sep_end_by1((identifier().skip(sign(":")), expression()), sign(",")),
         sign("}"),
     )
-        .then(
-            |(position, reference_type, _, _, argument, _, elements, _)| {
-                let elements: Vec<_> = elements;
+        .then(|(position, reference_type, _, _, record, _, elements, _)| {
+            let elements: Vec<_> = elements;
 
-                if elements
-                    .iter()
-                    .map(|(key, _)| key.into())
-                    .collect::<HashSet<String>>()
-                    .len()
-                    == elements.len()
-                {
-                    value(RecordUpdate::new(
-                        reference_type,
-                        argument,
-                        elements.into_iter().collect(),
-                        position,
-                    ))
-                    .left()
-                } else {
-                    unexpected_any("duplicate keys in record update").right()
-                }
-            },
-        )
+            if elements
+                .iter()
+                .map(|(key, _)| key.into())
+                .collect::<HashSet<String>>()
+                .len()
+                == elements.len()
+            {
+                value(RecordUpdate::new(
+                    reference_type,
+                    record,
+                    elements.into_iter().collect(),
+                    position,
+                ))
+                .left()
+            } else {
+                unexpected_any("duplicate keys in record update").right()
+            }
+        })
 }
 
 fn term<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
     choice!(
-        call_or_atomic_expression(),
+        call(),
         if_().map(Expression::from),
-        case().map(Expression::from),
-        list_case().map(Expression::from),
+        if_type().map(Expression::from),
+        if_list().map(Expression::from),
     )
 }
 
-fn operation_or_term<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
+fn binary_operation<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
     (
         term(),
         many(
@@ -1519,7 +1513,7 @@ mod tests {
         #[test]
         fn parse_case() {
             assert_eq!(
-                case()
+                if_type()
                     .parse(stream(
                         indoc!(
                             "
@@ -1542,7 +1536,7 @@ mod tests {
                 )
             );
             assert_eq!(
-                case()
+                if_type()
                     .parse(stream(
                         indoc!(
                             "
@@ -1576,7 +1570,7 @@ mod tests {
         #[test]
         fn parse_list_case() {
             assert_eq!(
-                list_case()
+                if_list()
                     .parse(stream(
                         indoc!(
                             "
@@ -1917,9 +1911,9 @@ mod tests {
 
         #[test]
         fn parse_record_construction() {
-            assert!(record_construction().parse(stream("Foo", "")).is_err());
+            assert!(record().parse(stream("Foo", "")).is_err());
 
-            assert!(record_construction().parse(stream("Foo{}", "")).is_err());
+            assert!(record().parse(stream("Foo{}", "")).is_err());
 
             assert_eq!(
                 expression()
@@ -1930,10 +1924,7 @@ mod tests {
             );
 
             assert_eq!(
-                record_construction()
-                    .parse(stream("Foo{ foo = 42 }", ""))
-                    .unwrap()
-                    .0,
+                record().parse(stream("Foo{ foo = 42 }", "")).unwrap().0,
                 RecordConstruction::new(
                     types::Reference::new("Foo", Position::dummy()),
                     vec![("foo".into(), Number::new(42.0, Position::dummy()).into())]
@@ -1944,7 +1935,7 @@ mod tests {
             );
 
             assert_eq!(
-                record_construction()
+                record()
                     .parse(stream("Foo{ foo = 42, bar = 42 }", ""))
                     .unwrap()
                     .0,
@@ -1960,7 +1951,7 @@ mod tests {
                 )
             );
 
-            assert!(record_construction()
+            assert!(record()
                 .parse(stream("Foo{ foo = 42, foo = 42 }", ""))
                 .is_err());
 
@@ -1984,7 +1975,7 @@ mod tests {
             );
 
             assert_eq!(
-                record_construction()
+                record()
                     .parse(stream("Foo{ foo = bar\n42, }", ""))
                     .unwrap()
                     .0,
