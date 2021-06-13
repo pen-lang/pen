@@ -30,7 +30,7 @@ impl Display for CompileError {
                 write!(formatter, "function expected\n{}", position)
             }
             Self::RecordElementUnknown(position) => {
-                write!(formatter, "uknown record element\n{}", position)
+                write!(formatter, "unknown record element\n{}", position)
             }
             Self::RecordElementMissing(position) => {
                 write!(formatter, "missing record element\n{}", position)
