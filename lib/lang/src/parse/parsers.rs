@@ -880,201 +880,87 @@ mod tests {
     //     );
     // }
 
-    // #[test]
-    // fn parse_variable_definition() {
-    //     assert_eq!(
-    //         variable_definition()
-    //             .parse(stream("x : Number\nx = 0", ""))
-    //             .unwrap()
-    //             .0,
-    //         VariableDefinition::new(
-    //             "x",
-    //             Number::new(0.0, Position::dummy()),
-    //             types::Number::new(Position::dummy()),
-    //             Position::dummy()
-    //         )
-    //     );
-    // }
+    #[test]
+    fn parse_type_definition() {
+        for (source, expected) in &[
+            (
+                "type Foo",
+                TypeDefinition::new("Foo", vec![], Position::dummy()),
+            ),
+            (
+                "type Foo {foo number}",
+                TypeDefinition::new(
+                    "Foo",
+                    vec![types::RecordElement::new(
+                        "foo",
+                        types::Number::new(Position::dummy()),
+                    )],
+                    Position::dummy(),
+                ),
+            ),
+            (
+                "type Foo {foo number,}",
+                TypeDefinition::new(
+                    "Foo",
+                    vec![types::RecordElement::new(
+                        "foo",
+                        types::Number::new(Position::dummy()),
+                    )],
+                    Position::dummy(),
+                ),
+            ),
+            (
+                "type Foo {foo number,bar number}",
+                TypeDefinition::new(
+                    "Foo",
+                    vec![
+                        types::RecordElement::new("foo", types::Number::new(Position::dummy())),
+                        types::RecordElement::new("bar", types::Number::new(Position::dummy())),
+                    ],
+                    Position::dummy(),
+                ),
+            ),
+            (
+                "type Foo {foo number,bar number,}",
+                TypeDefinition::new(
+                    "Foo",
+                    vec![
+                        types::RecordElement::new("foo", types::Number::new(Position::dummy())),
+                        types::RecordElement::new("bar", types::Number::new(Position::dummy())),
+                    ],
+                    Position::dummy(),
+                ),
+            ),
+        ] {
+            assert_eq!(
+                &type_definition().parse(stream(source, "")).unwrap().0,
+                expected
+            );
+        }
+    }
 
-    // #[test]
-    // fn parse_untyped_definition() {
-    //     assert_eq!(
-    //         untyped_variable_definition()
-    //             .parse(stream("x = 0", ""))
-    //             .unwrap()
-    //             .0,
-    //         VariableDefinition::new(
-    //             "x",
-    //             Number::new(0.0, Position::dummy()),
-    //             types::Unknown::new(Position::dummy()),
-    //             Position::dummy()
-    //         )
-    //     );
-    //     assert_eq!(
-    //         untyped_function_definition()
-    //             .parse(stream("main x = 42", ""))
-    //             .unwrap()
-    //             .0,
-    //         FunctionDefinition::new(
-    //             "main",
-    //             vec!["x".into()],
-    //             Number::new(42.0, Position::dummy()),
-    //             types::Unknown::new(Position::dummy()),
-    //             Position::dummy()
-    //         )
-    //     );
-    //     assert_eq!(
-    //         (untyped_function_definition(), untyped_variable_definition())
-    //             .parse(stream(
-    //                 indoc!(
-    //                     "
-    //                     f x = x
-    //                      y = (
-    //                          f x
-    //                      )
-    //                     "
-    //                 ),
-    //                 ""
-    //             ))
-    //             .unwrap()
-    //             .0,
-    //         (
-    //             FunctionDefinition::new(
-    //                 "f",
-    //                 vec!["x".into()],
-    //                 Variable::new("x", Position::dummy()),
-    //                 types::Unknown::new(Position::dummy()),
-    //                 Position::dummy()
-    //             ),
-    //             VariableDefinition::new(
-    //                 "y",
-    //                 Call::new(
-    //                     Variable::new("f", Position::dummy()),
-    //                     Variable::new("x", Position::dummy()),
-    //                     Position::dummy()
-    //                 ),
-    //                 types::Unknown::new(Position::dummy()),
-    //                 Position::dummy()
-    //             )
-    //         )
-    //     );
-    // }
-
-    // #[test]
-    // fn parse_type_definition() {
-    //     for (source, expected) in &[
-    //         (
-    //             "type Foo",
-    //             TypeDefinition::new(
-    //                 "Foo",
-    //                 types::Record::new("Foo", Default::default(), Position::dummy()),
-    //             ),
-    //         ),
-    //         (
-    //             "type Foo ( foo : Number )",
-    //             TypeDefinition::new(
-    //                 "Foo",
-    //                 types::Record::new(
-    //                     "Foo",
-    //                     vec![types::RecordElement::new(
-    //                         "foo",
-    //                         types::Number::new(Position::dummy()),
-    //                     )],
-    //                     Position::dummy(),
-    //                 ),
-    //             ),
-    //         ),
-    //         (
-    //             "type Foo ( foo : Number, )",
-    //             TypeDefinition::new(
-    //                 "Foo",
-    //                 types::Record::new(
-    //                     "Foo",
-    //                     vec![types::RecordElement::new(
-    //                         "foo",
-    //                         types::Number::new(Position::dummy()),
-    //                     )],
-    //                     Position::dummy(),
-    //                 ),
-    //             ),
-    //         ),
-    //         (
-    //             "type Foo ( foo : Number, bar : Number )",
-    //             TypeDefinition::new(
-    //                 "Foo",
-    //                 types::Record::new(
-    //                     "Foo",
-    //                     vec![
-    //                         types::RecordElement::new("foo", types::Number::new(Position::dummy())),
-    //                         types::RecordElement::new("bar", types::Number::new(Position::dummy())),
-    //                     ],
-    //                     Position::dummy(),
-    //                 ),
-    //             ),
-    //         ),
-    //         (
-    //             "type Foo ( foo : Number, bar : Number, )",
-    //             TypeDefinition::new(
-    //                 "Foo",
-    //                 types::Record::new(
-    //                     "Foo",
-    //                     vec![
-    //                         types::RecordElement::new("foo", types::Number::new(Position::dummy())),
-    //                         types::RecordElement::new("bar", types::Number::new(Position::dummy())),
-    //                     ],
-    //                     Position::dummy(),
-    //                 ),
-    //             ),
-    //         ),
-    //         (
-    //             "type Foo = Boolean | None",
-    //             TypeDefinition::new(
-    //                 "Foo",
-    //                 types::Union::new(
-    //                     vec![
-    //                         types::Boolean::new(Position::dummy()).into(),
-    //                         types::None::new(Position::dummy()).into(),
-    //                     ]
-    //                     .into_iter()
-    //                     .collect(),
-    //                     Position::dummy(),
-    //                 ),
-    //             ),
-    //         ),
-    //     ] {
-    //         assert_eq!(
-    //             &type_definition().parse(stream(source, "")).unwrap().0,
-    //             expected
-    //         );
-    //     }
-    // }
-
-    // #[test]
-    // fn parse_type_alias_definition() {
-    //     for (source, expected) in &[
-    //         (
-    //             "type Foo = Number",
-    //             TypeDefinition::new("Foo", types::Number::new(Position::dummy())),
-    //         ),
-    //         (
-    //             "type Foo = Number | None",
-    //             TypeDefinition::new(
-    //                 "Foo",
-    //                 types::Union::new(
-    //                     vec![
-    //                         types::Number::new(Position::dummy()).into(),
-    //                         types::None::new(Position::dummy()).into(),
-    //                     ]
-    //                     .into_iter()
-    //                     .collect(),
-    //                     Position::dummy(),
-    //                 ),
-    //             ),
-    //         ),
-    //     ] {
-    //         assert_eq!(&type_alias().parse(stream(source, "")).unwrap().0, expected);
-    //     }
-    // }
+    #[test]
+    fn parse_type_alias() {
+        for (source, expected) in &[
+            (
+                "type foo=number",
+                TypeAlias::new("foo", types::Number::new(Position::dummy())),
+            ),
+            (
+                "type foo=number|none",
+                TypeAlias::new(
+                    "foo",
+                    types::Union::new(
+                        types::Number::new(Position::dummy()),
+                        types::None::new(Position::dummy()),
+                        Position::dummy(),
+                    ),
+                ),
+            ),
+        ] {
+            assert_eq!(&type_alias().parse(stream(source, "")).unwrap().0, expected);
+        }
+    }
 
     mod types_ {
         use super::*;
