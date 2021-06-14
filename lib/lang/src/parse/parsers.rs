@@ -1351,163 +1351,135 @@ mod tests {
                     Position::dummy(),
                 )
             );
-            // assert_eq!(
-            //     if_()
-            //         .parse(stream(
-            //             "if if True then False else True then 42 else 13",
-            //             ""
-            //         ))
-            //         .unwrap()
-            //         .0,
-            //     If::new(
-            //         If::new(
-            //             Boolean::new(true, Position::dummy()),
-            //             Boolean::new(false, Position::dummy()),
-            //             Boolean::new(true, Position::dummy()),
-            //             Position::dummy(),
-            //         ),
-            //         Number::new(42.0, Position::dummy()),
-            //         Number::new(13.0, Position::dummy()),
-            //         Position::dummy(),
-            //     )
-            // );
-            // assert_eq!(
-            //     if_()
-            //         .parse(stream("if True then if False then 1 else 2 else 3", ""))
-            //         .unwrap()
-            //         .0,
-            //     If::new(
-            //         Boolean::new(true, Position::dummy()),
-            //         If::new(
-            //             Boolean::new(false, Position::dummy()),
-            //             Number::new(1.0, Position::dummy()),
-            //             Number::new(2.0, Position::dummy()),
-            //             Position::dummy(),
-            //         ),
-            //         Number::new(3.0, Position::dummy()),
-            //         Position::dummy(),
-            //     )
-            // );
-            // assert_eq!(
-            //     if_()
-            //         .parse(stream("if True then 1 else if False then 2 else 3", ""))
-            //         .unwrap()
-            //         .0,
-            //     If::new(
-            //         Boolean::new(true, Position::dummy()),
-            //         Number::new(1.0, Position::dummy()),
-            //         If::new(
-            //             Boolean::new(false, Position::dummy()),
-            //             Number::new(2.0, Position::dummy()),
-            //             Number::new(3.0, Position::dummy()),
-            //             Position::dummy(),
-            //         ),
-            //         Position::dummy(),
-            //     )
-            // );
-            // assert_eq!(
-            //     if_()
-            //         .parse(stream("if x < 0 then 42 else 13", ""))
-            //         .unwrap()
-            //         .0,
-            //     If::new(
-            //         OrderOperation::new(
-            //             OrderOperator::LessThan,
-            //             Variable::new("x", Position::dummy()),
-            //             Number::new(0.0, Position::dummy()),
-            //             Position::dummy()
-            //         ),
-            //         Number::new(42.0, Position::dummy()),
-            //         Number::new(13.0, Position::dummy()),
-            //         Position::dummy(),
-            //     )
-            // );
+            assert_eq!(
+                if_()
+                    .parse(stream("if if true{true}else{true}{42}else{13}", ""))
+                    .unwrap()
+                    .0,
+                If::new(
+                    vec![IfBranch::new(
+                        If::new(
+                            vec![IfBranch::new(
+                                Boolean::new(true, Position::dummy()),
+                                Block::new(vec![], Boolean::new(true, Position::dummy())),
+                            )],
+                            Block::new(vec![], Boolean::new(true, Position::dummy())),
+                            Position::dummy(),
+                        ),
+                        Block::new(vec![], Number::new(42.0, Position::dummy())),
+                    )],
+                    Block::new(vec![], Number::new(13.0, Position::dummy())),
+                    Position::dummy(),
+                )
+            );
+            assert_eq!(
+                if_()
+                    .parse(stream("if true{1}else if true{2}else{3}", ""))
+                    .unwrap()
+                    .0,
+                If::new(
+                    vec![
+                        IfBranch::new(
+                            Boolean::new(true, Position::dummy()),
+                            Block::new(vec![], Number::new(1.0, Position::dummy())),
+                        ),
+                        IfBranch::new(
+                            Boolean::new(true, Position::dummy()),
+                            Block::new(vec![], Number::new(2.0, Position::dummy())),
+                        )
+                    ],
+                    Block::new(vec![], Number::new(3.0, Position::dummy())),
+                    Position::dummy(),
+                )
+            );
         }
 
-        //     #[test]
-        //     fn parse_case() {
-        //         assert_eq!(
-        //             if_type()
-        //                 .parse(stream(
-        //                     indoc!(
-        //                         "
-        //                       case foo = True
-        //                         Boolean => foo
-        //                     "
-        //                     ),
-        //                     ""
-        //                 ))
-        //                 .unwrap()
-        //                 .0,
-        //             Case::new(
-        //                 "foo",
-        //                 Boolean::new(true, Position::dummy()),
-        //                 vec![Alternative::new(
-        //                     types::Boolean::new(Position::dummy()),
-        //                     Variable::new("foo", Position::dummy())
-        //                 )],
-        //                 Position::dummy(),
-        //             )
-        //         );
-        //         assert_eq!(
-        //             if_type()
-        //                 .parse(stream(
-        //                     indoc!(
-        //                         "
-        //                       case foo = True
-        //                         Boolean => True
-        //                         None => False
-        //                     "
-        //                     ),
-        //                     ""
-        //                 ))
-        //                 .unwrap()
-        //                 .0,
-        //             Case::new(
-        //                 "foo",
-        //                 Boolean::new(true, Position::dummy()),
-        //                 vec![
-        //                     Alternative::new(
-        //                         types::Boolean::new(Position::dummy()),
-        //                         Boolean::new(true, Position::dummy())
-        //                     ),
-        //                     Alternative::new(
-        //                         types::None::new(Position::dummy()),
-        //                         Boolean::new(false, Position::dummy())
-        //                     )
-        //                 ],
-        //                 Position::dummy()
-        //             )
-        //         );
-        //     }
+        #[test]
+        fn parse_if_type() {
+            assert_eq!(
+                if_type()
+                    .parse(stream("if x=y;boolean{none}else{none}", ""))
+                    .unwrap()
+                    .0,
+                IfType::new(
+                    "x",
+                    Variable::new("y", Position::dummy()),
+                    vec![Alternative::new(
+                        types::Boolean::new(Position::dummy()),
+                        Block::new(vec![], None::new(Position::dummy())),
+                    )],
+                    Some(Block::new(vec![], None::new(Position::dummy()))),
+                    Position::dummy(),
+                )
+            );
 
-        //     #[test]
-        //     fn parse_list_case() {
-        //         assert_eq!(
-        //             if_list()
-        //                 .parse(stream(
-        //                     indoc!(
-        //                         "
-        //                         case xs
-        //                             [] => None
-        //                             [ x, ...xs ] => None
-        //                         "
-        //                     ),
-        //                     ""
-        //                 ))
-        //                 .unwrap()
-        //                 .0,
-        //             ListCase::new(
-        //                 Variable::new("xs", Position::dummy()),
-        //                 types::Unknown::new(Position::dummy()),
-        //                 "x",
-        //                 "xs",
-        //                 None::new(Position::dummy()),
-        //                 None::new(Position::dummy()),
-        //                 Position::dummy(),
-        //             )
-        //         );
-        //     }
+            assert_eq!(
+                if_type()
+                    .parse(stream(
+                        "if x=y;boolean{none}else if none{none}else{none}",
+                        ""
+                    ))
+                    .unwrap()
+                    .0,
+                IfType::new(
+                    "x",
+                    Variable::new("y", Position::dummy()),
+                    vec![
+                        Alternative::new(
+                            types::Boolean::new(Position::dummy()),
+                            Block::new(vec![], None::new(Position::dummy())),
+                        ),
+                        Alternative::new(
+                            types::None::new(Position::dummy()),
+                            Block::new(vec![], None::new(Position::dummy())),
+                        )
+                    ],
+                    Some(Block::new(vec![], None::new(Position::dummy()))),
+                    Position::dummy()
+                )
+            );
+
+            assert_eq!(
+                if_type()
+                    .parse(stream("if x=y;boolean{none}else if none{none}", ""))
+                    .unwrap()
+                    .0,
+                IfType::new(
+                    "x",
+                    Variable::new("y", Position::dummy()),
+                    vec![
+                        Alternative::new(
+                            types::Boolean::new(Position::dummy()),
+                            Block::new(vec![], None::new(Position::dummy())),
+                        ),
+                        Alternative::new(
+                            types::None::new(Position::dummy()),
+                            Block::new(vec![], None::new(Position::dummy())),
+                        )
+                    ],
+                    None,
+                    Position::dummy()
+                )
+            );
+        }
+
+        #[test]
+        fn parse_if_list() {
+            assert_eq!(
+                if_list()
+                    .parse(stream("if[x,...xs]=xs{none}else{none}", ""))
+                    .unwrap()
+                    .0,
+                IfList::new(
+                    Variable::new("xs", Position::dummy()),
+                    "x",
+                    "xs",
+                    Block::new(vec![], None::new(Position::dummy())),
+                    Block::new(vec![], None::new(Position::dummy())),
+                    Position::dummy(),
+                )
+            );
+        }
 
         #[test]
         fn parse_call() {
