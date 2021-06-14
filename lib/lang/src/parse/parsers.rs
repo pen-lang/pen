@@ -673,120 +673,92 @@ mod tests {
     use super::*;
     use pretty_assertions::assert_eq;
 
-    // #[test]
-    // fn parse_module() {
-    //     assert_eq!(
-    //         module().parse(stream("", "")).unwrap().0,
-    //         Module::from_definitions(vec![])
-    //     );
-    //     assert_eq!(
-    //         module().parse(stream(" ", "")).unwrap().0,
-    //         Module::from_definitions(vec![])
-    //     );
-    //     assert_eq!(
-    //         module().parse(stream("\n", "")).unwrap().0,
-    //         Module::from_definitions(vec![])
-    //     );
-    //     assert_eq!(
-    //         module().parse(stream("export { foo }", "")).unwrap().0,
-    //         Module::new(
-    //             Export::new(vec!["foo".into()].drain(..).collect()),
-    //             ExportForeign::new(Default::default()),
-    //             vec![],
-    //             vec![],
-    //             vec![],
-    //             vec![]
-    //         )
-    //     );
-    //     assert_eq!(
-    //         module()
-    //             .parse(stream("export { foo }\nimport Foo.Bar", ""))
-    //             .unwrap()
-    //             .0,
-    //         Module::new(
-    //             Export::new(vec!["foo".into()].drain(..).collect()),
-    //             ExportForeign::new(Default::default()),
-    //             vec![Import::new(ExternalModulePath::new(
-    //                 "Foo",
-    //                 vec!["Bar".into()]
-    //             ))],
-    //             vec![],
-    //             vec![],
-    //             vec![]
-    //         )
-    //     );
-    //     assert_eq!(
-    //         module().parse(stream("x : Number\nx = 42", "")).unwrap().0,
-    //         Module::new(
-    //             Export::new(Default::default()),
-    //             ExportForeign::new(Default::default()),
-    //             vec![],
-    //             vec![],
-    //             vec![],
-    //             vec![VariableDefinition::new(
-    //                 "x",
-    //                 Number::new(42.0, Position::dummy()),
-    //                 types::Number::new(Position::dummy()),
-    //                 Position::dummy()
-    //             )
-    //             .into()]
-    //         )
-    //     );
-    //     assert_eq!(
-    //         module()
-    //             .parse(stream("x : Number\nx = 42\ny : Number\ny = 42", ""))
-    //             .unwrap()
-    //             .0,
-    //         Module::new(
-    //             Export::new(Default::default()),
-    //             ExportForeign::new(Default::default()),
-    //             vec![],
-    //             vec![],
-    //             vec![],
-    //             vec![
-    //                 VariableDefinition::new(
-    //                     "x",
-    //                     Number::new(42.0, Position::dummy()),
-    //                     types::Number::new(Position::dummy()),
-    //                     Position::dummy()
-    //                 )
-    //                 .into(),
-    //                 VariableDefinition::new(
-    //                     "y",
-    //                     Number::new(42.0, Position::dummy()),
-    //                     types::Number::new(Position::dummy()),
-    //                     Position::dummy()
-    //                 )
-    //                 .into()
-    //             ]
-    //         )
-    //     );
-    //     assert_eq!(
-    //         module()
-    //             .parse(stream("main : Number -> Number\nmain x = 42", ""))
-    //             .unwrap()
-    //             .0,
-    //         Module::new(
-    //             Export::new(Default::default()),
-    //             ExportForeign::new(Default::default()),
-    //             vec![],
-    //             vec![],
-    //             vec![],
-    //             vec![FunctionDefinition::new(
-    //                 "main",
-    //                 vec!["x".into()],
-    //                 Number::new(42.0, Position::dummy()),
-    //                 types::Function::new(
-    //                     types::Number::new(Position::dummy()),
-    //                     types::Number::new(Position::dummy()),
-    //                     Position::dummy()
-    //                 ),
-    //                 Position::dummy()
-    //             )
-    //             .into(),]
-    //         )
-    //     );
-    // }
+    #[test]
+    fn parse_module() {
+        assert_eq!(
+            module().parse(stream("", "")).unwrap().0,
+            Module::new(vec![], vec![], vec![], vec![])
+        );
+        assert_eq!(
+            module().parse(stream(" ", "")).unwrap().0,
+            Module::new(vec![], vec![], vec![], vec![])
+        );
+        assert_eq!(
+            module().parse(stream("\n", "")).unwrap().0,
+            Module::new(vec![], vec![], vec![], vec![])
+        );
+        assert_eq!(
+            module().parse(stream("import Foo.Bar", "")).unwrap().0,
+            Module::new(
+                vec![Import::new(ExternalModulePath::new(
+                    "Foo",
+                    vec!["Bar".into()]
+                ))],
+                vec![],
+                vec![],
+                vec![]
+            )
+        );
+        assert_eq!(
+            module()
+                .parse(stream("x=\\(x number)number{42}", ""))
+                .unwrap()
+                .0,
+            Module::new(
+                vec![],
+                vec![],
+                vec![],
+                vec![Definition::new(
+                    "x",
+                    Lambda::new(
+                        vec![Argument::new("x", types::Number::new(Position::dummy()))],
+                        types::Number::new(Position::dummy()),
+                        Block::new(vec![], Number::new(42.0, Position::dummy())),
+                        Position::dummy()
+                    ),
+                    Position::dummy()
+                )
+                .into()]
+            )
+        );
+        assert_eq!(
+            module()
+                .parse(stream(
+                    "x=\\(x number)number{42}y=\\(y number)number{42}",
+                    ""
+                ))
+                .unwrap()
+                .0,
+            Module::new(
+                vec![],
+                vec![],
+                vec![],
+                vec![
+                    Definition::new(
+                        "x",
+                        Lambda::new(
+                            vec![Argument::new("x", types::Number::new(Position::dummy()))],
+                            types::Number::new(Position::dummy()),
+                            Block::new(vec![], Number::new(42.0, Position::dummy())),
+                            Position::dummy()
+                        ),
+                        Position::dummy()
+                    ),
+                    Definition::new(
+                        "y",
+                        Lambda::new(
+                            vec![Argument::new("y", types::Number::new(Position::dummy()))],
+                            types::Number::new(Position::dummy()),
+                            Block::new(vec![], Number::new(42.0, Position::dummy())),
+                            Position::dummy()
+                        ),
+                        Position::dummy()
+                    )
+                    .into()
+                ]
+            )
+        );
+    }
 
     #[test]
     fn parse_import() {
