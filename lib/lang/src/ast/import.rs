@@ -6,8 +6,10 @@ pub struct Import {
 }
 
 impl Import {
-    pub fn new(module_path: ModulePath) -> Self {
-        Self { module_path }
+    pub fn new(module_path: impl Into<ModulePath>) -> Self {
+        Self {
+            module_path: module_path.into(),
+        }
     }
 
     pub fn module_path(&self) -> &ModulePath {

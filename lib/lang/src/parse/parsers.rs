@@ -788,62 +788,58 @@ mod tests {
     //     );
     // }
 
-    // #[test]
-    // fn parse_import() {
-    //     assert_eq!(
-    //         import().parse(stream("import .Foo", "")).unwrap().0,
-    //         Import::new(InternalModulePath::new(vec!["Foo".into()])),
-    //     );
-    //     assert_eq!(
-    //         import().parse(stream("import Foo.Bar", "")).unwrap().0,
-    //         Import::new(ExternalModulePath::new("Foo", vec!["Bar".into()])),
-    //     );
-    // }
+    #[test]
+    fn parse_import() {
+        assert_eq!(
+            import().parse(stream("import .Foo", "")).unwrap().0,
+            Import::new(InternalModulePath::new(vec!["Foo".into()])),
+        );
+        assert_eq!(
+            import().parse(stream("import Foo.Bar", "")).unwrap().0,
+            Import::new(ExternalModulePath::new("Foo", vec!["Bar".into()])),
+        );
+    }
 
-    // #[test]
-    // fn parse_module_path() {
-    //     assert!(module_path().parse(stream("?", "")).is_err());
-    //     assert_eq!(
-    //         module_path().parse(stream(".Foo", "")).unwrap().0,
-    //         ModulePath::Internal(InternalModulePath::new(vec!["Foo".into()])),
-    //     );
-    //     assert_eq!(
-    //         module_path().parse(stream("Foo.Bar", "")).unwrap().0,
-    //         ModulePath::External(ExternalModulePath::new("Foo", vec!["Bar".into()])),
-    //     );
-    //     assert_eq!(
-    //         module_path().parse(stream(" .Foo", "")).unwrap().0,
-    //         ModulePath::Internal(InternalModulePath::new(vec!["Foo".into()])),
-    //     );
-    // }
+    #[test]
+    fn parse_module_path() {
+        assert!(module_path().parse(stream("", "")).is_err());
+        assert_eq!(
+            module_path().parse(stream(".Foo", "")).unwrap().0,
+            InternalModulePath::new(vec!["Foo".into()]).into(),
+        );
+        assert_eq!(
+            module_path().parse(stream("Foo.Bar", "")).unwrap().0,
+            ExternalModulePath::new("Foo", vec!["Bar".into()]).into(),
+        );
+    }
 
-    // #[test]
-    // fn parse_internal_module_path() {
-    //     assert!(internal_module_path().parse(stream("?", "")).is_err());
-    //     assert_eq!(
-    //         internal_module_path().parse(stream(".Foo", "")).unwrap().0,
-    //         InternalModulePath::new(vec!["Foo".into()]),
-    //     );
-    //     assert_eq!(
-    //         internal_module_path()
-    //             .parse(stream(".Foo.Bar", ""))
-    //             .unwrap()
-    //             .0,
-    //         InternalModulePath::new(vec!["Foo".into(), "Bar".into()]),
-    //     );
-    // }
+    #[test]
+    fn parse_internal_module_path() {
+        assert!(internal_module_path().parse(stream("", "")).is_err());
+        assert_eq!(
+            internal_module_path().parse(stream(".Foo", "")).unwrap().0,
+            InternalModulePath::new(vec!["Foo".into()]),
+        );
+        assert_eq!(
+            internal_module_path()
+                .parse(stream(".Foo.Bar", ""))
+                .unwrap()
+                .0,
+            InternalModulePath::new(vec!["Foo".into(), "Bar".into()]),
+        );
+    }
 
-    // #[test]
-    // fn parse_external_module_path() {
-    //     assert!(external_module_path().parse(stream("?", "")).is_err());
-    //     assert_eq!(
-    //         external_module_path()
-    //             .parse(stream("Foo.Bar", ""))
-    //             .unwrap()
-    //             .0,
-    //         ExternalModulePath::new("Foo", vec!["Bar".into()]),
-    //     );
-    // }
+    #[test]
+    fn parse_external_module_path() {
+        assert!(external_module_path().parse(stream("", "")).is_err());
+        assert_eq!(
+            external_module_path()
+                .parse(stream("Foo.Bar", ""))
+                .unwrap()
+                .0,
+            ExternalModulePath::new("Foo", vec!["Bar".into()]),
+        );
+    }
 
     // #[test]
     // fn parse_definition() {
