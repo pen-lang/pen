@@ -1,4 +1,4 @@
-use super::{alternative::Alternative, expression::Expression, Block};
+use super::{expression::Expression, if_type_branch::IfTypeBranch, Block};
 use crate::position::Position;
 use std::sync::Arc;
 
@@ -6,7 +6,7 @@ use std::sync::Arc;
 pub struct IfType {
     name: String,
     argument: Arc<Expression>,
-    alternatives: Vec<Alternative>,
+    branches: Vec<IfTypeBranch>,
     else_: Option<Block>,
     position: Position,
 }
@@ -15,14 +15,14 @@ impl IfType {
     pub fn new(
         name: impl Into<String>,
         argument: impl Into<Expression>,
-        alternatives: Vec<Alternative>,
+        branches: Vec<IfTypeBranch>,
         else_: Option<Block>,
         position: Position,
     ) -> Self {
         Self {
             name: name.into(),
             argument: argument.into().into(),
-            alternatives,
+            branches,
             else_,
             position,
         }
@@ -36,8 +36,8 @@ impl IfType {
         &self.argument
     }
 
-    pub fn alternatives(&self) -> &[Alternative] {
-        &self.alternatives
+    pub fn branches(&self) -> &[IfTypeBranch] {
+        &self.branches
     }
 
     pub fn else_(&self) -> Option<&Block> {

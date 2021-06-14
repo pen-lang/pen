@@ -382,8 +382,8 @@ fn if_type<'a>() -> impl Parser<Stream<'a>, Output = IfType> {
         .expected("type case expression")
 }
 
-fn if_type_branch<'a>() -> impl Parser<Stream<'a>, Output = Alternative> {
-    (type_(), block()).map(|(type_, block)| Alternative::new(type_, block))
+fn if_type_branch<'a>() -> impl Parser<Stream<'a>, Output = IfTypeBranch> {
+    (type_(), block()).map(|(type_, block)| IfTypeBranch::new(type_, block))
 }
 
 fn call<'a>() -> impl Parser<Stream<'a>, Output = Call> {
@@ -1312,7 +1312,7 @@ mod tests {
                 IfType::new(
                     "x",
                     Variable::new("y", Position::dummy()),
-                    vec![Alternative::new(
+                    vec![IfTypeBranch::new(
                         types::Boolean::new(Position::dummy()),
                         Block::new(vec![], None::new(Position::dummy())),
                     )],
@@ -1333,11 +1333,11 @@ mod tests {
                     "x",
                     Variable::new("y", Position::dummy()),
                     vec![
-                        Alternative::new(
+                        IfTypeBranch::new(
                             types::Boolean::new(Position::dummy()),
                             Block::new(vec![], None::new(Position::dummy())),
                         ),
-                        Alternative::new(
+                        IfTypeBranch::new(
                             types::None::new(Position::dummy()),
                             Block::new(vec![], None::new(Position::dummy())),
                         )
@@ -1356,11 +1356,11 @@ mod tests {
                     "x",
                     Variable::new("y", Position::dummy()),
                     vec![
-                        Alternative::new(
+                        IfTypeBranch::new(
                             types::Boolean::new(Position::dummy()),
                             Block::new(vec![], None::new(Position::dummy())),
                         ),
-                        Alternative::new(
+                        IfTypeBranch::new(
                             types::None::new(Position::dummy()),
                             Block::new(vec![], None::new(Position::dummy())),
                         )
