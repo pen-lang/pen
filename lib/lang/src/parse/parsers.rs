@@ -717,8 +717,7 @@ mod tests {
                         Position::dummy()
                     ),
                     Position::dummy()
-                )
-                .into()]
+                )]
             )
         );
         assert_eq!(
@@ -754,7 +753,6 @@ mod tests {
                         ),
                         Position::dummy()
                     )
-                    .into()
                 ]
             )
         );
