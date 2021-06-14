@@ -813,40 +813,25 @@ mod tests {
         );
     }
 
-    // #[test]
-    // fn parse_definition() {
-    //     assert_eq!(
-    //         definition()
-    //             .parse(stream("x : Number\nx = 0", ""))
-    //             .unwrap()
-    //             .0,
-    //         VariableDefinition::new(
-    //             "x",
-    //             Number::new(0.0, Position::dummy()),
-    //             types::Number::new(Position::dummy()),
-    //             Position::dummy()
-    //         )
-    //         .into()
-    //     );
-    //     assert_eq!(
-    //         definition()
-    //             .parse(stream("main : Number -> Number\nmain x = 42", ""))
-    //             .unwrap()
-    //             .0,
-    //         FunctionDefinition::new(
-    //             "main",
-    //             vec!["x".into()],
-    //             Number::new(42.0, Position::dummy()),
-    //             types::Function::new(
-    //                 types::Number::new(Position::dummy()),
-    //                 types::Number::new(Position::dummy()),
-    //                 Position::dummy()
-    //             ),
-    //             Position::dummy()
-    //         )
-    //         .into()
-    //     );
-    // }
+    #[test]
+    fn parse_definition() {
+        assert_eq!(
+            definition()
+                .parse(stream("x=\\(x number)number{42}", ""))
+                .unwrap()
+                .0,
+            Definition::new(
+                "x",
+                Lambda::new(
+                    vec![Argument::new("x", types::Number::new(Position::dummy()))],
+                    types::Number::new(Position::dummy()),
+                    Block::new(vec![], Number::new(42.0, Position::dummy())),
+                    Position::dummy()
+                ),
+                Position::dummy()
+            ),
+        );
+    }
 
     #[test]
     fn parse_type_definition() {
@@ -1186,6 +1171,77 @@ mod tests {
             assert_eq!(
                 atomic_expression().parse(stream("(x)", "")).unwrap().0,
                 Variable::new("x", Position::dummy()).into()
+            );
+        }
+
+        #[test]
+        fn parse_lambda() {
+            assert_eq!(
+                lambda()
+                    .parse(stream("\\(x number)number{42}", ""))
+                    .unwrap()
+                    .0,
+                Lambda::new(
+                    vec![Argument::new("x", types::Number::new(Position::dummy()))],
+                    types::Number::new(Position::dummy()),
+                    Block::new(vec![], Number::new(42.0, Position::dummy())),
+                    Position::dummy()
+                ),
+            );
+            assert_eq!(
+                lambda()
+                    .parse(stream("\\(x number,y number)number{42}", ""))
+                    .unwrap()
+                    .0,
+                Lambda::new(
+                    vec![
+                        Argument::new("x", types::Number::new(Position::dummy())),
+                        Argument::new("y", types::Number::new(Position::dummy()))
+                    ],
+                    types::Number::new(Position::dummy()),
+                    Block::new(vec![], Number::new(42.0, Position::dummy())),
+                    Position::dummy()
+                ),
+            );
+        }
+
+        #[test]
+        fn parse_block() {
+            assert_eq!(
+                block().parse(stream("{none}", "")).unwrap().0,
+                Block::new(vec![], None::new(Position::dummy())),
+            );
+            assert_eq!(
+                block().parse(stream("{none none}", "")).unwrap().0,
+                Block::new(
+                    vec![Assignment::new(
+                        "",
+                        None::new(Position::dummy()),
+                        Position::dummy()
+                    )],
+                    None::new(Position::dummy())
+                ),
+            );
+            assert_eq!(
+                block().parse(stream("{none none none}", "")).unwrap().0,
+                Block::new(
+                    vec![
+                        Assignment::new("", None::new(Position::dummy()), Position::dummy()),
+                        Assignment::new("", None::new(Position::dummy()), Position::dummy())
+                    ],
+                    None::new(Position::dummy())
+                ),
+            );
+            assert_eq!(
+                block().parse(stream("{x=none none}", "")).unwrap().0,
+                Block::new(
+                    vec![Assignment::new(
+                        "x",
+                        None::new(Position::dummy()),
+                        Position::dummy()
+                    )],
+                    None::new(Position::dummy())
+                ),
             );
         }
 
