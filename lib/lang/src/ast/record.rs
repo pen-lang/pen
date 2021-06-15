@@ -19,7 +19,7 @@ impl Record {
     ) -> Self {
         Self {
             type_: type_.into(),
-            record: Arc::new(record.into()),
+            record: Arc::new(record),
             elements,
             position,
         }
