@@ -1,6 +1,6 @@
 use super::{
     boolean::Boolean, call::Call, if_::If, if_list::IfList, if_type::IfType, list::List,
-    none::None, number::Number, operation::Operation, record_construction::RecordConstruction,
+    none::None, number::Number, record_construction::RecordConstruction,
     record_element::RecordElement, record_update::RecordUpdate, string::ByteString,
     variable::Variable, BinaryOperation, Lambda,
 };
@@ -18,7 +18,6 @@ pub enum Expression {
     IfList(IfList),
     None(None),
     Number(Number),
-    Operation(Operation),
     RecordConstruction(RecordConstruction),
     RecordElement(RecordElement),
     RecordUpdate(RecordUpdate),
@@ -37,7 +36,6 @@ impl Expression {
             Self::Lambda(lambda) => lambda.position(),
             Self::List(list) => list.position(),
             Self::IfList(if_) => if_.position(),
-            Self::Operation(operation) => operation.position(),
             Self::RecordConstruction(construction) => construction.position(),
             Self::RecordElement(element) => element.position(),
             Self::RecordUpdate(record_update) => record_update.position(),
@@ -130,12 +128,6 @@ impl From<None> for Expression {
 impl From<Number> for Expression {
     fn from(number: Number) -> Self {
         Self::Number(number)
-    }
-}
-
-impl<T: Into<Operation>> From<T> for Expression {
-    fn from(operation: T) -> Self {
-        Self::Operation(operation.into())
     }
 }
 
