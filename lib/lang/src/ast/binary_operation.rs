@@ -1,5 +1,4 @@
-use super::binary_operator::BinaryOperator;
-use super::expression::Expression;
+use super::{binary_operator::BinaryOperator, expression::Expression};
 use crate::position::Position;
 use std::sync::Arc;
 
