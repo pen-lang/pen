@@ -1,4 +1,4 @@
-use super::{Statement, Expression};
+use super::{Expression, Statement};
 use std::sync::Arc;
 
 #[derive(Clone, Debug, PartialEq)]
