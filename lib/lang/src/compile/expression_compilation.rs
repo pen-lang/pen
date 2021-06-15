@@ -44,16 +44,16 @@ pub fn compile_block(
 ) -> Result<mir::ir::Expression, CompileError> {
     let mut expression = compile(block.expression(), type_context)?;
 
-    for assignment in block.assignments().iter().rev() {
+    for statement in block.statements().iter().rev() {
         expression = mir::ir::Let::new(
-            assignment.name(),
+            statement.name(),
             type_compilation::compile(
-                assignment
+                statement
                     .type_()
-                    .ok_or_else(|| CompileError::TypeNotInferred(assignment.position().clone()))?,
+                    .ok_or_else(|| CompileError::TypeNotInferred(statement.position().clone()))?,
                 type_context,
             )?,
-            compile(assignment.expression(), type_context)?,
+            compile(statement.expression(), type_context)?,
             expression,
         )
         .into();

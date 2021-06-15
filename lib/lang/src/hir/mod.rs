@@ -1,7 +1,7 @@
 mod if_type_branch;
 mod argument;
 mod arithmetic_operation;
-mod assignment;
+mod statement;
 mod block;
 mod boolean;
 mod boolean_operation;
@@ -33,7 +33,7 @@ mod variable;
 pub use if_type_branch::*;
 pub use argument::*;
 pub use arithmetic_operation::*;
-pub use assignment::*;
+pub use statement::*;
 pub use block::*;
 pub use boolean::*;
 pub use boolean_operation::*;

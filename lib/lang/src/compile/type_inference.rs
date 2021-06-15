@@ -165,42 +165,42 @@ fn infer_block(
     types: &HashMap<String, Type>,
 ) -> Result<Block, CompileError> {
     let mut variables = variables.clone();
-    let mut assignments = vec![];
+    let mut statements = vec![];
 
-    for assignment in block.assignments() {
-        let assignment = infer_assignment(assignment, &variables, types)?;
+    for statement in block.statements() {
+        let statement = infer_statement(statement, &variables, types)?;
 
         variables.insert(
-            assignment.name().into(),
-            assignment
+            statement.name().into(),
+            statement
                 .type_()
                 .cloned()
-                .ok_or_else(|| CompileError::TypeNotInferred(assignment.position().clone()))?,
+                .ok_or_else(|| CompileError::TypeNotInferred(statement.position().clone()))?,
         );
-        assignments.push(assignment);
+        statements.push(statement);
     }
 
     Ok(Block::new(
-        assignments,
+        statements,
         infer_expression(block.expression(), &variables, types)?,
     ))
 }
 
-fn infer_assignment(
-    assignment: &Assignment,
+fn infer_statement(
+    statement: &Statement,
     variables: &HashMap<String, Type>,
     types: &HashMap<String, Type>,
-) -> Result<Assignment, CompileError> {
-    let expression = infer_expression(assignment.expression(), variables, types)?;
+) -> Result<Statement, CompileError> {
+    let expression = infer_expression(statement.expression(), variables, types)?;
 
-    Ok(Assignment::new(
-        assignment.name(),
+    Ok(Statement::new(
+        statement.name(),
         expression.clone(),
         Some(type_extraction::extract_from_expression(
             &expression,
             types,
         )?),
-        assignment.position().clone(),
+        statement.position().clone(),
     ))
 }
 

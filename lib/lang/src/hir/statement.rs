@@ -2,14 +2,14 @@ use super::expression::Expression;
 use crate::{position::*, types::Type};
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct Assignment {
+pub struct Statement {
     name: String,
     expression: Expression,
     type_: Option<Type>,
     position: Position,
 }
 
-impl Assignment {
+impl Statement {
     pub fn new(
         name: impl Into<String>,
         expression: impl Into<Expression>,

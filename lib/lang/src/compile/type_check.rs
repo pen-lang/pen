@@ -99,21 +99,21 @@ fn check_block(
 ) -> Result<Type, CompileError> {
     let mut variables = variables.clone();
 
-    for assignment in block.assignments() {
+    for statement in block.statements() {
         check_subsumption(
-            &check_expression(assignment.expression(), &variables, type_context)?,
-            assignment
+            &check_expression(statement.expression(), &variables, type_context)?,
+            statement
                 .type_()
-                .ok_or_else(|| CompileError::TypeNotInferred(assignment.position().clone()))?,
+                .ok_or_else(|| CompileError::TypeNotInferred(statement.position().clone()))?,
             type_context.types(),
         )?;
 
         variables.insert(
-            assignment.name().into(),
-            assignment
+            statement.name().into(),
+            statement
                 .type_()
                 .cloned()
-                .ok_or_else(|| CompileError::TypeNotInferred(assignment.position().clone()))?,
+                .ok_or_else(|| CompileError::TypeNotInferred(statement.position().clone()))?,
         );
     }
 
@@ -170,7 +170,7 @@ mod tests {
     }
 
     #[test]
-    fn check_assignment() -> Result<(), CompileError> {
+    fn check_statement() -> Result<(), CompileError> {
         check_module(&Module::new(
             vec![],
             vec![],
@@ -181,7 +181,7 @@ mod tests {
                     vec![],
                     types::None::new(Position::dummy()),
                     Block::new(
-                        vec![Assignment::new(
+                        vec![Statement::new(
                             "y",
                             None::new(Position::dummy()),
                             Some(types::None::new(Position::dummy()).into()),
