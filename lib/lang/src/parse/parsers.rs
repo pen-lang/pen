@@ -224,13 +224,13 @@ fn reference_type<'a>() -> impl Parser<Stream<'a>, Output = types::Reference> {
 }
 
 fn block<'a>() -> impl Parser<Stream<'a>, Output = Block> {
-    between(sign("{"), sign("}"), many1(assignment()))
-        .then(|assignments: Vec<_>| {
-            if let Some(assignment) = assignments.last() {
-                if assignment.name() == "" {
+    between(sign("{"), sign("}"), many1(statement()))
+        .then(|statements: Vec<_>| {
+            if let Some(statement) = statements.last() {
+                if statement.name().is_none() {
                     value(Block::new(
-                        assignments[..assignments.len() - 1].to_vec(),
-                        assignment.expression().clone(),
+                        statements[..statements.len() - 1].to_vec(),
+                        statement.expression().clone(),
                     ))
                     .left()
                 } else {
@@ -243,16 +243,14 @@ fn block<'a>() -> impl Parser<Stream<'a>, Output = Block> {
         .expected("block")
 }
 
-fn assignment<'a>() -> impl Parser<Stream<'a>, Output = Assignment> {
+fn statement<'a>() -> impl Parser<Stream<'a>, Output = Statement> {
     (
         position(),
         optional(identifier().skip(sign("="))),
         expression(),
     )
-        .map(|(position, name, expression)| {
-            Assignment::new(name.unwrap_or_default(), expression, position)
-        })
-        .expected("assignment")
+        .map(|(position, name, expression)| Statement::new(name, expression, position))
+        .expected("statement")
 }
 
 fn expression<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
@@ -1244,8 +1242,8 @@ mod tests {
             assert_eq!(
                 block().parse(stream("{none none}", "")).unwrap().0,
                 Block::new(
-                    vec![Assignment::new(
-                        "",
+                    vec![Statement::new(
+                        None,
                         None::new(Position::dummy()),
                         Position::dummy()
                     )],
@@ -1256,8 +1254,8 @@ mod tests {
                 block().parse(stream("{none none none}", "")).unwrap().0,
                 Block::new(
                     vec![
-                        Assignment::new("", None::new(Position::dummy()), Position::dummy()),
-                        Assignment::new("", None::new(Position::dummy()), Position::dummy())
+                        Statement::new(None, None::new(Position::dummy()), Position::dummy()),
+                        Statement::new(None, None::new(Position::dummy()), Position::dummy())
                     ],
                     None::new(Position::dummy())
                 ),
@@ -1265,8 +1263,8 @@ mod tests {
             assert_eq!(
                 block().parse(stream("{x=none none}", "")).unwrap().0,
                 Block::new(
-                    vec![Assignment::new(
-                        "x",
+                    vec![Statement::new(
+                        Some("x".into()),
                         None::new(Position::dummy()),
                         Position::dummy()
                     )],

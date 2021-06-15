@@ -1,5 +1,5 @@
 mod argument;
-mod assignment;
+mod statement;
 mod binary_operation;
 mod binary_operator;
 mod block;
@@ -33,7 +33,7 @@ mod unary_operator;
 mod variable;
 
 pub use argument::*;
-pub use assignment::*;
+pub use statement::*;
 pub use binary_operation::*;
 pub use binary_operator::*;
 pub use block::*;
