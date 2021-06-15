@@ -25,7 +25,7 @@ use once_cell::sync::Lazy;
 use std::collections::HashSet;
 
 const KEYWORDS: &[&str] = &["else", "if", "import", "type"];
-const OPERATOR_CHARACTERS: &str = "+-*/=<>&|";
+const OPERATOR_CHARACTERS: &str = "+-*/=<>&|!?";
 
 static NUMBER_REGEX: Lazy<regex::Regex> =
     Lazy::new(|| regex::Regex::new(r"^-?([123456789][0123456789]*|0)(\.[0123456789]+)?").unwrap());
@@ -462,12 +462,44 @@ fn record_update<'a>() -> impl Parser<Stream<'a>, Output = RecordUpdate> {
 }
 
 fn term<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
+    lazy(|| {
+        no_partial(choice!(
+            call().map(Expression::from),
+            if_().map(Expression::from),
+            if_type().map(Expression::from),
+            if_list().map(Expression::from),
+            unary_operation().map(Expression::from),
+            atomic_expression(),
+        ))
+    })
+    .boxed()
+}
+
+fn unary_operation<'a>() -> impl Parser<Stream<'a>, Output = UnaryOperation> {
+    (position(), unary_operator(), term())
+        .map(|(position, operator, expression)| UnaryOperation::new(operator, expression, position))
+}
+
+fn unary_operator<'a>() -> impl Parser<Stream<'a>, Output = UnaryOperator> {
     choice!(
-        call().map(Expression::from),
-        if_().map(Expression::from),
-        if_type().map(Expression::from),
-        if_list().map(Expression::from),
-        atomic_expression(),
+        concrete_unary_operator("!", UnaryOperator::Not),
+        concrete_unary_operator("?", UnaryOperator::Try),
+    )
+    .expected("unary operator")
+}
+
+fn concrete_unary_operator<'a>(
+    literal: &'static str,
+    operator: UnaryOperator,
+) -> impl Parser<Stream<'a>, Output = UnaryOperator> {
+    token(
+        one_of(OPERATOR_CHARACTERS.chars()).then(move |parsed_literal: char| {
+            if parsed_literal.to_string() == literal {
+                value(operator).left()
+            } else {
+                unexpected_any("unknown unary operator").right()
+            }
+        }),
     )
 }
 
@@ -484,23 +516,23 @@ fn binary_operation<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
 
 fn binary_operator<'a>() -> impl Parser<Stream<'a>, Output = BinaryOperator> {
     choice!(
-        concrete_operator("+", BinaryOperator::Add),
-        concrete_operator("-", BinaryOperator::Subtract),
-        concrete_operator("*", BinaryOperator::Multiply),
-        concrete_operator("/", BinaryOperator::Divide),
-        concrete_operator("==", BinaryOperator::Equal),
-        concrete_operator("/=", BinaryOperator::NotEqual),
-        concrete_operator("<", BinaryOperator::LessThan),
-        concrete_operator("<=", BinaryOperator::LessThanOrEqual),
-        concrete_operator(">", BinaryOperator::GreaterThan),
-        concrete_operator(">=", BinaryOperator::GreaterThanOrEqual),
-        concrete_operator("&", BinaryOperator::And),
-        concrete_operator("|", BinaryOperator::Or),
+        concrete_binary_operator("+", BinaryOperator::Add),
+        concrete_binary_operator("-", BinaryOperator::Subtract),
+        concrete_binary_operator("*", BinaryOperator::Multiply),
+        concrete_binary_operator("/", BinaryOperator::Divide),
+        concrete_binary_operator("==", BinaryOperator::Equal),
+        concrete_binary_operator("/=", BinaryOperator::NotEqual),
+        concrete_binary_operator("<", BinaryOperator::LessThan),
+        concrete_binary_operator("<=", BinaryOperator::LessThanOrEqual),
+        concrete_binary_operator(">", BinaryOperator::GreaterThan),
+        concrete_binary_operator(">=", BinaryOperator::GreaterThanOrEqual),
+        concrete_binary_operator("&", BinaryOperator::And),
+        concrete_binary_operator("|", BinaryOperator::Or),
     )
     .expected("binary operator")
 }
 
-fn concrete_operator<'a>(
+fn concrete_binary_operator<'a>(
     literal: &'static str,
     operator: BinaryOperator,
 ) -> impl Parser<Stream<'a>, Output = BinaryOperator> {
@@ -509,7 +541,7 @@ fn concrete_operator<'a>(
             if parsed_literal == literal {
                 value(operator).left()
             } else {
-                unexpected_any("unknown operator").right()
+                unexpected_any("unknown binary operator").right()
             }
         }),
     )
@@ -1436,7 +1468,87 @@ mod tests {
         }
 
         #[test]
-        fn parse_operation() {
+        fn parse_unary_operation() {
+            assert!(unary_operation().parse(stream("", "")).is_err());
+
+            for (source, expected) in &[
+                (
+                    "!42",
+                    UnaryOperation::new(
+                        UnaryOperator::Not,
+                        Number::new(42.0, Position::dummy()),
+                        Position::dummy(),
+                    ),
+                ),
+                (
+                    "?42",
+                    UnaryOperation::new(
+                        UnaryOperator::Try,
+                        Number::new(42.0, Position::dummy()),
+                        Position::dummy(),
+                    ),
+                ),
+                (
+                    "!f(42)",
+                    UnaryOperation::new(
+                        UnaryOperator::Not,
+                        Call::new(
+                            Variable::new("f", Position::dummy()),
+                            vec![Number::new(42.0, Position::dummy()).into()],
+                            Position::dummy(),
+                        ),
+                        Position::dummy(),
+                    ),
+                ),
+                (
+                    "!if true{true}else{true}",
+                    UnaryOperation::new(
+                        UnaryOperator::Not,
+                        If::new(
+                            vec![IfBranch::new(
+                                Boolean::new(true, Position::dummy()),
+                                Block::new(vec![], Boolean::new(true, Position::dummy())),
+                            )],
+                            Block::new(vec![], Boolean::new(true, Position::dummy())),
+                            Position::dummy(),
+                        ),
+                        Position::dummy(),
+                    ),
+                ),
+                (
+                    "!!42",
+                    UnaryOperation::new(
+                        UnaryOperator::Not,
+                        UnaryOperation::new(
+                            UnaryOperator::Not,
+                            Number::new(42.0, Position::dummy()),
+                            Position::dummy(),
+                        ),
+                        Position::dummy(),
+                    ),
+                ),
+            ] {
+                assert_eq!(
+                    unary_operation().parse(stream(source, "")).unwrap().0,
+                    *expected
+                );
+            }
+        }
+
+        #[test]
+        fn parse_unary_operator() {
+            assert!(unary_operator().parse(stream("", "")).is_err());
+
+            for (source, expected) in &[("!", UnaryOperator::Not), ("?", UnaryOperator::Try)] {
+                assert_eq!(
+                    unary_operator().parse(stream(source, "")).unwrap().0,
+                    *expected
+                );
+            }
+        }
+
+        #[test]
+        fn parse_binary_operation() {
             for (source, target) in vec![
                 (
                     "1+1",
@@ -1594,6 +1706,32 @@ mod tests {
         }
 
         #[test]
+        fn parse_binary_operator() {
+            assert!(binary_operator().parse(stream("", "")).is_err());
+            assert!(binary_operator().parse(stream("++", "")).is_err());
+
+            for (source, expected) in &[
+                ("+", BinaryOperator::Add),
+                ("-", BinaryOperator::Subtract),
+                ("*", BinaryOperator::Multiply),
+                ("/", BinaryOperator::Divide),
+                ("==", BinaryOperator::Equal),
+                ("/=", BinaryOperator::NotEqual),
+                ("<", BinaryOperator::LessThan),
+                ("<=", BinaryOperator::LessThanOrEqual),
+                (">", BinaryOperator::GreaterThan),
+                (">=", BinaryOperator::GreaterThanOrEqual),
+                ("&", BinaryOperator::And),
+                ("|", BinaryOperator::Or),
+            ] {
+                assert_eq!(
+                    binary_operator().parse(stream(source, "")).unwrap().0,
+                    *expected
+                );
+            }
+        }
+
+        #[test]
         fn parse_record_construction() {
             assert!(record().parse(stream("Foo", "")).is_err());
             assert!(record().parse(stream("Foo{}", "")).is_err());
@@ -1723,32 +1861,6 @@ mod tests {
             assert!(record_update()
                 .parse(stream("Foo{...if true { none } else { none },bar:42}", ""))
                 .is_ok());
-        }
-
-        #[test]
-        fn parse_operator() {
-            assert!(binary_operator().parse(stream("", "")).is_err());
-            assert!(binary_operator().parse(stream("++", "")).is_err());
-
-            for (source, expected) in &[
-                ("+", BinaryOperator::Add),
-                ("-", BinaryOperator::Subtract),
-                ("*", BinaryOperator::Multiply),
-                ("/", BinaryOperator::Divide),
-                ("==", BinaryOperator::Equal),
-                ("/=", BinaryOperator::NotEqual),
-                ("<", BinaryOperator::LessThan),
-                ("<=", BinaryOperator::LessThanOrEqual),
-                (">", BinaryOperator::GreaterThan),
-                (">=", BinaryOperator::GreaterThanOrEqual),
-                ("&", BinaryOperator::And),
-                ("|", BinaryOperator::Or),
-            ] {
-                assert_eq!(
-                    binary_operator().parse(stream(source, "")).unwrap().0,
-                    *expected
-                );
-            }
         }
 
         #[test]

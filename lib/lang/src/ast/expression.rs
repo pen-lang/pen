@@ -2,7 +2,7 @@ use super::{
     boolean::Boolean, call::Call, if_::If, if_list::IfList, if_type::IfType, list::List,
     none::None, number::Number, record_construction::RecordConstruction,
     record_element::RecordElement, record_update::RecordUpdate, string::ByteString,
-    variable::Variable, BinaryOperation, Lambda,
+    variable::Variable, BinaryOperation, Lambda, UnaryOperation,
 };
 use crate::position::Position;
 
@@ -22,26 +22,28 @@ pub enum Expression {
     RecordElement(RecordElement),
     RecordUpdate(RecordUpdate),
     String(ByteString),
+    UnaryOperation(UnaryOperation),
     Variable(Variable),
 }
 
 impl Expression {
     pub fn position(&self) -> &Position {
         match self {
-            Self::Call(call) => call.position(),
             Self::BinaryOperation(operation) => operation.position(),
             Self::Boolean(boolean) => boolean.position(),
-            Self::IfType(if_) => if_.position(),
+            Self::Call(call) => call.position(),
             Self::If(if_) => if_.position(),
+            Self::IfList(if_) => if_.position(),
+            Self::IfType(if_) => if_.position(),
             Self::Lambda(lambda) => lambda.position(),
             Self::List(list) => list.position(),
-            Self::IfList(if_) => if_.position(),
+            Self::None(none) => none.position(),
+            Self::Number(number) => number.position(),
             Self::RecordConstruction(construction) => construction.position(),
             Self::RecordElement(element) => element.position(),
             Self::RecordUpdate(record_update) => record_update.position(),
             Self::String(string) => string.position(),
-            Self::None(none) => none.position(),
-            Self::Number(number) => number.position(),
+            Self::UnaryOperation(operation) => operation.position(),
             Self::Variable(variable) => variable.position(),
         }
     }
@@ -128,6 +130,12 @@ impl From<None> for Expression {
 impl From<Number> for Expression {
     fn from(number: Number) -> Self {
         Self::Number(number)
+    }
+}
+
+impl From<UnaryOperation> for Expression {
+    fn from(operation: UnaryOperation) -> Self {
+        Self::UnaryOperation(operation)
     }
 }
 

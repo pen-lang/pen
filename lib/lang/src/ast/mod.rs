@@ -28,6 +28,8 @@ mod record_update;
 mod string;
 mod type_alias;
 mod type_definition;
+mod unary_operation;
+mod unary_operator;
 mod variable;
 
 pub use argument::*;
@@ -60,4 +62,6 @@ pub use record_update::*;
 pub use string::*;
 pub use type_alias::*;
 pub use type_definition::*;
+pub use unary_operation::*;
+pub use unary_operator::*;
 pub use variable::*;
