@@ -3,6 +3,8 @@
     "arity",
     "canonicalization",
     "canonicalize",
+    "combinator",
+    "concat",
     "hasher",
     "idempotently",
     "malloc",
