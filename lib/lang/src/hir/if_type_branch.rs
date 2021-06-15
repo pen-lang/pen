@@ -2,12 +2,12 @@ use super::Block;
 use crate::types::Type;
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct Alternative {
+pub struct IfTypeBranch {
     type_: Type,
     block: Block,
 }
 
-impl Alternative {
+impl IfTypeBranch {
     pub fn new(type_: impl Into<Type>, block: Block) -> Self {
         Self {
             type_: type_.into(),

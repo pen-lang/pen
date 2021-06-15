@@ -106,40 +106,40 @@ fn infer_expression(
         }
         Expression::IfType(if_) => {
             let argument = infer_expression(if_.argument(), variables)?;
-            let alternatives = if_
-                .alternatives()
+            let branches = if_
+                .branches()
                 .iter()
-                .map(|alternative| -> Result<_, CompileError> {
-                    Ok(Alternative::new(
-                        alternative.type_().clone(),
+                .map(|branch| -> Result<_, CompileError> {
+                    Ok(IfTypeBranch::new(
+                        branch.type_().clone(),
                         infer_block(
-                            alternative.block(),
+                            branch.block(),
                             &variables
                                 .clone()
                                 .into_iter()
-                                .chain(vec![(if_.name().into(), alternative.type_().clone())])
+                                .chain(vec![(if_.name().into(), branch.type_().clone())])
                                 .collect(),
                         )?,
                     ))
                 })
                 .collect::<Result<Vec<_>, _>>()?;
-            let default_alternative = if_
-                .default_alternative()
-                .map(|alternative| infer_block(alternative, variables))
+            let else_ = if_
+                .else_()
+                .map(|block| infer_block(block, variables))
                 .transpose()?;
 
             IfType::new(
                 if_.name(),
                 argument.clone(),
                 Some(type_extraction::extract_from_expression(&argument, types)?),
-                alternatives.clone(),
-                default_alternative.clone(),
+                branches.clone(),
+                else_.clone(),
                 Some(
                     union_types::create_union_type(
-                        &alternatives
+                        &branches
                             .iter()
                             .map(|alternative| alternative.block())
-                            .chain(&default_alternative)
+                            .chain(&else_)
                             .map(|block| type_extraction::extract_from_block(block, types))
                             .collect::<Result<Vec<_>, _>>()?,
                         if_.position(),

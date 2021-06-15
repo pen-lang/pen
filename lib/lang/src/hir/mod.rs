@@ -1,4 +1,4 @@
-mod alternative;
+mod if_type_branch;
 mod argument;
 mod arithmetic_operation;
 mod assignment;
@@ -30,7 +30,7 @@ mod type_coercion;
 mod type_definition;
 mod variable;
 
-pub use alternative::*;
+pub use if_type_branch::*;
 pub use argument::*;
 pub use arithmetic_operation::*;
 pub use assignment::*;
