@@ -170,13 +170,16 @@ fn infer_block(
     for statement in block.statements() {
         let statement = infer_statement(statement, &variables, types)?;
 
-        variables.insert(
-            statement.name().into(),
-            statement
-                .type_()
-                .cloned()
-                .ok_or_else(|| CompileError::TypeNotInferred(statement.position().clone()))?,
-        );
+        if let Some(name) = statement.name() {
+            variables.insert(
+                name.into(),
+                statement
+                    .type_()
+                    .cloned()
+                    .ok_or_else(|| CompileError::TypeNotInferred(statement.position().clone()))?,
+            );
+        }
+
         statements.push(statement);
     }
 
@@ -194,7 +197,7 @@ fn infer_statement(
     let expression = infer_expression(statement.expression(), variables, types)?;
 
     Ok(Statement::new(
-        statement.name(),
+        statement.name().map(|string| string.into()),
         expression.clone(),
         Some(type_extraction::extract_from_expression(
             &expression,

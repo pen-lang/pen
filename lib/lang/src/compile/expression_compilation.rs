@@ -2,6 +2,7 @@ use super::{type_compilation, type_context::TypeContext, CompileError};
 use crate::{compile::type_compilation::NONE_RECORD_TYPE_NAME, hir::*};
 
 const CLOSURE_NAME: &str = "$closure";
+const UNUSED_VARIABLE: &str = "$unused";
 
 pub fn compile(
     expression: &Expression,
@@ -46,7 +47,7 @@ pub fn compile_block(
 
     for statement in block.statements().iter().rev() {
         expression = mir::ir::Let::new(
-            statement.name(),
+            statement.name().unwrap_or(UNUSED_VARIABLE),
             type_compilation::compile(
                 statement
                     .type_()

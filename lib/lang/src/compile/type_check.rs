@@ -108,13 +108,15 @@ fn check_block(
             type_context.types(),
         )?;
 
-        variables.insert(
-            statement.name().into(),
-            statement
-                .type_()
-                .cloned()
-                .ok_or_else(|| CompileError::TypeNotInferred(statement.position().clone()))?,
-        );
+        if let Some(name) = statement.name() {
+            variables.insert(
+                name.into(),
+                statement
+                    .type_()
+                    .cloned()
+                    .ok_or_else(|| CompileError::TypeNotInferred(statement.position().clone()))?,
+            );
+        }
     }
 
     check_expression(block.expression(), &variables, type_context)
@@ -182,7 +184,7 @@ mod tests {
                     types::None::new(Position::dummy()),
                     Block::new(
                         vec![Statement::new(
-                            "y",
+                            Some("y".into()),
                             None::new(Position::dummy()),
                             Some(types::None::new(Position::dummy()).into()),
                             Position::dummy(),
