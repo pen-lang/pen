@@ -1,26 +1,24 @@
 use super::{
     boolean::Boolean, call::Call, if_::If, if_list::IfList, if_type::IfType, list::List,
-    none::None, number::Number, record_construction::RecordConstruction,
-    record_element::RecordElement, record::Record, string::ByteString,
+    none::None, number::Number, record::Record, record_element::RecordElement, string::ByteString,
     variable::Variable, BinaryOperation, Lambda, UnaryOperation,
 };
 use crate::position::Position;
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum Expression {
-    Call(Call),
     BinaryOperation(BinaryOperation),
     Boolean(Boolean),
-    IfType(IfType),
+    Call(Call),
     If(If),
+    IfList(IfList),
+    IfType(IfType),
     Lambda(Lambda),
     List(List),
-    IfList(IfList),
     None(None),
     Number(Number),
-    RecordConstruction(RecordConstruction),
-    RecordElement(RecordElement),
     Record(Record),
+    RecordElement(RecordElement),
     String(ByteString),
     UnaryOperation(UnaryOperation),
     Variable(Variable),
@@ -39,9 +37,8 @@ impl Expression {
             Self::List(list) => list.position(),
             Self::None(none) => none.position(),
             Self::Number(number) => number.position(),
-            Self::RecordConstruction(construction) => construction.position(),
-            Self::RecordElement(element) => element.position(),
             Self::Record(record) => record.position(),
+            Self::RecordElement(element) => element.position(),
             Self::String(string) => string.position(),
             Self::UnaryOperation(operation) => operation.position(),
             Self::Variable(variable) => variable.position(),
@@ -76,12 +73,6 @@ impl From<IfType> for Expression {
 impl From<ByteString> for Expression {
     fn from(string: ByteString) -> Self {
         Self::String(string)
-    }
-}
-
-impl From<RecordConstruction> for Expression {
-    fn from(construction: RecordConstruction) -> Self {
-        Self::RecordConstruction(construction)
     }
 }
 
