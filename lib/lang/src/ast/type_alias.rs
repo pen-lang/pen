@@ -1,7 +1,6 @@
 use crate::types::Type;
-use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Debug, Deserialize, Hash, PartialEq, Serialize)]
+#[derive(Clone, Debug, Hash, PartialEq)]
 pub struct TypeAlias {
     name: String,
     type_: Type,

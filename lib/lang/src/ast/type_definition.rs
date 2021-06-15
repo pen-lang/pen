@@ -1,7 +1,6 @@
 use crate::{position::Position, types};
-use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Debug, Deserialize, Hash, PartialEq, Serialize)]
+#[derive(Clone, Debug, Hash, PartialEq)]
 pub struct TypeDefinition {
     name: String,
     elements: Vec<types::RecordElement>,
