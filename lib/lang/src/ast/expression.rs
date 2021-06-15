@@ -1,7 +1,7 @@
 use super::{
     boolean::Boolean, call::Call, if_::If, if_list::IfList, if_type::IfType, list::List,
     none::None, number::Number, record_construction::RecordConstruction,
-    record_element::RecordElement, record_update::RecordUpdate, string::ByteString,
+    record_element::RecordElement, record::Record, string::ByteString,
     variable::Variable, BinaryOperation, Lambda, UnaryOperation,
 };
 use crate::position::Position;
@@ -20,7 +20,7 @@ pub enum Expression {
     Number(Number),
     RecordConstruction(RecordConstruction),
     RecordElement(RecordElement),
-    RecordUpdate(RecordUpdate),
+    Record(Record),
     String(ByteString),
     UnaryOperation(UnaryOperation),
     Variable(Variable),
@@ -41,7 +41,7 @@ impl Expression {
             Self::Number(number) => number.position(),
             Self::RecordConstruction(construction) => construction.position(),
             Self::RecordElement(element) => element.position(),
-            Self::RecordUpdate(record_update) => record_update.position(),
+            Self::Record(record) => record.position(),
             Self::String(string) => string.position(),
             Self::UnaryOperation(operation) => operation.position(),
             Self::Variable(variable) => variable.position(),
@@ -91,9 +91,9 @@ impl From<RecordElement> for Expression {
     }
 }
 
-impl From<RecordUpdate> for Expression {
-    fn from(record_update: RecordUpdate) -> Self {
-        Self::RecordUpdate(record_update)
+impl From<Record> for Expression {
+    fn from(record: Record) -> Self {
+        Self::Record(record)
     }
 }
 

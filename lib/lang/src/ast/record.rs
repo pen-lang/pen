@@ -3,17 +3,17 @@ use crate::{position::Position, types::Type};
 use std::{collections::HashMap, sync::Arc};
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct RecordUpdate {
+pub struct Record {
     type_: Type,
-    record: Arc<Expression>,
+    record: Arc<Option<Expression>>,
     elements: HashMap<String, Expression>,
     position: Position,
 }
 
-impl RecordUpdate {
+impl Record {
     pub fn new(
         type_: impl Into<Type>,
-        record: impl Into<Expression>,
+        record: Option<Expression>,
         elements: HashMap<String, Expression>,
         position: Position,
     ) -> Self {
@@ -29,8 +29,8 @@ impl RecordUpdate {
         &self.type_
     }
 
-    pub fn record(&self) -> &Expression {
-        &self.record
+    pub fn record(&self) -> Option<&Expression> {
+        self.record.as_ref().as_ref()
     }
 
     pub fn elements(&self) -> &HashMap<String, Expression> {

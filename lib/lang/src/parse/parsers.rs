@@ -263,7 +263,7 @@ fn atomic_expression<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
     lazy(|| {
         no_partial(choice!(
             record().map(Expression::from),
-            record_update().map(Expression::from),
+            record().map(Expression::from),
             list_literal().map(Expression::from),
             boolean_literal().map(Expression::from),
             none_literal().map(Expression::from),
@@ -394,15 +394,16 @@ fn call<'a>() -> impl Parser<Stream<'a>, Output = Call> {
         .expected("function call")
 }
 
-fn record<'a>() -> impl Parser<Stream<'a>, Output = RecordConstruction> {
+fn record<'a>() -> impl Parser<Stream<'a>, Output = Record> {
     (
         position(),
         reference_type(),
         string("{"),
+        optional(between(sign("..."), sign(","), term())),
         sep_end_by1((identifier().skip(sign(":")), expression()), sign(",")),
         sign("}"),
     )
-        .then(|(position, reference_type, _, elements, _)| {
+        .then(|(position, reference_type, _, record, elements, _)| {
             let elements: Vec<_> = elements;
 
             if elements
@@ -412,41 +413,7 @@ fn record<'a>() -> impl Parser<Stream<'a>, Output = RecordConstruction> {
                 .len()
                 == elements.len()
             {
-                value(RecordConstruction::new(
-                    reference_type,
-                    elements.into_iter().collect(),
-                    position,
-                ))
-                .left()
-            } else {
-                unexpected_any("duplicate keys in record construction").right()
-            }
-        })
-        .expected("record")
-}
-
-fn record_update<'a>() -> impl Parser<Stream<'a>, Output = RecordUpdate> {
-    (
-        position(),
-        reference_type(),
-        string("{"),
-        sign("..."),
-        term(),
-        sign(","),
-        sep_end_by1((identifier().skip(sign(":")), expression()), sign(",")),
-        sign("}"),
-    )
-        .then(|(position, reference_type, _, _, record, _, elements, _)| {
-            let elements: Vec<_> = elements;
-
-            if elements
-                .iter()
-                .map(|(key, _)| key.into())
-                .collect::<HashSet<String>>()
-                .len()
-                == elements.len()
-            {
-                value(RecordUpdate::new(
+                value(Record::new(
                     reference_type,
                     record,
                     elements.into_iter().collect(),
@@ -454,7 +421,7 @@ fn record_update<'a>() -> impl Parser<Stream<'a>, Output = RecordUpdate> {
                 ))
                 .left()
             } else {
-                unexpected_any("duplicate keys in record update").right()
+                unexpected_any("duplicate keys in record literal").right()
             }
         })
 }
@@ -1730,7 +1697,7 @@ mod tests {
         }
 
         #[test]
-        fn parse_record_construction() {
+        fn parse_record() {
             assert!(record().parse(stream("Foo", "")).is_err());
             assert!(record().parse(stream("Foo{}", "")).is_err());
 
@@ -1741,8 +1708,9 @@ mod tests {
 
             assert_eq!(
                 record().parse(stream("Foo{foo:42}", "")).unwrap().0,
-                RecordConstruction::new(
+                Record::new(
                     types::Reference::new("Foo", Position::dummy()),
+                    None,
                     vec![("foo".into(), Number::new(42.0, Position::dummy()).into())]
                         .into_iter()
                         .collect(),
@@ -1752,8 +1720,9 @@ mod tests {
 
             assert_eq!(
                 record().parse(stream("Foo{foo:42,bar:42}", "")).unwrap().0,
-                RecordConstruction::new(
+                Record::new(
                     types::Reference::new("Foo", Position::dummy()),
+                    None,
                     vec![
                         ("foo".into(), Number::new(42.0, Position::dummy()).into()),
                         ("bar".into(), Number::new(42.0, Position::dummy()).into())
@@ -1773,8 +1742,9 @@ mod tests {
                     .0,
                 Call::new(
                     Variable::new("foo", Position::dummy()),
-                    vec![RecordConstruction::new(
+                    vec![Record::new(
                         types::Reference::new("Foo", Position::dummy()),
+                        None,
                         vec![("foo".into(), Number::new(42.0, Position::dummy()).into())]
                             .into_iter()
                             .collect(),
@@ -1788,8 +1758,9 @@ mod tests {
 
             assert_eq!(
                 record().parse(stream("Foo{foo:bar(42)}", "")).unwrap().0,
-                RecordConstruction::new(
+                Record::new(
                     types::Reference::new("Foo", Position::dummy()),
+                    None,
                     vec![(
                         "foo".into(),
                         Call::new(
@@ -1804,18 +1775,12 @@ mod tests {
                     Position::dummy()
                 )
             );
-        }
 
-        #[test]
-        fn parse_record_update() {
             assert_eq!(
-                record_update()
-                    .parse(stream("Foo{...foo,bar:42}", ""))
-                    .unwrap()
-                    .0,
-                RecordUpdate::new(
+                record().parse(stream("Foo{...foo,bar:42}", "")).unwrap().0,
+                Record::new(
                     types::Reference::new("Foo", Position::dummy()),
-                    Variable::new("foo", Position::dummy()),
+                    Some(Variable::new("foo", Position::dummy()).into()),
                     vec![("bar".into(), Number::new(42.0, Position::dummy()).into())]
                         .into_iter()
                         .collect(),
@@ -1824,13 +1789,10 @@ mod tests {
             );
 
             assert_eq!(
-                record_update()
-                    .parse(stream("Foo{...foo,bar:42,}", ""))
-                    .unwrap()
-                    .0,
-                RecordUpdate::new(
+                record().parse(stream("Foo{...foo,bar:42,}", "")).unwrap().0,
+                Record::new(
                     types::Reference::new("Foo", Position::dummy()),
-                    Variable::new("foo", Position::dummy()),
+                    Some(Variable::new("foo", Position::dummy()).into()),
                     vec![("bar".into(), Number::new(42.0, Position::dummy()).into())]
                         .into_iter()
                         .collect(),
@@ -1846,17 +1808,15 @@ mod tests {
                 Variable::new("Foo", Position::dummy()).into(),
             );
 
-            assert!(record_update().parse(stream("Foo{...foo}", "")).is_err());
-            assert!(record_update()
+            assert!(record().parse(stream("Foo{...foo}", "")).is_err());
+            assert!(record()
                 .parse(stream("Foo{...foo,bar:42,bar:42}", ""))
                 .is_err());
-            assert!(record_update()
-                .parse(stream("Foo{...(foo),bar:42}", ""))
-                .is_ok());
-            assert!(record_update()
+            assert!(record().parse(stream("Foo{...(foo),bar:42}", "")).is_ok());
+            assert!(record()
                 .parse(stream("Foo{...foo(bar),bar:42}", ""))
                 .is_ok());
-            assert!(record_update()
+            assert!(record()
                 .parse(stream("Foo{...if true { none } else { none },bar:42}", ""))
                 .is_ok());
         }
