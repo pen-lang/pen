@@ -482,28 +482,28 @@ fn binary_operation<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
         .map(|(expression, pairs): (_, Vec<_>)| reduce_operations(expression, &pairs))
 }
 
-fn binary_operator<'a>() -> impl Parser<Stream<'a>, Output = ParsedOperator> {
+fn binary_operator<'a>() -> impl Parser<Stream<'a>, Output = BinaryOperator> {
     choice!(
-        concrete_operator("+", ParsedOperator::Add),
-        concrete_operator("-", ParsedOperator::Subtract),
-        concrete_operator("*", ParsedOperator::Multiply),
-        concrete_operator("/", ParsedOperator::Divide),
-        concrete_operator("==", ParsedOperator::Equal),
-        concrete_operator("/=", ParsedOperator::NotEqual),
-        concrete_operator("<", ParsedOperator::LessThan),
-        concrete_operator("<=", ParsedOperator::LessThanOrEqual),
-        concrete_operator(">", ParsedOperator::GreaterThan),
-        concrete_operator(">=", ParsedOperator::GreaterThanOrEqual),
-        concrete_operator("&", ParsedOperator::And),
-        concrete_operator("|", ParsedOperator::Or),
+        concrete_operator("+", BinaryOperator::Add),
+        concrete_operator("-", BinaryOperator::Subtract),
+        concrete_operator("*", BinaryOperator::Multiply),
+        concrete_operator("/", BinaryOperator::Divide),
+        concrete_operator("==", BinaryOperator::Equal),
+        concrete_operator("/=", BinaryOperator::NotEqual),
+        concrete_operator("<", BinaryOperator::LessThan),
+        concrete_operator("<=", BinaryOperator::LessThanOrEqual),
+        concrete_operator(">", BinaryOperator::GreaterThan),
+        concrete_operator(">=", BinaryOperator::GreaterThanOrEqual),
+        concrete_operator("&", BinaryOperator::And),
+        concrete_operator("|", BinaryOperator::Or),
     )
     .expected("binary operator")
 }
 
 fn concrete_operator<'a>(
     literal: &'static str,
-    operator: ParsedOperator,
-) -> impl Parser<Stream<'a>, Output = ParsedOperator> {
+    operator: BinaryOperator,
+) -> impl Parser<Stream<'a>, Output = BinaryOperator> {
     token(
         many1(one_of(OPERATOR_CHARACTERS.chars())).then(move |parsed_literal: String| {
             if parsed_literal == literal {
@@ -1109,8 +1109,8 @@ mod tests {
             );
             assert_eq!(
                 expression().parse(stream("x + 1", "")).unwrap().0,
-                ArithmeticOperation::new(
-                    ArithmeticOperator::Add,
+                BinaryOperation::new(
+                    BinaryOperator::Add,
                     Variable::new("x", Position::dummy()),
                     Number::new(1.0, Position::dummy()),
                     Position::dummy()
@@ -1119,8 +1119,8 @@ mod tests {
             );
             assert_eq!(
                 expression().parse(stream("x + y(z)", "")).unwrap().0,
-                ArithmeticOperation::new(
-                    ArithmeticOperator::Add,
+                BinaryOperation::new(
+                    BinaryOperator::Add,
                     Variable::new("x", Position::dummy()),
                     Call::new(
                         Variable::new("y", Position::dummy()),
@@ -1134,8 +1134,8 @@ mod tests {
             assert_eq!(
                 expression().parse(stream("(x + y)(z)", "")).unwrap().0,
                 Call::new(
-                    ArithmeticOperation::new(
-                        ArithmeticOperator::Add,
+                    BinaryOperation::new(
+                        BinaryOperator::Add,
                         Variable::new("x", Position::dummy()),
                         Variable::new("y", Position::dummy()),
                         Position::dummy()
@@ -1440,8 +1440,8 @@ mod tests {
             for (source, target) in vec![
                 (
                     "1+1",
-                    ArithmeticOperation::new(
-                        ArithmeticOperator::Add,
+                    BinaryOperation::new(
+                        BinaryOperator::Add,
                         Number::new(1.0, Position::dummy()),
                         Number::new(1.0, Position::dummy()),
                         Position::dummy(),
@@ -1450,10 +1450,10 @@ mod tests {
                 ),
                 (
                     "1+1+1",
-                    ArithmeticOperation::new(
-                        ArithmeticOperator::Add,
-                        ArithmeticOperation::new(
-                            ArithmeticOperator::Add,
+                    BinaryOperation::new(
+                        BinaryOperator::Add,
+                        BinaryOperation::new(
+                            BinaryOperator::Add,
                             Number::new(1.0, Position::dummy()),
                             Number::new(1.0, Position::dummy()),
                             Position::dummy(),
@@ -1465,11 +1465,11 @@ mod tests {
                 ),
                 (
                     "1+(1+1)",
-                    ArithmeticOperation::new(
-                        ArithmeticOperator::Add,
+                    BinaryOperation::new(
+                        BinaryOperator::Add,
                         Number::new(1.0, Position::dummy()),
-                        ArithmeticOperation::new(
-                            ArithmeticOperator::Add,
+                        BinaryOperation::new(
+                            BinaryOperator::Add,
                             Number::new(1.0, Position::dummy()),
                             Number::new(1.0, Position::dummy()),
                             Position::dummy(),
@@ -1480,10 +1480,10 @@ mod tests {
                 ),
                 (
                     "1*2-3",
-                    ArithmeticOperation::new(
-                        ArithmeticOperator::Subtract,
-                        ArithmeticOperation::new(
-                            ArithmeticOperator::Multiply,
+                    BinaryOperation::new(
+                        BinaryOperator::Subtract,
+                        BinaryOperation::new(
+                            BinaryOperator::Multiply,
                             Number::new(1.0, Position::dummy()),
                             Number::new(2.0, Position::dummy()),
                             Position::dummy(),
@@ -1495,11 +1495,11 @@ mod tests {
                 ),
                 (
                     "1+2*3",
-                    ArithmeticOperation::new(
-                        ArithmeticOperator::Add,
+                    BinaryOperation::new(
+                        BinaryOperator::Add,
                         Number::new(1.0, Position::dummy()),
-                        ArithmeticOperation::new(
-                            ArithmeticOperator::Multiply,
+                        BinaryOperation::new(
+                            BinaryOperator::Multiply,
                             Number::new(2.0, Position::dummy()),
                             Number::new(3.0, Position::dummy()),
                             Position::dummy(),
@@ -1510,16 +1510,16 @@ mod tests {
                 ),
                 (
                     "1*2-3/4",
-                    ArithmeticOperation::new(
-                        ArithmeticOperator::Subtract,
-                        ArithmeticOperation::new(
-                            ArithmeticOperator::Multiply,
+                    BinaryOperation::new(
+                        BinaryOperator::Subtract,
+                        BinaryOperation::new(
+                            BinaryOperator::Multiply,
                             Number::new(1.0, Position::dummy()),
                             Number::new(2.0, Position::dummy()),
                             Position::dummy(),
                         ),
-                        ArithmeticOperation::new(
-                            ArithmeticOperator::Divide,
+                        BinaryOperation::new(
+                            BinaryOperator::Divide,
                             Number::new(3.0, Position::dummy()),
                             Number::new(4.0, Position::dummy()),
                             Position::dummy(),
@@ -1530,8 +1530,8 @@ mod tests {
                 ),
                 (
                     "1==1",
-                    EqualityOperation::new(
-                        EqualityOperator::Equal,
+                    BinaryOperation::new(
+                        BinaryOperator::Equal,
                         Number::new(1.0, Position::dummy()),
                         Number::new(1.0, Position::dummy()),
                         Position::dummy(),
@@ -1540,8 +1540,8 @@ mod tests {
                 ),
                 (
                     "true&true",
-                    BooleanOperation::new(
-                        BooleanOperator::And,
+                    BinaryOperation::new(
+                        BinaryOperator::And,
                         Boolean::new(true, Position::dummy()),
                         Boolean::new(true, Position::dummy()),
                         Position::dummy(),
@@ -1550,8 +1550,8 @@ mod tests {
                 ),
                 (
                     "true|true",
-                    BooleanOperation::new(
-                        BooleanOperator::Or,
+                    BinaryOperation::new(
+                        BinaryOperator::Or,
                         Boolean::new(true, Position::dummy()),
                         Boolean::new(true, Position::dummy()),
                         Position::dummy(),
@@ -1560,11 +1560,11 @@ mod tests {
                 ),
                 (
                     "true&1<2",
-                    BooleanOperation::new(
-                        BooleanOperator::And,
+                    BinaryOperation::new(
+                        BinaryOperator::And,
                         Boolean::new(true, Position::dummy()),
-                        OrderOperation::new(
-                            OrderOperator::LessThan,
+                        BinaryOperation::new(
+                            BinaryOperator::LessThan,
                             Number::new(1.0, Position::dummy()),
                             Number::new(2.0, Position::dummy()),
                             Position::dummy(),
@@ -1575,11 +1575,11 @@ mod tests {
                 ),
                 (
                     "true|true&true",
-                    BooleanOperation::new(
-                        BooleanOperator::Or,
+                    BinaryOperation::new(
+                        BinaryOperator::Or,
                         Boolean::new(true, Position::dummy()),
-                        BooleanOperation::new(
-                            BooleanOperator::And,
+                        BinaryOperation::new(
+                            BinaryOperator::And,
                             Boolean::new(true, Position::dummy()),
                             Boolean::new(true, Position::dummy()),
                             Position::dummy(),
@@ -1731,18 +1731,18 @@ mod tests {
             assert!(binary_operator().parse(stream("++", "")).is_err());
 
             for (source, expected) in &[
-                ("+", ParsedOperator::Add),
-                ("-", ParsedOperator::Subtract),
-                ("*", ParsedOperator::Multiply),
-                ("/", ParsedOperator::Divide),
-                ("==", ParsedOperator::Equal),
-                ("/=", ParsedOperator::NotEqual),
-                ("<", ParsedOperator::LessThan),
-                ("<=", ParsedOperator::LessThanOrEqual),
-                (">", ParsedOperator::GreaterThan),
-                (">=", ParsedOperator::GreaterThanOrEqual),
-                ("&", ParsedOperator::And),
-                ("|", ParsedOperator::Or),
+                ("+", BinaryOperator::Add),
+                ("-", BinaryOperator::Subtract),
+                ("*", BinaryOperator::Multiply),
+                ("/", BinaryOperator::Divide),
+                ("==", BinaryOperator::Equal),
+                ("/=", BinaryOperator::NotEqual),
+                ("<", BinaryOperator::LessThan),
+                ("<=", BinaryOperator::LessThanOrEqual),
+                (">", BinaryOperator::GreaterThan),
+                (">=", BinaryOperator::GreaterThanOrEqual),
+                ("&", BinaryOperator::And),
+                ("|", BinaryOperator::Or),
             ] {
                 assert_eq!(
                     binary_operator().parse(stream(source, "")).unwrap().0,
