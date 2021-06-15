@@ -1,4 +1,5 @@
 mod ast;
+pub mod ast_hir;
 mod compile;
 mod hir;
 mod interface;
