@@ -106,40 +106,40 @@ fn infer_expression(
         }
         Expression::IfType(if_) => {
             let argument = infer_expression(if_.argument(), variables)?;
-            let alternatives = if_
-                .alternatives()
+            let branches = if_
+                .branches()
                 .iter()
-                .map(|alternative| -> Result<_, CompileError> {
-                    Ok(Alternative::new(
-                        alternative.type_().clone(),
+                .map(|branch| -> Result<_, CompileError> {
+                    Ok(IfTypeBranch::new(
+                        branch.type_().clone(),
                         infer_block(
-                            alternative.block(),
+                            branch.block(),
                             &variables
                                 .clone()
                                 .into_iter()
-                                .chain(vec![(if_.name().into(), alternative.type_().clone())])
+                                .chain(vec![(if_.name().into(), branch.type_().clone())])
                                 .collect(),
                         )?,
                     ))
                 })
                 .collect::<Result<Vec<_>, _>>()?;
-            let default_alternative = if_
-                .default_alternative()
-                .map(|alternative| infer_block(alternative, variables))
+            let else_ = if_
+                .else_()
+                .map(|block| infer_block(block, variables))
                 .transpose()?;
 
             IfType::new(
                 if_.name(),
                 argument.clone(),
                 Some(type_extraction::extract_from_expression(&argument, types)?),
-                alternatives.clone(),
-                default_alternative.clone(),
+                branches.clone(),
+                else_.clone(),
                 Some(
                     union_types::create_union_type(
-                        &alternatives
+                        &branches
                             .iter()
                             .map(|alternative| alternative.block())
-                            .chain(&default_alternative)
+                            .chain(&else_)
                             .map(|block| type_extraction::extract_from_block(block, types))
                             .collect::<Result<Vec<_>, _>>()?,
                         if_.position(),
@@ -165,42 +165,45 @@ fn infer_block(
     types: &HashMap<String, Type>,
 ) -> Result<Block, CompileError> {
     let mut variables = variables.clone();
-    let mut assignments = vec![];
+    let mut statements = vec![];
 
-    for assignment in block.assignments() {
-        let assignment = infer_assignment(assignment, &variables, types)?;
+    for statement in block.statements() {
+        let statement = infer_statement(statement, &variables, types)?;
 
-        variables.insert(
-            assignment.name().into(),
-            assignment
-                .type_()
-                .cloned()
-                .ok_or_else(|| CompileError::TypeNotInferred(assignment.position().clone()))?,
-        );
-        assignments.push(assignment);
+        if let Some(name) = statement.name() {
+            variables.insert(
+                name.into(),
+                statement
+                    .type_()
+                    .cloned()
+                    .ok_or_else(|| CompileError::TypeNotInferred(statement.position().clone()))?,
+            );
+        }
+
+        statements.push(statement);
     }
 
     Ok(Block::new(
-        assignments,
+        statements,
         infer_expression(block.expression(), &variables, types)?,
     ))
 }
 
-fn infer_assignment(
-    assignment: &Assignment,
+fn infer_statement(
+    statement: &Statement,
     variables: &HashMap<String, Type>,
     types: &HashMap<String, Type>,
-) -> Result<Assignment, CompileError> {
-    let expression = infer_expression(assignment.expression(), variables, types)?;
+) -> Result<Statement, CompileError> {
+    let expression = infer_expression(statement.expression(), variables, types)?;
 
-    Ok(Assignment::new(
-        assignment.name(),
+    Ok(Statement::new(
+        statement.name().map(|string| string.into()),
         expression.clone(),
         Some(type_extraction::extract_from_expression(
             &expression,
             types,
         )?),
-        assignment.position().clone(),
+        statement.position().clone(),
     ))
 }
 

@@ -2,6 +2,7 @@ use super::{type_compilation, type_context::TypeContext, CompileError};
 use crate::{compile::type_compilation::NONE_RECORD_TYPE_NAME, hir::*};
 
 const CLOSURE_NAME: &str = "$closure";
+const UNUSED_VARIABLE: &str = "$unused";
 
 pub fn compile(
     expression: &Expression,
@@ -44,16 +45,16 @@ pub fn compile_block(
 ) -> Result<mir::ir::Expression, CompileError> {
     let mut expression = compile(block.expression(), type_context)?;
 
-    for assignment in block.assignments().iter().rev() {
+    for statement in block.statements().iter().rev() {
         expression = mir::ir::Let::new(
-            assignment.name(),
+            statement.name().unwrap_or(UNUSED_VARIABLE),
             type_compilation::compile(
-                assignment
+                statement
                     .type_()
-                    .ok_or_else(|| CompileError::TypeNotInferred(assignment.position().clone()))?,
+                    .ok_or_else(|| CompileError::TypeNotInferred(statement.position().clone()))?,
                 type_context,
             )?,
-            compile(assignment.expression(), type_context)?,
+            compile(statement.expression(), type_context)?,
             expression,
         )
         .into();
