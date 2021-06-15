@@ -2,13 +2,14 @@ use super::{
     boolean::Boolean, call::Call, if_::If, if_list::IfList, if_type::IfType, list::List,
     none::None, number::Number, operation::Operation, record_construction::RecordConstruction,
     record_element::RecordElement, record_update::RecordUpdate, string::ByteString,
-    variable::Variable, Lambda,
+    variable::Variable, BinaryOperation, Lambda,
 };
 use crate::position::Position;
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum Expression {
     Call(Call),
+    BinaryOperation(BinaryOperation),
     Boolean(Boolean),
     IfType(IfType),
     If(If),
@@ -29,6 +30,7 @@ impl Expression {
     pub fn position(&self) -> &Position {
         match self {
             Self::Call(call) => call.position(),
+            Self::BinaryOperation(operation) => operation.position(),
             Self::Boolean(boolean) => boolean.position(),
             Self::IfType(if_) => if_.position(),
             Self::If(if_) => if_.position(),
@@ -50,6 +52,12 @@ impl Expression {
 impl From<Call> for Expression {
     fn from(call: Call) -> Self {
         Self::Call(call)
+    }
+}
+
+impl From<BinaryOperation> for Expression {
+    fn from(operation: BinaryOperation) -> Self {
+        Self::BinaryOperation(operation)
     }
 }
 
