@@ -11,6 +11,7 @@ pub fn compile(
 ) -> Result<hir::Module, CompileError> {
     let module = module_compiler::compile(module, module_interfaces)?;
     let module = hir::analysis::definition_qualifier::qualify(&module, prefix);
+    let module = hir::analysis::type_qualifier::qualify(&module, prefix);
 
     Ok(module)
 }
