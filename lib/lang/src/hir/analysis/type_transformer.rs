@@ -1,5 +1,7 @@
-use crate::hir::*;
-use crate::types::{self, Type};
+use crate::{
+    hir::*,
+    types::{self, Type},
+};
 
 pub fn transform(module: &Module, transform: impl Fn(&Type) -> Type) -> Module {
     let transform = |type_: &Type| transform_type(type_, &transform);

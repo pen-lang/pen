@@ -247,8 +247,7 @@ fn qualify_operation(operation: &Operation, names: &HashMap<String, String>) -> 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::position::Position;
-    use crate::types;
+    use crate::{position::Position, types};
     use pretty_assertions::assert_eq;
 
     #[test]

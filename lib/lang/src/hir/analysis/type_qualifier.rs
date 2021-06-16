@@ -1,6 +1,8 @@
 use super::type_transformer;
-use crate::hir::*;
-use crate::types::{self, Type};
+use crate::{
+    hir::*,
+    types::{self, Type},
+};
 use std::collections::HashMap;
 
 pub fn qualify(module: &Module, prefix: &str) -> Module {
