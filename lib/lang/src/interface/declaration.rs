@@ -1,5 +1,4 @@
-use crate::position::Position;
-use crate::types;
+use crate::{position::Position, types};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Deserialize, Hash, PartialEq, Serialize)]
