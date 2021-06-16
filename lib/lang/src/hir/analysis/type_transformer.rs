@@ -27,7 +27,7 @@ pub fn transform(module: &Module, transform: impl Fn(&Type) -> Type) -> Module {
 fn transform_type(type_: &Type, transform: &impl Fn(&Type) -> Type) -> Type {
     let transform_deeply = |type_| transform_type(type_, transform);
 
-    let type_ = match type_ {
+    transform(&match type_ {
         Type::Function(function) => types::Function::new(
             function.arguments().iter().map(transform_deeply).collect(),
             transform_deeply(function.result()),
@@ -50,9 +50,7 @@ fn transform_type(type_: &Type, transform: &impl Fn(&Type) -> Type) -> Type {
         | Type::Record(_)
         | Type::Reference(_)
         | Type::String(_) => type_.clone(),
-    };
-
-    transform(&type_)
+    })
 }
 
 fn transform_type_definition(
