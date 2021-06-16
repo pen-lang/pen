@@ -1,3 +1,4 @@
+use crate::position::Position;
 use crate::types;
 use serde::{Deserialize, Serialize};
 
@@ -5,13 +6,15 @@ use serde::{Deserialize, Serialize};
 pub struct Declaration {
     name: String,
     type_: types::Function,
+    position: Position,
 }
 
 impl Declaration {
-    pub fn new(name: impl Into<String>, type_: types::Function) -> Self {
+    pub fn new(name: impl Into<String>, type_: types::Function, position: Position) -> Self {
         Self {
             name: name.into(),
             type_,
+            position,
         }
     }
 
@@ -21,5 +24,9 @@ impl Declaration {
 
     pub fn type_(&self) -> &types::Function {
         &self.type_
+    }
+
+    pub fn position(&self) -> &Position {
+        &self.position
     }
 }
