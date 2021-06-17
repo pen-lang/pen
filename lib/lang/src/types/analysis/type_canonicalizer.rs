@@ -1,9 +1,9 @@
-use super::{type_resolution, CompileError};
+use super::{type_resolver, TypeAnalysisError};
 use crate::types::{self, Type};
 use std::collections::{BTreeSet, HashMap};
 
-pub fn canonicalize(type_: &Type, types: &HashMap<String, Type>) -> Result<Type, CompileError> {
-    Ok(match type_resolution::resolve_type(type_, types)? {
+pub fn canonicalize(type_: &Type, types: &HashMap<String, Type>) -> Result<Type, TypeAnalysisError> {
+    Ok(match type_resolver::resolve_type(type_, types)? {
         Type::Function(function) => types::Function::new(
             function
                 .arguments()
@@ -33,18 +33,15 @@ pub fn canonicalize(type_: &Type, types: &HashMap<String, Type>) -> Result<Type,
 fn canonicalize_union(
     union: &types::Union,
     types: &HashMap<String, Type>,
-) -> Result<Type, CompileError> {
+) -> Result<Type, TypeAnalysisError> {
     Ok(collect_types(&union.clone().into(), types)?
         .into_iter()
         .reduce(|one, other| types::Union::new(one, other, union.position().clone()).into())
         .unwrap())
 }
 
-fn collect_types(
-    type_: &Type,
-    types: &HashMap<String, Type>,
-) -> Result<BTreeSet<Type>, CompileError> {
-    Ok(match type_resolution::resolve_type(type_, types)? {
+fn collect_types(type_: &Type, types: &HashMap<String, Type>) -> Result<BTreeSet<Type>, TypeAnalysisError> {
+    Ok(match type_resolver::resolve_type(type_, types)? {
         Type::Union(union) => collect_types(union.lhs(), types)?
             .into_iter()
             .chain(collect_types(union.rhs(), types)?)

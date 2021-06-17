@@ -1,4 +1,4 @@
-use super::{type_canonicalization, type_resolution, CompileError};
+use super::{type_canonicalizer, type_resolver, TypeAnalysisError};
 use crate::types::Type;
 use std::collections::HashMap;
 
@@ -6,11 +6,10 @@ pub fn check_equality(
     one: &Type,
     other: &Type,
     types: &HashMap<String, Type>,
-) -> Result<bool, CompileError> {
-    let one =
-        type_canonicalization::canonicalize(&type_resolution::resolve_type(one, types)?, types)?;
+) -> Result<bool, TypeAnalysisError> {
+    let one = type_canonicalizer::canonicalize(&type_resolver::resolve_type(one, types)?, types)?;
     let other =
-        type_canonicalization::canonicalize(&type_resolution::resolve_type(other, types)?, types)?;
+        type_canonicalizer::canonicalize(&type_resolver::resolve_type(other, types)?, types)?;
 
     Ok(match (&one, &other) {
         (Type::Function(one), Type::Function(other)) => {

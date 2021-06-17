@@ -1,4 +1,4 @@
-use super::{type_resolution, CompileError};
+use super::CompileError;
 use crate::{
     hir::*,
     types::{self, Type},
@@ -11,7 +11,7 @@ pub fn extract_from_expression(
 ) -> Result<Type, CompileError> {
     Ok(match expression {
         Expression::Boolean(boolean) => types::Boolean::new(boolean.position().clone()).into(),
-        Expression::Call(call) => type_resolution::resolve_to_function(
+        Expression::Call(call) => types::analysis::resolve_to_function(
             call.function_type()
                 .ok_or_else(|| CompileError::TypeNotInferred(call.position().clone()))?,
             types,

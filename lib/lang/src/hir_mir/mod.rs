@@ -4,15 +4,11 @@ mod expression_compilation;
 mod interfaces;
 mod list_type_configuration;
 mod module_compilation;
-mod type_canonicalization;
 mod type_check;
 mod type_compilation;
 mod type_context;
-mod type_equality;
 mod type_extraction;
 mod type_inference;
-mod type_resolution;
-mod type_subsumption;
 mod union_types;
 
 use self::type_context::TypeContext;

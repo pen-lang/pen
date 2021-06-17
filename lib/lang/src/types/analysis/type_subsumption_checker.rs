@@ -1,4 +1,4 @@
-use super::{type_canonicalization, type_equality, type_resolution, CompileError};
+use super::{type_canonicalizer, type_equality_checker, type_resolver, TypeAnalysisError};
 use crate::types::Type;
 use std::collections::HashMap;
 
@@ -6,11 +6,11 @@ pub fn check_subsumption(
     lower: &Type,
     upper: &Type,
     types: &HashMap<String, Type>,
-) -> Result<bool, CompileError> {
+) -> Result<bool, TypeAnalysisError> {
     let lower =
-        type_canonicalization::canonicalize(&type_resolution::resolve_type(lower, types)?, types)?;
+        type_canonicalizer::canonicalize(&type_resolver::resolve_type(lower, types)?, types)?;
     let upper =
-        type_canonicalization::canonicalize(&type_resolution::resolve_type(upper, types)?, types)?;
+        type_canonicalizer::canonicalize(&type_resolver::resolve_type(upper, types)?, types)?;
 
     Ok(match (&lower, &upper) {
         (_, Type::Any(_)) => true,
@@ -25,7 +25,7 @@ pub fn check_subsumption(
             check_subsumption(lower, union.lhs(), types)?
                 || check_subsumption(lower, union.rhs(), types)?
         }
-        _ => type_equality::check_equality(&lower, &upper, types)?,
+        _ => type_equality_checker::check_equality(&lower, &upper, types)?,
     })
 }
 

@@ -1,4 +1,8 @@
-use crate::{hir::*, position::Position, types};
+use crate::{
+    hir::*,
+    position::Position,
+    types::{self, analysis::TypeAnalysisError},
+};
 use std::{
     error::Error,
     fmt::{self, Display, Formatter},
@@ -7,11 +11,12 @@ use std::{
 #[derive(Clone, Debug, PartialEq)]
 pub enum CompileError {
     FunctionExpected(Position),
-    MirTypeCheckError(mir::analysis::TypeCheckError),
+    MirTypeCheck(mir::analysis::TypeCheckError),
     RecordElementUnknown(Position),
     RecordElementMissing(Position),
     RecordExpected(Position),
     RecordNotFound(types::Record),
+    TypeAnalysis(TypeAnalysisError),
     TypeNotFound(types::Reference),
     TypeNotInferred(Position),
     TypesNotMatched(Position, Position),
@@ -25,7 +30,7 @@ impl Display for CompileError {
             Self::FunctionExpected(position) => {
                 write!(formatter, "function expected\n{}", position)
             }
-            Self::MirTypeCheckError(error) => {
+            Self::MirTypeCheck(error) => {
                 write!(formatter, "failed to check types in MIR: {}", error)
             }
             Self::RecordElementUnknown(position) => {
@@ -43,6 +48,7 @@ impl Display for CompileError {
                 record.name(),
                 record.position()
             ),
+            Self::TypeAnalysis(error) => write!(formatter, "{}", error),
             Self::TypeNotFound(reference) => write!(
                 formatter,
                 "type \"{}\" not found\n{}",
@@ -78,6 +84,12 @@ impl Error for CompileError {}
 
 impl From<mir::analysis::TypeCheckError> for CompileError {
     fn from(error: mir::analysis::TypeCheckError) -> Self {
-        Self::MirTypeCheckError(error)
+        Self::MirTypeCheck(error)
+    }
+}
+
+impl From<TypeAnalysisError> for CompileError {
+    fn from(error: TypeAnalysisError) -> Self {
+        Self::TypeAnalysis(error)
     }
 }

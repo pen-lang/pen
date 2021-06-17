@@ -1,11 +1,11 @@
-use super::{type_canonicalization, type_context::TypeContext, CompileError};
+use super::{type_context::TypeContext, CompileError};
 use crate::types::{self, Type};
 
 pub const NONE_RECORD_TYPE_NAME: &str = "_pen_none";
 
 pub fn compile(type_: &Type, type_context: &TypeContext) -> Result<mir::types::Type, CompileError> {
     Ok(
-        match type_canonicalization::canonicalize(type_, type_context.types())? {
+        match types::analysis::canonicalize(type_, type_context.types())? {
             Type::Boolean(_) => mir::types::Type::Boolean,
             Type::Function(function) => compile_function(&function, type_context)?.into(),
             Type::List(_) => {

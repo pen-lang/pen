@@ -1,7 +1,4 @@
-use super::{
-    environment, type_context::TypeContext, type_extraction, type_resolution, type_subsumption,
-    CompileError,
-};
+use super::{environment, type_context::TypeContext, type_extraction, CompileError};
 use crate::{
     hir::*,
     types::{self, Type},
@@ -56,7 +53,7 @@ fn check_expression(
         Expression::None(none) => types::None::new(none.position().clone()).into(),
         Expression::Number(number) => types::Number::new(number.position().clone()).into(),
         Expression::RecordConstruction(construction) => {
-            let element_types = type_resolution::resolve_record_elements(
+            let element_types = types::analysis::resolve_record_elements(
                 construction.type_(),
                 type_context.types(),
                 type_context.records(),
@@ -127,7 +124,7 @@ fn check_subsumption(
     upper: &Type,
     types: &HashMap<String, Type>,
 ) -> Result<(), CompileError> {
-    if type_subsumption::check_subsumption(lower, upper, types)? {
+    if types::analysis::check_subsumption(lower, upper, types)? {
         Ok(())
     } else {
         Err(CompileError::TypesNotMatched(
