@@ -7,9 +7,12 @@ pub fn compile_module(
     infrastructure: &CompileInfrastructure,
     source_file_path: &FilePath,
     object_file_path: &FilePath,
-    name_prefix: &str,
+    module_prefix: &str,
+    package_prefix: &str,
     list_type_configuration: &ListTypeConfiguration,
 ) -> Result<(), Box<dyn std::error::Error>> {
+    let full_prefix = package_prefix.to_owned() + module_prefix;
+
     // TODO Compile module imports.
     let (module, module_interface) = lang::hir_mir::compile(
         &lang::ast_hir::compile(
@@ -19,7 +22,7 @@ pub fn compile_module(
                     .read_to_string(source_file_path)?,
                 &infrastructure.file_path_displayer.display(source_file_path),
             )?,
-            name_prefix,
+            &full_prefix,
             &[],
         )?,
         list_type_configuration,
