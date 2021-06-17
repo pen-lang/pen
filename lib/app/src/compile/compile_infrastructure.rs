@@ -1,4 +1,4 @@
-use crate::{infra::FilePathDisplayer, infra::FileSystem};
+use crate::infra::{FilePathDisplayer, FileSystem};
 
 pub struct CompileInfrastructure {
     pub file_system: Box<dyn FileSystem>,
