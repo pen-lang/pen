@@ -1,4 +1,4 @@
-use super::type_extraction;
+use super::type_extractor;
 use crate::{hir::*, types::Type};
 use std::collections::HashMap;
 
@@ -15,7 +15,7 @@ pub fn create_from_module(module: &Module) -> HashMap<String, Type> {
         .chain(module.definitions().iter().map(|definition| {
             (
                 definition.name().into(),
-                type_extraction::extract_from_lambda(definition.lambda()).into(),
+                type_extractor::extract_from_lambda(definition.lambda()).into(),
             )
         }))
         .collect()

@@ -3,6 +3,7 @@
     "arity",
     "canonicalization",
     "canonicalize",
+    "canonicalizer",
     "combinator",
     "concat",
     "hasher",

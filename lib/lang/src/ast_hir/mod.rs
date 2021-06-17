@@ -5,7 +5,7 @@ use crate::{ast, hir, interface};
 use error::CompileError;
 
 pub fn compile(
-    module: ast::Module,
+    module: &ast::Module,
     prefix: &str,
     module_interfaces: &[interface::Module],
 ) -> Result<hir::Module, CompileError> {
