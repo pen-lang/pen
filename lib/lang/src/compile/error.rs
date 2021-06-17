@@ -6,9 +6,8 @@ use std::{
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum CompileError {
-    FmmLlvmCompile(fmm_llvm::CompileError),
     FunctionExpected(Position),
-    MirFmmCompile(mir_fmm::CompileError),
+    MirTypeCheckError(mir::analysis::TypeCheckError),
     RecordElementUnknown(Position),
     RecordElementMissing(Position),
     RecordExpected(Position),
@@ -23,20 +22,17 @@ pub enum CompileError {
 impl Display for CompileError {
     fn fmt(&self, formatter: &mut Formatter) -> fmt::Result {
         match self {
-            Self::FmmLlvmCompile(error) => {
-                write!(formatter, "failed to compile F-- to LLVM: {}", error)
-            }
             Self::FunctionExpected(position) => {
                 write!(formatter, "function expected\n{}", position)
+            }
+            Self::MirTypeCheckError(error) => {
+                write!(formatter, "failed to check types in MIR: {}", error)
             }
             Self::RecordElementUnknown(position) => {
                 write!(formatter, "unknown record element\n{}", position)
             }
             Self::RecordElementMissing(position) => {
                 write!(formatter, "missing record element\n{}", position)
-            }
-            Self::MirFmmCompile(error) => {
-                write!(formatter, "failed to compile MIR to F--: {}", error)
             }
             Self::RecordExpected(position) => {
                 write!(formatter, "record expected\n{}", position)
@@ -80,14 +76,8 @@ impl Display for CompileError {
 
 impl Error for CompileError {}
 
-impl From<fmm_llvm::CompileError> for CompileError {
-    fn from(error: fmm_llvm::CompileError) -> Self {
-        Self::FmmLlvmCompile(error)
-    }
-}
-
-impl From<mir_fmm::CompileError> for CompileError {
-    fn from(error: mir_fmm::CompileError) -> Self {
-        Self::MirFmmCompile(error)
+impl From<mir::analysis::TypeCheckError> for CompileError {
+    fn from(error: mir::analysis::TypeCheckError) -> Self {
+        Self::MirTypeCheckError(error)
     }
 }

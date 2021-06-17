@@ -23,22 +23,18 @@ use list_type_configuration::ListTypeConfiguration;
 pub fn compile(
     module: &Module,
     list_type_configuration: &ListTypeConfiguration,
-) -> Result<(Vec<u8>, interface::Module), CompileError> {
+) -> Result<(mir::ir::Module, interface::Module), CompileError> {
     let type_context = TypeContext::new(module, list_type_configuration);
 
     let module = type_inference::infer_types(module, type_context.types())?;
     type_check::check_types(&module, &type_context)?;
 
     Ok((
-        fmm_llvm::compile_to_bit_code(
-            &mir_fmm::compile(&module_compilation::compile(&module, &type_context)?)?,
-            &fmm_llvm::HeapConfiguration {
-                allocate_function_name: "malloc".into(),
-                reallocate_function_name: "realloc".into(),
-                free_function_name: "free".into(),
-            },
-            None,
-        )?,
+        {
+            let module = module_compilation::compile(&module, &type_context)?;
+            mir::analysis::check_types(&module)?;
+            module
+        },
         interfaces::compile(&module)?,
     ))
 }

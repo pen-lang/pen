@@ -181,10 +181,7 @@ name = "lang"
 version = "0.1.0"
 dependencies = [
  "combine",
- "fmm",
- "fmm-llvm",
  "mir",
- "mir-fmm",
  "once_cell",
  "pretty_assertions",
  "regex",
