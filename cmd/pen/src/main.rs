@@ -20,6 +20,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                 .arg(
                     clap::Arg::with_name("package prefix")
                         .required(true)
+                        .takes_value(true)
                         .short("p")
                         .long("package-prefix")
                         .help("Sets a package prefix"),
@@ -27,6 +28,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                 .arg(
                     clap::Arg::with_name("module prefix")
                         .required(true)
+                        .takes_value(true)
                         .short("m")
                         .long("module-prefix")
                         .help("Sets a module prefix"),
