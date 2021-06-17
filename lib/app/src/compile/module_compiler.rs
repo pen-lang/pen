@@ -1,5 +1,6 @@
-use super::compile_configuration::CompileConfiguration;
-use super::compile_infrastructure::CompileInfrastructure;
+use super::{
+    compile_configuration::CompileConfiguration, compile_infrastructure::CompileInfrastructure,
+};
 use crate::infra::FilePath;
 
 // TODO Pass a package configuration file path.

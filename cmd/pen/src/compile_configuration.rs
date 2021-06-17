@@ -19,8 +19,7 @@ pub static COMPILE_CONFIGURATION: Lazy<Arc<app::compile::CompileConfiguration>> 
             list_type_name: "_AnyList".into(),
             first_rest_type_name: "_FirstRest".into(),
             map_function_name: "_mapList".into(),
-        }
-        .into(),
+        },
     }
     .into()
 });
