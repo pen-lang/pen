@@ -26,7 +26,7 @@ pub fn compile_module(
     )?;
 
     infrastructure.file_system.write(
-        &object_file_path,
+        object_file_path,
         &fmm_llvm::compile_to_bit_code(
             &fmm::analysis::transform_to_cps(
                 &mir_fmm::compile(&mir_module)?,
@@ -41,7 +41,7 @@ pub fn compile_module(
         )?,
     )?;
     infrastructure.file_system.write(
-        &interface_file_path,
+        interface_file_path,
         serde_json::to_string(&module_interface)?.as_bytes(),
     )?;
 
