@@ -2,7 +2,7 @@ use super::error::CompileError;
 use crate::{ast, hir, interface, position::Position, types};
 
 pub fn compile(
-    module: ast::Module,
+    module: &ast::Module,
     module_interfaces: &[interface::Module],
 ) -> Result<hir::Module, CompileError> {
     Ok(hir::Module::new(
