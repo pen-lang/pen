@@ -17,40 +17,32 @@ impl FilePathConverter {
         )
     }
 
-    pub fn convert_absolute_to_file_path(
+    pub fn convert_to_file_path(
         &self,
         path: impl AsRef<std::path::Path>,
     ) -> Result<app::infra::FilePath, Box<dyn std::error::Error>> {
-        Ok(app::infra::FilePath::new(
-            path.as_ref()
-                .strip_prefix(&self.base_directory)
-                .map_err(|_| {
-                    std::io::Error::new(
-                        std::io::ErrorKind::InvalidInput,
-                        format!(
-                            "path outside package directory: {}",
-                            path.as_ref().to_string_lossy()
-                        ),
-                    )
-                })?
-                .components()
-                .filter_map(|component| match component {
-                    std::path::Component::Normal(component) => {
-                        Some(component.to_string_lossy().into())
-                    }
-                    _ => None,
-                })
-                .collect::<Vec<String>>(),
-        ))
+        Ok(if path.as_ref().is_relative() {
+            self.convert_relative_to_file_path(path.as_ref())
+        } else {
+            self.convert_relative_to_file_path(
+                path.as_ref()
+                    .strip_prefix(&self.base_directory)
+                    .map_err(|_| {
+                        std::io::Error::new(
+                            std::io::ErrorKind::InvalidInput,
+                            format!(
+                                "path outside package directory: {}",
+                                path.as_ref().to_string_lossy()
+                            ),
+                        )
+                    })?,
+            )
+        })
     }
 
-    pub fn convert_relative_to_file_path(
-        &self,
-        path: impl AsRef<std::path::Path>,
-    ) -> Result<app::infra::FilePath, Box<dyn std::error::Error>> {
-        Ok(app::infra::FilePath::new(
-            path.as_ref()
-                .components()
+    fn convert_relative_to_file_path(&self, path: &std::path::Path) -> app::infra::FilePath {
+        app::infra::FilePath::new(
+            path.components()
                 .filter_map(|component| match component {
                     std::path::Component::Normal(component) => {
                         Some(component.to_string_lossy().into())
@@ -58,7 +50,7 @@ impl FilePathConverter {
                     _ => None,
                 })
                 .collect::<Vec<String>>(),
-        ))
+        )
     }
 }
 

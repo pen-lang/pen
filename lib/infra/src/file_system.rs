@@ -22,7 +22,7 @@ impl FileSystem {
             .map(|entry| {
                 Ok(self
                     .file_path_converter
-                    .convert_absolute_to_file_path(entry?.path())
+                    .convert_to_file_path(entry?.path())
                     .unwrap())
             })
             .collect::<Result<_, std::io::Error>>()

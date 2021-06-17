@@ -1,6 +1,6 @@
+use super::compile_configuration::CompileConfiguration;
 use super::compile_infrastructure::CompileInfrastructure;
 use crate::infra::FilePath;
-use lang::hir_mir::ListTypeConfiguration;
 
 // TODO Pass a package configuration file path.
 pub fn compile_module(
@@ -9,7 +9,7 @@ pub fn compile_module(
     object_file_path: &FilePath,
     module_prefix: &str,
     package_prefix: &str,
-    list_type_configuration: &ListTypeConfiguration,
+    compile_configuration: &CompileConfiguration,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let full_prefix = package_prefix.to_owned() + module_prefix;
 
@@ -25,7 +25,7 @@ pub fn compile_module(
             &full_prefix,
             &[],
         )?,
-        list_type_configuration,
+        &compile_configuration.list_type,
     )?;
 
     infrastructure.file_system.write(
@@ -35,11 +35,7 @@ pub fn compile_module(
                 &mir_fmm::compile(&module)?,
                 fmm::types::VOID_TYPE.clone(),
             )?,
-            &fmm_llvm::HeapConfiguration {
-                allocate_function_name: "malloc".into(),
-                reallocate_function_name: "realloc".into(),
-                free_function_name: "free".into(),
-            },
+            &compile_configuration.heap,
             None,
         )?,
     )?;
