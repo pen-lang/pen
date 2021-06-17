@@ -7,7 +7,6 @@ pub fn compile_module(
     infrastructure: &CompileInfrastructure,
     source_file_path: &FilePath,
     object_file_path: &FilePath,
-    interface_file_path: &FilePath,
     name_prefix: &str,
     list_type_configuration: &ListTypeConfiguration,
 ) -> Result<(), Box<dyn std::error::Error>> {
@@ -41,7 +40,7 @@ pub fn compile_module(
         )?,
     )?;
     infrastructure.file_system.write(
-        interface_file_path,
+        &object_file_path.with_extension("json"),
         serde_json::to_string(&module_interface)?.as_bytes(),
     )?;
 
