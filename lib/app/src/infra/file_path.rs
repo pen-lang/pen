@@ -1,4 +1,4 @@
-use std::{fmt::Display, ops::Deref, str::FromStr};
+use std::ops::Deref;
 
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct FilePath {
@@ -24,62 +24,46 @@ impl FilePath {
     }
 
     pub fn with_extension(&self, extension: &str) -> Self {
-        let replacement = if extension.is_empty() {
-            "".into()
+        if let Some(last) = self.components.last() {
+            Self::new(
+                self.components().take(self.components.len() - 1).chain(
+                    vec![regex::Regex::new(r"(\..*)?$")
+                        .unwrap()
+                        .replace(
+                            last,
+                            if extension.is_empty() {
+                                "".into()
+                            } else {
+                                format!(".{}", extension)
+                            }
+                            .as_str(),
+                        )
+                        .deref()]
+                    .into_iter(),
+                ),
+            )
         } else {
-            format!(".{}", extension)
-        };
-
-        Self::new(
-            self.components().take(self.components.len() - 1).chain(
-                vec![regex::Regex::new(r"(\..*)?$")
-                    .unwrap()
-                    .replace(self.components.iter().last().unwrap(), replacement.as_str())
-                    .deref()]
-                .into_iter(),
-            ),
-        )
+            self.clone()
+        }
     }
 
     pub fn join(&self, file_path: &Self) -> Self {
         Self::new(self.components().chain(file_path.components()))
     }
 
-    pub fn has_extension(&self, file_extension: &str) -> bool {
-        let has_extension = || {
-            let component = self.components.last()?;
-            let element = component.split('.').last()?;
-
-            Some(if element == component {
-                file_extension.is_empty()
-            } else {
-                element == file_extension
-            })
-        };
-
-        has_extension().unwrap_or(false)
+    pub fn has_extension(&self, extension: &str) -> bool {
+        self.check_extension(extension).unwrap_or_default()
     }
 
-    pub fn relative_to(&self, path: &Self) -> Self {
-        Self::new(self.components().skip(path.components().count()))
-    }
-}
+    fn check_extension(&self, extension: &str) -> Option<bool> {
+        let component = self.components.last()?;
+        let element = component.split('.').last()?;
 
-impl Display for FilePath {
-    fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(
-            formatter,
-            "{}",
-            self.components().collect::<Vec<_>>().join("/")
-        )
-    }
-}
-
-impl FromStr for FilePath {
-    type Err = ();
-
-    fn from_str(path: &str) -> Result<Self, ()> {
-        Ok(Self::new(path.split('/')))
+        Some(if element == component {
+            extension.is_empty()
+        } else {
+            element == extension
+        })
     }
 }
 
@@ -88,13 +72,8 @@ mod tests {
     use super::*;
 
     #[test]
-    fn display() {
-        assert_eq!(format!("{}", FilePath::new(&["foo"])), "foo");
-        assert_eq!(format!("{}", FilePath::new(&["foo", "bar"])), "foo/bar");
-    }
-
-    #[test]
     fn with_extension() {
+        assert_eq!(FilePath::empty().with_extension(""), FilePath::empty());
         assert_eq!(
             FilePath::new(&["foo"]).with_extension("c"),
             FilePath::new(&["foo.c"])
@@ -116,9 +95,20 @@ mod tests {
     #[test]
     fn join() {
         assert_eq!(
+            FilePath::new(&["foo"]).join(&FilePath::empty()),
+            FilePath::new(&["foo"])
+        );
+
+        assert_eq!(
+            FilePath::empty().join(&FilePath::new(&["foo"])),
+            FilePath::new(&["foo"])
+        );
+
+        assert_eq!(
             FilePath::new(&["foo"]).join(&FilePath::new(&["bar"])),
             FilePath::new(&["foo", "bar"])
         );
+
         assert_eq!(
             FilePath::new(&["foo", "bar"]).join(&FilePath::new(&["baz"])),
             FilePath::new(&["foo", "bar", "baz"])
@@ -127,6 +117,8 @@ mod tests {
 
     #[test]
     fn has_extension() {
+        assert!(!FilePath::empty().has_extension(""));
+        assert!(!FilePath::empty().has_extension("foo"));
         assert!(FilePath::new(&["foo"]).has_extension(""));
         assert!(!FilePath::new(&["foo"]).has_extension("foo"));
         assert!(FilePath::new(&["foo.bar"]).has_extension("bar"));
