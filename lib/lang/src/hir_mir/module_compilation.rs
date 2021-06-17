@@ -1,8 +1,6 @@
+use super::{expression_compilation, type_compilation::NONE_RECORD_TYPE_NAME};
 use super::{type_compilation, type_context::TypeContext, CompileError};
-use crate::{
-    compile::{expression_compilation, type_compilation::NONE_RECORD_TYPE_NAME},
-    hir::*,
-};
+use crate::hir::*;
 
 pub fn compile(
     module: &Module,

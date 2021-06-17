@@ -1,6 +1,6 @@
+use super::type_resolution;
 use super::CompileError;
 use crate::{
-    compile::type_resolution,
     hir::*,
     types::{self, Type},
 };

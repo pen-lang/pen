@@ -1,5 +1,5 @@
-use super::{type_resolution, CompileError};
-use crate::{compile::type_canonicalization, types::Type};
+use super::{type_canonicalization, type_resolution, CompileError};
+use crate::types::Type;
 use std::collections::HashMap;
 
 pub fn check_equality(

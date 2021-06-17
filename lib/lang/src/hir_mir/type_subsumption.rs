@@ -1,8 +1,6 @@
+use super::{type_canonicalization, type_equality};
 use super::{type_resolution, CompileError};
-use crate::{
-    compile::{type_canonicalization, type_equality},
-    types::Type,
-};
+use crate::types::Type;
 use std::collections::HashMap;
 
 pub fn check_subsumption(

@@ -1,6 +1,6 @@
+use super::union_types;
 use super::{environment, type_extraction, CompileError};
 use crate::{
-    compile::union_types,
     hir::*,
     types::{self, Type},
 };

@@ -1,8 +1,8 @@
+use super::type_resolution;
 use super::{
     environment, type_context::TypeContext, type_extraction, type_subsumption, CompileError,
 };
 use crate::{
-    compile::type_resolution,
     hir::*,
     types::{self, Type},
 };
@@ -139,8 +139,9 @@ fn check_subsumption(
 
 #[cfg(test)]
 mod tests {
+    use super::super::list_type_configuration::LIST_TYPE_CONFIGURATION;
     use super::*;
-    use crate::{compile::list_type_configuration::LIST_TYPE_CONFIGURATION, position::Position};
+    use crate::position::Position;
 
     fn check_module(module: &Module) -> Result<(), CompileError> {
         check_types(module, &TypeContext::new(module, &LIST_TYPE_CONFIGURATION))

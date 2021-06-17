@@ -1,5 +1,6 @@
+use super::type_compilation::NONE_RECORD_TYPE_NAME;
 use super::{type_compilation, type_context::TypeContext, CompileError};
-use crate::{compile::type_compilation::NONE_RECORD_TYPE_NAME, hir::*};
+use crate::hir::*;
 
 const CLOSURE_NAME: &str = "$closure";
 const UNUSED_VARIABLE: &str = "$unused";
