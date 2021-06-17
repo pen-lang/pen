@@ -1,5 +1,7 @@
-use super::{expression_compilation, type_compilation::NONE_RECORD_TYPE_NAME};
-use super::{type_compilation, type_context::TypeContext, CompileError};
+use super::{
+    expression_compilation, type_compilation, type_compilation::NONE_RECORD_TYPE_NAME,
+    type_context::TypeContext, CompileError,
+};
 use crate::hir::*;
 
 pub fn compile(

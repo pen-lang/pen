@@ -1,5 +1,4 @@
-use super::{type_canonicalization, type_equality};
-use super::{type_resolution, CompileError};
+use super::{type_canonicalization, type_equality, type_resolution, CompileError};
 use crate::types::Type;
 use std::collections::HashMap;
 

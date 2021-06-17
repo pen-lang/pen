@@ -1,5 +1,4 @@
-use super::type_canonicalization;
-use super::{type_context::TypeContext, CompileError};
+use super::{type_canonicalization, type_context::TypeContext, CompileError};
 use crate::types::{self, Type};
 
 pub const NONE_RECORD_TYPE_NAME: &str = "_pen_none";

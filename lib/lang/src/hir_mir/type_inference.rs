@@ -1,5 +1,4 @@
-use super::union_types;
-use super::{environment, type_extraction, CompileError};
+use super::{environment, type_extraction, union_types, CompileError};
 use crate::{
     hir::*,
     types::{self, Type},
