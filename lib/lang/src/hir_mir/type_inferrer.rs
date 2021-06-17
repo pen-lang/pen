@@ -1,4 +1,4 @@
-use super::{environment, type_extraction, union_types, CompileError};
+use super::{environment_creator, type_extractor, union_type_creator, CompileError};
 use crate::{
     hir::*,
     types::{self, Type},
@@ -6,7 +6,7 @@ use crate::{
 use std::collections::HashMap;
 
 pub fn infer_types(module: &Module, types: &HashMap<String, Type>) -> Result<Module, CompileError> {
-    let variables = environment::create_from_module(module);
+    let variables = environment_creator::create_from_module(module);
 
     Ok(Module::new(
         module.type_definitions().to_vec(),
@@ -77,7 +77,7 @@ fn infer_expression(
                     .iter()
                     .map(|argument| infer_expression(argument, variables))
                     .collect::<Result<_, _>>()?,
-                Some(type_extraction::extract_from_expression(&function, types)?),
+                Some(type_extractor::extract_from_expression(&function, types)?),
                 call.position().clone(),
             )
             .into()
@@ -93,8 +93,8 @@ fn infer_expression(
                 else_.clone(),
                 Some(
                     types::Union::new(
-                        type_extraction::extract_from_block(&then, types)?,
-                        type_extraction::extract_from_block(&else_, types)?,
+                        type_extractor::extract_from_block(&then, types)?,
+                        type_extractor::extract_from_block(&else_, types)?,
                         if_.position().clone(),
                     )
                     .into(),
@@ -130,16 +130,16 @@ fn infer_expression(
             IfType::new(
                 if_.name(),
                 argument.clone(),
-                Some(type_extraction::extract_from_expression(&argument, types)?),
+                Some(type_extractor::extract_from_expression(&argument, types)?),
                 branches.clone(),
                 else_.clone(),
                 Some(
-                    union_types::create_union_type(
+                    union_type_creator::create_union_type(
                         &branches
                             .iter()
                             .map(|alternative| alternative.block())
                             .chain(&else_)
-                            .map(|block| type_extraction::extract_from_block(block, types))
+                            .map(|block| type_extractor::extract_from_block(block, types))
                             .collect::<Result<Vec<_>, _>>()?,
                         if_.position(),
                     )
@@ -198,10 +198,7 @@ fn infer_statement(
     Ok(Statement::new(
         statement.name().map(|string| string.into()),
         expression.clone(),
-        Some(type_extraction::extract_from_expression(
-            &expression,
-            types,
-        )?),
+        Some(type_extractor::extract_from_expression(&expression, types)?),
         statement.position().clone(),
     ))
 }

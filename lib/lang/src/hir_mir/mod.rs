@@ -1,15 +1,15 @@
-mod environment;
+mod environment_creator;
 mod error;
-mod expression_compilation;
-mod interfaces;
+mod expression_compiler;
 mod list_type_configuration;
-mod module_compilation;
-mod type_check;
-mod type_compilation;
+mod module_compiler;
+mod module_interface_compiler;
+mod type_checker;
+mod type_compiler;
 mod type_context;
-mod type_extraction;
-mod type_inference;
-mod union_types;
+mod type_extractor;
+mod type_inferrer;
+mod union_type_creator;
 
 use self::type_context::TypeContext;
 use crate::{hir::*, interface};
@@ -22,16 +22,16 @@ pub fn compile(
 ) -> Result<(mir::ir::Module, interface::Module), CompileError> {
     let type_context = TypeContext::new(module, list_type_configuration);
 
-    let module = type_inference::infer_types(module, type_context.types())?;
-    type_check::check_types(&module, &type_context)?;
+    let module = type_inferrer::infer_types(module, type_context.types())?;
+    type_checker::check_types(&module, &type_context)?;
 
     Ok((
         {
-            let module = module_compilation::compile(&module, &type_context)?;
+            let module = module_compiler::compile(&module, &type_context)?;
             mir::analysis::check_types(&module)?;
             module
         },
-        interfaces::compile(&module)?,
+        module_interface_compiler::compile(&module)?,
     ))
 }
 

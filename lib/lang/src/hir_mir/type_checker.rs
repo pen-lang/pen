@@ -1,4 +1,4 @@
-use super::{environment, type_context::TypeContext, type_extraction, CompileError};
+use super::{environment_creator, type_context::TypeContext, type_extractor, CompileError};
 use crate::{
     hir::*,
     types::{self, Type},
@@ -6,7 +6,7 @@ use crate::{
 use std::collections::HashMap;
 
 pub fn check_types(module: &Module, type_context: &TypeContext) -> Result<(), CompileError> {
-    let variables = environment::create_from_module(module);
+    let variables = environment_creator::create_from_module(module);
 
     for definition in module.definitions() {
         check_lambda(definition.lambda(), &variables, type_context)?;
@@ -39,7 +39,7 @@ fn check_lambda(
         type_context.types(),
     )?;
 
-    Ok(type_extraction::extract_from_lambda(lambda))
+    Ok(type_extractor::extract_from_lambda(lambda))
 }
 
 fn check_expression(

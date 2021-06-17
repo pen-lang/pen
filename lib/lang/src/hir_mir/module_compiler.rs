@@ -1,5 +1,5 @@
 use super::{
-    expression_compilation, type_compilation, type_compilation::NONE_RECORD_TYPE_NAME,
+    expression_compiler, type_compiler, type_compiler::NONE_RECORD_TYPE_NAME,
     type_context::TypeContext, CompileError,
 };
 use crate::hir::*;
@@ -47,7 +47,7 @@ fn compile_type_definition(
             type_definition
                 .elements()
                 .iter()
-                .map(|element| type_compilation::compile(element.type_(), type_context))
+                .map(|element| type_compiler::compile(element.type_(), type_context))
                 .collect::<Result<_, _>>()?,
         ),
     ))
@@ -59,7 +59,7 @@ fn compile_declaration(
 ) -> Result<mir::ir::Declaration, CompileError> {
     Ok(mir::ir::Declaration::new(
         declaration.name(),
-        type_compilation::compile_function(declaration.type_(), type_context)?,
+        type_compiler::compile_function(declaration.type_(), type_context)?,
     ))
 }
 
@@ -67,8 +67,8 @@ fn compile_definition(
     definition: &Definition,
     type_context: &TypeContext,
 ) -> Result<mir::ir::Definition, CompileError> {
-    let body = expression_compilation::compile_block(definition.lambda().body(), type_context)?;
-    let result_type = type_compilation::compile(definition.lambda().result_type(), type_context)?;
+    let body = expression_compiler::compile_block(definition.lambda().body(), type_context)?;
+    let result_type = type_compiler::compile(definition.lambda().result_type(), type_context)?;
 
     Ok(if definition.lambda().arguments().is_empty() {
         mir::ir::Definition::thunk(definition.name(), vec![], body, result_type)
@@ -82,7 +82,7 @@ fn compile_definition(
                 .map(|argument| -> Result<_, CompileError> {
                     Ok(mir::ir::Argument::new(
                         argument.name(),
-                        type_compilation::compile(argument.type_(), type_context)?,
+                        type_compiler::compile(argument.type_(), type_context)?,
                     ))
                 })
                 .collect::<Result<_, _>>()?,
