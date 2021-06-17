@@ -1,5 +1,4 @@
-use super::TypeAnalysisError;
-use crate::types::{self, Type};
+use super::{super::*, TypeAnalysisError};
 use std::collections::HashMap;
 
 pub fn resolve_type(
@@ -13,7 +12,7 @@ pub fn resolve_type(
 }
 
 pub fn resolve_reference(
-    reference: &types::Reference,
+    reference: &Reference,
     types: &HashMap<String, Type>,
 ) -> Result<Type, TypeAnalysisError> {
     Ok(
@@ -30,14 +29,14 @@ pub fn resolve_reference(
 pub fn resolve_to_function(
     type_: &Type,
     types: &HashMap<String, Type>,
-) -> Result<Option<types::Function>, TypeAnalysisError> {
+) -> Result<Option<Function>, TypeAnalysisError> {
     Ok(resolve_type(type_, types)?.into_function())
 }
 
 pub fn resolve_to_record(
     type_: &Type,
     types: &HashMap<String, Type>,
-) -> Result<Option<types::Record>, TypeAnalysisError> {
+) -> Result<Option<Record>, TypeAnalysisError> {
     Ok(resolve_type(type_, types)?.into_record())
 }
 

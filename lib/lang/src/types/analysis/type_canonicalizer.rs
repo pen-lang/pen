@@ -1,5 +1,4 @@
-use super::{type_resolver, TypeAnalysisError};
-use crate::types::{self, Type};
+use super::{super::*, type_resolver, TypeAnalysisError};
 use std::collections::{BTreeSet, HashMap};
 
 pub fn canonicalize(
@@ -7,7 +6,7 @@ pub fn canonicalize(
     types: &HashMap<String, Type>,
 ) -> Result<Type, TypeAnalysisError> {
     Ok(match type_resolver::resolve_type(type_, types)? {
-        Type::Function(function) => types::Function::new(
+        Type::Function(function) => Function::new(
             function
                 .arguments()
                 .iter()
@@ -17,7 +16,7 @@ pub fn canonicalize(
             function.position().clone(),
         )
         .into(),
-        Type::List(list) => types::List::new(
+        Type::List(list) => List::new(
             canonicalize(list.element(), types)?,
             list.position().clone(),
         )
@@ -34,12 +33,12 @@ pub fn canonicalize(
 }
 
 fn canonicalize_union(
-    union: &types::Union,
+    union: &Union,
     types: &HashMap<String, Type>,
 ) -> Result<Type, TypeAnalysisError> {
     Ok(collect_types(&union.clone().into(), types)?
         .into_iter()
-        .reduce(|one, other| types::Union::new(one, other, union.position().clone()).into())
+        .reduce(|one, other| Union::new(one, other, union.position().clone()).into())
         .unwrap())
 }
 
@@ -72,11 +71,8 @@ mod tests {
     #[test]
     fn canonicalize_number() {
         assert_eq!(
-            canonicalize(
-                &types::Number::new(Position::dummy()).into(),
-                &Default::default(),
-            ),
-            Ok(types::Number::new(Position::dummy()).into())
+            canonicalize(&Number::new(Position::dummy()).into(), &Default::default(),),
+            Ok(Number::new(Position::dummy()).into())
         );
     }
 
@@ -84,15 +80,15 @@ mod tests {
     fn canonicalize_union_of_numbers() {
         assert_eq!(
             canonicalize(
-                &types::Union::new(
-                    types::Number::new(Position::dummy()),
-                    types::Number::new(Position::dummy()),
+                &Union::new(
+                    Number::new(Position::dummy()),
+                    Number::new(Position::dummy()),
                     Position::dummy()
                 )
                 .into(),
                 &Default::default(),
             ),
-            Ok(types::Number::new(Position::dummy()).into())
+            Ok(Number::new(Position::dummy()).into())
         );
     }
 
@@ -100,11 +96,11 @@ mod tests {
     fn canonicalize_union_of_3_types() {
         assert_eq!(
             canonicalize(
-                &types::Union::new(
-                    types::Number::new(Position::dummy()),
-                    types::Union::new(
-                        types::Boolean::new(Position::dummy()),
-                        types::None::new(Position::dummy()),
+                &Union::new(
+                    Number::new(Position::dummy()),
+                    Union::new(
+                        Boolean::new(Position::dummy()),
+                        None::new(Position::dummy()),
                         Position::dummy()
                     ),
                     Position::dummy()
@@ -112,13 +108,13 @@ mod tests {
                 .into(),
                 &Default::default(),
             ),
-            Ok(types::Union::new(
-                types::Union::new(
-                    types::Boolean::new(Position::dummy()),
-                    types::None::new(Position::dummy()),
+            Ok(Union::new(
+                Union::new(
+                    Boolean::new(Position::dummy()),
+                    None::new(Position::dummy()),
                     Position::dummy()
                 ),
-                types::Number::new(Position::dummy()),
+                Number::new(Position::dummy()),
                 Position::dummy()
             )
             .into())
@@ -129,22 +125,22 @@ mod tests {
     fn canonicalize_union_of_function_argument() {
         assert_eq!(
             canonicalize(
-                &types::Function::new(
-                    vec![types::Union::new(
-                        types::Number::new(Position::dummy()),
-                        types::Number::new(Position::dummy()),
+                &Function::new(
+                    vec![Union::new(
+                        Number::new(Position::dummy()),
+                        Number::new(Position::dummy()),
                         Position::dummy()
                     )
                     .into()],
-                    types::None::new(Position::dummy()),
+                    None::new(Position::dummy()),
                     Position::dummy(),
                 )
                 .into(),
                 &Default::default(),
             ),
-            Ok(types::Function::new(
-                vec![types::Number::new(Position::dummy()).into()],
-                types::None::new(Position::dummy()),
+            Ok(Function::new(
+                vec![Number::new(Position::dummy()).into()],
+                None::new(Position::dummy()),
                 Position::dummy(),
             )
             .into())
@@ -155,11 +151,11 @@ mod tests {
     fn canonicalize_union_of_function_result() {
         assert_eq!(
             canonicalize(
-                &types::Function::new(
+                &Function::new(
                     vec![],
-                    types::Union::new(
-                        types::Number::new(Position::dummy()),
-                        types::Number::new(Position::dummy()),
+                    Union::new(
+                        Number::new(Position::dummy()),
+                        Number::new(Position::dummy()),
                         Position::dummy()
                     ),
                     Position::dummy(),
@@ -167,12 +163,7 @@ mod tests {
                 .into(),
                 &Default::default(),
             ),
-            Ok(types::Function::new(
-                vec![],
-                types::Number::new(Position::dummy()),
-                Position::dummy(),
-            )
-            .into())
+            Ok(Function::new(vec![], Number::new(Position::dummy()), Position::dummy(),).into())
         );
     }
 
@@ -180,10 +171,10 @@ mod tests {
     fn canonicalize_union_of_list_element() {
         assert_eq!(
             canonicalize(
-                &types::List::new(
-                    types::Union::new(
-                        types::Number::new(Position::dummy()),
-                        types::Number::new(Position::dummy()),
+                &List::new(
+                    Union::new(
+                        Number::new(Position::dummy()),
+                        Number::new(Position::dummy()),
                         Position::dummy()
                     ),
                     Position::dummy(),
@@ -191,7 +182,7 @@ mod tests {
                 .into(),
                 &Default::default(),
             ),
-            Ok(types::List::new(types::Number::new(Position::dummy()), Position::dummy(),).into())
+            Ok(List::new(Number::new(Position::dummy()), Position::dummy(),).into())
         );
     }
 }

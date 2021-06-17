@@ -1,5 +1,4 @@
-use super::{type_canonicalizer, type_resolver, TypeAnalysisError};
-use crate::types::Type;
+use super::{super::Type, type_canonicalizer, type_resolver, TypeAnalysisError};
 use std::collections::HashMap;
 
 pub fn check_equality(
@@ -44,14 +43,14 @@ pub fn check_equality(
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use crate::{position::Position, types};
+    use super::{super::super::*, *};
+    use crate::position::Position;
 
     #[test]
     fn check_numbers() {
         assert!(check_equality(
-            &types::Number::new(Position::dummy()).into(),
-            &types::Number::new(Position::dummy()).into(),
+            &Number::new(Position::dummy()).into(),
+            &Number::new(Position::dummy()).into(),
             &Default::default(),
         )
         .unwrap());
@@ -60,8 +59,8 @@ mod tests {
     #[test]
     fn fail_to_check_number_and_none() {
         assert!(!check_equality(
-            &types::Number::new(Position::dummy()).into(),
-            &types::None::new(Position::dummy()).into(),
+            &Number::new(Position::dummy()).into(),
+            &None::new(Position::dummy()).into(),
             &Default::default(),
         )
         .unwrap());
@@ -70,8 +69,8 @@ mod tests {
     #[test]
     fn check_lists() {
         assert!(check_equality(
-            &types::List::new(types::Number::new(Position::dummy()), Position::dummy()).into(),
-            &types::List::new(types::Number::new(Position::dummy()), Position::dummy()).into(),
+            &List::new(Number::new(Position::dummy()), Position::dummy()).into(),
+            &List::new(Number::new(Position::dummy()), Position::dummy()).into(),
             &Default::default(),
         )
         .unwrap());
@@ -80,18 +79,8 @@ mod tests {
     #[test]
     fn check_functions() {
         assert!(check_equality(
-            &types::Function::new(
-                vec![],
-                types::Number::new(Position::dummy()),
-                Position::dummy()
-            )
-            .into(),
-            &types::Function::new(
-                vec![],
-                types::Number::new(Position::dummy()),
-                Position::dummy()
-            )
-            .into(),
+            &Function::new(vec![], Number::new(Position::dummy()), Position::dummy()).into(),
+            &Function::new(vec![], Number::new(Position::dummy()), Position::dummy()).into(),
             &Default::default(),
         )
         .unwrap());
@@ -100,18 +89,8 @@ mod tests {
     #[test]
     fn check_function_arguments() {
         assert!(check_equality(
-            &types::Function::new(
-                vec![],
-                types::Number::new(Position::dummy()),
-                Position::dummy()
-            )
-            .into(),
-            &types::Function::new(
-                vec![],
-                types::Number::new(Position::dummy()),
-                Position::dummy()
-            )
-            .into(),
+            &Function::new(vec![], Number::new(Position::dummy()), Position::dummy()).into(),
+            &Function::new(vec![], Number::new(Position::dummy()), Position::dummy()).into(),
             &Default::default(),
         )
         .unwrap());
@@ -120,13 +99,13 @@ mod tests {
     #[test]
     fn check_union_and_number() {
         assert!(check_equality(
-            &types::Union::new(
-                types::Number::new(Position::dummy()),
-                types::Number::new(Position::dummy()),
+            &Union::new(
+                Number::new(Position::dummy()),
+                Number::new(Position::dummy()),
                 Position::dummy(),
             )
             .into(),
-            &types::Number::new(Position::dummy()).into(),
+            &Number::new(Position::dummy()).into(),
             &Default::default(),
         )
         .unwrap());
@@ -135,15 +114,15 @@ mod tests {
     #[test]
     fn check_unions() {
         assert!(check_equality(
-            &types::Union::new(
-                types::Number::new(Position::dummy()),
-                types::None::new(Position::dummy()),
+            &Union::new(
+                Number::new(Position::dummy()),
+                None::new(Position::dummy()),
                 Position::dummy(),
             )
             .into(),
-            &types::Union::new(
-                types::None::new(Position::dummy()),
-                types::Number::new(Position::dummy()),
+            &Union::new(
+                None::new(Position::dummy()),
+                Number::new(Position::dummy()),
                 Position::dummy(),
             )
             .into(),

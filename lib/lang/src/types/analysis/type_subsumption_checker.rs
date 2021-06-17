@@ -1,5 +1,6 @@
-use super::{type_canonicalizer, type_equality_checker, type_resolver, TypeAnalysisError};
-use crate::types::Type;
+use super::{
+    super::Type, type_canonicalizer, type_equality_checker, type_resolver, TypeAnalysisError,
+};
 use std::collections::HashMap;
 
 pub fn check_subsumption(
@@ -31,14 +32,14 @@ pub fn check_subsumption(
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use crate::{position::Position, types};
+    use super::{super::super::*, *};
+    use crate::position::Position;
 
     #[test]
     fn check_numbers() {
         assert!(check_subsumption(
-            &types::Number::new(Position::dummy()).into(),
-            &types::Number::new(Position::dummy()).into(),
+            &Number::new(Position::dummy()).into(),
+            &Number::new(Position::dummy()).into(),
             &Default::default()
         )
         .unwrap());
@@ -47,10 +48,10 @@ mod tests {
     #[test]
     fn check_number_and_union() {
         assert!(check_subsumption(
-            &types::Number::new(Position::dummy()).into(),
-            &types::Union::new(
-                types::Number::new(Position::dummy()),
-                types::None::new(Position::dummy()),
+            &Number::new(Position::dummy()).into(),
+            &Union::new(
+                Number::new(Position::dummy()),
+                None::new(Position::dummy()),
                 Position::dummy()
             )
             .into(),
@@ -62,13 +63,13 @@ mod tests {
     #[test]
     fn check_non_canonical_union_and_number() {
         assert!(check_subsumption(
-            &types::Union::new(
-                types::Number::new(Position::dummy()),
-                types::Number::new(Position::dummy()),
+            &Union::new(
+                Number::new(Position::dummy()),
+                Number::new(Position::dummy()),
                 Position::dummy()
             )
             .into(),
-            &types::Number::new(Position::dummy()).into(),
+            &Number::new(Position::dummy()).into(),
             &Default::default()
         )
         .unwrap());
