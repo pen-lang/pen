@@ -11,7 +11,7 @@ pub fn compile_module(
     name_prefix: &str,
     list_type_configuration: &ListTypeConfiguration,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    let (mir_module, module_interface) = lang::hir_mir::compile(
+    let (module, module_interface) = lang::hir_mir::compile(
         &lang::ast_hir::compile(
             &lang::parse::parse(
                 &infrastructure
@@ -29,7 +29,7 @@ pub fn compile_module(
         object_file_path,
         &fmm_llvm::compile_to_bit_code(
             &fmm::analysis::transform_to_cps(
-                &mir_fmm::compile(&mir_module)?,
+                &mir_fmm::compile(&module)?,
                 fmm::types::VOID_TYPE.clone(),
             )?,
             &fmm_llvm::HeapConfiguration {
