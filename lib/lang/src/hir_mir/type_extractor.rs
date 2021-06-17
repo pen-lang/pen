@@ -55,5 +55,6 @@ pub fn extract_from_block(
     block: &Block,
     types: &HashMap<String, Type>,
 ) -> Result<Type, CompileError> {
+    // TODO Process statements.
     extract_from_expression(block.expression(), types)
 }
