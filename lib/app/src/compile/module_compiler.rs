@@ -10,6 +10,7 @@ pub fn compile_module(
     name_prefix: &str,
     list_type_configuration: &ListTypeConfiguration,
 ) -> Result<(), Box<dyn std::error::Error>> {
+    // TODO Compile module imports.
     let (module, module_interface) = lang::hir_mir::compile(
         &lang::ast_hir::compile(
             &lang::parse::parse(
