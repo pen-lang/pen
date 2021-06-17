@@ -1,19 +1,15 @@
-mod environment;
+mod environment_creator;
 mod error;
-mod expression_compilation;
-mod interfaces;
+mod expression_compiler;
 mod list_type_configuration;
-mod module_compilation;
-mod type_canonicalization;
-mod type_check;
-mod type_compilation;
+mod module_compiler;
+mod module_interface_compiler;
+mod type_checker;
+mod type_compiler;
 mod type_context;
-mod type_equality;
-mod type_extraction;
-mod type_inference;
-mod type_resolution;
-mod type_subsumption;
-mod union_types;
+mod type_extractor;
+mod type_inferrer;
+mod union_type_creator;
 
 use self::type_context::TypeContext;
 use crate::{hir::*, interface};
@@ -23,23 +19,19 @@ use list_type_configuration::ListTypeConfiguration;
 pub fn compile(
     module: &Module,
     list_type_configuration: &ListTypeConfiguration,
-) -> Result<(Vec<u8>, interface::Module), CompileError> {
+) -> Result<(mir::ir::Module, interface::Module), CompileError> {
     let type_context = TypeContext::new(module, list_type_configuration);
 
-    let module = type_inference::infer_types(module, type_context.types())?;
-    type_check::check_types(&module, &type_context)?;
+    let module = type_inferrer::infer_types(module, type_context.types())?;
+    type_checker::check_types(&module, &type_context)?;
 
     Ok((
-        fmm_llvm::compile_to_bit_code(
-            &mir_fmm::compile(&module_compilation::compile(&module, &type_context)?)?,
-            &fmm_llvm::HeapConfiguration {
-                allocate_function_name: "malloc".into(),
-                reallocate_function_name: "realloc".into(),
-                free_function_name: "free".into(),
-            },
-            None,
-        )?,
-        interfaces::compile(&module)?,
+        {
+            let module = module_compiler::compile(&module, &type_context)?;
+            mir::analysis::check_types(&module)?;
+            module
+        },
+        module_interface_compiler::compile(&module)?,
     ))
 }
 

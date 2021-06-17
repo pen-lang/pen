@@ -1,4 +1,8 @@
-use crate::{hir::*, position::Position, types};
+use crate::{
+    hir::*,
+    position::Position,
+    types::{self, analysis::TypeAnalysisError},
+};
 use std::{
     error::Error,
     fmt::{self, Display, Formatter},
@@ -6,13 +10,13 @@ use std::{
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum CompileError {
-    FmmLlvmCompile(fmm_llvm::CompileError),
     FunctionExpected(Position),
-    MirFmmCompile(mir_fmm::CompileError),
+    MirTypeCheck(mir::analysis::TypeCheckError),
     RecordElementUnknown(Position),
     RecordElementMissing(Position),
     RecordExpected(Position),
     RecordNotFound(types::Record),
+    TypeAnalysis(TypeAnalysisError),
     TypeNotFound(types::Reference),
     TypeNotInferred(Position),
     TypesNotMatched(Position, Position),
@@ -23,20 +27,17 @@ pub enum CompileError {
 impl Display for CompileError {
     fn fmt(&self, formatter: &mut Formatter) -> fmt::Result {
         match self {
-            Self::FmmLlvmCompile(error) => {
-                write!(formatter, "failed to compile F-- to LLVM: {}", error)
-            }
             Self::FunctionExpected(position) => {
                 write!(formatter, "function expected\n{}", position)
+            }
+            Self::MirTypeCheck(error) => {
+                write!(formatter, "failed to check types in MIR: {}", error)
             }
             Self::RecordElementUnknown(position) => {
                 write!(formatter, "unknown record element\n{}", position)
             }
             Self::RecordElementMissing(position) => {
                 write!(formatter, "missing record element\n{}", position)
-            }
-            Self::MirFmmCompile(error) => {
-                write!(formatter, "failed to compile MIR to F--: {}", error)
             }
             Self::RecordExpected(position) => {
                 write!(formatter, "record expected\n{}", position)
@@ -47,6 +48,7 @@ impl Display for CompileError {
                 record.name(),
                 record.position()
             ),
+            Self::TypeAnalysis(error) => write!(formatter, "{}", error),
             Self::TypeNotFound(reference) => write!(
                 formatter,
                 "type \"{}\" not found\n{}",
@@ -80,14 +82,14 @@ impl Display for CompileError {
 
 impl Error for CompileError {}
 
-impl From<fmm_llvm::CompileError> for CompileError {
-    fn from(error: fmm_llvm::CompileError) -> Self {
-        Self::FmmLlvmCompile(error)
+impl From<mir::analysis::TypeCheckError> for CompileError {
+    fn from(error: mir::analysis::TypeCheckError) -> Self {
+        Self::MirTypeCheck(error)
     }
 }
 
-impl From<mir_fmm::CompileError> for CompileError {
-    fn from(error: mir_fmm::CompileError) -> Self {
-        Self::MirFmmCompile(error)
+impl From<TypeAnalysisError> for CompileError {
+    fn from(error: TypeAnalysisError) -> Self {
+        Self::TypeAnalysis(error)
     }
 }
