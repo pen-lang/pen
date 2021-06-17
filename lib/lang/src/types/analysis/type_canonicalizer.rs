@@ -2,7 +2,10 @@ use super::{type_resolver, TypeAnalysisError};
 use crate::types::{self, Type};
 use std::collections::{BTreeSet, HashMap};
 
-pub fn canonicalize(type_: &Type, types: &HashMap<String, Type>) -> Result<Type, TypeAnalysisError> {
+pub fn canonicalize(
+    type_: &Type,
+    types: &HashMap<String, Type>,
+) -> Result<Type, TypeAnalysisError> {
     Ok(match type_resolver::resolve_type(type_, types)? {
         Type::Function(function) => types::Function::new(
             function
@@ -40,7 +43,10 @@ fn canonicalize_union(
         .unwrap())
 }
 
-fn collect_types(type_: &Type, types: &HashMap<String, Type>) -> Result<BTreeSet<Type>, TypeAnalysisError> {
+fn collect_types(
+    type_: &Type,
+    types: &HashMap<String, Type>,
+) -> Result<BTreeSet<Type>, TypeAnalysisError> {
     Ok(match type_resolver::resolve_type(type_, types)? {
         Type::Union(union) => collect_types(union.lhs(), types)?
             .into_iter()

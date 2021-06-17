@@ -2,7 +2,10 @@ use super::TypeAnalysisError;
 use crate::types::{self, Type};
 use std::collections::HashMap;
 
-pub fn resolve_type(type_: &Type, types: &HashMap<String, Type>) -> Result<Type, TypeAnalysisError> {
+pub fn resolve_type(
+    type_: &Type,
+    types: &HashMap<String, Type>,
+) -> Result<Type, TypeAnalysisError> {
     Ok(match type_ {
         Type::Reference(reference) => resolve_reference(reference, types)?,
         _ => type_.clone(),
