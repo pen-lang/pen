@@ -34,6 +34,7 @@ pub fn compile(module: &hir::Module) -> Result<interface::Module, CompileError> 
                 interface::Declaration::new(
                     definition.name(),
                     type_extraction::extract_from_lambda(definition.lambda()),
+                    definition.position().clone(),
                 )
             })
             .collect(),

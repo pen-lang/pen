@@ -8,13 +8,13 @@ use crate::position::Position;
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum Expression {
-    Call(Call),
     Boolean(Boolean),
-    IfType(IfType),
+    Call(Call),
     If(If),
+    IfList(IfList),
+    IfType(IfType),
     Lambda(Lambda),
     List(List),
-    IfList(IfList),
     None(None),
     Number(Number),
     Operation(Operation),
@@ -29,21 +29,21 @@ pub enum Expression {
 impl Expression {
     pub fn position(&self) -> &Position {
         match self {
-            Self::Call(call) => call.position(),
             Self::Boolean(boolean) => boolean.position(),
-            Self::IfType(if_) => if_.position(),
+            Self::Call(call) => call.position(),
             Self::If(if_) => if_.position(),
+            Self::IfList(if_) => if_.position(),
+            Self::IfType(if_) => if_.position(),
             Self::Lambda(lambda) => lambda.position(),
             Self::List(list) => list.position(),
-            Self::IfList(if_) => if_.position(),
+            Self::None(none) => none.position(),
+            Self::Number(number) => number.position(),
             Self::Operation(operation) => operation.position(),
             Self::RecordConstruction(construction) => construction.position(),
             Self::RecordElement(element) => element.position(),
             Self::RecordUpdate(record_update) => record_update.position(),
             Self::String(string) => string.position(),
             Self::TypeCoercion(coercion) => coercion.position(),
-            Self::None(none) => none.position(),
-            Self::Number(number) => number.position(),
             Self::Variable(variable) => variable.position(),
         }
     }
