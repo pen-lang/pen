@@ -8,7 +8,7 @@ jobs:
       - run: curl -fsSL https://apt.llvm.org/llvm.sh | sudo bash -s 12
       - uses: actions/checkout@v2
       - run: cargo build
-  test:
+  unit-test:
     runs-on: ubuntu-latest
     steps:
       - run: curl -fsSL https://apt.llvm.org/llvm.sh | sudo bash -s 12
@@ -32,3 +32,12 @@ jobs:
       - uses: streetsidesoftware/cspell-action@main
         with:
           files: "**/*.{md,rs}"
+  integration-test:
+    runs-on: ubuntu-latest
+    steps:
+      - run: curl -fsSL https://apt.llvm.org/llvm.sh | sudo bash -s 12
+      - uses: actions/checkout@v2
+      - uses: actions/setup-ruby@v1
+      - run: bundler install
+      - run: cargo build --release
+      - run: PATH=$PWD/target/release:$PATH cucumber --publish-quiet
