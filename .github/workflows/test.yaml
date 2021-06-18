@@ -33,7 +33,7 @@ jobs:
         with:
           files: "**/*.{md,rs}"
   integration-test:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
       - run: curl -fsSL https://apt.llvm.org/llvm.sh | sudo bash -s 12
       - uses: actions/checkout@v2
