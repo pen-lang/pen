@@ -65,6 +65,10 @@ impl FilePath {
             element == extension
         })
     }
+
+    pub fn relative_to(&self, path: &Self) -> Self {
+        Self::new(self.components().skip(path.components().count()))
+    }
 }
 
 #[cfg(test)]
