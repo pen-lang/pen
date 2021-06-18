@@ -66,6 +66,7 @@ impl FilePath {
         })
     }
 
+    // TODO Check a directory path.
     pub fn relative_to(&self, path: &Self) -> Self {
         Self::new(self.components().skip(path.components().count()))
     }
