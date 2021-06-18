@@ -176,6 +176,9 @@ fn compile_expression(expression: &ast::Expression) -> Result<hir::Expression, C
         ast::Expression::Number(number) => {
             hir::Number::new(number.value(), number.position().clone()).into()
         }
+        ast::Expression::Variable(variable) => {
+            hir::Variable::new(variable.name(), variable.position().clone()).into()
+        }
         _ => todo!(),
     })
 }
