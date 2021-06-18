@@ -14,7 +14,7 @@ mod union_type_creator;
 use self::type_context::TypeContext;
 use crate::{hir::*, interface};
 pub use error::CompileError;
-use list_type_configuration::ListTypeConfiguration;
+pub use list_type_configuration::ListTypeConfiguration;
 
 pub fn compile(
     module: &Module,

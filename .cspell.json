@@ -6,6 +6,7 @@
     "canonicalizer",
     "combinator",
     "concat",
+    "displayer",
     "hasher",
     "idempotently",
     "malloc",
