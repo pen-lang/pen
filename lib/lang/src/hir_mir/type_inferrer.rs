@@ -153,7 +153,8 @@ fn infer_expression(
         Expression::Boolean(_)
         | Expression::None(_)
         | Expression::Number(_)
-        | Expression::String(_) => expression.clone(),
+        | Expression::String(_)
+        | Expression::Variable(_) => expression.clone(),
         _ => todo!(),
     })
 }
