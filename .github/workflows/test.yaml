@@ -37,7 +37,7 @@ jobs:
     steps:
       - run: curl -fsSL https://apt.llvm.org/llvm.sh | sudo bash -s 12
       - uses: actions/checkout@v2
-      - run: sudo apt install ruby-bundler
+      - uses: actions/setup-ruby@v1
       - run: bundler install
       - run: cargo build --release
       - run: PATH=$PWD/target/release:$PATH cucumber --publish-quiet
