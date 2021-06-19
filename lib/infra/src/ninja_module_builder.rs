@@ -20,9 +20,9 @@ impl NinjaModuleBuilder {
     fn compile_ninja_file(&self, module_targets: &[app::build::ModuleTarget]) -> String {
         vec![
             "ninja_required_version = 1.10",
-            "rule compile",
+            "rule pen_compile",
             "  command = pen compile -p $package_prefix -m $module_prefix $in $out",
-            "rule compile_dependency",
+            "rule pen_compile_dependency",
             "  command = pen compile-dependency -p $package_directory $in $object_file $out",
         ]
         .into_iter()
@@ -40,7 +40,7 @@ impl NinjaModuleBuilder {
 
             vec![
                 format!(
-                    "build {}: compile_dependency {}",
+                    "build {}: pen_compile_dependency {}",
                     dependency_path.display(),
                     input_path.display(),
                 ),
@@ -52,7 +52,7 @@ impl NinjaModuleBuilder {
                 ),
                 format!("  object_file = {}", object_path.display()),
                 format!(
-                    "build {}: compile {} || {}",
+                    "build {}: pen_compile {} || {}",
                     object_path.display(),
                     input_path.display(),
                     dependency_path.display()
