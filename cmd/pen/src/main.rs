@@ -24,20 +24,6 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         .subcommand(
             clap::SubCommand::with_name("compile")
                 .about("Compiles a module")
-                .arg(
-                    clap::Arg::with_name("package prefix")
-                        .required(true)
-                        .takes_value(true)
-                        .short("p")
-                        .long("package-prefix"),
-                )
-                .arg(
-                    clap::Arg::with_name("module prefix")
-                        .required(true)
-                        .takes_value(true)
-                        .short("m")
-                        .long("module-prefix"),
-                )
                 .arg(clap::Arg::with_name("source file").required(true))
                 .arg(clap::Arg::with_name("object file").required(true))
                 .arg(clap::Arg::with_name("interface file").required(true)),
@@ -46,11 +32,11 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
             clap::SubCommand::with_name("compile-dependency")
                 .about("Compiles module dependency")
                 .arg(
-                    clap::Arg::with_name("package path")
+                    clap::Arg::with_name("package directory")
                         .required(true)
                         .takes_value(true)
                         .short("p")
-                        .long("package-path"),
+                        .long("package-directory"),
                 )
                 .arg(clap::Arg::with_name("source file").required(true))
                 .arg(clap::Arg::with_name("object file").required(true))
@@ -67,15 +53,13 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                 matches.value_of("source file").unwrap(),
                 matches.value_of("object file").unwrap(),
                 matches.value_of("interface file").unwrap(),
-                matches.value_of("module prefix").unwrap(),
-                matches.value_of("package prefix").unwrap(),
             )
         }
         ("compile-dependency", matches) => {
             let matches = matches.unwrap();
 
             compile_dependency(
-                matches.value_of("package path").unwrap(),
+                matches.value_of("package directory").unwrap(),
                 matches.value_of("source file").unwrap(),
                 matches.value_of("object file").unwrap(),
                 matches.value_of("dependency file").unwrap(),

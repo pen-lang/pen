@@ -21,7 +21,7 @@ impl NinjaModuleBuilder {
         vec![
             "ninja_required_version = 1.10",
             "rule pen_compile",
-            "  command = pen compile -p $package_prefix -m $module_prefix $in $out",
+            "  command = pen compile $in $out",
             "rule pen_compile_dependency",
             "  command = pen compile-dependency -p $package_directory $in $object_file $out",
         ]
@@ -60,8 +60,6 @@ impl NinjaModuleBuilder {
                     dependency_path.display()
                 ),
                 format!("  dyndep = {}", dependency_path.display()),
-                format!("  package_prefix = {}", target.package_prefix()),
-                format!("  module_prefix = {}", target.module_prefix()),
             ]
         }))
         .chain(vec![format!(

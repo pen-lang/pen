@@ -10,7 +10,6 @@ pub fn build_main_package(
     infrastructure.module_builder.build(
         &module_target_collector::collect_module_targets(
             infrastructure,
-            "main",
             main_package_directory,
             output_directory,
         )?,
