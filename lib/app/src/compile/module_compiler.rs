@@ -40,7 +40,7 @@ pub fn compile_module(
         )?,
     )?;
     infrastructure.file_system.write(
-        &interface_file,
+        interface_file,
         serde_json::to_string(&module_interface)?.as_bytes(),
     )?;
 
