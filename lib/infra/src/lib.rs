@@ -4,11 +4,11 @@ mod file_path_converter;
 mod file_path_displayer;
 mod file_system;
 mod logger;
-mod module_builder;
+mod ninja_module_builder;
 
 pub use error::*;
 pub use file_path_converter::*;
 pub use file_path_displayer::*;
 pub use file_system::*;
 pub use logger::*;
-pub use module_builder::*;
+pub use ninja_module_builder::*;
