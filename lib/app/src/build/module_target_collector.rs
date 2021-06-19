@@ -1,10 +1,12 @@
-use super::build_infrastructure::BuildInfrastructure;
-use super::module_finder;
-use super::module_target::ModuleTarget;
+use super::{
+    build_infrastructure::BuildInfrastructure, module_finder, module_target::ModuleTarget,
+};
 use crate::infra::FilePath;
-use std::collections::hash_map::DefaultHasher;
-use std::error::Error;
-use std::hash::{Hash, Hasher};
+use std::{
+    collections::hash_map::DefaultHasher,
+    error::Error,
+    hash::{Hash, Hasher},
+};
 
 const OBJECT_DIRECTORY: &str = "objects";
 const MODULE_PREFIX_COMPONENT_SEPARATOR: &str = ".";

@@ -1,5 +1,7 @@
-use crate::common::FilePathConfiguration;
-use crate::infra::{ModuleBuilder, FileSystem};
+use crate::{
+    common::FilePathConfiguration,
+    infra::{FileSystem, ModuleBuilder},
+};
 use std::sync::Arc;
 
 pub struct BuildInfrastructure {

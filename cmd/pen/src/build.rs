@@ -1,5 +1,4 @@
-use super::file_path_configuration::FILE_PATH_CONFIGURATION;
-use super::main_package_directory_finder;
+use super::{file_path_configuration::FILE_PATH_CONFIGURATION, main_package_directory_finder};
 use std::sync::Arc;
 
 const OUTPUT_DIRECTORY: &str = ".pen";

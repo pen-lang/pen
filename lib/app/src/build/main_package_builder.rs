@@ -1,5 +1,4 @@
-use super::build_infrastructure::BuildInfrastructure;
-use super::module_target_collector;
+use super::{build_infrastructure::BuildInfrastructure, module_target_collector};
 use crate::infra::FilePath;
 use std::error::Error;
 

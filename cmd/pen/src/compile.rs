@@ -1,5 +1,4 @@
-use super::compile_configuration::COMPILE_CONFIGURATION;
-use super::main_package_directory_finder;
+use super::{compile_configuration::COMPILE_CONFIGURATION, main_package_directory_finder};
 use std::sync::Arc;
 
 pub fn compile(

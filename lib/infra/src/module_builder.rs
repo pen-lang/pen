@@ -1,7 +1,5 @@
-use super::command_runner;
-use super::file_path_converter::FilePathConverter;
-use std::error::Error;
-use std::sync::Arc;
+use super::{command_runner, file_path_converter::FilePathConverter};
+use std::{error::Error, sync::Arc};
 
 pub struct ModuleBuilder {
     file_system: Arc<dyn app::infra::FileSystem>,
