@@ -5,8 +5,6 @@ pub fn compile(
     source_path: &str,
     object_path: &str,
     interface_path: &str,
-    module_prefix: &str,
-    package_prefix: &str,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let file_path_converter = Arc::new(infra::FilePathConverter::new(
         main_package_directory_finder::find()?,
@@ -22,8 +20,6 @@ pub fn compile(
         &file_path_converter.convert_to_file_path(source_path)?,
         &file_path_converter.convert_to_file_path(object_path)?,
         &file_path_converter.convert_to_file_path(interface_path)?,
-        module_prefix,
-        package_prefix,
         &COMPILE_CONFIGURATION,
     )?;
 

@@ -9,12 +9,8 @@ pub fn compile_module(
     source_file: &FilePath,
     object_file: &FilePath,
     interface_file: &FilePath,
-    module_prefix: &str,
-    package_prefix: &str,
     compile_configuration: &CompileConfiguration,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    let full_prefix = package_prefix.to_owned() + module_prefix;
-
     // TODO Compile module imports.
     let (module, module_interface) = lang::hir_mir::compile(
         &lang::ast_hir::compile(
@@ -22,7 +18,10 @@ pub fn compile_module(
                 &infrastructure.file_system.read_to_string(source_file)?,
                 &infrastructure.file_path_displayer.display(source_file),
             )?,
-            &full_prefix,
+            &format!(
+                "{}:",
+                infrastructure.file_path_displayer.display(source_file)
+            ),
             &[],
         )?,
         &compile_configuration.list_type,
