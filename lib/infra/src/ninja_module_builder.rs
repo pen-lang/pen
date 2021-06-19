@@ -42,11 +42,12 @@ impl NinjaModuleBuilder {
                     input_path.display()
                 ),
                 format!(
-                    "build {}: compile {}",
+                    "build {}: compile {} || {}",
                     self.file_path_converter
                         .convert_to_os_path(target.object_file_path())
                         .display(),
-                    input_path.display()
+                    input_path.display(),
+                    dependency_path.display()
                 ),
                 format!("  dyndep = {}", dependency_path.display()),
                 format!("  package_prefix = {}", target.package_prefix()),
