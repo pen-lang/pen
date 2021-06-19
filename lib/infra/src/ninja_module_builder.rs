@@ -69,6 +69,7 @@ impl NinjaModuleBuilder {
         )])
         .collect::<Vec<String>>()
         .join("\n")
+            + "\n"
     }
 }
 
