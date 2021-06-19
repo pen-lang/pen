@@ -2,6 +2,7 @@ use super::{
     compile_configuration::CompileConfiguration, compile_infrastructure::CompileInfrastructure,
 };
 use crate::infra::FilePath;
+use std::error::Error;
 
 // TODO Pass a package configuration file path.
 pub fn compile_module(
@@ -10,7 +11,7 @@ pub fn compile_module(
     object_file: &FilePath,
     interface_file: &FilePath,
     compile_configuration: &CompileConfiguration,
-) -> Result<(), Box<dyn std::error::Error>> {
+) -> Result<(), Box<dyn Error>> {
     // TODO Compile module imports.
     let (module, module_interface) = lang::hir_mir::compile(
         &lang::ast_hir::compile(
