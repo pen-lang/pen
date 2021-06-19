@@ -28,9 +28,15 @@ impl NinjaModuleBuilder {
         .into_iter()
         .map(String::from)
         .chain(module_targets.iter().flat_map(|target| {
-            let input_path = self
+            let package_directory = self
+                .file_path_converter
+                .convert_to_os_path(target.package_directory());
+            let source_path = self
                 .file_path_converter
                 .convert_to_os_path(target.source_file_path());
+            let interface_path = self
+                .file_path_converter
+                .convert_to_os_path(target.interface_file_path());
             let dependency_path = self
                 .file_path_converter
                 .convert_to_os_path(&target.object_file_path().with_extension("dd"));
@@ -42,19 +48,15 @@ impl NinjaModuleBuilder {
                 format!(
                     "build {}: pen_compile_dependency {}",
                     dependency_path.display(),
-                    input_path.display(),
+                    source_path.display(),
                 ),
-                format!(
-                    "  package_directory = {}",
-                    self.file_path_converter
-                        .convert_to_os_path(target.package_directory())
-                        .display()
-                ),
+                format!("  package_directory = {}", package_directory.display()),
                 format!("  object_file = {}", object_path.display()),
                 format!(
-                    "build {}: pen_compile {} || {}",
+                    "build {} {}: pen_compile {} || {}",
                     object_path.display(),
-                    input_path.display(),
+                    interface_path.display(),
+                    source_path.display(),
                     dependency_path.display()
                 ),
                 format!("  dyndep = {}", dependency_path.display()),

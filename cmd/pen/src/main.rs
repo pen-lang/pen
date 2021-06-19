@@ -38,8 +38,9 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                         .short("m")
                         .long("module-prefix"),
                 )
-                .arg(clap::Arg::with_name("source path").required(true))
-                .arg(clap::Arg::with_name("object path").required(true)),
+                .arg(clap::Arg::with_name("source file").required(true))
+                .arg(clap::Arg::with_name("object file").required(true))
+                .arg(clap::Arg::with_name("interface file").required(true)),
         )
         .subcommand(
             clap::SubCommand::with_name("compile-dependency")
@@ -51,9 +52,9 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                         .short("p")
                         .long("package-path"),
                 )
-                .arg(clap::Arg::with_name("source path").required(true))
-                .arg(clap::Arg::with_name("object path").required(true))
-                .arg(clap::Arg::with_name("dependency path").required(true)),
+                .arg(clap::Arg::with_name("source file").required(true))
+                .arg(clap::Arg::with_name("object file").required(true))
+                .arg(clap::Arg::with_name("dependency file").required(true)),
         )
         .get_matches()
         .subcommand()
@@ -63,8 +64,9 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
             let matches = matches.unwrap();
 
             compile(
-                matches.value_of("source path").unwrap(),
-                matches.value_of("object path").unwrap(),
+                matches.value_of("source file").unwrap(),
+                matches.value_of("object file").unwrap(),
+                matches.value_of("interface file").unwrap(),
                 matches.value_of("module prefix").unwrap(),
                 matches.value_of("package prefix").unwrap(),
             )
@@ -74,9 +76,9 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
 
             compile_dependency(
                 matches.value_of("package path").unwrap(),
-                matches.value_of("source path").unwrap(),
-                matches.value_of("object path").unwrap(),
-                matches.value_of("dependency path").unwrap(),
+                matches.value_of("source file").unwrap(),
+                matches.value_of("object file").unwrap(),
+                matches.value_of("dependency file").unwrap(),
             )
         }
         _ => unreachable!(),
