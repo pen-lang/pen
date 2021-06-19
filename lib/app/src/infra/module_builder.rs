@@ -1,12 +1,11 @@
 use super::file_path::FilePath;
-use crate::build::ModuleBuildTarget;
+use crate::build::ModuleTarget;
 use std::error::Error;
 
-pub trait Builder {
+pub trait ModuleBuilder {
     fn build(
         &self,
-        package_prefix: &str,
-        module_build_targets: &[ModuleBuildTarget],
+        module_targets: &[ModuleTarget],
         output_directory_path: &FilePath,
     ) -> Result<(), Box<dyn Error>>;
 }

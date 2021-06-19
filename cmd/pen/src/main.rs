@@ -1,6 +1,10 @@
+mod build;
 mod compile;
 mod compile_configuration;
+mod file_path_configuration;
+mod main_package_directory_finder;
 
+use build::build;
 use compile::compile;
 
 fn main() {
@@ -14,6 +18,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
     match clap::App::new("pen")
         .version("0.1.0")
         .setting(clap::AppSettings::SubcommandRequired)
+        .subcommand(clap::SubCommand::with_name("build").about("Builds a package"))
         .subcommand(
             clap::SubCommand::with_name("compile")
                 .about("Compiles a module")
@@ -47,6 +52,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         .get_matches()
         .subcommand()
     {
+        ("build", _) => build(),
         ("compile", matches) => {
             let matches = matches.unwrap();
 
