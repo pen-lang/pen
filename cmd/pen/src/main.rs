@@ -1,7 +1,13 @@
+mod build;
 mod compile;
 mod compile_configuration;
+mod compile_dependency;
+mod file_path_configuration;
+mod main_package_directory_finder;
 
+use build::build;
 use compile::compile;
+use compile_dependency::compile_dependency;
 
 fn main() {
     if let Err(error) = run() {
@@ -14,6 +20,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
     match clap::App::new("pen")
         .version("0.1.0")
         .setting(clap::AppSettings::SubcommandRequired)
+        .subcommand(clap::SubCommand::with_name("build").about("Builds a package"))
         .subcommand(
             clap::SubCommand::with_name("compile")
                 .about("Compiles a module")
@@ -22,39 +29,56 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                         .required(true)
                         .takes_value(true)
                         .short("p")
-                        .long("package-prefix")
-                        .help("Sets a package prefix"),
+                        .long("package-prefix"),
                 )
                 .arg(
                     clap::Arg::with_name("module prefix")
                         .required(true)
                         .takes_value(true)
                         .short("m")
-                        .long("module-prefix")
-                        .help("Sets a module prefix"),
+                        .long("module-prefix"),
                 )
+                .arg(clap::Arg::with_name("source file").required(true))
+                .arg(clap::Arg::with_name("object file").required(true))
+                .arg(clap::Arg::with_name("interface file").required(true)),
+        )
+        .subcommand(
+            clap::SubCommand::with_name("compile-dependency")
+                .about("Compiles module dependency")
                 .arg(
-                    clap::Arg::with_name("source path")
+                    clap::Arg::with_name("package path")
                         .required(true)
-                        .help("source path"),
+                        .takes_value(true)
+                        .short("p")
+                        .long("package-path"),
                 )
-                .arg(
-                    clap::Arg::with_name("object path")
-                        .required(true)
-                        .help("object path"),
-                ),
+                .arg(clap::Arg::with_name("source file").required(true))
+                .arg(clap::Arg::with_name("object file").required(true))
+                .arg(clap::Arg::with_name("dependency file").required(true)),
         )
         .get_matches()
         .subcommand()
     {
+        ("build", _) => build(),
         ("compile", matches) => {
             let matches = matches.unwrap();
 
             compile(
-                matches.value_of("source path").unwrap(),
-                matches.value_of("object path").unwrap(),
+                matches.value_of("source file").unwrap(),
+                matches.value_of("object file").unwrap(),
+                matches.value_of("interface file").unwrap(),
                 matches.value_of("module prefix").unwrap(),
                 matches.value_of("package prefix").unwrap(),
+            )
+        }
+        ("compile-dependency", matches) => {
+            let matches = matches.unwrap();
+
+            compile_dependency(
+                matches.value_of("package path").unwrap(),
+                matches.value_of("source file").unwrap(),
+                matches.value_of("object file").unwrap(),
+                matches.value_of("dependency file").unwrap(),
             )
         }
         _ => unreachable!(),

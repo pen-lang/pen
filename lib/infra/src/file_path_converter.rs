@@ -22,25 +22,23 @@ impl FilePathConverter {
         path: impl AsRef<std::path::Path>,
     ) -> Result<app::infra::FilePath, Box<dyn std::error::Error>> {
         Ok(if path.as_ref().is_relative() {
-            self.convert_relative_to_file_path(path.as_ref())
+            self.convert_components(path.as_ref())
         } else {
-            self.convert_relative_to_file_path(
-                path.as_ref()
-                    .strip_prefix(&self.base_directory)
-                    .map_err(|_| {
-                        std::io::Error::new(
-                            std::io::ErrorKind::InvalidInput,
-                            format!(
-                                "path outside package directory: {}",
-                                path.as_ref().to_string_lossy()
-                            ),
-                        )
-                    })?,
-            )
+            self.convert_components(path.as_ref().strip_prefix(&self.base_directory).map_err(
+                |_| {
+                    std::io::Error::new(
+                        std::io::ErrorKind::InvalidInput,
+                        format!(
+                            "path outside package directory: {}",
+                            path.as_ref().to_string_lossy()
+                        ),
+                    )
+                },
+            )?)
         })
     }
 
-    fn convert_relative_to_file_path(&self, path: &std::path::Path) -> app::infra::FilePath {
+    fn convert_components(&self, path: &std::path::Path) -> app::infra::FilePath {
         app::infra::FilePath::new(
             path.components()
                 .filter_map(|component| match component {

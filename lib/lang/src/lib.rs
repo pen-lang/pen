@@ -1,4 +1,4 @@
-mod ast;
+pub mod ast;
 pub mod ast_hir;
 mod hir;
 pub mod hir_mir;

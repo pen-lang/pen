@@ -1,16 +1,16 @@
-Feature: Module compiler
+Feature: Package builder
   Background:
     Given a file named "pen.json" with:
     """
     {}
     """
 
-  Scenario: Compile a module
+  Scenario: Build a package
     Given a file named "Foo.pen" with:
     """
     f = \(x number) number {
       x
     }
     """
-    When I run `pen compile -p foo. -m foo. Foo.pen Foo.bc Foo.json`
+    When I run `pen build`
     Then the exit status should be 0
