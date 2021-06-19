@@ -33,16 +33,16 @@ impl NinjaModuleBuilder {
                 .convert_to_os_path(target.package_directory());
             let source_path = self
                 .file_path_converter
-                .convert_to_os_path(target.source_file_path());
+                .convert_to_os_path(target.source_file());
             let interface_path = self
                 .file_path_converter
-                .convert_to_os_path(target.interface_file_path());
+                .convert_to_os_path(target.interface_file());
             let dependency_path = self
                 .file_path_converter
-                .convert_to_os_path(&target.object_file_path().with_extension("dd"));
+                .convert_to_os_path(&target.object_file().with_extension("dd"));
             let object_path = self
                 .file_path_converter
-                .convert_to_os_path(target.object_file_path());
+                .convert_to_os_path(target.object_file());
 
             vec![
                 format!(
@@ -71,7 +71,7 @@ impl NinjaModuleBuilder {
                 .map(|target| format!(
                     "{}",
                     self.file_path_converter
-                        .convert_to_os_path(target.object_file_path())
+                        .convert_to_os_path(target.object_file())
                         .display()
                 ))
                 .collect::<Vec<_>>()
@@ -89,18 +89,18 @@ impl app::infra::ModuleBuilder for NinjaModuleBuilder {
         module_targets: &[app::build::ModuleTarget],
         output_directory_path: &app::infra::FilePath,
     ) -> Result<(), Box<dyn Error>> {
-        let ninja_file_path =
+        let ninja_file =
             output_directory_path.join(&app::infra::FilePath::new(vec!["build.ninja"]));
 
         self.file_system.write(
-            &ninja_file_path,
+            &ninja_file,
             self.compile_ninja_file(module_targets).as_bytes(),
         )?;
 
         command_runner::run(
             std::process::Command::new("ninja").arg("-f").arg(
                 self.file_path_converter
-                    .convert_to_os_path(&ninja_file_path),
+                    .convert_to_os_path(&ninja_file),
             ),
         )?;
 

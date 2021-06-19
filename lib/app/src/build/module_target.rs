@@ -4,9 +4,9 @@ pub struct ModuleTarget {
     package_prefix: String,
     module_prefix: String,
     package_directory: FilePath,
-    source_file_path: FilePath,
-    object_file_path: FilePath,
-    interface_file_path: FilePath,
+    source_file: FilePath,
+    object_file: FilePath,
+    interface_file: FilePath,
 }
 
 impl ModuleTarget {
@@ -14,17 +14,17 @@ impl ModuleTarget {
         package_prefix: impl Into<String>,
         module_prefix: impl Into<String>,
         package_directory: FilePath,
-        source_file_path: FilePath,
-        object_file_path: FilePath,
-        interface_file_path: FilePath,
+        source_file: FilePath,
+        object_file: FilePath,
+        interface_file: FilePath,
     ) -> Self {
         Self {
             package_prefix: package_prefix.into(),
             module_prefix: module_prefix.into(),
             package_directory,
-            source_file_path,
-            object_file_path,
-            interface_file_path,
+            source_file,
+            object_file,
+            interface_file,
         }
     }
 
@@ -40,15 +40,15 @@ impl ModuleTarget {
         &self.package_directory
     }
 
-    pub fn source_file_path(&self) -> &FilePath {
-        &self.source_file_path
+    pub fn source_file(&self) -> &FilePath {
+        &self.source_file
     }
 
-    pub fn object_file_path(&self) -> &FilePath {
-        &self.object_file_path
+    pub fn object_file(&self) -> &FilePath {
+        &self.object_file
     }
 
-    pub fn interface_file_path(&self) -> &FilePath {
-        &self.interface_file_path
+    pub fn interface_file(&self) -> &FilePath {
+        &self.interface_file
     }
 }

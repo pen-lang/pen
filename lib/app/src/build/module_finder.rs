@@ -5,7 +5,7 @@ pub fn find_modules(
     infrastructure: &BuildInfrastructure,
     directory_path: &FilePath,
 ) -> Result<Vec<FilePath>, Box<dyn std::error::Error>> {
-    let mut source_file_paths = vec![];
+    let mut source_files = vec![];
 
     for path in infrastructure.file_system.read_directory(directory_path)? {
         if path
@@ -16,11 +16,11 @@ pub fn find_modules(
             .starts_with('.')
         {
         } else if infrastructure.file_system.is_directory(&path) {
-            source_file_paths.extend(find_modules(infrastructure, &path)?);
+            source_files.extend(find_modules(infrastructure, &path)?);
         } else if path.has_extension(infrastructure.file_path_configuration.source_file_extension) {
-            source_file_paths.push(path);
+            source_files.push(path);
         }
     }
 
-    Ok(source_file_paths)
+    Ok(source_files)
 }
