@@ -87,10 +87,9 @@ impl app::infra::ModuleBuilder for NinjaModuleBuilder {
     fn build(
         &self,
         module_targets: &[app::build::ModuleTarget],
-        output_directory_path: &app::infra::FilePath,
+        output_directory: &app::infra::FilePath,
     ) -> Result<(), Box<dyn Error>> {
-        let ninja_file =
-            output_directory_path.join(&app::infra::FilePath::new(vec!["build.ninja"]));
+        let ninja_file = output_directory.join(&app::infra::FilePath::new(vec!["build.ninja"]));
 
         self.file_system.write(
             &ninja_file,

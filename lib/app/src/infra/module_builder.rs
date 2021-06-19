@@ -6,6 +6,6 @@ pub trait ModuleBuilder {
     fn build(
         &self,
         module_targets: &[ModuleTarget],
-        output_directory_path: &FilePath,
+        output_directory: &FilePath,
     ) -> Result<(), Box<dyn Error>>;
 }

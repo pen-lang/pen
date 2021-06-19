@@ -3,13 +3,13 @@ use crate::infra::FilePath;
 
 pub fn find_modules(
     infrastructure: &BuildInfrastructure,
-    directory_path: &FilePath,
+    directory: &FilePath,
 ) -> Result<Vec<FilePath>, Box<dyn std::error::Error>> {
     let mut source_files = vec![];
 
-    for path in infrastructure.file_system.read_directory(directory_path)? {
+    for path in infrastructure.file_system.read_directory(directory)? {
         if path
-            .relative_to(directory_path)
+            .relative_to(directory)
             .components()
             .next()
             .unwrap()
