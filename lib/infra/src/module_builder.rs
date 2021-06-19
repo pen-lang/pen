@@ -53,6 +53,19 @@ impl ModuleBuilder {
                 format!("  module_prefix = {}", target.module_prefix()),
             ]
         }))
+        .chain(vec![format!(
+            "default {}",
+            module_targets
+                .iter()
+                .map(|target| format!(
+                    "{}",
+                    self.file_path_converter
+                        .convert_to_os_path(target.object_file_path())
+                        .display()
+                ))
+                .collect::<Vec<_>>()
+                .join(" ")
+        )])
         .collect::<Vec<String>>()
         .join("\n")
     }
