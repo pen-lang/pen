@@ -12,5 +12,5 @@ Feature: Module compiler
       x
     }
     """
-    When I run `pen compile -p foo. -m foo. Foo.pen Foo.bc Foo.json`
+    When I run `pen compile Foo.pen Foo.bc Foo.json`
     Then the exit status should be 0
