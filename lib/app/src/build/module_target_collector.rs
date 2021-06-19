@@ -32,6 +32,7 @@ pub fn collect_module_targets(
                 ModuleTarget::new(
                     package_prefix,
                     &module_prefix,
+                    package_directory.clone(),
                     source_file.clone(),
                     target_file.with_extension(
                         infrastructure.file_path_configuration.object_file_extension,

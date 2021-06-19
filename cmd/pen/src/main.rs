@@ -1,11 +1,13 @@
 mod build;
 mod compile;
 mod compile_configuration;
+mod compile_dependency;
 mod file_path_configuration;
 mod main_package_directory_finder;
 
 use build::build;
 use compile::compile;
+use compile_dependency::compile_dependency;
 
 fn main() {
     if let Err(error) = run() {
@@ -27,27 +29,31 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                         .required(true)
                         .takes_value(true)
                         .short("p")
-                        .long("package-prefix")
-                        .help("Sets a package prefix"),
+                        .long("package-prefix"),
                 )
                 .arg(
                     clap::Arg::with_name("module prefix")
                         .required(true)
                         .takes_value(true)
                         .short("m")
-                        .long("module-prefix")
-                        .help("Sets a module prefix"),
+                        .long("module-prefix"),
                 )
+                .arg(clap::Arg::with_name("source path").required(true))
+                .arg(clap::Arg::with_name("object path").required(true)),
+        )
+        .subcommand(
+            clap::SubCommand::with_name("compile-dependency")
+                .about("Compiles module dependency")
                 .arg(
-                    clap::Arg::with_name("source path")
+                    clap::Arg::with_name("package path")
                         .required(true)
-                        .help("source path"),
+                        .takes_value(true)
+                        .short("p")
+                        .long("package-path"),
                 )
-                .arg(
-                    clap::Arg::with_name("object path")
-                        .required(true)
-                        .help("object path"),
-                ),
+                .arg(clap::Arg::with_name("source path").required(true))
+                .arg(clap::Arg::with_name("object path").required(true))
+                .arg(clap::Arg::with_name("dependency path").required(true)),
         )
         .get_matches()
         .subcommand()
@@ -61,6 +67,16 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                 matches.value_of("object path").unwrap(),
                 matches.value_of("module prefix").unwrap(),
                 matches.value_of("package prefix").unwrap(),
+            )
+        }
+        ("compile-dependency", matches) => {
+            let matches = matches.unwrap();
+
+            compile_dependency(
+                matches.value_of("package path").unwrap(),
+                matches.value_of("source path").unwrap(),
+                matches.value_of("object path").unwrap(),
+                matches.value_of("dependency path").unwrap(),
             )
         }
         _ => unreachable!(),

@@ -23,7 +23,7 @@ impl NinjaModuleBuilder {
             "rule compile",
             "  command = pen compile -p $package_prefix -m $module_prefix $in $out",
             "rule compile_dependency",
-            "  command = pen compile-dependency $in $out",
+            "  command = pen compile-dependency -p $package_directory $in $object_file $out",
         ]
         .into_iter()
         .map(String::from)
@@ -34,18 +34,26 @@ impl NinjaModuleBuilder {
             let dependency_path = self
                 .file_path_converter
                 .convert_to_os_path(&target.object_file_path().with_extension("dd"));
+            let object_path = self
+                .file_path_converter
+                .convert_to_os_path(target.object_file_path());
 
             vec![
                 format!(
                     "build {}: compile_dependency {}",
                     dependency_path.display(),
-                    input_path.display()
+                    input_path.display(),
                 ),
                 format!(
-                    "build {}: compile {} || {}",
+                    "  package_directory = {}",
                     self.file_path_converter
-                        .convert_to_os_path(target.object_file_path())
-                        .display(),
+                        .convert_to_os_path(target.package_directory())
+                        .display()
+                ),
+                format!("  object_file = {}", object_path.display()),
+                format!(
+                    "build {}: compile {} || {}",
+                    object_path.display(),
                     input_path.display(),
                     dependency_path.display()
                 ),
