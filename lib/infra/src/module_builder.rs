@@ -1,12 +1,12 @@
 use super::{command_runner, file_path_converter::FilePathConverter};
 use std::{error::Error, sync::Arc};
 
-pub struct ModuleBuilder {
+pub struct NinjaModuleBuilder {
     file_system: Arc<dyn app::infra::FileSystem>,
     file_path_converter: Arc<FilePathConverter>,
 }
 
-impl ModuleBuilder {
+impl NinjaModuleBuilder {
     pub fn new(
         file_system: Arc<dyn app::infra::FileSystem>,
         file_path_converter: Arc<FilePathConverter>,
@@ -71,7 +71,7 @@ impl ModuleBuilder {
     }
 }
 
-impl app::infra::ModuleBuilder for ModuleBuilder {
+impl app::infra::ModuleBuilder for NinjaModuleBuilder {
     fn build(
         &self,
         module_targets: &[app::build::ModuleTarget],

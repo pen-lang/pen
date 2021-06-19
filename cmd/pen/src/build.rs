@@ -15,7 +15,7 @@ pub fn build() -> Result<(), Box<dyn std::error::Error>> {
 
     app::build::build_main_package(
         &app::build::BuildInfrastructure {
-            module_builder: Arc::new(infra::ModuleBuilder::new(
+            module_builder: Arc::new(infra::NinjaModuleBuilder::new(
                 file_system.clone(),
                 file_path_converter,
             )),
