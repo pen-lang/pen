@@ -228,7 +228,10 @@ version = "0.1.0"
 dependencies = [
  "app",
  "lang",
+ "serde",
+ "serde_json",
  "termcolor",
+ "url",
 ]
 
 [[package]]
