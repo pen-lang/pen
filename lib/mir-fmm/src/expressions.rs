@@ -171,8 +171,7 @@ pub fn compile(
             operation,
             variables,
             types,
-        )?
-        .into(),
+        )?,
         mir::ir::Expression::Variable(variable) => variables[variable.name()].clone(),
         mir::ir::Expression::Variant(variant) => fmm::build::record(vec![
             variants::compile_tag(variant.type_()),
@@ -266,7 +265,7 @@ fn compile_alternatives(
             })
             .transpose()?,
         [alternative, ..] => Some(instruction_builder.if_(
-            compile_tag_comparison(&instruction_builder, &argument, alternative.type_())?,
+            compile_tag_comparison(instruction_builder, &argument, alternative.type_())?,
             |instruction_builder| -> Result<_, CompileError> {
                 Ok(instruction_builder.branch(compile(
                     module_builder,
@@ -497,13 +496,13 @@ fn compile_try_operation(
         types,
     )?;
 
-    Ok(instruction_builder.if_(
-        compile_tag_comparison(&instruction_builder, &operand, operation.type_())?,
+    instruction_builder.if_(
+        compile_tag_comparison(instruction_builder, &operand, operation.type_())?,
         |instruction_builder| -> Result<_, CompileError> {
             Ok(instruction_builder.return_(compile(
-                &module_builder,
+                module_builder,
                 &instruction_builder,
-                &operation.then(),
+                operation.then(),
                 &variables
                     .clone()
                     .into_iter()
@@ -521,5 +520,5 @@ fn compile_try_operation(
             )?))
         },
         |instruction_builder| Ok(instruction_builder.branch(operand.clone())),
-    )?)
+    )
 }
