@@ -2,7 +2,7 @@ Feature: Package builder
   Background:
     Given a file named "pen.json" with:
     """
-    {}
+    { "dependencies": {} }
     """
 
   Scenario: Build a package

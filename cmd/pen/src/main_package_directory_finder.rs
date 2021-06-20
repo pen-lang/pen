@@ -1,4 +1,4 @@
-const BUILD_CONFIGURATION_FILENAME: &str = "pen.json";
+use crate::file_path_configuration::BUILD_CONFIGURATION_FILENAME;
 
 pub fn find() -> Result<std::path::PathBuf, Box<dyn std::error::Error>> {
     let mut directory: &std::path::Path = &std::env::current_dir()?;
