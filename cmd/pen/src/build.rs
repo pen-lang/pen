@@ -30,7 +30,7 @@ pub fn build() -> Result<(), Box<dyn std::error::Error>> {
             file_system: file_system.clone(),
         },
         &main_package_directory,
-        &output_directory.join(&app::infra::FilePath::new(vec!["packages"])),
+        &output_directory,
     )?;
 
     app::package_builder::build_main_package(

@@ -2,10 +2,11 @@ use super::{
     module_finder, module_target::ModuleTarget,
     package_builder_infrastructure::PackageBuilderInfrastructure,
 };
-use crate::{common::calculate_module_id, infra::FilePath};
+use crate::{
+    common::calculate_module_id,
+    infra::{FilePath, OBJECT_DIRECTORY},
+};
 use std::error::Error;
-
-const OBJECT_DIRECTORY: &str = "objects";
 
 pub fn collect_module_targets(
     infrastructure: &PackageBuilderInfrastructure,
