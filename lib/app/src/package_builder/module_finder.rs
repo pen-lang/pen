@@ -1,8 +1,8 @@
-use super::build_infrastructure::BuildInfrastructure;
+use super::package_builder_infrastructure::PackageBuilderInfrastructure;
 use crate::infra::FilePath;
 
 pub fn find_modules(
-    infrastructure: &BuildInfrastructure,
+    infrastructure: &PackageBuilderInfrastructure,
     directory: &FilePath,
 ) -> Result<Vec<FilePath>, Box<dyn std::error::Error>> {
     let mut source_files = vec![];

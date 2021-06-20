@@ -17,7 +17,7 @@ impl NinjaModuleBuilder {
         }
     }
 
-    fn compile_ninja_file(&self, module_targets: &[app::build::ModuleTarget]) -> String {
+    fn compile_ninja_file(&self, module_targets: &[app::package_builder::ModuleTarget]) -> String {
         vec![
             "ninja_required_version = 1.10",
             "rule pen_compile",
@@ -84,7 +84,7 @@ impl NinjaModuleBuilder {
 impl app::infra::ModuleBuilder for NinjaModuleBuilder {
     fn build(
         &self,
-        module_targets: &[app::build::ModuleTarget],
+        module_targets: &[app::package_builder::ModuleTarget],
         output_directory: &app::infra::FilePath,
     ) -> Result<(), Box<dyn Error>> {
         let ninja_file = output_directory.join(&app::infra::FilePath::new(vec!["build.ninja"]));

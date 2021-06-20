@@ -1,9 +1,11 @@
-use super::compile_dependency_infrastructure::CompileDependencyInfrastructure;
+mod module_dependency_compiler_infrastructure;
+
 use crate::infra::FilePath;
+pub use module_dependency_compiler_infrastructure::*;
 use std::error::Error;
 
 pub fn compile_dependency(
-    infrastructure: &CompileDependencyInfrastructure,
+    infrastructure: &ModuleDependencyCompilerInfrastructure,
     package_directory: &FilePath,
     source_file: &FilePath,
     object_file: &FilePath,

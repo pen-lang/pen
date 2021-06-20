@@ -1,12 +1,14 @@
-use super::{
-    compile_configuration::CompileConfiguration, compile_infrastructure::CompileInfrastructure,
-};
+mod compile_configuration;
+mod module_compiler_infrastructure;
+
 use crate::infra::FilePath;
+pub use compile_configuration::{CompileConfiguration, HeapConfiguration, ListTypeConfiguration};
+pub use module_compiler_infrastructure::ModuleCompilerInfrastructure;
 use std::error::Error;
 
 // TODO Pass a package configuration file path.
 pub fn compile_module(
-    infrastructure: &CompileInfrastructure,
+    infrastructure: &ModuleCompilerInfrastructure,
     source_file: &FilePath,
     object_file: &FilePath,
     interface_file: &FilePath,
