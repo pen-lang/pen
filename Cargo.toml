@@ -5,5 +5,5 @@ members = [
   "lib/infra",
   "lib/lang",
   "lib/mir",
-  "lib/mir-fmm"
+  "lib/mir-fmm",
 ]
