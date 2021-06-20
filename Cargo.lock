@@ -36,7 +36,6 @@ dependencies = [
  "lang",
  "mir-fmm",
  "regex",
- "serde",
  "serde_json",
  "url",
 ]
