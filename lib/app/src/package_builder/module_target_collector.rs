@@ -1,5 +1,5 @@
 use super::{
-    build_infrastructure::BuildInfrastructure, module_finder, module_target::ModuleTarget,
+    package_builder_infrastructure::PackageBuilderInfrastructure, module_finder, module_target::ModuleTarget,
 };
 use crate::{common::calculate_module_id, infra::FilePath};
 use std::error::Error;
@@ -7,7 +7,7 @@ use std::error::Error;
 const OBJECT_DIRECTORY: &str = "objects";
 
 pub fn collect_module_targets(
-    infrastructure: &BuildInfrastructure,
+    infrastructure: &PackageBuilderInfrastructure,
     package_directory: &FilePath,
     output_directory: &FilePath,
 ) -> Result<Vec<ModuleTarget>, Box<dyn Error>> {
