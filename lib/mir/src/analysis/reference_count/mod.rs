@@ -441,6 +441,10 @@ fn convert_expression(
                 moved_variables,
             )
         }
+        Expression::TryOperation(_) => {
+            // TODO
+            (expression.clone(), moved_variables.clone())
+        }
         Expression::Variable(variable) => {
             if should_clone_variable(variable.name(), owned_variables, moved_variables) {
                 (

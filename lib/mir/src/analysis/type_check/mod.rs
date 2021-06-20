@@ -61,7 +61,12 @@ fn check_definition(
     }
 
     check_equality(
-        &check_expression(definition.body(), &variables, types)?,
+        &check_expression(
+            definition.body(),
+            &variables,
+            definition.result_type(),
+            types,
+        )?,
         &definition.result_type().clone(),
     )
 }
@@ -69,9 +74,11 @@ fn check_definition(
 fn check_expression(
     expression: &Expression,
     variables: &HashMap<&str, Type>,
+    result_type: &Type,
     types: &HashMap<&str, &types::RecordBody>,
 ) -> Result<Type, TypeCheckError> {
-    let check_expression = |expression, variables| check_expression(expression, variables, types);
+    let check_expression =
+        |expression, variables| check_expression(expression, variables, result_type, types);
 
     Ok(match expression {
         Expression::ArithmeticOperation(operation) => {
@@ -87,7 +94,7 @@ fn check_expression(
             Type::Number
         }
         Expression::Boolean(_) => Type::Boolean,
-        Expression::Case(case) => check_case(case, variables, types)?,
+        Expression::Case(case) => check_case(case, variables, result_type, types)?,
         Expression::CloneVariables(clone) => {
             for (variable, type_) in clone.variables() {
                 check_equality(&check_variable(&Variable::new(variable), variables)?, type_)?;
@@ -201,6 +208,23 @@ fn check_expression(
                 .clone()
         }
         Expression::ByteString(_) => Type::ByteString,
+        Expression::TryOperation(operation) => {
+            let then_variables = variables
+                .clone()
+                .into_iter()
+                .chain(vec![(operation.name(), operation.type_().clone())])
+                .collect();
+            check_equality(
+                &check_expression(operation.then(), &then_variables)?,
+                result_type,
+            )?;
+
+            let type_ = check_expression(operation.operand(), variables)?;
+
+            check_equality(&type_, &Type::Variant)?;
+
+            type_
+        }
         Expression::Variable(variable) => check_variable(variable, variables)?,
         Expression::Variant(variant) => {
             if matches!(variant.type_(), Type::Variant) {
@@ -220,10 +244,11 @@ fn check_expression(
 fn check_case(
     case: &Case,
     variables: &HashMap<&str, Type>,
+    result_type: &Type,
     types: &HashMap<&str, &types::RecordBody>,
 ) -> Result<Type, TypeCheckError> {
     let check_expression = |expression: &Expression, variables: &HashMap<&str, Type>| {
-        check_expression(expression, variables, types)
+        check_expression(expression, variables, result_type, types)
     };
 
     check_equality(
@@ -845,6 +870,27 @@ mod tests {
             Type::Boolean,
         )]);
         assert_eq!(check_types(&module), Ok(()));
+    }
+
+    mod try_operations {
+        use super::*;
+
+        #[test]
+        fn check_try_operation() {
+            let module = create_module_from_definitions(vec![Definition::with_environment(
+                "f",
+                vec![],
+                vec![Argument::new("x", Type::Variant)],
+                TryOperation::new(
+                    Variable::new("x"),
+                    "y",
+                    Type::Number,
+                    Variant::new(Type::Number, Variable::new("y")),
+                ),
+                Type::Variant,
+            )]);
+            assert_eq!(check_types(&module), Ok(()));
+        }
     }
 
     mod foreign_declarations {

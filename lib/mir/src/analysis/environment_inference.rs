@@ -88,6 +88,7 @@ fn infer_in_expression(expression: &Expression, variables: &HashMap<String, Type
         Expression::LetRecursive(let_) => infer_in_let_recursive(let_, variables).into(),
         Expression::Record(record) => infer_in_record(record, variables).into(),
         Expression::RecordElement(element) => infer_in_record_element(element, variables).into(),
+        Expression::TryOperation(operation) => infer_in_try_operation(operation, variables).into(),
         Expression::Variant(variant) => infer_in_variant(variant, variables).into(),
         Expression::Boolean(_)
         | Expression::ByteString(_)
@@ -250,6 +251,25 @@ fn infer_in_record_element(
         element.type_().clone(),
         element.index(),
         infer_in_expression(element.record(), variables),
+    )
+}
+
+fn infer_in_try_operation(
+    operation: &TryOperation,
+    variables: &HashMap<String, Type>,
+) -> TryOperation {
+    TryOperation::new(
+        infer_in_expression(operation.operand(), variables),
+        operation.name(),
+        operation.type_().clone(),
+        infer_in_expression(
+            operation.then(),
+            &variables
+                .clone()
+                .drain()
+                .chain(vec![(operation.name().into(), operation.type_().clone())])
+                .collect(),
+        ),
     )
 }
 

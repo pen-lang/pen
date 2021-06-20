@@ -1012,6 +1012,26 @@ mod tests {
                 ),
             ]));
         }
+
+        #[test]
+        fn compile_try_operation() {
+            compile_module(&create_module_with_definitions(vec![
+                mir::ir::Definition::new(
+                    "f",
+                    vec![mir::ir::Argument::new("x", mir::types::Type::Variant)],
+                    mir::ir::TryOperation::new(
+                        mir::ir::Variable::new("x"),
+                        "y",
+                        mir::types::Type::Number,
+                        mir::ir::Variant::new(
+                            mir::types::Type::Number,
+                            mir::ir::Variable::new("y"),
+                        ),
+                    ),
+                    mir::types::Type::Variant,
+                ),
+            ]));
+        }
     }
 
     mod reference_count {
