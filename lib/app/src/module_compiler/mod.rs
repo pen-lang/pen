@@ -2,7 +2,9 @@ mod compile_configuration;
 mod module_compiler_infrastructure;
 
 use crate::infra::FilePath;
-pub use compile_configuration::{CompileConfiguration, HeapConfiguration, ListTypeConfiguration};
+pub use compile_configuration::{
+    CompileConfiguration, HeapConfiguration, ListTypeConfiguration, StringTypeConfiguration,
+};
 pub use module_compiler_infrastructure::ModuleCompilerInfrastructure;
 use std::error::Error;
 
@@ -28,6 +30,7 @@ pub fn compile_module(
             &[],
         )?,
         &compile_configuration.list_type,
+        &compile_configuration.string_type,
     )?;
 
     infrastructure.file_system.write(

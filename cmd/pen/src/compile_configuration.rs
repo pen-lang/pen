@@ -21,6 +21,10 @@ pub static COMPILE_CONFIGURATION: Lazy<Arc<app::module_compiler::CompileConfigur
                 first_rest_type_name: "_FirstRest".into(),
                 map_function_name: "_mapList".into(),
             },
+            string_type: app::module_compiler::StringTypeConfiguration {
+                equal_function_name: "_equalStrings".into(),
+            }
+            .into(),
         }
         .into()
     });

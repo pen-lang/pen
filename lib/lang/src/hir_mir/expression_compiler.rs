@@ -7,10 +7,13 @@ use super::{
     type_context::TypeContext,
     CompileError,
 };
-use crate::hir::*;
-use crate::types::analysis::type_canonicalizer;
-use crate::types::analysis::type_resolver;
-use crate::types::Type;
+use crate::{
+    hir::*,
+    types::{
+        analysis::{type_canonicalizer, type_resolver},
+        Type,
+    },
+};
 
 const CLOSURE_NAME: &str = "$closure";
 const UNUSED_VARIABLE: &str = "$unused";
@@ -71,11 +74,11 @@ pub fn compile(
                     Type::Function(_) => todo!(),
                     Type::List(list_type) => {
                         let concrete_list_type =
-                            type_compiler::compile_concrete_list(&list_type, type_context.types())?;
+                            type_compiler::compile_concrete_list(list_type, type_context.types())?;
 
                         mir::ir::Variant::new(
                             concrete_list_type.clone(),
-                            mir::ir::Record::new(concrete_list_type.clone(), vec![argument]),
+                            mir::ir::Record::new(concrete_list_type, vec![argument]),
                         )
                         .into()
                     }
@@ -127,8 +130,8 @@ fn compile_operation(
                     Type::String(_) => mir::ir::Call::new(
                         mir::types::Function::new(
                             vec![
-                                mir::types::Type::ByteString.into(),
-                                mir::types::Type::ByteString.into(),
+                                mir::types::Type::ByteString,
+                                mir::types::Type::ByteString,
                             ],
                             mir::types::Type::Boolean,
                         ),

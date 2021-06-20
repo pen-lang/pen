@@ -13,10 +13,11 @@ mod type_extractor;
 mod type_inferrer;
 mod union_type_creator;
 
-use self::{string_type_configuration::StringTypeConfiguration, type_context::TypeContext};
+use self::type_context::TypeContext;
 use crate::{hir::*, interface};
 pub use error::CompileError;
 pub use list_type_configuration::ListTypeConfiguration;
+pub use string_type_configuration::StringTypeConfiguration;
 
 pub fn compile(
     module: &Module,

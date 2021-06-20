@@ -1,5 +1,7 @@
-use super::list_type_configuration::ListTypeConfiguration;
-use super::string_type_configuration::StringTypeConfiguration;
+use super::{
+    list_type_configuration::ListTypeConfiguration,
+    string_type_configuration::StringTypeConfiguration,
+};
 use crate::{
     hir::Module,
     types::{self, Type},
