@@ -1,6 +1,7 @@
 use super::{
     arithmetic_operation::ArithmeticOperation, boolean_operation::BooleanOperation,
-    equality_operation::EqualityOperation, order_operation::OrderOperation,
+    equality_operation::EqualityOperation, not_operation::NotOperation,
+    order_operation::OrderOperation, try_operation::TryOperation,
 };
 use crate::position::Position;
 
@@ -9,7 +10,9 @@ pub enum Operation {
     Arithmetic(ArithmeticOperation),
     Boolean(BooleanOperation),
     Equality(EqualityOperation),
+    Not(NotOperation),
     Order(OrderOperation),
+    Try(TryOperation),
 }
 
 impl Operation {
@@ -18,7 +21,9 @@ impl Operation {
             Self::Arithmetic(operation) => operation.position(),
             Self::Boolean(operation) => operation.position(),
             Self::Equality(operation) => operation.position(),
+            Self::Not(operation) => operation.position(),
             Self::Order(operation) => operation.position(),
+            Self::Try(operation) => operation.position(),
         }
     }
 }
@@ -41,8 +46,20 @@ impl From<EqualityOperation> for Operation {
     }
 }
 
+impl From<NotOperation> for Operation {
+    fn from(operation: NotOperation) -> Self {
+        Self::Not(operation)
+    }
+}
+
 impl From<OrderOperation> for Operation {
     fn from(operation: OrderOperation) -> Self {
         Self::Order(operation)
+    }
+}
+
+impl From<TryOperation> for Operation {
+    fn from(operation: TryOperation) -> Self {
+        Self::Try(operation)
     }
 }

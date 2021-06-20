@@ -171,9 +171,9 @@ fn qualify_expression(expression: &Expression, names: &HashMap<String, String>) 
         )
         .into(),
         Expression::RecordElement(element) => RecordElement::new(
-            element.type_().clone(),
+            element.type_().cloned(),
+            qualify_expression(element.record(), names),
             element.element_name(),
-            qualify_expression(element.argument(), names),
             element.position().clone(),
         )
         .into(),
@@ -234,10 +234,20 @@ fn qualify_operation(operation: &Operation, names: &HashMap<String, String>) -> 
             operation.position().clone(),
         )
         .into(),
+        Operation::Not(operation) => NotOperation::new(
+            qualify_expression(operation.expression(), names),
+            operation.position().clone(),
+        )
+        .into(),
         Operation::Order(operation) => OrderOperation::new(
             operation.operator(),
             qualify_expression(operation.lhs(), names),
             qualify_expression(operation.rhs(), names),
+            operation.position().clone(),
+        )
+        .into(),
+        Operation::Try(operation) => TryOperation::new(
+            qualify_expression(operation.expression(), names),
             operation.position().clone(),
         )
         .into(),
