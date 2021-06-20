@@ -6,7 +6,7 @@ pub use compile_configuration::{CompileConfiguration, HeapConfiguration, ListTyp
 pub use module_compiler_infrastructure::ModuleCompilerInfrastructure;
 use std::error::Error;
 
-// TODO Pass a package configuration file path.
+// TODO Pass a dependency file.
 pub fn compile_module(
     infrastructure: &ModuleCompilerInfrastructure,
     source_file: &FilePath,
@@ -14,7 +14,6 @@ pub fn compile_module(
     interface_file: &FilePath,
     compile_configuration: &CompileConfiguration,
 ) -> Result<(), Box<dyn Error>> {
-    // TODO Compile module imports.
     let (module, module_interface) = lang::hir_mir::compile(
         &lang::ast_hir::compile(
             &lang::parse::parse(
@@ -25,6 +24,7 @@ pub fn compile_module(
                 "{}:",
                 infrastructure.file_path_displayer.display(source_file)
             ),
+            // TODO Compile module imports.
             &[],
         )?,
         &compile_configuration.list_type,
