@@ -5,12 +5,17 @@ use std::sync::Arc;
 use std::{error::Error, process::Command};
 
 pub struct ExternalPackageInitializer {
+    file_system: Arc<dyn app::infra::FileSystem>,
     file_path_converter: Arc<FilePathConverter>,
 }
 
 impl ExternalPackageInitializer {
-    pub fn new(file_path_converter: Arc<FilePathConverter>) -> Self {
+    pub fn new(
+        file_system: Arc<dyn app::infra::FileSystem>,
+        file_path_converter: Arc<FilePathConverter>,
+    ) -> Self {
         Self {
+            file_system,
             file_path_converter,
         }
     }
@@ -22,6 +27,10 @@ impl app::infra::ExternalPackageInitializer for ExternalPackageInitializer {
         url: &url::Url,
         package_directory: &app::infra::FilePath,
     ) -> Result<(), Box<dyn Error>> {
+        if self.file_system.exists(package_directory) {
+            return Ok(());
+        }
+
         match url.scheme() {
             "git" => {
                 command_runner::run(
