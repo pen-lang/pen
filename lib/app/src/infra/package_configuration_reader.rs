@@ -1,5 +1,4 @@
-use super::file_path::FilePath;
-use super::package_configuration::PackageConfiguration;
+use super::{file_path::FilePath, package_configuration::PackageConfiguration};
 use std::error::Error;
 
 pub trait PackageConfigurationReader {

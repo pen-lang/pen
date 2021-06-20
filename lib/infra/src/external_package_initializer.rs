@@ -1,8 +1,6 @@
-use super::command_runner;
-use super::file_path_converter::FilePathConverter;
+use super::{command_runner, file_path_converter::FilePathConverter};
 use crate::InfrastructureError;
-use std::sync::Arc;
-use std::{error::Error, process::Command};
+use std::{error::Error, process::Command, sync::Arc};
 
 pub struct ExternalPackageInitializer {
     file_system: Arc<dyn app::infra::FileSystem>,

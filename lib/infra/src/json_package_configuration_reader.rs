@@ -1,7 +1,5 @@
 use super::json_package_configuration::JsonPackageConfiguration;
-use std::convert::TryInto;
-use std::error::Error;
-use std::sync::Arc;
+use std::{convert::TryInto, error::Error, sync::Arc};
 
 pub struct JsonPackageConfigurationReader {
     file_system: Arc<dyn app::infra::FileSystem>,
