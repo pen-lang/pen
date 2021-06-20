@@ -1,5 +1,6 @@
 mod command_runner;
 mod error;
+mod external_package_initializer;
 mod file_path_converter;
 mod file_path_displayer;
 mod file_system;
@@ -10,6 +11,7 @@ mod ninja_dependency_compiler;
 mod ninja_module_builder;
 
 pub use error::*;
+pub use external_package_initializer::*;
 pub use file_path_converter::*;
 pub use file_path_displayer::*;
 pub use file_system::*;

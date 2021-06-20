@@ -9,6 +9,7 @@ pub enum InfrastructureError {
         path: std::path::PathBuf,
         source: std::io::Error,
     },
+    PackageUrlSchemeNotSupported(url::Url),
     ReadDirectory {
         path: std::path::PathBuf,
         source: std::io::Error,
@@ -25,13 +26,14 @@ pub enum InfrastructureError {
 
 impl Error for InfrastructureError {
     fn source(&self) -> Option<&(dyn Error + 'static)> {
-        Some(match self {
-            Self::CommandExit { status_code: _ } => return None,
-            Self::CreateDirectory { path: _, source } => source,
-            Self::ReadDirectory { path: _, source } => source,
-            Self::ReadFile { path: _, source } => source,
-            Self::WriteFile { path: _, source } => source,
-        })
+        match self {
+            Self::CommandExit { status_code: _ } => None,
+            Self::CreateDirectory { path: _, source } => Some(source),
+            Self::PackageUrlSchemeNotSupported(_) => None,
+            Self::ReadDirectory { path: _, source } => Some(source),
+            Self::ReadFile { path: _, source } => Some(source),
+            Self::WriteFile { path: _, source } => Some(source),
+        }
     }
 }
 
@@ -49,6 +51,9 @@ impl Display for InfrastructureError {
                 "failed to create directory {}",
                 path.to_string_lossy()
             ),
+            Self::PackageUrlSchemeNotSupported(url) => {
+                write!(formatter, "package URL scheme not supported {}", url)
+            }
             Self::ReadDirectory { path, source: _ } => write!(
                 formatter,
                 "failed to read directory {}",
