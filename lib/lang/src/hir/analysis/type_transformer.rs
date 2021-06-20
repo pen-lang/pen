@@ -219,7 +219,7 @@ fn transform_expression(expression: &Expression, transform: &impl Fn(&Type) -> T
         .into(),
         Expression::RecordUpdate(update) => RecordUpdate::new(
             transform(update.type_()),
-            transform_expression(update.argument(), transform),
+            transform_expression(update.record(), transform),
             update
                 .elements()
                 .iter()

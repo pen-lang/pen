@@ -83,12 +83,33 @@ fn infer_expression(
             .into()
         }
         Expression::If(if_) => {
-            let condition = infer_expression(if_.condition(), variables)?;
             let then = infer_block(if_.then(), variables)?;
             let else_ = infer_block(if_.else_(), variables)?;
 
             If::new(
-                condition,
+                infer_expression(if_.condition(), variables)?,
+                then.clone(),
+                else_.clone(),
+                Some(
+                    types::Union::new(
+                        type_extractor::extract_from_block(&then, types)?,
+                        type_extractor::extract_from_block(&else_, types)?,
+                        if_.position().clone(),
+                    )
+                    .into(),
+                ),
+                if_.position().clone(),
+            )
+            .into()
+        }
+        Expression::IfList(if_) => {
+            let then = infer_block(if_.then(), variables)?;
+            let else_ = infer_block(if_.else_(), variables)?;
+
+            IfList::new(
+                infer_expression(if_.argument(), variables)?,
+                if_.first_name(),
+                if_.rest_name(),
                 then.clone(),
                 else_.clone(),
                 Some(
@@ -150,12 +171,117 @@ fn infer_expression(
             .into()
         }
         Expression::Lambda(lambda) => infer_lambda(lambda, variables, types)?.into(),
+        Expression::List(list) => List::new(
+            list.type_().clone(),
+            list.elements()
+                .iter()
+                .map(|element| {
+                    Ok(match element {
+                        ListElement::Multiple(element) => {
+                            ListElement::Multiple(infer_expression(element, variables)?)
+                        }
+                        ListElement::Single(element) => {
+                            ListElement::Single(infer_expression(element, variables)?)
+                        }
+                    })
+                })
+                .collect::<Result<_, CompileError>>()?,
+            list.position().clone(),
+        )
+        .into(),
+        Expression::Operation(operation) => match operation {
+            Operation::Arithmetic(operation) => ArithmeticOperation::new(
+                operation.operator(),
+                infer_expression(operation.lhs(), variables)?,
+                infer_expression(operation.rhs(), variables)?,
+                operation.position().clone(),
+            )
+            .into(),
+            Operation::Boolean(operation) => BooleanOperation::new(
+                operation.operator(),
+                infer_expression(operation.lhs(), variables)?,
+                infer_expression(operation.rhs(), variables)?,
+                operation.position().clone(),
+            )
+            .into(),
+            Operation::Equality(operation) => {
+                let lhs = infer_expression(operation.lhs(), variables)?;
+                let rhs = infer_expression(operation.rhs(), variables)?;
+
+                EqualityOperation::new(
+                    Some(
+                        types::Union::new(
+                            type_extractor::extract_from_expression(&lhs, types)?,
+                            type_extractor::extract_from_expression(&rhs, types)?,
+                            operation.position().clone(),
+                        )
+                        .into(),
+                    ),
+                    operation.operator(),
+                    lhs,
+                    rhs,
+                    operation.position().clone(),
+                )
+                .into()
+            }
+            Operation::Not(operation) => NotOperation::new(
+                infer_expression(operation.expression(), variables)?,
+                operation.position().clone(),
+            )
+            .into(),
+            Operation::Order(operation) => OrderOperation::new(
+                operation.operator(),
+                infer_expression(operation.lhs(), variables)?,
+                infer_expression(operation.rhs(), variables)?,
+                operation.position().clone(),
+            )
+            .into(),
+            Operation::Try(_) => todo!(),
+        },
+        Expression::RecordConstruction(construction) => RecordConstruction::new(
+            construction.type_().clone(),
+            construction
+                .elements()
+                .iter()
+                .map(|(key, element)| Ok((key.clone(), infer_expression(element, variables)?)))
+                .collect::<Result<_, CompileError>>()?,
+            construction.position().clone(),
+        )
+        .into(),
+        Expression::RecordElement(element) => {
+            let record = infer_expression(element.record(), variables)?;
+
+            RecordElement::new(
+                Some(type_extractor::extract_from_expression(&record, types)?),
+                record,
+                element.element_name(),
+                element.position().clone(),
+            )
+            .into()
+        }
+        Expression::RecordUpdate(update) => RecordUpdate::new(
+            update.type_().clone(),
+            infer_expression(update.record(), variables)?,
+            update
+                .elements()
+                .iter()
+                .map(|(key, element)| Ok((key.clone(), infer_expression(element, variables)?)))
+                .collect::<Result<_, CompileError>>()?,
+            update.position().clone(),
+        )
+        .into(),
+        Expression::TypeCoercion(coercion) => TypeCoercion::new(
+            coercion.from().clone(),
+            coercion.to().clone(),
+            infer_expression(coercion.argument(), variables)?,
+            coercion.position().clone(),
+        )
+        .into(),
         Expression::Boolean(_)
         | Expression::None(_)
         | Expression::Number(_)
         | Expression::String(_)
         | Expression::Variable(_) => expression.clone(),
-        _ => todo!(),
     })
 }
 
@@ -197,7 +323,7 @@ fn infer_statement(
     let expression = infer_expression(statement.expression(), variables, types)?;
 
     Ok(Statement::new(
-        statement.name().map(|string| string.into()),
+        statement.name().map(|name| name.into()),
         expression.clone(),
         Some(type_extractor::extract_from_expression(&expression, types)?),
         statement.position().clone(),

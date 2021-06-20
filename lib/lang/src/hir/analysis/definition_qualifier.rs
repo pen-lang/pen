@@ -179,7 +179,7 @@ fn qualify_expression(expression: &Expression, names: &HashMap<String, String>) 
         .into(),
         Expression::RecordUpdate(update) => RecordUpdate::new(
             update.type_().clone(),
-            qualify_expression(update.argument(), names),
+            qualify_expression(update.record(), names),
             update
                 .elements()
                 .iter()

@@ -260,7 +260,18 @@ fn compile_expression(expression: &ast::Expression) -> Result<hir::Expression, C
         ast::Expression::String(string) => {
             hir::ByteString::new(string.value(), string.position().clone()).into()
         }
-        ast::Expression::UnaryOperation(_) => todo!(),
+        ast::Expression::UnaryOperation(operation) => {
+            let operand = compile_expression(operation.expression())?;
+
+            match operation.operator() {
+                ast::UnaryOperator::Not => {
+                    hir::NotOperation::new(operand, operation.position().clone()).into()
+                }
+                ast::UnaryOperator::Try => {
+                    hir::TryOperation::new(operand, operation.position().clone()).into()
+                }
+            }
+        }
         ast::Expression::Variable(variable) => {
             hir::Variable::new(variable.name(), variable.position().clone()).into()
         }
