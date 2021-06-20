@@ -1,5 +1,4 @@
-use crate::position::Position;
-use crate::types::Type;
+use crate::{position::Position, types::Type};
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Variable {
