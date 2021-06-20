@@ -129,10 +129,7 @@ fn compile_operation(
                     .into(),
                     Type::String(_) => mir::ir::Call::new(
                         mir::types::Function::new(
-                            vec![
-                                mir::types::Type::ByteString,
-                                mir::types::Type::ByteString,
-                            ],
+                            vec![mir::types::Type::ByteString, mir::types::Type::ByteString],
                             mir::types::Type::Boolean,
                         ),
                         mir::ir::Variable::new(
