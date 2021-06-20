@@ -35,6 +35,10 @@ pub fn extract_from_expression(
         Expression::None(none) => types::None::new(none.position().clone()).into(),
         Expression::Number(number) => types::Number::new(number.position().clone()).into(),
         Expression::String(string) => types::ByteString::new(string.position().clone()).into(),
+        Expression::Variable(variable) => variable
+            .type_()
+            .ok_or_else(|| CompileError::TypeNotInferred(variable.position().clone()))?
+            .clone(),
         _ => todo!(),
     })
 }
@@ -55,6 +59,5 @@ pub fn extract_from_block(
     block: &Block,
     types: &HashMap<String, Type>,
 ) -> Result<Type, CompileError> {
-    // TODO Process statements.
     extract_from_expression(block.expression(), types)
 }

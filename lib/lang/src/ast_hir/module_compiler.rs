@@ -273,7 +273,7 @@ fn compile_expression(expression: &ast::Expression) -> Result<hir::Expression, C
             }
         }
         ast::Expression::Variable(variable) => {
-            hir::Variable::new(variable.name(), variable.position().clone()).into()
+            hir::Variable::new(variable.name(), None, variable.position().clone()).into()
         }
     })
 }

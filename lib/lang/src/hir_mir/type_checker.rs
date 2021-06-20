@@ -186,7 +186,11 @@ mod tests {
                             Some(types::None::new(Position::dummy()).into()),
                             Position::dummy(),
                         )],
-                        Variable::new("y", Position::dummy()),
+                        Variable::new(
+                            "y",
+                            Some(types::None::new(Position::dummy()).into()),
+                            Position::dummy(),
+                        ),
                     ),
                     Position::dummy(),
                 ),

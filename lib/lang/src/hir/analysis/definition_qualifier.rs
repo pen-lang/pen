@@ -200,6 +200,7 @@ fn qualify_expression(expression: &Expression, names: &HashMap<String, String>) 
                 .get(variable.name())
                 .map(|string| string.as_str())
                 .unwrap_or_else(|| variable.name()),
+            variable.type_().cloned(),
             variable.position().clone(),
         )
         .into(),
@@ -314,7 +315,7 @@ mod tests {
                         Lambda::new(
                             vec![],
                             types::None::new(Position::dummy()),
-                            Block::new(vec![], Variable::new("x", Position::dummy())),
+                            Block::new(vec![], Variable::new("x", None, Position::dummy())),
                             Position::dummy()
                         ),
                         false,
@@ -332,7 +333,7 @@ mod tests {
                     Lambda::new(
                         vec![],
                         types::None::new(Position::dummy()),
-                        Block::new(vec![], Variable::new("foo.x", Position::dummy())),
+                        Block::new(vec![], Variable::new("foo.x", None, Position::dummy())),
                         Position::dummy()
                     ),
                     false,
@@ -355,7 +356,7 @@ mod tests {
                         Lambda::new(
                             vec![Argument::new("x", types::None::new(Position::dummy()))],
                             types::None::new(Position::dummy()),
-                            Block::new(vec![], Variable::new("x", Position::dummy())),
+                            Block::new(vec![], Variable::new("x", None, Position::dummy())),
                             Position::dummy()
                         ),
                         false,
@@ -373,7 +374,7 @@ mod tests {
                     Lambda::new(
                         vec![Argument::new("x", types::None::new(Position::dummy()))],
                         types::None::new(Position::dummy()),
-                        Block::new(vec![], Variable::new("x", Position::dummy())),
+                        Block::new(vec![], Variable::new("x", None, Position::dummy())),
                         Position::dummy()
                     ),
                     false,
@@ -403,7 +404,7 @@ mod tests {
                                     None,
                                     Position::dummy(),
                                 )],
-                                Variable::new("x", Position::dummy())
+                                Variable::new("x", None, Position::dummy())
                             ),
                             Position::dummy()
                         ),
@@ -429,7 +430,7 @@ mod tests {
                                 None,
                                 Position::dummy(),
                             )],
-                            Variable::new("x", Position::dummy())
+                            Variable::new("x", None, Position::dummy())
                         ),
                         Position::dummy()
                     ),
