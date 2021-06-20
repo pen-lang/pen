@@ -2,6 +2,8 @@ use super::{
     type_compiler, type_compiler::NONE_RECORD_TYPE_NAME, type_context::TypeContext, CompileError,
 };
 use crate::hir::*;
+use crate::types::analysis::type_canonicalizer;
+use crate::types::Type;
 
 const CLOSURE_NAME: &str = "$closure";
 const UNUSED_VARIABLE: &str = "$unused";
@@ -10,6 +12,8 @@ pub fn compile(
     expression: &Expression,
     type_context: &TypeContext,
 ) -> Result<mir::ir::Expression, CompileError> {
+    let compile = |expression| compile(expression, type_context);
+
     Ok(match expression {
         Expression::Boolean(boolean) => mir::ir::Expression::Boolean(boolean.value()),
         Expression::Lambda(lambda) => mir::ir::LetRecursive::new(
@@ -36,6 +40,42 @@ pub fn compile(
         }
         Expression::Number(number) => mir::ir::Expression::Number(number.value()),
         Expression::String(string) => mir::ir::ByteString::new(string.value()).into(),
+        Expression::TypeCoercion(coercion) => {
+            let from = type_canonicalizer::canonicalize(coercion.from(), type_context.types())?;
+            let to = type_canonicalizer::canonicalize(coercion.to(), type_context.types())?;
+
+            if from.is_list() && to.is_list() {
+                compile(coercion.argument())?
+            } else {
+                // Coerce to union or Any types.
+                let argument = compile(coercion.argument())?;
+
+                match &from {
+                    Type::Boolean(_)
+                    | Type::None(_)
+                    | Type::Number(_)
+                    | Type::Record(_)
+                    | Type::String(_) => mir::ir::Variant::new(
+                        type_compiler::compile(coercion.from(), type_context)?,
+                        argument,
+                    )
+                    .into(),
+                    Type::Function(_) => todo!(),
+                    Type::List(list_type) => {
+                        let concrete_list_type =
+                            type_compiler::compile_concrete_list(&list_type, type_context.types())?;
+
+                        mir::ir::Variant::new(
+                            concrete_list_type.clone(),
+                            mir::ir::Record::new(concrete_list_type.clone(), vec![argument]),
+                        )
+                        .into()
+                    }
+                    Type::Any(_) | Type::Union(_) => argument,
+                    Type::Reference(_) => unreachable!(),
+                }
+            }
+        }
         Expression::Variable(variable) => mir::ir::Variable::new(variable.name()).into(),
         _ => todo!(),
     })

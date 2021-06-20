@@ -1,5 +1,6 @@
 use super::{type_context::TypeContext, CompileError};
-use crate::types::{self, Type};
+use crate::types::{self, analysis::type_id_calculator, Type};
+use std::collections::HashMap;
 
 pub const NONE_RECORD_TYPE_NAME: &str = "_pen_none";
 
@@ -36,4 +37,14 @@ pub fn compile_function(
             .collect::<Result<_, _>>()?,
         compile(function.result())?,
     ))
+}
+
+pub fn compile_concrete_list(
+    list: &types::List,
+    types: &HashMap<String, Type>,
+) -> Result<mir::types::Record, CompileError> {
+    Ok(mir::types::Record::new(format!(
+        "_list_{}",
+        type_id_calculator::calculate(list.element(), types)?
+    )))
 }
