@@ -1,7 +1,4 @@
-use crate::{
-    infra::FilePathConfiguration,
-    infra::{DependencyCompiler, FilePathDisplayer, FileSystem},
-};
+use crate::infra::{DependencyCompiler, FilePathConfiguration, FilePathDisplayer, FileSystem};
 use std::sync::Arc;
 
 pub struct ModuleDependencyCompilerInfrastructure {
