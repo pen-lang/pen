@@ -1,8 +1,15 @@
 use super::{
-    type_compiler, type_compiler::NONE_RECORD_TYPE_NAME, type_context::TypeContext, CompileError,
+    transformation::{
+        boolean_operation_transformer, equal_operation_transformer, not_equal_operation_transformer,
+    },
+    type_compiler,
+    type_compiler::NONE_RECORD_TYPE_NAME,
+    type_context::TypeContext,
+    CompileError,
 };
 use crate::hir::*;
 use crate::types::analysis::type_canonicalizer;
+use crate::types::analysis::type_resolver;
 use crate::types::Type;
 
 const CLOSURE_NAME: &str = "$closure";
@@ -39,6 +46,7 @@ pub fn compile(
             mir::ir::Record::new(mir::types::Record::new(NONE_RECORD_TYPE_NAME), vec![]).into()
         }
         Expression::Number(number) => mir::ir::Expression::Number(number.value()),
+        Expression::Operation(operation) => compile_operation(operation, type_context)?,
         Expression::String(string) => mir::ir::ByteString::new(string.value()).into(),
         Expression::TypeCoercion(coercion) => {
             let from = type_canonicalizer::canonicalize(coercion.from(), type_context.types())?;
@@ -78,6 +86,80 @@ pub fn compile(
         }
         Expression::Variable(variable) => mir::ir::Variable::new(variable.name()).into(),
         _ => todo!(),
+    })
+}
+
+fn compile_operation(
+    operation: &Operation,
+    type_context: &TypeContext,
+) -> Result<mir::ir::Expression, CompileError> {
+    let compile = |expression| compile(expression, type_context);
+
+    Ok(match operation {
+        Operation::Arithmetic(operation) => mir::ir::ArithmeticOperation::new(
+            match operation.operator() {
+                ArithmeticOperator::Add => mir::ir::ArithmeticOperator::Add,
+                ArithmeticOperator::Subtract => mir::ir::ArithmeticOperator::Subtract,
+                ArithmeticOperator::Multiply => mir::ir::ArithmeticOperator::Multiply,
+                ArithmeticOperator::Divide => mir::ir::ArithmeticOperator::Divide,
+            },
+            compile(operation.lhs())?,
+            compile(operation.rhs())?,
+        )
+        .into(),
+        Operation::Boolean(operation) => {
+            compile(&boolean_operation_transformer::transform(operation))?
+        }
+        Operation::Equality(operation) => match operation.operator() {
+            EqualityOperator::Equal => {
+                match type_resolver::resolve_type(
+                    operation.type_().ok_or_else(|| {
+                        CompileError::TypeNotInferred(operation.position().clone())
+                    })?,
+                    type_context.types(),
+                )? {
+                    Type::Number(_) => mir::ir::ComparisonOperation::new(
+                        mir::ir::ComparisonOperator::Equal,
+                        compile(operation.lhs())?,
+                        compile(operation.rhs())?,
+                    )
+                    .into(),
+                    Type::String(_) => mir::ir::Call::new(
+                        mir::types::Function::new(
+                            vec![
+                                mir::types::Type::ByteString.into(),
+                                mir::types::Type::ByteString.into(),
+                            ],
+                            mir::types::Type::Boolean,
+                        ),
+                        mir::ir::Variable::new(
+                            &type_context.string_type_configuration().equal_function_name,
+                        ),
+                        vec![compile(operation.lhs())?, compile(operation.rhs())?],
+                    )
+                    .into(),
+                    _ => compile(&equal_operation_transformer::transform(operation)?)?,
+                }
+            }
+            EqualityOperator::NotEqual => {
+                compile(&not_equal_operation_transformer::transform(operation))?
+            }
+        },
+        Operation::Not(_) => todo!(),
+        Operation::Order(operation) => mir::ir::ComparisonOperation::new(
+            match operation.operator() {
+                OrderOperator::LessThan => mir::ir::ComparisonOperator::LessThan,
+                OrderOperator::LessThanOrEqual => mir::ir::ComparisonOperator::LessThanOrEqual,
+                OrderOperator::GreaterThan => mir::ir::ComparisonOperator::GreaterThan,
+                OrderOperator::GreaterThanOrEqual => {
+                    mir::ir::ComparisonOperator::GreaterThanOrEqual
+                }
+            },
+            compile(operation.lhs())?,
+            compile(operation.rhs())?,
+        )
+        .into(),
+        Operation::Try(_) => todo!(),
     })
 }
 
