@@ -165,32 +165,14 @@ pub fn compile(
                 )?
             }
         }
-        mir::ir::Expression::TryOperation(operation) => {
-            let operand = compile(operation.operand(), variables)?;
-
-            instruction_builder.if_(
-                compile_tag_comparison(&instruction_builder, &operand, operation.type_())?,
-                |instruction_builder| -> Result<_, CompileError> {
-                    Ok(instruction_builder.return_(compile(
-                        &operation.then(),
-                        &variables
-                            .clone()
-                            .into_iter()
-                            .chain(vec![(
-                                operation.name().into(),
-                                variants::compile_unboxed_payload(
-                                    &instruction_builder,
-                                    &instruction_builder.deconstruct_record(operand.clone(), 1)?,
-                                    operation.type_(),
-                                    types,
-                                )?,
-                            )])
-                            .collect(),
-                    )?))
-                },
-                |instruction_builder| Ok(instruction_builder.branch(operand.clone())),
-            )?
-        }
+        mir::ir::Expression::TryOperation(operation) => compile_try_operation(
+            module_builder,
+            instruction_builder,
+            operation,
+            variables,
+            types,
+        )?
+        .into(),
         mir::ir::Expression::Variable(variable) => variables[variable.name()].clone(),
         mir::ir::Expression::Variant(variant) => fmm::build::record(vec![
             variants::compile_tag(variant.type_()),
@@ -497,5 +479,47 @@ fn compile_comparison_operation(
         },
         lhs,
         rhs,
+    )?)
+}
+
+fn compile_try_operation(
+    module_builder: &fmm::build::ModuleBuilder,
+    instruction_builder: &fmm::build::InstructionBuilder,
+    operation: &mir::ir::TryOperation,
+    variables: &HashMap<String, fmm::build::TypedExpression>,
+    types: &HashMap<String, mir::types::RecordBody>,
+) -> Result<fmm::build::TypedExpression, CompileError> {
+    let operand = compile(
+        module_builder,
+        instruction_builder,
+        operation.operand(),
+        variables,
+        types,
+    )?;
+
+    Ok(instruction_builder.if_(
+        compile_tag_comparison(&instruction_builder, &operand, operation.type_())?,
+        |instruction_builder| -> Result<_, CompileError> {
+            Ok(instruction_builder.return_(compile(
+                &module_builder,
+                &instruction_builder,
+                &operation.then(),
+                &variables
+                    .clone()
+                    .into_iter()
+                    .chain(vec![(
+                        operation.name().into(),
+                        variants::compile_unboxed_payload(
+                            &instruction_builder,
+                            &instruction_builder.deconstruct_record(operand.clone(), 1)?,
+                            operation.type_(),
+                            types,
+                        )?,
+                    )])
+                    .collect(),
+                types,
+            )?))
+        },
+        |instruction_builder| Ok(instruction_builder.branch(operand.clone())),
     )?)
 }
