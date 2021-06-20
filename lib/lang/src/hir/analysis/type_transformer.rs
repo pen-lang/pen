@@ -211,15 +211,15 @@ fn transform_expression(expression: &Expression, transform: &impl Fn(&Type) -> T
         )
         .into(),
         Expression::RecordElement(element) => RecordElement::new(
-            transform(element.type_()),
+            element.type_().map(transform),
+            transform_expression(element.record(), transform),
             element.element_name(),
-            transform_expression(element.argument(), transform),
             element.position().clone(),
         )
         .into(),
         Expression::RecordUpdate(update) => RecordUpdate::new(
             transform(update.type_()),
-            transform_expression(update.argument(), transform),
+            transform_expression(update.record(), transform),
             update
                 .elements()
                 .iter()
@@ -267,10 +267,20 @@ fn transform_operation(operation: &Operation, transform: &impl Fn(&Type) -> Type
             operation.position().clone(),
         )
         .into(),
+        Operation::Not(operation) => NotOperation::new(
+            transform_expression(operation.expression(), transform),
+            operation.position().clone(),
+        )
+        .into(),
         Operation::Order(operation) => OrderOperation::new(
             operation.operator(),
             transform_expression(operation.lhs(), transform),
             transform_expression(operation.rhs(), transform),
+            operation.position().clone(),
+        )
+        .into(),
+        Operation::Try(operation) => TryOperation::new(
+            transform_expression(operation.expression(), transform),
             operation.position().clone(),
         )
         .into(),

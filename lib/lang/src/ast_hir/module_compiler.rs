@@ -171,15 +171,110 @@ fn compile_expression(expression: &ast::Expression) -> Result<hir::Expression, C
         ast::Expression::Boolean(boolean) => {
             hir::Boolean::new(boolean.value(), boolean.position().clone()).into()
         }
+        ast::Expression::Call(call) => hir::Call::new(
+            compile_expression(call.function())?,
+            call.arguments()
+                .iter()
+                .map(|argument| compile_expression(argument))
+                .collect::<Result<_, _>>()?,
+            None,
+            call.position().clone(),
+        )
+        .into(),
         ast::Expression::If(if_) => compile_if(if_.branches(), if_.else_(), if_.position())?.into(),
+        ast::Expression::IfList(if_) => hir::IfList::new(
+            compile_expression(if_.argument())?,
+            if_.first_name(),
+            if_.rest_name(),
+            compile_block(if_.then())?,
+            compile_block(if_.else_())?,
+            None,
+            if_.position().clone(),
+        )
+        .into(),
+        ast::Expression::IfType(if_) => hir::IfType::new(
+            if_.name(),
+            compile_expression(if_.argument())?,
+            None,
+            if_.branches()
+                .iter()
+                .map(|branch| {
+                    Ok(hir::IfTypeBranch::new(
+                        branch.type_().clone(),
+                        compile_block(branch.block())?,
+                    ))
+                })
+                .collect::<Result<_, _>>()?,
+            if_.else_().map(compile_block).transpose()?,
+            None,
+            if_.position().clone(),
+        )
+        .into(),
         ast::Expression::Lambda(lambda) => compile_lambda(lambda)?.into(),
+        ast::Expression::List(list) => hir::List::new(
+            list.type_().clone(),
+            list.elements()
+                .iter()
+                .map(|element| {
+                    Ok(match element {
+                        ast::ListElement::Multiple(element) => {
+                            hir::ListElement::Multiple(compile_expression(element)?)
+                        }
+                        ast::ListElement::Single(element) => {
+                            hir::ListElement::Single(compile_expression(element)?)
+                        }
+                    })
+                })
+                .collect::<Result<_, _>>()?,
+            list.position().clone(),
+        )
+        .into(),
+        ast::Expression::None(none) => hir::None::new(none.position().clone()).into(),
         ast::Expression::Number(number) => {
             hir::Number::new(number.value(), number.position().clone()).into()
         }
-        ast::Expression::Variable(variable) => {
-            hir::Variable::new(variable.name(), variable.position().clone()).into()
+        ast::Expression::Record(record) => {
+            let elements = record
+                .elements()
+                .iter()
+                .map(|(key, element)| Ok((key.clone(), compile_expression(element)?)))
+                .collect::<Result<_, _>>()?;
+
+            if let Some(old_record) = record.record() {
+                hir::RecordUpdate::new(
+                    record.type_().clone(),
+                    compile_expression(old_record)?,
+                    elements,
+                    record.position().clone(),
+                )
+                .into()
+            } else {
+                hir::RecordConstruction::new(
+                    record.type_().clone(),
+                    elements,
+                    record.position().clone(),
+                )
+                .into()
+            }
         }
-        _ => todo!(),
+        ast::Expression::String(string) => {
+            hir::ByteString::new(string.value(), string.position().clone()).into()
+        }
+        ast::Expression::UnaryOperation(operation) => {
+            let operand = compile_expression(operation.expression())?;
+
+            match operation.operator() {
+                ast::UnaryOperator::Not => {
+                    hir::NotOperation::new(operand, operation.position().clone()).into()
+                }
+                ast::UnaryOperator::Try => {
+                    hir::TryOperation::new(operand, operation.position().clone()).into()
+                }
+            }
+        }
+        ast::Expression::Variable(variable) => {
+            hir::Variable::new(variable.name(), None, variable.position().clone()).into()
+        }
     })
 }
 

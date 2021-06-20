@@ -5,7 +5,7 @@ use std::{collections::BTreeMap, sync::Arc};
 #[derive(Clone, Debug, PartialEq)]
 pub struct RecordUpdate {
     type_: Type,
-    argument: Arc<Expression>,
+    record: Arc<Expression>,
     elements: BTreeMap<String, Expression>,
     position: Position,
 }
@@ -13,13 +13,13 @@ pub struct RecordUpdate {
 impl RecordUpdate {
     pub fn new(
         type_: impl Into<Type>,
-        argument: impl Into<Expression>,
+        record: impl Into<Expression>,
         elements: BTreeMap<String, Expression>,
         position: Position,
     ) -> Self {
         Self {
             type_: type_.into(),
-            argument: Arc::new(argument.into()),
+            record: Arc::new(record.into()),
             elements,
             position,
         }
@@ -29,8 +29,8 @@ impl RecordUpdate {
         &self.type_
     }
 
-    pub fn argument(&self) -> &Expression {
-        &self.argument
+    pub fn record(&self) -> &Expression {
+        &self.record
     }
 
     pub fn elements(&self) -> &BTreeMap<String, Expression> {

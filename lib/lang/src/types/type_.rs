@@ -42,11 +42,30 @@ impl Type {
         }
     }
 
+    pub fn into_list(self) -> Option<List> {
+        match self {
+            Type::List(list) => Some(list),
+            _ => None,
+        }
+    }
+
     pub fn into_record(self) -> Option<Record> {
         match self {
             Type::Record(record) => Some(record),
             _ => None,
         }
+    }
+
+    pub fn is_function(&self) -> bool {
+        matches!(self, Type::Function(_))
+    }
+
+    pub fn is_list(&self) -> bool {
+        matches!(self, Type::List(_))
+    }
+
+    pub fn is_record(&self) -> bool {
+        matches!(self, Type::Record(_))
     }
 }
 

@@ -1,9 +1,11 @@
 mod error;
-mod type_canonicalizer;
-mod type_equality_checker;
-mod type_resolver;
-mod type_subsumption_checker;
+pub mod type_canonicalizer;
+pub mod type_equality_checker;
+pub mod type_id_calculator;
+pub mod type_resolver;
+pub mod type_subsumption_checker;
 
+// TODO Remove those re-exports.
 pub use error::TypeAnalysisError;
 pub use type_canonicalizer::canonicalize;
 pub use type_equality_checker::check_equality;

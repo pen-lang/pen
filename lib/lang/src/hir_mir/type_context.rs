@@ -1,4 +1,7 @@
-use super::list_type_configuration::ListTypeConfiguration;
+use super::{
+    list_type_configuration::ListTypeConfiguration,
+    string_type_configuration::StringTypeConfiguration,
+};
 use crate::{
     hir::Module,
     types::{self, Type},
@@ -9,10 +12,15 @@ pub struct TypeContext {
     records: HashMap<String, HashMap<String, Type>>,
     types: HashMap<String, Type>,
     list_type_configuration: ListTypeConfiguration,
+    string_type_configuration: StringTypeConfiguration,
 }
 
 impl TypeContext {
-    pub fn new(module: &Module, list_type_configuration: &ListTypeConfiguration) -> Self {
+    pub fn new(
+        module: &Module,
+        list_type_configuration: &ListTypeConfiguration,
+        string_type_configuration: &StringTypeConfiguration,
+    ) -> Self {
         Self {
             records: module
                 .type_definitions()
@@ -45,6 +53,7 @@ impl TypeContext {
                 )
                 .collect(),
             list_type_configuration: list_type_configuration.clone(),
+            string_type_configuration: string_type_configuration.clone(),
         }
     }
 
@@ -58,5 +67,9 @@ impl TypeContext {
 
     pub fn list_type_configuration(&self) -> &ListTypeConfiguration {
         &self.list_type_configuration
+    }
+
+    pub fn string_type_configuration(&self) -> &StringTypeConfiguration {
+        &self.string_type_configuration
     }
 }

@@ -171,15 +171,15 @@ fn qualify_expression(expression: &Expression, names: &HashMap<String, String>) 
         )
         .into(),
         Expression::RecordElement(element) => RecordElement::new(
-            element.type_().clone(),
+            element.type_().cloned(),
+            qualify_expression(element.record(), names),
             element.element_name(),
-            qualify_expression(element.argument(), names),
             element.position().clone(),
         )
         .into(),
         Expression::RecordUpdate(update) => RecordUpdate::new(
             update.type_().clone(),
-            qualify_expression(update.argument(), names),
+            qualify_expression(update.record(), names),
             update
                 .elements()
                 .iter()
@@ -200,6 +200,7 @@ fn qualify_expression(expression: &Expression, names: &HashMap<String, String>) 
                 .get(variable.name())
                 .map(|string| string.as_str())
                 .unwrap_or_else(|| variable.name()),
+            variable.type_().cloned(),
             variable.position().clone(),
         )
         .into(),
@@ -234,10 +235,20 @@ fn qualify_operation(operation: &Operation, names: &HashMap<String, String>) -> 
             operation.position().clone(),
         )
         .into(),
+        Operation::Not(operation) => NotOperation::new(
+            qualify_expression(operation.expression(), names),
+            operation.position().clone(),
+        )
+        .into(),
         Operation::Order(operation) => OrderOperation::new(
             operation.operator(),
             qualify_expression(operation.lhs(), names),
             qualify_expression(operation.rhs(), names),
+            operation.position().clone(),
+        )
+        .into(),
+        Operation::Try(operation) => TryOperation::new(
+            qualify_expression(operation.expression(), names),
             operation.position().clone(),
         )
         .into(),
@@ -304,7 +315,7 @@ mod tests {
                         Lambda::new(
                             vec![],
                             types::None::new(Position::dummy()),
-                            Block::new(vec![], Variable::new("x", Position::dummy())),
+                            Block::new(vec![], Variable::new("x", None, Position::dummy())),
                             Position::dummy()
                         ),
                         false,
@@ -322,7 +333,7 @@ mod tests {
                     Lambda::new(
                         vec![],
                         types::None::new(Position::dummy()),
-                        Block::new(vec![], Variable::new("foo.x", Position::dummy())),
+                        Block::new(vec![], Variable::new("foo.x", None, Position::dummy())),
                         Position::dummy()
                     ),
                     false,
@@ -345,7 +356,7 @@ mod tests {
                         Lambda::new(
                             vec![Argument::new("x", types::None::new(Position::dummy()))],
                             types::None::new(Position::dummy()),
-                            Block::new(vec![], Variable::new("x", Position::dummy())),
+                            Block::new(vec![], Variable::new("x", None, Position::dummy())),
                             Position::dummy()
                         ),
                         false,
@@ -363,7 +374,7 @@ mod tests {
                     Lambda::new(
                         vec![Argument::new("x", types::None::new(Position::dummy()))],
                         types::None::new(Position::dummy()),
-                        Block::new(vec![], Variable::new("x", Position::dummy())),
+                        Block::new(vec![], Variable::new("x", None, Position::dummy())),
                         Position::dummy()
                     ),
                     false,
@@ -393,7 +404,7 @@ mod tests {
                                     None,
                                     Position::dummy(),
                                 )],
-                                Variable::new("x", Position::dummy())
+                                Variable::new("x", None, Position::dummy())
                             ),
                             Position::dummy()
                         ),
@@ -419,7 +430,7 @@ mod tests {
                                 None,
                                 Position::dummy(),
                             )],
-                            Variable::new("x", Position::dummy())
+                            Variable::new("x", None, Position::dummy())
                         ),
                         Position::dummy()
                     ),
