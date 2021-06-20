@@ -32,6 +32,14 @@ impl app::infra::ExternalPackageInitializer for ExternalPackageInitializer {
         }
 
         match url.scheme() {
+            "file" => {
+                command_runner::run(
+                    Command::new("cp").arg("-r").arg(url.path()).arg(
+                        self.file_path_converter
+                            .convert_to_os_path(package_directory),
+                    ),
+                )?;
+            }
             "git" => {
                 command_runner::run(
                     Command::new("git").arg("clone").arg(url.as_str()).arg(
