@@ -1,3 +1,5 @@
+pub const BUILD_CONFIGURATION_FILENAME: &str = "pen.json";
+
 pub const FILE_PATH_CONFIGURATION: app::common::FilePathConfiguration =
     app::common::FilePathConfiguration {
         source_file_extension: "pen",
