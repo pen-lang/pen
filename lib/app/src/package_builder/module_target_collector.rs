@@ -1,5 +1,6 @@
 use super::{
-    package_builder_infrastructure::PackageBuilderInfrastructure, module_finder, module_target::ModuleTarget,
+    module_finder, module_target::ModuleTarget,
+    package_builder_infrastructure::PackageBuilderInfrastructure,
 };
 use crate::{common::calculate_module_id, infra::FilePath};
 use std::error::Error;
