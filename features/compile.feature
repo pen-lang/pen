@@ -2,7 +2,7 @@ Feature: Module compiler
   Background:
     Given a file named "pen.json" with:
     """
-    {}
+    { "dependencies": {} }
     """
 
   Scenario: Compile a module
