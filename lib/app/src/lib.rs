@@ -1,4 +1,4 @@
-pub mod common;
+mod common;
 pub mod infra;
 pub mod module_compiler;
 pub mod module_dependency_compiler;

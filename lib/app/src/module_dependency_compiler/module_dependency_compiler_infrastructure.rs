@@ -1,5 +1,5 @@
 use crate::{
-    common::FilePathConfiguration,
+    infra::FilePathConfiguration,
     infra::{DependencyCompiler, FilePathDisplayer, FileSystem},
 };
 use std::sync::Arc;
