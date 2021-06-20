@@ -11,7 +11,7 @@ pub fn compile(
     ));
 
     app::module_compiler::compile_module(
-        &app::module_compiler::CompileInfrastructure {
+        &app::module_compiler::ModuleCompilerInfrastructure {
             file_system: Arc::new(infra::FileSystem::new(file_path_converter.clone())),
             file_path_displayer: Arc::new(infra::FilePathDisplayer::new(
                 file_path_converter.clone(),

@@ -13,7 +13,7 @@ pub fn compile_dependency(
     ));
 
     app::module_dependency_compiler::compile_dependency(
-        &app::module_dependency_compiler::CompileDependencyInfrastructure {
+        &app::module_dependency_compiler::ModuleDependencyCompilerInfrastructure {
             dependency_compiler: Arc::new(infra::NinjaDependencyCompiler::new(
                 file_path_converter.clone(),
             )),
