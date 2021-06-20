@@ -1,5 +1,5 @@
 use super::file_path::FilePath;
-use crate::build::ModuleTarget;
+use crate::package_builder::ModuleTarget;
 use std::error::Error;
 
 pub trait ModuleBuilder {

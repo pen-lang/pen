@@ -12,8 +12,8 @@ pub fn compile_dependency(
         main_package_directory_finder::find()?,
     ));
 
-    app::compile_dependency::compile_dependency(
-        &app::compile_dependency::CompileDependencyInfrastructure {
+    app::module_dependency_compiler::compile_dependency(
+        &app::module_dependency_compiler::CompileDependencyInfrastructure {
             dependency_compiler: Arc::new(infra::NinjaDependencyCompiler::new(
                 file_path_converter.clone(),
             )),

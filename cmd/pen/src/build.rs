@@ -33,8 +33,8 @@ pub fn build() -> Result<(), Box<dyn std::error::Error>> {
         &output_directory.join(&app::infra::FilePath::new(vec!["packages"])),
     )?;
 
-    app::build::build_main_package(
-        &app::build::BuildInfrastructure {
+    app::package_builder::build_main_package(
+        &app::package_builder::BuildInfrastructure {
             module_builder: Arc::new(infra::NinjaModuleBuilder::new(
                 file_system.clone(),
                 file_path_converter,
