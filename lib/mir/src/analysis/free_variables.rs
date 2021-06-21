@@ -46,6 +46,14 @@ fn find_in_expression(expression: &Expression) -> HashSet<String> {
             .flat_map(find_in_expression)
             .collect(),
         Expression::RecordElement(element) => find_in_expression(element.record()),
+        Expression::TryOperation(operation) => find_in_expression(operation.operand())
+            .into_iter()
+            .chain(
+                find_in_expression(operation.then())
+                    .into_iter()
+                    .filter(|variable| variable != operation.name()),
+            )
+            .collect(),
         Expression::Variable(variable) => vec![variable.name().into()].into_iter().collect(),
         Expression::Variant(variant) => find_in_expression(variant.payload()),
         Expression::Boolean(_) | Expression::ByteString(_) | Expression::Number(_) => {

@@ -441,6 +441,47 @@ fn convert_expression(
                 moved_variables,
             )
         }
+        Expression::TryOperation(operation) => {
+            let (then, then_moved_variables) =
+                convert_expression(operation.then(), owned_variables, &Default::default())?;
+            let then_moved_variables = then_moved_variables
+                .into_iter()
+                .filter(|name| name != operation.name())
+                .collect::<HashSet<_>>();
+
+            let all_moved_variables = then_moved_variables
+                .clone()
+                .into_iter()
+                .chain(moved_variables.clone())
+                .collect();
+
+            let (operand, operand_moved_variables) =
+                convert_expression(operation.operand(), owned_variables, &all_moved_variables)?;
+
+            (
+                drop_variables(
+                    TryOperation::new(
+                        operand,
+                        operation.name(),
+                        operation.type_().clone(),
+                        drop_variables(
+                            then,
+                            all_moved_variables
+                                .difference(&then_moved_variables)
+                                .cloned()
+                                .collect(),
+                            owned_variables,
+                        ),
+                    ),
+                    all_moved_variables
+                        .difference(moved_variables)
+                        .cloned()
+                        .collect(),
+                    owned_variables,
+                ),
+                operand_moved_variables,
+            )
+        }
         Expression::Variable(variable) => {
             if should_clone_variable(variable.name(), owned_variables, moved_variables) {
                 (
@@ -1641,6 +1682,73 @@ mod tests {
                             Some(DefaultAlternative::new("x", Variable::new("x")))
                         ),
                         Variable::new("x"),
+                    )
+                    .into(),
+                    vec!["x".into()].into_iter().collect()
+                )
+            );
+        }
+    }
+
+    mod try_operation {
+        use super::*;
+        use pretty_assertions::assert_eq;
+
+        #[test]
+        fn convert_try_operation() {
+            assert_eq!(
+                convert_expression(
+                    &TryOperation::new(
+                        Variable::new("x"),
+                        "y",
+                        types::Type::Number,
+                        Variant::new(types::Type::Number, Variable::new("y")),
+                    )
+                    .into(),
+                    &vec![("x".into(), Type::Variant)].into_iter().collect(),
+                    &Default::default()
+                )
+                .unwrap(),
+                (
+                    TryOperation::new(
+                        Variable::new("x"),
+                        "y",
+                        types::Type::Number,
+                        Variant::new(types::Type::Number, Variable::new("y"),),
+                    )
+                    .into(),
+                    vec!["x".into()].into_iter().collect()
+                )
+            );
+        }
+
+        #[test]
+        fn convert_try_operation_with_moved_operand() {
+            assert_eq!(
+                convert_expression(
+                    &TryOperation::new(
+                        Variable::new("x"),
+                        "y",
+                        types::Type::Number,
+                        Variant::new(types::Type::Number, Variable::new("y")),
+                    )
+                    .into(),
+                    &vec![("x".into(), Type::Variant)].into_iter().collect(),
+                    &vec!["x".into()].into_iter().collect(),
+                )
+                .unwrap(),
+                (
+                    TryOperation::new(
+                        CloneVariables::new(
+                            vec![("x".into(), Type::Variant)].into_iter().collect(),
+                            Variable::new("x")
+                        ),
+                        "y",
+                        types::Type::Number,
+                        DropVariables::new(
+                            vec![("x".into(), Type::Variant)].into_iter().collect(),
+                            Variant::new(types::Type::Number, Variable::new("y"),)
+                        ),
                     )
                     .into(),
                     vec!["x".into()].into_iter().collect()

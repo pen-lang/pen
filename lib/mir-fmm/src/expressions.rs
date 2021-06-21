@@ -9,7 +9,7 @@ pub fn compile(
     variables: &HashMap<String, fmm::build::TypedExpression>,
     types: &HashMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    let compile = |expression, variables| {
+    let compile = |expression, variables: &HashMap<_, _>| {
         compile(
             module_builder,
             instruction_builder,
@@ -165,6 +165,13 @@ pub fn compile(
                 )?
             }
         }
+        mir::ir::Expression::TryOperation(operation) => compile_try_operation(
+            module_builder,
+            instruction_builder,
+            operation,
+            variables,
+            types,
+        )?,
         mir::ir::Expression::Variable(variable) => variables[variable.name()].clone(),
         mir::ir::Expression::Variant(variant) => fmm::build::record(vec![
             variants::compile_tag(variant.type_()),
@@ -258,17 +265,7 @@ fn compile_alternatives(
             })
             .transpose()?,
         [alternative, ..] => Some(instruction_builder.if_(
-            fmm::build::comparison_operation(
-                fmm::ir::ComparisonOperator::Equal,
-                fmm::build::bit_cast(
-                    fmm::types::Primitive::PointerInteger,
-                    instruction_builder.deconstruct_record(argument.clone(), 0)?,
-                ),
-                fmm::build::bit_cast(
-                    fmm::types::Primitive::PointerInteger,
-                    variants::compile_tag(alternative.type_()),
-                ),
-            )?,
+            compile_tag_comparison(instruction_builder, &argument, alternative.type_())?,
             |instruction_builder| -> Result<_, CompileError> {
                 Ok(instruction_builder.branch(compile(
                     module_builder,
@@ -309,6 +306,25 @@ fn compile_alternatives(
             },
         )?),
     })
+}
+
+fn compile_tag_comparison(
+    instruction_builder: &fmm::build::InstructionBuilder,
+    argument: &fmm::build::TypedExpression,
+    type_: &mir::types::Type,
+) -> Result<fmm::build::TypedExpression, CompileError> {
+    Ok(fmm::build::comparison_operation(
+        fmm::ir::ComparisonOperator::Equal,
+        fmm::build::bit_cast(
+            fmm::types::Primitive::PointerInteger,
+            instruction_builder.deconstruct_record(argument.clone(), 0)?,
+        ),
+        fmm::build::bit_cast(
+            fmm::types::Primitive::PointerInteger,
+            variants::compile_tag(type_),
+        ),
+    )?
+    .into())
 }
 
 fn compile_let(
@@ -463,4 +479,46 @@ fn compile_comparison_operation(
         lhs,
         rhs,
     )?)
+}
+
+fn compile_try_operation(
+    module_builder: &fmm::build::ModuleBuilder,
+    instruction_builder: &fmm::build::InstructionBuilder,
+    operation: &mir::ir::TryOperation,
+    variables: &HashMap<String, fmm::build::TypedExpression>,
+    types: &HashMap<String, mir::types::RecordBody>,
+) -> Result<fmm::build::TypedExpression, CompileError> {
+    let operand = compile(
+        module_builder,
+        instruction_builder,
+        operation.operand(),
+        variables,
+        types,
+    )?;
+
+    instruction_builder.if_(
+        compile_tag_comparison(instruction_builder, &operand, operation.type_())?,
+        |instruction_builder| -> Result<_, CompileError> {
+            Ok(instruction_builder.return_(compile(
+                module_builder,
+                &instruction_builder,
+                operation.then(),
+                &variables
+                    .clone()
+                    .into_iter()
+                    .chain(vec![(
+                        operation.name().into(),
+                        variants::compile_unboxed_payload(
+                            &instruction_builder,
+                            &instruction_builder.deconstruct_record(operand.clone(), 1)?,
+                            operation.type_(),
+                            types,
+                        )?,
+                    )])
+                    .collect(),
+                types,
+            )?))
+        },
+        |instruction_builder| Ok(instruction_builder.branch(operand.clone())),
+    )
 }
