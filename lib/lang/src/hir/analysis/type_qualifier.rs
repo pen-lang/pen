@@ -98,10 +98,13 @@ mod tests {
         assert_eq!(
             qualify(
                 &Module::new(
-                    vec![TypeDefinition::without_source("x", vec![],
+                    vec![TypeDefinition::without_source(
+                        "x",
+                        vec![],
                         false,
                         false,
-                        false)],
+                        false
+                    )],
                     vec![],
                     vec![],
                     vec![],
@@ -109,10 +112,13 @@ mod tests {
                 "foo."
             ),
             Module::new(
-                vec![TypeDefinition::without_source("foo.x", vec![],
+                vec![TypeDefinition::without_source(
+                    "foo.x",
+                    vec![],
                     false,
                     false,
-                    false)],
+                    false
+                )],
                 vec![],
                 vec![],
                 vec![],
@@ -125,13 +131,16 @@ mod tests {
         assert_eq!(
             qualify(
                 &Module::new(
-                    vec![TypeDefinition::without_source("x", vec![types::RecordElement::new(
+                    vec![TypeDefinition::without_source(
+                        "x",
+                        vec![types::RecordElement::new(
                             "x",
                             types::Reference::new("x", Position::dummy())
                         )],
                         false,
                         false,
-                        false)],
+                        false
+                    )],
                     vec![],
                     vec![],
                     vec![],
@@ -139,13 +148,16 @@ mod tests {
                 "foo."
             ),
             Module::new(
-                vec![TypeDefinition::without_source("foo.x", vec![types::RecordElement::new(
+                vec![TypeDefinition::without_source(
+                    "foo.x",
+                    vec![types::RecordElement::new(
                         "x",
                         types::Reference::new("foo.x", Position::dummy())
                     )],
                     false,
                     false,
-                    false)],
+                    false
+                )],
                 vec![],
                 vec![],
                 vec![],
@@ -159,7 +171,12 @@ mod tests {
             qualify(
                 &Module::new(
                     vec![],
-                    vec![TypeAlias::without_source("x", types::Reference::new("x", Position::dummy()), false,false)],
+                    vec![TypeAlias::without_source(
+                        "x",
+                        types::Reference::new("x", Position::dummy()),
+                        false,
+                        false
+                    )],
                     vec![],
                     vec![],
                 ),
@@ -167,7 +184,12 @@ mod tests {
             ),
             Module::new(
                 vec![],
-                vec![TypeAlias::without_source("foo.x", types::Reference::new("foo.x", Position::dummy()), false,false)],
+                vec![TypeAlias::without_source(
+                    "foo.x",
+                    types::Reference::new("foo.x", Position::dummy()),
+                    false,
+                    false
+                )],
                 vec![],
                 vec![],
             )
