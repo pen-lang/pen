@@ -1,4 +1,5 @@
 mod error;
+mod import_renamer;
 mod module_compiler;
 
 use crate::{ast, hir, interface};
@@ -13,6 +14,7 @@ pub fn compile(
     let module = module_compiler::compile(module, module_interfaces)?;
     let module = hir::analysis::definition_qualifier::qualify(&module, prefix);
     let module = hir::analysis::type_qualifier::qualify(&module, prefix);
+    let module = import_renamer::rename(&module, module_interfaces);
 
     Ok(module)
 }
