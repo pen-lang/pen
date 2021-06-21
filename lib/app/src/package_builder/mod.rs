@@ -28,6 +28,8 @@ pub fn build_main_package(
         },
         main_package_directory,
         output_directory,
+        // TODO Pass external packages' build script files.
+        &[],
         &build_script_file,
     )?;
 

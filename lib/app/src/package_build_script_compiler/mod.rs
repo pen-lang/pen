@@ -12,17 +12,21 @@ pub fn compile(
     infrastructure: &PackageBuildScriptCompilerInfrastructure,
     package_directory: &FilePath,
     output_directory: &FilePath,
+    child_build_script_files: &[FilePath],
     build_script_file: &FilePath,
 ) -> Result<(), Box<dyn Error>> {
     infrastructure.file_system.write(
         build_script_file,
         infrastructure
             .module_build_script_compiler
-            .compile(&module_target_collector::collect_module_targets(
-                infrastructure,
-                package_directory,
-                output_directory,
-            )?)
+            .compile(
+                &module_target_collector::collect_module_targets(
+                    infrastructure,
+                    package_directory,
+                    output_directory,
+                )?,
+                child_build_script_files,
+            )
             .as_bytes(),
     )?;
 

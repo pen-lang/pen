@@ -54,6 +54,7 @@ fn initialize_external_package(
         },
         &package_directory,
         output_directory,
+        &[],
         &package_directory.with_extension(
             infrastructure
                 .file_path_configuration
