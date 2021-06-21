@@ -29,19 +29,29 @@ fn initialize_external_packages(
         .read(package_directory)?;
 
     for url in package_configuration.dependencies.values() {
-        let package_directory =
-            external_package_directory.join(&FilePath::new(vec![calculate_package_id(url)]));
-
-        infrastructure
-            .external_package_initializer
-            .initialize(url, &package_directory)?;
-
-        initialize_external_packages(
-            infrastructure,
-            &package_directory,
-            external_package_directory,
-        )?;
+        initialize_external_package(infrastructure, url, external_package_directory)?;
     }
+
+    Ok(())
+}
+
+fn initialize_external_package(
+    infrastructure: &PackageManagerInfrastructure,
+    url: &url::Url,
+    external_package_directory: &FilePath,
+) -> Result<(), Box<dyn Error>> {
+    let package_directory =
+        external_package_directory.join(&FilePath::new(vec![calculate_package_id(url)]));
+
+    infrastructure
+        .external_package_initializer
+        .initialize(url, &package_directory)?;
+
+    initialize_external_packages(
+        infrastructure,
+        &package_directory,
+        external_package_directory,
+    )?;
 
     Ok(())
 }
