@@ -2,6 +2,7 @@ use super::package_manager_infrastructure::PackageManagerInfrastructure;
 use crate::{
     common::calculate_package_id,
     infra::{FilePath, PACKAGE_DIRECTORY},
+    package_build_script_compiler::{self, PackageBuildScriptCompilerInfrastructure},
 };
 use std::error::Error;
 
@@ -10,11 +11,7 @@ pub fn initialize_main_package(
     package_directory: &FilePath,
     output_directory: &FilePath,
 ) -> Result<(), Box<dyn Error>> {
-    initialize_external_packages(
-        infrastructure,
-        package_directory,
-        &output_directory.join(&FilePath::new(vec![PACKAGE_DIRECTORY])),
-    )?;
+    initialize_external_packages(infrastructure, package_directory, output_directory)?;
 
     Ok(())
 }
@@ -22,14 +19,14 @@ pub fn initialize_main_package(
 fn initialize_external_packages(
     infrastructure: &PackageManagerInfrastructure,
     package_directory: &FilePath,
-    external_package_directory: &FilePath,
+    output_directory: &FilePath,
 ) -> Result<(), Box<dyn Error>> {
     let package_configuration = infrastructure
         .package_configuration_reader
         .read(package_directory)?;
 
     for url in package_configuration.dependencies.values() {
-        initialize_external_package(infrastructure, url, external_package_directory)?;
+        initialize_external_package(infrastructure, url, output_directory)?;
     }
 
     Ok(())
@@ -38,20 +35,33 @@ fn initialize_external_packages(
 fn initialize_external_package(
     infrastructure: &PackageManagerInfrastructure,
     url: &url::Url,
-    external_package_directory: &FilePath,
+    output_directory: &FilePath,
 ) -> Result<(), Box<dyn Error>> {
-    let package_directory =
-        external_package_directory.join(&FilePath::new(vec![calculate_package_id(url)]));
+    let package_directory = output_directory.join(&FilePath::new(vec![
+        PACKAGE_DIRECTORY.into(),
+        calculate_package_id(url),
+    ]));
 
     infrastructure
         .external_package_initializer
         .initialize(url, &package_directory)?;
 
-    initialize_external_packages(
-        infrastructure,
+    package_build_script_compiler::compile(
+        &PackageBuildScriptCompilerInfrastructure {
+            module_build_script_compiler: infrastructure.module_build_script_compiler.clone(),
+            file_system: infrastructure.file_system.clone(),
+            file_path_configuration: infrastructure.file_path_configuration.clone(),
+        },
         &package_directory,
-        external_package_directory,
+        output_directory,
+        &package_directory.with_extension(
+            infrastructure
+                .file_path_configuration
+                .build_script_file_extension,
+        ),
     )?;
+
+    initialize_external_packages(infrastructure, &package_directory, output_directory)?;
 
     Ok(())
 }

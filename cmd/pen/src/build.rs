@@ -16,6 +16,9 @@ pub fn build() -> Result<(), Box<dyn std::error::Error>> {
         file_path_converter.convert_to_file_path(&main_package_directory)?;
     let output_directory =
         main_package_directory.join(&app::infra::FilePath::new(vec![OUTPUT_DIRECTORY]));
+    let module_build_script_compiler = Arc::new(infra::NinjaModuleBuildScriptCompiler::new(
+        file_path_converter.clone(),
+    ));
 
     app::package_manager::initialize_main_package(
         &app::package_manager::PackageManagerInfrastructure {
@@ -27,7 +30,9 @@ pub fn build() -> Result<(), Box<dyn std::error::Error>> {
                 file_system.clone(),
                 BUILD_CONFIGURATION_FILENAME,
             )),
+            module_build_script_compiler: module_build_script_compiler.clone(),
             file_system: file_system.clone(),
+            file_path_configuration: FILE_PATH_CONFIGURATION.clone().into(),
         },
         &main_package_directory,
         &output_directory,
@@ -36,9 +41,7 @@ pub fn build() -> Result<(), Box<dyn std::error::Error>> {
     app::package_builder::build_main_package(
         &app::package_builder::PackageBuilderInfrastructure {
             module_builder: Arc::new(infra::NinjaModuleBuilder::new(file_path_converter.clone())),
-            module_build_script_compiler: Arc::new(infra::NinjaModuleBuildScriptCompiler::new(
-                file_path_converter,
-            )),
+            module_build_script_compiler,
             file_system,
             file_path_configuration: FILE_PATH_CONFIGURATION.clone().into(),
         },
