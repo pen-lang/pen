@@ -1,6 +1,6 @@
 use super::{
     module_finder, module_target::ModuleTarget,
-    package_builder_infrastructure::PackageBuilderInfrastructure,
+    package_build_script_compiler_infrastructure::PackageBuildScriptCompilerInfrastructure,
 };
 use crate::{
     common::calculate_module_id,
@@ -9,7 +9,7 @@ use crate::{
 use std::error::Error;
 
 pub fn collect_module_targets(
-    infrastructure: &PackageBuilderInfrastructure,
+    infrastructure: &PackageBuildScriptCompilerInfrastructure,
     package_directory: &FilePath,
     output_directory: &FilePath,
 ) -> Result<Vec<ModuleTarget>, Box<dyn Error>> {

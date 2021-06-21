@@ -1,10 +1,9 @@
-mod module_finder;
-mod module_target;
-mod module_target_collector;
 mod package_builder_infrastructure;
 
-use crate::infra::FilePath;
-pub use module_target::ModuleTarget;
+use crate::{
+    infra::FilePath,
+    package_build_script_compiler::{self, PackageBuildScriptCompilerInfrastructure},
+};
 pub use package_builder_infrastructure::PackageBuilderInfrastructure;
 use std::error::Error;
 
@@ -21,16 +20,15 @@ pub fn build_main_package(
         ),
     );
 
-    infrastructure.file_system.write(
+    package_build_script_compiler::compile(
+        &PackageBuildScriptCompilerInfrastructure {
+            module_build_script_compiler: infrastructure.module_build_script_compiler.clone(),
+            file_system: infrastructure.file_system.clone(),
+            file_path_configuration: infrastructure.file_path_configuration.clone(),
+        },
+        main_package_directory,
+        output_directory,
         &build_script_file,
-        infrastructure
-            .module_build_script_compiler
-            .compile(&module_target_collector::collect_module_targets(
-                infrastructure,
-                main_package_directory,
-                output_directory,
-            )?)
-            .as_bytes(),
     )?;
 
     infrastructure.module_builder.build(&build_script_file)?;
