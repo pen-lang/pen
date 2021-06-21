@@ -27,7 +27,7 @@ pub fn compile_module(
                 infrastructure.file_path_displayer.display(source_file)
             ),
             // TODO Compile module imports.
-            &[],
+            &Default::default(),
         )?,
         &compile_configuration.list_type,
         &compile_configuration.string_type,
