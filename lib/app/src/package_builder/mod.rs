@@ -13,14 +13,27 @@ pub fn build_main_package(
     main_package_directory: &FilePath,
     output_directory: &FilePath,
 ) -> Result<(), Box<dyn Error>> {
-    infrastructure.module_builder.build(
-        &module_target_collector::collect_module_targets(
-            infrastructure,
-            main_package_directory,
-            output_directory,
-        )?,
-        output_directory,
+    let build_script_file = output_directory.join(
+        &FilePath::new(vec!["main"]).with_extension(
+            infrastructure
+                .file_path_configuration
+                .build_script_file_extension,
+        ),
+    );
+
+    infrastructure.file_system.write(
+        &build_script_file,
+        infrastructure
+            .module_build_script_compiler
+            .compile(&module_target_collector::collect_module_targets(
+                infrastructure,
+                main_package_directory,
+                output_directory,
+            )?)
+            .as_bytes(),
     )?;
+
+    infrastructure.module_builder.build(&build_script_file)?;
 
     Ok(())
 }

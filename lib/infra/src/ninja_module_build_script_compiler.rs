@@ -14,7 +14,7 @@ impl NinjaModuleBuildScriptCompiler {
 }
 
 impl app::infra::ModuleBuildScriptCompiler for NinjaModuleBuildScriptCompiler {
-    fn build(&self, module_targets: &[app::package_builder::ModuleTarget]) -> String {
+    fn compile(&self, module_targets: &[app::package_builder::ModuleTarget]) -> String {
         vec![
             "ninja_required_version = 1.10",
             "rule pen_compile",
