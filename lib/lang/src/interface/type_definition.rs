@@ -36,7 +36,7 @@ impl TypeDefinition {
     }
 
     pub fn is_open(&self) -> bool {
-        self.public
+        self.open
     }
 
     pub fn is_public(&self) -> bool {

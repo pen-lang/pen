@@ -6,24 +6,54 @@ pub fn compile(
     module_interfaces: &[interface::Module],
 ) -> Result<hir::Module, CompileError> {
     Ok(hir::Module::new(
-        module
-            .type_definitions()
+        module_interfaces
             .iter()
-            .map(|definition| {
+            .flat_map(|module_interface| {
+                module_interface
+                    .type_definitions()
+                    .iter()
+                    .map(|definition| {
+                        hir::TypeDefinition::new(
+                            definition.name(),
+                            definition.elements().to_vec(),
+                            definition.is_open(),
+                            definition.is_public(),
+                            true,
+                            definition.position().clone(),
+                        )
+                    })
+            })
+            .chain(module.type_definitions().iter().map(|definition| {
                 hir::TypeDefinition::new(
                     definition.name(),
                     definition.elements().to_vec(),
                     is_record_open(definition.elements()),
+                    is_name_public(definition.name()),
                     false,
-                    true,
                     definition.position().clone(),
                 )
-            })
+            }))
             .collect(),
-        module
-            .type_aliases()
+        module_interfaces
             .iter()
-            .map(|alias| hir::TypeAlias::new(alias.name(), alias.type_().clone(), false, true))
+            .flat_map(|module_interface| {
+                module_interface.type_aliases().iter().map(|alias| {
+                    hir::TypeAlias::new(
+                        alias.name(),
+                        alias.type_().clone(),
+                        alias.is_public(),
+                        true,
+                    )
+                })
+            })
+            .chain(module.type_aliases().iter().map(|alias| {
+                hir::TypeAlias::new(
+                    alias.name(),
+                    alias.type_().clone(),
+                    is_name_public(alias.name()),
+                    false,
+                )
+            }))
             .collect(),
         module_interfaces
             .iter()
@@ -303,11 +333,105 @@ fn compile_if(
 }
 
 fn is_record_open(elements: &[types::RecordElement]) -> bool {
-    elements
-        .iter()
-        .all(|element| is_name_public(element.name()))
+    !elements.is_empty()
+        && elements
+            .iter()
+            .all(|element| is_name_public(element.name()))
 }
 
 fn is_name_public(name: &str) -> bool {
     name.chars().next().unwrap().is_ascii_uppercase()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use pretty_assertions::assert_eq;
+
+    #[test]
+    fn compile_empty_module() {
+        assert_eq!(
+            compile(&ast::Module::new(vec![], vec![], vec![], vec![]), &[]),
+            Ok(hir::Module::new(vec![], vec![], vec![], vec![]))
+        );
+    }
+
+    #[test]
+    fn compile_module_with_module_interface() {
+        assert_eq!(
+            compile(
+                &ast::Module::new(
+                    vec![],
+                    vec![ast::TypeDefinition::new("Foo1", vec![], Position::dummy())],
+                    vec![ast::TypeAlias::new(
+                        "Foo2",
+                        types::None::new(Position::dummy())
+                    )],
+                    vec![ast::Definition::new(
+                        "Foo3",
+                        ast::Lambda::new(
+                            vec![],
+                            types::None::new(Position::dummy()),
+                            ast::Block::new(vec![], ast::None::new(Position::dummy())),
+                            Position::dummy(),
+                        ),
+                        Position::dummy()
+                    )]
+                ),
+                &[interface::Module::new(
+                    vec![interface::TypeDefinition::new(
+                        "Bar1",
+                        vec![],
+                        false,
+                        true,
+                        Position::dummy()
+                    )],
+                    vec![interface::TypeAlias::new(
+                        "Bar2",
+                        types::None::new(Position::dummy()),
+                        true,
+                    )],
+                    vec![interface::Declaration::new(
+                        "Bar3",
+                        types::Function::new(
+                            vec![],
+                            types::None::new(Position::dummy()),
+                            Position::dummy()
+                        ),
+                        Position::dummy()
+                    )]
+                )]
+            ),
+            Ok(hir::Module::new(
+                vec![
+                    hir::TypeDefinition::new("Bar1", vec![], false, true, true, Position::dummy(),),
+                    hir::TypeDefinition::new("Foo1", vec![], false, true, false, Position::dummy(),)
+                ],
+                vec![
+                    hir::TypeAlias::new("Bar2", types::None::new(Position::dummy()), true, true),
+                    hir::TypeAlias::new("Foo2", types::None::new(Position::dummy()), true, false)
+                ],
+                vec![hir::Declaration::new(
+                    "Bar3",
+                    types::Function::new(
+                        vec![],
+                        types::None::new(Position::dummy()),
+                        Position::dummy()
+                    ),
+                    Position::dummy()
+                )],
+                vec![hir::Definition::new(
+                    "Foo3",
+                    hir::Lambda::new(
+                        vec![],
+                        types::None::new(Position::dummy()),
+                        hir::Block::new(vec![], hir::None::new(Position::dummy())),
+                        Position::dummy(),
+                    ),
+                    true,
+                    Position::dummy()
+                )]
+            ))
+        );
+    }
 }
