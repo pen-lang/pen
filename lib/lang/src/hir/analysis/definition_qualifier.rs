@@ -28,6 +28,7 @@ pub fn qualify(module: &Module, prefix: &str) -> Module {
 fn qualify_definition(definition: &Definition, names: &HashMap<String, String>) -> Definition {
     Definition::new(
         names[definition.name()].clone(),
+        definition.original_name(),
         qualify_lambda(definition.lambda(), names),
         definition.is_public(),
         definition.position().clone(),
@@ -269,17 +270,14 @@ mod tests {
                     vec![],
                     vec![],
                     vec![],
-                    vec![Definition::new(
-                        "x",
+                    vec![Definition::without_source("x",
                         Lambda::new(
                             vec![],
                             types::None::new(Position::dummy()),
                             Block::new(vec![], None::new(Position::dummy())),
                             Position::dummy()
                         ),
-                        false,
-                        Position::dummy()
-                    )]
+                        false)]
                 ),
                 "foo."
             ),
@@ -287,17 +285,14 @@ mod tests {
                 vec![],
                 vec![],
                 vec![],
-                vec![Definition::new(
-                    "foo.x",
+                vec![Definition::without_source("foo.x",
                     Lambda::new(
                         vec![],
                         types::None::new(Position::dummy()),
                         Block::new(vec![], None::new(Position::dummy())),
                         Position::dummy()
                     ),
-                    false,
-                    Position::dummy()
-                )]
+                    false)]
             )
         );
     }
@@ -310,17 +305,14 @@ mod tests {
                     vec![],
                     vec![],
                     vec![],
-                    vec![Definition::new(
-                        "x",
+                    vec![Definition::without_source("x",
                         Lambda::new(
                             vec![],
                             types::None::new(Position::dummy()),
                             Block::new(vec![], Variable::new("x", None, Position::dummy())),
                             Position::dummy()
                         ),
-                        false,
-                        Position::dummy()
-                    )]
+                        false)]
                 ),
                 "foo."
             ),
@@ -328,17 +320,14 @@ mod tests {
                 vec![],
                 vec![],
                 vec![],
-                vec![Definition::new(
-                    "foo.x",
+                vec![Definition::without_source("foo.x",
                     Lambda::new(
                         vec![],
                         types::None::new(Position::dummy()),
                         Block::new(vec![], Variable::new("foo.x", None, Position::dummy())),
                         Position::dummy()
                     ),
-                    false,
-                    Position::dummy()
-                )]
+                    false)]
             )
         );
     }
@@ -351,17 +340,14 @@ mod tests {
                     vec![],
                     vec![],
                     vec![],
-                    vec![Definition::new(
-                        "x",
+                    vec![Definition::without_source("x",
                         Lambda::new(
                             vec![Argument::new("x", types::None::new(Position::dummy()))],
                             types::None::new(Position::dummy()),
                             Block::new(vec![], Variable::new("x", None, Position::dummy())),
                             Position::dummy()
                         ),
-                        false,
-                        Position::dummy()
-                    )]
+                        false)]
                 ),
                 "foo."
             ),
@@ -369,17 +355,14 @@ mod tests {
                 vec![],
                 vec![],
                 vec![],
-                vec![Definition::new(
-                    "foo.x",
+                vec![Definition::without_source("foo.x",
                     Lambda::new(
                         vec![Argument::new("x", types::None::new(Position::dummy()))],
                         types::None::new(Position::dummy()),
                         Block::new(vec![], Variable::new("x", None, Position::dummy())),
                         Position::dummy()
                     ),
-                    false,
-                    Position::dummy()
-                )]
+                    false)]
             )
         );
     }
@@ -392,8 +375,7 @@ mod tests {
                     vec![],
                     vec![],
                     vec![],
-                    vec![Definition::new(
-                        "x",
+                    vec![Definition::without_source("x",
                         Lambda::new(
                             vec![],
                             types::None::new(Position::dummy()),
@@ -408,9 +390,7 @@ mod tests {
                             ),
                             Position::dummy()
                         ),
-                        false,
-                        Position::dummy()
-                    )]
+                        false)]
                 ),
                 "foo."
             ),
@@ -418,8 +398,7 @@ mod tests {
                 vec![],
                 vec![],
                 vec![],
-                vec![Definition::new(
-                    "foo.x",
+                vec![Definition::without_source("foo.x",
                     Lambda::new(
                         vec![],
                         types::None::new(Position::dummy()),
@@ -434,9 +413,7 @@ mod tests {
                         ),
                         Position::dummy()
                     ),
-                    false,
-                    Position::dummy()
-                )]
+                    false)]
             )
         );
     }

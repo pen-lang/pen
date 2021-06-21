@@ -15,6 +15,7 @@ pub fn compile(
                     .map(|definition| {
                         hir::TypeDefinition::new(
                             definition.name(),
+                            definition.original_name(),
                             definition.elements().to_vec(),
                             definition.is_open(),
                             definition.is_public(),
@@ -25,6 +26,7 @@ pub fn compile(
             })
             .chain(module.type_definitions().iter().map(|definition| {
                 hir::TypeDefinition::new(
+                    definition.name(),
                     definition.name(),
                     definition.elements().to_vec(),
                     is_record_open(definition.elements()),
@@ -40,6 +42,7 @@ pub fn compile(
                 module_interface.type_aliases().iter().map(|alias| {
                     hir::TypeAlias::new(
                         alias.name(),
+                        alias.original_name(),
                         alias.type_().clone(),
                         alias.is_public(),
                         true,
@@ -48,6 +51,7 @@ pub fn compile(
             })
             .chain(module.type_aliases().iter().map(|alias| {
                 hir::TypeAlias::new(
+                    alias.name(),
                     alias.name(),
                     alias.type_().clone(),
                     is_name_public(alias.name()),
@@ -76,6 +80,7 @@ pub fn compile(
 
 fn compile_definition(definition: &ast::Definition) -> Result<hir::Definition, CompileError> {
     Ok(hir::Definition::new(
+        definition.name(),
         definition.name(),
         compile_lambda(definition.lambda())?,
         is_name_public(definition.name()),
@@ -375,23 +380,22 @@ mod tests {
                             ast::Block::new(vec![], ast::None::new(Position::dummy())),
                             Position::dummy(),
                         ),
-                        Position::dummy()
+                        Position::dummy(),
                     )]
                 ),
                 &[interface::Module::new(
-                    vec![interface::TypeDefinition::new(
+                    vec![interface::TypeDefinition::without_source(
                         "Bar1",
                         vec![],
                         false,
-                        true,
-                        Position::dummy()
+                        true
                     )],
-                    vec![interface::TypeAlias::new(
+                    vec![interface::TypeAlias::without_source(
                         "Bar2",
                         types::None::new(Position::dummy()),
                         true,
                     )],
-                    vec![interface::Declaration::new(
+                    vec![interface::Declaration::without_source(
                         "Bar3",
                         types::Function::new(
                             vec![],
@@ -404,12 +408,31 @@ mod tests {
             ),
             Ok(hir::Module::new(
                 vec![
-                    hir::TypeDefinition::new("Bar1", vec![], false, true, true, Position::dummy(),),
-                    hir::TypeDefinition::new("Foo1", vec![], false, true, false, Position::dummy(),)
+                    hir::TypeDefinition::without_source("Bar1", vec![], false, true, true),
+                    hir::TypeDefinition::new(
+                        "Foo1",
+                        "Foo1",
+                        vec![],
+                        false,
+                        true,
+                        false,
+                        Position::dummy()
+                    )
                 ],
                 vec![
-                    hir::TypeAlias::new("Bar2", types::None::new(Position::dummy()), true, true),
-                    hir::TypeAlias::new("Foo2", types::None::new(Position::dummy()), true, false)
+                    hir::TypeAlias::without_source(
+                        "Bar2",
+                        types::None::new(Position::dummy()),
+                        true,
+                        true
+                    ),
+                    hir::TypeAlias::new(
+                        "Foo2",
+                        "Foo2",
+                        types::None::new(Position::dummy()),
+                        true,
+                        false
+                    )
                 ],
                 vec![hir::Declaration::new(
                     "Bar3",
@@ -421,6 +444,7 @@ mod tests {
                     Position::dummy()
                 )],
                 vec![hir::Definition::new(
+                    "Foo3",
                     "Foo3",
                     hir::Lambda::new(
                         vec![],

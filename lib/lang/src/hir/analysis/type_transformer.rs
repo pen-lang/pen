@@ -64,6 +64,7 @@ fn transform_type_definition(
     } else {
         TypeDefinition::new(
             definition.name(),
+            definition.original_name(),
             definition
                 .elements()
                 .iter()
@@ -85,6 +86,7 @@ fn transform_type_alias(alias: &TypeAlias, transform: &impl Fn(&Type) -> Type) -
     } else {
         TypeAlias::new(
             alias.name(),
+            alias.original_name(),
             transform(alias.type_()),
             alias.is_public(),
             alias.is_external(),
@@ -95,6 +97,7 @@ fn transform_type_alias(alias: &TypeAlias, transform: &impl Fn(&Type) -> Type) -
 fn transform_definition(definition: &Definition, transform: &impl Fn(&Type) -> Type) -> Definition {
     Definition::new(
         definition.name(),
+        definition.original_name(),
         transform_lambda(definition.lambda(), transform),
         definition.is_public(),
         definition.position().clone(),

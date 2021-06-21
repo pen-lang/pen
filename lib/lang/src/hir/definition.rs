@@ -4,23 +4,40 @@ use crate::position::Position;
 #[derive(Clone, Debug, PartialEq)]
 pub struct Definition {
     name: String,
+    original_name: String,
     lambda: Lambda,
     public: bool,
     position: Position,
 }
 
 impl Definition {
-    pub fn new(name: impl Into<String>, lambda: Lambda, public: bool, position: Position) -> Self {
+    pub fn new(
+        name: impl Into<String>,
+        original_name: impl Into<String>,
+        lambda: Lambda,
+        public: bool,
+        position: Position,
+    ) -> Self {
         Self {
             name: name.into(),
+            original_name: original_name.into(),
             lambda,
             public,
             position,
         }
     }
 
+    #[cfg(test)]
+    pub fn without_source(name: impl Into<String>, lambda: Lambda, public: bool) -> Self {
+        Self::new(name, "", lambda, public, Position::dummy())
+    }
+
     pub fn name(&self) -> &str {
         &self.name
+    }
+
+    pub fn original_name(&self) -> &str {
+        &self.original_name
     }
 
     pub fn lambda(&self) -> &Lambda {

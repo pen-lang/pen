@@ -27,6 +27,7 @@ fn infer_definition(
 ) -> Result<Definition, CompileError> {
     Ok(Definition::new(
         definition.name(),
+        definition.original_name(),
         infer_lambda(definition.lambda(), variables, types)?,
         definition.is_public(),
         definition.position().clone(),
