@@ -1,32 +1,67 @@
 use super::error::CompileError;
 use crate::{ast, hir, interface, position::Position, types};
+use std::collections::HashMap;
 
 pub fn compile(
     module: &ast::Module,
-    module_interfaces: &[interface::Module],
+    module_interfaces: &HashMap<ast::ModulePath, interface::Module>,
 ) -> Result<hir::Module, CompileError> {
     Ok(hir::Module::new(
-        module
-            .type_definitions()
-            .iter()
-            .map(|definition| {
+        module_interfaces
+            .values()
+            .flat_map(|module_interface| {
+                module_interface
+                    .type_definitions()
+                    .iter()
+                    .map(|definition| {
+                        hir::TypeDefinition::new(
+                            definition.name(),
+                            definition.original_name(),
+                            definition.elements().to_vec(),
+                            definition.is_open(),
+                            definition.is_public(),
+                            true,
+                            definition.position().clone(),
+                        )
+                    })
+            })
+            .chain(module.type_definitions().iter().map(|definition| {
                 hir::TypeDefinition::new(
+                    definition.name(),
                     definition.name(),
                     definition.elements().to_vec(),
                     is_record_open(definition.elements()),
+                    is_name_public(definition.name()),
                     false,
-                    true,
                     definition.position().clone(),
                 )
-            })
-            .collect(),
-        module
-            .type_aliases()
-            .iter()
-            .map(|alias| hir::TypeAlias::new(alias.name(), alias.type_().clone(), false, true))
+            }))
             .collect(),
         module_interfaces
-            .iter()
+            .values()
+            .flat_map(|module_interface| {
+                module_interface.type_aliases().iter().map(|alias| {
+                    hir::TypeAlias::new(
+                        alias.name(),
+                        alias.original_name(),
+                        alias.type_().clone(),
+                        alias.is_public(),
+                        true,
+                    )
+                })
+            })
+            .chain(module.type_aliases().iter().map(|alias| {
+                hir::TypeAlias::new(
+                    alias.name(),
+                    alias.name(),
+                    alias.type_().clone(),
+                    is_name_public(alias.name()),
+                    false,
+                )
+            }))
+            .collect(),
+        module_interfaces
+            .values()
             .flat_map(|interface| interface.declarations())
             .map(|declaration| {
                 hir::Declaration::new(
@@ -46,6 +81,7 @@ pub fn compile(
 
 fn compile_definition(definition: &ast::Definition) -> Result<hir::Definition, CompileError> {
     Ok(hir::Definition::new(
+        definition.name(),
         definition.name(),
         compile_lambda(definition.lambda())?,
         is_name_public(definition.name()),
@@ -303,11 +339,132 @@ fn compile_if(
 }
 
 fn is_record_open(elements: &[types::RecordElement]) -> bool {
-    elements
-        .iter()
-        .all(|element| is_name_public(element.name()))
+    !elements.is_empty()
+        && elements
+            .iter()
+            .all(|element| is_name_public(element.name()))
 }
 
 fn is_name_public(name: &str) -> bool {
     name.chars().next().unwrap().is_ascii_uppercase()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use pretty_assertions::assert_eq;
+
+    #[test]
+    fn compile_empty_module() {
+        assert_eq!(
+            compile(
+                &ast::Module::new(vec![], vec![], vec![], vec![]),
+                &Default::default()
+            ),
+            Ok(hir::Module::new(vec![], vec![], vec![], vec![]))
+        );
+    }
+
+    #[test]
+    fn compile_module_with_module_interface() {
+        assert_eq!(
+            compile(
+                &ast::Module::new(
+                    vec![],
+                    vec![ast::TypeDefinition::new("Foo1", vec![], Position::dummy())],
+                    vec![ast::TypeAlias::new(
+                        "Foo2",
+                        types::None::new(Position::dummy())
+                    )],
+                    vec![ast::Definition::new(
+                        "Foo3",
+                        ast::Lambda::new(
+                            vec![],
+                            types::None::new(Position::dummy()),
+                            ast::Block::new(vec![], ast::None::new(Position::dummy())),
+                            Position::dummy(),
+                        ),
+                        Position::dummy(),
+                    )]
+                ),
+                &vec![(
+                    ast::InternalModulePath::new(vec!["Foo".into()]).into(),
+                    interface::Module::new(
+                        vec![interface::TypeDefinition::without_source(
+                            "Bar1",
+                            vec![],
+                            false,
+                            true
+                        )],
+                        vec![interface::TypeAlias::without_source(
+                            "Bar2",
+                            types::None::new(Position::dummy()),
+                            true,
+                        )],
+                        vec![interface::Declaration::without_source(
+                            "Bar3",
+                            types::Function::new(
+                                vec![],
+                                types::None::new(Position::dummy()),
+                                Position::dummy()
+                            ),
+                            Position::dummy()
+                        )]
+                    )
+                )]
+                .into_iter()
+                .collect()
+            ),
+            Ok(hir::Module::new(
+                vec![
+                    hir::TypeDefinition::without_source("Bar1", vec![], false, true, true),
+                    hir::TypeDefinition::new(
+                        "Foo1",
+                        "Foo1",
+                        vec![],
+                        false,
+                        true,
+                        false,
+                        Position::dummy()
+                    )
+                ],
+                vec![
+                    hir::TypeAlias::without_source(
+                        "Bar2",
+                        types::None::new(Position::dummy()),
+                        true,
+                        true
+                    ),
+                    hir::TypeAlias::new(
+                        "Foo2",
+                        "Foo2",
+                        types::None::new(Position::dummy()),
+                        true,
+                        false
+                    )
+                ],
+                vec![hir::Declaration::new(
+                    "Bar3",
+                    types::Function::new(
+                        vec![],
+                        types::None::new(Position::dummy()),
+                        Position::dummy()
+                    ),
+                    Position::dummy()
+                )],
+                vec![hir::Definition::new(
+                    "Foo3",
+                    "Foo3",
+                    hir::Lambda::new(
+                        vec![],
+                        types::None::new(Position::dummy()),
+                        hir::Block::new(vec![], hir::None::new(Position::dummy())),
+                        Position::dummy(),
+                    ),
+                    true,
+                    Position::dummy()
+                )]
+            ))
+        );
+    }
 }

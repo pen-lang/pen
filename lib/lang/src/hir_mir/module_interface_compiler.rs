@@ -9,6 +9,7 @@ pub fn compile(module: &hir::Module) -> Result<interface::Module, CompileError> 
             .map(|definition| {
                 interface::TypeDefinition::new(
                     definition.name(),
+                    definition.original_name(),
                     definition.elements().to_vec(),
                     definition.is_open(),
                     definition.is_public() && !definition.is_external(),
@@ -22,6 +23,7 @@ pub fn compile(module: &hir::Module) -> Result<interface::Module, CompileError> 
             .map(|alias| {
                 interface::TypeAlias::new(
                     alias.name(),
+                    alias.original_name(),
                     alias.type_().clone(),
                     alias.is_public() && !alias.is_external(),
                 )
@@ -33,6 +35,7 @@ pub fn compile(module: &hir::Module) -> Result<interface::Module, CompileError> 
             .map(|definition| {
                 interface::Declaration::new(
                     definition.name(),
+                    definition.original_name(),
                     type_extractor::extract_from_lambda(definition.lambda()),
                     definition.position().clone(),
                 )

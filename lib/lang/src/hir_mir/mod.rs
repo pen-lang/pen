@@ -65,7 +65,7 @@ mod tests {
             vec![],
             vec![],
             vec![],
-            vec![Definition::new(
+            vec![Definition::without_source(
                 "x",
                 Lambda::new(
                     vec![],
@@ -74,7 +74,6 @@ mod tests {
                     Position::dummy(),
                 ),
                 false,
-                Position::dummy(),
             )],
         ))?;
 
@@ -87,7 +86,7 @@ mod tests {
             vec![],
             vec![],
             vec![],
-            vec![Definition::new(
+            vec![Definition::without_source(
                 "x",
                 Lambda::new(
                     vec![],
@@ -96,7 +95,6 @@ mod tests {
                     Position::dummy(),
                 ),
                 false,
-                Position::dummy(),
             )],
         ))?;
 
@@ -109,7 +107,7 @@ mod tests {
             vec![],
             vec![],
             vec![],
-            vec![Definition::new(
+            vec![Definition::without_source(
                 "x",
                 Lambda::new(
                     vec![],
@@ -118,7 +116,6 @@ mod tests {
                     Position::dummy(),
                 ),
                 false,
-                Position::dummy(),
             )],
         ))?;
 
@@ -131,7 +128,7 @@ mod tests {
             vec![],
             vec![],
             vec![],
-            vec![Definition::new(
+            vec![Definition::without_source(
                 "x",
                 Lambda::new(
                     vec![],
@@ -140,7 +137,6 @@ mod tests {
                     Position::dummy(),
                 ),
                 false,
-                Position::dummy(),
             )],
         ))?;
 

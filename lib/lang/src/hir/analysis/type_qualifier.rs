@@ -37,6 +37,7 @@ pub fn qualify(module: &Module, prefix: &str) -> Module {
                             .get(definition.name())
                             .map(String::as_str)
                             .unwrap_or_else(|| definition.name()),
+                        definition.original_name(),
                         definition.elements().to_vec(),
                         definition.is_open(),
                         definition.is_public(),
@@ -54,6 +55,7 @@ pub fn qualify(module: &Module, prefix: &str) -> Module {
                             .get(alias.name())
                             .map(String::as_str)
                             .unwrap_or_else(|| alias.name()),
+                        alias.original_name(),
                         alias.type_().clone(),
                         alias.is_public(),
                         alias.is_external(),
@@ -96,13 +98,12 @@ mod tests {
         assert_eq!(
             qualify(
                 &Module::new(
-                    vec![TypeDefinition::new(
+                    vec![TypeDefinition::without_source(
                         "x",
                         vec![],
                         false,
                         false,
-                        false,
-                        Position::dummy(),
+                        false
                     )],
                     vec![],
                     vec![],
@@ -111,13 +112,12 @@ mod tests {
                 "foo."
             ),
             Module::new(
-                vec![TypeDefinition::new(
+                vec![TypeDefinition::without_source(
                     "foo.x",
                     vec![],
                     false,
                     false,
-                    false,
-                    Position::dummy(),
+                    false
                 )],
                 vec![],
                 vec![],
@@ -131,7 +131,7 @@ mod tests {
         assert_eq!(
             qualify(
                 &Module::new(
-                    vec![TypeDefinition::new(
+                    vec![TypeDefinition::without_source(
                         "x",
                         vec![types::RecordElement::new(
                             "x",
@@ -139,8 +139,7 @@ mod tests {
                         )],
                         false,
                         false,
-                        false,
-                        Position::dummy(),
+                        false
                     )],
                     vec![],
                     vec![],
@@ -149,7 +148,7 @@ mod tests {
                 "foo."
             ),
             Module::new(
-                vec![TypeDefinition::new(
+                vec![TypeDefinition::without_source(
                     "foo.x",
                     vec![types::RecordElement::new(
                         "x",
@@ -157,8 +156,7 @@ mod tests {
                     )],
                     false,
                     false,
-                    false,
-                    Position::dummy(),
+                    false
                 )],
                 vec![],
                 vec![],
@@ -173,11 +171,11 @@ mod tests {
             qualify(
                 &Module::new(
                     vec![],
-                    vec![TypeAlias::new(
+                    vec![TypeAlias::without_source(
                         "x",
                         types::Reference::new("x", Position::dummy()),
                         false,
-                        false,
+                        false
                     )],
                     vec![],
                     vec![],
@@ -186,11 +184,11 @@ mod tests {
             ),
             Module::new(
                 vec![],
-                vec![TypeAlias::new(
+                vec![TypeAlias::without_source(
                     "foo.x",
                     types::Reference::new("foo.x", Position::dummy()),
                     false,
-                    false,
+                    false
                 )],
                 vec![],
                 vec![],

@@ -159,7 +159,7 @@ mod tests {
             vec![],
             vec![],
             vec![],
-            vec![Definition::new(
+            vec![Definition::without_source(
                 "x",
                 Lambda::new(
                     vec![],
@@ -168,7 +168,6 @@ mod tests {
                     Position::dummy(),
                 ),
                 false,
-                Position::dummy(),
             )],
         ))
     }
@@ -179,7 +178,7 @@ mod tests {
             vec![],
             vec![],
             vec![],
-            vec![Definition::new(
+            vec![Definition::without_source(
                 "x",
                 Lambda::new(
                     vec![],
@@ -200,7 +199,6 @@ mod tests {
                     Position::dummy(),
                 ),
                 false,
-                Position::dummy(),
             )],
         ))
     }
@@ -211,7 +209,7 @@ mod tests {
             vec![],
             vec![],
             vec![],
-            vec![Definition::new(
+            vec![Definition::without_source(
                 "x",
                 Lambda::new(
                     vec![],
@@ -224,7 +222,6 @@ mod tests {
                     Position::dummy(),
                 ),
                 false,
-                Position::dummy(),
             )],
         ))
     }
@@ -237,7 +234,7 @@ mod tests {
             let reference_type = types::Reference::new("r", Position::dummy());
 
             check_module(&Module::new(
-                vec![TypeDefinition::new(
+                vec![TypeDefinition::without_source(
                     "r",
                     vec![types::RecordElement::new(
                         "x",
@@ -246,11 +243,10 @@ mod tests {
                     false,
                     false,
                     false,
-                    Position::dummy(),
                 )],
                 vec![],
                 vec![],
-                vec![Definition::new(
+                vec![Definition::without_source(
                     "x",
                     Lambda::new(
                         vec![],
@@ -268,7 +264,6 @@ mod tests {
                         Position::dummy(),
                     ),
                     false,
-                    Position::dummy(),
                 )],
             ))
         }
@@ -279,7 +274,7 @@ mod tests {
 
             assert!(matches!(
                 check_module(&Module::new(
-                    vec![TypeDefinition::new(
+                    vec![TypeDefinition::without_source(
                         "r",
                         vec![types::RecordElement::new(
                             "x",
@@ -287,12 +282,11 @@ mod tests {
                         )],
                         false,
                         false,
-                        false,
-                        Position::dummy(),
+                        false
                     )],
                     vec![],
                     vec![],
-                    vec![Definition::new(
+                    vec![Definition::without_source(
                         "x",
                         Lambda::new(
                             vec![],
@@ -307,8 +301,7 @@ mod tests {
                             ),
                             Position::dummy(),
                         ),
-                        false,
-                        Position::dummy(),
+                        false
                     )],
                 )),
                 Err(CompileError::RecordElementMissing(_))
@@ -321,17 +314,16 @@ mod tests {
 
             assert!(matches!(
                 check_module(&Module::new(
-                    vec![TypeDefinition::new(
+                    vec![TypeDefinition::without_source(
                         "r",
                         vec![],
                         false,
                         false,
-                        false,
-                        Position::dummy(),
+                        false
                     )],
                     vec![],
                     vec![],
-                    vec![Definition::new(
+                    vec![Definition::without_source(
                         "x",
                         Lambda::new(
                             vec![],
@@ -348,8 +340,7 @@ mod tests {
                             ),
                             Position::dummy(),
                         ),
-                        false,
-                        Position::dummy(),
+                        false
                     )],
                 )),
                 Err(CompileError::RecordElementUnknown(_))
