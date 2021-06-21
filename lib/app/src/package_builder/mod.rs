@@ -1,7 +1,7 @@
 mod package_builder_infrastructure;
 
 use crate::{
-    infra::FilePath,
+    infra::{FilePath, PACKAGE_DIRECTORY},
     package_build_script_compiler::{self, PackageBuildScriptCompilerInfrastructure},
 };
 pub use package_builder_infrastructure::PackageBuilderInfrastructure;
@@ -28,12 +28,29 @@ pub fn build_main_package(
         },
         main_package_directory,
         output_directory,
-        // TODO Pass external packages' build script files.
-        &[],
+        &find_external_package_build_script(infrastructure, output_directory)?,
         &build_script_file,
     )?;
 
     infrastructure.module_builder.build(&build_script_file)?;
 
     Ok(())
+}
+
+fn find_external_package_build_script(
+    infrastructure: &PackageBuilderInfrastructure,
+    output_directory: &FilePath,
+) -> Result<Vec<FilePath>, Box<dyn std::error::Error>> {
+    Ok(infrastructure
+        .file_system
+        .read_directory(&output_directory.join(&FilePath::new(vec![PACKAGE_DIRECTORY])))?
+        .into_iter()
+        .filter(|path| {
+            path.has_extension(
+                infrastructure
+                    .file_path_configuration
+                    .build_script_file_extension,
+            )
+        })
+        .collect())
 }
