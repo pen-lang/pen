@@ -18,7 +18,7 @@ impl app::infra::ModuleBuilder for NinjaModuleBuilder {
         command_runner::run(
             std::process::Command::new("ninja").arg("-f").arg(
                 self.file_path_converter
-                    .convert_to_os_path(&build_script_file),
+                    .convert_to_os_path(build_script_file),
             ),
         )?;
 

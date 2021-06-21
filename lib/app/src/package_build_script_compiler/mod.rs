@@ -15,7 +15,7 @@ pub fn compile(
     build_script_file: &FilePath,
 ) -> Result<(), Box<dyn Error>> {
     infrastructure.file_system.write(
-        &build_script_file,
+        build_script_file,
         infrastructure
             .module_build_script_compiler
             .compile(&module_target_collector::collect_module_targets(
