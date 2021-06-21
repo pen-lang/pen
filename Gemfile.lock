@@ -7,7 +7,8 @@ GEM
       minitest (>= 5.1)
       tzinfo (~> 2.0)
       zeitwerk (~> 2.3)
-    aruba (1.1.1)
+    aruba (1.1.2)
+      bundler (>= 1.17, < 3.0)
       childprocess (>= 2.0, < 5.0)
       contracts (>= 0.16.0, < 0.18.0)
       cucumber (>= 2.4, < 7.0)
@@ -16,7 +17,7 @@ GEM
     builder (3.2.4)
     childprocess (4.1.0)
     concurrent-ruby (1.1.9)
-    contracts (0.17)
+    contracts (0.16.1)
     cucumber (6.1.0)
       builder (~> 3.2, >= 3.2.4)
       cucumber-core (~> 9.0, >= 9.0.1)
@@ -80,7 +81,7 @@ PLATFORMS
   x86_64-linux
 
 DEPENDENCIES
-  aruba (~> 1.1.1)
+  aruba (~> 1.1.2)
 
 BUNDLED WITH
    2.2.20
