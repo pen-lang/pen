@@ -1,7 +1,7 @@
 mod package_builder_infrastructure;
 
 use crate::{
-    infra::{FilePath, PACKAGE_DIRECTORY},
+    infra::{FilePath, EXTERNAL_PACKAGE_DIRECTORY},
     package_build_script_compiler::{self, PackageBuildScriptCompilerInfrastructure},
 };
 pub use package_builder_infrastructure::PackageBuilderInfrastructure;
@@ -41,16 +41,28 @@ fn find_external_package_build_script(
     infrastructure: &PackageBuilderInfrastructure,
     output_directory: &FilePath,
 ) -> Result<Vec<FilePath>, Box<dyn std::error::Error>> {
-    Ok(infrastructure
-        .file_system
-        .read_directory(&output_directory.join(&FilePath::new(vec![PACKAGE_DIRECTORY])))?
-        .into_iter()
-        .filter(|path| {
-            path.has_extension(
-                infrastructure
-                    .file_path_configuration
-                    .build_script_file_extension,
-            )
-        })
-        .collect())
+    let external_package_directory =
+        output_directory.join(&FilePath::new(vec![EXTERNAL_PACKAGE_DIRECTORY]));
+
+    Ok(
+        if infrastructure
+            .file_system
+            .exists(&external_package_directory)
+        {
+            infrastructure
+                .file_system
+                .read_directory(&external_package_directory)?
+                .into_iter()
+                .filter(|path| {
+                    path.has_extension(
+                        infrastructure
+                            .file_path_configuration
+                            .build_script_file_extension,
+                    )
+                })
+                .collect()
+        } else {
+            vec![]
+        },
+    )
 }

@@ -1,7 +1,7 @@
 use super::package_manager_infrastructure::PackageManagerInfrastructure;
 use crate::{
     common::calculate_package_id,
-    infra::{FilePath, PACKAGE_DIRECTORY},
+    infra::{FilePath, EXTERNAL_PACKAGE_DIRECTORY},
     package_build_script_compiler::{self, PackageBuildScriptCompilerInfrastructure},
 };
 use std::error::Error;
@@ -38,7 +38,7 @@ fn initialize_external_package(
     output_directory: &FilePath,
 ) -> Result<(), Box<dyn Error>> {
     let package_directory = output_directory.join(&FilePath::new(vec![
-        PACKAGE_DIRECTORY.into(),
+        EXTERNAL_PACKAGE_DIRECTORY.into(),
         calculate_package_id(url),
     ]));
 

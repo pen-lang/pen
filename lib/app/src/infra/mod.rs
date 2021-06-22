@@ -20,5 +20,5 @@ pub use module_builder::*;
 pub use package_configuration::*;
 pub use package_configuration_reader::*;
 
-pub const PACKAGE_DIRECTORY: &str = "packages";
+pub const EXTERNAL_PACKAGE_DIRECTORY: &str = "packages";
 pub const OBJECT_DIRECTORY: &str = "objects";
