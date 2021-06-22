@@ -2,7 +2,7 @@ mod error;
 mod module_dependency_resolver_infrastructure;
 
 use crate::{
-    common::{module_id_calculator, module_path_resolver},
+    common::{dependency_serializer, module_id_calculator, module_path_resolver},
     infra::{FilePath, OBJECT_DIRECTORY},
 };
 use error::ModuleDependencyResolverError;
@@ -69,7 +69,7 @@ pub fn compile_dependency(
 
     infrastructure.file_system.write(
         dependency_file,
-        serde_json::to_string(&interfaces)?.as_bytes(),
+        &dependency_serializer::serialize(&interfaces)?,
     )?;
 
     infrastructure.file_system.write(
