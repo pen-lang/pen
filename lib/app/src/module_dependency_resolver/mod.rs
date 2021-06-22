@@ -1,16 +1,16 @@
 mod error;
-mod module_dependency_compiler_infrastructure;
+mod module_dependency_resolver_infrastructure;
 
 use crate::{
     common::{module_id_calculator, module_path_resolver},
     infra::{FilePath, OBJECT_DIRECTORY},
 };
-use error::ModuleDependencyCompilerError;
-pub use module_dependency_compiler_infrastructure::*;
+use error::ModuleDependencyResolverError;
+pub use module_dependency_resolver_infrastructure::*;
 use std::error::Error;
 
 pub fn compile_dependency(
-    infrastructure: &ModuleDependencyCompilerInfrastructure,
+    infrastructure: &ModuleDependencyResolverInfrastructure,
     package_directory: &FilePath,
     source_file: &FilePath,
     object_file: &FilePath,
@@ -49,7 +49,7 @@ pub fn compile_dependency(
                                     .dependencies
                                     .get(path.package())
                                     .ok_or_else(|| {
-                                        ModuleDependencyCompilerError::PackageNotFound(
+                                        ModuleDependencyResolverError::PackageNotFound(
                                             path.package().into(),
                                         )
                                     })?,

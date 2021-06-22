@@ -4,7 +4,7 @@ use crate::infra::{
 };
 use std::sync::Arc;
 
-pub struct ModuleDependencyCompilerInfrastructure {
+pub struct ModuleDependencyResolverInfrastructure {
     pub dependency_compiler: Arc<dyn DependencyCompiler>,
     pub package_configuration_reader: Arc<dyn PackageConfigurationReader>,
     pub file_system: Arc<dyn FileSystem>,

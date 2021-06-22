@@ -1,13 +1,13 @@
 use std::{error::Error, fmt::Display};
 
 #[derive(Debug)]
-pub enum ModuleDependencyCompilerError {
+pub enum ModuleDependencyResolverError {
     PackageNotFound(String),
 }
 
-impl Error for ModuleDependencyCompilerError {}
+impl Error for ModuleDependencyResolverError {}
 
-impl Display for ModuleDependencyCompilerError {
+impl Display for ModuleDependencyResolverError {
     fn fmt(&self, formatter: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
         match self {
             Self::PackageNotFound(package) => {
