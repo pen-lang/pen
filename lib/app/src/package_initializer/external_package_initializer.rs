@@ -1,4 +1,4 @@
-use super::package_manager_infrastructure::PackageManagerInfrastructure;
+use super::package_initializer_infrastructure::PackageInitializerInfrastructure;
 use crate::{
     common::calculate_package_id,
     infra::{FilePath, EXTERNAL_PACKAGE_DIRECTORY},
@@ -6,18 +6,8 @@ use crate::{
 };
 use std::error::Error;
 
-pub fn initialize_main_package(
-    infrastructure: &PackageManagerInfrastructure,
-    package_directory: &FilePath,
-    output_directory: &FilePath,
-) -> Result<(), Box<dyn Error>> {
-    initialize_external_packages(infrastructure, package_directory, output_directory)?;
-
-    Ok(())
-}
-
-fn initialize_external_packages(
-    infrastructure: &PackageManagerInfrastructure,
+pub fn initialize_external_packages(
+    infrastructure: &PackageInitializerInfrastructure,
     package_directory: &FilePath,
     output_directory: &FilePath,
 ) -> Result<(), Box<dyn Error>> {
@@ -33,7 +23,7 @@ fn initialize_external_packages(
 }
 
 fn initialize_external_package(
-    infrastructure: &PackageManagerInfrastructure,
+    infrastructure: &PackageInitializerInfrastructure,
     url: &url::Url,
     output_directory: &FilePath,
 ) -> Result<(), Box<dyn Error>> {

@@ -4,12 +4,17 @@ use std::sync::Arc;
 
 pub struct NinjaModuleBuildScriptCompiler {
     file_path_converter: Arc<FilePathConverter>,
+    output_directory: &'static str,
 }
 
 impl NinjaModuleBuildScriptCompiler {
-    pub fn new(file_path_converter: Arc<FilePathConverter>) -> Self {
+    pub fn new(
+        file_path_converter: Arc<FilePathConverter>,
+        output_directory: &'static str,
+    ) -> Self {
         Self {
             file_path_converter,
+            output_directory,
         }
     }
 }
@@ -22,6 +27,7 @@ impl app::infra::ModuleBuildScriptCompiler for NinjaModuleBuildScriptCompiler {
     ) -> String {
         vec![
             "ninja_required_version = 1.10",
+            &format!("builddir = {}", self.output_directory),
             "rule pen_compile",
             "  command = pen compile $in $out",
             "rule pen_compile_dependency",

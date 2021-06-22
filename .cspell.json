@@ -1,6 +1,7 @@
 {
   "words": [
     "arity",
+    "builddir",
     "canonicalization",
     "canonicalize",
     "canonicalizer",
