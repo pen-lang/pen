@@ -12,6 +12,7 @@
     "idempotently",
     "malloc",
     "realloc",
-    "renamer"
+    "renamer",
+    "subninja"
   ]
 }
