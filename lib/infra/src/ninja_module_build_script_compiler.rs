@@ -53,6 +53,9 @@ impl app::infra::ModuleBuildScriptCompiler for NinjaModuleBuildScriptCompiler {
                 .convert_to_os_path(target.interface_file());
             let dependency_path = self
                 .file_path_converter
+                .convert_to_os_path(&target.object_file().with_extension("dep"));
+            let ninja_dependency_path = self
+                .file_path_converter
                 .convert_to_os_path(&target.object_file().with_extension("dd"));
             let object_path = self
                 .file_path_converter
@@ -60,8 +63,9 @@ impl app::infra::ModuleBuildScriptCompiler for NinjaModuleBuildScriptCompiler {
 
             vec![
                 format!(
-                    "build {}: pen_compile_dependency {}",
+                    "build {} {}: pen_compile_dependency {}",
                     dependency_path.display(),
+                    ninja_dependency_path.display(),
                     source_path.display(),
                 ),
                 format!("  package_directory = {}", package_directory.display()),
@@ -71,9 +75,9 @@ impl app::infra::ModuleBuildScriptCompiler for NinjaModuleBuildScriptCompiler {
                     object_path.display(),
                     interface_path.display(),
                     source_path.display(),
-                    dependency_path.display()
+                    ninja_dependency_path.display()
                 ),
-                format!("  dyndep = {}", dependency_path.display()),
+                format!("  dyndep = {}", ninja_dependency_path.display()),
             ]
         }))
         .chain(vec![format!(

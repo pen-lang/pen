@@ -10,5 +10,6 @@ fmm-llvm = { git = "https://github.com/raviqqe/fmm", branch = "main" }
 lang = { path = "../lang" }
 mir-fmm = { path = "../mir-fmm" }
 regex = "1"
+serde = { version = "1", features = ["derive", "rc"] }
 serde_json = "1"
 url = "2"

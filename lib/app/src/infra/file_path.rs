@@ -1,6 +1,7 @@
+use serde::{Deserialize, Serialize};
 use std::ops::Deref;
 
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct FilePath {
     components: Vec<String>,
 }
