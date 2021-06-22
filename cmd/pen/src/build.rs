@@ -20,8 +20,8 @@ pub fn build() -> Result<(), Box<dyn std::error::Error>> {
         file_path_converter.clone(),
     ));
 
-    app::package_manager::initialize_main_package(
-        &app::package_manager::PackageManagerInfrastructure {
+    app::package_initializer::initialize_main_package(
+        &app::package_initializer::PackageInitializerInfrastructure {
             external_package_initializer: Arc::new(infra::ExternalPackageInitializer::new(
                 file_system.clone(),
                 file_path_converter.clone(),

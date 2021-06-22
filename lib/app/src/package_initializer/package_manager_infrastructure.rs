@@ -4,7 +4,7 @@ use crate::infra::{
 };
 use std::sync::Arc;
 
-pub struct PackageManagerInfrastructure {
+pub struct PackageInitializerInfrastructure {
     pub external_package_initializer: Arc<dyn ExternalPackageInitializer>,
     pub package_configuration_reader: Arc<dyn PackageConfigurationReader>,
     pub module_build_script_compiler: Arc<dyn ModuleBuildScriptCompiler>,
