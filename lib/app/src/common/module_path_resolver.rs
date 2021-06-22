@@ -20,7 +20,7 @@ pub fn resolve_source_file_in_external_package(
     resolve_source_file(
         &output_directory.join(&FilePath::new(vec![
             EXTERNAL_PACKAGE_DIRECTORY,
-            &package_id_calculator::calculate_package_id(url),
+            &package_id_calculator::calculate(url),
         ])),
         components,
         file_path_configuration,

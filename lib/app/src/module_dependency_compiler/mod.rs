@@ -1,8 +1,10 @@
 mod error;
 mod module_dependency_compiler_infrastructure;
 
-use crate::common::{calculate_module_id, module_path_resolver};
-use crate::infra::{FilePath, OBJECT_DIRECTORY};
+use crate::{
+    common::{module_id_calculator, module_path_resolver},
+    infra::{FilePath, OBJECT_DIRECTORY},
+};
 use error::ModuleDependencyCompilerError;
 pub use module_dependency_compiler_infrastructure::*;
 use std::error::Error;
@@ -58,12 +60,15 @@ pub fn compile_dependency(
                     };
 
                     Ok(output_directory.join(
-                        &FilePath::new(vec![OBJECT_DIRECTORY, &calculate_module_id(&source_file)])
-                            .with_extension(
-                                infrastructure
-                                    .file_path_configuration
-                                    .interface_file_extension,
-                            ),
+                        &FilePath::new(vec![
+                            OBJECT_DIRECTORY,
+                            &module_id_calculator::calculate(&source_file),
+                        ])
+                        .with_extension(
+                            infrastructure
+                                .file_path_configuration
+                                .interface_file_extension,
+                        ),
                     ))
                 })
                 .collect::<Result<Vec<_>, Box<dyn Error>>>()?,

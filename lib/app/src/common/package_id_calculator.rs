@@ -3,7 +3,7 @@ use std::{
     hash::{Hash, Hasher},
 };
 
-pub fn calculate_package_id(url: &url::Url) -> String {
+pub fn calculate(url: &url::Url) -> String {
     let mut hasher = DefaultHasher::new();
 
     url.hash(&mut hasher);
