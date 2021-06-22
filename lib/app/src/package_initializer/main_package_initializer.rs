@@ -6,7 +6,7 @@ use crate::{
 };
 use std::error::Error;
 
-pub fn initialize_main_package(
+pub fn initialize(
     infrastructure: &PackageInitializerInfrastructure,
     package_directory: &FilePath,
     output_directory: &FilePath,
