@@ -1,6 +1,9 @@
+mod error;
 mod module_dependency_compiler_infrastructure;
 
-use crate::infra::FilePath;
+use crate::common::{calculate_module_id, module_path_resolver};
+use crate::infra::{FilePath, OBJECT_DIRECTORY};
+use error::ModuleDependencyCompilerError;
 pub use module_dependency_compiler_infrastructure::*;
 use std::error::Error;
 
@@ -9,8 +12,13 @@ pub fn compile_dependency(
     package_directory: &FilePath,
     source_file: &FilePath,
     object_file: &FilePath,
+    output_directory: &FilePath,
     dependency_file: &FilePath,
 ) -> Result<(), Box<dyn Error>> {
+    let package_configuration = infrastructure
+        .package_configuration_reader
+        .read(package_directory)?;
+
     infrastructure.file_system.write(
         dependency_file,
         infrastructure
@@ -24,21 +32,41 @@ pub fn compile_dependency(
                 .imports()
                 .iter()
                 .map(|import| {
-                    match import.module_path() {
-                        lang::ast::ModulePath::Internal(path) => package_directory.join(
-                            &FilePath::new(path.components().to_vec()).with_extension(
-                                infrastructure.file_path_configuration.source_file_extension,
+                    let source_file = match import.module_path() {
+                        lang::ast::ModulePath::Internal(path) => {
+                            module_path_resolver::resolve_source_file(
+                                package_directory,
+                                path.components(),
+                                &infrastructure.file_path_configuration,
+                            )
+                        }
+                        lang::ast::ModulePath::External(path) => {
+                            module_path_resolver::resolve_source_file_in_external_package(
+                                output_directory,
+                                package_configuration
+                                    .dependencies
+                                    .get(path.package())
+                                    .ok_or_else(|| {
+                                        ModuleDependencyCompilerError::PackageNotFound(
+                                            path.package().into(),
+                                        )
+                                    })?,
+                                path.components(),
+                                &infrastructure.file_path_configuration,
+                            )
+                        }
+                    };
+
+                    Ok(output_directory.join(
+                        &FilePath::new(vec![OBJECT_DIRECTORY, &calculate_module_id(&source_file)])
+                            .with_extension(
+                                infrastructure
+                                    .file_path_configuration
+                                    .interface_file_extension,
                             ),
-                        ),
-                        _ => todo!("external paths not supported yet"),
-                    }
-                    .with_extension(
-                        infrastructure
-                            .file_path_configuration
-                            .interface_file_extension,
-                    )
+                    ))
                 })
-                .collect::<Vec<_>>(),
+                .collect::<Result<Vec<_>, Box<dyn Error>>>()?,
             )
             .as_bytes(),
     )?;

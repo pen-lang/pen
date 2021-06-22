@@ -1,8 +1,6 @@
 use super::{file_path_configuration::FILE_PATH_CONFIGURATION, main_package_directory_finder};
-use crate::file_path_configuration::BUILD_CONFIGURATION_FILENAME;
+use crate::file_path_configuration::{BUILD_CONFIGURATION_FILENAME, OUTPUT_DIRECTORY};
 use std::sync::Arc;
-
-const OUTPUT_DIRECTORY: &str = ".pen";
 
 pub fn build() -> Result<(), Box<dyn std::error::Error>> {
     let main_package_directory = main_package_directory_finder::find()?;
