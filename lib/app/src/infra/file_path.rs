@@ -95,10 +95,6 @@ mod tests {
             FilePath::new(&["foo.c"]).with_extension("h"),
             FilePath::new(&["foo.h"])
         );
-        assert_eq!(
-            FilePath::new(&["foo.c"]).with_extension(".test.c"),
-            FilePath::new(&["foo.test.c"])
-        );
     }
 
     #[test]
@@ -137,7 +133,5 @@ mod tests {
         assert!(!FilePath::new(&["foo", "bar"]).has_extension("bar"));
         assert!(FilePath::new(&["foo", "bar.baz"]).has_extension("baz"));
         assert!(!FilePath::new(&["foo", "bar.baz"]).has_extension("blah"));
-        assert!(FilePath::new(&["foo", "bar.test.c"]).has_extension("test.c"));
-        assert!(!FilePath::new(&["foo", "bar.test.c"]).has_extension("c"));
     }
 }
