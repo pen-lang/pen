@@ -1,5 +1,4 @@
-use super::FilePath;
-use super::ModuleTarget;
+use super::{FilePath, ModuleTarget};
 
 pub trait ModuleBuildScriptCompiler {
     fn compile(
