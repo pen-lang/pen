@@ -6,6 +6,7 @@ mod file_path_displayer;
 mod file_system;
 mod module_build_script_compiler;
 mod module_builder;
+mod module_target;
 mod package_configuration;
 mod package_configuration_reader;
 
@@ -17,6 +18,7 @@ pub use file_path_displayer::*;
 pub use file_system::*;
 pub use module_build_script_compiler::*;
 pub use module_builder::*;
+pub use module_target::*;
 pub use package_configuration::*;
 pub use package_configuration_reader::*;
 

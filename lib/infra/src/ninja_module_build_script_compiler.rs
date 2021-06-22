@@ -22,7 +22,7 @@ impl NinjaModuleBuildScriptCompiler {
 impl app::infra::ModuleBuildScriptCompiler for NinjaModuleBuildScriptCompiler {
     fn compile(
         &self,
-        module_targets: &[app::package_build_script_compiler::ModuleTarget],
+        module_targets: &[app::infra::ModuleTarget],
         sub_build_script_files: &[FilePath],
     ) -> String {
         vec![

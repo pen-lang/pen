@@ -1,10 +1,10 @@
 use super::{
-    module_finder, module_target::ModuleTarget,
+    module_finder,
     package_build_script_compiler_infrastructure::PackageBuildScriptCompilerInfrastructure,
 };
 use crate::{
     common::module_id_calculator,
-    infra::{FilePath, OBJECT_DIRECTORY},
+    infra::{FilePath, ModuleTarget, OBJECT_DIRECTORY},
 };
 use std::error::Error;
 

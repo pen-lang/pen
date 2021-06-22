@@ -1,10 +1,8 @@
 mod module_finder;
-mod module_target;
 mod module_target_collector;
 mod package_build_script_compiler_infrastructure;
 
 use crate::infra::FilePath;
-pub use module_target::ModuleTarget;
 pub use package_build_script_compiler_infrastructure::PackageBuildScriptCompilerInfrastructure;
 use std::error::Error;
 
