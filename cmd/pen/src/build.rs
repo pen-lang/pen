@@ -18,6 +18,7 @@ pub fn build() -> Result<(), Box<dyn std::error::Error>> {
         main_package_directory.join(&app::infra::FilePath::new(vec![OUTPUT_DIRECTORY]));
     let module_build_script_compiler = Arc::new(infra::NinjaModuleBuildScriptCompiler::new(
         file_path_converter.clone(),
+        OUTPUT_DIRECTORY,
     ));
 
     app::package_initializer::initialize(
