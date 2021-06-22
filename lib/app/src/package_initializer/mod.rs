@@ -1,5 +1,20 @@
-mod main_package_initializer;
+mod external_package_initializer;
 mod package_initializer_infrastructure;
 
-pub use main_package_initializer::*;
+use crate::infra::FilePath;
 pub use package_initializer_infrastructure::*;
+use std::error::Error;
+
+pub fn initialize(
+    infrastructure: &PackageInitializerInfrastructure,
+    package_directory: &FilePath,
+    output_directory: &FilePath,
+) -> Result<(), Box<dyn Error>> {
+    external_package_initializer::initialize_external_packages(
+        infrastructure,
+        package_directory,
+        output_directory,
+    )?;
+
+    Ok(())
+}

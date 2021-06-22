@@ -6,17 +6,7 @@ use crate::{
 };
 use std::error::Error;
 
-pub fn initialize(
-    infrastructure: &PackageInitializerInfrastructure,
-    package_directory: &FilePath,
-    output_directory: &FilePath,
-) -> Result<(), Box<dyn Error>> {
-    initialize_external_packages(infrastructure, package_directory, output_directory)?;
-
-    Ok(())
-}
-
-fn initialize_external_packages(
+pub fn initialize_external_packages(
     infrastructure: &PackageInitializerInfrastructure,
     package_directory: &FilePath,
     output_directory: &FilePath,
