@@ -25,6 +25,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
             clap::SubCommand::with_name("compile")
                 .about("Compiles a module")
                 .arg(clap::Arg::with_name("source file").required(true))
+                .arg(clap::Arg::with_name("dependency file").required(true))
                 .arg(clap::Arg::with_name("object file").required(true))
                 .arg(clap::Arg::with_name("interface file").required(true)),
         )
@@ -52,6 +53,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
 
             compile(
                 matches.value_of("source file").unwrap(),
+                matches.value_of("dependency file").unwrap(),
                 matches.value_of("object file").unwrap(),
                 matches.value_of("interface file").unwrap(),
             )

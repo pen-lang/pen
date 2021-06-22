@@ -3,6 +3,7 @@ use std::sync::Arc;
 
 pub fn compile(
     source_path: &str,
+    dependency_path: &str,
     object_path: &str,
     interface_path: &str,
 ) -> Result<(), Box<dyn std::error::Error>> {
@@ -18,6 +19,7 @@ pub fn compile(
             )),
         },
         &file_path_converter.convert_to_file_path(source_path)?,
+        &file_path_converter.convert_to_file_path(dependency_path)?,
         &file_path_converter.convert_to_file_path(object_path)?,
         &file_path_converter.convert_to_file_path(interface_path)?,
         &COMPILE_CONFIGURATION,

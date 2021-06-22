@@ -1,7 +1,7 @@
 mod compile_configuration;
 mod module_compiler_infrastructure;
 
-use crate::infra::FilePath;
+use crate::{common::dependency_serializer, infra::FilePath};
 pub use compile_configuration::{
     CompileConfiguration, HeapConfiguration, ListTypeConfiguration, StringTypeConfiguration,
 };
@@ -12,22 +12,41 @@ use std::error::Error;
 pub fn compile_module(
     infrastructure: &ModuleCompilerInfrastructure,
     source_file: &FilePath,
+    dependency_file: &FilePath,
     object_file: &FilePath,
     interface_file: &FilePath,
     compile_configuration: &CompileConfiguration,
 ) -> Result<(), Box<dyn Error>> {
+    let dependencies = dependency_serializer::deserialize(
+        &infrastructure.file_system.read_to_vec(dependency_file)?,
+    )?;
+
+    let ast_module = lang::parse::parse(
+        &infrastructure.file_system.read_to_string(source_file)?,
+        &infrastructure.file_path_displayer.display(source_file),
+    )?;
+
     let (module, module_interface) = lang::hir_mir::compile(
         &lang::ast_hir::compile(
-            &lang::parse::parse(
-                &infrastructure.file_system.read_to_string(source_file)?,
-                &infrastructure.file_path_displayer.display(source_file),
-            )?,
+            &ast_module,
             &format!(
                 "{}:",
                 infrastructure.file_path_displayer.display(source_file)
             ),
-            // TODO Compile module imports.
-            &Default::default(),
+            &ast_module
+                .imports()
+                .iter()
+                .map(|import| {
+                    Ok((
+                        import.module_path().clone(),
+                        serde_json::from_str(
+                            &infrastructure
+                                .file_system
+                                .read_to_string(&dependencies[import.module_path()].clone())?,
+                        )?,
+                    ))
+                })
+                .collect::<Result<_, Box<dyn Error>>>()?,
         )?,
         &compile_configuration.list_type,
         &compile_configuration.string_type,

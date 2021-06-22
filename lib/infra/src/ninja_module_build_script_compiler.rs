@@ -71,10 +71,11 @@ impl app::infra::ModuleBuildScriptCompiler for NinjaModuleBuildScriptCompiler {
                 format!("  package_directory = {}", package_directory.display()),
                 format!("  object_file = {}", object_path.display()),
                 format!(
-                    "build {} {}: pen_compile {} || {}",
+                    "build {} {}: pen_compile {} {} || {}",
                     object_path.display(),
                     interface_path.display(),
                     source_path.display(),
+                    dependency_path.display(),
                     ninja_dependency_path.display()
                 ),
                 format!("  dyndep = {}", ninja_dependency_path.display()),
