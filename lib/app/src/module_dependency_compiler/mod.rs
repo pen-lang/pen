@@ -25,13 +25,12 @@ pub fn compile_dependency(
                 .iter()
                 .map(|import| {
                     match import.module_path() {
-                        // TODO Handle external paths.
                         lang::ast::ModulePath::Internal(path) => package_directory.join(
                             &FilePath::new(path.components().to_vec()).with_extension(
                                 infrastructure.file_path_configuration.source_file_extension,
                             ),
                         ),
-                        _ => todo!(),
+                        _ => todo!("external paths not supported yet"),
                     }
                     .with_extension(
                         infrastructure
