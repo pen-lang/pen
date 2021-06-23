@@ -63,7 +63,7 @@ fn check_expression(
 
             check_subsumption(
                 &check_expression(call.function(), variables, type_context)?,
-                &type_,
+                type_,
                 type_context.types(),
             )?;
 
