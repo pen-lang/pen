@@ -145,7 +145,26 @@ fn infer_expression(
             .into()
         }
         Expression::Lambda(lambda) => infer_lambda(lambda, variables, types)?.into(),
-        Expression::Let(_) => todo!(),
+        Expression::Let(let_) => {
+            let bound_type =
+                type_extractor::extract_from_expression(let_.bound_expression(), variables, types)?;
+
+            Let::new(
+                let_.name().map(String::from),
+                Some(bound_type.clone()),
+                infer_expression(let_.bound_expression(), variables)?,
+                infer_expression(
+                    let_.expression(),
+                    &variables
+                        .clone()
+                        .into_iter()
+                        .chain(let_.name().map(|name| (name.into(), bound_type)))
+                        .collect(),
+                )?,
+                let_.position().clone(),
+            )
+            .into()
+        }
         Expression::List(list) => List::new(
             list.type_().clone(),
             list.elements()
@@ -265,6 +284,8 @@ fn infer_expression(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::position::Position;
+    use pretty_assertions::assert_eq;
 
     #[test]
     fn infer_empty_module() -> Result<(), CompileError> {
@@ -274,5 +295,242 @@ mod tests {
         )?;
 
         Ok(())
+    }
+
+    #[test]
+    fn infer_call() {
+        assert_eq!(
+            infer_types(
+                &Module::new(
+                    vec![],
+                    vec![],
+                    vec![],
+                    vec![Definition::without_source(
+                        "x",
+                        Lambda::new(
+                            vec![],
+                            types::None::new(Position::dummy()),
+                            Call::new(
+                                Variable::new("x", Position::dummy()),
+                                vec![],
+                                None,
+                                Position::dummy()
+                            ),
+                            Position::dummy(),
+                        ),
+                        false,
+                    )],
+                ),
+                &Default::default(),
+            )
+            .unwrap(),
+            Module::new(
+                vec![],
+                vec![],
+                vec![],
+                vec![Definition::without_source(
+                    "x",
+                    Lambda::new(
+                        vec![],
+                        types::None::new(Position::dummy()),
+                        Call::new(
+                            Variable::new("x", Position::dummy()),
+                            vec![],
+                            Some(
+                                types::Function::new(
+                                    vec![],
+                                    types::None::new(Position::dummy()),
+                                    Position::dummy()
+                                )
+                                .into()
+                            ),
+                            Position::dummy()
+                        ),
+                        Position::dummy(),
+                    ),
+                    false,
+                )],
+            )
+        );
+    }
+
+    #[test]
+    fn infer_equality_operation() {
+        assert_eq!(
+            infer_types(
+                &Module::new(
+                    vec![],
+                    vec![],
+                    vec![],
+                    vec![Definition::without_source(
+                        "x",
+                        Lambda::new(
+                            vec![],
+                            types::None::new(Position::dummy()),
+                            EqualityOperation::new(
+                                None,
+                                EqualityOperator::Equal,
+                                None::new(Position::dummy()),
+                                None::new(Position::dummy()),
+                                Position::dummy()
+                            ),
+                            Position::dummy(),
+                        ),
+                        false,
+                    )],
+                ),
+                &Default::default(),
+            )
+            .unwrap(),
+            Module::new(
+                vec![],
+                vec![],
+                vec![],
+                vec![Definition::without_source(
+                    "x",
+                    Lambda::new(
+                        vec![],
+                        types::None::new(Position::dummy()),
+                        EqualityOperation::new(
+                            Some(
+                                types::Union::new(
+                                    types::None::new(Position::dummy()),
+                                    types::None::new(Position::dummy()),
+                                    Position::dummy()
+                                )
+                                .into()
+                            ),
+                            EqualityOperator::Equal,
+                            None::new(Position::dummy()),
+                            None::new(Position::dummy()),
+                            Position::dummy()
+                        ),
+                        Position::dummy(),
+                    ),
+                    false,
+                )],
+            )
+        );
+    }
+
+    #[test]
+    fn infer_let() {
+        assert_eq!(
+            infer_types(
+                &Module::new(
+                    vec![],
+                    vec![],
+                    vec![],
+                    vec![Definition::without_source(
+                        "x",
+                        Lambda::new(
+                            vec![],
+                            types::None::new(Position::dummy()),
+                            Let::new(
+                                Some("x".into()),
+                                None,
+                                None::new(Position::dummy()),
+                                Variable::new("x", Position::dummy()),
+                                Position::dummy(),
+                            ),
+                            Position::dummy(),
+                        ),
+                        false,
+                    )],
+                ),
+                &Default::default(),
+            )
+            .unwrap(),
+            Module::new(
+                vec![],
+                vec![],
+                vec![],
+                vec![Definition::without_source(
+                    "x",
+                    Lambda::new(
+                        vec![],
+                        types::None::new(Position::dummy()),
+                        Let::new(
+                            Some("x".into()),
+                            Some(types::None::new(Position::dummy()).into()),
+                            None::new(Position::dummy()),
+                            Variable::new("x", Position::dummy()),
+                            Position::dummy(),
+                        ),
+                        Position::dummy(),
+                    ),
+                    false,
+                )],
+            )
+        );
+    }
+
+    #[test]
+    fn infer_record_element() {
+        let type_definition = TypeDefinition::new(
+            "r",
+            "",
+            vec![types::RecordElement::new(
+                "x",
+                types::None::new(Position::dummy()),
+            )],
+            false,
+            false,
+            false,
+            Position::dummy(),
+        );
+
+        assert_eq!(
+            infer_types(
+                &Module::new(
+                    vec![type_definition.clone()],
+                    vec![],
+                    vec![],
+                    vec![Definition::without_source(
+                        "x",
+                        Lambda::new(
+                            vec![Argument::new(
+                                "x",
+                                types::Record::new("r", Position::dummy())
+                            )],
+                            types::None::new(Position::dummy()),
+                            RecordElement::new(
+                                None,
+                                Variable::new("x", Position::dummy()),
+                                "x",
+                                Position::dummy()
+                            ),
+                            Position::dummy(),
+                        ),
+                        false,
+                    )],
+                ),
+                &Default::default(),
+            )
+            .unwrap(),
+            Module::new(
+                vec![type_definition.clone()],
+                vec![],
+                vec![],
+                vec![Definition::without_source(
+                    "x",
+                    Lambda::new(
+                        vec![Argument::new(
+                            "x",
+                            types::Record::new("r", Position::dummy())
+                        )],
+                        types::None::new(Position::dummy()),
+                        RecordElement::new(
+                            Some(types::Record::new("r", Position::dummy()).into()),
+                            Variable::new("x", Position::dummy()),
+                            "x",
+                            Position::dummy()
+                        ),
+                        Position::dummy(),
+                    ),
+                    false,
+                )],
+            )
+        );
     }
 }
