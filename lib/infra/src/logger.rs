@@ -32,17 +32,3 @@ pub fn log_info(log: &str) -> Result<(), Box<dyn std::error::Error>> {
 
     Ok(())
 }
-
-pub struct Logger {}
-
-impl Logger {
-    pub fn new() -> Self {
-        Self {}
-    }
-}
-
-impl app::infra::Logger for Logger {
-    fn log(&self, log: &str) -> Result<(), Box<dyn std::error::Error>> {
-        log_info(log)
-    }
-}
