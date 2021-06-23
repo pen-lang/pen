@@ -1,5 +1,7 @@
-use super::record_element_resolver;
-use super::{environment_creator, type_context::TypeContext, type_extractor, CompileError};
+use super::{
+    environment_creator, record_element_resolver, type_context::TypeContext, type_extractor,
+    CompileError,
+};
 use crate::{
     hir::*,
     types::{self, Type},
@@ -78,7 +80,7 @@ fn check_expression(
                 }
             }
 
-            construction.type_().clone().into()
+            construction.type_().clone()
         }
         Expression::RecordUpdate(update) => {
             check_subsumption(
@@ -103,7 +105,7 @@ fn check_expression(
                 )?;
             }
 
-            update.type_().clone().into()
+            update.type_().clone()
         }
         Expression::String(string) => types::ByteString::new(string.position().clone()).into(),
         Expression::Variable(variable) => variables

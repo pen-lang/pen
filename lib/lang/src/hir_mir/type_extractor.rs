@@ -1,5 +1,4 @@
-use super::CompileError;
-use super::{record_element_resolver, type_context::TypeContext, union_type_creator};
+use super::{record_element_resolver, type_context::TypeContext, union_type_creator, CompileError};
 use crate::{
     hir::*,
     types::{self, analysis::type_resolver, Type},

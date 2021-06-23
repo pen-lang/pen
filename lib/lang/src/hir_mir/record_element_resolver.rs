@@ -10,12 +10,6 @@ pub fn resolve_elements<'a>(
     position: &Position,
     type_context: &'a TypeContext,
 ) -> Result<&'a HashMap<String, Type>, CompileError> {
-    Ok(
-        type_resolver::resolve_record_elements(
-            type_,
-            type_context.types(),
-            type_context.records(),
-        )?
-        .ok_or_else(|| CompileError::RecordExpected(position.clone()))?,
-    )
+    type_resolver::resolve_record_elements(type_, type_context.types(), type_context.records())?
+        .ok_or_else(|| CompileError::RecordExpected(position.clone()))
 }
