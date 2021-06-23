@@ -186,6 +186,14 @@ fn transform_expression(expression: &Expression, transform: &impl Fn(&Type) -> T
         )
         .into(),
         Expression::Lambda(lambda) => transform_lambda(lambda, transform).into(),
+        Expression::Let(let_) => Let::new(
+            let_.name().map(String::from),
+            let_.type_().map(transform),
+            transform_expression(let_.bound_expression(), transform),
+            transform_expression(let_.expression(), transform),
+            let_.position().clone(),
+        )
+        .into(),
         Expression::List(list) => List::new(
             transform(list.type_()),
             list.elements()

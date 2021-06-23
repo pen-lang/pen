@@ -172,6 +172,7 @@ fn infer_expression(
             .into()
         }
         Expression::Lambda(lambda) => infer_lambda(lambda, variables, types)?.into(),
+        Expression::Let(_) => todo!(),
         Expression::List(list) => List::new(
             list.type_().clone(),
             list.elements()

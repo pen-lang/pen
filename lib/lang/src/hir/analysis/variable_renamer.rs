@@ -133,6 +133,21 @@ fn rename_expression(expression: &Expression, names: &HashMap<String, String>) -
             .into()
         }
         Expression::Lambda(lambda) => rename_lambda(lambda, names).into(),
+        Expression::Let(let_) => Let::new(
+            let_.name().map(String::from),
+            let_.type_().cloned(),
+            rename_expression(let_.bound_expression(), names),
+            rename_expression(
+                let_.expression(),
+                &names
+                    .clone()
+                    .into_iter()
+                    .filter(|(name, _)| Some(name.as_str()) != let_.name())
+                    .collect(),
+            ),
+            let_.position().clone(),
+        )
+        .into(),
         Expression::List(list) => List::new(
             list.type_().clone(),
             list.elements()
@@ -292,40 +307,28 @@ mod tests {
 
     #[test]
     fn do_not_rename_variable_shadowed_by_argument() {
+        let module = Module::new(
+            vec![],
+            vec![],
+            vec![],
+            vec![Definition::without_source(
+                "x",
+                Lambda::new(
+                    vec![Argument::new("x", types::None::new(Position::dummy()))],
+                    types::None::new(Position::dummy()),
+                    Block::new(vec![], Variable::new("x", None, Position::dummy())),
+                    Position::dummy(),
+                ),
+                false,
+            )],
+        );
+
         assert_eq!(
             rename(
-                &Module::new(
-                    vec![],
-                    vec![],
-                    vec![],
-                    vec![Definition::without_source(
-                        "x",
-                        Lambda::new(
-                            vec![Argument::new("x", types::None::new(Position::dummy()))],
-                            types::None::new(Position::dummy()),
-                            Block::new(vec![], Variable::new("x", None, Position::dummy())),
-                            Position::dummy()
-                        ),
-                        false
-                    )]
-                ),
+                &module,
                 &vec![("x".into(), "foo.x".into())].into_iter().collect()
             ),
-            Module::new(
-                vec![],
-                vec![],
-                vec![],
-                vec![Definition::without_source(
-                    "x",
-                    Lambda::new(
-                        vec![Argument::new("x", types::None::new(Position::dummy()))],
-                        types::None::new(Position::dummy()),
-                        Block::new(vec![], Variable::new("x", None, Position::dummy())),
-                        Position::dummy()
-                    ),
-                    false
-                )]
-            )
+            module
         );
     }
 
@@ -381,6 +384,42 @@ mod tests {
                     false
                 )]
             )
+        );
+    }
+
+    #[test]
+    fn do_not_rename_shadowed_variable_in_let() {
+        let module = Module::new(
+            vec![],
+            vec![],
+            vec![],
+            vec![Definition::without_source(
+                "x",
+                Lambda::new(
+                    vec![],
+                    types::None::new(Position::dummy()),
+                    Block::new(
+                        vec![],
+                        Let::new(
+                            Some("x".into()),
+                            None,
+                            None::new(Position::dummy()),
+                            Variable::new("x", None, Position::dummy()),
+                            Position::dummy(),
+                        ),
+                    ),
+                    Position::dummy(),
+                ),
+                false,
+            )],
+        );
+
+        assert_eq!(
+            rename(
+                &module,
+                &vec![("x".into(), "foo.x".into())].into_iter().collect()
+            ),
+            module
         );
     }
 }
