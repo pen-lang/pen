@@ -1,7 +1,10 @@
 mod compile_configuration;
 mod module_compiler_infrastructure;
 
-use crate::{common::dependency_serializer, infra::FilePath};
+use crate::{
+    common::{dependency_serializer, interface_serializer},
+    infra::FilePath,
+};
 pub use compile_configuration::{
     CompileConfiguration, HeapConfiguration, ListTypeConfiguration, StringTypeConfiguration,
 };
@@ -39,10 +42,11 @@ pub fn compile_module(
                 .map(|import| {
                     Ok((
                         import.module_path().clone(),
-                        serde_json::from_str(
-                            &infrastructure
+                        interface_serializer::deserialize(
+                            infrastructure
                                 .file_system
-                                .read_to_string(&dependencies[import.module_path()].clone())?,
+                                .read_to_string(&dependencies[import.module_path()].clone())?
+                                .as_bytes(),
                         )?,
                     ))
                 })
@@ -65,7 +69,7 @@ pub fn compile_module(
     )?;
     infrastructure.file_system.write(
         interface_file,
-        serde_json::to_string(&module_interface)?.as_bytes(),
+        &interface_serializer::serialize(&module_interface)?,
     )?;
 
     Ok(())
