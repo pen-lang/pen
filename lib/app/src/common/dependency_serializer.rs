@@ -1,6 +1,5 @@
 use crate::infra::FilePath;
-use std::collections::HashMap;
-use std::error::Error;
+use std::{collections::HashMap, error::Error};
 
 pub fn serialize(
     map: &HashMap<lang::ast::ModulePath, FilePath>,
@@ -17,7 +16,7 @@ pub fn deserialize(
     slice: &[u8],
 ) -> Result<HashMap<lang::ast::ModulePath, FilePath>, Box<dyn Error>> {
     Ok(
-        serde_json::from_slice::<Vec<(lang::ast::ModulePath, FilePath)>>(&slice)?
+        serde_json::from_slice::<Vec<(lang::ast::ModulePath, FilePath)>>(slice)?
             .into_iter()
             .collect(),
     )
