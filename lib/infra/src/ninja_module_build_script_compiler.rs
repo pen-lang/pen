@@ -62,8 +62,17 @@ impl app::infra::ModuleBuildScriptCompiler for NinjaModuleBuildScriptCompiler {
                 .convert_to_os_path(target.object_file());
 
             vec![
+                format!(
+                    "build {} {}: compile {} {} || {}",
+                    object_path.display(),
+                    interface_path.display(),
+                    source_path.display(),
+                    dependency_path.display(),
+                    ninja_dependency_path.display()
+                ),
+                format!("  dyndep = {}", ninja_dependency_path.display()),
                 // TODO Remove this hack to circumvent ninja's bug where dynamic dependency files
-                // cannot be specified together with outputs of the same build rules.
+                // cannot be specified as inputs together with outputs of the same build rules.
                 format!(
                     "build {} {}: resolve_dependency {}",
                     dependency_path.display(),
@@ -80,15 +89,6 @@ impl app::infra::ModuleBuildScriptCompiler for NinjaModuleBuildScriptCompiler {
                 ),
                 format!("  package_directory = {}", package_directory.display()),
                 format!("  object_file = {}", object_path.display()),
-                format!(
-                    "build {} {}: compile {} {} || {}",
-                    object_path.display(),
-                    interface_path.display(),
-                    source_path.display(),
-                    dependency_path.display(),
-                    ninja_dependency_path.display()
-                ),
-                format!("  dyndep = {}", ninja_dependency_path.display()),
             ]
         }))
         .chain(vec![format!(
