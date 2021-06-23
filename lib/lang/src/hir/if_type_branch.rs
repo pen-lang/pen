@@ -1,17 +1,17 @@
-use super::Block;
+use super::Expression;
 use crate::types::Type;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct IfTypeBranch {
     type_: Type,
-    block: Block,
+    expression: Expression,
 }
 
 impl IfTypeBranch {
-    pub fn new(type_: impl Into<Type>, block: Block) -> Self {
+    pub fn new(type_: impl Into<Type>, expression: impl Into<Expression>) -> Self {
         Self {
             type_: type_.into(),
-            block,
+            expression: expression.into(),
         }
     }
 
@@ -19,7 +19,7 @@ impl IfTypeBranch {
         &self.type_
     }
 
-    pub fn block(&self) -> &Block {
-        &self.block
+    pub fn expression(&self) -> &Expression {
+        &self.expression
     }
 }

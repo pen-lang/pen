@@ -102,24 +102,21 @@ fn compile_lambda(lambda: &ast::Lambda) -> Result<hir::Lambda, CompileError> {
     ))
 }
 
-fn compile_block(block: &ast::Block) -> Result<hir::Block, CompileError> {
-    Ok(hir::Block::new(
-        block
-            .statements()
-            .iter()
-            .map(|statement| compile_statement(statement))
-            .collect::<Result<_, _>>()?,
-        compile_expression(block.expression())?,
-    ))
-}
+fn compile_block(block: &ast::Block) -> Result<hir::Expression, CompileError> {
+    let mut expression = compile_expression(block.expression())?;
 
-fn compile_statement(statement: &ast::Statement) -> Result<hir::Statement, CompileError> {
-    Ok(hir::Statement::new(
-        statement.name().map(String::from),
-        compile_expression(statement.expression())?,
-        None,
-        statement.position().clone(),
-    ))
+    for statement in block.statements().iter().rev() {
+        expression = hir::Let::new(
+            statement.name().map(String::from),
+            None,
+            compile_expression(statement.expression())?,
+            expression,
+            statement.position().clone(),
+        )
+        .into();
+    }
+
+    Ok(expression)
 }
 
 fn compile_expression(expression: &ast::Expression) -> Result<hir::Expression, CompileError> {
@@ -331,7 +328,7 @@ fn compile_if(
         [then, ..] => hir::If::new(
             compile_expression(then.condition())?,
             compile_block(then.block())?,
-            hir::Block::new(vec![], compile_if(&branches[1..], else_, position)?),
+            compile_if(&branches[1..], else_, position)?,
             None,
             position.clone(),
         ),
@@ -458,7 +455,7 @@ mod tests {
                     hir::Lambda::new(
                         vec![],
                         types::None::new(Position::dummy()),
-                        hir::Block::new(vec![], hir::None::new(Position::dummy())),
+                        hir::None::new(Position::dummy()),
                         Position::dummy(),
                     ),
                     true,

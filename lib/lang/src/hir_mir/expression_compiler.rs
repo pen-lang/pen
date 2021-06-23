@@ -16,7 +16,6 @@ use crate::{
 };
 
 const CLOSURE_NAME: &str = "$closure";
-const UNUSED_VARIABLE: &str = "$unused";
 
 pub fn compile(
     expression: &Expression,
@@ -39,7 +38,7 @@ pub fn compile(
                         ))
                     })
                     .collect::<Result<_, _>>()?,
-                compile_block(lambda.body(), type_context)?,
+                compile(lambda.body())?,
                 type_compiler::compile(lambda.result_type(), type_context)?,
             ),
             mir::ir::Variable::new(CLOSURE_NAME),
@@ -161,28 +160,4 @@ fn compile_operation(
         .into(),
         Operation::Try(_) => todo!(),
     })
-}
-
-pub fn compile_block(
-    block: &Block,
-    type_context: &TypeContext,
-) -> Result<mir::ir::Expression, CompileError> {
-    let mut expression = compile(block.expression(), type_context)?;
-
-    for statement in block.statements().iter().rev() {
-        expression = mir::ir::Let::new(
-            statement.name().unwrap_or(UNUSED_VARIABLE),
-            type_compiler::compile(
-                statement
-                    .type_()
-                    .ok_or_else(|| CompileError::TypeNotInferred(statement.position().clone()))?,
-                type_context,
-            )?,
-            compile(statement.expression(), type_context)?,
-            expression,
-        )
-        .into();
-    }
-
-    Ok(expression)
 }

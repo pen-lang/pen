@@ -28,7 +28,7 @@ fn rename_lambda(lambda: &Lambda, names: &HashMap<String, String>) -> Lambda {
     Lambda::new(
         lambda.arguments().to_vec(),
         lambda.result_type().clone(),
-        rename_block(
+        rename_expression(
             lambda.body(),
             &names
                 .clone()
@@ -42,30 +42,6 @@ fn rename_lambda(lambda: &Lambda, names: &HashMap<String, String>) -> Lambda {
                 .collect(),
         ),
         lambda.position().clone(),
-    )
-}
-
-fn rename_block(block: &Block, names: &HashMap<String, String>) -> Block {
-    let mut names = names.clone();
-    let mut statements = vec![];
-
-    for statement in block.statements() {
-        statements.push(rename_statement(statement, &names));
-
-        if let Some(name) = statement.name() {
-            names.remove(name);
-        }
-    }
-
-    Block::new(statements, rename_expression(block.expression(), &names))
-}
-
-fn rename_statement(statement: &Statement, names: &HashMap<String, String>) -> Statement {
-    Statement::new(
-        statement.name().map(String::from),
-        rename_expression(statement.expression(), names),
-        statement.type_().cloned(),
-        statement.position().clone(),
     )
 }
 
@@ -83,8 +59,8 @@ fn rename_expression(expression: &Expression, names: &HashMap<String, String>) -
         .into(),
         Expression::If(if_) => If::new(
             rename_expression(if_.condition(), names),
-            rename_block(if_.then(), names),
-            rename_block(if_.else_(), names),
+            rename_expression(if_.then(), names),
+            rename_expression(if_.else_(), names),
             if_.result_type().cloned(),
             if_.position().clone(),
         )
@@ -93,7 +69,7 @@ fn rename_expression(expression: &Expression, names: &HashMap<String, String>) -
             rename_expression(if_.argument(), names),
             if_.first_name(),
             if_.rest_name(),
-            rename_block(
+            rename_expression(
                 if_.then(),
                 &names
                     .clone()
@@ -101,7 +77,7 @@ fn rename_expression(expression: &Expression, names: &HashMap<String, String>) -
                     .filter(|(name, _)| name != if_.first_name() && name != if_.rest_name())
                     .collect(),
             ),
-            rename_block(if_.else_(), names),
+            rename_expression(if_.else_(), names),
             if_.result_type().cloned(),
             if_.position().clone(),
         )
@@ -122,11 +98,12 @@ fn rename_expression(expression: &Expression, names: &HashMap<String, String>) -
                     .map(|branch| {
                         IfTypeBranch::new(
                             branch.type_().clone(),
-                            rename_block(branch.block(), &branch_names),
+                            rename_expression(branch.expression(), &branch_names),
                         )
                     })
                     .collect(),
-                if_.else_().map(|block| rename_block(block, &branch_names)),
+                if_.else_()
+                    .map(|expression| rename_expression(expression, &branch_names)),
                 if_.result_type().cloned(),
                 if_.position().clone(),
             )
@@ -279,7 +256,7 @@ mod tests {
                         Lambda::new(
                             vec![],
                             types::None::new(Position::dummy()),
-                            Block::new(vec![], Variable::new("x", None, Position::dummy())),
+                            Variable::new("x", None, Position::dummy()),
                             Position::dummy()
                         ),
                         false
@@ -296,7 +273,7 @@ mod tests {
                     Lambda::new(
                         vec![],
                         types::None::new(Position::dummy()),
-                        Block::new(vec![], Variable::new("foo.x", None, Position::dummy())),
+                        Variable::new("foo.x", None, Position::dummy()),
                         Position::dummy()
                     ),
                     false
@@ -316,7 +293,7 @@ mod tests {
                 Lambda::new(
                     vec![Argument::new("x", types::None::new(Position::dummy()))],
                     types::None::new(Position::dummy()),
-                    Block::new(vec![], Variable::new("x", None, Position::dummy())),
+                    Variable::new("x", None, Position::dummy()),
                     Position::dummy(),
                 ),
                 false,
@@ -345,14 +322,12 @@ mod tests {
                         Lambda::new(
                             vec![],
                             types::None::new(Position::dummy()),
-                            Block::new(
-                                vec![Statement::new(
-                                    Some("x".into()),
-                                    None::new(Position::dummy()),
-                                    None,
-                                    Position::dummy(),
-                                )],
-                                Variable::new("x", None, Position::dummy())
+                            Let::new(
+                                Some("x".into()),
+                                None,
+                                None::new(Position::dummy()),
+                                Variable::new("x", None, Position::dummy()),
+                                Position::dummy(),
                             ),
                             Position::dummy()
                         ),
@@ -370,14 +345,12 @@ mod tests {
                     Lambda::new(
                         vec![],
                         types::None::new(Position::dummy()),
-                        Block::new(
-                            vec![Statement::new(
-                                Some("x".into()),
-                                None::new(Position::dummy()),
-                                None,
-                                Position::dummy(),
-                            )],
-                            Variable::new("x", None, Position::dummy())
+                        Let::new(
+                            Some("x".into()),
+                            None,
+                            None::new(Position::dummy()),
+                            Variable::new("x", None, Position::dummy()),
+                            Position::dummy(),
                         ),
                         Position::dummy()
                     ),
@@ -398,15 +371,12 @@ mod tests {
                 Lambda::new(
                     vec![],
                     types::None::new(Position::dummy()),
-                    Block::new(
-                        vec![],
-                        Let::new(
-                            Some("x".into()),
-                            None,
-                            None::new(Position::dummy()),
-                            Variable::new("x", None, Position::dummy()),
-                            Position::dummy(),
-                        ),
+                    Let::new(
+                        Some("x".into()),
+                        None,
+                        None::new(Position::dummy()),
+                        Variable::new("x", None, Position::dummy()),
+                        Position::dummy(),
                     ),
                     Position::dummy(),
                 ),

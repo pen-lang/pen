@@ -42,7 +42,7 @@ fn infer_lambda(
     Ok(Lambda::new(
         lambda.arguments().to_vec(),
         lambda.result_type().clone(),
-        infer_block(
+        infer_expression(
             lambda.body(),
             &variables
                 .clone()
@@ -65,8 +65,8 @@ fn infer_expression(
     variables: &HashMap<String, Type>,
     types: &HashMap<String, Type>,
 ) -> Result<Expression, CompileError> {
-    let infer_expression = |expression, variables| infer_expression(expression, variables, types);
-    let infer_block = |block, variables: &HashMap<_, _>| infer_block(block, variables, types);
+    let infer_expression =
+        |expression, variables: &_| infer_expression(expression, variables, types);
 
     Ok(match expression {
         Expression::Call(call) => {
@@ -84,8 +84,8 @@ fn infer_expression(
             .into()
         }
         Expression::If(if_) => {
-            let then = infer_block(if_.then(), variables)?;
-            let else_ = infer_block(if_.else_(), variables)?;
+            let then = infer_expression(if_.then(), variables)?;
+            let else_ = infer_expression(if_.else_(), variables)?;
 
             If::new(
                 infer_expression(if_.condition(), variables)?,
@@ -93,8 +93,8 @@ fn infer_expression(
                 else_.clone(),
                 Some(
                     types::Union::new(
-                        type_extractor::extract_from_block(&then, types)?,
-                        type_extractor::extract_from_block(&else_, types)?,
+                        type_extractor::extract_from_expression(&then, types)?,
+                        type_extractor::extract_from_expression(&else_, types)?,
                         if_.position().clone(),
                     )
                     .into(),
@@ -104,8 +104,8 @@ fn infer_expression(
             .into()
         }
         Expression::IfList(if_) => {
-            let then = infer_block(if_.then(), variables)?;
-            let else_ = infer_block(if_.else_(), variables)?;
+            let then = infer_expression(if_.then(), variables)?;
+            let else_ = infer_expression(if_.else_(), variables)?;
 
             IfList::new(
                 infer_expression(if_.argument(), variables)?,
@@ -115,8 +115,8 @@ fn infer_expression(
                 else_.clone(),
                 Some(
                     types::Union::new(
-                        type_extractor::extract_from_block(&then, types)?,
-                        type_extractor::extract_from_block(&else_, types)?,
+                        type_extractor::extract_from_expression(&then, types)?,
+                        type_extractor::extract_from_expression(&else_, types)?,
                         if_.position().clone(),
                     )
                     .into(),
@@ -133,8 +133,8 @@ fn infer_expression(
                 .map(|branch| -> Result<_, CompileError> {
                     Ok(IfTypeBranch::new(
                         branch.type_().clone(),
-                        infer_block(
-                            branch.block(),
+                        infer_expression(
+                            branch.expression(),
                             &variables
                                 .clone()
                                 .into_iter()
@@ -146,7 +146,7 @@ fn infer_expression(
                 .collect::<Result<Vec<_>, _>>()?;
             let else_ = if_
                 .else_()
-                .map(|block| infer_block(block, variables))
+                .map(|expression| infer_expression(expression, variables))
                 .transpose()?;
 
             IfType::new(
@@ -159,9 +159,11 @@ fn infer_expression(
                     union_type_creator::create_union_type(
                         &branches
                             .iter()
-                            .map(|alternative| alternative.block())
+                            .map(|alternative| alternative.expression())
                             .chain(&else_)
-                            .map(|block| type_extractor::extract_from_block(block, types))
+                            .map(|expression| {
+                                type_extractor::extract_from_expression(expression, types)
+                            })
                             .collect::<Result<Vec<_>, _>>()?,
                         if_.position(),
                     )
@@ -285,51 +287,6 @@ fn infer_expression(
         | Expression::String(_)
         | Expression::Variable(_) => expression.clone(),
     })
-}
-
-fn infer_block(
-    block: &Block,
-    variables: &HashMap<String, Type>,
-    types: &HashMap<String, Type>,
-) -> Result<Block, CompileError> {
-    let mut variables = variables.clone();
-    let mut statements = vec![];
-
-    for statement in block.statements() {
-        let statement = infer_statement(statement, &variables, types)?;
-
-        if let Some(name) = statement.name() {
-            variables.insert(
-                name.into(),
-                statement
-                    .type_()
-                    .cloned()
-                    .ok_or_else(|| CompileError::TypeNotInferred(statement.position().clone()))?,
-            );
-        }
-
-        statements.push(statement);
-    }
-
-    Ok(Block::new(
-        statements,
-        infer_expression(block.expression(), &variables, types)?,
-    ))
-}
-
-fn infer_statement(
-    statement: &Statement,
-    variables: &HashMap<String, Type>,
-    types: &HashMap<String, Type>,
-) -> Result<Statement, CompileError> {
-    let expression = infer_expression(statement.expression(), variables, types)?;
-
-    Ok(Statement::new(
-        statement.name().map(|name| name.into()),
-        expression.clone(),
-        Some(type_extractor::extract_from_expression(&expression, types)?),
-        statement.position().clone(),
-    ))
 }
 
 #[cfg(test)]

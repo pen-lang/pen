@@ -56,7 +56,7 @@ mod tests {
                         Lambda::new(
                             vec![],
                             types::None::new(Position::dummy()),
-                            Block::new(vec![], None::new(Position::dummy())),
+                            None::new(Position::dummy()),
                             Position::dummy()
                         ),
                         false
@@ -73,7 +73,7 @@ mod tests {
                     Lambda::new(
                         vec![],
                         types::None::new(Position::dummy()),
-                        Block::new(vec![], None::new(Position::dummy())),
+                        None::new(Position::dummy()),
                         Position::dummy()
                     ),
                     false
@@ -95,7 +95,7 @@ mod tests {
                         Lambda::new(
                             vec![],
                             types::None::new(Position::dummy()),
-                            Block::new(vec![], Variable::new("x", None, Position::dummy())),
+                            Variable::new("x", None, Position::dummy()),
                             Position::dummy()
                         ),
                         false
@@ -112,7 +112,7 @@ mod tests {
                     Lambda::new(
                         vec![],
                         types::None::new(Position::dummy()),
-                        Block::new(vec![], Variable::new("foo.x", None, Position::dummy())),
+                        Variable::new("foo.x", None, Position::dummy()),
                         Position::dummy()
                     ),
                     false
@@ -134,7 +134,7 @@ mod tests {
                         Lambda::new(
                             vec![Argument::new("x", types::None::new(Position::dummy()))],
                             types::None::new(Position::dummy()),
-                            Block::new(vec![], Variable::new("x", None, Position::dummy())),
+                            Variable::new("x", None, Position::dummy()),
                             Position::dummy()
                         ),
                         false
@@ -151,7 +151,7 @@ mod tests {
                     Lambda::new(
                         vec![Argument::new("x", types::None::new(Position::dummy()))],
                         types::None::new(Position::dummy()),
-                        Block::new(vec![], Variable::new("x", None, Position::dummy())),
+                        Variable::new("x", None, Position::dummy()),
                         Position::dummy()
                     ),
                     false
@@ -173,14 +173,12 @@ mod tests {
                         Lambda::new(
                             vec![],
                             types::None::new(Position::dummy()),
-                            Block::new(
-                                vec![Statement::new(
-                                    Some("x".into()),
-                                    None::new(Position::dummy()),
-                                    None,
-                                    Position::dummy(),
-                                )],
-                                Variable::new("x", None, Position::dummy())
+                            Let::new(
+                                Some("x".into()),
+                                None,
+                                None::new(Position::dummy()),
+                                Variable::new("x", None, Position::dummy()),
+                                Position::dummy(),
                             ),
                             Position::dummy()
                         ),
@@ -198,14 +196,12 @@ mod tests {
                     Lambda::new(
                         vec![],
                         types::None::new(Position::dummy()),
-                        Block::new(
-                            vec![Statement::new(
-                                Some("x".into()),
-                                None::new(Position::dummy()),
-                                None,
-                                Position::dummy(),
-                            )],
-                            Variable::new("x", None, Position::dummy())
+                        Let::new(
+                            Some("x".into()),
+                            None,
+                            None::new(Position::dummy()),
+                            Variable::new("x", None, Position::dummy()),
+                            Position::dummy(),
                         ),
                         Position::dummy()
                     ),

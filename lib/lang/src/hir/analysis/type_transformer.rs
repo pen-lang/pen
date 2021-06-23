@@ -112,28 +112,8 @@ fn transform_lambda(lambda: &Lambda, transform: &impl Fn(&Type) -> Type) -> Lamb
             .map(|argument| Argument::new(argument.name(), transform(argument.type_())))
             .collect(),
         transform(lambda.result_type()),
-        transform_block(lambda.body(), transform),
+        transform_expression(lambda.body(), transform),
         lambda.position().clone(),
-    )
-}
-
-fn transform_block(block: &Block, transform: &impl Fn(&Type) -> Type) -> Block {
-    Block::new(
-        block
-            .statements()
-            .iter()
-            .map(|statement| transform_statement(statement, transform))
-            .collect(),
-        transform_expression(block.expression(), transform),
-    )
-}
-
-fn transform_statement(statement: &Statement, transform: &impl Fn(&Type) -> Type) -> Statement {
-    Statement::new(
-        statement.name().map(String::from),
-        transform_expression(statement.expression(), transform),
-        statement.type_().map(transform),
-        statement.position().clone(),
     )
 }
 
@@ -151,8 +131,8 @@ fn transform_expression(expression: &Expression, transform: &impl Fn(&Type) -> T
         .into(),
         Expression::If(if_) => If::new(
             transform_expression(if_.condition(), transform),
-            transform_block(if_.then(), transform),
-            transform_block(if_.else_(), transform),
+            transform_expression(if_.then(), transform),
+            transform_expression(if_.else_(), transform),
             if_.result_type().map(transform),
             if_.position().clone(),
         )
@@ -161,8 +141,8 @@ fn transform_expression(expression: &Expression, transform: &impl Fn(&Type) -> T
             transform_expression(if_.argument(), transform),
             if_.first_name(),
             if_.rest_name(),
-            transform_block(if_.then(), transform),
-            transform_block(if_.else_(), transform),
+            transform_expression(if_.then(), transform),
+            transform_expression(if_.else_(), transform),
             if_.result_type().map(transform),
             if_.position().clone(),
         )
@@ -176,11 +156,12 @@ fn transform_expression(expression: &Expression, transform: &impl Fn(&Type) -> T
                 .map(|branch| {
                     IfTypeBranch::new(
                         branch.type_().clone(),
-                        transform_block(branch.block(), transform),
+                        transform_expression(branch.expression(), transform),
                     )
                 })
                 .collect(),
-            if_.else_().map(|block| transform_block(block, transform)),
+            if_.else_()
+                .map(|expression| transform_expression(expression, transform)),
             if_.result_type().map(transform),
             if_.position().clone(),
         )

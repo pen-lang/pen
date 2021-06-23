@@ -1,4 +1,4 @@
-use super::{expression::Expression, Block};
+use super::expression::Expression;
 use crate::{position::Position, types::Type};
 use std::sync::Arc;
 
@@ -7,8 +7,8 @@ pub struct IfList {
     argument: Arc<Expression>,
     first_name: String,
     rest_name: String,
-    then: Arc<Block>,
-    else_: Arc<Block>,
+    then: Arc<Expression>,
+    else_: Arc<Expression>,
     result_type: Option<Type>,
     position: Position,
 }
@@ -18,8 +18,8 @@ impl IfList {
         argument: impl Into<Expression>,
         first_name: impl Into<String>,
         rest_name: impl Into<String>,
-        then: Block,
-        else_: Block,
+        then: Expression,
+        else_: Expression,
         result_type: Option<Type>,
         position: Position,
     ) -> Self {
@@ -46,11 +46,11 @@ impl IfList {
         &self.rest_name
     }
 
-    pub fn then(&self) -> &Block {
+    pub fn then(&self) -> &Expression {
         &self.then
     }
 
-    pub fn else_(&self) -> &Block {
+    pub fn else_(&self) -> &Expression {
         &self.else_
     }
 
