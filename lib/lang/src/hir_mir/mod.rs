@@ -4,6 +4,7 @@ mod expression_compiler;
 mod list_type_configuration;
 mod module_compiler;
 mod module_interface_compiler;
+mod record_element_resolver;
 mod string_type_configuration;
 mod transformation;
 mod type_checker;

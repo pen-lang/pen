@@ -1,7 +1,7 @@
 use super::CompileError;
+use super::{record_element_resolver, type_context::TypeContext, union_type_creator};
 use crate::{
     hir::*,
-    hir_mir::{type_context::TypeContext, union_type_creator},
     types::{self, analysis::type_resolver, Type},
 };
 use std::collections::HashMap;
@@ -119,18 +119,15 @@ pub fn extract_from_expression(
         Expression::Number(number) => types::Number::new(number.position().clone()).into(),
         Expression::RecordConstruction(construction) => construction.type_().clone(),
         Expression::RecordElement(element) => {
-            let record_type = type_resolver::resolve_to_record(
+            let element_types = record_element_resolver::resolve_elements(
                 element
                     .type_()
                     .ok_or_else(|| CompileError::TypeNotInferred(element.position().clone()))?,
-                type_context.types(),
-            )?
-            .ok_or_else(|| CompileError::RecordExpected(element.position().clone()))?;
+                element.position(),
+                type_context,
+            )?;
 
-            type_context
-                .records()
-                .get(record_type.name())
-                .ok_or(CompileError::RecordNotFound(record_type))?
+            element_types
                 .get(element.element_name())
                 .ok_or_else(|| CompileError::RecordElementUnknown(element.position().clone()))?
                 .clone()

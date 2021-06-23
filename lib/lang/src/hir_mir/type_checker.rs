@@ -1,3 +1,4 @@
+use super::record_element_resolver;
 use super::{environment_creator, type_context::TypeContext, type_extractor, CompileError};
 use crate::{
     hir::*,
@@ -53,18 +54,17 @@ fn check_expression(
         Expression::None(none) => types::None::new(none.position().clone()).into(),
         Expression::Number(number) => types::Number::new(number.position().clone()).into(),
         Expression::RecordConstruction(construction) => {
-            let element_types = types::analysis::resolve_record_elements(
+            let element_types = record_element_resolver::resolve_elements(
                 construction.type_(),
-                type_context.types(),
-                type_context.records(),
-            )?
-            .ok_or_else(|| CompileError::RecordExpected(construction.type_().position().clone()))?;
+                construction.position(),
+                type_context,
+            )?;
 
-            for (name, element) in construction.elements() {
+            for (name, expression) in construction.elements() {
                 check_subsumption(
-                    &check_expression(element, variables, type_context)?,
+                    &check_expression(expression, variables, type_context)?,
                     element_types.get(name).ok_or_else(|| {
-                        CompileError::RecordElementUnknown(element.position().clone())
+                        CompileError::RecordElementUnknown(expression.position().clone())
                     })?,
                     type_context.types(),
                 )?;
@@ -78,7 +78,32 @@ fn check_expression(
                 }
             }
 
-            construction.type_().clone()
+            construction.type_().clone().into()
+        }
+        Expression::RecordUpdate(update) => {
+            check_subsumption(
+                &check_expression(update.record(), variables, type_context)?,
+                update.type_(),
+                type_context.types(),
+            )?;
+
+            let element_types = record_element_resolver::resolve_elements(
+                update.type_(),
+                update.position(),
+                type_context,
+            )?;
+
+            for (name, expression) in update.elements() {
+                check_subsumption(
+                    &check_expression(expression, variables, type_context)?,
+                    element_types.get(name).ok_or_else(|| {
+                        CompileError::RecordElementUnknown(expression.position().clone())
+                    })?,
+                    type_context.types(),
+                )?;
+            }
+
+            update.type_().clone().into()
         }
         Expression::String(string) => types::ByteString::new(string.position().clone()).into(),
         Expression::Variable(variable) => variables
@@ -275,6 +300,43 @@ mod tests {
                 )),
                 Err(CompileError::RecordElementUnknown(_))
             ));
+        }
+
+        #[test]
+        fn check_record_update() -> Result<(), CompileError> {
+            let reference_type = types::Reference::new("r", Position::dummy());
+
+            check_module(&Module::new(
+                vec![TypeDefinition::without_source(
+                    "r",
+                    vec![types::RecordElement::new(
+                        "x",
+                        types::None::new(Position::dummy()),
+                    )],
+                    false,
+                    false,
+                    false,
+                )],
+                vec![],
+                vec![],
+                vec![Definition::without_source(
+                    "x",
+                    Lambda::new(
+                        vec![Argument::new("x", reference_type.clone())],
+                        reference_type.clone(),
+                        RecordUpdate::new(
+                            reference_type,
+                            Variable::new("x", Position::dummy()),
+                            vec![("x".into(), None::new(Position::dummy()).into())]
+                                .into_iter()
+                                .collect(),
+                            Position::dummy(),
+                        ),
+                        Position::dummy(),
+                    ),
+                    false,
+                )],
+            ))
         }
     }
 }
