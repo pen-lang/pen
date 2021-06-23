@@ -509,7 +509,7 @@ mod tests {
             )
             .unwrap(),
             Module::new(
-                vec![type_definition.clone()],
+                vec![type_definition],
                 vec![],
                 vec![],
                 vec![Definition::without_source(
