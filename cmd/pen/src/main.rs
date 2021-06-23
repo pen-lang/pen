@@ -20,6 +20,12 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
     match clap::App::new("pen")
         .version("0.1.0")
         .setting(clap::AppSettings::SubcommandRequired)
+        .arg(
+            clap::Arg::with_name("verbose")
+                .short("v")
+                .long("verbose")
+                .global(true),
+        )
         .subcommand(clap::SubCommand::with_name("build").about("Builds a package"))
         .subcommand(
             clap::SubCommand::with_name("compile")
@@ -47,7 +53,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         .get_matches()
         .subcommand()
     {
-        ("build", _) => build(),
+        ("build", matches) => build(matches.unwrap().is_present("verbose")),
         ("compile", matches) => {
             let matches = matches.unwrap();
 

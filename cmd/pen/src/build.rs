@@ -2,7 +2,7 @@ use super::{file_path_configuration::FILE_PATH_CONFIGURATION, main_package_direc
 use crate::file_path_configuration::{BUILD_CONFIGURATION_FILENAME, OUTPUT_DIRECTORY};
 use std::sync::Arc;
 
-pub fn build() -> Result<(), Box<dyn std::error::Error>> {
+pub fn build(verbose: bool) -> Result<(), Box<dyn std::error::Error>> {
     let main_package_directory = main_package_directory_finder::find()?;
 
     let file_path_converter = Arc::new(infra::FilePathConverter::new(
@@ -18,6 +18,10 @@ pub fn build() -> Result<(), Box<dyn std::error::Error>> {
         file_path_converter.clone(),
         OUTPUT_DIRECTORY,
     ));
+
+    if verbose {
+        infra::log_info("initializing external packages")?;
+    }
 
     app::package_initializer::initialize(
         &app::package_initializer::PackageInitializerInfrastructure {
@@ -36,6 +40,10 @@ pub fn build() -> Result<(), Box<dyn std::error::Error>> {
         &main_package_directory,
         &output_directory,
     )?;
+
+    if verbose {
+        infra::log_info("building modules")?;
+    }
 
     app::package_builder::build_main_package(
         &app::package_builder::PackageBuilderInfrastructure {
