@@ -4,7 +4,7 @@ use super::{
 };
 use crate::{
     hir::*,
-    types::{self, Type},
+    types::{self, analysis::type_resolver, Type},
 };
 use std::collections::HashMap;
 
@@ -52,6 +52,35 @@ fn check_expression(
 ) -> Result<Type, CompileError> {
     Ok(match expression {
         Expression::Boolean(boolean) => types::Boolean::new(boolean.position().clone()).into(),
+        Expression::Call(call) => {
+            let type_ = call
+                .function_type()
+                .ok_or_else(|| CompileError::TypeNotInferred(call.position().clone()))?;
+            let function_type = type_resolver::resolve_to_function(type_, type_context.types())?
+                .ok_or_else(|| {
+                    CompileError::FunctionExpected(call.function().position().clone())
+                })?;
+
+            check_subsumption(
+                &check_expression(call.function(), variables, type_context)?,
+                &type_,
+                type_context.types(),
+            )?;
+
+            if call.arguments().len() != function_type.arguments().len() {
+                return Err(CompileError::WrongArgumentCount(call.position().clone()));
+            }
+
+            for (argument, type_) in call.arguments().iter().zip(function_type.arguments()) {
+                check_subsumption(
+                    &check_expression(argument, variables, type_context)?,
+                    type_,
+                    type_context.types(),
+                )?;
+            }
+
+            function_type.result().clone()
+        }
         Expression::Lambda(lambda) => check_lambda(lambda, variables, type_context)?.into(),
         Expression::None(none) => types::None::new(none.position().clone()).into(),
         Expression::Number(number) => types::Number::new(number.position().clone()).into(),
@@ -190,6 +219,140 @@ mod tests {
                 false,
             )],
         ))
+    }
+
+    mod calls {
+        use super::*;
+
+        #[test]
+        fn check_call() {
+            check_module(&Module::new(
+                vec![],
+                vec![],
+                vec![],
+                vec![Definition::without_source(
+                    "f",
+                    Lambda::new(
+                        vec![],
+                        types::None::new(Position::dummy()),
+                        Call::new(
+                            Variable::new("f", Position::dummy()),
+                            vec![],
+                            Some(
+                                types::Function::new(
+                                    vec![],
+                                    types::None::new(Position::dummy()),
+                                    Position::dummy(),
+                                )
+                                .into(),
+                            ),
+                            Position::dummy(),
+                        ),
+                        Position::dummy(),
+                    ),
+                    false,
+                )],
+            ))
+            .unwrap()
+        }
+
+        #[test]
+        fn check_call_with_arguments() {
+            check_module(&Module::new(
+                vec![],
+                vec![],
+                vec![],
+                vec![Definition::without_source(
+                    "f",
+                    Lambda::new(
+                        vec![Argument::new("x", types::None::new(Position::dummy()))],
+                        types::None::new(Position::dummy()),
+                        Call::new(
+                            Variable::new("f", Position::dummy()),
+                            vec![None::new(Position::dummy()).into()],
+                            Some(
+                                types::Function::new(
+                                    vec![types::None::new(Position::dummy()).into()],
+                                    types::None::new(Position::dummy()),
+                                    Position::dummy(),
+                                )
+                                .into(),
+                            ),
+                            Position::dummy(),
+                        ),
+                        Position::dummy(),
+                    ),
+                    false,
+                )],
+            ))
+            .unwrap()
+        }
+
+        #[test]
+        #[should_panic]
+        fn fail_to_check_call_with_wrong_argument_type() {
+            check_module(&Module::new(
+                vec![],
+                vec![],
+                vec![],
+                vec![Definition::without_source(
+                    "f",
+                    Lambda::new(
+                        vec![Argument::new("x", types::None::new(Position::dummy()))],
+                        types::None::new(Position::dummy()),
+                        Call::new(
+                            Variable::new("f", Position::dummy()),
+                            vec![Number::new(42.0, Position::dummy()).into()],
+                            Some(
+                                types::Function::new(
+                                    vec![types::None::new(Position::dummy()).into()],
+                                    types::None::new(Position::dummy()),
+                                    Position::dummy(),
+                                )
+                                .into(),
+                            ),
+                            Position::dummy(),
+                        ),
+                        Position::dummy(),
+                    ),
+                    false,
+                )],
+            ))
+            .unwrap()
+        }
+
+        #[test]
+        #[should_panic]
+        fn fail_to_check_call_with_wrong_argument_count() {
+            check_module(&Module::new(
+                vec![],
+                vec![],
+                vec![],
+                vec![Definition::without_source(
+                    "f",
+                    Lambda::new(
+                        vec![Argument::new("x", types::None::new(Position::dummy()))],
+                        types::None::new(Position::dummy()),
+                        Call::new(
+                            Variable::new("f", Position::dummy()),
+                            vec![],
+                            Some(
+                                types::Function::new(
+                                    vec![types::None::new(Position::dummy()).into()],
+                                    types::None::new(Position::dummy()),
+                                    Position::dummy(),
+                                )
+                                .into(),
+                            ),
+                            Position::dummy(),
+                        ),
+                        Position::dummy(),
+                    ),
+                    false,
+                )],
+            ))
+            .unwrap()
+        }
     }
 
     mod records {
