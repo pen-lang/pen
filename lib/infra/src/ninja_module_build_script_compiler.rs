@@ -28,9 +28,9 @@ impl app::infra::ModuleBuildScriptCompiler for NinjaModuleBuildScriptCompiler {
         vec![
             "ninja_required_version = 1.10",
             &format!("builddir = {}", self.output_directory),
-            "rule pen_compile",
+            "rule compile",
             "  command = pen compile $in $out",
-            "rule pen_compile_dependency",
+            "rule resolve_dependency",
             "  command = pen compile-dependency -p $package_directory $in $object_file $out",
         ]
         .into_iter()
@@ -62,16 +62,26 @@ impl app::infra::ModuleBuildScriptCompiler for NinjaModuleBuildScriptCompiler {
                 .convert_to_os_path(target.object_file());
 
             vec![
+                // TODO Remove this hack to circumvent ninja's bug where dynamic dependency files
+                // cannot be specified together with outputs of the same build rules.
                 format!(
-                    "build {} {}: pen_compile_dependency {}",
+                    "build {} {}: resolve_dependency {}",
                     dependency_path.display(),
+                    ninja_dependency_path.with_extension("dd.dummy").display(),
+                    source_path.display(),
+                ),
+                format!("  package_directory = {}", package_directory.display()),
+                format!("  object_file = {}", object_path.display()),
+                format!(
+                    "build {} {}: resolve_dependency {}",
+                    dependency_path.with_extension("dep.dummy").display(),
                     ninja_dependency_path.display(),
                     source_path.display(),
                 ),
                 format!("  package_directory = {}", package_directory.display()),
                 format!("  object_file = {}", object_path.display()),
                 format!(
-                    "build {} {}: pen_compile {} {} || {}",
+                    "build {} {}: compile {} {} || {}",
                     object_path.display(),
                     interface_path.display(),
                     source_path.display(),
