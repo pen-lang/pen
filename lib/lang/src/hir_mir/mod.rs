@@ -26,7 +26,7 @@ pub fn compile(
 ) -> Result<(mir::ir::Module, interface::Module), CompileError> {
     let type_context = TypeContext::new(module, list_type_configuration, string_type_configuration);
 
-    let module = type_inferrer::infer_types(module, type_context.types())?;
+    let module = type_inferrer::infer_types(module, &type_context)?;
     type_checker::check_types(&module, &type_context)?;
 
     Ok((

@@ -57,6 +57,22 @@ impl TypeContext {
         }
     }
 
+    #[cfg(test)]
+    pub fn dummy(
+        records: HashMap<String, HashMap<String, Type>>,
+        types: HashMap<String, Type>,
+    ) -> Self {
+        use super::list_type_configuration::LIST_TYPE_CONFIGURATION;
+        use super::string_type_configuration::STRING_TYPE_CONFIGURATION;
+
+        Self {
+            records,
+            types,
+            list_type_configuration: LIST_TYPE_CONFIGURATION.clone(),
+            string_type_configuration: STRING_TYPE_CONFIGURATION.clone(),
+        }
+    }
+
     pub fn records(&self) -> &HashMap<String, HashMap<String, Type>> {
         &self.records
     }
