@@ -73,6 +73,7 @@ impl app::infra::ModuleBuildScriptCompiler for NinjaModuleBuildScriptCompiler {
                 format!("  dyndep = {}", ninja_dependency_file.display()),
                 // TODO Remove this hack to circumvent ninja's bug where dynamic dependency files
                 // cannot be specified as inputs together with outputs of the same build rules.
+                // https://github.com/ninja-build/ninja/issues/1988
                 format!(
                     "build {} {}: resolve_dependency {}",
                     dependency_file.display(),
