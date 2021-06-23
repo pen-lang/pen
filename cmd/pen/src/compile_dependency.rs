@@ -17,9 +17,9 @@ pub fn compile_dependency(
 
     app::module_dependency_resolver::compile_dependency(
         &app::module_dependency_resolver::ModuleDependencyResolverInfrastructure {
-            build_script_dependency_compiler: Arc::new(infra::NinjaBuildScriptDependencyCompiler::new(
-                file_path_converter.clone(),
-            )),
+            build_script_dependency_compiler: Arc::new(
+                infra::NinjaBuildScriptDependencyCompiler::new(file_path_converter.clone()),
+            ),
             package_configuration_reader: Arc::new(infra::JsonPackageConfigurationReader::new(
                 file_system.clone(),
                 BUILD_CONFIGURATION_FILENAME,
