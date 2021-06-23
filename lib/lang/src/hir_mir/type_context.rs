@@ -62,8 +62,10 @@ impl TypeContext {
         records: HashMap<String, HashMap<String, Type>>,
         types: HashMap<String, Type>,
     ) -> Self {
-        use super::list_type_configuration::LIST_TYPE_CONFIGURATION;
-        use super::string_type_configuration::STRING_TYPE_CONFIGURATION;
+        use super::{
+            list_type_configuration::LIST_TYPE_CONFIGURATION,
+            string_type_configuration::STRING_TYPE_CONFIGURATION,
+        };
 
         Self {
             records,

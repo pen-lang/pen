@@ -117,7 +117,7 @@ pub fn extract_from_expression(
         )?,
         Expression::None(none) => types::None::new(none.position().clone()).into(),
         Expression::Number(number) => types::Number::new(number.position().clone()).into(),
-        Expression::RecordConstruction(construction) => construction.type_().clone().into(),
+        Expression::RecordConstruction(construction) => construction.type_().clone(),
         Expression::RecordElement(element) => {
             let record_type = type_resolver::resolve_to_record(
                 element
@@ -130,12 +130,12 @@ pub fn extract_from_expression(
             type_context
                 .records()
                 .get(record_type.name())
-                .ok_or_else(|| CompileError::RecordNotFound(record_type))?
+                .ok_or(CompileError::RecordNotFound(record_type))?
                 .get(element.element_name())
                 .ok_or_else(|| CompileError::RecordElementUnknown(element.position().clone()))?
                 .clone()
         }
-        Expression::RecordUpdate(update) => update.type_().clone().into(),
+        Expression::RecordUpdate(update) => update.type_().clone(),
         Expression::String(string) => types::ByteString::new(string.position().clone()).into(),
         Expression::TypeCoercion(coercion) => coercion.to().clone(),
         Expression::Variable(variable) => variables
