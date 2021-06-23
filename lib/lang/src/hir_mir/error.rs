@@ -11,6 +11,7 @@ use std::{
 #[derive(Clone, Debug, PartialEq)]
 pub enum CompileError {
     FunctionExpected(Position),
+    ListExpected(Position),
     MirTypeCheck(mir::analysis::TypeCheckError),
     RecordElementUnknown(Position),
     RecordElementMissing(Position),
@@ -29,6 +30,9 @@ impl Display for CompileError {
         match self {
             Self::FunctionExpected(position) => {
                 write!(formatter, "function expected\n{}", position)
+            }
+            Self::ListExpected(position) => {
+                write!(formatter, "list expected\n{}", position)
             }
             Self::MirTypeCheck(error) => {
                 write!(formatter, "failed to check types in MIR: {}", error)

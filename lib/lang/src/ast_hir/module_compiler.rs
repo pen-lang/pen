@@ -221,14 +221,12 @@ fn compile_expression(expression: &ast::Expression) -> Result<hir::Expression, C
             if_.rest_name(),
             compile_block(if_.then())?,
             compile_block(if_.else_())?,
-            None,
             if_.position().clone(),
         )
         .into(),
         ast::Expression::IfType(if_) => hir::IfType::new(
             if_.name(),
             compile_expression(if_.argument())?,
-            None,
             if_.branches()
                 .iter()
                 .map(|branch| {
@@ -238,7 +236,6 @@ fn compile_expression(expression: &ast::Expression) -> Result<hir::Expression, C
                     ))
                 })
                 .collect::<Result<_, _>>()?,
-            if_.else_().map(compile_block).transpose()?,
             None,
             if_.position().clone(),
         )
@@ -306,7 +303,7 @@ fn compile_expression(expression: &ast::Expression) -> Result<hir::Expression, C
             }
         }
         ast::Expression::Variable(variable) => {
-            hir::Variable::new(variable.name(), None, variable.position().clone()).into()
+            hir::Variable::new(variable.name(), variable.position().clone()).into()
         }
     })
 }
@@ -322,14 +319,12 @@ fn compile_if(
             compile_expression(then.condition())?,
             compile_block(then.block())?,
             compile_block(else_)?,
-            None,
             position.clone(),
         ),
         [then, ..] => hir::If::new(
             compile_expression(then.condition())?,
             compile_block(then.block())?,
             compile_if(&branches[1..], else_, position)?,
-            None,
             position.clone(),
         ),
     })

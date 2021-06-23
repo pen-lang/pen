@@ -1,5 +1,5 @@
 use super::expression::Expression;
-use crate::{position::Position, types::Type};
+use crate::position::Position;
 use std::sync::Arc;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -9,7 +9,6 @@ pub struct IfList {
     rest_name: String,
     then: Arc<Expression>,
     else_: Arc<Expression>,
-    result_type: Option<Type>,
     position: Position,
 }
 
@@ -20,7 +19,6 @@ impl IfList {
         rest_name: impl Into<String>,
         then: Expression,
         else_: Expression,
-        result_type: Option<Type>,
         position: Position,
     ) -> Self {
         Self {
@@ -29,7 +27,6 @@ impl IfList {
             rest_name: rest_name.into(),
             then: then.into(),
             else_: else_.into(),
-            result_type,
             position,
         }
     }
@@ -52,10 +49,6 @@ impl IfList {
 
     pub fn else_(&self) -> &Expression {
         &self.else_
-    }
-
-    pub fn result_type(&self) -> Option<&Type> {
-        self.result_type.as_ref()
     }
 
     pub fn position(&self) -> &Position {

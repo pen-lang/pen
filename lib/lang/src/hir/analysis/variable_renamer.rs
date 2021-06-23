@@ -61,7 +61,6 @@ fn rename_expression(expression: &Expression, names: &HashMap<String, String>) -
             rename_expression(if_.condition(), names),
             rename_expression(if_.then(), names),
             rename_expression(if_.else_(), names),
-            if_.result_type().cloned(),
             if_.position().clone(),
         )
         .into(),
@@ -78,7 +77,6 @@ fn rename_expression(expression: &Expression, names: &HashMap<String, String>) -
                     .collect(),
             ),
             rename_expression(if_.else_(), names),
-            if_.result_type().cloned(),
             if_.position().clone(),
         )
         .into(),
@@ -92,7 +90,6 @@ fn rename_expression(expression: &Expression, names: &HashMap<String, String>) -
             IfType::new(
                 if_.name(),
                 rename_expression(if_.argument(), names),
-                if_.argument_type().cloned(),
                 if_.branches()
                     .iter()
                     .map(|branch| {
@@ -104,7 +101,6 @@ fn rename_expression(expression: &Expression, names: &HashMap<String, String>) -
                     .collect(),
                 if_.else_()
                     .map(|expression| rename_expression(expression, &branch_names)),
-                if_.result_type().cloned(),
                 if_.position().clone(),
             )
             .into()
@@ -182,7 +178,6 @@ fn rename_expression(expression: &Expression, names: &HashMap<String, String>) -
                 .get(variable.name())
                 .map(|string| string.as_str())
                 .unwrap_or_else(|| variable.name()),
-            variable.type_().cloned(),
             variable.position().clone(),
         )
         .into(),
@@ -256,7 +251,7 @@ mod tests {
                         Lambda::new(
                             vec![],
                             types::None::new(Position::dummy()),
-                            Variable::new("x", None, Position::dummy()),
+                            Variable::new("x", Position::dummy()),
                             Position::dummy()
                         ),
                         false
@@ -273,7 +268,7 @@ mod tests {
                     Lambda::new(
                         vec![],
                         types::None::new(Position::dummy()),
-                        Variable::new("foo.x", None, Position::dummy()),
+                        Variable::new("foo.x", Position::dummy()),
                         Position::dummy()
                     ),
                     false
@@ -293,7 +288,7 @@ mod tests {
                 Lambda::new(
                     vec![Argument::new("x", types::None::new(Position::dummy()))],
                     types::None::new(Position::dummy()),
-                    Variable::new("x", None, Position::dummy()),
+                    Variable::new("x", Position::dummy()),
                     Position::dummy(),
                 ),
                 false,
@@ -326,7 +321,7 @@ mod tests {
                                 Some("x".into()),
                                 None,
                                 None::new(Position::dummy()),
-                                Variable::new("x", None, Position::dummy()),
+                                Variable::new("x", Position::dummy()),
                                 Position::dummy(),
                             ),
                             Position::dummy()
@@ -349,7 +344,7 @@ mod tests {
                             Some("x".into()),
                             None,
                             None::new(Position::dummy()),
-                            Variable::new("x", None, Position::dummy()),
+                            Variable::new("x", Position::dummy()),
                             Position::dummy(),
                         ),
                         Position::dummy()
@@ -375,7 +370,7 @@ mod tests {
                         Some("x".into()),
                         None,
                         None::new(Position::dummy()),
-                        Variable::new("x", None, Position::dummy()),
+                        Variable::new("x", Position::dummy()),
                         Position::dummy(),
                     ),
                     Position::dummy(),
