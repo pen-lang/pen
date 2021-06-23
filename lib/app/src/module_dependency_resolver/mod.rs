@@ -75,7 +75,7 @@ pub fn compile_dependency(
     infrastructure.file_system.write(
         build_script_dependency_file,
         infrastructure
-            .dependency_compiler
+            .build_script_dependency_compiler
             .compile(
                 object_file,
                 &interfaces.values().cloned().collect::<Vec<_>>(),
