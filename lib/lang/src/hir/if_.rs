@@ -1,12 +1,12 @@
-use super::{expression::Expression, Block};
+use super::expression::Expression;
 use crate::{position::Position, types::Type};
 use std::sync::Arc;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct If {
     condition: Arc<Expression>,
-    then: Arc<Block>,
-    else_: Arc<Block>,
+    then: Arc<Expression>,
+    else_: Arc<Expression>,
     result_type: Option<Type>,
     position: Position,
 }
@@ -14,15 +14,15 @@ pub struct If {
 impl If {
     pub fn new(
         condition: impl Into<Expression>,
-        then: Block,
-        else_: Block,
+        then: impl Into<Expression>,
+        else_: impl Into<Expression>,
         result_type: Option<Type>,
         position: Position,
     ) -> Self {
         Self {
             condition: Arc::new(condition.into()),
-            then: then.into(),
-            else_: else_.into(),
+            then: then.into().into(),
+            else_: else_.into().into(),
             result_type,
             position,
         }
@@ -32,11 +32,11 @@ impl If {
         &self.condition
     }
 
-    pub fn then(&self) -> &Block {
+    pub fn then(&self) -> &Expression {
         &self.then
     }
 
-    pub fn else_(&self) -> &Block {
+    pub fn else_(&self) -> &Expression {
         &self.else_
     }
 

@@ -67,7 +67,7 @@ fn compile_definition(
     definition: &Definition,
     type_context: &TypeContext,
 ) -> Result<mir::ir::Definition, CompileError> {
-    let body = expression_compiler::compile_block(definition.lambda().body(), type_context)?;
+    let body = expression_compiler::compile(definition.lambda().body(), type_context)?;
     let result_type = type_compiler::compile(definition.lambda().result_type(), type_context)?;
 
     Ok(if definition.lambda().arguments().is_empty() {

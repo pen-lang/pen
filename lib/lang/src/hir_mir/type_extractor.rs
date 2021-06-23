@@ -54,10 +54,3 @@ pub fn extract_from_lambda(lambda: &Lambda) -> types::Function {
         lambda.position().clone(),
     )
 }
-
-pub fn extract_from_block(
-    block: &Block,
-    types: &HashMap<String, Type>,
-) -> Result<Type, CompileError> {
-    extract_from_expression(block.expression(), types)
-}

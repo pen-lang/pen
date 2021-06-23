@@ -21,7 +21,7 @@ fn check_lambda(
     type_context: &TypeContext,
 ) -> Result<types::Function, CompileError> {
     check_subsumption(
-        &check_block(
+        &check_expression(
             lambda.body(),
             &variables
                 .clone()
@@ -89,36 +89,6 @@ fn check_expression(
     })
 }
 
-fn check_block(
-    block: &Block,
-    variables: &HashMap<String, Type>,
-    type_context: &TypeContext,
-) -> Result<Type, CompileError> {
-    let mut variables = variables.clone();
-
-    for statement in block.statements() {
-        check_subsumption(
-            &check_expression(statement.expression(), &variables, type_context)?,
-            statement
-                .type_()
-                .ok_or_else(|| CompileError::TypeNotInferred(statement.position().clone()))?,
-            type_context.types(),
-        )?;
-
-        if let Some(name) = statement.name() {
-            variables.insert(
-                name.into(),
-                statement
-                    .type_()
-                    .cloned()
-                    .ok_or_else(|| CompileError::TypeNotInferred(statement.position().clone()))?,
-            );
-        }
-    }
-
-    check_expression(block.expression(), &variables, type_context)
-}
-
 fn check_subsumption(
     lower: &Type,
     upper: &Type,
@@ -164,38 +134,7 @@ mod tests {
                 Lambda::new(
                     vec![],
                     types::None::new(Position::dummy()),
-                    Block::new(vec![], None::new(Position::dummy())),
-                    Position::dummy(),
-                ),
-                false,
-            )],
-        ))
-    }
-
-    #[test]
-    fn check_statement() -> Result<(), CompileError> {
-        check_module(&Module::new(
-            vec![],
-            vec![],
-            vec![],
-            vec![Definition::without_source(
-                "x",
-                Lambda::new(
-                    vec![],
-                    types::None::new(Position::dummy()),
-                    Block::new(
-                        vec![Statement::new(
-                            Some("y".into()),
-                            None::new(Position::dummy()),
-                            Some(types::None::new(Position::dummy()).into()),
-                            Position::dummy(),
-                        )],
-                        Variable::new(
-                            "y",
-                            Some(types::None::new(Position::dummy()).into()),
-                            Position::dummy(),
-                        ),
-                    ),
+                    None::new(Position::dummy()),
                     Position::dummy(),
                 ),
                 false,
@@ -218,7 +157,7 @@ mod tests {
                         types::None::new(Position::dummy()),
                         Position::dummy(),
                     ),
-                    Block::new(vec![], None::new(Position::dummy())),
+                    None::new(Position::dummy()),
                     Position::dummy(),
                 ),
                 false,
@@ -251,15 +190,12 @@ mod tests {
                     Lambda::new(
                         vec![],
                         reference_type.clone(),
-                        Block::new(
-                            vec![],
-                            RecordConstruction::new(
-                                reference_type,
-                                vec![("x".into(), None::new(Position::dummy()).into())]
-                                    .into_iter()
-                                    .collect(),
-                                Position::dummy(),
-                            ),
+                        RecordConstruction::new(
+                            reference_type,
+                            vec![("x".into(), None::new(Position::dummy()).into())]
+                                .into_iter()
+                                .collect(),
+                            Position::dummy(),
                         ),
                         Position::dummy(),
                     ),
@@ -291,13 +227,10 @@ mod tests {
                         Lambda::new(
                             vec![],
                             reference_type.clone(),
-                            Block::new(
-                                vec![],
-                                RecordConstruction::new(
-                                    reference_type,
-                                    Default::default(),
-                                    Position::dummy(),
-                                ),
+                            RecordConstruction::new(
+                                reference_type,
+                                Default::default(),
+                                Position::dummy(),
                             ),
                             Position::dummy(),
                         ),
@@ -328,15 +261,12 @@ mod tests {
                         Lambda::new(
                             vec![],
                             reference_type.clone(),
-                            Block::new(
-                                vec![],
-                                RecordConstruction::new(
-                                    reference_type,
-                                    vec![("x".into(), None::new(Position::dummy()).into())]
-                                        .into_iter()
-                                        .collect(),
-                                    Position::dummy(),
-                                ),
+                            RecordConstruction::new(
+                                reference_type,
+                                vec![("x".into(), None::new(Position::dummy()).into())]
+                                    .into_iter()
+                                    .collect(),
+                                Position::dummy(),
                             ),
                             Position::dummy(),
                         ),

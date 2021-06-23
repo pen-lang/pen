@@ -1,11 +1,12 @@
-use super::{Argument, Block};
+use super::{Argument, Expression};
 use crate::{position::Position, types::Type};
+use std::sync::Arc;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Lambda {
     arguments: Vec<Argument>,
     result_type: Type,
-    body: Block,
+    body: Arc<Expression>,
     position: Position,
 }
 
@@ -13,13 +14,13 @@ impl Lambda {
     pub fn new(
         arguments: Vec<Argument>,
         result_type: impl Into<Type>,
-        body: impl Into<Block>,
+        body: impl Into<Expression>,
         position: Position,
     ) -> Self {
         Self {
             arguments,
             result_type: result_type.into(),
-            body: body.into(),
+            body: body.into().into(),
             position,
         }
     }
@@ -32,7 +33,7 @@ impl Lambda {
         &self.result_type
     }
 
-    pub fn body(&self) -> &Block {
+    pub fn body(&self) -> &Expression {
         &self.body
     }
 

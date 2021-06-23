@@ -70,7 +70,7 @@ mod tests {
                 Lambda::new(
                     vec![],
                     types::Boolean::new(Position::dummy()),
-                    Block::new(vec![], Boolean::new(false, Position::dummy())),
+                    Boolean::new(false, Position::dummy()),
                     Position::dummy(),
                 ),
                 false,
@@ -91,7 +91,7 @@ mod tests {
                 Lambda::new(
                     vec![],
                     types::None::new(Position::dummy()),
-                    Block::new(vec![], None::new(Position::dummy())),
+                    None::new(Position::dummy()),
                     Position::dummy(),
                 ),
                 false,
@@ -112,7 +112,7 @@ mod tests {
                 Lambda::new(
                     vec![],
                     types::Number::new(Position::dummy()),
-                    Block::new(vec![], Number::new(42.0, Position::dummy())),
+                    Number::new(42.0, Position::dummy()),
                     Position::dummy(),
                 ),
                 false,
@@ -133,7 +133,7 @@ mod tests {
                 Lambda::new(
                     vec![],
                     types::ByteString::new(Position::dummy()),
-                    Block::new(vec![], ByteString::new("foo", Position::dummy())),
+                    ByteString::new("foo", Position::dummy()),
                     Position::dummy(),
                 ),
                 false,

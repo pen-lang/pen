@@ -2,7 +2,7 @@ use super::{
     boolean::Boolean, call::Call, if_::If, if_list::IfList, if_type::IfType, list::List,
     none::None, number::Number, operation::Operation, record_construction::RecordConstruction,
     record_element::RecordElement, record_update::RecordUpdate, string::ByteString,
-    type_coercion::TypeCoercion, variable::Variable, Lambda,
+    type_coercion::TypeCoercion, variable::Variable, Lambda, Let,
 };
 use crate::position::Position;
 
@@ -14,6 +14,7 @@ pub enum Expression {
     IfList(IfList),
     IfType(IfType),
     Lambda(Lambda),
+    Let(Let),
     List(List),
     None(None),
     Number(Number),
@@ -35,6 +36,7 @@ impl Expression {
             Self::IfList(if_) => if_.position(),
             Self::IfType(if_) => if_.position(),
             Self::Lambda(lambda) => lambda.position(),
+            Self::Let(let_) => let_.position(),
             Self::List(list) => list.position(),
             Self::None(none) => none.position(),
             Self::Number(number) => number.position(),
@@ -100,6 +102,12 @@ impl From<If> for Expression {
 impl From<Lambda> for Expression {
     fn from(lambda: Lambda) -> Self {
         Self::Lambda(lambda)
+    }
+}
+
+impl From<Let> for Expression {
+    fn from(let_: Let) -> Self {
+        Self::Let(let_)
     }
 }
 

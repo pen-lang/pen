@@ -144,10 +144,7 @@ mod tests {
                         hir::Lambda::new(
                             vec![],
                             types::None::new(Position::dummy()),
-                            hir::Block::new(
-                                vec![],
-                                hir::Variable::new("Bar.Bar", None, Position::dummy())
-                            ),
+                            hir::Variable::new("Bar.Bar", None, Position::dummy()),
                             Position::dummy(),
                         ),
                         true,
@@ -184,10 +181,7 @@ mod tests {
                     hir::Lambda::new(
                         vec![],
                         types::None::new(Position::dummy()),
-                        hir::Block::new(
-                            vec![],
-                            hir::Variable::new("RealBar", None, Position::dummy())
-                        ),
+                        hir::Variable::new("RealBar", None, Position::dummy()),
                         Position::dummy(),
                     ),
                     true,
@@ -219,7 +213,7 @@ mod tests {
                         hir::Lambda::new(
                             vec![],
                             types::Reference::new("Bar.Bar", Position::dummy()),
-                            hir::Block::new(vec![], hir::None::new(Position::dummy())),
+                            hir::None::new(Position::dummy()),
                             Position::dummy(),
                         ),
                         true,
@@ -261,7 +255,7 @@ mod tests {
                     hir::Lambda::new(
                         vec![],
                         types::Reference::new("RealBar", Position::dummy()),
-                        hir::Block::new(vec![], hir::None::new(Position::dummy())),
+                        hir::None::new(Position::dummy()),
                         Position::dummy(),
                     ),
                     true,
@@ -292,7 +286,7 @@ mod tests {
                         hir::Lambda::new(
                             vec![],
                             types::Reference::new("Bar.Bar", Position::dummy()),
-                            hir::Block::new(vec![], hir::None::new(Position::dummy())),
+                            hir::None::new(Position::dummy()),
                             Position::dummy(),
                         ),
                         true,
@@ -332,7 +326,7 @@ mod tests {
                     hir::Lambda::new(
                         vec![],
                         types::Reference::new("RealBar", Position::dummy()),
-                        hir::Block::new(vec![], hir::None::new(Position::dummy())),
+                        hir::None::new(Position::dummy()),
                         Position::dummy(),
                     ),
                     true,
@@ -361,7 +355,7 @@ mod tests {
                 hir::Lambda::new(
                     vec![],
                     types::Reference::new("Bar.Bar", Position::dummy()),
-                    hir::Block::new(vec![], hir::None::new(Position::dummy())),
+                    hir::None::new(Position::dummy()),
                     Position::dummy(),
                 ),
                 true,
@@ -413,7 +407,7 @@ mod tests {
                 hir::Lambda::new(
                     vec![],
                     types::Reference::new("Bar.Bar", Position::dummy()),
-                    hir::Block::new(vec![], hir::None::new(Position::dummy())),
+                    hir::None::new(Position::dummy()),
                     Position::dummy(),
                 ),
                 true,
