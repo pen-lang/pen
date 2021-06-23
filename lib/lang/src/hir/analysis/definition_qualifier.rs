@@ -95,7 +95,7 @@ mod tests {
                         Lambda::new(
                             vec![],
                             types::None::new(Position::dummy()),
-                            Variable::new("x", None, Position::dummy()),
+                            Variable::new("x", Position::dummy()),
                             Position::dummy()
                         ),
                         false
@@ -112,7 +112,7 @@ mod tests {
                     Lambda::new(
                         vec![],
                         types::None::new(Position::dummy()),
-                        Variable::new("foo.x", None, Position::dummy()),
+                        Variable::new("foo.x", Position::dummy()),
                         Position::dummy()
                     ),
                     false
@@ -134,7 +134,7 @@ mod tests {
                         Lambda::new(
                             vec![Argument::new("x", types::None::new(Position::dummy()))],
                             types::None::new(Position::dummy()),
-                            Variable::new("x", None, Position::dummy()),
+                            Variable::new("x", Position::dummy()),
                             Position::dummy()
                         ),
                         false
@@ -151,7 +151,7 @@ mod tests {
                     Lambda::new(
                         vec![Argument::new("x", types::None::new(Position::dummy()))],
                         types::None::new(Position::dummy()),
-                        Variable::new("x", None, Position::dummy()),
+                        Variable::new("x", Position::dummy()),
                         Position::dummy()
                     ),
                     false
@@ -177,7 +177,7 @@ mod tests {
                                 Some("x".into()),
                                 None,
                                 None::new(Position::dummy()),
-                                Variable::new("x", None, Position::dummy()),
+                                Variable::new("x", Position::dummy()),
                                 Position::dummy(),
                             ),
                             Position::dummy()
@@ -200,7 +200,7 @@ mod tests {
                             Some("x".into()),
                             None,
                             None::new(Position::dummy()),
-                            Variable::new("x", None, Position::dummy()),
+                            Variable::new("x", Position::dummy()),
                             Position::dummy(),
                         ),
                         Position::dummy()

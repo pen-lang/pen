@@ -133,7 +133,6 @@ fn transform_expression(expression: &Expression, transform: &impl Fn(&Type) -> T
             transform_expression(if_.condition(), transform),
             transform_expression(if_.then(), transform),
             transform_expression(if_.else_(), transform),
-            if_.result_type().map(transform),
             if_.position().clone(),
         )
         .into(),
@@ -143,14 +142,12 @@ fn transform_expression(expression: &Expression, transform: &impl Fn(&Type) -> T
             if_.rest_name(),
             transform_expression(if_.then(), transform),
             transform_expression(if_.else_(), transform),
-            if_.result_type().map(transform),
             if_.position().clone(),
         )
         .into(),
         Expression::IfType(if_) => IfType::new(
             if_.name(),
             transform_expression(if_.argument(), transform),
-            if_.argument_type().map(transform),
             if_.branches()
                 .iter()
                 .map(|branch| {
@@ -162,7 +159,6 @@ fn transform_expression(expression: &Expression, transform: &impl Fn(&Type) -> T
                 .collect(),
             if_.else_()
                 .map(|expression| transform_expression(expression, transform)),
-            if_.result_type().map(transform),
             if_.position().clone(),
         )
         .into(),

@@ -144,7 +144,7 @@ mod tests {
                         hir::Lambda::new(
                             vec![],
                             types::None::new(Position::dummy()),
-                            hir::Variable::new("Bar.Bar", None, Position::dummy()),
+                            hir::Variable::new("Bar.Bar", Position::dummy()),
                             Position::dummy(),
                         ),
                         true,
@@ -181,7 +181,7 @@ mod tests {
                     hir::Lambda::new(
                         vec![],
                         types::None::new(Position::dummy()),
-                        hir::Variable::new("RealBar", None, Position::dummy()),
+                        hir::Variable::new("RealBar", Position::dummy()),
                         Position::dummy(),
                     ),
                     true,

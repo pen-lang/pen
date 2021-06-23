@@ -1,15 +1,13 @@
 use super::{expression::Expression, if_type_branch::IfTypeBranch};
-use crate::{position::Position, types::Type};
+use crate::position::Position;
 use std::sync::Arc;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct IfType {
     name: String,
     argument: Arc<Expression>,
-    argument_type: Option<Type>,
     branches: Vec<IfTypeBranch>,
     else_: Arc<Option<Expression>>,
-    result_type: Option<Type>,
     position: Position,
 }
 
@@ -17,19 +15,15 @@ impl IfType {
     pub fn new(
         name: impl Into<String>,
         argument: impl Into<Expression>,
-        argument_type: Option<Type>,
         branches: Vec<IfTypeBranch>,
         else_: Option<Expression>,
-        result_type: Option<Type>,
         position: Position,
     ) -> Self {
         Self {
             name: name.into(),
             argument: argument.into().into(),
-            argument_type,
             branches,
             else_: else_.into(),
-            result_type,
             position,
         }
     }
@@ -42,20 +36,12 @@ impl IfType {
         &self.argument
     }
 
-    pub fn argument_type(&self) -> Option<&Type> {
-        self.argument_type.as_ref()
-    }
-
     pub fn branches(&self) -> &[IfTypeBranch] {
         &self.branches
     }
 
     pub fn else_(&self) -> Option<&Expression> {
         self.else_.as_ref().as_ref()
-    }
-
-    pub fn result_type(&self) -> Option<&Type> {
-        self.result_type.as_ref()
     }
 
     pub fn position(&self) -> &Position {

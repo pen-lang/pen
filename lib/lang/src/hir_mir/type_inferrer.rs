@@ -1,4 +1,4 @@
-use super::{environment_creator, type_extractor, union_type_creator, CompileError};
+use super::{environment_creator, type_extractor, CompileError};
 use crate::{
     hir::*,
     types::{self, Type},
@@ -78,7 +78,9 @@ fn infer_expression(
                     .iter()
                     .map(|argument| infer_expression(argument, variables))
                     .collect::<Result<_, _>>()?,
-                Some(type_extractor::extract_from_expression(&function, types)?),
+                Some(type_extractor::extract_from_expression(
+                    &function, variables, types,
+                )?),
                 call.position().clone(),
             )
             .into()
@@ -89,16 +91,8 @@ fn infer_expression(
 
             If::new(
                 infer_expression(if_.condition(), variables)?,
-                then.clone(),
-                else_.clone(),
-                Some(
-                    types::Union::new(
-                        type_extractor::extract_from_expression(&then, types)?,
-                        type_extractor::extract_from_expression(&else_, types)?,
-                        if_.position().clone(),
-                    )
-                    .into(),
-                ),
+                then,
+                else_,
                 if_.position().clone(),
             )
             .into()
@@ -111,16 +105,8 @@ fn infer_expression(
                 infer_expression(if_.argument(), variables)?,
                 if_.first_name(),
                 if_.rest_name(),
-                then.clone(),
-                else_.clone(),
-                Some(
-                    types::Union::new(
-                        type_extractor::extract_from_expression(&then, types)?,
-                        type_extractor::extract_from_expression(&else_, types)?,
-                        if_.position().clone(),
-                    )
-                    .into(),
-                ),
+                then,
+                else_,
                 if_.position().clone(),
             )
             .into()
@@ -151,24 +137,9 @@ fn infer_expression(
 
             IfType::new(
                 if_.name(),
-                argument.clone(),
-                Some(type_extractor::extract_from_expression(&argument, types)?),
-                branches.clone(),
-                else_.clone(),
-                Some(
-                    union_type_creator::create_union_type(
-                        &branches
-                            .iter()
-                            .map(|alternative| alternative.expression())
-                            .chain(&else_)
-                            .map(|expression| {
-                                type_extractor::extract_from_expression(expression, types)
-                            })
-                            .collect::<Result<Vec<_>, _>>()?,
-                        if_.position(),
-                    )
-                    .unwrap(),
-                ),
+                argument,
+                branches,
+                else_,
                 if_.position().clone(),
             )
             .into()
@@ -215,8 +186,8 @@ fn infer_expression(
                 EqualityOperation::new(
                     Some(
                         types::Union::new(
-                            type_extractor::extract_from_expression(&lhs, types)?,
-                            type_extractor::extract_from_expression(&rhs, types)?,
+                            type_extractor::extract_from_expression(&lhs, variables, types)?,
+                            type_extractor::extract_from_expression(&rhs, variables, types)?,
                             operation.position().clone(),
                         )
                         .into(),
@@ -256,7 +227,9 @@ fn infer_expression(
             let record = infer_expression(element.record(), variables)?;
 
             RecordElement::new(
-                Some(type_extractor::extract_from_expression(&record, types)?),
+                Some(type_extractor::extract_from_expression(
+                    &record, variables, types,
+                )?),
                 record,
                 element.element_name(),
                 element.position().clone(),
