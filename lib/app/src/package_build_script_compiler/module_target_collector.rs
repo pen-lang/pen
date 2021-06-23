@@ -1,10 +1,10 @@
 use super::{
-    module_finder, module_target::ModuleTarget,
+    module_finder,
     package_build_script_compiler_infrastructure::PackageBuildScriptCompilerInfrastructure,
 };
 use crate::{
-    common::calculate_module_id,
-    infra::{FilePath, OBJECT_DIRECTORY},
+    common::module_id_calculator,
+    infra::{FilePath, ModuleTarget, OBJECT_DIRECTORY},
 };
 use std::error::Error;
 
@@ -20,7 +20,9 @@ pub fn collect_module_targets(
             .iter()
             .map(|source_file| {
                 let target_file =
-                    object_directory.join(&FilePath::new(vec![calculate_module_id(source_file)]));
+                    object_directory.join(&FilePath::new(vec![module_id_calculator::calculate(
+                        source_file,
+                    )]));
 
                 ModuleTarget::new(
                     package_directory.clone(),

@@ -1,6 +1,6 @@
 use super::package_initializer_infrastructure::PackageInitializerInfrastructure;
 use crate::{
-    common::calculate_package_id,
+    common::package_id_calculator,
     infra::{FilePath, EXTERNAL_PACKAGE_DIRECTORY},
     package_build_script_compiler::{self, PackageBuildScriptCompilerInfrastructure},
 };
@@ -29,7 +29,7 @@ fn initialize_external_package(
 ) -> Result<(), Box<dyn Error>> {
     let package_directory = output_directory.join(&FilePath::new(vec![
         EXTERNAL_PACKAGE_DIRECTORY.into(),
-        calculate_package_id(url),
+        package_id_calculator::calculate(url),
     ]));
 
     infrastructure

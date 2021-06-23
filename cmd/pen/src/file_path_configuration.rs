@@ -1,4 +1,5 @@
 pub const BUILD_CONFIGURATION_FILENAME: &str = "pen.json";
+pub const OUTPUT_DIRECTORY: &str = ".pen";
 
 pub const FILE_PATH_CONFIGURATION: app::infra::FilePathConfiguration =
     app::infra::FilePathConfiguration {

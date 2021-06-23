@@ -1,5 +1,4 @@
-mod module_id_calculator;
-mod package_id_calculator;
-
-pub use module_id_calculator::*;
-pub use package_id_calculator::*;
+pub mod dependency_serializer;
+pub mod module_id_calculator;
+pub mod module_path_resolver;
+pub mod package_id_calculator;

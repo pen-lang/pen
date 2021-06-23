@@ -22,16 +22,16 @@ impl NinjaModuleBuildScriptCompiler {
 impl app::infra::ModuleBuildScriptCompiler for NinjaModuleBuildScriptCompiler {
     fn compile(
         &self,
-        module_targets: &[app::package_build_script_compiler::ModuleTarget],
+        module_targets: &[app::infra::ModuleTarget],
         sub_build_script_files: &[FilePath],
     ) -> String {
         vec![
             "ninja_required_version = 1.10",
             &format!("builddir = {}", self.output_directory),
-            "rule pen_compile",
+            "rule compile",
             "  command = pen compile $in $out",
-            "rule pen_compile_dependency",
-            "  command = pen compile-dependency -p $package_directory $in $object_file $out",
+            "rule resolve_dependency",
+            "  command = pen resolve-dependency -p $package_directory $in $object_file $out",
         ]
         .into_iter()
         .map(String::from)
@@ -45,35 +45,51 @@ impl app::infra::ModuleBuildScriptCompiler for NinjaModuleBuildScriptCompiler {
             let package_directory = self
                 .file_path_converter
                 .convert_to_os_path(target.package_directory());
-            let source_path = self
+            let source_file = self
                 .file_path_converter
                 .convert_to_os_path(target.source_file());
-            let interface_path = self
+            let interface_file = self
                 .file_path_converter
                 .convert_to_os_path(target.interface_file());
-            let dependency_path = self
+            let dependency_file = self
+                .file_path_converter
+                .convert_to_os_path(&target.object_file().with_extension("dep"));
+            let ninja_dependency_file = self
                 .file_path_converter
                 .convert_to_os_path(&target.object_file().with_extension("dd"));
-            let object_path = self
+            let object_file = self
                 .file_path_converter
                 .convert_to_os_path(target.object_file());
 
             vec![
                 format!(
-                    "build {}: pen_compile_dependency {}",
-                    dependency_path.display(),
-                    source_path.display(),
+                    "build {} {}: compile {} {} || {}",
+                    object_file.display(),
+                    interface_file.display(),
+                    source_file.display(),
+                    dependency_file.display(),
+                    ninja_dependency_file.display()
+                ),
+                format!("  dyndep = {}", ninja_dependency_file.display()),
+                // TODO Remove this hack to circumvent ninja's bug where dynamic dependency files
+                // cannot be specified as inputs together with outputs of the same build rules.
+                // https://github.com/ninja-build/ninja/issues/1988
+                format!(
+                    "build {} {}: resolve_dependency {}",
+                    dependency_file.display(),
+                    ninja_dependency_file.with_extension("dd.dummy").display(),
+                    source_file.display(),
                 ),
                 format!("  package_directory = {}", package_directory.display()),
-                format!("  object_file = {}", object_path.display()),
+                format!("  object_file = {}", object_file.display()),
                 format!(
-                    "build {} {}: pen_compile {} || {}",
-                    object_path.display(),
-                    interface_path.display(),
-                    source_path.display(),
-                    dependency_path.display()
+                    "build {} {}: resolve_dependency {}",
+                    dependency_file.with_extension("dep.dummy").display(),
+                    ninja_dependency_file.display(),
+                    source_file.display(),
                 ),
-                format!("  dyndep = {}", dependency_path.display()),
+                format!("  package_directory = {}", package_directory.display()),
+                format!("  object_file = {}", object_file.display()),
             ]
         }))
         .chain(vec![format!(

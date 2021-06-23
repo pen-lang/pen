@@ -1,5 +1,4 @@
-use super::FilePath;
-use crate::package_build_script_compiler::ModuleTarget;
+use super::{FilePath, ModuleTarget};
 
 pub trait ModuleBuildScriptCompiler {
     fn compile(

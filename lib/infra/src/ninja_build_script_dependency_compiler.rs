@@ -1,11 +1,11 @@
 use super::file_path_converter::FilePathConverter;
 use std::sync::Arc;
 
-pub struct NinjaDependencyCompiler {
+pub struct NinjaBuildScriptDependencyCompiler {
     file_path_converter: Arc<FilePathConverter>,
 }
 
-impl NinjaDependencyCompiler {
+impl NinjaBuildScriptDependencyCompiler {
     pub fn new(file_path_converter: Arc<FilePathConverter>) -> Self {
         Self {
             file_path_converter,
@@ -13,7 +13,7 @@ impl NinjaDependencyCompiler {
     }
 }
 
-impl app::infra::DependencyCompiler for NinjaDependencyCompiler {
+impl app::infra::BuildScriptDependencyCompiler for NinjaBuildScriptDependencyCompiler {
     fn compile(
         &self,
         object_file: &app::infra::FilePath,
