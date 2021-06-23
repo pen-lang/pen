@@ -31,7 +31,7 @@ impl app::infra::ModuleBuildScriptCompiler for NinjaModuleBuildScriptCompiler {
             "rule compile",
             "  command = pen compile $in $out",
             "rule resolve_dependency",
-            "  command = pen compile-dependency -p $package_directory $in $object_file $out",
+            "  command = pen resolve-dependency -p $package_directory $in $object_file $out",
         ]
         .into_iter()
         .map(String::from)

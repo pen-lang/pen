@@ -30,8 +30,8 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                 .arg(clap::Arg::with_name("interface file").required(true)),
         )
         .subcommand(
-            clap::SubCommand::with_name("compile-dependency")
-                .about("Compiles module dependency")
+            clap::SubCommand::with_name("resolve-dependency")
+                .about("Resolves module dependency")
                 .arg(
                     clap::Arg::with_name("package directory")
                         .required(true)
@@ -58,7 +58,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                 matches.value_of("interface file").unwrap(),
             )
         }
-        ("compile-dependency", matches) => {
+        ("resolve-dependency", matches) => {
             let matches = matches.unwrap();
 
             compile_dependency(
