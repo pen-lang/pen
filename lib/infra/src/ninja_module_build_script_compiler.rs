@@ -1,8 +1,6 @@
 use super::file_path_converter::FilePathConverter;
 use app::infra::FilePath;
-use std::error::Error;
-use std::path::PathBuf;
-use std::sync::Arc;
+use std::{error::Error, path::PathBuf, sync::Arc};
 
 pub struct NinjaModuleBuildScriptCompiler {
     file_path_converter: Arc<FilePathConverter>,
