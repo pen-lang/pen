@@ -1,5 +1,7 @@
 use super::{file_path_configuration::FILE_PATH_CONFIGURATION, main_package_directory_finder};
-use crate::file_path_configuration::{BUILD_CONFIGURATION_FILENAME, OUTPUT_DIRECTORY};
+use crate::file_path_configuration::{
+    BIT_CODE_FILE_EXTENSION, BUILD_CONFIGURATION_FILENAME, OUTPUT_DIRECTORY,
+};
 use std::sync::Arc;
 
 pub fn build(verbose: bool) -> Result<(), Box<dyn std::error::Error>> {
@@ -16,6 +18,7 @@ pub fn build(verbose: bool) -> Result<(), Box<dyn std::error::Error>> {
         main_package_directory.join(&app::infra::FilePath::new(vec![OUTPUT_DIRECTORY]));
     let module_build_script_compiler = Arc::new(infra::NinjaModuleBuildScriptCompiler::new(
         file_path_converter.clone(),
+        BIT_CODE_FILE_EXTENSION,
         OUTPUT_DIRECTORY,
     ));
 
