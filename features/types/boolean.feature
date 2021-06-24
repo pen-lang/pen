@@ -48,3 +48,17 @@ Feature: Boolean
     """
     When I run `pen build`
     Then the exit status should be 0
+
+  Scenario: Use an if expression
+    Given a file named "Foo.pen" with:
+    """
+    f = \() number {
+      if true {
+        1
+      } else {
+        0
+      }
+    }
+    """
+    When I run `pen build`
+    Then the exit status should be 0

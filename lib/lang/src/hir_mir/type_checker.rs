@@ -82,6 +82,15 @@ fn check_expression(
 
             function_type.result().clone()
         }
+        Expression::If(if_) => {
+            check_subsumption(
+                &check_expression(if_.condition(), variables, type_context)?,
+                &types::Boolean::new(if_.position().clone()).into(),
+                type_context.types(),
+            )?;
+
+            type_extractor::extract_from_expression(expression, variables, type_context)?
+        }
         Expression::Lambda(lambda) => check_lambda(lambda, variables, type_context)?.into(),
         Expression::None(none) => types::None::new(none.position().clone()).into(),
         Expression::Number(number) => types::Number::new(number.position().clone()).into(),
@@ -260,6 +269,64 @@ mod tests {
                 false,
             )],
         ))
+    }
+
+    mod if_ {
+        use super::*;
+
+        #[test]
+        fn check_if() {
+            check_module(&Module::new(
+                vec![],
+                vec![],
+                vec![],
+                vec![Definition::without_source(
+                    "f",
+                    Lambda::new(
+                        vec![],
+                        types::Number::new(Position::dummy()),
+                        If::new(
+                            Boolean::new(true, Position::dummy()),
+                            Number::new(0.0, Position::dummy()),
+                            Number::new(0.0, Position::dummy()),
+                            Position::dummy(),
+                        ),
+                        Position::dummy(),
+                    ),
+                    false,
+                )],
+            ))
+            .unwrap()
+        }
+
+        #[test]
+        fn check_if_of_union_type() {
+            check_module(&Module::new(
+                vec![],
+                vec![],
+                vec![],
+                vec![Definition::without_source(
+                    "f",
+                    Lambda::new(
+                        vec![],
+                        types::Union::new(
+                            types::Number::new(Position::dummy()),
+                            types::None::new(Position::dummy()),
+                            Position::dummy(),
+                        ),
+                        If::new(
+                            Boolean::new(true, Position::dummy()),
+                            Number::new(0.0, Position::dummy()),
+                            None::new(Position::dummy()),
+                            Position::dummy(),
+                        ),
+                        Position::dummy(),
+                    ),
+                    false,
+                )],
+            ))
+            .unwrap()
+        }
     }
 
     mod calls {
