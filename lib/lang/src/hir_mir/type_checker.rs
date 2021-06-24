@@ -85,6 +85,9 @@ fn check_expression(
         Expression::Lambda(lambda) => check_lambda(lambda, variables, type_context)?.into(),
         Expression::None(none) => types::None::new(none.position().clone()).into(),
         Expression::Number(number) => types::Number::new(number.position().clone()).into(),
+        Expression::Operation(operation) => {
+            check_operation(operation, variables, type_context)?.into()
+        }
         Expression::RecordConstruction(construction) => {
             let element_types = type_resolver::resolve_record_elements(
                 construction.type_(),
@@ -144,6 +147,28 @@ fn check_expression(
             .get(variable.name())
             .ok_or_else(|| CompileError::VariableNotFound(variable.clone()))?
             .clone(),
+        _ => todo!(),
+    })
+}
+
+fn check_operation(
+    operation: &Operation,
+    variables: &HashMap<String, Type>,
+    type_context: &TypeContext,
+) -> Result<Type, CompileError> {
+    let check_expression = |expression| check_expression(expression, variables, type_context);
+    let check_subsumption =
+        |lower: &_, upper| check_subsumption(lower, upper, type_context.types());
+
+    Ok(match operation {
+        Operation::Boolean(operation) => {
+            let boolean_type = types::Boolean::new(operation.position().clone()).into();
+
+            check_subsumption(&check_expression(operation.lhs())?, &boolean_type)?;
+            check_subsumption(&check_expression(operation.rhs())?, &boolean_type)?;
+
+            boolean_type
+        }
         _ => todo!(),
     })
 }
@@ -355,6 +380,65 @@ mod tests {
                 )],
             ))
             .unwrap()
+        }
+    }
+
+    mod operations {
+        use super::*;
+
+        #[test]
+        fn check_and_operation() {
+            check_module(&Module::new(
+                vec![],
+                vec![],
+                vec![],
+                vec![Definition::without_source(
+                    "x",
+                    Lambda::new(
+                        vec![],
+                        types::Boolean::new(Position::dummy()),
+                        BooleanOperation::new(
+                            BooleanOperator::And,
+                            Boolean::new(true, Position::dummy()),
+                            Boolean::new(true, Position::dummy()),
+                            Position::dummy(),
+                        ),
+                        Position::dummy(),
+                    ),
+                    false,
+                )],
+            ))
+            .unwrap();
+        }
+
+        #[test]
+        fn fail_to_check_and_operation() {
+            assert_eq!(
+                check_module(&Module::new(
+                    vec![],
+                    vec![],
+                    vec![],
+                    vec![Definition::without_source(
+                        "x",
+                        Lambda::new(
+                            vec![],
+                            types::Boolean::new(Position::dummy()),
+                            BooleanOperation::new(
+                                BooleanOperator::And,
+                                Number::new(42.0, Position::dummy()),
+                                Boolean::new(true, Position::dummy()),
+                                Position::dummy(),
+                            ),
+                            Position::dummy(),
+                        ),
+                        false,
+                    )],
+                )),
+                Err(CompileError::TypesNotMatched(
+                    Position::dummy(),
+                    Position::dummy()
+                ))
+            );
         }
     }
 

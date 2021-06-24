@@ -40,6 +40,12 @@ pub fn compile(
                 .collect::<Result<_, _>>()?,
         )
         .into(),
+        Expression::If(if_) => mir::ir::If::new(
+            compile(if_.condition())?,
+            compile(if_.then())?,
+            compile(if_.else_())?,
+        )
+        .into(),
         Expression::Lambda(lambda) => mir::ir::LetRecursive::new(
             mir::ir::Definition::new(
                 CLOSURE_NAME,
