@@ -1,11 +1,11 @@
-use super::{super::Type, type_canonicalizer, type_resolver, TypeAnalysisError};
+use super::{super::Type, type_canonicalizer, type_resolver, TypeError};
 use std::collections::HashMap;
 
 pub fn check_equality(
     one: &Type,
     other: &Type,
     types: &HashMap<String, Type>,
-) -> Result<bool, TypeAnalysisError> {
+) -> Result<bool, TypeError> {
     let one = type_canonicalizer::canonicalize(&type_resolver::resolve_type(one, types)?, types)?;
     let other =
         type_canonicalizer::canonicalize(&type_resolver::resolve_type(other, types)?, types)?;

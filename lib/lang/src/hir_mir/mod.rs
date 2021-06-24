@@ -4,7 +4,6 @@ mod expression_compiler;
 mod list_type_configuration;
 mod module_compiler;
 mod module_interface_compiler;
-mod record_element_resolver;
 mod string_type_configuration;
 mod transformation;
 mod type_checker;
@@ -12,7 +11,6 @@ mod type_compiler;
 mod type_context;
 mod type_extractor;
 mod type_inferrer;
-mod union_type_creator;
 
 use self::type_context::TypeContext;
 use crate::{hir::*, interface};

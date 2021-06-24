@@ -1,18 +1,23 @@
 use super::super::*;
+use crate::position::Position;
 use std::{
     error::Error,
     fmt::{self, Display, Formatter},
 };
 
 #[derive(Clone, Debug, PartialEq)]
-pub enum TypeAnalysisError {
+pub enum TypeError {
+    RecordExpected(Position),
     RecordNotFound(Record),
     TypeNotFound(Reference),
 }
 
-impl Display for TypeAnalysisError {
+impl Display for TypeError {
     fn fmt(&self, formatter: &mut Formatter) -> fmt::Result {
         match self {
+            Self::RecordExpected(position) => {
+                write!(formatter, "record expected\n{}", position)
+            }
             Self::RecordNotFound(record) => write!(
                 formatter,
                 "record type \"{}\" not found\n{}",
@@ -29,4 +34,4 @@ impl Display for TypeAnalysisError {
     }
 }
 
-impl Error for TypeAnalysisError {}
+impl Error for TypeError {}

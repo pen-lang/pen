@@ -1,7 +1,7 @@
 use crate::{
     hir::*,
     position::Position,
-    types::{self, analysis::TypeAnalysisError},
+    types::{self, analysis::TypeError},
 };
 use std::{
     error::Error,
@@ -17,7 +17,7 @@ pub enum CompileError {
     RecordElementMissing(Position),
     RecordExpected(Position),
     RecordNotFound(types::Record),
-    TypeAnalysis(TypeAnalysisError),
+    TypeAnalysis(TypeError),
     TypeNotFound(types::Reference),
     TypeNotInferred(Position),
     TypesNotMatched(Position, Position),
@@ -92,8 +92,8 @@ impl From<mir::analysis::TypeCheckError> for CompileError {
     }
 }
 
-impl From<TypeAnalysisError> for CompileError {
-    fn from(error: TypeAnalysisError) -> Self {
+impl From<TypeError> for CompileError {
+    fn from(error: TypeError) -> Self {
         Self::TypeAnalysis(error)
     }
 }

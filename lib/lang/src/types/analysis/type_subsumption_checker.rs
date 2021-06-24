@@ -1,13 +1,11 @@
-use super::{
-    super::Type, type_canonicalizer, type_equality_checker, type_resolver, TypeAnalysisError,
-};
+use super::{super::Type, type_canonicalizer, type_equality_checker, type_resolver, TypeError};
 use std::collections::HashMap;
 
 pub fn check_subsumption(
     lower: &Type,
     upper: &Type,
     types: &HashMap<String, Type>,
-) -> Result<bool, TypeAnalysisError> {
+) -> Result<bool, TypeError> {
     let lower =
         type_canonicalizer::canonicalize(&type_resolver::resolve_type(lower, types)?, types)?;
     let upper =
