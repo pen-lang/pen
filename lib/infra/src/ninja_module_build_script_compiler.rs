@@ -33,10 +33,13 @@ impl app::infra::ModuleBuildScriptCompiler for NinjaModuleBuildScriptCompiler {
             &format!("builddir = {}", self.log_directory),
             "rule compile",
             "  command = pen compile $in $out",
+            "  description = compiling module of $source_file",
             "rule llc",
             "  command = llc -O3 -tailcallopt -filetype obj -o $out $in",
+            "  description = generating object file for $source_file",
             "rule resolve_dependency",
             "  command = pen resolve-dependency -p $package_directory $in $object_file $out",
+            "  description = resolving dependency of $in",
         ]
         .into_iter()
         .map(String::from)
@@ -77,11 +80,13 @@ impl app::infra::ModuleBuildScriptCompiler for NinjaModuleBuildScriptCompiler {
                     ninja_dependency_file.display()
                 ),
                 format!("  dyndep = {}", ninja_dependency_file.display()),
+                format!("  source_file = {}", source_file.display()),
                 format!(
                     "build {}: llc {}",
                     object_file.display(),
                     bit_code_file.display(),
                 ),
+                format!("  source_file = {}", source_file.display()),
                 // TODO Remove this hack to circumvent ninja's bug where dynamic dependency files
                 // cannot be specified as inputs together with outputs of the same build rules.
                 // https://github.com/ninja-build/ninja/issues/1988
