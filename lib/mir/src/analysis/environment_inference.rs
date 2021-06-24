@@ -92,6 +92,7 @@ fn infer_in_expression(expression: &Expression, variables: &HashMap<String, Type
         Expression::Variant(variant) => infer_in_variant(variant, variables).into(),
         Expression::Boolean(_)
         | Expression::ByteString(_)
+        | Expression::None
         | Expression::Number(_)
         | Expression::Variable(_) => expression.clone(),
     }

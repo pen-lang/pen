@@ -60,6 +60,7 @@ fn collect_from_expression(expression: &Expression) -> HashSet<Type> {
             .collect(),
         Expression::Boolean(_)
         | Expression::ByteString(_)
+        | Expression::None
         | Expression::Number(_)
         | Expression::Variable(_) => Default::default(),
     }

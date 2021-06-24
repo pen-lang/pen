@@ -38,7 +38,7 @@ pub fn clone_expression(
                     .deconstruct_record(expression.clone(), VARIANT_PAYLOAD_ELEMENT_INDEX)?],
             )?;
         }
-        mir::types::Type::Boolean | mir::types::Type::Number => {}
+        mir::types::Type::Boolean | mir::types::Type::None | mir::types::Type::Number => {}
     }
 
     Ok(())
@@ -75,7 +75,7 @@ pub fn drop_expression(
                     .deconstruct_record(expression.clone(), VARIANT_PAYLOAD_ELEMENT_INDEX)?],
             )?;
         }
-        mir::types::Type::Boolean | mir::types::Type::Number => {}
+        mir::types::Type::Boolean | mir::types::Type::None | mir::types::Type::Number => {}
     }
 
     Ok(())

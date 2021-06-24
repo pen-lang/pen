@@ -86,6 +86,7 @@ pub fn compile(
             variables,
             types,
         )?,
+        mir::ir::Expression::None => fmm::ir::Undefined::new(types::compile_none()).into(),
         mir::ir::Expression::Number(number) => fmm::ir::Primitive::Float64(*number).into(),
         mir::ir::Expression::Record(record) => {
             let unboxed = fmm::build::record(

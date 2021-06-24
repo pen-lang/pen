@@ -177,6 +177,7 @@ fn check_expression(
 
             check_expression(let_.expression(), &variables)?
         }
+        Expression::None => Type::None,
         Expression::Number(_) => Type::Number,
         Expression::Record(record) => {
             let record_type = types

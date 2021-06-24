@@ -19,6 +19,7 @@ pub enum Expression {
     If(If),
     Let(Let),
     LetRecursive(LetRecursive),
+    None,
     Number(f64),
     Record(Record),
     RecordElement(RecordElement),
