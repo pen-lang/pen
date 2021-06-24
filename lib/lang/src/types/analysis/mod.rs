@@ -7,7 +7,7 @@ pub mod type_subsumption_checker;
 pub mod union_type_creator;
 
 // TODO Remove those re-exports.
-pub use error::TypeAnalysisError;
+pub use error::TypeError;
 pub use type_canonicalizer::canonicalize;
 pub use type_equality_checker::check_equality;
 pub use type_resolver::{

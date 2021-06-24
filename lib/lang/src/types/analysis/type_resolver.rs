@@ -1,11 +1,8 @@
-use super::{super::*, TypeAnalysisError};
+use super::{super::*, TypeError};
 use crate::position::Position;
 use std::collections::HashMap;
 
-pub fn resolve_type(
-    type_: &Type,
-    types: &HashMap<String, Type>,
-) -> Result<Type, TypeAnalysisError> {
+pub fn resolve_type(type_: &Type, types: &HashMap<String, Type>) -> Result<Type, TypeError> {
     Ok(match type_ {
         Type::Reference(reference) => resolve_reference(reference, types)?,
         _ => type_.clone(),
@@ -15,11 +12,11 @@ pub fn resolve_type(
 pub fn resolve_reference(
     reference: &Reference,
     types: &HashMap<String, Type>,
-) -> Result<Type, TypeAnalysisError> {
+) -> Result<Type, TypeError> {
     Ok(
         match types
             .get(reference.name())
-            .ok_or_else(|| TypeAnalysisError::TypeNotFound(reference.clone()))?
+            .ok_or_else(|| TypeError::TypeNotFound(reference.clone()))?
         {
             Type::Reference(reference) => resolve_reference(reference, types)?,
             type_ => type_.clone(),
@@ -30,21 +27,21 @@ pub fn resolve_reference(
 pub fn resolve_to_function(
     type_: &Type,
     types: &HashMap<String, Type>,
-) -> Result<Option<Function>, TypeAnalysisError> {
+) -> Result<Option<Function>, TypeError> {
     Ok(resolve_type(type_, types)?.into_function())
 }
 
 pub fn resolve_to_list(
     type_: &Type,
     types: &HashMap<String, Type>,
-) -> Result<Option<List>, TypeAnalysisError> {
+) -> Result<Option<List>, TypeError> {
     Ok(resolve_type(type_, types)?.into_list())
 }
 
 pub fn resolve_to_record(
     type_: &Type,
     types: &HashMap<String, Type>,
-) -> Result<Option<Record>, TypeAnalysisError> {
+) -> Result<Option<Record>, TypeError> {
     Ok(resolve_type(type_, types)?.into_record())
 }
 
@@ -53,11 +50,11 @@ pub fn resolve_record_elements<'a>(
     position: &Position,
     types: &HashMap<String, Type>,
     records: &'a HashMap<String, HashMap<String, Type>>,
-) -> Result<&'a HashMap<String, Type>, TypeAnalysisError> {
+) -> Result<&'a HashMap<String, Type>, TypeError> {
     let record = resolve_to_record(type_, types)?
-        .ok_or_else(|| TypeAnalysisError::RecordExpected(position.clone()))?;
+        .ok_or_else(|| TypeError::RecordExpected(position.clone()))?;
 
     records
         .get(record.name())
-        .ok_or_else(|| TypeAnalysisError::RecordNotFound(record.clone()))
+        .ok_or_else(|| TypeError::RecordNotFound(record.clone()))
 }

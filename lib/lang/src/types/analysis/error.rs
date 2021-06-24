@@ -6,13 +6,13 @@ use std::{
 };
 
 #[derive(Clone, Debug, PartialEq)]
-pub enum TypeAnalysisError {
+pub enum TypeError {
     RecordExpected(Position),
     RecordNotFound(Record),
     TypeNotFound(Reference),
 }
 
-impl Display for TypeAnalysisError {
+impl Display for TypeError {
     fn fmt(&self, formatter: &mut Formatter) -> fmt::Result {
         match self {
             Self::RecordExpected(position) => {
@@ -34,4 +34,4 @@ impl Display for TypeAnalysisError {
     }
 }
 
-impl Error for TypeAnalysisError {}
+impl Error for TypeError {}

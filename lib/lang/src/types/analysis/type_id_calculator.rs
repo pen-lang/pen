@@ -1,11 +1,11 @@
-use super::{error::TypeAnalysisError, type_canonicalizer, type_resolver};
+use super::{error::TypeError, type_canonicalizer, type_resolver};
 use crate::types::Type;
 use std::{
     collections::{hash_map::DefaultHasher, HashMap},
     hash::{Hash, Hasher},
 };
 
-pub fn calculate(type_: &Type, types: &HashMap<String, Type>) -> Result<String, TypeAnalysisError> {
+pub fn calculate(type_: &Type, types: &HashMap<String, Type>) -> Result<String, TypeError> {
     let mut hasher = DefaultHasher::new();
 
     calculate_string(&type_canonicalizer::canonicalize(type_, types)?, types)?.hash(&mut hasher);
@@ -13,10 +13,7 @@ pub fn calculate(type_: &Type, types: &HashMap<String, Type>) -> Result<String, 
     Ok(format!("{:x}", hasher.finish()))
 }
 
-fn calculate_string(
-    type_: &Type,
-    types: &HashMap<String, Type>,
-) -> Result<String, TypeAnalysisError> {
+fn calculate_string(type_: &Type, types: &HashMap<String, Type>) -> Result<String, TypeError> {
     let calculate_string = |type_| calculate_string(type_, types);
 
     Ok(match type_resolver::resolve_type(type_, types)? {
