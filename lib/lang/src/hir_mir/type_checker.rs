@@ -51,6 +51,11 @@ fn check_expression(
     variables: &HashMap<String, Type>,
     type_context: &TypeContext,
 ) -> Result<Type, CompileError> {
+    let check_expression =
+        |expression, variables| check_expression(expression, variables, type_context);
+    let check_subsumption =
+        |lower: &_, upper| check_subsumption(lower, upper, type_context.types());
+
     Ok(match expression {
         Expression::Boolean(boolean) => types::Boolean::new(boolean.position().clone()).into(),
         Expression::Call(call) => {
@@ -62,31 +67,22 @@ fn check_expression(
                     CompileError::FunctionExpected(call.function().position().clone())
                 })?;
 
-            check_subsumption(
-                &check_expression(call.function(), variables, type_context)?,
-                type_,
-                type_context.types(),
-            )?;
+            check_subsumption(&check_expression(call.function(), variables)?, type_)?;
 
             if call.arguments().len() != function_type.arguments().len() {
                 return Err(CompileError::WrongArgumentCount(call.position().clone()));
             }
 
             for (argument, type_) in call.arguments().iter().zip(function_type.arguments()) {
-                check_subsumption(
-                    &check_expression(argument, variables, type_context)?,
-                    type_,
-                    type_context.types(),
-                )?;
+                check_subsumption(&check_expression(argument, variables)?, type_)?;
             }
 
             function_type.result().clone()
         }
         Expression::If(if_) => {
             check_subsumption(
-                &check_expression(if_.condition(), variables, type_context)?,
+                &check_expression(if_.condition(), variables)?,
                 &types::Boolean::new(if_.position().clone()).into(),
-                type_context.types(),
             )?;
 
             type_extractor::extract_from_expression(expression, variables, type_context)?
@@ -105,11 +101,10 @@ fn check_expression(
 
             for (name, expression) in construction.elements() {
                 check_subsumption(
-                    &check_expression(expression, variables, type_context)?,
+                    &check_expression(expression, variables)?,
                     element_types.get(name).ok_or_else(|| {
                         CompileError::RecordElementUnknown(expression.position().clone())
                     })?,
-                    type_context.types(),
                 )?;
             }
 
@@ -125,9 +120,8 @@ fn check_expression(
         }
         Expression::RecordUpdate(update) => {
             check_subsumption(
-                &check_expression(update.record(), variables, type_context)?,
+                &check_expression(update.record(), variables)?,
                 update.type_(),
-                type_context.types(),
             )?;
 
             let element_types = type_resolver::resolve_record_elements(
@@ -139,11 +133,10 @@ fn check_expression(
 
             for (name, expression) in update.elements() {
                 check_subsumption(
-                    &check_expression(expression, variables, type_context)?,
+                    &check_expression(expression, variables)?,
                     element_types.get(name).ok_or_else(|| {
                         CompileError::RecordElementUnknown(expression.position().clone())
                     })?,
-                    type_context.types(),
                 )?;
             }
 
