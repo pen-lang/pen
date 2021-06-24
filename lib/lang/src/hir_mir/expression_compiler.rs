@@ -40,6 +40,12 @@ pub fn compile(
                 .collect::<Result<_, _>>()?,
         )
         .into(),
+        Expression::If(if_) => mir::ir::If::new(
+            compile(if_.condition())?,
+            compile(if_.then())?,
+            compile(if_.else_())?,
+        )
+        .into(),
         Expression::Lambda(lambda) => mir::ir::LetRecursive::new(
             mir::ir::Definition::new(
                 CLOSURE_NAME,
@@ -159,7 +165,9 @@ fn compile_operation(
                 compile(&not_equal_operation_transformer::transform(operation))?
             }
         },
-        Operation::Not(_) => todo!(),
+        Operation::Not(operation) => {
+            mir::ir::If::new(compile(operation.expression())?, false, true).into()
+        }
         Operation::Order(operation) => mir::ir::ComparisonOperation::new(
             match operation.operator() {
                 OrderOperator::LessThan => mir::ir::ComparisonOperator::LessThan,
