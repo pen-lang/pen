@@ -261,6 +261,7 @@ fn expression<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
 fn atomic_expression<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
     lazy(|| {
         no_partial(choice!(
+            lambda().map(Expression::from),
             record().map(Expression::from),
             list_literal().map(Expression::from),
             boolean_literal().map(Expression::from),

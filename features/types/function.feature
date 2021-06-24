@@ -44,3 +44,15 @@ Feature: Function
     """
     When I run `pen build`
     Then the exit status should be 0
+
+  Scenario: Define a closure
+    Given a file named "Foo.pen" with:
+    """
+    f = \(x number) \(number) number {
+      \(y number) number {
+        x + y
+      }
+    }
+    """
+    When I run `pen build`
+    Then the exit status should be 0
