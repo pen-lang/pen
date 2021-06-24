@@ -19,7 +19,7 @@ pub fn extract_from_expression(
 
     Ok(match expression {
         Expression::Boolean(boolean) => types::Boolean::new(boolean.position().clone()).into(),
-        Expression::Call(call) => types::analysis::resolve_to_function(
+        Expression::Call(call) => type_resolver::resolve_to_function(
             call.function_type()
                 .ok_or_else(|| CompileError::TypeNotInferred(call.position().clone()))?,
             type_context.types(),

@@ -1,7 +1,11 @@
 use super::{environment_creator, type_context::TypeContext, type_extractor, CompileError};
 use crate::{
     hir::*,
-    types::{self, analysis::type_resolver, Type},
+    types::{
+        self,
+        analysis::{type_resolver, type_subsumption_checker},
+        Type,
+    },
 };
 use std::collections::HashMap;
 
@@ -149,7 +153,7 @@ fn check_subsumption(
     upper: &Type,
     types: &HashMap<String, Type>,
 ) -> Result<(), CompileError> {
-    if types::analysis::check_subsumption(lower, upper, types)? {
+    if type_subsumption_checker::check_subsumption(lower, upper, types)? {
         Ok(())
     } else {
         Err(CompileError::TypesNotMatched(
