@@ -85,9 +85,7 @@ fn check_expression(
         Expression::Lambda(lambda) => check_lambda(lambda, variables, type_context)?.into(),
         Expression::None(none) => types::None::new(none.position().clone()).into(),
         Expression::Number(number) => types::Number::new(number.position().clone()).into(),
-        Expression::Operation(operation) => {
-            check_operation(operation, variables, type_context)?.into()
-        }
+        Expression::Operation(operation) => check_operation(operation, variables, type_context)?,
         Expression::RecordConstruction(construction) => {
             let element_types = type_resolver::resolve_record_elements(
                 construction.type_(),
