@@ -1,6 +1,6 @@
 use super::{command_runner, file_path_converter::FilePathConverter};
 use crate::InfrastructureError;
-use std::{error::Error, process::Command, sync::Arc};
+use std::{error::Error, path::PathBuf, process::Command, sync::Arc};
 
 pub struct ExternalPackageInitializer {
     file_system: Arc<dyn app::infra::FileSystem>,
@@ -30,7 +30,7 @@ impl app::infra::ExternalPackageInitializer for ExternalPackageInitializer {
         }
 
         match url.scheme() {
-            "file" => {
+            "file" | "file+relative" => {
                 let directory = self
                     .file_path_converter
                     .convert_to_os_path(package_directory);
@@ -39,7 +39,12 @@ impl app::infra::ExternalPackageInitializer for ExternalPackageInitializer {
                     std::fs::create_dir_all(directory)?;
                 }
 
-                command_runner::run(Command::new("cp").arg("-r").arg(url.path()).arg(directory))?;
+                command_runner::run(
+                    Command::new("cp")
+                        .arg("-r")
+                        .arg(&PathBuf::from(url.path()))
+                        .arg(directory),
+                )?;
             }
             "git" => {
                 command_runner::run(
