@@ -159,6 +159,14 @@ fn check_operation(
         |lower: &_, upper| check_subsumption(lower, upper, type_context.types());
 
     Ok(match operation {
+        Operation::Arithmetic(operation) => {
+            let number_type = types::Number::new(operation.position().clone()).into();
+
+            check_subsumption(&check_expression(operation.lhs())?, &number_type)?;
+            check_subsumption(&check_expression(operation.rhs())?, &number_type)?;
+
+            number_type
+        }
         Operation::Boolean(operation) => {
             let boolean_type = types::Boolean::new(operation.position().clone()).into();
 
@@ -392,7 +400,32 @@ mod tests {
         use super::*;
 
         #[test]
-        fn check_and_operation() {
+        fn check_arithmetic_operation() {
+            check_module(&Module::new(
+                vec![],
+                vec![],
+                vec![],
+                vec![Definition::without_source(
+                    "x",
+                    Lambda::new(
+                        vec![],
+                        types::Number::new(Position::dummy()),
+                        ArithmeticOperation::new(
+                            ArithmeticOperator::Add,
+                            Number::new(0.0, Position::dummy()),
+                            Number::new(0.0, Position::dummy()),
+                            Position::dummy(),
+                        ),
+                        Position::dummy(),
+                    ),
+                    false,
+                )],
+            ))
+            .unwrap();
+        }
+
+        #[test]
+        fn check_boolean_operation() {
             check_module(&Module::new(
                 vec![],
                 vec![],
@@ -417,7 +450,7 @@ mod tests {
         }
 
         #[test]
-        fn fail_to_check_and_operation() {
+        fn fail_to_check_boolean_operation() {
             assert_eq!(
                 check_module(&Module::new(
                     vec![],
