@@ -4,6 +4,7 @@ mod expression_compiler;
 mod list_type_configuration;
 mod module_compiler;
 mod module_interface_compiler;
+mod record_element_resolver;
 mod string_type_configuration;
 mod transformation;
 mod type_checker;
@@ -26,7 +27,7 @@ pub fn compile(
 ) -> Result<(mir::ir::Module, interface::Module), CompileError> {
     let type_context = TypeContext::new(module, list_type_configuration, string_type_configuration);
 
-    let module = type_inferrer::infer_types(module, type_context.types())?;
+    let module = type_inferrer::infer_types(module, &type_context)?;
     type_checker::check_types(&module, &type_context)?;
 
     Ok((

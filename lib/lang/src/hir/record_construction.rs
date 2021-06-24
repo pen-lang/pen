@@ -5,6 +5,7 @@ use std::collections::BTreeMap;
 #[derive(Clone, Debug, PartialEq)]
 pub struct RecordConstruction {
     type_: Type,
+    // TODO Change elements to Vec to keep the evaluation order.
     elements: BTreeMap<String, Expression>,
     position: Position,
 }

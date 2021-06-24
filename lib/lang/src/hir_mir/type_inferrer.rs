@@ -1,11 +1,11 @@
-use super::{environment_creator, type_extractor, CompileError};
+use super::{environment_creator, type_context::TypeContext, type_extractor, CompileError};
 use crate::{
     hir::*,
     types::{self, Type},
 };
 use std::collections::HashMap;
 
-pub fn infer_types(module: &Module, types: &HashMap<String, Type>) -> Result<Module, CompileError> {
+pub fn infer_types(module: &Module, type_context: &TypeContext) -> Result<Module, CompileError> {
     let variables = environment_creator::create_from_module(module);
 
     Ok(Module::new(
@@ -15,7 +15,7 @@ pub fn infer_types(module: &Module, types: &HashMap<String, Type>) -> Result<Mod
         module
             .definitions()
             .iter()
-            .map(|definition| infer_definition(definition, &variables, types))
+            .map(|definition| infer_definition(definition, &variables, type_context))
             .collect::<Result<_, _>>()?,
     ))
 }
@@ -23,12 +23,12 @@ pub fn infer_types(module: &Module, types: &HashMap<String, Type>) -> Result<Mod
 fn infer_definition(
     definition: &Definition,
     variables: &HashMap<String, Type>,
-    types: &HashMap<String, Type>,
+    type_context: &TypeContext,
 ) -> Result<Definition, CompileError> {
     Ok(Definition::new(
         definition.name(),
         definition.original_name(),
-        infer_lambda(definition.lambda(), variables, types)?,
+        infer_lambda(definition.lambda(), variables, type_context)?,
         definition.is_public(),
         definition.position().clone(),
     ))
@@ -37,7 +37,7 @@ fn infer_definition(
 fn infer_lambda(
     lambda: &Lambda,
     variables: &HashMap<String, Type>,
-    types: &HashMap<String, Type>,
+    type_context: &TypeContext,
 ) -> Result<Lambda, CompileError> {
     Ok(Lambda::new(
         lambda.arguments().to_vec(),
@@ -54,7 +54,7 @@ fn infer_lambda(
                         .map(|argument| (argument.name().into(), argument.type_().clone())),
                 )
                 .collect(),
-            types,
+            type_context,
         )?,
         lambda.position().clone(),
     ))
@@ -63,10 +63,10 @@ fn infer_lambda(
 fn infer_expression(
     expression: &Expression,
     variables: &HashMap<String, Type>,
-    types: &HashMap<String, Type>,
+    type_context: &TypeContext,
 ) -> Result<Expression, CompileError> {
     let infer_expression =
-        |expression, variables: &_| infer_expression(expression, variables, types);
+        |expression, variables: &_| infer_expression(expression, variables, type_context);
 
     Ok(match expression {
         Expression::Call(call) => {
@@ -79,7 +79,9 @@ fn infer_expression(
                     .map(|argument| infer_expression(argument, variables))
                     .collect::<Result<_, _>>()?,
                 Some(type_extractor::extract_from_expression(
-                    &function, variables, types,
+                    &function,
+                    variables,
+                    type_context,
                 )?),
                 call.position().clone(),
             )
@@ -144,8 +146,30 @@ fn infer_expression(
             )
             .into()
         }
-        Expression::Lambda(lambda) => infer_lambda(lambda, variables, types)?.into(),
-        Expression::Let(_) => todo!(),
+        Expression::Lambda(lambda) => infer_lambda(lambda, variables, type_context)?.into(),
+        Expression::Let(let_) => {
+            let bound_type = type_extractor::extract_from_expression(
+                let_.bound_expression(),
+                variables,
+                type_context,
+            )?;
+
+            Let::new(
+                let_.name().map(String::from),
+                Some(bound_type.clone()),
+                infer_expression(let_.bound_expression(), variables)?,
+                infer_expression(
+                    let_.expression(),
+                    &variables
+                        .clone()
+                        .into_iter()
+                        .chain(let_.name().map(|name| (name.into(), bound_type)))
+                        .collect(),
+                )?,
+                let_.position().clone(),
+            )
+            .into()
+        }
         Expression::List(list) => List::new(
             list.type_().clone(),
             list.elements()
@@ -186,8 +210,8 @@ fn infer_expression(
                 EqualityOperation::new(
                     Some(
                         types::Union::new(
-                            type_extractor::extract_from_expression(&lhs, variables, types)?,
-                            type_extractor::extract_from_expression(&rhs, variables, types)?,
+                            type_extractor::extract_from_expression(&lhs, variables, type_context)?,
+                            type_extractor::extract_from_expression(&rhs, variables, type_context)?,
                             operation.position().clone(),
                         )
                         .into(),
@@ -228,7 +252,9 @@ fn infer_expression(
 
             RecordElement::new(
                 Some(type_extractor::extract_from_expression(
-                    &record, variables, types,
+                    &record,
+                    variables,
+                    type_context,
                 )?),
                 record,
                 element.element_name(),
@@ -265,14 +291,246 @@ fn infer_expression(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::{
+        hir_mir::{
+            list_type_configuration::LIST_TYPE_CONFIGURATION,
+            string_type_configuration::STRING_TYPE_CONFIGURATION,
+        },
+        position::Position,
+    };
+    use pretty_assertions::assert_eq;
+
+    fn infer_module(module: &Module) -> Module {
+        infer_types(
+            module,
+            &TypeContext::new(module, &LIST_TYPE_CONFIGURATION, &STRING_TYPE_CONFIGURATION),
+        )
+        .unwrap()
+    }
 
     #[test]
-    fn infer_empty_module() -> Result<(), CompileError> {
-        infer_types(
-            &Module::new(vec![], vec![], vec![], vec![]),
-            &Default::default(),
-        )?;
+    fn infer_empty_module() {
+        infer_module(&Module::new(vec![], vec![], vec![], vec![]));
+    }
 
-        Ok(())
+    #[test]
+    fn infer_call() {
+        assert_eq!(
+            infer_module(&Module::new(
+                vec![],
+                vec![],
+                vec![],
+                vec![Definition::without_source(
+                    "x",
+                    Lambda::new(
+                        vec![],
+                        types::None::new(Position::dummy()),
+                        Call::new(
+                            Variable::new("x", Position::dummy()),
+                            vec![],
+                            None,
+                            Position::dummy()
+                        ),
+                        Position::dummy(),
+                    ),
+                    false,
+                )],
+            )),
+            Module::new(
+                vec![],
+                vec![],
+                vec![],
+                vec![Definition::without_source(
+                    "x",
+                    Lambda::new(
+                        vec![],
+                        types::None::new(Position::dummy()),
+                        Call::new(
+                            Variable::new("x", Position::dummy()),
+                            vec![],
+                            Some(
+                                types::Function::new(
+                                    vec![],
+                                    types::None::new(Position::dummy()),
+                                    Position::dummy()
+                                )
+                                .into()
+                            ),
+                            Position::dummy()
+                        ),
+                        Position::dummy(),
+                    ),
+                    false,
+                )],
+            )
+        );
+    }
+
+    #[test]
+    fn infer_equality_operation() {
+        assert_eq!(
+            infer_module(&Module::new(
+                vec![],
+                vec![],
+                vec![],
+                vec![Definition::without_source(
+                    "x",
+                    Lambda::new(
+                        vec![],
+                        types::None::new(Position::dummy()),
+                        EqualityOperation::new(
+                            None,
+                            EqualityOperator::Equal,
+                            None::new(Position::dummy()),
+                            None::new(Position::dummy()),
+                            Position::dummy()
+                        ),
+                        Position::dummy(),
+                    ),
+                    false,
+                )],
+            )),
+            Module::new(
+                vec![],
+                vec![],
+                vec![],
+                vec![Definition::without_source(
+                    "x",
+                    Lambda::new(
+                        vec![],
+                        types::None::new(Position::dummy()),
+                        EqualityOperation::new(
+                            Some(
+                                types::Union::new(
+                                    types::None::new(Position::dummy()),
+                                    types::None::new(Position::dummy()),
+                                    Position::dummy()
+                                )
+                                .into()
+                            ),
+                            EqualityOperator::Equal,
+                            None::new(Position::dummy()),
+                            None::new(Position::dummy()),
+                            Position::dummy()
+                        ),
+                        Position::dummy(),
+                    ),
+                    false,
+                )],
+            )
+        );
+    }
+
+    #[test]
+    fn infer_let() {
+        assert_eq!(
+            infer_module(&Module::new(
+                vec![],
+                vec![],
+                vec![],
+                vec![Definition::without_source(
+                    "x",
+                    Lambda::new(
+                        vec![],
+                        types::None::new(Position::dummy()),
+                        Let::new(
+                            Some("x".into()),
+                            None,
+                            None::new(Position::dummy()),
+                            Variable::new("x", Position::dummy()),
+                            Position::dummy(),
+                        ),
+                        Position::dummy(),
+                    ),
+                    false,
+                )],
+            )),
+            Module::new(
+                vec![],
+                vec![],
+                vec![],
+                vec![Definition::without_source(
+                    "x",
+                    Lambda::new(
+                        vec![],
+                        types::None::new(Position::dummy()),
+                        Let::new(
+                            Some("x".into()),
+                            Some(types::None::new(Position::dummy()).into()),
+                            None::new(Position::dummy()),
+                            Variable::new("x", Position::dummy()),
+                            Position::dummy(),
+                        ),
+                        Position::dummy(),
+                    ),
+                    false,
+                )],
+            )
+        );
+    }
+
+    #[test]
+    fn infer_record_element() {
+        let type_definition = TypeDefinition::new(
+            "r",
+            "",
+            vec![types::RecordElement::new(
+                "x",
+                types::None::new(Position::dummy()),
+            )],
+            false,
+            false,
+            false,
+            Position::dummy(),
+        );
+
+        assert_eq!(
+            infer_module(&Module::new(
+                vec![type_definition.clone()],
+                vec![],
+                vec![],
+                vec![Definition::without_source(
+                    "x",
+                    Lambda::new(
+                        vec![Argument::new(
+                            "x",
+                            types::Record::new("r", Position::dummy())
+                        )],
+                        types::None::new(Position::dummy()),
+                        RecordElement::new(
+                            None,
+                            Variable::new("x", Position::dummy()),
+                            "x",
+                            Position::dummy()
+                        ),
+                        Position::dummy(),
+                    ),
+                    false,
+                )],
+            )),
+            Module::new(
+                vec![type_definition],
+                vec![],
+                vec![],
+                vec![Definition::without_source(
+                    "x",
+                    Lambda::new(
+                        vec![Argument::new(
+                            "x",
+                            types::Record::new("r", Position::dummy())
+                        )],
+                        types::None::new(Position::dummy()),
+                        RecordElement::new(
+                            Some(types::Record::new("r", Position::dummy()).into()),
+                            Variable::new("x", Position::dummy()),
+                            "x",
+                            Position::dummy()
+                        ),
+                        Position::dummy(),
+                    ),
+                    false,
+                )],
+            )
+        );
     }
 }

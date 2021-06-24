@@ -6,6 +6,7 @@ use std::{collections::BTreeMap, sync::Arc};
 pub struct RecordUpdate {
     type_: Type,
     record: Arc<Expression>,
+    // TODO Change elements to Vec to keep the evaluation order.
     elements: BTreeMap<String, Expression>,
     position: Position,
 }

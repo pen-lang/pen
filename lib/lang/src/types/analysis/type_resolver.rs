@@ -33,6 +33,13 @@ pub fn resolve_to_function(
     Ok(resolve_type(type_, types)?.into_function())
 }
 
+pub fn resolve_to_list(
+    type_: &Type,
+    types: &HashMap<String, Type>,
+) -> Result<Option<List>, TypeAnalysisError> {
+    Ok(resolve_type(type_, types)?.into_list())
+}
+
 pub fn resolve_to_record(
     type_: &Type,
     types: &HashMap<String, Type>,
