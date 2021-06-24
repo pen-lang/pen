@@ -1,5 +1,7 @@
 use super::file_path_converter::FilePathConverter;
 use app::infra::FilePath;
+use std::error::Error;
+use std::path::PathBuf;
 use std::sync::Arc;
 
 pub struct NinjaModuleBuildScriptCompiler {
@@ -20,6 +22,13 @@ impl NinjaModuleBuildScriptCompiler {
             log_directory,
         }
     }
+
+    fn find_llc(&self) -> Result<PathBuf, Box<dyn Error>> {
+        Ok(which::which("llc-13")
+            .or_else(|_| which::which("llc-12"))
+            .or_else(|_| which::which("llc-11"))
+            .or_else(|_| which::which("llc"))?)
+    }
 }
 
 impl app::infra::ModuleBuildScriptCompiler for NinjaModuleBuildScriptCompiler {
@@ -27,15 +36,20 @@ impl app::infra::ModuleBuildScriptCompiler for NinjaModuleBuildScriptCompiler {
         &self,
         module_targets: &[app::infra::ModuleTarget],
         sub_build_script_files: &[FilePath],
-    ) -> String {
-        vec![
+    ) -> Result<String, Box<dyn Error>> {
+        let llc = self.find_llc()?;
+
+        Ok(vec![
             "ninja_required_version = 1.10",
             &format!("builddir = {}", self.log_directory),
             "rule compile",
             "  command = pen compile $in $out",
             "  description = compiling module of $source_file",
             "rule llc",
-            "  command = llc -O3 -tailcallopt -filetype obj -o $out $in",
+            &format!(
+                "  command = {} -O3 -tailcallopt -filetype obj -o $out $in",
+                llc.display()
+            ),
             "  description = generating object file for $source_file",
             "rule resolve_dependency",
             "  command = pen resolve-dependency -p $package_directory $in $object_file $out",
@@ -123,6 +137,6 @@ impl app::infra::ModuleBuildScriptCompiler for NinjaModuleBuildScriptCompiler {
         )])
         .collect::<Vec<String>>()
         .join("\n")
-            + "\n"
+            + "\n")
     }
 }
