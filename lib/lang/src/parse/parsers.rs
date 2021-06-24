@@ -104,17 +104,16 @@ fn type_definition<'a>() -> impl Parser<Stream<'a>, Output = TypeDefinition> {
         position(),
         keyword("type"),
         identifier(),
-        optional(between(
+        between(
             sign("{"),
             sign("}"),
-            sep_end_by1((identifier(), type_()), sign(",")),
-        )),
+            sep_end_by((identifier(), type_()), sign(",")),
+        ),
     )
-        .map(|(position, _, name, elements): (_, _, _, Option<Vec<_>>)| {
+        .map(|(position, _, name, elements): (_, _, _, Vec<_>)| {
             TypeDefinition::new(
                 name,
                 elements
-                    .unwrap_or_default()
                     .into_iter()
                     .map(|(name, type_)| types::RecordElement::new(name, type_))
                     .collect(),
@@ -696,6 +695,15 @@ mod tests {
             )
         );
         assert_eq!(
+            module().parse(stream("type foo = number", "")).unwrap().0,
+            Module::new(
+                vec![],
+                vec![],
+                vec![TypeAlias::new("foo", types::Number::new(Position::dummy()))],
+                vec![]
+            )
+        );
+        assert_eq!(
             module()
                 .parse(stream("x=\\(x number)number{42}", ""))
                 .unwrap()
@@ -831,7 +839,7 @@ mod tests {
     fn parse_type_definition() {
         for (source, expected) in &[
             (
-                "type Foo",
+                "type Foo {}",
                 TypeDefinition::new("Foo", vec![], Position::dummy()),
             ),
             (
@@ -891,6 +899,10 @@ mod tests {
         for (source, expected) in &[
             (
                 "type foo=number",
+                TypeAlias::new("foo", types::Number::new(Position::dummy())),
+            ),
+            (
+                "type foo = number",
                 TypeAlias::new("foo", types::Number::new(Position::dummy())),
             ),
             (
