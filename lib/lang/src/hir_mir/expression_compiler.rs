@@ -25,6 +25,21 @@ pub fn compile(
 
     Ok(match expression {
         Expression::Boolean(boolean) => mir::ir::Expression::Boolean(boolean.value()),
+        Expression::Call(call) => mir::ir::Call::new(
+            type_compiler::compile(
+                call.function_type()
+                    .ok_or_else(|| CompileError::TypeNotInferred(call.position().clone()))?,
+                type_context,
+            )?
+            .into_function()
+            .ok_or_else(|| CompileError::FunctionExpected(call.position().clone()))?,
+            compile(call.function())?,
+            call.arguments()
+                .iter()
+                .map(compile)
+                .collect::<Result<_, _>>()?,
+        )
+        .into(),
         Expression::Lambda(lambda) => mir::ir::LetRecursive::new(
             mir::ir::Definition::new(
                 CLOSURE_NAME,
