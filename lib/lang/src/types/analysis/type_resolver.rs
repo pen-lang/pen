@@ -1,4 +1,5 @@
 use super::{super::*, TypeAnalysisError};
+use crate::position::Position;
 use std::collections::HashMap;
 
 pub fn resolve_type(
@@ -49,16 +50,14 @@ pub fn resolve_to_record(
 
 pub fn resolve_record_elements<'a>(
     type_: &Type,
+    position: &Position,
     types: &HashMap<String, Type>,
     records: &'a HashMap<String, HashMap<String, Type>>,
-) -> Result<Option<&'a HashMap<String, Type>>, TypeAnalysisError> {
-    Ok(if let Some(record) = resolve_to_record(type_, types)? {
-        Some(
-            records
-                .get(record.name())
-                .ok_or_else(|| TypeAnalysisError::RecordNotFound(record.clone()))?,
-        )
-    } else {
-        None
-    })
+) -> Result<&'a HashMap<String, Type>, TypeAnalysisError> {
+    let record = resolve_to_record(type_, types)?
+        .ok_or_else(|| TypeAnalysisError::RecordExpected(position.clone()))?;
+
+    records
+        .get(record.name())
+        .ok_or_else(|| TypeAnalysisError::RecordNotFound(record.clone()))
 }

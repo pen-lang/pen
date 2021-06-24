@@ -1,7 +1,4 @@
-use super::{
-    environment_creator, record_element_resolver, type_context::TypeContext, type_extractor,
-    CompileError,
-};
+use super::{environment_creator, type_context::TypeContext, type_extractor, CompileError};
 use crate::{
     hir::*,
     types::{self, analysis::type_resolver, Type},
@@ -85,10 +82,11 @@ fn check_expression(
         Expression::None(none) => types::None::new(none.position().clone()).into(),
         Expression::Number(number) => types::Number::new(number.position().clone()).into(),
         Expression::RecordConstruction(construction) => {
-            let element_types = record_element_resolver::resolve_elements(
+            let element_types = type_resolver::resolve_record_elements(
                 construction.type_(),
                 construction.position(),
-                type_context,
+                type_context.types(),
+                type_context.records(),
             )?;
 
             for (name, expression) in construction.elements() {
@@ -118,10 +116,11 @@ fn check_expression(
                 type_context.types(),
             )?;
 
-            let element_types = record_element_resolver::resolve_elements(
+            let element_types = type_resolver::resolve_record_elements(
                 update.type_(),
                 update.position(),
-                type_context,
+                type_context.types(),
+                type_context.records(),
             )?;
 
             for (name, expression) in update.elements() {

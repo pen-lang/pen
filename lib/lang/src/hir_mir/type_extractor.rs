@@ -1,7 +1,11 @@
-use super::{record_element_resolver, type_context::TypeContext, union_type_creator, CompileError};
+use super::{type_context::TypeContext, CompileError};
 use crate::{
     hir::*,
-    types::{self, analysis::type_resolver, Type},
+    types::{
+        self,
+        analysis::{type_resolver, union_type_creator},
+        Type,
+    },
 };
 use std::collections::HashMap;
 
@@ -117,20 +121,17 @@ pub fn extract_from_expression(
         Expression::None(none) => types::None::new(none.position().clone()).into(),
         Expression::Number(number) => types::Number::new(number.position().clone()).into(),
         Expression::RecordConstruction(construction) => construction.type_().clone(),
-        Expression::RecordElement(element) => {
-            let element_types = record_element_resolver::resolve_elements(
-                element
-                    .type_()
-                    .ok_or_else(|| CompileError::TypeNotInferred(element.position().clone()))?,
-                element.position(),
-                type_context,
-            )?;
-
-            element_types
-                .get(element.element_name())
-                .ok_or_else(|| CompileError::RecordElementUnknown(element.position().clone()))?
-                .clone()
-        }
+        Expression::RecordElement(element) => type_resolver::resolve_record_elements(
+            element
+                .type_()
+                .ok_or_else(|| CompileError::TypeNotInferred(element.position().clone()))?,
+            element.position(),
+            type_context.types(),
+            type_context.records(),
+        )?
+        .get(element.element_name())
+        .ok_or_else(|| CompileError::RecordElementUnknown(element.position().clone()))?
+        .clone(),
         Expression::RecordUpdate(update) => update.type_().clone(),
         Expression::String(string) => types::ByteString::new(string.position().clone()).into(),
         Expression::TypeCoercion(coercion) => coercion.to().clone(),
