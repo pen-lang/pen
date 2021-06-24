@@ -34,7 +34,7 @@ impl app::infra::ModuleBuildScriptCompiler for NinjaModuleBuildScriptCompiler {
             "rule compile",
             "  command = pen compile $in $out",
             "rule llc",
-            "  command = llc -O3 -tailcallopt -o $out $in",
+            "  command = llc -O3 -tailcallopt -filetype obj -o $out $in",
             "rule resolve_dependency",
             "  command = pen resolve-dependency -p $package_directory $in $object_file $out",
         ]
