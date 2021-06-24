@@ -6,8 +6,6 @@ use crate::types::{
 };
 use std::collections::HashMap;
 
-pub const NONE_RECORD_TYPE_NAME: &str = "_pen_none";
-
 pub fn compile(type_: &Type, type_context: &TypeContext) -> Result<mir::types::Type, CompileError> {
     Ok(
         match type_canonicalizer::canonicalize(type_, type_context.types())? {
@@ -17,7 +15,7 @@ pub fn compile(type_: &Type, type_context: &TypeContext) -> Result<mir::types::T
                 mir::types::Record::new(&type_context.list_type_configuration().list_type_name)
                     .into()
             }
-            Type::None(_) => mir::types::Record::new(NONE_RECORD_TYPE_NAME).into(),
+            Type::None(_) => mir::types::Type::None,
             Type::Number(_) => mir::types::Type::Number,
             Type::Record(record) => mir::types::Record::new(record.name()).into(),
             Type::String(_) => mir::types::Type::ByteString,

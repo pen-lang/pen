@@ -56,9 +56,10 @@ fn find_in_expression(expression: &Expression) -> HashSet<String> {
             .collect(),
         Expression::Variable(variable) => vec![variable.name().into()].into_iter().collect(),
         Expression::Variant(variant) => find_in_expression(variant.payload()),
-        Expression::Boolean(_) | Expression::ByteString(_) | Expression::Number(_) => {
-            HashSet::new()
-        }
+        Expression::Boolean(_)
+        | Expression::ByteString(_)
+        | Expression::None
+        | Expression::Number(_) => HashSet::new(),
     }
 }
 

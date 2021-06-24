@@ -5,6 +5,7 @@ pub enum Type {
     Boolean,
     ByteString,
     Function(Function),
+    None,
     Number,
     Record(Record),
     Variant,

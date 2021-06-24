@@ -512,9 +512,10 @@ fn convert_expression(
                 moved_variables,
             )
         }
-        Expression::Boolean(_) | Expression::ByteString(_) | Expression::Number(_) => {
-            (expression.clone(), moved_variables.clone())
-        }
+        Expression::Boolean(_)
+        | Expression::ByteString(_)
+        | Expression::None
+        | Expression::Number(_) => (expression.clone(), moved_variables.clone()),
         Expression::CloneVariables(_) | Expression::DropVariables(_) => {
             return Err(ReferenceCountError::ExpressionNotSupported(
                 expression.clone(),

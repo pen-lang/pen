@@ -1,7 +1,4 @@
-use super::{
-    expression_compiler, type_compiler, type_compiler::NONE_RECORD_TYPE_NAME,
-    type_context::TypeContext, CompileError,
-};
+use super::{expression_compiler, type_compiler, type_context::TypeContext, CompileError};
 use crate::hir::*;
 
 pub fn compile(
@@ -9,19 +6,11 @@ pub fn compile(
     type_context: &TypeContext,
 ) -> Result<mir::ir::Module, CompileError> {
     Ok(mir::ir::Module::new(
-        vec![mir::ir::TypeDefinition::new(
-            NONE_RECORD_TYPE_NAME,
-            mir::types::RecordBody::new(vec![]),
-        )]
-        .into_iter()
-        .chain(
-            module
-                .type_definitions()
-                .iter()
-                .map(|type_definition| compile_type_definition(type_definition, type_context))
-                .collect::<Result<Vec<_>, _>>()?,
-        )
-        .collect(),
+        module
+            .type_definitions()
+            .iter()
+            .map(|type_definition| compile_type_definition(type_definition, type_context))
+            .collect::<Result<Vec<_>, _>>()?,
         vec![],
         vec![],
         module
