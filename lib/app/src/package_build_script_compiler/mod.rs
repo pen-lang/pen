@@ -24,7 +24,7 @@ pub fn compile(
                     output_directory,
                 )?,
                 child_build_script_files,
-            )
+            )?
             .as_bytes(),
     )?;
 
