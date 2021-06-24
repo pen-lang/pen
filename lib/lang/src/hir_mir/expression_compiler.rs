@@ -3,7 +3,6 @@ use super::{
         boolean_operation_transformer, equal_operation_transformer, not_equal_operation_transformer,
     },
     type_compiler,
-    type_compiler::NONE_RECORD_TYPE_NAME,
     type_context::TypeContext,
     CompileError,
 };
@@ -65,9 +64,7 @@ pub fn compile(
             mir::ir::Variable::new(CLOSURE_NAME),
         )
         .into(),
-        Expression::None(_) => {
-            mir::ir::Record::new(mir::types::Record::new(NONE_RECORD_TYPE_NAME), vec![]).into()
-        }
+        Expression::None(_) => mir::ir::Expression::None,
         Expression::Number(number) => mir::ir::Expression::Number(number.value()),
         Expression::Operation(operation) => compile_operation(operation, type_context)?,
         Expression::String(string) => mir::ir::ByteString::new(string.value()).into(),
