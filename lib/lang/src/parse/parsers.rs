@@ -218,7 +218,7 @@ fn any_type<'a>() -> impl Parser<Stream<'a>, Output = types::Any> {
 }
 
 fn reference_type<'a>() -> impl Parser<Stream<'a>, Output = types::Reference> {
-    (position(), qualified_identifier())
+    token((position(), qualified_identifier()))
         .map(|(position, identifier)| types::Reference::new(identifier, position))
         .expected("reference type")
 }
@@ -262,7 +262,6 @@ fn expression<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
 fn atomic_expression<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
     lazy(|| {
         no_partial(choice!(
-            record().map(Expression::from),
             record().map(Expression::from),
             list_literal().map(Expression::from),
             boolean_literal().map(Expression::from),
@@ -930,6 +929,14 @@ mod tests {
                 types::Number::new(Position::dummy()).into()
             );
             assert_eq!(
+                type_().parse(stream("Foo", "")).unwrap().0,
+                types::Reference::new("Foo", Position::dummy()).into()
+            );
+            assert_eq!(
+                type_().parse(stream("Foo.Bar", "")).unwrap().0,
+                types::Reference::new("Foo.Bar", Position::dummy()).into()
+            );
+            assert_eq!(
                 type_().parse(stream("\\(number)number", "")).unwrap().0,
                 types::Function::new(
                     vec![types::Number::new(Position::dummy()).into()],
@@ -1183,6 +1190,7 @@ mod tests {
                     Position::dummy()
                 ),
             );
+
             assert_eq!(
                 lambda()
                     .parse(stream("\\(x number,y number)number{42}", ""))
@@ -1194,6 +1202,19 @@ mod tests {
                         Argument::new("y", types::Number::new(Position::dummy()))
                     ],
                     types::Number::new(Position::dummy()),
+                    Block::new(vec![], Number::new(42.0, Position::dummy())),
+                    Position::dummy()
+                ),
+            );
+        }
+
+        #[test]
+        fn parse_lambda_with_reference_type() {
+            assert_eq!(
+                lambda().parse(stream("\\() Foo { 42 }", "")).unwrap().0,
+                Lambda::new(
+                    vec![],
+                    types::Reference::new("Foo", Position::dummy()),
                     Block::new(vec![], Number::new(42.0, Position::dummy())),
                     Position::dummy()
                 ),
@@ -1703,7 +1724,15 @@ mod tests {
 
             assert_eq!(
                 expression().parse(stream("Foo {foo:42}", "")).unwrap().0,
-                Variable::new("Foo", Position::dummy()).into()
+                Record::new(
+                    types::Reference::new("Foo", Position::dummy()),
+                    None,
+                    vec![("foo".into(), Number::new(42.0, Position::dummy()).into())]
+                        .into_iter()
+                        .collect(),
+                    Position::dummy()
+                )
+                .into()
             );
 
             assert_eq!(
@@ -1805,7 +1834,15 @@ mod tests {
                     .parse(stream("Foo {...foo,bar:42}", ""))
                     .unwrap()
                     .0,
-                Variable::new("Foo", Position::dummy()).into(),
+                Record::new(
+                    types::Reference::new("Foo", Position::dummy()),
+                    Some(Variable::new("foo", Position::dummy()).into()),
+                    vec![("bar".into(), Number::new(42.0, Position::dummy()).into())]
+                        .into_iter()
+                        .collect(),
+                    Position::dummy()
+                )
+                .into(),
             );
 
             assert!(record().parse(stream("Foo{...foo}", "")).is_err());
