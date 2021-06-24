@@ -38,3 +38,13 @@ Feature: Boolean
     """
     When I run `pen build`
     Then the exit status should be 0
+
+  Scenario: Use a not operation
+    Given a file named "Foo.pen" with:
+    """
+    f = \() boolean {
+      !true
+    }
+    """
+    When I run `pen build`
+    Then the exit status should be 0

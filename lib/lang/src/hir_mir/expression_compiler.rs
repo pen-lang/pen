@@ -165,7 +165,9 @@ fn compile_operation(
                 compile(&not_equal_operation_transformer::transform(operation))?
             }
         },
-        Operation::Not(_) => todo!(),
+        Operation::Not(operation) => {
+            mir::ir::If::new(compile(operation.expression())?, false, true).into()
+        }
         Operation::Order(operation) => mir::ir::ComparisonOperation::new(
             match operation.operator() {
                 OrderOperator::LessThan => mir::ir::ComparisonOperator::LessThan,

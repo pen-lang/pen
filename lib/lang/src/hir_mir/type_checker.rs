@@ -169,6 +169,13 @@ fn check_operation(
 
             boolean_type
         }
+        Operation::Not(operation) => {
+            let boolean_type = types::Boolean::new(operation.position().clone()).into();
+
+            check_subsumption(&check_expression(operation.expression())?, &boolean_type)?;
+
+            boolean_type
+        }
         _ => todo!(),
     })
 }
@@ -439,6 +446,26 @@ mod tests {
                     Position::dummy()
                 ))
             );
+        }
+
+        #[test]
+        fn check_not_operation() {
+            check_module(&Module::new(
+                vec![],
+                vec![],
+                vec![],
+                vec![Definition::without_source(
+                    "x",
+                    Lambda::new(
+                        vec![],
+                        types::Boolean::new(Position::dummy()),
+                        NotOperation::new(Boolean::new(true, Position::dummy()), Position::dummy()),
+                        Position::dummy(),
+                    ),
+                    false,
+                )],
+            ))
+            .unwrap();
         }
     }
 
