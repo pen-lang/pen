@@ -24,3 +24,25 @@ Feature: Number
     """
     When I run `pen build`
     Then the exit status should be 0
+
+  Scenario: Use order operators
+    Given a file named "Foo.pen" with:
+    """
+    f = \() boolean {
+      0 < 0
+    }
+
+    g = \() boolean {
+      0 <= 0
+    }
+
+    h = \() boolean {
+      0 > 0
+    }
+
+    i = \() boolean {
+      0 >= 0
+    }
+    """
+    When I run `pen build`
+    Then the exit status should be 0
