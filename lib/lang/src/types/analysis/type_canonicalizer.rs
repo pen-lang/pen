@@ -32,7 +32,13 @@ pub fn canonicalize(type_: &Type, types: &HashMap<String, Type>) -> Result<Type,
 fn canonicalize_union(union: &Union, types: &HashMap<String, Type>) -> Result<Type, TypeError> {
     Ok(collect_types(&union.clone().into(), types)?
         .into_iter()
-        .reduce(|one, other| Union::new(one, other, union.position().clone()).into())
+        .reduce(|one, other| {
+            if one.is_any() || other.is_any() {
+                one.clone().into()
+            } else {
+                Union::new(one, other, union.position().clone()).into()
+            }
+        })
         .unwrap())
 }
 
@@ -174,6 +180,22 @@ mod tests {
                 &Default::default(),
             ),
             Ok(List::new(Number::new(Position::dummy()), Position::dummy(),).into())
+        );
+    }
+
+    #[test]
+    fn canonicalize_union_with_any() {
+        assert_eq!(
+            canonicalize(
+                &Union::new(
+                    Number::new(Position::dummy()),
+                    Any::new(Position::dummy()),
+                    Position::dummy()
+                )
+                .into(),
+                &Default::default(),
+            ),
+            Ok(Any::new(Position::dummy()).into())
         );
     }
 }
