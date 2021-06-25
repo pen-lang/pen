@@ -576,7 +576,7 @@ mod tests {
                 vec![Definition::without_source(
                     "f",
                     Lambda::new(
-                        vec![Argument::new("xs", list_type.clone())],
+                        vec![Argument::new("xs", list_type)],
                         union_type.clone(),
                         IfList::new(
                             Variable::new("xs", Position::dummy()),
