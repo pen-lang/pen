@@ -3,14 +3,14 @@ use crate::{position::Position, types::Type};
 use std::sync::Arc;
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct RecordElement {
+pub struct RecordDeconstruction {
     type_: Option<Type>,
     element_name: String,
     record: Arc<Expression>,
     position: Position,
 }
 
-impl RecordElement {
+impl RecordDeconstruction {
     pub fn new(
         type_: Option<Type>,
         record: impl Into<Expression>,

@@ -292,7 +292,7 @@ fn transform_expression(
         },
         Expression::RecordConstruction(construction) => RecordConstruction::new(
             construction.type_().clone(),
-            transform_record_elements(
+            transform_record_deconstructions(
                 construction.elements(),
                 construction.position(),
                 construction.type_(),
@@ -302,7 +302,7 @@ fn transform_expression(
             construction.position().clone(),
         )
         .into(),
-        Expression::RecordElement(element) => RecordElement::new(
+        Expression::RecordDeconstruction(element) => RecordDeconstruction::new(
             element.type_().cloned(),
             transform_expression(element.record(), variables)?,
             element.element_name(),
@@ -312,7 +312,7 @@ fn transform_expression(
         Expression::RecordUpdate(update) => RecordUpdate::new(
             update.type_().clone(),
             transform_expression(update.record(), variables)?,
-            transform_record_elements(
+            transform_record_deconstructions(
                 update.elements(),
                 update.position(),
                 update.type_(),
@@ -337,7 +337,7 @@ fn transform_expression(
     })
 }
 
-fn transform_record_elements(
+fn transform_record_deconstructions(
     elements: &BTreeMap<String, Expression>,
     position: &Position,
     record_type: &Type,

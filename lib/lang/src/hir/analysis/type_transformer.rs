@@ -198,7 +198,7 @@ fn transform_expression(expression: &Expression, transform: &impl Fn(&Type) -> T
             construction.position().clone(),
         )
         .into(),
-        Expression::RecordElement(element) => RecordElement::new(
+        Expression::RecordDeconstruction(element) => RecordDeconstruction::new(
             element.type_().map(transform),
             transform_expression(element.record(), transform),
             element.element_name(),

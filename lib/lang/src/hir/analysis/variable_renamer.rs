@@ -148,7 +148,7 @@ fn rename_expression(expression: &Expression, names: &HashMap<String, String>) -
             construction.position().clone(),
         )
         .into(),
-        Expression::RecordElement(element) => RecordElement::new(
+        Expression::RecordDeconstruction(element) => RecordDeconstruction::new(
             element.type_().cloned(),
             rename_expression(element.record(), names),
             element.element_name(),

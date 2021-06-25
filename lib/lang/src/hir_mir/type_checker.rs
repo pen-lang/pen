@@ -103,14 +103,14 @@ fn check_expression(
                 check_subsumption(
                     &check_expression(expression, variables)?,
                     element_types.get(name).ok_or_else(|| {
-                        CompileError::RecordElementUnknown(expression.position().clone())
+                        CompileError::RecordDeconstructionUnknown(expression.position().clone())
                     })?,
                 )?;
             }
 
             for name in element_types.keys() {
                 if !construction.elements().contains_key(name) {
-                    return Err(CompileError::RecordElementMissing(
+                    return Err(CompileError::RecordDeconstructionMissing(
                         construction.position().clone(),
                     ));
                 }
@@ -135,7 +135,7 @@ fn check_expression(
                 check_subsumption(
                     &check_expression(expression, variables)?,
                     element_types.get(name).ok_or_else(|| {
-                        CompileError::RecordElementUnknown(expression.position().clone())
+                        CompileError::RecordDeconstructionUnknown(expression.position().clone())
                     })?,
                 )?;
             }
@@ -665,7 +665,7 @@ mod tests {
                         false
                     )],
                 )),
-                Err(CompileError::RecordElementMissing(_))
+                Err(CompileError::RecordDeconstructionMissing(_))
             ));
         }
 
@@ -701,7 +701,7 @@ mod tests {
                         false
                     )],
                 )),
-                Err(CompileError::RecordElementUnknown(_))
+                Err(CompileError::RecordDeconstructionUnknown(_))
             ));
         }
 
