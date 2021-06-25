@@ -12,7 +12,7 @@ Feature: Record
       x number,
     }
 
-    f = \() any {
+    f = \() r {
       r{x: 42}
     }
     """
@@ -27,8 +27,20 @@ Feature: Record
       y none,
     }
 
-    f = \() any {
+    f = \() r {
       r{x: 42, y: none}
+    }
+    """
+    When I run `pen build`
+    Then the exit status should be 0
+
+  Scenario: Create a record without no element
+    Given a file named "Foo.pen" with:
+    """
+    type r {}
+
+    f = \() r {
+      r
     }
     """
     When I run `pen build`
