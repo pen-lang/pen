@@ -20,7 +20,7 @@ pub fn canonicalize(type_: &Type, types: &HashMap<String, Type>) -> Result<Type,
             list.position().clone(),
         )
         .into(),
-        Type::Union(union) => canonicalize_union(&union, types)?,
+        Type::Union(union) => canonicalize_union(union, types)?,
         Type::Any(_)
         | Type::Boolean(_)
         | Type::Record(_)
