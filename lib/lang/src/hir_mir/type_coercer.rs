@@ -44,26 +44,24 @@ fn transform_lambda(
     variables: &HashMap<String, Type>,
     type_context: &TypeContext,
 ) -> Result<Lambda, CompileError> {
+    let variables = variables
+        .clone()
+        .into_iter()
+        .chain(
+            lambda
+                .arguments()
+                .iter()
+                .map(|argument| (argument.name().into(), argument.type_().clone())),
+        )
+        .collect();
+
     Ok(Lambda::new(
         lambda.arguments().to_vec(),
         lambda.result_type().clone(),
         coerce_expression(
-            &transform_expression(
-                lambda.body(),
-                &variables
-                    .clone()
-                    .into_iter()
-                    .chain(
-                        lambda
-                            .arguments()
-                            .iter()
-                            .map(|argument| (argument.name().into(), argument.type_().clone())),
-                    )
-                    .collect(),
-                type_context,
-            )?,
+            &transform_expression(lambda.body(), &variables, type_context)?,
             lambda.result_type(),
-            variables,
+            &variables,
             type_context,
         )?,
         lambda.position().clone(),
@@ -416,6 +414,53 @@ mod tests {
                             types::None::new(Position::dummy()),
                             union_type,
                             None::new(Position::dummy()),
+                            Position::dummy()
+                        ),
+                        Position::dummy(),
+                    ),
+                    false,
+                )],
+            ))
+        );
+    }
+
+    #[test]
+    fn coerce_function_result_of_variable() {
+        let union_type = types::Union::new(
+            types::Number::new(Position::dummy()),
+            types::None::new(Position::dummy()),
+            Position::dummy(),
+        );
+
+        assert_eq!(
+            coerce_module(&Module::new(
+                vec![],
+                vec![],
+                vec![],
+                vec![Definition::without_source(
+                    "f",
+                    Lambda::new(
+                        vec![Argument::new("x", types::None::new(Position::dummy()))],
+                        union_type.clone(),
+                        Variable::new("x", Position::dummy()),
+                        Position::dummy(),
+                    ),
+                    false,
+                )],
+            )),
+            Ok(Module::new(
+                vec![],
+                vec![],
+                vec![],
+                vec![Definition::without_source(
+                    "f",
+                    Lambda::new(
+                        vec![Argument::new("x", types::None::new(Position::dummy()))],
+                        union_type.clone(),
+                        TypeCoercion::new(
+                            types::None::new(Position::dummy()),
+                            union_type,
+                            Variable::new("x", Position::dummy()),
                             Position::dummy()
                         ),
                         Position::dummy(),
