@@ -71,13 +71,11 @@ pub fn compile(
         Expression::TypeCoercion(coercion) => {
             let from = type_canonicalizer::canonicalize(coercion.from(), type_context.types())?;
             let to = type_canonicalizer::canonicalize(coercion.to(), type_context.types())?;
+            let argument = compile(coercion.argument())?;
 
             if from.is_list() && to.is_list() {
-                compile(coercion.argument())?
+                argument
             } else {
-                // Coerce to union or Any types.
-                let argument = compile(coercion.argument())?;
-
                 match &from {
                     Type::Boolean(_)
                     | Type::None(_)
