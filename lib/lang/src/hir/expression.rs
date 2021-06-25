@@ -42,7 +42,7 @@ impl Expression {
             Self::Number(number) => number.position(),
             Self::Operation(operation) => operation.position(),
             Self::RecordConstruction(construction) => construction.position(),
-            Self::RecordDeconstruction(element) => element.position(),
+            Self::RecordDeconstruction(deconstruction) => deconstruction.position(),
             Self::RecordUpdate(record_update) => record_update.position(),
             Self::String(string) => string.position(),
             Self::TypeCoercion(coercion) => coercion.position(),

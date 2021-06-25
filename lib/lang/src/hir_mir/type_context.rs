@@ -9,7 +9,7 @@ use crate::{
 use std::collections::HashMap;
 
 pub struct TypeContext {
-    records: HashMap<String, HashMap<String, Type>>,
+    records: HashMap<String, Vec<types::RecordElement>>,
     types: HashMap<String, Type>,
     list_type_configuration: ListTypeConfiguration,
     string_type_configuration: StringTypeConfiguration,
@@ -25,16 +25,7 @@ impl TypeContext {
             records: module
                 .type_definitions()
                 .iter()
-                .map(|definition| {
-                    (
-                        definition.name().into(),
-                        definition
-                            .elements()
-                            .iter()
-                            .map(|element| (element.name().into(), element.type_().clone()))
-                            .collect(),
-                    )
-                })
+                .map(|definition| (definition.name().into(), definition.elements().to_vec()))
                 .collect(),
             types: module
                 .type_definitions()
@@ -59,7 +50,7 @@ impl TypeContext {
 
     #[cfg(test)]
     pub fn dummy(
-        records: HashMap<String, HashMap<String, Type>>,
+        records: HashMap<String, Vec<types::RecordElement>>,
         types: HashMap<String, Type>,
     ) -> Self {
         use super::{
@@ -75,7 +66,7 @@ impl TypeContext {
         }
     }
 
-    pub fn records(&self) -> &HashMap<String, HashMap<String, Type>> {
+    pub fn records(&self) -> &HashMap<String, Vec<types::RecordElement>> {
         &self.records
     }
 

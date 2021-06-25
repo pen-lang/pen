@@ -102,9 +102,13 @@ fn check_expression(
             for element in construction.elements() {
                 check_subsumption(
                     &check_expression(element.expression(), variables)?,
-                    element_types.get(element.name()).ok_or_else(|| {
-                        CompileError::RecordDeconstructionUnknown(expression.position().clone())
-                    })?,
+                    element_types
+                        .iter()
+                        .find(|element_type| element_type.name() == element.name())
+                        .ok_or_else(|| {
+                            CompileError::RecordElementUnknown(expression.position().clone())
+                        })?
+                        .type_(),
                 )?;
             }
 
@@ -114,8 +118,8 @@ fn check_expression(
                 .map(|element| element.name())
                 .collect::<HashSet<_>>();
 
-            for name in element_types.keys() {
-                if !element_names.contains(name.as_str()) {
+            for element_type in element_types {
+                if !element_names.contains(element_type.name()) {
                     return Err(CompileError::RecordElementMissing(
                         construction.position().clone(),
                     ));
@@ -140,9 +144,13 @@ fn check_expression(
             for element in update.elements() {
                 check_subsumption(
                     &check_expression(element.expression(), variables)?,
-                    element_types.get(element.name()).ok_or_else(|| {
-                        CompileError::RecordDeconstructionUnknown(expression.position().clone())
-                    })?,
+                    element_types
+                        .iter()
+                        .find(|element_type| element_type.name() == element.name())
+                        .ok_or_else(|| {
+                            CompileError::RecordElementUnknown(expression.position().clone())
+                        })?
+                        .type_(),
                 )?;
             }
 
@@ -711,7 +719,7 @@ mod tests {
                         false
                     )],
                 )),
-                Err(CompileError::RecordDeconstructionUnknown(_))
+                Err(CompileError::RecordElementUnknown(_))
             ));
         }
 
