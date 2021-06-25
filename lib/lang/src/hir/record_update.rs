@@ -1,6 +1,6 @@
 use super::{expression::Expression, RecordElement};
 use crate::{position::Position, types::Type};
-use std::{collections::BTreeMap, sync::Arc};
+use std::sync::Arc;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct RecordUpdate {

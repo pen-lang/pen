@@ -420,7 +420,7 @@ fn record<'a>() -> impl Parser<Stream<'a>, Output = Record> {
 }
 
 fn record_element<'a>() -> impl Parser<Stream<'a>, Output = RecordElement> {
-    ((position(), identifier(), sign(":"), expression()))
+    (position(), identifier(), sign(":"), expression())
         .map(|(position, name, _, expression)| RecordElement::new(name, expression, position))
 }
 

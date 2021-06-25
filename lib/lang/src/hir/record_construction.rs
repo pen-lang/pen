@@ -1,6 +1,5 @@
-use super::{expression::Expression, RecordElement};
+use super::RecordElement;
 use crate::{position::Position, types::Type};
-use std::collections::BTreeMap;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct RecordConstruction {

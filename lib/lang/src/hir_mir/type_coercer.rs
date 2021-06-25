@@ -8,7 +8,7 @@ use crate::{
         Type,
     },
 };
-use std::collections::{BTreeMap, HashMap};
+use std::collections::HashMap;
 
 pub fn coerce_types(module: &Module, type_context: &TypeContext) -> Result<Module, CompileError> {
     let variables = environment_creator::create_from_module(module);
