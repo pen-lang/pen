@@ -3,6 +3,7 @@ use crate::{
     hir::*,
     position::Position,
     types::{
+        self,
         analysis::{type_equality_checker, type_resolver},
         Type,
     },
@@ -76,7 +77,7 @@ fn transform_expression(
 ) -> Result<Expression, CompileError> {
     let transform_expression =
         |expression, variables| transform_expression(expression, variables, type_context);
-    let transform_and_coerce_expression = |expression, type_, variables| {
+    let transform_and_coerce_expression = |expression, type_: &_, variables| {
         coerce_expression(
             &transform_expression(expression, variables)?,
             type_,
@@ -191,24 +192,29 @@ fn transform_expression(
         //     .into()
         // }
         Expression::Lambda(lambda) => transform_lambda(lambda, variables, type_context)?.into(),
-        // Expression::List(list) => List::new(
-        //     list.type_().clone(),
-        //     list.elements()
-        //         .iter()
-        //         .map(|element| {
-        //             Ok(match element {
-        //                 ListElement::Multiple(element) => {
-        //                     ListElement::Multiple(transform_expression(element, variables)?)
-        //                 }
-        //                 ListElement::Single(element) => {
-        //                     ListElement::Single(transform_expression(element, variables)?)
-        //                 }
-        //             })
-        //         })
-        //         .collect::<Result<_, CompileError>>()?,
-        //     list.position().clone(),
-        // )
-        // .into(),
+        Expression::List(list) => List::new(
+            list.type_().clone(),
+            list.elements()
+                .iter()
+                .map(|element| {
+                    Ok(match element {
+                        ListElement::Multiple(element) => {
+                            ListElement::Multiple(transform_and_coerce_expression(
+                                element,
+                                &types::List::new(list.type_().clone(), element.position().clone())
+                                    .into(),
+                                variables,
+                            )?)
+                        }
+                        ListElement::Single(element) => ListElement::Single(
+                            transform_and_coerce_expression(element, list.type_(), variables)?,
+                        ),
+                    })
+                })
+                .collect::<Result<_, CompileError>>()?,
+            list.position().clone(),
+        )
+        .into(),
         Expression::Operation(operation) => match operation {
             Operation::Arithmetic(operation) => ArithmeticOperation::new(
                 operation.operator(),
@@ -462,21 +468,13 @@ mod tests {
                             Boolean::new(true, Position::dummy()),
                             TypeCoercion::new(
                                 types::Number::new(Position::dummy()),
-                                types::Union::new(
-                                    types::Number::new(Position::dummy()),
-                                    types::None::new(Position::dummy()),
-                                    Position::dummy()
-                                ),
+                                union_type.clone(),
                                 Number::new(42.0, Position::dummy()),
                                 Position::dummy(),
                             ),
                             TypeCoercion::new(
                                 types::None::new(Position::dummy()),
-                                types::Union::new(
-                                    types::Number::new(Position::dummy()),
-                                    types::None::new(Position::dummy()),
-                                    Position::dummy()
-                                ),
+                                union_type.clone(),
                                 None::new(Position::dummy()),
                                 Position::dummy(),
                             ),
@@ -534,24 +532,148 @@ mod tests {
                             EqualityOperator::Equal,
                             TypeCoercion::new(
                                 types::Number::new(Position::dummy()),
-                                types::Union::new(
-                                    types::Number::new(Position::dummy()),
-                                    types::None::new(Position::dummy()),
-                                    Position::dummy()
-                                ),
+                                union_type.clone(),
                                 Number::new(42.0, Position::dummy()),
                                 Position::dummy(),
                             ),
                             TypeCoercion::new(
                                 types::None::new(Position::dummy()),
-                                types::Union::new(
-                                    types::Number::new(Position::dummy()),
-                                    types::None::new(Position::dummy()),
-                                    Position::dummy()
-                                ),
+                                union_type.clone(),
                                 None::new(Position::dummy()),
                                 Position::dummy(),
                             ),
+                            Position::dummy(),
+                        ),
+                        Position::dummy(),
+                    ),
+                    false,
+                )],
+            ))
+        );
+    }
+
+    #[test]
+    fn coerce_single_element_in_list() {
+        let union_type = types::Union::new(
+            types::Number::new(Position::dummy()),
+            types::None::new(Position::dummy()),
+            Position::dummy(),
+        );
+        let list_type = types::List::new(union_type.clone(), Position::dummy());
+
+        assert_eq!(
+            coerce_module(&Module::new(
+                vec![],
+                vec![],
+                vec![],
+                vec![Definition::without_source(
+                    "f",
+                    Lambda::new(
+                        vec![],
+                        list_type.clone(),
+                        List::new(
+                            union_type.clone(),
+                            vec![ListElement::Single(None::new(Position::dummy()).into())],
+                            Position::dummy(),
+                        ),
+                        Position::dummy(),
+                    ),
+                    false,
+                )],
+            )),
+            Ok(Module::new(
+                vec![],
+                vec![],
+                vec![],
+                vec![Definition::without_source(
+                    "f",
+                    Lambda::new(
+                        vec![],
+                        list_type.clone(),
+                        List::new(
+                            union_type.clone(),
+                            vec![ListElement::Single(
+                                TypeCoercion::new(
+                                    types::None::new(Position::dummy()),
+                                    union_type.clone(),
+                                    None::new(Position::dummy()),
+                                    Position::dummy(),
+                                )
+                                .into()
+                            )],
+                            Position::dummy(),
+                        ),
+                        Position::dummy(),
+                    ),
+                    false,
+                )],
+            ))
+        );
+    }
+
+    #[test]
+    fn coerce_multiple_element_in_list() {
+        let union_type = types::Union::new(
+            types::Number::new(Position::dummy()),
+            types::None::new(Position::dummy()),
+            Position::dummy(),
+        );
+        let list_type = types::List::new(union_type.clone(), Position::dummy());
+
+        assert_eq!(
+            coerce_module(&Module::new(
+                vec![],
+                vec![],
+                vec![],
+                vec![Definition::without_source(
+                    "f",
+                    Lambda::new(
+                        vec![],
+                        list_type.clone(),
+                        List::new(
+                            union_type.clone(),
+                            vec![ListElement::Multiple(
+                                List::new(
+                                    types::None::new(Position::dummy()),
+                                    vec![],
+                                    Position::dummy()
+                                )
+                                .into()
+                            )],
+                            Position::dummy(),
+                        ),
+                        Position::dummy(),
+                    ),
+                    false,
+                )],
+            )),
+            Ok(Module::new(
+                vec![],
+                vec![],
+                vec![],
+                vec![Definition::without_source(
+                    "f",
+                    Lambda::new(
+                        vec![],
+                        list_type.clone(),
+                        List::new(
+                            union_type.clone(),
+                            vec![ListElement::Multiple(
+                                TypeCoercion::new(
+                                    types::List::new(
+                                        types::None::new(Position::dummy()),
+                                        Position::dummy()
+                                    ),
+                                    list_type.clone(),
+                                    List::new(
+                                        types::None::new(Position::dummy()),
+                                        vec![],
+                                        Position::dummy()
+                                    ),
+                                    Position::dummy(),
+                                )
+                                .into()
+                            )],
                             Position::dummy(),
                         ),
                         Position::dummy(),
@@ -615,11 +737,7 @@ mod tests {
                                 "x".into(),
                                 TypeCoercion::new(
                                     types::None::new(Position::dummy()),
-                                    types::Union::new(
-                                        types::Number::new(Position::dummy()),
-                                        types::None::new(Position::dummy()),
-                                        Position::dummy()
-                                    ),
+                                    union_type.clone(),
                                     None::new(Position::dummy()),
                                     Position::dummy(),
                                 )
@@ -692,11 +810,7 @@ mod tests {
                                 "x".into(),
                                 TypeCoercion::new(
                                     types::None::new(Position::dummy()),
-                                    types::Union::new(
-                                        types::Number::new(Position::dummy()),
-                                        types::None::new(Position::dummy()),
-                                        Position::dummy()
-                                    ),
+                                    union_type.clone(),
                                     None::new(Position::dummy()),
                                     Position::dummy(),
                                 )
