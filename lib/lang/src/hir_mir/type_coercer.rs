@@ -302,11 +302,11 @@ fn transform_expression(
             construction.position().clone(),
         )
         .into(),
-        Expression::RecordDeconstruction(element) => RecordDeconstruction::new(
-            element.type_().cloned(),
-            transform_expression(element.record(), variables)?,
-            element.element_name(),
-            element.position().clone(),
+        Expression::RecordDeconstruction(deconstruction) => RecordDeconstruction::new(
+            deconstruction.type_().cloned(),
+            transform_expression(deconstruction.record(), variables)?,
+            deconstruction.element_name(),
+            deconstruction.position().clone(),
         )
         .into(),
         Expression::RecordUpdate(update) => RecordUpdate::new(

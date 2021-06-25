@@ -204,11 +204,11 @@ fn transform_expression(expression: &Expression, transform: &impl Fn(&Type) -> T
             construction.position().clone(),
         )
         .into(),
-        Expression::RecordDeconstruction(element) => RecordDeconstruction::new(
-            element.type_().map(transform),
-            transform_expression(element.record(), transform),
-            element.element_name(),
-            element.position().clone(),
+        Expression::RecordDeconstruction(deconstruction) => RecordDeconstruction::new(
+            deconstruction.type_().map(transform),
+            transform_expression(deconstruction.record(), transform),
+            deconstruction.element_name(),
+            deconstruction.position().clone(),
         )
         .into(),
         Expression::RecordUpdate(update) => RecordUpdate::new(

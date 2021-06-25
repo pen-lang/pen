@@ -253,8 +253,8 @@ fn infer_expression(
             construction.position().clone(),
         )
         .into(),
-        Expression::RecordDeconstruction(element) => {
-            let record = infer_expression(element.record(), variables)?;
+        Expression::RecordDeconstruction(deconstruction) => {
+            let record = infer_expression(deconstruction.record(), variables)?;
 
             RecordDeconstruction::new(
                 Some(type_extractor::extract_from_expression(
@@ -263,8 +263,8 @@ fn infer_expression(
                     type_context,
                 )?),
                 record,
-                element.element_name(),
-                element.position().clone(),
+                deconstruction.element_name(),
+                deconstruction.position().clone(),
             )
             .into()
         }
