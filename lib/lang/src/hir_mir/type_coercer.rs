@@ -121,28 +121,35 @@ fn transform_expression(
             )
             .into()
         }
-        // Expression::IfList(if_) => {
-        //     let then = transform_expression(if_.then(), variables)?;
-        //     let else_ = transform_expression(if_.else_(), variables)?;
+        Expression::IfList(if_) => {
+            let list_type = type_resolver::resolve_to_list(
+                &extract_type(if_.argument(), variables)?,
+                type_context.types(),
+            )?
+            .ok_or_else(|| CompileError::ListExpected(if_.argument().position().clone()))?;
+            let result_type = extract_type(expression, variables)?;
 
-        //     IfList::new(
-        //         transform_expression(if_.argument(), variables)?,
-        //         if_.first_name(),
-        //         if_.rest_name(),
-        //         then.clone(),
-        //         else_.clone(),
-        //         Some(
-        //             types::Union::new(
-        //                 type_extractor::extract_from_block(&then, types)?,
-        //                 type_extractor::extract_from_block(&else_, types)?,
-        //                 if_.position().clone(),
-        //             )
-        //             .into(),
-        //         ),
-        //         if_.position().clone(),
-        //     )
-        //     .into()
-        // }
+            IfList::new(
+                transform_expression(if_.argument(), variables)?,
+                if_.first_name(),
+                if_.rest_name(),
+                transform_and_coerce_expression(
+                    if_.then(),
+                    &result_type,
+                    &variables
+                        .clone()
+                        .into_iter()
+                        .chain(vec![
+                            (if_.first_name().into(), list_type.element().clone()),
+                            (if_.rest_name().into(), list_type.clone().into()),
+                        ])
+                        .collect(),
+                )?,
+                transform_and_coerce_expression(if_.else_(), &result_type, variables)?,
+                if_.position().clone(),
+            )
+            .into()
+        }
         // Expression::IfType(if_) => {
         //     let argument = transform_expression(if_.argument(), variables)?;
         //     let branches = if_
@@ -515,6 +522,73 @@ mod tests {
                                 types::Number::new(Position::dummy()),
                                 union_type.clone(),
                                 Number::new(42.0, Position::dummy()),
+                                Position::dummy(),
+                            ),
+                            TypeCoercion::new(
+                                types::None::new(Position::dummy()),
+                                union_type,
+                                None::new(Position::dummy()),
+                                Position::dummy(),
+                            ),
+                            Position::dummy(),
+                        ),
+                        Position::dummy(),
+                    ),
+                    false,
+                )],
+            ))
+        );
+    }
+
+    #[test]
+    fn coerce_if_list() {
+        let union_type = types::Union::new(
+            types::Number::new(Position::dummy()),
+            types::None::new(Position::dummy()),
+            Position::dummy(),
+        );
+        let list_type = types::List::new(types::Number::new(Position::dummy()), Position::dummy());
+
+        assert_eq!(
+            coerce_module(&Module::new(
+                vec![],
+                vec![],
+                vec![],
+                vec![Definition::without_source(
+                    "f",
+                    Lambda::new(
+                        vec![Argument::new("xs", list_type.clone())],
+                        union_type.clone(),
+                        IfList::new(
+                            Variable::new("xs", Position::dummy()),
+                            "x",
+                            "xs",
+                            Variable::new("x", Position::dummy()),
+                            None::new(Position::dummy()),
+                            Position::dummy(),
+                        ),
+                        Position::dummy(),
+                    ),
+                    false,
+                )],
+            )),
+            Ok(Module::new(
+                vec![],
+                vec![],
+                vec![],
+                vec![Definition::without_source(
+                    "f",
+                    Lambda::new(
+                        vec![Argument::new("xs", list_type.clone())],
+                        union_type.clone(),
+                        IfList::new(
+                            Variable::new("xs", Position::dummy()),
+                            "x",
+                            "xs",
+                            TypeCoercion::new(
+                                types::Number::new(Position::dummy()),
+                                union_type.clone(),
+                                Variable::new("x", Position::dummy()),
                                 Position::dummy(),
                             ),
                             TypeCoercion::new(
