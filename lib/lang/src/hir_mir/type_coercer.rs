@@ -74,8 +74,8 @@ fn transform_expression(
     type_context: &TypeContext,
 ) -> Result<Expression, CompileError> {
     let transform_expression =
-        |expression, variables| transform_expression(expression, variables, type_context);
-    let transform_and_coerce_expression = |expression, type_: &_, variables| {
+        |expression, variables: &_| transform_expression(expression, variables, type_context);
+    let transform_and_coerce_expression = |expression, type_: &_, variables: &_| {
         coerce_expression(
             &transform_expression(expression, variables)?,
             type_,
@@ -150,53 +150,51 @@ fn transform_expression(
             )
             .into()
         }
-        // Expression::IfType(if_) => {
-        //     let argument = transform_expression(if_.argument(), variables)?;
-        //     let branches = if_
-        //         .branches()
-        //         .iter()
-        //         .map(|branch| -> Result<_, CompileError> {
-        //             Ok(IfTypeBranch::new(
-        //                 branch.type_().clone(),
-        //                 transform_expression(
-        //                     branch.block(),
-        //                     &variables
-        //                         .clone()
-        //                         .into_iter()
-        //                         .chain(vec![(if_.name().into(), branch.type_().clone())])
-        //                         .collect(),
-        //                 )?,
-        //             ))
-        //         })
-        //         .collect::<Result<Vec<_>, _>>()?;
-        //     let else_ = if_
-        //         .else_()
-        //         .map(|block| transform_expression(block, variables))
-        //         .transpose()?;
+        Expression::IfType(if_) => {
+            let result_type = extract_type(expression, variables)?;
 
-        //     IfType::new(
-        //         if_.name(),
-        //         argument.clone(),
-        //         Some(type_extractor::extract_from_expression(&argument, types)?),
-        //         branches.clone(),
-        //         else_.clone(),
-        //         Some(
-        //             union_type_creator::create_union_type(
-        //                 &branches
-        //                     .iter()
-        //                     .map(|alternative| alternative.block())
-        //                     .chain(&else_)
-        //                     .map(|block| type_extractor::extract_from_block(block, types))
-        //                     .collect::<Result<Vec<_>, _>>()?,
-        //                 if_.position(),
-        //             )
-        //             .unwrap(),
-        //         ),
-        //         if_.position().clone(),
-        //     )
-        //     .into()
-        // }
+            IfType::new(
+                if_.name(),
+                transform_expression(if_.argument(), variables)?,
+                if_.branches()
+                    .iter()
+                    .map(|branch| -> Result<_, CompileError> {
+                        Ok(IfTypeBranch::new(
+                            branch.type_().clone(),
+                            transform_and_coerce_expression(
+                                branch.expression(),
+                                &result_type,
+                                &variables
+                                    .clone()
+                                    .into_iter()
+                                    .chain(vec![(if_.name().into(), branch.type_().clone())])
+                                    .collect(),
+                            )?,
+                        ))
+                    })
+                    .collect::<Result<Vec<_>, _>>()?,
+                if_.else_()
+                    .map(|expression| {
+                        transform_and_coerce_expression(
+                            expression,
+                            &result_type,
+                            &variables
+                                .clone()
+                                .into_iter()
+                                .chain(vec![(
+                                    if_.name().into(),
+                                    extract_type(expression, variables)?,
+                                )])
+                                .collect(),
+                        )
+                    })
+                    .transpose()?,
+                if_.position().clone(),
+            )
+            .into()
+        }
         Expression::Lambda(lambda) => transform_lambda(lambda, variables, type_context)?.into(),
+        Expression::Let(_) => todo!(),
         Expression::List(list) => List::new(
             list.type_().clone(),
             list.elements()
@@ -307,7 +305,6 @@ fn transform_expression(
         | Expression::Number(_)
         | Expression::String(_)
         | Expression::Variable(_) => expression.clone(),
-        _ => todo!(),
     })
 }
 
@@ -596,6 +593,79 @@ mod tests {
                                 union_type,
                                 None::new(Position::dummy()),
                                 Position::dummy(),
+                            ),
+                            Position::dummy(),
+                        ),
+                        Position::dummy(),
+                    ),
+                    false,
+                )],
+            ))
+        );
+    }
+
+    #[test]
+    fn coerce_if_type() {
+        let union_type = types::Union::new(
+            types::Number::new(Position::dummy()),
+            types::None::new(Position::dummy()),
+            Position::dummy(),
+        );
+
+        assert_eq!(
+            coerce_module(&Module::new(
+                vec![],
+                vec![],
+                vec![],
+                vec![Definition::without_source(
+                    "f",
+                    Lambda::new(
+                        vec![Argument::new("x", union_type.clone())],
+                        union_type.clone(),
+                        IfType::new(
+                            "y",
+                            Variable::new("x", Position::dummy()),
+                            vec![IfTypeBranch::new(
+                                types::Number::new(Position::dummy()),
+                                Variable::new("y", Position::dummy()),
+                            )],
+                            Some(None::new(Position::dummy()).into()),
+                            Position::dummy(),
+                        ),
+                        Position::dummy(),
+                    ),
+                    false,
+                )],
+            )),
+            Ok(Module::new(
+                vec![],
+                vec![],
+                vec![],
+                vec![Definition::without_source(
+                    "f",
+                    Lambda::new(
+                        vec![Argument::new("x", union_type.clone())],
+                        union_type.clone(),
+                        IfType::new(
+                            "y",
+                            Variable::new("x", Position::dummy()),
+                            vec![IfTypeBranch::new(
+                                types::Number::new(Position::dummy()),
+                                TypeCoercion::new(
+                                    types::Number::new(Position::dummy()),
+                                    union_type.clone(),
+                                    Variable::new("y", Position::dummy()),
+                                    Position::dummy(),
+                                ),
+                            )],
+                            Some(
+                                TypeCoercion::new(
+                                    types::None::new(Position::dummy()),
+                                    union_type,
+                                    None::new(Position::dummy()),
+                                    Position::dummy(),
+                                )
+                                .into()
                             ),
                             Position::dummy(),
                         ),
