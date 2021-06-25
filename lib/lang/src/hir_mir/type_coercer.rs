@@ -414,7 +414,7 @@ mod tests {
                         union_type.clone(),
                         TypeCoercion::new(
                             types::None::new(Position::dummy()),
-                            union_type.clone(),
+                            union_type,
                             None::new(Position::dummy()),
                             Position::dummy()
                         ),
@@ -474,7 +474,7 @@ mod tests {
                             ),
                             TypeCoercion::new(
                                 types::None::new(Position::dummy()),
-                                union_type.clone(),
+                                union_type,
                                 None::new(Position::dummy()),
                                 Position::dummy(),
                             ),
@@ -538,7 +538,7 @@ mod tests {
                             ),
                             TypeCoercion::new(
                                 types::None::new(Position::dummy()),
-                                union_type.clone(),
+                                union_type,
                                 None::new(Position::dummy()),
                                 Position::dummy(),
                             ),
@@ -589,13 +589,13 @@ mod tests {
                     "f",
                     Lambda::new(
                         vec![],
-                        list_type.clone(),
+                        list_type,
                         List::new(
                             union_type.clone(),
                             vec![ListElement::Single(
                                 TypeCoercion::new(
                                     types::None::new(Position::dummy()),
-                                    union_type.clone(),
+                                    union_type,
                                     None::new(Position::dummy()),
                                     Position::dummy(),
                                 )
@@ -657,14 +657,14 @@ mod tests {
                         vec![],
                         list_type.clone(),
                         List::new(
-                            union_type.clone(),
+                            union_type,
                             vec![ListElement::Multiple(
                                 TypeCoercion::new(
                                     types::List::new(
                                         types::None::new(Position::dummy()),
                                         Position::dummy()
                                     ),
-                                    list_type.clone(),
+                                    list_type,
                                     List::new(
                                         types::None::new(Position::dummy()),
                                         vec![],
@@ -723,7 +723,7 @@ mod tests {
                 )],
             )),
             Ok(Module::new(
-                vec![type_definition.clone()],
+                vec![type_definition],
                 vec![],
                 vec![],
                 vec![Definition::without_source(
@@ -732,12 +732,12 @@ mod tests {
                         vec![],
                         record_type.clone(),
                         RecordConstruction::new(
-                            record_type.clone(),
+                            record_type,
                             vec![(
                                 "x".into(),
                                 TypeCoercion::new(
                                     types::None::new(Position::dummy()),
-                                    union_type.clone(),
+                                    union_type,
                                     None::new(Position::dummy()),
                                     Position::dummy(),
                                 )
@@ -795,7 +795,7 @@ mod tests {
                 )],
             )),
             Ok(Module::new(
-                vec![type_definition.clone()],
+                vec![type_definition],
                 vec![],
                 vec![],
                 vec![Definition::without_source(
@@ -804,13 +804,13 @@ mod tests {
                         vec![Argument::new("r", record_type.clone())],
                         record_type.clone(),
                         RecordUpdate::new(
-                            record_type.clone(),
+                            record_type,
                             Variable::new("r", Position::dummy()),
                             vec![(
                                 "x".into(),
                                 TypeCoercion::new(
                                     types::None::new(Position::dummy()),
-                                    union_type.clone(),
+                                    union_type,
                                     None::new(Position::dummy()),
                                     Position::dummy(),
                                 )
