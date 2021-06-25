@@ -56,6 +56,10 @@ impl Type {
         }
     }
 
+    pub fn is_any(&self) -> bool {
+        matches!(self, Type::Any(_))
+    }
+
     pub fn is_function(&self) -> bool {
         matches!(self, Type::Function(_))
     }

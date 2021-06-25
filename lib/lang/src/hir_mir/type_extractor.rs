@@ -120,6 +120,14 @@ pub fn extract_from_expression(
         )?,
         Expression::None(none) => types::None::new(none.position().clone()).into(),
         Expression::Number(number) => types::Number::new(number.position().clone()).into(),
+        Expression::Operation(operation) => match operation {
+            Operation::Arithmetic(_) => types::Number::new(expression.position().clone()).into(),
+            Operation::Boolean(_)
+            | Operation::Equality(_)
+            | Operation::Not(_)
+            | Operation::Order(_) => types::Boolean::new(expression.position().clone()).into(),
+            Operation::Try(_) => todo!(),
+        },
         Expression::RecordConstruction(construction) => construction.type_().clone(),
         Expression::RecordElement(element) => type_resolver::resolve_record_elements(
             element
@@ -139,7 +147,6 @@ pub fn extract_from_expression(
             .get(variable.name())
             .cloned()
             .ok_or_else(|| CompileError::VariableNotFound(variable.clone()))?,
-        _ => todo!(),
     })
 }
 

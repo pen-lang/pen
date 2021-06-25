@@ -17,16 +17,16 @@ impl IfList {
         argument: impl Into<Expression>,
         first_name: impl Into<String>,
         rest_name: impl Into<String>,
-        then: Expression,
-        else_: Expression,
+        then: impl Into<Expression>,
+        else_: impl Into<Expression>,
         position: Position,
     ) -> Self {
         Self {
             argument: Arc::new(argument.into()),
             first_name: first_name.into(),
             rest_name: rest_name.into(),
-            then: then.into(),
-            else_: else_.into(),
+            then: then.into().into(),
+            else_: else_.into().into(),
             position,
         }
     }
