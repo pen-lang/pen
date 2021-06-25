@@ -33,8 +33,10 @@ fn canonicalize_union(union: &Union, types: &HashMap<String, Type>) -> Result<Ty
     Ok(collect_types(&union.clone().into(), types)?
         .into_iter()
         .reduce(|one, other| {
-            if one.is_any() || other.is_any() {
+            if one.is_any() {
                 one
+            } else if other.is_any() {
+                other
             } else {
                 Union::new(one, other, union.position().clone()).into()
             }
