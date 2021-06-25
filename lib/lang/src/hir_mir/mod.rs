@@ -7,6 +7,7 @@ mod module_interface_compiler;
 mod string_type_configuration;
 mod transformation;
 mod type_checker;
+mod type_coercer;
 mod type_compiler;
 mod type_context;
 mod type_extractor;
@@ -27,6 +28,7 @@ pub fn compile(
 
     let module = type_inferrer::infer_types(module, &type_context)?;
     type_checker::check_types(&module, &type_context)?;
+    let module = type_coercer::coerce_types(&module, &type_context)?;
 
     Ok((
         {
