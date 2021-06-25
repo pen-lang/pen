@@ -1,12 +1,12 @@
-use super::expression::Expression;
+use super::{expression::Expression, RecordElement};
 use crate::{position::Position, types::Type};
-use std::{collections::HashMap, sync::Arc};
+use std::sync::Arc;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Record {
     type_: Type,
     record: Arc<Option<Expression>>,
-    elements: HashMap<String, Expression>,
+    elements: Vec<RecordElement>,
     position: Position,
 }
 
@@ -14,7 +14,7 @@ impl Record {
     pub fn new(
         type_: impl Into<Type>,
         record: Option<Expression>,
-        elements: HashMap<String, Expression>,
+        elements: Vec<RecordElement>,
         position: Position,
     ) -> Self {
         Self {
@@ -33,7 +33,7 @@ impl Record {
         self.record.as_ref().as_ref()
     }
 
-    pub fn elements(&self) -> &HashMap<String, Expression> {
+    pub fn elements(&self) -> &[RecordElement] {
         &self.elements
     }
 

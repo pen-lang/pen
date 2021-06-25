@@ -1,4 +1,4 @@
-use super::expression::Expression;
+use super::{expression::Expression, RecordElement};
 use crate::{position::Position, types::Type};
 use std::{collections::BTreeMap, sync::Arc};
 
@@ -6,8 +6,7 @@ use std::{collections::BTreeMap, sync::Arc};
 pub struct RecordUpdate {
     type_: Type,
     record: Arc<Expression>,
-    // TODO Change elements to Vec to keep the evaluation order.
-    elements: BTreeMap<String, Expression>,
+    elements: Vec<RecordElement>,
     position: Position,
 }
 
@@ -15,7 +14,7 @@ impl RecordUpdate {
     pub fn new(
         type_: impl Into<Type>,
         record: impl Into<Expression>,
-        elements: BTreeMap<String, Expression>,
+        elements: Vec<RecordElement>,
         position: Position,
     ) -> Self {
         Self {
@@ -34,7 +33,7 @@ impl RecordUpdate {
         &self.record
     }
 
-    pub fn elements(&self) -> &BTreeMap<String, Expression> {
+    pub fn elements(&self) -> &[RecordElement] {
         &self.elements
     }
 

@@ -338,12 +338,12 @@ fn transform_expression(
 }
 
 fn transform_record_deconstructions(
-    elements: &BTreeMap<String, Expression>,
+    elements: &[RecordElement],
     position: &Position,
     record_type: &Type,
     variables: &HashMap<String, Type>,
     type_context: &TypeContext,
-) -> Result<BTreeMap<String, Expression>, CompileError> {
+) -> Result<Vec<RecordElement>, CompileError> {
     let element_types = type_resolver::resolve_record_elements(
         record_type,
         position,
@@ -353,15 +353,16 @@ fn transform_record_deconstructions(
 
     elements
         .iter()
-        .map(|(key, expression)| {
-            Ok((
-                key.clone(),
+        .map(|element| {
+            Ok(RecordElement::new(
+                element.name(),
                 coerce_expression(
-                    &transform_expression(expression, variables, type_context)?,
-                    &element_types[key],
+                    &transform_expression(element.expression(), variables, type_context)?,
+                    &element_types[element.name()],
                     variables,
                     type_context,
                 )?,
+                element.position().clone(),
             ))
         })
         .collect::<Result<_, _>>()
@@ -930,9 +931,11 @@ mod tests {
                         record_type.clone(),
                         RecordConstruction::new(
                             record_type.clone(),
-                            vec![("x".into(), None::new(Position::dummy()).into())]
-                                .into_iter()
-                                .collect(),
+                            vec![RecordElement::new(
+                                "x",
+                                None::new(Position::dummy()),
+                                Position::dummy()
+                            )],
                             Position::dummy(),
                         ),
                         Position::dummy(),
@@ -951,18 +954,16 @@ mod tests {
                         record_type.clone(),
                         RecordConstruction::new(
                             record_type,
-                            vec![(
-                                "x".into(),
+                            vec![RecordElement::new(
+                                "x",
                                 TypeCoercion::new(
                                     types::None::new(Position::dummy()),
                                     union_type,
                                     None::new(Position::dummy()),
                                     Position::dummy(),
-                                )
-                                .into()
-                            )]
-                            .into_iter()
-                            .collect(),
+                                ),
+                                Position::dummy(),
+                            )],
                             Position::dummy(),
                         ),
                         Position::dummy(),
@@ -1002,9 +1003,11 @@ mod tests {
                         RecordUpdate::new(
                             record_type.clone(),
                             Variable::new("r", Position::dummy()),
-                            vec![("x".into(), None::new(Position::dummy()).into())]
-                                .into_iter()
-                                .collect(),
+                            vec![RecordElement::new(
+                                "x",
+                                None::new(Position::dummy()),
+                                Position::dummy()
+                            )],
                             Position::dummy(),
                         ),
                         Position::dummy(),
@@ -1024,18 +1027,16 @@ mod tests {
                         RecordUpdate::new(
                             record_type,
                             Variable::new("r", Position::dummy()),
-                            vec![(
-                                "x".into(),
+                            vec![RecordElement::new(
+                                "x",
                                 TypeCoercion::new(
                                     types::None::new(Position::dummy()),
                                     union_type,
                                     None::new(Position::dummy()),
                                     Position::dummy(),
-                                )
-                                .into()
-                            )]
-                            .into_iter()
-                            .collect(),
+                                ),
+                                Position::dummy(),
+                            )],
                             Position::dummy(),
                         ),
                         Position::dummy(),

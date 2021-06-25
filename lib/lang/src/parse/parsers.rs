@@ -399,7 +399,7 @@ fn record<'a>() -> impl Parser<Stream<'a>, Output = Record> {
         reference_type(),
         string("{"),
         optional(between(sign("..."), sign(","), term())),
-        sep_end_by1((identifier().skip(sign(":")), expression()), sign(",")),
+        sep_end_by1(record_element(), sign(",")),
         sign("}"),
     )
         .then(|(position, reference_type, _, record, elements, _)| {
@@ -407,22 +407,21 @@ fn record<'a>() -> impl Parser<Stream<'a>, Output = Record> {
 
             if elements
                 .iter()
-                .map(|(key, _)| key.into())
-                .collect::<HashSet<String>>()
+                .map(|element| element.name())
+                .collect::<HashSet<_>>()
                 .len()
                 == elements.len()
             {
-                value(Record::new(
-                    reference_type,
-                    record,
-                    elements.into_iter().collect(),
-                    position,
-                ))
-                .left()
+                value(Record::new(reference_type, record, elements, position)).left()
             } else {
                 unexpected_any("duplicate keys in record literal").right()
             }
         })
+}
+
+fn record_element<'a>() -> impl Parser<Stream<'a>, Output = RecordElement> {
+    ((position(), identifier(), sign(":"), expression()))
+        .map(|(position, name, _, expression)| RecordElement::new(name, expression, position))
 }
 
 fn term<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
@@ -1740,9 +1739,11 @@ mod tests {
                 Record::new(
                     types::Reference::new("Foo", Position::dummy()),
                     None,
-                    vec![("foo".into(), Number::new(42.0, Position::dummy()).into())]
-                        .into_iter()
-                        .collect(),
+                    vec![RecordElement::new(
+                        "foo",
+                        Number::new(42.0, Position::dummy()),
+                        Position::dummy()
+                    )],
                     Position::dummy()
                 )
                 .into()
@@ -1753,9 +1754,11 @@ mod tests {
                 Record::new(
                     types::Reference::new("Foo", Position::dummy()),
                     None,
-                    vec![("foo".into(), Number::new(42.0, Position::dummy()).into())]
-                        .into_iter()
-                        .collect(),
+                    vec![RecordElement::new(
+                        "foo",
+                        Number::new(42.0, Position::dummy()),
+                        Position::dummy()
+                    )],
                     Position::dummy()
                 )
             );
@@ -1766,11 +1769,17 @@ mod tests {
                     types::Reference::new("Foo", Position::dummy()),
                     None,
                     vec![
-                        ("foo".into(), Number::new(42.0, Position::dummy()).into()),
-                        ("bar".into(), Number::new(42.0, Position::dummy()).into())
-                    ]
-                    .into_iter()
-                    .collect(),
+                        RecordElement::new(
+                            "foo",
+                            Number::new(42.0, Position::dummy()),
+                            Position::dummy()
+                        ),
+                        RecordElement::new(
+                            "bar",
+                            Number::new(42.0, Position::dummy()),
+                            Position::dummy()
+                        )
+                    ],
                     Position::dummy()
                 )
             );
@@ -1787,9 +1796,11 @@ mod tests {
                     vec![Record::new(
                         types::Reference::new("Foo", Position::dummy()),
                         None,
-                        vec![("foo".into(), Number::new(42.0, Position::dummy()).into())]
-                            .into_iter()
-                            .collect(),
+                        vec![RecordElement::new(
+                            "foo",
+                            Number::new(42.0, Position::dummy()),
+                            Position::dummy()
+                        )],
                         Position::dummy()
                     )
                     .into()],
@@ -1803,17 +1814,15 @@ mod tests {
                 Record::new(
                     types::Reference::new("Foo", Position::dummy()),
                     None,
-                    vec![(
-                        "foo".into(),
+                    vec![RecordElement::new(
+                        "foo",
                         Call::new(
                             Variable::new("bar", Position::dummy()),
                             vec![Number::new(42.0, Position::dummy()).into()],
                             Position::dummy()
-                        )
-                        .into()
-                    )]
-                    .into_iter()
-                    .collect(),
+                        ),
+                        Position::dummy()
+                    )],
                     Position::dummy()
                 )
             );
@@ -1823,9 +1832,11 @@ mod tests {
                 Record::new(
                     types::Reference::new("Foo", Position::dummy()),
                     Some(Variable::new("foo", Position::dummy()).into()),
-                    vec![("bar".into(), Number::new(42.0, Position::dummy()).into())]
-                        .into_iter()
-                        .collect(),
+                    vec![RecordElement::new(
+                        "bar",
+                        Number::new(42.0, Position::dummy()),
+                        Position::dummy()
+                    )],
                     Position::dummy()
                 )
             );
@@ -1835,9 +1846,11 @@ mod tests {
                 Record::new(
                     types::Reference::new("Foo", Position::dummy()),
                     Some(Variable::new("foo", Position::dummy()).into()),
-                    vec![("bar".into(), Number::new(42.0, Position::dummy()).into())]
-                        .into_iter()
-                        .collect(),
+                    vec![RecordElement::new(
+                        "bar",
+                        Number::new(42.0, Position::dummy()),
+                        Position::dummy()
+                    )],
                     Position::dummy()
                 )
             );
@@ -1850,9 +1863,11 @@ mod tests {
                 Record::new(
                     types::Reference::new("Foo", Position::dummy()),
                     Some(Variable::new("foo", Position::dummy()).into()),
-                    vec![("bar".into(), Number::new(42.0, Position::dummy()).into())]
-                        .into_iter()
-                        .collect(),
+                    vec![RecordElement::new(
+                        "bar",
+                        Number::new(42.0, Position::dummy()),
+                        Position::dummy()
+                    )],
                     Position::dummy()
                 )
                 .into(),

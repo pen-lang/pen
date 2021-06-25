@@ -242,7 +242,13 @@ fn infer_expression(
             construction
                 .elements()
                 .iter()
-                .map(|(key, element)| Ok((key.clone(), infer_expression(element, variables)?)))
+                .map(|element| {
+                    Ok(RecordElement::new(
+                        element.name(),
+                        infer_expression(element.expression(), variables)?,
+                        element.position().clone(),
+                    ))
+                })
                 .collect::<Result<_, CompileError>>()?,
             construction.position().clone(),
         )
@@ -268,7 +274,13 @@ fn infer_expression(
             update
                 .elements()
                 .iter()
-                .map(|(key, element)| Ok((key.clone(), infer_expression(element, variables)?)))
+                .map(|element| {
+                    Ok(RecordElement::new(
+                        element.name(),
+                        infer_expression(element.expression(), variables)?,
+                        element.position().clone(),
+                    ))
+                })
                 .collect::<Result<_, CompileError>>()?,
             update.position().clone(),
         )

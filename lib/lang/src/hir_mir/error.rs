@@ -14,7 +14,7 @@ pub enum CompileError {
     ListExpected(Position),
     MirTypeCheck(mir::analysis::TypeCheckError),
     RecordDeconstructionUnknown(Position),
-    RecordDeconstructionMissing(Position),
+    RecordElementMissing(Position),
     RecordExpected(Position),
     RecordNotFound(types::Record),
     TypeAnalysis(TypeError),
@@ -40,7 +40,7 @@ impl Display for CompileError {
             Self::RecordDeconstructionUnknown(position) => {
                 write!(formatter, "unknown record deconstruction\n{}", position)
             }
-            Self::RecordDeconstructionMissing(position) => {
+            Self::RecordElementMissing(position) => {
                 write!(formatter, "missing record deconstruction\n{}", position)
             }
             Self::RecordExpected(position) => {

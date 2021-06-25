@@ -267,7 +267,13 @@ fn compile_expression(expression: &ast::Expression) -> Result<hir::Expression, C
             let elements = record
                 .elements()
                 .iter()
-                .map(|(key, element)| Ok((key.clone(), compile_expression(element)?)))
+                .map(|element| {
+                    Ok(hir::RecordElement::new(
+                        element.name(),
+                        compile_expression(element.expression())?,
+                        element.position().clone(),
+                    ))
+                })
                 .collect::<Result<_, _>>()?;
 
             if let Some(old_record) = record.record() {
