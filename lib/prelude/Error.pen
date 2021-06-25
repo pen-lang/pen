@@ -1,0 +1,11 @@
+type PenError {
+  source any,
+}
+
+PenNewError = \(source any) PenError {
+  PenError{source: source}
+}
+
+PenSource = \(error PenError) any {
+  error.source
+}
