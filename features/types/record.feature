@@ -40,7 +40,7 @@ Feature: Record
     type r {}
 
     f = \() r {
-      r
+      r{}
     }
     """
     When I run `pen build`

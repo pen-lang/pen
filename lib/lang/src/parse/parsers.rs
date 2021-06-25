@@ -399,7 +399,7 @@ fn record<'a>() -> impl Parser<Stream<'a>, Output = Record> {
         reference_type(),
         string("{"),
         optional(between(sign("..."), sign(","), term())),
-        sep_end_by1(record_element(), sign(",")),
+        sep_end_by(record_element(), sign(",")),
         sign("}"),
     )
         .then(|(position, reference_type, _, record, elements, _)| {
@@ -1732,7 +1732,17 @@ mod tests {
         #[test]
         fn parse_record() {
             assert!(record().parse(stream("Foo", "")).is_err());
-            assert!(record().parse(stream("Foo{}", "")).is_err());
+
+            assert_eq!(
+                record().parse(stream("Foo {}", "")).unwrap().0,
+                Record::new(
+                    types::Reference::new("Foo", Position::dummy()),
+                    None,
+                    vec![],
+                    Position::dummy()
+                )
+                .into()
+            );
 
             assert_eq!(
                 expression().parse(stream("Foo {foo:42}", "")).unwrap().0,
