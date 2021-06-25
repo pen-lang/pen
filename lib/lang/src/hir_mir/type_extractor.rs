@@ -129,16 +129,18 @@ pub fn extract_from_expression(
             Operation::Try(_) => todo!(),
         },
         Expression::RecordConstruction(construction) => construction.type_().clone(),
-        Expression::RecordDeconstruction(element) => type_resolver::resolve_record_elements(
-            element
+        Expression::RecordDeconstruction(deconstruction) => type_resolver::resolve_record_elements(
+            deconstruction
                 .type_()
-                .ok_or_else(|| CompileError::TypeNotInferred(element.position().clone()))?,
-            element.position(),
+                .ok_or_else(|| CompileError::TypeNotInferred(deconstruction.position().clone()))?,
+            deconstruction.position(),
             type_context.types(),
             type_context.records(),
         )?
-        .get(element.element_name())
-        .ok_or_else(|| CompileError::RecordDeconstructionUnknown(element.position().clone()))?
+        .iter()
+        .find(|element| element.name() == deconstruction.element_name())
+        .ok_or_else(|| CompileError::RecordElementUnknown(deconstruction.position().clone()))?
+        .type_()
         .clone(),
         Expression::RecordUpdate(update) => update.type_().clone(),
         Expression::String(string) => types::ByteString::new(string.position().clone()).into(),

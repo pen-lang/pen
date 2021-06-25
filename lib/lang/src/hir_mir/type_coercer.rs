@@ -292,7 +292,7 @@ fn transform_expression(
         },
         Expression::RecordConstruction(construction) => RecordConstruction::new(
             construction.type_().clone(),
-            transform_record_deconstructions(
+            transform_record_elements(
                 construction.elements(),
                 construction.position(),
                 construction.type_(),
@@ -312,7 +312,7 @@ fn transform_expression(
         Expression::RecordUpdate(update) => RecordUpdate::new(
             update.type_().clone(),
             transform_expression(update.record(), variables)?,
-            transform_record_deconstructions(
+            transform_record_elements(
                 update.elements(),
                 update.position(),
                 update.type_(),
@@ -337,7 +337,7 @@ fn transform_expression(
     })
 }
 
-fn transform_record_deconstructions(
+fn transform_record_elements(
     elements: &[RecordElement],
     position: &Position,
     record_type: &Type,
@@ -358,7 +358,13 @@ fn transform_record_deconstructions(
                 element.name(),
                 coerce_expression(
                     &transform_expression(element.expression(), variables, type_context)?,
-                    &element_types[element.name()],
+                    element_types
+                        .iter()
+                        .find(|element_type| element_type.name() == element.name())
+                        .ok_or_else(|| {
+                            CompileError::RecordElementUnknown(element.position().clone())
+                        })?
+                        .type_(),
                     variables,
                     type_context,
                 )?,
