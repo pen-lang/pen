@@ -194,7 +194,36 @@ fn transform_expression(
             .into()
         }
         Expression::Lambda(lambda) => transform_lambda(lambda, variables, type_context)?.into(),
-        Expression::Let(_) => todo!(),
+        Expression::Let(let_) => Let::new(
+            let_.name().map(String::from),
+            let_.type_().cloned(),
+            transform_expression(let_.bound_expression(), variables)?,
+            transform_expression(
+                let_.expression(),
+                &variables
+                    .clone()
+                    .into_iter()
+                    .chain(
+                        let_.name()
+                            .map(|name| -> Result<_, CompileError> {
+                                Ok((
+                                    name.into(),
+                                    let_.type_()
+                                        .ok_or_else(|| {
+                                            CompileError::TypeNotInferred(
+                                                let_.bound_expression().position().clone(),
+                                            )
+                                        })?
+                                        .clone(),
+                                ))
+                            })
+                            .transpose()?,
+                    )
+                    .collect(),
+            )?,
+            let_.position().clone(),
+        )
+        .into(),
         Expression::List(list) => List::new(
             list.type_().clone(),
             list.elements()
