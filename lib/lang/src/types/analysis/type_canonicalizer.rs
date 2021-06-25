@@ -34,7 +34,7 @@ fn canonicalize_union(union: &Union, types: &HashMap<String, Type>) -> Result<Ty
         .into_iter()
         .reduce(|one, other| {
             if one.is_any() || other.is_any() {
-                one.clone().into()
+                one
             } else {
                 Union::new(one, other, union.position().clone()).into()
             }
