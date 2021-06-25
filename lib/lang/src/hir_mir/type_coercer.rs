@@ -8,7 +8,7 @@ use crate::{
         Type,
     },
 };
-use std::collections::{BTreeMap, HashMap};
+use std::collections::HashMap;
 
 pub fn coerce_types(module: &Module, type_context: &TypeContext) -> Result<Module, CompileError> {
     let variables = environment_creator::create_from_module(module);
@@ -292,7 +292,7 @@ fn transform_expression(
         },
         Expression::RecordConstruction(construction) => RecordConstruction::new(
             construction.type_().clone(),
-            transform_record_elements(
+            transform_record_deconstructions(
                 construction.elements(),
                 construction.position(),
                 construction.type_(),
@@ -302,7 +302,7 @@ fn transform_expression(
             construction.position().clone(),
         )
         .into(),
-        Expression::RecordElement(element) => RecordElement::new(
+        Expression::RecordDeconstruction(element) => RecordDeconstruction::new(
             element.type_().cloned(),
             transform_expression(element.record(), variables)?,
             element.element_name(),
@@ -312,7 +312,7 @@ fn transform_expression(
         Expression::RecordUpdate(update) => RecordUpdate::new(
             update.type_().clone(),
             transform_expression(update.record(), variables)?,
-            transform_record_elements(
+            transform_record_deconstructions(
                 update.elements(),
                 update.position(),
                 update.type_(),
@@ -337,13 +337,13 @@ fn transform_expression(
     })
 }
 
-fn transform_record_elements(
-    elements: &BTreeMap<String, Expression>,
+fn transform_record_deconstructions(
+    elements: &[RecordElement],
     position: &Position,
     record_type: &Type,
     variables: &HashMap<String, Type>,
     type_context: &TypeContext,
-) -> Result<BTreeMap<String, Expression>, CompileError> {
+) -> Result<Vec<RecordElement>, CompileError> {
     let element_types = type_resolver::resolve_record_elements(
         record_type,
         position,
@@ -353,15 +353,16 @@ fn transform_record_elements(
 
     elements
         .iter()
-        .map(|(key, expression)| {
-            Ok((
-                key.clone(),
+        .map(|element| {
+            Ok(RecordElement::new(
+                element.name(),
                 coerce_expression(
-                    &transform_expression(expression, variables, type_context)?,
-                    &element_types[key],
+                    &transform_expression(element.expression(), variables, type_context)?,
+                    &element_types[element.name()],
                     variables,
                     type_context,
                 )?,
+                element.position().clone(),
             ))
         })
         .collect::<Result<_, _>>()
@@ -930,9 +931,11 @@ mod tests {
                         record_type.clone(),
                         RecordConstruction::new(
                             record_type.clone(),
-                            vec![("x".into(), None::new(Position::dummy()).into())]
-                                .into_iter()
-                                .collect(),
+                            vec![RecordElement::new(
+                                "x",
+                                None::new(Position::dummy()),
+                                Position::dummy()
+                            )],
                             Position::dummy(),
                         ),
                         Position::dummy(),
@@ -951,18 +954,16 @@ mod tests {
                         record_type.clone(),
                         RecordConstruction::new(
                             record_type,
-                            vec![(
-                                "x".into(),
+                            vec![RecordElement::new(
+                                "x",
                                 TypeCoercion::new(
                                     types::None::new(Position::dummy()),
                                     union_type,
                                     None::new(Position::dummy()),
                                     Position::dummy(),
-                                )
-                                .into()
-                            )]
-                            .into_iter()
-                            .collect(),
+                                ),
+                                Position::dummy(),
+                            )],
                             Position::dummy(),
                         ),
                         Position::dummy(),
@@ -1002,9 +1003,11 @@ mod tests {
                         RecordUpdate::new(
                             record_type.clone(),
                             Variable::new("r", Position::dummy()),
-                            vec![("x".into(), None::new(Position::dummy()).into())]
-                                .into_iter()
-                                .collect(),
+                            vec![RecordElement::new(
+                                "x",
+                                None::new(Position::dummy()),
+                                Position::dummy()
+                            )],
                             Position::dummy(),
                         ),
                         Position::dummy(),
@@ -1024,18 +1027,16 @@ mod tests {
                         RecordUpdate::new(
                             record_type,
                             Variable::new("r", Position::dummy()),
-                            vec![(
-                                "x".into(),
+                            vec![RecordElement::new(
+                                "x",
                                 TypeCoercion::new(
                                     types::None::new(Position::dummy()),
                                     union_type,
                                     None::new(Position::dummy()),
                                     Position::dummy(),
-                                )
-                                .into()
-                            )]
-                            .into_iter()
-                            .collect(),
+                                ),
+                                Position::dummy(),
+                            )],
                             Position::dummy(),
                         ),
                         Position::dummy(),

@@ -193,12 +193,18 @@ fn transform_expression(expression: &Expression, transform: &impl Fn(&Type) -> T
             construction
                 .elements()
                 .iter()
-                .map(|(key, element)| (key.clone(), transform_expression(element, transform)))
+                .map(|element| {
+                    RecordElement::new(
+                        element.name(),
+                        transform_expression(element.expression(), transform),
+                        element.position().clone(),
+                    )
+                })
                 .collect(),
             construction.position().clone(),
         )
         .into(),
-        Expression::RecordElement(element) => RecordElement::new(
+        Expression::RecordDeconstruction(element) => RecordDeconstruction::new(
             element.type_().map(transform),
             transform_expression(element.record(), transform),
             element.element_name(),
@@ -211,7 +217,13 @@ fn transform_expression(expression: &Expression, transform: &impl Fn(&Type) -> T
             update
                 .elements()
                 .iter()
-                .map(|(key, element)| (key.clone(), transform_expression(element, transform)))
+                .map(|element| {
+                    RecordElement::new(
+                        element.name(),
+                        transform_expression(element.expression(), transform),
+                        element.position().clone(),
+                    )
+                })
                 .collect(),
             update.position().clone(),
         )

@@ -242,15 +242,21 @@ fn infer_expression(
             construction
                 .elements()
                 .iter()
-                .map(|(key, element)| Ok((key.clone(), infer_expression(element, variables)?)))
+                .map(|element| {
+                    Ok(RecordElement::new(
+                        element.name(),
+                        infer_expression(element.expression(), variables)?,
+                        element.position().clone(),
+                    ))
+                })
                 .collect::<Result<_, CompileError>>()?,
             construction.position().clone(),
         )
         .into(),
-        Expression::RecordElement(element) => {
+        Expression::RecordDeconstruction(element) => {
             let record = infer_expression(element.record(), variables)?;
 
-            RecordElement::new(
+            RecordDeconstruction::new(
                 Some(type_extractor::extract_from_expression(
                     &record,
                     variables,
@@ -268,7 +274,13 @@ fn infer_expression(
             update
                 .elements()
                 .iter()
-                .map(|(key, element)| Ok((key.clone(), infer_expression(element, variables)?)))
+                .map(|element| {
+                    Ok(RecordElement::new(
+                        element.name(),
+                        infer_expression(element.expression(), variables)?,
+                        element.position().clone(),
+                    ))
+                })
                 .collect::<Result<_, CompileError>>()?,
             update.position().clone(),
         )
@@ -470,7 +482,7 @@ mod tests {
     }
 
     #[test]
-    fn infer_record_element() {
+    fn infer_record_deconstruction() {
         let type_definition = TypeDefinition::new(
             "r",
             "",
@@ -497,7 +509,7 @@ mod tests {
                             types::Record::new("r", Position::dummy())
                         )],
                         types::None::new(Position::dummy()),
-                        RecordElement::new(
+                        RecordDeconstruction::new(
                             None,
                             Variable::new("x", Position::dummy()),
                             "x",
@@ -520,7 +532,7 @@ mod tests {
                             types::Record::new("r", Position::dummy())
                         )],
                         types::None::new(Position::dummy()),
-                        RecordElement::new(
+                        RecordDeconstruction::new(
                             Some(types::Record::new("r", Position::dummy()).into()),
                             Variable::new("x", Position::dummy()),
                             "x",

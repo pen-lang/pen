@@ -7,7 +7,7 @@ use crate::{
         Type,
     },
 };
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 pub fn check_types(module: &Module, type_context: &TypeContext) -> Result<(), CompileError> {
     let variables = environment_creator::create_from_module(module);
@@ -99,17 +99,23 @@ fn check_expression(
                 type_context.records(),
             )?;
 
-            for (name, expression) in construction.elements() {
+            for element in construction.elements() {
                 check_subsumption(
-                    &check_expression(expression, variables)?,
-                    element_types.get(name).ok_or_else(|| {
-                        CompileError::RecordElementUnknown(expression.position().clone())
+                    &check_expression(element.expression(), variables)?,
+                    element_types.get(element.name()).ok_or_else(|| {
+                        CompileError::RecordDeconstructionUnknown(expression.position().clone())
                     })?,
                 )?;
             }
 
+            let element_names = construction
+                .elements()
+                .iter()
+                .map(|element| element.name())
+                .collect::<HashSet<_>>();
+
             for name in element_types.keys() {
-                if !construction.elements().contains_key(name) {
+                if !element_names.contains(name.as_str()) {
                     return Err(CompileError::RecordElementMissing(
                         construction.position().clone(),
                     ));
@@ -131,11 +137,11 @@ fn check_expression(
                 type_context.records(),
             )?;
 
-            for (name, expression) in update.elements() {
+            for element in update.elements() {
                 check_subsumption(
-                    &check_expression(expression, variables)?,
-                    element_types.get(name).ok_or_else(|| {
-                        CompileError::RecordElementUnknown(expression.position().clone())
+                    &check_expression(element.expression(), variables)?,
+                    element_types.get(element.name()).ok_or_else(|| {
+                        CompileError::RecordDeconstructionUnknown(expression.position().clone())
                     })?,
                 )?;
             }
@@ -620,9 +626,11 @@ mod tests {
                         reference_type.clone(),
                         RecordConstruction::new(
                             reference_type,
-                            vec![("x".into(), None::new(Position::dummy()).into())]
-                                .into_iter()
-                                .collect(),
+                            vec![RecordElement::new(
+                                "x",
+                                None::new(Position::dummy()),
+                                Position::dummy(),
+                            )],
                             Position::dummy(),
                         ),
                         Position::dummy(),
@@ -691,9 +699,11 @@ mod tests {
                             reference_type.clone(),
                             RecordConstruction::new(
                                 reference_type,
-                                vec![("x".into(), None::new(Position::dummy()).into())]
-                                    .into_iter()
-                                    .collect(),
+                                vec![RecordElement::new(
+                                    "x",
+                                    None::new(Position::dummy()),
+                                    Position::dummy()
+                                )],
                                 Position::dummy(),
                             ),
                             Position::dummy(),
@@ -701,7 +711,7 @@ mod tests {
                         false
                     )],
                 )),
-                Err(CompileError::RecordElementUnknown(_))
+                Err(CompileError::RecordDeconstructionUnknown(_))
             ));
         }
 
@@ -730,9 +740,11 @@ mod tests {
                         RecordUpdate::new(
                             reference_type,
                             Variable::new("x", Position::dummy()),
-                            vec![("x".into(), None::new(Position::dummy()).into())]
-                                .into_iter()
-                                .collect(),
+                            vec![RecordElement::new(
+                                "x",
+                                None::new(Position::dummy()),
+                                Position::dummy(),
+                            )],
                             Position::dummy(),
                         ),
                         Position::dummy(),
