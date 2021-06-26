@@ -45,3 +45,18 @@ Feature: Record
     """
     When I run `pen build`
     Then the exit status should be 0
+
+  Scenario: Update a record
+    Given a file named "Foo.pen" with:
+    """
+    type r {
+      x number,
+      y none,
+    }
+
+    f = \(x r) r {
+      r{...x, y: none}
+    }
+    """
+    When I run `pen build`
+    Then the exit status should be 0

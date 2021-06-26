@@ -8,6 +8,7 @@ use super::{
 };
 use crate::{
     hir::*,
+    hir_mir::transformation::record_update_transformer,
     types::{
         self,
         analysis::{type_canonicalizer, type_resolver},
@@ -66,6 +67,17 @@ pub fn compile(
             mir::ir::Variable::new(CLOSURE_NAME),
         )
         .into(),
+        Expression::Let(let_) => mir::ir::Let::new(
+            let_.name().unwrap_or_default(),
+            type_compiler::compile(
+                let_.type_()
+                    .ok_or_else(|| CompileError::TypeNotInferred(let_.position().clone()))?,
+                type_context,
+            )?,
+            compile(let_.bound_expression())?,
+            compile(let_.expression())?,
+        )
+        .into(),
         Expression::None(_) => mir::ir::Expression::None,
         Expression::Number(number) => mir::ir::Expression::Number(number.value()),
         Expression::Operation(operation) => compile_operation(operation, type_context)?,
@@ -95,6 +107,29 @@ pub fn compile(
                 },
                 type_context,
             )?
+        }
+        Expression::RecordDeconstruction(deconstruction) => {
+            let type_ = deconstruction.type_().unwrap();
+
+            mir::ir::RecordElement::new(
+                type_compiler::compile(type_, type_context)?
+                    .into_record()
+                    .unwrap(),
+                type_resolver::resolve_record_elements(
+                    type_,
+                    deconstruction.position(),
+                    type_context.types(),
+                    type_context.records(),
+                )?
+                .iter()
+                .position(|element_type| element_type.name() == deconstruction.element_name())
+                .unwrap(),
+                compile(deconstruction.record())?,
+            )
+            .into()
+        }
+        Expression::RecordUpdate(update) => {
+            compile(&record_update_transformer::transform(update, type_context)?)?
         }
         Expression::String(string) => mir::ir::ByteString::new(string.value()).into(),
         Expression::TypeCoercion(coercion) => {
