@@ -1,5 +1,11 @@
 use crate::{ast::*, position::Position};
 
+#[derive(Clone, Debug)]
+pub enum SuffixOperator {
+    Call(Vec<Expression>),
+    Element(String),
+}
+
 pub fn reduce_operations(
     lhs: Expression,
     pairs: &[(BinaryOperator, Expression, Position)],

@@ -2,7 +2,6 @@
 mod attempt;
 mod error;
 mod parsers;
-mod suffix;
 mod utilities;
 
 use crate::ast;
