@@ -60,3 +60,17 @@ Feature: Record
     """
     When I run `pen build`
     Then the exit status should be 0
+
+  Scenario: Get an elemnt in a record
+    Given a file named "Foo.pen" with:
+    """
+    type r {
+      x number,
+    }
+
+    f = \(x r) number {
+      x.x
+    }
+    """
+    When I run `pen build`
+    Then the exit status should be 0
