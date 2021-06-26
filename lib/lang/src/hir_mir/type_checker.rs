@@ -135,7 +135,7 @@ fn check_expression(
 
             check_subsumption(
                 &check_expression(deconstruction.record(), variables)?,
-                &type_,
+                type_,
             )?;
 
             let element_types = type_resolver::resolve_record_elements(
@@ -811,7 +811,7 @@ mod tests {
                         vec![Argument::new("x", reference_type.clone())],
                         types::None::new(Position::dummy()),
                         RecordDeconstruction::new(
-                            Some(reference_type.clone().into()),
+                            Some(reference_type.into()),
                             Variable::new("x", Position::dummy()),
                             "x",
                             Position::dummy(),
@@ -847,7 +847,7 @@ mod tests {
                             vec![Argument::new("x", reference_type.clone())],
                             types::None::new(Position::dummy()),
                             RecordDeconstruction::new(
-                                Some(reference_type.clone().into()),
+                                Some(reference_type.into()),
                                 Variable::new("x", Position::dummy()),
                                 "y",
                                 Position::dummy(),
