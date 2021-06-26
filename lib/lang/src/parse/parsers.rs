@@ -1741,7 +1741,6 @@ mod tests {
                     vec![],
                     Position::dummy()
                 )
-                .into()
             );
 
             assert_eq!(

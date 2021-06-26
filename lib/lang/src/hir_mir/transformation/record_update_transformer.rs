@@ -18,7 +18,7 @@ pub fn transform(
 
     Ok(Let::new(
         Some(RECORD_NAME.into()),
-        Some(update.type_().clone().into()),
+        Some(update.type_().clone()),
         update.record().clone(),
         RecordConstruction::new(
             update.type_().clone(),
@@ -57,8 +57,7 @@ pub fn transform(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::position::Position;
-    use crate::types;
+    use crate::{position::Position, types};
     use pretty_assertions::assert_eq;
 
     #[test]
@@ -100,7 +99,7 @@ mod tests {
                         RecordElement::new(
                             "x",
                             RecordDeconstruction::new(
-                                Some(record_type.clone().into()),
+                                Some(record_type.into()),
                                 Variable::new(RECORD_NAME, Position::dummy()),
                                 "x",
                                 Position::dummy()
