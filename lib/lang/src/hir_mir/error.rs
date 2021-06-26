@@ -13,6 +13,7 @@ pub enum CompileError {
     FunctionExpected(Position),
     ListExpected(Position),
     MirTypeCheck(mir::analysis::TypeCheckError),
+    MissingElseBlock(Position),
     RecordElementUnknown(Position),
     RecordElementMissing(Position),
     RecordExpected(Position),
@@ -21,6 +22,7 @@ pub enum CompileError {
     TypeNotFound(types::Reference),
     TypeNotInferred(Position),
     TypesNotMatched(Position, Position),
+    UnionOrAnyTypeExpected(Position),
     VariableNotFound(Variable),
     WrongArgumentCount(Position),
 }
@@ -36,6 +38,13 @@ impl Display for CompileError {
             }
             Self::MirTypeCheck(error) => {
                 write!(formatter, "failed to check types in MIR: {}", error)
+            }
+            Self::MissingElseBlock(position) => {
+                write!(
+                    formatter,
+                    "missing else block in if-type expression\n{}",
+                    position
+                )
             }
             Self::RecordElementUnknown(position) => {
                 write!(formatter, "unknown record deconstruction\n{}", position)
@@ -67,6 +76,9 @@ impl Display for CompileError {
                 "types not matched\n{}\n{}",
                 lhs_position, rhs_position
             ),
+            Self::UnionOrAnyTypeExpected(position) => {
+                write!(formatter, "union or any type expected\n{}", position)
+            }
             Self::VariableNotFound(variable) => write!(
                 formatter,
                 "variable \"{}\" not found\n{}",

@@ -3,7 +3,10 @@ use crate::{
     hir::*,
     types::{
         self,
-        analysis::{type_resolver, type_subsumption_checker},
+        analysis::{
+            type_canonicalizer, type_equality_checker, type_resolver, type_subsumption_checker,
+            union_type_creator,
+        },
         Type,
     },
 };
@@ -52,7 +55,7 @@ fn check_expression(
     type_context: &TypeContext,
 ) -> Result<Type, CompileError> {
     let check_expression =
-        |expression, variables| check_expression(expression, variables, type_context);
+        |expression, variables: &_| check_expression(expression, variables, type_context);
     let check_subsumption =
         |lower: &_, upper| check_subsumption(lower, upper, type_context.types());
 
@@ -84,6 +87,55 @@ fn check_expression(
                 &check_expression(if_.condition(), variables)?,
                 &types::Boolean::new(if_.position().clone()).into(),
             )?;
+
+            type_extractor::extract_from_expression(expression, variables, type_context)?
+        }
+        Expression::IfType(if_) => {
+            let argument_type = type_canonicalizer::canonicalize(
+                &check_expression(if_.argument(), variables)?,
+                type_context.types(),
+            )?;
+
+            if !matches!(argument_type, Type::Union(_) | Type::Any(_)) {
+                return Err(CompileError::UnionOrAnyTypeExpected(
+                    if_.argument().position().clone(),
+                ));
+            }
+
+            for branch in if_.branches() {
+                check_expression(
+                    branch.expression(),
+                    &variables
+                        .clone()
+                        .into_iter()
+                        .chain(vec![(if_.name().into(), branch.type_().clone())])
+                        .collect(),
+                )?;
+            }
+
+            if let Some(expression) = if_.else_() {
+                check_expression(
+                    expression,
+                    &variables
+                        .clone()
+                        .into_iter()
+                        .chain(vec![(if_.name().into(), argument_type.clone())])
+                        .collect(),
+                )?;
+            } else if !type_equality_checker::check_equality(
+                &argument_type,
+                &union_type_creator::create_union_type(
+                    &if_.branches()
+                        .iter()
+                        .map(|branch| branch.type_().clone())
+                        .collect::<Vec<_>>(),
+                    if_.position(),
+                )
+                .unwrap(),
+                type_context.types(),
+            )? {
+                return Err(CompileError::MissingElseBlock(if_.position().clone()));
+            }
 
             type_extractor::extract_from_expression(expression, variables, type_context)?
         }
@@ -367,6 +419,246 @@ mod tests {
                 )],
             ))
             .unwrap()
+        }
+    }
+
+    mod if_type {
+        use super::*;
+
+        #[test]
+        fn check_with_union() {
+            let union_type = types::Union::new(
+                types::Number::new(Position::dummy()),
+                types::None::new(Position::dummy()),
+                Position::dummy(),
+            );
+
+            check_module(&Module::new(
+                vec![],
+                vec![],
+                vec![],
+                vec![Definition::without_source(
+                    "f",
+                    Lambda::new(
+                        vec![Argument::new("x", union_type.clone())],
+                        types::None::new(Position::dummy()),
+                        IfType::new(
+                            "y",
+                            Variable::new("x", Position::dummy()),
+                            vec![
+                                IfTypeBranch::new(
+                                    types::Number::new(Position::dummy()),
+                                    None::new(Position::dummy()),
+                                ),
+                                IfTypeBranch::new(
+                                    types::None::new(Position::dummy()),
+                                    None::new(Position::dummy()),
+                                ),
+                            ],
+                            None,
+                            Position::dummy(),
+                        ),
+                        Position::dummy(),
+                    ),
+                    false,
+                )],
+            ))
+            .unwrap()
+        }
+
+        #[test]
+        fn check_with_any() {
+            check_module(&Module::new(
+                vec![],
+                vec![],
+                vec![],
+                vec![Definition::without_source(
+                    "f",
+                    Lambda::new(
+                        vec![Argument::new("x", types::Any::new(Position::dummy()))],
+                        types::None::new(Position::dummy()),
+                        IfType::new(
+                            "y",
+                            Variable::new("x", Position::dummy()),
+                            vec![IfTypeBranch::new(
+                                types::None::new(Position::dummy()),
+                                None::new(Position::dummy()),
+                            )],
+                            Some(None::new(Position::dummy()).into()),
+                            Position::dummy(),
+                        ),
+                        Position::dummy(),
+                    ),
+                    false,
+                )],
+            ))
+            .unwrap()
+        }
+
+        #[test]
+        fn check_result_of_union() {
+            check_module(&Module::new(
+                vec![],
+                vec![],
+                vec![],
+                vec![Definition::without_source(
+                    "f",
+                    Lambda::new(
+                        vec![Argument::new("x", types::Any::new(Position::dummy()))],
+                        types::Union::new(
+                            types::Number::new(Position::dummy()),
+                            types::None::new(Position::dummy()),
+                            Position::dummy(),
+                        ),
+                        IfType::new(
+                            "y",
+                            Variable::new("x", Position::dummy()),
+                            vec![IfTypeBranch::new(
+                                types::None::new(Position::dummy()),
+                                Number::new(42.0, Position::dummy()),
+                            )],
+                            Some(None::new(Position::dummy()).into()),
+                            Position::dummy(),
+                        ),
+                        Position::dummy(),
+                    ),
+                    false,
+                )],
+            ))
+            .unwrap()
+        }
+
+        #[test]
+        fn check_result_of_any() {
+            check_module(&Module::new(
+                vec![],
+                vec![],
+                vec![],
+                vec![Definition::without_source(
+                    "f",
+                    Lambda::new(
+                        vec![Argument::new("x", types::Any::new(Position::dummy()))],
+                        types::Any::new(Position::dummy()),
+                        IfType::new(
+                            "y",
+                            Variable::new("x", Position::dummy()),
+                            vec![IfTypeBranch::new(
+                                types::None::new(Position::dummy()),
+                                None::new(Position::dummy()),
+                            )],
+                            Some(Variable::new("y", Position::dummy()).into()),
+                            Position::dummy(),
+                        ),
+                        Position::dummy(),
+                    ),
+                    false,
+                )],
+            ))
+            .unwrap()
+        }
+
+        #[test]
+        #[should_panic]
+        fn fail_to_check_due_to_wrong_argument_type() {
+            check_module(&Module::new(
+                vec![],
+                vec![],
+                vec![],
+                vec![Definition::without_source(
+                    "f",
+                    Lambda::new(
+                        vec![],
+                        types::None::new(Position::dummy()),
+                        IfType::new(
+                            "y",
+                            None::new(Position::dummy()),
+                            vec![IfTypeBranch::new(
+                                types::None::new(Position::dummy()),
+                                None::new(Position::dummy()),
+                            )],
+                            Some(None::new(Position::dummy()).into()),
+                            Position::dummy(),
+                        ),
+                        Position::dummy(),
+                    ),
+                    false,
+                )],
+            ))
+            .unwrap()
+        }
+
+        #[test]
+        #[should_panic]
+        fn fail_to_check_union_due_to_missing_else() {
+            check_module(&Module::new(
+                vec![],
+                vec![],
+                vec![],
+                vec![Definition::without_source(
+                    "f",
+                    Lambda::new(
+                        vec![Argument::new(
+                            "x",
+                            types::Union::new(
+                                types::Number::new(Position::dummy()),
+                                types::None::new(Position::dummy()),
+                                Position::dummy(),
+                            ),
+                        )],
+                        types::None::new(Position::dummy()),
+                        IfType::new(
+                            "y",
+                            Variable::new("x", Position::dummy()),
+                            vec![IfTypeBranch::new(
+                                types::Number::new(Position::dummy()),
+                                None::new(Position::dummy()),
+                            )],
+                            None,
+                            Position::dummy(),
+                        ),
+                        Position::dummy(),
+                    ),
+                    false,
+                )],
+            ))
+            .unwrap();
+        }
+
+        #[test]
+        #[should_panic]
+        fn fail_to_check_any_due_to_missing_else() {
+            check_module(&Module::new(
+                vec![],
+                vec![],
+                vec![],
+                vec![Definition::without_source(
+                    "f",
+                    Lambda::new(
+                        vec![Argument::new(
+                            "x",
+                            types::Union::new(
+                                types::Number::new(Position::dummy()),
+                                types::None::new(Position::dummy()),
+                                Position::dummy(),
+                            ),
+                        )],
+                        types::None::new(Position::dummy()),
+                        IfType::new(
+                            "y",
+                            Variable::new("x", Position::dummy()),
+                            vec![IfTypeBranch::new(
+                                types::Number::new(Position::dummy()),
+                                None::new(Position::dummy()),
+                            )],
+                            None,
+                            Position::dummy(),
+                        ),
+                        Position::dummy(),
+                    ),
+                    false,
+                )],
+            ))
+            .unwrap();
         }
     }
 
