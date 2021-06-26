@@ -606,7 +606,7 @@ fn list_element<'a>() -> impl Parser<Stream<'a>, Output = ListElement> {
 }
 
 fn variable<'a>() -> impl Parser<Stream<'a>, Output = Variable> {
-    token((position(), qualified_identifier()))
+    token((position(), identifier()))
         .map(|(position, identifier)| Variable::new(identifier, position))
         .expected("variable")
 }
@@ -1948,17 +1948,15 @@ mod tests {
 
         #[test]
         fn parse_variable() {
-            assert!(variable().parse(stream("Foo. x", "")).is_err());
+            assert!(variable().parse(stream("", "")).is_err());
+
             assert_eq!(
                 variable().parse(stream("x", "")).unwrap().0,
                 Variable::new("x", Position::dummy()),
             );
+
             assert_eq!(
                 variable().parse(stream("Foo.x", "")).unwrap().0,
-                Variable::new("Foo.x", Position::dummy()),
-            );
-            assert_eq!(
-                variable().parse(stream("Foo .x", "")).unwrap().0,
                 Variable::new("Foo", Position::dummy()),
             );
         }

@@ -128,6 +128,32 @@ fn check_expression(
 
             construction.type_().clone()
         }
+        Expression::RecordDeconstruction(deconstruction) => {
+            let type_ = deconstruction
+                .type_()
+                .ok_or_else(|| CompileError::TypeNotInferred(deconstruction.position().clone()))?;
+
+            check_subsumption(
+                &check_expression(deconstruction.record(), variables)?,
+                type_,
+            )?;
+
+            let element_types = type_resolver::resolve_record_elements(
+                type_,
+                deconstruction.position(),
+                type_context.types(),
+                type_context.records(),
+            )?;
+
+            element_types
+                .iter()
+                .find(|element_type| element_type.name() == deconstruction.element_name())
+                .ok_or_else(|| {
+                    CompileError::RecordElementUnknown(deconstruction.position().clone())
+                })?
+                .type_()
+                .clone()
+        }
         Expression::RecordUpdate(update) => {
             check_subsumption(
                 &check_expression(update.record(), variables)?,
@@ -760,6 +786,79 @@ mod tests {
                     false,
                 )],
             ))
+        }
+
+        #[test]
+        fn check_record_deconstruction() -> Result<(), CompileError> {
+            let reference_type = types::Reference::new("r", Position::dummy());
+
+            check_module(&Module::new(
+                vec![TypeDefinition::without_source(
+                    "r",
+                    vec![types::RecordElement::new(
+                        "x",
+                        types::None::new(Position::dummy()),
+                    )],
+                    false,
+                    false,
+                    false,
+                )],
+                vec![],
+                vec![],
+                vec![Definition::without_source(
+                    "x",
+                    Lambda::new(
+                        vec![Argument::new("x", reference_type.clone())],
+                        types::None::new(Position::dummy()),
+                        RecordDeconstruction::new(
+                            Some(reference_type.into()),
+                            Variable::new("x", Position::dummy()),
+                            "x",
+                            Position::dummy(),
+                        ),
+                        Position::dummy(),
+                    ),
+                    false,
+                )],
+            ))
+        }
+
+        #[test]
+        fn fail_to_check_record_deconstruction_due_to_unknown_element() {
+            let reference_type = types::Reference::new("r", Position::dummy());
+
+            assert_eq!(
+                check_module(&Module::new(
+                    vec![TypeDefinition::without_source(
+                        "r",
+                        vec![types::RecordElement::new(
+                            "x",
+                            types::None::new(Position::dummy()),
+                        )],
+                        false,
+                        false,
+                        false,
+                    )],
+                    vec![],
+                    vec![],
+                    vec![Definition::without_source(
+                        "x",
+                        Lambda::new(
+                            vec![Argument::new("x", reference_type.clone())],
+                            types::None::new(Position::dummy()),
+                            RecordDeconstruction::new(
+                                Some(reference_type.into()),
+                                Variable::new("x", Position::dummy()),
+                                "y",
+                                Position::dummy(),
+                            ),
+                            Position::dummy(),
+                        ),
+                        false,
+                    )],
+                )),
+                Err(CompileError::RecordElementUnknown(Position::dummy()))
+            );
         }
     }
 }
