@@ -1,3 +1,4 @@
+use super::utilities;
 use crate::{
     ast,
     hir::{
@@ -28,7 +29,7 @@ fn rename_variables(
         &module_interfaces
             .iter()
             .flat_map(|(path, interface)| {
-                let prefix = get_prefix(path);
+                let prefix = utilities::get_prefix(path);
 
                 interface
                     .declarations()
@@ -52,7 +53,7 @@ fn rename_types(
     let names = module_interfaces
         .iter()
         .flat_map(|(path, interface)| {
-            let prefix = get_prefix(path);
+            let prefix = utilities::get_prefix(path);
 
             interface
                 .type_definitions()
@@ -104,13 +105,6 @@ fn rename_types(
 
 fn qualify_name(prefix: &str, name: &str) -> String {
     prefix.to_owned() + PREFIX_SEPARATOR + name
-}
-
-fn get_prefix(path: &ast::ModulePath) -> String {
-    match path {
-        ast::ModulePath::External(path) => path.components().last().unwrap().clone(),
-        ast::ModulePath::Internal(path) => path.components().last().unwrap().clone(),
-    }
 }
 
 #[cfg(test)]

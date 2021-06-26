@@ -1,8 +1,16 @@
 mod error;
 mod import_renamer;
 mod module_compiler;
+mod utilities;
 
-use crate::{ast, hir, interface};
+use crate::{
+    ast,
+    hir::{
+        self,
+        analysis::{definition_qualifier, type_qualifier},
+    },
+    interface,
+};
 use error::CompileError;
 use std::collections::HashMap;
 
@@ -13,8 +21,9 @@ pub fn compile(
 ) -> Result<hir::Module, CompileError> {
     let module = module_compiler::compile(module, module_interfaces)?;
     let module = import_renamer::rename(&module, module_interfaces);
-    let module = hir::analysis::definition_qualifier::qualify(&module, prefix);
-    let module = hir::analysis::type_qualifier::qualify(&module, prefix);
+
+    let module = definition_qualifier::qualify(&module, prefix);
+    let module = type_qualifier::qualify(&module, prefix);
 
     Ok(module)
 }

@@ -1,11 +1,18 @@
 use super::error::CompileError;
+use super::utilities;
 use crate::{ast, hir, interface, position::Position, types};
 use std::collections::HashMap;
+use std::collections::HashSet;
 
 pub fn compile(
     module: &ast::Module,
     module_interfaces: &HashMap<ast::ModulePath, interface::Module>,
 ) -> Result<hir::Module, CompileError> {
+    let module_names = module_interfaces
+        .keys()
+        .map(|module_path| utilities::get_prefix(module_path))
+        .collect::<HashSet<_>>();
+
     Ok(hir::Module::new(
         module_interfaces
             .values()
