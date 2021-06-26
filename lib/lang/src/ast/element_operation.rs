@@ -1,4 +1,4 @@
-use super::{expression::Expression, unary_operator::UnaryOperator};
+use super::expression::Expression;
 use crate::position::Position;
 use std::sync::Arc;
 

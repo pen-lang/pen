@@ -1,6 +1,6 @@
-use super::suffix::SuffixOperator;
 use super::{
     attempt::{many, many1, optional, sep_end_by, sep_end_by1},
+    suffix::SuffixOperator,
     utilities::*,
 };
 use crate::{
