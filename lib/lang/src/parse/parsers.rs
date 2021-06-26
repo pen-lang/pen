@@ -253,14 +253,134 @@ fn statement<'a>() -> impl Parser<Stream<'a>, Output = Statement> {
 }
 
 fn expression<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
-    lazy(|| no_partial(binary_operation()))
+    lazy(|| no_partial(binary_operation_like()))
         .boxed()
         .expected("expression")
+}
+
+fn binary_operation_like<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
+    (
+        prefix_operation_like(),
+        many(
+            (position(), binary_operator(), prefix_operation_like())
+                .map(|(position, operator, expression)| (operator, expression, position)),
+        ),
+    )
+        .map(|(expression, pairs): (_, Vec<_>)| reduce_operations(expression, &pairs))
+}
+
+fn binary_operator<'a>() -> impl Parser<Stream<'a>, Output = BinaryOperator> {
+    choice!(
+        concrete_binary_operator("+", BinaryOperator::Add),
+        concrete_binary_operator("-", BinaryOperator::Subtract),
+        concrete_binary_operator("*", BinaryOperator::Multiply),
+        concrete_binary_operator("/", BinaryOperator::Divide),
+        concrete_binary_operator("==", BinaryOperator::Equal),
+        concrete_binary_operator("!=", BinaryOperator::NotEqual),
+        concrete_binary_operator("<", BinaryOperator::LessThan),
+        concrete_binary_operator("<=", BinaryOperator::LessThanOrEqual),
+        concrete_binary_operator(">", BinaryOperator::GreaterThan),
+        concrete_binary_operator(">=", BinaryOperator::GreaterThanOrEqual),
+        concrete_binary_operator("&", BinaryOperator::And),
+        concrete_binary_operator("|", BinaryOperator::Or),
+    )
+    .expected("binary operator")
+}
+
+fn concrete_binary_operator<'a>(
+    literal: &'static str,
+    operator: BinaryOperator,
+) -> impl Parser<Stream<'a>, Output = BinaryOperator> {
+    token(
+        many1(one_of(OPERATOR_CHARACTERS.chars())).then(move |parsed_literal: String| {
+            if parsed_literal == literal {
+                value(operator).left()
+            } else {
+                unexpected_any("unknown binary operator").right()
+            }
+        }),
+    )
+}
+
+fn prefix_operation_like<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
+    lazy(|| {
+        no_partial(choice!(
+            prefix_operation().map(Expression::from),
+            suffix_operation_like().map(Expression::from),
+        ))
+    })
+    .boxed()
+}
+
+fn prefix_operation<'a>() -> impl Parser<Stream<'a>, Output = UnaryOperation> {
+    (position(), prefix_operator(), prefix_operation_like())
+        .map(|(position, operator, expression)| UnaryOperation::new(operator, expression, position))
+}
+
+fn prefix_operator<'a>() -> impl Parser<Stream<'a>, Output = UnaryOperator> {
+    choice!(
+        concrete_prefix_operator("!", UnaryOperator::Not),
+        concrete_prefix_operator("?", UnaryOperator::Try),
+    )
+    .expected("unary operator")
+}
+
+fn concrete_prefix_operator<'a>(
+    literal: &'static str,
+    operator: UnaryOperator,
+) -> impl Parser<Stream<'a>, Output = UnaryOperator> {
+    token(
+        one_of(OPERATOR_CHARACTERS.chars()).then(move |parsed_literal: char| {
+            if parsed_literal.to_string() == literal {
+                value(operator).left()
+            } else {
+                unexpected_any("unknown unary operator").right()
+            }
+        }),
+    )
+}
+
+fn suffix_operation_like<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
+    (atomic_expression(), many((position(), suffix_operator()))).map(
+        |(expression, suffix_operators): (_, Vec<_>)| {
+            suffix_operators
+                .into_iter()
+                .fold(
+                    expression,
+                    |expression, (position, operator)| match operator {
+                        SuffixOperator::Call(arguments) => {
+                            Call::new(expression, arguments, position).into()
+                        }
+                        SuffixOperator::Element(name) => {
+                            ElementOperation::new(expression, name, position).into()
+                        }
+                    },
+                )
+        },
+    )
+}
+
+fn suffix_operator<'a>() -> impl Parser<Stream<'a>, Output = SuffixOperator> {
+    choice!(
+        call_operator().map(SuffixOperator::Call),
+        element_operator().map(SuffixOperator::Element),
+    )
+}
+
+fn call_operator<'a>() -> impl Parser<Stream<'a>, Output = Vec<Expression>> {
+    between(sign("("), sign(")"), sep_end_by(expression(), sign(",")))
+}
+
+fn element_operator<'a>() -> impl Parser<Stream<'a>, Output = String> {
+    sign(".").with(identifier())
 }
 
 fn atomic_expression<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
     lazy(|| {
         no_partial(choice!(
+            if_().map(Expression::from),
+            if_type().map(Expression::from),
+            if_list().map(Expression::from),
             lambda().map(Expression::from),
             record().map(Expression::from),
             list_literal().map(Expression::from),
@@ -383,22 +503,12 @@ fn if_type_branch<'a>() -> impl Parser<Stream<'a>, Output = IfTypeBranch> {
     (type_(), block()).map(|(type_, block)| IfTypeBranch::new(type_, block))
 }
 
-fn call<'a>() -> impl Parser<Stream<'a>, Output = Call> {
-    (
-        position(),
-        atomic_expression(),
-        between(sign("("), sign(")"), sep_end_by(expression(), sign(","))),
-    )
-        .map(|(position, function, arguments)| Call::new(function, arguments, position))
-        .expected("function call")
-}
-
 fn record<'a>() -> impl Parser<Stream<'a>, Output = Record> {
     (
         position(),
         reference_type(),
-        string("{"),
-        optional(between(sign("..."), sign(","), term())),
+        sign("{"),
+        optional(between(sign("..."), sign(","), expression())),
         sep_end_by(record_element(), sign(",")),
         sign("}"),
     )
@@ -422,92 +532,6 @@ fn record<'a>() -> impl Parser<Stream<'a>, Output = Record> {
 fn record_element<'a>() -> impl Parser<Stream<'a>, Output = RecordElement> {
     (position(), identifier(), sign(":"), expression())
         .map(|(position, name, _, expression)| RecordElement::new(name, expression, position))
-}
-
-fn term<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
-    lazy(|| {
-        no_partial(choice!(
-            call().map(Expression::from),
-            if_().map(Expression::from),
-            if_type().map(Expression::from),
-            if_list().map(Expression::from),
-            unary_operation().map(Expression::from),
-            atomic_expression(),
-        ))
-    })
-    .boxed()
-}
-
-fn unary_operation<'a>() -> impl Parser<Stream<'a>, Output = UnaryOperation> {
-    (position(), unary_operator(), term())
-        .map(|(position, operator, expression)| UnaryOperation::new(operator, expression, position))
-}
-
-fn unary_operator<'a>() -> impl Parser<Stream<'a>, Output = UnaryOperator> {
-    choice!(
-        concrete_unary_operator("!", UnaryOperator::Not),
-        concrete_unary_operator("?", UnaryOperator::Try),
-    )
-    .expected("unary operator")
-}
-
-fn concrete_unary_operator<'a>(
-    literal: &'static str,
-    operator: UnaryOperator,
-) -> impl Parser<Stream<'a>, Output = UnaryOperator> {
-    token(
-        one_of(OPERATOR_CHARACTERS.chars()).then(move |parsed_literal: char| {
-            if parsed_literal.to_string() == literal {
-                value(operator).left()
-            } else {
-                unexpected_any("unknown unary operator").right()
-            }
-        }),
-    )
-}
-
-fn binary_operation<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
-    (
-        term(),
-        many(
-            (position(), binary_operator(), term())
-                .map(|(position, operator, expression)| (operator, expression, position)),
-        ),
-    )
-        .map(|(expression, pairs): (_, Vec<_>)| reduce_operations(expression, &pairs))
-}
-
-fn binary_operator<'a>() -> impl Parser<Stream<'a>, Output = BinaryOperator> {
-    choice!(
-        concrete_binary_operator("+", BinaryOperator::Add),
-        concrete_binary_operator("-", BinaryOperator::Subtract),
-        concrete_binary_operator("*", BinaryOperator::Multiply),
-        concrete_binary_operator("/", BinaryOperator::Divide),
-        concrete_binary_operator("==", BinaryOperator::Equal),
-        concrete_binary_operator("!=", BinaryOperator::NotEqual),
-        concrete_binary_operator("<", BinaryOperator::LessThan),
-        concrete_binary_operator("<=", BinaryOperator::LessThanOrEqual),
-        concrete_binary_operator(">", BinaryOperator::GreaterThan),
-        concrete_binary_operator(">=", BinaryOperator::GreaterThanOrEqual),
-        concrete_binary_operator("&", BinaryOperator::And),
-        concrete_binary_operator("|", BinaryOperator::Or),
-    )
-    .expected("binary operator")
-}
-
-fn concrete_binary_operator<'a>(
-    literal: &'static str,
-    operator: BinaryOperator,
-) -> impl Parser<Stream<'a>, Output = BinaryOperator> {
-    token(
-        many1(one_of(OPERATOR_CHARACTERS.chars())).then(move |parsed_literal: String| {
-            if parsed_literal == literal {
-                value(operator).left()
-            } else {
-                unexpected_any("unknown binary operator").right()
-            }
-        }),
-    )
 }
 
 fn boolean_literal<'a>() -> impl Parser<Stream<'a>, Output = Boolean> {
@@ -1422,6 +1446,30 @@ mod tests {
         #[test]
         fn parse_call() {
             assert_eq!(
+                expression().parse(stream("f()", "")).unwrap().0,
+                Call::new(
+                    Variable::new("f", Position::dummy()),
+                    vec![],
+                    Position::dummy()
+                )
+                .into()
+            );
+
+            assert_eq!(
+                expression().parse(stream("f()()", "")).unwrap().0,
+                Call::new(
+                    Call::new(
+                        Variable::new("f", Position::dummy()),
+                        vec![],
+                        Position::dummy()
+                    ),
+                    vec![],
+                    Position::dummy()
+                )
+                .into()
+            );
+
+            assert_eq!(
                 expression().parse(stream("f(1)", "")).unwrap().0,
                 Call::new(
                     Variable::new("f", Position::dummy()),
@@ -1430,6 +1478,7 @@ mod tests {
                 )
                 .into()
             );
+
             assert_eq!(
                 expression().parse(stream("f(1,)", "")).unwrap().0,
                 Call::new(
@@ -1439,6 +1488,7 @@ mod tests {
                 )
                 .into()
             );
+
             assert_eq!(
                 expression().parse(stream("f(1, 2)", "")).unwrap().0,
                 Call::new(
@@ -1451,6 +1501,7 @@ mod tests {
                 )
                 .into()
             );
+
             assert_eq!(
                 expression().parse(stream("f(1, 2,)", "")).unwrap().0,
                 Call::new(
@@ -1467,7 +1518,7 @@ mod tests {
 
         #[test]
         fn parse_unary_operation() {
-            assert!(unary_operation().parse(stream("", "")).is_err());
+            assert!(prefix_operation().parse(stream("", "")).is_err());
 
             for (source, expected) in &[
                 (
@@ -1527,7 +1578,7 @@ mod tests {
                 ),
             ] {
                 assert_eq!(
-                    unary_operation().parse(stream(source, "")).unwrap().0,
+                    prefix_operation().parse(stream(source, "")).unwrap().0,
                     *expected
                 );
             }
@@ -1535,11 +1586,11 @@ mod tests {
 
         #[test]
         fn parse_unary_operator() {
-            assert!(unary_operator().parse(stream("", "")).is_err());
+            assert!(prefix_operator().parse(stream("", "")).is_err());
 
             for (source, expected) in &[("!", UnaryOperator::Not), ("?", UnaryOperator::Try)] {
                 assert_eq!(
-                    unary_operator().parse(stream(source, "")).unwrap().0,
+                    prefix_operator().parse(stream(source, "")).unwrap().0,
                     *expected
                 );
             }

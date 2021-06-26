@@ -214,6 +214,7 @@ fn compile_expression(expression: &ast::Expression) -> Result<hir::Expression, C
             call.position().clone(),
         )
         .into(),
+        ast::Expression::ElementOperation(_) => todo!(),
         ast::Expression::If(if_) => compile_if(if_.branches(), if_.else_(), if_.position())?.into(),
         ast::Expression::IfList(if_) => hir::IfList::new(
             compile_expression(if_.argument())?,

@@ -1,7 +1,7 @@
 use super::{
     boolean::Boolean, call::Call, if_::If, if_list::IfList, if_type::IfType, list::List,
     none::None, number::Number, record::Record, string::ByteString, variable::Variable,
-    BinaryOperation, Lambda, UnaryOperation,
+    BinaryOperation, ElementOperation, Lambda, UnaryOperation,
 };
 use crate::position::Position;
 
@@ -10,6 +10,7 @@ pub enum Expression {
     BinaryOperation(BinaryOperation),
     Boolean(Boolean),
     Call(Call),
+    ElementOperation(ElementOperation),
     If(If),
     IfList(IfList),
     IfType(IfType),
@@ -29,6 +30,7 @@ impl Expression {
             Self::BinaryOperation(operation) => operation.position(),
             Self::Boolean(boolean) => boolean.position(),
             Self::Call(call) => call.position(),
+            Self::ElementOperation(operation) => operation.position(),
             Self::If(if_) => if_.position(),
             Self::IfList(if_) => if_.position(),
             Self::IfType(if_) => if_.position(),
@@ -59,6 +61,12 @@ impl From<BinaryOperation> for Expression {
 impl From<Boolean> for Expression {
     fn from(boolean: Boolean) -> Self {
         Self::Boolean(boolean)
+    }
+}
+
+impl From<ElementOperation> for Expression {
+    fn from(operation: ElementOperation) -> Self {
+        Self::ElementOperation(operation)
     }
 }
 
