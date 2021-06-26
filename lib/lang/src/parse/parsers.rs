@@ -1,3 +1,4 @@
+use super::suffix::SuffixOperator;
 use super::{
     attempt::{many, many1, optional, sep_end_by, sep_end_by1},
     utilities::*,
@@ -386,22 +387,12 @@ fn if_type_branch<'a>() -> impl Parser<Stream<'a>, Output = IfTypeBranch> {
     (type_(), block()).map(|(type_, block)| IfTypeBranch::new(type_, block))
 }
 
-fn call<'a>() -> impl Parser<Stream<'a>, Output = Call> {
-    (
-        position(),
-        atomic_expression(),
-        between(sign("("), sign(")"), sep_end_by(expression(), sign(","))),
-    )
-        .map(|(position, function, arguments)| Call::new(function, arguments, position))
-        .expected("function call")
-}
-
 fn record<'a>() -> impl Parser<Stream<'a>, Output = Record> {
     (
         position(),
         reference_type(),
-        string("{"),
-        optional(between(sign("..."), sign(","), term())),
+        sign("{"),
+        optional(between(sign("..."), sign(","), expression())),
         sep_end_by(record_element(), sign(",")),
         sign("}"),
     )
@@ -427,19 +418,54 @@ fn record_element<'a>() -> impl Parser<Stream<'a>, Output = RecordElement> {
         .map(|(position, name, _, expression)| RecordElement::new(name, expression, position))
 }
 
-fn term<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
+fn suffix_operation_like<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
+    (atomic_expression(), many((position(), suffix_operator()))).map(
+        |(expression, suffix_operators): (_, Vec<_>)| {
+            suffix_operators
+                .into_iter()
+                .fold(
+                    expression,
+                    |expression, (position, operator)| match operator {
+                        SuffixOperator::Call(arguments) => {
+                            Call::new(expression, arguments, position).into()
+                        }
+                        SuffixOperator::Element(name) => {
+                            ElementOperation::new(expression, name, position).into()
+                        }
+                    },
+                )
+        },
+    )
+}
+
+fn suffix_operator<'a>() -> impl Parser<Stream<'a>, Output = SuffixOperator> {
+    choice!(
+        call_operator().map(SuffixOperator::Call),
+        element_operator().map(SuffixOperator::Element),
+    )
+}
+
+fn call_operator<'a>() -> impl Parser<Stream<'a>, Output = Vec<Expression>> {
+    between(sign("("), sign(")"), sep_end_by(expression(), sign(",")))
+}
+
+fn element_operator<'a>() -> impl Parser<Stream<'a>, Output = String> {
+    sign(".").with(identifier())
+}
+
+fn prefix_operation_like<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
     lazy(|| {
         no_partial(choice!(
-            call().map(Expression::from),
-            unary_operation().map(Expression::from),
+            suffix_operation_like().map(Expression::from),
+            prefix_operation().map(Expression::from),
             atomic_expression(),
         ))
     })
     .boxed()
 }
 
-fn unary_operation<'a>() -> impl Parser<Stream<'a>, Output = UnaryOperation> {
-    (position(), unary_operator(), term())
+fn prefix_operation<'a>() -> impl Parser<Stream<'a>, Output = UnaryOperation> {
+    (position(), unary_operator(), prefix_operation_like())
         .map(|(position, operator, expression)| UnaryOperation::new(operator, expression, position))
 }
 
@@ -468,9 +494,9 @@ fn concrete_unary_operator<'a>(
 
 fn binary_operation<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
     (
-        term(),
+        prefix_operation_like(),
         many(
-            (position(), binary_operator(), term())
+            (position(), binary_operator(), prefix_operation_like())
                 .map(|(position, operator, expression)| (operator, expression, position)),
         ),
     )
@@ -1422,6 +1448,30 @@ mod tests {
         #[test]
         fn parse_call() {
             assert_eq!(
+                expression().parse(stream("f()", "")).unwrap().0,
+                Call::new(
+                    Variable::new("f", Position::dummy()),
+                    vec![],
+                    Position::dummy()
+                )
+                .into()
+            );
+
+            assert_eq!(
+                expression().parse(stream("f()()", "")).unwrap().0,
+                Call::new(
+                    Call::new(
+                        Variable::new("f", Position::dummy()),
+                        vec![],
+                        Position::dummy()
+                    ),
+                    vec![],
+                    Position::dummy()
+                )
+                .into()
+            );
+
+            assert_eq!(
                 expression().parse(stream("f(1)", "")).unwrap().0,
                 Call::new(
                     Variable::new("f", Position::dummy()),
@@ -1430,6 +1480,7 @@ mod tests {
                 )
                 .into()
             );
+
             assert_eq!(
                 expression().parse(stream("f(1,)", "")).unwrap().0,
                 Call::new(
@@ -1439,6 +1490,7 @@ mod tests {
                 )
                 .into()
             );
+
             assert_eq!(
                 expression().parse(stream("f(1, 2)", "")).unwrap().0,
                 Call::new(
@@ -1451,6 +1503,7 @@ mod tests {
                 )
                 .into()
             );
+
             assert_eq!(
                 expression().parse(stream("f(1, 2,)", "")).unwrap().0,
                 Call::new(
@@ -1467,7 +1520,7 @@ mod tests {
 
         #[test]
         fn parse_unary_operation() {
-            assert!(unary_operation().parse(stream("", "")).is_err());
+            assert!(prefix_operation().parse(stream("", "")).is_err());
 
             for (source, expected) in &[
                 (
@@ -1527,7 +1580,7 @@ mod tests {
                 ),
             ] {
                 assert_eq!(
-                    unary_operation().parse(stream(source, "")).unwrap().0,
+                    prefix_operation().parse(stream(source, "")).unwrap().0,
                     *expected
                 );
             }
