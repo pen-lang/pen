@@ -1,32 +1,33 @@
 use super::expression::Expression;
 use crate::position::Position;
+use std::sync::Arc;
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct RecordElement {
+pub struct ElementOperation {
+    expression: Arc<Expression>,
     name: String,
-    expression: Expression,
     position: Position,
 }
 
-impl RecordElement {
+impl ElementOperation {
     pub fn new(
-        name: impl Into<String>,
         expression: impl Into<Expression>,
+        name: impl Into<String>,
         position: Position,
     ) -> Self {
         Self {
+            expression: expression.into().into(),
             name: name.into(),
-            expression: expression.into(),
             position,
         }
     }
 
-    pub fn name(&self) -> &str {
-        &self.name
-    }
-
     pub fn expression(&self) -> &Expression {
         &self.expression
+    }
+
+    pub fn name(&self) -> &str {
+        &self.name
     }
 
     pub fn position(&self) -> &Position {

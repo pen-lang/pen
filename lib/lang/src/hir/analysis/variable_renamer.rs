@@ -143,16 +143,22 @@ fn rename_expression(expression: &Expression, names: &HashMap<String, String>) -
             construction
                 .elements()
                 .iter()
-                .map(|(key, element)| (key.clone(), rename_expression(element, names)))
+                .map(|element| {
+                    RecordElement::new(
+                        element.name(),
+                        rename_expression(element.expression(), names),
+                        element.position().clone(),
+                    )
+                })
                 .collect(),
             construction.position().clone(),
         )
         .into(),
-        Expression::RecordElement(element) => RecordElement::new(
-            element.type_().cloned(),
-            rename_expression(element.record(), names),
-            element.element_name(),
-            element.position().clone(),
+        Expression::RecordDeconstruction(deconstruction) => RecordDeconstruction::new(
+            deconstruction.type_().cloned(),
+            rename_expression(deconstruction.record(), names),
+            deconstruction.element_name(),
+            deconstruction.position().clone(),
         )
         .into(),
         Expression::RecordUpdate(update) => RecordUpdate::new(
@@ -161,7 +167,13 @@ fn rename_expression(expression: &Expression, names: &HashMap<String, String>) -
             update
                 .elements()
                 .iter()
-                .map(|(key, element)| (key.clone(), rename_expression(element, names)))
+                .map(|element| {
+                    RecordElement::new(
+                        element.name(),
+                        rename_expression(element.expression(), names),
+                        element.position().clone(),
+                    )
+                })
                 .collect(),
             update.position().clone(),
         )

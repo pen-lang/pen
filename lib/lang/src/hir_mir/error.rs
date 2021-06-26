@@ -38,10 +38,10 @@ impl Display for CompileError {
                 write!(formatter, "failed to check types in MIR: {}", error)
             }
             Self::RecordElementUnknown(position) => {
-                write!(formatter, "unknown record element\n{}", position)
+                write!(formatter, "unknown record deconstruction\n{}", position)
             }
             Self::RecordElementMissing(position) => {
-                write!(formatter, "missing record element\n{}", position)
+                write!(formatter, "missing record deconstruction\n{}", position)
             }
             Self::RecordExpected(position) => {
                 write!(formatter, "record expected\n{}", position)

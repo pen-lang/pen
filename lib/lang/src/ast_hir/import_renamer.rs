@@ -1,3 +1,4 @@
+use super::utilities;
 use crate::{
     ast,
     hir::{
@@ -8,8 +9,6 @@ use crate::{
     types::{self, Type},
 };
 use std::collections::HashMap;
-
-const PREFIX_SEPARATOR: &str = ".";
 
 pub fn rename(
     module: &hir::Module,
@@ -28,14 +27,14 @@ fn rename_variables(
         &module_interfaces
             .iter()
             .flat_map(|(path, interface)| {
-                let prefix = get_prefix(path);
+                let prefix = utilities::get_prefix(path);
 
                 interface
                     .declarations()
                     .iter()
                     .map(|declaration| {
                         (
-                            qualify_name(&prefix, declaration.original_name()),
+                            utilities::qualify_name(prefix, declaration.original_name()),
                             declaration.name().into(),
                         )
                     })
@@ -52,7 +51,7 @@ fn rename_types(
     let names = module_interfaces
         .iter()
         .flat_map(|(path, interface)| {
-            let prefix = get_prefix(path);
+            let prefix = utilities::get_prefix(path);
 
             interface
                 .type_definitions()
@@ -60,7 +59,7 @@ fn rename_types(
                 .filter_map(|definition| {
                     if definition.is_public() {
                         Some((
-                            qualify_name(&prefix, definition.original_name()),
+                            utilities::qualify_name(prefix, definition.original_name()),
                             definition.name().into(),
                         ))
                     } else {
@@ -70,7 +69,7 @@ fn rename_types(
                 .chain(interface.type_aliases().iter().filter_map(|alias| {
                     if alias.is_public() {
                         Some((
-                            qualify_name(&prefix, alias.original_name()),
+                            utilities::qualify_name(prefix, alias.original_name()),
                             alias.name().into(),
                         ))
                     } else {
@@ -100,17 +99,6 @@ fn rename_types(
         .into(),
         _ => type_.clone(),
     })
-}
-
-fn qualify_name(prefix: &str, name: &str) -> String {
-    prefix.to_owned() + PREFIX_SEPARATOR + name
-}
-
-fn get_prefix(path: &ast::ModulePath) -> String {
-    match path {
-        ast::ModulePath::External(path) => path.components().last().unwrap().clone(),
-        ast::ModulePath::Internal(path) => path.components().last().unwrap().clone(),
-    }
 }
 
 #[cfg(test)]

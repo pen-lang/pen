@@ -7,7 +7,7 @@ use crate::{
         Type,
     },
 };
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 pub fn check_types(module: &Module, type_context: &TypeContext) -> Result<(), CompileError> {
     let variables = environment_creator::create_from_module(module);
@@ -99,17 +99,27 @@ fn check_expression(
                 type_context.records(),
             )?;
 
-            for (name, expression) in construction.elements() {
+            for element in construction.elements() {
                 check_subsumption(
-                    &check_expression(expression, variables)?,
-                    element_types.get(name).ok_or_else(|| {
-                        CompileError::RecordElementUnknown(expression.position().clone())
-                    })?,
+                    &check_expression(element.expression(), variables)?,
+                    element_types
+                        .iter()
+                        .find(|element_type| element_type.name() == element.name())
+                        .ok_or_else(|| {
+                            CompileError::RecordElementUnknown(expression.position().clone())
+                        })?
+                        .type_(),
                 )?;
             }
 
-            for name in element_types.keys() {
-                if !construction.elements().contains_key(name) {
+            let element_names = construction
+                .elements()
+                .iter()
+                .map(|element| element.name())
+                .collect::<HashSet<_>>();
+
+            for element_type in element_types {
+                if !element_names.contains(element_type.name()) {
                     return Err(CompileError::RecordElementMissing(
                         construction.position().clone(),
                     ));
@@ -117,6 +127,32 @@ fn check_expression(
             }
 
             construction.type_().clone()
+        }
+        Expression::RecordDeconstruction(deconstruction) => {
+            let type_ = deconstruction
+                .type_()
+                .ok_or_else(|| CompileError::TypeNotInferred(deconstruction.position().clone()))?;
+
+            check_subsumption(
+                &check_expression(deconstruction.record(), variables)?,
+                type_,
+            )?;
+
+            let element_types = type_resolver::resolve_record_elements(
+                type_,
+                deconstruction.position(),
+                type_context.types(),
+                type_context.records(),
+            )?;
+
+            element_types
+                .iter()
+                .find(|element_type| element_type.name() == deconstruction.element_name())
+                .ok_or_else(|| {
+                    CompileError::RecordElementUnknown(deconstruction.position().clone())
+                })?
+                .type_()
+                .clone()
         }
         Expression::RecordUpdate(update) => {
             check_subsumption(
@@ -131,12 +167,16 @@ fn check_expression(
                 type_context.records(),
             )?;
 
-            for (name, expression) in update.elements() {
+            for element in update.elements() {
                 check_subsumption(
-                    &check_expression(expression, variables)?,
-                    element_types.get(name).ok_or_else(|| {
-                        CompileError::RecordElementUnknown(expression.position().clone())
-                    })?,
+                    &check_expression(element.expression(), variables)?,
+                    element_types
+                        .iter()
+                        .find(|element_type| element_type.name() == element.name())
+                        .ok_or_else(|| {
+                            CompileError::RecordElementUnknown(expression.position().clone())
+                        })?
+                        .type_(),
                 )?;
             }
 
@@ -620,9 +660,11 @@ mod tests {
                         reference_type.clone(),
                         RecordConstruction::new(
                             reference_type,
-                            vec![("x".into(), None::new(Position::dummy()).into())]
-                                .into_iter()
-                                .collect(),
+                            vec![RecordElement::new(
+                                "x",
+                                None::new(Position::dummy()),
+                                Position::dummy(),
+                            )],
                             Position::dummy(),
                         ),
                         Position::dummy(),
@@ -691,9 +733,11 @@ mod tests {
                             reference_type.clone(),
                             RecordConstruction::new(
                                 reference_type,
-                                vec![("x".into(), None::new(Position::dummy()).into())]
-                                    .into_iter()
-                                    .collect(),
+                                vec![RecordElement::new(
+                                    "x",
+                                    None::new(Position::dummy()),
+                                    Position::dummy()
+                                )],
                                 Position::dummy(),
                             ),
                             Position::dummy(),
@@ -730,9 +774,11 @@ mod tests {
                         RecordUpdate::new(
                             reference_type,
                             Variable::new("x", Position::dummy()),
-                            vec![("x".into(), None::new(Position::dummy()).into())]
-                                .into_iter()
-                                .collect(),
+                            vec![RecordElement::new(
+                                "x",
+                                None::new(Position::dummy()),
+                                Position::dummy(),
+                            )],
                             Position::dummy(),
                         ),
                         Position::dummy(),
@@ -740,6 +786,79 @@ mod tests {
                     false,
                 )],
             ))
+        }
+
+        #[test]
+        fn check_record_deconstruction() -> Result<(), CompileError> {
+            let reference_type = types::Reference::new("r", Position::dummy());
+
+            check_module(&Module::new(
+                vec![TypeDefinition::without_source(
+                    "r",
+                    vec![types::RecordElement::new(
+                        "x",
+                        types::None::new(Position::dummy()),
+                    )],
+                    false,
+                    false,
+                    false,
+                )],
+                vec![],
+                vec![],
+                vec![Definition::without_source(
+                    "x",
+                    Lambda::new(
+                        vec![Argument::new("x", reference_type.clone())],
+                        types::None::new(Position::dummy()),
+                        RecordDeconstruction::new(
+                            Some(reference_type.into()),
+                            Variable::new("x", Position::dummy()),
+                            "x",
+                            Position::dummy(),
+                        ),
+                        Position::dummy(),
+                    ),
+                    false,
+                )],
+            ))
+        }
+
+        #[test]
+        fn fail_to_check_record_deconstruction_due_to_unknown_element() {
+            let reference_type = types::Reference::new("r", Position::dummy());
+
+            assert_eq!(
+                check_module(&Module::new(
+                    vec![TypeDefinition::without_source(
+                        "r",
+                        vec![types::RecordElement::new(
+                            "x",
+                            types::None::new(Position::dummy()),
+                        )],
+                        false,
+                        false,
+                        false,
+                    )],
+                    vec![],
+                    vec![],
+                    vec![Definition::without_source(
+                        "x",
+                        Lambda::new(
+                            vec![Argument::new("x", reference_type.clone())],
+                            types::None::new(Position::dummy()),
+                            RecordDeconstruction::new(
+                                Some(reference_type.into()),
+                                Variable::new("x", Position::dummy()),
+                                "y",
+                                Position::dummy(),
+                            ),
+                            Position::dummy(),
+                        ),
+                        false,
+                    )],
+                )),
+                Err(CompileError::RecordElementUnknown(Position::dummy()))
+            );
         }
     }
 }

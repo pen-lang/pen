@@ -1,21 +1,15 @@
-use super::expression::Expression;
+use super::RecordElement;
 use crate::{position::Position, types::Type};
-use std::collections::BTreeMap;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct RecordConstruction {
     type_: Type,
-    // TODO Change elements to Vec to keep the evaluation order.
-    elements: BTreeMap<String, Expression>,
+    elements: Vec<RecordElement>,
     position: Position,
 }
 
 impl RecordConstruction {
-    pub fn new(
-        type_: impl Into<Type>,
-        elements: BTreeMap<String, Expression>,
-        position: Position,
-    ) -> Self {
+    pub fn new(type_: impl Into<Type>, elements: Vec<RecordElement>, position: Position) -> Self {
         Self {
             type_: type_.into(),
             elements,
@@ -27,7 +21,7 @@ impl RecordConstruction {
         &self.type_
     }
 
-    pub fn elements(&self) -> &BTreeMap<String, Expression> {
+    pub fn elements(&self) -> &[RecordElement] {
         &self.elements
     }
 

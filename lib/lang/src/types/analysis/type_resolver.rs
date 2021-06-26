@@ -1,5 +1,5 @@
 use super::{super::*, TypeError};
-use crate::position::Position;
+use crate::{position::Position, types};
 use std::collections::HashMap;
 
 pub fn resolve_type(type_: &Type, types: &HashMap<String, Type>) -> Result<Type, TypeError> {
@@ -49,12 +49,12 @@ pub fn resolve_record_elements<'a>(
     type_: &Type,
     position: &Position,
     types: &HashMap<String, Type>,
-    records: &'a HashMap<String, HashMap<String, Type>>,
-) -> Result<&'a HashMap<String, Type>, TypeError> {
+    records: &'a HashMap<String, Vec<types::RecordElement>>,
+) -> Result<&'a [types::RecordElement], TypeError> {
     let record = resolve_to_record(type_, types)?
         .ok_or_else(|| TypeError::RecordExpected(position.clone()))?;
 
-    records
+    Ok(records
         .get(record.name())
-        .ok_or_else(|| TypeError::RecordNotFound(record.clone()))
+        .ok_or_else(|| TypeError::RecordNotFound(record.clone()))?)
 }
