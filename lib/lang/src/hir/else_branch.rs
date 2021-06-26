@@ -1,6 +1,5 @@
 use super::Expression;
-use crate::position::Position;
-use crate::types::Type;
+use crate::{position::Position, types::Type};
 use std::sync::Arc;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -13,7 +12,7 @@ pub struct ElseBranch {
 impl ElseBranch {
     pub fn new(type_: Option<Type>, expression: impl Into<Expression>, position: Position) -> Self {
         Self {
-            type_: type_.into(),
+            type_,
             expression: expression.into().into(),
             position,
         }

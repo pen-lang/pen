@@ -23,7 +23,7 @@ impl IfType {
             name: name.into(),
             argument: argument.into().into(),
             branches,
-            else_: else_.into(),
+            else_,
             position,
         }
     }
