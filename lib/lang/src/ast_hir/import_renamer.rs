@@ -34,7 +34,7 @@ fn rename_variables(
                     .iter()
                     .map(|declaration| {
                         (
-                            utilities::qualify_name(&prefix, declaration.original_name()),
+                            utilities::qualify_name(prefix, declaration.original_name()),
                             declaration.name().into(),
                         )
                     })
@@ -59,7 +59,7 @@ fn rename_types(
                 .filter_map(|definition| {
                     if definition.is_public() {
                         Some((
-                            utilities::qualify_name(&prefix, definition.original_name()),
+                            utilities::qualify_name(prefix, definition.original_name()),
                             definition.name().into(),
                         ))
                     } else {
@@ -69,7 +69,7 @@ fn rename_types(
                 .chain(interface.type_aliases().iter().filter_map(|alias| {
                     if alias.is_public() {
                         Some((
-                            utilities::qualify_name(&prefix, alias.original_name()),
+                            utilities::qualify_name(prefix, alias.original_name()),
                             alias.name().into(),
                         ))
                     } else {
