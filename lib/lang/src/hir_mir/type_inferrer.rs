@@ -132,9 +132,17 @@ fn infer_expression(
                     ))
                 })
                 .collect::<Result<Vec<_>, _>>()?;
+
+            // TODO Infer a rest type.
             let else_ = if_
                 .else_()
-                .map(|expression| infer_expression(expression, variables))
+                .map(|branch| -> Result<_, CompileError> {
+                    Ok(ElseBranch::new(
+                        branch.type_().cloned(),
+                        infer_expression(expression, variables)?,
+                        branch.position().clone(),
+                    ))
+                })
                 .transpose()?;
 
             IfType::new(

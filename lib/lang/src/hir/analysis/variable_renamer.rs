@@ -99,8 +99,13 @@ fn rename_expression(expression: &Expression, names: &HashMap<String, String>) -
                         )
                     })
                     .collect(),
-                if_.else_()
-                    .map(|expression| rename_expression(expression, &branch_names)),
+                if_.else_().map(|branch| {
+                    ElseBranch::new(
+                        branch.type_().cloned(),
+                        rename_expression(expression, &branch_names),
+                        branch.position().clone(),
+                    )
+                }),
                 if_.position().clone(),
             )
             .into()

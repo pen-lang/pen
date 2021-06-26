@@ -157,8 +157,13 @@ fn transform_expression(expression: &Expression, transform: &impl Fn(&Type) -> T
                     )
                 })
                 .collect(),
-            if_.else_()
-                .map(|expression| transform_expression(expression, transform)),
+            if_.else_().map(|branch| {
+                ElseBranch::new(
+                    branch.type_().cloned(),
+                    transform_expression(expression, transform),
+                    branch.position().clone(),
+                )
+            }),
             if_.position().clone(),
         )
         .into(),

@@ -174,19 +174,30 @@ fn transform_expression(
                     })
                     .collect::<Result<Vec<_>, _>>()?,
                 if_.else_()
-                    .map(|expression| {
-                        transform_and_coerce_expression(
-                            expression,
-                            &result_type,
-                            &variables
-                                .clone()
-                                .into_iter()
-                                .chain(vec![(
-                                    if_.name().into(),
-                                    extract_type(expression, variables)?,
-                                )])
-                                .collect(),
-                        )
+                    .map(|branch| -> Result<_, CompileError> {
+                        Ok(ElseBranch::new(
+                            branch.type_().cloned(),
+                            transform_and_coerce_expression(
+                                branch.expression(),
+                                &result_type,
+                                &variables
+                                    .clone()
+                                    .into_iter()
+                                    .chain(vec![(
+                                        if_.name().into(),
+                                        branch
+                                            .type_()
+                                            .ok_or_else(|| {
+                                                CompileError::TypeNotInferred(
+                                                    branch.position().clone(),
+                                                )
+                                            })?
+                                            .clone(),
+                                    )])
+                                    .collect(),
+                            )?,
+                            branch.position().clone(),
+                        ))
                     })
                     .transpose()?,
                 if_.position().clone(),
@@ -665,7 +676,11 @@ mod tests {
                                 types::Number::new(Position::dummy()),
                                 Variable::new("y", Position::dummy()),
                             )],
-                            Some(None::new(Position::dummy()).into()),
+                            Some(ElseBranch::new(
+                                Some(types::None::new(Position::dummy()).into()),
+                                None::new(Position::dummy()),
+                                Position::dummy(),
+                            )),
                             Position::dummy(),
                         ),
                         Position::dummy(),
@@ -694,15 +709,16 @@ mod tests {
                                     Position::dummy(),
                                 ),
                             )],
-                            Some(
+                            Some(ElseBranch::new(
+                                Some(types::None::new(Position::dummy()).into()),
                                 TypeCoercion::new(
                                     types::None::new(Position::dummy()),
                                     union_type,
                                     None::new(Position::dummy()),
                                     Position::dummy(),
-                                )
-                                .into()
-                            ),
+                                ),
+                                Position::dummy()
+                            )),
                             Position::dummy(),
                         ),
                         Position::dummy(),

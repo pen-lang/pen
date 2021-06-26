@@ -113,13 +113,21 @@ fn check_expression(
                 )?;
             }
 
-            if let Some(expression) = if_.else_() {
+            if let Some(branch) = if_.else_() {
                 check_expression(
-                    expression,
+                    branch.expression(),
                     &variables
                         .clone()
                         .into_iter()
-                        .chain(vec![(if_.name().into(), argument_type)])
+                        .chain(vec![(
+                            if_.name().into(),
+                            branch
+                                .type_()
+                                .ok_or_else(|| {
+                                    CompileError::TypeNotInferred(branch.position().clone())
+                                })?
+                                .clone(),
+                        )])
                         .collect(),
                 )?;
             } else if !type_equality_checker::check_equality(
@@ -484,7 +492,11 @@ mod tests {
                                 types::None::new(Position::dummy()),
                                 None::new(Position::dummy()),
                             )],
-                            Some(None::new(Position::dummy()).into()),
+                            Some(ElseBranch::new(
+                                Some(types::Any::new(Position::dummy()).into()),
+                                None::new(Position::dummy()),
+                                Position::dummy(),
+                            )),
                             Position::dummy(),
                         ),
                         Position::dummy(),
@@ -517,7 +529,11 @@ mod tests {
                                 types::None::new(Position::dummy()),
                                 Number::new(42.0, Position::dummy()),
                             )],
-                            Some(None::new(Position::dummy()).into()),
+                            Some(ElseBranch::new(
+                                Some(types::Any::new(Position::dummy()).into()),
+                                None::new(Position::dummy()),
+                                Position::dummy(),
+                            )),
                             Position::dummy(),
                         ),
                         Position::dummy(),
@@ -546,7 +562,11 @@ mod tests {
                                 types::None::new(Position::dummy()),
                                 None::new(Position::dummy()),
                             )],
-                            Some(Variable::new("y", Position::dummy()).into()),
+                            Some(ElseBranch::new(
+                                Some(types::Any::new(Position::dummy()).into()),
+                                Variable::new("y", Position::dummy()),
+                                Position::dummy(),
+                            )),
                             Position::dummy(),
                         ),
                         Position::dummy(),
@@ -576,7 +596,7 @@ mod tests {
                                 types::None::new(Position::dummy()),
                                 None::new(Position::dummy()),
                             )],
-                            Some(None::new(Position::dummy()).into()),
+                            None,
                             Position::dummy(),
                         ),
                         Position::dummy(),
