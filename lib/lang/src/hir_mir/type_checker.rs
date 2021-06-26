@@ -119,7 +119,7 @@ fn check_expression(
                     &variables
                         .clone()
                         .into_iter()
-                        .chain(vec![(if_.name().into(), argument_type.clone())])
+                        .chain(vec![(if_.name().into(), argument_type)])
                         .collect(),
                 )?;
             } else if !type_equality_checker::check_equality(
@@ -440,7 +440,7 @@ mod tests {
                 vec![Definition::without_source(
                     "f",
                     Lambda::new(
-                        vec![Argument::new("x", union_type.clone())],
+                        vec![Argument::new("x", union_type)],
                         types::None::new(Position::dummy()),
                         IfType::new(
                             "y",
