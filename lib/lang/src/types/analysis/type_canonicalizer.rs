@@ -2,7 +2,9 @@ use super::{super::*, type_resolver, TypeError};
 use std::collections::{BTreeSet, HashMap};
 
 pub fn canonicalize(type_: &Type, types: &HashMap<String, Type>) -> Result<Type, TypeError> {
-    Ok(match type_resolver::resolve_type(type_, types)? {
+    let type_ = type_resolver::resolve_type(type_, types)?;
+
+    Ok(match &type_ {
         Type::Function(function) => Function::new(
             function
                 .arguments()
@@ -18,7 +20,7 @@ pub fn canonicalize(type_: &Type, types: &HashMap<String, Type>) -> Result<Type,
             list.position().clone(),
         )
         .into(),
-        Type::Union(union) => canonicalize_union(&union, types)?,
+        Type::Union(union) => canonicalize_union(union, types)?,
         Type::Any(_)
         | Type::Boolean(_)
         | Type::Record(_)
@@ -198,6 +200,19 @@ mod tests {
                 &Default::default(),
             ),
             Ok(Any::new(Position::dummy()).into())
+        );
+    }
+
+    #[test]
+    fn canonicalize_reference() {
+        assert_eq!(
+            canonicalize(
+                &Reference::new("t", Position::dummy()).into(),
+                &vec![("t".into(), Number::new(Position::dummy()).into())]
+                    .into_iter()
+                    .collect(),
+            ),
+            Ok(Number::new(Position::dummy()).into())
         );
     }
 }
