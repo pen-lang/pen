@@ -261,6 +261,9 @@ fn expression<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
 fn atomic_expression<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
     lazy(|| {
         no_partial(choice!(
+            if_().map(Expression::from),
+            if_type().map(Expression::from),
+            if_list().map(Expression::from),
             lambda().map(Expression::from),
             record().map(Expression::from),
             list_literal().map(Expression::from),
@@ -428,9 +431,6 @@ fn term<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
     lazy(|| {
         no_partial(choice!(
             call().map(Expression::from),
-            if_().map(Expression::from),
-            if_type().map(Expression::from),
-            if_list().map(Expression::from),
             unary_operation().map(Expression::from),
             atomic_expression(),
         ))
