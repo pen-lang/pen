@@ -606,7 +606,7 @@ fn list_element<'a>() -> impl Parser<Stream<'a>, Output = ListElement> {
 }
 
 fn variable<'a>() -> impl Parser<Stream<'a>, Output = Variable> {
-    token((position(), qualified_identifier()))
+    token((position(), identifier()))
         .map(|(position, identifier)| Variable::new(identifier, position))
         .expected("variable")
 }
