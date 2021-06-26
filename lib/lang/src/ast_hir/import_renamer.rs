@@ -10,8 +10,6 @@ use crate::{
 };
 use std::collections::HashMap;
 
-const PREFIX_SEPARATOR: &str = ".";
-
 pub fn rename(
     module: &hir::Module,
     module_interfaces: &HashMap<ast::ModulePath, interface::Module>,
@@ -36,7 +34,7 @@ fn rename_variables(
                     .iter()
                     .map(|declaration| {
                         (
-                            qualify_name(&prefix, declaration.original_name()),
+                            utilities::qualify_name(&prefix, declaration.original_name()),
                             declaration.name().into(),
                         )
                     })
@@ -61,7 +59,7 @@ fn rename_types(
                 .filter_map(|definition| {
                     if definition.is_public() {
                         Some((
-                            qualify_name(&prefix, definition.original_name()),
+                            utilities::qualify_name(&prefix, definition.original_name()),
                             definition.name().into(),
                         ))
                     } else {
@@ -71,7 +69,7 @@ fn rename_types(
                 .chain(interface.type_aliases().iter().filter_map(|alias| {
                     if alias.is_public() {
                         Some((
-                            qualify_name(&prefix, alias.original_name()),
+                            utilities::qualify_name(&prefix, alias.original_name()),
                             alias.name().into(),
                         ))
                     } else {
@@ -101,10 +99,6 @@ fn rename_types(
         .into(),
         _ => type_.clone(),
     })
-}
-
-fn qualify_name(prefix: &str, name: &str) -> String {
-    prefix.to_owned() + PREFIX_SEPARATOR + name
 }
 
 #[cfg(test)]
