@@ -16,7 +16,7 @@ pub fn calculate(type_: &Type, types: &HashMap<String, Type>) -> Result<String, 
 fn calculate_string(type_: &Type, types: &HashMap<String, Type>) -> Result<String, TypeError> {
     let calculate_string = |type_| calculate_string(type_, types);
 
-    Ok(match type_resolver::resolve_type(type_, types)? {
+    Ok(match type_resolver::resolve(type_, types)? {
         Type::Any(_) => "any".into(),
         Type::Boolean(_) => "boolean".into(),
         Type::Function(function) => format!(

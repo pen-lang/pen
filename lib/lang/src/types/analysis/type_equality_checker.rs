@@ -6,9 +6,9 @@ pub fn check_equality(
     other: &Type,
     types: &HashMap<String, Type>,
 ) -> Result<bool, TypeError> {
-    let one = type_canonicalizer::canonicalize(&type_resolver::resolve_type(one, types)?, types)?;
+    let one = type_canonicalizer::canonicalize(&type_resolver::resolve(one, types)?, types)?;
     let other =
-        type_canonicalizer::canonicalize(&type_resolver::resolve_type(other, types)?, types)?;
+        type_canonicalizer::canonicalize(&type_resolver::resolve(other, types)?, types)?;
 
     Ok(match (&one, &other) {
         (Type::Function(one), Type::Function(other)) => {

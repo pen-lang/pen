@@ -279,7 +279,7 @@ fn compile_operation(
         }
         Operation::Equality(operation) => match operation.operator() {
             EqualityOperator::Equal => {
-                match type_resolver::resolve_type(
+                match type_resolver::resolve(
                     operation.type_().ok_or_else(|| {
                         CompileError::TypeNotInferred(operation.position().clone())
                     })?,

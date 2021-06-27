@@ -3,7 +3,7 @@ use crate::{
     types::{self, Type},
 };
 
-pub fn create_union_type(types: &[Type], position: &Position) -> Option<Type> {
+pub fn create(types: &[Type], position: &Position) -> Option<Type> {
     types
         .iter()
         .cloned()

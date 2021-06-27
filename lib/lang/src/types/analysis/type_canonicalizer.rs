@@ -2,7 +2,7 @@ use super::{super::*, type_resolver, TypeError};
 use std::collections::{BTreeSet, HashMap};
 
 pub fn canonicalize(type_: &Type, types: &HashMap<String, Type>) -> Result<Type, TypeError> {
-    let type_ = type_resolver::resolve_type(type_, types)?;
+    let type_ = type_resolver::resolve(type_, types)?;
 
     Ok(match &type_ {
         Type::Function(function) => Function::new(
@@ -47,7 +47,7 @@ fn canonicalize_union(union: &Union, types: &HashMap<String, Type>) -> Result<Ty
 }
 
 fn collect_types(type_: &Type, types: &HashMap<String, Type>) -> Result<BTreeSet<Type>, TypeError> {
-    Ok(match type_resolver::resolve_type(type_, types)? {
+    Ok(match type_resolver::resolve(type_, types)? {
         Type::Union(union) => collect_types(union.lhs(), types)?
             .into_iter()
             .chain(collect_types(union.rhs(), types)?)
