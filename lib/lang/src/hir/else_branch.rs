@@ -1,29 +1,25 @@
-use super::{Expression, Statement};
-use crate::position::Position;
+use super::Expression;
+use crate::{position::Position, types::Type};
 use std::sync::Arc;
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct Block {
-    statements: Vec<Statement>,
+pub struct ElseBranch {
+    type_: Option<Type>,
     expression: Arc<Expression>,
     position: Position,
 }
 
-impl Block {
-    pub fn new(
-        statements: Vec<Statement>,
-        expression: impl Into<Expression>,
-        position: Position,
-    ) -> Self {
+impl ElseBranch {
+    pub fn new(type_: Option<Type>, expression: impl Into<Expression>, position: Position) -> Self {
         Self {
-            statements,
+            type_,
             expression: expression.into().into(),
             position,
         }
     }
 
-    pub fn statements(&self) -> &[Statement] {
-        &self.statements
+    pub fn type_(&self) -> Option<&Type> {
+        self.type_.as_ref()
     }
 
     pub fn expression(&self) -> &Expression {

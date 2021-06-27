@@ -11,7 +11,9 @@ use crate::{
     hir_mir::transformation::record_update_transformer,
     types::{
         self,
-        analysis::{type_canonicalizer, type_resolver},
+        analysis::{
+            type_canonicalizer, type_equality_checker, type_resolver, union_type_member_calculator,
+        },
         Type,
     },
 };
@@ -46,6 +48,58 @@ pub fn compile(
             compile(if_.condition())?,
             compile(if_.then())?,
             compile(if_.else_())?,
+        )
+        .into(),
+        Expression::IfType(if_) => mir::ir::Case::new(
+            compile(if_.argument())?,
+            if_.branches()
+                .iter()
+                .map(|branch| {
+                    compile_if_type_branch(
+                        if_.name(),
+                        branch.type_(),
+                        branch.expression(),
+                        type_context,
+                    )
+                })
+                .collect::<Result<Vec<_>, CompileError>>()?
+                .into_iter()
+                .flatten()
+                .chain(if let Some(branch) = if_.else_() {
+                    if !type_equality_checker::check(
+                        branch.type_().unwrap(),
+                        &types::Any::new(if_.position().clone()).into(),
+                        type_context.types(),
+                    )? {
+                        compile_if_type_branch(
+                            if_.name(),
+                            branch.type_().unwrap(),
+                            branch.expression(),
+                            type_context,
+                        )?
+                    } else {
+                        vec![]
+                    }
+                } else {
+                    vec![]
+                })
+                .collect(),
+            if let Some(branch) = if_.else_() {
+                if type_equality_checker::check(
+                    branch.type_().unwrap(),
+                    &types::Any::new(if_.position().clone()).into(),
+                    type_context.types(),
+                )? {
+                    Some(mir::ir::DefaultAlternative::new(
+                        if_.name(),
+                        compile(branch.expression())?,
+                    ))
+                } else {
+                    None
+                }
+            } else {
+                None
+            },
         )
         .into(),
         Expression::Lambda(lambda) => mir::ir::LetRecursive::new(
@@ -171,6 +225,37 @@ pub fn compile(
     })
 }
 
+fn compile_if_type_branch(
+    name: &str,
+    type_: &Type,
+    expression: &Expression,
+    type_context: &TypeContext,
+) -> Result<Vec<mir::ir::Alternative>, CompileError> {
+    let type_ = type_canonicalizer::canonicalize(type_, type_context.types())?;
+
+    union_type_member_calculator::calculate(&type_, type_context.types())?
+        .into_iter()
+        .map(|member_type| {
+            let member_type = type_compiler::compile(&member_type, type_context)?;
+            let expression = compile(expression, type_context)?;
+
+            Ok(mir::ir::Alternative::new(member_type.clone(), name, {
+                if type_.is_union() {
+                    mir::ir::Let::new(
+                        name,
+                        mir::types::Type::Variant,
+                        mir::ir::Variant::new(member_type, mir::ir::Variable::new(name)),
+                        expression,
+                    )
+                    .into()
+                } else {
+                    expression
+                }
+            }))
+        })
+        .collect::<Result<_, _>>()
+}
+
 fn compile_operation(
     operation: &Operation,
     type_context: &TypeContext,
@@ -194,7 +279,7 @@ fn compile_operation(
         }
         Operation::Equality(operation) => match operation.operator() {
             EqualityOperator::Equal => {
-                match type_resolver::resolve_type(
+                match type_resolver::resolve(
                     operation.type_().ok_or_else(|| {
                         CompileError::TypeNotInferred(operation.position().clone())
                     })?,
@@ -297,139 +382,333 @@ fn compile_record_elements(
 mod tests {
     use super::*;
     use crate::position::Position;
-    use pretty_assertions::assert_eq;
 
-    #[test]
-    fn compile_record_construction() {
-        assert_eq!(
-            compile(
-                &RecordConstruction::new(
-                    types::Record::new("r", Position::dummy()),
-                    vec![RecordElement::new(
-                        "x",
-                        None::new(Position::dummy()),
-                        Position::dummy()
-                    )],
-                    Position::dummy()
-                )
-                .into(),
-                &TypeContext::dummy(
-                    vec![(
-                        "r".into(),
-                        vec![types::RecordElement::new(
-                            "x",
-                            types::None::new(Position::dummy())
-                        )]
-                    )]
-                    .into_iter()
-                    .collect(),
-                    Default::default()
+    mod if_type {
+        use super::*;
+        use pretty_assertions::assert_eq;
+
+        #[test]
+        fn compile_with_union() {
+            assert_eq!(
+                compile(
+                    &IfType::new(
+                        "y",
+                        Variable::new("x", Position::dummy()),
+                        vec![
+                            IfTypeBranch::new(
+                                types::Number::new(Position::dummy()),
+                                None::new(Position::dummy()),
+                            ),
+                            IfTypeBranch::new(
+                                types::None::new(Position::dummy()),
+                                None::new(Position::dummy()),
+                            )
+                        ],
+                        None,
+                        Position::dummy(),
+                    )
+                    .into(),
+                    &TypeContext::dummy(Default::default(), Default::default()),
                 ),
-            ),
-            Ok(mir::ir::Let::new(
-                "$x",
-                mir::types::Type::None,
-                mir::ir::Expression::None,
-                mir::ir::Record::new(
-                    mir::types::Record::new("r"),
-                    vec![mir::ir::Variable::new("$x").into()]
+                Ok(mir::ir::Case::new(
+                    mir::ir::Variable::new("x"),
+                    vec![
+                        mir::ir::Alternative::new(
+                            mir::types::Type::Number,
+                            "y",
+                            mir::ir::Expression::None
+                        ),
+                        mir::ir::Alternative::new(
+                            mir::types::Type::None,
+                            "y",
+                            mir::ir::Expression::None
+                        )
+                    ],
+                    None
                 )
-            )
-            .into())
-        );
+                .into())
+            );
+        }
+
+        #[test]
+        fn compile_with_union_and_else() {
+            assert_eq!(
+                compile(
+                    &IfType::new(
+                        "y",
+                        Variable::new("x", Position::dummy()),
+                        vec![IfTypeBranch::new(
+                            types::Number::new(Position::dummy()),
+                            None::new(Position::dummy()),
+                        )],
+                        Some(ElseBranch::new(
+                            Some(types::None::new(Position::dummy()).into()),
+                            None::new(Position::dummy()),
+                            Position::dummy()
+                        )),
+                        Position::dummy(),
+                    )
+                    .into(),
+                    &TypeContext::dummy(Default::default(), Default::default()),
+                ),
+                Ok(mir::ir::Case::new(
+                    mir::ir::Variable::new("x"),
+                    vec![
+                        mir::ir::Alternative::new(
+                            mir::types::Type::Number,
+                            "y",
+                            mir::ir::Expression::None
+                        ),
+                        mir::ir::Alternative::new(
+                            mir::types::Type::None,
+                            "y",
+                            mir::ir::Expression::None
+                        )
+                    ],
+                    None
+                )
+                .into())
+            );
+        }
+
+        #[test]
+        fn compile_with_any() {
+            assert_eq!(
+                compile(
+                    &IfType::new(
+                        "y",
+                        Variable::new("x", Position::dummy()),
+                        vec![IfTypeBranch::new(
+                            types::Number::new(Position::dummy()),
+                            None::new(Position::dummy()),
+                        )],
+                        Some(ElseBranch::new(
+                            Some(types::Any::new(Position::dummy()).into()),
+                            None::new(Position::dummy()),
+                            Position::dummy()
+                        )),
+                        Position::dummy(),
+                    )
+                    .into(),
+                    &TypeContext::dummy(Default::default(), Default::default()),
+                ),
+                Ok(mir::ir::Case::new(
+                    mir::ir::Variable::new("x"),
+                    vec![mir::ir::Alternative::new(
+                        mir::types::Type::Number,
+                        "y",
+                        mir::ir::Expression::None
+                    )],
+                    Some(mir::ir::DefaultAlternative::new(
+                        "y",
+                        mir::ir::Expression::None
+                    ))
+                )
+                .into())
+            );
+        }
+
+        #[test]
+        fn compile_with_union_branch() {
+            assert_eq!(
+                compile(
+                    &IfType::new(
+                        "y",
+                        Variable::new("x", Position::dummy()),
+                        vec![IfTypeBranch::new(
+                            types::Union::new(
+                                types::Number::new(Position::dummy()),
+                                types::None::new(Position::dummy()),
+                                Position::dummy()
+                            ),
+                            None::new(Position::dummy()),
+                        )],
+                        None,
+                        Position::dummy(),
+                    )
+                    .into(),
+                    &TypeContext::dummy(Default::default(), Default::default()),
+                ),
+                Ok(mir::ir::Case::new(
+                    mir::ir::Variable::new("x"),
+                    vec![
+                        mir::ir::Alternative::new(
+                            mir::types::Type::None,
+                            "y",
+                            mir::ir::Let::new(
+                                "y",
+                                mir::types::Type::Variant,
+                                mir::ir::Variant::new(
+                                    mir::types::Type::None,
+                                    mir::ir::Variable::new("y")
+                                ),
+                                mir::ir::Expression::None
+                            )
+                        ),
+                        mir::ir::Alternative::new(
+                            mir::types::Type::Number,
+                            "y",
+                            mir::ir::Let::new(
+                                "y",
+                                mir::types::Type::Variant,
+                                mir::ir::Variant::new(
+                                    mir::types::Type::Number,
+                                    mir::ir::Variable::new("y")
+                                ),
+                                mir::ir::Expression::None
+                            )
+                        ),
+                    ],
+                    None
+                )
+                .into())
+            );
+        }
     }
 
-    #[test]
-    fn compile_record_construction_with_two_elements() {
-        assert_eq!(
-            compile(
-                &RecordConstruction::new(
-                    types::Record::new("r", Position::dummy()),
-                    vec![
-                        RecordElement::new(
+    mod records {
+        use super::*;
+        use pretty_assertions::assert_eq;
+
+        #[test]
+        fn compile_record_construction() {
+            assert_eq!(
+                compile(
+                    &RecordConstruction::new(
+                        types::Record::new("r", Position::dummy()),
+                        vec![RecordElement::new(
                             "x",
-                            Number::new(42.0, Position::dummy()),
+                            None::new(Position::dummy()),
                             Position::dummy()
-                        ),
-                        RecordElement::new("y", None::new(Position::dummy()), Position::dummy())
-                    ],
-                    Position::dummy()
-                )
-                .into(),
-                &TypeContext::dummy(
-                    vec![(
-                        "r".into(),
-                        vec![
-                            types::RecordElement::new("x", types::Number::new(Position::dummy())),
-                            types::RecordElement::new("y", types::None::new(Position::dummy()))
-                        ]
-                    )]
-                    .into_iter()
-                    .collect(),
-                    Default::default()
+                        )],
+                        Position::dummy()
+                    )
+                    .into(),
+                    &TypeContext::dummy(
+                        vec![(
+                            "r".into(),
+                            vec![types::RecordElement::new(
+                                "x",
+                                types::None::new(Position::dummy())
+                            )]
+                        )]
+                        .into_iter()
+                        .collect(),
+                        Default::default()
+                    ),
                 ),
-            ),
-            Ok(mir::ir::Let::new(
-                "$x",
-                mir::types::Type::Number,
-                42.0,
-                mir::ir::Let::new(
-                    "$y",
+                Ok(mir::ir::Let::new(
+                    "$x",
                     mir::types::Type::None,
                     mir::ir::Expression::None,
                     mir::ir::Record::new(
                         mir::types::Record::new("r"),
-                        vec![
-                            mir::ir::Variable::new("$x").into(),
-                            mir::ir::Variable::new("$y").into()
-                        ]
+                        vec![mir::ir::Variable::new("$x").into()]
                     )
                 )
-            )
-            .into())
-        );
-    }
+                .into())
+            );
+        }
 
-    #[test]
-    fn compile_singleton_record_construction() {
-        assert_eq!(
-            compile(
-                &RecordConstruction::new(
-                    types::Record::new("r", Position::dummy()),
-                    vec![],
-                    Position::dummy()
-                )
-                .into(),
-                &TypeContext::dummy(
-                    vec![("r".into(), vec![])].into_iter().collect(),
-                    Default::default()
+        #[test]
+        fn compile_record_construction_with_two_elements() {
+            assert_eq!(
+                compile(
+                    &RecordConstruction::new(
+                        types::Record::new("r", Position::dummy()),
+                        vec![
+                            RecordElement::new(
+                                "x",
+                                Number::new(42.0, Position::dummy()),
+                                Position::dummy()
+                            ),
+                            RecordElement::new(
+                                "y",
+                                None::new(Position::dummy()),
+                                Position::dummy()
+                            )
+                        ],
+                        Position::dummy()
+                    )
+                    .into(),
+                    &TypeContext::dummy(
+                        vec![(
+                            "r".into(),
+                            vec![
+                                types::RecordElement::new(
+                                    "x",
+                                    types::Number::new(Position::dummy())
+                                ),
+                                types::RecordElement::new("y", types::None::new(Position::dummy()))
+                            ]
+                        )]
+                        .into_iter()
+                        .collect(),
+                        Default::default()
+                    ),
                 ),
-            ),
-            Ok(mir::ir::Record::new(mir::types::Record::new("r"), vec![]).into())
-        );
-    }
+                Ok(mir::ir::Let::new(
+                    "$x",
+                    mir::types::Type::Number,
+                    42.0,
+                    mir::ir::Let::new(
+                        "$y",
+                        mir::types::Type::None,
+                        mir::ir::Expression::None,
+                        mir::ir::Record::new(
+                            mir::types::Record::new("r"),
+                            vec![
+                                mir::ir::Variable::new("$x").into(),
+                                mir::ir::Variable::new("$y").into()
+                            ]
+                        )
+                    )
+                )
+                .into())
+            );
+        }
 
-    #[test]
-    fn compile_record_construction_with_reference_type() {
-        assert_eq!(
-            compile(
-                &RecordConstruction::new(
-                    types::Reference::new("r", Position::dummy()),
-                    vec![],
-                    Position::dummy()
-                )
-                .into(),
-                &TypeContext::dummy(
-                    vec![("r".into(), vec![])].into_iter().collect(),
-                    vec![(
-                        "r".into(),
-                        types::Record::new("r", Position::dummy()).into()
-                    )]
-                    .into_iter()
-                    .collect(),
+        #[test]
+        fn compile_singleton_record_construction() {
+            assert_eq!(
+                compile(
+                    &RecordConstruction::new(
+                        types::Record::new("r", Position::dummy()),
+                        vec![],
+                        Position::dummy()
+                    )
+                    .into(),
+                    &TypeContext::dummy(
+                        vec![("r".into(), vec![])].into_iter().collect(),
+                        Default::default()
+                    ),
                 ),
-            ),
-            Ok(mir::ir::Record::new(mir::types::Record::new("r"), vec![]).into())
-        );
+                Ok(mir::ir::Record::new(mir::types::Record::new("r"), vec![]).into())
+            );
+        }
+
+        #[test]
+        fn compile_record_construction_with_reference_type() {
+            assert_eq!(
+                compile(
+                    &RecordConstruction::new(
+                        types::Reference::new("r", Position::dummy()),
+                        vec![],
+                        Position::dummy()
+                    )
+                    .into(),
+                    &TypeContext::dummy(
+                        vec![("r".into(), vec![])].into_iter().collect(),
+                        vec![(
+                            "r".into(),
+                            types::Record::new("r", Position::dummy()).into()
+                        )]
+                        .into_iter()
+                        .collect(),
+                    ),
+                ),
+                Ok(mir::ir::Record::new(mir::types::Record::new("r"), vec![]).into())
+            );
+        }
     }
 }

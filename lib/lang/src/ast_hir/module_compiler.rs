@@ -272,7 +272,15 @@ fn compile_expression(
                     ))
                 })
                 .collect::<Result<_, _>>()?,
-            None,
+            if_.else_()
+                .map(|block| {
+                    Ok(hir::ElseBranch::new(
+                        None,
+                        compile_block(block)?,
+                        block.position().clone(),
+                    ))
+                })
+                .transpose()?,
             if_.position().clone(),
         )
         .into(),
@@ -428,7 +436,11 @@ mod tests {
                         ast::Lambda::new(
                             vec![],
                             types::None::new(Position::dummy()),
-                            ast::Block::new(vec![], ast::None::new(Position::dummy())),
+                            ast::Block::new(
+                                vec![],
+                                ast::None::new(Position::dummy()),
+                                Position::dummy()
+                            ),
                             Position::dummy(),
                         ),
                         Position::dummy(),

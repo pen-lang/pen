@@ -19,7 +19,7 @@ pub fn extract_from_expression(
 
     Ok(match expression {
         Expression::Boolean(boolean) => types::Boolean::new(boolean.position().clone()).into(),
-        Expression::Call(call) => type_resolver::resolve_to_function(
+        Expression::Call(call) => type_resolver::resolve_function(
             call.function_type()
                 .ok_or_else(|| CompileError::TypeNotInferred(call.position().clone()))?,
             type_context.types(),
@@ -34,7 +34,7 @@ pub fn extract_from_expression(
         )
         .into(),
         Expression::IfList(if_) => {
-            let list_type = type_resolver::resolve_to_list(
+            let list_type = type_resolver::resolve_list(
                 &extract_from_expression(if_.argument(), variables)?,
                 type_context.types(),
             )?
@@ -57,7 +57,7 @@ pub fn extract_from_expression(
             )
             .into()
         }
-        Expression::IfType(if_) => union_type_creator::create_union_type(
+        Expression::IfType(if_) => union_type_creator::create(
             &if_.branches()
                 .iter()
                 .map(|branch| {
@@ -74,15 +74,22 @@ pub fn extract_from_expression(
                 .into_iter()
                 .chain(
                     if_.else_()
-                        .map(|expression| {
+                        .map(|branch| {
                             extract_from_expression(
-                                expression,
+                                branch.expression(),
                                 &variables
                                     .clone()
                                     .into_iter()
                                     .chain(vec![(
                                         if_.name().into(),
-                                        extract_from_expression(if_.argument(), variables)?,
+                                        branch
+                                            .type_()
+                                            .ok_or_else(|| {
+                                                CompileError::TypeNotInferred(
+                                                    branch.position().clone(),
+                                                )
+                                            })?
+                                            .clone(),
                                     )])
                                     .collect(),
                             )
