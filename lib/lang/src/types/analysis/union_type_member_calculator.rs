@@ -1,5 +1,4 @@
-use super::type_canonicalizer;
-use super::TypeError;
+use super::{type_canonicalizer, TypeError};
 use crate::types::Type;
 use std::collections::{HashMap, HashSet};
 

@@ -55,12 +55,12 @@ pub fn compile(
             if_.branches()
                 .iter()
                 .map(|branch| {
-                    Ok(compile_if_type_branch(
+                    compile_if_type_branch(
                         if_.name(),
                         branch.type_(),
                         branch.expression(),
                         type_context,
-                    )?)
+                    )
                 })
                 .collect::<Result<Vec<_>, CompileError>>()?
                 .into_iter()

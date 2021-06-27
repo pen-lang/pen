@@ -171,10 +171,7 @@ fn infer_expression(
                                 &types.iter().cloned().collect::<Vec<_>>(),
                                 branch.position(),
                             ) {
-                                type_canonicalizer::canonicalize(
-                                    &union_type.into(),
-                                    type_context.types(),
-                                )?
+                                type_canonicalizer::canonicalize(&union_type, type_context.types())?
                             } else {
                                 return Err(CompileError::UnreachableCode(
                                     branch.position().clone(),
@@ -646,12 +643,12 @@ mod tests {
                     vec![Definition::without_source(
                         "x",
                         Lambda::new(
-                            vec![Argument::new("x", union_type.clone())],
+                            vec![Argument::new("x", union_type)],
                             types::None::new(Position::dummy()),
                             IfType::new(
                                 "x",
                                 Variable::new("x", Position::dummy()),
-                                branches.clone(),
+                                branches,
                                 Some(ElseBranch::new(
                                     Some(types::None::new(Position::dummy()).into()),
                                     None::new(Position::dummy()),
@@ -716,12 +713,12 @@ mod tests {
                     vec![Definition::without_source(
                         "x",
                         Lambda::new(
-                            vec![Argument::new("x", union_type.clone())],
+                            vec![Argument::new("x", union_type)],
                             types::None::new(Position::dummy()),
                             IfType::new(
                                 "x",
                                 Variable::new("x", Position::dummy()),
-                                branches.clone(),
+                                branches,
                                 Some(ElseBranch::new(
                                     Some(
                                         types::Union::new(
@@ -790,9 +787,9 @@ mod tests {
                             IfType::new(
                                 "x",
                                 Variable::new("x", Position::dummy()),
-                                branches.clone(),
+                                branches,
                                 Some(ElseBranch::new(
-                                    Some(any_type.clone().into()),
+                                    Some(any_type.into()),
                                     None::new(Position::dummy()),
                                     Position::dummy()
                                 )),
@@ -822,7 +819,7 @@ mod tests {
                     vec![Definition::without_source(
                         "x",
                         Lambda::new(
-                            vec![Argument::new("x", union_type.clone())],
+                            vec![Argument::new("x", union_type)],
                             types::None::new(Position::dummy()),
                             IfType::new(
                                 "x",

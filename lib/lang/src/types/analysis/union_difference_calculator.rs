@@ -1,6 +1,4 @@
-use super::type_canonicalizer;
-use super::union_type_member_calculator;
-use super::TypeError;
+use super::{type_canonicalizer, union_type_member_calculator, TypeError};
 use crate::types::Type;
 use std::collections::{HashMap, HashSet};
 
@@ -29,8 +27,7 @@ pub fn calculate(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::position::Position;
-    use crate::types;
+    use crate::{position::Position, types};
     use pretty_assertions::assert_eq;
 
     #[test]
