@@ -89,7 +89,7 @@ fn transform_expression(
 
     Ok(match expression {
         Expression::Call(call) => {
-            let function_type = type_resolver::resolve_to_function(
+            let function_type = type_resolver::resolve_function(
                 call.function_type()
                     .ok_or_else(|| CompileError::TypeNotInferred(call.position().clone()))?,
                 type_context.types(),
@@ -122,7 +122,7 @@ fn transform_expression(
             .into()
         }
         Expression::IfList(if_) => {
-            let list_type = type_resolver::resolve_to_list(
+            let list_type = type_resolver::resolve_list(
                 &extract_type(if_.argument(), variables)?,
                 type_context.types(),
             )?
@@ -394,7 +394,7 @@ fn coerce_expression(
     let lower_type = type_extractor::extract_from_expression(expression, variables, type_context)?;
 
     Ok(
-        if type_equality_checker::check_equality(&lower_type, upper_type, type_context.types())? {
+        if type_equality_checker::check(&lower_type, upper_type, type_context.types())? {
             expression.clone()
         } else {
             TypeCoercion::new(

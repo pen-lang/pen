@@ -65,7 +65,7 @@ fn check_expression(
             let type_ = call
                 .function_type()
                 .ok_or_else(|| CompileError::TypeNotInferred(call.position().clone()))?;
-            let function_type = type_resolver::resolve_to_function(type_, type_context.types())?
+            let function_type = type_resolver::resolve_function(type_, type_context.types())?
                 .ok_or_else(|| {
                     CompileError::FunctionExpected(call.function().position().clone())
                 })?;
@@ -137,9 +137,9 @@ fn check_expression(
                         )])
                         .collect(),
                 )?;
-            } else if !type_equality_checker::check_equality(
+            } else if !type_equality_checker::check(
                 &argument_type,
-                &union_type_creator::create_union_type(
+                &union_type_creator::create(
                     &if_.branches()
                         .iter()
                         .map(|branch| branch.type_().clone())
@@ -308,7 +308,7 @@ fn check_subsumption(
     upper: &Type,
     types: &HashMap<String, Type>,
 ) -> Result<(), CompileError> {
-    if type_subsumption_checker::check_subsumption(lower, upper, types)? {
+    if type_subsumption_checker::check(lower, upper, types)? {
         Ok(())
     } else {
         Err(CompileError::TypesNotMatched(

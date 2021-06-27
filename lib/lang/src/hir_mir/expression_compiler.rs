@@ -66,7 +66,7 @@ pub fn compile(
                 .into_iter()
                 .flatten()
                 .chain(if let Some(branch) = if_.else_() {
-                    if !type_equality_checker::check_equality(
+                    if !type_equality_checker::check(
                         branch.type_().unwrap(),
                         &types::Any::new(if_.position().clone()).into(),
                         type_context.types(),
@@ -85,7 +85,7 @@ pub fn compile(
                 })
                 .collect(),
             if let Some(branch) = if_.else_() {
-                if type_equality_checker::check_equality(
+                if type_equality_checker::check(
                     branch.type_().unwrap(),
                     &types::Any::new(if_.position().clone()).into(),
                     type_context.types(),
@@ -279,7 +279,7 @@ fn compile_operation(
         }
         Operation::Equality(operation) => match operation.operator() {
             EqualityOperator::Equal => {
-                match type_resolver::resolve_type(
+                match type_resolver::resolve(
                     operation.type_().ok_or_else(|| {
                         CompileError::TypeNotInferred(operation.position().clone())
                     })?,

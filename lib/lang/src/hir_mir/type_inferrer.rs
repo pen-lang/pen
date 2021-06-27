@@ -149,7 +149,7 @@ fn infer_expression(
                         type_context.types(),
                     )?;
                     let branch_type = type_canonicalizer::canonicalize(
-                        &union_type_creator::create_union_type(
+                        &union_type_creator::create(
                             &if_.branches()
                                 .iter()
                                 .map(|branch| branch.type_().clone())
@@ -167,7 +167,7 @@ fn infer_expression(
 
                     Ok(ElseBranch::new(
                         Some(if let Some(types) = types {
-                            if let Some(union_type) = union_type_creator::create_union_type(
+                            if let Some(union_type) = union_type_creator::create(
                                 &types.iter().cloned().collect::<Vec<_>>(),
                                 branch.position(),
                             ) {
