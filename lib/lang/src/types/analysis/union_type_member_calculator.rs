@@ -1,8 +1,7 @@
+use super::type_canonicalizer;
 use super::TypeError;
 use crate::types::Type;
 use std::collections::{HashMap, HashSet};
-
-use super::type_canonicalizer;
 
 pub fn calculate(type_: &Type, types: &HashMap<String, Type>) -> Result<HashSet<Type>, TypeError> {
     calculate_canonical(&type_canonicalizer::canonicalize(type_, types)?, types)

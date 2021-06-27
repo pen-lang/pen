@@ -1,17 +1,24 @@
 use super::{Expression, Statement};
+use crate::position::Position;
 use std::sync::Arc;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Block {
     statements: Vec<Statement>,
     expression: Arc<Expression>,
+    position: Position,
 }
 
 impl Block {
-    pub fn new(statements: Vec<Statement>, expression: impl Into<Expression>) -> Self {
+    pub fn new(
+        statements: Vec<Statement>,
+        expression: impl Into<Expression>,
+        position: Position,
+    ) -> Self {
         Self {
             statements,
             expression: expression.into().into(),
+            position,
         }
     }
 
@@ -21,5 +28,9 @@ impl Block {
 
     pub fn expression(&self) -> &Expression {
         &self.expression
+    }
+
+    pub fn position(&self) -> &Position {
+        &self.position
     }
 }

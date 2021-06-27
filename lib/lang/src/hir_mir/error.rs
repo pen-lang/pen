@@ -23,6 +23,7 @@ pub enum CompileError {
     TypeNotInferred(Position),
     TypesNotMatched(Position, Position),
     UnionOrAnyTypeExpected(Position),
+    UnreachableCode(Position),
     VariableNotFound(Variable),
     WrongArgumentCount(Position),
 }
@@ -78,6 +79,9 @@ impl Display for CompileError {
             ),
             Self::UnionOrAnyTypeExpected(position) => {
                 write!(formatter, "union or any type expected\n{}", position)
+            }
+            Self::UnreachableCode(position) => {
+                write!(formatter, "unreachable code\n{}", position)
             }
             Self::VariableNotFound(variable) => write!(
                 formatter,
