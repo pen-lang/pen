@@ -102,7 +102,7 @@ fn rename_expression(expression: &Expression, names: &HashMap<String, String>) -
                 if_.else_().map(|branch| {
                     ElseBranch::new(
                         branch.type_().cloned(),
-                        rename_expression(expression, &branch_names),
+                        rename_expression(branch.expression(), &branch_names),
                         branch.position().clone(),
                     )
                 }),

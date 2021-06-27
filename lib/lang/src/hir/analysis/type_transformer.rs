@@ -160,7 +160,7 @@ fn transform_expression(expression: &Expression, transform: &impl Fn(&Type) -> T
             if_.else_().map(|branch| {
                 ElseBranch::new(
                     branch.type_().cloned(),
-                    transform_expression(expression, transform),
+                    transform_expression(branch.expression(), transform),
                     branch.position().clone(),
                 )
             }),
