@@ -394,7 +394,7 @@ fn coerce_expression(
     let lower_type = type_extractor::extract_from_expression(expression, variables, type_context)?;
 
     Ok(
-        if type_equality_checker::check_equality(&lower_type, upper_type, type_context.types())? {
+        if type_equality_checker::check(&lower_type, upper_type, type_context.types())? {
             expression.clone()
         } else {
             TypeCoercion::new(

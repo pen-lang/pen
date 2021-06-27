@@ -137,7 +137,7 @@ fn check_expression(
                         )])
                         .collect(),
                 )?;
-            } else if !type_equality_checker::check_equality(
+            } else if !type_equality_checker::check(
                 &argument_type,
                 &union_type_creator::create(
                     &if_.branches()
@@ -308,7 +308,7 @@ fn check_subsumption(
     upper: &Type,
     types: &HashMap<String, Type>,
 ) -> Result<(), CompileError> {
-    if type_subsumption_checker::check_subsumption(lower, upper, types)? {
+    if type_subsumption_checker::check(lower, upper, types)? {
         Ok(())
     } else {
         Err(CompileError::TypesNotMatched(
