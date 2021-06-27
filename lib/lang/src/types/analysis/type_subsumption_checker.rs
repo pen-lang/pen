@@ -6,10 +6,8 @@ pub fn check_subsumption(
     upper: &Type,
     types: &HashMap<String, Type>,
 ) -> Result<bool, TypeError> {
-    let lower =
-        type_canonicalizer::canonicalize(&type_resolver::resolve(lower, types)?, types)?;
-    let upper =
-        type_canonicalizer::canonicalize(&type_resolver::resolve(upper, types)?, types)?;
+    let lower = type_canonicalizer::canonicalize(&type_resolver::resolve(lower, types)?, types)?;
+    let upper = type_canonicalizer::canonicalize(&type_resolver::resolve(upper, types)?, types)?;
 
     Ok(match (&lower, &upper) {
         (_, Type::Any(_)) => true,
