@@ -231,14 +231,27 @@ fn compile_if_type_branch(
     expression: &Expression,
     type_context: &TypeContext,
 ) -> Result<Vec<mir::ir::Alternative>, CompileError> {
-    union_type_member_calculator::calculate(type_, type_context.types())?
+    let type_ = type_canonicalizer::canonicalize(type_, type_context.types())?;
+
+    union_type_member_calculator::calculate(&type_, type_context.types())?
         .into_iter()
-        .map(|type_| {
-            Ok(mir::ir::Alternative::new(
-                type_compiler::compile(&type_, type_context)?,
-                name,
-                compile(expression, type_context)?,
-            ))
+        .map(|member_type| {
+            let member_type = type_compiler::compile(&member_type, type_context)?;
+            let expression = compile(expression, type_context)?;
+
+            Ok(mir::ir::Alternative::new(member_type.clone(), name, {
+                if type_.is_union() {
+                    mir::ir::Let::new(
+                        name,
+                        mir::types::Type::Variant,
+                        mir::ir::Variant::new(member_type, mir::ir::Variable::new(name)),
+                        expression,
+                    )
+                    .into()
+                } else {
+                    expression
+                }
+            }))
         })
         .collect::<Result<_, _>>()
 }
@@ -490,6 +503,63 @@ mod tests {
                         "y",
                         mir::ir::Expression::None
                     ))
+                )
+                .into())
+            );
+        }
+
+        #[test]
+        fn compile_with_union_branch() {
+            assert_eq!(
+                compile(
+                    &IfType::new(
+                        "y",
+                        Variable::new("x", Position::dummy()),
+                        vec![IfTypeBranch::new(
+                            types::Union::new(
+                                types::Number::new(Position::dummy()),
+                                types::None::new(Position::dummy()),
+                                Position::dummy()
+                            ),
+                            None::new(Position::dummy()),
+                        )],
+                        None,
+                        Position::dummy(),
+                    )
+                    .into(),
+                    &TypeContext::dummy(Default::default(), Default::default()),
+                ),
+                Ok(mir::ir::Case::new(
+                    mir::ir::Variable::new("x"),
+                    vec![
+                        mir::ir::Alternative::new(
+                            mir::types::Type::None,
+                            "y",
+                            mir::ir::Let::new(
+                                "y",
+                                mir::types::Type::Variant,
+                                mir::ir::Variant::new(
+                                    mir::types::Type::None,
+                                    mir::ir::Variable::new("y")
+                                ),
+                                mir::ir::Expression::None
+                            )
+                        ),
+                        mir::ir::Alternative::new(
+                            mir::types::Type::Number,
+                            "y",
+                            mir::ir::Let::new(
+                                "y",
+                                mir::types::Type::Variant,
+                                mir::ir::Variant::new(
+                                    mir::types::Type::Number,
+                                    mir::ir::Variable::new("y")
+                                ),
+                                mir::ir::Expression::None
+                            )
+                        ),
+                    ],
+                    None
                 )
                 .into())
             );

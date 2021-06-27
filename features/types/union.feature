@@ -42,3 +42,17 @@ Feature: Union
     """
     When I run `pen build`
     Then the exit status should be 0
+
+  Scenario: Downcast a union type to another union type
+    Given a file named "Foo.pen" with:
+    """
+    f = \(x number | boolean | none) number | none {
+      if x = x; number | none {
+        x
+      } else {
+        none
+      }
+    }
+    """
+    When I run `pen build`
+    Then the exit status should be 0
