@@ -111,6 +111,13 @@ fn check_expression(
                         .chain(vec![(if_.name().into(), branch.type_().clone())])
                         .collect(),
                 )?;
+
+                if type_canonicalizer::canonicalize(branch.type_(), type_context.types())?.is_any()
+                {
+                    return Err(CompileError::AnyTypeBranch(
+                        branch.type_().position().clone(),
+                    ));
+                }
             }
 
             if let Some(branch) = if_.else_() {
@@ -671,6 +678,40 @@ mod tests {
                                 None::new(Position::dummy()),
                             )],
                             None,
+                            Position::dummy(),
+                        ),
+                        Position::dummy(),
+                    ),
+                    false,
+                )],
+            ))
+            .unwrap();
+        }
+
+        #[test]
+        #[should_panic]
+        fn fail_to_check_due_to_any_type_branch() {
+            check_module(&Module::new(
+                vec![],
+                vec![],
+                vec![],
+                vec![Definition::without_source(
+                    "f",
+                    Lambda::new(
+                        vec![Argument::new("x", types::Any::new(Position::dummy()))],
+                        types::None::new(Position::dummy()),
+                        IfType::new(
+                            "y",
+                            Variable::new("x", Position::dummy()),
+                            vec![IfTypeBranch::new(
+                                types::Any::new(Position::dummy()),
+                                None::new(Position::dummy()),
+                            )],
+                            Some(ElseBranch::new(
+                                Some(types::Any::new(Position::dummy()).into()),
+                                None::new(Position::dummy()),
+                                Position::dummy(),
+                            )),
                             Position::dummy(),
                         ),
                         Position::dummy(),

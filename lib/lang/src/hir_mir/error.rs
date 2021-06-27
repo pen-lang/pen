@@ -10,6 +10,7 @@ use std::{
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum CompileError {
+    AnyTypeBranch(Position),
     FunctionExpected(Position),
     ListExpected(Position),
     MirTypeCheck(mir::analysis::TypeCheckError),
@@ -31,6 +32,13 @@ pub enum CompileError {
 impl Display for CompileError {
     fn fmt(&self, formatter: &mut Formatter) -> fmt::Result {
         match self {
+            Self::AnyTypeBranch(position) => {
+                write!(
+                    formatter,
+                    "any type cannot be used for downcast\n{}",
+                    position
+                )
+            }
             Self::FunctionExpected(position) => {
                 write!(formatter, "function expected\n{}", position)
             }
