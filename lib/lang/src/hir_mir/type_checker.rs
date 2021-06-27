@@ -155,6 +155,16 @@ fn check_expression(
             type_extractor::extract_from_expression(expression, variables, type_context)?
         }
         Expression::Lambda(lambda) => check_lambda(lambda, variables, type_context)?.into(),
+        Expression::Let(let_) => {
+            check_subsumption(
+                &check_expression(let_.bound_expression(), variables)?,
+                let_.type_().ok_or_else(|| {
+                    CompileError::TypeNotInferred(let_.bound_expression().position().clone())
+                })?,
+            )?;
+
+            type_extractor::extract_from_expression(expression, variables, type_context)?
+        }
         Expression::None(none) => types::None::new(none.position().clone()).into(),
         Expression::Number(number) => types::Number::new(number.position().clone()).into(),
         Expression::Operation(operation) => check_operation(operation, variables, type_context)?,
@@ -377,6 +387,32 @@ mod tests {
                 false,
             )],
         ))
+    }
+
+    #[test]
+    fn check_let() {
+        check_module(&Module::new(
+            vec![],
+            vec![],
+            vec![],
+            vec![Definition::without_source(
+                "x",
+                Lambda::new(
+                    vec![],
+                    types::None::new(Position::dummy()),
+                    Let::new(
+                        Some("x".into()),
+                        Some(types::None::new(Position::dummy()).into()),
+                        None::new(Position::dummy()),
+                        Variable::new("x", Position::dummy()),
+                        Position::dummy(),
+                    ),
+                    Position::dummy(),
+                ),
+                false,
+            )],
+        ))
+        .unwrap();
     }
 
     mod if_ {
