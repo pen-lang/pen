@@ -223,13 +223,17 @@ fn reference_type<'a>() -> impl Parser<Stream<'a>, Output = types::Reference> {
 }
 
 fn block<'a>() -> impl Parser<Stream<'a>, Output = Block> {
-    between(sign("{"), sign("}"), many1(statement()))
-        .then(|statements: Vec<_>| {
+    (
+        position(),
+        between(sign("{"), sign("}"), many1(statement())),
+    )
+        .then(|(position, statements): (_, Vec<_>)| {
             if let Some(statement) = statements.last() {
                 if statement.name().is_none() {
                     value(Block::new(
                         statements[..statements.len() - 1].to_vec(),
                         statement.expression().clone(),
+                        position,
                     ))
                     .left()
                 } else {
@@ -741,7 +745,11 @@ mod tests {
                     Lambda::new(
                         vec![Argument::new("x", types::Number::new(Position::dummy()))],
                         types::Number::new(Position::dummy()),
-                        Block::new(vec![], Number::new(42.0, Position::dummy())),
+                        Block::new(
+                            vec![],
+                            Number::new(42.0, Position::dummy()),
+                            Position::dummy()
+                        ),
                         Position::dummy()
                     ),
                     Position::dummy()
@@ -766,7 +774,11 @@ mod tests {
                         Lambda::new(
                             vec![Argument::new("x", types::Number::new(Position::dummy()))],
                             types::Number::new(Position::dummy()),
-                            Block::new(vec![], Number::new(42.0, Position::dummy())),
+                            Block::new(
+                                vec![],
+                                Number::new(42.0, Position::dummy()),
+                                Position::dummy()
+                            ),
                             Position::dummy()
                         ),
                         Position::dummy()
@@ -776,7 +788,11 @@ mod tests {
                         Lambda::new(
                             vec![Argument::new("y", types::Number::new(Position::dummy()))],
                             types::Number::new(Position::dummy()),
-                            Block::new(vec![], Number::new(42.0, Position::dummy())),
+                            Block::new(
+                                vec![],
+                                Number::new(42.0, Position::dummy()),
+                                Position::dummy()
+                            ),
                             Position::dummy()
                         ),
                         Position::dummy()
@@ -851,7 +867,11 @@ mod tests {
                 Lambda::new(
                     vec![Argument::new("x", types::Number::new(Position::dummy()))],
                     types::Number::new(Position::dummy()),
-                    Block::new(vec![], Number::new(42.0, Position::dummy())),
+                    Block::new(
+                        vec![],
+                        Number::new(42.0, Position::dummy()),
+                        Position::dummy()
+                    ),
                     Position::dummy()
                 ),
                 Position::dummy()
@@ -1222,7 +1242,11 @@ mod tests {
                 Lambda::new(
                     vec![Argument::new("x", types::Number::new(Position::dummy()))],
                     types::Number::new(Position::dummy()),
-                    Block::new(vec![], Number::new(42.0, Position::dummy())),
+                    Block::new(
+                        vec![],
+                        Number::new(42.0, Position::dummy()),
+                        Position::dummy()
+                    ),
                     Position::dummy()
                 ),
             );
@@ -1238,7 +1262,11 @@ mod tests {
                         Argument::new("y", types::Number::new(Position::dummy()))
                     ],
                     types::Number::new(Position::dummy()),
-                    Block::new(vec![], Number::new(42.0, Position::dummy())),
+                    Block::new(
+                        vec![],
+                        Number::new(42.0, Position::dummy()),
+                        Position::dummy()
+                    ),
                     Position::dummy()
                 ),
             );
@@ -1251,7 +1279,11 @@ mod tests {
                 Lambda::new(
                     vec![],
                     types::Reference::new("Foo", Position::dummy()),
-                    Block::new(vec![], Number::new(42.0, Position::dummy())),
+                    Block::new(
+                        vec![],
+                        Number::new(42.0, Position::dummy()),
+                        Position::dummy()
+                    ),
                     Position::dummy()
                 ),
             );
@@ -1261,7 +1293,7 @@ mod tests {
         fn parse_block() {
             assert_eq!(
                 block().parse(stream("{none}", "")).unwrap().0,
-                Block::new(vec![], None::new(Position::dummy())),
+                Block::new(vec![], None::new(Position::dummy()), Position::dummy()),
             );
             assert_eq!(
                 block().parse(stream("{none none}", "")).unwrap().0,
@@ -1271,7 +1303,8 @@ mod tests {
                         None::new(Position::dummy()),
                         Position::dummy()
                     )],
-                    None::new(Position::dummy())
+                    None::new(Position::dummy()),
+                    Position::dummy()
                 ),
             );
             assert_eq!(
@@ -1281,7 +1314,8 @@ mod tests {
                         Statement::new(None, None::new(Position::dummy()), Position::dummy()),
                         Statement::new(None, None::new(Position::dummy()), Position::dummy())
                     ],
-                    None::new(Position::dummy())
+                    None::new(Position::dummy()),
+                    Position::dummy()
                 ),
             );
             assert_eq!(
@@ -1292,7 +1326,8 @@ mod tests {
                         None::new(Position::dummy()),
                         Position::dummy()
                     )],
-                    None::new(Position::dummy())
+                    None::new(Position::dummy()),
+                    Position::dummy()
                 ),
             );
         }
@@ -1307,9 +1342,17 @@ mod tests {
                 If::new(
                     vec![IfBranch::new(
                         Boolean::new(true, Position::dummy()),
-                        Block::new(vec![], Number::new(42.0, Position::dummy())),
+                        Block::new(
+                            vec![],
+                            Number::new(42.0, Position::dummy()),
+                            Position::dummy()
+                        ),
                     )],
-                    Block::new(vec![], Number::new(13.0, Position::dummy())),
+                    Block::new(
+                        vec![],
+                        Number::new(13.0, Position::dummy()),
+                        Position::dummy()
+                    ),
                     Position::dummy(),
                 )
             );
@@ -1323,14 +1366,30 @@ mod tests {
                         If::new(
                             vec![IfBranch::new(
                                 Boolean::new(true, Position::dummy()),
-                                Block::new(vec![], Boolean::new(true, Position::dummy())),
+                                Block::new(
+                                    vec![],
+                                    Boolean::new(true, Position::dummy()),
+                                    Position::dummy()
+                                ),
                             )],
-                            Block::new(vec![], Boolean::new(true, Position::dummy())),
+                            Block::new(
+                                vec![],
+                                Boolean::new(true, Position::dummy()),
+                                Position::dummy()
+                            ),
                             Position::dummy(),
                         ),
-                        Block::new(vec![], Number::new(42.0, Position::dummy())),
+                        Block::new(
+                            vec![],
+                            Number::new(42.0, Position::dummy()),
+                            Position::dummy()
+                        ),
                     )],
-                    Block::new(vec![], Number::new(13.0, Position::dummy())),
+                    Block::new(
+                        vec![],
+                        Number::new(13.0, Position::dummy()),
+                        Position::dummy()
+                    ),
                     Position::dummy(),
                 )
             );
@@ -1343,14 +1402,26 @@ mod tests {
                     vec![
                         IfBranch::new(
                             Boolean::new(true, Position::dummy()),
-                            Block::new(vec![], Number::new(1.0, Position::dummy())),
+                            Block::new(
+                                vec![],
+                                Number::new(1.0, Position::dummy()),
+                                Position::dummy()
+                            ),
                         ),
                         IfBranch::new(
                             Boolean::new(true, Position::dummy()),
-                            Block::new(vec![], Number::new(2.0, Position::dummy())),
+                            Block::new(
+                                vec![],
+                                Number::new(2.0, Position::dummy()),
+                                Position::dummy()
+                            ),
                         )
                     ],
-                    Block::new(vec![], Number::new(3.0, Position::dummy())),
+                    Block::new(
+                        vec![],
+                        Number::new(3.0, Position::dummy()),
+                        Position::dummy()
+                    ),
                     Position::dummy(),
                 )
             );
@@ -1368,9 +1439,13 @@ mod tests {
                     Variable::new("y", Position::dummy()),
                     vec![IfTypeBranch::new(
                         types::Boolean::new(Position::dummy()),
-                        Block::new(vec![], None::new(Position::dummy())),
+                        Block::new(vec![], None::new(Position::dummy()), Position::dummy()),
                     )],
-                    Some(Block::new(vec![], None::new(Position::dummy()))),
+                    Some(Block::new(
+                        vec![],
+                        None::new(Position::dummy()),
+                        Position::dummy()
+                    )),
                     Position::dummy(),
                 )
             );
@@ -1389,14 +1464,18 @@ mod tests {
                     vec![
                         IfTypeBranch::new(
                             types::Boolean::new(Position::dummy()),
-                            Block::new(vec![], None::new(Position::dummy())),
+                            Block::new(vec![], None::new(Position::dummy()), Position::dummy()),
                         ),
                         IfTypeBranch::new(
                             types::None::new(Position::dummy()),
-                            Block::new(vec![], None::new(Position::dummy())),
+                            Block::new(vec![], None::new(Position::dummy()), Position::dummy()),
                         )
                     ],
-                    Some(Block::new(vec![], None::new(Position::dummy()))),
+                    Some(Block::new(
+                        vec![],
+                        None::new(Position::dummy()),
+                        Position::dummy()
+                    )),
                     Position::dummy()
                 )
             );
@@ -1412,11 +1491,11 @@ mod tests {
                     vec![
                         IfTypeBranch::new(
                             types::Boolean::new(Position::dummy()),
-                            Block::new(vec![], None::new(Position::dummy())),
+                            Block::new(vec![], None::new(Position::dummy()), Position::dummy()),
                         ),
                         IfTypeBranch::new(
                             types::None::new(Position::dummy()),
-                            Block::new(vec![], None::new(Position::dummy())),
+                            Block::new(vec![], None::new(Position::dummy()), Position::dummy()),
                         )
                     ],
                     None,
@@ -1436,8 +1515,8 @@ mod tests {
                     Variable::new("xs", Position::dummy()),
                     "x",
                     "xs",
-                    Block::new(vec![], None::new(Position::dummy())),
-                    Block::new(vec![], None::new(Position::dummy())),
+                    Block::new(vec![], None::new(Position::dummy()), Position::dummy()),
+                    Block::new(vec![], None::new(Position::dummy()), Position::dummy()),
                     Position::dummy(),
                 )
             );
@@ -1556,9 +1635,17 @@ mod tests {
                         If::new(
                             vec![IfBranch::new(
                                 Boolean::new(true, Position::dummy()),
-                                Block::new(vec![], Boolean::new(true, Position::dummy())),
+                                Block::new(
+                                    vec![],
+                                    Boolean::new(true, Position::dummy()),
+                                    Position::dummy(),
+                                ),
                             )],
-                            Block::new(vec![], Boolean::new(true, Position::dummy())),
+                            Block::new(
+                                vec![],
+                                Boolean::new(true, Position::dummy()),
+                                Position::dummy(),
+                            ),
                             Position::dummy(),
                         ),
                         Position::dummy(),

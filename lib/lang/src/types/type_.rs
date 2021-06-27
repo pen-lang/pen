@@ -71,6 +71,10 @@ impl Type {
     pub fn is_record(&self) -> bool {
         matches!(self, Type::Record(_))
     }
+
+    pub fn is_union(&self) -> bool {
+        matches!(self, Type::Union(_))
+    }
 }
 
 impl From<Any> for Type {

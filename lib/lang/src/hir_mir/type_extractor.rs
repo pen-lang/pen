@@ -74,15 +74,22 @@ pub fn extract_from_expression(
                 .into_iter()
                 .chain(
                     if_.else_()
-                        .map(|expression| {
+                        .map(|branch| {
                             extract_from_expression(
-                                expression,
+                                branch.expression(),
                                 &variables
                                     .clone()
                                     .into_iter()
                                     .chain(vec![(
                                         if_.name().into(),
-                                        extract_from_expression(if_.argument(), variables)?,
+                                        branch
+                                            .type_()
+                                            .ok_or_else(|| {
+                                                CompileError::TypeNotInferred(
+                                                    branch.position().clone(),
+                                                )
+                                            })?
+                                            .clone(),
                                     )])
                                     .collect(),
                             )

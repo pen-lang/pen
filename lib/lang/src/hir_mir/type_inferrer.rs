@@ -1,7 +1,11 @@
 use super::{environment_creator, type_context::TypeContext, type_extractor, CompileError};
 use crate::{
     hir::*,
-    types::{self, Type},
+    types::{
+        self,
+        analysis::{type_canonicalizer, union_difference_calculator, union_type_creator},
+        Type,
+    },
 };
 use std::collections::HashMap;
 
@@ -132,9 +136,54 @@ fn infer_expression(
                     ))
                 })
                 .collect::<Result<Vec<_>, _>>()?;
+
             let else_ = if_
                 .else_()
-                .map(|expression| infer_expression(expression, variables))
+                .map(|branch| -> Result<_, CompileError> {
+                    let argument_type = type_canonicalizer::canonicalize(
+                        &type_extractor::extract_from_expression(
+                            &argument,
+                            variables,
+                            type_context,
+                        )?,
+                        type_context.types(),
+                    )?;
+                    let branch_type = type_canonicalizer::canonicalize(
+                        &union_type_creator::create_union_type(
+                            &if_.branches()
+                                .iter()
+                                .map(|branch| branch.type_().clone())
+                                .collect::<Vec<_>>(),
+                            if_.position(),
+                        )
+                        .unwrap(),
+                        type_context.types(),
+                    )?;
+                    let types = union_difference_calculator::calculate(
+                        &argument_type,
+                        &branch_type,
+                        type_context.types(),
+                    )?;
+
+                    Ok(ElseBranch::new(
+                        Some(if let Some(types) = types {
+                            if let Some(union_type) = union_type_creator::create_union_type(
+                                &types.iter().cloned().collect::<Vec<_>>(),
+                                branch.position(),
+                            ) {
+                                type_canonicalizer::canonicalize(&union_type, type_context.types())?
+                            } else {
+                                return Err(CompileError::UnreachableCode(
+                                    branch.position().clone(),
+                                ));
+                            }
+                        } else {
+                            types::Any::new(branch.position().clone()).into()
+                        }),
+                        infer_expression(branch.expression(), variables)?,
+                        branch.position().clone(),
+                    ))
+                })
                 .transpose()?;
 
             IfType::new(
@@ -312,17 +361,16 @@ mod tests {
     };
     use pretty_assertions::assert_eq;
 
-    fn infer_module(module: &Module) -> Module {
+    fn infer_module(module: &Module) -> Result<Module, CompileError> {
         infer_types(
             module,
             &TypeContext::new(module, &LIST_TYPE_CONFIGURATION, &STRING_TYPE_CONFIGURATION),
         )
-        .unwrap()
     }
 
     #[test]
     fn infer_empty_module() {
-        infer_module(&Module::new(vec![], vec![], vec![], vec![]));
+        infer_module(&Module::new(vec![], vec![], vec![], vec![])).unwrap();
     }
 
     #[test]
@@ -348,7 +396,7 @@ mod tests {
                     false,
                 )],
             )),
-            Module::new(
+            Ok(Module::new(
                 vec![],
                 vec![],
                 vec![],
@@ -374,7 +422,7 @@ mod tests {
                     ),
                     false,
                 )],
-            )
+            ))
         );
     }
 
@@ -402,7 +450,7 @@ mod tests {
                     false,
                 )],
             )),
-            Module::new(
+            Ok(Module::new(
                 vec![],
                 vec![],
                 vec![],
@@ -429,7 +477,7 @@ mod tests {
                     ),
                     false,
                 )],
-            )
+            ))
         );
     }
 
@@ -457,7 +505,7 @@ mod tests {
                     false,
                 )],
             )),
-            Module::new(
+            Ok(Module::new(
                 vec![],
                 vec![],
                 vec![],
@@ -477,7 +525,7 @@ mod tests {
                     ),
                     false,
                 )],
-            )
+            ))
         );
     }
 
@@ -520,7 +568,7 @@ mod tests {
                     false,
                 )],
             )),
-            Module::new(
+            Ok(Module::new(
                 vec![type_definition],
                 vec![],
                 vec![],
@@ -542,7 +590,264 @@ mod tests {
                     ),
                     false,
                 )],
-            )
+            ))
         );
+    }
+
+    mod if_type {
+        use super::*;
+        use pretty_assertions::assert_eq;
+
+        #[test]
+        fn infer_else_branch_type_of_none() {
+            let union_type = types::Union::new(
+                types::Number::new(Position::dummy()),
+                types::None::new(Position::dummy()),
+                Position::dummy(),
+            );
+            let branches = vec![IfTypeBranch::new(
+                types::Number::new(Position::dummy()),
+                None::new(Position::dummy()),
+            )];
+
+            assert_eq!(
+                infer_module(&Module::new(
+                    vec![],
+                    vec![],
+                    vec![],
+                    vec![Definition::without_source(
+                        "x",
+                        Lambda::new(
+                            vec![Argument::new("x", union_type.clone())],
+                            types::None::new(Position::dummy()),
+                            IfType::new(
+                                "x",
+                                Variable::new("x", Position::dummy()),
+                                branches.clone(),
+                                Some(ElseBranch::new(
+                                    None,
+                                    None::new(Position::dummy()),
+                                    Position::dummy()
+                                )),
+                                Position::dummy()
+                            ),
+                            Position::dummy(),
+                        ),
+                        false,
+                    )],
+                )),
+                Ok(Module::new(
+                    vec![],
+                    vec![],
+                    vec![],
+                    vec![Definition::without_source(
+                        "x",
+                        Lambda::new(
+                            vec![Argument::new("x", union_type)],
+                            types::None::new(Position::dummy()),
+                            IfType::new(
+                                "x",
+                                Variable::new("x", Position::dummy()),
+                                branches,
+                                Some(ElseBranch::new(
+                                    Some(types::None::new(Position::dummy()).into()),
+                                    None::new(Position::dummy()),
+                                    Position::dummy()
+                                )),
+                                Position::dummy()
+                            ),
+                            Position::dummy(),
+                        ),
+                        false,
+                    )],
+                ))
+            );
+        }
+
+        #[test]
+        fn infer_else_branch_type_of_union() {
+            let union_type = types::Union::new(
+                types::Union::new(
+                    types::Number::new(Position::dummy()),
+                    types::Boolean::new(Position::dummy()),
+                    Position::dummy(),
+                ),
+                types::None::new(Position::dummy()),
+                Position::dummy(),
+            );
+            let branches = vec![IfTypeBranch::new(
+                types::Number::new(Position::dummy()),
+                None::new(Position::dummy()),
+            )];
+
+            assert_eq!(
+                infer_module(&Module::new(
+                    vec![],
+                    vec![],
+                    vec![],
+                    vec![Definition::without_source(
+                        "x",
+                        Lambda::new(
+                            vec![Argument::new("x", union_type.clone())],
+                            types::None::new(Position::dummy()),
+                            IfType::new(
+                                "x",
+                                Variable::new("x", Position::dummy()),
+                                branches.clone(),
+                                Some(ElseBranch::new(
+                                    None,
+                                    None::new(Position::dummy()),
+                                    Position::dummy()
+                                )),
+                                Position::dummy()
+                            ),
+                            Position::dummy(),
+                        ),
+                        false,
+                    )],
+                )),
+                Ok(Module::new(
+                    vec![],
+                    vec![],
+                    vec![],
+                    vec![Definition::without_source(
+                        "x",
+                        Lambda::new(
+                            vec![Argument::new("x", union_type)],
+                            types::None::new(Position::dummy()),
+                            IfType::new(
+                                "x",
+                                Variable::new("x", Position::dummy()),
+                                branches,
+                                Some(ElseBranch::new(
+                                    Some(
+                                        types::Union::new(
+                                            types::Boolean::new(Position::dummy()),
+                                            types::None::new(Position::dummy()),
+                                            Position::dummy(),
+                                        )
+                                        .into()
+                                    ),
+                                    None::new(Position::dummy()),
+                                    Position::dummy()
+                                )),
+                                Position::dummy()
+                            ),
+                            Position::dummy(),
+                        ),
+                        false,
+                    )],
+                ))
+            );
+        }
+
+        #[test]
+        fn infer_else_branch_type_of_any() {
+            let any_type = types::Any::new(Position::dummy());
+            let branches = vec![IfTypeBranch::new(
+                types::Number::new(Position::dummy()),
+                None::new(Position::dummy()),
+            )];
+
+            assert_eq!(
+                infer_module(&Module::new(
+                    vec![],
+                    vec![],
+                    vec![],
+                    vec![Definition::without_source(
+                        "x",
+                        Lambda::new(
+                            vec![Argument::new("x", any_type.clone())],
+                            types::None::new(Position::dummy()),
+                            IfType::new(
+                                "x",
+                                Variable::new("x", Position::dummy()),
+                                branches.clone(),
+                                Some(ElseBranch::new(
+                                    None,
+                                    None::new(Position::dummy()),
+                                    Position::dummy()
+                                )),
+                                Position::dummy()
+                            ),
+                            Position::dummy(),
+                        ),
+                        false,
+                    )],
+                )),
+                Ok(Module::new(
+                    vec![],
+                    vec![],
+                    vec![],
+                    vec![Definition::without_source(
+                        "x",
+                        Lambda::new(
+                            vec![Argument::new("x", any_type.clone())],
+                            types::None::new(Position::dummy()),
+                            IfType::new(
+                                "x",
+                                Variable::new("x", Position::dummy()),
+                                branches,
+                                Some(ElseBranch::new(
+                                    Some(any_type.into()),
+                                    None::new(Position::dummy()),
+                                    Position::dummy()
+                                )),
+                                Position::dummy()
+                            ),
+                            Position::dummy(),
+                        ),
+                        false,
+                    )],
+                ))
+            );
+        }
+
+        #[test]
+        fn fail_to_infer_else_branch_type_due_to_unreachable_code() {
+            let union_type = types::Union::new(
+                types::Number::new(Position::dummy()),
+                types::None::new(Position::dummy()),
+                Position::dummy(),
+            );
+
+            assert_eq!(
+                infer_module(&Module::new(
+                    vec![],
+                    vec![],
+                    vec![],
+                    vec![Definition::without_source(
+                        "x",
+                        Lambda::new(
+                            vec![Argument::new("x", union_type)],
+                            types::None::new(Position::dummy()),
+                            IfType::new(
+                                "x",
+                                Variable::new("x", Position::dummy()),
+                                vec![
+                                    IfTypeBranch::new(
+                                        types::Number::new(Position::dummy()),
+                                        None::new(Position::dummy()),
+                                    ),
+                                    IfTypeBranch::new(
+                                        types::None::new(Position::dummy()),
+                                        None::new(Position::dummy()),
+                                    )
+                                ],
+                                Some(ElseBranch::new(
+                                    None,
+                                    None::new(Position::dummy()),
+                                    Position::dummy()
+                                )),
+                                Position::dummy()
+                            ),
+                            Position::dummy(),
+                        ),
+                        false,
+                    )],
+                )),
+                Err(CompileError::UnreachableCode(Position::dummy()))
+            );
+        }
     }
 }
