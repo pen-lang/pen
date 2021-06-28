@@ -197,8 +197,9 @@ fn infer_expression(
         }
         Expression::Lambda(lambda) => infer_lambda(lambda, variables, type_context)?.into(),
         Expression::Let(let_) => {
+            let bound_expression = infer_expression(let_.bound_expression(), variables)?;
             let bound_type = type_extractor::extract_from_expression(
-                let_.bound_expression(),
+                &bound_expression,
                 variables,
                 type_context,
             )?;
@@ -206,7 +207,7 @@ fn infer_expression(
             Let::new(
                 let_.name().map(String::from),
                 Some(bound_type.clone()),
-                infer_expression(let_.bound_expression(), variables)?,
+                bound_expression,
                 infer_expression(
                     let_.expression(),
                     &variables
@@ -518,6 +519,74 @@ mod tests {
                             Some("x".into()),
                             Some(types::None::new(Position::dummy()).into()),
                             None::new(Position::dummy()),
+                            Variable::new("x", Position::dummy()),
+                            Position::dummy(),
+                        ),
+                        Position::dummy(),
+                    ),
+                    false,
+                )],
+            ))
+        );
+    }
+
+    #[test]
+    fn infer_let_with_call() {
+        let declaration = Declaration::new(
+            "f",
+            types::Function::new(
+                vec![],
+                types::None::new(Position::dummy()),
+                Position::dummy(),
+            ),
+            Position::dummy(),
+        );
+
+        assert_eq!(
+            infer_module(&Module::new(
+                vec![],
+                vec![],
+                vec![declaration.clone()],
+                vec![Definition::without_source(
+                    "x",
+                    Lambda::new(
+                        vec![],
+                        types::None::new(Position::dummy()),
+                        Let::new(
+                            Some("x".into()),
+                            None,
+                            Call::new(
+                                Variable::new("f", Position::dummy()),
+                                vec![],
+                                None,
+                                Position::dummy()
+                            ),
+                            Variable::new("x", Position::dummy()),
+                            Position::dummy(),
+                        ),
+                        Position::dummy(),
+                    ),
+                    false,
+                )],
+            )),
+            Ok(Module::new(
+                vec![],
+                vec![],
+                vec![declaration.clone()],
+                vec![Definition::without_source(
+                    "x",
+                    Lambda::new(
+                        vec![],
+                        types::None::new(Position::dummy()),
+                        Let::new(
+                            Some("x".into()),
+                            Some(types::None::new(Position::dummy()).into()),
+                            Call::new(
+                                Variable::new("f", Position::dummy()),
+                                vec![],
+                                Some(declaration.type_().clone().into()),
+                                Position::dummy()
+                            ),
                             Variable::new("x", Position::dummy()),
                             Position::dummy(),
                         ),
