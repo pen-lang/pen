@@ -19,6 +19,7 @@ pub fn compile(
     prefix: &str,
     module_interfaces: &HashMap<ast::ModulePath, interface::Module>,
 ) -> Result<hir::Module, CompileError> {
+    // TODO Do not pass module interfaces to a module compiler.
     let module = module_compiler::compile(module, module_interfaces)?;
     let module = import_renamer::rename(&module, module_interfaces);
 
