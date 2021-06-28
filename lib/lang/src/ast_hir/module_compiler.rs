@@ -1,6 +1,6 @@
-use super::{error::CompileError, utilities};
+use super::error::CompileError;
 use crate::{ast, hir, interface, position::Position, types};
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 
 pub fn compile(
     module: &ast::Module,
