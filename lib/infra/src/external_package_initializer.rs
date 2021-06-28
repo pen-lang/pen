@@ -1,6 +1,6 @@
 use super::{command_runner, file_path_converter::FilePathConverter};
-use crate::InfrastructureError;
-use std::{env, error::Error, path::PathBuf, process::Command, sync::Arc};
+use crate::{environment_variable_reader, InfrastructureError};
+use std::{error::Error, path::PathBuf, process::Command, sync::Arc};
 
 pub struct ExternalPackageInitializer {
     file_system: Arc<dyn app::infra::FileSystem>,
@@ -52,8 +52,10 @@ impl app::infra::ExternalPackageInitializer for ExternalPackageInitializer {
                             let path = PathBuf::from(url.path());
 
                             if url.host() == Some(url::Host::Domain(self.language_root_host_name)) {
-                                PathBuf::from(env::var(self.language_root_environment_variable)?)
-                                    .join(path.strip_prefix("/")?)
+                                PathBuf::from(environment_variable_reader::read(
+                                    self.language_root_environment_variable,
+                                )?)
+                                .join(path.strip_prefix("/")?)
                             } else {
                                 path
                             }

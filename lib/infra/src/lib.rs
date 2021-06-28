@@ -1,4 +1,5 @@
 mod command_runner;
+mod environment_variable_reader;
 mod error;
 mod external_package_initializer;
 mod file_path_converter;
