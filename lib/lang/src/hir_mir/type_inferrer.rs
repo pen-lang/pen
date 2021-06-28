@@ -531,6 +531,74 @@ mod tests {
     }
 
     #[test]
+    fn infer_let_with_call() {
+        let declaration = Declaration::new(
+            "f",
+            types::Function::new(
+                vec![],
+                types::None::new(Position::dummy()),
+                Position::dummy(),
+            ),
+            Position::dummy(),
+        );
+
+        assert_eq!(
+            infer_module(&Module::new(
+                vec![],
+                vec![],
+                vec![declaration.clone()],
+                vec![Definition::without_source(
+                    "x",
+                    Lambda::new(
+                        vec![],
+                        types::None::new(Position::dummy()),
+                        Let::new(
+                            Some("x".into()),
+                            None,
+                            Call::new(
+                                Variable::new("f", Position::dummy()),
+                                vec![],
+                                None,
+                                Position::dummy()
+                            ),
+                            Variable::new("x", Position::dummy()),
+                            Position::dummy(),
+                        ),
+                        Position::dummy(),
+                    ),
+                    false,
+                )],
+            )),
+            Ok(Module::new(
+                vec![],
+                vec![],
+                vec![declaration.clone()],
+                vec![Definition::without_source(
+                    "x",
+                    Lambda::new(
+                        vec![],
+                        types::None::new(Position::dummy()),
+                        Let::new(
+                            Some("x".into()),
+                            Some(types::None::new(Position::dummy()).into()),
+                            Call::new(
+                                Variable::new("f", Position::dummy()),
+                                vec![],
+                                Some(declaration.type_().clone().into()),
+                                Position::dummy()
+                            ),
+                            Variable::new("x", Position::dummy()),
+                            Position::dummy(),
+                        ),
+                        Position::dummy(),
+                    ),
+                    false,
+                )],
+            ))
+        );
+    }
+
+    #[test]
     fn infer_record_deconstruction() {
         let type_definition = TypeDefinition::new(
             "r",
