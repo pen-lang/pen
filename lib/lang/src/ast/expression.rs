@@ -1,7 +1,7 @@
 use super::{
     boolean::Boolean, call::Call, if_::If, if_list::IfList, if_type::IfType, list::List,
     none::None, number::Number, record::Record, string::ByteString, variable::Variable,
-    BinaryOperation, ElementOperation, Lambda, UnaryOperation,
+    BinaryOperation, Lambda, RecordDeconstruction, UnaryOperation,
 };
 use crate::position::Position;
 
@@ -10,7 +10,6 @@ pub enum Expression {
     BinaryOperation(BinaryOperation),
     Boolean(Boolean),
     Call(Call),
-    ElementOperation(ElementOperation),
     If(If),
     IfList(IfList),
     IfType(IfType),
@@ -19,6 +18,7 @@ pub enum Expression {
     None(None),
     Number(Number),
     Record(Record),
+    RecordDeconstruction(RecordDeconstruction),
     String(ByteString),
     UnaryOperation(UnaryOperation),
     Variable(Variable),
@@ -30,7 +30,6 @@ impl Expression {
             Self::BinaryOperation(operation) => operation.position(),
             Self::Boolean(boolean) => boolean.position(),
             Self::Call(call) => call.position(),
-            Self::ElementOperation(operation) => operation.position(),
             Self::If(if_) => if_.position(),
             Self::IfList(if_) => if_.position(),
             Self::IfType(if_) => if_.position(),
@@ -39,6 +38,7 @@ impl Expression {
             Self::None(none) => none.position(),
             Self::Number(number) => number.position(),
             Self::Record(record) => record.position(),
+            Self::RecordDeconstruction(operation) => operation.position(),
             Self::String(string) => string.position(),
             Self::UnaryOperation(operation) => operation.position(),
             Self::Variable(variable) => variable.position(),
@@ -64,12 +64,6 @@ impl From<Boolean> for Expression {
     }
 }
 
-impl From<ElementOperation> for Expression {
-    fn from(operation: ElementOperation) -> Self {
-        Self::ElementOperation(operation)
-    }
-}
-
 impl From<IfType> for Expression {
     fn from(if_: IfType) -> Self {
         Self::IfType(if_)
@@ -79,12 +73,6 @@ impl From<IfType> for Expression {
 impl From<ByteString> for Expression {
     fn from(string: ByteString) -> Self {
         Self::String(string)
-    }
-}
-
-impl From<Record> for Expression {
-    fn from(record: Record) -> Self {
-        Self::Record(record)
     }
 }
 
@@ -121,6 +109,18 @@ impl From<None> for Expression {
 impl From<Number> for Expression {
     fn from(number: Number) -> Self {
         Self::Number(number)
+    }
+}
+
+impl From<Record> for Expression {
+    fn from(record: Record) -> Self {
+        Self::Record(record)
+    }
+}
+
+impl From<RecordDeconstruction> for Expression {
+    fn from(operation: RecordDeconstruction) -> Self {
+        Self::RecordDeconstruction(operation)
     }
 }
 
