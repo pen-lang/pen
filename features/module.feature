@@ -14,10 +14,10 @@ Feature: Module
     """
     And a file named "Bar.pen" with:
     """
-    import .Foo
+    import 'Foo
 
     Bar = \() number {
-      Foo.Foo()
+      Foo'Foo()
     }
     """
     When I run `pen build`
@@ -30,9 +30,9 @@ Feature: Module
     """
     And a file named "Bar.pen" with:
     """
-    import .Foo
+    import 'Foo
 
-    type Bar = Foo.Foo
+    type Bar = Foo'Foo
     """
     When I run `pen build`
     Then the exit status should be 0

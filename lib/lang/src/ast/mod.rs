@@ -65,3 +65,5 @@ pub use type_definition::*;
 pub use unary_operation::*;
 pub use unary_operator::*;
 pub use variable::*;
+
+pub const IDENTIFIER_SEPARATOR: &str = "'";

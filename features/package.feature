@@ -24,10 +24,10 @@ Feature: Package
   Scenario: Import a function from a module
     Given a file named "Bar.pen" with:
     """
-    import Foo.Foo
+    import Foo'Foo
 
     Bar = \() number {
-      Foo.Foo()
+      Foo'Foo()
     }
     """
     When I run `pen build`
@@ -36,9 +36,9 @@ Feature: Package
   Scenario: Import a type alias from a module
     Given a file named "Bar.pen" with:
     """
-    import Foo.Foo
+    import Foo'Foo
 
-    type Bar = Foo.Foo
+    type Bar = Foo'Foo
     """
     When I run `pen build`
     Then the exit status should be 0

@@ -26,7 +26,6 @@ use std::collections::HashSet;
 
 const KEYWORDS: &[&str] = &["else", "if", "import", "type"];
 const OPERATOR_CHARACTERS: &str = "+-*/=<>&|!?";
-const IDENTIFIER_SEPARATOR: &str = "'";
 
 static NUMBER_REGEX: Lazy<regex::Regex> =
     Lazy::new(|| regex::Regex::new(r"^-?([123456789][0123456789]*|0)(\.[0123456789]+)?").unwrap());
