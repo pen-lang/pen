@@ -197,8 +197,9 @@ fn infer_expression(
         }
         Expression::Lambda(lambda) => infer_lambda(lambda, variables, type_context)?.into(),
         Expression::Let(let_) => {
+            let bound_expression = infer_expression(let_.bound_expression(), variables)?;
             let bound_type = type_extractor::extract_from_expression(
-                let_.bound_expression(),
+                &bound_expression,
                 variables,
                 type_context,
             )?;
@@ -206,7 +207,7 @@ fn infer_expression(
             Let::new(
                 let_.name().map(String::from),
                 Some(bound_type.clone()),
-                infer_expression(let_.bound_expression(), variables)?,
+                bound_expression,
                 infer_expression(
                     let_.expression(),
                     &variables
