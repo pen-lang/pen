@@ -132,7 +132,7 @@ mod tests {
                         hir::Lambda::new(
                             vec![],
                             types::None::new(Position::dummy()),
-                            hir::Variable::new("Bar.Bar", Position::dummy()),
+                            hir::Variable::new("Bar'Bar", Position::dummy()),
                             Position::dummy(),
                         ),
                         true,
@@ -188,7 +188,7 @@ mod tests {
                         "Foo",
                         vec![types::RecordElement::new(
                             "foo",
-                            types::Reference::new("Bar.Bar", Position::dummy())
+                            types::Reference::new("Bar'Bar", Position::dummy())
                         )],
                         false,
                         false,
@@ -200,7 +200,7 @@ mod tests {
                         "Foo",
                         hir::Lambda::new(
                             vec![],
-                            types::Reference::new("Bar.Bar", Position::dummy()),
+                            types::Reference::new("Bar'Bar", Position::dummy()),
                             hir::None::new(Position::dummy()),
                             Position::dummy(),
                         ),
@@ -261,7 +261,7 @@ mod tests {
                         "Foo",
                         vec![types::RecordElement::new(
                             "foo",
-                            types::Reference::new("Bar.Bar", Position::dummy())
+                            types::Reference::new("Bar'Bar", Position::dummy())
                         )],
                         false,
                         false,
@@ -273,7 +273,7 @@ mod tests {
                         "Foo",
                         hir::Lambda::new(
                             vec![],
-                            types::Reference::new("Bar.Bar", Position::dummy()),
+                            types::Reference::new("Bar'Bar", Position::dummy()),
                             hir::None::new(Position::dummy()),
                             Position::dummy(),
                         ),
@@ -330,7 +330,7 @@ mod tests {
                 "Foo",
                 vec![types::RecordElement::new(
                     "foo",
-                    types::Reference::new("Bar.Bar", Position::dummy()),
+                    types::Reference::new("Bar'Bar", Position::dummy()),
                 )],
                 false,
                 false,
@@ -342,7 +342,7 @@ mod tests {
                 "Foo",
                 hir::Lambda::new(
                     vec![],
-                    types::Reference::new("Bar.Bar", Position::dummy()),
+                    types::Reference::new("Bar'Bar", Position::dummy()),
                     hir::None::new(Position::dummy()),
                     Position::dummy(),
                 ),
@@ -382,7 +382,7 @@ mod tests {
                 "Foo",
                 vec![types::RecordElement::new(
                     "foo",
-                    types::Reference::new("Bar.Bar", Position::dummy()),
+                    types::Reference::new("Bar'Bar", Position::dummy()),
                 )],
                 false,
                 false,
@@ -394,7 +394,7 @@ mod tests {
                 "Foo",
                 hir::Lambda::new(
                     vec![],
-                    types::Reference::new("Bar.Bar", Position::dummy()),
+                    types::Reference::new("Bar'Bar", Position::dummy()),
                     hir::None::new(Position::dummy()),
                     Position::dummy(),
                 ),
