@@ -16,3 +16,43 @@ Feature: Block
     """
     When I run `pen build`
     Then the exit status should be 0
+
+  Scenario: Call a function
+    Given a file named "Foo.pen" with:
+    """
+    f = \() none {
+      none
+    }
+
+    g = \() none {
+      f()
+
+      none
+    }
+    """
+    When I run `pen build`
+    Then the exit status should be 0
+
+  Scenario: Use if expression
+    Given a file named "Foo.pen" with:
+    """
+    f = \() none {
+      none
+    }
+
+    g = \() none {
+      none
+    }
+
+    h = \(x boolean) none {
+      if x {
+        f()
+      } else {
+        g()
+      }
+
+      none
+    }
+    """
+    When I run `pen build`
+    Then the exit status should be 0
