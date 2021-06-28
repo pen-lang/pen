@@ -6,7 +6,7 @@ use crate::{
 };
 use std::error::Error;
 
-pub fn initialize_external_packages(
+pub fn initialize_recursively(
     infrastructure: &PackageInitializerInfrastructure,
     package_directory: &FilePath,
     output_directory: &FilePath,
@@ -16,13 +16,13 @@ pub fn initialize_external_packages(
         .read(package_directory)?;
 
     for url in package_configuration.dependencies.values() {
-        initialize_external_package(infrastructure, url, output_directory)?;
+        initialize(infrastructure, url, output_directory)?;
     }
 
     Ok(())
 }
 
-fn initialize_external_package(
+fn initialize(
     infrastructure: &PackageInitializerInfrastructure,
     url: &url::Url,
     output_directory: &FilePath,
@@ -52,7 +52,7 @@ fn initialize_external_package(
         ),
     )?;
 
-    initialize_external_packages(infrastructure, &package_directory, output_directory)?;
+    initialize_recursively(infrastructure, &package_directory, output_directory)?;
 
     Ok(())
 }

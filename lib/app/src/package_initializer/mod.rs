@@ -10,7 +10,7 @@ pub fn initialize(
     package_directory: &FilePath,
     output_directory: &FilePath,
 ) -> Result<(), Box<dyn Error>> {
-    external_package_initializer::initialize_external_packages(
+    external_package_initializer::initialize_recursively(
         infrastructure,
         package_directory,
         output_directory,
