@@ -11,7 +11,6 @@ pub use compile_configuration::{
 pub use module_compiler_infrastructure::ModuleCompilerInfrastructure;
 use std::error::Error;
 
-// TODO Pass a dependency file.
 pub fn compile_module(
     infrastructure: &ModuleCompilerInfrastructure,
     source_file: &FilePath,
