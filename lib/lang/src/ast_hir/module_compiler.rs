@@ -6,11 +6,6 @@ pub fn compile(
     module: &ast::Module,
     module_interfaces: &HashMap<ast::ModulePath, interface::Module>,
 ) -> Result<hir::Module, CompileError> {
-    let module_names = module_interfaces
-        .keys()
-        .map(|module_path| utilities::get_prefix(module_path).into())
-        .collect();
-
     Ok(hir::Module::new(
         module_interfaces
             .values()
@@ -79,28 +74,22 @@ pub fn compile(
         module
             .definitions()
             .iter()
-            .map(|definition| compile_definition(definition, &module_names))
+            .map(|definition| compile_definition(definition))
             .collect::<Result<_, _>>()?,
     ))
 }
 
-fn compile_definition(
-    definition: &ast::Definition,
-    module_names: &HashSet<String>,
-) -> Result<hir::Definition, CompileError> {
+fn compile_definition(definition: &ast::Definition) -> Result<hir::Definition, CompileError> {
     Ok(hir::Definition::new(
         definition.name(),
         definition.name(),
-        compile_lambda(definition.lambda(), module_names)?,
+        compile_lambda(definition.lambda())?,
         is_name_public(definition.name()),
         definition.position().clone(),
     ))
 }
 
-fn compile_lambda(
-    lambda: &ast::Lambda,
-    module_names: &HashSet<String>,
-) -> Result<hir::Lambda, CompileError> {
+fn compile_lambda(lambda: &ast::Lambda) -> Result<hir::Lambda, CompileError> {
     Ok(hir::Lambda::new(
         lambda
             .arguments()
@@ -108,22 +97,19 @@ fn compile_lambda(
             .map(|argument| hir::Argument::new(argument.name(), argument.type_().clone()))
             .collect(),
         lambda.result_type().clone(),
-        compile_block(lambda.body(), module_names)?,
+        compile_block(lambda.body())?,
         lambda.position().clone(),
     ))
 }
 
-fn compile_block(
-    block: &ast::Block,
-    module_names: &HashSet<String>,
-) -> Result<hir::Expression, CompileError> {
-    let mut expression = compile_expression(block.expression(), module_names)?;
+fn compile_block(block: &ast::Block) -> Result<hir::Expression, CompileError> {
+    let mut expression = compile_expression(block.expression())?;
 
     for statement in block.statements().iter().rev() {
         expression = hir::Let::new(
             statement.name().map(String::from),
             None,
-            compile_expression(statement.expression(), module_names)?,
+            compile_expression(statement.expression())?,
             expression,
             statement.position().clone(),
         )
@@ -133,13 +119,7 @@ fn compile_block(
     Ok(expression)
 }
 
-fn compile_expression(
-    expression: &ast::Expression,
-    module_names: &HashSet<String>,
-) -> Result<hir::Expression, CompileError> {
-    let compile_expression = |expression| compile_expression(expression, module_names);
-    let compile_block = |block| compile_block(block, module_names);
-
+fn compile_expression(expression: &ast::Expression) -> Result<hir::Expression, CompileError> {
     Ok(match expression {
         ast::Expression::BinaryOperation(operation) => {
             let lhs = compile_expression(operation.lhs())?;
@@ -234,23 +214,14 @@ fn compile_expression(
             call.position().clone(),
         )
         .into(),
-        ast::Expression::ElementOperation(operation) => match operation.expression() {
-            ast::Expression::Variable(variable) => {
-                if module_names.contains(variable.name()) {
-                    hir::Variable::new(
-                        utilities::qualify_name(variable.name(), operation.name()),
-                        operation.position().clone(),
-                    )
-                    .into()
-                } else {
-                    compile_element_operation(operation, module_names)?.into()
-                }
-            }
-            _ => compile_element_operation(operation, module_names)?.into(),
-        },
-        ast::Expression::If(if_) => {
-            compile_if(if_.branches(), if_.else_(), if_.position(), module_names)?.into()
-        }
+        ast::Expression::RecordDeconstruction(operation) => hir::RecordDeconstruction::new(
+            None,
+            compile_expression(operation.expression())?,
+            operation.name(),
+            operation.position().clone(),
+        )
+        .into(),
+        ast::Expression::If(if_) => compile_if(if_.branches(), if_.else_(), if_.position())?.into(),
         ast::Expression::IfList(if_) => hir::IfList::new(
             compile_expression(if_.argument())?,
             if_.first_name(),
@@ -284,7 +255,7 @@ fn compile_expression(
             if_.position().clone(),
         )
         .into(),
-        ast::Expression::Lambda(lambda) => compile_lambda(lambda, module_names)?.into(),
+        ast::Expression::Lambda(lambda) => compile_lambda(lambda)?.into(),
         ast::Expression::List(list) => hir::List::new(
             list.type_().clone(),
             list.elements()
@@ -358,36 +329,23 @@ fn compile_expression(
     })
 }
 
-fn compile_element_operation(
-    operation: &ast::ElementOperation,
-    module_names: &HashSet<String>,
-) -> Result<hir::RecordDeconstruction, CompileError> {
-    Ok(hir::RecordDeconstruction::new(
-        None,
-        compile_expression(operation.expression(), module_names)?,
-        operation.name(),
-        operation.position().clone(),
-    ))
-}
-
 fn compile_if(
     branches: &[ast::IfBranch],
     else_: &ast::Block,
     position: &Position,
-    module_names: &HashSet<String>,
 ) -> Result<hir::If, CompileError> {
     Ok(match branches {
         [] => return Err(CompileError::TooFewBranchesInIf(position.clone())),
         [then] => hir::If::new(
-            compile_expression(then.condition(), module_names)?,
-            compile_block(then.block(), module_names)?,
-            compile_block(else_, module_names)?,
+            compile_expression(then.condition())?,
+            compile_block(then.block())?,
+            compile_block(else_)?,
             position.clone(),
         ),
         [then, ..] => hir::If::new(
-            compile_expression(then.condition(), module_names)?,
-            compile_block(then.block(), module_names)?,
-            compile_if(&branches[1..], else_, position, module_names)?,
+            compile_expression(then.condition())?,
+            compile_block(then.block())?,
+            compile_if(&branches[1..], else_, position)?,
             position.clone(),
         ),
     })

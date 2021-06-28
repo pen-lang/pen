@@ -357,7 +357,7 @@ fn suffix_operation_like<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
                             Call::new(expression, arguments, position).into()
                         }
                         SuffixOperator::Element(name) => {
-                            ElementOperation::new(expression, name, position).into()
+                            RecordDeconstruction::new(expression, name, position).into()
                         }
                     },
                 )

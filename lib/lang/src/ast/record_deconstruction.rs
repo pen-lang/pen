@@ -3,13 +3,13 @@ use crate::position::Position;
 use std::sync::Arc;
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct ElementOperation {
+pub struct RecordDeconstruction {
     expression: Arc<Expression>,
     name: String,
     position: Position,
 }
 
-impl ElementOperation {
+impl RecordDeconstruction {
     pub fn new(
         expression: impl Into<Expression>,
         name: impl Into<String>,
