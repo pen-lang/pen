@@ -1,6 +1,9 @@
 use super::{command_runner, file_path_converter::FilePathConverter};
 use crate::InfrastructureError;
-use std::{error::Error, path::PathBuf, process::Command, sync::Arc};
+use std::{env, error::Error, path::PathBuf, process::Command, sync::Arc};
+
+const PEN_ROOT_HOST_NAME: &str = "pen-root";
+const PEN_ROOT_ENVIRONMENT_VARIABLE: &str = "PEN_ROOT";
 
 pub struct ExternalPackageInitializer {
     file_system: Arc<dyn app::infra::FileSystem>,
@@ -42,7 +45,16 @@ impl app::infra::ExternalPackageInitializer for ExternalPackageInitializer {
                 command_runner::run(
                     Command::new("cp")
                         .arg("-r")
-                        .arg(&PathBuf::from(url.path()))
+                        .arg({
+                            let path = PathBuf::from(url.path());
+
+                            if url.host() == Some(url::Host::Domain(PEN_ROOT_HOST_NAME)) {
+                                PathBuf::from(env::var(PEN_ROOT_ENVIRONMENT_VARIABLE)?)
+                                    .join(path.strip_prefix("/")?)
+                            } else {
+                                path
+                            }
+                        })
                         .arg(directory),
                 )?;
             }

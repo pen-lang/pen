@@ -402,6 +402,7 @@ dependencies = [
  "clap",
  "infra",
  "once_cell",
+ "url",
 ]
 
 [[package]]

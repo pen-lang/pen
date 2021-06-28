@@ -9,7 +9,14 @@ pub fn initialize(
     infrastructure: &PackageInitializerInfrastructure,
     package_directory: &FilePath,
     output_directory: &FilePath,
+    prelude_package_url: &url::Url,
 ) -> Result<(), Box<dyn Error>> {
+    external_package_initializer::initialize(
+        infrastructure,
+        prelude_package_url,
+        output_directory,
+    )?;
+
     external_package_initializer::initialize_recursively(
         infrastructure,
         package_directory,

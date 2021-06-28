@@ -22,7 +22,7 @@ pub fn initialize_recursively(
     Ok(())
 }
 
-fn initialize(
+pub fn initialize(
     infrastructure: &PackageInitializerInfrastructure,
     url: &url::Url,
     output_directory: &FilePath,

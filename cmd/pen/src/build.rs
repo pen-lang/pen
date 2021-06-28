@@ -4,6 +4,8 @@ use crate::file_path_configuration::{
 };
 use std::sync::Arc;
 
+const PRELUDE_PACKAGE_URL: &str = "file://pen-root/lib/prelude";
+
 pub fn build(verbose: bool) -> Result<(), Box<dyn std::error::Error>> {
     let main_package_directory = main_package_directory_finder::find()?;
 
@@ -42,6 +44,7 @@ pub fn build(verbose: bool) -> Result<(), Box<dyn std::error::Error>> {
         },
         &main_package_directory,
         &output_directory,
+        &url::Url::parse(PRELUDE_PACKAGE_URL)?,
     )?;
 
     if verbose {
