@@ -10,6 +10,12 @@ Feature: Package
       42
     }
     """
+    And a file named "foo/Foo/Foo.pen" with:
+    """
+    Foo = \() number {
+      42
+    }
+    """
     And a directory named "bar"
     And I cd to "bar"
     And a file named "pen.json" with:
@@ -39,6 +45,18 @@ Feature: Package
     import Foo'Foo
 
     type Bar = Foo'Foo
+    """
+    When I run `pen build`
+    Then the exit status should be 0
+
+  Scenario: Import a function from a nested module
+    Given a file named "Bar.pen" with:
+    """
+    import Foo'Foo'Foo
+
+    Bar = \() number {
+      Foo'Foo()
+    }
     """
     When I run `pen build`
     Then the exit status should be 0
