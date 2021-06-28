@@ -2,22 +2,25 @@ use super::{command_runner, file_path_converter::FilePathConverter};
 use crate::InfrastructureError;
 use std::{env, error::Error, path::PathBuf, process::Command, sync::Arc};
 
-const PEN_ROOT_HOST_NAME: &str = "pen-root";
-const PEN_ROOT_ENVIRONMENT_VARIABLE: &str = "PEN_ROOT";
-
 pub struct ExternalPackageInitializer {
     file_system: Arc<dyn app::infra::FileSystem>,
     file_path_converter: Arc<FilePathConverter>,
+    language_root_host_name: &'static str,
+    language_root_environment_variable: &'static str,
 }
 
 impl ExternalPackageInitializer {
     pub fn new(
         file_system: Arc<dyn app::infra::FileSystem>,
         file_path_converter: Arc<FilePathConverter>,
+        language_root_host_name: &'static str,
+        language_root_environment_variable: &'static str,
     ) -> Self {
         Self {
             file_system,
             file_path_converter,
+            language_root_host_name,
+            language_root_environment_variable,
         }
     }
 }
@@ -48,8 +51,8 @@ impl app::infra::ExternalPackageInitializer for ExternalPackageInitializer {
                         .arg({
                             let path = PathBuf::from(url.path());
 
-                            if url.host() == Some(url::Host::Domain(PEN_ROOT_HOST_NAME)) {
-                                PathBuf::from(env::var(PEN_ROOT_ENVIRONMENT_VARIABLE)?)
+                            if url.host() == Some(url::Host::Domain(self.language_root_host_name)) {
+                                PathBuf::from(env::var(self.language_root_environment_variable)?)
                                     .join(path.strip_prefix("/")?)
                             } else {
                                 path

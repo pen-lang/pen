@@ -1,6 +1,7 @@
 use super::{file_path_configuration::FILE_PATH_CONFIGURATION, main_package_directory_finder};
 use crate::file_path_configuration::{
-    BIT_CODE_FILE_EXTENSION, BUILD_CONFIGURATION_FILENAME, OUTPUT_DIRECTORY,
+    BIT_CODE_FILE_EXTENSION, BUILD_CONFIGURATION_FILENAME, LANGUAGE_ROOT_ENVIRONMENT_VARIABLE,
+    LANGUAGE_ROOT_HOST_NAME, OUTPUT_DIRECTORY,
 };
 use std::sync::Arc;
 
@@ -33,6 +34,8 @@ pub fn build(verbose: bool) -> Result<(), Box<dyn std::error::Error>> {
             external_package_initializer: Arc::new(infra::ExternalPackageInitializer::new(
                 file_system.clone(),
                 file_path_converter.clone(),
+                LANGUAGE_ROOT_HOST_NAME,
+                LANGUAGE_ROOT_ENVIRONMENT_VARIABLE,
             )),
             package_configuration_reader: Arc::new(infra::JsonPackageConfigurationReader::new(
                 file_system.clone(),
