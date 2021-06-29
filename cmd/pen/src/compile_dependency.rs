@@ -15,7 +15,7 @@ pub fn compile_dependency(
     let file_path_converter = Arc::new(infra::FilePathConverter::new(&main_package_directory));
     let file_system = Arc::new(infra::FileSystem::new(file_path_converter.clone()));
 
-    app::module_dependency_resolver::compile_dependency(
+    app::module_dependency_resolver::resolve(
         &app::module_dependency_resolver::ModuleDependencyResolverInfrastructure {
             build_script_dependency_compiler: Arc::new(
                 infra::NinjaBuildScriptDependencyCompiler::new(file_path_converter.clone()),
