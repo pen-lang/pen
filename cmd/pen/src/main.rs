@@ -1,13 +1,13 @@
 mod build;
 mod compile;
 mod compile_configuration;
-mod compile_dependency;
 mod file_path_configuration;
 mod main_package_directory_finder;
+mod resolve_dependency;
 
 use build::build;
 use compile::compile;
-use compile_dependency::compile_dependency;
+use resolve_dependency::resolve_dependency;
 
 fn main() {
     if let Err(error) = run() {
@@ -67,7 +67,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         ("resolve-dependency", matches) => {
             let matches = matches.unwrap();
 
-            compile_dependency(
+            resolve_dependency(
                 matches.value_of("package directory").unwrap(),
                 matches.value_of("source file").unwrap(),
                 matches.value_of("object file").unwrap(),

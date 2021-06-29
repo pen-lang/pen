@@ -4,7 +4,7 @@ use crate::file_path_configuration::{
 };
 use std::sync::Arc;
 
-pub fn compile_dependency(
+pub fn resolve_dependency(
     package_directory: &str,
     source_file: &str,
     object_file: &str,
