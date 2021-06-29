@@ -18,10 +18,18 @@ pub fn compile(
     module: &ast::Module,
     prefix: &str,
     module_interfaces: &HashMap<ast::ModulePath, interface::Module>,
+    prelude_module_interfaces: &[interface::Module],
 ) -> Result<hir::Module, CompileError> {
     // TODO Do not pass module interfaces to a module compiler.
-    let module = module_compiler::compile(module, module_interfaces)?;
-    let module = import_renamer::rename(&module, module_interfaces);
+    let module = module_compiler::compile(
+        module,
+        &module_interfaces
+            .values()
+            .chain(prelude_module_interfaces)
+            .cloned()
+            .collect::<Vec<_>>(),
+    )?;
+    let module = import_renamer::rename(&module, module_interfaces, prelude_module_interfaces);
 
     let module = definition_qualifier::qualify(&module, prefix);
     let module = type_qualifier::qualify(&module, prefix);

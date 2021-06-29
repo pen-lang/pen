@@ -50,6 +50,7 @@ pub fn compile_module(
                     ))
                 })
                 .collect::<Result<_, Box<dyn Error>>>()?,
+            &[],
         )?,
         &compile_configuration.list_type,
         &compile_configuration.string_type,

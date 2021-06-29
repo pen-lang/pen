@@ -13,23 +13,25 @@ use std::collections::HashMap;
 pub fn rename(
     module: &hir::Module,
     module_interfaces: &HashMap<ast::ModulePath, interface::Module>,
+    prelude_module_interfaces: &[interface::Module],
 ) -> hir::Module {
-    let module = rename_types(module, module_interfaces);
-    rename_variables(&module, module_interfaces)
+    let module = rename_types(module, module_interfaces, prelude_module_interfaces);
+    rename_variables(&module, module_interfaces, prelude_module_interfaces)
 }
 
 fn rename_variables(
     module: &hir::Module,
     module_interfaces: &HashMap<ast::ModulePath, interface::Module>,
+    prelude_module_interfaces: &[interface::Module],
 ) -> hir::Module {
     variable_renamer::rename(
         module,
         &module_interfaces
             .iter()
-            .flat_map(|(path, interface)| {
+            .flat_map(|(path, module)| {
                 let prefix = utilities::get_prefix(path);
 
-                interface
+                module
                     .declarations()
                     .iter()
                     .map(|declaration| {
@@ -40,6 +42,14 @@ fn rename_variables(
                     })
                     .collect::<Vec<_>>()
             })
+            .chain(prelude_module_interfaces.iter().flat_map(|module| {
+                module.declarations().iter().map(|declaration| {
+                    (
+                        declaration.original_name().into(),
+                        declaration.name().into(),
+                    )
+                })
+            }))
             .collect(),
     )
 }
@@ -47,13 +57,14 @@ fn rename_variables(
 fn rename_types(
     module: &hir::Module,
     module_interfaces: &HashMap<ast::ModulePath, interface::Module>,
+    prelude_module_interfaces: &[interface::Module],
 ) -> hir::Module {
     let names = module_interfaces
         .iter()
-        .flat_map(|(path, interface)| {
+        .flat_map(|(path, module)| {
             let prefix = utilities::get_prefix(path);
 
-            interface
+            module
                 .type_definitions()
                 .iter()
                 .filter_map(|definition| {
@@ -66,7 +77,7 @@ fn rename_types(
                         None
                     }
                 })
-                .chain(interface.type_aliases().iter().filter_map(|alias| {
+                .chain(module.type_aliases().iter().filter_map(|alias| {
                     if alias.is_public() {
                         Some((
                             utilities::qualify_name(prefix, alias.original_name()),
@@ -78,6 +89,18 @@ fn rename_types(
                 }))
                 .collect::<Vec<_>>()
         })
+        .chain(prelude_module_interfaces.iter().flat_map(|module| {
+            module
+                .type_definitions()
+                .iter()
+                .map(|definition| (definition.original_name().into(), definition.name().into()))
+                .chain(
+                    module
+                        .type_aliases()
+                        .iter()
+                        .map(|alias| (alias.original_name().into(), alias.name().into())),
+                )
+        }))
         .collect::<HashMap<String, String>>();
 
     type_transformer::transform(module, |type_| match type_ {
@@ -112,7 +135,8 @@ mod tests {
         assert_eq!(
             rename(
                 &hir::Module::new(vec![], vec![], vec![], vec![]),
-                &Default::default()
+                &Default::default(),
+                &[]
             ),
             hir::Module::new(vec![], vec![], vec![], vec![])
         );
@@ -157,7 +181,8 @@ mod tests {
                     )
                 )]
                 .into_iter()
-                .collect()
+                .collect(),
+                &[]
             ),
             hir::Module::new(
                 vec![],
@@ -223,7 +248,8 @@ mod tests {
                     )
                 )]
                 .into_iter()
-                .collect()
+                .collect(),
+                &[]
             ),
             hir::Module::new(
                 vec![hir::TypeDefinition::without_source(
@@ -294,7 +320,8 @@ mod tests {
                     )
                 )]
                 .into_iter()
-                .collect()
+                .collect(),
+                &[]
             ),
             hir::Module::new(
                 vec![hir::TypeDefinition::without_source(
@@ -369,7 +396,8 @@ mod tests {
                     )
                 )]
                 .into_iter()
-                .collect()
+                .collect(),
+                &[]
             ),
             module
         );
@@ -419,7 +447,8 @@ mod tests {
                     )
                 )]
                 .into_iter()
-                .collect()
+                .collect(),
+                &[],
             ),
             module
         );
