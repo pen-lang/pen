@@ -1,11 +1,9 @@
 use super::{file_path_configuration::FILE_PATH_CONFIGURATION, main_package_directory_finder};
 use crate::file_path_configuration::{
     BIT_CODE_FILE_EXTENSION, BUILD_CONFIGURATION_FILENAME, LANGUAGE_ROOT_ENVIRONMENT_VARIABLE,
-    LANGUAGE_ROOT_HOST_NAME, OUTPUT_DIRECTORY,
+    LANGUAGE_ROOT_HOST_NAME, OUTPUT_DIRECTORY, PRELUDE_MODULE_CONFIGURATION,
 };
 use std::sync::Arc;
-
-const PRELUDE_PACKAGE_URL: &str = "file://pen-root/lib/prelude";
 
 pub fn build(verbose: bool) -> Result<(), Box<dyn std::error::Error>> {
     let main_package_directory = main_package_directory_finder::find()?;
@@ -47,7 +45,7 @@ pub fn build(verbose: bool) -> Result<(), Box<dyn std::error::Error>> {
         },
         &main_package_directory,
         &output_directory,
-        &url::Url::parse(PRELUDE_PACKAGE_URL)?,
+        &PRELUDE_MODULE_CONFIGURATION,
     )?;
 
     if verbose {
@@ -63,6 +61,7 @@ pub fn build(verbose: bool) -> Result<(), Box<dyn std::error::Error>> {
         },
         &main_package_directory,
         &output_directory,
+        &PRELUDE_MODULE_CONFIGURATION,
     )?;
 
     Ok(())

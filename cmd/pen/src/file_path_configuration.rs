@@ -1,3 +1,5 @@
+use once_cell::sync::Lazy;
+
 pub const BUILD_CONFIGURATION_FILENAME: &str = "pen.json";
 pub const OUTPUT_DIRECTORY: &str = ".pen";
 pub const BIT_CODE_FILE_EXTENSION: &str = "bc";
@@ -12,3 +14,9 @@ pub const FILE_PATH_CONFIGURATION: app::infra::FilePathConfiguration =
         interface_file_extension: "json",
         build_script_file_extension: "ninja",
     };
+
+pub static PRELUDE_MODULE_CONFIGURATION: Lazy<app::infra::PreludeModuleConfiguration> =
+    Lazy::new(|| app::infra::PreludeModuleConfiguration {
+        url: url::Url::parse("file://pen-root/lib/prelude").unwrap(),
+        module_paths: vec![vec!["Error".into()]],
+    });

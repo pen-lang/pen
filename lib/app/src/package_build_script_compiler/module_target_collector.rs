@@ -3,8 +3,8 @@ use super::{
     package_build_script_compiler_infrastructure::PackageBuildScriptCompilerInfrastructure,
 };
 use crate::{
-    common::module_id_calculator,
-    infra::{FilePath, ModuleTarget, OBJECT_DIRECTORY},
+    common::module_path_resolver,
+    infra::{FilePath, ModuleTarget},
 };
 use std::error::Error;
 
@@ -13,28 +13,21 @@ pub fn collect_module_targets(
     package_directory: &FilePath,
     output_directory: &FilePath,
 ) -> Result<Vec<ModuleTarget>, Box<dyn Error>> {
-    let object_directory = output_directory.join(&FilePath::new(vec![OBJECT_DIRECTORY]));
-
     Ok(
         module_finder::find_modules(infrastructure, package_directory)?
             .iter()
             .map(|source_file| {
-                let target_file =
-                    object_directory.join(&FilePath::new(vec![module_id_calculator::calculate(
-                        source_file,
-                    )]));
+                let (object_file, interface_file) = module_path_resolver::resolve_target_files(
+                    output_directory,
+                    source_file,
+                    &infrastructure.file_path_configuration,
+                );
 
                 ModuleTarget::new(
                     package_directory.clone(),
                     source_file.clone(),
-                    target_file.with_extension(
-                        infrastructure.file_path_configuration.object_file_extension,
-                    ),
-                    target_file.with_extension(
-                        infrastructure
-                            .file_path_configuration
-                            .interface_file_extension,
-                    ),
+                    object_file,
+                    interface_file,
                 )
             })
             .collect::<Vec<_>>(),

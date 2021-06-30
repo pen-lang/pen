@@ -34,8 +34,19 @@ impl app::infra::ModuleBuildScriptCompiler for NinjaModuleBuildScriptCompiler {
         &self,
         module_targets: &[app::infra::ModuleTarget],
         sub_build_script_files: &[FilePath],
+        prelude_interface_files: &[FilePath],
     ) -> Result<String, Box<dyn Error>> {
         let llc = self.find_llc()?;
+        let prelude_interface_files_string = prelude_interface_files
+            .iter()
+            .map(|file| {
+                self.file_path_converter
+                    .convert_to_os_path(&file)
+                    .display()
+                    .to_string()
+            })
+            .collect::<Vec<_>>()
+            .join(" ");
 
         Ok(vec![
             "ninja_required_version = 1.10",
@@ -84,11 +95,12 @@ impl app::infra::ModuleBuildScriptCompiler for NinjaModuleBuildScriptCompiler {
 
             vec![
                 format!(
-                    "build {} {}: compile {} {} || {}",
+                    "build {} {}: compile {} {} | {} || {}",
                     bit_code_file.display(),
                     interface_file.display(),
                     source_file.display(),
                     dependency_file.display(),
+                    prelude_interface_files_string,
                     ninja_dependency_file.display()
                 ),
                 format!("  dyndep = {}", ninja_dependency_file.display()),
