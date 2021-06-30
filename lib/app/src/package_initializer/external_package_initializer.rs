@@ -1,6 +1,6 @@
 use super::package_initializer_infrastructure::PackageInitializerInfrastructure;
 use crate::{
-    common::module_path_resolver,
+    common::file_path_resolver,
     infra::{FilePath, PreludePackageConfiguration},
     package_build_script_compiler::{self, PackageBuildScriptCompilerInfrastructure},
 };
@@ -34,7 +34,7 @@ pub fn initialize(
     output_directory: &FilePath,
     prelude_package_configuration: Option<&PreludePackageConfiguration>,
 ) -> Result<(), Box<dyn Error>> {
-    let package_directory = module_path_resolver::resolve_package_directory(output_directory, url);
+    let package_directory = file_path_resolver::resolve_package_directory(output_directory, url);
 
     infrastructure
         .external_package_initializer

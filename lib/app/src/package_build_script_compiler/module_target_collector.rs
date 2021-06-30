@@ -3,7 +3,7 @@ use super::{
     package_build_script_compiler_infrastructure::PackageBuildScriptCompilerInfrastructure,
 };
 use crate::{
-    common::module_path_resolver,
+    common::file_path_resolver,
     infra::{FilePath, ModuleTarget},
 };
 use std::error::Error;
@@ -17,7 +17,7 @@ pub fn collect_module_targets(
         module_finder::find_modules(infrastructure, package_directory)?
             .iter()
             .map(|source_file| {
-                let (object_file, interface_file) = module_path_resolver::resolve_target_files(
+                let (object_file, interface_file) = file_path_resolver::resolve_target_files(
                     output_directory,
                     source_file,
                     &infrastructure.file_path_configuration,

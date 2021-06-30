@@ -2,7 +2,7 @@ mod error;
 mod module_dependency_resolver_infrastructure;
 
 use crate::{
-    common::{dependency_serializer, module_id_calculator, module_path_resolver},
+    common::{dependency_serializer, file_path_resolver, module_id_calculator},
     infra::{FilePath, OBJECT_DIRECTORY},
 };
 use error::ModuleDependencyResolverError;
@@ -30,13 +30,13 @@ pub fn resolve(
     .iter()
     .map(|import| {
         let source_file = match import.module_path() {
-            lang::ast::ModulePath::Internal(path) => module_path_resolver::resolve_source_file(
+            lang::ast::ModulePath::Internal(path) => file_path_resolver::resolve_source_file(
                 package_directory,
                 path.components(),
                 &infrastructure.file_path_configuration,
             ),
             lang::ast::ModulePath::External(path) => {
-                module_path_resolver::resolve_source_file_in_external_package(
+                file_path_resolver::resolve_source_file_in_external_package(
                     output_directory,
                     package_configuration
                         .dependencies

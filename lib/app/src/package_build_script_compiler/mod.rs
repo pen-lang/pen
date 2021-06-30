@@ -3,7 +3,7 @@ mod module_target_collector;
 mod package_build_script_compiler_infrastructure;
 
 use crate::{
-    common::module_path_resolver,
+    common::file_path_resolver,
     infra::{FilePath, PreludePackageConfiguration},
 };
 pub use package_build_script_compiler_infrastructure::PackageBuildScriptCompilerInfrastructure;
@@ -20,18 +20,16 @@ pub fn compile(
     let prelude_interface_files = prelude_package_configuration
         .iter()
         .flat_map(|configuration| {
-            let package_directory = module_path_resolver::resolve_package_directory(
-                output_directory,
-                &configuration.url,
-            );
+            let package_directory =
+                file_path_resolver::resolve_package_directory(output_directory, &configuration.url);
 
             configuration
                 .module_paths
                 .iter()
                 .map(|path_components| {
-                    let (_, interface_file) = module_path_resolver::resolve_target_files(
+                    let (_, interface_file) = file_path_resolver::resolve_target_files(
                         output_directory,
-                        &module_path_resolver::resolve_source_file(
+                        &file_path_resolver::resolve_source_file(
                             &package_directory,
                             path_components,
                             &infrastructure.file_path_configuration,
