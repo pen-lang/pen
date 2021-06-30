@@ -23,20 +23,18 @@ pub fn compile(
             let package_directory =
                 file_path_resolver::resolve_package_directory(output_directory, &configuration.url);
 
-            Ok(
-                module_finder::find_modules(infrastructure, &package_directory)?
-                    .iter()
-                    .map(|source_file| {
-                        let (_, interface_file) = file_path_resolver::resolve_target_files(
-                            output_directory,
-                            source_file,
-                            &infrastructure.file_path_configuration,
-                        );
+            Ok(module_finder::find(infrastructure, &package_directory)?
+                .iter()
+                .map(|source_file| {
+                    let (_, interface_file) = file_path_resolver::resolve_target_files(
+                        output_directory,
+                        source_file,
+                        &infrastructure.file_path_configuration,
+                    );
 
-                        interface_file
-                    })
-                    .collect::<Vec<_>>(),
-            )
+                    interface_file
+                })
+                .collect::<Vec<_>>())
         },
     )?;
 

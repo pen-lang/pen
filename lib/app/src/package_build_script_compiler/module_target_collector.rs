@@ -13,23 +13,21 @@ pub fn collect_module_targets(
     package_directory: &FilePath,
     output_directory: &FilePath,
 ) -> Result<Vec<ModuleTarget>, Box<dyn Error>> {
-    Ok(
-        module_finder::find_modules(infrastructure, package_directory)?
-            .iter()
-            .map(|source_file| {
-                let (object_file, interface_file) = file_path_resolver::resolve_target_files(
-                    output_directory,
-                    source_file,
-                    &infrastructure.file_path_configuration,
-                );
+    Ok(module_finder::find(infrastructure, package_directory)?
+        .iter()
+        .map(|source_file| {
+            let (object_file, interface_file) = file_path_resolver::resolve_target_files(
+                output_directory,
+                source_file,
+                &infrastructure.file_path_configuration,
+            );
 
-                ModuleTarget::new(
-                    package_directory.clone(),
-                    source_file.clone(),
-                    object_file,
-                    interface_file,
-                )
-            })
-            .collect::<Vec<_>>(),
-    )
+            ModuleTarget::new(
+                package_directory.clone(),
+                source_file.clone(),
+                object_file,
+                interface_file,
+            )
+        })
+        .collect::<Vec<_>>())
 }

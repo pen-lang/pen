@@ -11,7 +11,7 @@ pub use compile_configuration::{
 pub use module_compiler_infrastructure::ModuleCompilerInfrastructure;
 use std::error::Error;
 
-pub fn compile_module(
+pub fn compile(
     infrastructure: &ModuleCompilerInfrastructure,
     source_file: &FilePath,
     dependency_file: &FilePath,

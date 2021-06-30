@@ -1,7 +1,7 @@
 use super::package_build_script_compiler_infrastructure::PackageBuildScriptCompilerInfrastructure;
 use crate::infra::FilePath;
 
-pub fn find_modules(
+pub fn find(
     infrastructure: &PackageBuildScriptCompilerInfrastructure,
     package_directory: &FilePath,
 ) -> Result<Vec<FilePath>, Box<dyn std::error::Error>> {
@@ -19,7 +19,7 @@ pub fn find_modules(
             .starts_with('.')
         {
         } else if infrastructure.file_system.is_directory(&path) {
-            source_files.extend(find_modules(infrastructure, &path)?);
+            source_files.extend(find(infrastructure, &path)?);
         } else if path.has_extension(infrastructure.file_path_configuration.source_file_extension) {
             source_files.push(path);
         }
