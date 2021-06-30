@@ -1,12 +1,14 @@
 mod build;
 mod compile;
 mod compile_configuration;
+mod compile_prelude;
 mod file_path_configuration;
 mod main_package_directory_finder;
 mod resolve_dependency;
 
 use build::build;
 use compile::compile;
+use compile_prelude::compile_prelude;
 use resolve_dependency::resolve_dependency;
 
 fn main() {
@@ -36,6 +38,13 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                 .arg(clap::Arg::with_name("interface file").required(true)),
         )
         .subcommand(
+            clap::SubCommand::with_name("compile-prelude")
+                .about("Compiles a prelude module")
+                .arg(clap::Arg::with_name("source file").required(true))
+                .arg(clap::Arg::with_name("object file").required(true))
+                .arg(clap::Arg::with_name("interface file").required(true)),
+        )
+        .subcommand(
             clap::SubCommand::with_name("resolve-dependency")
                 .about("Resolves module dependency")
                 .arg(
@@ -60,6 +69,15 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
             compile(
                 matches.value_of("source file").unwrap(),
                 matches.value_of("dependency file").unwrap(),
+                matches.value_of("object file").unwrap(),
+                matches.value_of("interface file").unwrap(),
+            )
+        }
+        ("compile-prelude", matches) => {
+            let matches = matches.unwrap();
+
+            compile_prelude(
+                matches.value_of("source file").unwrap(),
                 matches.value_of("object file").unwrap(),
                 matches.value_of("interface file").unwrap(),
             )

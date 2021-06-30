@@ -11,6 +11,8 @@ pub use compile_configuration::{
 pub use module_compiler_infrastructure::ModuleCompilerInfrastructure;
 use std::error::Error;
 
+const PRELUDE_PREFIX: &str = "prelude:";
+
 pub fn compile(
     infrastructure: &ModuleCompilerInfrastructure,
     source_file: &FilePath,
@@ -56,6 +58,50 @@ pub fn compile(
         &compile_configuration.string_type,
     )?;
 
+    compile_mir_module(infrastructure, &module, object_file, compile_configuration)?;
+    infrastructure.file_system.write(
+        interface_file,
+        &interface_serializer::serialize(&module_interface)?,
+    )?;
+
+    Ok(())
+}
+
+pub fn compile_prelude(
+    infrastructure: &ModuleCompilerInfrastructure,
+    source_file: &FilePath,
+    object_file: &FilePath,
+    interface_file: &FilePath,
+    compile_configuration: &CompileConfiguration,
+) -> Result<(), Box<dyn Error>> {
+    // TODO Use lang::hir_mir::compile_prelude().
+    let (module, module_interface) = lang::hir_mir::compile(
+        &lang::ast_hir::compile_prelude(
+            &lang::parse::parse(
+                &infrastructure.file_system.read_to_string(source_file)?,
+                &infrastructure.file_path_displayer.display(source_file),
+            )?,
+            PRELUDE_PREFIX,
+        )?,
+        &compile_configuration.list_type,
+        &compile_configuration.string_type,
+    )?;
+
+    compile_mir_module(infrastructure, &module, object_file, compile_configuration)?;
+    infrastructure.file_system.write(
+        interface_file,
+        &interface_serializer::serialize(&module_interface)?,
+    )?;
+
+    Ok(())
+}
+
+fn compile_mir_module(
+    infrastructure: &ModuleCompilerInfrastructure,
+    module: &mir::ir::Module,
+    object_file: &FilePath,
+    compile_configuration: &CompileConfiguration,
+) -> Result<(), Box<dyn Error>> {
     infrastructure.file_system.write(
         object_file,
         &fmm_llvm::compile_to_bit_code(
@@ -66,10 +112,6 @@ pub fn compile(
             &compile_configuration.heap,
             None,
         )?,
-    )?;
-    infrastructure.file_system.write(
-        interface_file,
-        &interface_serializer::serialize(&module_interface)?,
     )?;
 
     Ok(())
