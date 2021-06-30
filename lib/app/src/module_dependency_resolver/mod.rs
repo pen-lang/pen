@@ -35,8 +35,8 @@ pub fn resolve(
                 path.components(),
                 &infrastructure.file_path_configuration,
             ),
-            lang::ast::ModulePath::External(path) => {
-                file_path_resolver::resolve_source_file_in_external_package(
+            lang::ast::ModulePath::External(path) => file_path_resolver::resolve_source_file(
+                &file_path_resolver::resolve_package_directory(
                     output_directory,
                     package_configuration
                         .dependencies
@@ -44,10 +44,10 @@ pub fn resolve(
                         .ok_or_else(|| {
                             ModuleDependencyResolverError::PackageNotFound(path.package().into())
                         })?,
-                    path.components(),
-                    &infrastructure.file_path_configuration,
-                )
-            }
+                ),
+                path.components(),
+                &infrastructure.file_path_configuration,
+            ),
         };
 
         Ok((

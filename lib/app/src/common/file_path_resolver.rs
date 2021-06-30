@@ -14,19 +14,6 @@ pub fn resolve_source_file(
         .with_extension(file_path_configuration.source_file_extension)
 }
 
-pub fn resolve_source_file_in_external_package(
-    output_directory: &FilePath,
-    url: &url::Url,
-    components: &[String],
-    file_path_configuration: &FilePathConfiguration,
-) -> FilePath {
-    resolve_source_file(
-        &resolve_package_directory(output_directory, url),
-        components,
-        file_path_configuration,
-    )
-}
-
 pub fn resolve_target_files(
     output_directory: &FilePath,
     source_file: &FilePath,
