@@ -33,7 +33,7 @@ impl app::infra::ModuleBuildScriptCompiler for NinjaModuleBuildScriptCompiler {
     fn compile(
         &self,
         module_targets: &[app::infra::ModuleTarget],
-        sub_build_script_files: &[FilePath],
+        child_build_script_files: &[FilePath],
         prelude_interface_files: &[FilePath],
     ) -> Result<String, Box<dyn Error>> {
         let llc = self.find_llc()?;
@@ -66,7 +66,7 @@ impl app::infra::ModuleBuildScriptCompiler for NinjaModuleBuildScriptCompiler {
         ]
         .into_iter()
         .map(String::from)
-        .chain(sub_build_script_files.iter().map(|file| {
+        .chain(child_build_script_files.iter().map(|file| {
             format!(
                 "subninja {}",
                 self.file_path_converter.convert_to_os_path(file).display()
