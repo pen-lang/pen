@@ -17,31 +17,28 @@ pub fn compile(
     build_script_file: &FilePath,
     prelude_package_configuration: Option<&PreludePackageConfiguration>,
 ) -> Result<(), Box<dyn Error>> {
-    let prelude_interface_files = prelude_package_configuration
-        .iter()
-        .flat_map(|configuration| {
+    let prelude_interface_files = prelude_package_configuration.map_or(
+        Ok(vec![]),
+        |configuration| -> Result<_, Box<dyn Error>> {
             let package_directory =
                 file_path_resolver::resolve_package_directory(output_directory, &configuration.url);
 
-            configuration
-                .module_paths
-                .iter()
-                .map(|path_components| {
-                    let (_, interface_file) = file_path_resolver::resolve_target_files(
-                        output_directory,
-                        &file_path_resolver::resolve_source_file(
-                            &package_directory,
-                            path_components,
+            Ok(
+                module_finder::find_modules(infrastructure, &package_directory)?
+                    .iter()
+                    .map(|source_file| {
+                        let (_, interface_file) = file_path_resolver::resolve_target_files(
+                            output_directory,
+                            source_file,
                             &infrastructure.file_path_configuration,
-                        ),
-                        &infrastructure.file_path_configuration,
-                    );
+                        );
 
-                    interface_file
-                })
-                .collect::<Vec<_>>()
-        })
-        .collect::<Vec<_>>();
+                        interface_file
+                    })
+                    .collect::<Vec<_>>(),
+            )
+        },
+    )?;
 
     infrastructure.file_system.write(
         build_script_file,

@@ -18,5 +18,4 @@ pub const FILE_PATH_CONFIGURATION: app::infra::FilePathConfiguration =
 pub static PRELUDE_PACKAGE_CONFIGURATION: Lazy<app::infra::PreludePackageConfiguration> =
     Lazy::new(|| app::infra::PreludePackageConfiguration {
         url: url::Url::parse("file://pen-root/lib/prelude").unwrap(),
-        module_paths: vec![vec!["Error".into()]],
     });
