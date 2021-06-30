@@ -1,7 +1,7 @@
 use super::package_initializer_infrastructure::PackageInitializerInfrastructure;
 use crate::{
     common::module_path_resolver,
-    infra::{FilePath, PreludeModuleConfiguration},
+    infra::{FilePath, PreludePackageConfiguration},
     package_build_script_compiler::{self, PackageBuildScriptCompilerInfrastructure},
 };
 use std::error::Error;
@@ -10,7 +10,7 @@ pub fn initialize_recursively(
     infrastructure: &PackageInitializerInfrastructure,
     package_directory: &FilePath,
     output_directory: &FilePath,
-    prelude_module_configuration: Option<&PreludeModuleConfiguration>,
+    prelude_package_configuration: Option<&PreludePackageConfiguration>,
 ) -> Result<(), Box<dyn Error>> {
     let package_configuration = infrastructure
         .package_configuration_reader
@@ -21,7 +21,7 @@ pub fn initialize_recursively(
             infrastructure,
             url,
             output_directory,
-            prelude_module_configuration,
+            prelude_package_configuration,
         )?;
     }
 
@@ -32,7 +32,7 @@ pub fn initialize(
     infrastructure: &PackageInitializerInfrastructure,
     url: &url::Url,
     output_directory: &FilePath,
-    prelude_module_configuration: Option<&PreludeModuleConfiguration>,
+    prelude_package_configuration: Option<&PreludePackageConfiguration>,
 ) -> Result<(), Box<dyn Error>> {
     let package_directory = module_path_resolver::resolve_package_directory(output_directory, url);
 
@@ -54,14 +54,14 @@ pub fn initialize(
                 .file_path_configuration
                 .build_script_file_extension,
         ),
-        prelude_module_configuration,
+        prelude_package_configuration,
     )?;
 
     initialize_recursively(
         infrastructure,
         &package_directory,
         output_directory,
-        prelude_module_configuration,
+        prelude_package_configuration,
     )?;
 
     Ok(())

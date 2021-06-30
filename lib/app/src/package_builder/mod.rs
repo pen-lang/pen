@@ -1,7 +1,7 @@
 mod package_builder_infrastructure;
 
 use crate::{
-    infra::{FilePath, PreludeModuleConfiguration, EXTERNAL_PACKAGE_DIRECTORY},
+    infra::{FilePath, PreludePackageConfiguration, EXTERNAL_PACKAGE_DIRECTORY},
     package_build_script_compiler::{self, PackageBuildScriptCompilerInfrastructure},
 };
 pub use package_builder_infrastructure::PackageBuilderInfrastructure;
@@ -11,7 +11,7 @@ pub fn build_main_package(
     infrastructure: &PackageBuilderInfrastructure,
     main_package_directory: &FilePath,
     output_directory: &FilePath,
-    prelude_module_configuration: &PreludeModuleConfiguration,
+    prelude_package_configuration: &PreludePackageConfiguration,
 ) -> Result<(), Box<dyn Error>> {
     let build_script_file = output_directory.join(
         &FilePath::new(vec!["main"]).with_extension(
@@ -31,7 +31,7 @@ pub fn build_main_package(
         output_directory,
         &find_external_package_build_script(infrastructure, output_directory)?,
         &build_script_file,
-        Some(prelude_module_configuration),
+        Some(prelude_package_configuration),
     )?;
 
     infrastructure.module_builder.build(&build_script_file)?;

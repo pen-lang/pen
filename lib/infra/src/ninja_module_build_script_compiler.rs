@@ -41,7 +41,7 @@ impl app::infra::ModuleBuildScriptCompiler for NinjaModuleBuildScriptCompiler {
             .iter()
             .map(|file| {
                 self.file_path_converter
-                    .convert_to_os_path(&file)
+                    .convert_to_os_path(file)
                     .display()
                     .to_string()
             })

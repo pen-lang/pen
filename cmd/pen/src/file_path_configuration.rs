@@ -15,8 +15,8 @@ pub const FILE_PATH_CONFIGURATION: app::infra::FilePathConfiguration =
         build_script_file_extension: "ninja",
     };
 
-pub static PRELUDE_MODULE_CONFIGURATION: Lazy<app::infra::PreludeModuleConfiguration> =
-    Lazy::new(|| app::infra::PreludeModuleConfiguration {
+pub static PRELUDE_PACKAGE_CONFIGURATION: Lazy<app::infra::PreludePackageConfiguration> =
+    Lazy::new(|| app::infra::PreludePackageConfiguration {
         url: url::Url::parse("file://pen-root/lib/prelude").unwrap(),
         module_paths: vec![vec!["Error".into()]],
     });

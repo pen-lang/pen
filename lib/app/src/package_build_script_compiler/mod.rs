@@ -4,7 +4,7 @@ mod package_build_script_compiler_infrastructure;
 
 use crate::{
     common::module_path_resolver,
-    infra::{FilePath, PreludeModuleConfiguration},
+    infra::{FilePath, PreludePackageConfiguration},
 };
 pub use package_build_script_compiler_infrastructure::PackageBuildScriptCompilerInfrastructure;
 use std::error::Error;
@@ -15,9 +15,9 @@ pub fn compile(
     output_directory: &FilePath,
     child_build_script_files: &[FilePath],
     build_script_file: &FilePath,
-    prelude_module_configuration: Option<&PreludeModuleConfiguration>,
+    prelude_package_configuration: Option<&PreludePackageConfiguration>,
 ) -> Result<(), Box<dyn Error>> {
-    let prelude_interface_files = prelude_module_configuration
+    let prelude_interface_files = prelude_package_configuration
         .iter()
         .flat_map(|configuration| {
             let package_directory = module_path_resolver::resolve_package_directory(
@@ -33,7 +33,7 @@ pub fn compile(
                         output_directory,
                         &module_path_resolver::resolve_source_file(
                             &package_directory,
-                            &path_components,
+                            path_components,
                             &infrastructure.file_path_configuration,
                         ),
                         &infrastructure.file_path_configuration,

@@ -1,7 +1,7 @@
 use super::{file_path_configuration::FILE_PATH_CONFIGURATION, main_package_directory_finder};
 use crate::file_path_configuration::{
     BIT_CODE_FILE_EXTENSION, BUILD_CONFIGURATION_FILENAME, LANGUAGE_ROOT_ENVIRONMENT_VARIABLE,
-    LANGUAGE_ROOT_HOST_NAME, OUTPUT_DIRECTORY, PRELUDE_MODULE_CONFIGURATION,
+    LANGUAGE_ROOT_HOST_NAME, OUTPUT_DIRECTORY, PRELUDE_PACKAGE_CONFIGURATION,
 };
 use std::sync::Arc;
 
@@ -45,7 +45,7 @@ pub fn build(verbose: bool) -> Result<(), Box<dyn std::error::Error>> {
         },
         &main_package_directory,
         &output_directory,
-        &PRELUDE_MODULE_CONFIGURATION,
+        &PRELUDE_PACKAGE_CONFIGURATION,
     )?;
 
     if verbose {
@@ -61,7 +61,7 @@ pub fn build(verbose: bool) -> Result<(), Box<dyn std::error::Error>> {
         },
         &main_package_directory,
         &output_directory,
-        &PRELUDE_MODULE_CONFIGURATION,
+        &PRELUDE_PACKAGE_CONFIGURATION,
     )?;
 
     Ok(())
