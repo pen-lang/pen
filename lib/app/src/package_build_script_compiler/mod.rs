@@ -1,13 +1,14 @@
 mod module_finder;
 mod module_target_collector;
-mod package_build_script_compiler_infrastructure;
 
-use crate::{common::file_path_resolver, infra::FilePath};
-pub use package_build_script_compiler_infrastructure::PackageBuildScriptCompilerInfrastructure;
+use crate::{
+    common::file_path_resolver,
+    infra::{FilePath, Infrastructure},
+};
 use std::error::Error;
 
 pub fn compile(
-    infrastructure: &PackageBuildScriptCompilerInfrastructure,
+    infrastructure: &Infrastructure,
     package_directory: &FilePath,
     output_directory: &FilePath,
     child_build_script_files: &[FilePath],
@@ -37,7 +38,7 @@ pub fn compile(
 }
 
 fn find_prelude_interface_files(
-    infrastructure: &PackageBuildScriptCompilerInfrastructure,
+    infrastructure: &Infrastructure,
     output_directory: &FilePath,
     prelude_package_url: &url::Url,
 ) -> Result<Vec<FilePath>, Box<dyn Error>> {
@@ -59,7 +60,7 @@ fn find_prelude_interface_files(
 }
 
 pub fn compile_prelude(
-    infrastructure: &PackageBuildScriptCompilerInfrastructure,
+    infrastructure: &Infrastructure,
     package_directory: &FilePath,
     output_directory: &FilePath,
     build_script_file: &FilePath,
