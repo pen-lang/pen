@@ -1,5 +1,6 @@
 mod error;
 mod import_renamer;
+mod module_canonicalizer;
 mod module_compiler;
 mod prelude_module_modifier;
 mod utilities;

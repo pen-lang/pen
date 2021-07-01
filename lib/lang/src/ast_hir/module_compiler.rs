@@ -1,11 +1,11 @@
-use super::error::CompileError;
+use super::{error::CompileError, module_canonicalizer};
 use crate::{ast, hir, interface, position::Position, types};
 
 pub fn compile(
     module: &ast::Module,
     module_interfaces: &[interface::Module],
 ) -> Result<hir::Module, CompileError> {
-    Ok(hir::Module::new(
+    Ok(module_canonicalizer::canonicalize(&hir::Module::new(
         module_interfaces
             .iter()
             .flat_map(|module_interface| {
@@ -75,7 +75,7 @@ pub fn compile(
             .iter()
             .map(|definition| compile_definition(definition))
             .collect::<Result<_, _>>()?,
-    ))
+    )))
 }
 
 fn compile_definition(definition: &ast::Definition) -> Result<hir::Definition, CompileError> {
