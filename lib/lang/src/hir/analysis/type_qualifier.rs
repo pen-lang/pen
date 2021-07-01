@@ -25,7 +25,6 @@ pub fn qualify(module: &Module, prefix: &str) -> Module {
         )
         .collect::<HashMap<String, String>>();
 
-    // TODO Rename type definitions and aliases.
     type_transformer::transform(
         &Module::new(
             module
