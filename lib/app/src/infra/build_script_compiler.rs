@@ -4,7 +4,6 @@ use std::error::Error;
 pub trait BuildScriptCompiler {
     fn compile(
         &self,
-        package_directory: &FilePath,
         module_targets: &[ModuleTarget],
         child_build_script_files: &[FilePath],
         prelude_interface_files: &[FilePath],
