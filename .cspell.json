@@ -12,6 +12,7 @@
     "dyndep",
     "hasher",
     "idempotently",
+    "itertools",
     "malloc",
     "realloc",
     "renamer",
