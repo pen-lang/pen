@@ -3,7 +3,6 @@ mod compile;
 mod compile_configuration;
 mod compile_prelude;
 mod file_path_configuration;
-mod infrastructure;
 mod main_package_directory_finder;
 mod resolve_dependency;
 
