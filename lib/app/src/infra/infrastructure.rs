@@ -1,6 +1,6 @@
 use super::{
-    BuildScriptDependencyCompiler, ExternalPackageInitializer, FilePathConfiguration,
-    FilePathDisplayer, FileSystem, BuildScriptCompiler, ModuleBuilder,
+    BuildScriptCompiler, BuildScriptDependencyCompiler, ExternalPackageInitializer,
+    FilePathConfiguration, FilePathDisplayer, FileSystem, ModuleBuilder,
     PackageConfigurationReader,
 };
 use std::sync::Arc;
