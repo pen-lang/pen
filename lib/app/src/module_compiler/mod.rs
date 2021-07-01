@@ -12,6 +12,7 @@ use std::error::Error;
 
 const PRELUDE_PREFIX: &str = "prelude:";
 
+#[allow(clippy::too_many_arguments)]
 pub fn compile(
     infrastructure: &Infrastructure,
     source_file: &FilePath,
@@ -59,7 +60,7 @@ pub fn compile(
             )?
             .iter()
             .map(|file| {
-                interface_serializer::deserialize(&infrastructure.file_system.read_to_vec(&file)?)
+                interface_serializer::deserialize(&infrastructure.file_system.read_to_vec(file)?)
             })
             .collect::<Result<Vec<_>, _>>()?,
         )?,
