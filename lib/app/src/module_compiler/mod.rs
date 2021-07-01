@@ -3,6 +3,7 @@ mod compile_configuration;
 use crate::{
     common::{dependency_serializer, interface_serializer},
     infra::{FilePath, Infrastructure},
+    prelude_interface_file_finder,
 };
 pub use compile_configuration::{
     CompileConfiguration, HeapConfiguration, ListTypeConfiguration, StringTypeConfiguration,
@@ -18,6 +19,8 @@ pub fn compile(
     object_file: &FilePath,
     interface_file: &FilePath,
     compile_configuration: &CompileConfiguration,
+    output_directory: &FilePath,
+    prelude_package_url: &url::Url,
 ) -> Result<(), Box<dyn Error>> {
     let dependencies = dependency_serializer::deserialize(
         &infrastructure.file_system.read_to_vec(dependency_file)?,
@@ -42,15 +45,23 @@ pub fn compile(
                     Ok((
                         import.module_path().clone(),
                         interface_serializer::deserialize(
-                            infrastructure
+                            &infrastructure
                                 .file_system
-                                .read_to_string(&dependencies[import.module_path()].clone())?
-                                .as_bytes(),
+                                .read_to_vec(&dependencies[import.module_path()].clone())?,
                         )?,
                     ))
                 })
                 .collect::<Result<_, Box<dyn Error>>>()?,
-            &[],
+            &prelude_interface_file_finder::find(
+                infrastructure,
+                output_directory,
+                prelude_package_url,
+            )?
+            .iter()
+            .map(|file| {
+                interface_serializer::deserialize(&infrastructure.file_system.read_to_vec(&file)?)
+            })
+            .collect::<Result<Vec<_>, _>>()?,
         )?,
         &compile_configuration.list_type,
         &compile_configuration.string_type,

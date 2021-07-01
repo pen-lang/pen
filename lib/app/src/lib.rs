@@ -6,3 +6,4 @@ mod module_finder;
 mod package_build_script_compiler;
 pub mod package_builder;
 pub mod package_initializer;
+mod prelude_interface_file_finder;
