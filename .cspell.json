@@ -5,6 +5,7 @@
     "canonicalization",
     "canonicalize",
     "canonicalizer",
+    "clippy",
     "combinator",
     "concat",
     "displayer",
