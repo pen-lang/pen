@@ -10,7 +10,7 @@ pub fn create(
 ) -> Result<app::infra::Infrastructure, Box<dyn Error>> {
     let file_system = Arc::new(infra::FileSystem::new(file_path_converter.clone()));
 
-    let module_build_script_compiler = Arc::new(infra::NinjaModuleBuildScriptCompiler::new(
+    let build_script_compiler = Arc::new(infra::NinjaBuildScriptCompiler::new(
         file_path_converter.clone(),
         BIT_CODE_FILE_EXTENSION,
         OUTPUT_DIRECTORY,
@@ -30,7 +30,7 @@ pub fn create(
         file_path_displayer: Arc::new(infra::FilePathDisplayer::new(file_path_converter.clone())),
         file_path_configuration: FILE_PATH_CONFIGURATION.clone().into(),
         module_builder: Arc::new(infra::NinjaModuleBuilder::new(file_path_converter)),
-        module_build_script_compiler,
+        build_script_compiler,
         package_configuration_reader: Arc::new(infra::JsonPackageConfigurationReader::new(
             file_system,
             BUILD_CONFIGURATION_FILENAME,

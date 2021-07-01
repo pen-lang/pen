@@ -1,7 +1,7 @@
 use super::{FilePath, ModuleTarget};
 use std::error::Error;
 
-pub trait ModuleBuildScriptCompiler {
+pub trait BuildScriptCompiler {
     fn compile(
         &self,
         package_directory: &FilePath,

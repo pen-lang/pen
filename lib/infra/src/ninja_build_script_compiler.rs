@@ -2,13 +2,13 @@ use super::file_path_converter::FilePathConverter;
 use app::infra::FilePath;
 use std::{error::Error, path::PathBuf, sync::Arc};
 
-pub struct NinjaModuleBuildScriptCompiler {
+pub struct NinjaBuildScriptCompiler {
     file_path_converter: Arc<FilePathConverter>,
     bit_code_file_extension: &'static str,
     log_directory: &'static str,
 }
 
-impl NinjaModuleBuildScriptCompiler {
+impl NinjaBuildScriptCompiler {
     pub fn new(
         file_path_converter: Arc<FilePathConverter>,
         bit_code_file_extension: &'static str,
@@ -29,7 +29,7 @@ impl NinjaModuleBuildScriptCompiler {
     }
 }
 
-impl app::infra::ModuleBuildScriptCompiler for NinjaModuleBuildScriptCompiler {
+impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
     fn compile(
         &self,
         package_directory: &FilePath,
