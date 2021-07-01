@@ -8,6 +8,7 @@ use crate::{
     interface,
     types::{self, Type},
 };
+use itertools::Itertools;
 use std::collections::HashMap;
 
 pub fn compile(
@@ -15,8 +16,72 @@ pub fn compile(
     module_interfaces: &HashMap<ast::ModulePath, interface::Module>,
     prelude_module_interfaces: &[interface::Module],
 ) -> hir::Module {
-    let module = rename_types(module, module_interfaces, prelude_module_interfaces);
+    let module = compile_imports(
+        module,
+        &module_interfaces
+            .values()
+            .chain(prelude_module_interfaces)
+            .collect::<Vec<_>>(),
+    );
+
+    let module = rename_types(&module, module_interfaces, prelude_module_interfaces);
     rename_variables(&module, module_interfaces, prelude_module_interfaces)
+}
+
+fn compile_imports(module: &hir::Module, module_interfaces: &[&interface::Module]) -> hir::Module {
+    hir::Module::new(
+        module_interfaces
+            .iter()
+            .flat_map(|module_interface| {
+                module_interface
+                    .type_definitions()
+                    .iter()
+                    .map(|definition| {
+                        hir::TypeDefinition::new(
+                            definition.name(),
+                            definition.original_name(),
+                            definition.elements().to_vec(),
+                            definition.is_open(),
+                            definition.is_public(),
+                            true,
+                            definition.position().clone(),
+                        )
+                    })
+            })
+            .unique_by(|definition| definition.name().to_string())
+            .chain(module.type_definitions().iter().cloned())
+            .collect(),
+        module_interfaces
+            .iter()
+            .flat_map(|module_interface| {
+                module_interface.type_aliases().iter().map(|alias| {
+                    hir::TypeAlias::new(
+                        alias.name(),
+                        alias.original_name(),
+                        alias.type_().clone(),
+                        alias.is_public(),
+                        true,
+                    )
+                })
+            })
+            .unique_by(|alias| alias.name().to_string())
+            .chain(module.type_aliases().iter().cloned())
+            .collect(),
+        module_interfaces
+            .iter()
+            .flat_map(|interface| interface.declarations())
+            .map(|declaration| {
+                hir::Declaration::new(
+                    declaration.name(),
+                    declaration.type_().clone(),
+                    declaration.position().clone(),
+                )
+            })
+            .unique_by(|declaration| declaration.name().to_string())
+            .chain(module.declarations().iter().cloned())
+            .collect(),
+        module.definitions().to_vec(),
+    )
 }
 
 fn rename_variables(
@@ -131,7 +196,7 @@ mod tests {
     use pretty_assertions::assert_eq;
 
     #[test]
-    fn rename_empty_module() {
+    fn compile_empty_module() {
         assert_eq!(
             compile(
                 &hir::Module::new(vec![], vec![], vec![], vec![]),
@@ -187,7 +252,15 @@ mod tests {
             hir::Module::new(
                 vec![],
                 vec![],
-                vec![],
+                vec![hir::Declaration::new(
+                    "RealBar",
+                    types::Function::new(
+                        vec![],
+                        types::None::new(Position::dummy()),
+                        Position::dummy()
+                    ),
+                    Position::dummy()
+                )],
                 vec![hir::Definition::new(
                     "Foo",
                     "Foo",
@@ -252,16 +325,27 @@ mod tests {
                 &[]
             ),
             hir::Module::new(
-                vec![hir::TypeDefinition::without_source(
-                    "Foo",
-                    vec![types::RecordElement::new(
-                        "foo",
-                        types::Reference::new("RealBar", Position::dummy())
-                    )],
-                    false,
-                    false,
-                    false,
-                )],
+                vec![
+                    hir::TypeDefinition::new(
+                        "RealBar",
+                        "Bar",
+                        vec![],
+                        false,
+                        true,
+                        true,
+                        Position::dummy()
+                    ),
+                    hir::TypeDefinition::without_source(
+                        "Foo",
+                        vec![types::RecordElement::new(
+                            "foo",
+                            types::Reference::new("RealBar", Position::dummy())
+                        )],
+                        false,
+                        false,
+                        false,
+                    )
+                ],
                 vec![],
                 vec![],
                 vec![hir::Definition::without_source(
@@ -334,7 +418,13 @@ mod tests {
                     false,
                     false,
                 )],
-                vec![],
+                vec![hir::TypeAlias::new(
+                    "RealBar",
+                    "Bar",
+                    types::None::new(Position::dummy()),
+                    true,
+                    true,
+                )],
                 vec![],
                 vec![hir::Definition::without_source(
                     "Foo",
@@ -352,34 +442,35 @@ mod tests {
 
     #[test]
     fn do_not_rename_private_type_definition() {
-        let module = hir::Module::new(
-            vec![hir::TypeDefinition::without_source(
-                "Foo",
-                vec![types::RecordElement::new(
-                    "foo",
-                    types::Reference::new("Bar'Bar", Position::dummy()),
-                )],
-                false,
-                false,
-                false,
+        let type_definition = hir::TypeDefinition::without_source(
+            "Foo",
+            vec![types::RecordElement::new(
+                "foo",
+                types::Reference::new("Bar'Bar", Position::dummy()),
             )],
-            vec![],
-            vec![],
-            vec![hir::Definition::without_source(
-                "Foo",
-                hir::Lambda::new(
-                    vec![],
-                    types::Reference::new("Bar'Bar", Position::dummy()),
-                    hir::None::new(Position::dummy()),
-                    Position::dummy(),
-                ),
-                true,
-            )],
+            false,
+            false,
+            false,
+        );
+        let definition = hir::Definition::without_source(
+            "Foo",
+            hir::Lambda::new(
+                vec![],
+                types::Reference::new("Bar'Bar", Position::dummy()),
+                hir::None::new(Position::dummy()),
+                Position::dummy(),
+            ),
+            true,
         );
 
         assert_eq!(
             compile(
-                &module,
+                &hir::Module::new(
+                    vec![type_definition.clone()],
+                    vec![],
+                    vec![],
+                    vec![definition.clone()],
+                ),
                 &vec![(
                     ast::InternalModulePath::new(vec!["Bar".into()]).into(),
                     interface::Module::new(
@@ -392,47 +483,64 @@ mod tests {
                             Position::dummy()
                         )],
                         vec![],
-                        vec![]
+                        vec![],
                     )
                 )]
                 .into_iter()
                 .collect(),
                 &[]
             ),
-            module
+            hir::Module::new(
+                vec![
+                    hir::TypeDefinition::new(
+                        "RealBar",
+                        "Bar",
+                        vec![],
+                        false,
+                        false,
+                        true,
+                        Position::dummy()
+                    ),
+                    type_definition
+                ],
+                vec![],
+                vec![],
+                vec![definition],
+            )
         );
     }
 
     #[test]
     fn do_not_rename_private_type_alias() {
-        let module = hir::Module::new(
-            vec![hir::TypeDefinition::without_source(
-                "Foo",
-                vec![types::RecordElement::new(
-                    "foo",
-                    types::Reference::new("Bar'Bar", Position::dummy()),
-                )],
-                false,
-                false,
-                false,
+        let type_definition = hir::TypeDefinition::without_source(
+            "Foo",
+            vec![types::RecordElement::new(
+                "foo",
+                types::Reference::new("Bar'Bar", Position::dummy()),
             )],
-            vec![],
-            vec![],
-            vec![hir::Definition::without_source(
-                "Foo",
-                hir::Lambda::new(
-                    vec![],
-                    types::Reference::new("Bar'Bar", Position::dummy()),
-                    hir::None::new(Position::dummy()),
-                    Position::dummy(),
-                ),
-                true,
-            )],
+            false,
+            false,
+            false,
+        );
+        let definition = hir::Definition::without_source(
+            "Foo",
+            hir::Lambda::new(
+                vec![],
+                types::Reference::new("Bar'Bar", Position::dummy()),
+                hir::None::new(Position::dummy()),
+                Position::dummy(),
+            ),
+            true,
         );
 
         assert_eq!(
             compile(
-                &module,
+                &hir::Module::new(
+                    vec![type_definition.clone()],
+                    vec![],
+                    vec![],
+                    vec![definition.clone()]
+                ),
                 &vec![(
                     ast::InternalModulePath::new(vec!["Bar".into()]).into(),
                     interface::Module::new(
@@ -450,7 +558,18 @@ mod tests {
                 .collect(),
                 &[],
             ),
-            module
+            hir::Module::new(
+                vec![type_definition],
+                vec![hir::TypeAlias::new(
+                    "RealBar",
+                    "Bar",
+                    types::None::new(Position::dummy()),
+                    false,
+                    true
+                )],
+                vec![],
+                vec![definition],
+            )
         );
     }
 }
