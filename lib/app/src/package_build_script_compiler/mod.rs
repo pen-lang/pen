@@ -1,9 +1,9 @@
-mod module_finder;
 mod module_target_collector;
 
 use crate::{
     common::file_path_resolver,
     infra::{FilePath, Infrastructure},
+    module_finder,
 };
 use std::error::Error;
 
