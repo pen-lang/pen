@@ -1,5 +1,5 @@
 use crate::hir::*;
-use std::collections::HashSet;
+use std::collections::BTreeSet;
 
 // TODO Canonicalize only external ones.
 pub fn canonicalize(module: &Module) -> Module {
@@ -8,7 +8,7 @@ pub fn canonicalize(module: &Module) -> Module {
             .type_definitions()
             .iter()
             .map(|definition| definition.name())
-            .collect::<HashSet<_>>()
+            .collect::<BTreeSet<_>>()
             .into_iter()
             .flat_map(|name| {
                 module
@@ -22,7 +22,7 @@ pub fn canonicalize(module: &Module) -> Module {
             .type_aliases()
             .iter()
             .map(|alias| alias.name())
-            .collect::<HashSet<_>>()
+            .collect::<BTreeSet<_>>()
             .into_iter()
             .flat_map(|name| {
                 module
@@ -36,7 +36,7 @@ pub fn canonicalize(module: &Module) -> Module {
             .declarations()
             .iter()
             .map(|declaration| declaration.name())
-            .collect::<HashSet<_>>()
+            .collect::<BTreeSet<_>>()
             .into_iter()
             .flat_map(|name| {
                 module
