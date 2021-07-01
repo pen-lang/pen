@@ -30,6 +30,25 @@ impl NinjaBuildScriptCompiler {
             .or_else(|_| which::which("llc-11"))
             .or_else(|_| which::which("llc"))?)
     }
+
+    fn compile_ffi_build(&self, package_directory: &FilePath) -> Vec<String> {
+        let package_directory = self
+            .file_path_converter
+            .convert_to_os_path(package_directory);
+        let ffi_build_script = package_directory.join(self.ffi_build_script);
+        let object_file = package_directory.with_extension(".o");
+
+        if ffi_build_script.exists() {
+            vec![
+                "rule compile_ffi".into(),
+                format!("  command = {} $out", ffi_build_script.display()),
+                format!("build {}: compile_ffi", object_file.display()),
+                format!("default {}", object_file.display()),
+            ]
+        } else {
+            vec![]
+        }
+    }
 }
 
 impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
@@ -136,25 +155,7 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
                 format!("  object_file = {}", bit_code_file.display()),
             ]
         }))
-        .chain({
-            let package_directory = self
-                .file_path_converter
-                .convert_to_os_path(package_directory);
-            let ffi_build_script = package_directory.join(self.ffi_build_script);
-
-            if ffi_build_script.exists() {
-                vec![
-                    "rule compile_ffi".into(),
-                    format!("  command = {} $out", ffi_build_script.display()),
-                    format!(
-                        "build {}: compile_ffi",
-                        package_directory.with_extension(".o").display()
-                    ),
-                ]
-            } else {
-                vec![]
-            }
-        })
+        .chain(self.compile_ffi_build(package_directory))
         .chain(vec![format!(
             "default {}",
             module_targets
@@ -176,6 +177,7 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
     fn compile_prelude(
         &self,
         module_targets: &[app::infra::ModuleTarget],
+        package_directory: &FilePath,
     ) -> Result<String, Box<dyn Error>> {
         let llc = self.find_llc()?;
 
@@ -222,6 +224,7 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
                 format!("  source_file = {}", source_file.display()),
             ]
         }))
+        .chain(self.compile_ffi_build(package_directory))
         .chain(vec![format!(
             "default {}",
             module_targets

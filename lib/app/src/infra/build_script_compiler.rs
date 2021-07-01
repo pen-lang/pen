@@ -10,5 +10,9 @@ pub trait BuildScriptCompiler {
         package_directory: &FilePath,
     ) -> Result<String, Box<dyn Error>>;
 
-    fn compile_prelude(&self, module_targets: &[ModuleTarget]) -> Result<String, Box<dyn Error>>;
+    fn compile_prelude(
+        &self,
+        module_targets: &[ModuleTarget],
+        package_directory: &FilePath,
+    ) -> Result<String, Box<dyn Error>>;
 }

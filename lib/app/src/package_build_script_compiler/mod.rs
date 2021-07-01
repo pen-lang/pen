@@ -47,11 +47,14 @@ pub fn compile_prelude(
         build_script_file,
         infrastructure
             .build_script_compiler
-            .compile_prelude(&module_target_collector::collect_module_targets(
-                infrastructure,
+            .compile_prelude(
+                &module_target_collector::collect_module_targets(
+                    infrastructure,
+                    package_directory,
+                    output_directory,
+                )?,
                 package_directory,
-                output_directory,
-            )?)?
+            )?
             .as_bytes(),
     )?;
 
