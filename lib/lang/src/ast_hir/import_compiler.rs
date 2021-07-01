@@ -10,7 +10,7 @@ use crate::{
 };
 use std::collections::HashMap;
 
-pub fn rename(
+pub fn compile(
     module: &hir::Module,
     module_interfaces: &HashMap<ast::ModulePath, interface::Module>,
     prelude_module_interfaces: &[interface::Module],
@@ -133,7 +133,7 @@ mod tests {
     #[test]
     fn rename_empty_module() {
         assert_eq!(
-            rename(
+            compile(
                 &hir::Module::new(vec![], vec![], vec![], vec![]),
                 &Default::default(),
                 &[]
@@ -145,7 +145,7 @@ mod tests {
     #[test]
     fn rename_variable() {
         assert_eq!(
-            rename(
+            compile(
                 &hir::Module::new(
                     vec![],
                     vec![],
@@ -207,7 +207,7 @@ mod tests {
     #[test]
     fn rename_type_definition() {
         assert_eq!(
-            rename(
+            compile(
                 &hir::Module::new(
                     vec![hir::TypeDefinition::without_source(
                         "Foo",
@@ -281,7 +281,7 @@ mod tests {
     #[test]
     fn rename_type_alias() {
         assert_eq!(
-            rename(
+            compile(
                 &hir::Module::new(
                     vec![hir::TypeDefinition::without_source(
                         "Foo",
@@ -378,7 +378,7 @@ mod tests {
         );
 
         assert_eq!(
-            rename(
+            compile(
                 &module,
                 &vec![(
                     ast::InternalModulePath::new(vec!["Bar".into()]).into(),
@@ -431,7 +431,7 @@ mod tests {
         );
 
         assert_eq!(
-            rename(
+            compile(
                 &module,
                 &vec![(
                     ast::InternalModulePath::new(vec!["Bar".into()]).into(),

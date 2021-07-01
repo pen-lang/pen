@@ -1,5 +1,5 @@
 mod error;
-mod import_renamer;
+mod import_compiler;
 mod module_canonicalizer;
 mod module_compiler;
 mod prelude_module_modifier;
@@ -31,7 +31,7 @@ pub fn compile(
             .cloned()
             .collect::<Vec<_>>(),
     )?;
-    let module = import_renamer::rename(&module, module_interfaces, prelude_module_interfaces);
+    let module = import_compiler::compile(&module, module_interfaces, prelude_module_interfaces);
 
     let module = definition_qualifier::qualify(&module, prefix);
     let module = type_qualifier::qualify(&module, prefix);
