@@ -1,6 +1,7 @@
 use crate::hir::*;
 use std::collections::HashSet;
 
+// TODO Canonicalize only external ones.
 pub fn canonicalize(module: &Module) -> Module {
     Module::new(
         module
