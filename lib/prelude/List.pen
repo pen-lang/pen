@@ -1,0 +1,106 @@
+type _AnyList {
+  node _Node | none,
+}
+
+type _Node {
+  first any,
+  rest _Node | none,
+}
+
+type _FirstRest {
+  first any,
+  rest _AnyList,
+}
+
+_first = \(fr _FirstRest) any {
+  fr.first
+}
+
+_rest = \(fr _FirstRest) _AnyList {
+  fr.rest
+}
+
+_firstRest = \(l _AnyList) _FirstRest | none {
+  if n = l.node; _Node {
+    _FirstRest{
+      first: n.first,
+      rest: _AnyList{node: n.rest},
+    }
+  } else {
+    none
+  }
+}
+
+_emptyList = \() _AnyList {
+  _AnyList{node: none}
+}
+
+_getListLength = \(l _AnyList) number {
+  _getLengthFromNode(l.node)
+}
+
+_getLengthFromNode = \(n _Node | none) number {
+  if n = n; _Node {
+    1 + _getLengthFromNode(n.rest)
+  } else {
+    0
+  }
+}
+
+_prependToList = \(x any, l _AnyList) _AnyList {
+  _AnyList{node: _prependToNode(x, l.node)}
+}
+
+_prependToNode = \(x any, n _Node | none) _Node {
+  _Node{
+    first: x,
+    rest: n,
+  }
+}
+
+_concatenateLists = \(x _AnyList, y _AnyList) _AnyList {
+  _AnyList{node: _concatenateNodes(x.node, y.node)}
+}
+
+_concatenateNodes = \(x _Node | none, y _Node | none) _Node | none {
+  if x = x; _Node {
+    _prependToNode(x.first, _concatenateNodes(x.rest, y))
+  } else {
+    y
+  }
+}
+
+_equalLists = \(f \(any, any) boolean, x _AnyList, y _AnyList) boolean {
+  _equalNodes(f, x.node, y.node)
+}
+
+_equalNodes = \(f \(any, any) boolean, x _Node | none, y _Node | none) boolean {
+  if x = x; _Node {
+    if y = y; _Node {
+      f(x.first, y.first) & _equalNodes(f, x.rest, y.rest)
+    } else {
+      false
+    }
+  } else {
+    if y = y; _Node {
+      false
+    } else {
+      true
+    }
+  }
+}
+
+_mapList = \(f \(any) any, l _AnyList) _AnyList {
+  _AnyList{node: _mapNodes(f, l.node)}
+}
+
+_mapNodes = \(f \(any) any, n _Node | none) _Node | none {
+  if n = n; _Node {
+    _Node{
+      first: f(n.first),
+      rest: _mapNodes(f, n.rest),
+    }
+  } else {
+    none
+  }
+}

@@ -8,6 +8,7 @@ use crate::{
 };
 use std::collections::HashMap;
 
+#[derive(Debug)]
 pub struct TypeContext {
     records: HashMap<String, Vec<types::RecordElement>>,
     types: HashMap<String, Type>,
