@@ -84,7 +84,7 @@ pub fn compile_prelude(
     interface_file: &FilePath,
     compile_configuration: &CompileConfiguration,
 ) -> Result<(), Box<dyn Error>> {
-    // TODO Use lang::hir_mir::compile_prelude().
+    // TODO Implement and use lang::hir_mir::compile_prelude().
     let (module, module_interface) = lang::hir_mir::compile(
         &lang::ast_hir::compile_prelude(
             &lang::parse::parse(
