@@ -29,6 +29,7 @@ pub fn compile(
                 )?,
                 child_build_script_files,
                 &prelude_interface_files,
+                package_directory,
             )?
             .as_bytes(),
     )?;

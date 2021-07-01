@@ -6,6 +6,7 @@ pub struct NinjaBuildScriptCompiler {
     file_path_converter: Arc<FilePathConverter>,
     bit_code_file_extension: &'static str,
     log_directory: &'static str,
+    ffi_build_script: &'static str,
 }
 
 impl NinjaBuildScriptCompiler {
@@ -13,11 +14,13 @@ impl NinjaBuildScriptCompiler {
         file_path_converter: Arc<FilePathConverter>,
         bit_code_file_extension: &'static str,
         log_directory: &'static str,
+        ffi_build_script: &'static str,
     ) -> Self {
         Self {
             file_path_converter,
             bit_code_file_extension,
             log_directory,
+            ffi_build_script,
         }
     }
 
@@ -35,6 +38,7 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
         module_targets: &[app::infra::ModuleTarget],
         child_build_script_files: &[FilePath],
         prelude_interface_files: &[FilePath],
+        package_directory: &FilePath,
     ) -> Result<String, Box<dyn Error>> {
         let llc = self.find_llc()?;
         let prelude_interface_files_string = prelude_interface_files
@@ -132,6 +136,25 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
                 format!("  object_file = {}", bit_code_file.display()),
             ]
         }))
+        .chain({
+            let package_directory = self
+                .file_path_converter
+                .convert_to_os_path(package_directory);
+            let ffi_build_script = package_directory.join(self.ffi_build_script);
+
+            if ffi_build_script.exists() {
+                vec![
+                    "rule compile_ffi".into(),
+                    format!("  command = {} $out", ffi_build_script.display()),
+                    format!(
+                        "build {}: compile_ffi",
+                        package_directory.with_extension(".o").display()
+                    ),
+                ]
+            } else {
+                vec![]
+            }
+        })
         .chain(vec![format!(
             "default {}",
             module_targets
