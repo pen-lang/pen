@@ -7,4 +7,6 @@ members = [
   "lib/lang",
   "lib/mir",
   "lib/mir-fmm",
+  "lib/prelude/ffi",
 ]
+exclude = ["tmp"]
