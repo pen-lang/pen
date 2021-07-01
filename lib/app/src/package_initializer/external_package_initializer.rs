@@ -1,47 +1,42 @@
-use super::package_initializer_infrastructure::PackageInitializerInfrastructure;
 use crate::{
-    common::package_id_calculator,
-    infra::{FilePath, EXTERNAL_PACKAGE_DIRECTORY},
-    package_build_script_compiler::{self, PackageBuildScriptCompilerInfrastructure},
+    common::file_path_resolver,
+    infra::{FilePath, Infrastructure},
+    package_build_script_compiler,
 };
 use std::error::Error;
 
-pub fn initialize_external_packages(
-    infrastructure: &PackageInitializerInfrastructure,
+pub fn initialize_recursively(
+    infrastructure: &Infrastructure,
     package_directory: &FilePath,
     output_directory: &FilePath,
+    prelude_package_url: &url::Url,
 ) -> Result<(), Box<dyn Error>> {
     let package_configuration = infrastructure
         .package_configuration_reader
         .read(package_directory)?;
 
     for url in package_configuration.dependencies.values() {
-        initialize_external_package(infrastructure, url, output_directory)?;
+        initialize(infrastructure, url, output_directory, prelude_package_url)?;
     }
 
     Ok(())
 }
 
-fn initialize_external_package(
-    infrastructure: &PackageInitializerInfrastructure,
-    url: &url::Url,
+fn initialize(
+    infrastructure: &Infrastructure,
+    package_url: &url::Url,
     output_directory: &FilePath,
+    prelude_package_url: &url::Url,
 ) -> Result<(), Box<dyn Error>> {
-    let package_directory = output_directory.join(&FilePath::new(vec![
-        EXTERNAL_PACKAGE_DIRECTORY.into(),
-        package_id_calculator::calculate(url),
-    ]));
+    let package_directory =
+        file_path_resolver::resolve_package_directory(output_directory, package_url);
 
     infrastructure
         .external_package_initializer
-        .initialize(url, &package_directory)?;
+        .initialize(package_url, &package_directory)?;
 
     package_build_script_compiler::compile(
-        &PackageBuildScriptCompilerInfrastructure {
-            module_build_script_compiler: infrastructure.module_build_script_compiler.clone(),
-            file_system: infrastructure.file_system.clone(),
-            file_path_configuration: infrastructure.file_path_configuration.clone(),
-        },
+        infrastructure,
         &package_directory,
         output_directory,
         &[],
@@ -50,9 +45,15 @@ fn initialize_external_package(
                 .file_path_configuration
                 .build_script_file_extension,
         ),
+        prelude_package_url,
     )?;
 
-    initialize_external_packages(infrastructure, &package_directory, output_directory)?;
+    initialize_recursively(
+        infrastructure,
+        &package_directory,
+        output_directory,
+        prelude_package_url,
+    )?;
 
     Ok(())
 }

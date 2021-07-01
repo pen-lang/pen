@@ -33,9 +33,20 @@ impl app::infra::ModuleBuildScriptCompiler for NinjaModuleBuildScriptCompiler {
     fn compile(
         &self,
         module_targets: &[app::infra::ModuleTarget],
-        sub_build_script_files: &[FilePath],
+        child_build_script_files: &[FilePath],
+        prelude_interface_files: &[FilePath],
     ) -> Result<String, Box<dyn Error>> {
         let llc = self.find_llc()?;
+        let prelude_interface_files_string = prelude_interface_files
+            .iter()
+            .map(|file| {
+                self.file_path_converter
+                    .convert_to_os_path(file)
+                    .display()
+                    .to_string()
+            })
+            .collect::<Vec<_>>()
+            .join(" ");
 
         Ok(vec![
             "ninja_required_version = 1.10",
@@ -55,7 +66,7 @@ impl app::infra::ModuleBuildScriptCompiler for NinjaModuleBuildScriptCompiler {
         ]
         .into_iter()
         .map(String::from)
-        .chain(sub_build_script_files.iter().map(|file| {
+        .chain(child_build_script_files.iter().map(|file| {
             format!(
                 "subninja {}",
                 self.file_path_converter.convert_to_os_path(file).display()
@@ -84,11 +95,12 @@ impl app::infra::ModuleBuildScriptCompiler for NinjaModuleBuildScriptCompiler {
 
             vec![
                 format!(
-                    "build {} {}: compile {} {} || {}",
+                    "build {} {}: compile {} {} | {} || {}",
                     bit_code_file.display(),
                     interface_file.display(),
                     source_file.display(),
                     dependency_file.display(),
+                    prelude_interface_files_string,
                     ninja_dependency_file.display()
                 ),
                 format!("  dyndep = {}", ninja_dependency_file.display()),
@@ -133,6 +145,60 @@ impl app::infra::ModuleBuildScriptCompiler for NinjaModuleBuildScriptCompiler {
                 .collect::<Vec<_>>()
                 .join(" ")
         )])
+        .collect::<Vec<String>>()
+        .join("\n")
+            + "\n")
+    }
+
+    fn compile_prelude(
+        &self,
+        module_targets: &[app::infra::ModuleTarget],
+    ) -> Result<String, Box<dyn Error>> {
+        let llc = self.find_llc()?;
+
+        Ok(vec![
+            "ninja_required_version = 1.10",
+            &format!("builddir = {}", self.log_directory),
+            "rule compile",
+            "  command = pen compile-prelude $in $out",
+            "  description = compiling module of $source_file",
+            "rule llc",
+            &format!(
+                "  command = {} -O3 -tailcallopt -filetype obj -o $out $in",
+                llc.display()
+            ),
+            "  description = generating object file for $source_file",
+        ]
+        .into_iter()
+        .map(String::from)
+        .chain(module_targets.iter().flat_map(|target| {
+            let source_file = self
+                .file_path_converter
+                .convert_to_os_path(target.source_file());
+            let interface_file = self
+                .file_path_converter
+                .convert_to_os_path(target.interface_file());
+            let object_file = self
+                .file_path_converter
+                .convert_to_os_path(target.object_file());
+            let bit_code_file = object_file.with_extension(self.bit_code_file_extension);
+
+            vec![
+                format!(
+                    "build {} {}: compile {}",
+                    bit_code_file.display(),
+                    interface_file.display(),
+                    source_file.display(),
+                ),
+                format!("  source_file = {}", source_file.display()),
+                format!(
+                    "build {}: llc {}",
+                    object_file.display(),
+                    bit_code_file.display(),
+                ),
+                format!("  source_file = {}", source_file.display()),
+            ]
+        }))
         .collect::<Vec<String>>()
         .join("\n")
             + "\n")

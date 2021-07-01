@@ -9,3 +9,4 @@ clap = "2"
 app = { path = "../../lib/app" }
 infra = { path = "../../lib/infra" }
 once_cell = "1"
+url = "2"

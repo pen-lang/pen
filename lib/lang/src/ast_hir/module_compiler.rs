@@ -1,14 +1,13 @@
-use super::error::CompileError;
+use super::{error::CompileError, module_canonicalizer};
 use crate::{ast, hir, interface, position::Position, types};
-use std::collections::HashMap;
 
 pub fn compile(
     module: &ast::Module,
-    module_interfaces: &HashMap<ast::ModulePath, interface::Module>,
+    module_interfaces: &[interface::Module],
 ) -> Result<hir::Module, CompileError> {
-    Ok(hir::Module::new(
+    Ok(module_canonicalizer::canonicalize(&hir::Module::new(
         module_interfaces
-            .values()
+            .iter()
             .flat_map(|module_interface| {
                 module_interface
                     .type_definitions()
@@ -38,7 +37,7 @@ pub fn compile(
             }))
             .collect(),
         module_interfaces
-            .values()
+            .iter()
             .flat_map(|module_interface| {
                 module_interface.type_aliases().iter().map(|alias| {
                     hir::TypeAlias::new(
@@ -61,7 +60,7 @@ pub fn compile(
             }))
             .collect(),
         module_interfaces
-            .values()
+            .iter()
             .flat_map(|interface| interface.declarations())
             .map(|declaration| {
                 hir::Declaration::new(
@@ -76,7 +75,7 @@ pub fn compile(
             .iter()
             .map(|definition| compile_definition(definition))
             .collect::<Result<_, _>>()?,
-    ))
+    )))
 }
 
 fn compile_definition(definition: &ast::Definition) -> Result<hir::Definition, CompileError> {
@@ -370,10 +369,7 @@ mod tests {
     #[test]
     fn compile_empty_module() {
         assert_eq!(
-            compile(
-                &ast::Module::new(vec![], vec![], vec![], vec![]),
-                &Default::default()
-            ),
+            compile(&ast::Module::new(vec![], vec![], vec![], vec![]), &[]),
             Ok(hir::Module::new(vec![], vec![], vec![], vec![]))
         );
     }
@@ -404,33 +400,28 @@ mod tests {
                         Position::dummy(),
                     )]
                 ),
-                &vec![(
-                    ast::InternalModulePath::new(vec!["Foo".into()]).into(),
-                    interface::Module::new(
-                        vec![interface::TypeDefinition::without_source(
-                            "Bar1",
+                &[interface::Module::new(
+                    vec![interface::TypeDefinition::without_source(
+                        "Bar1",
+                        vec![],
+                        false,
+                        true
+                    )],
+                    vec![interface::TypeAlias::without_source(
+                        "Bar2",
+                        types::None::new(Position::dummy()),
+                        true,
+                    )],
+                    vec![interface::Declaration::without_source(
+                        "Bar3",
+                        types::Function::new(
                             vec![],
-                            false,
-                            true
-                        )],
-                        vec![interface::TypeAlias::without_source(
-                            "Bar2",
                             types::None::new(Position::dummy()),
-                            true,
-                        )],
-                        vec![interface::Declaration::without_source(
-                            "Bar3",
-                            types::Function::new(
-                                vec![],
-                                types::None::new(Position::dummy()),
-                                Position::dummy()
-                            ),
                             Position::dummy()
-                        )]
-                    )
+                        ),
+                        Position::dummy()
+                    )]
                 )]
-                .into_iter()
-                .collect()
             ),
             Ok(hir::Module::new(
                 vec![

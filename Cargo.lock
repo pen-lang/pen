@@ -36,6 +36,7 @@ dependencies = [
  "fmm",
  "fmm-llvm",
  "lang",
+ "mir",
  "mir-fmm",
  "regex",
  "serde",
@@ -402,6 +403,7 @@ dependencies = [
  "clap",
  "infra",
  "once_cell",
+ "url",
 ]
 
 [[package]]

@@ -1,0 +1,11 @@
+type error {
+  source any,
+}
+
+error = \(source any) error {
+  error{source: source}
+}
+
+source = \(error error) any {
+  error.source
+}
