@@ -1,10 +1,11 @@
 use super::package_build_script_compiler_infrastructure::PackageBuildScriptCompilerInfrastructure;
 use crate::infra::FilePath;
+use std::error::Error;
 
 pub fn find(
     infrastructure: &PackageBuildScriptCompilerInfrastructure,
     package_directory: &FilePath,
-) -> Result<Vec<FilePath>, Box<dyn std::error::Error>> {
+) -> Result<Vec<FilePath>, Box<dyn Error>> {
     let mut source_files = vec![];
 
     for path in infrastructure
