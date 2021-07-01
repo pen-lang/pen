@@ -5,6 +5,11 @@ use super::{
 };
 use std::sync::Arc;
 
+// Infrastructure is agnostic about the following concepts and their information
+// should be passed through function arguments instead.
+//
+// - Output directory
+// - Main package directory
 pub struct Infrastructure {
     pub build_script_dependency_compiler: Arc<dyn BuildScriptDependencyCompiler>,
     pub external_package_initializer: Arc<dyn ExternalPackageInitializer>,
