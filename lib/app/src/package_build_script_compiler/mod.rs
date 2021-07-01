@@ -20,7 +20,7 @@ pub fn compile(
     infrastructure.file_system.write(
         build_script_file,
         infrastructure
-            .module_build_script_compiler
+            .build_script_compiler
             .compile(
                 &module_target_collector::collect_module_targets(
                     infrastructure,
@@ -29,6 +29,7 @@ pub fn compile(
                 )?,
                 child_build_script_files,
                 &prelude_interface_files,
+                package_directory,
             )?
             .as_bytes(),
     )?;
@@ -45,12 +46,15 @@ pub fn compile_prelude(
     infrastructure.file_system.write(
         build_script_file,
         infrastructure
-            .module_build_script_compiler
-            .compile_prelude(&module_target_collector::collect_module_targets(
-                infrastructure,
+            .build_script_compiler
+            .compile_prelude(
+                &module_target_collector::collect_module_targets(
+                    infrastructure,
+                    package_directory,
+                    output_directory,
+                )?,
                 package_directory,
-                output_directory,
-            )?)?
+            )?
             .as_bytes(),
     )?;
 

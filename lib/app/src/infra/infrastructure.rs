@@ -1,6 +1,6 @@
 use super::{
-    BuildScriptDependencyCompiler, ExternalPackageInitializer, FilePathConfiguration,
-    FilePathDisplayer, FileSystem, ModuleBuildScriptCompiler, ModuleBuilder,
+    BuildScriptCompiler, BuildScriptDependencyCompiler, ExternalPackageInitializer,
+    FilePathConfiguration, FilePathDisplayer, FileSystem, ModuleBuilder,
     PackageConfigurationReader,
 };
 use std::sync::Arc;
@@ -16,7 +16,7 @@ pub struct Infrastructure {
     pub file_path_configuration: Arc<FilePathConfiguration>,
     pub file_path_displayer: Arc<dyn FilePathDisplayer>,
     pub file_system: Arc<dyn FileSystem>,
-    pub module_build_script_compiler: Arc<dyn ModuleBuildScriptCompiler>,
+    pub build_script_compiler: Arc<dyn BuildScriptCompiler>,
     pub module_builder: Arc<dyn ModuleBuilder>,
     pub package_configuration_reader: Arc<dyn PackageConfigurationReader>,
 }

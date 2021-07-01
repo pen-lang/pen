@@ -2,8 +2,11 @@
 members = [
   "cmd/pen",
   "lib/app",
+  "lib/ffi",
   "lib/infra",
   "lib/lang",
   "lib/mir",
   "lib/mir-fmm",
+  "lib/prelude/ffi",
 ]
+exclude = ["tmp"]
