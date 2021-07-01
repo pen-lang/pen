@@ -331,7 +331,7 @@ mod tests {
     #[test]
     fn compile_empty_module() {
         assert_eq!(
-            compile(&ast::Module::new(vec![], vec![], vec![], vec![])),
+            compile(&ast::Module::new(vec![], vec![], vec![], vec![], vec![])),
             Ok(hir::Module::new(vec![], vec![], vec![], vec![]))
         );
     }
@@ -340,6 +340,7 @@ mod tests {
     fn compile_module() {
         assert_eq!(
             compile(&ast::Module::new(
+                vec![],
                 vec![],
                 vec![ast::TypeDefinition::new("Foo1", vec![], Position::dummy())],
                 vec![ast::TypeAlias::new(
