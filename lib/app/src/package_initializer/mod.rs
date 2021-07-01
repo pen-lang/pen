@@ -1,16 +1,14 @@
 mod external_package_initializer;
-mod package_initializer_infrastructure;
 
 use crate::{
     common::file_path_resolver,
-    infra::FilePath,
-    package_build_script_compiler::{self, PackageBuildScriptCompilerInfrastructure},
+    infra::{FilePath, Infrastructure},
+    package_build_script_compiler,
 };
-pub use package_initializer_infrastructure::*;
 use std::error::Error;
 
 pub fn initialize(
-    infrastructure: &PackageInitializerInfrastructure,
+    infrastructure: &Infrastructure,
     package_directory: &FilePath,
     output_directory: &FilePath,
     prelude_package_url: &url::Url,
@@ -28,7 +26,7 @@ pub fn initialize(
 }
 
 fn initialize_prelude(
-    infrastructure: &PackageInitializerInfrastructure,
+    infrastructure: &Infrastructure,
     package_url: &url::Url,
     output_directory: &FilePath,
 ) -> Result<(), Box<dyn Error>> {
@@ -40,11 +38,7 @@ fn initialize_prelude(
         .initialize(package_url, &package_directory)?;
 
     package_build_script_compiler::compile_prelude(
-        &PackageBuildScriptCompilerInfrastructure {
-            module_build_script_compiler: infrastructure.module_build_script_compiler.clone(),
-            file_system: infrastructure.file_system.clone(),
-            file_path_configuration: infrastructure.file_path_configuration.clone(),
-        },
+        &infrastructure,
         &package_directory,
         output_directory,
         &package_directory.with_extension(

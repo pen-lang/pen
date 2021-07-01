@@ -1,9 +1,8 @@
-use super::package_build_script_compiler_infrastructure::PackageBuildScriptCompilerInfrastructure;
-use crate::infra::FilePath;
+use crate::infra::{FilePath, Infrastructure};
 use std::error::Error;
 
 pub fn find(
-    infrastructure: &PackageBuildScriptCompilerInfrastructure,
+    infrastructure: &Infrastructure,
     package_directory: &FilePath,
 ) -> Result<Vec<FilePath>, Box<dyn Error>> {
     let mut source_files = vec![];
