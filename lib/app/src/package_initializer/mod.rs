@@ -13,7 +13,7 @@ pub fn initialize(
     output_directory: &FilePath,
     prelude_package_url: &url::Url,
 ) -> Result<(), Box<dyn Error>> {
-    initialize_prelude(infrastructure, &prelude_package_url, output_directory)?;
+    initialize_prelude(infrastructure, prelude_package_url, output_directory)?;
 
     external_package_initializer::initialize_recursively(
         infrastructure,
@@ -38,7 +38,7 @@ fn initialize_prelude(
         .initialize(package_url, &package_directory)?;
 
     package_build_script_compiler::compile_prelude(
-        &infrastructure,
+        infrastructure,
         &package_directory,
         output_directory,
         &package_directory.with_extension(

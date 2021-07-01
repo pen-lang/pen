@@ -1,5 +1,4 @@
-use std::error::Error;
-use std::sync::Arc;
+use std::{error::Error, sync::Arc};
 
 use crate::file_path_configuration::{
     BIT_CODE_FILE_EXTENSION, BUILD_CONFIGURATION_FILENAME, FILE_PATH_CONFIGURATION,
@@ -33,7 +32,7 @@ pub fn create(
         module_builder: Arc::new(infra::NinjaModuleBuilder::new(file_path_converter)),
         module_build_script_compiler,
         package_configuration_reader: Arc::new(infra::JsonPackageConfigurationReader::new(
-            file_system.clone(),
+            file_system,
             BUILD_CONFIGURATION_FILENAME,
         )),
     })

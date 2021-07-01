@@ -104,7 +104,7 @@ fn compile_mir_module(
         object_file,
         &fmm_llvm::compile_to_bit_code(
             &fmm::analysis::transform_to_cps(
-                &mir_fmm::compile(&module)?,
+                &mir_fmm::compile(module)?,
                 fmm::types::VOID_TYPE.clone(),
             )?,
             &compile_configuration.heap,
