@@ -7,6 +7,7 @@ pub struct NinjaBuildScriptCompiler {
     bit_code_file_extension: &'static str,
     log_directory: &'static str,
     ffi_build_script: &'static str,
+    archive_file_extension: &'static str,
 }
 
 impl NinjaBuildScriptCompiler {
@@ -15,12 +16,14 @@ impl NinjaBuildScriptCompiler {
         bit_code_file_extension: &'static str,
         log_directory: &'static str,
         ffi_build_script: &'static str,
+        archive_file_extension: &'static str,
     ) -> Self {
         Self {
             file_path_converter,
             bit_code_file_extension,
             log_directory,
             ffi_build_script,
+            archive_file_extension,
         }
     }
 
@@ -36,7 +39,7 @@ impl NinjaBuildScriptCompiler {
             .file_path_converter
             .convert_to_os_path(package_directory);
         let ffi_build_script = package_directory.join(self.ffi_build_script);
-        let object_file = package_directory.with_extension(".o");
+        let object_file = package_directory.with_extension(self.archive_file_extension);
 
         if ffi_build_script.exists() {
             vec![
