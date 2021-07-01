@@ -32,6 +32,7 @@ impl NinjaModuleBuildScriptCompiler {
 impl app::infra::ModuleBuildScriptCompiler for NinjaModuleBuildScriptCompiler {
     fn compile(
         &self,
+        package_directory: &FilePath,
         module_targets: &[app::infra::ModuleTarget],
         child_build_script_files: &[FilePath],
         prelude_interface_files: &[FilePath],
