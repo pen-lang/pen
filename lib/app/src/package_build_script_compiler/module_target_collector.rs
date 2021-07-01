@@ -1,12 +1,15 @@
-use super::module_finder;
+use super::{
+    module_finder,
+    package_build_script_compiler_infrastructure::PackageBuildScriptCompilerInfrastructure,
+};
 use crate::{
     common::file_path_resolver,
-    infra::{FilePath, Infrastructure, ModuleTarget},
+    infra::{FilePath, ModuleTarget},
 };
 use std::error::Error;
 
 pub fn collect_module_targets(
-    infrastructure: &Infrastructure,
+    infrastructure: &PackageBuildScriptCompilerInfrastructure,
     package_directory: &FilePath,
     output_directory: &FilePath,
 ) -> Result<Vec<ModuleTarget>, Box<dyn Error>> {

@@ -1,14 +1,16 @@
 mod error;
+mod module_dependency_resolver_infrastructure;
 
 use crate::{
     common::{dependency_serializer, file_path_resolver, module_id_calculator},
-    infra::{FilePath, Infrastructure, OBJECT_DIRECTORY},
+    infra::{FilePath, OBJECT_DIRECTORY},
 };
 use error::ModuleDependencyResolverError;
+pub use module_dependency_resolver_infrastructure::*;
 use std::{collections::HashMap, error::Error};
 
 pub fn resolve(
-    infrastructure: &Infrastructure,
+    infrastructure: &ModuleDependencyResolverInfrastructure,
     package_directory: &FilePath,
     source_file: &FilePath,
     object_file: &FilePath,

@@ -1,18 +1,20 @@
 mod compile_configuration;
+mod module_compiler_infrastructure;
 
 use crate::{
     common::{dependency_serializer, interface_serializer},
-    infra::{FilePath, Infrastructure},
+    infra::FilePath,
 };
 pub use compile_configuration::{
     CompileConfiguration, HeapConfiguration, ListTypeConfiguration, StringTypeConfiguration,
 };
+pub use module_compiler_infrastructure::ModuleCompilerInfrastructure;
 use std::error::Error;
 
 const PRELUDE_PREFIX: &str = "prelude:";
 
 pub fn compile(
-    infrastructure: &Infrastructure,
+    infrastructure: &ModuleCompilerInfrastructure,
     source_file: &FilePath,
     dependency_file: &FilePath,
     object_file: &FilePath,
@@ -66,7 +68,7 @@ pub fn compile(
 }
 
 pub fn compile_prelude(
-    infrastructure: &Infrastructure,
+    infrastructure: &ModuleCompilerInfrastructure,
     source_file: &FilePath,
     object_file: &FilePath,
     interface_file: &FilePath,
@@ -95,7 +97,7 @@ pub fn compile_prelude(
 }
 
 fn compile_mir_module(
-    infrastructure: &Infrastructure,
+    infrastructure: &ModuleCompilerInfrastructure,
     module: &mir::ir::Module,
     object_file: &FilePath,
     compile_configuration: &CompileConfiguration,
