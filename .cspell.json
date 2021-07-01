@@ -8,6 +8,7 @@
     "clippy",
     "combinator",
     "concat",
+    "dealloc",
     "displayer",
     "dyndep",
     "hasher",
@@ -16,6 +17,7 @@
     "malloc",
     "realloc",
     "renamer",
+    "repr",
     "subninja",
     "tailcallopt",
     "termcolor"
