@@ -152,14 +152,14 @@ fn transform_expression(expression: &Expression, transform: &impl Fn(&Type) -> T
                 .iter()
                 .map(|branch| {
                     IfTypeBranch::new(
-                        branch.type_().clone(),
+                        transform(branch.type_()),
                         transform_expression(branch.expression(), transform),
                     )
                 })
                 .collect(),
             if_.else_().map(|branch| {
                 ElseBranch::new(
-                    branch.type_().cloned(),
+                    branch.type_().map(transform),
                     transform_expression(branch.expression(), transform),
                     branch.position().clone(),
                 )

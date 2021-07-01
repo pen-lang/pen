@@ -632,7 +632,10 @@ fn identifier<'a>() -> impl Parser<Stream<'a>, Output = String> {
 }
 
 fn raw_identifier<'a>() -> impl Parser<Stream<'a>, Output = String> {
-    (letter(), many(alpha_num()))
+    (
+        choice!(letter(), combine::parser::char::char('_')),
+        many(choice!(alpha_num(), combine::parser::char::char('_'))),
+    )
         .map(|(head, tail): (char, String)| [head.into(), tail].concat())
         .then(|identifier| {
             if KEYWORDS.contains(&identifier.as_str()) {

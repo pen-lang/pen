@@ -1,6 +1,5 @@
 mod error;
-mod import_renamer;
-mod module_canonicalizer;
+mod import_compiler;
 mod module_compiler;
 mod prelude_module_modifier;
 mod utilities;
@@ -22,16 +21,8 @@ pub fn compile(
     module_interfaces: &HashMap<ast::ModulePath, interface::Module>,
     prelude_module_interfaces: &[interface::Module],
 ) -> Result<hir::Module, CompileError> {
-    // TODO Do not pass module interfaces to a module compiler but merge them later.
-    let module = module_compiler::compile(
-        module,
-        &module_interfaces
-            .values()
-            .chain(prelude_module_interfaces)
-            .cloned()
-            .collect::<Vec<_>>(),
-    )?;
-    let module = import_renamer::rename(&module, module_interfaces, prelude_module_interfaces);
+    let module = module_compiler::compile(module)?;
+    let module = import_compiler::compile(&module, module_interfaces, prelude_module_interfaces);
 
     let module = definition_qualifier::qualify(&module, prefix);
     let module = type_qualifier::qualify(&module, prefix);
@@ -40,7 +31,7 @@ pub fn compile(
 }
 
 pub fn compile_prelude(module: &ast::Module, prefix: &str) -> Result<hir::Module, CompileError> {
-    let module = module_compiler::compile(module, &[])?;
+    let module = module_compiler::compile(module)?;
     let module = definition_qualifier::qualify(&module, prefix);
     let module = type_qualifier::qualify(&module, prefix);
     let module = prelude_module_modifier::modify(&module);

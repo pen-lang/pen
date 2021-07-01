@@ -1,30 +1,12 @@
-use super::{error::CompileError, module_canonicalizer};
-use crate::{ast, hir, interface, position::Position, types};
+use super::error::CompileError;
+use crate::{ast, hir, position::Position, types};
 
-pub fn compile(
-    module: &ast::Module,
-    module_interfaces: &[interface::Module],
-) -> Result<hir::Module, CompileError> {
-    Ok(module_canonicalizer::canonicalize(&hir::Module::new(
-        module_interfaces
+pub fn compile(module: &ast::Module) -> Result<hir::Module, CompileError> {
+    Ok(hir::Module::new(
+        module
+            .type_definitions()
             .iter()
-            .flat_map(|module_interface| {
-                module_interface
-                    .type_definitions()
-                    .iter()
-                    .map(|definition| {
-                        hir::TypeDefinition::new(
-                            definition.name(),
-                            definition.original_name(),
-                            definition.elements().to_vec(),
-                            definition.is_open(),
-                            definition.is_public(),
-                            true,
-                            definition.position().clone(),
-                        )
-                    })
-            })
-            .chain(module.type_definitions().iter().map(|definition| {
+            .map(|definition| {
                 hir::TypeDefinition::new(
                     definition.name(),
                     definition.name(),
@@ -34,22 +16,12 @@ pub fn compile(
                     false,
                     definition.position().clone(),
                 )
-            }))
-            .collect(),
-        module_interfaces
-            .iter()
-            .flat_map(|module_interface| {
-                module_interface.type_aliases().iter().map(|alias| {
-                    hir::TypeAlias::new(
-                        alias.name(),
-                        alias.original_name(),
-                        alias.type_().clone(),
-                        alias.is_public(),
-                        true,
-                    )
-                })
             })
-            .chain(module.type_aliases().iter().map(|alias| {
+            .collect(),
+        module
+            .type_aliases()
+            .iter()
+            .map(|alias| {
                 hir::TypeAlias::new(
                     alias.name(),
                     alias.name(),
@@ -57,25 +29,15 @@ pub fn compile(
                     is_name_public(alias.name()),
                     false,
                 )
-            }))
-            .collect(),
-        module_interfaces
-            .iter()
-            .flat_map(|interface| interface.declarations())
-            .map(|declaration| {
-                hir::Declaration::new(
-                    declaration.name(),
-                    declaration.type_().clone(),
-                    declaration.position().clone(),
-                )
             })
             .collect(),
+        vec![],
         module
             .definitions()
             .iter()
             .map(|definition| compile_definition(definition))
             .collect::<Result<_, _>>()?,
-    )))
+    ))
 }
 
 fn compile_definition(definition: &ast::Definition) -> Result<hir::Definition, CompileError> {
@@ -369,97 +331,54 @@ mod tests {
     #[test]
     fn compile_empty_module() {
         assert_eq!(
-            compile(&ast::Module::new(vec![], vec![], vec![], vec![]), &[]),
+            compile(&ast::Module::new(vec![], vec![], vec![], vec![])),
             Ok(hir::Module::new(vec![], vec![], vec![], vec![]))
         );
     }
 
     #[test]
-    fn compile_module_with_module_interface() {
+    fn compile_module() {
         assert_eq!(
-            compile(
-                &ast::Module::new(
-                    vec![],
-                    vec![ast::TypeDefinition::new("Foo1", vec![], Position::dummy())],
-                    vec![ast::TypeAlias::new(
-                        "Foo2",
-                        types::None::new(Position::dummy())
-                    )],
-                    vec![ast::Definition::new(
-                        "Foo3",
-                        ast::Lambda::new(
-                            vec![],
-                            types::None::new(Position::dummy()),
-                            ast::Block::new(
-                                vec![],
-                                ast::None::new(Position::dummy()),
-                                Position::dummy()
-                            ),
-                            Position::dummy(),
-                        ),
-                        Position::dummy(),
-                    )]
-                ),
-                &[interface::Module::new(
-                    vec![interface::TypeDefinition::without_source(
-                        "Bar1",
+            compile(&ast::Module::new(
+                vec![],
+                vec![ast::TypeDefinition::new("Foo1", vec![], Position::dummy())],
+                vec![ast::TypeAlias::new(
+                    "Foo2",
+                    types::None::new(Position::dummy())
+                )],
+                vec![ast::Definition::new(
+                    "Foo3",
+                    ast::Lambda::new(
                         vec![],
-                        false,
-                        true
-                    )],
-                    vec![interface::TypeAlias::without_source(
-                        "Bar2",
                         types::None::new(Position::dummy()),
-                        true,
-                    )],
-                    vec![interface::Declaration::without_source(
-                        "Bar3",
-                        types::Function::new(
+                        ast::Block::new(
                             vec![],
-                            types::None::new(Position::dummy()),
+                            ast::None::new(Position::dummy()),
                             Position::dummy()
                         ),
-                        Position::dummy()
-                    )]
+                        Position::dummy(),
+                    ),
+                    Position::dummy(),
                 )]
-            ),
+            )),
             Ok(hir::Module::new(
-                vec![
-                    hir::TypeDefinition::without_source("Bar1", vec![], false, true, true),
-                    hir::TypeDefinition::new(
-                        "Foo1",
-                        "Foo1",
-                        vec![],
-                        false,
-                        true,
-                        false,
-                        Position::dummy()
-                    )
-                ],
-                vec![
-                    hir::TypeAlias::without_source(
-                        "Bar2",
-                        types::None::new(Position::dummy()),
-                        true,
-                        true
-                    ),
-                    hir::TypeAlias::new(
-                        "Foo2",
-                        "Foo2",
-                        types::None::new(Position::dummy()),
-                        true,
-                        false
-                    )
-                ],
-                vec![hir::Declaration::new(
-                    "Bar3",
-                    types::Function::new(
-                        vec![],
-                        types::None::new(Position::dummy()),
-                        Position::dummy()
-                    ),
+                vec![hir::TypeDefinition::new(
+                    "Foo1",
+                    "Foo1",
+                    vec![],
+                    false,
+                    true,
+                    false,
                     Position::dummy()
                 )],
+                vec![hir::TypeAlias::new(
+                    "Foo2",
+                    "Foo2",
+                    types::None::new(Position::dummy()),
+                    true,
+                    false
+                )],
+                vec![],
                 vec![hir::Definition::new(
                     "Foo3",
                     "Foo3",
