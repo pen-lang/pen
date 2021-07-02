@@ -375,6 +375,7 @@ mod tests {
                         ),
                         Position::dummy(),
                     ),
+                    false,
                     Position::dummy(),
                 )]
             )),
