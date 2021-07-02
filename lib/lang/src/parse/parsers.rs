@@ -104,8 +104,8 @@ fn module_path_components<'a>() -> impl Parser<Stream<'a>, Output = Vec<String>>
 fn foreign_import<'a>() -> impl Parser<Stream<'a>, Output = ForeignImport> {
     (
         position(),
-        keyword("foreign"),
         keyword("import"),
+        keyword("foreign"),
         optional(calling_convention()),
         identifier(),
         type_(),
@@ -903,7 +903,7 @@ mod tests {
     fn parse_foreign_import() {
         assert_eq!(
             foreign_import()
-                .parse(stream("foreign import foo \\(number) number", ""))
+                .parse(stream("import foreign foo \\(number) number", ""))
                 .unwrap()
                 .0,
             ForeignImport::new(
@@ -921,7 +921,7 @@ mod tests {
 
         assert_eq!(
             foreign_import()
-                .parse(stream("foreign import \"c\" foo \\(number) number", ""))
+                .parse(stream("import foreign \"c\" foo \\(number) number", ""))
                 .unwrap()
                 .0,
             ForeignImport::new(
