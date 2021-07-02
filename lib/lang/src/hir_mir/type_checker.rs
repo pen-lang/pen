@@ -349,69 +349,54 @@ mod tests {
 
     #[test]
     fn check_definition() -> Result<(), CompileError> {
-        check_module(&Module::new(
-            vec![],
-            vec![],
-            vec![],
-            vec![Definition::without_source(
-                "x",
-                Lambda::new(
-                    vec![],
-                    types::None::new(Position::dummy()),
-                    None::new(Position::dummy()),
-                    Position::dummy(),
-                ),
-                false,
-            )],
-        ))
+        check_module(&Module::from_definitions(vec![Definition::without_source(
+            "x",
+            Lambda::new(
+                vec![],
+                types::None::new(Position::dummy()),
+                None::new(Position::dummy()),
+                Position::dummy(),
+            ),
+            false,
+        )]))
     }
 
     #[test]
     fn check_subsumption_of_function_result_type() -> Result<(), CompileError> {
-        check_module(&Module::new(
-            vec![],
-            vec![],
-            vec![],
-            vec![Definition::without_source(
-                "x",
-                Lambda::new(
-                    vec![],
-                    types::Union::new(
-                        types::Number::new(Position::dummy()),
-                        types::None::new(Position::dummy()),
-                        Position::dummy(),
-                    ),
-                    None::new(Position::dummy()),
+        check_module(&Module::from_definitions(vec![Definition::without_source(
+            "x",
+            Lambda::new(
+                vec![],
+                types::Union::new(
+                    types::Number::new(Position::dummy()),
+                    types::None::new(Position::dummy()),
                     Position::dummy(),
                 ),
-                false,
-            )],
-        ))
+                None::new(Position::dummy()),
+                Position::dummy(),
+            ),
+            false,
+        )]))
     }
 
     #[test]
     fn check_let() {
-        check_module(&Module::new(
-            vec![],
-            vec![],
-            vec![],
-            vec![Definition::without_source(
-                "x",
-                Lambda::new(
-                    vec![],
-                    types::None::new(Position::dummy()),
-                    Let::new(
-                        Some("x".into()),
-                        Some(types::None::new(Position::dummy()).into()),
-                        None::new(Position::dummy()),
-                        Variable::new("x", Position::dummy()),
-                        Position::dummy(),
-                    ),
+        check_module(&Module::from_definitions(vec![Definition::without_source(
+            "x",
+            Lambda::new(
+                vec![],
+                types::None::new(Position::dummy()),
+                Let::new(
+                    Some("x".into()),
+                    Some(types::None::new(Position::dummy()).into()),
+                    None::new(Position::dummy()),
+                    Variable::new("x", Position::dummy()),
                     Position::dummy(),
                 ),
-                false,
-            )],
-        ))
+                Position::dummy(),
+            ),
+            false,
+        )]))
         .unwrap();
     }
 
@@ -420,55 +405,45 @@ mod tests {
 
         #[test]
         fn check_if() {
-            check_module(&Module::new(
-                vec![],
-                vec![],
-                vec![],
-                vec![Definition::without_source(
-                    "f",
-                    Lambda::new(
-                        vec![],
-                        types::Number::new(Position::dummy()),
-                        If::new(
-                            Boolean::new(true, Position::dummy()),
-                            Number::new(0.0, Position::dummy()),
-                            Number::new(0.0, Position::dummy()),
-                            Position::dummy(),
-                        ),
+            check_module(&Module::from_definitions(vec![Definition::without_source(
+                "f",
+                Lambda::new(
+                    vec![],
+                    types::Number::new(Position::dummy()),
+                    If::new(
+                        Boolean::new(true, Position::dummy()),
+                        Number::new(0.0, Position::dummy()),
+                        Number::new(0.0, Position::dummy()),
                         Position::dummy(),
                     ),
-                    false,
-                )],
-            ))
+                    Position::dummy(),
+                ),
+                false,
+            )]))
             .unwrap()
         }
 
         #[test]
         fn check_if_of_union_type() {
-            check_module(&Module::new(
-                vec![],
-                vec![],
-                vec![],
-                vec![Definition::without_source(
-                    "f",
-                    Lambda::new(
-                        vec![],
-                        types::Union::new(
-                            types::Number::new(Position::dummy()),
-                            types::None::new(Position::dummy()),
-                            Position::dummy(),
-                        ),
-                        If::new(
-                            Boolean::new(true, Position::dummy()),
-                            Number::new(0.0, Position::dummy()),
-                            None::new(Position::dummy()),
-                            Position::dummy(),
-                        ),
+            check_module(&Module::from_definitions(vec![Definition::without_source(
+                "f",
+                Lambda::new(
+                    vec![],
+                    types::Union::new(
+                        types::Number::new(Position::dummy()),
+                        types::None::new(Position::dummy()),
                         Position::dummy(),
                     ),
-                    false,
-                )],
-            ))
+                    If::new(
+                        Boolean::new(true, Position::dummy()),
+                        Number::new(0.0, Position::dummy()),
+                        None::new(Position::dummy()),
+                        Position::dummy(),
+                    ),
+                    Position::dummy(),
+                ),
+                false,
+            )]))
             .unwrap()
         }
     }
@@ -484,277 +459,237 @@ mod tests {
                 Position::dummy(),
             );
 
-            check_module(&Module::new(
-                vec![],
-                vec![],
-                vec![],
-                vec![Definition::without_source(
-                    "f",
-                    Lambda::new(
-                        vec![Argument::new("x", union_type)],
-                        types::None::new(Position::dummy()),
-                        IfType::new(
-                            "y",
-                            Variable::new("x", Position::dummy()),
-                            vec![
-                                IfTypeBranch::new(
-                                    types::Number::new(Position::dummy()),
-                                    None::new(Position::dummy()),
-                                ),
-                                IfTypeBranch::new(
-                                    types::None::new(Position::dummy()),
-                                    None::new(Position::dummy()),
-                                ),
-                            ],
-                            None,
-                            Position::dummy(),
-                        ),
+            check_module(&Module::from_definitions(vec![Definition::without_source(
+                "f",
+                Lambda::new(
+                    vec![Argument::new("x", union_type)],
+                    types::None::new(Position::dummy()),
+                    IfType::new(
+                        "y",
+                        Variable::new("x", Position::dummy()),
+                        vec![
+                            IfTypeBranch::new(
+                                types::Number::new(Position::dummy()),
+                                None::new(Position::dummy()),
+                            ),
+                            IfTypeBranch::new(
+                                types::None::new(Position::dummy()),
+                                None::new(Position::dummy()),
+                            ),
+                        ],
+                        None,
                         Position::dummy(),
                     ),
-                    false,
-                )],
-            ))
+                    Position::dummy(),
+                ),
+                false,
+            )]))
             .unwrap()
         }
 
         #[test]
         fn check_with_any() {
-            check_module(&Module::new(
-                vec![],
-                vec![],
-                vec![],
-                vec![Definition::without_source(
-                    "f",
-                    Lambda::new(
-                        vec![Argument::new("x", types::Any::new(Position::dummy()))],
-                        types::None::new(Position::dummy()),
-                        IfType::new(
-                            "y",
-                            Variable::new("x", Position::dummy()),
-                            vec![IfTypeBranch::new(
-                                types::None::new(Position::dummy()),
-                                None::new(Position::dummy()),
-                            )],
-                            Some(ElseBranch::new(
-                                Some(types::Any::new(Position::dummy()).into()),
-                                None::new(Position::dummy()),
-                                Position::dummy(),
-                            )),
+            check_module(&Module::from_definitions(vec![Definition::without_source(
+                "f",
+                Lambda::new(
+                    vec![Argument::new("x", types::Any::new(Position::dummy()))],
+                    types::None::new(Position::dummy()),
+                    IfType::new(
+                        "y",
+                        Variable::new("x", Position::dummy()),
+                        vec![IfTypeBranch::new(
+                            types::None::new(Position::dummy()),
+                            None::new(Position::dummy()),
+                        )],
+                        Some(ElseBranch::new(
+                            Some(types::Any::new(Position::dummy()).into()),
+                            None::new(Position::dummy()),
                             Position::dummy(),
-                        ),
+                        )),
                         Position::dummy(),
                     ),
-                    false,
-                )],
-            ))
+                    Position::dummy(),
+                ),
+                false,
+            )]))
             .unwrap()
         }
 
         #[test]
         fn check_result_of_union() {
-            check_module(&Module::new(
-                vec![],
-                vec![],
-                vec![],
-                vec![Definition::without_source(
-                    "f",
-                    Lambda::new(
-                        vec![Argument::new("x", types::Any::new(Position::dummy()))],
-                        types::Union::new(
-                            types::Number::new(Position::dummy()),
-                            types::None::new(Position::dummy()),
-                            Position::dummy(),
-                        ),
-                        IfType::new(
-                            "y",
-                            Variable::new("x", Position::dummy()),
-                            vec![IfTypeBranch::new(
-                                types::None::new(Position::dummy()),
-                                Number::new(42.0, Position::dummy()),
-                            )],
-                            Some(ElseBranch::new(
-                                Some(types::Any::new(Position::dummy()).into()),
-                                None::new(Position::dummy()),
-                                Position::dummy(),
-                            )),
-                            Position::dummy(),
-                        ),
+            check_module(&Module::from_definitions(vec![Definition::without_source(
+                "f",
+                Lambda::new(
+                    vec![Argument::new("x", types::Any::new(Position::dummy()))],
+                    types::Union::new(
+                        types::Number::new(Position::dummy()),
+                        types::None::new(Position::dummy()),
                         Position::dummy(),
                     ),
-                    false,
-                )],
-            ))
+                    IfType::new(
+                        "y",
+                        Variable::new("x", Position::dummy()),
+                        vec![IfTypeBranch::new(
+                            types::None::new(Position::dummy()),
+                            Number::new(42.0, Position::dummy()),
+                        )],
+                        Some(ElseBranch::new(
+                            Some(types::Any::new(Position::dummy()).into()),
+                            None::new(Position::dummy()),
+                            Position::dummy(),
+                        )),
+                        Position::dummy(),
+                    ),
+                    Position::dummy(),
+                ),
+                false,
+            )]))
             .unwrap()
         }
 
         #[test]
         fn check_result_of_any() {
-            check_module(&Module::new(
-                vec![],
-                vec![],
-                vec![],
-                vec![Definition::without_source(
-                    "f",
-                    Lambda::new(
-                        vec![Argument::new("x", types::Any::new(Position::dummy()))],
-                        types::Any::new(Position::dummy()),
-                        IfType::new(
-                            "y",
-                            Variable::new("x", Position::dummy()),
-                            vec![IfTypeBranch::new(
-                                types::None::new(Position::dummy()),
-                                None::new(Position::dummy()),
-                            )],
-                            Some(ElseBranch::new(
-                                Some(types::Any::new(Position::dummy()).into()),
-                                Variable::new("y", Position::dummy()),
-                                Position::dummy(),
-                            )),
+            check_module(&Module::from_definitions(vec![Definition::without_source(
+                "f",
+                Lambda::new(
+                    vec![Argument::new("x", types::Any::new(Position::dummy()))],
+                    types::Any::new(Position::dummy()),
+                    IfType::new(
+                        "y",
+                        Variable::new("x", Position::dummy()),
+                        vec![IfTypeBranch::new(
+                            types::None::new(Position::dummy()),
+                            None::new(Position::dummy()),
+                        )],
+                        Some(ElseBranch::new(
+                            Some(types::Any::new(Position::dummy()).into()),
+                            Variable::new("y", Position::dummy()),
                             Position::dummy(),
-                        ),
+                        )),
                         Position::dummy(),
                     ),
-                    false,
-                )],
-            ))
+                    Position::dummy(),
+                ),
+                false,
+            )]))
             .unwrap()
         }
 
         #[test]
         #[should_panic]
         fn fail_to_check_due_to_wrong_argument_type() {
-            check_module(&Module::new(
-                vec![],
-                vec![],
-                vec![],
-                vec![Definition::without_source(
-                    "f",
-                    Lambda::new(
-                        vec![],
-                        types::None::new(Position::dummy()),
-                        IfType::new(
-                            "y",
+            check_module(&Module::from_definitions(vec![Definition::without_source(
+                "f",
+                Lambda::new(
+                    vec![],
+                    types::None::new(Position::dummy()),
+                    IfType::new(
+                        "y",
+                        None::new(Position::dummy()),
+                        vec![IfTypeBranch::new(
+                            types::None::new(Position::dummy()),
                             None::new(Position::dummy()),
-                            vec![IfTypeBranch::new(
-                                types::None::new(Position::dummy()),
-                                None::new(Position::dummy()),
-                            )],
-                            None,
-                            Position::dummy(),
-                        ),
+                        )],
+                        None,
                         Position::dummy(),
                     ),
-                    false,
-                )],
-            ))
+                    Position::dummy(),
+                ),
+                false,
+            )]))
             .unwrap()
         }
 
         #[test]
         #[should_panic]
         fn fail_to_check_union_due_to_missing_else() {
-            check_module(&Module::new(
-                vec![],
-                vec![],
-                vec![],
-                vec![Definition::without_source(
-                    "f",
-                    Lambda::new(
-                        vec![Argument::new(
-                            "x",
-                            types::Union::new(
-                                types::Number::new(Position::dummy()),
-                                types::None::new(Position::dummy()),
-                                Position::dummy(),
-                            ),
-                        )],
-                        types::None::new(Position::dummy()),
-                        IfType::new(
-                            "y",
-                            Variable::new("x", Position::dummy()),
-                            vec![IfTypeBranch::new(
-                                types::Number::new(Position::dummy()),
-                                None::new(Position::dummy()),
-                            )],
-                            None,
+            check_module(&Module::from_definitions(vec![Definition::without_source(
+                "f",
+                Lambda::new(
+                    vec![Argument::new(
+                        "x",
+                        types::Union::new(
+                            types::Number::new(Position::dummy()),
+                            types::None::new(Position::dummy()),
                             Position::dummy(),
                         ),
+                    )],
+                    types::None::new(Position::dummy()),
+                    IfType::new(
+                        "y",
+                        Variable::new("x", Position::dummy()),
+                        vec![IfTypeBranch::new(
+                            types::Number::new(Position::dummy()),
+                            None::new(Position::dummy()),
+                        )],
+                        None,
                         Position::dummy(),
                     ),
-                    false,
-                )],
-            ))
+                    Position::dummy(),
+                ),
+                false,
+            )]))
             .unwrap();
         }
 
         #[test]
         #[should_panic]
         fn fail_to_check_any_due_to_missing_else() {
-            check_module(&Module::new(
-                vec![],
-                vec![],
-                vec![],
-                vec![Definition::without_source(
-                    "f",
-                    Lambda::new(
-                        vec![Argument::new(
-                            "x",
-                            types::Union::new(
-                                types::Number::new(Position::dummy()),
-                                types::None::new(Position::dummy()),
-                                Position::dummy(),
-                            ),
-                        )],
-                        types::None::new(Position::dummy()),
-                        IfType::new(
-                            "y",
-                            Variable::new("x", Position::dummy()),
-                            vec![IfTypeBranch::new(
-                                types::Number::new(Position::dummy()),
-                                None::new(Position::dummy()),
-                            )],
-                            None,
+            check_module(&Module::from_definitions(vec![Definition::without_source(
+                "f",
+                Lambda::new(
+                    vec![Argument::new(
+                        "x",
+                        types::Union::new(
+                            types::Number::new(Position::dummy()),
+                            types::None::new(Position::dummy()),
                             Position::dummy(),
                         ),
+                    )],
+                    types::None::new(Position::dummy()),
+                    IfType::new(
+                        "y",
+                        Variable::new("x", Position::dummy()),
+                        vec![IfTypeBranch::new(
+                            types::Number::new(Position::dummy()),
+                            None::new(Position::dummy()),
+                        )],
+                        None,
                         Position::dummy(),
                     ),
-                    false,
-                )],
-            ))
+                    Position::dummy(),
+                ),
+                false,
+            )]))
             .unwrap();
         }
 
         #[test]
         #[should_panic]
         fn fail_to_check_due_to_any_type_branch() {
-            check_module(&Module::new(
-                vec![],
-                vec![],
-                vec![],
-                vec![Definition::without_source(
-                    "f",
-                    Lambda::new(
-                        vec![Argument::new("x", types::Any::new(Position::dummy()))],
-                        types::None::new(Position::dummy()),
-                        IfType::new(
-                            "y",
-                            Variable::new("x", Position::dummy()),
-                            vec![IfTypeBranch::new(
-                                types::Any::new(Position::dummy()),
-                                None::new(Position::dummy()),
-                            )],
-                            Some(ElseBranch::new(
-                                Some(types::Any::new(Position::dummy()).into()),
-                                None::new(Position::dummy()),
-                                Position::dummy(),
-                            )),
+            check_module(&Module::from_definitions(vec![Definition::without_source(
+                "f",
+                Lambda::new(
+                    vec![Argument::new("x", types::Any::new(Position::dummy()))],
+                    types::None::new(Position::dummy()),
+                    IfType::new(
+                        "y",
+                        Variable::new("x", Position::dummy()),
+                        vec![IfTypeBranch::new(
+                            types::Any::new(Position::dummy()),
+                            None::new(Position::dummy()),
+                        )],
+                        Some(ElseBranch::new(
+                            Some(types::Any::new(Position::dummy()).into()),
+                            None::new(Position::dummy()),
                             Position::dummy(),
-                        ),
+                        )),
                         Position::dummy(),
                     ),
-                    false,
-                )],
-            ))
+                    Position::dummy(),
+                ),
+                false,
+            )]))
             .unwrap();
         }
     }
@@ -764,131 +699,111 @@ mod tests {
 
         #[test]
         fn check_call() {
-            check_module(&Module::new(
-                vec![],
-                vec![],
-                vec![],
-                vec![Definition::without_source(
-                    "f",
-                    Lambda::new(
+            check_module(&Module::from_definitions(vec![Definition::without_source(
+                "f",
+                Lambda::new(
+                    vec![],
+                    types::None::new(Position::dummy()),
+                    Call::new(
+                        Variable::new("f", Position::dummy()),
                         vec![],
-                        types::None::new(Position::dummy()),
-                        Call::new(
-                            Variable::new("f", Position::dummy()),
-                            vec![],
-                            Some(
-                                types::Function::new(
-                                    vec![],
-                                    types::None::new(Position::dummy()),
-                                    Position::dummy(),
-                                )
-                                .into(),
-                            ),
-                            Position::dummy(),
+                        Some(
+                            types::Function::new(
+                                vec![],
+                                types::None::new(Position::dummy()),
+                                Position::dummy(),
+                            )
+                            .into(),
                         ),
                         Position::dummy(),
                     ),
-                    false,
-                )],
-            ))
+                    Position::dummy(),
+                ),
+                false,
+            )]))
             .unwrap()
         }
 
         #[test]
         fn check_call_with_arguments() {
-            check_module(&Module::new(
-                vec![],
-                vec![],
-                vec![],
-                vec![Definition::without_source(
-                    "f",
-                    Lambda::new(
-                        vec![Argument::new("x", types::None::new(Position::dummy()))],
-                        types::None::new(Position::dummy()),
-                        Call::new(
-                            Variable::new("f", Position::dummy()),
-                            vec![None::new(Position::dummy()).into()],
-                            Some(
-                                types::Function::new(
-                                    vec![types::None::new(Position::dummy()).into()],
-                                    types::None::new(Position::dummy()),
-                                    Position::dummy(),
-                                )
-                                .into(),
-                            ),
-                            Position::dummy(),
+            check_module(&Module::from_definitions(vec![Definition::without_source(
+                "f",
+                Lambda::new(
+                    vec![Argument::new("x", types::None::new(Position::dummy()))],
+                    types::None::new(Position::dummy()),
+                    Call::new(
+                        Variable::new("f", Position::dummy()),
+                        vec![None::new(Position::dummy()).into()],
+                        Some(
+                            types::Function::new(
+                                vec![types::None::new(Position::dummy()).into()],
+                                types::None::new(Position::dummy()),
+                                Position::dummy(),
+                            )
+                            .into(),
                         ),
                         Position::dummy(),
                     ),
-                    false,
-                )],
-            ))
+                    Position::dummy(),
+                ),
+                false,
+            )]))
             .unwrap()
         }
 
         #[test]
         #[should_panic]
         fn fail_to_check_call_with_wrong_argument_type() {
-            check_module(&Module::new(
-                vec![],
-                vec![],
-                vec![],
-                vec![Definition::without_source(
-                    "f",
-                    Lambda::new(
-                        vec![Argument::new("x", types::None::new(Position::dummy()))],
-                        types::None::new(Position::dummy()),
-                        Call::new(
-                            Variable::new("f", Position::dummy()),
-                            vec![Number::new(42.0, Position::dummy()).into()],
-                            Some(
-                                types::Function::new(
-                                    vec![types::None::new(Position::dummy()).into()],
-                                    types::None::new(Position::dummy()),
-                                    Position::dummy(),
-                                )
-                                .into(),
-                            ),
-                            Position::dummy(),
+            check_module(&Module::from_definitions(vec![Definition::without_source(
+                "f",
+                Lambda::new(
+                    vec![Argument::new("x", types::None::new(Position::dummy()))],
+                    types::None::new(Position::dummy()),
+                    Call::new(
+                        Variable::new("f", Position::dummy()),
+                        vec![Number::new(42.0, Position::dummy()).into()],
+                        Some(
+                            types::Function::new(
+                                vec![types::None::new(Position::dummy()).into()],
+                                types::None::new(Position::dummy()),
+                                Position::dummy(),
+                            )
+                            .into(),
                         ),
                         Position::dummy(),
                     ),
-                    false,
-                )],
-            ))
+                    Position::dummy(),
+                ),
+                false,
+            )]))
             .unwrap()
         }
 
         #[test]
         #[should_panic]
         fn fail_to_check_call_with_wrong_argument_count() {
-            check_module(&Module::new(
-                vec![],
-                vec![],
-                vec![],
-                vec![Definition::without_source(
-                    "f",
-                    Lambda::new(
-                        vec![Argument::new("x", types::None::new(Position::dummy()))],
-                        types::None::new(Position::dummy()),
-                        Call::new(
-                            Variable::new("f", Position::dummy()),
-                            vec![],
-                            Some(
-                                types::Function::new(
-                                    vec![types::None::new(Position::dummy()).into()],
-                                    types::None::new(Position::dummy()),
-                                    Position::dummy(),
-                                )
-                                .into(),
-                            ),
-                            Position::dummy(),
+            check_module(&Module::from_definitions(vec![Definition::without_source(
+                "f",
+                Lambda::new(
+                    vec![Argument::new("x", types::None::new(Position::dummy()))],
+                    types::None::new(Position::dummy()),
+                    Call::new(
+                        Variable::new("f", Position::dummy()),
+                        vec![],
+                        Some(
+                            types::Function::new(
+                                vec![types::None::new(Position::dummy()).into()],
+                                types::None::new(Position::dummy()),
+                                Position::dummy(),
+                            )
+                            .into(),
                         ),
                         Position::dummy(),
                     ),
-                    false,
-                )],
-            ))
+                    Position::dummy(),
+                ),
+                false,
+            )]))
             .unwrap()
         }
     }
@@ -898,77 +813,62 @@ mod tests {
 
         #[test]
         fn check_arithmetic_operation() {
-            check_module(&Module::new(
-                vec![],
-                vec![],
-                vec![],
-                vec![Definition::without_source(
-                    "x",
-                    Lambda::new(
-                        vec![],
-                        types::Number::new(Position::dummy()),
-                        ArithmeticOperation::new(
-                            ArithmeticOperator::Add,
-                            Number::new(0.0, Position::dummy()),
-                            Number::new(0.0, Position::dummy()),
-                            Position::dummy(),
-                        ),
+            check_module(&Module::from_definitions(vec![Definition::without_source(
+                "x",
+                Lambda::new(
+                    vec![],
+                    types::Number::new(Position::dummy()),
+                    ArithmeticOperation::new(
+                        ArithmeticOperator::Add,
+                        Number::new(0.0, Position::dummy()),
+                        Number::new(0.0, Position::dummy()),
                         Position::dummy(),
                     ),
-                    false,
-                )],
-            ))
+                    Position::dummy(),
+                ),
+                false,
+            )]))
             .unwrap();
         }
 
         #[test]
         fn check_boolean_operation() {
-            check_module(&Module::new(
-                vec![],
-                vec![],
-                vec![],
-                vec![Definition::without_source(
-                    "x",
-                    Lambda::new(
-                        vec![],
-                        types::Boolean::new(Position::dummy()),
-                        BooleanOperation::new(
-                            BooleanOperator::And,
-                            Boolean::new(true, Position::dummy()),
-                            Boolean::new(true, Position::dummy()),
-                            Position::dummy(),
-                        ),
+            check_module(&Module::from_definitions(vec![Definition::without_source(
+                "x",
+                Lambda::new(
+                    vec![],
+                    types::Boolean::new(Position::dummy()),
+                    BooleanOperation::new(
+                        BooleanOperator::And,
+                        Boolean::new(true, Position::dummy()),
+                        Boolean::new(true, Position::dummy()),
                         Position::dummy(),
                     ),
-                    false,
-                )],
-            ))
+                    Position::dummy(),
+                ),
+                false,
+            )]))
             .unwrap();
         }
 
         #[test]
         fn fail_to_check_boolean_operation() {
             assert_eq!(
-                check_module(&Module::new(
-                    vec![],
-                    vec![],
-                    vec![],
-                    vec![Definition::without_source(
-                        "x",
-                        Lambda::new(
-                            vec![],
-                            types::Boolean::new(Position::dummy()),
-                            BooleanOperation::new(
-                                BooleanOperator::And,
-                                Number::new(42.0, Position::dummy()),
-                                Boolean::new(true, Position::dummy()),
-                                Position::dummy(),
-                            ),
+                check_module(&Module::from_definitions(vec![Definition::without_source(
+                    "x",
+                    Lambda::new(
+                        vec![],
+                        types::Boolean::new(Position::dummy()),
+                        BooleanOperation::new(
+                            BooleanOperator::And,
+                            Number::new(42.0, Position::dummy()),
+                            Boolean::new(true, Position::dummy()),
                             Position::dummy(),
                         ),
-                        false,
-                    )],
-                )),
+                        Position::dummy(),
+                    ),
+                    false,
+                )],)),
                 Err(CompileError::TypesNotMatched(
                     Position::dummy(),
                     Position::dummy()
@@ -978,46 +878,36 @@ mod tests {
 
         #[test]
         fn check_not_operation() {
-            check_module(&Module::new(
-                vec![],
-                vec![],
-                vec![],
-                vec![Definition::without_source(
-                    "x",
-                    Lambda::new(
-                        vec![],
-                        types::Boolean::new(Position::dummy()),
-                        NotOperation::new(Boolean::new(true, Position::dummy()), Position::dummy()),
-                        Position::dummy(),
-                    ),
-                    false,
-                )],
-            ))
+            check_module(&Module::from_definitions(vec![Definition::without_source(
+                "x",
+                Lambda::new(
+                    vec![],
+                    types::Boolean::new(Position::dummy()),
+                    NotOperation::new(Boolean::new(true, Position::dummy()), Position::dummy()),
+                    Position::dummy(),
+                ),
+                false,
+            )]))
             .unwrap();
         }
 
         #[test]
         fn check_order_operation() {
-            check_module(&Module::new(
-                vec![],
-                vec![],
-                vec![],
-                vec![Definition::without_source(
-                    "x",
-                    Lambda::new(
-                        vec![],
-                        types::Boolean::new(Position::dummy()),
-                        OrderOperation::new(
-                            OrderOperator::LessThan,
-                            Number::new(0.0, Position::dummy()),
-                            Number::new(0.0, Position::dummy()),
-                            Position::dummy(),
-                        ),
+            check_module(&Module::from_definitions(vec![Definition::without_source(
+                "x",
+                Lambda::new(
+                    vec![],
+                    types::Boolean::new(Position::dummy()),
+                    OrderOperation::new(
+                        OrderOperator::LessThan,
+                        Number::new(0.0, Position::dummy()),
+                        Number::new(0.0, Position::dummy()),
                         Position::dummy(),
                     ),
-                    false,
-                )],
-            ))
+                    Position::dummy(),
+                ),
+                false,
+            )]))
             .unwrap();
         }
     }

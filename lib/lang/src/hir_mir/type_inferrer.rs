@@ -378,156 +378,126 @@ mod tests {
     #[test]
     fn infer_call() {
         assert_eq!(
-            infer_module(&Module::new(
-                vec![],
-                vec![],
-                vec![],
-                vec![Definition::without_source(
-                    "x",
-                    Lambda::new(
+            infer_module(&Module::from_definitions(vec![Definition::without_source(
+                "x",
+                Lambda::new(
+                    vec![],
+                    types::None::new(Position::dummy()),
+                    Call::new(
+                        Variable::new("x", Position::dummy()),
                         vec![],
-                        types::None::new(Position::dummy()),
-                        Call::new(
-                            Variable::new("x", Position::dummy()),
-                            vec![],
-                            None,
-                            Position::dummy()
-                        ),
-                        Position::dummy(),
+                        None,
+                        Position::dummy()
                     ),
-                    false,
-                )],
-            )),
-            Ok(Module::new(
-                vec![],
-                vec![],
-                vec![],
-                vec![Definition::without_source(
-                    "x",
-                    Lambda::new(
+                    Position::dummy(),
+                ),
+                false,
+            )],)),
+            Ok(Module::from_definitions(vec![Definition::without_source(
+                "x",
+                Lambda::new(
+                    vec![],
+                    types::None::new(Position::dummy()),
+                    Call::new(
+                        Variable::new("x", Position::dummy()),
                         vec![],
-                        types::None::new(Position::dummy()),
-                        Call::new(
-                            Variable::new("x", Position::dummy()),
-                            vec![],
-                            Some(
-                                types::Function::new(
-                                    vec![],
-                                    types::None::new(Position::dummy()),
-                                    Position::dummy()
-                                )
-                                .into()
-                            ),
-                            Position::dummy()
+                        Some(
+                            types::Function::new(
+                                vec![],
+                                types::None::new(Position::dummy()),
+                                Position::dummy()
+                            )
+                            .into()
                         ),
-                        Position::dummy(),
+                        Position::dummy()
                     ),
-                    false,
-                )],
-            ))
+                    Position::dummy(),
+                ),
+                false,
+            )],))
         );
     }
 
     #[test]
     fn infer_equality_operation() {
         assert_eq!(
-            infer_module(&Module::new(
-                vec![],
-                vec![],
-                vec![],
-                vec![Definition::without_source(
-                    "x",
-                    Lambda::new(
-                        vec![],
-                        types::None::new(Position::dummy()),
-                        EqualityOperation::new(
-                            None,
-                            EqualityOperator::Equal,
-                            None::new(Position::dummy()),
-                            None::new(Position::dummy()),
-                            Position::dummy()
-                        ),
-                        Position::dummy(),
+            infer_module(&Module::from_definitions(vec![Definition::without_source(
+                "x",
+                Lambda::new(
+                    vec![],
+                    types::None::new(Position::dummy()),
+                    EqualityOperation::new(
+                        None,
+                        EqualityOperator::Equal,
+                        None::new(Position::dummy()),
+                        None::new(Position::dummy()),
+                        Position::dummy()
                     ),
-                    false,
-                )],
-            )),
-            Ok(Module::new(
-                vec![],
-                vec![],
-                vec![],
-                vec![Definition::without_source(
-                    "x",
-                    Lambda::new(
-                        vec![],
-                        types::None::new(Position::dummy()),
-                        EqualityOperation::new(
-                            Some(
-                                types::Union::new(
-                                    types::None::new(Position::dummy()),
-                                    types::None::new(Position::dummy()),
-                                    Position::dummy()
-                                )
-                                .into()
-                            ),
-                            EqualityOperator::Equal,
-                            None::new(Position::dummy()),
-                            None::new(Position::dummy()),
-                            Position::dummy()
+                    Position::dummy(),
+                ),
+                false,
+            )],)),
+            Ok(Module::from_definitions(vec![Definition::without_source(
+                "x",
+                Lambda::new(
+                    vec![],
+                    types::None::new(Position::dummy()),
+                    EqualityOperation::new(
+                        Some(
+                            types::Union::new(
+                                types::None::new(Position::dummy()),
+                                types::None::new(Position::dummy()),
+                                Position::dummy()
+                            )
+                            .into()
                         ),
-                        Position::dummy(),
+                        EqualityOperator::Equal,
+                        None::new(Position::dummy()),
+                        None::new(Position::dummy()),
+                        Position::dummy()
                     ),
-                    false,
-                )],
-            ))
+                    Position::dummy(),
+                ),
+                false,
+            )],))
         );
     }
 
     #[test]
     fn infer_let() {
         assert_eq!(
-            infer_module(&Module::new(
-                vec![],
-                vec![],
-                vec![],
-                vec![Definition::without_source(
-                    "x",
-                    Lambda::new(
-                        vec![],
-                        types::None::new(Position::dummy()),
-                        Let::new(
-                            Some("x".into()),
-                            None,
-                            None::new(Position::dummy()),
-                            Variable::new("x", Position::dummy()),
-                            Position::dummy(),
-                        ),
+            infer_module(&Module::from_definitions(vec![Definition::without_source(
+                "x",
+                Lambda::new(
+                    vec![],
+                    types::None::new(Position::dummy()),
+                    Let::new(
+                        Some("x".into()),
+                        None,
+                        None::new(Position::dummy()),
+                        Variable::new("x", Position::dummy()),
                         Position::dummy(),
                     ),
-                    false,
-                )],
-            )),
-            Ok(Module::new(
-                vec![],
-                vec![],
-                vec![],
-                vec![Definition::without_source(
-                    "x",
-                    Lambda::new(
-                        vec![],
-                        types::None::new(Position::dummy()),
-                        Let::new(
-                            Some("x".into()),
-                            Some(types::None::new(Position::dummy()).into()),
-                            None::new(Position::dummy()),
-                            Variable::new("x", Position::dummy()),
-                            Position::dummy(),
-                        ),
+                    Position::dummy(),
+                ),
+                false,
+            )],)),
+            Ok(Module::from_definitions(vec![Definition::without_source(
+                "x",
+                Lambda::new(
+                    vec![],
+                    types::None::new(Position::dummy()),
+                    Let::new(
+                        Some("x".into()),
+                        Some(types::None::new(Position::dummy()).into()),
+                        None::new(Position::dummy()),
+                        Variable::new("x", Position::dummy()),
                         Position::dummy(),
                     ),
-                    false,
-                )],
-            ))
+                    Position::dummy(),
+                ),
+                false,
+            )],))
         );
     }
 
@@ -681,56 +651,46 @@ mod tests {
             )];
 
             assert_eq!(
-                infer_module(&Module::new(
-                    vec![],
-                    vec![],
-                    vec![],
-                    vec![Definition::without_source(
-                        "x",
-                        Lambda::new(
-                            vec![Argument::new("x", union_type.clone())],
-                            types::None::new(Position::dummy()),
-                            IfType::new(
-                                "x",
-                                Variable::new("x", Position::dummy()),
-                                branches.clone(),
-                                Some(ElseBranch::new(
-                                    None,
-                                    None::new(Position::dummy()),
-                                    Position::dummy()
-                                )),
+                infer_module(&Module::from_definitions(vec![Definition::without_source(
+                    "x",
+                    Lambda::new(
+                        vec![Argument::new("x", union_type.clone())],
+                        types::None::new(Position::dummy()),
+                        IfType::new(
+                            "x",
+                            Variable::new("x", Position::dummy()),
+                            branches.clone(),
+                            Some(ElseBranch::new(
+                                None,
+                                None::new(Position::dummy()),
                                 Position::dummy()
-                            ),
-                            Position::dummy(),
+                            )),
+                            Position::dummy()
                         ),
-                        false,
-                    )],
-                )),
-                Ok(Module::new(
-                    vec![],
-                    vec![],
-                    vec![],
-                    vec![Definition::without_source(
-                        "x",
-                        Lambda::new(
-                            vec![Argument::new("x", union_type)],
-                            types::None::new(Position::dummy()),
-                            IfType::new(
-                                "x",
-                                Variable::new("x", Position::dummy()),
-                                branches,
-                                Some(ElseBranch::new(
-                                    Some(types::None::new(Position::dummy()).into()),
-                                    None::new(Position::dummy()),
-                                    Position::dummy()
-                                )),
+                        Position::dummy(),
+                    ),
+                    false,
+                )],)),
+                Ok(Module::from_definitions(vec![Definition::without_source(
+                    "x",
+                    Lambda::new(
+                        vec![Argument::new("x", union_type)],
+                        types::None::new(Position::dummy()),
+                        IfType::new(
+                            "x",
+                            Variable::new("x", Position::dummy()),
+                            branches,
+                            Some(ElseBranch::new(
+                                Some(types::None::new(Position::dummy()).into()),
+                                None::new(Position::dummy()),
                                 Position::dummy()
-                            ),
-                            Position::dummy(),
+                            )),
+                            Position::dummy()
                         ),
-                        false,
-                    )],
-                ))
+                        Position::dummy(),
+                    ),
+                    false,
+                )],))
             );
         }
 
@@ -751,63 +711,53 @@ mod tests {
             )];
 
             assert_eq!(
-                infer_module(&Module::new(
-                    vec![],
-                    vec![],
-                    vec![],
-                    vec![Definition::without_source(
-                        "x",
-                        Lambda::new(
-                            vec![Argument::new("x", union_type.clone())],
-                            types::None::new(Position::dummy()),
-                            IfType::new(
-                                "x",
-                                Variable::new("x", Position::dummy()),
-                                branches.clone(),
-                                Some(ElseBranch::new(
-                                    None,
-                                    None::new(Position::dummy()),
-                                    Position::dummy()
-                                )),
+                infer_module(&Module::from_definitions(vec![Definition::without_source(
+                    "x",
+                    Lambda::new(
+                        vec![Argument::new("x", union_type.clone())],
+                        types::None::new(Position::dummy()),
+                        IfType::new(
+                            "x",
+                            Variable::new("x", Position::dummy()),
+                            branches.clone(),
+                            Some(ElseBranch::new(
+                                None,
+                                None::new(Position::dummy()),
                                 Position::dummy()
-                            ),
-                            Position::dummy(),
+                            )),
+                            Position::dummy()
                         ),
-                        false,
-                    )],
-                )),
-                Ok(Module::new(
-                    vec![],
-                    vec![],
-                    vec![],
-                    vec![Definition::without_source(
-                        "x",
-                        Lambda::new(
-                            vec![Argument::new("x", union_type)],
-                            types::None::new(Position::dummy()),
-                            IfType::new(
-                                "x",
-                                Variable::new("x", Position::dummy()),
-                                branches,
-                                Some(ElseBranch::new(
-                                    Some(
-                                        types::Union::new(
-                                            types::Boolean::new(Position::dummy()),
-                                            types::None::new(Position::dummy()),
-                                            Position::dummy(),
-                                        )
-                                        .into()
-                                    ),
-                                    None::new(Position::dummy()),
-                                    Position::dummy()
-                                )),
+                        Position::dummy(),
+                    ),
+                    false,
+                )],)),
+                Ok(Module::from_definitions(vec![Definition::without_source(
+                    "x",
+                    Lambda::new(
+                        vec![Argument::new("x", union_type)],
+                        types::None::new(Position::dummy()),
+                        IfType::new(
+                            "x",
+                            Variable::new("x", Position::dummy()),
+                            branches,
+                            Some(ElseBranch::new(
+                                Some(
+                                    types::Union::new(
+                                        types::Boolean::new(Position::dummy()),
+                                        types::None::new(Position::dummy()),
+                                        Position::dummy(),
+                                    )
+                                    .into()
+                                ),
+                                None::new(Position::dummy()),
                                 Position::dummy()
-                            ),
-                            Position::dummy(),
+                            )),
+                            Position::dummy()
                         ),
-                        false,
-                    )],
-                ))
+                        Position::dummy(),
+                    ),
+                    false,
+                )],))
             );
         }
 
@@ -820,56 +770,46 @@ mod tests {
             )];
 
             assert_eq!(
-                infer_module(&Module::new(
-                    vec![],
-                    vec![],
-                    vec![],
-                    vec![Definition::without_source(
-                        "x",
-                        Lambda::new(
-                            vec![Argument::new("x", any_type.clone())],
-                            types::None::new(Position::dummy()),
-                            IfType::new(
-                                "x",
-                                Variable::new("x", Position::dummy()),
-                                branches.clone(),
-                                Some(ElseBranch::new(
-                                    None,
-                                    None::new(Position::dummy()),
-                                    Position::dummy()
-                                )),
+                infer_module(&Module::from_definitions(vec![Definition::without_source(
+                    "x",
+                    Lambda::new(
+                        vec![Argument::new("x", any_type.clone())],
+                        types::None::new(Position::dummy()),
+                        IfType::new(
+                            "x",
+                            Variable::new("x", Position::dummy()),
+                            branches.clone(),
+                            Some(ElseBranch::new(
+                                None,
+                                None::new(Position::dummy()),
                                 Position::dummy()
-                            ),
-                            Position::dummy(),
+                            )),
+                            Position::dummy()
                         ),
-                        false,
-                    )],
-                )),
-                Ok(Module::new(
-                    vec![],
-                    vec![],
-                    vec![],
-                    vec![Definition::without_source(
-                        "x",
-                        Lambda::new(
-                            vec![Argument::new("x", any_type.clone())],
-                            types::None::new(Position::dummy()),
-                            IfType::new(
-                                "x",
-                                Variable::new("x", Position::dummy()),
-                                branches,
-                                Some(ElseBranch::new(
-                                    Some(any_type.into()),
-                                    None::new(Position::dummy()),
-                                    Position::dummy()
-                                )),
+                        Position::dummy(),
+                    ),
+                    false,
+                )],)),
+                Ok(Module::from_definitions(vec![Definition::without_source(
+                    "x",
+                    Lambda::new(
+                        vec![Argument::new("x", any_type.clone())],
+                        types::None::new(Position::dummy()),
+                        IfType::new(
+                            "x",
+                            Variable::new("x", Position::dummy()),
+                            branches,
+                            Some(ElseBranch::new(
+                                Some(any_type.into()),
+                                None::new(Position::dummy()),
                                 Position::dummy()
-                            ),
-                            Position::dummy(),
+                            )),
+                            Position::dummy()
                         ),
-                        false,
-                    )],
-                ))
+                        Position::dummy(),
+                    ),
+                    false,
+                )],))
             );
         }
 
@@ -882,40 +822,35 @@ mod tests {
             );
 
             assert_eq!(
-                infer_module(&Module::new(
-                    vec![],
-                    vec![],
-                    vec![],
-                    vec![Definition::without_source(
-                        "x",
-                        Lambda::new(
-                            vec![Argument::new("x", union_type)],
-                            types::None::new(Position::dummy()),
-                            IfType::new(
-                                "x",
-                                Variable::new("x", Position::dummy()),
-                                vec![
-                                    IfTypeBranch::new(
-                                        types::Number::new(Position::dummy()),
-                                        None::new(Position::dummy()),
-                                    ),
-                                    IfTypeBranch::new(
-                                        types::None::new(Position::dummy()),
-                                        None::new(Position::dummy()),
-                                    )
-                                ],
-                                Some(ElseBranch::new(
-                                    None,
+                infer_module(&Module::from_definitions(vec![Definition::without_source(
+                    "x",
+                    Lambda::new(
+                        vec![Argument::new("x", union_type)],
+                        types::None::new(Position::dummy()),
+                        IfType::new(
+                            "x",
+                            Variable::new("x", Position::dummy()),
+                            vec![
+                                IfTypeBranch::new(
+                                    types::Number::new(Position::dummy()),
                                     None::new(Position::dummy()),
-                                    Position::dummy()
-                                )),
+                                ),
+                                IfTypeBranch::new(
+                                    types::None::new(Position::dummy()),
+                                    None::new(Position::dummy()),
+                                )
+                            ],
+                            Some(ElseBranch::new(
+                                None,
+                                None::new(Position::dummy()),
                                 Position::dummy()
-                            ),
-                            Position::dummy(),
+                            )),
+                            Position::dummy()
                         ),
-                        false,
-                    )],
-                )),
+                        Position::dummy(),
+                    ),
+                    false,
+                )],)),
                 Err(CompileError::UnreachableCode(Position::dummy()))
             );
         }
