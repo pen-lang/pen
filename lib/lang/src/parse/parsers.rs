@@ -132,8 +132,20 @@ fn calling_convention<'a>() -> impl Parser<Stream<'a>, Output = CallingConventio
 }
 
 fn definition<'a>() -> impl Parser<Stream<'a>, Output = Definition> {
-    (position(), identifier(), sign("="), lambda())
-        .map(|(position, name, _, lambda)| Definition::new(name, lambda, position))
+    (
+        optional(foreign_export()),
+        position(),
+        identifier(),
+        sign("="),
+        lambda(),
+    )
+        .map(|(foreign_export, position, name, _, lambda)| {
+            Definition::new(name, lambda, foreign_export.is_some(), position)
+        })
+}
+
+fn foreign_export<'a>() -> impl Parser<Stream<'a>, Output = ()> {
+    (keyword("export"), keyword("foreign")).with(value(()))
 }
 
 fn type_definition<'a>() -> impl Parser<Stream<'a>, Output = TypeDefinition> {
@@ -795,6 +807,7 @@ mod tests {
                         ),
                         Position::dummy()
                     ),
+                    false,
                     Position::dummy()
                 )]
             )
@@ -825,6 +838,7 @@ mod tests {
                             ),
                             Position::dummy()
                         ),
+                        false,
                         Position::dummy()
                     ),
                     Definition::new(
@@ -839,6 +853,7 @@ mod tests {
                             ),
                             Position::dummy()
                         ),
+                        false,
                         Position::dummy()
                     )
                 ]
@@ -957,6 +972,29 @@ mod tests {
                     ),
                     Position::dummy()
                 ),
+                false,
+                Position::dummy()
+            ),
+        );
+
+        assert_eq!(
+            definition()
+                .parse(stream("export foreign x=\\(x number)number{42}", ""))
+                .unwrap()
+                .0,
+            Definition::new(
+                "x",
+                Lambda::new(
+                    vec![Argument::new("x", types::Number::new(Position::dummy()))],
+                    types::Number::new(Position::dummy()),
+                    Block::new(
+                        vec![],
+                        Number::new(42.0, Position::dummy()),
+                        Position::dummy()
+                    ),
+                    Position::dummy()
+                ),
+                true,
                 Position::dummy()
             ),
         );

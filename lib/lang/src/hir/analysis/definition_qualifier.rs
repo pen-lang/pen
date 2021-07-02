@@ -46,6 +46,7 @@ pub fn qualify(module: &Module, prefix: &str) -> Module {
                         names[definition.name()].clone(),
                         definition.original_name(),
                         definition.lambda().clone(),
+                        definition.is_foreign(),
                         definition.is_public(),
                         definition.position().clone(),
                     )

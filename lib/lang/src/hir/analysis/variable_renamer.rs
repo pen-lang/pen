@@ -20,6 +20,7 @@ fn rename_definition(definition: &Definition, names: &HashMap<String, String>) -
         definition.name(),
         definition.original_name(),
         rename_lambda(definition.lambda(), names),
+        definition.is_foreign(),
         definition.is_public(),
         definition.position().clone(),
     )

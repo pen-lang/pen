@@ -30,7 +30,20 @@ pub fn compile(
                 ))
             })
             .collect::<Result<_, _>>()?,
-        vec![],
+        module
+            .definitions()
+            .iter()
+            .flat_map(|definition| {
+                if definition.is_foreign() {
+                    Some(mir::ir::ForeignDefinition::new(
+                        definition.name(),
+                        definition.original_name(),
+                    ))
+                } else {
+                    None
+                }
+            })
+            .collect(),
         module
             .declarations()
             .iter()
@@ -97,4 +110,56 @@ fn compile_definition(
             result_type,
         )
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::types;
+    use crate::{
+        hir_mir::{
+            list_type_configuration::LIST_TYPE_CONFIGURATION,
+            string_type_configuration::STRING_TYPE_CONFIGURATION,
+        },
+        position::Position,
+    };
+    use pretty_assertions::assert_eq;
+
+    fn compile_module(module: &Module) -> Result<mir::ir::Module, CompileError> {
+        compile(
+            module,
+            &TypeContext::new(module, &LIST_TYPE_CONFIGURATION, &STRING_TYPE_CONFIGURATION),
+        )
+    }
+
+    #[test]
+    fn compile_foreign_declaration() {
+        assert_eq!(
+            compile_module(&Module::empty().set_definitions(vec![Definition::new(
+                "foo",
+                "bar",
+                Lambda::new(
+                    vec![Argument::new("x", types::None::new(Position::dummy()))],
+                    types::None::new(Position::dummy()),
+                    None::new(Position::dummy()),
+                    Position::dummy(),
+                ),
+                true,
+                false,
+                Position::dummy(),
+            )])),
+            Ok(mir::ir::Module::new(
+                vec![],
+                vec![],
+                vec![mir::ir::ForeignDefinition::new("foo", "bar")],
+                vec![],
+                vec![mir::ir::Definition::new(
+                    "foo",
+                    vec![mir::ir::Argument::new("x", mir::types::Type::None)],
+                    mir::ir::Expression::None,
+                    mir::types::Type::None,
+                )],
+            ))
+        );
+    }
 }

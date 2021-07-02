@@ -212,8 +212,7 @@ mod tests {
     fn rename_variable() {
         assert_eq!(
             compile(
-                &hir::Module::empty().set_definitions(vec![hir::Definition::new(
-                    "Foo",
+                &hir::Module::empty().set_definitions(vec![hir::Definition::without_source(
                     "Foo",
                     hir::Lambda::new(
                         vec![],
@@ -222,7 +221,6 @@ mod tests {
                         Position::dummy(),
                     ),
                     true,
-                    Position::dummy()
                 )]),
                 &vec![(
                     ast::InternalModulePath::new(vec!["Bar".into()]).into(),
@@ -255,8 +253,7 @@ mod tests {
                     ),
                     Position::dummy()
                 )])
-                .set_definitions(vec![hir::Definition::new(
-                    "Foo",
+                .set_definitions(vec![hir::Definition::without_source(
                     "Foo",
                     hir::Lambda::new(
                         vec![],
@@ -265,7 +262,6 @@ mod tests {
                         Position::dummy(),
                     ),
                     true,
-                    Position::dummy()
                 )])
         );
     }

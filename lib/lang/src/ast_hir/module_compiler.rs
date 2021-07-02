@@ -61,6 +61,7 @@ fn compile_definition(definition: &ast::Definition) -> Result<hir::Definition, C
         definition.name(),
         definition.name(),
         compile_lambda(definition.lambda())?,
+        definition.is_foreign(),
         is_name_public(definition.name()),
         definition.position().clone(),
     ))
@@ -375,6 +376,7 @@ mod tests {
                         ),
                         Position::dummy(),
                     ),
+                    false,
                     Position::dummy(),
                 )]
             )),
@@ -404,6 +406,7 @@ mod tests {
                         hir::None::new(Position::dummy()),
                         Position::dummy(),
                     ),
+                    false,
                     true,
                     Position::dummy()
                 )]))
