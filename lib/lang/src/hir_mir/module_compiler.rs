@@ -30,7 +30,20 @@ pub fn compile(
                 ))
             })
             .collect::<Result<_, _>>()?,
-        vec![],
+        module
+            .definitions()
+            .iter()
+            .flat_map(|definition| {
+                if definition.is_foreign() {
+                    Some(mir::ir::ForeignDefinition::new(
+                        definition.name(),
+                        definition.original_name(),
+                    ))
+                } else {
+                    None
+                }
+            })
+            .collect(),
         module
             .declarations()
             .iter()
