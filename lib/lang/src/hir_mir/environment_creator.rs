@@ -30,8 +30,7 @@ pub fn create_from_module(module: &Module) -> HashMap<String, Type> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::position::Position;
-    use crate::types;
+    use crate::{position::Position, types};
 
     #[test]
     fn create_with_foreign_declaration() {
@@ -51,9 +50,7 @@ mod tests {
                     Position::dummy()
                 )
             ])),
-            vec![("foo".into(), type_.clone().into())]
-                .into_iter()
-                .collect()
+            vec![("foo".into(), type_.into())].into_iter().collect()
         );
     }
 }
