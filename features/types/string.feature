@@ -1,11 +1,11 @@
-Feature: None
+Feature: String
   Background:
     Given a file named "pen.json" with:
     """
     { "dependencies": {} }
     """
 
-  Scenario: Use a none literal
+  Scenario: Use a string literal
     Given a file named "Foo.pen" with:
     """
     f = \() string {
