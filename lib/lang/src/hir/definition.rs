@@ -6,6 +6,7 @@ pub struct Definition {
     name: String,
     original_name: String,
     lambda: Lambda,
+    foreign: bool,
     public: bool,
     position: Position,
 }
@@ -15,6 +16,7 @@ impl Definition {
         name: impl Into<String>,
         original_name: impl Into<String>,
         lambda: Lambda,
+        foreign: bool,
         public: bool,
         position: Position,
     ) -> Self {
@@ -22,6 +24,7 @@ impl Definition {
             name: name.into(),
             original_name: original_name.into(),
             lambda,
+            foreign,
             public,
             position,
         }
@@ -29,7 +32,7 @@ impl Definition {
 
     #[cfg(test)]
     pub fn without_source(name: impl Into<String>, lambda: Lambda, public: bool) -> Self {
-        Self::new(name, "", lambda, public, Position::dummy())
+        Self::new(name, "", lambda, false, public, Position::dummy())
     }
 
     pub fn name(&self) -> &str {
@@ -42,6 +45,10 @@ impl Definition {
 
     pub fn lambda(&self) -> &Lambda {
         &self.lambda
+    }
+
+    pub fn is_foreign(&self) -> bool {
+        self.foreign
     }
 
     pub fn is_public(&self) -> bool {

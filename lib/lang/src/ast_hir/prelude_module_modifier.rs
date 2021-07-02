@@ -40,6 +40,7 @@ pub fn modify(module: &Module) -> Module {
                     definition.name(),
                     definition.original_name(),
                     definition.lambda().clone(),
+                    definition.is_foreign(),
                     true,
                     definition.position().clone(),
                 )
