@@ -378,8 +378,8 @@ mod tests {
                     Position::dummy(),
                 )]
             )),
-            Ok(hir::Module::new(
-                vec![hir::TypeDefinition::new(
+            Ok(hir::Module::empty()
+                .set_type_definitions(vec![hir::TypeDefinition::new(
                     "Foo1",
                     "Foo1",
                     vec![],
@@ -387,16 +387,15 @@ mod tests {
                     true,
                     false,
                     Position::dummy()
-                )],
-                vec![hir::TypeAlias::new(
+                )])
+                .set_type_aliases(vec![hir::TypeAlias::new(
                     "Foo2",
                     "Foo2",
                     types::None::new(Position::dummy()),
                     true,
                     false
-                )],
-                vec![],
-                vec![hir::Definition::new(
+                )])
+                .set_definitions(vec![hir::Definition::new(
                     "Foo3",
                     "Foo3",
                     hir::Lambda::new(
@@ -407,8 +406,7 @@ mod tests {
                     ),
                     true,
                     Position::dummy()
-                )]
-            ))
+                )]))
         );
     }
 }

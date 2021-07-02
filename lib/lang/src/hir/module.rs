@@ -30,6 +30,55 @@ impl Module {
     }
 
     #[cfg(test)]
+    pub fn empty() -> Self {
+        Self::new(vec![], vec![], vec![], vec![], vec![])
+    }
+
+    #[cfg(test)]
+    pub fn set_type_definitions(&self, type_definitions: Vec<TypeDefinition>) -> Self {
+        Self::new(
+            type_definitions,
+            self.type_aliases.clone(),
+            self.foreign_declarations.clone(),
+            self.declarations.clone(),
+            self.definitions.clone(),
+        )
+    }
+
+    #[cfg(test)]
+    pub fn set_type_aliases(&self, type_aliases: Vec<TypeAlias>) -> Self {
+        Self::new(
+            self.type_definitions.clone(),
+            type_aliases,
+            self.foreign_declarations.clone(),
+            self.declarations.clone(),
+            self.definitions.clone(),
+        )
+    }
+
+    #[cfg(test)]
+    pub fn set_declarations(&self, declarations: Vec<Declaration>) -> Self {
+        Self::new(
+            self.type_definitions.clone(),
+            self.type_aliases.clone(),
+            self.foreign_declarations.clone(),
+            declarations,
+            self.definitions.clone(),
+        )
+    }
+
+    #[cfg(test)]
+    pub fn set_definitions(&self, definitions: Vec<Definition>) -> Self {
+        Self::new(
+            self.type_definitions.clone(),
+            self.type_aliases.clone(),
+            self.foreign_declarations.clone(),
+            self.declarations.clone(),
+            definitions,
+        )
+    }
+
+    #[cfg(test)]
     pub fn from_definitions(definitions: Vec<Definition>) -> Self {
         Self::new(vec![], vec![], vec![], vec![], definitions)
     }

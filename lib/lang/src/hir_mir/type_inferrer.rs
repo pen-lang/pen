@@ -514,37 +514,34 @@ mod tests {
         );
 
         assert_eq!(
-            infer_module(&Module::new(
-                vec![],
-                vec![],
-                vec![declaration.clone()],
-                vec![Definition::without_source(
-                    "x",
-                    Lambda::new(
-                        vec![],
-                        types::None::new(Position::dummy()),
-                        Let::new(
-                            Some("x".into()),
-                            None,
-                            Call::new(
-                                Variable::new("f", Position::dummy()),
-                                vec![],
+            infer_module(
+                &Module::empty()
+                    .set_declarations(vec![declaration.clone()])
+                    .set_definitions(vec![Definition::without_source(
+                        "x",
+                        Lambda::new(
+                            vec![],
+                            types::None::new(Position::dummy()),
+                            Let::new(
+                                Some("x".into()),
                                 None,
-                                Position::dummy()
+                                Call::new(
+                                    Variable::new("f", Position::dummy()),
+                                    vec![],
+                                    None,
+                                    Position::dummy()
+                                ),
+                                Variable::new("x", Position::dummy()),
+                                Position::dummy(),
                             ),
-                            Variable::new("x", Position::dummy()),
                             Position::dummy(),
                         ),
-                        Position::dummy(),
-                    ),
-                    false,
-                )],
-            )),
-            Ok(Module::new(
-                vec![],
-                vec![],
-                vec![declaration.clone()],
-                vec![Definition::without_source(
+                        false,
+                    )],)
+            ),
+            Ok(Module::empty()
+                .set_declarations(vec![declaration.clone()])
+                .set_definitions(vec![Definition::without_source(
                     "x",
                     Lambda::new(
                         vec![],
@@ -564,8 +561,7 @@ mod tests {
                         Position::dummy(),
                     ),
                     false,
-                )],
-            ))
+                )]))
         );
     }
 

@@ -97,7 +97,7 @@ mod tests {
     fn qualify_type_definition() {
         assert_eq!(
             qualify(
-                &Module::new(
+                &Module::from_type_definitions_and_definitions(
                     vec![TypeDefinition::without_source(
                         "x",
                         vec![],
@@ -106,12 +106,10 @@ mod tests {
                         false
                     )],
                     vec![],
-                    vec![],
-                    vec![],
                 ),
                 "foo."
             ),
-            Module::new(
+            Module::from_type_definitions_and_definitions(
                 vec![TypeDefinition::without_source(
                     "foo.x",
                     vec![],
@@ -119,8 +117,6 @@ mod tests {
                     false,
                     false
                 )],
-                vec![],
-                vec![],
                 vec![],
             )
         );
@@ -130,7 +126,7 @@ mod tests {
     fn qualify_type_definition_recursively() {
         assert_eq!(
             qualify(
-                &Module::new(
+                &Module::from_type_definitions_and_definitions(
                     vec![TypeDefinition::without_source(
                         "x",
                         vec![types::RecordElement::new(
@@ -142,12 +138,10 @@ mod tests {
                         false
                     )],
                     vec![],
-                    vec![],
-                    vec![],
                 ),
                 "foo."
             ),
-            Module::new(
+            Module::from_type_definitions_and_definitions(
                 vec![TypeDefinition::without_source(
                     "foo.x",
                     vec![types::RecordElement::new(
@@ -158,8 +152,6 @@ mod tests {
                     false,
                     false
                 )],
-                vec![],
-                vec![],
                 vec![],
             )
         );
@@ -179,6 +171,7 @@ mod tests {
                     )],
                     vec![],
                     vec![],
+                    vec![],
                 ),
                 "foo."
             ),
@@ -190,6 +183,7 @@ mod tests {
                     false,
                     false
                 )],
+                vec![],
                 vec![],
                 vec![],
             )
