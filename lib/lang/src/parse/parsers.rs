@@ -24,7 +24,7 @@ use combine::{
 use once_cell::sync::Lazy;
 use std::collections::HashSet;
 
-const KEYWORDS: &[&str] = &["else", "if", "import", "type"];
+const KEYWORDS: &[&str] = &["else", "export", "foreign", "if", "import", "type"];
 const OPERATOR_CHARACTERS: &str = "+-*/=<>&|!?";
 
 static NUMBER_REGEX: Lazy<regex::Regex> =
@@ -54,14 +54,21 @@ pub fn module<'a>() -> impl Parser<Stream<'a>, Output = Module> {
     (
         blank(),
         many(import()),
+        many(foreign_import()),
         many(type_definition()),
         many(type_alias()),
         many(definition()),
     )
         .skip(eof())
         .map(
-            |(_, imports, type_definitions, type_aliases, definitions)| {
-                Module::new(imports, type_definitions, type_aliases, definitions)
+            |(_, imports, foreign_imports, type_definitions, type_aliases, definitions)| {
+                Module::new(
+                    imports,
+                    foreign_imports,
+                    type_definitions,
+                    type_aliases,
+                    definitions,
+                )
             },
         )
 }
@@ -92,6 +99,36 @@ fn external_module_path<'a>() -> impl Parser<Stream<'a>, Output = ExternalModule
 
 fn module_path_components<'a>() -> impl Parser<Stream<'a>, Output = Vec<String>> {
     many1(string(IDENTIFIER_SEPARATOR).with(identifier()))
+}
+
+fn foreign_import<'a>() -> impl Parser<Stream<'a>, Output = ForeignImport> {
+    (
+        position(),
+        keyword("import"),
+        keyword("foreign"),
+        optional(calling_convention()),
+        identifier(),
+        type_(),
+    )
+        .map(|(position, _, _, calling_convention, name, type_)| {
+            ForeignImport::new(
+                &name,
+                &name,
+                calling_convention.unwrap_or(CallingConvention::Native),
+                type_,
+                position,
+            )
+        })
+        .expected("foreign import statement")
+}
+
+fn calling_convention<'a>() -> impl Parser<Stream<'a>, Output = CallingConvention> {
+    string_literal()
+        .expected("calling convention")
+        .then(|string| match string.value() {
+            "c" => value(CallingConvention::C).left(),
+            _ => unexpected_any("unknown calling convention").right(),
+        })
 }
 
 fn definition<'a>() -> impl Parser<Stream<'a>, Output = Definition> {
@@ -703,15 +740,15 @@ mod tests {
     fn parse_module() {
         assert_eq!(
             module().parse(stream("", "")).unwrap().0,
-            Module::new(vec![], vec![], vec![], vec![])
+            Module::new(vec![], vec![], vec![], vec![], vec![])
         );
         assert_eq!(
             module().parse(stream(" ", "")).unwrap().0,
-            Module::new(vec![], vec![], vec![], vec![])
+            Module::new(vec![], vec![], vec![], vec![], vec![])
         );
         assert_eq!(
             module().parse(stream("\n", "")).unwrap().0,
-            Module::new(vec![], vec![], vec![], vec![])
+            Module::new(vec![], vec![], vec![], vec![], vec![])
         );
         assert_eq!(
             module().parse(stream("import Foo'Bar", "")).unwrap().0,
@@ -722,12 +759,14 @@ mod tests {
                 ))],
                 vec![],
                 vec![],
+                vec![],
                 vec![]
             )
         );
         assert_eq!(
             module().parse(stream("type foo = number", "")).unwrap().0,
             Module::new(
+                vec![],
                 vec![],
                 vec![],
                 vec![TypeAlias::new("foo", types::Number::new(Position::dummy()))],
@@ -740,6 +779,7 @@ mod tests {
                 .unwrap()
                 .0,
             Module::new(
+                vec![],
                 vec![],
                 vec![],
                 vec![],
@@ -768,6 +808,7 @@ mod tests {
                 .unwrap()
                 .0,
             Module::new(
+                vec![],
                 vec![],
                 vec![],
                 vec![],
@@ -855,6 +896,45 @@ mod tests {
                 .unwrap()
                 .0,
             ExternalModulePath::new("Foo", vec!["Bar".into()]),
+        );
+    }
+
+    #[test]
+    fn parse_foreign_import() {
+        assert_eq!(
+            foreign_import()
+                .parse(stream("import foreign foo \\(number) number", ""))
+                .unwrap()
+                .0,
+            ForeignImport::new(
+                "foo",
+                "foo",
+                CallingConvention::Native,
+                types::Function::new(
+                    vec![types::Number::new(Position::dummy()).into()],
+                    types::Number::new(Position::dummy()),
+                    Position::dummy()
+                ),
+                Position::dummy()
+            ),
+        );
+
+        assert_eq!(
+            foreign_import()
+                .parse(stream("import foreign \"c\" foo \\(number) number", ""))
+                .unwrap()
+                .0,
+            ForeignImport::new(
+                "foo",
+                "foo",
+                CallingConvention::C,
+                types::Function::new(
+                    vec![types::Number::new(Position::dummy()).into()],
+                    types::Number::new(Position::dummy()),
+                    Position::dummy()
+                ),
+                Position::dummy()
+            ),
         );
     }
 

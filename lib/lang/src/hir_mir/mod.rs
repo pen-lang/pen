@@ -55,18 +55,15 @@ mod tests {
 
     #[test]
     fn compile_empty_module() -> Result<(), CompileError> {
-        compile_module(&Module::new(vec![], vec![], vec![], vec![]))?;
+        compile_module(&Module::new(vec![], vec![], vec![], vec![], vec![]))?;
 
         Ok(())
     }
 
     #[test]
     fn compile_boolean() -> Result<(), CompileError> {
-        compile_module(&Module::new(
-            vec![],
-            vec![],
-            vec![],
-            vec![Definition::without_source(
+        compile_module(
+            &Module::empty().set_definitions(vec![Definition::without_source(
                 "x",
                 Lambda::new(
                     vec![],
@@ -75,19 +72,16 @@ mod tests {
                     Position::dummy(),
                 ),
                 false,
-            )],
-        ))?;
+            )]),
+        )?;
 
         Ok(())
     }
 
     #[test]
     fn compile_none() -> Result<(), CompileError> {
-        compile_module(&Module::new(
-            vec![],
-            vec![],
-            vec![],
-            vec![Definition::without_source(
+        compile_module(
+            &Module::empty().set_definitions(vec![Definition::without_source(
                 "x",
                 Lambda::new(
                     vec![],
@@ -96,19 +90,16 @@ mod tests {
                     Position::dummy(),
                 ),
                 false,
-            )],
-        ))?;
+            )]),
+        )?;
 
         Ok(())
     }
 
     #[test]
     fn compile_number() -> Result<(), CompileError> {
-        compile_module(&Module::new(
-            vec![],
-            vec![],
-            vec![],
-            vec![Definition::without_source(
+        compile_module(
+            &Module::empty().set_definitions(vec![Definition::without_source(
                 "x",
                 Lambda::new(
                     vec![],
@@ -117,19 +108,16 @@ mod tests {
                     Position::dummy(),
                 ),
                 false,
-            )],
-        ))?;
+            )]),
+        )?;
 
         Ok(())
     }
 
     #[test]
     fn compile_string() -> Result<(), CompileError> {
-        compile_module(&Module::new(
-            vec![],
-            vec![],
-            vec![],
-            vec![Definition::without_source(
+        compile_module(
+            &Module::empty().set_definitions(vec![Definition::without_source(
                 "x",
                 Lambda::new(
                     vec![],
@@ -138,8 +126,8 @@ mod tests {
                     Position::dummy(),
                 ),
                 false,
-            )],
-        ))?;
+            )]),
+        )?;
 
         Ok(())
     }

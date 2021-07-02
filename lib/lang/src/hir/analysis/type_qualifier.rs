@@ -61,6 +61,7 @@ pub fn qualify(module: &Module, prefix: &str) -> Module {
                     )
                 })
                 .collect(),
+            module.foreign_declarations().to_vec(),
             module.declarations().to_vec(),
             module.definitions().to_vec(),
         ),
@@ -96,32 +97,26 @@ mod tests {
     fn qualify_type_definition() {
         assert_eq!(
             qualify(
-                &Module::new(
-                    vec![TypeDefinition::without_source(
+                &Module::empty()
+                    .set_type_definitions(vec![TypeDefinition::without_source(
                         "x",
                         vec![],
                         false,
                         false,
                         false
-                    )],
-                    vec![],
-                    vec![],
-                    vec![],
-                ),
+                    )])
+                    .set_definitions(vec![]),
                 "foo."
             ),
-            Module::new(
-                vec![TypeDefinition::without_source(
+            Module::empty()
+                .set_type_definitions(vec![TypeDefinition::without_source(
                     "foo.x",
                     vec![],
                     false,
                     false,
                     false
-                )],
-                vec![],
-                vec![],
-                vec![],
-            )
+                )])
+                .set_definitions(vec![])
         );
     }
 
@@ -129,8 +124,8 @@ mod tests {
     fn qualify_type_definition_recursively() {
         assert_eq!(
             qualify(
-                &Module::new(
-                    vec![TypeDefinition::without_source(
+                &Module::empty()
+                    .set_type_definitions(vec![TypeDefinition::without_source(
                         "x",
                         vec![types::RecordElement::new(
                             "x",
@@ -139,15 +134,12 @@ mod tests {
                         false,
                         false,
                         false
-                    )],
-                    vec![],
-                    vec![],
-                    vec![],
-                ),
+                    )])
+                    .set_definitions(vec![]),
                 "foo."
             ),
-            Module::new(
-                vec![TypeDefinition::without_source(
+            Module::empty()
+                .set_type_definitions(vec![TypeDefinition::without_source(
                     "foo.x",
                     vec![types::RecordElement::new(
                         "x",
@@ -156,11 +148,8 @@ mod tests {
                     false,
                     false,
                     false
-                )],
-                vec![],
-                vec![],
-                vec![],
-            )
+                )])
+                .set_definitions(vec![])
         );
     }
 
@@ -178,6 +167,7 @@ mod tests {
                     )],
                     vec![],
                     vec![],
+                    vec![],
                 ),
                 "foo."
             ),
@@ -189,6 +179,7 @@ mod tests {
                     false,
                     false
                 )],
+                vec![],
                 vec![],
                 vec![],
             )

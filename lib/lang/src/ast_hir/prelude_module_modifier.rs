@@ -30,6 +30,7 @@ pub fn modify(module: &Module) -> Module {
                 )
             })
             .collect(),
+        module.foreign_declarations().to_vec(),
         module.declarations().to_vec(),
         module
             .definitions()

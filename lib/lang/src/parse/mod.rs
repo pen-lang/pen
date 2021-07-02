@@ -25,7 +25,7 @@ mod tests {
     fn parse_empty_module() {
         assert_eq!(
             parse("", ""),
-            Ok(Module::new(vec![], vec![], vec![], vec![]))
+            Ok(Module::new(vec![], vec![], vec![], vec![], vec![]))
         );
     }
 }

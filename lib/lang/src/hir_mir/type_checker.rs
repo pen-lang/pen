@@ -344,16 +344,13 @@ mod tests {
 
     #[test]
     fn check_empty_module() -> Result<(), CompileError> {
-        check_module(&Module::new(vec![], vec![], vec![], vec![]))
+        check_module(&Module::new(vec![], vec![], vec![], vec![], vec![]))
     }
 
     #[test]
     fn check_definition() -> Result<(), CompileError> {
-        check_module(&Module::new(
-            vec![],
-            vec![],
-            vec![],
-            vec![Definition::without_source(
+        check_module(
+            &Module::empty().set_definitions(vec![Definition::without_source(
                 "x",
                 Lambda::new(
                     vec![],
@@ -362,17 +359,14 @@ mod tests {
                     Position::dummy(),
                 ),
                 false,
-            )],
-        ))
+            )]),
+        )
     }
 
     #[test]
     fn check_subsumption_of_function_result_type() -> Result<(), CompileError> {
-        check_module(&Module::new(
-            vec![],
-            vec![],
-            vec![],
-            vec![Definition::without_source(
+        check_module(
+            &Module::empty().set_definitions(vec![Definition::without_source(
                 "x",
                 Lambda::new(
                     vec![],
@@ -385,17 +379,14 @@ mod tests {
                     Position::dummy(),
                 ),
                 false,
-            )],
-        ))
+            )]),
+        )
     }
 
     #[test]
     fn check_let() {
-        check_module(&Module::new(
-            vec![],
-            vec![],
-            vec![],
-            vec![Definition::without_source(
+        check_module(
+            &Module::empty().set_definitions(vec![Definition::without_source(
                 "x",
                 Lambda::new(
                     vec![],
@@ -410,8 +401,8 @@ mod tests {
                     Position::dummy(),
                 ),
                 false,
-            )],
-        ))
+            )]),
+        )
         .unwrap();
     }
 
@@ -420,11 +411,8 @@ mod tests {
 
         #[test]
         fn check_if() {
-            check_module(&Module::new(
-                vec![],
-                vec![],
-                vec![],
-                vec![Definition::without_source(
+            check_module(
+                &Module::empty().set_definitions(vec![Definition::without_source(
                     "f",
                     Lambda::new(
                         vec![],
@@ -438,18 +426,15 @@ mod tests {
                         Position::dummy(),
                     ),
                     false,
-                )],
-            ))
+                )]),
+            )
             .unwrap()
         }
 
         #[test]
         fn check_if_of_union_type() {
-            check_module(&Module::new(
-                vec![],
-                vec![],
-                vec![],
-                vec![Definition::without_source(
+            check_module(
+                &Module::empty().set_definitions(vec![Definition::without_source(
                     "f",
                     Lambda::new(
                         vec![],
@@ -467,8 +452,8 @@ mod tests {
                         Position::dummy(),
                     ),
                     false,
-                )],
-            ))
+                )]),
+            )
             .unwrap()
         }
     }
@@ -484,11 +469,8 @@ mod tests {
                 Position::dummy(),
             );
 
-            check_module(&Module::new(
-                vec![],
-                vec![],
-                vec![],
-                vec![Definition::without_source(
+            check_module(
+                &Module::empty().set_definitions(vec![Definition::without_source(
                     "f",
                     Lambda::new(
                         vec![Argument::new("x", union_type)],
@@ -512,18 +494,15 @@ mod tests {
                         Position::dummy(),
                     ),
                     false,
-                )],
-            ))
+                )]),
+            )
             .unwrap()
         }
 
         #[test]
         fn check_with_any() {
-            check_module(&Module::new(
-                vec![],
-                vec![],
-                vec![],
-                vec![Definition::without_source(
+            check_module(
+                &Module::empty().set_definitions(vec![Definition::without_source(
                     "f",
                     Lambda::new(
                         vec![Argument::new("x", types::Any::new(Position::dummy()))],
@@ -545,18 +524,15 @@ mod tests {
                         Position::dummy(),
                     ),
                     false,
-                )],
-            ))
+                )]),
+            )
             .unwrap()
         }
 
         #[test]
         fn check_result_of_union() {
-            check_module(&Module::new(
-                vec![],
-                vec![],
-                vec![],
-                vec![Definition::without_source(
+            check_module(
+                &Module::empty().set_definitions(vec![Definition::without_source(
                     "f",
                     Lambda::new(
                         vec![Argument::new("x", types::Any::new(Position::dummy()))],
@@ -582,18 +558,15 @@ mod tests {
                         Position::dummy(),
                     ),
                     false,
-                )],
-            ))
+                )]),
+            )
             .unwrap()
         }
 
         #[test]
         fn check_result_of_any() {
-            check_module(&Module::new(
-                vec![],
-                vec![],
-                vec![],
-                vec![Definition::without_source(
+            check_module(
+                &Module::empty().set_definitions(vec![Definition::without_source(
                     "f",
                     Lambda::new(
                         vec![Argument::new("x", types::Any::new(Position::dummy()))],
@@ -615,19 +588,16 @@ mod tests {
                         Position::dummy(),
                     ),
                     false,
-                )],
-            ))
+                )]),
+            )
             .unwrap()
         }
 
         #[test]
         #[should_panic]
         fn fail_to_check_due_to_wrong_argument_type() {
-            check_module(&Module::new(
-                vec![],
-                vec![],
-                vec![],
-                vec![Definition::without_source(
+            check_module(
+                &Module::empty().set_definitions(vec![Definition::without_source(
                     "f",
                     Lambda::new(
                         vec![],
@@ -645,19 +615,16 @@ mod tests {
                         Position::dummy(),
                     ),
                     false,
-                )],
-            ))
+                )]),
+            )
             .unwrap()
         }
 
         #[test]
         #[should_panic]
         fn fail_to_check_union_due_to_missing_else() {
-            check_module(&Module::new(
-                vec![],
-                vec![],
-                vec![],
-                vec![Definition::without_source(
+            check_module(
+                &Module::empty().set_definitions(vec![Definition::without_source(
                     "f",
                     Lambda::new(
                         vec![Argument::new(
@@ -682,19 +649,16 @@ mod tests {
                         Position::dummy(),
                     ),
                     false,
-                )],
-            ))
+                )]),
+            )
             .unwrap();
         }
 
         #[test]
         #[should_panic]
         fn fail_to_check_any_due_to_missing_else() {
-            check_module(&Module::new(
-                vec![],
-                vec![],
-                vec![],
-                vec![Definition::without_source(
+            check_module(
+                &Module::empty().set_definitions(vec![Definition::without_source(
                     "f",
                     Lambda::new(
                         vec![Argument::new(
@@ -719,19 +683,16 @@ mod tests {
                         Position::dummy(),
                     ),
                     false,
-                )],
-            ))
+                )]),
+            )
             .unwrap();
         }
 
         #[test]
         #[should_panic]
         fn fail_to_check_due_to_any_type_branch() {
-            check_module(&Module::new(
-                vec![],
-                vec![],
-                vec![],
-                vec![Definition::without_source(
+            check_module(
+                &Module::empty().set_definitions(vec![Definition::without_source(
                     "f",
                     Lambda::new(
                         vec![Argument::new("x", types::Any::new(Position::dummy()))],
@@ -753,8 +714,8 @@ mod tests {
                         Position::dummy(),
                     ),
                     false,
-                )],
-            ))
+                )]),
+            )
             .unwrap();
         }
     }
@@ -764,11 +725,8 @@ mod tests {
 
         #[test]
         fn check_call() {
-            check_module(&Module::new(
-                vec![],
-                vec![],
-                vec![],
-                vec![Definition::without_source(
+            check_module(
+                &Module::empty().set_definitions(vec![Definition::without_source(
                     "f",
                     Lambda::new(
                         vec![],
@@ -789,18 +747,15 @@ mod tests {
                         Position::dummy(),
                     ),
                     false,
-                )],
-            ))
+                )]),
+            )
             .unwrap()
         }
 
         #[test]
         fn check_call_with_arguments() {
-            check_module(&Module::new(
-                vec![],
-                vec![],
-                vec![],
-                vec![Definition::without_source(
+            check_module(
+                &Module::empty().set_definitions(vec![Definition::without_source(
                     "f",
                     Lambda::new(
                         vec![Argument::new("x", types::None::new(Position::dummy()))],
@@ -821,19 +776,16 @@ mod tests {
                         Position::dummy(),
                     ),
                     false,
-                )],
-            ))
+                )]),
+            )
             .unwrap()
         }
 
         #[test]
         #[should_panic]
         fn fail_to_check_call_with_wrong_argument_type() {
-            check_module(&Module::new(
-                vec![],
-                vec![],
-                vec![],
-                vec![Definition::without_source(
+            check_module(
+                &Module::empty().set_definitions(vec![Definition::without_source(
                     "f",
                     Lambda::new(
                         vec![Argument::new("x", types::None::new(Position::dummy()))],
@@ -854,19 +806,16 @@ mod tests {
                         Position::dummy(),
                     ),
                     false,
-                )],
-            ))
+                )]),
+            )
             .unwrap()
         }
 
         #[test]
         #[should_panic]
         fn fail_to_check_call_with_wrong_argument_count() {
-            check_module(&Module::new(
-                vec![],
-                vec![],
-                vec![],
-                vec![Definition::without_source(
+            check_module(
+                &Module::empty().set_definitions(vec![Definition::without_source(
                     "f",
                     Lambda::new(
                         vec![Argument::new("x", types::None::new(Position::dummy()))],
@@ -887,8 +836,8 @@ mod tests {
                         Position::dummy(),
                     ),
                     false,
-                )],
-            ))
+                )]),
+            )
             .unwrap()
         }
     }
@@ -898,11 +847,8 @@ mod tests {
 
         #[test]
         fn check_arithmetic_operation() {
-            check_module(&Module::new(
-                vec![],
-                vec![],
-                vec![],
-                vec![Definition::without_source(
+            check_module(
+                &Module::empty().set_definitions(vec![Definition::without_source(
                     "x",
                     Lambda::new(
                         vec![],
@@ -916,18 +862,15 @@ mod tests {
                         Position::dummy(),
                     ),
                     false,
-                )],
-            ))
+                )]),
+            )
             .unwrap();
         }
 
         #[test]
         fn check_boolean_operation() {
-            check_module(&Module::new(
-                vec![],
-                vec![],
-                vec![],
-                vec![Definition::without_source(
+            check_module(
+                &Module::empty().set_definitions(vec![Definition::without_source(
                     "x",
                     Lambda::new(
                         vec![],
@@ -941,19 +884,16 @@ mod tests {
                         Position::dummy(),
                     ),
                     false,
-                )],
-            ))
+                )]),
+            )
             .unwrap();
         }
 
         #[test]
         fn fail_to_check_boolean_operation() {
             assert_eq!(
-                check_module(&Module::new(
-                    vec![],
-                    vec![],
-                    vec![],
-                    vec![Definition::without_source(
+                check_module(
+                    &Module::empty().set_definitions(vec![Definition::without_source(
                         "x",
                         Lambda::new(
                             vec![],
@@ -967,8 +907,8 @@ mod tests {
                             Position::dummy(),
                         ),
                         false,
-                    )],
-                )),
+                    )],)
+                ),
                 Err(CompileError::TypesNotMatched(
                     Position::dummy(),
                     Position::dummy()
@@ -978,11 +918,8 @@ mod tests {
 
         #[test]
         fn check_not_operation() {
-            check_module(&Module::new(
-                vec![],
-                vec![],
-                vec![],
-                vec![Definition::without_source(
+            check_module(
+                &Module::empty().set_definitions(vec![Definition::without_source(
                     "x",
                     Lambda::new(
                         vec![],
@@ -991,18 +928,15 @@ mod tests {
                         Position::dummy(),
                     ),
                     false,
-                )],
-            ))
+                )]),
+            )
             .unwrap();
         }
 
         #[test]
         fn check_order_operation() {
-            check_module(&Module::new(
-                vec![],
-                vec![],
-                vec![],
-                vec![Definition::without_source(
+            check_module(
+                &Module::empty().set_definitions(vec![Definition::without_source(
                     "x",
                     Lambda::new(
                         vec![],
@@ -1016,8 +950,8 @@ mod tests {
                         Position::dummy(),
                     ),
                     false,
-                )],
-            ))
+                )]),
+            )
             .unwrap();
         }
     }
@@ -1029,47 +963,9 @@ mod tests {
         fn check_record() -> Result<(), CompileError> {
             let reference_type = types::Reference::new("r", Position::dummy());
 
-            check_module(&Module::new(
-                vec![TypeDefinition::without_source(
-                    "r",
-                    vec![types::RecordElement::new(
-                        "x",
-                        types::None::new(Position::dummy()),
-                    )],
-                    false,
-                    false,
-                    false,
-                )],
-                vec![],
-                vec![],
-                vec![Definition::without_source(
-                    "x",
-                    Lambda::new(
-                        vec![],
-                        reference_type.clone(),
-                        RecordConstruction::new(
-                            reference_type,
-                            vec![RecordElement::new(
-                                "x",
-                                None::new(Position::dummy()),
-                                Position::dummy(),
-                            )],
-                            Position::dummy(),
-                        ),
-                        Position::dummy(),
-                    ),
-                    false,
-                )],
-            ))
-        }
-
-        #[test]
-        fn fail_to_check_record_with_missing_element() {
-            let reference_type = types::Reference::new("r", Position::dummy());
-
-            assert!(matches!(
-                check_module(&Module::new(
-                    vec![TypeDefinition::without_source(
+            check_module(
+                &Module::empty()
+                    .set_type_definitions(vec![TypeDefinition::without_source(
                         "r",
                         vec![types::RecordElement::new(
                             "x",
@@ -1077,45 +973,9 @@ mod tests {
                         )],
                         false,
                         false,
-                        false
-                    )],
-                    vec![],
-                    vec![],
-                    vec![Definition::without_source(
-                        "x",
-                        Lambda::new(
-                            vec![],
-                            reference_type.clone(),
-                            RecordConstruction::new(
-                                reference_type,
-                                Default::default(),
-                                Position::dummy(),
-                            ),
-                            Position::dummy(),
-                        ),
-                        false
-                    )],
-                )),
-                Err(CompileError::RecordElementMissing(_))
-            ));
-        }
-
-        #[test]
-        fn fail_to_check_record_with_unknown_element() {
-            let reference_type = types::Reference::new("r", Position::dummy());
-
-            assert!(matches!(
-                check_module(&Module::new(
-                    vec![TypeDefinition::without_source(
-                        "r",
-                        vec![],
                         false,
-                        false,
-                        false
-                    )],
-                    vec![],
-                    vec![],
-                    vec![Definition::without_source(
+                    )])
+                    .set_definitions(vec![Definition::without_source(
                         "x",
                         Lambda::new(
                             vec![],
@@ -1125,15 +985,86 @@ mod tests {
                                 vec![RecordElement::new(
                                     "x",
                                     None::new(Position::dummy()),
-                                    Position::dummy()
+                                    Position::dummy(),
                                 )],
                                 Position::dummy(),
                             ),
                             Position::dummy(),
                         ),
-                        false
-                    )],
-                )),
+                        false,
+                    )]),
+            )
+        }
+
+        #[test]
+        fn fail_to_check_record_with_missing_element() {
+            let reference_type = types::Reference::new("r", Position::dummy());
+
+            assert!(matches!(
+                check_module(
+                    &Module::empty()
+                        .set_type_definitions(vec![TypeDefinition::without_source(
+                            "r",
+                            vec![types::RecordElement::new(
+                                "x",
+                                types::None::new(Position::dummy()),
+                            )],
+                            false,
+                            false,
+                            false
+                        )])
+                        .set_definitions(vec![Definition::without_source(
+                            "x",
+                            Lambda::new(
+                                vec![],
+                                reference_type.clone(),
+                                RecordConstruction::new(
+                                    reference_type,
+                                    Default::default(),
+                                    Position::dummy(),
+                                ),
+                                Position::dummy(),
+                            ),
+                            false
+                        )])
+                ),
+                Err(CompileError::RecordElementMissing(_))
+            ));
+        }
+
+        #[test]
+        fn fail_to_check_record_with_unknown_element() {
+            let reference_type = types::Reference::new("r", Position::dummy());
+
+            assert!(matches!(
+                check_module(
+                    &Module::empty()
+                        .set_type_definitions(vec![TypeDefinition::without_source(
+                            "r",
+                            vec![],
+                            false,
+                            false,
+                            false
+                        )])
+                        .set_definitions(vec![Definition::without_source(
+                            "x",
+                            Lambda::new(
+                                vec![],
+                                reference_type.clone(),
+                                RecordConstruction::new(
+                                    reference_type,
+                                    vec![RecordElement::new(
+                                        "x",
+                                        None::new(Position::dummy()),
+                                        Position::dummy()
+                                    )],
+                                    Position::dummy(),
+                                ),
+                                Position::dummy(),
+                            ),
+                            false
+                        )])
+                ),
                 Err(CompileError::RecordElementUnknown(_))
             ));
         }
@@ -1142,83 +1073,9 @@ mod tests {
         fn check_record_update() -> Result<(), CompileError> {
             let reference_type = types::Reference::new("r", Position::dummy());
 
-            check_module(&Module::new(
-                vec![TypeDefinition::without_source(
-                    "r",
-                    vec![types::RecordElement::new(
-                        "x",
-                        types::None::new(Position::dummy()),
-                    )],
-                    false,
-                    false,
-                    false,
-                )],
-                vec![],
-                vec![],
-                vec![Definition::without_source(
-                    "x",
-                    Lambda::new(
-                        vec![Argument::new("x", reference_type.clone())],
-                        reference_type.clone(),
-                        RecordUpdate::new(
-                            reference_type,
-                            Variable::new("x", Position::dummy()),
-                            vec![RecordElement::new(
-                                "x",
-                                None::new(Position::dummy()),
-                                Position::dummy(),
-                            )],
-                            Position::dummy(),
-                        ),
-                        Position::dummy(),
-                    ),
-                    false,
-                )],
-            ))
-        }
-
-        #[test]
-        fn check_record_deconstruction() -> Result<(), CompileError> {
-            let reference_type = types::Reference::new("r", Position::dummy());
-
-            check_module(&Module::new(
-                vec![TypeDefinition::without_source(
-                    "r",
-                    vec![types::RecordElement::new(
-                        "x",
-                        types::None::new(Position::dummy()),
-                    )],
-                    false,
-                    false,
-                    false,
-                )],
-                vec![],
-                vec![],
-                vec![Definition::without_source(
-                    "x",
-                    Lambda::new(
-                        vec![Argument::new("x", reference_type.clone())],
-                        types::None::new(Position::dummy()),
-                        RecordDeconstruction::new(
-                            Some(reference_type.into()),
-                            Variable::new("x", Position::dummy()),
-                            "x",
-                            Position::dummy(),
-                        ),
-                        Position::dummy(),
-                    ),
-                    false,
-                )],
-            ))
-        }
-
-        #[test]
-        fn fail_to_check_record_deconstruction_due_to_unknown_element() {
-            let reference_type = types::Reference::new("r", Position::dummy());
-
-            assert_eq!(
-                check_module(&Module::new(
-                    vec![TypeDefinition::without_source(
+            check_module(
+                &Module::empty()
+                    .set_type_definitions(vec![TypeDefinition::without_source(
                         "r",
                         vec![types::RecordElement::new(
                             "x",
@@ -1227,10 +1084,46 @@ mod tests {
                         false,
                         false,
                         false,
-                    )],
-                    vec![],
-                    vec![],
-                    vec![Definition::without_source(
+                    )])
+                    .set_definitions(vec![Definition::without_source(
+                        "x",
+                        Lambda::new(
+                            vec![Argument::new("x", reference_type.clone())],
+                            reference_type.clone(),
+                            RecordUpdate::new(
+                                reference_type,
+                                Variable::new("x", Position::dummy()),
+                                vec![RecordElement::new(
+                                    "x",
+                                    None::new(Position::dummy()),
+                                    Position::dummy(),
+                                )],
+                                Position::dummy(),
+                            ),
+                            Position::dummy(),
+                        ),
+                        false,
+                    )]),
+            )
+        }
+
+        #[test]
+        fn check_record_deconstruction() -> Result<(), CompileError> {
+            let reference_type = types::Reference::new("r", Position::dummy());
+
+            check_module(
+                &Module::empty()
+                    .set_type_definitions(vec![TypeDefinition::without_source(
+                        "r",
+                        vec![types::RecordElement::new(
+                            "x",
+                            types::None::new(Position::dummy()),
+                        )],
+                        false,
+                        false,
+                        false,
+                    )])
+                    .set_definitions(vec![Definition::without_source(
                         "x",
                         Lambda::new(
                             vec![Argument::new("x", reference_type.clone())],
@@ -1238,14 +1131,49 @@ mod tests {
                             RecordDeconstruction::new(
                                 Some(reference_type.into()),
                                 Variable::new("x", Position::dummy()),
-                                "y",
+                                "x",
                                 Position::dummy(),
                             ),
                             Position::dummy(),
                         ),
                         false,
-                    )],
-                )),
+                    )]),
+            )
+        }
+
+        #[test]
+        fn fail_to_check_record_deconstruction_due_to_unknown_element() {
+            let reference_type = types::Reference::new("r", Position::dummy());
+
+            assert_eq!(
+                check_module(
+                    &Module::empty()
+                        .set_type_definitions(vec![TypeDefinition::without_source(
+                            "r",
+                            vec![types::RecordElement::new(
+                                "x",
+                                types::None::new(Position::dummy()),
+                            )],
+                            false,
+                            false,
+                            false,
+                        )])
+                        .set_definitions(vec![Definition::without_source(
+                            "x",
+                            Lambda::new(
+                                vec![Argument::new("x", reference_type.clone())],
+                                types::None::new(Position::dummy()),
+                                RecordDeconstruction::new(
+                                    Some(reference_type.into()),
+                                    Variable::new("x", Position::dummy()),
+                                    "y",
+                                    Position::dummy(),
+                                ),
+                                Position::dummy(),
+                            ),
+                            false,
+                        )])
+                ),
                 Err(CompileError::RecordElementUnknown(Position::dummy()))
             );
         }

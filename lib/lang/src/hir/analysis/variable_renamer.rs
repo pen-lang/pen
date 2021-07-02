@@ -5,6 +5,7 @@ pub fn rename(module: &Module, names: &HashMap<String, String>) -> Module {
     Module::new(
         module.type_definitions().to_vec(),
         module.type_aliases().to_vec(),
+        module.foreign_declarations().to_vec(),
         module.declarations().to_vec(),
         module
             .definitions()
@@ -259,58 +260,43 @@ mod tests {
     fn rename_variable() {
         assert_eq!(
             rename(
-                &Module::new(
-                    vec![],
-                    vec![],
-                    vec![],
-                    vec![Definition::without_source(
-                        "x",
-                        Lambda::new(
-                            vec![],
-                            types::None::new(Position::dummy()),
-                            Variable::new("x", Position::dummy()),
-                            Position::dummy()
-                        ),
-                        false
-                    )]
-                ),
-                &vec![("x".into(), "foo.x".into())].into_iter().collect()
-            ),
-            Module::new(
-                vec![],
-                vec![],
-                vec![],
-                vec![Definition::without_source(
+                &Module::empty().set_definitions(vec![Definition::without_source(
                     "x",
                     Lambda::new(
                         vec![],
                         types::None::new(Position::dummy()),
-                        Variable::new("foo.x", Position::dummy()),
+                        Variable::new("x", Position::dummy()),
                         Position::dummy()
                     ),
                     false
-                )]
-            )
+                )],),
+                &vec![("x".into(), "foo.x".into())].into_iter().collect()
+            ),
+            Module::empty().set_definitions(vec![Definition::without_source(
+                "x",
+                Lambda::new(
+                    vec![],
+                    types::None::new(Position::dummy()),
+                    Variable::new("foo.x", Position::dummy()),
+                    Position::dummy()
+                ),
+                false
+            )],)
         );
     }
 
     #[test]
     fn do_not_rename_variable_shadowed_by_argument() {
-        let module = Module::new(
-            vec![],
-            vec![],
-            vec![],
-            vec![Definition::without_source(
-                "x",
-                Lambda::new(
-                    vec![Argument::new("x", types::None::new(Position::dummy()))],
-                    types::None::new(Position::dummy()),
-                    Variable::new("x", Position::dummy()),
-                    Position::dummy(),
-                ),
-                false,
-            )],
-        );
+        let module = Module::empty().set_definitions(vec![Definition::without_source(
+            "x",
+            Lambda::new(
+                vec![Argument::new("x", types::None::new(Position::dummy()))],
+                types::None::new(Position::dummy()),
+                Variable::new("x", Position::dummy()),
+                Position::dummy(),
+            ),
+            false,
+        )]);
 
         assert_eq!(
             rename(
@@ -325,34 +311,7 @@ mod tests {
     fn do_not_rename_variable_shadowed_by_statement() {
         assert_eq!(
             rename(
-                &Module::new(
-                    vec![],
-                    vec![],
-                    vec![],
-                    vec![Definition::without_source(
-                        "x",
-                        Lambda::new(
-                            vec![],
-                            types::None::new(Position::dummy()),
-                            Let::new(
-                                Some("x".into()),
-                                None,
-                                None::new(Position::dummy()),
-                                Variable::new("x", Position::dummy()),
-                                Position::dummy(),
-                            ),
-                            Position::dummy()
-                        ),
-                        false
-                    )]
-                ),
-                &vec![("x".into(), "foo.x".into())].into_iter().collect()
-            ),
-            Module::new(
-                vec![],
-                vec![],
-                vec![],
-                vec![Definition::without_source(
+                &Module::empty().set_definitions(vec![Definition::without_source(
                     "x",
                     Lambda::new(
                         vec![],
@@ -367,18 +326,10 @@ mod tests {
                         Position::dummy()
                     ),
                     false
-                )]
-            )
-        );
-    }
-
-    #[test]
-    fn do_not_rename_shadowed_variable_in_let() {
-        let module = Module::new(
-            vec![],
-            vec![],
-            vec![],
-            vec![Definition::without_source(
+                )],),
+                &vec![("x".into(), "foo.x".into())].into_iter().collect()
+            ),
+            Module::empty().set_definitions(vec![Definition::without_source(
                 "x",
                 Lambda::new(
                     vec![],
@@ -390,11 +341,31 @@ mod tests {
                         Variable::new("x", Position::dummy()),
                         Position::dummy(),
                     ),
+                    Position::dummy()
+                ),
+                false
+            )],)
+        );
+    }
+
+    #[test]
+    fn do_not_rename_shadowed_variable_in_let() {
+        let module = Module::empty().set_definitions(vec![Definition::without_source(
+            "x",
+            Lambda::new(
+                vec![],
+                types::None::new(Position::dummy()),
+                Let::new(
+                    Some("x".into()),
+                    None,
+                    None::new(Position::dummy()),
+                    Variable::new("x", Position::dummy()),
                     Position::dummy(),
                 ),
-                false,
-            )],
-        );
+                Position::dummy(),
+            ),
+            false,
+        )]);
 
         assert_eq!(
             rename(
