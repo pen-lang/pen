@@ -4,7 +4,7 @@ use std::collections::HashMap;
 
 pub fn qualify(module: &Module, prefix: &str) -> Module {
     let names = module
-        .definitions()
+        .foreign_declarations()
         .iter()
         .map(|declaration| {
             (
