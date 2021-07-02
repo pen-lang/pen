@@ -57,6 +57,17 @@ impl Module {
     }
 
     #[cfg(test)]
+    pub fn set_foreign_declarations(&self, declarations: Vec<ForeignDeclaration>) -> Self {
+        Self::new(
+            self.type_definitions.clone(),
+            self.type_aliases.clone(),
+            declarations,
+            self.declarations.clone(),
+            self.definitions.clone(),
+        )
+    }
+
+    #[cfg(test)]
     pub fn set_declarations(&self, declarations: Vec<Declaration>) -> Self {
         Self::new(
             self.type_definitions.clone(),

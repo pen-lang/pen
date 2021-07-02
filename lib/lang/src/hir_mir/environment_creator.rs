@@ -12,6 +12,12 @@ pub fn create_from_module(module: &Module) -> HashMap<String, Type> {
                 declaration.type_().clone().into(),
             )
         })
+        .chain(
+            module
+                .foreign_declarations()
+                .iter()
+                .map(|declaration| (declaration.name().into(), declaration.type_().clone())),
+        )
         .chain(module.definitions().iter().map(|definition| {
             (
                 definition.name().into(),
@@ -19,4 +25,35 @@ pub fn create_from_module(module: &Module) -> HashMap<String, Type> {
             )
         }))
         .collect()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::position::Position;
+    use crate::types;
+
+    #[test]
+    fn create_with_foreign_declaration() {
+        let type_ = types::Function::new(
+            vec![],
+            types::None::new(Position::dummy()),
+            Position::dummy(),
+        );
+
+        assert_eq!(
+            create_from_module(&Module::empty().set_foreign_declarations(vec![
+                ForeignDeclaration::new(
+                    "foo",
+                    "bar",
+                    CallingConvention::Native,
+                    type_.clone(),
+                    Position::dummy()
+                )
+            ])),
+            vec![("foo".into(), type_.clone().into())]
+                .into_iter()
+                .collect()
+        );
+    }
 }
