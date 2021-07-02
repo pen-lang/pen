@@ -32,8 +32,8 @@ impl Module {
         &self.imports
     }
 
-    pub fn foreign_imports(&self) -> &[Import] {
-        &self.imports
+    pub fn foreign_imports(&self) -> &[ForeignImport] {
+        &self.foreign_imports
     }
 
     pub fn type_definitions(&self) -> &[TypeDefinition] {

@@ -11,7 +11,25 @@ pub fn compile(
             .iter()
             .map(|type_definition| compile_type_definition(type_definition, type_context))
             .collect::<Result<Vec<_>, _>>()?,
-        vec![],
+        module
+            .foreign_declarations()
+            .iter()
+            .map(|declaration| -> Result<_, CompileError> {
+                Ok(mir::ir::ForeignDeclaration::new(
+                    declaration.name(),
+                    declaration.foreign_name(),
+                    type_compiler::compile(declaration.type_(), type_context)?
+                        .into_function()
+                        .ok_or_else(|| {
+                            CompileError::FunctionExpected(declaration.position().clone())
+                        })?,
+                    match declaration.calling_convention() {
+                        CallingConvention::Native => mir::ir::CallingConvention::Source,
+                        CallingConvention::C => mir::ir::CallingConvention::Target,
+                    },
+                ))
+            })
+            .collect::<Result<_, _>>()?,
         vec![],
         module
             .declarations()

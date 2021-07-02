@@ -31,6 +31,22 @@ pub fn compile(module: &ast::Module) -> Result<hir::Module, CompileError> {
                 )
             })
             .collect(),
+        module
+            .foreign_imports()
+            .iter()
+            .map(|import| {
+                hir::ForeignDeclaration::new(
+                    import.name(),
+                    import.foreign_name(),
+                    match import.calling_convention() {
+                        ast::CallingConvention::C => hir::CallingConvention::C,
+                        ast::CallingConvention::Native => hir::CallingConvention::Native,
+                    },
+                    import.type_().clone(),
+                    import.position().clone(),
+                )
+            })
+            .collect(),
         vec![],
         module
             .definitions()

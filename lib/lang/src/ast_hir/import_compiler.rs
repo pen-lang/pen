@@ -67,6 +67,7 @@ fn compile_imports(module: &hir::Module, module_interfaces: &[&interface::Module
             .unique_by(|alias| alias.name().to_string())
             .chain(module.type_aliases().iter().cloned())
             .collect(),
+        module.foreign_declarations().to_vec(),
         module_interfaces
             .iter()
             .flat_map(|interface| interface.declarations())

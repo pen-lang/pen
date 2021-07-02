@@ -6,18 +6,37 @@ pub fn qualify(module: &Module, prefix: &str) -> Module {
     let names = module
         .definitions()
         .iter()
-        .map(|definition| {
+        .map(|declaration| {
+            (
+                declaration.name().into(),
+                prefix.to_owned() + declaration.name(),
+            )
+        })
+        .chain(module.definitions().iter().map(|definition| {
             (
                 definition.name().into(),
                 prefix.to_owned() + definition.name(),
             )
-        })
+        }))
         .collect::<HashMap<_, _>>();
 
     variable_renamer::rename(
         &Module::new(
             module.type_definitions().to_vec(),
             module.type_aliases().to_vec(),
+            module
+                .foreign_declarations()
+                .iter()
+                .map(|declaration| {
+                    ForeignDeclaration::new(
+                        names[declaration.name()].clone(),
+                        declaration.foreign_name(),
+                        declaration.calling_convention(),
+                        declaration.type_().clone(),
+                        declaration.position().clone(),
+                    )
+                })
+                .collect(),
             module.declarations().to_vec(),
             module
                 .definitions()
