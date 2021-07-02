@@ -200,11 +200,11 @@ mod tests {
     fn compile_empty_module() {
         assert_eq!(
             compile(
-                &hir::Module::new(vec![], vec![], vec![], vec![]),
+                &hir::Module::new(vec![], vec![], vec![], vec![], vec![],),
                 &Default::default(),
                 &[]
             ),
-            hir::Module::new(vec![], vec![], vec![], vec![])
+            hir::Module::new(vec![], vec![], vec![], vec![], vec![],)
         );
     }
 

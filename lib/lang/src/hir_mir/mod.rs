@@ -55,7 +55,7 @@ mod tests {
 
     #[test]
     fn compile_empty_module() -> Result<(), CompileError> {
-        compile_module(&Module::new(vec![], vec![], vec![], vec![]))?;
+        compile_module(&Module::new(vec![], vec![], vec![], vec![], vec![]))?;
 
         Ok(())
     }

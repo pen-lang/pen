@@ -372,7 +372,7 @@ mod tests {
 
     #[test]
     fn infer_empty_module() {
-        infer_module(&Module::new(vec![], vec![], vec![], vec![])).unwrap();
+        infer_module(&Module::new(vec![], vec![], vec![], vec![], vec![])).unwrap();
     }
 
     #[test]

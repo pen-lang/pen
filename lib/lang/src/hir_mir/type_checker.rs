@@ -344,7 +344,7 @@ mod tests {
 
     #[test]
     fn check_empty_module() -> Result<(), CompileError> {
-        check_module(&Module::new(vec![], vec![], vec![], vec![]))
+        check_module(&Module::new(vec![], vec![], vec![], vec![], vec![]))
     }
 
     #[test]
