@@ -66,7 +66,7 @@ mod tests {
     fn qualify_definition() {
         assert_eq!(
             qualify(
-                &Module::from_definitions(vec![Definition::without_source(
+                &Module::empty().set_definitions(vec![Definition::without_source(
                     "x",
                     Lambda::new(
                         vec![],
@@ -78,7 +78,7 @@ mod tests {
                 )],),
                 "foo."
             ),
-            Module::from_definitions(vec![Definition::without_source(
+            Module::empty().set_definitions(vec![Definition::without_source(
                 "foo.x",
                 Lambda::new(
                     vec![],
@@ -95,7 +95,7 @@ mod tests {
     fn qualify_variable() {
         assert_eq!(
             qualify(
-                &Module::from_definitions(vec![Definition::without_source(
+                &Module::empty().set_definitions(vec![Definition::without_source(
                     "x",
                     Lambda::new(
                         vec![],
@@ -107,7 +107,7 @@ mod tests {
                 )],),
                 "foo."
             ),
-            Module::from_definitions(vec![Definition::without_source(
+            Module::empty().set_definitions(vec![Definition::without_source(
                 "foo.x",
                 Lambda::new(
                     vec![],
@@ -124,7 +124,7 @@ mod tests {
     fn do_not_qualify_variable_shadowed_by_argument() {
         assert_eq!(
             qualify(
-                &Module::from_definitions(vec![Definition::without_source(
+                &Module::empty().set_definitions(vec![Definition::without_source(
                     "x",
                     Lambda::new(
                         vec![Argument::new("x", types::None::new(Position::dummy()))],
@@ -136,7 +136,7 @@ mod tests {
                 )],),
                 "foo."
             ),
-            Module::from_definitions(vec![Definition::without_source(
+            Module::empty().set_definitions(vec![Definition::without_source(
                 "foo.x",
                 Lambda::new(
                     vec![Argument::new("x", types::None::new(Position::dummy()))],
@@ -153,7 +153,7 @@ mod tests {
     fn do_not_qualify_variable_shadowed_by_statement() {
         assert_eq!(
             qualify(
-                &Module::from_definitions(vec![Definition::without_source(
+                &Module::empty().set_definitions(vec![Definition::without_source(
                     "x",
                     Lambda::new(
                         vec![],
@@ -171,7 +171,7 @@ mod tests {
                 )],),
                 "foo."
             ),
-            Module::from_definitions(vec![Definition::without_source(
+            Module::empty().set_definitions(vec![Definition::without_source(
                 "foo.x",
                 Lambda::new(
                     vec![],

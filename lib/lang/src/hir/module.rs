@@ -78,19 +78,6 @@ impl Module {
         )
     }
 
-    #[cfg(test)]
-    pub fn from_definitions(definitions: Vec<Definition>) -> Self {
-        Self::new(vec![], vec![], vec![], vec![], definitions)
-    }
-
-    #[cfg(test)]
-    pub fn from_type_definitions_and_definitions(
-        type_definitions: Vec<TypeDefinition>,
-        definitions: Vec<Definition>,
-    ) -> Self {
-        Self::new(type_definitions, vec![], vec![], vec![], definitions)
-    }
-
     pub fn type_definitions(&self) -> &[TypeDefinition] {
         &self.type_definitions
     }

@@ -260,7 +260,7 @@ mod tests {
     fn rename_variable() {
         assert_eq!(
             rename(
-                &Module::from_definitions(vec![Definition::without_source(
+                &Module::empty().set_definitions(vec![Definition::without_source(
                     "x",
                     Lambda::new(
                         vec![],
@@ -272,7 +272,7 @@ mod tests {
                 )],),
                 &vec![("x".into(), "foo.x".into())].into_iter().collect()
             ),
-            Module::from_definitions(vec![Definition::without_source(
+            Module::empty().set_definitions(vec![Definition::without_source(
                 "x",
                 Lambda::new(
                     vec![],
@@ -287,7 +287,7 @@ mod tests {
 
     #[test]
     fn do_not_rename_variable_shadowed_by_argument() {
-        let module = Module::from_definitions(vec![Definition::without_source(
+        let module = Module::empty().set_definitions(vec![Definition::without_source(
             "x",
             Lambda::new(
                 vec![Argument::new("x", types::None::new(Position::dummy()))],
@@ -311,7 +311,7 @@ mod tests {
     fn do_not_rename_variable_shadowed_by_statement() {
         assert_eq!(
             rename(
-                &Module::from_definitions(vec![Definition::without_source(
+                &Module::empty().set_definitions(vec![Definition::without_source(
                     "x",
                     Lambda::new(
                         vec![],
@@ -329,7 +329,7 @@ mod tests {
                 )],),
                 &vec![("x".into(), "foo.x".into())].into_iter().collect()
             ),
-            Module::from_definitions(vec![Definition::without_source(
+            Module::empty().set_definitions(vec![Definition::without_source(
                 "x",
                 Lambda::new(
                     vec![],
@@ -350,7 +350,7 @@ mod tests {
 
     #[test]
     fn do_not_rename_shadowed_variable_in_let() {
-        let module = Module::from_definitions(vec![Definition::without_source(
+        let module = Module::empty().set_definitions(vec![Definition::without_source(
             "x",
             Lambda::new(
                 vec![],
