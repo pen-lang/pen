@@ -585,10 +585,8 @@ mod tests {
         );
 
         assert_eq!(
-            infer_module(&Module::new(
+            infer_module(&Module::from_type_definitions_and_definitions(
                 vec![type_definition.clone()],
-                vec![],
-                vec![],
                 vec![Definition::without_source(
                     "x",
                     Lambda::new(
@@ -608,10 +606,8 @@ mod tests {
                     false,
                 )],
             )),
-            Ok(Module::new(
+            Ok(Module::from_type_definitions_and_definitions(
                 vec![type_definition],
-                vec![],
-                vec![],
                 vec![Definition::without_source(
                     "x",
                     Lambda::new(

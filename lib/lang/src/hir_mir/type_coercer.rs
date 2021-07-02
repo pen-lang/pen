@@ -863,10 +863,8 @@ mod tests {
         let record_type = types::Record::new("r", Position::dummy());
 
         assert_eq!(
-            coerce_module(&Module::new(
+            coerce_module(&Module::from_type_definitions_and_definitions(
                 vec![type_definition.clone()],
-                vec![],
-                vec![],
                 vec![Definition::without_source(
                     "f",
                     Lambda::new(
@@ -886,10 +884,8 @@ mod tests {
                     false,
                 )],
             )),
-            Ok(Module::new(
+            Ok(Module::from_type_definitions_and_definitions(
                 vec![type_definition],
-                vec![],
-                vec![],
                 vec![Definition::without_source(
                     "f",
                     Lambda::new(
@@ -934,10 +930,8 @@ mod tests {
         let record_type = types::Record::new("r", Position::dummy());
 
         assert_eq!(
-            coerce_module(&Module::new(
+            coerce_module(&Module::from_type_definitions_and_definitions(
                 vec![type_definition.clone()],
-                vec![],
-                vec![],
                 vec![Definition::without_source(
                     "f",
                     Lambda::new(
@@ -958,10 +952,8 @@ mod tests {
                     false,
                 )],
             )),
-            Ok(Module::new(
+            Ok(Module::from_type_definitions_and_definitions(
                 vec![type_definition],
-                vec![],
-                vec![],
                 vec![Definition::without_source(
                     "f",
                     Lambda::new(

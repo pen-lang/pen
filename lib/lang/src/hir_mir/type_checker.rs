@@ -919,7 +919,7 @@ mod tests {
         fn check_record() -> Result<(), CompileError> {
             let reference_type = types::Reference::new("r", Position::dummy());
 
-            check_module(&Module::new(
+            check_module(&Module::from_type_definitions_and_definitions(
                 vec![TypeDefinition::without_source(
                     "r",
                     vec![types::RecordElement::new(
@@ -930,8 +930,6 @@ mod tests {
                     false,
                     false,
                 )],
-                vec![],
-                vec![],
                 vec![Definition::without_source(
                     "x",
                     Lambda::new(
@@ -958,7 +956,7 @@ mod tests {
             let reference_type = types::Reference::new("r", Position::dummy());
 
             assert!(matches!(
-                check_module(&Module::new(
+                check_module(&Module::from_type_definitions_and_definitions(
                     vec![TypeDefinition::without_source(
                         "r",
                         vec![types::RecordElement::new(
@@ -969,8 +967,6 @@ mod tests {
                         false,
                         false
                     )],
-                    vec![],
-                    vec![],
                     vec![Definition::without_source(
                         "x",
                         Lambda::new(
@@ -995,7 +991,7 @@ mod tests {
             let reference_type = types::Reference::new("r", Position::dummy());
 
             assert!(matches!(
-                check_module(&Module::new(
+                check_module(&Module::from_type_definitions_and_definitions(
                     vec![TypeDefinition::without_source(
                         "r",
                         vec![],
@@ -1003,8 +999,6 @@ mod tests {
                         false,
                         false
                     )],
-                    vec![],
-                    vec![],
                     vec![Definition::without_source(
                         "x",
                         Lambda::new(
@@ -1032,7 +1026,7 @@ mod tests {
         fn check_record_update() -> Result<(), CompileError> {
             let reference_type = types::Reference::new("r", Position::dummy());
 
-            check_module(&Module::new(
+            check_module(&Module::from_type_definitions_and_definitions(
                 vec![TypeDefinition::without_source(
                     "r",
                     vec![types::RecordElement::new(
@@ -1043,8 +1037,6 @@ mod tests {
                     false,
                     false,
                 )],
-                vec![],
-                vec![],
                 vec![Definition::without_source(
                     "x",
                     Lambda::new(
@@ -1071,7 +1063,7 @@ mod tests {
         fn check_record_deconstruction() -> Result<(), CompileError> {
             let reference_type = types::Reference::new("r", Position::dummy());
 
-            check_module(&Module::new(
+            check_module(&Module::from_type_definitions_and_definitions(
                 vec![TypeDefinition::without_source(
                     "r",
                     vec![types::RecordElement::new(
@@ -1082,8 +1074,6 @@ mod tests {
                     false,
                     false,
                 )],
-                vec![],
-                vec![],
                 vec![Definition::without_source(
                     "x",
                     Lambda::new(
@@ -1107,7 +1097,7 @@ mod tests {
             let reference_type = types::Reference::new("r", Position::dummy());
 
             assert_eq!(
-                check_module(&Module::new(
+                check_module(&Module::from_type_definitions_and_definitions(
                     vec![TypeDefinition::without_source(
                         "r",
                         vec![types::RecordElement::new(
@@ -1118,8 +1108,6 @@ mod tests {
                         false,
                         false,
                     )],
-                    vec![],
-                    vec![],
                     vec![Definition::without_source(
                         "x",
                         Lambda::new(
