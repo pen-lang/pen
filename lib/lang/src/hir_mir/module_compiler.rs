@@ -115,13 +115,13 @@ fn compile_definition(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::types;
     use crate::{
         hir_mir::{
             list_type_configuration::LIST_TYPE_CONFIGURATION,
             string_type_configuration::STRING_TYPE_CONFIGURATION,
         },
         position::Position,
+        types,
     };
     use pretty_assertions::assert_eq;
 

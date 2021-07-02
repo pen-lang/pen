@@ -349,7 +349,7 @@ mod tests {
     fn compile_empty_module() {
         assert_eq!(
             compile(&ast::Module::new(vec![], vec![], vec![], vec![], vec![])),
-            Ok(hir::Module::new(vec![], vec![], vec![], vec![], vec![],))
+            Ok(hir::Module::empty())
         );
     }
 
