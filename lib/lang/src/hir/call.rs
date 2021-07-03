@@ -11,6 +11,7 @@ pub struct Call {
 }
 
 impl Call {
+    // TODO Move function type to top.
     pub fn new(
         function: impl Into<Expression>,
         arguments: Vec<Expression>,
