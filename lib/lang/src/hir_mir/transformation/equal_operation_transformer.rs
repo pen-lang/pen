@@ -128,7 +128,7 @@ fn transform_equal_operation(
                             )
                             .into(),
                             any_list_type.clone().into(),
-                            any_list_type.clone().into(),
+                            any_list_type.into(),
                         ],
                         types::Boolean::new(position.clone()),
                         position.clone(),
@@ -255,7 +255,7 @@ mod tests {
         assert_eq!(
             transform(
                 &EqualityOperation::new(
-                    Some(union_type.clone().into()),
+                    Some(union_type.into()),
                     EqualityOperator::Equal,
                     Variable::new("x", Position::dummy()),
                     Variable::new("y", Position::dummy()),
@@ -373,7 +373,7 @@ mod tests {
         assert_eq!(
             transform(
                 &EqualityOperation::new(
-                    Some(types::Any::new(Position::dummy()).clone().into()),
+                    Some(types::Any::new(Position::dummy()).into()),
                     EqualityOperator::Equal,
                     Variable::new("x", Position::dummy()),
                     Variable::new("y", Position::dummy()),
@@ -396,7 +396,6 @@ mod tests {
                             types::None::new(Position::dummy()),
                             Position::dummy()
                         )
-                        .clone()
                         .into()
                     ),
                     EqualityOperator::Equal,
