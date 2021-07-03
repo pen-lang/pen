@@ -302,7 +302,10 @@ fn compile_operation(
                         vec![compile(operation.lhs())?, compile(operation.rhs())?],
                     )
                     .into(),
-                    _ => compile(&equal_operation_transformer::transform(operation)?)?,
+                    _ => compile(&equal_operation_transformer::transform(
+                        operation,
+                        type_context,
+                    )?)?,
                 }
             }
             EqualityOperator::NotEqual => {

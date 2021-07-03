@@ -294,6 +294,16 @@ fn check_operation(
 
             boolean_type
         }
+        Operation::Equality(operation) => {
+            let operand_type = operation
+                .type_()
+                .ok_or_else(|| CompileError::TypeNotInferred(operation.position().clone()))?;
+
+            check_subsumption(&check_expression(operation.lhs())?, operand_type)?;
+            check_subsumption(&check_expression(operation.rhs())?, operand_type)?;
+
+            types::Boolean::new(operation.position().clone()).into()
+        }
         Operation::Not(operation) => {
             let boolean_type = types::Boolean::new(operation.position().clone()).into();
 
@@ -914,6 +924,59 @@ mod tests {
                     Position::dummy()
                 ))
             );
+        }
+
+        #[test]
+        fn check_equality_operation() {
+            check_module(
+                &Module::empty().set_definitions(vec![Definition::without_source(
+                    "x",
+                    Lambda::new(
+                        vec![],
+                        types::Boolean::new(Position::dummy()),
+                        EqualityOperation::new(
+                            Some(types::Number::new(Position::dummy()).into()),
+                            EqualityOperator::Equal,
+                            Number::new(0.0, Position::dummy()),
+                            Number::new(0.0, Position::dummy()),
+                            Position::dummy(),
+                        ),
+                        Position::dummy(),
+                    ),
+                    false,
+                )]),
+            )
+            .unwrap();
+        }
+
+        #[test]
+        fn check_equality_operation_with_subsumption() {
+            check_module(
+                &Module::empty().set_definitions(vec![Definition::without_source(
+                    "x",
+                    Lambda::new(
+                        vec![],
+                        types::Boolean::new(Position::dummy()),
+                        EqualityOperation::new(
+                            Some(
+                                types::Union::new(
+                                    types::Number::new(Position::dummy()),
+                                    types::None::new(Position::dummy()),
+                                    Position::dummy(),
+                                )
+                                .into(),
+                            ),
+                            EqualityOperator::Equal,
+                            Number::new(0.0, Position::dummy()),
+                            None::new(Position::dummy()),
+                            Position::dummy(),
+                        ),
+                        Position::dummy(),
+                    ),
+                    false,
+                )]),
+            )
+            .unwrap();
         }
 
         #[test]

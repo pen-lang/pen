@@ -10,8 +10,11 @@ use std::{
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum CompileError {
+    AnyEqualOperation(Position),
     AnyTypeBranch(Position),
+    FunctionEqualOperation(Position),
     FunctionExpected(Position),
+    InvalidRecordEqualOperation(Position),
     ListExpected(Position),
     MirTypeCheck(mir::analysis::TypeCheckError),
     MissingElseBlock(Position),
@@ -32,6 +35,13 @@ pub enum CompileError {
 impl Display for CompileError {
     fn fmt(&self, formatter: &mut Formatter) -> fmt::Result {
         match self {
+            Self::AnyEqualOperation(position) => {
+                write!(
+                    formatter,
+                    "equal operator cannot be used with any type\n{}",
+                    position
+                )
+            }
             Self::AnyTypeBranch(position) => {
                 write!(
                     formatter,
@@ -39,8 +49,22 @@ impl Display for CompileError {
                     position
                 )
             }
+            Self::FunctionEqualOperation(position) => {
+                write!(
+                    formatter,
+                    "equal operator cannot be used with function type\n{}",
+                    position
+                )
+            }
             Self::FunctionExpected(position) => {
                 write!(formatter, "function expected\n{}", position)
+            }
+            Self::InvalidRecordEqualOperation(position) => {
+                write!(
+                    formatter,
+                    "equal operator cannot be used with record type containing any or function types\n{}",
+                    position
+                )
             }
             Self::ListExpected(position) => {
                 write!(formatter, "list expected\n{}", position)

@@ -74,3 +74,31 @@ Feature: Record
     """
     When I run `pen build`
     Then the exit status should be 0
+
+  Scenario: Use an equal operator
+    Given a file named "Foo.pen" with:
+    """
+    type r {
+      x number,
+    }
+
+    f = \(x r, y r) boolean {
+      x == y
+    }
+    """
+    When I run `pen build`
+    Then the exit status should be 0
+
+  Scenario: Use a not-equal operator
+    Given a file named "Foo.pen" with:
+    """
+    type r {
+      x number,
+    }
+
+    f = \(x r, y r) boolean {
+      x == y
+    }
+    """
+    When I run `pen build`
+    Then the exit status should be 0

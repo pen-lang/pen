@@ -296,13 +296,17 @@ fn block<'a>() -> impl Parser<Stream<'a>, Output = Block> {
 }
 
 fn statement<'a>() -> impl Parser<Stream<'a>, Output = Statement> {
-    (
-        position(),
-        optional(identifier().skip(sign("="))),
-        expression(),
-    )
-        .map(|(position, name, expression)| Statement::new(name, expression, position))
-        .expected("statement")
+    choice!(statement_with_result(), statement_without_result()).expected("statement")
+}
+
+fn statement_with_result<'a>() -> impl Parser<Stream<'a>, Output = Statement> {
+    (position(), identifier(), sign("="), expression())
+        .map(|(position, name, _, expression)| Statement::new(Some(name), expression, position))
+}
+
+fn statement_without_result<'a>() -> impl Parser<Stream<'a>, Output = Statement> {
+    (position(), expression())
+        .map(|(position, expression)| Statement::new(None, expression, position))
 }
 
 fn expression<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
@@ -1451,6 +1455,36 @@ mod tests {
                     Position::dummy()
                 ),
             );
+            assert_eq!(
+                block().parse(stream("{x==x}", "")).unwrap().0,
+                Block::new(
+                    vec![],
+                    BinaryOperation::new(
+                        BinaryOperator::Equal,
+                        Variable::new("x", Position::dummy()),
+                        Variable::new("x", Position::dummy()),
+                        Position::dummy()
+                    ),
+                    Position::dummy()
+                ),
+            );
+        }
+
+        #[test]
+        fn parse_statement() {
+            assert_eq!(
+                statement().parse(stream("x==x", "")).unwrap().0,
+                Statement::new(
+                    None,
+                    BinaryOperation::new(
+                        BinaryOperator::Equal,
+                        Variable::new("x", Position::dummy()),
+                        Variable::new("x", Position::dummy()),
+                        Position::dummy()
+                    ),
+                    Position::dummy()
+                ),
+            );
         }
 
         #[test]
@@ -1953,6 +1987,16 @@ mod tests {
                             Boolean::new(true, Position::dummy()),
                             Position::dummy(),
                         ),
+                        Position::dummy(),
+                    )
+                    .into(),
+                ),
+                (
+                    "x+x",
+                    BinaryOperation::new(
+                        BinaryOperator::Add,
+                        Variable::new("x", Position::dummy()),
+                        Variable::new("x", Position::dummy()),
                         Position::dummy(),
                     )
                     .into(),
