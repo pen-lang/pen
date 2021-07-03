@@ -2,6 +2,7 @@ mod error;
 mod import_compiler;
 mod module_compiler;
 mod prelude_module_modifier;
+mod singleton_record_compiler;
 mod utilities;
 
 use crate::{
@@ -26,6 +27,8 @@ pub fn compile(
 
     let module = definition_qualifier::qualify(&module, prefix);
     let module = type_qualifier::qualify(&module, prefix);
+
+    let module = singleton_record_compiler::compile(&module, module_interfaces);
 
     Ok(module)
 }
