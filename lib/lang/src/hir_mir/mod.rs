@@ -13,7 +13,7 @@ mod type_context;
 mod type_extractor;
 mod type_inferrer;
 
-use self::type_context::TypeContext;
+use self::{transformation::record_equal_function_transformer, type_context::TypeContext};
 use crate::{hir::*, interface};
 pub use error::CompileError;
 pub use list_type_configuration::ListTypeConfiguration;
@@ -26,7 +26,8 @@ pub fn compile(
 ) -> Result<(mir::ir::Module, interface::Module), CompileError> {
     let type_context = TypeContext::new(module, list_type_configuration, string_type_configuration);
 
-    let module = type_inferrer::infer_types(module, &type_context)?;
+    let module = record_equal_function_transformer::transform(&module, &type_context)?;
+    let module = type_inferrer::infer_types(&module, &type_context)?;
     type_checker::check_types(&module, &type_context)?;
     let module = type_coercer::coerce_types(&module, &type_context)?;
 
@@ -127,6 +128,45 @@ mod tests {
                 ),
                 false,
             )]),
+        )?;
+
+        Ok(())
+    }
+
+    #[test]
+    fn compile_record() -> Result<(), CompileError> {
+        let reference_type = types::Reference::new("foo", Position::dummy());
+
+        compile_module(
+            &Module::empty()
+                .set_type_definitions(vec![TypeDefinition::without_source(
+                    "foo",
+                    vec![types::RecordElement::new(
+                        "x",
+                        types::None::new(Position::dummy()),
+                    )],
+                    false,
+                    false,
+                    false,
+                )])
+                .set_definitions(vec![Definition::without_source(
+                    "x",
+                    Lambda::new(
+                        vec![],
+                        reference_type.clone(),
+                        RecordConstruction::new(
+                            reference_type.clone(),
+                            vec![RecordElement::new(
+                                "x",
+                                None::new(Position::dummy()),
+                                Position::dummy(),
+                            )],
+                            Position::dummy(),
+                        ),
+                        Position::dummy(),
+                    ),
+                    false,
+                )]),
         )?;
 
         Ok(())
