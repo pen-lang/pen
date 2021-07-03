@@ -1,4 +1,4 @@
-use super::utilities;
+use super::name_qualifier;
 use crate::{
     ast,
     hir::{
@@ -95,14 +95,12 @@ fn rename_variables(
         &module_interfaces
             .iter()
             .flat_map(|(path, module)| {
-                let prefix = utilities::get_prefix(path);
-
                 module
                     .declarations()
                     .iter()
                     .map(|declaration| {
                         (
-                            utilities::qualify_name(prefix, declaration.original_name()),
+                            name_qualifier::qualify(path, declaration.original_name()),
                             declaration.name().into(),
                         )
                     })
@@ -128,15 +126,13 @@ fn rename_types(
     let names = module_interfaces
         .iter()
         .flat_map(|(path, module)| {
-            let prefix = utilities::get_prefix(path);
-
             module
                 .type_definitions()
                 .iter()
                 .filter_map(|definition| {
                     if definition.is_public() {
                         Some((
-                            utilities::qualify_name(prefix, definition.original_name()),
+                            name_qualifier::qualify(path, definition.original_name()),
                             definition.name().into(),
                         ))
                     } else {
@@ -146,7 +142,7 @@ fn rename_types(
                 .chain(module.type_aliases().iter().filter_map(|alias| {
                     if alias.is_public() {
                         Some((
-                            utilities::qualify_name(prefix, alias.original_name()),
+                            name_qualifier::qualify(path, alias.original_name()),
                             alias.name().into(),
                         ))
                     } else {

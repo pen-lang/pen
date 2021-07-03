@@ -34,13 +34,13 @@ Feature: Record
     When I run `pen build`
     Then the exit status should be 0
 
-  Scenario: Create a record without no element
+  Scenario: Create a record with no element
     Given a file named "Foo.pen" with:
     """
     type r {}
 
     f = \() r {
-      r{}
+      r
     }
     """
     When I run `pen build`
