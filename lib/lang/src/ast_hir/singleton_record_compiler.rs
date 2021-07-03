@@ -5,7 +5,7 @@ use crate::{
 };
 use std::collections::HashMap;
 
-use super::utilities;
+use super::name_qualifier;
 
 pub fn compile(
     module: &Module,
@@ -20,10 +20,7 @@ pub fn compile(
                 .filter_map(|definition| {
                     if definition.elements().is_empty() && definition.is_public() {
                         Some((
-                            utilities::qualify_name(
-                                utilities::get_prefix(path),
-                                definition.original_name(),
-                            ),
+                            name_qualifier::qualify(path, definition.original_name()),
                             definition.name().into(),
                         ))
                     } else {
