@@ -58,18 +58,19 @@ pub extern "C" fn _pen_realloc(old_pointer: *mut c_void, size: usize) -> *mut c_
     new_pointer
 }
 
+/// # Safety
+///
+/// Pointers returned from `_pen_malloc` or `_pen_realloc` must be passed.
 #[no_mangle]
-pub extern "C" fn _pen_free(pointer: *mut u8) {
+pub unsafe extern "C" fn _pen_free(pointer: *mut u8) {
     if std::env::var(DEBUG_ENVIRONMENT_VARIABLE).is_ok() {
         eprintln!("free: {:x}", pointer as usize);
     }
 
-    unsafe {
-        std::alloc::dealloc(
-            pointer,
-            Layout::from_size_align(0, DEFAULT_ALIGNMENT).unwrap(),
-        )
-    }
+    std::alloc::dealloc(
+        pointer,
+        Layout::from_size_align(0, DEFAULT_ALIGNMENT).unwrap(),
+    )
 }
 
 #[no_mangle]
