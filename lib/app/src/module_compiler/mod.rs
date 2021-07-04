@@ -112,7 +112,7 @@ pub fn compile_prelude(
         &DUMMY_STRING_TYPE_CONFIGURATION,
     )?;
 
-    compile_mir_module(infrastructure, &module, object_file, &heap_configuration)?;
+    compile_mir_module(infrastructure, &module, object_file, heap_configuration)?;
     infrastructure.file_system.write(
         interface_file,
         &interface_serializer::serialize(&module_interface)?,
@@ -134,7 +134,7 @@ fn compile_mir_module(
                 &mir_fmm::compile(module)?,
                 fmm::types::VOID_TYPE.clone(),
             )?,
-            &heap_configuration,
+            heap_configuration,
             None,
         )?,
     )?;

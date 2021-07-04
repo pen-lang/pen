@@ -51,8 +51,7 @@ pub fn compile(module: &hir::Module) -> Result<interface::Module, CompileError> 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::position::Position;
-    use crate::types;
+    use crate::{position::Position, types};
 
     #[test]
     fn compile_empty_module() {
