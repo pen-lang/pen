@@ -11,6 +11,7 @@ use std::{
 };
 
 const DEBUG_ENVIRONMENT_VARIABLE: &str = "PEN_DEBUG";
+const DEFAULT_ALIGNMENT: usize = 8;
 #[cfg(not(test))]
 const INITIAL_STACK_CAPACITY: usize = 256;
 
@@ -21,8 +22,6 @@ extern "C" {
         argument: ffi::None,
     ) -> ffi::cps::Result;
 }
-
-const DEFAULT_ALIGNMENT: usize = 8;
 
 #[no_mangle]
 pub extern "C" fn _pen_malloc(size: usize) -> *mut c_void {
