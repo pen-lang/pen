@@ -14,3 +14,17 @@ Feature: String
     """
     When I run `pen build`
     Then the exit status should be 0
+
+  Scenario: Use equality operators
+    Given a file named "Foo.pen" with:
+    """
+    f = \() boolean {
+      "" == ""
+    }
+
+    g = \() boolean {
+      "" != ""
+    }
+    """
+    When I run `pen build`
+    Then the exit status should be 0
