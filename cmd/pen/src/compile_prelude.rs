@@ -16,7 +16,7 @@ pub fn compile_prelude(
         &file_path_converter.convert_to_file_path(source_file)?,
         &file_path_converter.convert_to_file_path(object_file)?,
         &file_path_converter.convert_to_file_path(interface_file)?,
-        &COMPILE_CONFIGURATION,
+        &COMPILE_CONFIGURATION.heap,
     )?;
 
     Ok(())

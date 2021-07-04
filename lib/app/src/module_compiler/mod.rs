@@ -1,4 +1,6 @@
 mod compile_configuration;
+mod prelude_type_configuration_qualifier;
+mod utilities;
 
 use crate::{
     common::{dependency_serializer, interface_serializer},
@@ -9,6 +11,8 @@ pub use compile_configuration::{
     CompileConfiguration, HeapConfiguration, ListTypeConfiguration, StringTypeConfiguration,
 };
 use std::error::Error;
+
+use self::utilities::{DUMMY_LIST_TYPE_CONFIGURATION, DUMMY_STRING_TYPE_CONFIGURATION};
 
 const PRELUDE_PREFIX: &str = "prelude:";
 
@@ -64,11 +68,22 @@ pub fn compile(
             })
             .collect::<Result<Vec<_>, _>>()?,
         )?,
-        &compile_configuration.list_type,
-        &compile_configuration.string_type,
+        &prelude_type_configuration_qualifier::qualify_list_type_configuration(
+            &compile_configuration.list_type,
+            PRELUDE_PREFIX,
+        ),
+        &prelude_type_configuration_qualifier::qualify_string_type_configuration(
+            &compile_configuration.string_type,
+            PRELUDE_PREFIX,
+        ),
     )?;
 
-    compile_mir_module(infrastructure, &module, object_file, compile_configuration)?;
+    compile_mir_module(
+        infrastructure,
+        &module,
+        object_file,
+        &compile_configuration.heap,
+    )?;
     infrastructure.file_system.write(
         interface_file,
         &interface_serializer::serialize(&module_interface)?,
@@ -82,7 +97,7 @@ pub fn compile_prelude(
     source_file: &FilePath,
     object_file: &FilePath,
     interface_file: &FilePath,
-    compile_configuration: &CompileConfiguration,
+    heap_configuration: &HeapConfiguration,
 ) -> Result<(), Box<dyn Error>> {
     // TODO Implement and use lang::hir_mir::compile_prelude().
     let (module, module_interface) = lang::hir_mir::compile(
@@ -93,11 +108,11 @@ pub fn compile_prelude(
             )?,
             PRELUDE_PREFIX,
         )?,
-        &compile_configuration.list_type,
-        &compile_configuration.string_type,
+        &DUMMY_LIST_TYPE_CONFIGURATION,
+        &DUMMY_STRING_TYPE_CONFIGURATION,
     )?;
 
-    compile_mir_module(infrastructure, &module, object_file, compile_configuration)?;
+    compile_mir_module(infrastructure, &module, object_file, heap_configuration)?;
     infrastructure.file_system.write(
         interface_file,
         &interface_serializer::serialize(&module_interface)?,
@@ -110,7 +125,7 @@ fn compile_mir_module(
     infrastructure: &Infrastructure,
     module: &mir::ir::Module,
     object_file: &FilePath,
-    compile_configuration: &CompileConfiguration,
+    heap_configuration: &HeapConfiguration,
 ) -> Result<(), Box<dyn Error>> {
     infrastructure.file_system.write(
         object_file,
@@ -119,7 +134,7 @@ fn compile_mir_module(
                 &mir_fmm::compile(module)?,
                 fmm::types::VOID_TYPE.clone(),
             )?,
-            &compile_configuration.heap,
+            heap_configuration,
             None,
         )?,
     )?;

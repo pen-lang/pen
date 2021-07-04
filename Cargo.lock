@@ -38,6 +38,7 @@ dependencies = [
  "lang",
  "mir",
  "mir-fmm",
+ "once_cell",
  "regex",
  "serde",
  "serde_json",
