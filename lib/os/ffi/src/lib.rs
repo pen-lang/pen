@@ -1,11 +1,15 @@
 mod result;
 
 use result::FfiResult;
-use std::alloc::Layout;
-use std::fs::File;
-use std::io::{Read, Write};
-use std::os::raw::{c_int, c_void};
-use std::os::unix::io::FromRawFd;
+use std::{
+    alloc::Layout,
+    fs::File,
+    io::{Read, Write},
+    os::{
+        raw::{c_int, c_void},
+        unix::io::FromRawFd,
+    },
+};
 
 const DEBUG_ENVIRONMENT_VARIABLE: &str = "PEN_DEBUG";
 const INITIAL_STACK_CAPACITY: usize = 256;
