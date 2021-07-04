@@ -26,7 +26,7 @@ pub fn compile(
 ) -> Result<(mir::ir::Module, interface::Module), CompileError> {
     let type_context = TypeContext::new(module, list_type_configuration, string_type_configuration);
 
-    let module = record_equal_function_transformer::transform(&module, &type_context)?;
+    let module = record_equal_function_transformer::transform(module, &type_context)?;
     let module = type_inferrer::infer_types(&module, &type_context)?;
     type_checker::check_types(&module, &type_context)?;
     let module = type_coercer::coerce_types(&module, &type_context)?;
@@ -155,7 +155,7 @@ mod tests {
                         vec![],
                         reference_type.clone(),
                         RecordConstruction::new(
-                            reference_type.clone(),
+                            reference_type,
                             vec![RecordElement::new(
                                 "x",
                                 None::new(Position::dummy()),

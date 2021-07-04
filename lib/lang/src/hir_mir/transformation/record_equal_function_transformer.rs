@@ -1,9 +1,11 @@
-use crate::hir::*;
-use crate::hir_mir::transformation::record_type_information_compiler;
-use crate::hir_mir::type_context::TypeContext;
-use crate::hir_mir::CompileError;
-use crate::types;
-use crate::types::analysis::type_comparability_checker;
+use crate::{
+    hir::*,
+    hir_mir::{
+        transformation::record_type_information_compiler, type_context::TypeContext, CompileError,
+    },
+    types,
+    types::analysis::type_comparability_checker,
+};
 
 const LHS_NAME: &str = "$lhs";
 const RHS_NAME: &str = "$rhs";
@@ -123,7 +125,7 @@ mod tests {
         assert_eq!(
             transform_module(&Module::empty().set_type_definitions(vec![type_definition.clone()])),
             Ok(Module::empty()
-                .set_type_definitions(vec![type_definition.clone()])
+                .set_type_definitions(vec![type_definition])
                 .set_definitions(vec![Definition::new(
                     "foo.$equal",
                     "foo.$equal",
@@ -162,7 +164,7 @@ mod tests {
                                         Position::dummy(),
                                     ),
                                     RecordDeconstruction::new(
-                                        Some(record_type.clone().into()),
+                                        Some(record_type.into()),
                                         Variable::new(RHS_NAME, Position::dummy()),
                                         "y",
                                         Position::dummy(),
