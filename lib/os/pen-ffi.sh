@@ -2,6 +2,6 @@
 
 set -e
 
-cd ffi
-cargo build --release
-echo ffi/target/release/libos.a
+cd $(dirname $0)/ffi
+cargo build --release --quiet
+cp target/release/libos.a $1
