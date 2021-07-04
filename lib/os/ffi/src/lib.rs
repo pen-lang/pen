@@ -1,17 +1,17 @@
 mod result;
 
 use result::FfiResult;
+#[cfg(not(test))]
+use std::os::raw::c_int;
 use std::{
     alloc::Layout,
     fs::File,
     io::{Read, Write},
-    os::{
-        raw::{c_int, c_void},
-        unix::io::FromRawFd,
-    },
+    os::{raw::c_void, unix::io::FromRawFd},
 };
 
 const DEBUG_ENVIRONMENT_VARIABLE: &str = "PEN_DEBUG";
+#[cfg(not(test))]
 const INITIAL_STACK_CAPACITY: usize = 256;
 
 extern "C" {
@@ -73,6 +73,7 @@ pub unsafe extern "C" fn _pen_free(pointer: *mut u8) {
     )
 }
 
+#[cfg(not(test))]
 #[no_mangle]
 pub extern "C" fn main() -> c_int {
     let mut stack = ffi::cps::Stack::new(INITIAL_STACK_CAPACITY);
@@ -82,6 +83,7 @@ pub extern "C" fn main() -> c_int {
     unreachable!()
 }
 
+#[cfg(not(test))]
 extern "C" fn exit(_: *mut ffi::cps::Stack, code: f64) -> ffi::cps::Result {
     std::process::exit(code as i32)
 }
