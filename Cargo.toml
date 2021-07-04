@@ -10,4 +10,4 @@ members = [
   "lib/os/ffi",
   "lib/prelude/ffi",
 ]
-exclude = ["tmp"]
+exclude = ["lib/os/.pen", "tmp"]
