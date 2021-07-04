@@ -1,0 +1,53 @@
+import foreign "c" _pen_os_fd_read \(number, number) fdReadResult
+import foreign "c" _pen_os_fd_write \(number, string) fdWriteResult
+import foreign _pen_main \(Os) number
+
+type Os {
+  fdRead \(number, number) fdReadResult,
+  fdWrite \(number, string) fdWriteResult,
+}
+
+type fdReadResult {
+  bytes string,
+  error number,
+}
+
+type fdWriteResult {
+  bytes number,
+  error number,
+}
+
+FdRead = \(os Os, fd number, count number) string | error {
+  r = os.fdRead(fd, count)
+
+  if r.error == -1 {
+    r.bytes
+  } else {
+    error(r.error)
+  }
+}
+
+FdWrite = \(os Os, fd number, data string) number | error {
+  r = os.fdWrite(fd, data)
+
+  if r.error == -1 {
+    r.bytes
+  } else {
+    error(r.error)
+  }
+}
+
+StdIn = \() number { 0 }
+
+StdOut = \() number { 1 }
+
+StdErr = \() number { 2 }
+
+export foreign _pen_os_main = \(_ none) number {
+  _pen_main(
+    Os{
+      fdRead: _pen_os_fd_read,
+      fdWrite: _pen_os_fd_write,
+    },
+  )
+}
