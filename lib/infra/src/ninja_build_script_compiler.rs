@@ -39,14 +39,14 @@ impl NinjaBuildScriptCompiler {
             .file_path_converter
             .convert_to_os_path(package_directory);
         let ffi_build_script = package_directory.join(self.ffi_build_script);
-        let object_file = package_directory.with_extension(self.archive_file_extension);
+        let archive_file = package_directory.with_extension(self.archive_file_extension);
 
         if ffi_build_script.exists() {
             vec![
                 "rule compile_ffi".into(),
                 format!("  command = {} $out", ffi_build_script.display()),
-                format!("build {}: compile_ffi", object_file.display()),
-                format!("default {}", object_file.display()),
+                format!("build {}: compile_ffi", archive_file.display()),
+                format!("default {}", archive_file.display()),
             ]
         } else {
             vec![]
