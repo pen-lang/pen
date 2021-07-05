@@ -17,7 +17,7 @@ pub fn compile_main(
 ) -> Result<(), Box<dyn Error>> {
     compile_normal_package(
         infrastructure,
-        &package_directory,
+        package_directory,
         output_directory,
         child_build_script_files,
         &file_path_resolver::resolve_main_package_ffi_archive_file(
@@ -70,13 +70,13 @@ fn compile_normal_package(
             .compile(
                 &module_target_collector::collect_module_targets(
                     infrastructure,
-                    &package_directory,
+                    package_directory,
                     output_directory,
                 )?,
-                &child_build_script_files,
+                child_build_script_files,
                 &prelude_interface_files,
-                &package_ffi_archive_file,
-                &package_directory,
+                package_ffi_archive_file,
+                package_directory,
             )?
             .as_bytes(),
     )?;

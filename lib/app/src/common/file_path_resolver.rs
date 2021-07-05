@@ -62,6 +62,6 @@ fn resolve_package_ffi_archive_file(
     file_path_configuration: &FilePathConfiguration,
 ) -> FilePath {
     output_directory
-        .join(&FilePath::new(vec![OBJECT_DIRECTORY.into(), package_id]))
-        .with_extension(&file_path_configuration.archive_file_extension)
+        .join(&FilePath::new(vec![OBJECT_DIRECTORY, package_id]))
+        .with_extension(file_path_configuration.archive_file_extension)
 }

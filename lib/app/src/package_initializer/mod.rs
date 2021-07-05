@@ -39,7 +39,7 @@ fn initialize_prelude(
 
     package_build_script_compiler::compile_prelude(
         infrastructure,
-        &package_url,
+        package_url,
         output_directory,
         &package_directory.with_extension(
             infrastructure
