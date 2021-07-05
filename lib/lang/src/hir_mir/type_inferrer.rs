@@ -22,6 +22,7 @@ pub fn infer_types(module: &Module, type_context: &TypeContext) -> Result<Module
             .iter()
             .map(|definition| infer_definition(definition, &variables, type_context))
             .collect::<Result<_, _>>()?,
+        module.position().clone(),
     ))
 }
 

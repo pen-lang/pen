@@ -53,6 +53,7 @@ pub fn compile(module: &ast::Module) -> Result<hir::Module, CompileError> {
             .iter()
             .map(|definition| compile_definition(definition))
             .collect::<Result<_, _>>()?,
+        module.position().clone(),
     ))
 }
 
@@ -348,7 +349,14 @@ mod tests {
     #[test]
     fn compile_empty_module() {
         assert_eq!(
-            compile(&ast::Module::new(vec![], vec![], vec![], vec![], vec![])),
+            compile(&ast::Module::new(
+                vec![],
+                vec![],
+                vec![],
+                vec![],
+                vec![],
+                Position::dummy()
+            )),
             Ok(hir::Module::empty())
         );
     }
@@ -378,7 +386,8 @@ mod tests {
                     ),
                     false,
                     Position::dummy(),
-                )]
+                )],
+                Position::dummy(),
             )),
             Ok(hir::Module::empty()
                 .set_type_definitions(vec![hir::TypeDefinition::new(

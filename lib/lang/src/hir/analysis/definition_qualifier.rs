@@ -52,6 +52,7 @@ pub fn qualify(module: &Module, prefix: &str) -> Module {
                     )
                 })
                 .collect(),
+            module.position().clone(),
         ),
         &names,
     )

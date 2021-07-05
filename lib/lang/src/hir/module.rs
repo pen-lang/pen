@@ -2,6 +2,7 @@ use super::{
     definition::Definition, type_definition::TypeDefinition, Declaration, ForeignDeclaration,
     TypeAlias,
 };
+use crate::position::Position;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Module {
@@ -10,6 +11,7 @@ pub struct Module {
     foreign_declarations: Vec<ForeignDeclaration>,
     declarations: Vec<Declaration>,
     definitions: Vec<Definition>,
+    position: Position,
 }
 
 impl Module {
@@ -19,6 +21,7 @@ impl Module {
         foreign_declarations: Vec<ForeignDeclaration>,
         declarations: Vec<Declaration>,
         definitions: Vec<Definition>,
+        position: Position,
     ) -> Self {
         Self {
             type_definitions,
@@ -26,12 +29,13 @@ impl Module {
             foreign_declarations,
             declarations,
             definitions,
+            position,
         }
     }
 
     #[cfg(test)]
     pub fn empty() -> Self {
-        Self::new(vec![], vec![], vec![], vec![], vec![])
+        Self::new(vec![], vec![], vec![], vec![], vec![], Position::dummy())
     }
 
     #[cfg(test)]
@@ -42,6 +46,7 @@ impl Module {
             self.foreign_declarations.clone(),
             self.declarations.clone(),
             self.definitions.clone(),
+            self.position.clone(),
         )
     }
 
@@ -53,6 +58,7 @@ impl Module {
             self.foreign_declarations.clone(),
             self.declarations.clone(),
             self.definitions.clone(),
+            self.position.clone(),
         )
     }
 
@@ -64,6 +70,7 @@ impl Module {
             declarations,
             self.declarations.clone(),
             self.definitions.clone(),
+            self.position.clone(),
         )
     }
 
@@ -75,6 +82,7 @@ impl Module {
             self.foreign_declarations.clone(),
             declarations,
             self.definitions.clone(),
+            self.position.clone(),
         )
     }
 
@@ -86,6 +94,7 @@ impl Module {
             self.foreign_declarations.clone(),
             self.declarations.clone(),
             definitions,
+            self.position.clone(),
         )
     }
 
@@ -107,5 +116,9 @@ impl Module {
 
     pub fn definitions(&self) -> &[Definition] {
         &self.definitions
+    }
+
+    pub fn position(&self) -> &Position {
+        &self.position
     }
 }

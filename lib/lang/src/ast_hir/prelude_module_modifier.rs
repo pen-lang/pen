@@ -46,5 +46,6 @@ pub fn modify(module: &Module) -> Module {
                 )
             })
             .collect(),
+        module.position().clone(),
     )
 }

@@ -52,6 +52,7 @@ pub fn stream<'a>(source: &'a str, path: &'a str) -> Stream<'a> {
 
 pub fn module<'a>() -> impl Parser<Stream<'a>, Output = Module> {
     (
+        position(),
         blank(),
         many(import()),
         many(foreign_import()),
@@ -61,13 +62,22 @@ pub fn module<'a>() -> impl Parser<Stream<'a>, Output = Module> {
     )
         .skip(eof())
         .map(
-            |(_, imports, foreign_imports, type_definitions, type_aliases, definitions)| {
+            |(
+                position,
+                _,
+                imports,
+                foreign_imports,
+                type_definitions,
+                type_aliases,
+                definitions,
+            )| {
                 Module::new(
                     imports,
                     foreign_imports,
                     type_definitions,
                     type_aliases,
                     definitions,
+                    position,
                 )
             },
         )
@@ -756,15 +766,15 @@ mod tests {
     fn parse_module() {
         assert_eq!(
             module().parse(stream("", "")).unwrap().0,
-            Module::new(vec![], vec![], vec![], vec![], vec![])
+            Module::new(vec![], vec![], vec![], vec![], vec![], Position::dummy())
         );
         assert_eq!(
             module().parse(stream(" ", "")).unwrap().0,
-            Module::new(vec![], vec![], vec![], vec![], vec![])
+            Module::new(vec![], vec![], vec![], vec![], vec![], Position::dummy())
         );
         assert_eq!(
             module().parse(stream("\n", "")).unwrap().0,
-            Module::new(vec![], vec![], vec![], vec![], vec![])
+            Module::new(vec![], vec![], vec![], vec![], vec![], Position::dummy())
         );
         assert_eq!(
             module().parse(stream("import Foo'Bar", "")).unwrap().0,
@@ -776,7 +786,8 @@ mod tests {
                 vec![],
                 vec![],
                 vec![],
-                vec![]
+                vec![],
+                Position::dummy()
             )
         );
         assert_eq!(
@@ -786,7 +797,8 @@ mod tests {
                 vec![],
                 vec![],
                 vec![TypeAlias::new("foo", types::Number::new(Position::dummy()))],
-                vec![]
+                vec![],
+                Position::dummy()
             )
         );
         assert_eq!(
@@ -813,7 +825,8 @@ mod tests {
                     ),
                     false,
                     Position::dummy()
-                )]
+                )],
+                Position::dummy()
             )
         );
         assert_eq!(
@@ -860,7 +873,8 @@ mod tests {
                         false,
                         Position::dummy()
                     )
-                ]
+                ],
+                Position::dummy()
             )
         );
     }

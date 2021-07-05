@@ -1,6 +1,7 @@
 use super::{
     definition::Definition, type_definition::TypeDefinition, ForeignImport, Import, TypeAlias,
 };
+use crate::position::Position;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Module {
@@ -9,6 +10,7 @@ pub struct Module {
     type_definitions: Vec<TypeDefinition>,
     type_aliases: Vec<TypeAlias>,
     definitions: Vec<Definition>,
+    position: Position,
 }
 
 impl Module {
@@ -18,6 +20,7 @@ impl Module {
         type_definitions: Vec<TypeDefinition>,
         type_aliases: Vec<TypeAlias>,
         definitions: Vec<Definition>,
+        position: Position,
     ) -> Self {
         Self {
             imports,
@@ -25,6 +28,7 @@ impl Module {
             type_definitions,
             type_aliases,
             definitions,
+            position,
         }
     }
 
@@ -46,5 +50,9 @@ impl Module {
 
     pub fn definitions(&self) -> &[Definition] {
         &self.definitions
+    }
+
+    pub fn position(&self) -> &Position {
+        &self.position
     }
 }

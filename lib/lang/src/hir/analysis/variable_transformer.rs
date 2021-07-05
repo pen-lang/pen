@@ -11,6 +11,7 @@ pub fn transform(module: &Module, transform: &dyn Fn(&Variable) -> Expression) -
             .iter()
             .map(|definition| transform_definition(definition, transform))
             .collect(),
+        module.position().clone(),
     )
 }
 

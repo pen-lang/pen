@@ -12,6 +12,7 @@ pub fn rename(module: &Module, names: &HashMap<String, String>) -> Module {
             .iter()
             .map(|definition| rename_definition(definition, names))
             .collect(),
+        module.position().clone(),
     )
 }
 
