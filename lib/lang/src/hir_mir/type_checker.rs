@@ -88,6 +88,9 @@ fn check_expression(
                 &types::Boolean::new(if_.position().clone()).into(),
             )?;
 
+            check_expression(if_.then(), variables)?;
+            check_expression(if_.else_(), variables)?;
+
             type_extractor::extract_from_expression(expression, variables, type_context)?
         }
         Expression::IfType(if_) => {
@@ -163,7 +166,25 @@ fn check_expression(
                 })?,
             )?;
 
-            type_extractor::extract_from_expression(expression, variables, type_context)?
+            check_expression(
+                let_.expression(),
+                &variables
+                    .clone()
+                    .into_iter()
+                    .chain(if let Some(name) = let_.name() {
+                        Some((
+                            name.into(),
+                            let_.type_()
+                                .ok_or_else(|| {
+                                    CompileError::TypeNotInferred(let_.position().clone())
+                                })?
+                                .clone(),
+                        ))
+                    } else {
+                        None
+                    })
+                    .collect(),
+            )?
         }
         Expression::None(none) => types::None::new(none.position().clone()).into(),
         Expression::Number(number) => types::Number::new(number.position().clone()).into(),
@@ -393,27 +414,59 @@ mod tests {
         )
     }
 
-    #[test]
-    fn check_let() {
-        check_module(
-            &Module::empty().set_definitions(vec![Definition::without_source(
-                "x",
-                Lambda::new(
-                    vec![],
-                    types::None::new(Position::dummy()),
-                    Let::new(
-                        Some("x".into()),
-                        Some(types::None::new(Position::dummy()).into()),
-                        None::new(Position::dummy()),
-                        Variable::new("x", Position::dummy()),
+    mod let_ {
+        use super::*;
+
+        #[test]
+        fn check_let() {
+            check_module(
+                &Module::empty().set_definitions(vec![Definition::without_source(
+                    "x",
+                    Lambda::new(
+                        vec![],
+                        types::None::new(Position::dummy()),
+                        Let::new(
+                            Some("x".into()),
+                            Some(types::None::new(Position::dummy()).into()),
+                            None::new(Position::dummy()),
+                            Variable::new("x", Position::dummy()),
+                            Position::dummy(),
+                        ),
                         Position::dummy(),
                     ),
-                    Position::dummy(),
+                    false,
+                )]),
+            )
+            .unwrap();
+        }
+
+        #[test]
+        fn fail_to_check_expression_in_let() {
+            assert_eq!(
+                check_module(
+                    &Module::empty().set_definitions(vec![Definition::without_source(
+                        "x",
+                        Lambda::new(
+                            vec![],
+                            types::None::new(Position::dummy()),
+                            Let::new(
+                                Some("x".into()),
+                                Some(types::None::new(Position::dummy()).into()),
+                                None::new(Position::dummy()),
+                                NotOperation::new(None::new(Position::dummy()), Position::dummy()),
+                                Position::dummy(),
+                            ),
+                            Position::dummy(),
+                        ),
+                        false,
+                    )])
                 ),
-                false,
-            )]),
-        )
-        .unwrap();
+                Err(CompileError::TypesNotMatched(
+                    Position::dummy(),
+                    Position::dummy()
+                ))
+            );
+        }
     }
 
     mod if_ {
@@ -465,6 +518,60 @@ mod tests {
                 )]),
             )
             .unwrap()
+        }
+
+        #[test]
+        fn fail_to_check_then_expression() {
+            assert_eq!(
+                check_module(
+                    &Module::empty().set_definitions(vec![Definition::without_source(
+                        "f",
+                        Lambda::new(
+                            vec![],
+                            types::Number::new(Position::dummy()),
+                            If::new(
+                                Boolean::new(true, Position::dummy()),
+                                NotOperation::new(None::new(Position::dummy()), Position::dummy()),
+                                Number::new(0.0, Position::dummy()),
+                                Position::dummy(),
+                            ),
+                            Position::dummy(),
+                        ),
+                        false,
+                    )]),
+                ),
+                Err(CompileError::TypesNotMatched(
+                    Position::dummy(),
+                    Position::dummy()
+                ))
+            );
+        }
+
+        #[test]
+        fn fail_to_check_else_expression() {
+            assert_eq!(
+                check_module(
+                    &Module::empty().set_definitions(vec![Definition::without_source(
+                        "f",
+                        Lambda::new(
+                            vec![],
+                            types::Number::new(Position::dummy()),
+                            If::new(
+                                Boolean::new(true, Position::dummy()),
+                                Number::new(0.0, Position::dummy()),
+                                NotOperation::new(None::new(Position::dummy()), Position::dummy()),
+                                Position::dummy(),
+                            ),
+                            Position::dummy(),
+                        ),
+                        false,
+                    )]),
+                ),
+                Err(CompileError::TypesNotMatched(
+                    Position::dummy(),
+                    Position::dummy()
+                ))
+            );
         }
     }
 
