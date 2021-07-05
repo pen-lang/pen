@@ -3,7 +3,6 @@ use std::{error::Error, sync::Arc};
 use crate::file_path_configuration::{
     BIT_CODE_FILE_EXTENSION, BUILD_CONFIGURATION_FILENAME, FFI_BUILD_SCRIPT,
     FILE_PATH_CONFIGURATION, LANGUAGE_ROOT_ENVIRONMENT_VARIABLE, LANGUAGE_ROOT_HOST_NAME,
-    OUTPUT_DIRECTORY,
 };
 
 pub fn create(
@@ -14,7 +13,6 @@ pub fn create(
     let build_script_compiler = Arc::new(infra::NinjaBuildScriptCompiler::new(
         file_path_converter.clone(),
         BIT_CODE_FILE_EXTENSION,
-        OUTPUT_DIRECTORY,
         FFI_BUILD_SCRIPT,
     ));
 

@@ -77,6 +77,7 @@ fn compile_normal_package(
                 &prelude_interface_files,
                 package_ffi_archive_file,
                 package_directory,
+                output_directory,
             )?
             .as_bytes(),
     )?;
@@ -109,6 +110,7 @@ pub fn compile_prelude(
                     &infrastructure.file_path_configuration,
                 ),
                 &package_directory,
+                output_directory,
             )?
             .as_bytes(),
     )?;
