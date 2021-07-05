@@ -2,6 +2,8 @@ mod environment_creator;
 mod error;
 mod expression_compiler;
 mod list_type_configuration;
+mod main_function_compiler;
+mod main_module_configuration;
 mod module_compiler;
 mod module_interface_compiler;
 mod string_type_configuration;
@@ -13,19 +15,43 @@ mod type_context;
 mod type_extractor;
 mod type_inferrer;
 
-use self::{transformation::record_equal_function_transformer, type_context::TypeContext};
+use self::{
+    main_module_configuration::MainModuleConfiguration,
+    transformation::record_equal_function_transformer, type_context::TypeContext,
+};
 use crate::{hir::*, interface};
 pub use error::CompileError;
 pub use list_type_configuration::ListTypeConfiguration;
 pub use string_type_configuration::StringTypeConfiguration;
+
+pub fn compile_main(
+    module: &Module,
+    list_type_configuration: &ListTypeConfiguration,
+    string_type_configuration: &StringTypeConfiguration,
+    main_module_configuration: &MainModuleConfiguration,
+) -> Result<(mir::ir::Module, interface::Module), CompileError> {
+    let type_context = TypeContext::new(module, list_type_configuration, string_type_configuration);
+    let module =
+        main_function_compiler::compile(module, type_context.types(), main_module_configuration)?;
+
+    compile_module(&module, &type_context)
+}
 
 pub fn compile(
     module: &Module,
     list_type_configuration: &ListTypeConfiguration,
     string_type_configuration: &StringTypeConfiguration,
 ) -> Result<(mir::ir::Module, interface::Module), CompileError> {
-    let type_context = TypeContext::new(module, list_type_configuration, string_type_configuration);
+    compile_module(
+        module,
+        &TypeContext::new(module, list_type_configuration, string_type_configuration),
+    )
+}
 
+fn compile_module(
+    module: &Module,
+    type_context: &TypeContext,
+) -> Result<(mir::ir::Module, interface::Module), CompileError> {
     let module = record_equal_function_transformer::transform(module, &type_context)?;
     let module = type_inferrer::infer_types(&module, &type_context)?;
     type_checker::check_types(&module, &type_context)?;
