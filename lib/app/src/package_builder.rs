@@ -18,7 +18,7 @@ pub fn build_main_package(
         ),
     );
 
-    package_build_script_compiler::compile(
+    package_build_script_compiler::compile_main(
         infrastructure,
         main_package_directory,
         output_directory,
