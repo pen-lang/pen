@@ -36,3 +36,32 @@ pub fn resolve_package_directory(output_directory: &FilePath, url: &url::Url) ->
         package_id_calculator::calculate(url),
     ]))
 }
+
+pub fn resolve_main_package_ffi_archive_file(
+    output_directory: &FilePath,
+    file_path_configuration: &FilePathConfiguration,
+) -> FilePath {
+    resolve_package_ffi_archive_file(output_directory, "main", file_path_configuration)
+}
+
+pub fn resolve_external_package_ffi_archive_file(
+    output_directory: &FilePath,
+    url: &url::Url,
+    file_path_configuration: &FilePathConfiguration,
+) -> FilePath {
+    resolve_package_ffi_archive_file(
+        output_directory,
+        &package_id_calculator::calculate(url),
+        file_path_configuration,
+    )
+}
+
+fn resolve_package_ffi_archive_file(
+    output_directory: &FilePath,
+    package_id: &str,
+    file_path_configuration: &FilePathConfiguration,
+) -> FilePath {
+    output_directory
+        .join(&FilePath::new(vec![OBJECT_DIRECTORY.into(), package_id]))
+        .with_extension(&file_path_configuration.archive_file_extension)
+}

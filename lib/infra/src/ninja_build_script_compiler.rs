@@ -7,7 +7,6 @@ pub struct NinjaBuildScriptCompiler {
     bit_code_file_extension: &'static str,
     log_directory: &'static str,
     ffi_build_script: &'static str,
-    archive_file_extension: &'static str,
 }
 
 impl NinjaBuildScriptCompiler {
@@ -16,14 +15,12 @@ impl NinjaBuildScriptCompiler {
         bit_code_file_extension: &'static str,
         log_directory: &'static str,
         ffi_build_script: &'static str,
-        archive_file_extension: &'static str,
     ) -> Self {
         Self {
             file_path_converter,
             bit_code_file_extension,
             log_directory,
             ffi_build_script,
-            archive_file_extension,
         }
     }
 
@@ -34,12 +31,16 @@ impl NinjaBuildScriptCompiler {
             .or_else(|_| which::which("llc"))?)
     }
 
-    fn compile_ffi_build(&self, package_directory: &FilePath) -> Vec<String> {
+    fn compile_ffi_build(
+        &self,
+        package_directory: &FilePath,
+        archive_file: &FilePath,
+    ) -> Vec<String> {
         let package_directory = self
             .file_path_converter
             .convert_to_os_path(package_directory);
         let ffi_build_script = package_directory.join(self.ffi_build_script);
-        let archive_file = package_directory.with_extension(self.archive_file_extension);
+        let archive_file = self.file_path_converter.convert_to_os_path(archive_file);
 
         if ffi_build_script.exists() {
             vec![
@@ -60,6 +61,7 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
         module_targets: &[app::infra::ModuleTarget],
         child_build_script_files: &[FilePath],
         prelude_interface_files: &[FilePath],
+        ffi_archive_file: &FilePath,
         package_directory: &FilePath,
     ) -> Result<String, Box<dyn Error>> {
         let llc = self.find_llc()?;
@@ -158,7 +160,7 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
                 format!("  object_file = {}", bit_code_file.display()),
             ]
         }))
-        .chain(self.compile_ffi_build(package_directory))
+        .chain(self.compile_ffi_build(package_directory, ffi_archive_file))
         .chain(vec![format!(
             "default {}",
             module_targets
@@ -180,6 +182,7 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
     fn compile_prelude(
         &self,
         module_targets: &[app::infra::ModuleTarget],
+        ffi_archive_file: &FilePath,
         package_directory: &FilePath,
     ) -> Result<String, Box<dyn Error>> {
         let llc = self.find_llc()?;
@@ -227,7 +230,7 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
                 format!("  source_file = {}", source_file.display()),
             ]
         }))
-        .chain(self.compile_ffi_build(package_directory))
+        .chain(self.compile_ffi_build(package_directory, ffi_archive_file))
         .chain(vec![format!(
             "default {}",
             module_targets

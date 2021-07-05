@@ -35,11 +35,10 @@ fn initialize(
         .external_package_initializer
         .initialize(package_url, &package_directory)?;
 
-    package_build_script_compiler::compile(
+    package_build_script_compiler::compile_external(
         infrastructure,
-        &package_directory,
+        package_url,
         output_directory,
-        &[],
         &package_directory.with_extension(
             infrastructure
                 .file_path_configuration
