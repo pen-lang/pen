@@ -50,14 +50,14 @@ fn compile_module(
     module: &Module,
     type_context: &TypeContext,
 ) -> Result<(mir::ir::Module, interface::Module), CompileError> {
-    let module = record_equal_function_transformer::transform(module, &type_context)?;
-    let module = type_inferrer::infer_types(&module, &type_context)?;
-    type_checker::check_types(&module, &type_context)?;
-    let module = type_coercer::coerce_types(&module, &type_context)?;
+    let module = record_equal_function_transformer::transform(module, type_context)?;
+    let module = type_inferrer::infer_types(&module, type_context)?;
+    type_checker::check_types(&module, type_context)?;
+    let module = type_coercer::coerce_types(&module, type_context)?;
 
     Ok((
         {
-            let module = module_compiler::compile(&module, &type_context)?;
+            let module = module_compiler::compile(&module, type_context)?;
             mir::analysis::check_types(&module)?;
             module
         },

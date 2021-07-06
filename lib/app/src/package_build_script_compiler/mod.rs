@@ -14,7 +14,7 @@ pub fn compile_main(
     child_build_script_files: &[FilePath],
     build_script_file: &FilePath,
     prelude_package_url: &url::Url,
-    is_application: bool,
+    _is_application: bool,
 ) -> Result<(), Box<dyn Error>> {
     infrastructure.file_system.write(
         build_script_file,
@@ -23,7 +23,7 @@ pub fn compile_main(
             .compile_main(
                 &module_target_collector::collect_module_targets(
                     infrastructure,
-                    &package_directory,
+                    package_directory,
                     output_directory,
                 )?,
                 child_build_script_files,
@@ -33,7 +33,7 @@ pub fn compile_main(
                     prelude_package_url,
                 )?,
                 package_directory,
-                &package_directory,
+                package_directory,
                 output_directory,
             )?
             .as_bytes(),
