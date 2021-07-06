@@ -5,7 +5,7 @@ use crate::{
 };
 use std::collections::HashMap;
 
-const MAIN_MODULE_PREFIX: &str = "main:";
+const MAIN_FUNCTION_WRAPPER_SUFFIX: &str = "__wrapper";
 
 pub fn compile(
     module: &Module,
@@ -44,8 +44,10 @@ pub fn compile(
             .iter()
             .cloned()
             .chain(vec![Definition::new(
-                MAIN_MODULE_PREFIX.to_owned()
-                    + &main_module_configuration.object_main_function_name,
+                main_module_configuration
+                    .object_main_function_name
+                    .to_owned()
+                    + MAIN_FUNCTION_WRAPPER_SUFFIX,
                 &main_module_configuration.object_main_function_name,
                 Lambda::new(
                     arguments.clone(),
