@@ -196,11 +196,7 @@ mod tests {
     #[test]
     fn compile_empty_module() {
         assert_eq!(
-            compile(
-                &hir::Module::new(vec![], vec![], vec![], vec![], vec![], Position::dummy()),
-                &Default::default(),
-                &[]
-            ),
+            compile(&hir::Module::empty(), &Default::default(), &[]),
             hir::Module::empty()
         );
     }
