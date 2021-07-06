@@ -1,5 +1,6 @@
 use super::application_configuration::ApplicationConfiguration;
 use crate::{
+    common::file_path_resolver,
     infra::{FilePath, Infrastructure, EXTERNAL_PACKAGE_DIRECTORY},
     package_build_script_compiler,
 };
@@ -74,11 +75,11 @@ fn is_package_application(
     package_directory: &FilePath,
     application_configuration: &ApplicationConfiguration,
 ) -> bool {
-    infrastructure.file_system.exists(
-        &package_directory
-            .join(&FilePath::new(vec![
-                &application_configuration.main_module_basename,
-            ]))
-            .with_extension(infrastructure.file_path_configuration.source_file_extension),
-    )
+    infrastructure
+        .file_system
+        .exists(&file_path_resolver::resolve_source_file(
+            package_directory,
+            &[application_configuration.main_module_basename.clone()],
+            &infrastructure.file_path_configuration,
+        ))
 }
