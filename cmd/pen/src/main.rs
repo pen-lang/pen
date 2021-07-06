@@ -48,6 +48,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                     clap::Arg::with_name("system package directory")
                         .short("s")
                         .long("system-package-directory")
+                        .required(true)
                         .takes_value(true),
                 )
                 .arg(clap::Arg::with_name("source file").required(true))
@@ -66,10 +67,10 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                 .about("Resolves module dependency")
                 .arg(
                     clap::Arg::with_name("package directory")
-                        .required(true)
-                        .takes_value(true)
                         .short("p")
-                        .long("package-directory"),
+                        .long("package-directory")
+                        .required(true)
+                        .takes_value(true),
                 )
                 .arg(clap::Arg::with_name("source file").required(true))
                 .arg(clap::Arg::with_name("object file").required(true))
