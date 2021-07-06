@@ -12,12 +12,15 @@ pub fn compile(
     types: &HashMap<String, Type>,
     main_module_configuration: &MainModuleConfiguration,
 ) -> Result<Module, CompileError> {
-    let position = module
+    let definition = module
         .definitions()
         .iter()
-        .find(|definition| definition.name() == main_module_configuration.source_main_function_name)
-        .ok_or_else(|| CompileError::MainFunctionNotFound(module.position().clone()))?
-        .position();
+        .find(|definition| {
+            definition.original_name() == main_module_configuration.source_main_function_name
+        })
+        .ok_or_else(|| CompileError::MainFunctionNotFound(module.position().clone()))?;
+
+    let position = definition.position();
 
     let type_ = module
         .type_aliases()
@@ -53,10 +56,7 @@ pub fn compile(
                     arguments.clone(),
                     function_type.result().clone(),
                     Call::new(
-                        Variable::new(
-                            &main_module_configuration.source_main_function_name,
-                            position.clone(),
-                        ),
+                        Variable::new(definition.name(), position.clone()),
                         arguments
                             .iter()
                             .map(|argument| Variable::new(argument.name(), position.clone()).into())
