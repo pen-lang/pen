@@ -1,3 +1,4 @@
+pub mod application_configuration;
 mod common;
 pub mod infra;
 pub mod module_compiler;

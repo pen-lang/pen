@@ -15,13 +15,11 @@ mod type_context;
 mod type_extractor;
 mod type_inferrer;
 
-use self::{
-    main_module_configuration::MainModuleConfiguration,
-    transformation::record_equal_function_transformer, type_context::TypeContext,
-};
+use self::{transformation::record_equal_function_transformer, type_context::TypeContext};
 use crate::{hir::*, interface};
 pub use error::CompileError;
 pub use list_type_configuration::ListTypeConfiguration;
+pub use main_module_configuration::MainModuleConfiguration;
 pub use string_type_configuration::StringTypeConfiguration;
 
 pub fn compile_main(

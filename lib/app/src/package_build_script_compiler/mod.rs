@@ -14,6 +14,7 @@ pub fn compile_main(
     child_build_script_files: &[FilePath],
     build_script_file: &FilePath,
     prelude_package_url: &url::Url,
+    is_application: bool,
 ) -> Result<(), Box<dyn Error>> {
     compile_normal_package(
         infrastructure,
