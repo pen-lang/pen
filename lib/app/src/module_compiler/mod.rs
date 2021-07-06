@@ -1,9 +1,11 @@
 mod compile_configuration;
+mod main_module_configuration_qualifier;
 mod prelude_type_configuration_qualifier;
 mod utilities;
 
 use crate::{
-    common::{dependency_serializer, interface_serializer},
+    application_configuration::ApplicationConfiguration,
+    common::{dependency_serializer, file_path_resolver, interface_serializer},
     infra::{FilePath, Infrastructure},
     prelude_interface_file_finder,
 };
@@ -27,46 +29,13 @@ pub fn compile(
     output_directory: &FilePath,
     prelude_package_url: &url::Url,
 ) -> Result<(), Box<dyn Error>> {
-    let dependencies = dependency_serializer::deserialize(
-        &infrastructure.file_system.read_to_vec(dependency_file)?,
-    )?;
-
-    let ast_module = lang::parse::parse(
-        &infrastructure.file_system.read_to_string(source_file)?,
-        &infrastructure.file_path_displayer.display(source_file),
-    )?;
-
     let (module, module_interface) = lang::hir_mir::compile(
-        &lang::ast_hir::compile(
-            &ast_module,
-            &format!(
-                "{}:",
-                infrastructure.file_path_displayer.display(source_file)
-            ),
-            &ast_module
-                .imports()
-                .iter()
-                .map(|import| {
-                    Ok((
-                        import.module_path().clone(),
-                        interface_serializer::deserialize(
-                            &infrastructure
-                                .file_system
-                                .read_to_vec(&dependencies[import.module_path()].clone())?,
-                        )?,
-                    ))
-                })
-                .collect::<Result<_, Box<dyn Error>>>()?,
-            &prelude_interface_file_finder::find(
-                infrastructure,
-                output_directory,
-                prelude_package_url,
-            )?
-            .iter()
-            .map(|file| {
-                interface_serializer::deserialize(&infrastructure.file_system.read_to_vec(file)?)
-            })
-            .collect::<Result<Vec<_>, _>>()?,
+        &compile_to_hir(
+            infrastructure,
+            source_file,
+            dependency_file,
+            output_directory,
+            prelude_package_url,
         )?,
         &prelude_type_configuration_qualifier::qualify_list_type_configuration(
             &compile_configuration.list_type,
@@ -90,6 +59,105 @@ pub fn compile(
     )?;
 
     Ok(())
+}
+
+#[allow(clippy::too_many_arguments)]
+pub fn compile_main(
+    infrastructure: &Infrastructure,
+    source_file: &FilePath,
+    dependency_file: &FilePath,
+    object_file: &FilePath,
+    system_package_directory: &FilePath,
+    compile_configuration: &CompileConfiguration,
+    output_directory: &FilePath,
+    prelude_package_url: &url::Url,
+    application_configuration: &ApplicationConfiguration,
+) -> Result<(), Box<dyn Error>> {
+    let (module, _) = lang::hir_mir::compile_main(
+        &compile_to_hir(
+            infrastructure,
+            source_file,
+            dependency_file,
+            output_directory,
+            prelude_package_url,
+        )?,
+        &prelude_type_configuration_qualifier::qualify_list_type_configuration(
+            &compile_configuration.list_type,
+            PRELUDE_PREFIX,
+        ),
+        &prelude_type_configuration_qualifier::qualify_string_type_configuration(
+            &compile_configuration.string_type,
+            PRELUDE_PREFIX,
+        ),
+        &main_module_configuration_qualifier::qualify(
+            &application_configuration.main_module,
+            &calculate_module_prefix(
+                infrastructure,
+                &file_path_resolver::resolve_source_file(
+                    system_package_directory,
+                    &[application_configuration
+                        .main_function_module_basename
+                        .clone()],
+                    &infrastructure.file_path_configuration,
+                ),
+            ),
+        ),
+    )?;
+
+    compile_mir_module(
+        infrastructure,
+        &module,
+        object_file,
+        &compile_configuration.heap,
+    )?;
+
+    Ok(())
+}
+
+fn compile_to_hir(
+    infrastructure: &Infrastructure,
+    source_file: &FilePath,
+    dependency_file: &FilePath,
+    output_directory: &FilePath,
+    prelude_package_url: &url::Url,
+) -> Result<lang::hir::Module, Box<dyn Error>> {
+    let dependencies = dependency_serializer::deserialize(
+        &infrastructure.file_system.read_to_vec(dependency_file)?,
+    )?;
+
+    let ast_module = lang::parse::parse(
+        &infrastructure.file_system.read_to_string(source_file)?,
+        &infrastructure.file_path_displayer.display(source_file),
+    )?;
+
+    Ok(lang::ast_hir::compile(
+        &ast_module,
+        &calculate_module_prefix(infrastructure, source_file),
+        &ast_module
+            .imports()
+            .iter()
+            .map(|import| {
+                Ok((
+                    import.module_path().clone(),
+                    interface_serializer::deserialize(
+                        &infrastructure
+                            .file_system
+                            .read_to_vec(&dependencies[import.module_path()].clone())?,
+                    )?,
+                ))
+            })
+            .collect::<Result<_, Box<dyn Error>>>()?,
+        &prelude_interface_file_finder::find(
+            infrastructure,
+            output_directory,
+            prelude_package_url,
+        )?
+        .iter()
+        .map(|file| {
+            interface_serializer::deserialize(&infrastructure.file_system.read_to_vec(file)?)
+        })
+        .collect::<Result<Vec<_>, _>>()?,
+    )?)
 }
 
 pub fn compile_prelude(
@@ -140,4 +208,11 @@ fn compile_mir_module(
     )?;
 
     Ok(())
+}
+
+fn calculate_module_prefix(infrastructure: &Infrastructure, source_file: &FilePath) -> String {
+    format!(
+        "{}:",
+        infrastructure.file_path_displayer.display(source_file)
+    )
 }
