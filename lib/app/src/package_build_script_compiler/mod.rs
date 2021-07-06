@@ -32,7 +32,10 @@ pub fn compile_main(
                     output_directory,
                     prelude_package_url,
                 )?,
-                package_directory,
+                &file_path_resolver::resolve_main_package_ffi_archive_file(
+                    output_directory,
+                    &infrastructure.file_path_configuration,
+                ),
                 package_directory,
                 output_directory,
             )?
