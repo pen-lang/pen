@@ -1,7 +1,7 @@
 use std::error::Error;
 
 pub fn serialize(module: &lang::interface::Module) -> Result<Vec<u8>, Box<dyn Error>> {
-    Ok(bincode::serialize(&module)?.into())
+    Ok(bincode::serialize(&module)?)
 }
 
 pub fn deserialize(slice: &[u8]) -> Result<lang::interface::Module, Box<dyn Error>> {

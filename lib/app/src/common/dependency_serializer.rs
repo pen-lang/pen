@@ -1,8 +1,10 @@
 use crate::infra::FilePath;
 use std::{collections::HashMap, error::Error};
 
+type InterfaceFileMap = HashMap<lang::ast::ModulePath, FilePath>;
+
 pub fn serialize(
-    interface_files: &HashMap<lang::ast::ModulePath, FilePath>,
+    interface_files: &InterfaceFileMap,
     prelude_interface_files: &[FilePath],
 ) -> Result<Vec<u8>, Box<dyn Error>> {
     Ok(bincode::serialize(&(
@@ -11,8 +13,6 @@ pub fn serialize(
     ))?)
 }
 
-pub fn deserialize(
-    slice: &[u8],
-) -> Result<(HashMap<lang::ast::ModulePath, FilePath>, Vec<FilePath>), Box<dyn Error>> {
+pub fn deserialize(slice: &[u8]) -> Result<(InterfaceFileMap, Vec<FilePath>), Box<dyn Error>> {
     Ok(bincode::deserialize(slice)?)
 }

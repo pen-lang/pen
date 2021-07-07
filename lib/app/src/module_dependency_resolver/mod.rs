@@ -8,6 +8,7 @@ use crate::{
 use error::ModuleDependencyResolverError;
 use std::{collections::HashMap, error::Error};
 
+#[allow(clippy::too_many_arguments)]
 pub fn resolve(
     infrastructure: &Infrastructure,
     package_directory: &FilePath,
