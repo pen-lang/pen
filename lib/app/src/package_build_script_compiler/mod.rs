@@ -26,6 +26,7 @@ pub fn compile_main(
                     package_directory,
                     output_directory,
                 )?,
+                None,
                 child_build_script_files,
                 &prelude_interface_file_finder::find(
                     infrastructure,

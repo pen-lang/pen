@@ -1,10 +1,11 @@
-use super::{FilePath, ModuleTarget};
+use super::{FilePath, MainModuleTarget, ModuleTarget};
 use std::error::Error;
 
 pub trait BuildScriptCompiler {
     fn compile_main(
         &self,
         module_targets: &[ModuleTarget],
+        main_module_target: Option<&MainModuleTarget>,
         child_build_script_files: &[FilePath],
         prelude_interface_files: &[FilePath],
         ffi_archive_file: &FilePath,

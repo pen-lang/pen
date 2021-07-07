@@ -2,6 +2,8 @@ use super::file_path_converter::FilePathConverter;
 use app::infra::FilePath;
 use std::{error::Error, path::PathBuf, sync::Arc};
 
+const APPLICATION_EXECUTABLE_FILENAME: &str = "app";
+
 pub struct NinjaBuildScriptCompiler {
     file_path_converter: Arc<FilePathConverter>,
     bit_code_file_extension: &'static str,
@@ -176,6 +178,7 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
     fn compile_main(
         &self,
         module_targets: &[app::infra::ModuleTarget],
+        main_module_target: Option<&app::infra::MainModuleTarget>,
         child_build_script_files: &[FilePath],
         prelude_interface_files: &[FilePath],
         ffi_archive_file: &FilePath,
@@ -197,6 +200,60 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
                     self.file_path_converter.convert_to_os_path(file).display()
                 )
             }))
+            .chain(if let Some(main_module_target) = main_module_target {
+                // TODO Collect those from arguments.
+                let object_files = module_targets
+                    .iter()
+                    .map(|target| target.object_file())
+                    .map(|path| {
+                        self.file_path_converter
+                            .convert_to_os_path(path)
+                            .display()
+                            .to_string()
+                    })
+                    .collect::<Vec<String>>();
+
+                let application_file = self.file_path_converter.convert_to_os_path(
+                    &package_directory.join(&FilePath::new([APPLICATION_EXECUTABLE_FILENAME])),
+                );
+
+                vec![
+                    "rule compile_main".into(),
+                    format!(
+                        "  command = ein compile-main -s {} $in $out",
+                        self.file_path_converter
+                            .convert_to_os_path(main_module_target.system_package_directory())
+                            .display()
+                    ),
+                    "  description = compiling main module".into(),
+                    "rule link".into(),
+                    // spell-checker: disable-next-line
+                    "  command = clang -Werror -o $out $in -ldl -lpthread".into(),
+                    "  description = linking application file".into(),
+                    format!(
+                        "build {}: compile_main {} {}",
+                        self.file_path_converter
+                            .convert_to_os_path(main_module_target.object_file())
+                            .display(),
+                        self.file_path_converter
+                            .convert_to_os_path(main_module_target.source_file())
+                            .display(),
+                        self.file_path_converter
+                            .convert_to_os_path(
+                                &main_module_target.object_file().with_extension("dep")
+                            )
+                            .display(),
+                    ),
+                    format!(
+                        "build {}: link {}",
+                        application_file.display(),
+                        object_files.join(" ")
+                    ),
+                    format!("default {}", application_file.display()),
+                ]
+            } else {
+                vec![]
+            })
             .collect::<Vec<_>>()
             .join("\n")
             + "\n")
