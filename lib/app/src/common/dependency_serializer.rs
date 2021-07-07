@@ -5,7 +5,10 @@ pub fn serialize(
     interface_files: &HashMap<lang::ast::ModulePath, FilePath>,
     prelude_interface_files: &[FilePath],
 ) -> Result<Vec<u8>, Box<dyn Error>> {
-    Ok(bincode::serialize(&(interface_files, prelude_interface_files))?.into())
+    Ok(bincode::serialize(&(
+        interface_files,
+        prelude_interface_files,
+    ))?)
 }
 
 pub fn deserialize(
