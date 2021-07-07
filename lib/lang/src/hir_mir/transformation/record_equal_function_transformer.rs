@@ -34,6 +34,7 @@ pub fn transform(module: &Module, type_context: &TypeContext) -> Result<Module, 
             .cloned()
             .chain(equal_function_definitions)
             .collect(),
+        module.position().clone(),
     ))
 }
 

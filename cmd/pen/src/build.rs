@@ -1,5 +1,6 @@
 use super::main_package_directory_finder;
 use crate::{
+    application_configuration::APPLICATION_CONFIGURATION,
     file_path_configuration::{OUTPUT_DIRECTORY, PRELUDE_PACKAGE_URL},
     infrastructure,
 };
@@ -36,6 +37,7 @@ pub fn build(verbose: bool) -> Result<(), Box<dyn std::error::Error>> {
         &main_package_directory,
         &output_directory,
         &url::Url::parse(PRELUDE_PACKAGE_URL)?,
+        &APPLICATION_CONFIGURATION,
     )?;
 
     Ok(())

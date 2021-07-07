@@ -23,6 +23,7 @@ pub fn coerce_types(module: &Module, type_context: &TypeContext) -> Result<Modul
             .iter()
             .map(|definition| transform_definition(definition, &variables, type_context))
             .collect::<Result<_, _>>()?,
+        module.position().clone(),
     ))
 }
 

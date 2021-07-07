@@ -2,6 +2,8 @@ use super::file_path_converter::FilePathConverter;
 use app::infra::FilePath;
 use std::{error::Error, path::PathBuf, sync::Arc};
 
+const APPLICATION_EXECUTABLE_FILENAME: &str = "app";
+
 pub struct NinjaBuildScriptCompiler {
     file_path_converter: Arc<FilePathConverter>,
     bit_code_file_extension: &'static str,
@@ -21,47 +23,14 @@ impl NinjaBuildScriptCompiler {
         }
     }
 
-    fn find_llc(&self) -> Result<PathBuf, Box<dyn Error>> {
-        Ok(which::which("llc-13")
-            .or_else(|_| which::which("llc-12"))
-            .or_else(|_| which::which("llc-11"))
-            .or_else(|_| which::which("llc"))?)
-    }
-
-    fn compile_ffi_build(
-        &self,
-        package_directory: &FilePath,
-        archive_file: &FilePath,
-    ) -> Vec<String> {
-        let package_directory = self
-            .file_path_converter
-            .convert_to_os_path(package_directory);
-        let ffi_build_script = package_directory.join(self.ffi_build_script);
-        let archive_file = self.file_path_converter.convert_to_os_path(archive_file);
-
-        if ffi_build_script.exists() {
-            vec![
-                "rule compile_ffi".into(),
-                format!("  command = {} $out", ffi_build_script.display()),
-                format!("build {}: compile_ffi", archive_file.display()),
-                format!("default {}", archive_file.display()),
-            ]
-        } else {
-            vec![]
-        }
-    }
-}
-
-impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
-    fn compile(
+    fn compile_common(
         &self,
         module_targets: &[app::infra::ModuleTarget],
-        child_build_script_files: &[FilePath],
         prelude_interface_files: &[FilePath],
         ffi_archive_file: &FilePath,
         package_directory: &FilePath,
         output_directory: &FilePath,
-    ) -> Result<String, Box<dyn Error>> {
+    ) -> Result<Vec<String>, Box<dyn Error>> {
         let llc = self.find_llc()?;
         let prelude_interface_files_string = prelude_interface_files
             .iter()
@@ -97,12 +66,6 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
         ]
         .into_iter()
         .map(String::from)
-        .chain(child_build_script_files.iter().map(|file| {
-            format!(
-                "subninja {}",
-                self.file_path_converter.convert_to_os_path(file).display()
-            )
-        }))
         .chain(module_targets.iter().flat_map(|target| {
             let package_directory = self
                 .file_path_converter
@@ -177,8 +140,142 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
                 .collect::<Vec<_>>()
                 .join(" ")
         )])
-        .collect::<Vec<String>>()
-        .join("\n")
+        .collect::<Vec<String>>())
+    }
+
+    fn find_llc(&self) -> Result<PathBuf, Box<dyn Error>> {
+        Ok(which::which("llc-13")
+            .or_else(|_| which::which("llc-12"))
+            .or_else(|_| which::which("llc-11"))
+            .or_else(|_| which::which("llc"))?)
+    }
+
+    fn compile_ffi_build(
+        &self,
+        package_directory: &FilePath,
+        archive_file: &FilePath,
+    ) -> Vec<String> {
+        let package_directory = self
+            .file_path_converter
+            .convert_to_os_path(package_directory);
+        let ffi_build_script = package_directory.join(self.ffi_build_script);
+        let archive_file = self.file_path_converter.convert_to_os_path(archive_file);
+
+        if ffi_build_script.exists() {
+            vec![
+                "rule compile_ffi".into(),
+                format!("  command = {} $out", ffi_build_script.display()),
+                format!("build {}: compile_ffi", archive_file.display()),
+                format!("default {}", archive_file.display()),
+            ]
+        } else {
+            vec![]
+        }
+    }
+}
+
+impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
+    fn compile_main(
+        &self,
+        module_targets: &[app::infra::ModuleTarget],
+        main_module_target: Option<&app::infra::MainModuleTarget>,
+        child_build_script_files: &[FilePath],
+        prelude_interface_files: &[FilePath],
+        ffi_archive_file: &FilePath,
+        package_directory: &FilePath,
+        output_directory: &FilePath,
+    ) -> Result<String, Box<dyn Error>> {
+        Ok(self
+            .compile_common(
+                module_targets,
+                prelude_interface_files,
+                ffi_archive_file,
+                package_directory,
+                output_directory,
+            )?
+            .into_iter()
+            .chain(child_build_script_files.iter().map(|file| {
+                format!(
+                    "subninja {}",
+                    self.file_path_converter.convert_to_os_path(file).display()
+                )
+            }))
+            .chain(if let Some(main_module_target) = main_module_target {
+                // TODO Collect those from arguments.
+                let object_files = module_targets
+                    .iter()
+                    .map(|target| target.object_file())
+                    .map(|path| {
+                        self.file_path_converter
+                            .convert_to_os_path(path)
+                            .display()
+                            .to_string()
+                    })
+                    .collect::<Vec<String>>();
+
+                let application_file = self.file_path_converter.convert_to_os_path(
+                    &package_directory.join(&FilePath::new([APPLICATION_EXECUTABLE_FILENAME])),
+                );
+
+                vec![
+                    "rule compile_main".into(),
+                    format!(
+                        "  command = ein compile-main -s {} $in $out",
+                        self.file_path_converter
+                            .convert_to_os_path(main_module_target.system_package_directory())
+                            .display()
+                    ),
+                    "  description = compiling main module".into(),
+                    "rule link".into(),
+                    // spell-checker: disable-next-line
+                    "  command = clang -Werror -o $out $in -ldl -lpthread".into(),
+                    "  description = linking application file".into(),
+                    format!(
+                        "build {}: compile_main {} {}",
+                        self.file_path_converter
+                            .convert_to_os_path(main_module_target.object_file())
+                            .display(),
+                        self.file_path_converter
+                            .convert_to_os_path(main_module_target.source_file())
+                            .display(),
+                        self.file_path_converter
+                            .convert_to_os_path(
+                                &main_module_target.object_file().with_extension("dep")
+                            )
+                            .display(),
+                    ),
+                    format!(
+                        "build {}: link {}",
+                        application_file.display(),
+                        object_files.join(" ")
+                    ),
+                    format!("default {}", application_file.display()),
+                ]
+            } else {
+                vec![]
+            })
+            .collect::<Vec<_>>()
+            .join("\n")
+            + "\n")
+    }
+
+    fn compile_external(
+        &self,
+        module_targets: &[app::infra::ModuleTarget],
+        prelude_interface_files: &[FilePath],
+        ffi_archive_file: &FilePath,
+        package_directory: &FilePath,
+        output_directory: &FilePath,
+    ) -> Result<String, Box<dyn Error>> {
+        Ok(self
+            .compile_common(
+                module_targets,
+                prelude_interface_files,
+                ffi_archive_file,
+                package_directory,
+                output_directory,
+            )?
+            .join("\n")
             + "\n")
     }
 

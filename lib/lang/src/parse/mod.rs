@@ -19,13 +19,20 @@ pub fn parse(source_content: &str, path: &str) -> Result<ast::Module, ParseError
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::ast::*;
+    use crate::{ast::*, position::Position};
 
     #[test]
     fn parse_empty_module() {
         assert_eq!(
             parse("", ""),
-            Ok(Module::new(vec![], vec![], vec![], vec![], vec![]))
+            Ok(Module::new(
+                vec![],
+                vec![],
+                vec![],
+                vec![],
+                vec![],
+                Position::dummy()
+            ))
         );
     }
 }

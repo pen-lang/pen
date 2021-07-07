@@ -64,6 +64,7 @@ pub fn qualify(module: &Module, prefix: &str) -> Module {
             module.foreign_declarations().to_vec(),
             module.declarations().to_vec(),
             module.definitions().to_vec(),
+            module.position().clone(),
         ),
         |type_| match type_ {
             Type::Record(record) => types::Record::new(
@@ -157,32 +158,20 @@ mod tests {
     fn qualify_type_alias() {
         assert_eq!(
             qualify(
-                &Module::new(
-                    vec![],
-                    vec![TypeAlias::without_source(
-                        "x",
-                        types::Reference::new("x", Position::dummy()),
-                        false,
-                        false
-                    )],
-                    vec![],
-                    vec![],
-                    vec![],
-                ),
-                "foo."
-            ),
-            Module::new(
-                vec![],
-                vec![TypeAlias::without_source(
-                    "foo.x",
-                    types::Reference::new("foo.x", Position::dummy()),
+                &Module::empty().set_type_aliases(vec![TypeAlias::without_source(
+                    "x",
+                    types::Reference::new("x", Position::dummy()),
                     false,
                     false
-                )],
-                vec![],
-                vec![],
-                vec![],
-            )
+                )]),
+                "foo."
+            ),
+            Module::empty().set_type_aliases(vec![TypeAlias::without_source(
+                "foo.x",
+                types::Reference::new("foo.x", Position::dummy()),
+                false,
+                false
+            )])
         );
     }
 }

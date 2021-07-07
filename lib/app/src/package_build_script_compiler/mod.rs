@@ -3,7 +3,7 @@ mod module_target_collector;
 use crate::{
     common::file_path_resolver,
     infra::{FilePath, Infrastructure},
-    module_finder, prelude_interface_file_finder,
+    module_finder, prelude_interface_file_finder, ApplicationConfiguration,
 };
 use std::error::Error;
 
@@ -14,19 +14,37 @@ pub fn compile_main(
     child_build_script_files: &[FilePath],
     build_script_file: &FilePath,
     prelude_package_url: &url::Url,
+    _application_configuration: &ApplicationConfiguration,
 ) -> Result<(), Box<dyn Error>> {
-    compile_normal_package(
-        infrastructure,
-        package_directory,
-        output_directory,
-        child_build_script_files,
-        &file_path_resolver::resolve_main_package_ffi_archive_file(
-            output_directory,
-            &infrastructure.file_path_configuration,
-        ),
+    infrastructure.file_system.write(
         build_script_file,
-        prelude_package_url,
-    )
+        infrastructure
+            .build_script_compiler
+            .compile_main(
+                &module_target_collector::collect_module_targets(
+                    infrastructure,
+                    package_directory,
+                    output_directory,
+                )?,
+                // TODO Find main module targets.
+                None,
+                child_build_script_files,
+                &prelude_interface_file_finder::find(
+                    infrastructure,
+                    output_directory,
+                    prelude_package_url,
+                )?,
+                &file_path_resolver::resolve_main_package_ffi_archive_file(
+                    output_directory,
+                    &infrastructure.file_path_configuration,
+                ),
+                package_directory,
+                output_directory,
+            )?
+            .as_bytes(),
+    )?;
+
+    Ok(())
 }
 
 pub fn compile_external(
@@ -36,47 +54,30 @@ pub fn compile_external(
     build_script_file: &FilePath,
     prelude_package_url: &url::Url,
 ) -> Result<(), Box<dyn Error>> {
-    compile_normal_package(
-        infrastructure,
-        &file_path_resolver::resolve_package_directory(output_directory, package_url),
-        output_directory,
-        &[],
-        &file_path_resolver::resolve_external_package_ffi_archive_file(
-            output_directory,
-            package_url,
-            &infrastructure.file_path_configuration,
-        ),
-        build_script_file,
-        prelude_package_url,
-    )
-}
-
-fn compile_normal_package(
-    infrastructure: &Infrastructure,
-    package_directory: &FilePath,
-    output_directory: &FilePath,
-    child_build_script_files: &[FilePath],
-    package_ffi_archive_file: &FilePath,
-    build_script_file: &FilePath,
-    prelude_package_url: &url::Url,
-) -> Result<(), Box<dyn Error>> {
-    let prelude_interface_files =
-        prelude_interface_file_finder::find(infrastructure, output_directory, prelude_package_url)?;
+    let package_directory =
+        file_path_resolver::resolve_package_directory(output_directory, package_url);
 
     infrastructure.file_system.write(
         build_script_file,
         infrastructure
             .build_script_compiler
-            .compile(
+            .compile_external(
                 &module_target_collector::collect_module_targets(
                     infrastructure,
-                    package_directory,
+                    &package_directory,
                     output_directory,
                 )?,
-                child_build_script_files,
-                &prelude_interface_files,
-                package_ffi_archive_file,
-                package_directory,
+                &prelude_interface_file_finder::find(
+                    infrastructure,
+                    output_directory,
+                    prelude_package_url,
+                )?,
+                &file_path_resolver::resolve_external_package_ffi_archive_file(
+                    output_directory,
+                    package_url,
+                    &infrastructure.file_path_configuration,
+                ),
+                &package_directory,
                 output_directory,
             )?
             .as_bytes(),

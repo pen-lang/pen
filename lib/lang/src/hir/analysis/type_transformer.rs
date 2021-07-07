@@ -28,6 +28,7 @@ pub fn transform(module: &Module, transform: impl Fn(&Type) -> Type) -> Module {
             .iter()
             .map(|definition| transform_definition(definition, &transform))
             .collect(),
+        module.position().clone(),
     )
 }
 

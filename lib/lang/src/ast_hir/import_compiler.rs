@@ -82,6 +82,7 @@ fn compile_imports(module: &hir::Module, module_interfaces: &[&interface::Module
             .chain(module.declarations().iter().cloned())
             .collect(),
         module.definitions().to_vec(),
+        module.position().clone(),
     )
 }
 
@@ -195,12 +196,8 @@ mod tests {
     #[test]
     fn compile_empty_module() {
         assert_eq!(
-            compile(
-                &hir::Module::new(vec![], vec![], vec![], vec![], vec![],),
-                &Default::default(),
-                &[]
-            ),
-            hir::Module::new(vec![], vec![], vec![], vec![], vec![],)
+            compile(&hir::Module::empty(), &Default::default(), &[]),
+            hir::Module::empty()
         );
     }
 

@@ -16,6 +16,8 @@ pub enum CompileError {
     FunctionExpected(Position),
     InvalidRecordEqualOperation(Position),
     ListExpected(Position),
+    MainFunctionNotFound(Position),
+    MainFunctionTypeUndefined(Position),
     MirTypeCheck(mir::analysis::TypeCheckError),
     MissingElseBlock(Position),
     RecordElementUnknown(Position),
@@ -68,6 +70,12 @@ impl Display for CompileError {
             }
             Self::ListExpected(position) => {
                 write!(formatter, "list expected\n{}", position)
+            }
+            Self::MainFunctionNotFound(position) => {
+                write!(formatter, "main function not found\n{}", position)
+            }
+            Self::MainFunctionTypeUndefined(position) => {
+                write!(formatter, "main function type undefined\n{}", position)
             }
             Self::MirTypeCheck(error) => {
                 write!(formatter, "failed to check types in MIR: {}", error)
