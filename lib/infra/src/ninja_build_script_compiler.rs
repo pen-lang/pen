@@ -61,7 +61,7 @@ impl NinjaBuildScriptCompiler {
             ),
             "  description = generating object file for $source_file",
             "rule resolve_dependency",
-            "  command = pen resolve-dependency -p $package_directory $in $object_file $out",
+            "  command = pen resolve-dependency -o $output_directory -p $package_directory $in $object_file $out",
             "  description = resolving dependency of $in",
         ]
         .into_iter()
@@ -114,6 +114,7 @@ impl NinjaBuildScriptCompiler {
                     ninja_dependency_file.with_extension("dd.dummy").display(),
                     source_file.display(),
                 ),
+                format!("  output_directory = {}", self.file_path_converter.convert_to_os_path(output_directory).display()),
                 format!("  package_directory = {}", package_directory.display()),
                 format!("  object_file = {}", bit_code_file.display()),
                 format!(
@@ -122,6 +123,7 @@ impl NinjaBuildScriptCompiler {
                     ninja_dependency_file.display(),
                     source_file.display(),
                 ),
+                format!("  output_directory = {}", self.file_path_converter.convert_to_os_path(output_directory).display()),
                 format!("  package_directory = {}", package_directory.display()),
                 format!("  object_file = {}", bit_code_file.display()),
             ]

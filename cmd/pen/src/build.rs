@@ -1,10 +1,11 @@
 use super::main_package_directory_finder;
 use crate::{
     application_configuration::APPLICATION_CONFIGURATION,
-    file_path_configuration::{OUTPUT_DIRECTORY, PRELUDE_PACKAGE_URL},
-    infrastructure,
+    file_path_configuration::PRELUDE_PACKAGE_URL, infrastructure,
 };
 use std::sync::Arc;
+
+pub const OUTPUT_DIRECTORY: &str = ".pen";
 
 pub fn build(verbose: bool) -> Result<(), Box<dyn std::error::Error>> {
     let main_package_directory = main_package_directory_finder::find()?;
