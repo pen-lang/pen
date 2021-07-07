@@ -26,7 +26,7 @@ pub fn compile_main(
         &COMPILE_CONFIGURATION,
         &file_path_converter
             .convert_to_file_path(main_package_directory)?
-            .join(&app::infra::FilePath::new(vec![OUTPUT_DIRECTORY])),
+            .join(&app::infra::FilePath::new([OUTPUT_DIRECTORY])),
         &url::Url::parse(PRELUDE_PACKAGE_URL)?,
         &APPLICATION_CONFIGURATION,
     )?;
