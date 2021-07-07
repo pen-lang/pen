@@ -3,7 +3,7 @@ mod module_target_collector;
 use crate::{
     common::file_path_resolver,
     infra::{FilePath, Infrastructure},
-    module_finder, prelude_interface_file_finder,
+    module_finder, prelude_interface_file_finder, ApplicationConfiguration,
 };
 use std::error::Error;
 
@@ -14,7 +14,7 @@ pub fn compile_main(
     child_build_script_files: &[FilePath],
     build_script_file: &FilePath,
     prelude_package_url: &url::Url,
-    _is_application: bool,
+    _application_configuration: &ApplicationConfiguration,
 ) -> Result<(), Box<dyn Error>> {
     infrastructure.file_system.write(
         build_script_file,
@@ -26,6 +26,7 @@ pub fn compile_main(
                     package_directory,
                     output_directory,
                 )?,
+                // TODO Find main module targets.
                 None,
                 child_build_script_files,
                 &prelude_interface_file_finder::find(

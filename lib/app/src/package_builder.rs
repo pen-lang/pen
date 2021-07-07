@@ -1,6 +1,5 @@
 use super::application_configuration::ApplicationConfiguration;
 use crate::{
-    common::file_path_resolver,
     infra::{FilePath, Infrastructure, EXTERNAL_PACKAGE_DIRECTORY},
     package_build_script_compiler,
 };
@@ -28,11 +27,7 @@ pub fn build_main_package(
         &find_external_package_build_script(infrastructure, output_directory)?,
         &build_script_file,
         prelude_package_url,
-        is_package_application(
-            infrastructure,
-            main_package_directory,
-            application_configuration,
-        ),
+        application_configuration,
     )?;
 
     infrastructure.module_builder.build(&build_script_file)?;
@@ -68,18 +63,4 @@ fn find_external_package_build_script(
             vec![]
         },
     )
-}
-
-fn is_package_application(
-    infrastructure: &Infrastructure,
-    package_directory: &FilePath,
-    application_configuration: &ApplicationConfiguration,
-) -> bool {
-    infrastructure
-        .file_system
-        .exists(&file_path_resolver::resolve_source_file(
-            package_directory,
-            &[application_configuration.main_module_basename.clone()],
-            &infrastructure.file_path_configuration,
-        ))
 }
