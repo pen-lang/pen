@@ -73,40 +73,38 @@ pub fn compile_main(
     prelude_package_url: &url::Url,
     application_configuration: &ApplicationConfiguration,
 ) -> Result<(), Box<dyn Error>> {
-    let (module, _) = lang::hir_mir::compile_main(
-        &compile_to_hir(
-            infrastructure,
-            source_file,
-            dependency_file,
-            output_directory,
-            prelude_package_url,
-        )?,
-        &prelude_type_configuration_qualifier::qualify_list_type_configuration(
-            &compile_configuration.list_type,
-            PRELUDE_PREFIX,
-        ),
-        &prelude_type_configuration_qualifier::qualify_string_type_configuration(
-            &compile_configuration.string_type,
-            PRELUDE_PREFIX,
-        ),
-        &main_module_configuration_qualifier::qualify(
-            &application_configuration.main_module,
-            &calculate_module_prefix(
-                infrastructure,
-                &file_path_resolver::resolve_source_file(
-                    system_package_directory,
-                    &[application_configuration
-                        .main_function_module_basename
-                        .clone()],
-                    &infrastructure.file_path_configuration,
-                ),
-            ),
-        ),
-    )?;
-
     compile_mir_module(
         infrastructure,
-        &module,
+        &lang::hir_mir::compile_main(
+            &compile_to_hir(
+                infrastructure,
+                source_file,
+                dependency_file,
+                output_directory,
+                prelude_package_url,
+            )?,
+            &prelude_type_configuration_qualifier::qualify_list_type_configuration(
+                &compile_configuration.list_type,
+                PRELUDE_PREFIX,
+            ),
+            &prelude_type_configuration_qualifier::qualify_string_type_configuration(
+                &compile_configuration.string_type,
+                PRELUDE_PREFIX,
+            ),
+            &main_module_configuration_qualifier::qualify(
+                &application_configuration.main_module,
+                &calculate_module_prefix(
+                    infrastructure,
+                    &file_path_resolver::resolve_source_file(
+                        system_package_directory,
+                        &[application_configuration
+                            .main_function_module_basename
+                            .clone()],
+                        &infrastructure.file_path_configuration,
+                    ),
+                ),
+            ),
+        )?,
         object_file,
         &compile_configuration.heap,
     )?;
