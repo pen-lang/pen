@@ -2,8 +2,6 @@ use super::file_path_converter::FilePathConverter;
 use app::infra::FilePath;
 use std::{error::Error, path::PathBuf, sync::Arc};
 
-const APPLICATION_EXECUTABLE_FILENAME: &str = "app";
-
 pub struct NinjaBuildScriptCompiler {
     file_path_converter: Arc<FilePathConverter>,
     bit_code_file_extension: &'static str,
@@ -29,6 +27,9 @@ impl NinjaBuildScriptCompiler {
         Ok([
             "rule compile",
             "  command = pen compile $in $out",
+            "  description = compiling module of $source_file",
+            "rule compile_main",
+            "  command = ein compile-main -s $system_package_directory $in $out",
             "  description = compiling module of $source_file",
             "rule compile_prelude",
             "  command = pen compile-prelude $in $out",
@@ -80,15 +81,11 @@ impl NinjaBuildScriptCompiler {
                 let interface_file = self
                     .file_path_converter
                     .convert_to_os_path(target.interface_file());
-                let dependency_file = self
-                    .file_path_converter
-                    .convert_to_os_path(&target.object_file().with_extension("dep"));
-                let ninja_dependency_file = self
-                    .file_path_converter
-                    .convert_to_os_path(&target.object_file().with_extension("dd"));
                 let object_file = self
                     .file_path_converter
                     .convert_to_os_path(target.object_file());
+                let dependency_file = object_file.with_extension("dep");
+                let ninja_dependency_file = object_file.with_extension("dd");
                 let bit_code_file = object_file.with_extension(self.bit_code_file_extension);
 
                 vec![
@@ -109,26 +106,15 @@ impl NinjaBuildScriptCompiler {
                         bit_code_file.display(),
                     ),
                     format!("  source_file = {}", source_file.display()),
-                    // TODO Remove this hack to circumvent ninja's bug where dynamic dependency files
-                    // cannot be specified as inputs together with outputs of the same build rules.
-                    // https://github.com/ninja-build/ninja/issues/1988
-                    format!(
-                        "build {} {}: resolve_dependency {}",
-                        dependency_file.display(),
-                        ninja_dependency_file.with_extension("dd.dummy").display(),
-                        source_file.display(),
-                    ),
-                    format!("  package_directory = {}", package_directory.display()),
-                    format!("  object_file = {}", bit_code_file.display()),
-                    format!(
-                        "build {} {}: resolve_dependency {}",
-                        dependency_file.with_extension("dep.dummy").display(),
-                        ninja_dependency_file.display(),
-                        source_file.display(),
-                    ),
-                    format!("  package_directory = {}", package_directory.display()),
-                    format!("  object_file = {}", bit_code_file.display()),
                 ]
+                .into_iter()
+                .chain(self.compile_dependency(
+                    &source_file,
+                    &bit_code_file,
+                    &dependency_file,
+                    &ninja_dependency_file,
+                    &package_directory,
+                ))
             })
             .chain(vec![format!(
                 "default {}",
@@ -145,6 +131,37 @@ impl NinjaBuildScriptCompiler {
             )])
             .chain(self.compile_ffi_build(package_directory, ffi_archive_file))
             .collect()
+    }
+
+    // TODO Remove this hack to circumvent ninja's bug where dynamic dependency files
+    // cannot be specified as inputs together with outputs of the same build rules.
+    // https://github.com/ninja-build/ninja/issues/1988
+    fn compile_dependency(
+        &self,
+        source_file: &std::path::Path,
+        bit_code_file: &std::path::Path,
+        dependency_file: &std::path::Path,
+        ninja_dependency_file: &std::path::Path,
+        package_directory: &std::path::Path,
+    ) -> Vec<String> {
+        vec![
+            format!(
+                "build {} {}: resolve_dependency {}",
+                dependency_file.display(),
+                ninja_dependency_file.with_extension("dd.dummy").display(),
+                source_file.display(),
+            ),
+            format!("  package_directory = {}", package_directory.display()),
+            format!("  object_file = {}", bit_code_file.display()),
+            format!(
+                "build {} {}: resolve_dependency {}",
+                dependency_file.with_extension("dep.dummy").display(),
+                ninja_dependency_file.display(),
+                source_file.display(),
+            ),
+            format!("  package_directory = {}", package_directory.display()),
+            format!("  object_file = {}", bit_code_file.display()),
+        ]
     }
 
     fn find_llc(&self) -> Result<PathBuf, Box<dyn Error>> {
@@ -208,64 +225,60 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
             ffi_archive_file,
             package_directory,
         ))
+        .chain(if let Some(main_module_target) = main_module_target {
+            let source_file = self
+                .file_path_converter
+                .convert_to_os_path(main_module_target.source_file());
+            let object_file = self
+                .file_path_converter
+                .convert_to_os_path(main_module_target.object_file());
+            let dependency_file = object_file.with_extension("dep");
+            let ninja_dependency_file = object_file.with_extension("dd");
+            let bit_code_file = object_file.with_extension(self.bit_code_file_extension);
+
+            vec![
+                format!(
+                    "build {}: compile_main {} {}",
+                    bit_code_file.display(),
+                    source_file.display(),
+                    dependency_file.display(),
+                ),
+                format!(
+                    "  system_package_directory = {}",
+                    self.file_path_converter
+                        .convert_to_os_path(main_module_target.system_package_directory())
+                        .display()
+                ),
+                format!(
+                    "build {}: llc {}",
+                    object_file.display(),
+                    bit_code_file.display(),
+                ),
+                format!("  source_file = {}", source_file.display()),
+                format!("default {}", object_file.display()),
+            ]
+            .into_iter()
+            .chain(
+                self.compile_dependency(
+                    &source_file,
+                    &bit_code_file,
+                    &dependency_file,
+                    &ninja_dependency_file,
+                    &self
+                        .file_path_converter
+                        .convert_to_os_path(package_directory),
+                ),
+            )
+            .collect()
+        } else {
+            vec![]
+        })
         .chain(child_build_script_files.iter().map(|file| {
             format!(
                 "subninja {}",
                 self.file_path_converter.convert_to_os_path(file).display()
             )
         }))
-        .chain(if let Some(main_module_target) = main_module_target {
-            // TODO Collect those from arguments.
-            let object_files = module_targets
-                .iter()
-                .map(|target| target.object_file())
-                .map(|path| {
-                    self.file_path_converter
-                        .convert_to_os_path(path)
-                        .display()
-                        .to_string()
-                })
-                .collect::<Vec<String>>();
-
-            let application_file = self.file_path_converter.convert_to_os_path(
-                &package_directory.join(&FilePath::new([APPLICATION_EXECUTABLE_FILENAME])),
-            );
-
-            vec![
-                "rule compile_main".into(),
-                format!(
-                    "  command = ein compile-main -s {} $in $out",
-                    self.file_path_converter
-                        .convert_to_os_path(main_module_target.system_package_directory())
-                        .display()
-                ),
-                "  description = compiling main module".into(),
-                "rule link".into(),
-                // spell-checker: disable-next-line
-                "  command = clang -Werror -o $out $in -ldl -lpthread".into(),
-                "  description = linking application file".into(),
-                format!(
-                    "build {}: compile_main {} {}",
-                    self.file_path_converter
-                        .convert_to_os_path(main_module_target.object_file())
-                        .display(),
-                    self.file_path_converter
-                        .convert_to_os_path(main_module_target.source_file())
-                        .display(),
-                    self.file_path_converter
-                        .convert_to_os_path(&main_module_target.object_file().with_extension("dep"))
-                        .display(),
-                ),
-                format!(
-                    "build {}: link {}",
-                    application_file.display(),
-                    object_files.join(" ")
-                ),
-                format!("default {}", application_file.display()),
-            ]
-        } else {
-            vec![]
-        })
         .collect::<Vec<_>>()
         .join("\n")
             + "\n")
