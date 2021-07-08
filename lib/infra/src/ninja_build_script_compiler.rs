@@ -40,8 +40,10 @@ impl NinjaBuildScriptCompiler {
             ),
             "  description = generating object file for $source_file",
             "rule resolve_dependency",
-            "  command = pen resolve-dependency -o $output_directory -p $package_directory $in $object_file $out",
+            "  command = pen resolve-dependency -o $builddir -p $package_directory $in $object_file $out",
             "  description = resolving dependency of $in",
+            "rule compile_ffi",
+            "  command = $in $out",
         ]
         .iter()
         .map(|string| string.to_string())
@@ -54,7 +56,6 @@ impl NinjaBuildScriptCompiler {
         prelude_interface_files: &[FilePath],
         ffi_archive_file: &FilePath,
         package_directory: &FilePath,
-        output_directory: &FilePath,
     ) -> Vec<String> {
         let prelude_interface_files_string = prelude_interface_files
             .iter()
@@ -117,12 +118,6 @@ impl NinjaBuildScriptCompiler {
                         ninja_dependency_file.with_extension("dd.dummy").display(),
                         source_file.display(),
                     ),
-                    format!(
-                        "  output_directory = {}",
-                        self.file_path_converter
-                            .convert_to_os_path(output_directory)
-                            .display()
-                    ),
                     format!("  package_directory = {}", package_directory.display()),
                     format!("  object_file = {}", bit_code_file.display()),
                     format!(
@@ -130,12 +125,6 @@ impl NinjaBuildScriptCompiler {
                         dependency_file.with_extension("dep.dummy").display(),
                         ninja_dependency_file.display(),
                         source_file.display(),
-                    ),
-                    format!(
-                        "  output_directory = {}",
-                        self.file_path_converter
-                            .convert_to_os_path(output_directory)
-                            .display()
                     ),
                     format!("  package_directory = {}", package_directory.display()),
                     format!("  object_file = {}", bit_code_file.display()),
@@ -178,9 +167,11 @@ impl NinjaBuildScriptCompiler {
 
         if ffi_build_script.exists() {
             vec![
-                "rule compile_ffi".into(),
-                format!("  command = {} $out", ffi_build_script.display()),
-                format!("build {}: compile_ffi", archive_file.display()),
+                format!(
+                    "build {}: compile_ffi {}",
+                    archive_file.display(),
+                    ffi_build_script.display()
+                ),
                 format!("default {}", archive_file.display()),
             ]
         } else {
@@ -216,7 +207,6 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
             prelude_interface_files,
             ffi_archive_file,
             package_directory,
-            output_directory,
         ))
         .chain(child_build_script_files.iter().map(|file| {
             format!(
@@ -287,7 +277,6 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
         prelude_interface_files: &[FilePath],
         ffi_archive_file: &FilePath,
         package_directory: &FilePath,
-        output_directory: &FilePath,
     ) -> Result<String, Box<dyn Error>> {
         Ok(self
             .compile_common(
@@ -295,7 +284,6 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
                 prelude_interface_files,
                 ffi_archive_file,
                 package_directory,
-                output_directory,
             )
             .join("\n")
             + "\n")

@@ -78,7 +78,6 @@ pub fn compile_external(
                     &infrastructure.file_path_configuration,
                 ),
                 &package_directory,
-                output_directory,
             )?
             .as_bytes(),
     )?;
