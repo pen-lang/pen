@@ -28,6 +28,5 @@ pub trait BuildScriptCompiler {
         module_targets: &[ModuleTarget],
         ffi_archive_file: &FilePath,
         package_directory: &FilePath,
-        output_directory: &FilePath,
     ) -> Result<String, Box<dyn Error>>;
 }

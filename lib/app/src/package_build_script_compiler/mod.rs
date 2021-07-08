@@ -111,7 +111,6 @@ pub fn compile_prelude(
                     &infrastructure.file_path_configuration,
                 ),
                 &package_directory,
-                output_directory,
             )?
             .as_bytes(),
     )?;
