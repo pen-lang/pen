@@ -35,7 +35,6 @@ pub fn build_main_package(
     Ok(())
 }
 
-// TODO Generate external package targets.
 fn find_external_package_build_script(
     infrastructure: &Infrastructure,
     output_directory: &FilePath,
