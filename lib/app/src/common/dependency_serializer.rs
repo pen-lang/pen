@@ -1,23 +1,18 @@
 use crate::infra::FilePath;
 use std::{collections::HashMap, error::Error};
 
+type InterfaceFileMap = HashMap<lang::ast::ModulePath, FilePath>;
+
 pub fn serialize(
-    map: &HashMap<lang::ast::ModulePath, FilePath>,
+    interface_files: &InterfaceFileMap,
+    prelude_interface_files: &[FilePath],
 ) -> Result<Vec<u8>, Box<dyn Error>> {
-    Ok(serde_json::to_string(
-        &map.clone()
-            .into_iter()
-            .collect::<Vec<(lang::ast::ModulePath, FilePath)>>(),
-    )?
-    .into())
+    Ok(bincode::serialize(&(
+        interface_files,
+        prelude_interface_files,
+    ))?)
 }
 
-pub fn deserialize(
-    slice: &[u8],
-) -> Result<HashMap<lang::ast::ModulePath, FilePath>, Box<dyn Error>> {
-    Ok(
-        serde_json::from_slice::<Vec<(lang::ast::ModulePath, FilePath)>>(slice)?
-            .into_iter()
-            .collect(),
-    )
+pub fn deserialize(slice: &[u8]) -> Result<(InterfaceFileMap, Vec<FilePath>), Box<dyn Error>> {
+    Ok(bincode::deserialize(slice)?)
 }

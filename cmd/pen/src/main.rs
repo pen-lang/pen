@@ -72,6 +72,13 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                         .required(true)
                         .takes_value(true),
                 )
+                .arg(
+                    clap::Arg::with_name("output directory")
+                        .short("o")
+                        .long("output-directory")
+                        .required(true)
+                        .takes_value(true),
+                )
                 .arg(clap::Arg::with_name("source file").required(true))
                 .arg(clap::Arg::with_name("object file").required(true))
                 .arg(clap::Arg::with_name("dependency file").required(true))
@@ -114,11 +121,12 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
             let matches = matches.unwrap();
 
             resolve_dependency(
-                matches.value_of("package directory").unwrap(),
                 matches.value_of("source file").unwrap(),
                 matches.value_of("object file").unwrap(),
                 matches.value_of("dependency file").unwrap(),
                 matches.value_of("build script dependency file").unwrap(),
+                matches.value_of("package directory").unwrap(),
+                matches.value_of("output directory").unwrap(),
             )
         }
         _ => unreachable!(),
