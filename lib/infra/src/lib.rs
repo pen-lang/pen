@@ -1,3 +1,4 @@
+mod application_linker;
 mod command_runner;
 mod environment_variable_reader;
 mod error;
@@ -12,6 +13,7 @@ mod ninja_build_script_compiler;
 mod ninja_build_script_dependency_compiler;
 mod ninja_module_builder;
 
+pub use application_linker::*;
 pub use error::*;
 pub use external_package_initializer::*;
 pub use file_path_converter::*;

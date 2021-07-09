@@ -1,5 +1,6 @@
 use super::application_configuration::ApplicationConfiguration;
 use crate::{
+    common::file_path_resolver,
     infra::{FilePath, Infrastructure, EXTERNAL_PACKAGE_DIRECTORY},
     package_build_script_compiler,
 };
@@ -31,6 +32,26 @@ pub fn build_main_package(
     )?;
 
     infrastructure.module_builder.build(&build_script_file)?;
+
+    let files = infrastructure.file_system.read_directory(
+        &file_path_resolver::resolve_object_directory(output_directory),
+    )?;
+    let (archive_files, files) = files.into_iter().partition::<Vec<_>, _>(|file| {
+        file.has_extension(
+            &infrastructure
+                .file_path_configuration
+                .archive_file_extension,
+        )
+    });
+    let (object_files, _) = files.into_iter().partition::<Vec<_>, _>(|file| {
+        file.has_extension(&infrastructure.file_path_configuration.object_file_extension)
+    });
+
+    infrastructure.application_linker.link(
+        &object_files,
+        &archive_files,
+        &main_package_directory.join(&FilePath::new(["app"])),
+    )?;
 
     Ok(())
 }

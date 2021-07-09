@@ -36,7 +36,7 @@ impl NinjaBuildScriptCompiler {
             "  description = compiling module of $source_file",
             "rule llc",
             &format!(
-                "  command = {} -O3 -tailcallopt -filetype obj -o $out $in",
+                "  command = {} -O3 -tailcallopt --relocation-model pic -filetype obj -o $out $in",
                 llc.display()
             ),
             "  description = generating object file for $source_file",
