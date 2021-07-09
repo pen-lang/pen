@@ -246,7 +246,7 @@ mod tests {
                 .set_declarations(vec![Declaration::new(
                     "foo.$equal",
                     types::Function::new(
-                        vec![record_type.clone().into(), record_type.clone().into()],
+                        vec![record_type.clone().into(), record_type.into()],
                         types::Boolean::new(Position::dummy()),
                         Position::dummy()
                     ),
