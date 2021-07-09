@@ -13,7 +13,7 @@ pub fn qualify(
             .type_aliases()
             .iter()
             .find(|alias| {
-                alias.original_name() == &configuration.main_function_type_name && alias.is_public()
+                alias.original_name() == configuration.main_function_type_name && alias.is_public()
             })
             .ok_or(ModuleCompilerError::MainFunctionTypeNotFound)?
             .name()
