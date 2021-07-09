@@ -134,3 +134,29 @@ Feature: Memory leak
     """
     When I successfully run `pen build`
     Then I successfully run `check_memory_leak_in_loop.sh ./app`
+
+  Scenario: Call a global thunk function
+    Given a file named "pen.json" with:
+    """
+    {
+      "dependencies": {
+        "System": "file://pen-root/lib/os"
+      }
+    }
+    """
+    And a file named "Foo.pen" with:
+    """
+    import System'Os
+
+    f = \() none {
+      f()
+    }
+
+    main = \(os Os'Os) number {
+      f()
+
+      0
+    }
+    """
+    When I successfully run `pen build`
+    Then I successfully run `check_memory_leak_in_loop.sh ./app`
