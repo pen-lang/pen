@@ -14,11 +14,14 @@ pub fn transform(module: &Module, type_context: &TypeContext) -> Result<Module, 
     let mut equal_function_definitions = vec![];
 
     for type_definition in module.type_definitions() {
-        if type_comparability_checker::check(
-            &types::Record::new(type_definition.name(), type_definition.position().clone()).into(),
-            type_context.types(),
-            type_context.records(),
-        )? {
+        if !type_definition.is_external()
+            && type_comparability_checker::check(
+                &types::Record::new(type_definition.name(), type_definition.position().clone())
+                    .into(),
+                type_context.types(),
+                type_context.records(),
+            )?
+        {
             equal_function_definitions.push(compile_record_equal_function(type_definition));
         }
     }
@@ -84,7 +87,7 @@ fn compile_record_equal_function(type_definition: &TypeDefinition) -> Definition
             position.clone(),
         ),
         false,
-        false,
+        true,
         position.clone(),
     )
 }
@@ -99,6 +102,7 @@ mod tests {
         },
         position::Position,
     };
+    use pretty_assertions::assert_eq;
 
     fn transform_module(module: &Module) -> Result<Module, CompileError> {
         transform(
@@ -182,9 +186,27 @@ mod tests {
                         Position::dummy(),
                     ),
                     false,
-                    false,
+                    true,
                     Position::dummy()
                 )]))
         );
+    }
+
+    #[test]
+    fn do_not_compile_equal_function_for_external_type_definition() {
+        let module = Module::empty().set_type_definitions(vec![TypeDefinition::new(
+            "foo",
+            "foo",
+            vec![
+                types::RecordElement::new("x", types::None::new(Position::dummy())),
+                types::RecordElement::new("y", types::None::new(Position::dummy())),
+            ],
+            false,
+            false,
+            true,
+            Position::dummy(),
+        )]);
+
+        assert_eq!(transform_module(&module), Ok(module));
     }
 }
