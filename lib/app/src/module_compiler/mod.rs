@@ -18,7 +18,6 @@ use self::utilities::{DUMMY_LIST_TYPE_CONFIGURATION, DUMMY_STRING_TYPE_CONFIGURA
 
 const PRELUDE_PREFIX: &str = "prelude:";
 
-#[allow(clippy::too_many_arguments)]
 pub fn compile(
     infrastructure: &Infrastructure,
     source_file: &FilePath,
