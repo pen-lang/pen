@@ -1,16 +1,13 @@
 mod error;
 mod module_target_collector;
 
+use self::error::PackageBuildScriptCompilerError;
 use crate::{
     common::file_path_resolver,
     infra::{FilePath, Infrastructure, MainModuleTarget},
     module_finder, prelude_interface_file_finder, ApplicationConfiguration,
 };
 use std::error::Error;
-
-use self::error::PackageBuildScriptCompilerError;
-
-const SYSTEM_PACKAGE_NAME: &str = "System";
 
 pub fn compile_main(
     infrastructure: &Infrastructure,
@@ -60,7 +57,7 @@ pub fn compile_main(
                                                 output_directory,
                                                 package_configuration
                                                     .dependencies
-                                                    .get(SYSTEM_PACKAGE_NAME).ok_or({
+                                                    .get(&application_configuration.system_package_name).ok_or({
                                                         PackageBuildScriptCompilerError::SystemPackageNotFound
                                                     })?,
                                             ),

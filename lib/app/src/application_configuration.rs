@@ -1,6 +1,7 @@
 pub struct ApplicationConfiguration {
     pub main_module_basename: String,
     pub main_function_module_basename: String,
+    pub system_package_name: String,
     pub main_module: MainModuleConfiguration,
 }
 
