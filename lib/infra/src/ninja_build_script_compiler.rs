@@ -21,8 +21,24 @@ impl NinjaBuildScriptCompiler {
         }
     }
 
-    fn compile_rules(&self) -> Result<Vec<String>, Box<dyn Error>> {
+    fn compile_rules(
+        &self,
+        prelude_interface_files: &[FilePath],
+    ) -> Result<Vec<String>, Box<dyn Error>> {
         let llc = self.find_llc()?;
+        let resolve_dependency_command = format!(
+            "  command = pen resolve-dependency -o $builddir -p $package_directory {} $in $object_file $out",
+            prelude_interface_files
+                .iter()
+                .map(|file| "-i ".to_owned()
+                    + &self
+                        .file_path_converter
+                        .convert_to_os_path(file)
+                        .display()
+                        .to_string())
+                .collect::<Vec<_>>()
+                .join(" "),
+        );
 
         Ok([
             "rule compile",
@@ -41,7 +57,7 @@ impl NinjaBuildScriptCompiler {
             ),
             "  description = generating object file for $source_file",
             "rule resolve_dependency",
-            "  command = pen resolve-dependency -o $builddir -p $package_directory $in $object_file $out",
+            &resolve_dependency_command,
             "  description = resolving dependency of $in",
             "rule compile_ffi",
             "  command = $in $out",
@@ -54,21 +70,9 @@ impl NinjaBuildScriptCompiler {
     fn compile_common(
         &self,
         module_targets: &[app::infra::ModuleTarget],
-        prelude_interface_files: &[FilePath],
         ffi_archive_file: &FilePath,
         package_directory: &FilePath,
     ) -> Vec<String> {
-        let prelude_interface_files_string = prelude_interface_files
-            .iter()
-            .map(|file| {
-                self.file_path_converter
-                    .convert_to_os_path(file)
-                    .display()
-                    .to_string()
-            })
-            .collect::<Vec<_>>()
-            .join(" ");
-
         module_targets
             .iter()
             .flat_map(|target| {
@@ -90,12 +94,11 @@ impl NinjaBuildScriptCompiler {
 
                 vec![
                     format!(
-                        "build {} {}: compile {} {} | {} || {}",
+                        "build {} {}: compile {} {} || {}",
                         bit_code_file.display(),
                         interface_file.display(),
                         source_file.display(),
                         dependency_file.display(),
-                        prelude_interface_files_string,
                         ninja_dependency_file.display()
                     ),
                     format!("  dyndep = {}", ninja_dependency_file.display()),
@@ -218,13 +221,8 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
             ),
         ]
         .into_iter()
-        .chain(self.compile_rules()?)
-        .chain(self.compile_common(
-            module_targets,
-            prelude_interface_files,
-            ffi_archive_file,
-            package_directory,
-        ))
+        .chain(self.compile_rules(prelude_interface_files)?)
+        .chain(self.compile_common(module_targets, ffi_archive_file, package_directory))
         .chain(if let Some(main_module_target) = main_module_target {
             let source_file = self
                 .file_path_converter
@@ -241,16 +239,19 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
 
             vec![
                 format!(
-                    "build {}: compile_main {} {} | {}",
+                    "build {}: compile_main {} {} | {} || {}",
                     bit_code_file.display(),
                     source_file.display(),
                     dependency_file.display(),
-                    main_function_interface_file.display()
+                    main_function_interface_file.display(),
+                    ninja_dependency_file.display(),
                 ),
                 format!(
                     "  main_function_interface_file = {}",
                     main_function_interface_file.display()
                 ),
+                format!("  dyndep = {}", ninja_dependency_file.display()),
+                format!("  source_file = {}", source_file.display()),
                 format!(
                     "build {}: llc {}",
                     object_file.display(),
@@ -289,17 +290,11 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
     fn compile_external(
         &self,
         module_targets: &[app::infra::ModuleTarget],
-        prelude_interface_files: &[FilePath],
         ffi_archive_file: &FilePath,
         package_directory: &FilePath,
     ) -> Result<String, Box<dyn Error>> {
         Ok(self
-            .compile_common(
-                module_targets,
-                prelude_interface_files,
-                ffi_archive_file,
-                package_directory,
-            )
+            .compile_common(module_targets, ffi_archive_file, package_directory)
             .join("\n")
             + "\n")
     }

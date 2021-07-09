@@ -9,14 +9,13 @@ pub fn initialize_recursively(
     infrastructure: &Infrastructure,
     package_directory: &FilePath,
     output_directory: &FilePath,
-    prelude_package_url: &url::Url,
 ) -> Result<(), Box<dyn Error>> {
     let package_configuration = infrastructure
         .package_configuration_reader
         .read(package_directory)?;
 
     for url in package_configuration.dependencies.values() {
-        initialize(infrastructure, url, output_directory, prelude_package_url)?;
+        initialize(infrastructure, url, output_directory)?;
     }
 
     Ok(())
@@ -26,7 +25,6 @@ fn initialize(
     infrastructure: &Infrastructure,
     package_url: &url::Url,
     output_directory: &FilePath,
-    prelude_package_url: &url::Url,
 ) -> Result<(), Box<dyn Error>> {
     let package_directory =
         file_path_resolver::resolve_package_directory(output_directory, package_url);
@@ -44,15 +42,9 @@ fn initialize(
                 .file_path_configuration
                 .build_script_file_extension,
         ),
-        prelude_package_url,
     )?;
 
-    initialize_recursively(
-        infrastructure,
-        &package_directory,
-        output_directory,
-        prelude_package_url,
-    )?;
+    initialize_recursively(infrastructure, &package_directory, output_directory)?;
 
     Ok(())
 }

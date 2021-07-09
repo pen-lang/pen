@@ -3,7 +3,6 @@ mod error;
 use crate::{
     common::{dependency_serializer, file_path_resolver, module_id_calculator},
     infra::{FilePath, Infrastructure, OBJECT_DIRECTORY},
-    prelude_interface_file_finder,
 };
 use error::ModuleDependencyResolverError;
 use std::{collections::HashMap, error::Error};
@@ -14,10 +13,10 @@ pub fn resolve(
     package_directory: &FilePath,
     source_file: &FilePath,
     object_file: &FilePath,
+    prelude_interface_files: &[FilePath],
     output_directory: &FilePath,
     dependency_file: &FilePath,
     build_script_dependency_file: &FilePath,
-    prelude_package_url: &url::Url,
 ) -> Result<(), Box<dyn Error>> {
     let package_configuration = infrastructure
         .package_configuration_reader
@@ -70,14 +69,7 @@ pub fn resolve(
 
     infrastructure.file_system.write(
         dependency_file,
-        &dependency_serializer::serialize(
-            &interface_files,
-            &prelude_interface_file_finder::find(
-                infrastructure,
-                output_directory,
-                prelude_package_url,
-            )?,
-        )?,
+        &dependency_serializer::serialize(&interface_files, prelude_interface_files)?,
     )?;
 
     infrastructure.file_system.write(
@@ -86,7 +78,11 @@ pub fn resolve(
             .build_script_dependency_compiler
             .compile(
                 object_file,
-                &interface_files.values().cloned().collect::<Vec<_>>(),
+                &interface_files
+                    .values()
+                    .chain(prelude_interface_files)
+                    .cloned()
+                    .collect::<Vec<_>>(),
             )
             .as_bytes(),
     )?;

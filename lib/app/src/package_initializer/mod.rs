@@ -19,7 +19,6 @@ pub fn initialize(
         infrastructure,
         package_directory,
         output_directory,
-        prelude_package_url,
     )?;
 
     Ok(())

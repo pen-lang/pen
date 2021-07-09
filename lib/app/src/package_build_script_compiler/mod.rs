@@ -99,7 +99,6 @@ pub fn compile_external(
     package_url: &url::Url,
     output_directory: &FilePath,
     build_script_file: &FilePath,
-    prelude_package_url: &url::Url,
 ) -> Result<(), Box<dyn Error>> {
     let package_directory =
         file_path_resolver::resolve_package_directory(output_directory, package_url);
@@ -113,11 +112,6 @@ pub fn compile_external(
                     infrastructure,
                     &package_directory,
                     output_directory,
-                )?,
-                &prelude_interface_file_finder::find(
-                    infrastructure,
-                    output_directory,
-                    prelude_package_url,
                 )?,
                 &file_path_resolver::resolve_external_package_ffi_archive_file(
                     output_directory,

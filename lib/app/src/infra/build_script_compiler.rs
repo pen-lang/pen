@@ -17,7 +17,6 @@ pub trait BuildScriptCompiler {
     fn compile_external(
         &self,
         module_targets: &[ModuleTarget],
-        prelude_interface_files: &[FilePath],
         ffi_archive_file: &FilePath,
         package_directory: &FilePath,
     ) -> Result<String, Box<dyn Error>>;

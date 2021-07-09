@@ -79,6 +79,14 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                         .required(true)
                         .takes_value(true),
                 )
+                .arg(
+                    clap::Arg::with_name("prelude interface file")
+                        .short("i")
+                        .long("prelude-interface-file")
+                        .multiple(true)
+                        .number_of_values(1)
+                        .takes_value(true),
+                )
                 .arg(clap::Arg::with_name("source file").required(true))
                 .arg(clap::Arg::with_name("object file").required(true))
                 .arg(clap::Arg::with_name("dependency file").required(true))
@@ -125,6 +133,10 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                 matches.value_of("object file").unwrap(),
                 matches.value_of("dependency file").unwrap(),
                 matches.value_of("build script dependency file").unwrap(),
+                &matches
+                    .values_of("prelude interface file")
+                    .unwrap()
+                    .collect::<Vec<_>>(),
                 matches.value_of("package directory").unwrap(),
                 matches.value_of("output directory").unwrap(),
             )
