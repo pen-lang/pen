@@ -12,9 +12,18 @@ const RHS_NAME: &str = "$rhs";
 
 pub fn transform(module: &Module, type_context: &TypeContext) -> Result<Module, CompileError> {
     let mut equal_function_definitions = vec![];
+    let mut equal_function_declarations = vec![];
 
     for type_definition in module.type_definitions() {
-        if !type_definition.is_external()
+        if !type_comparability_checker::check(
+            &types::Record::new(type_definition.name(), type_definition.position().clone()).into(),
+            type_context.types(),
+            type_context.records(),
+        )? {
+            continue;
+        }
+
+        if type_definition.is_external()
             && type_comparability_checker::check(
                 &types::Record::new(type_definition.name(), type_definition.position().clone())
                     .into(),
@@ -22,7 +31,9 @@ pub fn transform(module: &Module, type_context: &TypeContext) -> Result<Module, 
                 type_context.records(),
             )?
         {
-            equal_function_definitions.push(compile_record_equal_function(type_definition));
+            equal_function_declarations.push(compile_equal_function_declaration(type_definition));
+        } else {
+            equal_function_definitions.push(compile_equal_function_definition(type_definition));
         }
     }
 
@@ -30,7 +41,12 @@ pub fn transform(module: &Module, type_context: &TypeContext) -> Result<Module, 
         module.type_definitions().to_vec(),
         module.type_aliases().to_vec(),
         module.foreign_declarations().to_vec(),
-        module.declarations().to_vec(),
+        module
+            .declarations()
+            .iter()
+            .cloned()
+            .chain(equal_function_declarations)
+            .collect(),
         module
             .definitions()
             .iter()
@@ -41,7 +57,7 @@ pub fn transform(module: &Module, type_context: &TypeContext) -> Result<Module, 
     ))
 }
 
-fn compile_record_equal_function(type_definition: &TypeDefinition) -> Definition {
+fn compile_equal_function_definition(type_definition: &TypeDefinition) -> Definition {
     let position = type_definition.position();
     let record_type = types::Record::new(type_definition.name(), position.clone());
 
@@ -87,7 +103,22 @@ fn compile_record_equal_function(type_definition: &TypeDefinition) -> Definition
             position.clone(),
         ),
         false,
-        true,
+        false,
+        position.clone(),
+    )
+}
+
+fn compile_equal_function_declaration(type_definition: &TypeDefinition) -> Declaration {
+    let position = type_definition.position();
+    let record_type = types::Record::new(type_definition.name(), position.clone());
+
+    Declaration::new(
+        record_type_information_compiler::compile_equal_function_name(&record_type),
+        types::Function::new(
+            vec![record_type.clone().into(), record_type.clone().into()],
+            types::Boolean::new(position.clone()),
+            position.clone(),
+        ),
         position.clone(),
     )
 }
@@ -186,15 +217,15 @@ mod tests {
                         Position::dummy(),
                     ),
                     false,
-                    true,
+                    false,
                     Position::dummy()
                 )]))
         );
     }
 
     #[test]
-    fn do_not_compile_equal_function_for_external_type_definition() {
-        let module = Module::empty().set_type_definitions(vec![TypeDefinition::new(
+    fn compile_equal_function_declaration_for_external_type_definition() {
+        let type_definition = TypeDefinition::new(
             "foo",
             "foo",
             vec![
@@ -205,8 +236,22 @@ mod tests {
             false,
             true,
             Position::dummy(),
-        )]);
+        );
+        let record_type = types::Record::new(type_definition.name(), Position::dummy());
 
-        assert_eq!(transform_module(&module), Ok(module));
+        assert_eq!(
+            transform_module(&Module::empty().set_type_definitions(vec![type_definition.clone()])),
+            Ok(Module::empty()
+                .set_type_definitions(vec![type_definition])
+                .set_declarations(vec![Declaration::new(
+                    "foo.$equal",
+                    types::Function::new(
+                        vec![record_type.clone().into(), record_type.clone().into()],
+                        types::Boolean::new(Position::dummy()),
+                        Position::dummy()
+                    ),
+                    Position::dummy()
+                )]))
+        );
     }
 }
