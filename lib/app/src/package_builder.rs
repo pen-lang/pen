@@ -47,11 +47,20 @@ pub fn build(
         file.has_extension(&infrastructure.file_path_configuration.object_file_extension)
     });
 
-    infrastructure.application_linker.link(
-        &object_files,
-        &archive_files,
-        &main_package_directory.join(&FilePath::new(["app"])),
-    )?;
+    if infrastructure
+        .file_system
+        .exists(&file_path_resolver::resolve_source_file(
+            main_package_directory,
+            &[application_configuration.main_module_basename.clone()],
+            &infrastructure.file_path_configuration,
+        ))
+    {
+        infrastructure.application_linker.link(
+            &object_files,
+            &archive_files,
+            &main_package_directory.join(&FilePath::new(["app"])),
+        )?;
+    }
 
     Ok(())
 }
