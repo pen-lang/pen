@@ -5,9 +5,9 @@ pub static COMPILE_CONFIGURATION: Lazy<Arc<app::module_compiler::CompileConfigur
     Lazy::new(|| {
         app::module_compiler::CompileConfiguration {
             heap: app::module_compiler::HeapConfiguration {
-                allocate_function_name: "malloc".into(),
-                reallocate_function_name: "realloc".into(),
-                free_function_name: "free".into(),
+                allocate_function_name: "_pen_malloc".into(),
+                reallocate_function_name: "_pen_realloc".into(),
+                free_function_name: "_pen_free".into(),
             },
             list_type: app::module_compiler::ListTypeConfiguration {
                 empty_list_variable_name: "_emptyList".into(),
