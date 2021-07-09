@@ -1,11 +1,16 @@
+mod error;
 mod module_target_collector;
 
 use crate::{
     common::file_path_resolver,
-    infra::{FilePath, Infrastructure},
+    infra::{FilePath, Infrastructure, MainModuleTarget},
     module_finder, prelude_interface_file_finder, ApplicationConfiguration,
 };
 use std::error::Error;
+
+use self::error::PackageBuildScriptCompilerError;
+
+const SYSTEM_PACKAGE_NAME: &str = "System";
 
 pub fn compile_main(
     infrastructure: &Infrastructure,
@@ -14,20 +19,68 @@ pub fn compile_main(
     child_build_script_files: &[FilePath],
     build_script_file: &FilePath,
     prelude_package_url: &url::Url,
-    _application_configuration: &ApplicationConfiguration,
+    application_configuration: &ApplicationConfiguration,
 ) -> Result<(), Box<dyn Error>> {
+    let (main_module_targets, module_targets) = module_target_collector::collect_module_targets(
+        infrastructure,
+        package_directory,
+        output_directory,
+    )?
+    .into_iter()
+    .partition::<Vec<_>, _>(|target| {
+        target.source_file()
+            == &file_path_resolver::resolve_source_file(
+                package_directory,
+                &[application_configuration.main_module_basename.clone()],
+                &infrastructure.file_path_configuration,
+            )
+    });
+
     infrastructure.file_system.write(
         build_script_file,
         infrastructure
             .build_script_compiler
             .compile_main(
-                &module_target_collector::collect_module_targets(
-                    infrastructure,
-                    package_directory,
-                    output_directory,
-                )?,
-                // TODO Find main module targets.
-                None,
+                &module_targets,
+                main_module_targets
+                    .iter()
+                    .next()
+                    .map(|target| -> Result<_, Box<dyn Error>> {
+                        let package_configuration = infrastructure
+                            .package_configuration_reader
+                            .read(package_directory)?;
+
+                        Ok(MainModuleTarget::new(
+                            target.source_file().clone(),
+                            target.object_file().clone(),
+                            {
+                                let (_, main_function_interface_file) =
+                                    file_path_resolver::resolve_target_files(
+                                        output_directory,
+                                        &file_path_resolver::resolve_source_file(
+                                            &file_path_resolver::resolve_package_directory(
+                                                output_directory,
+                                                package_configuration
+                                                    .dependencies
+                                                    .get(SYSTEM_PACKAGE_NAME)
+                                                    .ok_or_else(|| {
+                                                        PackageBuildScriptCompilerError::SystemPackageNotFound
+                                                    })?,
+                                            ),
+                                            &[application_configuration
+                                                .main_function_module_basename
+                                                .clone()],
+                                            &infrastructure.file_path_configuration,
+                                        ),
+                                        &infrastructure.file_path_configuration,
+                                    );
+
+                                main_function_interface_file
+                            },
+                        ))
+                    })
+                    .transpose()?
+                    .as_ref(),
                 child_build_script_files,
                 &prelude_interface_file_finder::find(
                     infrastructure,

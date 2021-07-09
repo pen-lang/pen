@@ -29,7 +29,7 @@ impl NinjaBuildScriptCompiler {
             "  command = pen compile $in $out",
             "  description = compiling module of $source_file",
             "rule compile_main",
-            "  command = ein compile-main -s $system_package_directory $in $out",
+            "  command = pen compile-main -f $main_function_interface_file $in $out",
             "  description = compiling module of $source_file",
             "rule compile_prelude",
             "  command = pen compile-prelude $in $out",
@@ -235,19 +235,21 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
             let dependency_file = object_file.with_extension("dep");
             let ninja_dependency_file = object_file.with_extension("dd");
             let bit_code_file = object_file.with_extension(self.bit_code_file_extension);
+            let main_function_interface_file = self
+                .file_path_converter
+                .convert_to_os_path(main_module_target.main_function_interface_file());
 
             vec![
                 format!(
-                    "build {}: compile_main {} {}",
+                    "build {}: compile_main {} {} | {}",
                     bit_code_file.display(),
                     source_file.display(),
                     dependency_file.display(),
+                    main_function_interface_file.display()
                 ),
                 format!(
-                    "  system_package_directory = {}",
-                    self.file_path_converter
-                        .convert_to_os_path(main_module_target.system_package_directory())
-                        .display()
+                    "  main_function_interface_file = {}",
+                    main_function_interface_file.display()
                 ),
                 format!(
                     "build {}: llc {}",

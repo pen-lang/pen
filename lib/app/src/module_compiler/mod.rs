@@ -1,11 +1,12 @@
 mod compile_configuration;
+mod error;
 mod main_module_configuration_qualifier;
 mod prelude_type_configuration_qualifier;
 mod utilities;
 
 use crate::{
     application_configuration::ApplicationConfiguration,
-    common::{dependency_serializer, file_path_resolver, interface_serializer},
+    common::{dependency_serializer, interface_serializer},
     infra::{FilePath, Infrastructure},
 };
 pub use compile_configuration::{
@@ -27,7 +28,7 @@ pub fn compile(
     compile_configuration: &CompileConfiguration,
 ) -> Result<(), Box<dyn Error>> {
     let (module, module_interface) = lang::hir_mir::compile(
-        &compile_to_hir(infrastructure, source_file, dependency_file)?,
+        &compile_to_hir(infrastructure, source_file, dependency_file, None)?,
         &prelude_type_configuration_qualifier::qualify_list_type_configuration(
             &compile_configuration.list_type,
             PRELUDE_PREFIX,
@@ -58,14 +59,25 @@ pub fn compile_main(
     source_file: &FilePath,
     dependency_file: &FilePath,
     object_file: &FilePath,
-    system_package_directory: &FilePath,
+    main_function_interface_file: &FilePath,
     compile_configuration: &CompileConfiguration,
     application_configuration: &ApplicationConfiguration,
 ) -> Result<(), Box<dyn Error>> {
+    let main_function_interface = interface_serializer::deserialize(
+        &infrastructure
+            .file_system
+            .read_to_vec(main_function_interface_file)?,
+    )?;
+
     compile_mir_module(
         infrastructure,
         &lang::hir_mir::compile_main(
-            &compile_to_hir(infrastructure, source_file, dependency_file)?,
+            &compile_to_hir(
+                infrastructure,
+                source_file,
+                dependency_file,
+                Some(&main_function_interface),
+            )?,
             &prelude_type_configuration_qualifier::qualify_list_type_configuration(
                 &compile_configuration.list_type,
                 PRELUDE_PREFIX,
@@ -76,17 +88,8 @@ pub fn compile_main(
             ),
             &main_module_configuration_qualifier::qualify(
                 &application_configuration.main_module,
-                &calculate_module_prefix(
-                    infrastructure,
-                    &file_path_resolver::resolve_source_file(
-                        system_package_directory,
-                        &[application_configuration
-                            .main_function_module_basename
-                            .clone()],
-                        &infrastructure.file_path_configuration,
-                    ),
-                ),
-            ),
+                &main_function_interface,
+            )?,
         )?,
         object_file,
         &compile_configuration.heap,
@@ -99,6 +102,7 @@ fn compile_to_hir(
     infrastructure: &Infrastructure,
     source_file: &FilePath,
     dependency_file: &FilePath,
+    main_function_interface: Option<&lang::interface::Module>,
 ) -> Result<lang::hir::Module, Box<dyn Error>> {
     let (interface_files, prelude_interface_files) = dependency_serializer::deserialize(
         &infrastructure.file_system.read_to_vec(dependency_file)?,
@@ -131,6 +135,7 @@ fn compile_to_hir(
             .map(|file| {
                 interface_serializer::deserialize(&infrastructure.file_system.read_to_vec(file)?)
             })
+            .chain(main_function_interface.cloned().map(Ok))
             .collect::<Result<Vec<_>, _>>()?,
     )?)
 }

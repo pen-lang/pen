@@ -6,7 +6,7 @@ pub fn compile_main(
     source_file: &str,
     dependency_file: &str,
     object_file: &str,
-    system_package_directory: &str,
+    main_function_interface_file: &str,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let file_path_converter = Arc::new(infra::FilePathConverter::new(
         main_package_directory_finder::find()?,
@@ -17,7 +17,7 @@ pub fn compile_main(
         &file_path_converter.convert_to_file_path(source_file)?,
         &file_path_converter.convert_to_file_path(dependency_file)?,
         &file_path_converter.convert_to_file_path(object_file)?,
-        &file_path_converter.convert_to_file_path(system_package_directory)?,
+        &file_path_converter.convert_to_file_path(main_function_interface_file)?,
         &COMPILE_CONFIGURATION,
         &APPLICATION_CONFIGURATION,
     )?;

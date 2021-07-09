@@ -45,9 +45,9 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
             clap::SubCommand::with_name("compile-main")
                 .about("Compiles a main module")
                 .arg(
-                    clap::Arg::with_name("system package directory")
-                        .short("s")
-                        .long("system-package-directory")
+                    clap::Arg::with_name("main function interface file")
+                        .short("f")
+                        .long("main-function-interface-file")
                         .required(true)
                         .takes_value(true),
                 )
@@ -105,7 +105,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                 matches.value_of("source file").unwrap(),
                 matches.value_of("dependency file").unwrap(),
                 matches.value_of("object file").unwrap(),
-                matches.value_of("system package directory").unwrap(),
+                matches.value_of("main function interface file").unwrap(),
             )
         }
         ("compile-prelude", matches) => {
