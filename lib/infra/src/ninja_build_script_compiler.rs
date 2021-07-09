@@ -119,19 +119,23 @@ impl NinjaBuildScriptCompiler {
                     &package_directory,
                 ))
             })
-            .chain(vec![format!(
-                "default {}",
-                module_targets
-                    .iter()
-                    .map(|target| format!(
-                        "{}",
-                        self.file_path_converter
-                            .convert_to_os_path(target.object_file())
-                            .display()
-                    ))
-                    .collect::<Vec<_>>()
-                    .join(" ")
-            )])
+            .chain(if module_targets.is_empty() {
+                None
+            } else {
+                Some(format!(
+                    "default {}",
+                    module_targets
+                        .iter()
+                        .map(|target| format!(
+                            "{}",
+                            self.file_path_converter
+                                .convert_to_os_path(target.object_file())
+                                .display()
+                        ))
+                        .collect::<Vec<_>>()
+                        .join(" ")
+                ))
+            })
             .chain(self.compile_ffi_build(package_directory, ffi_archive_file))
             .collect()
     }
