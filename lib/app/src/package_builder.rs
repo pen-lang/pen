@@ -38,13 +38,13 @@ pub fn build(
     )?;
     let (archive_files, files) = files.into_iter().partition::<Vec<_>, _>(|file| {
         file.has_extension(
-            &infrastructure
+            infrastructure
                 .file_path_configuration
                 .archive_file_extension,
         )
     });
     let (object_files, _) = files.into_iter().partition::<Vec<_>, _>(|file| {
-        file.has_extension(&infrastructure.file_path_configuration.object_file_extension)
+        file.has_extension(infrastructure.file_path_configuration.object_file_extension)
     });
 
     if infrastructure
