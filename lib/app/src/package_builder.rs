@@ -6,7 +6,7 @@ use crate::{
 };
 use std::error::Error;
 
-pub fn build_main_package(
+pub fn build(
     infrastructure: &Infrastructure,
     main_package_directory: &FilePath,
     output_directory: &FilePath,
