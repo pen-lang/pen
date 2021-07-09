@@ -67,7 +67,7 @@ impl NinjaBuildScriptCompiler {
         .collect())
     }
 
-    fn compile_common(
+    fn compile_module_targets(
         &self,
         module_targets: &[app::infra::ModuleTarget],
         ffi_archive_file: &FilePath,
@@ -222,7 +222,7 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
         ]
         .into_iter()
         .chain(self.compile_rules(prelude_interface_files)?)
-        .chain(self.compile_common(module_targets, ffi_archive_file, package_directory))
+        .chain(self.compile_module_targets(module_targets, ffi_archive_file, package_directory))
         .chain(if let Some(main_module_target) = main_module_target {
             let source_file = self
                 .file_path_converter
@@ -294,7 +294,7 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
         package_directory: &FilePath,
     ) -> Result<String, Box<dyn Error>> {
         Ok(self
-            .compile_common(module_targets, ffi_archive_file, package_directory)
+            .compile_module_targets(module_targets, ffi_archive_file, package_directory)
             .join("\n")
             + "\n")
     }
