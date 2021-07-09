@@ -15,7 +15,7 @@ pub fn qualify(
             .find(|alias| {
                 alias.original_name() == &configuration.main_function_type_name && alias.is_public()
             })
-            .ok_or_else(|| ModuleCompilerError::MainFunctionTypeNotFound)?
+            .ok_or(ModuleCompilerError::MainFunctionTypeNotFound)?
             .name()
             .into(),
     })

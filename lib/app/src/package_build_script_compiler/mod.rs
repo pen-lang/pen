@@ -42,9 +42,7 @@ pub fn compile_main(
             .build_script_compiler
             .compile_main(
                 &module_targets,
-                main_module_targets
-                    .iter()
-                    .next()
+                main_module_targets.get(0)
                     .map(|target| -> Result<_, Box<dyn Error>> {
                         let package_configuration = infrastructure
                             .package_configuration_reader
@@ -62,8 +60,7 @@ pub fn compile_main(
                                                 output_directory,
                                                 package_configuration
                                                     .dependencies
-                                                    .get(SYSTEM_PACKAGE_NAME)
-                                                    .ok_or_else(|| {
+                                                    .get(SYSTEM_PACKAGE_NAME).ok_or({
                                                         PackageBuildScriptCompilerError::SystemPackageNotFound
                                                     })?,
                                             ),
