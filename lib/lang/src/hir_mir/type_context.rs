@@ -1,4 +1,5 @@
 use super::{
+    error_type_configuration::ErrorTypeConfiguration,
     list_type_configuration::ListTypeConfiguration,
     string_type_configuration::StringTypeConfiguration,
 };
@@ -14,6 +15,7 @@ pub struct TypeContext {
     types: HashMap<String, Type>,
     list_type_configuration: ListTypeConfiguration,
     string_type_configuration: StringTypeConfiguration,
+    error_type_configuration: ErrorTypeConfiguration,
 }
 
 impl TypeContext {
@@ -21,6 +23,7 @@ impl TypeContext {
         module: &Module,
         list_type_configuration: &ListTypeConfiguration,
         string_type_configuration: &StringTypeConfiguration,
+        error_type_configuration: &ErrorTypeConfiguration,
     ) -> Self {
         Self {
             records: module
@@ -46,6 +49,7 @@ impl TypeContext {
                 .collect(),
             list_type_configuration: list_type_configuration.clone(),
             string_type_configuration: string_type_configuration.clone(),
+            error_type_configuration: error_type_configuration.clone(),
         }
     }
 
@@ -55,6 +59,7 @@ impl TypeContext {
         types: HashMap<String, Type>,
     ) -> Self {
         use super::{
+            error_type_configuration::ERROR_TYPE_CONFIGURATION,
             list_type_configuration::LIST_TYPE_CONFIGURATION,
             string_type_configuration::STRING_TYPE_CONFIGURATION,
         };
@@ -64,6 +69,7 @@ impl TypeContext {
             types,
             list_type_configuration: LIST_TYPE_CONFIGURATION.clone(),
             string_type_configuration: STRING_TYPE_CONFIGURATION.clone(),
+            error_type_configuration: ERROR_TYPE_CONFIGURATION.clone(),
         }
     }
 
@@ -81,5 +87,9 @@ impl TypeContext {
 
     pub fn string_type_configuration(&self) -> &StringTypeConfiguration {
         &self.string_type_configuration
+    }
+
+    pub fn error_type_configuration(&self) -> &ErrorTypeConfiguration {
+        &self.error_type_configuration
     }
 }

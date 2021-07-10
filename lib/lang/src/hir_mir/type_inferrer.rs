@@ -358,6 +358,7 @@ mod tests {
     use super::*;
     use crate::{
         hir_mir::{
+            error_type_configuration::ERROR_TYPE_CONFIGURATION,
             list_type_configuration::LIST_TYPE_CONFIGURATION,
             string_type_configuration::STRING_TYPE_CONFIGURATION,
         },
@@ -368,7 +369,12 @@ mod tests {
     fn infer_module(module: &Module) -> Result<Module, CompileError> {
         infer_types(
             module,
-            &TypeContext::new(module, &LIST_TYPE_CONFIGURATION, &STRING_TYPE_CONFIGURATION),
+            &TypeContext::new(
+                module,
+                &LIST_TYPE_CONFIGURATION,
+                &STRING_TYPE_CONFIGURATION,
+                &ERROR_TYPE_CONFIGURATION,
+            ),
         )
     }
 

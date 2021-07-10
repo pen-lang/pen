@@ -1,5 +1,6 @@
 mod environment_creator;
 mod error;
+mod error_type_configuration;
 mod expression_compiler;
 mod list_type_configuration;
 mod main_function_compiler;
@@ -15,7 +16,10 @@ mod type_context;
 mod type_extractor;
 mod type_inferrer;
 
-use self::{transformation::record_equal_function_transformer, type_context::TypeContext};
+use self::{
+    error_type_configuration::ErrorTypeConfiguration,
+    transformation::record_equal_function_transformer, type_context::TypeContext,
+};
 use crate::{hir::*, interface};
 pub use error::CompileError;
 pub use list_type_configuration::ListTypeConfiguration;
@@ -26,9 +30,15 @@ pub fn compile_main(
     module: &Module,
     list_type_configuration: &ListTypeConfiguration,
     string_type_configuration: &StringTypeConfiguration,
+    error_type_configuration: &ErrorTypeConfiguration,
     main_module_configuration: &MainModuleConfiguration,
 ) -> Result<mir::ir::Module, CompileError> {
-    let type_context = TypeContext::new(module, list_type_configuration, string_type_configuration);
+    let type_context = TypeContext::new(
+        module,
+        list_type_configuration,
+        string_type_configuration,
+        error_type_configuration,
+    );
     let module =
         main_function_compiler::compile(module, type_context.types(), main_module_configuration)?;
     let (module, _) = compile_module(&module, &type_context)?;
@@ -40,10 +50,16 @@ pub fn compile(
     module: &Module,
     list_type_configuration: &ListTypeConfiguration,
     string_type_configuration: &StringTypeConfiguration,
+    error_type_configuration: &ErrorTypeConfiguration,
 ) -> Result<(mir::ir::Module, interface::Module), CompileError> {
     compile_module(
         module,
-        &TypeContext::new(module, list_type_configuration, string_type_configuration),
+        &TypeContext::new(
+            module,
+            list_type_configuration,
+            string_type_configuration,
+            error_type_configuration,
+        ),
     )
 }
 
