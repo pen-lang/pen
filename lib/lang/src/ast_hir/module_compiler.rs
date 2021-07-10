@@ -184,12 +184,12 @@ fn compile_expression(expression: &ast::Expression) -> Result<hir::Expression, C
             hir::Boolean::new(boolean.value(), boolean.position().clone()).into()
         }
         ast::Expression::Call(call) => hir::Call::new(
+            None,
             compile_expression(call.function())?,
             call.arguments()
                 .iter()
                 .map(|argument| compile_expression(argument))
                 .collect::<Result<_, _>>()?,
-            None,
             call.position().clone(),
         )
         .into(),

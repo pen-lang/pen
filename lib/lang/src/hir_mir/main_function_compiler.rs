@@ -56,12 +56,12 @@ pub fn compile(
                     arguments.clone(),
                     function_type.result().clone(),
                     Call::new(
+                        None,
                         Variable::new(definition.name(), position.clone()),
                         arguments
                             .iter()
                             .map(|argument| Variable::new(argument.name(), position.clone()).into())
                             .collect(),
-                        None,
                         position.clone(),
                     ),
                     position.clone(),

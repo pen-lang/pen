@@ -100,6 +100,7 @@ fn transform_expression(
             .ok_or_else(|| CompileError::FunctionExpected(call.position().clone()))?;
 
             Call::new(
+                call.function_type().cloned(),
                 transform_expression(call.function(), variables)?,
                 call.arguments()
                     .iter()
@@ -108,7 +109,6 @@ fn transform_expression(
                         transform_and_coerce_expression(argument, type_, variables)
                     })
                     .collect::<Result<_, _>>()?,
-                call.function_type().cloned(),
                 call.position().clone(),
             )
             .into()

@@ -140,12 +140,12 @@ fn transform_lambda(lambda: &Lambda, transform: &impl Fn(&Type) -> Type) -> Lamb
 fn transform_expression(expression: &Expression, transform: &impl Fn(&Type) -> Type) -> Expression {
     match expression {
         Expression::Call(call) => Call::new(
+            call.function_type().map(transform),
             transform_expression(call.function(), transform),
             call.arguments()
                 .iter()
                 .map(|argument| transform_expression(argument, transform))
                 .collect(),
-            call.function_type().map(transform),
             call.position().clone(),
         )
         .into(),

@@ -54,12 +54,12 @@ fn transform_expression(
 ) -> Expression {
     match expression {
         Expression::Call(call) => Call::new(
+            call.function_type().cloned(),
             transform_expression(call.function(), transform),
             call.arguments()
                 .iter()
                 .map(|argument| transform_expression(argument, transform))
                 .collect(),
-            call.function_type().cloned(),
             call.position().clone(),
         )
         .into(),

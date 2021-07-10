@@ -849,8 +849,6 @@ mod tests {
                         vec![],
                         types::None::new(Position::dummy()),
                         Call::new(
-                            Variable::new("f", Position::dummy()),
-                            vec![],
                             Some(
                                 types::Function::new(
                                     vec![],
@@ -859,6 +857,8 @@ mod tests {
                                 )
                                 .into(),
                             ),
+                            Variable::new("f", Position::dummy()),
+                            vec![],
                             Position::dummy(),
                         ),
                         Position::dummy(),
@@ -878,8 +878,6 @@ mod tests {
                         vec![Argument::new("x", types::None::new(Position::dummy()))],
                         types::None::new(Position::dummy()),
                         Call::new(
-                            Variable::new("f", Position::dummy()),
-                            vec![None::new(Position::dummy()).into()],
                             Some(
                                 types::Function::new(
                                     vec![types::None::new(Position::dummy()).into()],
@@ -888,6 +886,8 @@ mod tests {
                                 )
                                 .into(),
                             ),
+                            Variable::new("f", Position::dummy()),
+                            vec![None::new(Position::dummy()).into()],
                             Position::dummy(),
                         ),
                         Position::dummy(),
@@ -908,8 +908,6 @@ mod tests {
                         vec![Argument::new("x", types::None::new(Position::dummy()))],
                         types::None::new(Position::dummy()),
                         Call::new(
-                            Variable::new("f", Position::dummy()),
-                            vec![Number::new(42.0, Position::dummy()).into()],
                             Some(
                                 types::Function::new(
                                     vec![types::None::new(Position::dummy()).into()],
@@ -918,6 +916,8 @@ mod tests {
                                 )
                                 .into(),
                             ),
+                            Variable::new("f", Position::dummy()),
+                            vec![Number::new(42.0, Position::dummy()).into()],
                             Position::dummy(),
                         ),
                         Position::dummy(),
@@ -938,8 +938,6 @@ mod tests {
                         vec![Argument::new("x", types::None::new(Position::dummy()))],
                         types::None::new(Position::dummy()),
                         Call::new(
-                            Variable::new("f", Position::dummy()),
-                            vec![],
                             Some(
                                 types::Function::new(
                                     vec![types::None::new(Position::dummy()).into()],
@@ -948,6 +946,8 @@ mod tests {
                                 )
                                 .into(),
                             ),
+                            Variable::new("f", Position::dummy()),
+                            vec![],
                             Position::dummy(),
                         ),
                         Position::dummy(),

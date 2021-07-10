@@ -73,6 +73,26 @@ fn transform_equal_operation(
             );
 
             Call::new(
+                Some(
+                    types::Function::new(
+                        vec![
+                            types::Function::new(
+                                vec![
+                                    types::Any::new(position.clone()).into(),
+                                    types::Any::new(position.clone()).into(),
+                                ],
+                                types::Boolean::new(position.clone()),
+                                position.clone(),
+                            )
+                            .into(),
+                            any_list_type.clone().into(),
+                            any_list_type.into(),
+                        ],
+                        types::Boolean::new(position.clone()),
+                        position.clone(),
+                    )
+                    .into(),
+                ),
                 Variable::new(
                     &type_context.list_type_configuration().equal_function_name,
                     position.clone(),
@@ -115,26 +135,6 @@ fn transform_equal_operation(
                     lhs.clone(),
                     rhs.clone(),
                 ],
-                Some(
-                    types::Function::new(
-                        vec![
-                            types::Function::new(
-                                vec![
-                                    types::Any::new(position.clone()).into(),
-                                    types::Any::new(position.clone()).into(),
-                                ],
-                                types::Boolean::new(position.clone()),
-                                position.clone(),
-                            )
-                            .into(),
-                            any_list_type.clone().into(),
-                            any_list_type.into(),
-                        ],
-                        types::Boolean::new(position.clone()),
-                        position.clone(),
-                    )
-                    .into(),
-                ),
                 position.clone(),
             )
             .into()
@@ -158,11 +158,6 @@ fn transform_equal_operation(
             }
 
             Call::new(
-                Variable::new(
-                    record_type_information_compiler::compile_equal_function_name(&record_type),
-                    position.clone(),
-                ),
-                vec![lhs.clone(), rhs.clone()],
                 Some(
                     types::Function::new(
                         vec![record_type.clone().into(), record_type.clone().into()],
@@ -171,6 +166,11 @@ fn transform_equal_operation(
                     )
                     .into(),
                 ),
+                Variable::new(
+                    record_type_information_compiler::compile_equal_function_name(&record_type),
+                    position.clone(),
+                ),
+                vec![lhs.clone(), rhs.clone()],
                 position.clone(),
             )
             .into()
@@ -345,14 +345,6 @@ mod tests {
                 )
             ),
             Ok(Call::new(
-                Variable::new(
-                    record_type_information_compiler::compile_equal_function_name(&record_type),
-                    Position::dummy(),
-                ),
-                vec![
-                    Variable::new("x", Position::dummy()).into(),
-                    Variable::new("y", Position::dummy()).into(),
-                ],
                 Some(
                     types::Function::new(
                         vec![record_type.clone().into(), record_type.clone().into()],
@@ -361,7 +353,15 @@ mod tests {
                     )
                     .into(),
                 ),
-                Position::dummy(),
+                Variable::new(
+                    record_type_information_compiler::compile_equal_function_name(&record_type),
+                    Position::dummy(),
+                ),
+                vec![
+                    Variable::new("x", Position::dummy()).into(),
+                    Variable::new("y", Position::dummy()).into(),
+                ],
+                Position::dummy()
             )
             .into())
         );
