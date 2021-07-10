@@ -72,7 +72,8 @@ fn transform_equal_operation(
                 position.clone(),
             );
 
-            Call::new(Some(
+            Call::new(
+                Some(
                     types::Function::new(
                         vec![
                             types::Function::new(
@@ -91,10 +92,12 @@ fn transform_equal_operation(
                         position.clone(),
                     )
                     .into(),
-                ), Variable::new(
+                ),
+                Variable::new(
                     &type_context.list_type_configuration().equal_function_name,
                     position.clone(),
-                ), vec![
+                ),
+                vec![
                     Lambda::new(
                         vec![
                             Argument::new(LHS_NAME, types::Any::new(position.clone())),
@@ -131,7 +134,9 @@ fn transform_equal_operation(
                     .into(),
                     lhs.clone(),
                     rhs.clone(),
-                ], position.clone())
+                ],
+                position.clone(),
+            )
             .into()
         }
         Type::None(_) => Boolean::new(true, position.clone()).into(),
@@ -152,17 +157,22 @@ fn transform_equal_operation(
                 return Err(CompileError::InvalidRecordEqualOperation(position.clone()));
             }
 
-            Call::new(Some(
+            Call::new(
+                Some(
                     types::Function::new(
                         vec![record_type.clone().into(), record_type.clone().into()],
                         types::Boolean::new(position.clone()),
                         position.clone(),
                     )
                     .into(),
-                ), Variable::new(
+                ),
+                Variable::new(
                     record_type_information_compiler::compile_equal_function_name(&record_type),
                     position.clone(),
-                ), vec![lhs.clone(), rhs.clone()], position.clone())
+                ),
+                vec![lhs.clone(), rhs.clone()],
+                position.clone(),
+            )
             .into()
         }
         Type::String(_) => EqualityOperation::new(
@@ -334,20 +344,25 @@ mod tests {
                     Default::default()
                 )
             ),
-            Ok(Call::new(Some(
+            Ok(Call::new(
+                Some(
                     types::Function::new(
                         vec![record_type.clone().into(), record_type.clone().into()],
                         types::Boolean::new(Position::dummy()),
                         Position::dummy(),
                     )
                     .into(),
-                ), Variable::new(
+                ),
+                Variable::new(
                     record_type_information_compiler::compile_equal_function_name(&record_type),
                     Position::dummy(),
-                ), vec![
+                ),
+                vec![
                     Variable::new("x", Position::dummy()).into(),
                     Variable::new("y", Position::dummy()).into(),
-                ], Position::dummy())
+                ],
+                Position::dummy()
+            )
             .into())
         );
     }

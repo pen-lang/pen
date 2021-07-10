@@ -848,14 +848,19 @@ mod tests {
                     Lambda::new(
                         vec![],
                         types::None::new(Position::dummy()),
-                        Call::new(Some(
+                        Call::new(
+                            Some(
                                 types::Function::new(
                                     vec![],
                                     types::None::new(Position::dummy()),
                                     Position::dummy(),
                                 )
                                 .into(),
-                            ), Variable::new("f", Position::dummy()), vec![], Position::dummy()),
+                            ),
+                            Variable::new("f", Position::dummy()),
+                            vec![],
+                            Position::dummy(),
+                        ),
                         Position::dummy(),
                     ),
                     false,
@@ -872,14 +877,19 @@ mod tests {
                     Lambda::new(
                         vec![Argument::new("x", types::None::new(Position::dummy()))],
                         types::None::new(Position::dummy()),
-                        Call::new(Some(
+                        Call::new(
+                            Some(
                                 types::Function::new(
                                     vec![types::None::new(Position::dummy()).into()],
                                     types::None::new(Position::dummy()),
                                     Position::dummy(),
                                 )
                                 .into(),
-                            ), Variable::new("f", Position::dummy()), vec![None::new(Position::dummy()).into()], Position::dummy()),
+                            ),
+                            Variable::new("f", Position::dummy()),
+                            vec![None::new(Position::dummy()).into()],
+                            Position::dummy(),
+                        ),
                         Position::dummy(),
                     ),
                     false,
@@ -897,14 +907,19 @@ mod tests {
                     Lambda::new(
                         vec![Argument::new("x", types::None::new(Position::dummy()))],
                         types::None::new(Position::dummy()),
-                        Call::new(Some(
+                        Call::new(
+                            Some(
                                 types::Function::new(
                                     vec![types::None::new(Position::dummy()).into()],
                                     types::None::new(Position::dummy()),
                                     Position::dummy(),
                                 )
                                 .into(),
-                            ), Variable::new("f", Position::dummy()), vec![Number::new(42.0, Position::dummy()).into()], Position::dummy()),
+                            ),
+                            Variable::new("f", Position::dummy()),
+                            vec![Number::new(42.0, Position::dummy()).into()],
+                            Position::dummy(),
+                        ),
                         Position::dummy(),
                     ),
                     false,
@@ -922,14 +937,19 @@ mod tests {
                     Lambda::new(
                         vec![Argument::new("x", types::None::new(Position::dummy()))],
                         types::None::new(Position::dummy()),
-                        Call::new(Some(
+                        Call::new(
+                            Some(
                                 types::Function::new(
                                     vec![types::None::new(Position::dummy()).into()],
                                     types::None::new(Position::dummy()),
                                     Position::dummy(),
                                 )
                                 .into(),
-                            ), Variable::new("f", Position::dummy()), vec![], Position::dummy()),
+                            ),
+                            Variable::new("f", Position::dummy()),
+                            vec![],
+                            Position::dummy(),
+                        ),
                         Position::dummy(),
                     ),
                     false,
