@@ -14,8 +14,14 @@ Feature: Memory leak
     """
     import System'Os
 
+    f = \() none {
+      f()
+    }
+
     main = \(os Os'Os) number {
-      main(os)
+      f()
+
+      0
     }
     """
     When I successfully run `pen build`
@@ -35,7 +41,7 @@ Feature: Memory leak
     When I successfully run `pen build`
     Then I successfully run `check_memory_leak_in_loop.sh ./app`
 
-  Scenario: Use a global variable
+  Scenario: Create a record
     Given a file named "Main.pen" with:
     """
     import System'Os
@@ -44,14 +50,16 @@ Feature: Memory leak
       x number,
     }
 
-    foo = \() foo {
-      foo{x: 42}
+    f = \() none {
+      _ = foo{x: 42}
+
+      f()
     }
 
     main = \(os Os'Os) number {
-      _ = foo()
+      f()
 
-      main(os)
+      0
     }
     """
     When I successfully run `pen build`
@@ -66,14 +74,16 @@ Feature: Memory leak
       x number,
     }
 
-    foo = \() foo {
-      foo{x: 42}
+    f = \() none {
+      _ = foo{x: 42}.x
+
+      f()
     }
 
     main = \(os Os'Os) number {
-      _ = foo().x
+      f()
 
-      main(os)
+      0
     }
     """
     When I successfully run `pen build`
@@ -88,16 +98,22 @@ Feature: Memory leak
       x
     }
 
-    main = \(os Os'Os) number {
-      _ = f("")
+    g = \() none {
+      f("")
 
-      main(os)
+      g()
+    }
+
+    main = \(os Os'Os) number {
+      g()
+
+      0
     }
     """
     When I successfully run `pen build`
     Then I successfully run `check_memory_leak_in_loop.sh ./app`
 
-  Scenario: Shadow a variable in a let expression
+  Scenario: Shadow a variable in a block
     Given a file named "Main.pen" with:
     """
     import System'Os
@@ -106,11 +122,17 @@ Feature: Memory leak
       x number,
     }
 
-    main = \(os Os'Os) number {
+    f = \() none {
       x = foo{x: 42}
       x = x.x
 
-      main(os)
+      f()
+    }
+
+    main = \(os Os'Os) number {
+      f()
+
+      0
     }
     """
     When I successfully run `pen build`
@@ -125,30 +147,10 @@ Feature: Memory leak
       x number,
     }
 
-    main = \(os Os'Os) number {
-      x = foo{x: 42}
-      f = \() number { x.x }
-
-      main(os)
-    }
-    """
-    When I successfully run `pen build`
-    Then I successfully run `check_memory_leak_in_loop.sh ./app`
-
-  Scenario: Call a global thunk function
-    Given a file named "pen.json" with:
-    """
-    {
-      "dependencies": {
-        "System": "file://pen-root/lib/os"
-      }
-    }
-    """
-    And a file named "Foo.pen" with:
-    """
-    import System'Os
-
     f = \() none {
+      x = foo{x: 42}
+      _ = \() number { x.x }
+
       f()
     }
 
