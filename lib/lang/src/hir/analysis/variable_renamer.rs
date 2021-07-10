@@ -50,15 +50,10 @@ fn rename_lambda(lambda: &Lambda, names: &HashMap<String, String>) -> Lambda {
 
 fn rename_expression(expression: &Expression, names: &HashMap<String, String>) -> Expression {
     match expression {
-        Expression::Call(call) => Call::new(
-            rename_expression(call.function(), names),
-            call.arguments()
+        Expression::Call(call) => Call::new(call.function_type().cloned(), rename_expression(call.function(), names), call.arguments()
                 .iter()
                 .map(|argument| rename_expression(argument, names))
-                .collect(),
-            call.function_type().cloned(),
-            call.position().clone(),
-        )
+                .collect(), call.position().clone())
         .into(),
         Expression::If(if_) => If::new(
             rename_expression(if_.condition(), names),

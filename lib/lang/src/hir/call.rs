@@ -4,26 +4,30 @@ use std::sync::Arc;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Call {
+    function_type: Option<Type>,
     function: Arc<Expression>,
     arguments: Vec<Expression>,
-    function_type: Option<Type>,
     position: Position,
 }
 
 impl Call {
     // TODO Move function type to top.
     pub fn new(
+        function_type: Option<Type>,
         function: impl Into<Expression>,
         arguments: Vec<Expression>,
-        function_type: Option<Type>,
         position: Position,
     ) -> Self {
         Self {
+            function_type,
             function: Arc::new(function.into()),
             arguments,
-            function_type,
             position,
         }
+    }
+
+    pub fn function_type(&self) -> Option<&Type> {
+        self.function_type.as_ref()
     }
 
     pub fn function(&self) -> &Expression {
@@ -32,10 +36,6 @@ impl Call {
 
     pub fn arguments(&self) -> &[Expression] {
         &self.arguments
-    }
-
-    pub fn function_type(&self) -> Option<&Type> {
-        self.function_type.as_ref()
     }
 
     pub fn position(&self) -> &Position {

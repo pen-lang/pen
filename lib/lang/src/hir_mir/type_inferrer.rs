@@ -80,16 +80,16 @@ fn infer_expression(
             let function = infer_expression(call.function(), variables)?;
 
             Call::new(
-                function.clone(),
-                call.arguments()
-                    .iter()
-                    .map(|argument| infer_expression(argument, variables))
-                    .collect::<Result<_, _>>()?,
                 Some(type_extractor::extract_from_expression(
                     &function,
                     variables,
                     type_context,
                 )?),
+                function.clone(),
+                call.arguments()
+                    .iter()
+                    .map(|argument| infer_expression(argument, variables))
+                    .collect::<Result<_, _>>()?,
                 call.position().clone(),
             )
             .into()
@@ -387,9 +387,9 @@ mod tests {
                         vec![],
                         types::None::new(Position::dummy()),
                         Call::new(
+                            None,
                             Variable::new("x", Position::dummy()),
                             vec![],
-                            None,
                             Position::dummy()
                         ),
                         Position::dummy(),
@@ -404,8 +404,6 @@ mod tests {
                         vec![],
                         types::None::new(Position::dummy()),
                         Call::new(
-                            Variable::new("x", Position::dummy()),
-                            vec![],
                             Some(
                                 types::Function::new(
                                     vec![],
@@ -414,6 +412,8 @@ mod tests {
                                 )
                                 .into()
                             ),
+                            Variable::new("x", Position::dummy()),
+                            vec![],
                             Position::dummy()
                         ),
                         Position::dummy(),
@@ -540,9 +540,9 @@ mod tests {
                                 Some("x".into()),
                                 None,
                                 Call::new(
+                                    None,
                                     Variable::new("f", Position::dummy()),
                                     vec![],
-                                    None,
                                     Position::dummy()
                                 ),
                                 Variable::new("x", Position::dummy()),
@@ -564,9 +564,9 @@ mod tests {
                             Some("x".into()),
                             Some(types::None::new(Position::dummy()).into()),
                             Call::new(
+                                Some(declaration.type_().clone().into()),
                                 Variable::new("f", Position::dummy()),
                                 vec![],
-                                Some(declaration.type_().clone().into()),
                                 Position::dummy()
                             ),
                             Variable::new("x", Position::dummy()),

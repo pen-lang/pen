@@ -53,15 +53,10 @@ fn transform_expression(
     transform: &dyn Fn(&Variable) -> Expression,
 ) -> Expression {
     match expression {
-        Expression::Call(call) => Call::new(
-            transform_expression(call.function(), transform),
-            call.arguments()
+        Expression::Call(call) => Call::new(call.function_type().cloned(), transform_expression(call.function(), transform), call.arguments()
                 .iter()
                 .map(|argument| transform_expression(argument, transform))
-                .collect(),
-            call.function_type().cloned(),
-            call.position().clone(),
-        )
+                .collect(), call.position().clone())
         .into(),
         Expression::If(if_) => If::new(
             transform_expression(if_.condition(), transform),
