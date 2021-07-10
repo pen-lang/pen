@@ -3,6 +3,7 @@ use std::sync::Arc;
 
 pub static APPLICATION_CONFIGURATION: Lazy<Arc<app::ApplicationConfiguration>> = Lazy::new(|| {
     app::ApplicationConfiguration {
+        application_filename: "app".into(),
         main_module_basename: "Main".into(),
         main_function_module_basename: "MainFunction".into(),
         system_package_name: "System".into(),

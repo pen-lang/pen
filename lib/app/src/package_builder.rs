@@ -64,7 +64,9 @@ pub fn build(
                 })
                 .cloned()
                 .collect::<Vec<_>>(),
-            &main_package_directory.join(&FilePath::new(["app"])),
+            &main_package_directory.join(&FilePath::new([
+                &application_configuration.application_filename
+            ])),
         )?;
     }
 
