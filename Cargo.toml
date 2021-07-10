@@ -2,6 +2,7 @@
 members = [
   "cmd/pen",
   "lib/app",
+  "lib/core/ffi",
   "lib/ffi",
   "lib/infra",
   "lib/lang",
@@ -10,4 +11,4 @@ members = [
   "lib/os/ffi",
   "lib/prelude/ffi",
 ]
-exclude = ["lib/os/.pen", "tmp"]
+exclude = ["lib/os/.pen", "lib/core/.pen", "tmp"]

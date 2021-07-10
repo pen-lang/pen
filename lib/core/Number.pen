@@ -1,0 +1,6 @@
+export { string }
+
+import foreign "c" _pen_convert_number_to_string : Number -> String
+
+string : Number -> String
+string = _pen_convert_number_to_string

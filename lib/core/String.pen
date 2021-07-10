@@ -1,0 +1,14 @@
+import foreign "c" _pen_join_strings : String -> String -> String
+import foreign "c" _pen_slice_string : String -> Number -> Number -> String
+
+join : List String -> String
+join = joinTo ""
+
+joinTo : String -> List String -> String
+joinTo s ss =
+  case ss
+    [] => s
+    [ other, ...ss ] => joinTo (_pen_join_strings s other) ss
+
+slice : String -> Number -> Number -> String
+slice = _pen_slice_string
