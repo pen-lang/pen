@@ -35,7 +35,7 @@ pub fn compile(module: &ast::Module) -> Result<hir::Module, CompileError> {
             .foreign_imports()
             .iter()
             .map(|import| {
-                hir::ForeignDeclaration::new(
+                hir::ForeignFunctionDeclaration::new(
                     import.name(),
                     import.foreign_name(),
                     match import.calling_convention() {

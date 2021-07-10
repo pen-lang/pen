@@ -1,11 +1,11 @@
-use super::{Declaration, Definition, ForeignDeclaration, TypeAlias, TypeDefinition};
+use super::{Declaration, Definition, ForeignFunctionDeclaration, TypeAlias, TypeDefinition};
 use crate::position::Position;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Module {
     type_definitions: Vec<TypeDefinition>,
     type_aliases: Vec<TypeAlias>,
-    foreign_declarations: Vec<ForeignDeclaration>,
+    foreign_function_declarations: Vec<ForeignFunctionDeclaration>,
     declarations: Vec<Declaration>,
     definitions: Vec<Definition>,
     position: Position,
@@ -15,7 +15,7 @@ impl Module {
     pub fn new(
         type_definitions: Vec<TypeDefinition>,
         type_aliases: Vec<TypeAlias>,
-        foreign_declarations: Vec<ForeignDeclaration>,
+        foreign_function_declarations: Vec<ForeignFunctionDeclaration>,
         declarations: Vec<Declaration>,
         definitions: Vec<Definition>,
         position: Position,
@@ -23,7 +23,7 @@ impl Module {
         Self {
             type_definitions,
             type_aliases,
-            foreign_declarations,
+            foreign_function_declarations,
             declarations,
             definitions,
             position,
@@ -40,7 +40,7 @@ impl Module {
         Self::new(
             type_definitions,
             self.type_aliases.clone(),
-            self.foreign_declarations.clone(),
+            self.foreign_function_declarations.clone(),
             self.declarations.clone(),
             self.definitions.clone(),
             self.position.clone(),
@@ -52,7 +52,7 @@ impl Module {
         Self::new(
             self.type_definitions.clone(),
             type_aliases,
-            self.foreign_declarations.clone(),
+            self.foreign_function_declarations.clone(),
             self.declarations.clone(),
             self.definitions.clone(),
             self.position.clone(),
@@ -60,7 +60,7 @@ impl Module {
     }
 
     #[cfg(test)]
-    pub fn set_foreign_declarations(&self, declarations: Vec<ForeignDeclaration>) -> Self {
+    pub fn set_foreign_function_declarations(&self, declarations: Vec<ForeignFunctionDeclaration>) -> Self {
         Self::new(
             self.type_definitions.clone(),
             self.type_aliases.clone(),
@@ -76,7 +76,7 @@ impl Module {
         Self::new(
             self.type_definitions.clone(),
             self.type_aliases.clone(),
-            self.foreign_declarations.clone(),
+            self.foreign_function_declarations.clone(),
             declarations,
             self.definitions.clone(),
             self.position.clone(),
@@ -88,7 +88,7 @@ impl Module {
         Self::new(
             self.type_definitions.clone(),
             self.type_aliases.clone(),
-            self.foreign_declarations.clone(),
+            self.foreign_function_declarations.clone(),
             self.declarations.clone(),
             definitions,
             self.position.clone(),
@@ -103,8 +103,8 @@ impl Module {
         &self.type_aliases
     }
 
-    pub fn foreign_declarations(&self) -> &[ForeignDeclaration] {
-        &self.foreign_declarations
+    pub fn foreign_function_declarations(&self) -> &[ForeignFunctionDeclaration] {
+        &self.foreign_function_declarations
     }
 
     pub fn declarations(&self) -> &[Declaration] {
