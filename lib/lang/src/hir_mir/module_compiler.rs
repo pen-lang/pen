@@ -90,26 +90,22 @@ fn compile_definition(
     let body = expression_compiler::compile(definition.lambda().body(), type_context)?;
     let result_type = type_compiler::compile(definition.lambda().result_type(), type_context)?;
 
-    Ok(if definition.lambda().arguments().is_empty() {
-        mir::ir::Definition::thunk(definition.name(), vec![], body, result_type)
-    } else {
-        mir::ir::Definition::new(
-            definition.name(),
-            definition
-                .lambda()
-                .arguments()
-                .iter()
-                .map(|argument| -> Result<_, CompileError> {
-                    Ok(mir::ir::Argument::new(
-                        argument.name(),
-                        type_compiler::compile(argument.type_(), type_context)?,
-                    ))
-                })
-                .collect::<Result<_, _>>()?,
-            body,
-            result_type,
-        )
-    })
+    Ok(mir::ir::Definition::new(
+        definition.name(),
+        definition
+            .lambda()
+            .arguments()
+            .iter()
+            .map(|argument| -> Result<_, CompileError> {
+                Ok(mir::ir::Argument::new(
+                    argument.name(),
+                    type_compiler::compile(argument.type_(), type_context)?,
+                ))
+            })
+            .collect::<Result<_, _>>()?,
+        body,
+        result_type,
+    ))
 }
 
 #[cfg(test)]

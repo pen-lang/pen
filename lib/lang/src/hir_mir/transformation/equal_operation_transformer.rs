@@ -175,7 +175,6 @@ fn transform_equal_operation(
             )
             .into()
         }
-        // TODO Call a string equal function.
         Type::String(_) => EqualityOperation::new(
             Some(type_.clone()),
             EqualityOperator::Equal,

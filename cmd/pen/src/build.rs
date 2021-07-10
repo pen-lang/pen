@@ -33,7 +33,7 @@ pub fn build(verbose: bool) -> Result<(), Box<dyn std::error::Error>> {
         infra::log_info("building modules")?;
     }
 
-    app::package_builder::build_main_package(
+    app::package_builder::build(
         &infrastructure,
         &main_package_directory,
         &output_directory,

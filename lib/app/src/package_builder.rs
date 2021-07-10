@@ -1,11 +1,12 @@
 use super::application_configuration::ApplicationConfiguration;
 use crate::{
+    common::file_path_resolver,
     infra::{FilePath, Infrastructure, EXTERNAL_PACKAGE_DIRECTORY},
     package_build_script_compiler,
 };
 use std::error::Error;
 
-pub fn build_main_package(
+pub fn build(
     infrastructure: &Infrastructure,
     main_package_directory: &FilePath,
     output_directory: &FilePath,
@@ -32,10 +33,46 @@ pub fn build_main_package(
 
     infrastructure.module_builder.build(&build_script_file)?;
 
+    let files = infrastructure.file_system.read_directory(
+        &file_path_resolver::resolve_object_directory(output_directory),
+    )?;
+
+    if infrastructure
+        .file_system
+        .exists(&file_path_resolver::resolve_source_file(
+            main_package_directory,
+            &[application_configuration.main_module_basename.clone()],
+            &infrastructure.file_path_configuration,
+        ))
+    {
+        infrastructure.application_linker.link(
+            &files
+                .iter()
+                .filter(|file| {
+                    file.has_extension(infrastructure.file_path_configuration.object_file_extension)
+                })
+                .cloned()
+                .collect::<Vec<_>>(),
+            &files
+                .iter()
+                .filter(|file| {
+                    file.has_extension(
+                        infrastructure
+                            .file_path_configuration
+                            .archive_file_extension,
+                    )
+                })
+                .cloned()
+                .collect::<Vec<_>>(),
+            &main_package_directory.join(&FilePath::new([
+                &application_configuration.application_filename
+            ])),
+        )?;
+    }
+
     Ok(())
 }
 
-// TODO Generate external package targets.
 fn find_external_package_build_script(
     infrastructure: &Infrastructure,
     output_directory: &FilePath,

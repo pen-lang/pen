@@ -1,7 +1,7 @@
 use super::{
-    BuildScriptCompiler, BuildScriptDependencyCompiler, ExternalPackageInitializer,
-    FilePathConfiguration, FilePathDisplayer, FileSystem, ModuleBuilder,
-    PackageConfigurationReader,
+    ApplicationLinker, BuildScriptCompiler, BuildScriptDependencyCompiler,
+    ExternalPackageInitializer, FilePathConfiguration, FilePathDisplayer, FileSystem,
+    ModuleBuilder, PackageConfigurationReader,
 };
 use std::sync::Arc;
 
@@ -11,6 +11,7 @@ use std::sync::Arc;
 // - Output directory
 // - Main package directory
 pub struct Infrastructure {
+    pub application_linker: Arc<dyn ApplicationLinker>,
     pub build_script_dependency_compiler: Arc<dyn BuildScriptDependencyCompiler>,
     pub external_package_initializer: Arc<dyn ExternalPackageInitializer>,
     pub file_path_configuration: Arc<FilePathConfiguration>,

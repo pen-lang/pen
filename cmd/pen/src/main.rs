@@ -45,9 +45,9 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
             clap::SubCommand::with_name("compile-main")
                 .about("Compiles a main module")
                 .arg(
-                    clap::Arg::with_name("system package directory")
-                        .short("s")
-                        .long("system-package-directory")
+                    clap::Arg::with_name("main function interface file")
+                        .short("f")
+                        .long("main-function-interface-file")
                         .required(true)
                         .takes_value(true),
                 )
@@ -79,6 +79,14 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                         .required(true)
                         .takes_value(true),
                 )
+                .arg(
+                    clap::Arg::with_name("prelude interface file")
+                        .short("i")
+                        .long("prelude-interface-file")
+                        .multiple(true)
+                        .number_of_values(1)
+                        .takes_value(true),
+                )
                 .arg(clap::Arg::with_name("source file").required(true))
                 .arg(clap::Arg::with_name("object file").required(true))
                 .arg(clap::Arg::with_name("dependency file").required(true))
@@ -105,7 +113,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                 matches.value_of("source file").unwrap(),
                 matches.value_of("dependency file").unwrap(),
                 matches.value_of("object file").unwrap(),
-                matches.value_of("system package directory").unwrap(),
+                matches.value_of("main function interface file").unwrap(),
             )
         }
         ("compile-prelude", matches) => {
@@ -125,6 +133,10 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                 matches.value_of("object file").unwrap(),
                 matches.value_of("dependency file").unwrap(),
                 matches.value_of("build script dependency file").unwrap(),
+                &matches
+                    .values_of("prelude interface file")
+                    .unwrap()
+                    .collect::<Vec<_>>(),
                 matches.value_of("package directory").unwrap(),
                 matches.value_of("output directory").unwrap(),
             )

@@ -1,13 +1,22 @@
+use super::error::ModuleCompilerError;
 use crate::application_configuration::MainModuleConfiguration;
+use std::error::Error;
 
 pub fn qualify(
     configuration: &MainModuleConfiguration,
-    main_function_module_prefix: &str,
-) -> MainModuleConfiguration {
-    MainModuleConfiguration {
+    main_function_interface: &lang::interface::Module,
+) -> Result<MainModuleConfiguration, Box<dyn Error>> {
+    Ok(MainModuleConfiguration {
         source_main_function_name: configuration.source_main_function_name.clone(),
         object_main_function_name: configuration.object_main_function_name.clone(),
-        main_function_type_name: main_function_module_prefix.to_owned()
-            + &configuration.main_function_type_name,
-    }
+        main_function_type_name: main_function_interface
+            .type_aliases()
+            .iter()
+            .find(|alias| {
+                alias.original_name() == configuration.main_function_type_name && alias.is_public()
+            })
+            .ok_or(ModuleCompilerError::MainFunctionTypeNotFound)?
+            .name()
+            .into(),
+    })
 }
