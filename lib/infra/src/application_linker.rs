@@ -28,8 +28,16 @@ impl app::infra::ApplicationLinker for ApplicationLinker {
                     self.file_path_converter
                         .convert_to_os_path(application_file),
                 )
-                .args(object_files.iter().map(|file| self.file_path_converter.convert_to_os_path(file)))
-                .args(archive_files.iter().map(|file| self.file_path_converter.convert_to_os_path(file)))
+                .args(
+                    object_files
+                        .iter()
+                        .map(|file| self.file_path_converter.convert_to_os_path(file)),
+                )
+                .args(
+                    archive_files
+                        .iter()
+                        .map(|file| self.file_path_converter.convert_to_os_path(file)),
+                )
                 .arg("-ldl")
                 .arg("-lpthread"),
         )?;
