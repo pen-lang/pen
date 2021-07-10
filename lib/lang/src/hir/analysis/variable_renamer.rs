@@ -5,7 +5,7 @@ pub fn rename(module: &Module, names: &HashMap<String, String>) -> Module {
     Module::new(
         module.type_definitions().to_vec(),
         module.type_aliases().to_vec(),
-        module.foreign_function_declarations().to_vec(),
+        module.foreign_declarations().to_vec(),
         module.declarations().to_vec(),
         module
             .definitions()

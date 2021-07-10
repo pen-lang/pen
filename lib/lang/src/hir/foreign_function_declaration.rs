@@ -2,7 +2,7 @@ use super::calling_convention::CallingConvention;
 use crate::{position::Position, types::Type};
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct ForeignFunctionDeclaration {
+pub struct ForeignDeclaration {
     name: String,
     foreign_name: String,
     calling_convention: CallingConvention,
@@ -10,7 +10,7 @@ pub struct ForeignFunctionDeclaration {
     position: Position,
 }
 
-impl ForeignFunctionDeclaration {
+impl ForeignDeclaration {
     pub fn new(
         name: impl Into<String>,
         foreign_name: impl Into<String>,

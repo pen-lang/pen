@@ -12,7 +12,7 @@ pub fn compile(
             .map(|type_definition| compile_type_definition(type_definition, type_context))
             .collect::<Result<Vec<_>, _>>()?,
         module
-            .foreign_function_declarations()
+            .foreign_declarations()
             .iter()
             .map(|declaration| -> Result<_, CompileError> {
                 Ok(mir::ir::ForeignDeclaration::new(
@@ -129,7 +129,7 @@ mod tests {
     }
 
     #[test]
-    fn compile_foreign_function_declaration() {
+    fn compile_foreign_declaration() {
         assert_eq!(
             compile_module(&Module::empty().set_definitions(vec![Definition::new(
                 "foo",

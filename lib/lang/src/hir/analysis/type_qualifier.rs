@@ -61,7 +61,7 @@ pub fn qualify(module: &Module, prefix: &str) -> Module {
                     )
                 })
                 .collect(),
-            module.foreign_function_declarations().to_vec(),
+            module.foreign_declarations().to_vec(),
             module.declarations().to_vec(),
             module.definitions().to_vec(),
             module.position().clone(),

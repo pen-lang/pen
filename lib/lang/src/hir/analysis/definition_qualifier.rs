@@ -4,7 +4,7 @@ use std::collections::HashMap;
 
 pub fn qualify(module: &Module, prefix: &str) -> Module {
     let names = module
-        .foreign_function_declarations()
+        .foreign_declarations()
         .iter()
         .map(|declaration| {
             (
@@ -25,10 +25,10 @@ pub fn qualify(module: &Module, prefix: &str) -> Module {
             module.type_definitions().to_vec(),
             module.type_aliases().to_vec(),
             module
-                .foreign_function_declarations()
+                .foreign_declarations()
                 .iter()
                 .map(|declaration| {
-                    ForeignFunctionDeclaration::new(
+                    ForeignDeclaration::new(
                         names[declaration.name()].clone(),
                         declaration.foreign_name(),
                         declaration.calling_convention(),

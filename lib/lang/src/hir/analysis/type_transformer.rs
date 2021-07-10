@@ -18,9 +18,9 @@ pub fn transform(module: &Module, transform: impl Fn(&Type) -> Type) -> Module {
             .map(|alias| transform_type_alias(alias, &transform))
             .collect(),
         module
-            .foreign_function_declarations()
+            .foreign_declarations()
             .iter()
-            .map(|declaration| transform_foreign_function_declaration(declaration, &transform))
+            .map(|declaration| transform_foreign_declaration(declaration, &transform))
             .collect(),
         module.declarations().to_vec(),
         module
@@ -100,11 +100,11 @@ fn transform_type_alias(alias: &TypeAlias, transform: &impl Fn(&Type) -> Type) -
     }
 }
 
-fn transform_foreign_function_declaration(
-    declaration: &ForeignFunctionDeclaration,
+fn transform_foreign_declaration(
+    declaration: &ForeignDeclaration,
     transform: &impl Fn(&Type) -> Type,
-) -> ForeignFunctionDeclaration {
-    ForeignFunctionDeclaration::new(
+) -> ForeignDeclaration {
+    ForeignDeclaration::new(
         declaration.name(),
         declaration.foreign_name(),
         declaration.calling_convention(),
