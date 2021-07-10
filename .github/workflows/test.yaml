@@ -43,4 +43,4 @@ jobs:
       - run: sudo apt install ninja-build
       - run: bundler install
       - run: cargo build --release
-      - run: PEN_ROOT=$PWD PATH=$PWD/target/release:$PATH cucumber --publish-quiet
+      - run: PEN_ROOT=$PWD PATH=$PWD/target/release:$PWD/tools:$PATH cucumber --publish-quiet
