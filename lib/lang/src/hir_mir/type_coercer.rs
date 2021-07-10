@@ -432,7 +432,7 @@ mod tests {
                 module,
                 &LIST_TYPE_CONFIGURATION,
                 &STRING_TYPE_CONFIGURATION,
-                ERROR_TYPE_CONFIGURATION,
+                &ERROR_TYPE_CONFIGURATION,
             ),
         )
     }

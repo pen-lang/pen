@@ -24,6 +24,9 @@ pub static COMPILE_CONFIGURATION: Lazy<Arc<app::module_compiler::CompileConfigur
             string_type: app::module_compiler::StringTypeConfiguration {
                 equal_function_name: "_equalStrings".into(),
             },
+            error_type: app::module_compiler::ErrorTypeConfiguration {
+                error_type_name: "error".into(),
+            },
         }
         .into()
     });

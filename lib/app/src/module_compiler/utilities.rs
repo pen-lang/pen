@@ -18,3 +18,8 @@ pub static DUMMY_STRING_TYPE_CONFIGURATION: Lazy<lang::hir_mir::StringTypeConfig
     Lazy::new(|| lang::hir_mir::StringTypeConfiguration {
         equal_function_name: "<dummy>".into(),
     });
+
+pub static DUMMY_ERROR_TYPE_CONFIGURATION: Lazy<lang::hir_mir::ErrorTypeConfiguration> =
+    Lazy::new(|| lang::hir_mir::ErrorTypeConfiguration {
+        error_type_name: "<dummy>".into(),
+    });

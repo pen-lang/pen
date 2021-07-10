@@ -16,12 +16,10 @@ mod type_context;
 mod type_extractor;
 mod type_inferrer;
 
-use self::{
-    error_type_configuration::ErrorTypeConfiguration,
-    transformation::record_equal_function_transformer, type_context::TypeContext,
-};
+use self::{transformation::record_equal_function_transformer, type_context::TypeContext};
 use crate::{hir::*, interface};
 pub use error::CompileError;
+pub use error_type_configuration::ErrorTypeConfiguration;
 pub use list_type_configuration::ListTypeConfiguration;
 pub use main_module_configuration::MainModuleConfiguration;
 pub use string_type_configuration::StringTypeConfiguration;
@@ -84,7 +82,10 @@ fn compile_module(
 
 #[cfg(test)]
 mod tests {
-    use super::{list_type_configuration::LIST_TYPE_CONFIGURATION, *};
+    use super::{
+        error_type_configuration::ERROR_TYPE_CONFIGURATION,
+        list_type_configuration::LIST_TYPE_CONFIGURATION, *,
+    };
     use crate::{
         hir_mir::string_type_configuration::STRING_TYPE_CONFIGURATION, position::Position, types,
     };
@@ -92,7 +93,12 @@ mod tests {
     fn compile_module(
         module: &Module,
     ) -> Result<(mir::ir::Module, interface::Module), CompileError> {
-        compile(module, &LIST_TYPE_CONFIGURATION, &STRING_TYPE_CONFIGURATION)
+        compile(
+            module,
+            &LIST_TYPE_CONFIGURATION,
+            &STRING_TYPE_CONFIGURATION,
+            &ERROR_TYPE_CONFIGURATION,
+        )
     }
 
     #[test]
