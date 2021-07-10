@@ -1,7 +1,4 @@
-use super::{
-    definition::Definition, type_definition::TypeDefinition, Declaration, ForeignDeclaration,
-    TypeAlias,
-};
+use super::{Declaration, Definition, ForeignDeclaration, TypeAlias, TypeDefinition};
 use crate::position::Position;
 
 #[derive(Clone, Debug, PartialEq)]
