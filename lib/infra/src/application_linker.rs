@@ -22,7 +22,7 @@ impl app::infra::ApplicationLinker for ApplicationLinker {
     ) -> Result<(), Box<dyn Error>> {
         command_runner::run(
             std::process::Command::new("clang")
-                .arg("-Werror") // cspell:disable-line
+                .arg("-Werror")
                 .arg("-o")
                 .arg(
                     self.file_path_converter
