@@ -302,7 +302,12 @@ fn transform_expression(
                 operation.position().clone(),
             )
             .into(),
-            Operation::Try(_) => todo!(),
+            Operation::Try(operation) => TryOperation::new(
+                operation.type_().cloned(),
+                transform_expression(operation.expression(), variables)?,
+                operation.position().clone(),
+            )
+            .into(),
         },
         Expression::RecordConstruction(construction) => RecordConstruction::new(
             construction.type_().clone(),
