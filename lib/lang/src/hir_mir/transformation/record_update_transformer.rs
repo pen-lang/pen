@@ -76,7 +76,9 @@ mod tests {
                     )],
                     Position::dummy()
                 ),
-                &TypeContext::dummy(Default::default(), vec![(
+                &TypeContext::dummy(
+                    Default::default(),
+                    vec![(
                         "r".into(),
                         vec![
                             types::RecordElement::new("x", types::Number::new(Position::dummy())),
@@ -84,7 +86,8 @@ mod tests {
                         ]
                     )]
                     .into_iter()
-                    .collect())
+                    .collect()
+                )
             ),
             Ok(Let::new(
                 Some(RECORD_NAME.into()),
