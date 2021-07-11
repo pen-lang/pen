@@ -342,35 +342,26 @@ fn check_operation(
         }
         Operation::Try(operation) => {
             let position = operation.position();
-            let union_type = type_canonicalizer::canonicalize(
-                &check_expression(operation.expression())?,
-                type_context.types(),
-            )?;
-
-            if !union_type.is_union() {
-                return Err(CompileError::UnionTypeExpected(position.clone()));
-            }
-
+            let success_type = operation
+                .type_()
+                .ok_or_else(|| CompileError::TypeNotInferred(position.clone()))?;
             let error_type = types::Reference::new(
                 &type_context.error_type_configuration().error_type_name,
                 position.clone(),
             )
             .into();
+            let union_type = check_expression(operation.expression())?;
 
             check_subsumption(&error_type, &union_type)?;
+            check_subsumption(&success_type, &union_type)?;
 
-            union_type_creator::create(
-                &union_difference_calculator::calculate(
-                    &union_type,
-                    &error_type,
-                    type_context.types(),
-                )?
-                .into_iter()
-                .flatten()
-                .collect::<Vec<_>>(),
-                position,
-            )
-            .unwrap()
+            check_subsumption(
+                &union_type,
+                &types::Union::new(success_type.clone(), error_type.clone(), position.clone())
+                    .into(),
+            )?;
+
+            success_type.clone()
         }
     })
 }
@@ -1188,6 +1179,7 @@ mod tests {
                             vec![Argument::new("x", union_type.clone())],
                             union_type.clone(),
                             TryOperation::new(
+                                Some(types::None::new(Position::dummy()).into()),
                                 Variable::new("x", Position::dummy()),
                                 Position::dummy(),
                             ),
@@ -1224,6 +1216,7 @@ mod tests {
                             ArithmeticOperation::new(
                                 ArithmeticOperator::Add,
                                 TryOperation::new(
+                                    Some(types::Number::new(Position::dummy()).into()),
                                     Variable::new("x", Position::dummy()),
                                     Position::dummy(),
                                 ),
@@ -1239,8 +1232,12 @@ mod tests {
         }
 
         #[test]
-        fn fail_to_check_try_operation_with_error() {
-            let error_type = types::Reference::new("error", Position::dummy());
+        fn fail_to_check_try_operation_with_wrong_success_type() {
+            let union_type = types::Union::new(
+                types::None::new(Position::dummy()),
+                types::Reference::new("error", Position::dummy()),
+                Position::dummy(),
+            );
 
             assert_eq!(
                 check_module(
@@ -1255,9 +1252,10 @@ mod tests {
                         .set_definitions(vec![Definition::without_source(
                             "f",
                             Lambda::new(
-                                vec![Argument::new("x", error_type.clone())],
-                                error_type.clone(),
+                                vec![Argument::new("x", union_type.clone())],
+                                union_type.clone(),
                                 TryOperation::new(
+                                    Some(types::Number::new(Position::dummy()).into()),
                                     Variable::new("x", Position::dummy()),
                                     Position::dummy(),
                                 ),
@@ -1266,7 +1264,48 @@ mod tests {
                             false,
                         )]),
                 ),
-                Err(CompileError::UnionTypeExpected(Position::dummy()))
+                Err(CompileError::TypesNotMatched(
+                    Position::dummy(),
+                    Position::dummy()
+                ))
+            );
+        }
+
+        #[test]
+        fn fail_to_check_try_operation_with_wrong_operand_type() {
+            assert_eq!(
+                check_module(
+                    &Module::empty()
+                        .set_type_definitions(vec![TypeDefinition::without_source(
+                            "error",
+                            vec![],
+                            false,
+                            false,
+                            false,
+                        )])
+                        .set_definitions(vec![Definition::without_source(
+                            "f",
+                            Lambda::new(
+                                vec![Argument::new("x", types::None::new(Position::dummy()))],
+                                types::Union::new(
+                                    types::None::new(Position::dummy()),
+                                    types::Reference::new("error", Position::dummy()),
+                                    Position::dummy(),
+                                ),
+                                TryOperation::new(
+                                    Some(types::Number::new(Position::dummy()).into()),
+                                    Variable::new("x", Position::dummy()),
+                                    Position::dummy(),
+                                ),
+                                Position::dummy(),
+                            ),
+                            false,
+                        )]),
+                ),
+                Err(CompileError::TypesNotMatched(
+                    Position::dummy(),
+                    Position::dummy()
+                ))
             );
         }
     }

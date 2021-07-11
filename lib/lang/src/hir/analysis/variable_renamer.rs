@@ -245,6 +245,7 @@ fn rename_operation(operation: &Operation, names: &HashMap<String, String>) -> O
         )
         .into(),
         Operation::Try(operation) => TryOperation::new(
+            operation.type_().cloned(),
             rename_expression(operation.expression(), names),
             operation.position().clone(),
         )

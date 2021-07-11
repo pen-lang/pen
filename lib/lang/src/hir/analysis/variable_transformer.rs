@@ -244,6 +244,7 @@ fn transform_operation(
         )
         .into(),
         Operation::Try(operation) => TryOperation::new(
+            operation.type_().cloned(),
             transform_expression(operation.expression(), transform),
             operation.position().clone(),
         )

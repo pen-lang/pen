@@ -298,7 +298,7 @@ fn compile_expression(expression: &ast::Expression) -> Result<hir::Expression, C
                     hir::NotOperation::new(operand, operation.position().clone()).into()
                 }
                 ast::UnaryOperator::Try => {
-                    hir::TryOperation::new(operand, operation.position().clone()).into()
+                    hir::TryOperation::new(None, operand, operation.position().clone()).into()
                 }
             }
         }
