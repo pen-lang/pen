@@ -620,6 +620,7 @@ mod tests {
                     )
                     .into(),
                     &TypeContext::dummy(
+                        Default::default(),
                         vec![(
                             "r".into(),
                             vec![types::RecordElement::new(
@@ -628,8 +629,7 @@ mod tests {
                             )]
                         )]
                         .into_iter()
-                        .collect(),
-                        Default::default()
+                        .collect()
                     ),
                 ),
                 Ok(mir::ir::Let::new(
@@ -667,6 +667,7 @@ mod tests {
                     )
                     .into(),
                     &TypeContext::dummy(
+                        Default::default(),
                         vec![(
                             "r".into(),
                             vec![
@@ -678,8 +679,7 @@ mod tests {
                             ]
                         )]
                         .into_iter()
-                        .collect(),
-                        Default::default()
+                        .collect()
                     ),
                 ),
                 Ok(mir::ir::Let::new(
@@ -714,8 +714,8 @@ mod tests {
                     )
                     .into(),
                     &TypeContext::dummy(
-                        vec![("r".into(), vec![])].into_iter().collect(),
-                        Default::default()
+                        Default::default(),
+                        vec![("r".into(), vec![])].into_iter().collect()
                     ),
                 ),
                 Ok(mir::ir::Record::new(mir::types::Record::new("r"), vec![]).into())
@@ -733,13 +733,13 @@ mod tests {
                     )
                     .into(),
                     &TypeContext::dummy(
-                        vec![("r".into(), vec![])].into_iter().collect(),
                         vec![(
                             "r".into(),
                             types::Record::new("r", Position::dummy()).into()
                         )]
                         .into_iter()
                         .collect(),
+                        vec![("r".into(), vec![])].into_iter().collect()
                     ),
                 ),
                 Ok(mir::ir::Record::new(mir::types::Record::new("r"), vec![]).into())
@@ -764,13 +764,13 @@ mod tests {
                     )
                     .into(),
                     &TypeContext::dummy(
-                        Default::default(),
                         vec![(
                             "error".into(),
                             types::Record::new("error", Position::dummy()).into()
                         )]
                         .into_iter()
-                        .collect()
+                        .collect(),
+                        Default::default()
                     ),
                 ),
                 Ok(mir::ir::Case::new(
@@ -811,13 +811,13 @@ mod tests {
                     )
                     .into(),
                     &TypeContext::dummy(
-                        Default::default(),
                         vec![(
                             "error".into(),
                             types::Record::new("error", Position::dummy()).into()
                         )]
                         .into_iter()
-                        .collect()
+                        .collect(),
+                        Default::default()
                     ),
                 ),
                 Ok(mir::ir::Case::new(
