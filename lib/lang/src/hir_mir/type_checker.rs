@@ -191,7 +191,7 @@ fn check_expression(
                 match element {
                     ListElement::Multiple(expression) => {
                         check_subsumption(
-                            &type_resolver::resolve_list(
+                            type_resolver::resolve_list(
                                 &check_expression(expression, variables)?,
                                 type_context.types(),
                             )?
@@ -199,7 +199,7 @@ fn check_expression(
                                 CompileError::ListExpected(expression.position().clone())
                             })?
                             .element(),
-                            &list.type_(),
+                            list.type_(),
                         )?;
                     }
                     ListElement::Single(expression) => {
@@ -1651,7 +1651,6 @@ mod tests {
                                     types::Number::new(Position::dummy()),
                                     Position::dummy()
                                 )
-                                .clone()
                             )],
                             types::List::new(
                                 types::None::new(Position::dummy()),
@@ -1720,12 +1719,11 @@ mod tests {
                             types::List::new(
                                 types::None::new(Position::dummy()),
                                 Position::dummy(),
-                            )
-                            .clone(),
+                            ),
                         )],
                         types::List::new(union_type.clone(), Position::dummy()),
                         List::new(
-                            union_type.clone(),
+                            union_type,
                             vec![ListElement::Multiple(
                                 Variable::new("x", Position::dummy()).into(),
                             )],
