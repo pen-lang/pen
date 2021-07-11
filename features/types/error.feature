@@ -24,3 +24,27 @@ Feature: Error
     """
     When I run `pen build`
     Then the exit status should be 0
+
+  Scenario: Use a try operator
+    Given a file named "Foo.pen" with:
+    """
+    f = \(x number | error) number | error {
+      x? + 1
+    }
+    """
+    When I run `pen build`
+    Then the exit status should be 0
+
+  Scenario: Use a try operator with a union type
+    Given a file named "Foo.pen" with:
+    """
+    f = \(x number | none | error) number | error {
+      if x = x?; number {
+        x + 1
+      } else if none {
+        0
+      }
+    }
+    """
+    When I run `pen build`
+    Then the exit status should be 0
