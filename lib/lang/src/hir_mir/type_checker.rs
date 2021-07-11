@@ -5,7 +5,7 @@ use crate::{
         self,
         analysis::{
             type_canonicalizer, type_equality_checker, type_resolver, type_subsumption_checker,
-            union_type_creator,
+            union_difference_calculator, union_type_creator,
         },
         Type,
     },
@@ -340,7 +340,38 @@ fn check_operation(
 
             types::Boolean::new(operation.position().clone()).into()
         }
-        _ => todo!(),
+        Operation::Try(operation) => {
+            let position = operation.position();
+            let union_type = type_canonicalizer::canonicalize(
+                &check_expression(operation.expression())?,
+                type_context.types(),
+            )?;
+
+            if !union_type.is_union() {
+                return Err(CompileError::UnionTypeExpected(position.clone()));
+            }
+
+            let error_type = types::Reference::new(
+                &type_context.error_type_configuration().error_type_name,
+                position.clone(),
+            )
+            .into();
+
+            check_subsumption(&error_type, &union_type)?;
+
+            union_type_creator::create(
+                &union_difference_calculator::calculate(
+                    &union_type,
+                    &error_type,
+                    type_context.types(),
+                )?
+                .into_iter()
+                .flatten()
+                .collect::<Vec<_>>(),
+                position,
+            )
+            .unwrap()
+        }
     })
 }
 
@@ -1132,6 +1163,111 @@ mod tests {
                 )]),
             )
             .unwrap();
+        }
+
+        #[test]
+        fn check_try_operation() {
+            let union_type = types::Union::new(
+                types::None::new(Position::dummy()),
+                types::Reference::new("error", Position::dummy()),
+                Position::dummy(),
+            );
+
+            check_module(
+                &Module::empty()
+                    .set_type_definitions(vec![TypeDefinition::without_source(
+                        "error",
+                        vec![],
+                        false,
+                        false,
+                        false,
+                    )])
+                    .set_definitions(vec![Definition::without_source(
+                        "f",
+                        Lambda::new(
+                            vec![Argument::new("x", union_type.clone())],
+                            union_type.clone(),
+                            TryOperation::new(
+                                Variable::new("x", Position::dummy()),
+                                Position::dummy(),
+                            ),
+                            Position::dummy(),
+                        ),
+                        false,
+                    )]),
+            )
+            .unwrap();
+        }
+
+        #[test]
+        fn check_try_operation_with_number() {
+            let union_type = types::Union::new(
+                types::Number::new(Position::dummy()),
+                types::Reference::new("error", Position::dummy()),
+                Position::dummy(),
+            );
+
+            check_module(
+                &Module::empty()
+                    .set_type_definitions(vec![TypeDefinition::without_source(
+                        "error",
+                        vec![],
+                        false,
+                        false,
+                        false,
+                    )])
+                    .set_definitions(vec![Definition::without_source(
+                        "f",
+                        Lambda::new(
+                            vec![Argument::new("x", union_type.clone())],
+                            union_type.clone(),
+                            ArithmeticOperation::new(
+                                ArithmeticOperator::Add,
+                                TryOperation::new(
+                                    Variable::new("x", Position::dummy()),
+                                    Position::dummy(),
+                                ),
+                                Number::new(42.0, Position::dummy()),
+                                Position::dummy(),
+                            ),
+                            Position::dummy(),
+                        ),
+                        false,
+                    )]),
+            )
+            .unwrap();
+        }
+
+        #[test]
+        fn fail_to_check_try_operation_with_error() {
+            let error_type = types::Reference::new("error", Position::dummy());
+
+            assert_eq!(
+                check_module(
+                    &Module::empty()
+                        .set_type_definitions(vec![TypeDefinition::without_source(
+                            "error",
+                            vec![],
+                            false,
+                            false,
+                            false,
+                        )])
+                        .set_definitions(vec![Definition::without_source(
+                            "f",
+                            Lambda::new(
+                                vec![Argument::new("x", error_type.clone())],
+                                error_type.clone(),
+                                TryOperation::new(
+                                    Variable::new("x", Position::dummy()),
+                                    Position::dummy(),
+                                ),
+                                Position::dummy(),
+                            ),
+                            false,
+                        )]),
+                ),
+                Err(CompileError::UnionTypeExpected(Position::dummy()))
+            );
         }
     }
 

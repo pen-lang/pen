@@ -328,7 +328,24 @@ fn compile_operation(
             compile(operation.rhs())?,
         )
         .into(),
-        Operation::Try(_) => todo!(),
+        Operation::Try(operation) => {
+            let error_type = type_compiler::compile(
+                &types::Reference::new(
+                    &type_context.error_type_configuration().error_type_name,
+                    operation.position().clone(),
+                )
+                .into(),
+                type_context,
+            )?;
+
+            mir::ir::TryOperation::new(
+                compile(operation.expression())?,
+                "$error",
+                error_type.clone(),
+                mir::ir::Variant::new(error_type.clone(), mir::ir::Variable::new("$error")),
+            )
+            .into()
+        }
     })
 }
 

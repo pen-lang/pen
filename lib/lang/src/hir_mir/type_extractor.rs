@@ -3,7 +3,7 @@ use crate::{
     hir::*,
     types::{
         self,
-        analysis::{type_resolver, union_type_creator},
+        analysis::{type_resolver, union_difference_calculator, union_type_creator},
         Type,
     },
 };
@@ -133,7 +133,22 @@ pub fn extract_from_expression(
             | Operation::Equality(_)
             | Operation::Not(_)
             | Operation::Order(_) => types::Boolean::new(expression.position().clone()).into(),
-            Operation::Try(_) => todo!(),
+            Operation::Try(operation) => union_type_creator::create(
+                &union_difference_calculator::calculate(
+                    &extract_from_expression(operation.expression(), variables)?,
+                    &types::Reference::new(
+                        &type_context.error_type_configuration().error_type_name,
+                        operation.position().clone(),
+                    )
+                    .into(),
+                    type_context.types(),
+                )?
+                .into_iter()
+                .flatten()
+                .collect::<Vec<_>>(),
+                operation.position(),
+            )
+            .unwrap(),
         },
         Expression::RecordConstruction(construction) => construction.type_().clone(),
         Expression::RecordDeconstruction(deconstruction) => type_resolver::resolve_record_elements(
@@ -191,6 +206,38 @@ mod tests {
                 .into(),
                 &Default::default(),
                 &TypeContext::dummy(Default::default(), Default::default()),
+            )
+            .unwrap(),
+            types::None::new(Position::dummy()).into(),
+        );
+    }
+
+    #[test]
+    fn extract_from_try_operation() {
+        assert_eq!(
+            extract_from_expression(
+                &TryOperation::new(Variable::new("x", Position::dummy()), Position::dummy(),)
+                    .into(),
+                &vec![(
+                    "x".into(),
+                    types::Union::new(
+                        types::None::new(Position::dummy()),
+                        types::Reference::new("error", Position::dummy()),
+                        Position::dummy(),
+                    )
+                    .into()
+                )]
+                .into_iter()
+                .collect(),
+                &TypeContext::dummy(
+                    Default::default(),
+                    vec![(
+                        "error".into(),
+                        types::Record::new("error", Position::dummy()).into()
+                    )]
+                    .into_iter()
+                    .collect(),
+                ),
             )
             .unwrap(),
             types::None::new(Position::dummy()).into(),
