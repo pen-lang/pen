@@ -186,6 +186,30 @@ fn check_expression(
                     .collect(),
             )?
         }
+        Expression::List(list) => {
+            for element in list.elements() {
+                match element {
+                    ListElement::Multiple(expression) => {
+                        check_subsumption(
+                            &type_resolver::resolve_list(
+                                &check_expression(expression, variables)?,
+                                type_context.types(),
+                            )?
+                            .ok_or_else(|| {
+                                CompileError::ListExpected(expression.position().clone())
+                            })?
+                            .element(),
+                            &list.type_(),
+                        )?;
+                    }
+                    ListElement::Single(expression) => {
+                        check_subsumption(&check_expression(expression, variables)?, list.type_())?;
+                    }
+                }
+            }
+
+            types::List::new(list.type_().clone(), list.position().clone()).into()
+        }
         Expression::None(none) => types::None::new(none.position().clone()).into(),
         Expression::Number(number) => types::Number::new(number.position().clone()).into(),
         Expression::Operation(operation) => check_operation(operation, variables, type_context)?,
@@ -1529,6 +1553,190 @@ mod tests {
                 ),
                 Err(CompileError::RecordElementUnknown(Position::dummy()))
             );
+        }
+    }
+
+    mod lists {
+        use super::*;
+        use pretty_assertions::assert_eq;
+
+        #[test]
+        fn check_list_with_single_element() {
+            check_module(
+                &Module::empty().set_definitions(vec![Definition::without_source(
+                    "x",
+                    Lambda::new(
+                        vec![],
+                        types::List::new(types::None::new(Position::dummy()), Position::dummy()),
+                        List::new(
+                            types::None::new(Position::dummy()),
+                            vec![ListElement::Single(None::new(Position::dummy()).into())],
+                            Position::dummy(),
+                        ),
+                        Position::dummy(),
+                    ),
+                    false,
+                )]),
+            )
+            .unwrap();
+        }
+
+        #[test]
+        fn check_list_with_multiple_element() {
+            let list_type =
+                types::List::new(types::None::new(Position::dummy()), Position::dummy());
+
+            check_module(
+                &Module::empty().set_definitions(vec![Definition::without_source(
+                    "x",
+                    Lambda::new(
+                        vec![Argument::new("x", list_type.clone())],
+                        list_type,
+                        List::new(
+                            types::None::new(Position::dummy()),
+                            vec![ListElement::Multiple(
+                                Variable::new("x", Position::dummy()).into(),
+                            )],
+                            Position::dummy(),
+                        ),
+                        Position::dummy(),
+                    ),
+                    false,
+                )]),
+            )
+            .unwrap();
+        }
+
+        #[test]
+        fn fail_to_check_list_with_single_element() {
+            assert_eq!(
+                check_module(
+                    &Module::empty().set_definitions(vec![Definition::without_source(
+                        "x",
+                        Lambda::new(
+                            vec![],
+                            types::List::new(
+                                types::None::new(Position::dummy()),
+                                Position::dummy()
+                            ),
+                            List::new(
+                                types::None::new(Position::dummy()),
+                                vec![ListElement::Single(
+                                    Number::new(42.0, Position::dummy()).into(),
+                                )],
+                                Position::dummy(),
+                            ),
+                            Position::dummy(),
+                        ),
+                        false,
+                    )])
+                ),
+                Err(CompileError::TypesNotMatched(
+                    Position::dummy(),
+                    Position::dummy()
+                ))
+            );
+        }
+
+        #[test]
+        fn fail_to_check_list_with_multiple_element() {
+            assert_eq!(
+                check_module(
+                    &Module::empty().set_definitions(vec![Definition::without_source(
+                        "x",
+                        Lambda::new(
+                            vec![Argument::new(
+                                "x",
+                                types::List::new(
+                                    types::Number::new(Position::dummy()),
+                                    Position::dummy()
+                                )
+                                .clone()
+                            )],
+                            types::List::new(
+                                types::None::new(Position::dummy()),
+                                Position::dummy()
+                            ),
+                            List::new(
+                                types::None::new(Position::dummy()),
+                                vec![ListElement::Multiple(
+                                    Variable::new("x", Position::dummy()).into(),
+                                )],
+                                Position::dummy(),
+                            ),
+                            Position::dummy(),
+                        ),
+                        false,
+                    )]),
+                ),
+                Err(CompileError::TypesNotMatched(
+                    Position::dummy(),
+                    Position::dummy(),
+                ))
+            );
+        }
+
+        #[test]
+        fn check_list_with_single_element_of_union() {
+            let union_type = types::Union::new(
+                types::Number::new(Position::dummy()),
+                types::None::new(Position::dummy()),
+                Position::dummy(),
+            );
+
+            check_module(
+                &Module::empty().set_definitions(vec![Definition::without_source(
+                    "x",
+                    Lambda::new(
+                        vec![],
+                        types::List::new(union_type.clone(), Position::dummy()),
+                        List::new(
+                            union_type,
+                            vec![ListElement::Single(None::new(Position::dummy()).into())],
+                            Position::dummy(),
+                        ),
+                        Position::dummy(),
+                    ),
+                    false,
+                )]),
+            )
+            .unwrap();
+        }
+
+        #[test]
+        fn check_list_with_multiple_element_of_union() {
+            let union_type = types::Union::new(
+                types::Number::new(Position::dummy()),
+                types::None::new(Position::dummy()),
+                Position::dummy(),
+            );
+
+            check_module(
+                &Module::empty().set_definitions(vec![Definition::without_source(
+                    "x",
+                    Lambda::new(
+                        vec![Argument::new(
+                            "x",
+                            types::List::new(
+                                types::None::new(Position::dummy()),
+                                Position::dummy(),
+                            )
+                            .clone(),
+                        )],
+                        types::List::new(union_type.clone(), Position::dummy()),
+                        List::new(
+                            union_type.clone(),
+                            vec![ListElement::Multiple(
+                                Variable::new("x", Position::dummy()).into(),
+                            )],
+                            Position::dummy(),
+                        ),
+                        Position::dummy(),
+                    ),
+                    false,
+                )]),
+            )
+            .unwrap();
         }
     }
 }
