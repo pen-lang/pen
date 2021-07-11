@@ -619,8 +619,7 @@ mod tests {
                         Position::dummy()
                     )
                     .into(),
-                    &TypeContext::dummy(
-                        vec![(
+                    &TypeContext::dummy(Default::default(), vec![(
                             "r".into(),
                             vec![types::RecordElement::new(
                                 "x",
@@ -628,9 +627,7 @@ mod tests {
                             )]
                         )]
                         .into_iter()
-                        .collect(),
-                        Default::default()
-                    ),
+                        .collect()),
                 ),
                 Ok(mir::ir::Let::new(
                     "$x",
@@ -666,8 +663,7 @@ mod tests {
                         Position::dummy()
                     )
                     .into(),
-                    &TypeContext::dummy(
-                        vec![(
+                    &TypeContext::dummy(Default::default(), vec![(
                             "r".into(),
                             vec![
                                 types::RecordElement::new(
@@ -678,9 +674,7 @@ mod tests {
                             ]
                         )]
                         .into_iter()
-                        .collect(),
-                        Default::default()
-                    ),
+                        .collect()),
                 ),
                 Ok(mir::ir::Let::new(
                     "$x",
@@ -713,10 +707,7 @@ mod tests {
                         Position::dummy()
                     )
                     .into(),
-                    &TypeContext::dummy(
-                        vec![("r".into(), vec![])].into_iter().collect(),
-                        Default::default()
-                    ),
+                    &TypeContext::dummy(Default::default(), vec![("r".into(), vec![])].into_iter().collect()),
                 ),
                 Ok(mir::ir::Record::new(mir::types::Record::new("r"), vec![]).into())
             );
@@ -732,15 +723,12 @@ mod tests {
                         Position::dummy()
                     )
                     .into(),
-                    &TypeContext::dummy(
-                        vec![("r".into(), vec![])].into_iter().collect(),
-                        vec![(
+                    &TypeContext::dummy(vec![(
                             "r".into(),
                             types::Record::new("r", Position::dummy()).into()
                         )]
                         .into_iter()
-                        .collect(),
-                    ),
+                        .collect(), vec![("r".into(), vec![])].into_iter().collect()),
                 ),
                 Ok(mir::ir::Record::new(mir::types::Record::new("r"), vec![]).into())
             );
@@ -763,15 +751,12 @@ mod tests {
                         Position::dummy(),
                     )
                     .into(),
-                    &TypeContext::dummy(
-                        Default::default(),
-                        vec![(
+                    &TypeContext::dummy(vec![(
                             "error".into(),
                             types::Record::new("error", Position::dummy()).into()
                         )]
                         .into_iter()
-                        .collect()
-                    ),
+                        .collect(), Default::default()),
                 ),
                 Ok(mir::ir::Case::new(
                     mir::ir::TryOperation::new(
@@ -810,15 +795,12 @@ mod tests {
                         Position::dummy(),
                     )
                     .into(),
-                    &TypeContext::dummy(
-                        Default::default(),
-                        vec![(
+                    &TypeContext::dummy(vec![(
                             "error".into(),
                             types::Record::new("error", Position::dummy()).into()
                         )]
                         .into_iter()
-                        .collect()
-                    ),
+                        .collect(), Default::default()),
                 ),
                 Ok(mir::ir::Case::new(
                     mir::ir::TryOperation::new(
