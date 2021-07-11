@@ -26,7 +26,7 @@ fn transform_list(
 
     match elements {
         [] => Call::new(
-            Some(types::Function::new(vec![], any_list_type.clone(), position.clone()).into()),
+            Some(types::Function::new(vec![], any_list_type, position.clone()).into()),
             Variable::new(&configuration.empty_list_variable_name, position.clone()),
             vec![],
             position.clone(),
@@ -36,7 +36,7 @@ fn transform_list(
             Some(
                 types::Function::new(
                     vec![any_list_type.clone().into(), any_list_type.clone().into()],
-                    any_list_type.clone(),
+                    any_list_type,
                     position.clone(),
                 )
                 .into(),
@@ -53,7 +53,7 @@ fn transform_list(
                         types::Any::new(position.clone()).into(),
                         any_list_type.clone().into(),
                     ],
-                    any_list_type.clone(),
+                    any_list_type,
                     position.clone(),
                 )
                 .into(),
