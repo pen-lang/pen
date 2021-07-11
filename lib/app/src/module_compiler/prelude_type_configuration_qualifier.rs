@@ -27,3 +27,12 @@ pub fn qualify_string_type_configuration(
         equal_function_name: [prelude_prefix, &configuration.equal_function_name].join(""),
     }
 }
+
+pub fn qualify_error_type_configuration(
+    configuration: &lang::hir_mir::ErrorTypeConfiguration,
+    prelude_prefix: &str,
+) -> lang::hir_mir::ErrorTypeConfiguration {
+    lang::hir_mir::ErrorTypeConfiguration {
+        error_type_name: prelude_prefix.to_owned() + &configuration.error_type_name,
+    }
+}

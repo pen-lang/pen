@@ -288,7 +288,40 @@ fn infer_expression(
                 operation.position().clone(),
             )
             .into(),
-            Operation::Try(_) => todo!(),
+            Operation::Try(operation) => {
+                let position = operation.position();
+                let expression = infer_expression(operation.expression(), variables)?;
+                let error_type = types::Reference::new(
+                    &type_context.error_type_configuration().error_type_name,
+                    position.clone(),
+                )
+                .into();
+                let types = union_difference_calculator::calculate(
+                    &type_extractor::extract_from_expression(&expression, variables, type_context)?,
+                    &error_type,
+                    type_context.types(),
+                )?;
+
+                TryOperation::new(
+                    Some(
+                        union_type_creator::create(
+                            &types
+                                .ok_or_else(|| {
+                                    CompileError::UnionTypeExpected(expression.position().clone())
+                                })?
+                                .into_iter()
+                                .collect::<Vec<_>>(),
+                            position,
+                        )
+                        .ok_or_else(|| {
+                            CompileError::UnionTypeExpected(expression.position().clone())
+                        })?,
+                    ),
+                    expression,
+                    position.clone(),
+                )
+                .into()
+            }
         },
         Expression::RecordConstruction(construction) => RecordConstruction::new(
             construction.type_().clone(),
@@ -358,6 +391,7 @@ mod tests {
     use super::*;
     use crate::{
         hir_mir::{
+            error_type_configuration::ERROR_TYPE_CONFIGURATION,
             list_type_configuration::LIST_TYPE_CONFIGURATION,
             string_type_configuration::STRING_TYPE_CONFIGURATION,
         },
@@ -368,7 +402,12 @@ mod tests {
     fn infer_module(module: &Module) -> Result<Module, CompileError> {
         infer_types(
             module,
-            &TypeContext::new(module, &LIST_TYPE_CONFIGURATION, &STRING_TYPE_CONFIGURATION),
+            &TypeContext::new(
+                module,
+                &LIST_TYPE_CONFIGURATION,
+                &STRING_TYPE_CONFIGURATION,
+                &ERROR_TYPE_CONFIGURATION,
+            ),
         )
     }
 
@@ -872,6 +911,92 @@ mod tests {
                     )],)
                 ),
                 Err(CompileError::UnreachableCode(Position::dummy()))
+            );
+        }
+    }
+
+    mod try_operation {
+        use super::*;
+        use pretty_assertions::assert_eq;
+
+        #[test]
+        fn infer() {
+            let union_type = types::Union::new(
+                types::None::new(Position::dummy()),
+                types::Reference::new("error", Position::dummy()),
+                Position::dummy(),
+            );
+            let module =
+                Module::empty().set_type_definitions(vec![TypeDefinition::without_source(
+                    "error",
+                    vec![],
+                    false,
+                    false,
+                    false,
+                )]);
+
+            assert_eq!(
+                infer_module(&module.set_definitions(vec![Definition::without_source(
+                    "f",
+                    Lambda::new(
+                        vec![Argument::new("x", union_type.clone())],
+                        union_type.clone(),
+                        TryOperation::new(
+                            None,
+                            Variable::new("x", Position::dummy()),
+                            Position::dummy(),
+                        ),
+                        Position::dummy(),
+                    ),
+                    false,
+                )])),
+                Ok(module.set_definitions(vec![Definition::without_source(
+                    "f",
+                    Lambda::new(
+                        vec![Argument::new("x", union_type.clone())],
+                        union_type,
+                        TryOperation::new(
+                            Some(types::None::new(Position::dummy()).into()),
+                            Variable::new("x", Position::dummy()),
+                            Position::dummy(),
+                        ),
+                        Position::dummy(),
+                    ),
+                    false,
+                )],))
+            );
+        }
+
+        #[test]
+        fn fail_to_infer_with_error() {
+            let error_type = types::Reference::new("error", Position::dummy());
+
+            assert_eq!(
+                infer_module(
+                    &Module::empty()
+                        .set_type_definitions(vec![TypeDefinition::without_source(
+                            "error",
+                            vec![],
+                            false,
+                            false,
+                            false,
+                        )])
+                        .set_definitions(vec![Definition::without_source(
+                            "f",
+                            Lambda::new(
+                                vec![Argument::new("x", error_type.clone())],
+                                error_type,
+                                TryOperation::new(
+                                    None,
+                                    Variable::new("x", Position::dummy()),
+                                    Position::dummy(),
+                                ),
+                                Position::dummy(),
+                            ),
+                            false,
+                        )],)
+                ),
+                Err(CompileError::UnionTypeExpected(Position::dummy()))
             );
         }
     }

@@ -55,7 +55,7 @@ pub fn compile(
             if_.branches()
                 .iter()
                 .map(|branch| {
-                    compile_if_type_branch(
+                    compile_alternatives(
                         if_.name(),
                         branch.type_(),
                         branch.expression(),
@@ -71,7 +71,7 @@ pub fn compile(
                         &types::Any::new(if_.position().clone()).into(),
                         type_context.types(),
                     )? {
-                        compile_if_type_branch(
+                        compile_alternatives(
                             if_.name(),
                             branch.type_().unwrap(),
                             branch.expression(),
@@ -225,19 +225,19 @@ pub fn compile(
     })
 }
 
-fn compile_if_type_branch(
+fn compile_alternatives(
     name: &str,
     type_: &Type,
     expression: &Expression,
     type_context: &TypeContext,
 ) -> Result<Vec<mir::ir::Alternative>, CompileError> {
     let type_ = type_canonicalizer::canonicalize(type_, type_context.types())?;
+    let expression = compile(expression, type_context)?;
 
     union_type_member_calculator::calculate(&type_, type_context.types())?
         .into_iter()
         .map(|member_type| {
             let member_type = type_compiler::compile(&member_type, type_context)?;
-            let expression = compile(expression, type_context)?;
 
             Ok(mir::ir::Alternative::new(member_type.clone(), name, {
                 if type_.is_union() {
@@ -245,11 +245,11 @@ fn compile_if_type_branch(
                         name,
                         mir::types::Type::Variant,
                         mir::ir::Variant::new(member_type, mir::ir::Variable::new(name)),
-                        expression,
+                        expression.clone(),
                     )
                     .into()
                 } else {
-                    expression
+                    expression.clone()
                 }
             }))
         })
@@ -328,7 +328,39 @@ fn compile_operation(
             compile(operation.rhs())?,
         )
         .into(),
-        Operation::Try(_) => todo!(),
+        Operation::Try(operation) => {
+            let success_type = type_canonicalizer::canonicalize(
+                operation
+                    .type_()
+                    .ok_or_else(|| CompileError::TypeNotInferred(operation.position().clone()))?,
+                type_context.types(),
+            )?;
+            let error_type = type_compiler::compile(
+                &types::Reference::new(
+                    &type_context.error_type_configuration().error_type_name,
+                    operation.position().clone(),
+                )
+                .into(),
+                type_context,
+            )?;
+
+            mir::ir::Case::new(
+                mir::ir::TryOperation::new(
+                    compile(operation.expression())?,
+                    "$error",
+                    error_type.clone(),
+                    mir::ir::Variant::new(error_type, mir::ir::Variable::new("$error")),
+                ),
+                compile_alternatives(
+                    "$success",
+                    &success_type,
+                    &Variable::new("$success", operation.position().clone()).into(),
+                    type_context,
+                )?,
+                None,
+            )
+            .into()
+        }
     })
 }
 
@@ -711,6 +743,121 @@ mod tests {
                     ),
                 ),
                 Ok(mir::ir::Record::new(mir::types::Record::new("r"), vec![]).into())
+            );
+        }
+    }
+
+    mod try_operation {
+        use super::*;
+        use pretty_assertions::assert_eq;
+
+        #[test]
+        fn compile_with_none() {
+            let error_type = mir::types::Record::new("error");
+
+            assert_eq!(
+                compile(
+                    &TryOperation::new(
+                        Some(types::None::new(Position::dummy()).into()),
+                        Variable::new("x", Position::dummy()),
+                        Position::dummy(),
+                    )
+                    .into(),
+                    &TypeContext::dummy(
+                        Default::default(),
+                        vec![(
+                            "error".into(),
+                            types::Record::new("error", Position::dummy()).into()
+                        )]
+                        .into_iter()
+                        .collect()
+                    ),
+                ),
+                Ok(mir::ir::Case::new(
+                    mir::ir::TryOperation::new(
+                        mir::ir::Variable::new("x"),
+                        "$error",
+                        error_type.clone(),
+                        mir::ir::Variant::new(error_type, mir::ir::Variable::new("$error"))
+                    ),
+                    vec![mir::ir::Alternative::new(
+                        mir::types::Type::None,
+                        "$success",
+                        mir::ir::Variable::new("$success"),
+                    )],
+                    None
+                )
+                .into())
+            );
+        }
+
+        #[test]
+        fn compile_with_union() {
+            let error_type = mir::types::Record::new("error");
+
+            assert_eq!(
+                compile(
+                    &TryOperation::new(
+                        Some(
+                            types::Union::new(
+                                types::Number::new(Position::dummy()),
+                                types::None::new(Position::dummy()),
+                                Position::dummy()
+                            )
+                            .into()
+                        ),
+                        Variable::new("x", Position::dummy()),
+                        Position::dummy(),
+                    )
+                    .into(),
+                    &TypeContext::dummy(
+                        Default::default(),
+                        vec![(
+                            "error".into(),
+                            types::Record::new("error", Position::dummy()).into()
+                        )]
+                        .into_iter()
+                        .collect()
+                    ),
+                ),
+                Ok(mir::ir::Case::new(
+                    mir::ir::TryOperation::new(
+                        mir::ir::Variable::new("x"),
+                        "$error",
+                        error_type.clone(),
+                        mir::ir::Variant::new(error_type, mir::ir::Variable::new("$error"))
+                    ),
+                    vec![
+                        mir::ir::Alternative::new(
+                            mir::types::Type::None,
+                            "$success",
+                            mir::ir::Let::new(
+                                "$success",
+                                mir::types::Type::Variant,
+                                mir::ir::Variant::new(
+                                    mir::types::Type::None,
+                                    mir::ir::Variable::new("$success")
+                                ),
+                                mir::ir::Variable::new("$success"),
+                            ),
+                        ),
+                        mir::ir::Alternative::new(
+                            mir::types::Type::Number,
+                            "$success",
+                            mir::ir::Let::new(
+                                "$success",
+                                mir::types::Type::Variant,
+                                mir::ir::Variant::new(
+                                    mir::types::Type::Number,
+                                    mir::ir::Variable::new("$success")
+                                ),
+                                mir::ir::Variable::new("$success"),
+                            ),
+                        )
+                    ],
+                    None
+                )
+                .into())
             );
         }
     }

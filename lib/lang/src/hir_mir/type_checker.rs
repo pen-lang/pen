@@ -340,7 +340,28 @@ fn check_operation(
 
             types::Boolean::new(operation.position().clone()).into()
         }
-        _ => todo!(),
+        Operation::Try(operation) => {
+            let position = operation.position();
+            let success_type = operation
+                .type_()
+                .ok_or_else(|| CompileError::TypeNotInferred(position.clone()))?;
+            let error_type = types::Reference::new(
+                &type_context.error_type_configuration().error_type_name,
+                position.clone(),
+            )
+            .into();
+            let union_type = check_expression(operation.expression())?;
+
+            check_subsumption(&error_type, &union_type)?;
+            check_subsumption(success_type, &union_type)?;
+
+            check_subsumption(
+                &union_type,
+                &types::Union::new(success_type.clone(), error_type, position.clone()).into(),
+            )?;
+
+            success_type.clone()
+        }
     })
 }
 
@@ -363,13 +384,22 @@ fn check_subsumption(
 mod tests {
     use super::{super::list_type_configuration::LIST_TYPE_CONFIGURATION, *};
     use crate::{
-        hir_mir::string_type_configuration::STRING_TYPE_CONFIGURATION, position::Position,
+        hir_mir::{
+            error_type_configuration::ERROR_TYPE_CONFIGURATION,
+            string_type_configuration::STRING_TYPE_CONFIGURATION,
+        },
+        position::Position,
     };
 
     fn check_module(module: &Module) -> Result<(), CompileError> {
         check_types(
             module,
-            &TypeContext::new(module, &LIST_TYPE_CONFIGURATION, &STRING_TYPE_CONFIGURATION),
+            &TypeContext::new(
+                module,
+                &LIST_TYPE_CONFIGURATION,
+                &STRING_TYPE_CONFIGURATION,
+                &ERROR_TYPE_CONFIGURATION,
+            ),
         )
     }
 
@@ -1123,6 +1153,159 @@ mod tests {
                 )]),
             )
             .unwrap();
+        }
+
+        #[test]
+        fn check_try_operation() {
+            let union_type = types::Union::new(
+                types::None::new(Position::dummy()),
+                types::Reference::new("error", Position::dummy()),
+                Position::dummy(),
+            );
+
+            check_module(
+                &Module::empty()
+                    .set_type_definitions(vec![TypeDefinition::without_source(
+                        "error",
+                        vec![],
+                        false,
+                        false,
+                        false,
+                    )])
+                    .set_definitions(vec![Definition::without_source(
+                        "f",
+                        Lambda::new(
+                            vec![Argument::new("x", union_type.clone())],
+                            union_type,
+                            TryOperation::new(
+                                Some(types::None::new(Position::dummy()).into()),
+                                Variable::new("x", Position::dummy()),
+                                Position::dummy(),
+                            ),
+                            Position::dummy(),
+                        ),
+                        false,
+                    )]),
+            )
+            .unwrap();
+        }
+
+        #[test]
+        fn check_try_operation_with_number() {
+            let union_type = types::Union::new(
+                types::Number::new(Position::dummy()),
+                types::Reference::new("error", Position::dummy()),
+                Position::dummy(),
+            );
+
+            check_module(
+                &Module::empty()
+                    .set_type_definitions(vec![TypeDefinition::without_source(
+                        "error",
+                        vec![],
+                        false,
+                        false,
+                        false,
+                    )])
+                    .set_definitions(vec![Definition::without_source(
+                        "f",
+                        Lambda::new(
+                            vec![Argument::new("x", union_type.clone())],
+                            union_type,
+                            ArithmeticOperation::new(
+                                ArithmeticOperator::Add,
+                                TryOperation::new(
+                                    Some(types::Number::new(Position::dummy()).into()),
+                                    Variable::new("x", Position::dummy()),
+                                    Position::dummy(),
+                                ),
+                                Number::new(42.0, Position::dummy()),
+                                Position::dummy(),
+                            ),
+                            Position::dummy(),
+                        ),
+                        false,
+                    )]),
+            )
+            .unwrap();
+        }
+
+        #[test]
+        fn fail_to_check_try_operation_with_wrong_success_type() {
+            let union_type = types::Union::new(
+                types::None::new(Position::dummy()),
+                types::Reference::new("error", Position::dummy()),
+                Position::dummy(),
+            );
+
+            assert_eq!(
+                check_module(
+                    &Module::empty()
+                        .set_type_definitions(vec![TypeDefinition::without_source(
+                            "error",
+                            vec![],
+                            false,
+                            false,
+                            false,
+                        )])
+                        .set_definitions(vec![Definition::without_source(
+                            "f",
+                            Lambda::new(
+                                vec![Argument::new("x", union_type.clone())],
+                                union_type,
+                                TryOperation::new(
+                                    Some(types::Number::new(Position::dummy()).into()),
+                                    Variable::new("x", Position::dummy()),
+                                    Position::dummy(),
+                                ),
+                                Position::dummy(),
+                            ),
+                            false,
+                        )]),
+                ),
+                Err(CompileError::TypesNotMatched(
+                    Position::dummy(),
+                    Position::dummy()
+                ))
+            );
+        }
+
+        #[test]
+        fn fail_to_check_try_operation_with_wrong_operand_type() {
+            assert_eq!(
+                check_module(
+                    &Module::empty()
+                        .set_type_definitions(vec![TypeDefinition::without_source(
+                            "error",
+                            vec![],
+                            false,
+                            false,
+                            false,
+                        )])
+                        .set_definitions(vec![Definition::without_source(
+                            "f",
+                            Lambda::new(
+                                vec![Argument::new("x", types::None::new(Position::dummy()))],
+                                types::Union::new(
+                                    types::None::new(Position::dummy()),
+                                    types::Reference::new("error", Position::dummy()),
+                                    Position::dummy(),
+                                ),
+                                TryOperation::new(
+                                    Some(types::Number::new(Position::dummy()).into()),
+                                    Variable::new("x", Position::dummy()),
+                                    Position::dummy(),
+                                ),
+                                Position::dummy(),
+                            ),
+                            false,
+                        )]),
+                ),
+                Err(CompileError::TypesNotMatched(
+                    Position::dummy(),
+                    Position::dummy()
+                ))
+            );
         }
     }
 

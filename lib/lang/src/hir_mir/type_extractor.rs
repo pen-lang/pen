@@ -133,7 +133,10 @@ pub fn extract_from_expression(
             | Operation::Equality(_)
             | Operation::Not(_)
             | Operation::Order(_) => types::Boolean::new(expression.position().clone()).into(),
-            Operation::Try(_) => todo!(),
+            Operation::Try(operation) => operation
+                .type_()
+                .ok_or_else(|| CompileError::TypeNotInferred(operation.position().clone()))?
+                .clone(),
         },
         Expression::RecordConstruction(construction) => construction.type_().clone(),
         Expression::RecordDeconstruction(deconstruction) => type_resolver::resolve_record_elements(
@@ -187,6 +190,24 @@ mod tests {
                     None::new(Position::dummy()),
                     Variable::new("x", Position::dummy()),
                     Position::dummy(),
+                )
+                .into(),
+                &Default::default(),
+                &TypeContext::dummy(Default::default(), Default::default()),
+            )
+            .unwrap(),
+            types::None::new(Position::dummy()).into(),
+        );
+    }
+
+    #[test]
+    fn extract_from_try_operation() {
+        assert_eq!(
+            extract_from_expression(
+                &TryOperation::new(
+                    Some(types::None::new(Position::dummy()).into()),
+                    Variable::new("x", Position::dummy()),
+                    Position::dummy()
                 )
                 .into(),
                 &Default::default(),

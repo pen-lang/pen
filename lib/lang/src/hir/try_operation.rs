@@ -1,19 +1,25 @@
 use super::expression::Expression;
-use crate::position::Position;
+use crate::{position::Position, types::Type};
 use std::sync::Arc;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct TryOperation {
+    type_: Option<Type>,
     expression: Arc<Expression>,
     position: Position,
 }
 
 impl TryOperation {
-    pub fn new(expression: impl Into<Expression>, position: Position) -> Self {
+    pub fn new(type_: Option<Type>, expression: impl Into<Expression>, position: Position) -> Self {
         Self {
+            type_,
             expression: expression.into().into(),
             position,
         }
+    }
+
+    pub fn type_(&self) -> Option<&Type> {
+        self.type_.as_ref()
     }
 
     pub fn expression(&self) -> &Expression {

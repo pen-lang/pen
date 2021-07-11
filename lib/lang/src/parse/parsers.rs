@@ -385,11 +385,7 @@ fn prefix_operation<'a>() -> impl Parser<Stream<'a>, Output = UnaryOperation> {
 }
 
 fn prefix_operator<'a>() -> impl Parser<Stream<'a>, Output = UnaryOperator> {
-    choice!(
-        concrete_prefix_operator("!", UnaryOperator::Not),
-        concrete_prefix_operator("?", UnaryOperator::Try),
-    )
-    .expected("unary operator")
+    choice!(concrete_prefix_operator("!", UnaryOperator::Not),).expected("unary operator")
 }
 
 fn concrete_prefix_operator<'a>(
@@ -421,6 +417,9 @@ fn suffix_operation_like<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
                         SuffixOperator::Element(name) => {
                             RecordDeconstruction::new(expression, name, position).into()
                         }
+                        SuffixOperator::Try => {
+                            UnaryOperation::new(UnaryOperator::Try, expression, position).into()
+                        }
                     },
                 )
         },
@@ -431,6 +430,7 @@ fn suffix_operator<'a>() -> impl Parser<Stream<'a>, Output = SuffixOperator> {
     choice!(
         call_operator().map(SuffixOperator::Call),
         element_operator().map(SuffixOperator::Element),
+        try_operator().map(|_| SuffixOperator::Try),
     )
 }
 
@@ -440,6 +440,10 @@ fn call_operator<'a>() -> impl Parser<Stream<'a>, Output = Vec<Expression>> {
 
 fn element_operator<'a>() -> impl Parser<Stream<'a>, Output = String> {
     sign(".").with(identifier())
+}
+
+fn try_operator<'a>() -> impl Parser<Stream<'a>, Output = ()> {
+    sign("?")
 }
 
 fn atomic_expression<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
@@ -1765,6 +1769,19 @@ mod tests {
         }
 
         #[test]
+        fn parse_try_operation() {
+            assert_eq!(
+                expression().parse(stream("x?", "")).unwrap().0,
+                UnaryOperation::new(
+                    UnaryOperator::Try,
+                    Variable::new("x", Position::dummy()),
+                    Position::dummy()
+                )
+                .into()
+            );
+        }
+
+        #[test]
         fn parse_unary_operation() {
             assert!(prefix_operation().parse(stream("", "")).is_err());
 
@@ -1773,14 +1790,6 @@ mod tests {
                     "!42",
                     UnaryOperation::new(
                         UnaryOperator::Not,
-                        Number::new(42.0, Position::dummy()),
-                        Position::dummy(),
-                    ),
-                ),
-                (
-                    "?42",
-                    UnaryOperation::new(
-                        UnaryOperator::Try,
                         Number::new(42.0, Position::dummy()),
                         Position::dummy(),
                     ),
@@ -1841,10 +1850,10 @@ mod tests {
         }
 
         #[test]
-        fn parse_unary_operator() {
+        fn parse_prefix_operator() {
             assert!(prefix_operator().parse(stream("", "")).is_err());
 
-            for (source, expected) in &[("!", UnaryOperator::Not), ("?", UnaryOperator::Try)] {
+            for (source, expected) in &[("!", UnaryOperator::Not)] {
                 assert_eq!(
                     prefix_operator().parse(stream(source, "")).unwrap().0,
                     *expected

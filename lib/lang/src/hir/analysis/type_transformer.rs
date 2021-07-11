@@ -305,6 +305,7 @@ fn transform_operation(operation: &Operation, transform: &impl Fn(&Type) -> Type
         )
         .into(),
         Operation::Try(operation) => TryOperation::new(
+            operation.type_().map(transform),
             transform_expression(operation.expression(), transform),
             operation.position().clone(),
         )

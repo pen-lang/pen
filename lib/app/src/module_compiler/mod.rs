@@ -10,11 +10,14 @@ use crate::{
     infra::{FilePath, Infrastructure},
 };
 pub use compile_configuration::{
-    CompileConfiguration, HeapConfiguration, ListTypeConfiguration, StringTypeConfiguration,
+    CompileConfiguration, ErrorTypeConfiguration, HeapConfiguration, ListTypeConfiguration,
+    StringTypeConfiguration,
 };
 use std::error::Error;
 
-use self::utilities::{DUMMY_LIST_TYPE_CONFIGURATION, DUMMY_STRING_TYPE_CONFIGURATION};
+use self::utilities::{
+    DUMMY_ERROR_TYPE_CONFIGURATION, DUMMY_LIST_TYPE_CONFIGURATION, DUMMY_STRING_TYPE_CONFIGURATION,
+};
 
 const PRELUDE_PREFIX: &str = "prelude:";
 
@@ -34,6 +37,10 @@ pub fn compile(
         ),
         &prelude_type_configuration_qualifier::qualify_string_type_configuration(
             &compile_configuration.string_type,
+            PRELUDE_PREFIX,
+        ),
+        &prelude_type_configuration_qualifier::qualify_error_type_configuration(
+            &compile_configuration.error_type,
             PRELUDE_PREFIX,
         ),
     )?;
@@ -83,6 +90,10 @@ pub fn compile_main(
             ),
             &prelude_type_configuration_qualifier::qualify_string_type_configuration(
                 &compile_configuration.string_type,
+                PRELUDE_PREFIX,
+            ),
+            &prelude_type_configuration_qualifier::qualify_error_type_configuration(
+                &compile_configuration.error_type,
                 PRELUDE_PREFIX,
             ),
             &main_module_configuration_qualifier::qualify(
@@ -157,6 +168,7 @@ pub fn compile_prelude(
         )?,
         &DUMMY_LIST_TYPE_CONFIGURATION,
         &DUMMY_STRING_TYPE_CONFIGURATION,
+        &DUMMY_ERROR_TYPE_CONFIGURATION,
     )?;
 
     compile_mir_module(infrastructure, &module, object_file, heap_configuration)?;
