@@ -5,7 +5,7 @@ use crate::{
         self,
         analysis::{
             type_canonicalizer, type_equality_checker, type_resolver, type_subsumption_checker,
-            union_difference_calculator, union_type_creator,
+            union_type_creator,
         },
         Type,
     },
@@ -353,12 +353,11 @@ fn check_operation(
             let union_type = check_expression(operation.expression())?;
 
             check_subsumption(&error_type, &union_type)?;
-            check_subsumption(&success_type, &union_type)?;
+            check_subsumption(success_type, &union_type)?;
 
             check_subsumption(
                 &union_type,
-                &types::Union::new(success_type.clone(), error_type.clone(), position.clone())
-                    .into(),
+                &types::Union::new(success_type.clone(), error_type, position.clone()).into(),
             )?;
 
             success_type.clone()
@@ -1177,7 +1176,7 @@ mod tests {
                         "f",
                         Lambda::new(
                             vec![Argument::new("x", union_type.clone())],
-                            union_type.clone(),
+                            union_type,
                             TryOperation::new(
                                 Some(types::None::new(Position::dummy()).into()),
                                 Variable::new("x", Position::dummy()),
@@ -1212,7 +1211,7 @@ mod tests {
                         "f",
                         Lambda::new(
                             vec![Argument::new("x", union_type.clone())],
-                            union_type.clone(),
+                            union_type,
                             ArithmeticOperation::new(
                                 ArithmeticOperator::Add,
                                 TryOperation::new(
@@ -1253,7 +1252,7 @@ mod tests {
                             "f",
                             Lambda::new(
                                 vec![Argument::new("x", union_type.clone())],
-                                union_type.clone(),
+                                union_type,
                                 TryOperation::new(
                                     Some(types::Number::new(Position::dummy()).into()),
                                     Variable::new("x", Position::dummy()),

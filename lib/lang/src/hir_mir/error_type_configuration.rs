@@ -2,12 +2,10 @@
 use once_cell::sync::Lazy;
 
 #[cfg(test)]
-pub static ERROR_TYPE_CONFIGURATION: Lazy<ErrorTypeConfiguration> = Lazy::new(|| {
-    ErrorTypeConfiguration {
+pub static ERROR_TYPE_CONFIGURATION: Lazy<ErrorTypeConfiguration> =
+    Lazy::new(|| ErrorTypeConfiguration {
         error_type_name: "error".into(),
-    }
-    .into()
-});
+    });
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct ErrorTypeConfiguration {

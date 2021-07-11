@@ -3,7 +3,7 @@ use crate::{
     hir::*,
     types::{
         self,
-        analysis::{type_resolver, union_difference_calculator, union_type_creator},
+        analysis::{type_resolver, union_type_creator},
         Type,
     },
 };

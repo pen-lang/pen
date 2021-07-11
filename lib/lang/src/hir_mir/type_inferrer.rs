@@ -954,7 +954,7 @@ mod tests {
                     "f",
                     Lambda::new(
                         vec![Argument::new("x", union_type.clone())],
-                        union_type.clone(),
+                        union_type,
                         TryOperation::new(
                             Some(types::None::new(Position::dummy()).into()),
                             Variable::new("x", Position::dummy()),
@@ -985,7 +985,7 @@ mod tests {
                             "f",
                             Lambda::new(
                                 vec![Argument::new("x", error_type.clone())],
-                                error_type.clone(),
+                                error_type,
                                 TryOperation::new(
                                     None,
                                     Variable::new("x", Position::dummy()),
