@@ -105,4 +105,52 @@ mod tests {
             vec![Type::Number].into_iter().collect()
         );
     }
+
+    #[test]
+    fn collect_from_try_operation_operand() {
+        assert_eq!(
+            collect_variant_types(&Module::new(
+                vec![],
+                vec![],
+                vec![],
+                vec![],
+                vec![Definition::new(
+                    "f",
+                    vec![Argument::new("x", Type::Variant)],
+                    TryOperation::new(
+                        Variable::new("x"),
+                        "error",
+                        Type::Number,
+                        Variable::new("error"),
+                    ),
+                    Type::None,
+                )],
+            )),
+            vec![Type::Number].into_iter().collect()
+        );
+    }
+
+    #[test]
+    fn collect_from_try_operation_then_expression() {
+        assert_eq!(
+            collect_variant_types(&Module::new(
+                vec![],
+                vec![],
+                vec![],
+                vec![],
+                vec![Definition::new(
+                    "f",
+                    vec![Argument::new("x", Type::Variant)],
+                    TryOperation::new(
+                        Variable::new("x"),
+                        "error",
+                        Type::Number,
+                        Variant::new(Type::Boolean, Variable::new("error")),
+                    ),
+                    Type::None,
+                )],
+            )),
+            vec![Type::Boolean, Type::Number].into_iter().collect()
+        );
+    }
 }
