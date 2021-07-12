@@ -1028,7 +1028,7 @@ mod tests {
                         "f",
                         Lambda::new(
                             vec![Argument::new("x", list_type.clone())],
-                            types::None::new(Position::dummy()).clone(),
+                            types::None::new(Position::dummy()),
                             IfList::new(
                                 None,
                                 Variable::new("x", Position::dummy()),
@@ -1047,8 +1047,8 @@ mod tests {
                     Module::empty().set_definitions(vec![Definition::without_source(
                         "f",
                         Lambda::new(
-                            vec![Argument::new("x", list_type.clone())],
-                            types::None::new(Position::dummy()).clone(),
+                            vec![Argument::new("x", list_type)],
+                            types::None::new(Position::dummy()),
                             IfList::new(
                                 Some(types::None::new(Position::dummy()).into()),
                                 Variable::new("x", Position::dummy()),
