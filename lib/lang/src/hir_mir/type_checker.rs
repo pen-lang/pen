@@ -1776,7 +1776,7 @@ mod tests {
                 &Module::empty().set_definitions(vec![Definition::without_source(
                     "x",
                     Lambda::new(
-                        vec![Argument::new("x", list_type.clone())],
+                        vec![Argument::new("x", list_type)],
                         types::None::new(Position::dummy()),
                         IfList::new(
                             Some(types::None::new(Position::dummy()).into()),
@@ -1804,7 +1804,7 @@ mod tests {
                     "x",
                     Lambda::new(
                         vec![Argument::new("x", list_type.clone())],
-                        list_type.clone(),
+                        list_type,
                         IfList::new(
                             Some(types::None::new(Position::dummy()).into()),
                             Variable::new("x", Position::dummy()),
@@ -1830,7 +1830,7 @@ mod tests {
                 &Module::empty().set_definitions(vec![Definition::without_source(
                     "x",
                     Lambda::new(
-                        vec![Argument::new("x", list_type.clone())],
+                        vec![Argument::new("x", list_type)],
                         types::Union::new(
                             types::None::new(Position::dummy()),
                             types::Number::new(Position::dummy()),
@@ -1863,7 +1863,7 @@ mod tests {
                     &Module::empty().set_definitions(vec![Definition::without_source(
                         "x",
                         Lambda::new(
-                            vec![Argument::new("x", list_type.clone())],
+                            vec![Argument::new("x", list_type)],
                             types::None::new(Position::dummy()),
                             IfList::new(
                                 Some(types::None::new(Position::dummy()).into()),
@@ -1896,7 +1896,7 @@ mod tests {
                     &Module::empty().set_definitions(vec![Definition::without_source(
                         "x",
                         Lambda::new(
-                            vec![Argument::new("x", list_type.clone())],
+                            vec![Argument::new("x", list_type)],
                             types::None::new(Position::dummy()),
                             IfList::new(
                                 Some(types::None::new(Position::dummy()).into()),

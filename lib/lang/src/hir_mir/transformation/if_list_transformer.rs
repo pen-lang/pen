@@ -66,8 +66,8 @@ pub fn transform(
                         Call::new(
                             Some(
                                 types::Function::new(
-                                    vec![first_rest_type.clone().into()],
-                                    any_list_type.clone(),
+                                    vec![first_rest_type.into()],
+                                    any_list_type,
                                     position.clone(),
                                 )
                                 .into(),
