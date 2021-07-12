@@ -107,11 +107,17 @@ fn infer_expression(
             .into()
         }
         Expression::IfList(if_) => {
+            let list = infer_expression(if_.argument(), variables)?;
             let then = infer_expression(if_.then(), variables)?;
             let else_ = infer_expression(if_.else_(), variables)?;
 
             IfList::new(
-                infer_expression(if_.argument(), variables)?,
+                Some(type_extractor::extract_from_expression(
+                    &list,
+                    variables,
+                    type_context,
+                )?),
+                list,
                 if_.first_name(),
                 if_.rest_name(),
                 then,

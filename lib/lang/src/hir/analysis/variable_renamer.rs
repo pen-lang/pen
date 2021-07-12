@@ -68,6 +68,7 @@ fn rename_expression(expression: &Expression, names: &HashMap<String, String>) -
         )
         .into(),
         Expression::IfList(if_) => IfList::new(
+            if_.type_().cloned(),
             rename_expression(if_.argument(), names),
             if_.first_name(),
             if_.rest_name(),
