@@ -4,7 +4,7 @@ use once_cell::sync::Lazy;
 #[cfg(test)]
 pub static LIST_TYPE_CONFIGURATION: Lazy<ListTypeConfiguration> =
     Lazy::new(|| ListTypeConfiguration {
-        empty_list_variable_name: "emptyList".into(),
+        empty_list_function_name: "emptyList".into(),
         concatenate_function_name: "concatenateLists".into(),
         equal_function_name: "equalLists".into(),
         prepend_function_name: "prependToLists".into(),
@@ -18,7 +18,7 @@ pub static LIST_TYPE_CONFIGURATION: Lazy<ListTypeConfiguration> =
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct ListTypeConfiguration {
-    pub empty_list_variable_name: String,
+    pub empty_list_function_name: String,
     pub concatenate_function_name: String,
     pub equal_function_name: String,
     pub prepend_function_name: String,

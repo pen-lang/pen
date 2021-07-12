@@ -2,7 +2,7 @@ use once_cell::sync::Lazy;
 
 pub static DUMMY_LIST_TYPE_CONFIGURATION: Lazy<lang::hir_mir::ListTypeConfiguration> =
     Lazy::new(|| lang::hir_mir::ListTypeConfiguration {
-        empty_list_variable_name: "<dummy>".into(),
+        empty_list_function_name: "<dummy>".into(),
         concatenate_function_name: "<dummy>".into(),
         equal_function_name: "<dummy>".into(),
         prepend_function_name: "<dummy>".into(),

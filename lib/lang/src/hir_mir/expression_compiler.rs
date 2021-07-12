@@ -8,7 +8,7 @@ use super::{
 };
 use crate::{
     hir::*,
-    hir_mir::transformation::record_update_transformer,
+    hir_mir::transformation::{list_literal_transformer, record_update_transformer},
     types::{
         self,
         analysis::{
@@ -132,6 +132,10 @@ pub fn compile(
             compile(let_.expression())?,
         )
         .into(),
+        Expression::List(list) => compile(&list_literal_transformer::transform(
+            list,
+            type_context.list_type_configuration(),
+        ))?,
         Expression::None(_) => mir::ir::Expression::None,
         Expression::Number(number) => mir::ir::Expression::Number(number.value()),
         Expression::Operation(operation) => compile_operation(operation, type_context)?,

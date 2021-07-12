@@ -3,7 +3,7 @@ pub fn qualify_list_type_configuration(
     prelude_prefix: &str,
 ) -> lang::hir_mir::ListTypeConfiguration {
     lang::hir_mir::ListTypeConfiguration {
-        empty_list_variable_name: [prelude_prefix, &configuration.empty_list_variable_name]
+        empty_list_function_name: [prelude_prefix, &configuration.empty_list_function_name]
             .join(""),
         concatenate_function_name: [prelude_prefix, &configuration.concatenate_function_name]
             .join(""),
