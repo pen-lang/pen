@@ -7,7 +7,6 @@ pub fn check(lower: &Type, upper: &Type, types: &HashMap<String, Type>) -> Resul
 
     Ok(match (&lower, &upper) {
         (_, Type::Any(_)) => true,
-        (Type::List(one), Type::List(other)) => check(one.element(), other.element(), types)?,
         (Type::Union(lower), Type::Union(_)) => {
             check(lower.lhs(), &upper, types)? && check(lower.rhs(), &upper, types)?
         }
@@ -61,5 +60,35 @@ mod tests {
             &Default::default()
         )
         .unwrap());
+    }
+
+    #[test]
+    fn check_lists() {
+        assert!(check(
+            &List::new(Number::new(Position::dummy()), Position::dummy()).into(),
+            &List::new(Number::new(Position::dummy()), Position::dummy()).into(),
+            &Default::default()
+        )
+        .unwrap());
+    }
+
+    #[test]
+    fn fail_to_check_lists_with_covariance() {
+        assert_eq!(
+            check(
+                &List::new(Number::new(Position::dummy()), Position::dummy()).into(),
+                &List::new(
+                    Union::new(
+                        Number::new(Position::dummy()),
+                        None::new(Position::dummy()),
+                        Position::dummy()
+                    ),
+                    Position::dummy()
+                )
+                .into(),
+                &Default::default()
+            ),
+            Ok(false)
+        );
     }
 }
