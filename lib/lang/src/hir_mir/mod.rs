@@ -91,6 +91,7 @@ fn compile_module(
     let module = type_inferrer::infer_types(&module, type_context)?;
     type_checker::check_types(&module, type_context)?;
     let module = type_coercer::coerce_types(&module, type_context)?;
+    type_checker::check_types(&module, type_context)?;
 
     Ok((
         {

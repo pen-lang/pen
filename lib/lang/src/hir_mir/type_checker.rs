@@ -336,7 +336,12 @@ fn check_expression(
                 &check_expression(&coercion.argument(), variables)?,
                 coercion.from(),
             )?;
-            check_subsumption(coercion.from(), coercion.to())?;
+
+            if type_resolver::resolve_list(coercion.from(), type_context.types())?.is_none()
+                || type_resolver::resolve_list(coercion.to(), type_context.types())?.is_none()
+            {
+                check_subsumption(coercion.from(), coercion.to())?;
+            }
 
             coercion.to().clone()
         }
@@ -1971,6 +1976,33 @@ mod tests {
                             types::None::new(Position::dummy()),
                             types::Any::new(Position::dummy()),
                             None::new(Position::dummy()),
+                            Position::dummy(),
+                        ),
+                        Position::dummy(),
+                    ),
+                    false,
+                )]),
+            )
+            .unwrap();
+        }
+
+        #[test]
+        fn check_list() {
+            let none_list_type =
+                types::List::new(types::None::new(Position::dummy()), Position::dummy());
+            let any_list_type =
+                types::List::new(types::Any::new(Position::dummy()), Position::dummy());
+
+            check_module(
+                &Module::empty().set_definitions(vec![Definition::without_source(
+                    "x",
+                    Lambda::new(
+                        vec![Argument::new("x", none_list_type.clone())],
+                        any_list_type.clone(),
+                        TypeCoercion::new(
+                            none_list_type,
+                            any_list_type,
+                            Variable::new("x", Position::dummy()),
                             Position::dummy(),
                         ),
                         Position::dummy(),
