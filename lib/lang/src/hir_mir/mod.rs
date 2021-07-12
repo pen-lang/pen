@@ -1,3 +1,4 @@
+mod dummy_type_configurations;
 mod environment_creator;
 mod error;
 mod error_type_configuration;
@@ -16,7 +17,14 @@ mod type_context;
 mod type_extractor;
 mod type_inferrer;
 
-use self::{transformation::record_equal_function_transformer, type_context::TypeContext};
+use self::{
+    dummy_type_configurations::{
+        DUMMY_ERROR_TYPE_CONFIGURATION, DUMMY_LIST_TYPE_CONFIGURATION,
+        DUMMY_STRING_TYPE_CONFIGURATION,
+    },
+    transformation::record_equal_function_transformer,
+    type_context::TypeContext,
+};
 use crate::{hir::*, interface};
 pub use error::CompileError;
 pub use error_type_configuration::ErrorTypeConfiguration;
@@ -57,6 +65,20 @@ pub fn compile(
             list_type_configuration,
             string_type_configuration,
             error_type_configuration,
+        ),
+    )
+}
+
+pub fn compile_prelude(
+    module: &Module,
+) -> Result<(mir::ir::Module, interface::Module), CompileError> {
+    compile_module(
+        module,
+        &TypeContext::new(
+            module,
+            &DUMMY_LIST_TYPE_CONFIGURATION,
+            &DUMMY_STRING_TYPE_CONFIGURATION,
+            &DUMMY_ERROR_TYPE_CONFIGURATION,
         ),
     )
 }
