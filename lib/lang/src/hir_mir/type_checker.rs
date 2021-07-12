@@ -93,6 +93,32 @@ fn check_expression(
 
             type_extractor::extract_from_expression(expression, variables, type_context)?
         }
+        Expression::IfList(if_) => {
+            let element_type = if_
+                .type_()
+                .ok_or_else(|| CompileError::TypeNotInferred(if_.argument().position().clone()))?;
+            let list_type = types::List::new(element_type.clone(), if_.position().clone());
+
+            check_subsumption(
+                &check_expression(if_.argument(), variables)?,
+                &list_type.clone().into(),
+            )?;
+
+            check_expression(
+                if_.then(),
+                &variables
+                    .clone()
+                    .into_iter()
+                    .chain(vec![
+                        (if_.first_name().into(), element_type.clone()),
+                        (if_.rest_name().into(), list_type.into()),
+                    ])
+                    .collect(),
+            )?;
+            check_expression(if_.else_(), variables)?;
+
+            type_extractor::extract_from_expression(expression, variables, type_context)?
+        }
         Expression::IfType(if_) => {
             let argument_type = type_canonicalizer::canonicalize(
                 &check_expression(if_.argument(), variables)?,
@@ -305,11 +331,11 @@ fn check_expression(
             update.type_().clone()
         }
         Expression::String(string) => types::ByteString::new(string.position().clone()).into(),
+        Expression::TypeCoercion(_) => todo!(),
         Expression::Variable(variable) => variables
             .get(variable.name())
             .ok_or_else(|| CompileError::VariableNotFound(variable.clone()))?
             .clone(),
-        _ => todo!(),
     })
 }
 
@@ -1735,6 +1761,162 @@ mod tests {
                 )]),
             )
             .unwrap();
+        }
+    }
+
+    mod if_list {
+        use super::*;
+        use pretty_assertions::assert_eq;
+
+        #[test]
+        fn check_first_variable() {
+            let list_type =
+                types::List::new(types::None::new(Position::dummy()), Position::dummy());
+            check_module(
+                &Module::empty().set_definitions(vec![Definition::without_source(
+                    "x",
+                    Lambda::new(
+                        vec![Argument::new("x", list_type.clone())],
+                        types::None::new(Position::dummy()),
+                        IfList::new(
+                            Some(types::None::new(Position::dummy()).into()),
+                            Variable::new("x", Position::dummy()),
+                            "y",
+                            "ys",
+                            Variable::new("y", Position::dummy()),
+                            None::new(Position::dummy()),
+                            Position::dummy(),
+                        ),
+                        Position::dummy(),
+                    ),
+                    false,
+                )]),
+            )
+            .unwrap();
+        }
+
+        #[test]
+        fn check_rest_variable() {
+            let list_type =
+                types::List::new(types::None::new(Position::dummy()), Position::dummy());
+            check_module(
+                &Module::empty().set_definitions(vec![Definition::without_source(
+                    "x",
+                    Lambda::new(
+                        vec![Argument::new("x", list_type.clone())],
+                        list_type.clone(),
+                        IfList::new(
+                            Some(types::None::new(Position::dummy()).into()),
+                            Variable::new("x", Position::dummy()),
+                            "y",
+                            "ys",
+                            Variable::new("ys", Position::dummy()),
+                            Variable::new("x", Position::dummy()),
+                            Position::dummy(),
+                        ),
+                        Position::dummy(),
+                    ),
+                    false,
+                )]),
+            )
+            .unwrap();
+        }
+
+        #[test]
+        fn check_union_type_result() {
+            let list_type =
+                types::List::new(types::None::new(Position::dummy()), Position::dummy());
+            check_module(
+                &Module::empty().set_definitions(vec![Definition::without_source(
+                    "x",
+                    Lambda::new(
+                        vec![Argument::new("x", list_type.clone())],
+                        types::Union::new(
+                            types::None::new(Position::dummy()),
+                            types::Number::new(Position::dummy()),
+                            Position::dummy(),
+                        ),
+                        IfList::new(
+                            Some(types::None::new(Position::dummy()).into()),
+                            Variable::new("x", Position::dummy()),
+                            "y",
+                            "ys",
+                            Variable::new("y", Position::dummy()),
+                            Number::new(42.0, Position::dummy()),
+                            Position::dummy(),
+                        ),
+                        Position::dummy(),
+                    ),
+                    false,
+                )]),
+            )
+            .unwrap();
+        }
+
+        #[test]
+        fn fail_to_check_argument() {
+            let list_type =
+                types::List::new(types::Number::new(Position::dummy()), Position::dummy());
+
+            assert_eq!(
+                check_module(
+                    &Module::empty().set_definitions(vec![Definition::without_source(
+                        "x",
+                        Lambda::new(
+                            vec![Argument::new("x", list_type.clone())],
+                            types::None::new(Position::dummy()),
+                            IfList::new(
+                                Some(types::None::new(Position::dummy()).into()),
+                                Variable::new("x", Position::dummy()),
+                                "y",
+                                "ys",
+                                Variable::new("y", Position::dummy()),
+                                None::new(Position::dummy()),
+                                Position::dummy(),
+                            ),
+                            Position::dummy(),
+                        ),
+                        false,
+                    )]),
+                ),
+                Err(CompileError::TypesNotMatched(
+                    Position::dummy(),
+                    Position::dummy()
+                ))
+            );
+        }
+
+        #[test]
+        fn fail_to_check_result() {
+            let list_type =
+                types::List::new(types::None::new(Position::dummy()), Position::dummy());
+
+            assert_eq!(
+                check_module(
+                    &Module::empty().set_definitions(vec![Definition::without_source(
+                        "x",
+                        Lambda::new(
+                            vec![Argument::new("x", list_type.clone())],
+                            types::None::new(Position::dummy()),
+                            IfList::new(
+                                Some(types::None::new(Position::dummy()).into()),
+                                Variable::new("x", Position::dummy()),
+                                "y",
+                                "ys",
+                                Variable::new("y", Position::dummy()),
+                                Number::new(42.0, Position::dummy()),
+                                Position::dummy(),
+                            ),
+                            Position::dummy(),
+                        ),
+                        false,
+                    )]),
+                ),
+                Err(CompileError::TypesNotMatched(
+                    Position::dummy(),
+                    Position::dummy()
+                ))
+            );
         }
     }
 }
