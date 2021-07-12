@@ -1,0 +1,18 @@
+import foreign "c" _pen_join_strings \(string, string) string
+import foreign "c" _pen_slice_string \(string, number, number) string
+
+Join = \(ss [string]) string {
+  joinTo("", ss)
+}
+
+joinTo = \(s string, ss [string]) string {
+  if [t, ...ss] = ss {
+    joinTo(_pen_join_strings(s, t), ss)
+  } else {
+    s
+  }
+}
+
+Slice = \(s string, start number, end number) string {
+  _pen_slice_string(s, start, end)
+}

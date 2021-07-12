@@ -1,0 +1,5 @@
+import foreign "c" _pen_convert_number_to_string \(number) string
+
+String = \(x number) string {
+  _pen_convert_number_to_string(x)
+}

@@ -4,6 +4,7 @@ Feature: Memory leak
     """
     {
       "dependencies": {
+        "Core": "file://pen-root/lib/core",
         "System": "file://pen-root/lib/os"
       }
     }
@@ -150,6 +151,48 @@ Feature: Memory leak
     f = \() none {
       x = foo{x: 42}
       _ = \() number { x.x }
+
+      f()
+    }
+
+    main = \(os Os'Os) number {
+      f()
+
+      0
+    }
+    """
+    When I successfully run `pen build`
+    Then I successfully run `check_memory_leak_in_loop.sh ./app`
+
+  Scenario: Convert a number to a string
+    Given a file named "Main.pen" with:
+    """
+    import Core'Number
+    import System'Os
+
+    f = \() none {
+      Number'String(42)
+
+      f()
+    }
+
+    main = \(os Os'Os) number {
+      f()
+
+      0
+    }
+    """
+    When I successfully run `pen build`
+    Then I successfully run `check_memory_leak_in_loop.sh ./app`
+
+  Scenario: Join strings
+    Given a file named "Main.pen" with:
+    """
+    import Core'String
+    import System'Os
+
+    f = \() none {
+      String'Join([string; "hello", "world"])
 
       f()
     }
