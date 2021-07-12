@@ -125,14 +125,18 @@ fn transform_expression(
             .into()
         }
         Expression::IfList(if_) => {
-            let list_type = type_resolver::resolve_list(
-                &extract_type(if_.argument(), variables)?,
-                type_context.types(),
-            )?
-            .ok_or_else(|| CompileError::ListExpected(if_.argument().position().clone()))?;
+            let list_type = types::List::new(
+                if_.type_()
+                    .ok_or_else(|| {
+                        CompileError::TypeNotInferred(if_.argument().position().clone())
+                    })?
+                    .clone(),
+                if_.argument().position().clone(),
+            );
             let result_type = extract_type(expression, variables)?;
 
             IfList::new(
+                if_.type_().cloned(),
                 transform_expression(if_.argument(), variables)?,
                 if_.first_name(),
                 if_.rest_name(),
@@ -597,6 +601,7 @@ mod tests {
                         vec![Argument::new("xs", list_type.clone())],
                         union_type.clone(),
                         IfList::new(
+                            Some(types::Number::new(Position::dummy()).into()),
                             Variable::new("xs", Position::dummy()),
                             "x",
                             "xs",
@@ -616,6 +621,7 @@ mod tests {
                         vec![Argument::new("xs", list_type)],
                         union_type.clone(),
                         IfList::new(
+                            Some(types::Number::new(Position::dummy()).into()),
                             Variable::new("xs", Position::dummy()),
                             "x",
                             "xs",

@@ -202,6 +202,7 @@ fn compile_expression(expression: &ast::Expression) -> Result<hir::Expression, C
         .into(),
         ast::Expression::If(if_) => compile_if(if_.branches(), if_.else_(), if_.position())?.into(),
         ast::Expression::IfList(if_) => hir::IfList::new(
+            None,
             compile_expression(if_.argument())?,
             if_.first_name(),
             if_.rest_name(),

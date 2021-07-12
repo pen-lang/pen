@@ -1,6 +1,7 @@
 use super::{
     transformation::{
-        boolean_operation_transformer, equal_operation_transformer, not_equal_operation_transformer,
+        boolean_operation_transformer, equal_operation_transformer, if_list_transformer,
+        not_equal_operation_transformer,
     },
     type_compiler,
     type_context::TypeContext,
@@ -50,6 +51,10 @@ pub fn compile(
             compile(if_.else_())?,
         )
         .into(),
+        Expression::IfList(if_) => compile(&if_list_transformer::transform(
+            if_,
+            type_context.list_type_configuration(),
+        )?)?,
         Expression::IfType(if_) => mir::ir::Case::new(
             compile(if_.argument())?,
             if_.branches()
@@ -225,7 +230,6 @@ pub fn compile(
             }
         }
         Expression::Variable(variable) => mir::ir::Variable::new(variable.name()).into(),
-        _ => todo!(),
     })
 }
 
