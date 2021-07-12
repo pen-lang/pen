@@ -1,6 +1,5 @@
-export { string }
+import foreign "c" _pen_convert_number_to_string \(number) string
 
-import foreign "c" _pen_convert_number_to_string : Number -> String
-
-string : Number -> String
-string = _pen_convert_number_to_string
+String = \(x number) string {
+  _pen_convert_number_to_string(x)
+}
