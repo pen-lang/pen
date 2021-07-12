@@ -331,7 +331,20 @@ fn check_expression(
             update.type_().clone()
         }
         Expression::String(string) => types::ByteString::new(string.position().clone()).into(),
-        Expression::TypeCoercion(_) => todo!(),
+        Expression::TypeCoercion(coercion) => {
+            check_subsumption(
+                &check_expression(&coercion.argument(), variables)?,
+                coercion.from(),
+            )?;
+
+            if type_resolver::resolve_list(coercion.from(), type_context.types())?.is_none()
+                || type_resolver::resolve_list(coercion.to(), type_context.types())?.is_none()
+            {
+                check_subsumption(coercion.from(), coercion.to())?;
+            }
+
+            coercion.to().clone()
+        }
         Expression::Variable(variable) => variables
             .get(variable.name())
             .ok_or_else(|| CompileError::VariableNotFound(variable.clone()))?
@@ -1917,6 +1930,87 @@ mod tests {
                     Position::dummy()
                 ))
             );
+        }
+    }
+
+    mod type_coercion {
+        use super::*;
+
+        #[test]
+        fn check_union() {
+            let union_type = types::Union::new(
+                types::Number::new(Position::dummy()),
+                types::None::new(Position::dummy()),
+                Position::dummy(),
+            );
+
+            check_module(
+                &Module::empty().set_definitions(vec![Definition::without_source(
+                    "x",
+                    Lambda::new(
+                        vec![],
+                        union_type.clone(),
+                        TypeCoercion::new(
+                            types::None::new(Position::dummy()),
+                            union_type,
+                            None::new(Position::dummy()),
+                            Position::dummy(),
+                        ),
+                        Position::dummy(),
+                    ),
+                    false,
+                )]),
+            )
+            .unwrap();
+        }
+
+        #[test]
+        fn check_any() {
+            check_module(
+                &Module::empty().set_definitions(vec![Definition::without_source(
+                    "x",
+                    Lambda::new(
+                        vec![],
+                        types::Any::new(Position::dummy()),
+                        TypeCoercion::new(
+                            types::None::new(Position::dummy()),
+                            types::Any::new(Position::dummy()),
+                            None::new(Position::dummy()),
+                            Position::dummy(),
+                        ),
+                        Position::dummy(),
+                    ),
+                    false,
+                )]),
+            )
+            .unwrap();
+        }
+
+        #[test]
+        fn check_list() {
+            let none_list_type =
+                types::List::new(types::None::new(Position::dummy()), Position::dummy());
+            let any_list_type =
+                types::List::new(types::Any::new(Position::dummy()), Position::dummy());
+
+            check_module(
+                &Module::empty().set_definitions(vec![Definition::without_source(
+                    "x",
+                    Lambda::new(
+                        vec![Argument::new("x", none_list_type.clone())],
+                        any_list_type.clone(),
+                        TypeCoercion::new(
+                            none_list_type,
+                            any_list_type,
+                            Variable::new("x", Position::dummy()),
+                            Position::dummy(),
+                        ),
+                        Position::dummy(),
+                    ),
+                    false,
+                )]),
+            )
+            .unwrap();
         }
     }
 }
