@@ -64,3 +64,17 @@ Feature: List
     """
     When I run `pen build`
     Then the exit status should be 0
+
+  Scenario: Use if-list expression
+    Given a file named "Foo.pen" with:
+    """
+    f = \(xs [number]) [number] {
+      if [y, ...ys] = xs {
+        [number; y, ...ys]
+      } else {
+        [number;]
+      }
+    }
+    """
+    When I run `pen build`
+    Then the exit status should be 0
