@@ -11,7 +11,6 @@ pub struct Call {
 }
 
 impl Call {
-    // TODO Move function type to top.
     pub fn new(
         function_type: Option<Type>,
         function: impl Into<Expression>,

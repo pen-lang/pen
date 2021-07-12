@@ -332,6 +332,7 @@ mod tests {
                     Position::dummy()
                 ),
                 &TypeContext::dummy(
+                    Default::default(),
                     vec![(
                         "foo".into(),
                         vec![types::RecordElement::new(
@@ -340,8 +341,7 @@ mod tests {
                         )]
                     )]
                     .into_iter()
-                    .collect(),
-                    Default::default()
+                    .collect()
                 )
             ),
             Ok(Call::new(

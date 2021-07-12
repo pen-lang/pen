@@ -10,7 +10,7 @@ pub static COMPILE_CONFIGURATION: Lazy<Arc<app::module_compiler::CompileConfigur
                 free_function_name: "_pen_free".into(),
             },
             list_type: app::module_compiler::ListTypeConfiguration {
-                empty_list_variable_name: "_emptyList".into(),
+                empty_list_function_name: "_emptyList".into(),
                 concatenate_function_name: "_concatenateLists".into(),
                 equal_function_name: "_equalLists".into(),
                 prepend_function_name: "_prependToList".into(),
@@ -23,6 +23,9 @@ pub static COMPILE_CONFIGURATION: Lazy<Arc<app::module_compiler::CompileConfigur
             },
             string_type: app::module_compiler::StringTypeConfiguration {
                 equal_function_name: "_equalStrings".into(),
+            },
+            error_type: app::module_compiler::ErrorTypeConfiguration {
+                error_type_name: "error".into(),
             },
         }
         .into()

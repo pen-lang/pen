@@ -77,6 +77,7 @@ mod tests {
                     Position::dummy()
                 ),
                 &TypeContext::dummy(
+                    Default::default(),
                     vec![(
                         "r".into(),
                         vec![
@@ -85,8 +86,7 @@ mod tests {
                         ]
                     )]
                     .into_iter()
-                    .collect(),
-                    Default::default()
+                    .collect()
                 )
             ),
             Ok(Let::new(

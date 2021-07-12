@@ -2,7 +2,6 @@ mod compile_configuration;
 mod error;
 mod main_module_configuration_qualifier;
 mod prelude_type_configuration_qualifier;
-mod utilities;
 
 use crate::{
     application_configuration::ApplicationConfiguration,
@@ -10,11 +9,10 @@ use crate::{
     infra::{FilePath, Infrastructure},
 };
 pub use compile_configuration::{
-    CompileConfiguration, HeapConfiguration, ListTypeConfiguration, StringTypeConfiguration,
+    CompileConfiguration, ErrorTypeConfiguration, HeapConfiguration, ListTypeConfiguration,
+    StringTypeConfiguration,
 };
 use std::error::Error;
-
-use self::utilities::{DUMMY_LIST_TYPE_CONFIGURATION, DUMMY_STRING_TYPE_CONFIGURATION};
 
 const PRELUDE_PREFIX: &str = "prelude:";
 
@@ -34,6 +32,10 @@ pub fn compile(
         ),
         &prelude_type_configuration_qualifier::qualify_string_type_configuration(
             &compile_configuration.string_type,
+            PRELUDE_PREFIX,
+        ),
+        &prelude_type_configuration_qualifier::qualify_error_type_configuration(
+            &compile_configuration.error_type,
             PRELUDE_PREFIX,
         ),
     )?;
@@ -83,6 +85,10 @@ pub fn compile_main(
             ),
             &prelude_type_configuration_qualifier::qualify_string_type_configuration(
                 &compile_configuration.string_type,
+                PRELUDE_PREFIX,
+            ),
+            &prelude_type_configuration_qualifier::qualify_error_type_configuration(
+                &compile_configuration.error_type,
                 PRELUDE_PREFIX,
             ),
             &main_module_configuration_qualifier::qualify(
@@ -146,18 +152,14 @@ pub fn compile_prelude(
     interface_file: &FilePath,
     heap_configuration: &HeapConfiguration,
 ) -> Result<(), Box<dyn Error>> {
-    // TODO Implement and use lang::hir_mir::compile_prelude().
-    let (module, module_interface) = lang::hir_mir::compile(
-        &lang::ast_hir::compile_prelude(
+    let (module, module_interface) =
+        lang::hir_mir::compile_prelude(&lang::ast_hir::compile_prelude(
             &lang::parse::parse(
                 &infrastructure.file_system.read_to_string(source_file)?,
                 &infrastructure.file_path_displayer.display(source_file),
             )?,
             PRELUDE_PREFIX,
-        )?,
-        &DUMMY_LIST_TYPE_CONFIGURATION,
-        &DUMMY_STRING_TYPE_CONFIGURATION,
-    )?;
+        )?)?;
 
     compile_mir_module(infrastructure, &module, object_file, heap_configuration)?;
     infrastructure.file_system.write(

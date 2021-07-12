@@ -157,6 +157,7 @@ fn transform_expression(expression: &Expression, transform: &impl Fn(&Type) -> T
         )
         .into(),
         Expression::IfList(if_) => IfList::new(
+            if_.type_().map(transform),
             transform_expression(if_.argument(), transform),
             if_.first_name(),
             if_.rest_name(),
@@ -305,6 +306,7 @@ fn transform_operation(operation: &Operation, transform: &impl Fn(&Type) -> Type
         )
         .into(),
         Operation::Try(operation) => TryOperation::new(
+            operation.type_().map(transform),
             transform_expression(operation.expression(), transform),
             operation.position().clone(),
         )

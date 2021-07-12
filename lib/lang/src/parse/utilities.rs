@@ -4,6 +4,7 @@ use crate::{ast::*, position::Position};
 pub enum SuffixOperator {
     Call(Vec<Expression>),
     Element(String),
+    Try,
 }
 
 pub fn reduce_operations(

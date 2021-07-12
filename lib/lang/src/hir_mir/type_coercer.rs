@@ -125,14 +125,18 @@ fn transform_expression(
             .into()
         }
         Expression::IfList(if_) => {
-            let list_type = type_resolver::resolve_list(
-                &extract_type(if_.argument(), variables)?,
-                type_context.types(),
-            )?
-            .ok_or_else(|| CompileError::ListExpected(if_.argument().position().clone()))?;
+            let list_type = types::List::new(
+                if_.type_()
+                    .ok_or_else(|| {
+                        CompileError::TypeNotInferred(if_.argument().position().clone())
+                    })?
+                    .clone(),
+                if_.argument().position().clone(),
+            );
             let result_type = extract_type(expression, variables)?;
 
             IfList::new(
+                if_.type_().cloned(),
                 transform_expression(if_.argument(), variables)?,
                 if_.first_name(),
                 if_.rest_name(),
@@ -302,7 +306,12 @@ fn transform_expression(
                 operation.position().clone(),
             )
             .into(),
-            Operation::Try(_) => todo!(),
+            Operation::Try(operation) => TryOperation::new(
+                operation.type_().cloned(),
+                transform_expression(operation.expression(), variables)?,
+                operation.position().clone(),
+            )
+            .into(),
         },
         Expression::RecordConstruction(construction) => RecordConstruction::new(
             construction.type_().clone(),
@@ -416,6 +425,7 @@ mod tests {
     use super::*;
     use crate::{
         hir_mir::{
+            error_type_configuration::ERROR_TYPE_CONFIGURATION,
             list_type_configuration::LIST_TYPE_CONFIGURATION,
             string_type_configuration::STRING_TYPE_CONFIGURATION,
         },
@@ -427,7 +437,12 @@ mod tests {
     fn coerce_module(module: &Module) -> Result<Module, CompileError> {
         coerce_types(
             module,
-            &TypeContext::new(module, &LIST_TYPE_CONFIGURATION, &STRING_TYPE_CONFIGURATION),
+            &TypeContext::new(
+                module,
+                &LIST_TYPE_CONFIGURATION,
+                &STRING_TYPE_CONFIGURATION,
+                &ERROR_TYPE_CONFIGURATION,
+            ),
         )
     }
 
@@ -586,6 +601,7 @@ mod tests {
                         vec![Argument::new("xs", list_type.clone())],
                         union_type.clone(),
                         IfList::new(
+                            Some(types::Number::new(Position::dummy()).into()),
                             Variable::new("xs", Position::dummy()),
                             "x",
                             "xs",
@@ -605,6 +621,7 @@ mod tests {
                         vec![Argument::new("xs", list_type)],
                         union_type.clone(),
                         IfList::new(
+                            Some(types::Number::new(Position::dummy()).into()),
                             Variable::new("xs", Position::dummy()),
                             "x",
                             "xs",
