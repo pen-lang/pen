@@ -2,7 +2,6 @@ mod compile_configuration;
 mod error;
 mod main_module_configuration_qualifier;
 mod prelude_type_configuration_qualifier;
-mod utilities;
 
 use crate::{
     application_configuration::ApplicationConfiguration,
@@ -14,10 +13,6 @@ pub use compile_configuration::{
     StringTypeConfiguration,
 };
 use std::error::Error;
-
-use self::utilities::{
-    DUMMY_ERROR_TYPE_CONFIGURATION, DUMMY_LIST_TYPE_CONFIGURATION, DUMMY_STRING_TYPE_CONFIGURATION,
-};
 
 const PRELUDE_PREFIX: &str = "prelude:";
 
@@ -157,19 +152,14 @@ pub fn compile_prelude(
     interface_file: &FilePath,
     heap_configuration: &HeapConfiguration,
 ) -> Result<(), Box<dyn Error>> {
-    // TODO Implement and use lang::hir_mir::compile_prelude().
-    let (module, module_interface) = lang::hir_mir::compile(
-        &lang::ast_hir::compile_prelude(
+    let (module, module_interface) =
+        lang::hir_mir::compile_prelude(&lang::ast_hir::compile_prelude(
             &lang::parse::parse(
                 &infrastructure.file_system.read_to_string(source_file)?,
                 &infrastructure.file_path_displayer.display(source_file),
             )?,
             PRELUDE_PREFIX,
-        )?,
-        &DUMMY_LIST_TYPE_CONFIGURATION,
-        &DUMMY_STRING_TYPE_CONFIGURATION,
-        &DUMMY_ERROR_TYPE_CONFIGURATION,
-    )?;
+        )?)?;
 
     compile_mir_module(infrastructure, &module, object_file, heap_configuration)?;
     infrastructure.file_system.write(
