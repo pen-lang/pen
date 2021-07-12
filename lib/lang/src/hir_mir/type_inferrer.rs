@@ -3,7 +3,9 @@ use crate::{
     hir::*,
     types::{
         self,
-        analysis::{type_canonicalizer, union_difference_calculator, union_type_creator},
+        analysis::{
+            type_canonicalizer, type_resolver, union_difference_calculator, union_type_creator,
+        },
         Type,
     },
 };
@@ -112,11 +114,15 @@ fn infer_expression(
             let else_ = infer_expression(if_.else_(), variables)?;
 
             IfList::new(
-                Some(type_extractor::extract_from_expression(
-                    &list,
-                    variables,
-                    type_context,
-                )?),
+                Some(
+                    type_resolver::resolve_list(
+                        &type_extractor::extract_from_expression(&list, variables, type_context)?,
+                        type_context.types(),
+                    )?
+                    .ok_or_else(|| CompileError::ListExpected(if_.argument().position().clone()))?
+                    .element()
+                    .clone(),
+                ),
                 list,
                 if_.first_name(),
                 if_.rest_name(),
@@ -1003,6 +1009,60 @@ mod tests {
                         )],)
                 ),
                 Err(CompileError::UnionTypeExpected(Position::dummy()))
+            );
+        }
+    }
+
+    mod if_list {
+        use super::*;
+        use pretty_assertions::assert_eq;
+
+        #[test]
+        fn infer() {
+            let list_type =
+                types::List::new(types::None::new(Position::dummy()), Position::dummy());
+
+            assert_eq!(
+                infer_module(
+                    &Module::empty().set_definitions(vec![Definition::without_source(
+                        "f",
+                        Lambda::new(
+                            vec![Argument::new("x", list_type.clone())],
+                            types::None::new(Position::dummy()).clone(),
+                            IfList::new(
+                                None,
+                                Variable::new("x", Position::dummy()),
+                                "y",
+                                "ys",
+                                Variable::new("y", Position::dummy()),
+                                None::new(Position::dummy()),
+                                Position::dummy(),
+                            ),
+                            Position::dummy(),
+                        ),
+                        false,
+                    )])
+                ),
+                Ok(
+                    Module::empty().set_definitions(vec![Definition::without_source(
+                        "f",
+                        Lambda::new(
+                            vec![Argument::new("x", list_type.clone())],
+                            types::None::new(Position::dummy()).clone(),
+                            IfList::new(
+                                Some(types::None::new(Position::dummy()).into()),
+                                Variable::new("x", Position::dummy()),
+                                "y",
+                                "ys",
+                                Variable::new("y", Position::dummy()),
+                                None::new(Position::dummy()),
+                                Position::dummy(),
+                            ),
+                            Position::dummy(),
+                        ),
+                        false,
+                    )],)
+                )
             );
         }
     }
