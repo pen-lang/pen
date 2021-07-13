@@ -8,15 +8,22 @@ use std::{
 pub fn calculate(type_: &Type, types: &HashMap<String, Type>) -> Result<String, TypeError> {
     let mut hasher = DefaultHasher::new();
 
-    calculate_string(&type_canonicalizer::canonicalize(type_, types)?, types)?.hash(&mut hasher);
+    calculate_canonical_string(type_, types)?.hash(&mut hasher);
 
     Ok(format!("{:x}", hasher.finish()))
+}
+
+fn calculate_canonical_string(
+    type_: &Type,
+    types: &HashMap<String, Type>,
+) -> Result<String, TypeError> {
+    calculate_string(&type_canonicalizer::canonicalize(type_, types)?, types)
 }
 
 fn calculate_string(type_: &Type, types: &HashMap<String, Type>) -> Result<String, TypeError> {
     let calculate_string = |type_| calculate_string(type_, types);
 
-    Ok(match type_canonicalizer::canonicalize(type_, types)? {
+    Ok(match type_ {
         Type::Any(_) => "any".into(),
         Type::Boolean(_) => "boolean".into(),
         Type::Function(function) => format!(
@@ -51,7 +58,7 @@ mod tests {
     #[test]
     fn calculate_none_list_type_id() {
         assert_eq!(
-            calculate_string(
+            calculate_canonical_string(
                 &types::List::new(types::None::new(Position::dummy()), Position::dummy()).into(),
                 &Default::default()
             ),
@@ -62,7 +69,7 @@ mod tests {
     #[test]
     fn calculate_any_list_type_id() {
         assert_eq!(
-            calculate_string(
+            calculate_canonical_string(
                 &types::List::new(types::Any::new(Position::dummy()), Position::dummy()).into(),
                 &Default::default(),
             ),
@@ -73,7 +80,7 @@ mod tests {
     #[test]
     fn calculate_union_list_type_id() {
         assert_eq!(
-            calculate_string(
+            calculate_canonical_string(
                 &types::List::new(
                     types::Union::new(
                         types::Number::new(Position::dummy()),
