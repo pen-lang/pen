@@ -1297,6 +1297,37 @@ mod tests {
         }
 
         #[test]
+        fn fail_to_check_try_operation_with_any() {
+            let any_type = types::Any::new(Position::dummy());
+
+            check_module(
+                &Module::empty()
+                    .set_type_definitions(vec![TypeDefinition::without_source(
+                        "error",
+                        vec![],
+                        false,
+                        false,
+                        false,
+                    )])
+                    .set_definitions(vec![Definition::without_source(
+                        "f",
+                        Lambda::new(
+                            vec![Argument::new("x", any_type.clone())],
+                            any_type.clone(),
+                            TryOperation::new(
+                                Some(any_type.into()),
+                                Variable::new("x", Position::dummy()),
+                                Position::dummy(),
+                            ),
+                            Position::dummy(),
+                        ),
+                        false,
+                    )]),
+            )
+            .unwrap();
+        }
+
+        #[test]
         fn fail_to_check_try_operation_with_wrong_success_type() {
             let union_type = types::Union::new(
                 types::None::new(Position::dummy()),
