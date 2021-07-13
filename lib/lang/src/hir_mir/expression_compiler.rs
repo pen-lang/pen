@@ -359,7 +359,7 @@ fn compile_operation(
                 ),
                 compile_alternatives(
                     "$success",
-                    &success_type,
+                    success_type,
                     &Variable::new("$success", operation.position().clone()).into(),
                     type_context,
                 )?,
