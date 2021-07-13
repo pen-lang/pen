@@ -338,12 +338,9 @@ fn compile_operation(
         )
         .into(),
         Operation::Try(operation) => {
-            let success_type = type_canonicalizer::canonicalize(
-                operation
-                    .type_()
-                    .ok_or_else(|| CompileError::TypeNotInferred(operation.position().clone()))?,
-                type_context.types(),
-            )?;
+            let success_type = operation
+                .type_()
+                .ok_or_else(|| CompileError::TypeNotInferred(operation.position().clone()))?;
             let error_type = type_compiler::compile(
                 &types::Reference::new(
                     &type_context.error_type_configuration().error_type_name,
