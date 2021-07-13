@@ -19,10 +19,10 @@ fn check_canonical(
     Ok(match (&lower, &upper) {
         (_, Type::Any(_)) => true,
         (Type::Union(lower), Type::Union(_)) => {
-            check(lower.lhs(), &upper)? && check(lower.rhs(), &upper)?
+            check(lower.lhs(), upper)? && check(lower.rhs(), upper)?
         }
         (lower, Type::Union(union)) => check(lower, union.lhs())? || check(lower, union.rhs())?,
-        _ => type_equality_checker::check(&lower, &upper, types)?,
+        _ => type_equality_checker::check(lower, upper, types)?,
     })
 }
 

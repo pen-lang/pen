@@ -3,7 +3,7 @@ use crate::{
     hir::*,
     types::{
         self,
-        analysis::{type_canonicalizer, union_difference_calculator, union_type_creator},
+        analysis::{type_canonicalizer, type_difference_calculator, union_type_creator},
         Type,
     },
 };
@@ -166,7 +166,7 @@ fn infer_expression(
                         if_.position(),
                     )
                     .unwrap();
-                    let types = union_difference_calculator::calculate(
+                    let types = type_difference_calculator::calculate(
                         &argument_type,
                         &branch_type,
                         type_context.types(),
@@ -300,7 +300,7 @@ fn infer_expression(
                     position.clone(),
                 )
                 .into();
-                let types = union_difference_calculator::calculate(
+                let types = type_difference_calculator::calculate(
                     &type_extractor::extract_from_expression(&expression, variables, type_context)?,
                     &error_type,
                     type_context.types(),
