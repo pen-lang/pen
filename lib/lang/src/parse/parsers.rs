@@ -284,10 +284,13 @@ fn reference_type<'a>() -> impl Parser<Stream<'a>, Output = types::Reference> {
 fn block<'a>() -> impl Parser<Stream<'a>, Output = Block> {
     (
         position(),
-        between(sign("{"), sign("}"), many1(statement())),
+        between(sign("{"), sign("}"), many(statement())),
+        optional(expression()),
     )
-        .then(|(position, statements): (_, Vec<_>)| {
-            if let Some(statement) = statements.last() {
+        .then(|(position, statements, expression): (_, Vec<_>, _)| {
+            if let Some(expression) = expression {
+                value(Block::new(statements, expression, position)).left()
+            } else if let Some(statement) = statements.last() {
                 if statement.name().is_none() {
                     value(Block::new(
                         statements[..statements.len() - 1].to_vec(),
@@ -315,7 +318,7 @@ fn statement_with_result<'a>() -> impl Parser<Stream<'a>, Output = Statement> {
 }
 
 fn statement_without_result<'a>() -> impl Parser<Stream<'a>, Output = Statement> {
-    (position(), expression())
+    (position(), suffix_operation_like())
         .map(|(position, expression)| Statement::new(None, expression, position))
 }
 
