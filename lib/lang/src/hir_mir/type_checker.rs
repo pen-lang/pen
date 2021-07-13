@@ -126,7 +126,7 @@ fn check_expression(
                 type_context.types(),
             )?;
 
-            if !matches!(argument_type, Type::Union(_) | Type::Any(_)) {
+            if !argument_type.is_union() && !argument_type.is_any() {
                 return Err(CompileError::UnionOrAnyTypeExpected(
                     if_.argument().position().clone(),
                 ));
