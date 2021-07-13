@@ -1,5 +1,8 @@
 use serde::{Deserialize, Serialize};
-use std::ops::Deref;
+use std::{
+    fmt::{self, Display, Formatter},
+    ops::Deref,
+};
 
 #[derive(Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct FilePath {
@@ -70,6 +73,12 @@ impl FilePath {
     // TODO Check a directory path.
     pub fn relative_to(&self, path: &Self) -> Self {
         Self::new(self.components().skip(path.components().count()))
+    }
+}
+
+impl Display for FilePath {
+    fn fmt(&self, formatter: &mut Formatter) -> fmt::Result {
+        write!(formatter, "{}", "/".to_owned() + &self.components.join("/"))
     }
 }
 
