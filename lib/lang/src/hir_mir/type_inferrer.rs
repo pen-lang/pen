@@ -166,27 +166,21 @@ fn infer_expression(
                         if_.position(),
                     )
                     .unwrap();
-                    let types = type_difference_calculator::calculate(
-                        &argument_type,
-                        &branch_type,
-                        type_context.types(),
-                    )?;
 
                     Ok(ElseBranch::new(
-                        Some(if let Some(types) = types {
-                            if let Some(type_) = union_type_creator::create(
-                                &types.iter().cloned().collect::<Vec<_>>(),
-                                branch.position(),
-                            ) {
+                        Some(
+                            if let Some(type_) = type_difference_calculator::calculate(
+                                &argument_type,
+                                &branch_type,
+                                type_context.types(),
+                            )? {
                                 type_
                             } else {
                                 return Err(CompileError::UnreachableCode(
                                     branch.position().clone(),
                                 ));
-                            }
-                        } else {
-                            types::Any::new(branch.position().clone()).into()
-                        }),
+                            },
+                        ),
                         infer_expression(branch.expression(), variables)?,
                         branch.position().clone(),
                     ))
@@ -300,26 +294,30 @@ fn infer_expression(
                     position.clone(),
                 )
                 .into();
-                let types = type_difference_calculator::calculate(
-                    &type_extractor::extract_from_expression(&expression, variables, type_context)?,
-                    &error_type,
-                    type_context.types(),
-                )?;
 
                 TryOperation::new(
                     Some(
-                        union_type_creator::create(
-                            &types
-                                .ok_or_else(|| {
-                                    CompileError::UnionTypeExpected(expression.position().clone())
-                                })?
-                                .into_iter()
-                                .collect::<Vec<_>>(),
-                            position,
-                        )
-                        .ok_or_else(|| {
-                            CompileError::UnionTypeExpected(expression.position().clone())
-                        })?,
+                        if let Some(type_) = type_difference_calculator::calculate(
+                            &type_extractor::extract_from_expression(
+                                &expression,
+                                variables,
+                                type_context,
+                            )?,
+                            &error_type,
+                            type_context.types(),
+                        )? {
+                            if type_.is_any() {
+                                return Err(CompileError::UnionTypeExpected(
+                                    expression.position().clone(),
+                                ));
+                            } else {
+                                type_
+                            }
+                        } else {
+                            return Err(CompileError::UnionTypeExpected(
+                                expression.position().clone(),
+                            ));
+                        },
                     ),
                     expression,
                     position.clone(),
@@ -799,8 +797,8 @@ mod tests {
                                 Some(ElseBranch::new(
                                     Some(
                                         types::Union::new(
-                                            types::None::new(Position::dummy()),
                                             types::Boolean::new(Position::dummy()),
+                                            types::None::new(Position::dummy()),
                                             Position::dummy(),
                                         )
                                         .into()
