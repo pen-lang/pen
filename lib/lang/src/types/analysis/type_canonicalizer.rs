@@ -1,9 +1,8 @@
 use super::{super::*, type_resolver, TypeError};
 use std::collections::{BTreeSet, HashMap};
 
+// Canonicalize a type deeply.
 pub fn canonicalize(type_: &Type, types: &HashMap<String, Type>) -> Result<Type, TypeError> {
-    let type_ = type_resolver::resolve(type_, types)?;
-
     Ok(match &type_ {
         Type::Function(function) => Function::new(
             function
@@ -27,8 +26,31 @@ pub fn canonicalize(type_: &Type, types: &HashMap<String, Type>) -> Result<Type,
         | Type::None(_)
         | Type::Number(_)
         | Type::String(_) => type_.clone(),
-        Type::Reference(_) => unreachable!(),
+        Type::Reference(reference) => {
+            canonicalize(&type_resolver::resolve(reference, types)?, types)?
+        }
     })
+}
+
+pub fn canonicalize_function(
+    type_: &Type,
+    types: &HashMap<String, Type>,
+) -> Result<Option<Function>, TypeError> {
+    Ok(canonicalize(type_, types)?.into_function())
+}
+
+pub fn canonicalize_list(
+    type_: &Type,
+    types: &HashMap<String, Type>,
+) -> Result<Option<List>, TypeError> {
+    Ok(canonicalize(type_, types)?.into_list())
+}
+
+pub fn canonicalize_record(
+    type_: &Type,
+    types: &HashMap<String, Type>,
+) -> Result<Option<Record>, TypeError> {
+    Ok(canonicalize(type_, types)?.into_record())
 }
 
 fn canonicalize_union(union: &Union, types: &HashMap<String, Type>) -> Result<Type, TypeError> {
@@ -47,7 +69,7 @@ fn canonicalize_union(union: &Union, types: &HashMap<String, Type>) -> Result<Ty
 }
 
 fn collect_types(type_: &Type, types: &HashMap<String, Type>) -> Result<BTreeSet<Type>, TypeError> {
-    Ok(match type_resolver::resolve(type_, types)? {
+    Ok(match type_ {
         Type::Union(union) => collect_types(union.lhs(), types)?
             .into_iter()
             .chain(collect_types(union.rhs(), types)?)
@@ -60,7 +82,9 @@ fn collect_types(type_: &Type, types: &HashMap<String, Type>) -> Result<BTreeSet
         | Type::None(_)
         | Type::Number(_)
         | Type::String(_) => vec![canonicalize(type_, types)?].into_iter().collect(),
-        Type::Reference(_) => unreachable!(),
+        Type::Reference(reference) => {
+            collect_types(&type_resolver::resolve(reference, types)?, types)?
+        }
     })
 }
 
@@ -213,6 +237,37 @@ mod tests {
                     .collect(),
             ),
             Ok(Number::new(Position::dummy()).into())
+        );
+    }
+
+    #[test]
+    fn canonicalize_union_in_function_in_union() {
+        assert_eq!(
+            canonicalize(
+                &Union::new(
+                    Function::new(
+                        vec![],
+                        Union::new(
+                            None::new(Position::dummy()),
+                            None::new(Position::dummy()),
+                            Position::dummy()
+                        ),
+                        Position::dummy()
+                    ),
+                    None::new(Position::dummy()),
+                    Position::dummy()
+                )
+                .into(),
+                &vec![("t".into(), Number::new(Position::dummy()).into())]
+                    .into_iter()
+                    .collect(),
+            ),
+            Ok(Union::new(
+                Function::new(vec![], None::new(Position::dummy()), Position::dummy()),
+                None::new(Position::dummy()),
+                Position::dummy()
+            )
+            .into())
         );
     }
 }

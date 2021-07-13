@@ -1,7 +1,7 @@
 use super::{error::CompileError, main_module_configuration::MainModuleConfiguration};
 use crate::{
     hir::*,
-    types::{analysis::type_resolver, Type},
+    types::{analysis::type_canonicalizer, Type},
 };
 use std::collections::HashMap;
 
@@ -28,7 +28,7 @@ pub fn compile(
         .find(|alias| alias.name() == main_module_configuration.main_function_type_name)
         .ok_or_else(|| CompileError::MainFunctionTypeUndefined(module.position().clone()))?
         .type_();
-    let function_type = type_resolver::resolve_function(type_, types)?
+    let function_type = type_canonicalizer::canonicalize_function(type_, types)?
         .ok_or_else(|| CompileError::FunctionExpected(type_.position().clone()))?;
     let arguments = function_type
         .arguments()

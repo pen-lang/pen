@@ -1,5 +1,5 @@
 use super::super::error::CompileError;
-use crate::{hir::*, hir_mir::type_context::TypeContext, types::analysis::type_resolver};
+use crate::{hir::*, hir_mir::type_context::TypeContext, types::analysis::record_element_resolver};
 use std::collections::HashSet;
 
 const RECORD_NAME: &str = "$record";
@@ -8,7 +8,7 @@ pub fn transform(
     update: &RecordUpdate,
     type_context: &TypeContext,
 ) -> Result<Expression, CompileError> {
-    let element_types = type_resolver::resolve_record_elements(
+    let element_types = record_element_resolver::resolve(
         update.type_(),
         update.position(),
         type_context.types(),

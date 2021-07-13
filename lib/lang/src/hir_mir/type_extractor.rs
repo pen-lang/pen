@@ -3,7 +3,7 @@ use crate::{
     hir::*,
     types::{
         self,
-        analysis::{type_resolver, union_type_creator},
+        analysis::{record_element_resolver, type_canonicalizer, union_type_creator},
         Type,
     },
 };
@@ -19,7 +19,7 @@ pub fn extract_from_expression(
 
     Ok(match expression {
         Expression::Boolean(boolean) => types::Boolean::new(boolean.position().clone()).into(),
-        Expression::Call(call) => type_resolver::resolve_function(
+        Expression::Call(call) => type_canonicalizer::canonicalize_function(
             call.function_type()
                 .ok_or_else(|| CompileError::TypeNotInferred(call.position().clone()))?,
             type_context.types(),
@@ -34,7 +34,7 @@ pub fn extract_from_expression(
         )
         .into(),
         Expression::IfList(if_) => {
-            let list_type = type_resolver::resolve_list(
+            let list_type = type_canonicalizer::canonicalize_list(
                 &extract_from_expression(if_.argument(), variables)?,
                 type_context.types(),
             )?
@@ -139,7 +139,7 @@ pub fn extract_from_expression(
                 .clone(),
         },
         Expression::RecordConstruction(construction) => construction.type_().clone(),
-        Expression::RecordDeconstruction(deconstruction) => type_resolver::resolve_record_elements(
+        Expression::RecordDeconstruction(deconstruction) => record_element_resolver::resolve(
             deconstruction
                 .type_()
                 .ok_or_else(|| CompileError::TypeNotInferred(deconstruction.position().clone()))?,

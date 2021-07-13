@@ -3,9 +3,7 @@ use crate::{
     hir::*,
     types::{
         self,
-        analysis::{
-            type_canonicalizer, type_resolver, union_difference_calculator, union_type_creator,
-        },
+        analysis::{type_canonicalizer, type_difference_calculator, union_type_creator},
         Type,
     },
 };
@@ -115,7 +113,7 @@ fn infer_expression(
 
             IfList::new(
                 Some(
-                    type_resolver::resolve_list(
+                    type_canonicalizer::canonicalize_list(
                         &type_extractor::extract_from_expression(&list, variables, type_context)?,
                         type_context.types(),
                     )?
@@ -155,46 +153,34 @@ fn infer_expression(
             let else_ = if_
                 .else_()
                 .map(|branch| -> Result<_, CompileError> {
-                    let argument_type = type_canonicalizer::canonicalize(
-                        &type_extractor::extract_from_expression(
-                            &argument,
-                            variables,
-                            type_context,
-                        )?,
-                        type_context.types(),
+                    let argument_type = type_extractor::extract_from_expression(
+                        &argument,
+                        variables,
+                        type_context,
                     )?;
-                    let branch_type = type_canonicalizer::canonicalize(
-                        &union_type_creator::create(
-                            &if_.branches()
-                                .iter()
-                                .map(|branch| branch.type_().clone())
-                                .collect::<Vec<_>>(),
-                            if_.position(),
-                        )
-                        .unwrap(),
-                        type_context.types(),
-                    )?;
-                    let types = union_difference_calculator::calculate(
-                        &argument_type,
-                        &branch_type,
-                        type_context.types(),
-                    )?;
+                    let branch_type = union_type_creator::create(
+                        &if_.branches()
+                            .iter()
+                            .map(|branch| branch.type_().clone())
+                            .collect::<Vec<_>>(),
+                        if_.position(),
+                    )
+                    .unwrap();
 
                     Ok(ElseBranch::new(
-                        Some(if let Some(types) = types {
-                            if let Some(union_type) = union_type_creator::create(
-                                &types.iter().cloned().collect::<Vec<_>>(),
-                                branch.position(),
-                            ) {
-                                type_canonicalizer::canonicalize(&union_type, type_context.types())?
+                        Some(
+                            if let Some(type_) = type_difference_calculator::calculate(
+                                &argument_type,
+                                &branch_type,
+                                type_context.types(),
+                            )? {
+                                type_
                             } else {
                                 return Err(CompileError::UnreachableCode(
                                     branch.position().clone(),
                                 ));
-                            }
-                        } else {
-                            types::Any::new(branch.position().clone()).into()
-                        }),
+                            },
+                        ),
                         infer_expression(branch.expression(), variables)?,
                         branch.position().clone(),
                     ))
@@ -308,26 +294,30 @@ fn infer_expression(
                     position.clone(),
                 )
                 .into();
-                let types = union_difference_calculator::calculate(
-                    &type_extractor::extract_from_expression(&expression, variables, type_context)?,
-                    &error_type,
-                    type_context.types(),
-                )?;
 
                 TryOperation::new(
                     Some(
-                        union_type_creator::create(
-                            &types
-                                .ok_or_else(|| {
-                                    CompileError::UnionTypeExpected(expression.position().clone())
-                                })?
-                                .into_iter()
-                                .collect::<Vec<_>>(),
-                            position,
-                        )
-                        .ok_or_else(|| {
-                            CompileError::UnionTypeExpected(expression.position().clone())
-                        })?,
+                        if let Some(type_) = type_difference_calculator::calculate(
+                            &type_extractor::extract_from_expression(
+                                &expression,
+                                variables,
+                                type_context,
+                            )?,
+                            &error_type,
+                            type_context.types(),
+                        )? {
+                            if type_.is_any() {
+                                return Err(CompileError::UnionTypeExpected(
+                                    expression.position().clone(),
+                                ));
+                            } else {
+                                type_
+                            }
+                        } else {
+                            return Err(CompileError::UnionTypeExpected(
+                                expression.position().clone(),
+                            ));
+                        },
                     ),
                     expression,
                     position.clone(),

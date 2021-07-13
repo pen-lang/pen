@@ -45,7 +45,7 @@ fn transform_equal_operation(
     position: &Position,
     type_context: &TypeContext,
 ) -> Result<Expression, CompileError> {
-    Ok(match type_resolver::resolve(type_, type_context.types())? {
+    Ok(match type_ {
         Type::Any(_) => return Err(CompileError::AnyEqualOperation(position.clone())),
         Type::Boolean(_) => If::new(
             lhs.clone(),
@@ -167,7 +167,7 @@ fn transform_equal_operation(
                     .into(),
                 ),
                 Variable::new(
-                    record_type_information_compiler::compile_equal_function_name(&record_type),
+                    record_type_information_compiler::compile_equal_function_name(record_type),
                     position.clone(),
                 ),
                 vec![lhs.clone(), rhs.clone()],
@@ -234,7 +234,13 @@ fn transform_equal_operation(
             )
             .into()
         }
-        Type::Reference(_) => unreachable!(),
+        Type::Reference(reference) => transform_equal_operation(
+            &type_resolver::resolve(reference, type_context.types())?,
+            lhs,
+            rhs,
+            position,
+            type_context,
+        )?,
     })
 }
 

@@ -13,7 +13,8 @@ use crate::{
     types::{
         self,
         analysis::{
-            type_canonicalizer, type_equality_checker, type_resolver, union_type_member_calculator,
+            record_element_resolver, type_canonicalizer, type_equality_checker,
+            union_type_member_calculator,
         },
         Type,
     },
@@ -145,7 +146,7 @@ pub fn compile(
         Expression::Number(number) => mir::ir::Expression::Number(number.value()),
         Expression::Operation(operation) => compile_operation(operation, type_context)?,
         Expression::RecordConstruction(construction) => {
-            let element_types = type_resolver::resolve_record_elements(
+            let element_types = record_element_resolver::resolve(
                 construction.type_(),
                 construction.position(),
                 type_context.types(),
@@ -178,7 +179,7 @@ pub fn compile(
                 type_compiler::compile(type_, type_context)?
                     .into_record()
                     .unwrap(),
-                type_resolver::resolve_record_elements(
+                record_element_resolver::resolve(
                     type_,
                     deconstruction.position(),
                     type_context.types(),
@@ -287,7 +288,7 @@ fn compile_operation(
         }
         Operation::Equality(operation) => match operation.operator() {
             EqualityOperator::Equal => {
-                match type_resolver::resolve(
+                match type_canonicalizer::canonicalize(
                     operation.type_().ok_or_else(|| {
                         CompileError::TypeNotInferred(operation.position().clone())
                     })?,
@@ -337,12 +338,9 @@ fn compile_operation(
         )
         .into(),
         Operation::Try(operation) => {
-            let success_type = type_canonicalizer::canonicalize(
-                operation
-                    .type_()
-                    .ok_or_else(|| CompileError::TypeNotInferred(operation.position().clone()))?,
-                type_context.types(),
-            )?;
+            let success_type = operation
+                .type_()
+                .ok_or_else(|| CompileError::TypeNotInferred(operation.position().clone()))?;
             let error_type = type_compiler::compile(
                 &types::Reference::new(
                     &type_context.error_type_configuration().error_type_name,
@@ -361,7 +359,7 @@ fn compile_operation(
                 ),
                 compile_alternatives(
                     "$success",
-                    &success_type,
+                    success_type,
                     &Variable::new("$success", operation.position().clone()).into(),
                     type_context,
                 )?,

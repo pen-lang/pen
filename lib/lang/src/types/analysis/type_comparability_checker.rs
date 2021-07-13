@@ -1,5 +1,8 @@
 use super::TypeError;
-use crate::types::{analysis::type_resolver, RecordElement, Type};
+use crate::types::{
+    analysis::{record_element_resolver, type_resolver},
+    RecordElement, Type,
+};
 use std::collections::{HashMap, HashSet};
 
 pub fn check(
@@ -36,21 +39,16 @@ fn check_with_cache(
                     .chain(vec![record.name().into()])
                     .collect();
 
-                type_resolver::resolve_record_elements(
-                    type_,
-                    type_.position(),
-                    types,
-                    record_types,
-                )?
-                .iter()
-                .map(|element| check_with_cache(element.type_(), &record_names))
-                .collect::<Result<Vec<_>, _>>()?
-                .into_iter()
-                .all(|flag| flag)
+                record_element_resolver::resolve(type_, type_.position(), types, record_types)?
+                    .iter()
+                    .map(|element| check_with_cache(element.type_(), &record_names))
+                    .collect::<Result<Vec<_>, _>>()?
+                    .into_iter()
+                    .all(|flag| flag)
             }
         }
-        Type::Reference(_) => {
-            check_with_cache(&type_resolver::resolve(type_, types)?, record_names)?
+        Type::Reference(reference) => {
+            check_with_cache(&type_resolver::resolve(reference, types)?, record_names)?
         }
         Type::String(_) => true,
         Type::Union(union) => {

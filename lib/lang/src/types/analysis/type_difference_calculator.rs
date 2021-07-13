@@ -1,25 +1,26 @@
-use super::{type_canonicalizer, union_type_member_calculator, TypeError};
+use super::{type_canonicalizer, union_type_creator, union_type_member_calculator, TypeError};
 use crate::types::Type;
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 
 pub fn calculate(
     one: &Type,
     other: &Type,
     types: &HashMap<String, Type>,
-) -> Result<Option<HashSet<Type>>, TypeError> {
+) -> Result<Option<Type>, TypeError> {
     let one = type_canonicalizer::canonicalize(one, types)?;
     let other = type_canonicalizer::canonicalize(other, types)?;
 
-    Ok(if one.is_any() {
+    Ok(if other.is_any() {
         None
-    } else if other.is_any() {
-        Some(Default::default())
+    } else if one.is_any() {
+        Some(one)
     } else {
-        Some(
-            union_type_member_calculator::calculate(&one, types)?
+        union_type_creator::create(
+            &union_type_member_calculator::calculate(&one, types)?
                 .difference(&union_type_member_calculator::calculate(&other, types)?)
                 .cloned()
-                .collect(),
+                .collect::<Vec<_>>(),
+            one.position(),
         )
     })
 }
@@ -50,7 +51,7 @@ mod tests {
                 &types::Number::new(Position::dummy()).into(),
                 &Default::default(),
             ),
-            Ok(None)
+            Ok(Some(types::Any::new(Position::dummy()).into()))
         );
     }
 
@@ -62,7 +63,7 @@ mod tests {
                 &types::Any::new(Position::dummy()).into(),
                 &Default::default(),
             ),
-            Ok(Some(Default::default()))
+            Ok(None)
         );
     }
 
@@ -74,7 +75,7 @@ mod tests {
                 &types::Number::new(Position::dummy()).into(),
                 &Default::default(),
             ),
-            Ok(Some(Default::default()))
+            Ok(None)
         );
     }
 
@@ -91,11 +92,7 @@ mod tests {
                 &types::Number::new(Position::dummy()).into(),
                 &Default::default(),
             ),
-            Ok(Some(
-                vec![types::None::new(Position::dummy()).into()]
-                    .into_iter()
-                    .collect()
-            ))
+            Ok(Some(types::None::new(Position::dummy()).into()))
         );
     }
 
@@ -121,11 +118,7 @@ mod tests {
                 .into(),
                 &Default::default(),
             ),
-            Ok(Some(
-                vec![types::Number::new(Position::dummy()).into()]
-                    .into_iter()
-                    .collect()
-            ))
+            Ok(Some(types::Number::new(Position::dummy()).into()))
         );
     }
 }

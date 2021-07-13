@@ -4,8 +4,8 @@ use crate::{
     types::{
         self,
         analysis::{
-            type_canonicalizer, type_equality_checker, type_resolver, type_subsumption_checker,
-            union_type_creator,
+            record_element_resolver, type_canonicalizer, type_equality_checker,
+            type_subsumption_checker, union_type_creator,
         },
         Type,
     },
@@ -65,10 +65,11 @@ fn check_expression(
             let type_ = call
                 .function_type()
                 .ok_or_else(|| CompileError::TypeNotInferred(call.position().clone()))?;
-            let function_type = type_resolver::resolve_function(type_, type_context.types())?
-                .ok_or_else(|| {
-                    CompileError::FunctionExpected(call.function().position().clone())
-                })?;
+            let function_type =
+                type_canonicalizer::canonicalize_function(type_, type_context.types())?
+                    .ok_or_else(|| {
+                        CompileError::FunctionExpected(call.function().position().clone())
+                    })?;
 
             check_subsumption(&check_expression(call.function(), variables)?, type_)?;
 
@@ -125,7 +126,7 @@ fn check_expression(
                 type_context.types(),
             )?;
 
-            if !matches!(argument_type, Type::Union(_) | Type::Any(_)) {
+            if !argument_type.is_union() && !argument_type.is_any() {
                 return Err(CompileError::UnionOrAnyTypeExpected(
                     if_.argument().position().clone(),
                 ));
@@ -217,7 +218,7 @@ fn check_expression(
                 match element {
                     ListElement::Multiple(expression) => {
                         check_subsumption(
-                            type_resolver::resolve_list(
+                            type_canonicalizer::canonicalize_list(
                                 &check_expression(expression, variables)?,
                                 type_context.types(),
                             )?
@@ -240,7 +241,7 @@ fn check_expression(
         Expression::Number(number) => types::Number::new(number.position().clone()).into(),
         Expression::Operation(operation) => check_operation(operation, variables, type_context)?,
         Expression::RecordConstruction(construction) => {
-            let element_types = type_resolver::resolve_record_elements(
+            let element_types = record_element_resolver::resolve(
                 construction.type_(),
                 construction.position(),
                 type_context.types(),
@@ -286,7 +287,7 @@ fn check_expression(
                 type_,
             )?;
 
-            let element_types = type_resolver::resolve_record_elements(
+            let element_types = record_element_resolver::resolve(
                 type_,
                 deconstruction.position(),
                 type_context.types(),
@@ -308,7 +309,7 @@ fn check_expression(
                 update.type_(),
             )?;
 
-            let element_types = type_resolver::resolve_record_elements(
+            let element_types = record_element_resolver::resolve(
                 update.type_(),
                 update.position(),
                 type_context.types(),
@@ -333,12 +334,14 @@ fn check_expression(
         Expression::String(string) => types::ByteString::new(string.position().clone()).into(),
         Expression::TypeCoercion(coercion) => {
             check_subsumption(
-                &check_expression(&coercion.argument(), variables)?,
+                &check_expression(coercion.argument(), variables)?,
                 coercion.from(),
             )?;
 
-            if type_resolver::resolve_list(coercion.from(), type_context.types())?.is_none()
-                || type_resolver::resolve_list(coercion.to(), type_context.types())?.is_none()
+            if type_canonicalizer::canonicalize_list(coercion.from(), type_context.types())?
+                .is_none()
+                || type_canonicalizer::canonicalize_list(coercion.to(), type_context.types())?
+                    .is_none()
             {
                 check_subsumption(coercion.from(), coercion.to())?;
             }
@@ -1283,6 +1286,37 @@ mod tests {
                                     Position::dummy(),
                                 ),
                                 Number::new(42.0, Position::dummy()),
+                                Position::dummy(),
+                            ),
+                            Position::dummy(),
+                        ),
+                        false,
+                    )]),
+            )
+            .unwrap();
+        }
+
+        #[test]
+        fn fail_to_check_try_operation_with_any() {
+            let any_type = types::Any::new(Position::dummy());
+
+            check_module(
+                &Module::empty()
+                    .set_type_definitions(vec![TypeDefinition::without_source(
+                        "error",
+                        vec![],
+                        false,
+                        false,
+                        false,
+                    )])
+                    .set_definitions(vec![Definition::without_source(
+                        "f",
+                        Lambda::new(
+                            vec![Argument::new("x", any_type.clone())],
+                            any_type.clone(),
+                            TryOperation::new(
+                                Some(any_type.into()),
+                                Variable::new("x", Position::dummy()),
                                 Position::dummy(),
                             ),
                             Position::dummy(),
