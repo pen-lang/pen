@@ -120,7 +120,7 @@ fn compile_to_hir(
 
     Ok(lang::ast_hir::compile(
         &ast_module,
-        &calculate_module_prefix(infrastructure, source_file),
+        &calculate_module_prefix(source_file),
         &ast_module
             .imports()
             .iter()
@@ -191,9 +191,6 @@ fn compile_mir_module(
     Ok(())
 }
 
-fn calculate_module_prefix(infrastructure: &Infrastructure, source_file: &FilePath) -> String {
-    format!(
-        "{}:",
-        infrastructure.file_path_displayer.display(source_file)
-    )
+fn calculate_module_prefix(source_file: &FilePath) -> String {
+    format!("{}:", source_file)
 }
