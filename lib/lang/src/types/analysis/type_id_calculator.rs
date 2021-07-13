@@ -1,4 +1,4 @@
-use super::{error::TypeError, type_canonicalizer, type_resolver};
+use super::{error::TypeError, type_canonicalizer};
 use crate::types::Type;
 use std::{
     collections::{hash_map::DefaultHasher, HashMap},
@@ -16,7 +16,7 @@ pub fn calculate(type_: &Type, types: &HashMap<String, Type>) -> Result<String, 
 fn calculate_string(type_: &Type, types: &HashMap<String, Type>) -> Result<String, TypeError> {
     let calculate_string = |type_| calculate_string(type_, types);
 
-    Ok(match type_resolver::resolve(type_, types)? {
+    Ok(match type_canonicalizer::canonicalize(type_, types)? {
         Type::Any(_) => "any".into(),
         Type::Boolean(_) => "boolean".into(),
         Type::Function(function) => format!(
@@ -85,7 +85,7 @@ mod tests {
                 .into(),
                 &Default::default(),
             ),
-            Ok("[(number|none)]".into())
+            Ok("[(none|number)]".into())
         );
     }
 
