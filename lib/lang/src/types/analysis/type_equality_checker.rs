@@ -2,8 +2,19 @@ use super::{super::Type, type_canonicalizer, TypeError};
 use std::collections::HashMap;
 
 pub fn check(one: &Type, other: &Type, types: &HashMap<String, Type>) -> Result<bool, TypeError> {
-    let one = type_canonicalizer::canonicalize(one, types)?;
-    let other = type_canonicalizer::canonicalize(other, types)?;
+    check_canonical(
+        &type_canonicalizer::canonicalize(one, types)?,
+        &type_canonicalizer::canonicalize(other, types)?,
+        types,
+    )
+}
+
+fn check_canonical(
+    one: &Type,
+    other: &Type,
+    types: &HashMap<String, Type>,
+) -> Result<bool, TypeError> {
+    let check = |one, other| check_canonical(one, other, types);
 
     Ok(match (&one, &other) {
         (Type::Function(one), Type::Function(other)) => {
@@ -12,15 +23,15 @@ pub fn check(one: &Type, other: &Type, types: &HashMap<String, Type>) -> Result<
                     .arguments()
                     .iter()
                     .zip(other.arguments())
-                    .map(|(one, other)| check(one, other, types))
+                    .map(|(one, other)| check(one, other))
                     .collect::<Result<Vec<_>, _>>()?
                     .iter()
                     .all(|&ok| ok)
-                && check(one.result(), other.result(), types)?
+                && check(one.result(), other.result())?
         }
-        (Type::List(one), Type::List(other)) => check(one.element(), other.element(), types)?,
+        (Type::List(one), Type::List(other)) => check(one.element(), other.element())?,
         (Type::Union(one), Type::Union(other)) => {
-            check(one.lhs(), other.lhs(), types)? && check(one.rhs(), other.rhs(), types)?
+            check(one.lhs(), other.lhs())? && check(one.rhs(), other.rhs())?
         }
         (Type::Any(_), Type::Any(_))
         | (Type::Boolean(_), Type::Boolean(_))

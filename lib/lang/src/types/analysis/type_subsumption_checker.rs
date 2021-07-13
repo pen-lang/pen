@@ -2,17 +2,26 @@ use super::{super::Type, type_canonicalizer, type_equality_checker, TypeError};
 use std::collections::HashMap;
 
 pub fn check(lower: &Type, upper: &Type, types: &HashMap<String, Type>) -> Result<bool, TypeError> {
-    let lower = type_canonicalizer::canonicalize(lower, types)?;
-    let upper = type_canonicalizer::canonicalize(upper, types)?;
+    check_canonical(
+        &type_canonicalizer::canonicalize(lower, types)?,
+        &type_canonicalizer::canonicalize(upper, types)?,
+        types,
+    )
+}
+
+fn check_canonical(
+    lower: &Type,
+    upper: &Type,
+    types: &HashMap<String, Type>,
+) -> Result<bool, TypeError> {
+    let check = |lower, upper| check_canonical(lower, upper, types);
 
     Ok(match (&lower, &upper) {
         (_, Type::Any(_)) => true,
         (Type::Union(lower), Type::Union(_)) => {
-            check(lower.lhs(), &upper, types)? && check(lower.rhs(), &upper, types)?
+            check(lower.lhs(), &upper)? && check(lower.rhs(), &upper)?
         }
-        (lower, Type::Union(union)) => {
-            check(lower, union.lhs(), types)? || check(lower, union.rhs(), types)?
-        }
+        (lower, Type::Union(union)) => check(lower, union.lhs())? || check(lower, union.rhs())?,
         _ => type_equality_checker::check(&lower, &upper, types)?,
     })
 }
