@@ -1,6 +1,7 @@
 use super::{super::*, type_resolver, TypeError};
 use std::collections::{BTreeSet, HashMap};
 
+// Canonicalize a type deeply.
 pub fn canonicalize(type_: &Type, types: &HashMap<String, Type>) -> Result<Type, TypeError> {
     Ok(match &type_ {
         Type::Function(function) => Function::new(
@@ -245,6 +246,37 @@ mod tests {
                     .collect(),
             ),
             Ok(Number::new(Position::dummy()).into())
+        );
+    }
+
+    #[test]
+    fn canonicalize_union_in_function_in_union() {
+        assert_eq!(
+            canonicalize(
+                &Union::new(
+                    Function::new(
+                        vec![],
+                        Union::new(
+                            None::new(Position::dummy()),
+                            None::new(Position::dummy()),
+                            Position::dummy()
+                        ),
+                        Position::dummy()
+                    ),
+                    None::new(Position::dummy()),
+                    Position::dummy()
+                )
+                .into(),
+                &vec![("t".into(), Number::new(Position::dummy()).into())]
+                    .into_iter()
+                    .collect(),
+            ),
+            Ok(Union::new(
+                Function::new(vec![], None::new(Position::dummy()), Position::dummy()),
+                None::new(Position::dummy()),
+                Position::dummy()
+            )
+            .into())
         );
     }
 }
