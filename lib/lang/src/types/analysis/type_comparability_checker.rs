@@ -47,8 +47,8 @@ fn check_with_cache(
                     .all(|flag| flag)
             }
         }
-        Type::Reference(_) => {
-            check_with_cache(&type_resolver::resolve(type_, types)?, record_names)?
+        Type::Reference(reference) => {
+            check_with_cache(&type_resolver::resolve(reference, types)?, record_names)?
         }
         Type::String(_) => true,
         Type::Union(union) => {
