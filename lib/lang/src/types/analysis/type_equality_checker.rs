@@ -1,9 +1,9 @@
-use super::{super::Type, type_canonicalizer, type_resolver, TypeError};
+use super::{super::Type, type_canonicalizer, TypeError};
 use std::collections::HashMap;
 
 pub fn check(one: &Type, other: &Type, types: &HashMap<String, Type>) -> Result<bool, TypeError> {
-    let one = type_canonicalizer::canonicalize(&type_resolver::resolve(one, types)?, types)?;
-    let other = type_canonicalizer::canonicalize(&type_resolver::resolve(other, types)?, types)?;
+    let one = type_canonicalizer::canonicalize(one, types)?;
+    let other = type_canonicalizer::canonicalize(other, types)?;
 
     Ok(match (&one, &other) {
         (Type::Function(one), Type::Function(other)) => {

@@ -3,9 +3,7 @@ use crate::{
     hir::*,
     types::{
         self,
-        analysis::{
-            type_canonicalizer, type_resolver, union_difference_calculator, union_type_creator,
-        },
+        analysis::{type_canonicalizer, union_difference_calculator, union_type_creator},
         Type,
     },
 };
@@ -115,7 +113,7 @@ fn infer_expression(
 
             IfList::new(
                 Some(
-                    type_resolver::resolve_list(
+                    type_canonicalizer::canonicalize_list(
                         &type_extractor::extract_from_expression(&list, variables, type_context)?,
                         type_context.types(),
                     )?

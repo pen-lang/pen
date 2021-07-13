@@ -31,6 +31,36 @@ pub fn canonicalize(type_: &Type, types: &HashMap<String, Type>) -> Result<Type,
     })
 }
 
+pub fn canonicalize_function(
+    type_: &Type,
+    types: &HashMap<String, Type>,
+) -> Result<Option<Function>, TypeError> {
+    Ok(match canonicalize(type_, types)? {
+        Type::Function(function) => Some(function),
+        _ => None,
+    })
+}
+
+pub fn canonicalize_list(
+    type_: &Type,
+    types: &HashMap<String, Type>,
+) -> Result<Option<List>, TypeError> {
+    Ok(match canonicalize(type_, types)? {
+        Type::List(list) => Some(list),
+        _ => None,
+    })
+}
+
+pub fn canonicalize_record(
+    type_: &Type,
+    types: &HashMap<String, Type>,
+) -> Result<Option<Record>, TypeError> {
+    Ok(match canonicalize(type_, types)? {
+        Type::Record(record) => Some(record),
+        _ => None,
+    })
+}
+
 fn canonicalize_union(union: &Union, types: &HashMap<String, Type>) -> Result<Type, TypeError> {
     Ok(collect_types(&union.clone().into(), types)?
         .into_iter()

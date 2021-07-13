@@ -13,7 +13,7 @@ use crate::{
     types::{
         self,
         analysis::{
-            record_element_resolver, type_canonicalizer, type_equality_checker, type_resolver,
+            record_element_resolver, type_canonicalizer, type_equality_checker,
             union_type_member_calculator,
         },
         Type,
@@ -288,7 +288,7 @@ fn compile_operation(
         }
         Operation::Equality(operation) => match operation.operator() {
             EqualityOperator::Equal => {
-                match type_resolver::resolve(
+                match type_canonicalizer::canonicalize(
                     operation.type_().ok_or_else(|| {
                         CompileError::TypeNotInferred(operation.position().clone())
                     })?,

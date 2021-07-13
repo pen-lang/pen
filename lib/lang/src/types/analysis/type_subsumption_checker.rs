@@ -1,9 +1,9 @@
-use super::{super::Type, type_canonicalizer, type_equality_checker, type_resolver, TypeError};
+use super::{super::Type, type_canonicalizer, type_equality_checker, TypeError};
 use std::collections::HashMap;
 
 pub fn check(lower: &Type, upper: &Type, types: &HashMap<String, Type>) -> Result<bool, TypeError> {
-    let lower = type_canonicalizer::canonicalize(&type_resolver::resolve(lower, types)?, types)?;
-    let upper = type_canonicalizer::canonicalize(&type_resolver::resolve(upper, types)?, types)?;
+    let lower = type_canonicalizer::canonicalize(lower, types)?;
+    let upper = type_canonicalizer::canonicalize(upper, types)?;
 
     Ok(match (&lower, &upper) {
         (_, Type::Any(_)) => true,

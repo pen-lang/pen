@@ -1,4 +1,4 @@
-use super::{super::*, type_resolver, TypeError};
+use super::{super::*, type_canonicalizer, TypeError};
 use crate::{position::Position, types};
 use std::collections::HashMap;
 
@@ -8,7 +8,7 @@ pub fn resolve<'a>(
     types: &HashMap<String, Type>,
     records: &'a HashMap<String, Vec<types::RecordElement>>,
 ) -> Result<&'a [types::RecordElement], TypeError> {
-    let record = type_resolver::resolve_record(type_, types)?
+    let record = type_canonicalizer::canonicalize_record(type_, types)?
         .ok_or_else(|| TypeError::RecordExpected(position.clone()))?;
 
     Ok(records

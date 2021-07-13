@@ -4,7 +4,7 @@ use crate::{
     position::Position,
     types::{
         self,
-        analysis::{record_element_resolver, type_equality_checker, type_resolver},
+        analysis::{record_element_resolver, type_canonicalizer, type_equality_checker},
         Type,
     },
 };
@@ -92,7 +92,7 @@ fn transform_expression(
 
     Ok(match expression {
         Expression::Call(call) => {
-            let function_type = type_resolver::resolve_function(
+            let function_type = type_canonicalizer::canonicalize_function(
                 call.function_type()
                     .ok_or_else(|| CompileError::TypeNotInferred(call.position().clone()))?,
                 type_context.types(),

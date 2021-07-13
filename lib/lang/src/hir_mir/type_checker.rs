@@ -4,7 +4,7 @@ use crate::{
     types::{
         self,
         analysis::{
-            record_element_resolver, type_canonicalizer, type_equality_checker, type_resolver,
+            record_element_resolver, type_canonicalizer, type_equality_checker,
             type_subsumption_checker, union_type_creator,
         },
         Type,
@@ -65,10 +65,11 @@ fn check_expression(
             let type_ = call
                 .function_type()
                 .ok_or_else(|| CompileError::TypeNotInferred(call.position().clone()))?;
-            let function_type = type_resolver::resolve_function(type_, type_context.types())?
-                .ok_or_else(|| {
-                    CompileError::FunctionExpected(call.function().position().clone())
-                })?;
+            let function_type =
+                type_canonicalizer::canonicalize_function(type_, type_context.types())?
+                    .ok_or_else(|| {
+                        CompileError::FunctionExpected(call.function().position().clone())
+                    })?;
 
             check_subsumption(&check_expression(call.function(), variables)?, type_)?;
 
@@ -217,7 +218,7 @@ fn check_expression(
                 match element {
                     ListElement::Multiple(expression) => {
                         check_subsumption(
-                            type_resolver::resolve_list(
+                            type_canonicalizer::canonicalize_list(
                                 &check_expression(expression, variables)?,
                                 type_context.types(),
                             )?
@@ -333,12 +334,14 @@ fn check_expression(
         Expression::String(string) => types::ByteString::new(string.position().clone()).into(),
         Expression::TypeCoercion(coercion) => {
             check_subsumption(
-                &check_expression(&coercion.argument(), variables)?,
+                &check_expression(coercion.argument(), variables)?,
                 coercion.from(),
             )?;
 
-            if type_resolver::resolve_list(coercion.from(), type_context.types())?.is_none()
-                || type_resolver::resolve_list(coercion.to(), type_context.types())?.is_none()
+            if type_canonicalizer::canonicalize_list(coercion.from(), type_context.types())?
+                .is_none()
+                || type_canonicalizer::canonicalize_list(coercion.to(), type_context.types())?
+                    .is_none()
             {
                 check_subsumption(coercion.from(), coercion.to())?;
             }
