@@ -4,8 +4,8 @@ use crate::{
     types::{
         self,
         analysis::{
-            type_canonicalizer, type_equality_checker, type_resolver, type_subsumption_checker,
-            union_type_creator,
+            record_element_resolver, type_canonicalizer, type_equality_checker, type_resolver,
+            type_subsumption_checker, union_type_creator,
         },
         Type,
     },
@@ -240,7 +240,7 @@ fn check_expression(
         Expression::Number(number) => types::Number::new(number.position().clone()).into(),
         Expression::Operation(operation) => check_operation(operation, variables, type_context)?,
         Expression::RecordConstruction(construction) => {
-            let element_types = type_resolver::resolve_record_elements(
+            let element_types = record_element_resolver::resolve(
                 construction.type_(),
                 construction.position(),
                 type_context.types(),
@@ -286,7 +286,7 @@ fn check_expression(
                 type_,
             )?;
 
-            let element_types = type_resolver::resolve_record_elements(
+            let element_types = record_element_resolver::resolve(
                 type_,
                 deconstruction.position(),
                 type_context.types(),
@@ -308,7 +308,7 @@ fn check_expression(
                 update.type_(),
             )?;
 
-            let element_types = type_resolver::resolve_record_elements(
+            let element_types = record_element_resolver::resolve(
                 update.type_(),
                 update.position(),
                 type_context.types(),

@@ -1,4 +1,5 @@
 mod error;
+pub mod record_element_resolver;
 pub mod type_canonicalizer;
 pub mod type_comparability_checker;
 pub mod type_equality_checker;

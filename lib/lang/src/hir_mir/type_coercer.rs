@@ -4,7 +4,7 @@ use crate::{
     position::Position,
     types::{
         self,
-        analysis::{type_equality_checker, type_resolver},
+        analysis::{record_element_resolver, type_equality_checker, type_resolver},
         Type,
     },
 };
@@ -367,7 +367,7 @@ fn transform_record_elements(
     variables: &HashMap<String, Type>,
     type_context: &TypeContext,
 ) -> Result<Vec<RecordElement>, CompileError> {
-    let element_types = type_resolver::resolve_record_elements(
+    let element_types = record_element_resolver::resolve(
         record_type,
         position,
         type_context.types(),

@@ -3,7 +3,7 @@ use crate::{
     hir::*,
     types::{
         self,
-        analysis::{type_resolver, union_type_creator},
+        analysis::{record_element_resolver, type_resolver, union_type_creator},
         Type,
     },
 };
@@ -139,7 +139,7 @@ pub fn extract_from_expression(
                 .clone(),
         },
         Expression::RecordConstruction(construction) => construction.type_().clone(),
-        Expression::RecordDeconstruction(deconstruction) => type_resolver::resolve_record_elements(
+        Expression::RecordDeconstruction(deconstruction) => record_element_resolver::resolve(
             deconstruction
                 .type_()
                 .ok_or_else(|| CompileError::TypeNotInferred(deconstruction.position().clone()))?,
