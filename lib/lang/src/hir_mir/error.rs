@@ -12,6 +12,7 @@ use std::{
 pub enum CompileError {
     AnyEqualOperation(Position),
     AnyTypeBranch(Position),
+    DuplicateDefinitions(Position, Position),
     FunctionEqualOperation(Position),
     FunctionExpected(Position),
     InvalidRecordEqualOperation(Position),
@@ -51,6 +52,9 @@ impl Display for CompileError {
                     "any type cannot be used for downcast\n{}",
                     position
                 )
+            }
+            Self::DuplicateDefinitions(one, other) => {
+                write!(formatter, "duplicate definitions\n{}\n{}", one, other)
             }
             Self::FunctionEqualOperation(position) => {
                 write!(

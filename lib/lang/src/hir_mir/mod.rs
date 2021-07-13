@@ -241,4 +241,26 @@ mod tests {
 
         Ok(())
     }
+
+    #[test]
+    fn fail_to_compile_duplicate_definitions() {
+        let definition = Definition::without_source(
+            "x",
+            Lambda::new(
+                vec![],
+                types::None::new(Position::dummy()),
+                None::new(Position::dummy()),
+                Position::dummy(),
+            ),
+            false,
+        );
+
+        assert_eq!(
+            compile_module(&Module::empty().set_definitions(vec![definition.clone(), definition])),
+            Err(CompileError::DuplicateDefinitions(
+                Position::dummy(),
+                Position::dummy()
+            ))
+        );
+    }
 }
