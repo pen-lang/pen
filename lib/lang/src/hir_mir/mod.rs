@@ -1,5 +1,5 @@
 mod dummy_type_configurations;
-mod duplicate_definition_validator;
+mod duplicate_function_name_validator;
 mod duplicate_type_name_validator;
 mod environment_creator;
 mod error;
@@ -89,7 +89,7 @@ fn compile_module(
     module: &Module,
     type_context: &TypeContext,
 ) -> Result<(mir::ir::Module, interface::Module), CompileError> {
-    duplicate_definition_validator::validate(module)?;
+    duplicate_function_name_validator::validate(module)?;
     duplicate_type_name_validator::validate(module)?;
 
     let module = record_equal_function_transformer::transform(module, type_context)?;
