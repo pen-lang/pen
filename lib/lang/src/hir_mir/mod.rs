@@ -1,4 +1,5 @@
 mod dummy_type_configurations;
+mod duplicate_definition_validator;
 mod environment_creator;
 mod error;
 mod error_type_configuration;
@@ -87,6 +88,8 @@ fn compile_module(
     module: &Module,
     type_context: &TypeContext,
 ) -> Result<(mir::ir::Module, interface::Module), CompileError> {
+    duplicate_definition_validator::validate(module)?;
+
     let module = record_equal_function_transformer::transform(module, type_context)?;
     let module = type_inferrer::infer_types(&module, type_context)?;
     type_checker::check_types(&module, type_context)?;
