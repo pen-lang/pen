@@ -13,6 +13,7 @@ pub enum CompileError {
     AnyEqualOperation(Position),
     AnyTypeBranch(Position),
     DuplicateDefinitions(Position, Position),
+    DuplicateTypeNames(Position, Position),
     FunctionEqualOperation(Position),
     FunctionExpected(Position),
     InvalidRecordEqualOperation(Position),
@@ -55,6 +56,9 @@ impl Display for CompileError {
             }
             Self::DuplicateDefinitions(one, other) => {
                 write!(formatter, "duplicate definitions\n{}\n{}", one, other)
+            }
+            Self::DuplicateTypeNames(one, other) => {
+                write!(formatter, "duplicate type names\n{}\n{}", one, other)
             }
             Self::FunctionEqualOperation(position) => {
                 write!(

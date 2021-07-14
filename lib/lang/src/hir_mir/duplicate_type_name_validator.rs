@@ -17,7 +17,7 @@ pub fn validate(module: &Module) -> Result<(), CompileError> {
         )
     {
         if let Some(&position) = definitions.get(name) {
-            return Err(CompileError::DuplicateDefinitions(
+            return Err(CompileError::DuplicateTypeNames(
                 position.clone(),
                 position.clone(),
             ));
@@ -40,7 +40,7 @@ mod tests {
 
         assert_eq!(
             validate(&Module::empty().set_type_definitions(vec![definition.clone(), definition])),
-            Err(CompileError::DuplicateDefinitions(
+            Err(CompileError::DuplicateTypeNames(
                 Position::dummy(),
                 Position::dummy()
             ))
@@ -54,7 +54,7 @@ mod tests {
 
         assert_eq!(
             validate(&Module::empty().set_type_aliases(vec![alias.clone(), alias])),
-            Err(CompileError::DuplicateDefinitions(
+            Err(CompileError::DuplicateTypeNames(
                 Position::dummy(),
                 Position::dummy()
             ))
@@ -80,7 +80,7 @@ mod tests {
                         false
                     )])
             ),
-            Err(CompileError::DuplicateDefinitions(
+            Err(CompileError::DuplicateTypeNames(
                 Position::dummy(),
                 Position::dummy()
             ))
