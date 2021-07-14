@@ -248,7 +248,7 @@ mod tests {
     }
 
     #[test]
-    fn fail_to_compile_duplicate_definitions() {
+    fn fail_to_compile_duplicate_function_names() {
         let definition = Definition::without_source(
             "x",
             Lambda::new(
@@ -262,7 +262,7 @@ mod tests {
 
         assert_eq!(
             compile_module(&Module::empty().set_definitions(vec![definition.clone(), definition])),
-            Err(CompileError::DuplicateDefinitions(
+            Err(CompileError::DuplicateFunctionNames(
                 Position::dummy(),
                 Position::dummy()
             ))

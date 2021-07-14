@@ -12,7 +12,7 @@ use std::{
 pub enum CompileError {
     AnyEqualOperation(Position),
     AnyTypeBranch(Position),
-    DuplicateDefinitions(Position, Position),
+    DuplicateFunctionNames(Position, Position),
     DuplicateTypeNames(Position, Position),
     FunctionEqualOperation(Position),
     FunctionExpected(Position),
@@ -54,8 +54,8 @@ impl Display for CompileError {
                     position
                 )
             }
-            Self::DuplicateDefinitions(one, other) => {
-                write!(formatter, "duplicate definitions\n{}\n{}", one, other)
+            Self::DuplicateFunctionNames(one, other) => {
+                write!(formatter, "duplicate function names\n{}\n{}", one, other)
             }
             Self::DuplicateTypeNames(one, other) => {
                 write!(formatter, "duplicate type names\n{}\n{}", one, other)

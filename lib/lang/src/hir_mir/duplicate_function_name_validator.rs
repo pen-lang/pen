@@ -7,7 +7,7 @@ pub fn validate(module: &Module) -> Result<(), CompileError> {
 
     for definition in module.definitions() {
         if let Some(&position) = definitions.get(definition.name()) {
-            return Err(CompileError::DuplicateDefinitions(
+            return Err(CompileError::DuplicateFunctionNames(
                 position.clone(),
                 definition.position().clone(),
             ));
@@ -39,7 +39,7 @@ mod tests {
 
         assert_eq!(
             validate(&Module::empty().set_definitions(vec![definition.clone(), definition])),
-            Err(CompileError::DuplicateDefinitions(
+            Err(CompileError::DuplicateFunctionNames(
                 Position::dummy(),
                 Position::dummy()
             ))
