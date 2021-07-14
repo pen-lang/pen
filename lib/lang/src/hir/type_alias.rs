@@ -1,4 +1,4 @@
-use crate::types::Type;
+use crate::{position::Position, types::Type};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Deserialize, Hash, PartialEq, Serialize)]
@@ -8,6 +8,7 @@ pub struct TypeAlias {
     type_: Type,
     public: bool,
     external: bool,
+    position: Position,
 }
 
 impl TypeAlias {
@@ -17,6 +18,7 @@ impl TypeAlias {
         type_: impl Into<Type>,
         public: bool,
         external: bool,
+        position: Position,
     ) -> Self {
         Self {
             name: name.into(),
@@ -24,6 +26,7 @@ impl TypeAlias {
             type_: type_.into(),
             public,
             external,
+            position,
         }
     }
 
@@ -34,7 +37,7 @@ impl TypeAlias {
         public: bool,
         external: bool,
     ) -> Self {
-        Self::new(name, "", type_, public, external)
+        Self::new(name, "", type_, public, external, Position::dummy())
     }
 
     pub fn name(&self) -> &str {
@@ -55,5 +58,9 @@ impl TypeAlias {
 
     pub fn is_external(&self) -> bool {
         self.external
+    }
+
+    pub fn position(&self) -> &Position {
+        &self.position
     }
 }

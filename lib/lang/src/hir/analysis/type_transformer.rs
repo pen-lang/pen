@@ -96,6 +96,7 @@ fn transform_type_alias(alias: &TypeAlias, transform: &impl Fn(&Type) -> Type) -
             transform(alias.type_()),
             alias.is_public(),
             alias.is_external(),
+            alias.position().clone(),
         )
     }
 }

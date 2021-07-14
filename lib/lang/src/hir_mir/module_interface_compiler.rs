@@ -26,6 +26,7 @@ pub fn compile(module: &hir::Module) -> Result<interface::Module, CompileError> 
                     alias.original_name(),
                     alias.type_().clone(),
                     alias.is_public() && !alias.is_external(),
+                    alias.position().clone(),
                 )
             })
             .collect(),
