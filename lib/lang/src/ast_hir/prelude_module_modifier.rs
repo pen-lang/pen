@@ -27,6 +27,7 @@ pub fn modify(module: &Module) -> Module {
                     alias.type_().clone(),
                     true,
                     alias.is_external(),
+                    alias.position().clone(),
                 )
             })
             .collect(),

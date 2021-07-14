@@ -28,6 +28,7 @@ pub fn compile(module: &ast::Module) -> Result<hir::Module, CompileError> {
                     alias.type_().clone(),
                     is_name_public(alias.name()),
                     false,
+                    alias.position().clone(),
                 )
             })
             .collect(),
@@ -371,7 +372,8 @@ mod tests {
                 vec![ast::TypeDefinition::new("Foo1", vec![], Position::dummy())],
                 vec![ast::TypeAlias::new(
                     "Foo2",
-                    types::None::new(Position::dummy())
+                    types::None::new(Position::dummy()),
+                    Position::dummy(),
                 )],
                 vec![ast::Definition::new(
                     "Foo3",
@@ -405,7 +407,8 @@ mod tests {
                     "Foo2",
                     types::None::new(Position::dummy()),
                     true,
-                    false
+                    false,
+                    Position::dummy()
                 )])
                 .set_definitions(vec![hir::Definition::new(
                     "Foo3",

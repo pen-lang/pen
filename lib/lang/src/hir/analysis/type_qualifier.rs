@@ -58,6 +58,7 @@ pub fn qualify(module: &Module, prefix: &str) -> Module {
                         alias.type_().clone(),
                         alias.is_public(),
                         alias.is_external(),
+                        alias.position().clone(),
                     )
                 })
                 .collect(),

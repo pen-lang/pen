@@ -61,6 +61,7 @@ fn compile_imports(module: &hir::Module, module_interfaces: &[&interface::Module
                         alias.type_().clone(),
                         alias.is_public(),
                         true,
+                        alias.position().clone(),
                     )
                 })
             })
@@ -372,6 +373,7 @@ mod tests {
                             "Bar",
                             types::None::new(Position::dummy()),
                             true,
+                            Position::dummy(),
                         )],
                         vec![]
                     )
@@ -397,6 +399,7 @@ mod tests {
                     types::None::new(Position::dummy()),
                     true,
                     true,
+                    Position::dummy(),
                 )])
                 .set_definitions(vec![hir::Definition::without_source(
                     "Foo",
@@ -512,6 +515,7 @@ mod tests {
                             "Bar",
                             types::None::new(Position::dummy()),
                             false,
+                            Position::dummy(),
                         )],
                         vec![]
                     )
@@ -527,7 +531,8 @@ mod tests {
                     "Bar",
                     types::None::new(Position::dummy()),
                     false,
-                    true
+                    true,
+                    Position::dummy()
                 )])
                 .set_definitions(vec![definition])
         );

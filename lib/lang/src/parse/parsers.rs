@@ -183,8 +183,14 @@ fn type_definition<'a>() -> impl Parser<Stream<'a>, Output = TypeDefinition> {
 }
 
 fn type_alias<'a>() -> impl Parser<Stream<'a>, Output = TypeAlias> {
-    (keyword("type"), identifier(), sign("="), type_())
-        .map(|(_, name, _, type_)| TypeAlias::new(name, type_))
+    (
+        position(),
+        keyword("type"),
+        identifier(),
+        sign("="),
+        type_(),
+    )
+        .map(|(position, _, name, _, type_)| TypeAlias::new(name, type_, position))
         .expected("type alias")
 }
 
@@ -800,7 +806,11 @@ mod tests {
                 vec![],
                 vec![],
                 vec![],
-                vec![TypeAlias::new("foo", types::Number::new(Position::dummy()))],
+                vec![TypeAlias::new(
+                    "foo",
+                    types::Number::new(Position::dummy()),
+                    Position::dummy()
+                )],
                 vec![],
                 Position::dummy()
             )
@@ -1086,11 +1096,19 @@ mod tests {
         for (source, expected) in &[
             (
                 "type foo=number",
-                TypeAlias::new("foo", types::Number::new(Position::dummy())),
+                TypeAlias::new(
+                    "foo",
+                    types::Number::new(Position::dummy()),
+                    Position::dummy(),
+                ),
             ),
             (
                 "type foo = number",
-                TypeAlias::new("foo", types::Number::new(Position::dummy())),
+                TypeAlias::new(
+                    "foo",
+                    types::Number::new(Position::dummy()),
+                    Position::dummy(),
+                ),
             ),
             (
                 "type foo=number|none",
@@ -1101,6 +1119,7 @@ mod tests {
                         types::None::new(Position::dummy()),
                         Position::dummy(),
                     ),
+                    Position::dummy(),
                 ),
             ),
         ] {

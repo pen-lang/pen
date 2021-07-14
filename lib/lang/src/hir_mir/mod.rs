@@ -1,4 +1,6 @@
 mod dummy_type_configurations;
+mod duplicate_function_name_validator;
+mod duplicate_type_name_validator;
 mod environment_creator;
 mod error;
 mod error_type_configuration;
@@ -87,6 +89,9 @@ fn compile_module(
     module: &Module,
     type_context: &TypeContext,
 ) -> Result<(mir::ir::Module, interface::Module), CompileError> {
+    duplicate_function_name_validator::validate(module)?;
+    duplicate_type_name_validator::validate(module)?;
+
     let module = record_equal_function_transformer::transform(module, type_context)?;
     let module = type_inferrer::infer_types(&module, type_context)?;
     type_checker::check_types(&module, type_context)?;
@@ -240,5 +245,27 @@ mod tests {
         )?;
 
         Ok(())
+    }
+
+    #[test]
+    fn fail_to_compile_duplicate_function_names() {
+        let definition = Definition::without_source(
+            "x",
+            Lambda::new(
+                vec![],
+                types::None::new(Position::dummy()),
+                None::new(Position::dummy()),
+                Position::dummy(),
+            ),
+            false,
+        );
+
+        assert_eq!(
+            compile_module(&Module::empty().set_definitions(vec![definition.clone(), definition])),
+            Err(CompileError::DuplicateFunctionNames(
+                Position::dummy(),
+                Position::dummy()
+            ))
+        );
     }
 }
