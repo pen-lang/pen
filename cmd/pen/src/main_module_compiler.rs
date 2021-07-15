@@ -2,7 +2,7 @@ use super::{compile_configuration::COMPILE_CONFIGURATION, main_package_directory
 use crate::{application_configuration::APPLICATION_CONFIGURATION, infrastructure};
 use std::sync::Arc;
 
-pub fn compile_main(
+pub fn compile(
     source_file: &str,
     dependency_file: &str,
     object_file: &str,

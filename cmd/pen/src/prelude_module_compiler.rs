@@ -2,7 +2,7 @@ use super::{compile_configuration::COMPILE_CONFIGURATION, main_package_directory
 use crate::infrastructure;
 use std::sync::Arc;
 
-pub fn compile_prelude(
+pub fn compile(
     source_file: &str,
     object_file: &str,
     interface_file: &str,
