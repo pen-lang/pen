@@ -6,6 +6,18 @@ pub struct JsonPackageConfiguration {
     pub dependencies: HashMap<String, String>,
 }
 
+impl From<app::infra::PackageConfiguration> for JsonPackageConfiguration {
+    fn from(configuration: app::infra::PackageConfiguration) -> Self {
+        Self {
+            dependencies: configuration
+                .dependencies
+                .into_iter()
+                .map(|(name, url)| (name, url.to_string()))
+                .collect(),
+        }
+    }
+}
+
 impl TryFrom<JsonPackageConfiguration> for app::infra::PackageConfiguration {
     type Error = url::ParseError;
 

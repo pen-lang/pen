@@ -33,6 +33,10 @@ pub fn create(
         module_builder: Arc::new(infra::NinjaModuleBuilder::new(file_path_converter)),
         build_script_compiler,
         package_configuration_reader: Arc::new(infra::JsonPackageConfigurationReader::new(
+            file_system.clone(),
+            BUILD_CONFIGURATION_FILENAME,
+        )),
+        package_configuration_writer: Arc::new(infra::JsonPackageConfigurationWriter::new(
             file_system,
             BUILD_CONFIGURATION_FILENAME,
         )),

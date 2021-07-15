@@ -12,6 +12,7 @@ mod module_builder;
 mod module_target;
 mod package_configuration;
 mod package_configuration_reader;
+mod package_configuration_writer;
 
 pub use application_linker::*;
 pub use build_script_compiler::*;
@@ -27,6 +28,7 @@ pub use module_builder::*;
 pub use module_target::*;
 pub use package_configuration::*;
 pub use package_configuration_reader::*;
+pub use package_configuration_writer::*;
 
 pub const EXTERNAL_PACKAGE_DIRECTORY: &str = "packages";
 pub const OBJECT_DIRECTORY: &str = "objects";
