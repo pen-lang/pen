@@ -3,7 +3,7 @@ use crate::{
     infra::{FilePath, Infrastructure, PackageConfiguration},
     ApplicationConfiguration,
 };
-use std::error::Error;
+use std::{collections::HashMap, error::Error};
 
 pub fn create_application(
     infrastructure: &Infrastructure,
@@ -12,39 +12,45 @@ pub fn create_application(
     application_configuration: &ApplicationConfiguration,
     package_directory: &FilePath,
 ) -> Result<(), Box<dyn Error>> {
-    infrastructure.package_configuration_writer.write(
-        &PackageConfiguration {
-            dependencies: vec![(
-                application_configuration.system_package_name.clone(),
-                system_package_url.clone(),
-            )]
-            .into_iter()
-            .collect(),
-        },
+    create(
+        infrastructure,
+        &vec![(
+            application_configuration.system_package_name.clone(),
+            system_package_url.clone(),
+        )]
+        .into_iter()
+        .collect(),
+        &application_configuration.main_module_basename,
+        module_content,
         package_directory,
-    )?;
-
-    infrastructure.file_system.write(
-        &file_path_resolver::resolve_source_file(
-            package_directory,
-            &[application_configuration.main_module_basename.clone()],
-            &infrastructure.file_path_configuration,
-        ),
-        module_content.as_bytes(),
-    )?;
-
-    Ok(())
+    )
 }
 
 pub fn create_library(
     infrastructure: &Infrastructure,
-    module_filename: &str,
+    module_basename: &str,
+    module_content: &str,
+    package_directory: &FilePath,
+) -> Result<(), Box<dyn Error>> {
+    create(
+        infrastructure,
+        &Default::default(),
+        module_basename,
+        module_content,
+        package_directory,
+    )
+}
+
+fn create(
+    infrastructure: &Infrastructure,
+    dependencies: &HashMap<String, url::Url>,
+    module_basename: &str,
     module_content: &str,
     package_directory: &FilePath,
 ) -> Result<(), Box<dyn Error>> {
     infrastructure.package_configuration_writer.write(
         &PackageConfiguration {
-            dependencies: Default::default(),
+            dependencies: dependencies.clone(),
         },
         package_directory,
     )?;
@@ -52,7 +58,7 @@ pub fn create_library(
     infrastructure.file_system.write(
         &file_path_resolver::resolve_source_file(
             package_directory,
-            &[module_filename.into()],
+            &[module_basename.into()],
             &infrastructure.file_path_configuration,
         ),
         module_content.as_bytes(),
