@@ -1,4 +1,5 @@
 use crate::{
+    common::file_path_resolver,
     infra::{FilePath, Infrastructure, PackageConfiguration},
     ApplicationConfiguration,
 };
@@ -24,9 +25,11 @@ pub fn create_application(
     )?;
 
     infrastructure.file_system.write(
-        &package_directory.join(&FilePath::new([
-            &application_configuration.main_module_basename
-        ])),
+        &file_path_resolver::resolve_source_file(
+            package_directory,
+            &[application_configuration.main_module_basename.clone()],
+            &infrastructure.file_path_configuration,
+        ),
         module_content.as_bytes(),
     )?;
 
@@ -47,7 +50,11 @@ pub fn create_library(
     )?;
 
     infrastructure.file_system.write(
-        &package_directory.join(&FilePath::new([module_filename])),
+        &file_path_resolver::resolve_source_file(
+            package_directory,
+            &[module_filename.into()],
+            &infrastructure.file_path_configuration,
+        ),
         module_content.as_bytes(),
     )?;
 

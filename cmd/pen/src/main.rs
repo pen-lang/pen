@@ -7,6 +7,7 @@ mod compile_prelude;
 mod file_path_configuration;
 mod infrastructure;
 mod main_package_directory_finder;
+mod package_creator;
 mod resolve_dependency;
 
 use build::build;
@@ -33,6 +34,12 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                 .global(true),
         )
         .subcommand(clap::SubCommand::with_name("build").about("Builds a package"))
+        .subcommand(
+            clap::SubCommand::with_name("create")
+                .about("Creates a package")
+                .arg(clap::Arg::with_name("library").short("l").long("library"))
+                .arg(clap::Arg::with_name("directory").required(true)),
+        )
         .subcommand(
             clap::SubCommand::with_name("compile")
                 .about("Compiles a module")
@@ -96,6 +103,14 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         .subcommand()
     {
         ("build", matches) => build(matches.unwrap().is_present("verbose")),
+        ("create", matches) => {
+            let matches = matches.unwrap();
+
+            package_creator::create(
+                matches.value_of("directory").unwrap(),
+                matches.is_present("library"),
+            )
+        }
         ("compile", matches) => {
             let matches = matches.unwrap();
 
