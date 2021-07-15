@@ -46,6 +46,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         )
         .subcommand(
             clap::SubCommand::with_name("compile")
+                .setting(clap::AppSettings::Hidden)
                 .about("Compiles a module")
                 .arg(clap::Arg::with_name("source file").required(true))
                 .arg(clap::Arg::with_name("dependency file").required(true))
@@ -54,6 +55,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         )
         .subcommand(
             clap::SubCommand::with_name("compile-main")
+                .setting(clap::AppSettings::Hidden)
                 .about("Compiles a main module")
                 .arg(
                     clap::Arg::with_name("main function interface file")
@@ -68,6 +70,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         )
         .subcommand(
             clap::SubCommand::with_name("compile-prelude")
+                .setting(clap::AppSettings::Hidden)
                 .about("Compiles a prelude module")
                 .arg(clap::Arg::with_name("source file").required(true))
                 .arg(clap::Arg::with_name("object file").required(true))
@@ -75,6 +78,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         )
         .subcommand(
             clap::SubCommand::with_name("resolve-dependency")
+                .setting(clap::AppSettings::Hidden)
                 .about("Resolves module dependency")
                 .arg(
                     clap::Arg::with_name("package directory")
