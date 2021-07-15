@@ -1,6 +1,7 @@
 use crate::{
     application_configuration::APPLICATION_CONFIGURATION,
-    file_path_configuration::PRELUDE_PACKAGE_URL, infrastructure,
+    file_path_configuration::{DEFAULT_SYSTEM_PACKAGE_URL, PRELUDE_PACKAGE_URL},
+    infrastructure,
 };
 use std::{path::PathBuf, sync::Arc};
 
@@ -40,7 +41,7 @@ pub fn create(package_directory: &str, library: bool) -> Result<(), Box<dyn std:
                 }
                 "
             ),
-            &url::Url::parse(PRELUDE_PACKAGE_URL)?,
+            &url::Url::parse(DEFAULT_SYSTEM_PACKAGE_URL)?,
             &APPLICATION_CONFIGURATION,
             &package_directory,
         )?;
