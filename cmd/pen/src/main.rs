@@ -1,20 +1,14 @@
 mod application_configuration;
-mod build;
-mod compile;
 mod compile_configuration;
-mod compile_main;
-mod compile_prelude;
+mod dependency_resolver;
 mod file_path_configuration;
 mod infrastructure;
+mod main_module_compiler;
 mod main_package_directory_finder;
+mod module_compiler;
+mod package_builder;
 mod package_creator;
-mod resolve_dependency;
-
-use build::build;
-use compile::compile;
-use compile_main::compile_main;
-use compile_prelude::compile_prelude;
-use resolve_dependency::resolve_dependency;
+mod prelude_module_compiler;
 
 fn main() {
     if let Err(error) = run() {
@@ -52,6 +46,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         )
         .subcommand(
             clap::SubCommand::with_name("compile")
+                .setting(clap::AppSettings::Hidden)
                 .about("Compiles a module")
                 .arg(clap::Arg::with_name("source file").required(true))
                 .arg(clap::Arg::with_name("dependency file").required(true))
@@ -60,6 +55,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         )
         .subcommand(
             clap::SubCommand::with_name("compile-main")
+                .setting(clap::AppSettings::Hidden)
                 .about("Compiles a main module")
                 .arg(
                     clap::Arg::with_name("main function interface file")
@@ -74,6 +70,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         )
         .subcommand(
             clap::SubCommand::with_name("compile-prelude")
+                .setting(clap::AppSettings::Hidden)
                 .about("Compiles a prelude module")
                 .arg(clap::Arg::with_name("source file").required(true))
                 .arg(clap::Arg::with_name("object file").required(true))
@@ -81,6 +78,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         )
         .subcommand(
             clap::SubCommand::with_name("resolve-dependency")
+                .setting(clap::AppSettings::Hidden)
                 .about("Resolves module dependency")
                 .arg(
                     clap::Arg::with_name("package directory")
@@ -112,7 +110,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         .get_matches()
         .subcommand()
     {
-        ("build", matches) => build(matches.unwrap().is_present("verbose")),
+        ("build", matches) => package_builder::build(matches.unwrap().is_present("verbose")),
         ("create", matches) => {
             let matches = matches.unwrap();
 
@@ -124,7 +122,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         ("compile", matches) => {
             let matches = matches.unwrap();
 
-            compile(
+            module_compiler::compile(
                 matches.value_of("source file").unwrap(),
                 matches.value_of("dependency file").unwrap(),
                 matches.value_of("object file").unwrap(),
@@ -134,7 +132,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         ("compile-main", matches) => {
             let matches = matches.unwrap();
 
-            compile_main(
+            main_module_compiler::compile(
                 matches.value_of("source file").unwrap(),
                 matches.value_of("dependency file").unwrap(),
                 matches.value_of("object file").unwrap(),
@@ -144,7 +142,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         ("compile-prelude", matches) => {
             let matches = matches.unwrap();
 
-            compile_prelude(
+            prelude_module_compiler::compile(
                 matches.value_of("source file").unwrap(),
                 matches.value_of("object file").unwrap(),
                 matches.value_of("interface file").unwrap(),
@@ -153,7 +151,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         ("resolve-dependency", matches) => {
             let matches = matches.unwrap();
 
-            resolve_dependency(
+            dependency_resolver::resolve(
                 matches.value_of("source file").unwrap(),
                 matches.value_of("object file").unwrap(),
                 matches.value_of("dependency file").unwrap(),

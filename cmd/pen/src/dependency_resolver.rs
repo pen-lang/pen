@@ -2,7 +2,7 @@ use super::main_package_directory_finder;
 use crate::infrastructure;
 use std::sync::Arc;
 
-pub fn resolve_dependency(
+pub fn resolve(
     source_file: &str,
     object_file: &str,
     dependency_file: &str,
