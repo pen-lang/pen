@@ -18,6 +18,7 @@ pub fn compile(
         &file_path_converter.convert_to_file_path(dependency_file)?,
         &file_path_converter.convert_to_file_path(object_file)?,
         &file_path_converter.convert_to_file_path(interface_file)?,
+        None,
         &COMPILE_CONFIGURATION,
     )?;
 
