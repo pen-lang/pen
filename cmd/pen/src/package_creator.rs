@@ -1,7 +1,6 @@
 use crate::{
     application_configuration::APPLICATION_CONFIGURATION,
-    file_path_configuration::{DEFAULT_SYSTEM_PACKAGE_URL, PRELUDE_PACKAGE_URL},
-    infrastructure,
+    file_path_configuration::DEFAULT_SYSTEM_PACKAGE_URL, infrastructure,
 };
 use std::{path::PathBuf, sync::Arc};
 
