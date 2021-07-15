@@ -12,7 +12,7 @@ impl From<app::infra::PackageConfiguration> for JsonPackageConfiguration {
             dependencies: configuration
                 .dependencies
                 .into_iter()
-                .map(|(key, value)| (key, value.to_string()))
+                .map(|(name, url)| (name, url.to_string()))
                 .collect(),
         }
     }
