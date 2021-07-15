@@ -1,4 +1,5 @@
 use super::{error::InfrastructureError, file_path_converter::FilePathConverter};
+use std::io::Error;
 use std::sync::Arc;
 
 pub struct FileSystem {
@@ -15,7 +16,7 @@ impl FileSystem {
     fn read_directory_with_raw_error(
         &self,
         file_path: &app::infra::FilePath,
-    ) -> Result<Vec<app::infra::FilePath>, std::io::Error> {
+    ) -> Result<Vec<app::infra::FilePath>, Error> {
         let path = self.file_path_converter.convert_to_os_path(file_path);
 
         path.read_dir()?
@@ -25,7 +26,7 @@ impl FileSystem {
                     .convert_to_file_path(entry?.path())
                     .unwrap())
             })
-            .collect::<Result<_, std::io::Error>>()
+            .collect::<Result<_, Error>>()
     }
 }
 
