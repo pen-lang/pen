@@ -1,6 +1,5 @@
 use super::{error::InfrastructureError, file_path_converter::FilePathConverter};
-use std::io::Error;
-use std::sync::Arc;
+use std::{io::Error, sync::Arc};
 
 pub struct FileSystem {
     file_path_converter: Arc<FilePathConverter>,
