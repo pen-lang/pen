@@ -1,5 +1,6 @@
 mod application_linker;
 mod command_runner;
+mod default_target_finder;
 mod environment_variable_reader;
 mod error;
 mod external_package_initializer;

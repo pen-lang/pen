@@ -1,8 +1,7 @@
-use crate::command_runner;
-
 use super::file_path_converter::FilePathConverter;
+use crate::default_target_finder;
 use app::infra::FilePath;
-use std::{error::Error, path::PathBuf, process::Command, sync::Arc};
+use std::{error::Error, path::PathBuf, sync::Arc};
 
 pub struct NinjaBuildScriptCompiler {
     file_path_converter: Arc<FilePathConverter>,
@@ -29,7 +28,6 @@ impl NinjaBuildScriptCompiler {
         target_triple: Option<&str>,
     ) -> Result<Vec<String>, Box<dyn Error>> {
         let llc = self.find_llc()?;
-        let llvm_config = self.find_llvm_config()?;
 
         let resolve_dependency_command = format!(
             "  command = pen resolve-dependency -o $builddir -p $package_directory {} $in $object_file $out",
@@ -51,7 +49,7 @@ impl NinjaBuildScriptCompiler {
                 if let Some(triple) = target_triple {
                     triple.into()
                 } else {
-                    command_runner::run(Command::new(&llvm_config).arg("--host-target"))?
+                    default_target_finder::find()?
                 }
             ),
             "rule compile",
@@ -75,7 +73,7 @@ impl NinjaBuildScriptCompiler {
             &resolve_dependency_command,
             "  description = resolving dependency of $in",
             "rule compile_ffi",
-            "  command = $in $out",
+            "  command = $in -t $target $out",
         ]
         .iter()
         .map(|string| string.to_string())
@@ -191,10 +189,6 @@ impl NinjaBuildScriptCompiler {
             .or_else(|_| which::which("llc-12"))
             .or_else(|_| which::which("llc-11"))
             .or_else(|_| which::which("llc"))?)
-    }
-
-    fn find_llvm_config(&self) -> Result<PathBuf, Box<dyn Error>> {
-        Ok(which::which("llvm-config")?)
     }
 
     fn compile_ffi_build(
