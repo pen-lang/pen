@@ -9,6 +9,7 @@ use crate::{
 };
 use std::error::Error;
 
+#[allow(clippy::too_many_arguments)]
 pub fn compile_main(
     infrastructure: &Infrastructure,
     package_directory: &FilePath,
