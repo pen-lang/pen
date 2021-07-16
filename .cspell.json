@@ -16,6 +16,7 @@
     "idempotently",
     "itertools",
     "malloc",
+    "mtriple",
     "realloc",
     "renamer",
     "repr",
