@@ -186,5 +186,6 @@ fn build_target_triple_argument() -> clap::Arg<'static, 'static> {
     clap::Arg::with_name("target")
         .short("t")
         .long("target")
+        .takes_value(true)
         .help("Sets a target triple")
 }
