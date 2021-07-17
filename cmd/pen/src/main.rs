@@ -28,7 +28,11 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                 .global(true)
                 .help("Uses verbose output"),
         )
-        .subcommand(clap::SubCommand::with_name("build").about("Builds a package"))
+        .subcommand(
+            clap::SubCommand::with_name("build")
+                .about("Builds a package")
+                .arg(build_target_triple_argument()),
+        )
         .subcommand(
             clap::SubCommand::with_name("create")
                 .about("Creates a package")
@@ -51,7 +55,8 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                 .arg(clap::Arg::with_name("source file").required(true))
                 .arg(clap::Arg::with_name("dependency file").required(true))
                 .arg(clap::Arg::with_name("object file").required(true))
-                .arg(clap::Arg::with_name("interface file").required(true)),
+                .arg(clap::Arg::with_name("interface file").required(true))
+                .arg(build_target_triple_argument()),
         )
         .subcommand(
             clap::SubCommand::with_name("compile-main")
@@ -66,7 +71,8 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                 )
                 .arg(clap::Arg::with_name("source file").required(true))
                 .arg(clap::Arg::with_name("dependency file").required(true))
-                .arg(clap::Arg::with_name("object file").required(true)),
+                .arg(clap::Arg::with_name("object file").required(true))
+                .arg(build_target_triple_argument()),
         )
         .subcommand(
             clap::SubCommand::with_name("compile-prelude")
@@ -74,7 +80,8 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                 .about("Compiles a prelude module")
                 .arg(clap::Arg::with_name("source file").required(true))
                 .arg(clap::Arg::with_name("object file").required(true))
-                .arg(clap::Arg::with_name("interface file").required(true)),
+                .arg(clap::Arg::with_name("interface file").required(true))
+                .arg(build_target_triple_argument()),
         )
         .subcommand(
             clap::SubCommand::with_name("resolve-dependency")
@@ -110,7 +117,11 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         .get_matches()
         .subcommand()
     {
-        ("build", matches) => package_builder::build(matches.unwrap().is_present("verbose")),
+        ("build", matches) => {
+            let matches = matches.unwrap();
+
+            package_builder::build(matches.value_of("target"), matches.is_present("verbose"))
+        }
         ("create", matches) => {
             let matches = matches.unwrap();
 
@@ -127,6 +138,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                 matches.value_of("dependency file").unwrap(),
                 matches.value_of("object file").unwrap(),
                 matches.value_of("interface file").unwrap(),
+                matches.value_of("target"),
             )
         }
         ("compile-main", matches) => {
@@ -137,6 +149,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                 matches.value_of("dependency file").unwrap(),
                 matches.value_of("object file").unwrap(),
                 matches.value_of("main function interface file").unwrap(),
+                matches.value_of("target"),
             )
         }
         ("compile-prelude", matches) => {
@@ -146,6 +159,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                 matches.value_of("source file").unwrap(),
                 matches.value_of("object file").unwrap(),
                 matches.value_of("interface file").unwrap(),
+                matches.value_of("target"),
             )
         }
         ("resolve-dependency", matches) => {
@@ -166,4 +180,12 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         }
         _ => unreachable!(),
     }
+}
+
+fn build_target_triple_argument() -> clap::Arg<'static, 'static> {
+    clap::Arg::with_name("target")
+        .short("t")
+        .long("target")
+        .takes_value(true)
+        .help("Sets a target triple")
 }

@@ -22,6 +22,7 @@ pub fn compile(
     dependency_file: &FilePath,
     object_file: &FilePath,
     interface_file: &FilePath,
+    target_triple: Option<&str>,
     compile_configuration: &CompileConfiguration,
 ) -> Result<(), Box<dyn Error>> {
     let (module, module_interface) = lang::hir_mir::compile(
@@ -44,6 +45,7 @@ pub fn compile(
         infrastructure,
         &module,
         object_file,
+        target_triple,
         &compile_configuration.heap,
     )?;
     infrastructure.file_system.write(
@@ -61,6 +63,7 @@ pub fn compile_main(
     dependency_file: &FilePath,
     object_file: &FilePath,
     main_function_interface_file: &FilePath,
+    target_triple: Option<&str>,
     compile_configuration: &CompileConfiguration,
     application_configuration: &ApplicationConfiguration,
 ) -> Result<(), Box<dyn Error>> {
@@ -97,6 +100,7 @@ pub fn compile_main(
             )?,
         )?,
         object_file,
+        target_triple,
         &compile_configuration.heap,
     )?;
 
@@ -150,6 +154,7 @@ pub fn compile_prelude(
     source_file: &FilePath,
     object_file: &FilePath,
     interface_file: &FilePath,
+    target_triple: Option<&str>,
     heap_configuration: &HeapConfiguration,
 ) -> Result<(), Box<dyn Error>> {
     let (module, module_interface) =
@@ -161,7 +166,13 @@ pub fn compile_prelude(
             PRELUDE_PREFIX,
         )?)?;
 
-    compile_mir_module(infrastructure, &module, object_file, heap_configuration)?;
+    compile_mir_module(
+        infrastructure,
+        &module,
+        object_file,
+        target_triple,
+        heap_configuration,
+    )?;
     infrastructure.file_system.write(
         interface_file,
         &interface_serializer::serialize(&module_interface)?,
@@ -174,6 +185,7 @@ fn compile_mir_module(
     infrastructure: &Infrastructure,
     module: &mir::ir::Module,
     object_file: &FilePath,
+    target_triple: Option<&str>,
     heap_configuration: &HeapConfiguration,
 ) -> Result<(), Box<dyn Error>> {
     infrastructure.file_system.write(
@@ -184,7 +196,7 @@ fn compile_mir_module(
                 fmm::types::VOID_TYPE.clone(),
             )?,
             heap_configuration,
-            None,
+            target_triple,
         )?,
     )?;
 

@@ -9,12 +9,14 @@ use crate::{
 };
 use std::error::Error;
 
+#[allow(clippy::too_many_arguments)]
 pub fn compile_main(
     infrastructure: &Infrastructure,
     package_directory: &FilePath,
     output_directory: &FilePath,
     child_build_script_files: &[FilePath],
     build_script_file: &FilePath,
+    target_triple: Option<&str>,
     prelude_package_url: &url::Url,
     application_configuration: &ApplicationConfiguration,
 ) -> Result<(), Box<dyn Error>> {
@@ -87,6 +89,7 @@ pub fn compile_main(
                 ),
                 package_directory,
                 output_directory,
+                target_triple,
             )?
             .as_bytes(),
     )?;

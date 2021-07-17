@@ -12,6 +12,7 @@ pub trait BuildScriptCompiler {
         ffi_archive_file: &FilePath,
         package_directory: &FilePath,
         output_directory: &FilePath,
+        target_triple: Option<&str>,
     ) -> Result<String, Box<dyn Error>>;
 
     fn compile_external(

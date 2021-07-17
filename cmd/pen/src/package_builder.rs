@@ -7,7 +7,7 @@ use std::sync::Arc;
 
 pub const OUTPUT_DIRECTORY: &str = ".pen";
 
-pub fn build(verbose: bool) -> Result<(), Box<dyn std::error::Error>> {
+pub fn build(target_triple: Option<&str>, verbose: bool) -> Result<(), Box<dyn std::error::Error>> {
     let main_package_directory = main_package_directory_finder::find()?;
     let file_path_converter = Arc::new(infra::FilePathConverter::new(
         main_package_directory.clone(),
@@ -37,6 +37,7 @@ pub fn build(verbose: bool) -> Result<(), Box<dyn std::error::Error>> {
         &infrastructure,
         &main_package_directory,
         &output_directory,
+        target_triple,
         &url::Url::parse(PRELUDE_PACKAGE_URL)?,
         &APPLICATION_CONFIGURATION,
     )?;

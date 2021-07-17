@@ -1,6 +1,7 @@
 use super::file_path_converter::FilePathConverter;
+use crate::{default_target_finder, llvm_command_finder};
 use app::infra::FilePath;
-use std::{error::Error, path::PathBuf, sync::Arc};
+use std::{error::Error, sync::Arc};
 
 pub struct NinjaBuildScriptCompiler {
     file_path_converter: Arc<FilePathConverter>,
@@ -24,8 +25,10 @@ impl NinjaBuildScriptCompiler {
     fn compile_rules(
         &self,
         prelude_interface_files: &[FilePath],
+        target_triple: Option<&str>,
     ) -> Result<Vec<String>, Box<dyn Error>> {
-        let llc = self.find_llc()?;
+        let llc = llvm_command_finder::find("llc")?;
+
         let resolve_dependency_command = format!(
             "  command = pen resolve-dependency -o $builddir -p $package_directory {} $in $object_file $out",
             prelude_interface_files
@@ -41,18 +44,28 @@ impl NinjaBuildScriptCompiler {
         );
 
         Ok([
+            &format!(
+                "target = {}",
+                if let Some(triple) = target_triple {
+                    triple.into()
+                } else {
+                    default_target_finder::find()?
+                }
+            ),
             "rule compile",
-            "  command = pen compile $in $out",
+            "  command = pen compile --target $target $in $out",
             "  description = compiling module of $source_file",
             "rule compile_main",
-            "  command = pen compile-main -f $main_function_interface_file $in $out",
+            "  command = pen compile-main --target $target \
+                -f $main_function_interface_file $in $out",
             "  description = compiling module of $source_file",
             "rule compile_prelude",
-            "  command = pen compile-prelude $in $out",
+            "  command = pen compile-prelude --target $target $in $out",
             "  description = compiling module of $source_file",
             "rule llc",
             &format!(
-                "  command = {} -O3 -tailcallopt --relocation-model pic -filetype obj -o $out $in",
+                "  command = {} -O3 -tailcallopt --relocation-model pic \
+                    -mtriple $target -filetype obj -o $out $in",
                 llc.display()
             ),
             "  description = generating object file for $source_file",
@@ -60,7 +73,7 @@ impl NinjaBuildScriptCompiler {
             &resolve_dependency_command,
             "  description = resolving dependency of $in",
             "rule compile_ffi",
-            "  command = $in $out",
+            "  command = $in -t $target $out",
         ]
         .iter()
         .map(|string| string.to_string())
@@ -171,13 +184,6 @@ impl NinjaBuildScriptCompiler {
         ]
     }
 
-    fn find_llc(&self) -> Result<PathBuf, Box<dyn Error>> {
-        Ok(which::which("llc-13")
-            .or_else(|_| which::which("llc-12"))
-            .or_else(|_| which::which("llc-11"))
-            .or_else(|_| which::which("llc"))?)
-    }
-
     fn compile_ffi_build(
         &self,
         package_directory: &FilePath,
@@ -214,6 +220,7 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
         ffi_archive_file: &FilePath,
         package_directory: &FilePath,
         output_directory: &FilePath,
+        target_triple: Option<&str>,
     ) -> Result<String, Box<dyn Error>> {
         Ok(vec![
             "ninja_required_version = 1.10".into(),
@@ -225,7 +232,7 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
             ),
         ]
         .into_iter()
-        .chain(self.compile_rules(prelude_interface_files)?)
+        .chain(self.compile_rules(prelude_interface_files, target_triple)?)
         .chain(self.compile_module_targets(module_targets, ffi_archive_file, package_directory))
         .chain(if let Some(main_module_target) = main_module_target {
             let source_file = self

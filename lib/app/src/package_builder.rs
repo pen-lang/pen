@@ -10,6 +10,7 @@ pub fn build(
     infrastructure: &Infrastructure,
     main_package_directory: &FilePath,
     output_directory: &FilePath,
+    target_triple: Option<&str>,
     prelude_package_url: &url::Url,
     application_configuration: &ApplicationConfiguration,
 ) -> Result<(), Box<dyn Error>> {
@@ -27,6 +28,7 @@ pub fn build(
         output_directory,
         &find_external_package_build_script(infrastructure, output_directory)?,
         &build_script_file,
+        target_triple,
         prelude_package_url,
         application_configuration,
     )?;

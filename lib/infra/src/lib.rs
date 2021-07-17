@@ -1,5 +1,6 @@
 mod application_linker;
 mod command_runner;
+mod default_target_finder;
 mod environment_variable_reader;
 mod error;
 mod external_package_initializer;
@@ -9,6 +10,7 @@ mod file_system;
 mod json_package_configuration;
 mod json_package_configuration_reader;
 mod json_package_configuration_writer;
+mod llvm_command_finder;
 mod logger;
 mod ninja_build_script_compiler;
 mod ninja_build_script_dependency_compiler;

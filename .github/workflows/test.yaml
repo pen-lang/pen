@@ -42,5 +42,6 @@ jobs:
       - uses: actions/setup-ruby@v1
       - run: sudo apt install clang ninja-build valgrind
       - run: bundler install
+      - run: rustup target add wasm32-unknown-unknown
       - run: cargo build --release
       - run: PEN_ROOT=$PWD PATH=$PWD/target/release:$PWD/tools:$PATH cucumber --publish-quiet
