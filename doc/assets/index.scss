@@ -74,22 +74,6 @@ header {
   }
 }
 
-article {
-  padding: 2rem 3rem;
-}
-
-a {
-  text-decoration: none;
-
-  &:hover {
-    text-decoration: underline;
-  }
-}
-
-code {
-  font-family: "Roboto Mono", sans-serif;
-}
-
 .home {
   background-color: $light-primary;
   width: 100%;
@@ -172,5 +156,39 @@ code {
 
   h3 {
     font-size: 1.2rem;
+  }
+}
+
+article {
+  padding: 2rem 3rem;
+}
+
+a {
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+pre {
+  border-radius: 0.2rem;
+}
+
+code {
+  background-color: $black;
+  color: $white;
+  font-family: "Roboto Mono", monospace;
+  display: inline-block;
+  padding: 0.3rem 0.5rem;
+  margin: 0.2rem 0rem;
+  border-radius: 0.2rem;
+
+  pre & {
+    display: block;
+    overflow: hidden;
+    overflow-x: auto;
+    padding: 0.9em 1em;
+    margin: 0rem;
   }
 }
