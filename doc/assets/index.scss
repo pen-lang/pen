@@ -51,14 +51,15 @@ header {
 }
 
 .sidebar {
-  min-width: 10rem;
+  width: 12rem;
+  flex-shrink: 0;
   padding: 2rem 3rem;
 
   ul {
     list-style-type: none;
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.6rem;
     padding-inline-start: 0rem;
     margin: 0rem;
 
