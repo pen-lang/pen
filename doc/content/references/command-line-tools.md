@@ -1,3 +1,7 @@
+---
+title: Command line tools
+---
+
 # Command line tools
 
 The `pen` command has the following sub-commands.

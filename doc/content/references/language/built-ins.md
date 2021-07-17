@@ -1,3 +1,7 @@
+---
+title: Built-ins
+---
+
 # Built-ins
 
 Built-in types and functions that are accessible from any modules with no prefix.

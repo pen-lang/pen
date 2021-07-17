@@ -1,3 +1,7 @@
+---
+title: Modules
+---
+
 # Modules
 
 - Each source file composes a module.

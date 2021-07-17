@@ -1,3 +1,7 @@
+---
+title: Packages
+---
+
 # Packages
 
 - Each repository of some version control system (VCS) composes a package.

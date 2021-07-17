@@ -1,3 +1,7 @@
+---
+title: Syntax
+---
+
 # Syntax
 
 ## Statements

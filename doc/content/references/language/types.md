@@ -1,3 +1,7 @@
+---
+title: Types
+---
+
 # Types
 
 ## Number

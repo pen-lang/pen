@@ -1,3 +1,7 @@
+---
+title: Naming convention
+---
+
 # Naming convention
 
 | Kind               | Case style       | Examples                      |
