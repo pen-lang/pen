@@ -1,7 +1,7 @@
 use super::file_path_converter::FilePathConverter;
-use crate::default_target_finder;
+use crate::{default_target_finder, llvm_command_finder};
 use app::infra::FilePath;
-use std::{error::Error, path::PathBuf, sync::Arc};
+use std::{error::Error, sync::Arc};
 
 pub struct NinjaBuildScriptCompiler {
     file_path_converter: Arc<FilePathConverter>,
@@ -27,7 +27,7 @@ impl NinjaBuildScriptCompiler {
         prelude_interface_files: &[FilePath],
         target_triple: Option<&str>,
     ) -> Result<Vec<String>, Box<dyn Error>> {
-        let llc = self.find_llc()?;
+        let llc = llvm_command_finder::find("llc")?;
 
         let resolve_dependency_command = format!(
             "  command = pen resolve-dependency -o $builddir -p $package_directory {} $in $object_file $out",
@@ -182,13 +182,6 @@ impl NinjaBuildScriptCompiler {
             format!("  package_directory = {}", package_directory.display()),
             format!("  object_file = {}", bit_code_file.display()),
         ]
-    }
-
-    fn find_llc(&self) -> Result<PathBuf, Box<dyn Error>> {
-        Ok(which::which("llc-13")
-            .or_else(|_| which::which("llc-12"))
-            .or_else(|_| which::which("llc-11"))
-            .or_else(|_| which::which("llc"))?)
     }
 
     fn compile_ffi_build(

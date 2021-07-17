@@ -10,6 +10,7 @@ mod file_system;
 mod json_package_configuration;
 mod json_package_configuration_reader;
 mod json_package_configuration_writer;
+mod llvm_command_finder;
 mod logger;
 mod ninja_build_script_compiler;
 mod ninja_build_script_dependency_compiler;
