@@ -44,4 +44,5 @@ Feature: Package builder
       x
     }
     """
-    When I successfully run `pen build --target wasm32-unknown-unknown`
+    When I run `pen build --target wasm32-unknown-unknown`
+    Then the exit status should be 0
