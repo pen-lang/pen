@@ -29,7 +29,7 @@ See [Records](../types#records).
 It gives another name to a given type.
 
 ```pen
-type Foo = number | none
+type foo = number | none
 ```
 
 ### Function definition
@@ -131,13 +131,13 @@ if x {
 
 #### `if`-type expression
 
-- It evaluates blocks depending on types of a given expressions bound to a given name.
+- It evaluates one of blocks depending on types of a given expressions bound to a given name.
 - In each block, the given name is bound to a variable of the specified type.
 
 ```pen
 if x = ...; number {
   ...
-} else if none {
+} else if string | none {
   ...
 } else {
   ...
@@ -145,6 +145,10 @@ if x = ...; number {
 ```
 
 #### `if`-list expression
+
+- It evaluates one of blocks depending on values of given lists.
+- If a given list has 1 or more element, it evaluates the first block with its first element and rest of elements as a list.
+- If it has no element, it evaluates the second block.
 
 ```pen
 if [x, ...xs] = ... {
