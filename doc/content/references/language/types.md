@@ -93,7 +93,7 @@ person{...john, name: "bar"}
 john.name
 ```
 
-## Singletons
+## Singleton records
 
 ```
 type foo {}
