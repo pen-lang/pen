@@ -1,4 +1,12 @@
 <!DOCTYPE html>
+<!---->
+{{ define "renderLink" }}<!---->
+{{ if eq .page.File.UniqueID .current.File.UniqueID }}
+<li class="current"><a href="{{ .page.Permalink }}">{{ .page.Title }}</a></li>
+{{ else }}
+<li><a href="{{ .page.Permalink }}">{{ .page.Title }}</a></li>
+{{ end }}<!---->
+{{ end }}<!---->
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -26,8 +34,10 @@
     <header>
       <div><a href="/">Pen</a></div>
       <ul>
-        {{ range (.GetPage "/").Pages }}
-        <li><a href="{{ .Permalink }}">{{ .Title }}</a></li>
+        {{ range (.GetPage "/").Pages }}<!---->
+        <li class="current">
+          <a href="{{ .Permalink }}">{{ .Title }}</a>
+        </li>
         {{ end }}
       </ul>
     </header>
@@ -35,18 +45,21 @@
       {{ if not .IsHome }}
       <div class="sidebar">
         <ul>
-          {{ range .FirstSection.Pages }}
-          <li><a href="{{ .Permalink }}">{{ .Title }}</a></li>
+          {{ $current := . }}<!---->
+          {{ range .FirstSection.Pages }}<!---->
+          {{ template "renderLink" (dict "page" . "current" $current) }}<!---->
           {{ if .Pages }}
           <ul>
-            {{ range .Pages }}
-            <li><a href="{{ .Permalink }}">{{ .Title }}</a></li>
+            {{ range .Pages }}<!---->
+            {{ template "renderLink" (dict "page" . "current" $current) }}<!---->
             {{ end }}
           </ul>
-          {{ end }} {{ end }}
+          {{ end }}<!---->
+          {{ end }}
         </ul>
       </div>
-      {{ end }} {{ block "main" . }}{{ end }}
+      {{ end }}<!---->
+      {{ block "main" . }}{{ end }}
     </div>
   </body>
 </html>

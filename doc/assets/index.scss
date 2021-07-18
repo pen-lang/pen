@@ -3,6 +3,7 @@ $black: #222;
 $dark-grey: #444;
 $grey: #888;
 $light-grey: #ddd;
+$dim-grey: #eee;
 $primary: midnightblue;
 $light-primary: whitesmoke;
 $primary-text: steelblue;
@@ -63,7 +64,6 @@ header {
     list-style-type: none;
     display: flex;
     flex-direction: column;
-    gap: 0.6rem;
     padding-inline-start: 0rem;
     margin: 0rem;
 
@@ -71,9 +71,18 @@ header {
       padding-inline-start: 2rem;
     }
 
-    a {
-      color: inherit;
-      font-size: 1.1rem;
+    li {
+      padding: 0.3rem 0.5rem;
+      border-radius: $border-radius;
+
+      &.current {
+        background-color: $dim-grey;
+      }
+
+      a {
+        color: inherit;
+        font-size: 1.1rem;
+      }
     }
   }
 }
