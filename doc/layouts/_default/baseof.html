@@ -20,6 +20,7 @@
       content="width=device-width,initial-scale=1,shrink-to-fit=no"
     />
     <title>{{ block "title" . }}{{ .Site.Title }}{{ end }}</title>
+    <link rel="icon" href="/icon.svg" />
     <link rel="manifest" href="/manifest.json" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -36,7 +37,9 @@
   </head>
   <body>
     <header>
-      <div><a href="/">Pen</a></div>
+      <div>
+        <a href="/"><img src="/icon.svg" />Pen</a>
+      </div>
       <div>
         <ul>
           {{ range (.GetPage "/").Pages }}
