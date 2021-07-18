@@ -12,24 +12,32 @@ header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 1rem 1.5rem;
   box-shadow: 0rem 0rem 0.5rem rgba(0, 0, 0, 0.5);
   z-index: 1; }
-  header > div a {
+  header > div > a {
     color: #ddd;
     font-family: Montserrat, sans-serif;
-    font-size: 2rem;
-    margin: 1rem 1.5rem; }
-    header > div a:hover {
+    font-size: 2rem; }
+    header > div > a:hover {
       text-decoration: none; }
-  header > ul {
-    list-style-type: none;
+  header > div {
     display: flex;
-    gap: 1rem;
-    padding-inline-start: 0rem;
-    margin: 1rem 1.5rem; }
-    header > ul a {
-      color: #ddd;
-      font-size: 1.3rem; }
+    align-items: center;
+    gap: 1.25rem; }
+    header > div > ul {
+      list-style-type: none;
+      display: flex;
+      gap: 1rem;
+      padding-inline-start: 0rem;
+      padding: 0rem;
+      margin: 0rem; }
+      header > div > ul a {
+        color: #ddd;
+        font-size: 1.3rem; }
+    header > div i {
+      font-size: 2rem;
+      color: #ddd; }
 
 .content {
   display: flex;
@@ -38,7 +46,7 @@ header {
 .sidebar {
   width: 12rem;
   flex-shrink: 0;
-  padding: 2rem 3rem; }
+  padding: 2rem; }
   .sidebar ul {
     list-style-type: none;
     display: flex;
