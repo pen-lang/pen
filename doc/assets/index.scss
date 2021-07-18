@@ -130,6 +130,10 @@ header {
     height: 70%;
     flex-shrink: 0;
 
+    > img {
+      width: 6rem;
+    }
+
     > .description {
       font-size: 1rem;
       font-weight: normal;
