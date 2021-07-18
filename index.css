@@ -18,9 +18,14 @@ header {
   header > div > a {
     color: #ddd;
     font-family: Montserrat, sans-serif;
-    font-size: 2rem; }
+    font-size: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem; }
     header > div > a:hover {
       text-decoration: none; }
+    header > div > a > img {
+      width: 2.2rem; }
   header > div {
     display: flex;
     align-items: center;
@@ -81,6 +86,8 @@ header {
     gap: 1rem;
     height: 70%;
     flex-shrink: 0; }
+    .home .title > img {
+      width: 6rem; }
     .home .title > .description {
       font-size: 1rem;
       font-weight: normal;
