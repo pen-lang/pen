@@ -1,0 +1,193 @@
+body {
+  color: #222;
+  font: 16px "Noto Sans", sans-serif;
+  height: 100vh;
+  overflow: hidden;
+  margin: 0;
+  display: flex;
+  flex-direction: column; }
+
+header {
+  background: midnightblue;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0rem 0rem 0.5rem rgba(0, 0, 0, 0.5);
+  z-index: 1; }
+  header > div a {
+    color: #ddd;
+    font-family: Montserrat, sans-serif;
+    font-size: 2rem;
+    margin: 1rem 1.5rem; }
+    header > div a:hover {
+      text-decoration: none; }
+  header > ul {
+    list-style-type: none;
+    display: flex;
+    gap: 1rem;
+    padding-inline-start: 0rem;
+    margin: 1rem 1.5rem; }
+    header > ul a {
+      color: #ddd;
+      font-size: 1.3rem; }
+
+.content {
+  display: flex;
+  overflow: auto; }
+
+.sidebar {
+  width: 12rem;
+  flex-shrink: 0;
+  padding: 2rem 3rem; }
+  .sidebar ul {
+    list-style-type: none;
+    display: flex;
+    flex-direction: column;
+    padding-inline-start: 0rem;
+    margin: 0rem; }
+    .sidebar ul ul {
+      padding-inline-start: 2rem; }
+    .sidebar ul li {
+      padding: 0.3rem 0.5rem;
+      border-radius: 0.2rem; }
+      .sidebar ul li.current {
+        background-color: #eee; }
+      .sidebar ul li a {
+        color: inherit;
+        font-size: 1.1rem; }
+
+.home {
+  background-color: whitesmoke;
+  width: 100%;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 3rem;
+  gap: 4rem; }
+  .home .title {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    height: 70%;
+    flex-shrink: 0; }
+    .home .title > .description {
+      font-size: 1rem;
+      font-weight: normal;
+      margin: 0rem; }
+  .home div.card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem 1rem 1rem;
+    border-radius: 0.4rem;
+    background-color: #fff;
+    box-shadow: 0.2rem 0.2rem 0.6rem rgba(0, 0, 0, 0.2); }
+    .home div.card > ul {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      padding-inline-start: 0rem; }
+      .home div.card > ul > li {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        max-width: 20rem;
+        padding: 1rem 2rem 2rem; }
+        .home div.card > ul > li ul {
+          list-style-type: disc;
+          padding-inline-start: 2rem; }
+        .home div.card > ul > li > div > :first-child {
+          margin-top: 0rem; }
+  .home h1,
+  .home h2,
+  .home h3,
+  .home h4 {
+    font-weight: normal;
+    text-align: center;
+    margin: 0rem; }
+  .home h1 {
+    font-family: Montserrat, sans-serif;
+    font-size: 2.2rem; }
+  .home h2 {
+    color: midnightblue;
+    font-size: 1.5rem;
+    font-weight: bold; }
+  .home h3 {
+    font-size: 1.2rem; }
+
+article {
+  padding: 2rem 3rem;
+  flex-grow: 1;
+  overflow: auto; }
+  article h1 {
+    font-size: 2rem; }
+  article h2 {
+    font-size: 1.7rem; }
+  article h3 {
+    font-size: 1.3rem; }
+  article h4 {
+    font-size: 1.1rem; }
+  article h5 {
+    font-size: 0.975rem; }
+  article h1,
+  article h2,
+  article h3,
+  article h4,
+  article h5,
+  article h6 {
+    margin-top: 1.2em;
+    margin-bottom: 0.5em; }
+  article ul,
+  article ol {
+    line-height: 1.8; }
+
+a {
+  color: steelblue;
+  text-decoration: none; }
+  a:hover {
+    text-decoration: underline; }
+
+pre {
+  border-radius: 0.2rem; }
+
+code {
+  background-color: #444;
+  color: #ddd;
+  font-family: "Roboto Mono", monospace;
+  display: inline-block;
+  padding: 0.5rem;
+  line-height: 1;
+  margin: 0.2rem 0rem;
+  border-radius: 0.2rem; }
+  pre code {
+    display: block;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 1rem;
+    margin: 0rem;
+    line-height: unset; }
+
+table {
+  border-spacing: 0px; }
+
+th,
+td {
+  padding: 0.5rem 1.5rem;
+  border-bottom: 1px solid #888; }
+
+th {
+  border-top: 1px solid #888; }
+
+blockquote {
+  background: #ddd;
+  color: #444;
+  padding: 1rem;
+  margin: 1rem;
+  border-radius: 0.2rem; }
+  blockquote > *:first-child {
+    margin-top: 0rem; }
+  blockquote > *:last-child {
+    margin-bottom: 0rem; }

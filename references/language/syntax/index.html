@@ -1,0 +1,49 @@
+<!doctype html><html lang=en><head><meta charset=utf-8><meta name=description content="The portable functional programming language"><meta name=theme-color content="#fff"><meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no"><title>Pen programming language</title><link rel=manifest href=/manifest.json><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link rel=stylesheet href="https://fonts.googleapis.com/css2?family=Noto+Sans&family=Montserrat&family=Roboto+Mono&display=swap"><link rel=stylesheet href=https://pen-lang.org/index.css></head><body><header><div><a href=/>Pen</a></div><ul><li class=current><a href=https://pen-lang.org/guides/>Guides</a></li><li class=current><a href=https://pen-lang.org/references/>References</a></li></ul></header><div class=content><div class=sidebar><ul><li><a href=https://pen-lang.org/references/language/>Language</a></li><ul><li class=current><a href=https://pen-lang.org/references/language/syntax/>Syntax</a></li><li><a href=https://pen-lang.org/references/language/types/>Types</a></li><li><a href=https://pen-lang.org/references/language/built-ins/>Built-ins</a></li><li><a href=https://pen-lang.org/references/language/modules/>Modules</a></li><li><a href=https://pen-lang.org/references/language/packages/>Packages</a></li></ul><li><a href=https://pen-lang.org/references/command-line-tools/>Command line tools</a></li></ul></div><article><h1 id=syntax>Syntax</h1><h2 id=module>Module</h2><p>A module consists of <a href=#statements>statements</a>.</p><h2 id=statements>Statements</h2><h3 id=import-statement>Import statement</h3><p>See <a href=../modules>Modules</a>.</p><h3 id=foreign-import-statement>Foreign import statement</h3><pre><code class=language-pen data-lang=pen>import foreign &quot;c&quot; foo \(number, number) number
+</code></pre><h3 id=record-type-definition>Record type definition</h3><p>See <a href=../types#records>Records</a>.</p><h3 id=type-alias>Type alias</h3><p>It gives another name to a given type.</p><pre><code class=language-pen data-lang=pen>type foo = number | none
+</code></pre><h3 id=function-definition>Function definition</h3><ul><li>Followed by a function name, it declares its argument names and types in order and its result type.</li><li>Bodies of functions are <a href=#block>blocks</a>.</li></ul><pre><code class=language-pen data-lang=pen>foo = \(x number, y number) number {
+  x + y
+}
+</code></pre><h2 id=block>Block</h2><ul><li>It consists of 0 or more vaiable bindings and an expression.</li></ul><pre><code class=language-pen data-lang=pen>{
+  z = x + y
+  ...
+  foo(ctx, z)
+  ...
+
+  x + y + z
+}
+</code></pre><h2 id=expressions>Expressions</h2><h3 id=operators>Operators</h3><h4 id=arithmetic>Arithmetic</h4><pre><code class=language-pen data-lang=pen>1 + 1
+1 - 1
+1 * 1
+1 / 1
+</code></pre><h4 id=comparison>Comparison</h4><pre><code class=language-pen data-lang=pen>1 == 1
+1 != 1
+1 &lt; 1
+1 &lt;= 1
+1 &gt; 1
+1 &gt;= 1
+</code></pre><h5 id=generic-equality>Generic equality</h5><p><code>==</code> and <code>!=</code> operators can be used for any types except functions and types that include them.</p><pre><code class=language-pen data-lang=pen>&quot;foo&quot; == &quot;bar&quot;
+foo{x: 0} == foo{x: 1}
+42 != none
+</code></pre><h4 id=boolean>Boolean</h4><pre><code class=language-pen data-lang=pen>!true
+true &amp; false
+true | false
+</code></pre><h4 id=error-handling>Error handling</h4><ul><li>The <code>?</code> suffix operator immediately exits the current function with an operand&rsquo;s value if it is of <a href=../built-ins#error>the <code>error</code> type</a>.</li><li>An operand must be a union type including <a href=../built-ins#error>the <code>error</code> type</a>.</li></ul><pre><code>x?
+</code></pre><h3 id=function-call>Function call</h3><pre><code class=language-pen data-lang=pen>f(x, y)
+</code></pre><h3 id=conditionals>Conditionals</h3><h4 id=if-expression><code>if</code> expression</h4><ul><li>It evaluates the first block if a given boolean value is <code>true</code>.</li><li>Otherwise, it evaluates the second block.</li></ul><pre><code class=language-pen data-lang=pen>if x {
+  ...
+} else {
+  ...
+}
+</code></pre><h4 id=if-type-expression><code>if</code>-type expression</h4><ul><li>It evaluates one of blocks depending on types of a given expressions bound to a given name.</li><li>In each block, the given name is bound to a variable of the specified type.</li></ul><pre><code class=language-pen data-lang=pen>if x = ...; number {
+  ...
+} else if string | none {
+  ...
+} else {
+  ...
+}
+</code></pre><h4 id=if-list-expression><code>if</code>-list expression</h4><ul><li>It evaluates one of blocks depending on values of given lists.</li><li>If a given list has 1 or more element, it evaluates the first block with its first element and rest of elements as a list.</li><li>If it has no element, it evaluates the second block.</li></ul><pre><code class=language-pen data-lang=pen>if [x, ...xs] = ... {
+  ...
+} else {
+  ...
+}
+</code></pre></article></div></body></html>

@@ -1,0 +1,26 @@
+<!doctype html><html lang=en><head><meta charset=utf-8><meta name=description content="The portable functional programming language"><meta name=theme-color content="#fff"><meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no"><title>Pen programming language</title><link rel=manifest href=/manifest.json><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link rel=stylesheet href="https://fonts.googleapis.com/css2?family=Noto+Sans&family=Montserrat&family=Roboto+Mono&display=swap"><link rel=stylesheet href=https://pen-lang.org/index.css></head><body><header><div><a href=/>Pen</a></div><ul><li class=current><a href=https://pen-lang.org/guides/>Guides</a></li><li class=current><a href=https://pen-lang.org/references/>References</a></li></ul></header><div class=content><div class=sidebar><ul><li><a href=https://pen-lang.org/references/language/>Language</a></li><ul><li><a href=https://pen-lang.org/references/language/syntax/>Syntax</a></li><li class=current><a href=https://pen-lang.org/references/language/types/>Types</a></li><li><a href=https://pen-lang.org/references/language/built-ins/>Built-ins</a></li><li><a href=https://pen-lang.org/references/language/modules/>Modules</a></li><li><a href=https://pen-lang.org/references/language/packages/>Packages</a></li></ul><li><a href=https://pen-lang.org/references/command-line-tools/>Command line tools</a></li></ul></div><article><h1 id=types>Types</h1><h2 id=number>Number</h2><pre><code>number
+</code></pre><h3 id=literals>Literals</h3><pre><code>3.14
+-42
+</code></pre><h2 id=boolean>Boolean</h2><pre><code>boolean
+</code></pre><h3 id=literals-1>Literals</h3><pre><code>false
+true
+</code></pre><h2 id=none>None</h2><pre><code>none
+</code></pre><h3 id=literals-2>Literals</h3><pre><code>none
+</code></pre><h2 id=string>String</h2><pre><code>string
+</code></pre><h3 id=literals-3>Literals</h3><pre><code>&quot;foo&quot;
+</code></pre><h2 id=functions>Functions</h2><pre><code>\(number, number) number
+</code></pre><h2 id=lists>Lists</h2><pre><code>[a]
+</code></pre><h3 id=literals-4>Literals</h3><pre><code>[number; 1, 2, 3]
+[myType; x, ...xs]
+</code></pre><h2 id=records>Records</h2><pre><code>type person {
+  name string,
+  age number,
+}
+</code></pre><h3 id=literals-5>Literals</h3><ul><li>Fields are private outside modules where they are defined.</li><li>Append a suffix of a field name to an expression of a record type to access its value.</li></ul><pre><code>person{name: &quot;foo&quot;, age: 42}
+person{...john, name: &quot;bar&quot;}
+john.name
+</code></pre><h2 id=singleton-records>Singleton records</h2><pre><code>type foo {}
+</code></pre><h3 id=literals-6>Literals</h3><ul><li>Their values can be referenced as variables of their names.</li></ul><pre><code>foo
+</code></pre><h2 id=unions>Unions</h2><ul><li>Unions combine different types into a type.</li></ul><pre><code>foo | bar
+</code></pre><h2 id=any>Any</h2><ul><li><code>any</code> is something called a &ldquo;top&rdquo; type.</li><li>Any types can be casted to <code>any</code> type.</li></ul><pre><code>any
+</code></pre></article></div></body></html>
