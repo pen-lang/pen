@@ -121,6 +121,9 @@ f(x, y)
 
 #### `if` expression
 
+- It evaluates the first block if a given boolean value is `true`.
+- Otherwise, it evaluates the second block.
+
 ```pen
 if x {
   ...
