@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<!---->
+{{ define "renderLink" }}<!---->
+{{ if eq .page.Permalink .current.Permalink }}
+<li class="current"><a href="{{ .page.Permalink }}">{{ .page.Title }}</a></li>
+{{ else }}
+<li><a href="{{ .page.Permalink }}">{{ .page.Title }}</a></li>
+{{ end }}<!---->
+{{ end }}<!---->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="description"
+      content="The portable functional programming language"
+    />
+    <meta name="theme-color" content="#fff" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,shrink-to-fit=no"
+    />
+    <title>{{ block "title" . }}{{ .Site.Title }}{{ end }}</title>
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans&family=Montserrat&family=Roboto+Mono&display=swap"
+    />
+    <link rel="stylesheet" href="{{ (resources.Get "index.scss" |
+    resources.ToCSS).Permalink }}" />
+  </head>
+  <body>
+    <header>
+      <div><a href="/">Pen</a></div>
+      <ul>
+        {{ range (.GetPage "/").Pages }}<!---->
+        <li class="current">
+          <a href="{{ .Permalink }}">{{ .Title }}</a>
+        </li>
+        {{ end }}
+      </ul>
+    </header>
+    <div class="content">
+      {{ if not .IsHome }}
+      <div class="sidebar">
+        <ul>
+          {{ $current := . }}<!---->
+          {{ range .FirstSection.Pages }}<!---->
+          {{ template "renderLink" (dict "page" . "current" $current) }}<!---->
+          {{ if .Pages }}
+          <ul>
+            {{ range .Pages }}<!---->
+            {{ template "renderLink" (dict "page" . "current" $current) }}<!---->
+            {{ end }}
+          </ul>
+          {{ end }}<!---->
+          {{ end }}
+        </ul>
+      </div>
+      {{ end }}<!---->
+      {{ block "main" . }}{{ end }}
+    </div>
+  </body>
+</html>
