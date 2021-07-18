@@ -29,17 +29,24 @@
     />
     <link rel="stylesheet" href="{{ (resources.Get "index.scss" |
     resources.ToCSS).Permalink }}" />
+    <script
+      src="https://kit.fontawesome.com/ca450e7101.js"
+      crossorigin="anonymous"
+    ></script>
   </head>
   <body>
     <header>
       <div><a href="/">Pen</a></div>
-      <ul>
-        {{ range (.GetPage "/").Pages }}<!---->
-        <li class="current">
-          <a href="{{ .Permalink }}">{{ .Title }}</a>
-        </li>
-        {{ end }}
-      </ul>
+      <div>
+        <ul>
+          {{ range (.GetPage "/").Pages }}
+          <li>
+            <a href="{{ .Permalink }}">{{ .Title }}</a>
+          </li>
+          {{ end }}
+        </ul>
+        <i class="fab fa-github"></i>
+      </div>
     </header>
     <div class="content">
       {{ if not .IsHome }}
