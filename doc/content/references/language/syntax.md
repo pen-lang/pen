@@ -1,5 +1,6 @@
 ---
 title: Syntax
+weight: 1
 ---
 
 # Syntax
