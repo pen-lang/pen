@@ -11,9 +11,10 @@ title: Getting started
 Pen requires the following software on your system.
 
 - [`cargo`](https://github.com/rust-lang/cargo), the Rust package manager
-- [`git`](https://git-scm.com/), the version control system
-- [`clang`](https://clang.llvm.org/), the C compiler
-- [LLVM](https://llvm.org), the compiler infrastructure
+- [`git`](https://git-scm.com/), the Git version control system
+- [`ninja`](https://ninja-build.org/), the Ninja build system
+- [`clang`](https://clang.llvm.org/), the LLVM-based C compiler
+- [LLVM](https://llvm.org), the LLVM compiler infrastructure
   - Both the library and tools
 
 #### On Ubuntu
@@ -22,8 +23,8 @@ Run the following commands in your terminal to install the required software.
 Note that we need to install LLVM from the external repository to get the specific version of it.
 
 ```sh
-sudo apt install cargo git
-curl -fsSL https://apt.llvm.org/llvm.sh | sudo bash -s 11
+sudo apt install cargo git ninja-build
+curl -fsSL https://apt.llvm.org/llvm.sh | sudo bash -s 12
 ```
 
 #### On macOS
@@ -49,12 +50,12 @@ Then, you should be able to run an `pen` command in your shell. Make sure that t
 pen --help
 ```
 
-## Initializing a package
+## Creating a package
 
-To initialize your first package, run the following command.
+To create your first package, run the following command.
 
 ```sh
-pen init foo
+pen create foo
 ```
 
 Then, you should see a `foo` directory under your current directory. When you switch to the `foo` directory, you should see a `Main.pen` source file and a `pen.json` package configuration file there.
@@ -67,14 +68,14 @@ To build the package, run the following command in the `foo` directory.
 pen build
 ```
 
-Then, you will see an executable file named `foo` in the directory. Run the command to see your first "Hello, world!"
+Then, you will see an executable file named `app` in the directory. Run the command to see your first "Hello, world!"
 
 ```sh
-./foo
+./app
 ```
 
 ## For more information...
 
 Now, you can start editing `*.pen` files and build your own application!
 
-- To know more about the language, see [the language reference](/references/language/syntax.md).
+- To know more about the language, see [the language reference](/references/language).

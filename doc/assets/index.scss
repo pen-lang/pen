@@ -1,8 +1,10 @@
 $white: #ddd;
 $black: #222;
+$dark-grey: #446;
 $grey: #888;
 $primary: midnightblue;
 $light-primary: whitesmoke;
+$primary-text: steelblue;
 
 $language-name-font: Montserrat, sans-serif;
 
@@ -47,7 +49,7 @@ header {
 
 .content {
   display: flex;
-  overflow: hidden;
+  overflow: auto;
 }
 
 .sidebar {
@@ -161,9 +163,17 @@ header {
 
 article {
   padding: 2rem 3rem;
+  flex-grow: 1;
+  overflow: auto;
+
+  ul,
+  ol {
+    line-height: 2;
+  }
 }
 
 a {
+  color: $primary-text;
   text-decoration: none;
 
   &:hover {
@@ -176,11 +186,12 @@ pre {
 }
 
 code {
-  background-color: $black;
+  background-color: $dark-grey;
   color: $white;
   font-family: "Roboto Mono", monospace;
   display: inline-block;
-  padding: 0.3rem 0.5rem;
+  padding: 0.5rem;
+  line-height: 1;
   margin: 0.2rem 0rem;
   border-radius: 0.2rem;
 
@@ -191,4 +202,20 @@ code {
     padding: 0.9em 1em;
     margin: 0rem;
   }
+}
+
+table {
+  border-spacing: 0px;
+}
+
+$table-border: 1px solid $grey;
+
+th,
+td {
+  padding: 0.5rem 1.5rem;
+  border-bottom: $table-border;
+}
+
+th {
+  border-top: $table-border;
 }
