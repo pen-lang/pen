@@ -46,7 +46,7 @@ foo = \(x number, y number) number {
 
 ## Block
 
-- It consists of 0 or more vaiable bindings and an expression.
+- It consists of 0 or more variable bindings and an expression.
 
 ```pen
 {
