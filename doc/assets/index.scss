@@ -8,6 +8,7 @@ $light-primary: whitesmoke;
 $primary-text: steelblue;
 
 $language-name-font: Montserrat, sans-serif;
+$border-radius: 0.2rem;
 
 body {
   color: $black;
@@ -213,7 +214,7 @@ a {
 }
 
 pre {
-  border-radius: 0.2rem;
+  border-radius: $border-radius;
 }
 
 code {
@@ -224,7 +225,7 @@ code {
   padding: 0.5rem;
   line-height: 1;
   margin: 0.2rem 0rem;
-  border-radius: 0.2rem;
+  border-radius: $border-radius;
 
   pre & {
     display: block;
@@ -257,7 +258,7 @@ blockquote {
   color: $dark-grey;
   padding: 1rem;
   margin: 1rem;
-  border-radius: 0.2rem;
+  border-radius: $border-radius;
 
   > *:first-child {
     margin-top: 0rem;
