@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!---->
 {{ define "renderLink" }}<!---->
-{{ if eq .page.File.UniqueID .current.File.UniqueID }}
+{{ if eq .page.Permalink .current.Permalink }}
 <li class="current"><a href="{{ .page.Permalink }}">{{ .page.Title }}</a></li>
 {{ else }}
 <li><a href="{{ .page.Permalink }}">{{ .page.Title }}</a></li>
