@@ -34,6 +34,10 @@ header {
     font-family: $language-name-font;
     font-size: 2rem;
     margin: 1rem 1.5rem;
+
+    &:hover {
+      text-decoration: none;
+    }
   }
 
   > ul {
