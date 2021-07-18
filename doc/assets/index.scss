@@ -166,6 +166,10 @@ article {
   flex-grow: 1;
   overflow: auto;
 
+  h1 {
+    font-size: 1.7em;
+  }
+
   ul,
   ol {
     line-height: 2;
@@ -197,10 +201,11 @@ code {
 
   pre & {
     display: block;
-    overflow: hidden;
     overflow-x: auto;
-    padding: 0.9em 1em;
+    overflow-y: hidden;
+    padding: 1rem;
     margin: 0rem;
+    line-height: unset;
   }
 }
 

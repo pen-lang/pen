@@ -7,7 +7,7 @@ title: Types
 ## Number
 
 ```
-Number
+number
 ```
 
 ### Literals
@@ -20,32 +20,32 @@ Number
 ## Boolean
 
 ```
-Boolean
+boolean
 ```
 
 ### Literals
 
 ```
-False
-True
+false
+true
 ```
 
 ## None
 
 ```
-None
+none
 ```
 
 ### Literals
 
 ```
-None
+none
 ```
 
 ## String
 
 ```
-String
+string
 ```
 
 ### Literals
@@ -57,7 +57,7 @@ String
 ## Functions
 
 ```
-a -> b
+\(number, number) number
 ```
 
 ## Lists
@@ -69,33 +69,34 @@ a -> b
 ### Literals
 
 ```
-[ 1, 2, 3 ]
-[ x, ...xs ]
+[number; 1, 2, 3]
+[myType; x, ...xs]
 ```
 
 ## Records
 
 ```
-type Person {
-  name : String,
-  age : Number,
+type person {
+  name string,
+  age number,
 }
 ```
 
 ### Literals
 
 - Fields are private outside modules where they are defined.
+- Append a suffix of a field name to an expression of a record type to access its value.
 
 ```
-Person.name person
-Person{ name = "foo", age = 42 }
-Person{ ...person, name = "bar" }
+person{name: "foo", age: 42}
+person{...john, name: "bar"}
+john.name
 ```
 
 ## Singletons
 
 ```
-type Foo
+type foo {}
 ```
 
 ### Literals
@@ -103,7 +104,7 @@ type Foo
 - Singleton values can be referenced by their type names.
 
 ```
-Foo
+foo
 ```
 
 ## Unions
@@ -111,14 +112,14 @@ Foo
 - Unions combine different types into a type.
 
 ```
-Foo | Bar
+foo | bar
 ```
 
 ## Any
 
-- `Any` is something called a "top" type.
-- Any types can be casted to `Any` type.
+- `any` is something called a "top" type.
+- Any types can be casted to `any` type.
 
 ```
-Any
+any
 ```

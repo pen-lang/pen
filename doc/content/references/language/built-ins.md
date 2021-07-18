@@ -4,16 +4,16 @@ title: Built-ins
 
 # Built-ins
 
-Built-in types and functions that are accessible from any modules with no prefix.
+Built-in types and functions that are accessible from any modules
 
 ## Types
 
-### `Error`
+### `error`
 
-`Error` type is a special record type used for error handling.
+`error` type is a special record type used for error handling.
 
 ```
-type Error {
+type error {
   ...
 }
 ```
