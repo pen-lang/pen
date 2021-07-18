@@ -101,7 +101,7 @@ type foo {}
 
 ### Literals
 
-- Singleton values can be referenced by their type names.
+- Their values can be referenced as variables of their names.
 
 ```
 foo
