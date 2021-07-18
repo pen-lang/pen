@@ -4,5 +4,5 @@
   version="1.1"
   viewBox="0 0 100 100"
 >
-  <text x="0em" y="0.9em" font-size="90">✒️</text>
+  <text x="0em" y="0.95em" font-size="80">✒️</text>
 </svg>
