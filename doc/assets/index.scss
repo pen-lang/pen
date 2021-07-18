@@ -34,9 +34,17 @@ header {
     color: $white;
     font-family: $language-name-font;
     font-size: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
 
     &:hover {
       text-decoration: none;
+    }
+
+    > img {
+      display: inline-block;
+      width: 2rem;
     }
   }
 
