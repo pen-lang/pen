@@ -2,6 +2,7 @@ $white: #ddd;
 $black: #222;
 $dark-grey: #446;
 $grey: #888;
+$light-grey: #ddd;
 $primary: midnightblue;
 $light-primary: whitesmoke;
 $primary-text: steelblue;
@@ -107,7 +108,7 @@ header {
     flex-direction: column;
     align-items: center;
     padding: 2rem 1rem 1rem;
-    border-radius: 0.3rem;
+    border-radius: 0.4rem;
     background-color: #fff;
     box-shadow: 0.2rem 0.2rem 0.6rem rgba(0, 0, 0, 0.2);
 
@@ -223,4 +224,20 @@ td {
 
 th {
   border-top: $table-border;
+}
+
+blockquote {
+  background: $light-grey;
+  color: $dark-grey;
+  padding: 1rem;
+  margin: 1rem;
+  border-radius: 0.2rem;
+
+  > *:first-child {
+    margin-top: 0rem;
+  }
+
+  > *:last-child {
+    margin-bottom: 0rem;
+  }
 }

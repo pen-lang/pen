@@ -70,7 +70,7 @@ import Foo'Bar'Baz
 
 ### Custom prefixes
 
-> WIP
+> This feature is work in progress.
 
 Imported modules can have prefixes different from their names.
 
