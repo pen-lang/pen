@@ -4,62 +4,76 @@ title: Modules
 
 # Modules
 
-- Each source file composes a module.
-- Modules contain their variables, functions and types.
+## Overview
+
+- In Pen, each source file composes a module.
+- Modules contain their functions and types.
 - They are exported to and imported from other modules.
 
-## `export` statement
+## Exporting functions and types from a module
 
-The `export` statement exports variables, functions and types outside the module.
-
-```
-export { foo, Bar }
-```
-
-## `import` statement
-
-The `import` statement imports variables, functions and types from other modules.
+Name functions and types in an upper camel case.
 
 ```
-import "github.com/pen-lang/foo/Foo"
+type Foo {
+  ...
+}
+
+type Bar = ...
+
+Foo = \() number {
+  ...
+}
 ```
 
-Then, you can access members of the `Foo` module with its prefix.
+## Importing functions and types from a module
+
+First, place an `import` statement to import a module at the top of a module you want to import them into.
+
+The first component of a path in the statement is a name of an external package you declare in [a `pen.json` file](/references/language/packages) (`Foo`.) It is omitted if the imported module is in the same package. The rest of the path components are directory names where a module exists (`Bar`) and the basename of the module filename (`Baz`.)
 
 ```
-type Bar = Foo.Foo
+import Foo'Bar'Baz
+```
 
-bar x = Foo.foo x
+Then, you can access exported members of the module with its prefix.
+
+```
+type Foo = Baz'Foo
+
+bar = \(x number) number {
+  Baz'Foo(x)
+}
 ```
 
 ### Module names
 
 #### Modules in the same package
 
-Modules in the same package are referenced by their paths relative to their package root directory.
+Modules in the same package are referenced by their paths relative to their package root directories.
 
 For example, a module of a file `<package directory>/Foo/Bar.pen` is imported as below.
 
 ```
-import "/Foo/Bar"
+import 'Foo'Bar
 ```
 
 #### Modules in other packages
 
 Modules in other packages are referenced by their package names and module paths.
 
-For example, a module of a file `<package directory>/Foo/Bar.pen` in a package `github.com/foo/bar` is imported as below.
+For example, a module of a file `<package directory>/Bar/Baz.pen` in a package `Foo` is imported as below.
 
 ```
-import "github.com/foo/bar/Foo/Bar"
+import Foo'Bar'Baz
 ```
 
 ### Custom prefixes
 
 > WIP
 
-Imported modules can have different prefixes.
+Imported modules can have prefixes different from their names.
 
 ```
-import Bar "github.com/pen-lang/foo/Foo"
+import Bar Foo'Bar'Baz
 ```

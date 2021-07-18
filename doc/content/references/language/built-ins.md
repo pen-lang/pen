@@ -10,7 +10,7 @@ Built-in types and functions that are accessible from any modules
 
 ### `error`
 
-`error` type is a special record type used for error handling.
+It is a special record type used for error handling.
 
 ```
 type error {
@@ -20,26 +20,18 @@ type error {
 
 ## Functions
 
-### `not`
-
-`not` function flips a condition.
-
-```
-not : Boolean -> Boolean
-```
-
 ### `error`
 
-`error` function creates an error with its source information.
+It creates an error with its source information.
 
 ```
-error : Any -> Error
+error \(any) error
 ```
 
 ### `source`
 
-`source` function extracts source information from an error.
+It extracts source information from an error.
 
 ```
-source : Error -> Any
+source \(error) any
 ```
