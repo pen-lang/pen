@@ -4,37 +4,59 @@ title: Syntax
 
 # Syntax
 
+## Module
+
+A module consists of [statements](#statements).
+
 ## Statements
 
-Variables and functions can be defined using the `:` sign to specify their types and the `=` sign to specify their values.
+### Import statement
 
-### Variable definition
+See [Modules](../modules).
 
-```
-x : Number
-x = ...
-```
+### Foreign import statement
 
-### Function definition
-
-```
-f : Number -> Number -> Number
-f x y = ...
+```pen
+import foreign "c" foo \(number, number) number
 ```
 
 ### Record type definition
 
-See [Records](types.md#records).
+See [Records](../types#records).
 
 ### Type alias
 
-```
-type Foo = ...
+It gives another name to a given type.
+
+```pen
+type Foo = number | none
 ```
 
-### Module import and export
+### Function definition
 
-See [Modules](modules.md).
+- Followed by a function name, it declares its argument names and types in order and its result type.
+- Bodies of functions are [blocks](#block).
+
+```pen
+foo = \(x number, y number) number {
+  x + y
+}
+```
+
+## Block
+
+- It consists of 0 or more vaiable bindings and an expression.
+
+```pen
+{
+  z = x + y
+  ...
+  foo(ctx, z)
+  ...
+
+  x + y + z
+}
+```
 
 ## Expressions
 
@@ -42,7 +64,7 @@ See [Modules](modules.md).
 
 #### Arithmetic
 
-```
+```pen
 1 + 1
 1 - 1
 1 * 1
@@ -51,9 +73,9 @@ See [Modules](modules.md).
 
 #### Comparison
 
-```
+```pen
 1 == 1
-1 /= 1
+1 != 1
 1 < 1
 1 <= 1
 1 > 1
@@ -62,91 +84,72 @@ See [Modules](modules.md).
 
 ##### Generic equality
 
-`==` and `/=` operators can be used for any types except functions and types which might include them.
+`==` and `!=` operators can be used for any types except functions and types that include them.
 
-```
+```pen
 "foo" == "bar"
-Foo{ foo : 0 } == Foo{ foo : 1 }
-42 /= None
+foo{x: 0} == foo{x: 1}
+42 != none
 ```
 
 #### Boolean
 
-```
-True && True
-True || True
+```pen
+!true
+true & false
+true | false
 ```
 
-### Function application
+#### Error handling
+
+- The `?` suffix operator immediately exits the current function with an operand's value if it is of [the `error` type][error-type].
+- An operand must be a union type including [the `error` type][error-type].
 
 ```
-f x
+x?
+```
+
+[error-type]: ../built-ins#error
+
+### Function call
+
+```pen
+f(x, y)
 ```
 
 ### Conditionals
 
 #### `if` expression
 
-```
-if x then
+```pen
+if x {
   ...
-else
+} else {
   ...
+}
 ```
 
-#### `case` expression
+#### `if`-type expression
 
-##### Lists
+- It evaluates blocks depending on types of a given expressions bound to a given name.
+- In each block, the given name is bound to a variable of the specified type.
 
-```
-case xs
-  [] => ...
-  [ y, ...ys ] => ...
-```
-
-##### Unions and `Any`
-
-- Values of union and `Any` types can be downcasted using the `case` expression.
-- The variable (`x` in the code below) is bound as a different type in each branch.
-
-```
-case x = ...
-  Foo => ...
-  Bar | Baz => ...
+```pen
+if x = ...; number {
+  ...
+} else if none {
+  ...
+} else {
+  ...
+}
 ```
 
-### Bindings
+#### `if`-list expression
 
-#### `let` expression
-
-- Both variable and function definitions can be used in the `let` expressions.
-
-```
-let
-  x = 1
-  f x = x + 1
-in
-  x + f y
-```
-
-#### `let`-error expression
-
-- Using `case` expressions for error handling is hard because the expressions often get nested deeply.
-- `let`-error expression flattens those error handlings by propagating errors in variable definitions to a value of the whole expression.
-
-Given `x : Number | Error`,
-
-```
-let
-  y ?= x
-in
-  y + 1
-```
-
-is equivalent to
-
-```
-case y = x
-  Error => y
-  Number => y + 1
+```pen
+if [x, ...xs] = ... {
+  ...
+} else {
+  ...
+}
 ```
