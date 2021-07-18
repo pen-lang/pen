@@ -26,30 +26,42 @@ header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 1rem 1.5rem;
   box-shadow: 0rem 0rem 0.5rem rgba(0, 0, 0, 0.5);
   z-index: 1;
 
-  > div a {
+  > div > a {
     color: $white;
     font-family: $language-name-font;
     font-size: 2rem;
-    margin: 1rem 1.5rem;
 
     &:hover {
       text-decoration: none;
     }
   }
 
-  > ul {
-    list-style-type: none;
+  > div {
     display: flex;
-    gap: 1rem;
-    padding-inline-start: 0rem;
-    margin: 1rem 1.5rem;
+    align-items: center;
+    gap: 1.25rem;
 
-    a {
+    > ul {
+      list-style-type: none;
+      display: flex;
+      gap: 1rem;
+      padding-inline-start: 0rem;
+      padding: 0rem;
+      margin: 0rem;
+
+      a {
+        color: $white;
+        font-size: 1.3rem;
+      }
+    }
+
+    i {
+      font-size: 2rem;
       color: $white;
-      font-size: 1.3rem;
     }
   }
 }
@@ -62,7 +74,7 @@ header {
 .sidebar {
   width: 12rem;
   flex-shrink: 0;
-  padding: 2rem 3rem;
+  padding: 2rem;
 
   ul {
     list-style-type: none;
