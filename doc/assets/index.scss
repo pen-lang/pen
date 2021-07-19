@@ -10,6 +10,7 @@ $primary-text: steelblue;
 
 $language-name-font: Montserrat, sans-serif;
 $border-radius: 0.2rem;
+$transition-delay: 0.1s;
 
 @mixin small-width {
   @media (max-width: 768px) {
@@ -85,18 +86,30 @@ header {
 
 .content {
   display: flex;
-  overflow: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .sidebar {
-  width: 12rem;
+  padding: 1.5rem;
   flex-shrink: 0;
-  padding: 2rem;
+
+  @include small-width {
+    overflow-x: hidden;
+    transition: width $transition-delay, padding $transition-delay;
+
+    &.hidden {
+      width: 0rem;
+      padding-right: 0rem;
+      padding-left: 0rem;
+    }
+  }
 
   ul {
     list-style-type: none;
     display: flex;
     flex-direction: column;
+    width: 12rem;
     padding-inline-start: 0rem;
     margin: 0rem;
 
@@ -117,6 +130,34 @@ header {
         font-size: 1.1rem;
       }
     }
+  }
+}
+
+.sidebar-button {
+  display: none;
+
+  @include small-width {
+    display: grid;
+    place-items: center;
+    font-size: 2rem;
+    color: $grey;
+    width: 1em;
+    height: 1em;
+    position: fixed;
+    left: 0.4em;
+    bottom: 0.4em;
+    transition: transform $transition-delay;
+
+    &.on {
+      transform: rotate3d(0, 1, 0, 180deg);
+    }
+  }
+}
+
+.page {
+  @include small-width {
+    width: 100vw;
+    flex-shrink: 0;
   }
 }
 
