@@ -87,9 +87,9 @@ header {
     height: 70%;
     flex-shrink: 0; }
     .home .title > img {
-      width: 6rem; }
+      width: 7rem; }
     .home .title > .description {
-      font-size: 1rem;
+      font-size: 1.1rem;
       font-weight: normal;
       margin: 0rem; }
   .home div.card {
