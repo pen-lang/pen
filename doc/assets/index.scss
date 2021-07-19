@@ -40,7 +40,7 @@ header {
     font-size: 0.85rem;
   }
 
-  > div:first-child > a {
+  > div.title > a {
     color: $white;
     font-family: $language-name-font;
     font-size: 2em;
@@ -57,7 +57,7 @@ header {
     }
   }
 
-  > div:last-child {
+  > div.links {
     display: flex;
     align-items: center;
     gap: 1.25em;
