@@ -37,10 +37,10 @@
   </head>
   <body>
     <header>
-      <div>
+      <div class="title">
         <a href="/"><img src="/icon.svg" />Pen</a>
       </div>
-      <div>
+      <div class="links">
         <ul>
           {{ range (.GetPage "/").Pages }}
           <li>
@@ -55,7 +55,7 @@
     </header>
     <div class="content">
       {{ if not .IsHome }}
-      <div class="sidebar">
+      <div class="sidebar hidden">
         <ul>
           {{ $current := . }}<!---->
           {{ range .FirstSection.Pages }}<!---->
@@ -70,8 +70,12 @@
           {{ end }}
         </ul>
       </div>
+      <div class="sidebar-button">
+        <i class="fas fa-chevron-right"></i>
+      </div>
       {{ end }}<!---->
-      {{ block "main" . }}{{ end }}
+      <div class="page">{{ block "main" . }}{{ end }}</div>
     </div>
+    <script src="/index.js"></script>
   </body>
 </html>

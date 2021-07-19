@@ -10,6 +10,13 @@ $primary-text: steelblue;
 
 $language-name-font: Montserrat, sans-serif;
 $border-radius: 0.2rem;
+$transition-delay: 0.1s;
+
+@mixin small-width {
+  @media (max-width: 768px) {
+    @content;
+  }
+}
 
 body {
   color: $black;
@@ -26,14 +33,18 @@ header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 1.5rem;
+  padding: 1em 1.5em;
   box-shadow: 0rem 0rem 0.5rem rgba(0, 0, 0, 0.5);
   z-index: 1;
 
-  > div > a {
+  @include small-width {
+    font-size: 0.85rem;
+  }
+
+  > div.title > a {
     color: $white;
     font-family: $language-name-font;
-    font-size: 2rem;
+    font-size: 2em;
     display: flex;
     align-items: center;
     gap: 0.8rem;
@@ -43,31 +54,31 @@ header {
     }
 
     > img {
-      width: 2.2rem;
+      width: 1.1em;
     }
   }
 
-  > div {
+  > div.links {
     display: flex;
     align-items: center;
-    gap: 1.25rem;
+    gap: 1.25em;
 
     > ul {
       list-style-type: none;
       display: flex;
-      gap: 1rem;
+      gap: 1em;
       padding-inline-start: 0rem;
       padding: 0rem;
       margin: 0rem;
 
       a {
         color: $white;
-        font-size: 1.3rem;
+        font-size: 1.3em;
       }
     }
 
     i {
-      font-size: 2rem;
+      font-size: 2em;
       color: $white;
     }
   }
@@ -75,18 +86,32 @@ header {
 
 .content {
   display: flex;
-  overflow: auto;
+  height: 100%;
+  overflow: hidden;
 }
 
 .sidebar {
-  width: 12rem;
-  flex-shrink: 0;
   padding: 2rem;
+  flex-shrink: 0;
+  overflow-y: auto;
+
+  @include small-width {
+    overflow-x: hidden;
+    transition: width $transition-delay, padding $transition-delay;
+    padding: 1.5rem;
+
+    &.hidden {
+      width: 0rem;
+      padding-right: 0rem;
+      padding-left: 0rem;
+    }
+  }
 
   ul {
     list-style-type: none;
     display: flex;
     flex-direction: column;
+    width: 12rem;
     padding-inline-start: 0rem;
     margin: 0rem;
 
@@ -110,9 +135,41 @@ header {
   }
 }
 
+.sidebar-button {
+  display: none;
+
+  @include small-width {
+    display: grid;
+    place-items: center;
+    font-size: 2rem;
+    color: $grey;
+    width: 1em;
+    height: 1em;
+    position: fixed;
+    left: 0.4em;
+    bottom: 0.4em;
+    transition: transform $transition-delay;
+
+    &.on {
+      transform: rotate3d(0, 1, 0, 180deg);
+    }
+  }
+}
+
+.page {
+  width: 100%;
+  overflow-y: auto;
+
+  @include small-width {
+    width: 100vw;
+    flex-shrink: 0;
+  }
+}
+
 .home {
   background-color: $light-primary;
   width: 100%;
+  box-sizing: border-box;
   overflow: auto;
   display: flex;
   flex-direction: column;
@@ -126,7 +183,7 @@ header {
     align-items: center;
     justify-content: center;
     gap: 1rem;
-    height: 70%;
+    height: 50vh;
     flex-shrink: 0;
 
     > img {
@@ -200,9 +257,13 @@ header {
 }
 
 article {
-  padding: 2rem 3rem;
+  padding: 3rem;
   flex-grow: 1;
   overflow: auto;
+
+  @include small-width {
+    padding: 2rem;
+  }
 
   h1 {
     font-size: 2rem;
@@ -237,6 +298,10 @@ article {
   ul,
   ol {
     line-height: 1.8;
+  }
+
+  > :first-child {
+    margin-top: 0rem;
   }
 }
 
