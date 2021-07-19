@@ -11,6 +11,12 @@ $primary-text: steelblue;
 $language-name-font: Montserrat, sans-serif;
 $border-radius: 0.2rem;
 
+@mixin small-width {
+  @media (max-width: 768px) {
+    @content;
+  }
+}
+
 body {
   color: $black;
   font: 16px "Noto Sans", sans-serif;
@@ -26,14 +32,18 @@ header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 1.5rem;
+  padding: 1em 1.5em;
   box-shadow: 0rem 0rem 0.5rem rgba(0, 0, 0, 0.5);
   z-index: 1;
 
-  > div > a {
+  @include small-width {
+    font-size: 0.85rem;
+  }
+
+  > div:first-child > a {
     color: $white;
     font-family: $language-name-font;
-    font-size: 2rem;
+    font-size: 2em;
     display: flex;
     align-items: center;
     gap: 0.8rem;
@@ -43,31 +53,31 @@ header {
     }
 
     > img {
-      width: 2.2rem;
+      width: 1.1em;
     }
   }
 
-  > div {
+  > div:last-child {
     display: flex;
     align-items: center;
-    gap: 1.25rem;
+    gap: 1.25em;
 
     > ul {
       list-style-type: none;
       display: flex;
-      gap: 1rem;
+      gap: 1em;
       padding-inline-start: 0rem;
       padding: 0rem;
       margin: 0rem;
 
       a {
         color: $white;
-        font-size: 1.3rem;
+        font-size: 1.3em;
       }
     }
 
     i {
-      font-size: 2rem;
+      font-size: 2em;
       color: $white;
     }
   }
