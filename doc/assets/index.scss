@@ -201,7 +201,9 @@ header {
     display: flex;
     flex-direction: column;
     align-items: center;
+    max-width: 90vw;
     padding: 2rem 1rem 1rem;
+    box-sizing: border-box;
     border-radius: 0.4rem;
     background-color: #fff;
     box-shadow: 0.2rem 0.2rem 0.6rem rgba(0, 0, 0, 0.2);
