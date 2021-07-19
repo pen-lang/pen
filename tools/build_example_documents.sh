@@ -9,7 +9,7 @@ gherkin2markdown $base_directory/features $document_directory
 rm -r $document_directory/smoke
 
 for file in $(find $document_directory); do
-  if [ ! -f $file -o $(basename $file) = '_index.md' ]; then
+  if ! echo $file | grep '\.md$' || [ $(basename $file) = '_index.md' ]; then
     continue
   fi
 
