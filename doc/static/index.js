@@ -20,4 +20,4 @@ const configurePrerenderHooks = () => {
 };
 
 configureSidebar();
-configurePrerenderHooks;
+configurePrerenderHooks();

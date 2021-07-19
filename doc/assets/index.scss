@@ -91,12 +91,13 @@ header {
 }
 
 .sidebar {
-  padding: 1.5rem;
+  padding: 2rem;
   flex-shrink: 0;
 
   @include small-width {
     overflow-x: hidden;
     transition: width $transition-delay, padding $transition-delay;
+    padding: 1.5rem;
 
     &.hidden {
       width: 0rem;
@@ -155,6 +156,8 @@ header {
 }
 
 .page {
+  width: 100%;
+
   @include small-width {
     width: 100vw;
     flex-shrink: 0;
@@ -164,6 +167,7 @@ header {
 .home {
   background-color: $light-primary;
   width: 100%;
+  box-sizing: border-box;
   overflow: auto;
   display: flex;
   flex-direction: column;
@@ -251,9 +255,13 @@ header {
 }
 
 article {
-  padding: 2rem 3rem;
+  padding: 3rem;
   flex-grow: 1;
   overflow: auto;
+
+  @include small-width {
+    padding: 2rem;
+  }
 
   h1 {
     font-size: 2rem;
@@ -288,6 +296,10 @@ article {
   ul,
   ol {
     line-height: 1.8;
+  }
+
+  > :first-child {
+    margin-top: 0rem;
   }
 }
 
