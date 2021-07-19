@@ -15,13 +15,13 @@ It creates a package of a given kind in a specified directory.
 ### Creating an application package
 
 ```sh
-pen init foo
+pen create foo
 ```
 
 ### Creating a library package
 
 ```sh
-pen init --library foo
+pen create --library foo
 ```
 
 ## `build` command
