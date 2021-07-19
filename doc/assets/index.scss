@@ -207,16 +207,17 @@ header {
     box-shadow: 0.2rem 0.2rem 0.6rem rgba(0, 0, 0, 0.2);
 
     > ul {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
+      display: flex;
       gap: 1rem;
       padding-inline-start: 0rem;
+      justify-content: center;
+      flex-wrap: wrap;
 
       > li {
         display: flex;
         flex-direction: column;
         gap: 1rem;
-        max-width: 20rem;
+        width: 20rem;
         padding: 1rem 2rem 2rem;
 
         ul {
