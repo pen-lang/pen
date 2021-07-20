@@ -1,4 +1,4 @@
-Feature: Package creator
+Feature: Creating packages
   Scenario: Create an application package
     Given I successfully run `pen create foo`
     And I cd to "foo"

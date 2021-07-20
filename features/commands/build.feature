@@ -1,4 +1,4 @@
-Feature: Package builder
+Feature: Building packages
   Scenario: Build an application package
     Given a file named "pen.json" with:
     """
