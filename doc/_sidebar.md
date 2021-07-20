@@ -34,3 +34,5 @@
   - Libraries
     - [Core](/examples/libraries/core.md)
   - [FFI](/examples/ffi.md)
+- [Roadmap](roadmap)
+- [The Zen](the-zen)
