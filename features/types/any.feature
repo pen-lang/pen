@@ -1,13 +1,13 @@
 Feature: Any
   Background:
     Given a file named "pen.json" with:
-    """
+    """json
     { "dependencies": {} }
     """
 
   Scenario: Use an any type
     Given a file named "Foo.pen" with:
-    """
+    """pen
     f = \() any {
       42
     }
@@ -17,7 +17,7 @@ Feature: Any
 
   Scenario: Downcast an any type
     Given a file named "Foo.pen" with:
-    """
+    """pen
     f = \(x any) number {
       if x = x; number {
         x

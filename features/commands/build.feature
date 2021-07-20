@@ -1,7 +1,7 @@
 Feature: Building packages
   Scenario: Build an application package
     Given a file named "pen.json" with:
-    """
+    """json
     {
       "dependencies": {
         "System": "file://pen-root/lib/os"
@@ -9,7 +9,7 @@ Feature: Building packages
     }
     """
     And a file named "Main.pen" with:
-    """
+    """pen
     import System'Os
 
     main = \(os Os'Os) number {
@@ -21,11 +21,11 @@ Feature: Building packages
 
   Scenario: Build a library package
     Given a file named "pen.json" with:
-    """
+    """json
     { "dependencies": {} }
     """
     And a file named "Foo.pen" with:
-    """
+    """pen
     f = \(x number) number {
       x
     }
@@ -35,11 +35,11 @@ Feature: Building packages
 
   Scenario: Cross-build a library package
     Given a file named "pen.json" with:
-    """
+    """json
     { "dependencies": {} }
     """
     And a file named "Foo.pen" with:
-    """
+    """pen
     f = \(x number) number {
       x
     }

@@ -1,8 +1,3 @@
----
-title: Built-ins
-weight: 3
----
-
 # Built-ins
 
 Built-in types and functions that are accessible from any modules

@@ -1,13 +1,13 @@
 Feature: Union
   Background:
     Given a file named "pen.json" with:
-    """
+    """json
     { "dependencies": {} }
     """
 
   Scenario: Use a union type
     Given a file named "Foo.pen" with:
-    """
+    """pen
     f = \() number | none {
       42
     }
@@ -17,7 +17,7 @@ Feature: Union
 
   Scenario: Downcast a union type
     Given a file named "Foo.pen" with:
-    """
+    """pen
     f = \(x number | none) number {
       if x = x; number {
         x
@@ -31,7 +31,7 @@ Feature: Union
 
   Scenario: Downcast a union type with an else block
     Given a file named "Foo.pen" with:
-    """
+    """pen
     f = \(x number | none) number {
       if x = x; none {
         0
@@ -45,7 +45,7 @@ Feature: Union
 
   Scenario: Downcast a union type to another union type
     Given a file named "Foo.pen" with:
-    """
+    """pen
     f = \(x number | boolean | none) number | none {
       if x = x; number | none {
         x

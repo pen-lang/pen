@@ -1,7 +1,3 @@
----
-title: Install
----
-
 # Install
 
 ## Requirements

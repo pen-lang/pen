@@ -1,15 +1,15 @@
 Feature: Polymorphism
   Background:
     Given a file named "pen.json" with:
-    """
+    """json
     { "dependencies": {} }
     """
 
   Scenario: Use an equal operator
     Given a file named "Foo.pen" with:
-    """
+    """pen
     f = \() boolean {
-      0 == 0
+      42 == none
     }
     """
     When I run `pen build`
@@ -17,9 +17,9 @@ Feature: Polymorphism
 
   Scenario: Use a not-equal operator
     Given a file named "Foo.pen" with:
-    """
+    """pen
     f = \() boolean {
-      0 != 0
+      42 != none
     }
     """
     When I run `pen build`
@@ -27,7 +27,7 @@ Feature: Polymorphism
 
   Scenario: Compare unions
     Given a file named "Foo.pen" with:
-    """
+    """pen
     f = \(x number | none, y number | none) boolean {
       x == y
     }
@@ -35,9 +35,9 @@ Feature: Polymorphism
     When I run `pen build`
     Then the exit status should be 0
 
-  Scenario: Use a union and none
+  Scenario: Compare a union and none
     Given a file named "Foo.pen" with:
-    """
+    """pen
     f = \(x number | none) boolean {
       x == none
     }

@@ -1,0 +1,38 @@
+- [Home](/)
+- Guides
+  - [Getting started](/guides/getting-started)
+  - [Install](/guides/install)
+  - [Naming convention](/guides/naming-convention)
+- References
+  - Language
+    - [Syntax](/references/language/syntax)
+    - [Types](/references/language/types)
+    - [Built-ins](/references/language/built-ins)
+    - [Modules](/references/language/modules)
+    - [Packages](/references/language/packages)
+  - [Command line tools](/references/command-line-tools)
+- Examples
+  - Types
+    - [Number](/examples/types/number)
+    - [Boolean](/examples/types/boolean)
+    - [None](/examples/types/none)
+    - [String](/examples/types/string)
+    - [Function](/examples/types/function)
+    - [Record](/examples/types/record)
+    - [Union](/examples/types/union)
+    - [List](/examples/types/list)
+    - [Error](/examples/types/error)
+    - [Any](/examples/types/any)
+    - [Polymorphism](/examples/types/polymorphism)
+  - Syntax
+    - [Block](/examples/syntax/block)
+  - [Modules](/examples/module)
+  - [Packages](/examples/package)
+  - Commands
+    - [Building packages](/examples/commands/build)
+    - [Creating packages](/examples/commands/create)
+  - Libraries
+    - [Core](/examples/libraries/core)
+  - [FFI](/examples/ffi)
+- [Roadmap](roadmap)
+- [The Zen](the-zen)

@@ -20,8 +20,10 @@
     "realloc",
     "renamer",
     "repr",
+    "roadmap",
     "subninja",
     "tailcallopt",
-    "termcolor"
+    "termcolor",
+    "wasi"
   ]
 }

@@ -1,13 +1,13 @@
 Feature: List
   Background:
     Given a file named "pen.json" with:
-    """
+    """json
     { "dependencies": {} }
     """
 
   Scenario: Create an empty list
     Given a file named "Foo.pen" with:
-    """
+    """pen
     f = \() [number] {
       [number;]
     }
@@ -17,7 +17,7 @@ Feature: List
 
   Scenario: Create a list with an element
     Given a file named "Foo.pen" with:
-    """
+    """pen
     f = \() [number] {
       [number; 1]
     }
@@ -27,7 +27,7 @@ Feature: List
 
   Scenario: Create a list with two elements
     Given a file named "Foo.pen" with:
-    """
+    """pen
     f = \() [number] {
       [number; 1, 2]
     }
@@ -37,7 +37,7 @@ Feature: List
 
   Scenario: Join lists
     Given a file named "Foo.pen" with:
-    """
+    """pen
     f = \(xs [number]) [number] {
       [number; ...xs, ...xs]
     }
@@ -47,7 +47,7 @@ Feature: List
 
   Scenario: Create a list of a union type
     Given a file named "Foo.pen" with:
-    """
+    """pen
     f = \() [number | none] {
       [number | none; 1, none]
     }
@@ -57,7 +57,7 @@ Feature: List
 
   Scenario: Coerce elements of a spraed list
     Given a file named "Foo.pen" with:
-    """
+    """pen
     f = \(xs [number]) [number | none] {
       [number | none; ...xs]
     }
@@ -67,7 +67,7 @@ Feature: List
 
   Scenario: Use if-list expression
     Given a file named "Foo.pen" with:
-    """
+    """pen
     f = \(xs [number]) [number] {
       if [y, ...ys] = xs {
         [number; y, ...ys]

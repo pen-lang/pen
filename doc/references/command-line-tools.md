@@ -1,12 +1,16 @@
----
-title: Command line tools
----
-
 # Command line tools
 
 The `pen` command has the following sub-commands.
 
 For more information, see help by running `pen --help`.
+
+## `build` command
+
+It builds a package in a current directory.
+
+```sh
+pen build
+```
 
 ## `create` command
 
@@ -22,12 +26,4 @@ pen create foo
 
 ```sh
 pen create --library foo
-```
-
-## `build` command
-
-It builds a package in a current directory.
-
-```sh
-pen build
 ```

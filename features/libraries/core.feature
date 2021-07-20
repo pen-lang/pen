@@ -1,7 +1,7 @@
 Feature: Core
   Background:
     Given a file named "pen.json" with:
-    """
+    """json
     {
       "dependencies": {
         "Core": "file://pen-root/lib/core"
@@ -11,7 +11,7 @@ Feature: Core
 
   Scenario: Convert a number to a string
     Given a file named "Foo.pen" with:
-    """
+    """pen
     import Core'Number
 
     f = \() string {
@@ -23,7 +23,7 @@ Feature: Core
 
   Scenario: Join strings
     Given a file named "Foo.pen" with:
-    """
+    """pen
     import Core'String
 
     f = \() string {
@@ -35,7 +35,7 @@ Feature: Core
 
   Scenario: Slice a string
     Given a file named "Foo.pen" with:
-    """
+    """pen
     import Core'String
 
     f = \() string {

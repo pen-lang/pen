@@ -1,13 +1,8 @@
----
-title: Getting started
-weight: 1
----
-
 # Getting started
 
 ## Installing `pen` command
 
-See [Install](../install).
+See [Install](install).
 
 ## Creating a package
 

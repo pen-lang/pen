@@ -1,13 +1,13 @@
 Feature: Number
   Background:
     Given a file named "pen.json" with:
-    """
+    """json
     { "dependencies": {} }
     """
 
   Scenario: Use a number literal
     Given a file named "Foo.pen" with:
-    """
+    """pen
     f = \() number {
       42
     }
@@ -17,7 +17,7 @@ Feature: Number
 
   Scenario: Use arithmetic operators
     Given a file named "Foo.pen" with:
-    """
+    """pen
     f = \() number {
       1 + 2 - 3 * 4 / 5
     }
@@ -27,7 +27,7 @@ Feature: Number
 
   Scenario: Use equality operators
     Given a file named "Foo.pen" with:
-    """
+    """pen
     f = \() boolean {
       0 == 0
     }
@@ -41,7 +41,7 @@ Feature: Number
 
   Scenario: Use order operators
     Given a file named "Foo.pen" with:
-    """
+    """pen
     f = \() boolean {
       0 < 0
     }

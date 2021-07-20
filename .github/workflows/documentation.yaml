@@ -6,19 +6,12 @@ on:
   pull_request:
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@main
-      - uses: peaceiris/actions-hugo@v2
-        with:
-          hugo-version: "latest"
-          extended: true
-      - run: |
-          tools/build_example_documents.sh
-          cd doc
-          hugo --minify
+      - run: tools/build_example_documents.sh
       - uses: peaceiris/actions-gh-pages@v3
         if: github.ref == 'refs/heads/main'
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: doc/public
+          publish_dir: doc

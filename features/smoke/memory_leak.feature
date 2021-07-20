@@ -1,7 +1,7 @@
 Feature: Memory leak
   Background:
     Given a file named "pen.json" with:
-    """
+    """json
     {
       "dependencies": {
         "Core": "file://pen-root/lib/core",
@@ -12,7 +12,7 @@ Feature: Memory leak
 
   Scenario: Run an infinite loop
     Given a file named "Main.pen" with:
-    """
+    """pen
     import System'Os
 
     f = \() none {
@@ -30,7 +30,7 @@ Feature: Memory leak
 
   Scenario: Run hello world
     Given a file named "Main.pen" with:
-    """
+    """pen
     import System'Os
 
     main = \(os Os'Os) number {
@@ -44,7 +44,7 @@ Feature: Memory leak
 
   Scenario: Create a record
     Given a file named "Main.pen" with:
-    """
+    """pen
     import System'Os
 
     type foo {
@@ -68,7 +68,7 @@ Feature: Memory leak
 
   Scenario: Deconstruct a record
     Given a file named "Main.pen" with:
-    """
+    """pen
     import System'Os
 
     type foo {
@@ -92,7 +92,7 @@ Feature: Memory leak
 
   Scenario: Put a string into a value of any type
     Given a file named "Main.pen" with:
-    """
+    """pen
     import System'Os
 
     f = \(x any) any {
@@ -116,7 +116,7 @@ Feature: Memory leak
 
   Scenario: Shadow a variable in a block
     Given a file named "Main.pen" with:
-    """
+    """pen
     import System'Os
 
     type foo {
@@ -141,7 +141,7 @@ Feature: Memory leak
 
   Scenario: Define a function in a let expression with a free variable
     Given a file named "Main.pen" with:
-    """
+    """pen
     import System'Os
 
     type foo {
@@ -166,7 +166,7 @@ Feature: Memory leak
 
   Scenario: Convert a number to a string
     Given a file named "Main.pen" with:
-    """
+    """pen
     import Core'Number
     import System'Os
 
@@ -187,7 +187,7 @@ Feature: Memory leak
 
   Scenario: Join strings
     Given a file named "Main.pen" with:
-    """
+    """pen
     import Core'String
     import System'Os
 
