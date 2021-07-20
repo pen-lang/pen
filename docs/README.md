@@ -13,17 +13,18 @@ To make such development efficient, it focuses on:
   - Its minimal language features keep codes maintainable.
 - Portability
   - Software written in the language can be:
-    - Ported to different platforms including operating systems, web browsers and [WASI](https://wasi.dev/). (WIP)
+    - Ported to many platforms including different CPU architectures,
+      operating systems, web browsers and [WASI](https://wasi.dev/) (WIP.)
     - Reused by other languages via FFI.
 
 ## Features
 
-- Statically typed
+- Static typing
 - Immutable values
 - Pure functions by default
-- No runtime error
+- Errors as values
+- Asynchronous operation (WIP)
 - Parallel computation (WIP)
-- Thread safety (WIP)
 
 ## License
 
