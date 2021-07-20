@@ -26,7 +26,7 @@ To make such development efficient, it focuses on:
 ### Others
 
 - Static typing
-  - Data types are checked at compile time so that developers catch errors earlier.
+  - Data types are checked at compile time so that developers can catch errors earlier.
 - Immutable values
   - Values are immutable, which leads to more predictable and testable codes.
 - Pure functions by default
