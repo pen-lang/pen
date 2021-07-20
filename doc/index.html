@@ -37,6 +37,10 @@
         relativePath: true,
         subMaxLevel: 3,
         themeColor: "midnightblue",
+        pagination: {
+          crossChapter: true,
+          crossChapterText: true,
+        },
         plugins: [
           EditOnGithubPlugin.create(
             "https://github.com/pen-lang/pen/tree/main/docs/",
@@ -48,6 +52,7 @@
     </script>
     <script src="//cdn.jsdelivr.net/npm/docsify@4"></script>
     <script src="//cdn.jsdelivr.net/npm/docsify/lib/plugins/search.min.js"></script>
+    <script src="//unpkg.com/docsify-pagination/dist/docsify-pagination.min.js"></script>
     <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-json.min.js"></script>
   </body>
 </html>
