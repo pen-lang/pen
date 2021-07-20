@@ -9,7 +9,7 @@ Feature: Polymorphism
     Given a file named "Foo.pen" with:
     """
     f = \() boolean {
-      0 == 0
+      42 == none
     }
     """
     When I run `pen build`
@@ -19,7 +19,7 @@ Feature: Polymorphism
     Given a file named "Foo.pen" with:
     """
     f = \() boolean {
-      0 != 0
+      42 != none
     }
     """
     When I run `pen build`
@@ -35,7 +35,7 @@ Feature: Polymorphism
     When I run `pen build`
     Then the exit status should be 0
 
-  Scenario: Use a union and none
+  Scenario: Compare a union and none
     Given a file named "Foo.pen" with:
     """
     f = \(x number | none) boolean {
