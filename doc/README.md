@@ -4,7 +4,7 @@ The functional programming language for scalable development
 
 ## Goals
 
-Pen is designed for software developed by a large number of people and/or over a long period of time.
+Pen is designed for software development by a large number of people and/or over a long period of time.
 
 To make such development efficient, it focuses on:
 
