@@ -8,7 +8,7 @@ A module consists of [statements](#statements).
 
 ### Import statement
 
-See [Modules](../modules).
+See [Modules](modules).
 
 ### Foreign import statement
 
@@ -18,7 +18,7 @@ import foreign "c" foo \(number, number) number
 
 ### Record type definition
 
-See [Records](../types#records).
+See [Records](types#records).
 
 ### Type alias
 
@@ -105,7 +105,7 @@ true | false
 x?
 ```
 
-[error-type]: ../built-ins#error
+[error-type]: built-ins#error
 
 ### Function call
 

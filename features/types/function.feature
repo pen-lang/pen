@@ -1,13 +1,13 @@
 Feature: Function
   Background:
     Given a file named "pen.json" with:
-    """
+    """json
     { "dependencies": {} }
     """
 
   Scenario: Define a function
     Given a file named "Foo.pen" with:
-    """
+    """pen
     f = \(x number) number {
       x
     }
@@ -17,7 +17,7 @@ Feature: Function
 
   Scenario: Call a function with no argument
     Given a file named "Foo.pen" with:
-    """
+    """pen
     f = \() number {
       f()
     }
@@ -27,7 +27,7 @@ Feature: Function
 
   Scenario: Call a function with an argument
     Given a file named "Foo.pen" with:
-    """
+    """pen
     f = \(x number) number {
       f(x)
     }
@@ -37,7 +37,7 @@ Feature: Function
 
   Scenario: Call a function with two arguments
     Given a file named "Foo.pen" with:
-    """
+    """pen
     f = \(x number, y number) number {
       f(x, y)
     }
@@ -47,7 +47,7 @@ Feature: Function
 
   Scenario: Define a closure
     Given a file named "Foo.pen" with:
-    """
+    """pen
     f = \(x number) \(number) number {
       \(y number) number {
         x + y

@@ -10,7 +10,7 @@
 
 Name functions and types in an upper camel case.
 
-```
+```pen
 type Foo {
   ...
 }
@@ -26,15 +26,15 @@ Foo = \() number {
 
 First, place an `import` statement to import a module at the top of a module you want to import them into.
 
-The first component of a path in the statement is a name of an external package you declare in [a `pen.json` file](../packages#package-configuration) (`Foo`.) It is omitted if the imported module is in the same package. The rest of the path components are directory names where a module exists (`Bar`) and the basename of the module filename (`Baz`.)
+The first component of a path in the statement is a name of an external package you declare in [a `pen.json` file](packages#package-configuration) (`Foo`.) It is omitted if the imported module is in the same package. The rest of the path components are directory names where a module exists (`Bar`) and the basename of the module filename (`Baz`.)
 
-```
+```pen
 import Foo'Bar'Baz
 ```
 
 Then, you can access exported members of the module with its prefix.
 
-```
+```pen
 type Foo = Baz'Foo
 
 bar = \(x number) number {
@@ -50,7 +50,7 @@ Modules in the same package are referenced by their paths relative to their pack
 
 For example, a module of a file `<package directory>/Foo/Bar.pen` is imported as below.
 
-```
+```pen
 import 'Foo'Bar
 ```
 
@@ -60,7 +60,7 @@ Modules in other packages are referenced by their package names and module paths
 
 For example, a module of a file `<package directory>/Bar/Baz.pen` in a package `Foo` is imported as below.
 
-```
+```pen
 import Foo'Bar'Baz
 ```
 
@@ -70,6 +70,6 @@ import Foo'Bar'Baz
 
 Imported modules can have prefixes different from their names.
 
-```
+```pen
 import Bar Foo'Bar'Baz
 ```

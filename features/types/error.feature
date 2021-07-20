@@ -1,13 +1,13 @@
 Feature: Error
   Background:
     Given a file named "pen.json" with:
-    """
+    """json
     { "dependencies": {} }
     """
 
   Scenario: Call a error function
     Given a file named "Foo.pen" with:
-    """
+    """pen
     f = \() error {
       error(none)
     }
@@ -17,7 +17,7 @@ Feature: Error
 
   Scenario: Call a source function
     Given a file named "Foo.pen" with:
-    """
+    """pen
     f = \(e error) any {
       source(e)
     }
@@ -27,7 +27,7 @@ Feature: Error
 
   Scenario: Use a try operator
     Given a file named "Foo.pen" with:
-    """
+    """pen
     f = \(x number | error) number | error {
       x? + 1
     }
@@ -37,7 +37,7 @@ Feature: Error
 
   Scenario: Use a try operator with a union type
     Given a file named "Foo.pen" with:
-    """
+    """pen
     f = \(x number | none | error) number | error {
       if x = x?; number {
         x + 1

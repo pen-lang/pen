@@ -2,7 +2,7 @@
 
 ## Installing `pen` command
 
-See [Install](../install).
+See [Install](install).
 
 ## Creating a package
 

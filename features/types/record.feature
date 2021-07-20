@@ -1,13 +1,13 @@
 Feature: Record
   Background:
     Given a file named "pen.json" with:
-    """
+    """json
     { "dependencies": {} }
     """
 
   Scenario: Create a record with an element
     Given a file named "Foo.pen" with:
-    """
+    """pen
     type r {
       x number,
     }
@@ -21,7 +21,7 @@ Feature: Record
 
   Scenario: Create a record with two elements
     Given a file named "Foo.pen" with:
-    """
+    """pen
     type r {
       x number,
       y none,
@@ -36,7 +36,7 @@ Feature: Record
 
   Scenario: Create a record with no element
     Given a file named "Foo.pen" with:
-    """
+    """pen
     type r {}
 
     f = \() r {
@@ -48,7 +48,7 @@ Feature: Record
 
   Scenario: Update a record
     Given a file named "Foo.pen" with:
-    """
+    """pen
     type r {
       x number,
       y none,
@@ -63,7 +63,7 @@ Feature: Record
 
   Scenario: Get an elemnt in a record
     Given a file named "Foo.pen" with:
-    """
+    """pen
     type r {
       x number,
     }
@@ -77,7 +77,7 @@ Feature: Record
 
   Scenario: Use an equal operator
     Given a file named "Foo.pen" with:
-    """
+    """pen
     type r {
       x number,
     }
@@ -91,7 +91,7 @@ Feature: Record
 
   Scenario: Use a not-equal operator
     Given a file named "Foo.pen" with:
-    """
+    """pen
     type r {
       x number,
     }

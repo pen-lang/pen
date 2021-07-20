@@ -8,7 +8,7 @@
 - Packages are either application or library packages.
   - Packages are considered to be of applications if they have `Main.pen` files at their top directories. Otherwise, they are library ones.
 - Modules in library packages can be imported from other packages.
-- To import modules in other packages, see [Modules](../modules).
+- To import modules in other packages, see [Modules](modules).
 
 ## Package configuration
 
