@@ -36,8 +36,7 @@ To make such development efficient, it focuses on:
 - Asynchronous operation (WIP)
   - Every function is possibly asynchronous while called in the same way as synchronous ones.
 - Parallel computation (WIP)
-  - The runtime and library provides tools for thread-safe parallel
-    computation that leverage multi-core CPUs.
+  - The runtime and library provides tools for thread-safe parallel computation that leverage multi-core CPUs.
 
 ## License
 
