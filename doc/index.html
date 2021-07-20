@@ -54,5 +54,18 @@
     <script src="//cdn.jsdelivr.net/npm/docsify/lib/plugins/search.min.js"></script>
     <script src="//unpkg.com/docsify-pagination/dist/docsify-pagination.min.js"></script>
     <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-json.min.js"></script>
+    <script>
+      Prism.languages.pen = Prism.languages.extend("clike", {
+        string: {
+          pattern: /"(?:\\[\s\S]|(?!\1)[^\\])*"/,
+          greedy: true,
+        },
+        keyword: /\b(?:else|foreign|if|import|type)\b/,
+        boolean: /\b(?:none|true|false)\b/,
+        number: /(?:\b0x[a-f\d]+|(?:\b\d+(?:\.\d*)?|\B\.\d+)(?:e[-+]?\d+)?)i?/i,
+        operator: /(\+-\*\/!\?=<>&\|)+/,
+        builtin: /\b(?:boolean|error|number|string|source)\b/,
+      });
+    </script>
   </body>
 </html>
