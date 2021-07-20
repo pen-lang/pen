@@ -57,14 +57,14 @@
     <script>
       Prism.languages.pen = Prism.languages.extend("clike", {
         string: {
-          pattern: /"(?:\\[\s\S]|(?!\1)[^\\])*"/,
+          pattern: /"(\\[\s\S]|(?!")[^\\])*"/,
           greedy: true,
         },
-        keyword: /\b(?:else|foreign|if|import|type)\b/,
-        boolean: /\b(?:none|true|false)\b/,
-        number: /(?:\b0x[a-f\d]+|(?:\b\d+(?:\.\d*)?|\B\.\d+)(?:e[-+]?\d+)?)i?/i,
+        keyword: /\b(else|export|foreign|if|import|type)\b/,
+        boolean: /\b(none|true|false)\b/,
+        number: /(\b0x[a-f\d]+|(\b\d+(\.\d*)?|\B\.\d+)(e[-+]?\d+)?)i?/i,
         operator: /(\+-\*\/!\?=<>&\|)+/,
-        builtin: /\b(?:boolean|error|number|string|source)\b/,
+        builtin: /\b(boolean|error|number|string|source)\b/,
       });
     </script>
   </body>

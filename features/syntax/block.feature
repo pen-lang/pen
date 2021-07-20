@@ -1,13 +1,13 @@
 Feature: Block
   Background:
     Given a file named "pen.json" with:
-    """
+    """json
     { "dependencies": {} }
     """
 
   Scenario: Define a variable
     Given a file named "Foo.pen" with:
-    """
+    """pen
     f = \(x number) number {
       y = x
 
@@ -19,7 +19,7 @@ Feature: Block
 
   Scenario: Call a function
     Given a file named "Foo.pen" with:
-    """
+    """pen
     f = \() none {
       none
     }
@@ -35,7 +35,7 @@ Feature: Block
 
   Scenario: Use if expression
     Given a file named "Foo.pen" with:
-    """
+    """pen
     f = \() none {
       none
     }

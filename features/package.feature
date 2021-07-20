@@ -1,17 +1,17 @@
 Feature: Packages
   Background:
     Given a file named "foo/pen.json" with:
-    """
+    """json
     { "dependencies": {} }
     """
     And a file named "foo/Foo.pen" with:
-    """
+    """pen
     Foo = \() number {
       42
     }
     """
     And a file named "foo/Foo/Foo.pen" with:
-    """
+    """pen
     Foo = \() number {
       42
     }
@@ -19,7 +19,7 @@ Feature: Packages
     And a directory named "bar"
     And I cd to "bar"
     And a file named "pen.json" with:
-    """
+    """json
     {
       "dependencies": {
         "Foo": "file+relative:../foo"
@@ -29,7 +29,7 @@ Feature: Packages
 
   Scenario: Import a function from a module
     Given a file named "Bar.pen" with:
-    """
+    """pen
     import Foo'Foo
 
     Bar = \() number {
@@ -41,7 +41,7 @@ Feature: Packages
 
   Scenario: Import a type alias from a module
     Given a file named "Bar.pen" with:
-    """
+    """pen
     import Foo'Foo
 
     type Bar = Foo'Foo
@@ -51,7 +51,7 @@ Feature: Packages
 
   Scenario: Import a function from a nested module
     Given a file named "Bar.pen" with:
-    """
+    """pen
     import Foo'Foo'Foo
 
     Bar = \() number {

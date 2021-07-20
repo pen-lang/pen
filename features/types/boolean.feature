@@ -1,13 +1,13 @@
 Feature: Boolean
   Background:
     Given a file named "pen.json" with:
-    """
+    """json
     { "dependencies": {} }
     """
 
   Scenario: Use boolean literals
     Given a file named "Foo.pen" with:
-    """
+    """pen
     f = \() boolean {
       true
     }
@@ -21,7 +21,7 @@ Feature: Boolean
 
   Scenario: Use an and operation
     Given a file named "Foo.pen" with:
-    """
+    """pen
     f = \() boolean {
       true & false
     }
@@ -31,7 +31,7 @@ Feature: Boolean
 
   Scenario: Use an or operation
     Given a file named "Foo.pen" with:
-    """
+    """pen
     f = \() boolean {
       true | false
     }
@@ -41,7 +41,7 @@ Feature: Boolean
 
   Scenario: Use a not operation
     Given a file named "Foo.pen" with:
-    """
+    """pen
     f = \() boolean {
       !true
     }
@@ -51,7 +51,7 @@ Feature: Boolean
 
   Scenario: Use an if expression
     Given a file named "Foo.pen" with:
-    """
+    """pen
     f = \() number {
       if true {
         1

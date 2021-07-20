@@ -1,13 +1,13 @@
 Feature: None
   Background:
     Given a file named "pen.json" with:
-    """
+    """json
     { "dependencies": {} }
     """
 
   Scenario: Use a none literal
     Given a file named "Foo.pen" with:
-    """
+    """pen
     f = \() none {
       none
     }

@@ -1,13 +1,13 @@
 Feature: String
   Background:
     Given a file named "pen.json" with:
-    """
+    """json
     { "dependencies": {} }
     """
 
   Scenario: Use a string literal
     Given a file named "Foo.pen" with:
-    """
+    """pen
     f = \() string {
       "foo"
     }
@@ -17,7 +17,7 @@ Feature: String
 
   Scenario: Use equality operators
     Given a file named "Foo.pen" with:
-    """
+    """pen
     f = \() boolean {
       "" == ""
     }
