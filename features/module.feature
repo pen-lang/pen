@@ -1,4 +1,4 @@
-Feature: Module
+Feature: Modules
   Background:
     Given a file named "pen.json" with:
     """
