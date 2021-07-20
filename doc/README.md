@@ -12,15 +12,22 @@ To make such development efficient, it focuses on:
   - Its syntax and type system are simple and easy to learn.
   - Its minimal language features keep codes maintainable.
 - Portability
-  - Software written in the language can be:
+  - Programs written in the language can be:
     - Ported to many platforms including different CPU architectures,
       operating systems, web browsers and [WASI](https://wasi.dev/) (WIP.)
     - Reused by other languages via FFI.
 
 ## Features
 
+### System injection
+
+- System APIs are always injected as arguments to main functions.
+- Developers can define their own system APIs and main function types.
+
+### Others
+
 - Static typing
-  - Data types are checked at compile time in order to catch errors ealier.
+  - Data types are checked at compile time so that developers catch errors ealier.
 - Immutable values
   - Values are immutable, which leads to more predictable and testable codes.
 - Pure functions by default
