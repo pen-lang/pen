@@ -16,19 +16,26 @@
       rel="stylesheet"
       href="//cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css"
     />
+    <link rel="icon" href="/icon.svg" />
   </head>
   <body>
     <div id="app"></div>
+    <style>
+      img[src="/icon.svg"] {
+        width: 4rem;
+      }
+    </style>
     <script src="//cdn.jsdelivr.net/npm/docsify-edit-on-github"></script>
     <script>
       window.$docsify = {
         name: "Pen",
         repo: "https://github.com/pen-lang/pen",
+        logo: "/icon.svg",
         auto2top: true,
         loadSidebar: true,
         relativePath: true,
         subMaxLevel: 3,
-        themeColor: "tomato",
+        themeColor: "midnightblue",
         plugins: [
           EditOnGithubPlugin.create(
             "https://github.com/pen-lang/pen/tree/main/docs/",
