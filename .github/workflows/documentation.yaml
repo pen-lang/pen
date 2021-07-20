@@ -14,6 +14,7 @@ jobs:
           hugo-version: "latest"
           extended: true
       - run: |
+          tools/build_example_documents.sh
           cd doc
           hugo --minify
       - uses: peaceiris/actions-gh-pages@v3
