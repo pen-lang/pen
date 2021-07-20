@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Pen programming language</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta
+      name="description"
+      content="The functional programming language for scalable development"
+    />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, minimum-scale=1.0"
+    />
+    <link
+      rel="stylesheet"
+      href="//cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css"
+    />
+  </head>
+  <body>
+    <div id="app"></div>
+    <script src="//cdn.jsdelivr.net/npm/docsify-edit-on-github"></script>
+    <script>
+      window.$docsify = {
+        name: "Pen",
+        repo: "https://github.com/pen-lang/pen",
+        auto2top: true,
+        loadSidebar: true,
+        relativePath: true,
+        subMaxLevel: 3,
+        themeColor: "tomato",
+        plugins: [
+          EditOnGithubPlugin.create(
+            "https://github.com/pen-lang/pen/tree/main/docs/",
+            null,
+            "Edit on GitHub"
+          ),
+        ],
+      };
+    </script>
+    <script src="//cdn.jsdelivr.net/npm/docsify@4"></script>
+    <script src="//cdn.jsdelivr.net/npm/docsify/lib/plugins/search.min.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-json.min.js"></script>
+  </body>
+</html>
