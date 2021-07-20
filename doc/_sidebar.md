@@ -29,8 +29,8 @@
   - [Modules](/examples/module.md)
   - [Packages](/examples/package.md)
   - Commands
-    - [Building packges](/examples/commands/build.md)
-    - [Creating packges](/examples/commands/create.md)
+    - [Building packages](/examples/commands/build.md)
+    - [Creating packages](/examples/commands/create.md)
   - Libraries
     - [Core](/examples/libraries/core.md)
   - [FFI](/examples/ffi.md)
