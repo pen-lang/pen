@@ -9,20 +9,20 @@ Items are ordered by priority.
 - [ ] Asynchronous operations
 - [x] Performant GC
   - [x] Automatic reference counting
-- [ ] Code formatter
 - [x] Foreign function interface
 - [ ] WASM backend
+- [ ] Code formatter
 - [ ] Efficient persistent data structures
   - [ ] Array type
   - [ ] Map type
 - [ ] Testing framework
-- [ ] Stream type
-- [ ] Parallel computation
-- [ ] HTTP server framework
-- [ ] Binary support
-- [ ] Web browser interface
+- [ ] Stream-based list type
 - [ ] IDE/editor support
   - [ ] Language server
+- [ ] Parallel computation
+- [ ] Web browser interface
+- [ ] Binary support
+- [ ] Mutable state
+  - [ ] Thread safety
+  - [ ] Internal DSL
 - [ ] Self-hosting
-- [ ] Internal DSL
-  - [ ] Mutable state
