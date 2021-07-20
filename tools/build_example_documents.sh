@@ -6,4 +6,4 @@ base_directory=$(dirname $0)/..
 
 go run github.com/raviqqe/gherkin2markdown \
   $base_directory/features \
-  $base_directory/docs/examples
+  $base_directory/doc/examples
