@@ -22,6 +22,7 @@
     "repr",
     "subninja",
     "tailcallopt",
-    "termcolor"
+    "termcolor",
+    "wasi"
   ]
 }
