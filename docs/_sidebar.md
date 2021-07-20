@@ -1,0 +1,13 @@
+- [Home](/)
+- Guides
+  - [Getting started](/guides/getting-started.md)
+  - [Install](/guides/install)
+  - [Naming convention](/guides/naming-convention.md)
+- References
+  - Language
+    - [Syntax](/references/language/syntax.md)
+    - [Types](/references/language/types.md)
+    - [Built-ins](/references/language/built-ins.md)
+    - [Modules](/references/language/modules.md)
+    - [Packages](/references/language/packages.md)
+  - [Command line tools](/references/command-line-tools.md)
