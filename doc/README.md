@@ -13,8 +13,7 @@ To make such development efficient, it focuses on:
   - Its minimal language features keep codes maintainable.
 - Portability
   - [System injection](#system-injection) isolates application logic from implementation details in order to bring long expectancy of your software.
-  - Cross build supports many platforms of different CPU architectures,
-    operating systems, web browsers and [WASI](https://wasi.dev/) (WIP.)
+  - Cross build supports many platforms of different CPU architectures, operating systems, web browsers and [WASI](https://wasi.dev/) (WIP.)
   - Its C/[Rust](https://www.rust-lang.org/) Foreign Function Interface (FFI) brings interoperability with other languages.
 
 ## Features
