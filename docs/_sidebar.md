@@ -11,3 +11,26 @@
     - [Modules](/references/language/modules.md)
     - [Packages](/references/language/packages.md)
   - [Command line tools](/references/command-line-tools.md)
+- Examples
+  - Types
+    - [Number](/examples/types/number.md)
+    - [Boolean](/examples/types/boolean.md)
+    - [None](/examples/types/none.md)
+    - [String](/examples/types/string.md)
+    - [Function](/examples/types/function.md)
+    - [Record](/examples/types/record.md)
+    - [Union](/examples/types/union.md)
+    - [List](/examples/types/list.md)
+    - [Error](/examples/types/error.md)
+    - [Any](/examples/types/any.md)
+    - [Polymorphism](/examples/types/polymorphism.md)
+  - Syntax
+    - [Block](/examples/syntax/block.md)
+  - [Modules](/examples/module.md)
+  - [Packages](/examples/package.md)
+  - Commands
+    - [Building packges](/examples/commands/build.md)
+    - [Creating packges](/examples/commands/create.md)
+  - Libraries
+    - [Core](/examples/libraries/core.md)
+  - [FFI](/examples/ffi.md)
