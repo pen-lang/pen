@@ -137,9 +137,7 @@ header {
       text-align: center;
       margin: 0rem; }
   .home div.card {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    display: grid;
     max-width: 90vw;
     padding: 2rem 2.5rem;
     box-sizing: border-box;
