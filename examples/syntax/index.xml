@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Syntax on Pen programming language</title><link>https://pen-lang.org/examples/syntax/</link><description>Recent content in Syntax on Pen programming language</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><atom:link href="https://pen-lang.org/examples/syntax/index.xml" rel="self" type="application/rss+xml"/><item><title>Block</title><link>https://pen-lang.org/examples/syntax/block/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://pen-lang.org/examples/syntax/block/</guid><description>Block Background () Given a file named &amp;ldquo;pen.json&amp;rdquo; with:
+{ &amp;quot;dependencies&amp;quot;: {} } Define a variable Given a file named &amp;ldquo;Foo.pen&amp;rdquo; with:
+f = \(x number) number { y = x y } When I run pen build
+Then the exit status should be 0.
+Call a function Given a file named &amp;ldquo;Foo.pen&amp;rdquo; with:
+f = \() none { none } g = \() none { f() none } When I run pen build</description></item></channel></rss>

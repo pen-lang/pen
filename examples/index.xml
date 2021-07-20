@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Examples on Pen programming language</title><link>https://pen-lang.org/examples/</link><description>Recent content in Examples on Pen programming language</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><atom:link href="https://pen-lang.org/examples/index.xml" rel="self" type="application/rss+xml"/><item><title>FFI</title><link>https://pen-lang.org/examples/ffi/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://pen-lang.org/examples/ffi/</guid><description>FFI Background () Given a file named &amp;ldquo;pen.json&amp;rdquo; with:
+{ &amp;quot;dependencies&amp;quot;: {} } Import a foreign function of native calling convention Given a file named &amp;ldquo;Foo.pen&amp;rdquo; with:
+import foreign g \(number) number f = \(x number) number { g(x) } When I run pen build
+Then the exit status should be 0.
+Import a foreign function of C calling convention Given a file named &amp;ldquo;Foo.pen&amp;rdquo; with:
+import foreign &amp;quot;c&amp;quot; g \(number) number f = \(x number) number { g(x) } When I run pen build</description></item><item><title>Modules</title><link>https://pen-lang.org/examples/module/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://pen-lang.org/examples/module/</guid><description>Modules Background () Given a file named &amp;ldquo;pen.json&amp;rdquo; with:
+{ &amp;quot;dependencies&amp;quot;: {} } Import a function from a module Given a file named &amp;ldquo;Foo.pen&amp;rdquo; with:
+Foo = \() number { 42 } And a file named &amp;ldquo;Bar.pen&amp;rdquo; with:
+import 'Foo Bar = \() number { Foo'Foo() } When I run pen build
+Then the exit status should be 0.
+Import a type alias from a module Given a file named &amp;ldquo;Foo.</description></item><item><title>Packages</title><link>https://pen-lang.org/examples/package/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://pen-lang.org/examples/package/</guid><description>Packages Background () Given a file named &amp;ldquo;foo/pen.json&amp;rdquo; with:
+{ &amp;quot;dependencies&amp;quot;: {} } And a file named &amp;ldquo;foo/Foo.pen&amp;rdquo; with:
+Foo = \() number { 42 } And a file named &amp;ldquo;foo/Foo/Foo.pen&amp;rdquo; with:
+Foo = \() number { 42 } And a directory named &amp;ldquo;bar&amp;rdquo;
+And I cd to &amp;ldquo;bar&amp;rdquo;
+And a file named &amp;ldquo;pen.json&amp;rdquo; with:
+{ &amp;quot;dependencies&amp;quot;: { &amp;quot;Foo&amp;quot;: &amp;quot;file+relative:../foo&amp;quot; } } Import a function from a module Given a file named &amp;ldquo;Bar.</description></item></channel></rss>

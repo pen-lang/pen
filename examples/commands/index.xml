@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Commands on Pen programming language</title><link>https://pen-lang.org/examples/commands/</link><description>Recent content in Commands on Pen programming language</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><atom:link href="https://pen-lang.org/examples/commands/index.xml" rel="self" type="application/rss+xml"/><item><title>Building packages</title><link>https://pen-lang.org/examples/commands/build/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://pen-lang.org/examples/commands/build/</guid><description>Building packages Build an application package Given a file named &amp;ldquo;pen.json&amp;rdquo; with:
+{ &amp;quot;dependencies&amp;quot;: { &amp;quot;System&amp;quot;: &amp;quot;file://pen-root/lib/os&amp;quot; } } And a file named &amp;ldquo;Main.pen&amp;rdquo; with:
+import System'Os main = \(os Os'Os) number { 0 } When I successfully run pen build
+Then I successfully run ./app.
+Build a library package Given a file named &amp;ldquo;pen.json&amp;rdquo; with:
+{ &amp;quot;dependencies&amp;quot;: {} } And a file named &amp;ldquo;Foo.pen&amp;rdquo; with:
+f = \(x number) number { x } When I run pen build</description></item><item><title>Creating packages</title><link>https://pen-lang.org/examples/commands/create/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://pen-lang.org/examples/commands/create/</guid><description>Creating packages Create an application package Given I successfully run pen create foo
+And I cd to &amp;ldquo;foo&amp;rdquo;
+When I successfully run pen build
+Then I successfully run ./app.
+Create a library package Given I successfully run pen create --library foo
+And I cd to &amp;ldquo;foo&amp;rdquo;
+When I run pen build
+Then the exit status should be 0.
+Create an application package in a current directory Given I successfully run pen create .</description></item></channel></rss>

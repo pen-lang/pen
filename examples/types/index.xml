@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Types on Pen programming language</title><link>https://pen-lang.org/examples/types/</link><description>Recent content in Types on Pen programming language</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><atom:link href="https://pen-lang.org/examples/types/index.xml" rel="self" type="application/rss+xml"/><item><title>Any</title><link>https://pen-lang.org/examples/types/any/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://pen-lang.org/examples/types/any/</guid><description>Any Background () Given a file named &amp;ldquo;pen.json&amp;rdquo; with:
+{ &amp;quot;dependencies&amp;quot;: {} } Use an any type Given a file named &amp;ldquo;Foo.pen&amp;rdquo; with:
+f = \() any { 42 } When I run pen build
+Then the exit status should be 0.
+Downcast an any type Given a file named &amp;ldquo;Foo.pen&amp;rdquo; with:
+f = \(x any) number { if x = x; number { x } else { 0 } } When I run pen build</description></item><item><title>Boolean</title><link>https://pen-lang.org/examples/types/boolean/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://pen-lang.org/examples/types/boolean/</guid><description>Boolean Background () Given a file named &amp;ldquo;pen.json&amp;rdquo; with:
+{ &amp;quot;dependencies&amp;quot;: {} } Use boolean literals Given a file named &amp;ldquo;Foo.pen&amp;rdquo; with:
+f = \() boolean { true } g = \() boolean { false } When I run pen build
+Then the exit status should be 0.
+Use an and operation Given a file named &amp;ldquo;Foo.pen&amp;rdquo; with:
+f = \() boolean { true &amp;amp; false } When I run pen build</description></item><item><title>Error</title><link>https://pen-lang.org/examples/types/error/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://pen-lang.org/examples/types/error/</guid><description>Error Background () Given a file named &amp;ldquo;pen.json&amp;rdquo; with:
+{ &amp;quot;dependencies&amp;quot;: {} } Call a error function Given a file named &amp;ldquo;Foo.pen&amp;rdquo; with:
+f = \() error { error(none) } When I run pen build
+Then the exit status should be 0.
+Call a source function Given a file named &amp;ldquo;Foo.pen&amp;rdquo; with:
+f = \(e error) any { source(e) } When I run pen build
+Then the exit status should be 0.</description></item><item><title>Function</title><link>https://pen-lang.org/examples/types/function/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://pen-lang.org/examples/types/function/</guid><description>Function Background () Given a file named &amp;ldquo;pen.json&amp;rdquo; with:
+{ &amp;quot;dependencies&amp;quot;: {} } Define a function Given a file named &amp;ldquo;Foo.pen&amp;rdquo; with:
+f = \(x number) number { x } When I run pen build
+Then the exit status should be 0.
+Call a function with no argument Given a file named &amp;ldquo;Foo.pen&amp;rdquo; with:
+f = \() number { f() } When I run pen build
+Then the exit status should be 0.</description></item><item><title>List</title><link>https://pen-lang.org/examples/types/list/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://pen-lang.org/examples/types/list/</guid><description>List Background () Given a file named &amp;ldquo;pen.json&amp;rdquo; with:
+{ &amp;quot;dependencies&amp;quot;: {} } Create an empty list Given a file named &amp;ldquo;Foo.pen&amp;rdquo; with:
+f = \() [number] { [number;] } When I run pen build
+Then the exit status should be 0.
+Create a list with an element Given a file named &amp;ldquo;Foo.pen&amp;rdquo; with:
+f = \() [number] { [number; 1] } When I run pen build
+Then the exit status should be 0.</description></item><item><title>None</title><link>https://pen-lang.org/examples/types/none/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://pen-lang.org/examples/types/none/</guid><description>None Background () Given a file named &amp;ldquo;pen.json&amp;rdquo; with:
+{ &amp;quot;dependencies&amp;quot;: {} } Use a none literal Given a file named &amp;ldquo;Foo.pen&amp;rdquo; with:
+f = \() none { none } When I run pen build
+Then the exit status should be 0.</description></item><item><title>Number</title><link>https://pen-lang.org/examples/types/number/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://pen-lang.org/examples/types/number/</guid><description>Number Background () Given a file named &amp;ldquo;pen.json&amp;rdquo; with:
+{ &amp;quot;dependencies&amp;quot;: {} } Use a number literal Given a file named &amp;ldquo;Foo.pen&amp;rdquo; with:
+f = \() number { 42 } When I run pen build
+Then the exit status should be 0.
+Use arithmetic operators Given a file named &amp;ldquo;Foo.pen&amp;rdquo; with:
+f = \() number { 1 + 2 - 3 * 4 / 5 } When I run pen build</description></item><item><title>Polymorphism</title><link>https://pen-lang.org/examples/types/polymorphism/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://pen-lang.org/examples/types/polymorphism/</guid><description>Polymorphism Background () Given a file named &amp;ldquo;pen.json&amp;rdquo; with:
+{ &amp;quot;dependencies&amp;quot;: {} } Use an equal operator Given a file named &amp;ldquo;Foo.pen&amp;rdquo; with:
+f = \() boolean { 0 == 0 } When I run pen build
+Then the exit status should be 0.
+Use a not-equal operator Given a file named &amp;ldquo;Foo.pen&amp;rdquo; with:
+f = \() boolean { 0 != 0 } When I run pen build
+Then the exit status should be 0.</description></item><item><title>Record</title><link>https://pen-lang.org/examples/types/record/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://pen-lang.org/examples/types/record/</guid><description>Record Background () Given a file named &amp;ldquo;pen.json&amp;rdquo; with:
+{ &amp;quot;dependencies&amp;quot;: {} } Create a record with an element Given a file named &amp;ldquo;Foo.pen&amp;rdquo; with:
+type r { x number, } f = \() r { r{x: 42} } When I run pen build
+Then the exit status should be 0.
+Create a record with two elements Given a file named &amp;ldquo;Foo.pen&amp;rdquo; with:
+type r { x number, y none, } f = \() r { r{x: 42, y: none} } When I run pen build</description></item><item><title>String</title><link>https://pen-lang.org/examples/types/string/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://pen-lang.org/examples/types/string/</guid><description>String Background () Given a file named &amp;ldquo;pen.json&amp;rdquo; with:
+{ &amp;quot;dependencies&amp;quot;: {} } Use a string literal Given a file named &amp;ldquo;Foo.pen&amp;rdquo; with:
+f = \() string { &amp;quot;foo&amp;quot; } When I run pen build
+Then the exit status should be 0.
+Use equality operators Given a file named &amp;ldquo;Foo.pen&amp;rdquo; with:
+f = \() boolean { &amp;quot;&amp;quot; == &amp;quot;&amp;quot; } g = \() boolean { &amp;quot;&amp;quot; != &amp;quot;&amp;quot; } When I run pen build</description></item><item><title>Union</title><link>https://pen-lang.org/examples/types/union/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://pen-lang.org/examples/types/union/</guid><description>Union Background () Given a file named &amp;ldquo;pen.json&amp;rdquo; with:
+{ &amp;quot;dependencies&amp;quot;: {} } Use a union type Given a file named &amp;ldquo;Foo.pen&amp;rdquo; with:
+f = \() number | none { 42 } When I run pen build
+Then the exit status should be 0.
+Downcast a union type Given a file named &amp;ldquo;Foo.pen&amp;rdquo; with:
+f = \(x number | none) number { if x = x; number { x } else if none { 0 } } When I run pen build</description></item></channel></rss>

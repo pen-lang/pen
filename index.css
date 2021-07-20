@@ -73,7 +73,8 @@ header {
     padding-inline-start: 0rem;
     margin: 0rem; }
     .sidebar ul ul {
-      padding-inline-start: 2rem; }
+      padding-inline-start: 2rem;
+      box-sizing: border-box; }
     .sidebar ul li {
       padding: 0.3rem 0.5rem;
       border-radius: 0.2rem; }

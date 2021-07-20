@@ -1,0 +1,51 @@
+<!doctype html><html lang=en><head><meta charset=utf-8><meta name=description content="The portable functional programming language"><meta name=theme-color content="#fff"><meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no"><title>Pen programming language</title><link rel=icon href=/icon.svg><link rel=manifest href=/manifest.json><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link rel=stylesheet href="https://fonts.googleapis.com/css2?family=Noto+Sans&family=Montserrat&family=Roboto+Mono&display=swap"><link rel=stylesheet href=https://pen-lang.org/index.css><script src=https://kit.fontawesome.com/ca450e7101.js crossorigin=anonymous></script></head><body><header><div class=title><a href=/><img src=/icon.svg>Pen</a></div><div class=links><ul><li><a href=https://pen-lang.org/guides/>Guides</a></li><li><a href=https://pen-lang.org/references/>References</a></li><li><a href=https://pen-lang.org/examples/>Examples</a></li></ul><a href=https://github.com/pen-lang/pen target=_blank><i class="fab fa-github"></i></a></div></header><div class=content><div class="sidebar hidden"><ul><li><a href=https://pen-lang.org/examples/commands/>Commands</a></li><ul><li><a href=https://pen-lang.org/examples/commands/build/>Building packages</a></li><li><a href=https://pen-lang.org/examples/commands/create/>Creating packages</a></li></ul><li><a href=https://pen-lang.org/examples/types/>Types</a></li><ul><li><a href=https://pen-lang.org/examples/types/any/>Any</a></li><li><a href=https://pen-lang.org/examples/types/boolean/>Boolean</a></li><li><a href=https://pen-lang.org/examples/types/error/>Error</a></li><li><a href=https://pen-lang.org/examples/types/function/>Function</a></li><li><a href=https://pen-lang.org/examples/types/list/>List</a></li><li><a href=https://pen-lang.org/examples/types/none/>None</a></li><li><a href=https://pen-lang.org/examples/types/number/>Number</a></li><li><a href=https://pen-lang.org/examples/types/polymorphism/>Polymorphism</a></li><li class=current><a href=https://pen-lang.org/examples/types/record/>Record</a></li><li><a href=https://pen-lang.org/examples/types/string/>String</a></li><li><a href=https://pen-lang.org/examples/types/union/>Union</a></li></ul><li><a href=https://pen-lang.org/examples/syntax/>Syntax</a></li><ul><li><a href=https://pen-lang.org/examples/syntax/block/>Block</a></li></ul><li><a href=https://pen-lang.org/examples/libraries/>Libraries</a></li><ul><li><a href=https://pen-lang.org/examples/libraries/core/>Core</a></li></ul><li><a href=https://pen-lang.org/examples/ffi/>FFI</a></li><li><a href=https://pen-lang.org/examples/module/>Modules</a></li><li><a href=https://pen-lang.org/examples/package/>Packages</a></li></ul></div><div class=sidebar-button><i class="fas fa-chevron-right"></i></div><div class=page><article><h1 id=record>Record</h1><h2 id=background->Background ()</h2><p><em>Given</em> a file named &ldquo;pen.json&rdquo; with:</p><pre><code>{ &quot;dependencies&quot;: {} }
+</code></pre><h2 id=create-a-record-with-an-element>Create a record with an element</h2><p><em>Given</em> a file named &ldquo;Foo.pen&rdquo; with:</p><pre><code>type r {
+  x number,
+}
+
+f = \() r {
+  r{x: 42}
+}
+</code></pre><p><em>When</em> I run <code>pen build</code></p><p><em>Then</em> the exit status should be 0.</p><h2 id=create-a-record-with-two-elements>Create a record with two elements</h2><p><em>Given</em> a file named &ldquo;Foo.pen&rdquo; with:</p><pre><code>type r {
+  x number,
+  y none,
+}
+
+f = \() r {
+  r{x: 42, y: none}
+}
+</code></pre><p><em>When</em> I run <code>pen build</code></p><p><em>Then</em> the exit status should be 0.</p><h2 id=create-a-record-with-no-element>Create a record with no element</h2><p><em>Given</em> a file named &ldquo;Foo.pen&rdquo; with:</p><pre><code>type r {}
+
+f = \() r {
+  r
+}
+</code></pre><p><em>When</em> I run <code>pen build</code></p><p><em>Then</em> the exit status should be 0.</p><h2 id=update-a-record>Update a record</h2><p><em>Given</em> a file named &ldquo;Foo.pen&rdquo; with:</p><pre><code>type r {
+  x number,
+  y none,
+}
+
+f = \(x r) r {
+  r{...x, y: none}
+}
+</code></pre><p><em>When</em> I run <code>pen build</code></p><p><em>Then</em> the exit status should be 0.</p><h2 id=get-an-elemnt-in-a-record>Get an elemnt in a record</h2><p><em>Given</em> a file named &ldquo;Foo.pen&rdquo; with:</p><pre><code>type r {
+  x number,
+}
+
+f = \(x r) number {
+  x.x
+}
+</code></pre><p><em>When</em> I run <code>pen build</code></p><p><em>Then</em> the exit status should be 0.</p><h2 id=use-an-equal-operator>Use an equal operator</h2><p><em>Given</em> a file named &ldquo;Foo.pen&rdquo; with:</p><pre><code>type r {
+  x number,
+}
+
+f = \(x r, y r) boolean {
+  x == y
+}
+</code></pre><p><em>When</em> I run <code>pen build</code></p><p><em>Then</em> the exit status should be 0.</p><h2 id=use-a-not-equal-operator>Use a not-equal operator</h2><p><em>Given</em> a file named &ldquo;Foo.pen&rdquo; with:</p><pre><code>type r {
+  x number,
+}
+
+f = \(x r, y r) boolean {
+  x == y
+}
+</code></pre><p><em>When</em> I run <code>pen build</code></p><p><em>Then</em> the exit status should be 0.</p></article></div></div><script src=/index.js></script></body></html>
