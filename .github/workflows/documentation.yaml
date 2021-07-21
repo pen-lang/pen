@@ -10,7 +10,7 @@ jobs:
     steps:
       - uses: actions/checkout@main
       - run: tools/build_example_documents.sh
-      - run: cargo install mdbook
+      - uses: peaceiris/actions-mdbook@v1
       - run: cd doc && mdbook build
       - uses: peaceiris/actions-gh-pages@v3
         if: github.ref == 'refs/heads/main'
