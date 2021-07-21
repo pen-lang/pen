@@ -10,9 +10,10 @@ jobs:
     steps:
       - uses: actions/checkout@main
       - run: tools/build_example_documents.sh
-      - run: rm doc/examples/.gitignore
+      - run: cargo install mdbook
+      - run: cd doc && mdbook build
       - uses: peaceiris/actions-gh-pages@v3
         if: github.ref == 'refs/heads/main'
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: doc
+          publish_dir: doc/book
