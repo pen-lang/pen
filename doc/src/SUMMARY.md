@@ -1,6 +1,6 @@
 # Summary
 
-- [Home](README.md)
+- [Introduction](README.md)
 - [Guides](guides/README.md)
   - [Getting started](guides/getting-started.md)
   - [Install](guides/install.md)
