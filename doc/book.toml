@@ -15,3 +15,6 @@ cname = "pen-lang.org"
 [output.html.fold]
 enable = true
 level = 1
+
+[output.html.print]
+enable = false
