@@ -7,3 +7,6 @@ title = "Pen"
 
 [build]
 create-missing = false
+
+[output.html.fold]
+enable = true
