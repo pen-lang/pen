@@ -23,7 +23,7 @@ curl -fsSL https://apt.llvm.org/llvm.sh | sudo bash -s 12
 
 ### On macOS
 
-To install `clang` and `llc`, install Xcode from the App Store.
+To install `clang` and LLVM, install Xcode from the App Store.
 Also, install the `cargo` and `git` commands via [Homebrew](https://brew.sh/) by running the following command in your terminal.
 
 ```sh
