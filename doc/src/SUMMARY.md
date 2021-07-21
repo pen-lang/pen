@@ -5,7 +5,7 @@
   - [Getting started](guides/getting-started.md)
   - [Install](guides/install.md)
   - [Naming convention](guides/naming-convention.md)
-- [References](references/language/syntax.md)
+- [References](references/README.md)
   - [Language](references/language/syntax.md)
     - [Syntax](references/language/syntax.md)
     - [Types](references/language/types.md)
