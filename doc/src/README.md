@@ -43,7 +43,7 @@ Functions are pure; they work just like math functions unless developers inject 
 
 #### Errors as values
 
-Errors are merely data. Its special syntax brings a convenient way to handle errors inside each function.
+Errors are merely data. Its special syntax provides a convenient way to handle errors inside each function.
 
 #### Cross compile
 
