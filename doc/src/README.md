@@ -39,8 +39,8 @@ To make such development efficient, it focuses on:
   - Errors are merely data. Its special syntax brings a convenient way to handle errors inside each function.
 - Cross compile
   - The compiler and runtime support different CPU architectures, operating systems, web browsers and [WASI](https://wasi.dev/) (WIP.)
-- Foreign Function Interface
-  - Its C/[Rust](https://www.rust-lang.org/) Foreign Function Interface (FFI) provides interoperability with other languages.
+- Foreign Function Interface (FFI)
+  - Its C/[Rust](https://www.rust-lang.org/) FFI provides interoperability with other languages.
 - Deterministic tests (WIP)
   - Unit tests are deterministic and realize reliable continuous integration.
 - Asynchronous operation (WIP)
