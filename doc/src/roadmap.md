@@ -5,11 +5,11 @@ Items are ordered by priority.
 - [x] Basic syntax
 - [x] CPS transformation
 - [x] Capability-based side effects
-- [ ] OS interface
-- [ ] Asynchronous operations
 - [x] Performant GC
   - [x] Automatic reference counting
 - [x] Foreign function interface
+- [ ] OS interface
+- [ ] Asynchronous operations
 - [ ] WASM backend
 - [ ] Code formatter
 - [ ] Efficient persistent data structures
