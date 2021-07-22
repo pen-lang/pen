@@ -29,24 +29,41 @@ To make such development efficient, it focuses on:
 
 ### Even more...
 
-- Static typing
-  - Data types are checked at compile time so that developers can catch errors earlier.
-- Immutable values
-  - Values are immutable, which leads to predictable and testable codes.
-- Pure functions by default
-  - Functions are pure; they work just like math functions unless developers inject side effects explicitly.
-- Errors as values
-  - Errors are merely data. Its special syntax brings a convenient way to handle errors inside each function.
-- Cross compile
-  - The compiler and runtime support different CPU architectures, operating systems, web browsers and [WASI](https://wasi.dev/) (WIP.)
-- Foreign Function Interface (FFI)
-  - Its C/[Rust](https://www.rust-lang.org/) FFI provides interoperability with other languages.
-- Deterministic tests (WIP)
-  - Unit tests are deterministic and realize reliable continuous integration.
-- Asynchronous operation (WIP)
-  - Every function is possibly asynchronous while called in the same way as synchronous ones.
-- Parallel computation (WIP)
-  - The runtime and library provide tools for thread-safe parallel computation that leverage multi-core CPUs.
+#### Static typing
+
+Data types are checked at compile time so that developers can catch errors earlier.
+
+#### Immutable values
+
+Values are immutable, which leads to predictable and testable codes.
+
+#### Pure functions by default
+
+Functions are pure; they work just like math functions unless developers inject side effects explicitly.
+
+#### Errors as values
+
+Errors are merely data. Its special syntax brings a convenient way to handle errors inside each function.
+
+#### Cross compile
+
+The compiler and runtime support different CPU architectures, operating systems, web browsers and [WASI](https://wasi.dev/) (WIP.)
+
+#### Foreign Function Interface (FFI)
+
+Its C/[Rust](https://www.rust-lang.org/) FFI provides interoperability with other languages.
+
+#### Deterministic tests (WIP)
+
+Unit tests are deterministic and realize reliable continuous integration.
+
+#### Asynchronous operation (WIP)
+
+Every function is possibly asynchronous while called in the same way as synchronous ones.
+
+#### Parallel computation (WIP)
+
+The runtime and library provide tools for thread-safe parallel computation that leverage multi-core CPUs.
 
 ## License
 
