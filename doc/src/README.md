@@ -24,7 +24,7 @@ To make such development efficient, it focuses on:
 ### System injection
 
 - System APIs are always injected into entrypoints of applications.
-- That isolates application logic from implementation details bringing software's long expectancy as well as maintainability.
+- That isolates and protects application logic from implementation details bringing software's long expectancy as well as maintainability.
 - Developers can define their own system APIs and build applications on top of them.
 
 ### Even more...
@@ -41,6 +41,8 @@ To make such development efficient, it focuses on:
   - The compiler and runtime support different CPU architectures, operating systems, web browsers and [WASI](https://wasi.dev/) (WIP.)
 - Foreign Function Interface
   - Its C/[Rust](https://www.rust-lang.org/) Foreign Function Interface (FFI) provides interoperability with other languages.
+- Deterministic tests (WIP)
+  - Unit tests are deterministic and realize reliable continuous integration.
 - Asynchronous operation (WIP)
   - Every function is possibly asynchronous while called in the same way as synchronous ones.
 - Parallel computation (WIP)
