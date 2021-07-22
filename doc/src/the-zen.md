@@ -5,7 +5,6 @@
 - Simple is better than complex.
 - One way to do one thing.
 - Single solution to solve multiple problems.
-- Mimic but do not depend on other technologies.
 
 ## References
 
