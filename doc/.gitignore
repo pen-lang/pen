@@ -1,2 +1,2 @@
 book
-src/examples
+src/examples/**/*.md
