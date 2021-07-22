@@ -146,21 +146,20 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="pen"><a class="header" href="#pen">Pen</a></h1>
-<p>The programming language for scalable software engineering</p>
+<p>The programming language for scalable software development</p>
 <h2 id="vision"><a class="header" href="#vision">Vision</a></h2>
-<p>Pen is designed for software engineering, where we need to change software and provide values to users continuously over time. Particularly, it's optimized for the one by a large number of people and/or over a long time.</p>
-<p>To make such engineering efficient, it focuses on:</p>
+<p>Pen is designed for software development by a large number of people and/or over a long time.</p>
+<p>To make such development efficient, it focuses on:</p>
 <ul>
 <li>Maintainability
 <ul>
 <li>Everyone can learn the language and participate in actual development quickly.</li>
-<li>People having different backgrounds can collaborate with each other at a minimal cost.</li>
+<li>Developers can focus on application logic rather than ever-changing implementation details.</li>
 </ul>
 </li>
 <li>Portability
 <ul>
-<li><a href="#system-injection">System injection</a> isolates application logic from implementation details in order to bring long expectancy of your software as well as maintainability.</li>
-<li>Its C/<a href="https://www.rust-lang.org/">Rust</a> Foreign Function Interface (FFI) provides interoperability with other languages.</li>
+<li>Programs written in the language can be ported to different platforms.</li>
 </ul>
 </li>
 </ul>
@@ -168,51 +167,33 @@
 <h3 id="minimal-design"><a class="header" href="#minimal-design">Minimal design</a></h3>
 <ul>
 <li>Its syntax and type system are simple and easy to learn.</li>
-<li>Its minimal language features keep codes maintainable.</li>
+<li>Its minimal language features keep codes consistent.</li>
 </ul>
 <h3 id="system-injection"><a class="header" href="#system-injection">System injection</a></h3>
 <ul>
-<li>System APIs are always injected as arguments to main functions.</li>
-<li>Developers can define their own system APIs and main function types.</li>
+<li>System APIs are always injected into entry points of applications.</li>
+<li>That isolates and protects application logic from implementation details bringing software's long expectancy as well as maintainability.</li>
+<li>Developers can define their own system APIs and build applications on top of them.</li>
 </ul>
 <h3 id="even-more"><a class="header" href="#even-more">Even more...</a></h3>
-<ul>
-<li>Static typing
-<ul>
-<li>Data types are checked at compile time so that developers can catch errors earlier.</li>
-</ul>
-</li>
-<li>Immutable values
-<ul>
-<li>Values are immutable, which leads to predictable and testable codes.</li>
-</ul>
-</li>
-<li>Pure functions by default
-<ul>
-<li>Functions are pure; they work just like math functions unless developers inject side effects explicitly.</li>
-</ul>
-</li>
-<li>Errors as values
-<ul>
-<li>Errors are merely data. Its special syntax brings a convenient way to handle errors inside each function.</li>
-</ul>
-</li>
-<li>Cross compile
-<ul>
-<li>The compiler and runtime support different CPU architectures, operating systems, web browsers and <a href="https://wasi.dev/">WASI</a> (WIP.)</li>
-</ul>
-</li>
-<li>Asynchronous operation (WIP)
-<ul>
-<li>Every function is possibly asynchronous while called in the same way as synchronous ones.</li>
-</ul>
-</li>
-<li>Parallel computation (WIP)
-<ul>
-<li>The runtime and library provide tools for thread-safe parallel computation that leverage multi-core CPUs.</li>
-</ul>
-</li>
-</ul>
+<h4 id="static-typing"><a class="header" href="#static-typing">Static typing</a></h4>
+<p>Data types are checked at compile time so that developers can catch errors earlier.</p>
+<h4 id="immutable-values"><a class="header" href="#immutable-values">Immutable values</a></h4>
+<p>All values are immutable, which leads to predictable and testable codes.</p>
+<h4 id="pure-functions-by-default"><a class="header" href="#pure-functions-by-default">Pure functions by default</a></h4>
+<p>Functions are pure; they work just like math functions unless developers inject side effects explicitly.</p>
+<h4 id="errors-as-values"><a class="header" href="#errors-as-values">Errors as values</a></h4>
+<p>Errors are merely data. Its special syntax provides a convenient way to handle errors inside each function.</p>
+<h4 id="cross-compile"><a class="header" href="#cross-compile">Cross compile</a></h4>
+<p>The compiler and runtime support different CPU architectures, operating systems, web browsers and <a href="https://wasi.dev/">WASI</a> (WIP.)</p>
+<h4 id="foreign-function-interface-ffi"><a class="header" href="#foreign-function-interface-ffi">Foreign Function Interface (FFI)</a></h4>
+<p>Its C/<a href="https://www.rust-lang.org/">Rust</a> FFI provides interoperability with other languages.</p>
+<h4 id="deterministic-tests-wip"><a class="header" href="#deterministic-tests-wip">Deterministic tests (WIP)</a></h4>
+<p>Unit tests are deterministic and realize reliable continuous integration.</p>
+<h4 id="asynchronous-operation-wip"><a class="header" href="#asynchronous-operation-wip">Asynchronous operation (WIP)</a></h4>
+<p>Every function is possibly asynchronous while called in the same way as synchronous ones.</p>
+<h4 id="parallel-computation-wip"><a class="header" href="#parallel-computation-wip">Parallel computation (WIP)</a></h4>
+<p>The runtime and library provide tools for thread-safe parallel computation that leverage multi-core CPUs.</p>
 <h2 id="license"><a class="header" href="#license">License</a></h2>
 <p><a href="https://github.com/pen-lang/pen/blob/main/LICENSE">Apache 2.0</a></p>
 
