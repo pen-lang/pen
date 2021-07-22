@@ -1,6 +1,6 @@
 # Built-ins
 
-Built-in types and functions that are accessible from any modules
+Built-in types and functions are accessible from any modules.
 
 ## Types
 
@@ -8,7 +8,7 @@ Built-in types and functions that are accessible from any modules
 
 It is a special record type used for error handling.
 
-```
+```pen
 type error {
   ...
 }
@@ -20,7 +20,7 @@ type error {
 
 It creates an error with its source information.
 
-```
+```pen
 error \(any) error
 ```
 
@@ -28,6 +28,6 @@ error \(any) error
 
 It extracts source information from an error.
 
-```
+```pen
 source \(error) any
 ```
