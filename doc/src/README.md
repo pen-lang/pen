@@ -1,12 +1,12 @@
 # Pen
 
-The programming language for scalable software engineering
+The programming language for scalable software development
 
 ## Vision
 
-Pen is designed for software engineering, where we need to change software and provide values to users continuously over time. Particularly, it's optimized for the one by a large number of people and/or over a long time.
+Pen is designed for software development by a large number of people and/or over a long time.
 
-To make such engineering efficient, it focuses on:
+To make such development efficient, it focuses on:
 
 - Maintainability
   - Everyone can learn the language and participate in actual development quickly.
