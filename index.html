@@ -146,32 +146,36 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="pen"><a class="header" href="#pen">Pen</a></h1>
-<p>The functional programming language for scalable development</p>
-<h2 id="goals"><a class="header" href="#goals">Goals</a></h2>
-<p>Pen is designed for software development by a large number of people and/or over a long period of time.</p>
-<p>To make such development efficient, it focuses on:</p>
+<p>The programming language for scalable software engineering</p>
+<h2 id="vision"><a class="header" href="#vision">Vision</a></h2>
+<p>Pen is designed for software engineering, where we need to change software and provide values to users continuously over time. Particularly, it's optimized for the one by a large number of people and/or over a long time.</p>
+<p>To make such engineering efficient, it focuses on:</p>
 <ul>
-<li>Simplicity
+<li>Maintainability
 <ul>
-<li>Its syntax and type system are simple and easy to learn.</li>
-<li>Its minimal language features keep codes maintainable.</li>
+<li>Everyone can learn the language and participate in actual development quickly.</li>
+<li>People having different backgrounds can collaborate with each other at a minimal cost.</li>
 </ul>
 </li>
 <li>Portability
 <ul>
-<li><a href="#system-injection">System injection</a> isolates application logic from implementation details in order to bring long expectancy of your software.</li>
-<li>Cross build supports many platforms of different CPU architectures, operating systems, web browsers and <a href="https://wasi.dev/">WASI</a> (WIP.)</li>
-<li>Its C/<a href="https://www.rust-lang.org/">Rust</a> Foreign Function Interface (FFI) brings interoperability with other languages.</li>
+<li><a href="#system-injection">System injection</a> isolates application logic from implementation details in order to bring long expectancy of your software as well as maintainability.</li>
+<li>Its C/<a href="https://www.rust-lang.org/">Rust</a> Foreign Function Interface (FFI) provides interoperability with other languages.</li>
 </ul>
 </li>
 </ul>
 <h2 id="features"><a class="header" href="#features">Features</a></h2>
+<h3 id="minimal-design"><a class="header" href="#minimal-design">Minimal design</a></h3>
+<ul>
+<li>Its syntax and type system are simple and easy to learn.</li>
+<li>Its minimal language features keep codes maintainable.</li>
+</ul>
 <h3 id="system-injection"><a class="header" href="#system-injection">System injection</a></h3>
 <ul>
 <li>System APIs are always injected as arguments to main functions.</li>
 <li>Developers can define their own system APIs and main function types.</li>
 </ul>
-<h3 id="others"><a class="header" href="#others">Others</a></h3>
+<h3 id="even-more"><a class="header" href="#even-more">Even more...</a></h3>
 <ul>
 <li>Static typing
 <ul>
@@ -191,6 +195,11 @@
 <li>Errors as values
 <ul>
 <li>Errors are merely data. Its special syntax brings a convenient way to handle errors inside each function.</li>
+</ul>
+</li>
+<li>Cross compile
+<ul>
+<li>The compiler and runtime support different CPU architectures, operating systems, web browsers and <a href="https://wasi.dev/">WASI</a> (WIP.)</li>
 </ul>
 </li>
 <li>Asynchronous operation (WIP)
