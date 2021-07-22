@@ -159,7 +159,7 @@ checksum = "398ea4fabe40b9b0d885340a2a991a44c8a645624075ad966d21f88688e2b69e"
 [[package]]
 name = "fmm"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#37777f0cf1d5bf606bdcf567857ed55c85c995d5"
+source = "git+https://github.com/raviqqe/fmm?branch=main#e0a770cade6e3186730435c32d8be5304471e346"
 dependencies = [
  "once_cell",
  "petgraph",
@@ -168,7 +168,7 @@ dependencies = [
 [[package]]
 name = "fmm-c"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#37777f0cf1d5bf606bdcf567857ed55c85c995d5"
+source = "git+https://github.com/raviqqe/fmm?branch=main#e0a770cade6e3186730435c32d8be5304471e346"
 dependencies = [
  "fmm",
  "tempfile",
@@ -177,7 +177,7 @@ dependencies = [
 [[package]]
 name = "fmm-llvm"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#37777f0cf1d5bf606bdcf567857ed55c85c995d5"
+source = "git+https://github.com/raviqqe/fmm?branch=main#e0a770cade6e3186730435c32d8be5304471e346"
 dependencies = [
  "fmm",
  "inkwell",
