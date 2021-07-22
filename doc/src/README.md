@@ -10,7 +10,7 @@ To make such development efficient, it focuses on:
 
 - Maintainability
   - Everyone can learn the language and participate in actual development quickly.
-  - People having different backgrounds can collaborate with each other at a minimal cost.
+  - People with different backgrounds can collaborate with each other at a minimal cost.
 - Portability
   - [System injection](#system-injection) isolates application logic from implementation details in order to bring long expectancy of your software as well as maintainability.
   - Its C/[Rust](https://www.rust-lang.org/) Foreign Function Interface (FFI) provides interoperability with other languages.
