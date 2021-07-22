@@ -23,9 +23,9 @@ To make such development efficient, it focuses on:
 
 ### System injection
 
-- System APIs are always injected as arguments to main functions.
-- That isolates application logic from implementation details in order to bring long expectancy of your software as well as maintainability.
-- Developers can define their own system APIs and main function types.
+- System APIs are always injected into entrypoints of applications.
+- That isolates application logic from implementation details bringing software's long expectancy as well as maintainability.
+- Developers can define their own system APIs and build applications on top of them.
 
 ### Even more...
 
