@@ -67,4 +67,4 @@ The runtime and library provide tools for thread-safe parallel computation that 
 
 ## License
 
-[Apache 2.0](https://github.com/pen-lang/pen/blob/main/LICENSE)
+Dual-licensed under [MIT](https://github.com/pen-lang/pen/blob/main/LICENSE-MIT) and [Apache 2.0](https://github.com/pen-lang/pen/blob/main/LICENSE-APACHE).
