@@ -35,7 +35,7 @@ Data types are checked at compile time so that developers can catch errors earli
 
 #### Immutable values
 
-Values are immutable, which leads to predictable and testable codes.
+All values are immutable, which leads to predictable and testable codes.
 
 #### Pure functions by default
 
