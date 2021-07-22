@@ -10,10 +10,9 @@ To make such development efficient, it focuses on:
 
 - Maintainability
   - Everyone can learn the language and participate in actual development quickly.
-  - People with different backgrounds can collaborate with each other at a minimal cost.
+  - Developers can focus on application logic rather than ever-changing implementation details.
 - Portability
-  - [System injection](#system-injection) isolates application logic from implementation details in order to bring long expectancy of your software as well as maintainability.
-  - Its C/[Rust](https://www.rust-lang.org/) Foreign Function Interface (FFI) provides interoperability with other languages.
+  - Programs written in the language can be ported to different platforms.
 
 ## Features
 
@@ -25,6 +24,7 @@ To make such development efficient, it focuses on:
 ### System injection
 
 - System APIs are always injected as arguments to main functions.
+- That isolates application logic from implementation details in order to bring long expectancy of your software as well as maintainability.
 - Developers can define their own system APIs and main function types.
 
 ### Even more...
@@ -39,6 +39,8 @@ To make such development efficient, it focuses on:
   - Errors are merely data. Its special syntax brings a convenient way to handle errors inside each function.
 - Cross compile
   - The compiler and runtime support different CPU architectures, operating systems, web browsers and [WASI](https://wasi.dev/) (WIP.)
+- Foreign Function Interface
+  - Its C/[Rust](https://www.rust-lang.org/) Foreign Function Interface (FFI) provides interoperability with other languages.
 - Asynchronous operation (WIP)
   - Every function is possibly asynchronous while called in the same way as synchronous ones.
 - Parallel computation (WIP)
