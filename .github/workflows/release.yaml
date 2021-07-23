@@ -8,32 +8,19 @@ jobs:
   build:
     strategy:
       fail-fast: false
-      max-parallel: 4
       matrix:
-        platform:
-          - os: ubuntu-20.04
-            target: x86_64-unknown-linux-musl
-          - os: ubuntu-20.04
-            target: aarch64-unknown-linux-musl
-          - os: macos-latest
-            target: x86_64-apple-darwin
-          - os: macos-latest
-            target: aarch64-apple-darwin
-    runs-on: ${{ matrix.platform.os }}
+        os:
+          - ubuntu-latest
+          - macos-latest
+    runs-on: ${{ matrix.os }}
     steps:
       - run: curl -fsSL https://apt.llvm.org/llvm.sh | sudo bash -s 12
-        if: startsWith(matrix.platform.os, 'ubuntu-')
+        if: startsWith(matrix.os, 'ubuntu-')
       - run: brew install llvm
-        if: startsWith(matrix.platform.os, 'macos-')
+        if: startsWith(matrix.os, 'macos-')
       - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
-        with:
-          target: ${{ matrix.platform.target }}
-          override: true
-      - run: cargo install cross
-      - run: cross build --release --target ${{ matrix.platform.target }}
-      - run: strip target/${{ matrix.platform.target }}/release/pen
-        if: startsWith(matrix.platform.target, 'x86_64-')
+      - run: cargo build --release
+      - run: strip target/release/pen
       - run: |
           mkdir release
 
@@ -43,9 +30,11 @@ jobs:
           cp -r lib/os lib/prelude release/lib
 
           mkdir release/bin
-          cp target/${{ matrix.platform.target }}/release/pen release/bin
+          cp target/release/pen release/bin
 
-          tarball=pen-$(git describe --tags | head || echo test)-${{ matrix.platform.target }}.tar.gz
+          version=$(git describe --tags | head || echo test)
+          target=$(rustc -vV | grep host: | sed 's/host: //')
+          tarball=pen-$version-$target.tar.gz
           tar czf tarball release/*
 
           echo asset=$tarball >> $GITHUB_ENV
