@@ -41,7 +41,7 @@ jobs:
           tarball=pen-$version-$target.tar.gz
 
           cd release
-          tar czf $tarball *
+          tar czf ../$tarball *
 
           echo asset=$tarball >> $GITHUB_ENV
       - uses: actions/upload-artifact@v2
