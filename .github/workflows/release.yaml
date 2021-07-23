@@ -1,0 +1,51 @@
+name: release
+on:
+  push:
+    tags:
+      - v*.*.*
+  pull_request:
+jobs:
+  build:
+    strategy:
+      matrix:
+        platform:
+          - os: ubuntu-20.04
+            target: x86_64-unknown-linux-musl
+          - os: ubuntu-20.04
+            target: aarch64-unknown-linux-musl
+          - os: macos-11
+            target: x86_64-apple-darwin
+          - os: macos-11
+            target: aarch64-apple-darwin
+    runs-on: ${{ matrix.platform.os }}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          target: ${{ matrix.platform.target }}
+          override: true
+      - run: cargo install cross
+      - run: cross build --release --target ${{ matrix.platform.target }}
+      - run: strip target/${{ matrix.platform.target }}/release/pen
+        if: startsWith(matrix.platform.target, 'x86_64-')
+      - run: |
+          mkdir release
+
+          cp README.md LICENSE.md LICENSE-MIT LICENSE-APACHE release
+
+          mkdir release/lib
+          cp -r lib/os lib/prelude release/lib
+
+          mkdir release/bin
+          cp target/${{ matrix.platform.target }}/release/pen release/bin
+
+          tarball=pen-$(git describe --tags | head || echo test)-${{ matrix.platform.target }}.tar.gz
+          tar czf tarball release/*
+
+          echo asset=$tarball >> $GITHUB_ENV
+      - uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: ${{ env.asset }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
