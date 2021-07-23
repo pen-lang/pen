@@ -21,6 +21,10 @@ jobs:
             target: aarch64-apple-darwin
     runs-on: ${{ matrix.platform.os }}
     steps:
+      - run: curl -fsSL https://apt.llvm.org/llvm.sh | sudo bash -s 12
+        if: startsWith(matrix.platform.os, 'ubuntu-')
+      - run: brew install llvm
+        if: startsWith(matrix.platform.os, 'macos-')
       - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
         with:
