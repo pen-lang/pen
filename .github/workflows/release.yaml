@@ -31,7 +31,7 @@ jobs:
           cp README.md LICENSE.md LICENSE-MIT LICENSE-APACHE release
 
           mkdir release/lib
-          cp -r lib/os lib/prelude release/lib
+          cp -r lib/core lib/os lib/prelude release/lib
 
           mkdir release/bin
           cp target/release/pen release/bin
