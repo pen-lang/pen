@@ -16,7 +16,9 @@ jobs:
     steps:
       - run: curl -fsSL https://apt.llvm.org/llvm.sh | sudo bash -s 12
         if: startsWith(matrix.os, 'ubuntu-')
-      - run: brew install llvm
+      - run: |
+          brew install llvm
+          echo LLVM_SYS_120_PREFIX=$(brew --prefix)/opt/llvm >> $GITHUB_ENV
         if: startsWith(matrix.os, 'macos-')
       - uses: actions/checkout@v2
       - run: cargo build --release
