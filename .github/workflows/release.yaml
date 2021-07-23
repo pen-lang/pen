@@ -36,10 +36,10 @@ jobs:
           mkdir release/bin
           cp target/release/pen release/bin
 
-          version=$(git describe --tags | head || echo test)
+          version=$(git describe --tags || echo test | head)
           target=$(rustc -vV | grep host: | sed 's/host: //')
           tarball=pen-$version-$target.tar.gz
-          tar czf tarball release/*
+          tar czf $tarball release/*
 
           echo asset=$tarball >> $GITHUB_ENV
       - uses: actions/upload-artifact@v2
