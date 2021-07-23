@@ -40,6 +40,10 @@ jobs:
           tar czf tarball release/*
 
           echo asset=$tarball >> $GITHUB_ENV
+      - uses: actions/upload-artifact@v2
+        with:
+          name: ${{ env.asset }}
+          path: ${{ env.asset }}
       - uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
