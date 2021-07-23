@@ -5,7 +5,7 @@ on:
       - v*.*.*
   pull_request:
 jobs:
-  build:
+  release:
     strategy:
       fail-fast: false
       matrix:
