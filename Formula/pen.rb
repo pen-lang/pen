@@ -12,7 +12,7 @@ class Pen < Formula
   depends_on 'rust' => :build
 
   def install
-    system 'cargo', 'build', '--locked', '--release'
+    system 'cargo', 'build', '--release'
     bin.install 'target/release/pen' => 'rust-pen'
 
     File.write 'pen', <<~EOS
