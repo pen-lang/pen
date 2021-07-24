@@ -8,7 +8,9 @@ class Pen < Formula
 
   conflicts_with 'pen'
 
+  depends_on 'git'
   depends_on 'llvm'
+  depends_on 'ninja'
   depends_on 'rust' => :build
 
   def install
