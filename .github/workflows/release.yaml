@@ -21,7 +21,9 @@ jobs:
             target: x86_64-apple-darwin
     runs-on: ${{ matrix.os }}
     steps:
-      - run: curl -fsSL https://apt.llvm.org/llvm.sh | sudo bash -s 12
+      - run: |
+          curl -fsSL https://apt.llvm.org/llvm.sh | sudo bash -s 12
+          sudo apt -y install musl-tools
         if: startsWith(matrix.os, 'ubuntu-')
       - run: |
           brew install llvm
