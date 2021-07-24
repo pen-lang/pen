@@ -15,12 +15,12 @@ class Pen < Formula
 
   def install
     system 'cargo', 'build', '--release'
-    bin.install 'target/release/pen' => 'rust-pen'
+    libexec.install 'target/release/pen'
 
     File.write 'pen.sh', <<~EOS
       #!/bin/sh
       set -e
-      PEN_ROOT=#{prefix} #{bin / 'rust-pen'} "$@"
+      PEN_ROOT=#{prefix} #{libexec / 'pen'} "$@"
     EOS
 
     chmod 755, 'pen.sh'
