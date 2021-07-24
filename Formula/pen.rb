@@ -12,7 +12,7 @@ class Pen < Formula
   depends_on 'rust' => :build
 
   def install
-    system 'cargo', 'install', '--path', 'cmd/pen', *std_cargo_args
+    system 'cargo', 'install', *std_cargo_args.map { |s| s == "." ? "cmd/pen" : s }
   end
 
   test do
