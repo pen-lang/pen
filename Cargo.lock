@@ -257,6 +257,7 @@ version = "0.1.0"
 dependencies = [
  "app",
  "lang",
+ "regex",
  "serde",
  "serde_json",
  "termcolor",

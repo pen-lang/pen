@@ -9,6 +9,7 @@ pub enum InfrastructureError {
         path: std::path::PathBuf,
         source: std::io::Error,
     },
+    DefaultTargetDetection,
     EnvironmentVariableNotFound(String),
     PackageUrlSchemeNotSupported(url::Url),
     ReadDirectory {
@@ -30,6 +31,7 @@ impl Error for InfrastructureError {
         match self {
             Self::CommandExit { status_code: _ } => None,
             Self::CreateDirectory { path: _, source } => Some(source),
+            Self::DefaultTargetDetection => None,
             Self::EnvironmentVariableNotFound(_) => None,
             Self::PackageUrlSchemeNotSupported(_) => None,
             Self::ReadDirectory { path: _, source } => Some(source),
@@ -53,6 +55,7 @@ impl Display for InfrastructureError {
                 "failed to create directory {}",
                 path.to_string_lossy()
             ),
+            Self::DefaultTargetDetection => write!(formatter, "failed to detect default target"),
             Self::EnvironmentVariableNotFound(name) => {
                 write!(formatter, "environment variable \"{}\" not found", name)
             }
