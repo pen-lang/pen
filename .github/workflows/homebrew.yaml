@@ -15,4 +15,4 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - run: brew tap pen-lang/pen .
-      - run: brew install pen-lang/pen
+      - run: brew install pen-lang/pen/pen
