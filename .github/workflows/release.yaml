@@ -47,7 +47,6 @@ jobs:
           name: ${{ env.asset }}
           path: ${{ env.asset }}
       - run: |
-          echo VERSION: $version
           git fetch --prune --unshallow --tags
 
           if git tag -l | grep $version; then
@@ -58,12 +57,12 @@ jobs:
           git config --global user.email "$GIT_EMAIL"
 
           git tag $version
-          # git push --tags
+          git push --tags
         env:
           GIT_USER: ${{ secrets.GIT_USER }}
           GIT_EMAIL: ${{ secrets.GIT_EMAIL }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        # if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main'
       - uses: softprops/action-gh-release@v1
         if: github.ref == 'refs/heads/main'
         with:
