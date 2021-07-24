@@ -17,6 +17,8 @@ jobs:
             exit
           fi
 
+          echo new_tag=true >> $GITHUB_ENV
+
           git config --global user.name "$GIT_USER"
           git config --global user.email "$GIT_EMAIL"
 
@@ -30,6 +32,7 @@ jobs:
         if: github.ref == 'refs/heads/main'
     outputs:
       version: ${{ env.version }}
+      new_tag: ${{ env.new_tag }}
   release:
     needs: tag
     strategy:
@@ -72,8 +75,9 @@ jobs:
           name: ${{ env.asset }}
           path: ${{ env.asset }}
       - uses: softprops/action-gh-release@v1
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' && needs.tag.outputs.new_tag
         with:
+          tag_name: refs/tags/${{ needs.tag.outputs.version }}
           files: ${{ env.asset }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
