@@ -28,6 +28,7 @@ jobs:
           echo LLVM_SYS_120_PREFIX=$(brew --prefix)/opt/llvm >> $GITHUB_ENV
         if: startsWith(matrix.os, 'macos-')
       - uses: actions/checkout@v2
+      - run: rustup target add ${{ matrix.target }}
       - run: cargo build --release --target ${{ matrix.target }}
       - run: strip target/release/pen
       - run: |
