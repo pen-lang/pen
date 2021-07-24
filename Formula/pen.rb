@@ -26,6 +26,7 @@ class Pen < Formula
   end
 
   test do
-    system "#{bin}/pen", '--version'
+    system bin / 'pen', 'init', '.'
+    system bin / 'pen', 'build'
   end
 end
