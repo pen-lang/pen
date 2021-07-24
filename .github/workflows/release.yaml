@@ -34,21 +34,21 @@ jobs:
       - run: cargo build --release --target ${{ matrix.target }}
       - run: strip target/${{ matrix.target }}/release/pen
       - run: |
-          mkdir release
+          mkdir asset
 
-          cp README.md LICENSE.md LICENSE-MIT LICENSE-APACHE release
+          cp README.md LICENSE.md LICENSE-MIT LICENSE-APACHE asset
 
-          mkdir release/lib
-          cp -r lib/core lib/os lib/prelude release/lib
+          mkdir asset/lib
+          cp -r lib/core lib/os lib/prelude asset/lib
 
-          mkdir release/bin
-          cp target/${{ matrix.target }}/release/pen release/bin
+          mkdir asset/bin
+          cp target/${{ matrix.target }}/release/pen asset/bin
 
           version=$(git describe --tags || echo test | head)
           target=$(rustc -vV | grep host: | sed 's/host: //')
           tarball=pen-$version-$target.tar.gz
 
-          cd release
+          cd asset
           tar czf ../$tarball *
 
           echo asset=$tarball >> $GITHUB_ENV
