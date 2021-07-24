@@ -31,7 +31,7 @@ class Pen < Formula
   end
 
   test do
-    system (bin / 'pen'), 'init', '.'
+    system (bin / 'pen'), 'create', '.'
     system (bin / 'pen'), 'build'
   end
 end
