@@ -5,36 +5,7 @@ on:
       - main
   pull_request:
 jobs:
-  tag:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - run: echo version=$(cat cmd/pen/Cargo.toml | grep 'version = ' | sed 's/.*"\(.*\)"/\1/') >> $GITHUB_ENV
-      - run: |
-          git fetch --prune --unshallow --tags
-
-          if git tag -l | grep $version; then
-            exit
-          fi
-
-          echo new_tag=true >> $GITHUB_ENV
-
-          git config --global user.name "$GIT_USER"
-          git config --global user.email "$GIT_EMAIL"
-
-          git tag $version
-        env:
-          GIT_USER: ${{ secrets.GIT_USER }}
-          GIT_EMAIL: ${{ secrets.GIT_EMAIL }}
-      - run: git push --tags
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        if: github.ref == 'refs/heads/main'
-    outputs:
-      version: ${{ env.version }}
-      new_tag: ${{ env.new_tag }}
   release:
-    needs: tag
     strategy:
       fail-fast: false
       matrix:
@@ -52,6 +23,7 @@ jobs:
         if: startsWith(matrix.os, 'macos-')
       - run: cargo build --release
       - run: strip target/release/pen
+      - run: echo version=$(cat cmd/pen/Cargo.toml | grep 'version = ' | sed 's/.*"\(.*\)"/\1/') >> $GITHUB_ENV
       - run: |
           mkdir asset
 
@@ -64,7 +36,7 @@ jobs:
           cp target/release/pen asset/bin
 
           target=$(rustc -vV | grep host: | sed 's/host: //')
-          tarball=pen-${{ needs.tag.outputs.version }}-$target.tar.gz
+          tarball=pen-$version-$target.tar.gz
 
           cd asset
           tar czf ../$tarball *
@@ -75,9 +47,9 @@ jobs:
           name: ${{ env.asset }}
           path: ${{ env.asset }}
       - uses: softprops/action-gh-release@v1
-        if: github.ref == 'refs/heads/main' && needs.tag.outputs.new_tag
+        if: github.ref == 'refs/heads/main'
         with:
-          tag_name: refs/tags/${{ needs.tag.outputs.version }}
+          tag_name: v${{ env.version }}
           files: ${{ env.asset }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
