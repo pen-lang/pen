@@ -19,6 +19,7 @@ class Pen < Formula
 
     File.write 'pen', <<~EOS
       #!/bin/sh
+      set -e
       PEN_ROOT=#{prefix} #{bin / 'rust-pen'} "$@"
     EOS
 
