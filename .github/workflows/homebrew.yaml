@@ -14,18 +14,6 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
-      - id: setup
-        uses: Homebrew/actions/setup-homebrew@master
-      - id: cache
-        uses: actions/cache@v1
-        with:
-          path: ${{ steps.setup.outputs.gems-path }}
-          key: ${{ runner.os }}-rubygems-${{ steps.set-up-homebrew.outputs.gems-hash }}
-          restore-keys: ${{ runner.os }}-rubygems-
-      - name: Install Homebrew Bundler RubyGems
-        if: steps.cache.outputs.cache-hit != 'true'
-        run: brew install-bundler-gems
-      - run: brew test-bot --only-cleanup-before
-      - run: brew test-bot --only-setup
-      - run: brew test-bot --only-tap-syntax
-      - run: brew test-bot --only-formulae
+      - uses: Homebrew/actions/setup-homebrew@master
+      - run: brew tap pen-lang/pen .
+      - run: brew install pen-lang/pen/pen
