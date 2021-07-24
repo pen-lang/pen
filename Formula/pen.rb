@@ -12,9 +12,7 @@ class Pen < Formula
   depends_on 'rust' => :build
 
   def install
-    lib.install Dir['lib/*']
-
-    system 'cargo', 'build', '--release'
+    system 'cargo', 'build', '--locked', '--release'
     bin.install 'target/release/pen' => 'rust-pen'
 
     File.write 'pen', <<~EOS
@@ -25,6 +23,8 @@ class Pen < Formula
 
     chmod 755, 'pen'
     bin.install 'pen'
+
+    lib.install Dir['lib/*']
   end
 
   test do
