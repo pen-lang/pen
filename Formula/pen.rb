@@ -14,7 +14,7 @@ class Pen < Formula
   def install
     lib.install Dir['lib/*']
 
-    system 'cargo', 'build', '--path', 'cmd/pen', '--locked', '--release'
+    system 'cargo', 'build', '--locked', '--release'
     bin.install 'target/release/pen' => 'rust-pen'
 
     File.write 'pen', <<~EOS
