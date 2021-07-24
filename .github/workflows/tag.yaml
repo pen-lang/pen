@@ -1,0 +1,25 @@
+name: tag
+on:
+  push:
+    branches:
+      - main
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          version=$(cat cmd/pen/Cargo.toml | grep 'version = ' | sed 's/.*"\(.*\)"/\1/')
+
+          if git tag -l | grep $version; then
+            exit
+          fi
+
+          git config --global user.name "$GIT_USER"
+          git config --global user.email "$GIT_EMAIL"
+
+          git tag $version
+          git push --tags
+        env:
+          GIT_USER: ${{ secrets.GIT_USER }}
+          GIT_EMAIL: ${{ secrets.GIT_EMAIL }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
