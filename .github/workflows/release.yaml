@@ -60,8 +60,6 @@ jobs:
 
           git tag $version
           git push --tags
-
-          echo version=$version >> $GITHUB_ENV
         env:
           GIT_USER: ${{ secrets.GIT_USER }}
           GIT_EMAIL: ${{ secrets.GIT_EMAIL }}
