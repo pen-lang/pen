@@ -23,8 +23,9 @@ class Pen < Formula
       PEN_ROOT=#{prefix} #{libexec / 'pen'} "$@"
     EOS
 
-    chmod 755, 'pen.sh'
-    bin.install_symlink 'pen' => 'pen.sh'
+    chmod 0o755, 'pen.sh'
+    libexec.install 'pen.sh'
+    bin.install_symlink (libexec / 'pen.sh') => 'pen'
 
     lib.install Dir['lib/*']
   end
