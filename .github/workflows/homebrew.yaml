@@ -18,3 +18,4 @@ jobs:
       - uses: Homebrew/actions/setup-homebrew@master
       - run: brew tap pen-lang/pen .
       - run: brew install pen-lang/pen/pen
+      - run: brew test pen-lang/pen/pen
