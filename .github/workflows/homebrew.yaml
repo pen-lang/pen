@@ -14,11 +14,12 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
-      - uses: Homebrew/actions/setup-homebrew@master
+      - id: setup
+        uses: Homebrew/actions/setup-homebrew@master
       - id: cache
         uses: actions/cache@v1
         with:
-          path: ${{ steps.set-up-homebrew.outputs.gems-path }}
+          path: ${{ steps.setup.outputs.gems-path }}
           key: ${{ runner.os }}-rubygems-${{ steps.set-up-homebrew.outputs.gems-hash }}
           restore-keys: ${{ runner.os }}-rubygems-
       - name: Install Homebrew Bundler RubyGems
