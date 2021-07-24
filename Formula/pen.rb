@@ -12,7 +12,17 @@ class Pen < Formula
   depends_on 'rust' => :build
 
   def install
-    system 'cargo', 'install', *std_cargo_args.map { |s| s == '.' ? 'cmd/pen' : s }
+    lib.install Dir['lib/*']
+
+    system 'cargo', 'build', '--path', 'cmd/pen', '--locked', '--release'
+    bin.install 'target/release/pen' => 'rust-pen'
+
+    File.write 'pen', <<~EOS
+      #!/bin/sh
+      PEN_ROOT=#{prefix} #{bin / 'rust-pen'} "$@"
+    EOS
+    chmod 755, 'pen'
+    bin.install 'pen'
   end
 
   test do
