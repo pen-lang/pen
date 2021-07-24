@@ -3,11 +3,35 @@ on:
   push:
     branches:
       - main
-    tags:
-      - "[0-9]+.[0-9]+.[0-9]+"
   pull_request:
 jobs:
+  tag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: echo version=$(cat cmd/pen/Cargo.toml | grep 'version = ' | sed 's/.*"\(.*\)"/\1/') >> $GITHUB_ENV
+      - run: |
+          git fetch --prune --unshallow --tags
+
+          if git tag -l | grep $version; then
+            exit
+          fi
+
+          git config --global user.name "$GIT_USER"
+          git config --global user.email "$GIT_EMAIL"
+
+          git tag $version
+        env:
+          GIT_USER: ${{ secrets.GIT_USER }}
+          GIT_EMAIL: ${{ secrets.GIT_EMAIL }}
+      - run: git push --tags
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        if: github.ref == 'refs/heads/main'
+    outputs:
+      version: ${{ env.version }}
   release:
+    needs: tag
     strategy:
       fail-fast: false
       matrix:
@@ -16,13 +40,13 @@ jobs:
           - macos-latest
     runs-on: ${{ matrix.os }}
     steps:
+      - uses: actions/checkout@v2
       - run: curl -fsSL https://apt.llvm.org/llvm.sh | sudo bash -s 12
         if: startsWith(matrix.os, 'ubuntu-')
       - run: |
           brew install llvm
           echo LLVM_SYS_120_PREFIX=$(brew --prefix)/opt/llvm >> $GITHUB_ENV
         if: startsWith(matrix.os, 'macos-')
-      - uses: actions/checkout@v2
       - run: cargo build --release
       - run: strip target/release/pen
       - run: |
@@ -36,9 +60,8 @@ jobs:
           mkdir asset/bin
           cp target/release/pen asset/bin
 
-          version=$(git describe --tags || echo test | head)
           target=$(rustc -vV | grep host: | sed 's/host: //')
-          tarball=pen-$version-$target.tar.gz
+          tarball=pen-${{ needs.tag.outputs.version }}-$target.tar.gz
 
           cd asset
           tar czf ../$tarball *
@@ -49,7 +72,7 @@ jobs:
           name: ${{ env.asset }}
           path: ${{ env.asset }}
       - uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/')
+        if: github.ref == 'refs/heads/main'
         with:
           files: ${{ env.asset }}
         env:
