@@ -74,6 +74,7 @@ jobs:
       - uses: softprops/action-gh-release@v1
         if: github.ref == 'refs/heads/main'
         with:
+          tag_name: refs/tags/${{ needs.tag.outputs.version }}
           files: ${{ env.asset }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
