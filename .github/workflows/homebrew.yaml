@@ -14,5 +14,5 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
-      - run: brew tap pen-lang/pen .
-      - run: brew install pen-lang/pen/pen
+      - uses: Homebrew/actions/setup-homebrew@master
+      - run: brew test-bot
