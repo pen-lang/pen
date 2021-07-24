@@ -1,0 +1,56 @@
+name: release
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - v*.*.*
+  pull_request:
+jobs:
+  release:
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - macos-latest
+    runs-on: ${{ matrix.os }}
+    steps:
+      - run: curl -fsSL https://apt.llvm.org/llvm.sh | sudo bash -s 12
+        if: startsWith(matrix.os, 'ubuntu-')
+      - run: |
+          brew install llvm
+          echo LLVM_SYS_120_PREFIX=$(brew --prefix)/opt/llvm >> $GITHUB_ENV
+        if: startsWith(matrix.os, 'macos-')
+      - uses: actions/checkout@v2
+      - run: cargo build --release
+      - run: strip target/release/pen
+      - run: |
+          mkdir asset
+
+          cp README.md LICENSE.md LICENSE-MIT LICENSE-APACHE asset
+
+          mkdir asset/lib
+          cp -r lib/core lib/os lib/prelude asset/lib
+
+          mkdir asset/bin
+          cp target/release/pen asset/bin
+
+          version=$(git describe --tags || echo test | head)
+          target=$(rustc -vV | grep host: | sed 's/host: //')
+          tarball=pen-$version-$target.tar.gz
+
+          cd asset
+          tar czf ../$tarball *
+
+          echo asset=$tarball >> $GITHUB_ENV
+      - uses: actions/upload-artifact@v2
+        with:
+          name: ${{ env.asset }}
+          path: ${{ env.asset }}
+      - uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: ${{ env.asset }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
