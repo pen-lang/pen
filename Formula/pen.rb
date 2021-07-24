@@ -17,14 +17,14 @@ class Pen < Formula
     system 'cargo', 'build', '--release'
     bin.install 'target/release/pen' => 'rust-pen'
 
-    File.write 'pen', <<~EOS
+    File.write 'pen.sh', <<~EOS
       #!/bin/sh
       set -e
       PEN_ROOT=#{prefix} #{bin / 'rust-pen'} "$@"
     EOS
 
-    chmod 755, 'pen'
-    bin.install 'pen'
+    chmod 755, 'pen.sh'
+    bin.install_symlink 'pen' => 'pen.sh'
 
     lib.install Dir['lib/*']
   end
