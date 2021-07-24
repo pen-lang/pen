@@ -21,6 +21,7 @@ class Pen < Formula
       #!/bin/sh
       PEN_ROOT=#{prefix} #{bin / 'rust-pen'} "$@"
     EOS
+
     chmod 755, 'pen'
     bin.install 'pen'
   end
