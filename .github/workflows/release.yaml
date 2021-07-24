@@ -32,7 +32,7 @@ jobs:
       - uses: actions/checkout@v2
       - run: rustup target add ${{ matrix.target }}
       - run: cargo build --release --target ${{ matrix.target }}
-      - run: strip target/release/pen
+      - run: strip target/${{ matrix.target }}/release/pen
       - run: |
           mkdir release
 
@@ -42,7 +42,7 @@ jobs:
           cp -r lib/core lib/os lib/prelude release/lib
 
           mkdir release/bin
-          cp target/release/pen release/bin
+          cp target/${{ matrix.target }}/release/pen release/bin
 
           version=$(git describe --tags || echo test | head)
           target=$(rustc -vV | grep host: | sed 's/host: //')
