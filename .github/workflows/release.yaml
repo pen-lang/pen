@@ -14,25 +14,17 @@ jobs:
         os:
           - ubuntu-latest
           - macos-latest
-        include:
-          - os: ubuntu-latest
-            target: x86_64-unknown-linux-musl
-          - os: macos-latest
-            target: x86_64-apple-darwin
     runs-on: ${{ matrix.os }}
     steps:
-      - run: |
-          curl -fsSL https://apt.llvm.org/llvm.sh | sudo bash -s 12
-          sudo apt -y install musl-tools
+      - run: curl -fsSL https://apt.llvm.org/llvm.sh | sudo bash -s 12
         if: startsWith(matrix.os, 'ubuntu-')
       - run: |
           brew install llvm
           echo LLVM_SYS_120_PREFIX=$(brew --prefix)/opt/llvm >> $GITHUB_ENV
         if: startsWith(matrix.os, 'macos-')
       - uses: actions/checkout@v2
-      - run: rustup target add ${{ matrix.target }}
-      - run: cargo build --release --target ${{ matrix.target }}
-      - run: strip target/${{ matrix.target }}/release/pen
+      - run: cargo build --release
+      - run: strip target/release/pen
       - run: |
           mkdir asset
 
@@ -42,7 +34,7 @@ jobs:
           cp -r lib/core lib/os lib/prelude asset/lib
 
           mkdir asset/bin
-          cp target/${{ matrix.target }}/release/pen asset/bin
+          cp target/release/pen asset/bin
 
           version=$(git describe --tags || echo test | head)
           target=$(rustc -vV | grep host: | sed 's/host: //')
