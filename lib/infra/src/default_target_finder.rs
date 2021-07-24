@@ -7,7 +7,7 @@ pub fn find() -> Result<String, Box<dyn Error>> {
             Command::new(&llvm_command_finder::find("llc")?).arg("--version"),
         )?)
         .and_then(|captures| captures.get(1))
-        .ok_or_else(|| InfrastructureError::DefaultTargetDetection)?
+        .ok_or(InfrastructureError::DefaultTargetDetection)?
         .as_str()
         .into())
 }
