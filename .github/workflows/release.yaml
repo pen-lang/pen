@@ -35,9 +35,8 @@ jobs:
           mkdir asset/bin
           cp target/release/pen asset/bin
 
-          version=$(git describe --tags || echo test | head)
           target=$(rustc -vV | grep host: | sed 's/host: //')
-          tarball=pen-$version-$target.tar.gz
+          tarball=pen-${{ env.version }}-$target.tar.gz
 
           cd asset
           tar czf ../$tarball *
@@ -48,7 +47,7 @@ jobs:
           name: ${{ env.asset }}
           path: ${{ env.asset }}
       - run: |
-          version=$(pen --version | sed 's/^.* //')
+          version=${{ env.version }}
 
           git fetch --prune --unshallow --tags
 
