@@ -14,6 +14,11 @@ jobs:
         os:
           - ubuntu-latest
           - macos-latest
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-musl
+          - os: macos-latest
+            target: x86_64-apple-darwin
     runs-on: ${{ matrix.os }}
     steps:
       - run: curl -fsSL https://apt.llvm.org/llvm.sh | sudo bash -s 12
@@ -23,7 +28,7 @@ jobs:
           echo LLVM_SYS_120_PREFIX=$(brew --prefix)/opt/llvm >> $GITHUB_ENV
         if: startsWith(matrix.os, 'macos-')
       - uses: actions/checkout@v2
-      - run: cargo build --release
+      - run: cargo build --release --target ${{ matrix.target }}
       - run: strip target/release/pen
       - run: |
           mkdir release
