@@ -5,6 +5,7 @@ pub enum InfrastructureError {
     CommandExit {
         status_code: Option<i32>,
     },
+    CommandNotFound(String),
     CreateDirectory {
         path: std::path::PathBuf,
         source: std::io::Error,
@@ -29,6 +30,7 @@ impl Error for InfrastructureError {
     fn source(&self) -> Option<&(dyn Error + 'static)> {
         match self {
             Self::CommandExit { status_code: _ } => None,
+            Self::CommandNotFound(_) => None,
             Self::CreateDirectory { path: _, source } => Some(source),
             Self::EnvironmentVariableNotFound(_) => None,
             Self::PackageUrlSchemeNotSupported(_) => None,
@@ -48,6 +50,7 @@ impl Display for InfrastructureError {
                 }
                 None => write!(formatter, "command exited without status code"),
             },
+            Self::CommandNotFound(command) => write!(formatter, "command not found: {}", command),
             Self::CreateDirectory { path, source: _ } => write!(
                 formatter,
                 "failed to create directory {}",

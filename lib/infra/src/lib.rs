@@ -1,4 +1,5 @@
 mod application_linker;
+mod command_finder;
 mod command_runner;
 mod default_target_finder;
 mod environment_variable_reader;
