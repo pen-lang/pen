@@ -24,6 +24,7 @@ impl app::infra::ApplicationLinker for ApplicationLinker {
         command_runner::run(
             std::process::Command::new("clang")
                 .arg("-Werror")
+                .arg("-static")
                 .args(if let Some(target) = target {
                     vec!["-target", target]
                 } else {
