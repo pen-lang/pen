@@ -1,6 +1,6 @@
 # Getting started
 
-## Installing `pen` command
+## Install
 
 See [Install](install).
 
