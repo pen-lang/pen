@@ -14,7 +14,7 @@ class Pen < Formula
   depends_on 'rust' => :build
 
   def install
-    system 'cargo', 'build', '--release'
+    system 'cargo', 'build', '--locked', '--release'
     libexec.install 'target/release/pen'
 
     File.write 'pen.sh', <<~EOS
