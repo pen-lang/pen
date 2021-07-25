@@ -33,7 +33,7 @@ class Pen < Formula
   end
 
   test do
-    ENV['RUSTUP_TOOLCHAIN'] = 'stable'
+    ENV['PATH'] = "#{Formula['rust'].opt_bin}:#{ENV['PATH']}"
 
     system (bin / 'pen'), 'create', '.'
     system (bin / 'pen'), 'build'
