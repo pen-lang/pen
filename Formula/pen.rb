@@ -33,6 +33,8 @@ class Pen < Formula
   end
 
   test do
+    ENV['RUSTUP_TOOLCHAIN'] = 'stable'
+
     system (bin / 'pen'), 'create', '.'
     system (bin / 'pen'), 'build'
   end
