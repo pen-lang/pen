@@ -7,5 +7,6 @@ pub trait ApplicationLinker {
         object_files: &[FilePath],
         archive_files: &[FilePath],
         application_file: &FilePath,
+        target_triple: Option<&str>,
     ) -> Result<(), Box<dyn Error>>;
 }

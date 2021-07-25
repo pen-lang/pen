@@ -19,10 +19,16 @@ impl app::infra::ApplicationLinker for ApplicationLinker {
         object_files: &[app::infra::FilePath],
         archive_files: &[app::infra::FilePath],
         application_file: &app::infra::FilePath,
+        target: Option<&str>,
     ) -> Result<(), Box<dyn Error>> {
         command_runner::run(
             std::process::Command::new("clang")
                 .arg("-Werror")
+                .args(if let Some(target) = target {
+                    vec!["-target", target]
+                } else {
+                    vec![]
+                })
                 .arg("-o")
                 .arg(
                     self.file_path_converter

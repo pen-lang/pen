@@ -69,6 +69,7 @@ pub fn build(
             &main_package_directory.join(&FilePath::new([
                 &application_configuration.application_filename
             ])),
+            target_triple,
         )?;
     }
 
