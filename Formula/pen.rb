@@ -33,9 +33,10 @@ class Pen < Formula
   end
 
   test do
-    ENV['PATH'] = "#{Formula['rust'].opt_bin}:#{ENV['PATH']}"
+    ENV.prepend_path 'PATH', Formula['PATH'].opt_bin
+    ENV.prepend_path 'PATH', bin
 
-    system (bin / 'pen'), 'create', '.'
-    system (bin / 'pen'), 'build'
+    system 'pen', 'create', '.'
+    system 'pen', 'build'
   end
 end
