@@ -19,10 +19,18 @@ impl app::infra::ApplicationLinker for ApplicationLinker {
         object_files: &[app::infra::FilePath],
         archive_files: &[app::infra::FilePath],
         application_file: &app::infra::FilePath,
+        target: Option<&str>,
     ) -> Result<(), Box<dyn Error>> {
+        // spell-checker:disable
         command_runner::run(
             std::process::Command::new("clang")
                 .arg("-Werror")
+                .arg("-static")
+                .args(if let Some(target) = target {
+                    vec!["-target", target]
+                } else {
+                    vec![]
+                })
                 .arg("-o")
                 .arg(
                     self.file_path_converter
@@ -41,6 +49,7 @@ impl app::infra::ApplicationLinker for ApplicationLinker {
                 .arg("-ldl")
                 .arg("-lpthread"),
         )?;
+        // spell-checker:enable
 
         Ok(())
     }
