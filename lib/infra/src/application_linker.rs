@@ -21,6 +21,7 @@ impl app::infra::ApplicationLinker for ApplicationLinker {
         application_file: &app::infra::FilePath,
         target: Option<&str>,
     ) -> Result<(), Box<dyn Error>> {
+        // spell-checker:disable
         command_runner::run(
             std::process::Command::new("clang")
                 .arg("-Werror")
@@ -48,6 +49,7 @@ impl app::infra::ApplicationLinker for ApplicationLinker {
                 .arg("-ldl")
                 .arg("-lpthread"),
         )?;
+        // spell-checker:enable
 
         Ok(())
     }

@@ -14,6 +14,7 @@
     "dyndep",
     "hasher",
     "idempotently",
+    "indoc",
     "itertools",
     "malloc",
     "mtriple",
