@@ -9,7 +9,7 @@ class Pen < Formula
   conflicts_with 'pen'
 
   depends_on 'git'
-  depends_on 'llvm'
+  depends_on 'llvm@12'
   depends_on 'ninja'
   depends_on 'rust' => :build
 
@@ -20,7 +20,9 @@ class Pen < Formula
     File.write 'pen.sh', <<~EOS
       #!/bin/sh
       set -e
-      PEN_ROOT=#{prefix} #{libexec / 'pen'} "$@"
+      export PEN_ROOT=#{prefix}
+      export PATH=#{Formula['llvm@12'].opt_bin}:$PATH
+      #{libexec / 'pen'} "$@"
     EOS
 
     chmod 0o755, 'pen.sh'
