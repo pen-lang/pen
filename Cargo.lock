@@ -257,6 +257,7 @@ version = "0.1.0"
 dependencies = [
  "app",
  "lang",
+ "regex",
  "serde",
  "serde_json",
  "termcolor",
@@ -440,7 +441,7 @@ dependencies = [
 
 [[package]]
 name = "pen"
-version = "0.1.0"
+version = "0.1.5"
 dependencies = [
  "app",
  "clap",
