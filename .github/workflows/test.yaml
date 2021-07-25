@@ -11,6 +11,7 @@ jobs:
       - run: curl -fsSL https://apt.llvm.org/llvm.sh | sudo bash -s 12
       - uses: actions/checkout@v2
       - run: cargo build
+      - run: git diff --exit-code
   unit-test:
     runs-on: ubuntu-latest
     steps:
