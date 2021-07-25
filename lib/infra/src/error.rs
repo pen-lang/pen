@@ -50,7 +50,9 @@ impl Display for InfrastructureError {
                 }
                 None => write!(formatter, "command exited without status code"),
             },
-            Self::CommandNotFound(command) => write!(formatter, "command not found: {}", command),
+            Self::CommandNotFound(command) => {
+                write!(formatter, "command \"{}\" not found", command)
+            }
             Self::CreateDirectory { path, source: _ } => write!(
                 formatter,
                 "failed to create directory {}",
