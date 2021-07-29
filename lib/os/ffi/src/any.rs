@@ -4,6 +4,23 @@ pub struct Any {
     payload: u64,
 }
 
+impl Clone for Any {
+    fn clone(&self) -> Self {
+        (self.type_information.clone)(self.payload);
+
+        Self {
+            type_information: self.type_information,
+            payload: self.payload,
+        }
+    }
+}
+
+impl Drop for Any {
+    fn drop(&mut self) {
+        (self.type_information.drop)(self.payload);
+    }
+}
+
 impl Any {
     pub fn new(type_information: &'static TypeInformation, payload: u64) -> Self {
         Self {
@@ -35,13 +52,11 @@ macro_rules! type_information {
 
             pub static TYPE_INFORMATION: crate::any::TypeInformation =
                 crate::any::TypeInformation { clone, drop };
-        }
 
-        impl $type {
-            pub fn into_any(self) -> crate::any::Any {
-                crate::any::Any::new(&$name::TYPE_INFORMATION, unsafe {
-                    std::mem::transmute(self)
-                })
+            impl $type {
+                pub fn into_any(self) -> crate::any::Any {
+                    crate::any::Any::new(&TYPE_INFORMATION, unsafe { std::mem::transmute(self) })
+                }
             }
         }
     };
