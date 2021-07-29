@@ -33,16 +33,13 @@ macro_rules! type_information {
                 unsafe { std::intrinsics::transmute::<_, $type>(x) };
             }
 
-            pub static type_information: crate::type_information::TypeInformation =
-                crate::type_information::TypeInformation {
-                    clone: $name::clone,
-                    drop: $name::drop,
-                };
+            pub static TYPE_INFORMATION: crate::any::TypeInformation =
+                crate::any::TypeInformation { clone, drop };
         }
 
         impl $type {
-            pub fn to_any(self) -> crate::type_information::Any {
-                crate::type_information::Any::new(&$name::type_information, unsafe {
+            pub fn into_any(self) -> crate::any::Any {
+                crate::any::Any::new(&$name::TYPE_INFORMATION, unsafe {
                     std::mem::transmute(self)
                 })
             }
@@ -62,6 +59,6 @@ mod tests {
         value: std::rc::Rc<std::rc::Rc<f64>>,
     }
 
-    type_information!(foo, crate::type_information::tests::TypeA);
-    type_information!(bar, crate::type_information::tests::TypeB);
+    type_information!(foo, crate::any::tests::TypeA);
+    type_information!(bar, crate::any::tests::TypeB);
 }
