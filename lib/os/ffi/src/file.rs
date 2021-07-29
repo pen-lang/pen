@@ -1,4 +1,5 @@
 use super::type_information;
+use crate::any::Any;
 use crate::result::FfiResult;
 use std::fs::File;
 use std::path::Path;
@@ -16,7 +17,7 @@ pub struct FfiFile {
     file: Arc<RwLock<File>>,
 }
 
-type_information!(foo, crate::file::FfiFile);
+type_information!(ffi_file, crate::file::FfiFile);
 
 impl FfiFile {
     pub fn new(file: File) -> Self {
@@ -37,15 +38,17 @@ impl From<File> for FfiFile {
 }
 
 #[no_mangle]
-extern "C" fn _pen_os_open_file(path: ffi::ByteString) -> ffi::Arc<FfiResult<FfiFile>> {
+extern "C" fn _pen_os_open_file(path: ffi::ByteString) -> ffi::Arc<FfiResult<Any>> {
     FfiResult::ok(
-        match File::open(&Path::new(&match str::from_utf8(path.as_slice()) {
-            Ok(path) => path,
-            Err(_) => return FfiResult::error(UTF8_DECODE_ERROR).into(),
-        })) {
-            Ok(file) => file,
-            Err(_) => return FfiResult::error(OPEN_FILE_ERROR).into(),
-        }
+        FfiFile::new(
+            match File::open(&Path::new(&match str::from_utf8(path.as_slice()) {
+                Ok(path) => path,
+                Err(_) => return FfiResult::error(UTF8_DECODE_ERROR).into(),
+            })) {
+                Ok(file) => file,
+                Err(_) => return FfiResult::error(OPEN_FILE_ERROR).into(),
+            },
+        )
         .into(),
     )
     .into()

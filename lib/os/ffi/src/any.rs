@@ -53,9 +53,9 @@ macro_rules! type_information {
             pub static TYPE_INFORMATION: crate::any::TypeInformation =
                 crate::any::TypeInformation { clone, drop };
 
-            impl $type {
-                pub fn into_any(self) -> crate::any::Any {
-                    crate::any::Any::new(&TYPE_INFORMATION, unsafe { std::mem::transmute(self) })
+            impl From<$type> for crate::any::Any {
+                fn from(payload: $type) -> crate::any::Any {
+                    crate::any::Any::new(&TYPE_INFORMATION, unsafe { std::mem::transmute(payload) })
                 }
             }
         }
