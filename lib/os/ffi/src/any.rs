@@ -44,17 +44,17 @@ pub struct TypeInformation {
 macro_rules! type_information {
     ($name: ident, $type: ty) => {
         mod $name {
-            pub extern "C" fn clone(x: u64) {
+            extern "C" fn clone(x: u64) {
                 let x = unsafe { std::intrinsics::transmute::<_, $type>(x) };
                 std::mem::forget(x.clone());
                 std::mem::forget(x);
             }
 
-            pub extern "C" fn drop(x: u64) {
+            extern "C" fn drop(x: u64) {
                 unsafe { std::intrinsics::transmute::<_, $type>(x) };
             }
 
-            pub static TYPE_INFORMATION: crate::any::TypeInformation =
+            static TYPE_INFORMATION: crate::any::TypeInformation =
                 crate::any::TypeInformation { clone, drop };
 
             impl From<$type> for crate::any::Any {
