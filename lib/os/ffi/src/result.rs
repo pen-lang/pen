@@ -1,10 +1,12 @@
+use std::mem::MaybeUninit;
+
 #[repr(C)]
-pub struct FfiResult<T: Default> {
+pub struct FfiResult<T> {
     value: T,
     error: ffi::Number,
 }
 
-impl<T: Default> FfiResult<T> {
+impl<T> FfiResult<T> {
     pub fn ok(value: T) -> Self {
         Self {
             value,
@@ -14,7 +16,7 @@ impl<T: Default> FfiResult<T> {
 
     pub fn error(error: impl Into<ffi::Number>) -> Self {
         Self {
-            value: Default::default(),
+            value: unsafe { MaybeUninit::uninit().assume_init() },
             error: error.into(),
         }
     }
