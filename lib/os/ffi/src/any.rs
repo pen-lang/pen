@@ -72,6 +72,19 @@ macro_rules! type_information {
     };
 }
 
+#[derive(Clone, Default)]
+struct Dummy {
+    _dummy: u64,
+}
+
+type_information!(dummy, crate::any::Dummy);
+
+impl Default for Any {
+    fn default() -> Self {
+        Dummy::default().into()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
