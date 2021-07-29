@@ -1,10 +1,16 @@
 import foreign "c" _pen_os_fd_read \(number, number) fdReadResult
 import foreign "c" _pen_os_fd_write \(number, string) fdWriteResult
+import foreign "c" _pen_os_open_file \(string) openFileResult
 import foreign _pen_main \(Os) number
 
 type Os {
   fdRead \(number, number) fdReadResult,
   fdWrite \(number, string) fdWriteResult,
+  openFile \(string) openFileResult,
+}
+
+type File {
+  internal any,
 }
 
 type fdReadResult {
@@ -14,6 +20,11 @@ type fdReadResult {
 
 type fdWriteResult {
   bytes number,
+  error number,
+}
+
+type openFileResult {
+  file any,
   error number,
 }
 
@@ -43,11 +54,22 @@ StdOut = \() number { 1 }
 
 StdErr = \() number { 2 }
 
+OpenFile = \(os Os, path string) number | error {
+  r = os.openFile(path)
+
+  if r.error == -1 {
+    File{internal: r.file}
+  } else {
+    error(r.error)
+  }
+}
+
 export foreign _pen_os_main = \(_ none) number {
   _pen_main(
     Os{
       fdRead: _pen_os_fd_read,
       fdWrite: _pen_os_fd_write,
+      openFile: _pen_os_open_file,
     },
   )
 }
