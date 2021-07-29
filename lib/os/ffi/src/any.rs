@@ -74,6 +74,9 @@ macro_rules! type_information {
 
 #[cfg(test)]
 mod tests {
+    use super::*;
+    use std::rc::Rc;
+
     #[derive(Clone)]
     pub struct TypeA {
         value: std::rc::Rc<f64>,
@@ -86,4 +89,19 @@ mod tests {
 
     type_information!(foo, crate::any::tests::TypeA);
     type_information!(bar, crate::any::tests::TypeB);
+
+    #[test]
+    fn drop_any() {
+        Any::from(TypeA {
+            value: Rc::new(42.0),
+        });
+    }
+
+    #[test]
+    fn clone_any() {
+        let _ = Any::from(TypeA {
+            value: Rc::new(42.0),
+        })
+        .clone();
+    }
 }
