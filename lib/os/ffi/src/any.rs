@@ -28,6 +28,10 @@ impl Any {
             payload,
         }
     }
+
+    pub fn payload(&self) -> u64 {
+        self.payload
+    }
 }
 
 #[repr(C)]
@@ -56,6 +60,12 @@ macro_rules! type_information {
             impl From<$type> for crate::any::Any {
                 fn from(payload: $type) -> crate::any::Any {
                     crate::any::Any::new(&TYPE_INFORMATION, unsafe { std::mem::transmute(payload) })
+                }
+            }
+
+            impl From<crate::any::Any> for $type {
+                fn from(any: crate::any::Any) -> $type {
+                    unsafe { std::mem::transmute(any.payload()) }
                 }
             }
         }
