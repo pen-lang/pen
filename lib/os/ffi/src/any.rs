@@ -4,6 +4,19 @@ pub struct Any {
     payload: u64,
 }
 
+impl Any {
+    pub fn new(type_information: &'static TypeInformation, payload: u64) -> Self {
+        Self {
+            type_information,
+            payload,
+        }
+    }
+
+    pub fn payload(&self) -> u64 {
+        self.payload
+    }
+}
+
 impl Clone for Any {
     fn clone(&self) -> Self {
         (self.type_information.clone)(self.payload);
@@ -18,19 +31,6 @@ impl Clone for Any {
 impl Drop for Any {
     fn drop(&mut self) {
         (self.type_information.drop)(self.payload);
-    }
-}
-
-impl Any {
-    pub fn new(type_information: &'static TypeInformation, payload: u64) -> Self {
-        Self {
-            type_information,
-            payload,
-        }
-    }
-
-    pub fn payload(&self) -> u64 {
-        self.payload
     }
 }
 
