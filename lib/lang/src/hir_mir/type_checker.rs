@@ -491,23 +491,87 @@ mod tests {
     }
 
     #[test]
-    fn check_subsumption_of_function_result_type() -> Result<(), CompileError> {
-        check_module(
-            &Module::empty().set_definitions(vec![Definition::without_source(
-                "x",
-                Lambda::new(
-                    vec![],
-                    types::Union::new(
-                        types::Number::new(Position::dummy()),
-                        types::None::new(Position::dummy()),
+    fn fail_to_check_function_result_type_of_foreign_declaration() {
+        let function_type = types::Function::new(
+            vec![],
+            types::Number::new(Position::dummy()),
+            Position::dummy(),
+        );
+
+        assert_eq!(
+            check_module(
+                &Module::empty()
+                    .set_definitions(vec![Definition::without_source(
+                        "x",
+                        Lambda::new(
+                            vec![],
+                            types::None::new(Position::dummy()),
+                            Call::new(
+                                Some(function_type.clone().into()),
+                                Variable::new("y", Position::dummy()),
+                                vec![],
+                                Position::dummy()
+                            ),
+                            Position::dummy(),
+                        ),
+                        false,
+                    )])
+                    .set_foreign_declarations(vec![ForeignDeclaration::without_source(
+                        "y",
+                        function_type,
+                    )])
+            ),
+            Err(CompileError::TypesNotMatched(
+                Position::dummy(),
+                Position::dummy()
+            ))
+        );
+    }
+
+    mod lambda {
+        use super::*;
+
+        #[test]
+        fn check_subsumption_of_function_result_type() -> Result<(), CompileError> {
+            check_module(
+                &Module::empty().set_definitions(vec![Definition::without_source(
+                    "x",
+                    Lambda::new(
+                        vec![],
+                        types::Union::new(
+                            types::Number::new(Position::dummy()),
+                            types::None::new(Position::dummy()),
+                            Position::dummy(),
+                        ),
+                        None::new(Position::dummy()),
                         Position::dummy(),
                     ),
-                    None::new(Position::dummy()),
-                    Position::dummy(),
+                    false,
+                )]),
+            )
+        }
+
+        #[test]
+        fn fail_to_check_function_result_type() {
+            assert_eq!(
+                check_module(
+                    &Module::empty().set_definitions(vec![Definition::without_source(
+                        "x",
+                        Lambda::new(
+                            vec![],
+                            types::Number::new(Position::dummy()),
+                            None::new(Position::dummy()),
+                            Position::dummy(),
+                        ),
+                        false,
+                    )])
                 ),
-                false,
-            )]),
-        )
+                Err(CompileError::TypesNotMatched(
+                    Position::dummy(),
+                    Position::dummy()
+                ))
+            );
+        }
     }
 
     mod let_ {
@@ -1406,7 +1470,7 @@ mod tests {
         }
     }
 
-    mod records {
+    mod record {
         use super::*;
 
         #[test]
@@ -1625,6 +1689,36 @@ mod tests {
                         )])
                 ),
                 Err(CompileError::RecordElementUnknown(Position::dummy()))
+            );
+        }
+
+        #[test]
+        fn fail_to_check_different_records() {
+            assert_eq!(
+                check_module(
+                    &Module::empty()
+                        .set_type_definitions(vec![
+                            TypeDefinition::without_source("r1", vec![], false, false, false,),
+                            TypeDefinition::without_source("r2", vec![], false, false, false,)
+                        ])
+                        .set_definitions(vec![Definition::without_source(
+                            "x",
+                            Lambda::new(
+                                vec![Argument::new(
+                                    "x",
+                                    types::Reference::new("r1", Position::dummy())
+                                )],
+                                types::Reference::new("r2", Position::dummy()),
+                                Variable::new("x", Position::dummy()),
+                                Position::dummy(),
+                            ),
+                            false,
+                        )])
+                ),
+                Err(CompileError::TypesNotMatched(
+                    Position::dummy(),
+                    Position::dummy()
+                ))
             );
         }
     }

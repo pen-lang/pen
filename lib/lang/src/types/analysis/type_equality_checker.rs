@@ -33,11 +33,11 @@ fn check_canonical(
         (Type::Union(one), Type::Union(other)) => {
             check(one.lhs(), other.lhs())? && check(one.rhs(), other.rhs())?
         }
+        (Type::Record(one), Type::Record(other)) => one.name() == other.name(),
         (Type::Any(_), Type::Any(_))
         | (Type::Boolean(_), Type::Boolean(_))
         | (Type::None(_), Type::None(_))
         | (Type::Number(_), Type::Number(_))
-        | (Type::Record(_), Type::Record(_))
         | (Type::String(_), Type::String(_)) => true,
         (Type::Reference(_), _) | (_, Type::Reference(_)) => unreachable!(),
         _ => false,
@@ -129,6 +129,16 @@ mod tests {
                 Position::dummy(),
             )
             .into(),
+            &Default::default(),
+        )
+        .unwrap());
+    }
+
+    #[test]
+    fn check_records() {
+        assert!(!check(
+            &Record::new("x", Position::dummy()).into(),
+            &Record::new("y", Position::dummy()).into(),
             &Default::default(),
         )
         .unwrap());
