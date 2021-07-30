@@ -95,6 +95,7 @@ mod tests {
         value: std::rc::Rc<f64>,
     }
 
+    #[allow(clippy::redundant_allocation)]
     #[derive(Clone)]
     pub struct TypeB {
         value: std::rc::Rc<std::rc::Rc<f64>>,
@@ -112,9 +113,11 @@ mod tests {
 
     #[test]
     fn clone_any() {
-        let _ = Any::from(TypeA {
+        let x = Any::from(TypeA {
             value: Rc::new(42.0),
-        })
-        .clone();
+        });
+
+        drop(x.clone());
+        drop(x)
     }
 }

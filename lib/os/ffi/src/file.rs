@@ -1,13 +1,11 @@
 use super::type_information;
-use crate::any::Any;
-use crate::result::FfiResult;
-use std::fs::File;
-use std::path::Path;
-use std::str;
-use std::sync::Arc;
-use std::sync::LockResult;
-use std::sync::RwLock;
-use std::sync::RwLockWriteGuard;
+use crate::{any::Any, result::FfiResult};
+use std::{
+    fs::File,
+    path::Path,
+    str,
+    sync::{Arc, LockResult, RwLock, RwLockWriteGuard},
+};
 
 const UTF8_DECODE_ERROR: f64 = 0.0;
 const OPEN_FILE_ERROR: f64 = 1.0;
@@ -27,7 +25,7 @@ impl FfiFile {
     }
 
     pub fn get_mut(&self) -> LockResult<RwLockWriteGuard<'_, File>> {
-        Ok(self.file.write()?)
+        self.file.write()
     }
 }
 
