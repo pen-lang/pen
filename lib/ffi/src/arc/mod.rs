@@ -80,6 +80,13 @@ mod tests {
     }
 
     #[test]
+    fn clone_box() {
+        let x = Arc::new(Box::new(0));
+        forget(x.clone());
+        forget(x);
+    }
+
+    #[test]
     fn load_payload() {
         assert_eq!(*Arc::new(42), 42);
     }
