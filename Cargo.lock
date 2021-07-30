@@ -125,7 +125,7 @@ dependencies = [
 name = "core"
 version = "0.1.0"
 dependencies = [
- "pen-ffi 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "pen-ffi 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -402,7 +402,7 @@ checksum = "692fcb63b64b1758029e0a96ee63e049ce8c5948587f2f7208df04625e5f6b56"
 name = "os"
 version = "0.1.0"
 dependencies = [
- "pen-ffi 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "pen-ffi 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -453,13 +453,13 @@ dependencies = [
 
 [[package]]
 name = "pen-ffi"
-version = "0.1.0"
+version = "0.1.2"
 
 [[package]]
 name = "pen-ffi"
-version = "0.1.0"
+version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "60a526dee3fccdb76ace194ff60c2640410bdcb236ba8b2c74d6d82bef0cae07"
+checksum = "28b1239d88687f250d3289d15f44bbc66ad5b4fe70cc76cc9f94fe9385a7631d"
 
 [[package]]
 name = "percent-encoding"
@@ -496,7 +496,7 @@ checksum = "ac74c624d6b2d21f425f752262f42188365d7b8ff1aff74c82e45136510a4857"
 name = "prelude"
 version = "0.1.0"
 dependencies = [
- "pen-ffi 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "pen-ffi 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -656,9 +656,9 @@ dependencies = [
 
 [[package]]
 name = "serde_json"
-version = "1.0.64"
+version = "1.0.66"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "799e97dc9fdae36a5c8b8f2cae9ce2ee9fdce2058c57a93e6099d919fd982f79"
+checksum = "336b10da19a12ad094b59d870ebde26a45402e5b470add4b5fd03c5048a32127"
 dependencies = [
  "itoa",
  "ryu",
@@ -803,11 +803,12 @@ checksum = "fd6fbd9a79829dd1ad0cc20627bf1ed606756a7f77edff7b66b7064f9cb327c6"
 
 [[package]]
 name = "which"
-version = "4.1.0"
+version = "4.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b55551e42cbdf2ce2bedd2203d0cc08dba002c27510f86dab6d0ce304cba3dfe"
+checksum = "7cc009ab82a2afc94b9e467ab4214aee9cad1356cd9191264203d7d72006e00d"
 dependencies = [
  "either",
+ "lazy_static",
  "libc",
 ]
 
