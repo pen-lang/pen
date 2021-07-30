@@ -15,6 +15,7 @@
     "hasher",
     "idempotently",
     "indoc",
+    "intrinsics",
     "itertools",
     "malloc",
     "mtriple",
