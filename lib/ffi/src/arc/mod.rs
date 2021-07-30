@@ -87,6 +87,11 @@ mod tests {
     }
 
     #[test]
+    fn drop_box() {
+        Arc::new(Box::new(0));
+    }
+
+    #[test]
     fn load_payload() {
         assert_eq!(*Arc::new(42), 42);
     }

@@ -57,8 +57,12 @@ impl ArcBlock {
         unsafe { &*self.inner_pointer() }
     }
 
+    fn raw_pointer(&self) -> *const u8 {
+        (self.pointer as usize & !1) as *const u8
+    }
+
     fn inner_pointer(&self) -> *const ArcInner {
-        (unsafe { (self.pointer as *const usize).offset(-1) } as usize & !1) as *const ArcInner
+        (unsafe { (self.raw_pointer() as *const usize).offset(-1) }) as *const ArcInner
     }
 
     fn inner_layout(layout: Layout) -> Layout {
@@ -88,7 +92,7 @@ impl ArcBlock {
             fence(Ordering::Acquire);
 
             unsafe {
-                drop_in_place(self.inner_pointer() as *mut T);
+                drop_in_place(self.raw_pointer() as *mut T);
 
                 // This layout is expected not to be used.
                 dealloc(
