@@ -3,7 +3,7 @@ mod arc_buffer;
 
 use arc_block::*;
 pub use arc_buffer::*;
-use std::{alloc::Layout, marker::PhantomData, ops::Deref};
+use std::{alloc::Layout, marker::PhantomData, ops::Deref, ptr::write};
 
 #[derive(Debug)]
 #[repr(C)]
@@ -17,7 +17,7 @@ impl<T> Arc<T> {
         let mut block = ArcBlock::new(Layout::new::<T>());
 
         unsafe {
-            *(block.ptr_mut() as *mut T) = payload;
+            write(block.ptr_mut() as *mut T, payload);
         }
 
         Self {
@@ -59,8 +59,7 @@ impl<T> Drop for Arc<T> {
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    fn drop<T>(_: T) {}
+    use std::mem::{drop, forget};
 
     #[test]
     fn create() {
@@ -72,6 +71,23 @@ mod tests {
         let arc = Arc::new(0);
         drop(arc.clone());
         drop(arc);
+    }
+
+    #[test]
+    fn new_box() {
+        forget(Arc::new(Box::new(0)));
+    }
+
+    #[test]
+    fn clone_box() {
+        let x = Arc::new(Box::new(0));
+        forget(x.clone());
+        forget(x);
+    }
+
+    #[test]
+    fn drop_box() {
+        Arc::new(Box::new(0));
     }
 
     #[test]
