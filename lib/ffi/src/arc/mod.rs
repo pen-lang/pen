@@ -3,7 +3,7 @@ mod arc_buffer;
 
 use arc_block::*;
 pub use arc_buffer::*;
-use std::{alloc::Layout, marker::PhantomData, mem::forget, ops::Deref, ptr::replace};
+use std::{alloc::Layout, marker::PhantomData, ops::Deref, ptr::write};
 
 #[derive(Debug)]
 #[repr(C)]
@@ -17,7 +17,7 @@ impl<T> Arc<T> {
         let mut block = ArcBlock::new(Layout::new::<T>());
 
         unsafe {
-            forget(replace(block.ptr_mut() as *mut T, payload));
+            write(block.ptr_mut() as *mut T, payload);
         }
 
         Self {
@@ -59,8 +59,7 @@ impl<T> Drop for Arc<T> {
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    fn drop<T>(_: T) {}
+    use std::mem::{drop, forget};
 
     #[test]
     fn create() {
