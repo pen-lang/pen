@@ -90,16 +90,17 @@ impl Default for Any {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::rc::Rc;
 
     #[derive(Clone)]
     pub struct TypeA {
-        value: Box<f64>,
+        value: std::rc::Rc<f64>,
     }
 
     #[allow(clippy::redundant_allocation)]
     #[derive(Clone)]
     pub struct TypeB {
-        value: Box<Box<f64>>,
+        value: std::rc::Rc<std::rc::Rc<f64>>,
     }
 
     type_information!(foo, crate::any::tests::TypeA);
@@ -108,14 +109,14 @@ mod tests {
     #[test]
     fn drop_any() {
         Any::from(TypeA {
-            value: Box::new(42.0),
+            value: Rc::new(42.0),
         });
     }
 
     #[test]
     fn clone_any() {
         let x = Any::from(TypeA {
-            value: Box::new(42.0),
+            value: Rc::new(42.0),
         });
 
         drop(x.clone());
