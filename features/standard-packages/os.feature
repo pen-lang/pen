@@ -32,7 +32,12 @@ Feature: OS
     import System'Os
 
     writeFile = \(os Os'Os) none | error {
-      f = Os'OpenWriteFile(os, "./foo.txt")?
+      f = Os'OpenFileWithOptions(
+        os,
+        "./foo.txt",
+        Os'OpenFileOptions{...Os'DefaultOpenFileOptions(), Write: true},
+      )?
+
       Os'WriteFile(os, f, "foo")?
 
       none

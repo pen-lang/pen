@@ -91,14 +91,6 @@ OpenFile = \(os Os, path string) File | error {
   )
 }
 
-OpenWriteFile = \(os Os, path string) File | error {
-  OpenFileWithOptions(
-    os,
-    path,
-    OpenFileOptions{...DefaultOpenFileOptions(), Write: true}
-  )
-}
-
 WriteFile = \(os Os, file File, data string) none | error {
   r = os.writeFile(file.internal, data)
 
