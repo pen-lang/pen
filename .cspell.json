@@ -25,6 +25,7 @@
     "roadmap",
     "subninja",
     "tailcallopt",
+    "tempfile",
     "termcolor",
     "wasi"
   ]

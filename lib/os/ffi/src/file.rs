@@ -1,10 +1,9 @@
-use super::open_file_options::OpenFileOptions;
-use super::type_information;
+use super::{open_file_options::OpenFileOptions, type_information};
 use crate::{any::Any, result::FfiResult};
-use std::ops::Deref;
 use std::{
     fs::{File, OpenOptions},
     io::Write,
+    ops::Deref,
     path::Path,
     str,
     sync::{Arc, LockResult, RwLock, RwLockWriteGuard},
@@ -68,15 +67,15 @@ extern "C" fn _pen_os_write_file(
     bytes: ffi::ByteString,
 ) -> ffi::Arc<FfiResult<ffi::None>> {
     let result = match FfiFile::from(file).get_mut() {
-        Ok(mut file) => file.write(bytes.as_slice()),
+        Ok(mut file) => file.write_all(bytes.as_slice()),
         Err(_) => return FfiResult::error(LOCK_FILE_ERROR).into(),
     };
 
-    if let Err(_) = result {
-        return FfiResult::error(WRITE_FILE_ERROR).into();
+    match result {
+        Ok(_) => FfiResult::ok(ffi::None::new()),
+        Err(_) => FfiResult::error(WRITE_FILE_ERROR),
     }
-
-    FfiResult::ok(ffi::None::new()).into()
+    .into()
 }
 
 #[cfg(test)]
@@ -88,7 +87,7 @@ mod tests {
         FfiFile::from(Any::from(FfiFile::new(tempfile::tempfile().unwrap())))
             .get_mut()
             .unwrap()
-            .write(b"foo")
+            .write_all(b"foo")
             .unwrap();
     }
 }
