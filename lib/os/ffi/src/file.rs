@@ -2,6 +2,7 @@ use super::open_file_options::OpenFileOptions;
 use crate::result::FfiResult;
 use std::{
     fs::{File, OpenOptions},
+    io::Read,
     io::Write,
     ops::Deref,
     path::Path,
@@ -12,7 +13,8 @@ use std::{
 const UTF8_DECODE_ERROR: f64 = 0.0;
 const OPEN_FILE_ERROR: f64 = 1.0;
 const LOCK_FILE_ERROR: f64 = 2.0;
-const WRITE_FILE_ERROR: f64 = 3.0;
+const READ_FILE_ERROR: f64 = 3.0;
+const WRITE_FILE_ERROR: f64 = 4.0;
 
 #[derive(Clone, Debug)]
 pub struct FfiFile {
@@ -58,6 +60,21 @@ extern "C" fn _pen_os_open_file(
         )
         .into_any()
     })
+    .into()
+}
+
+#[no_mangle]
+extern "C" fn _pen_os_read_file(file: ffi::Any) -> ffi::Arc<FfiResult<ffi::ByteString>> {
+    let mut buffer = vec![];
+    let result = match unsafe { FfiFile::from_any(file) }.get_mut() {
+        Ok(mut file) => file.read_to_end(&mut buffer),
+        Err(_) => return FfiResult::error(LOCK_FILE_ERROR).into(),
+    };
+
+    match result {
+        Ok(_) => FfiResult::ok(buffer.into()),
+        Err(_) => FfiResult::error(READ_FILE_ERROR),
+    }
     .into()
 }
 

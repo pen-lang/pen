@@ -1,6 +1,7 @@
 import foreign "c" _pen_os_fd_read \(number, number) fdReadResult
 import foreign "c" _pen_os_fd_write \(number, string) fdWriteResult
 import foreign "c" _pen_os_open_file \(string, OpenFileOptions) openFileResult
+import foreign "c" _pen_os_read_file \(any) readFileResult
 import foreign "c" _pen_os_write_file \(any, string) writeFileResult
 import foreign _pen_main \(Os) number
 
@@ -8,6 +9,7 @@ type Os {
   fdRead \(number, number) fdReadResult,
   fdWrite \(number, string) fdWriteResult,
   openFile \(string, OpenFileOptions) openFileResult,
+  readFile \(any) readFileResult,
   writeFile \(any, string) writeFileResult,
 }
 
@@ -27,6 +29,11 @@ type fdWriteResult {
 
 type openFileResult {
   file any,
+  error number,
+}
+
+type readFileResult {
+  data string,
   error number,
 }
 
@@ -99,6 +106,16 @@ OpenFile = \(os Os, path string) File | error {
   )
 }
 
+ReadFile = \(os Os, file File) string | error {
+  r = os.readFile(file.internal)
+
+  if r.error == -1 {
+    r.data
+  } else {
+    error(r.error)
+  }
+}
+
 WriteFile = \(os Os, file File, data string) none | error {
   r = os.writeFile(file.internal, data)
 
@@ -115,6 +132,7 @@ export foreign _pen_os_main = \(_ none) number {
       fdRead: _pen_os_fd_read,
       fdWrite: _pen_os_fd_write,
       openFile: _pen_os_open_file,
+      readFile: _pen_os_read_file,
       writeFile: _pen_os_write_file,
     },
   )
