@@ -15,6 +15,7 @@
     "hasher",
     "idempotently",
     "indoc",
+    "intrinsics",
     "itertools",
     "malloc",
     "mtriple",
@@ -24,6 +25,7 @@
     "roadmap",
     "subninja",
     "tailcallopt",
+    "tempfile",
     "termcolor",
     "wasi"
   ]

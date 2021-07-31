@@ -37,6 +37,7 @@
     - [Creating packages](examples/commands/create.md)
   - [Standard packages](examples/standard-packages/README.md)
     - [Core](examples/standard-packages/core.md)
+    - [Os](examples/standard-packages/os.md)
   - [FFI](examples/ffi.md)
 - [Roadmap](roadmap.md)
 - [The Zen](the-zen.md)
