@@ -19,6 +19,7 @@ fn main() {
 
 fn run() -> Result<(), Box<dyn std::error::Error>> {
     match clap::App::new("pen")
+        .version(clap::crate_version!())
         .setting(clap::AppSettings::SubcommandRequired)
         .arg(
             clap::Arg::with_name("verbose")
