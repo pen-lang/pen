@@ -1,3 +1,4 @@
+mod any;
 mod arc;
 mod boolean;
 mod closure;
@@ -6,6 +7,7 @@ mod none;
 mod number;
 mod string;
 
+pub use any::*;
 pub use arc::*;
 pub use boolean::*;
 pub use closure::*;
