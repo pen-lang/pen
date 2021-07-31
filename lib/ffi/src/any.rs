@@ -126,4 +126,28 @@ mod tests {
             drop(x)
         }
     }
+
+    mod f64 {
+        use super::*;
+
+        #[derive(Clone)]
+        pub struct Type {
+            value: f64,
+        }
+
+        type_information!(foo, crate::any::tests::f64::Type);
+
+        #[test]
+        fn drop_any() {
+            Any::from(Type { value: 42.0 });
+        }
+
+        #[test]
+        fn clone_any() {
+            let x = Any::from(Type { value: 42.0 });
+
+            drop(x.clone());
+            drop(x)
+        }
+    }
 }
