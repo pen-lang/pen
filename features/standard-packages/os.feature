@@ -26,6 +26,41 @@ Feature: OS
     When I successfully run `pen build`
     Then I successfully run `./app`
 
+  Scenario: Read a file
+    Given a file named "Main.pen" with:
+    """pen
+    import System'Os
+
+    readFile = \(os Os'Os) none | error {
+      f = Os'OpenFile(os, "foo.txt")?
+      d = Os'ReadFile(os, f)?
+      f = Os'OpenFileWithOptions(
+        os,
+        "bar.txt",
+        Os'OpenFileOptions{
+          ...Os'DefaultOpenFileOptions(),
+          Create: true,
+          Write: true,
+        },
+      )?
+      Os'WriteFile(os, f, d)?
+
+      none
+    }
+
+    main = \(os Os'Os) number {
+      if _ = readFile(os); none {
+        0
+      } else {
+        1
+      }
+    }
+    """
+    And a file named "foo.txt" with "foo"
+    When I successfully run `pen build`
+    Then I successfully run `./app`
+    And the file "bar.txt" should contain "foo"
+
   Scenario: Write a file
     Given a file named "Main.pen" with:
     """pen
