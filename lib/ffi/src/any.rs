@@ -54,17 +54,17 @@ macro_rules! type_information {
                 unsafe { std::intrinsics::transmute::<_, $type>(x) };
             }
 
-            static TYPE_INFORMATION: crate::any::TypeInformation =
-                crate::any::TypeInformation { clone, drop };
+            static TYPE_INFORMATION: $crate::any::TypeInformation =
+                $crate::any::TypeInformation { clone, drop };
 
             impl $type {
                 #[allow(unused)]
-                pub unsafe fn into_any(self) -> crate::any::Any {
-                    crate::any::Any::new(&TYPE_INFORMATION, std::mem::transmute(self))
+                pub unsafe fn into_any(self) -> $crate::any::Any {
+                    $crate::any::Any::new(&TYPE_INFORMATION, std::mem::transmute(self))
                 }
 
                 #[allow(unused)]
-                pub unsafe fn from_any(any: crate::any::Any) -> $type {
+                pub unsafe fn from_any(any: $crate::any::Any) -> $type {
                     let x = std::mem::transmute(any.payload());
                     std::mem::forget(any);
                     x
