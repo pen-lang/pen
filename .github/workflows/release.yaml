@@ -24,24 +24,7 @@ jobs:
       - run: cargo build --release
       - run: strip target/release/pen
       - run: echo version=$(cat cmd/pen/Cargo.toml | grep 'version = ' | sed 's/.*"\(.*\)"/\1/') >> $GITHUB_ENV
-      - run: |
-          mkdir asset
-
-          cp README.md LICENSE.md LICENSE-MIT LICENSE-APACHE asset
-
-          mkdir asset/lib
-          cp -r lib/core lib/os lib/prelude asset/lib
-
-          mkdir asset/bin
-          cp target/release/pen asset/bin
-
-          target=$(rustc -vV | grep host: | sed 's/host: //')
-          tarball=pen-$version-$target.tar.gz
-
-          cd asset
-          tar czf ../$tarball *
-
-          echo asset=$tarball >> $GITHUB_ENV
+      - run: echo asset=$(tools/build_asset.sh $version) >> $GITHUB_ENV
       - uses: actions/upload-artifact@v2
         with:
           name: ${{ env.asset }}
