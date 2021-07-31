@@ -14,7 +14,6 @@ cd $(dirname $0)/..
 
 tar caf $tarball \
   README.md LICENSE.md LICENSE-MIT LICENSE-APACHE \
-  lib \
-  target/release/pen
+  doc lib target/release/pen
 
 echo $tarball
