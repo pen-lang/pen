@@ -90,36 +90,40 @@ impl Default for Any {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::rc::Rc;
 
-    #[derive(Clone)]
-    pub struct TypeA {
-        value: std::rc::Rc<f64>,
-    }
+    mod rc {
+        use super::*;
+        use std::rc::Rc;
 
-    #[allow(clippy::redundant_allocation)]
-    #[derive(Clone)]
-    pub struct TypeB {
-        value: std::rc::Rc<std::rc::Rc<f64>>,
-    }
+        #[derive(Clone)]
+        pub struct TypeA {
+            value: std::rc::Rc<f64>,
+        }
 
-    type_information!(foo, crate::any::tests::TypeA);
-    type_information!(bar, crate::any::tests::TypeB);
+        #[allow(clippy::redundant_allocation)]
+        #[derive(Clone)]
+        pub struct TypeB {
+            value: std::rc::Rc<std::rc::Rc<f64>>,
+        }
 
-    #[test]
-    fn drop_any() {
-        Any::from(TypeA {
-            value: Rc::new(42.0),
-        });
-    }
+        type_information!(foo, crate::any::tests::rc::TypeA);
+        type_information!(bar, crate::any::tests::rc::TypeB);
 
-    #[test]
-    fn clone_any() {
-        let x = Any::from(TypeA {
-            value: Rc::new(42.0),
-        });
+        #[test]
+        fn drop_any() {
+            Any::from(TypeA {
+                value: Rc::new(42.0),
+            });
+        }
 
-        drop(x.clone());
-        drop(x)
+        #[test]
+        fn clone_any() {
+            let x = Any::from(TypeA {
+                value: Rc::new(42.0),
+            });
+
+            drop(x.clone());
+            drop(x)
+        }
     }
 }
