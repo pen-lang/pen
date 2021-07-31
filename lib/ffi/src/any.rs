@@ -12,7 +12,7 @@ impl Any {
         }
     }
 
-    fn payload(&self) -> u64 {
+    pub fn payload(&self) -> u64 {
         self.payload
     }
 }
