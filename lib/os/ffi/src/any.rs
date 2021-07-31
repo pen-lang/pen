@@ -65,7 +65,9 @@ macro_rules! type_information {
 
             impl From<crate::any::Any> for $type {
                 fn from(any: crate::any::Any) -> $type {
-                    unsafe { std::mem::transmute(any.payload()) }
+                    let x = unsafe { std::mem::transmute(any.payload()) };
+                    std::mem::forget(any);
+                    x
                 }
             }
         }

@@ -1,12 +1,14 @@
 import foreign "c" _pen_os_fd_read \(number, number) fdReadResult
 import foreign "c" _pen_os_fd_write \(number, string) fdWriteResult
-import foreign "c" _pen_os_open_file \(string) openFileResult
+import foreign "c" _pen_os_open_file \(string, OpenFileOptions) openFileResult
+import foreign "c" _pen_os_write_file \(any, string) writeFileResult
 import foreign _pen_main \(Os) number
 
 type Os {
   fdRead \(number, number) fdReadResult,
   fdWrite \(number, string) fdWriteResult,
-  openFile \(string) openFileResult,
+  openFile \(string, OpenFileOptions) openFileResult,
+  writeFile \(any, string) writeFileResult,
 }
 
 type File {
@@ -26,6 +28,23 @@ type fdWriteResult {
 type openFileResult {
   file any,
   error number,
+}
+
+type writeFileResult {
+  _ none,
+  error number,
+}
+
+type OpenFileOptions {
+  Read boolean,
+  Write boolean,
+}
+
+DefaultOpenFileOptions = \() OpenFileOptions {
+  OpenFileOptions{
+    Read: false,
+    Write: false,
+  }
 }
 
 FdRead = \(os Os, fd number, count number) string | error {
@@ -54,11 +73,21 @@ StdOut = \() number { 1 }
 
 StdErr = \() number { 2 }
 
-OpenFile = \(os Os, path string) File | error {
-  r = os.openFile(path)
+OpenFile = \(os Os, path string, opts OpenFileOptions) File | error {
+  r = os.openFile(path, opts)
 
   if r.error == -1 {
     File{internal: r.file}
+  } else {
+    error(r.error)
+  }
+}
+
+WriteFile = \(os Os, file File, data string) none | error {
+  r = os.writeFile(file.internal, data)
+
+  if r.error == -1 {
+    none
   } else {
     error(r.error)
   }
@@ -70,6 +99,7 @@ export foreign _pen_os_main = \(_ none) number {
       fdRead: _pen_os_fd_read,
       fdWrite: _pen_os_fd_write,
       openFile: _pen_os_open_file,
+      writeFile: _pen_os_write_file,
     },
   )
 }

@@ -1,7 +1,10 @@
+use super::open_file_options::OpenFileOptions;
 use super::type_information;
 use crate::{any::Any, result::FfiResult};
+use std::ops::Deref;
 use std::{
-    fs::File,
+    fs::{File, OpenOptions},
+    io::Write,
     path::Path,
     str,
     sync::{Arc, LockResult, RwLock, RwLockWriteGuard},
@@ -9,6 +12,8 @@ use std::{
 
 const UTF8_DECODE_ERROR: f64 = 0.0;
 const OPEN_FILE_ERROR: f64 = 1.0;
+const LOCK_FILE_ERROR: f64 = 2.0;
+const WRITE_FILE_ERROR: f64 = 3.0;
 
 #[derive(Clone, Debug)]
 pub struct FfiFile {
@@ -36,10 +41,15 @@ impl From<File> for FfiFile {
 }
 
 #[no_mangle]
-extern "C" fn _pen_os_open_file(path: ffi::ByteString) -> ffi::Arc<FfiResult<Any>> {
+extern "C" fn _pen_os_open_file(
+    path: ffi::ByteString,
+    options: ffi::Arc<OpenFileOptions>,
+) -> ffi::Arc<FfiResult<Any>> {
     FfiResult::ok(
         FfiFile::new(
-            match File::open(&Path::new(&match str::from_utf8(path.as_slice()) {
+            match OpenOptions::from(options.deref()).open(&Path::new(&match str::from_utf8(
+                path.as_slice(),
+            ) {
                 Ok(path) => path,
                 Err(_) => return FfiResult::error(UTF8_DECODE_ERROR).into(),
             })) {
@@ -50,4 +60,35 @@ extern "C" fn _pen_os_open_file(path: ffi::ByteString) -> ffi::Arc<FfiResult<Any
         .into(),
     )
     .into()
+}
+
+#[no_mangle]
+extern "C" fn _pen_os_write_file(
+    file: Any,
+    bytes: ffi::ByteString,
+) -> ffi::Arc<FfiResult<ffi::None>> {
+    let result = match FfiFile::from(file).get_mut() {
+        Ok(mut file) => file.write(bytes.as_slice()),
+        Err(_) => return FfiResult::error(LOCK_FILE_ERROR).into(),
+    };
+
+    if let Err(_) = result {
+        return FfiResult::error(WRITE_FILE_ERROR).into();
+    }
+
+    FfiResult::ok(ffi::None::new()).into()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn convert_to_any() {
+        FfiFile::from(Any::from(FfiFile::new(tempfile::tempfile().unwrap())))
+            .get_mut()
+            .unwrap()
+            .write(b"foo")
+            .unwrap();
+    }
 }
