@@ -1,5 +1,5 @@
-use super::{open_file_options::OpenFileOptions, type_information};
-use crate::{any::Any, result::FfiResult};
+use super::open_file_options::OpenFileOptions;
+use crate::result::FfiResult;
 use std::{
     fs::{File, OpenOptions},
     io::Write,
@@ -19,7 +19,7 @@ pub struct FfiFile {
     file: Arc<RwLock<File>>,
 }
 
-type_information!(ffi_file, crate::file::FfiFile);
+ffi::type_information!(ffi_file, crate::file::FfiFile);
 
 impl FfiFile {
     pub fn new(file: File) -> Self {
@@ -43,8 +43,8 @@ impl From<File> for FfiFile {
 extern "C" fn _pen_os_open_file(
     path: ffi::ByteString,
     options: ffi::Arc<OpenFileOptions>,
-) -> ffi::Arc<FfiResult<Any>> {
-    FfiResult::ok(
+) -> ffi::Arc<FfiResult<ffi::Any>> {
+    FfiResult::ok(unsafe {
         FfiFile::new(
             match OpenOptions::from(options.deref()).open(&Path::new(&match str::from_utf8(
                 path.as_slice(),
@@ -56,17 +56,17 @@ extern "C" fn _pen_os_open_file(
                 Err(_) => return FfiResult::error(OPEN_FILE_ERROR).into(),
             },
         )
-        .into(),
-    )
+        .into_any()
+    })
     .into()
 }
 
 #[no_mangle]
 extern "C" fn _pen_os_write_file(
-    file: Any,
+    file: ffi::Any,
     bytes: ffi::ByteString,
 ) -> ffi::Arc<FfiResult<ffi::None>> {
-    let result = match FfiFile::from(file).get_mut() {
+    let result = match unsafe { FfiFile::from_any(file) }.get_mut() {
         Ok(mut file) => file.write_all(bytes.as_slice()),
         Err(_) => return FfiResult::error(LOCK_FILE_ERROR).into(),
     };
@@ -84,7 +84,7 @@ mod tests {
 
     #[test]
     fn convert_to_any() {
-        FfiFile::from(Any::from(FfiFile::new(tempfile::tempfile().unwrap())))
+        unsafe { FfiFile::from_any(FfiFile::new(tempfile::tempfile().unwrap()).into_any()) }
             .get_mut()
             .unwrap()
             .write_all(b"foo")
