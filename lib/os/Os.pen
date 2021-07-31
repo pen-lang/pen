@@ -73,7 +73,7 @@ StdOut = \() number { 1 }
 
 StdErr = \() number { 2 }
 
-OpenFile = \(os Os, path string, opts OpenFileOptions) File | error {
+OpenFileWithOptions = \(os Os, path string, opts OpenFileOptions) File | error {
   r = os.openFile(path, opts)
 
   if r.error == -1 {
@@ -81,6 +81,22 @@ OpenFile = \(os Os, path string, opts OpenFileOptions) File | error {
   } else {
     error(r.error)
   }
+}
+
+OpenFile = \(os Os, path string) File | error {
+  OpenFileWithOptions(
+    os,
+    path,
+    OpenFileOptions{...DefaultOpenFileOptions(), Read: true}
+  )
+}
+
+OpenWriteFile = \(os Os, path string) File | error {
+  OpenFileWithOptions(
+    os,
+    path,
+    OpenFileOptions{...DefaultOpenFileOptions(), Write: true}
+  )
 }
 
 WriteFile = \(os Os, file File, data string) none | error {
