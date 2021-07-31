@@ -8,11 +8,11 @@ fi
 
 version=$1
 target=$(rustc -vV | grep host: | sed 's/host: //')
-tarball=pen-$version-$target.tar.gz
+tarball=pen-$version-$target.tar.xz
 
 cd $(dirname $0)/..
 
-tar czf $tarball \
+tar caf $tarball \
   README.md LICENSE.md LICENSE-MIT LICENSE-APACHE \
   lib \
   target/release/pen
