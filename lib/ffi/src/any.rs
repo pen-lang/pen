@@ -59,7 +59,7 @@ macro_rules! type_information {
 
             impl $type {
                 #[allow(unused)]
-                pub unsafe fn to_any(self) -> crate::any::Any {
+                pub unsafe fn into_any(self) -> crate::any::Any {
                     crate::any::Any::new(&TYPE_INFORMATION, std::mem::transmute(self))
                 }
 
@@ -83,7 +83,7 @@ type_information!(dummy, crate::any::Dummy);
 
 impl Default for Any {
     fn default() -> Self {
-        unsafe { Dummy::default().to_any() }
+        unsafe { Dummy::default().into_any() }
     }
 }
 
@@ -114,7 +114,7 @@ mod tests {
                 TypeA {
                     value: Rc::new(42.0),
                 }
-                .to_any()
+                .into_any()
             };
         }
 
@@ -124,7 +124,7 @@ mod tests {
                 TypeA {
                     value: Rc::new(42.0),
                 }
-                .to_any()
+                .into_any()
             };
 
             drop(x.clone());
@@ -144,12 +144,12 @@ mod tests {
 
         #[test]
         fn drop_any() {
-            unsafe { Type { value: 42.0 }.to_any() };
+            unsafe { Type { value: 42.0 }.into_any() };
         }
 
         #[test]
         fn clone_any() {
-            let x = unsafe { Type { value: 42.0 }.to_any() };
+            let x = unsafe { Type { value: 42.0 }.into_any() };
 
             drop(x.clone());
             drop(x)
