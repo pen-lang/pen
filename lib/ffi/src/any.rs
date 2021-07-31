@@ -57,15 +57,15 @@ macro_rules! type_information {
             static TYPE_INFORMATION: crate::any::TypeInformation =
                 crate::any::TypeInformation { clone, drop };
 
-            impl From<$type> for crate::any::Any {
-                fn from(payload: $type) -> crate::any::Any {
-                    crate::any::Any::new(&TYPE_INFORMATION, unsafe { std::mem::transmute(payload) })
+            impl $type {
+                #[allow(unused)]
+                pub unsafe fn to_any(self) -> crate::any::Any {
+                    crate::any::Any::new(&TYPE_INFORMATION, std::mem::transmute(self))
                 }
-            }
 
-            impl From<crate::any::Any> for $type {
-                fn from(any: crate::any::Any) -> $type {
-                    let x = unsafe { std::mem::transmute(any.payload()) };
+                #[allow(unused)]
+                pub unsafe fn from_any(any: crate::any::Any) -> $type {
+                    let x = std::mem::transmute(any.payload());
                     std::mem::forget(any);
                     x
                 }
@@ -83,13 +83,12 @@ type_information!(dummy, crate::any::Dummy);
 
 impl Default for Any {
     fn default() -> Self {
-        Dummy::default().into()
+        unsafe { Dummy::default().to_any() }
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::*;
 
     mod rc {
         use super::*;
@@ -111,16 +110,22 @@ mod tests {
 
         #[test]
         fn drop_any() {
-            Any::from(TypeA {
-                value: Rc::new(42.0),
-            });
+            unsafe {
+                TypeA {
+                    value: Rc::new(42.0),
+                }
+                .to_any()
+            };
         }
 
         #[test]
         fn clone_any() {
-            let x = Any::from(TypeA {
-                value: Rc::new(42.0),
-            });
+            let x = unsafe {
+                TypeA {
+                    value: Rc::new(42.0),
+                }
+                .to_any()
+            };
 
             drop(x.clone());
             drop(x)
@@ -139,12 +144,12 @@ mod tests {
 
         #[test]
         fn drop_any() {
-            Any::from(Type { value: 42.0 });
+            unsafe { Type { value: 42.0 }.to_any() };
         }
 
         #[test]
         fn clone_any() {
-            let x = Any::from(Type { value: 42.0 });
+            let x = unsafe { Type { value: 42.0 }.to_any() };
 
             drop(x.clone());
             drop(x)
