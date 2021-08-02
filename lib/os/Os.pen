@@ -1,43 +1,33 @@
-import foreign "c" _pen_os_fd_read \(number, number) fdReadResult
-import foreign "c" _pen_os_fd_write \(number, string) fdWriteResult
-import foreign "c" _pen_os_open_file \(string, OpenFileOptions) openFileResult
-import foreign "c" _pen_os_read_file \(any) readFileResult
-import foreign "c" _pen_os_write_file \(any, string) writeFileResult
+import foreign "c" _pen_os_fd_read \(number, number) ffiReadResult
+import foreign "c" _pen_os_fd_write \(number, string) ffiWriteResult
+import foreign "c" _pen_os_open_file \(string, OpenFileOptions) ffiOpenResult
+import foreign "c" _pen_os_read_file \(any) ffiReadResult
+import foreign "c" _pen_os_write_file \(any, string) ffiWriteResult
 import foreign _pen_main \(Os) number
 
 type Os {
-  fdRead \(number, number) fdReadResult,
-  fdWrite \(number, string) fdWriteResult,
-  openFile \(string, OpenFileOptions) openFileResult,
-  readFile \(any) readFileResult,
-  writeFile \(any, string) writeFileResult,
+  fdRead \(number, number) ffiReadResult,
+  fdWrite \(number, string) ffiWriteResult,
+  openFile \(string, OpenFileOptions) ffiOpenResult,
+  readFile \(any) ffiReadResult,
+  writeFile \(any, string) ffiWriteResult,
 }
 
 type File {
   inner any,
 }
 
-type fdReadResult {
-  bytes string,
-  error number,
-}
-
-type fdWriteResult {
-  bytes number,
-  error number,
-}
-
-type openFileResult {
+type ffiOpenResult {
   file any,
   error number,
 }
 
-type readFileResult {
+type ffiReadResult {
   data string,
   error number,
 }
 
-type writeFileResult {
+type ffiWriteResult {
   count number,
   error number,
 }
@@ -66,7 +56,7 @@ FdRead = \(os Os, fd number, count number) string | error {
   r = os.fdRead(fd, count)
 
   if r.error == -1 {
-    r.bytes
+    r.data
   } else {
     error(r.error)
   }
@@ -76,7 +66,7 @@ FdWrite = \(os Os, fd number, data string) number | error {
   r = os.fdWrite(fd, data)
 
   if r.error == -1 {
-    r.bytes
+    r.count
   } else {
     error(r.error)
   }
