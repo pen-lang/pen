@@ -14,7 +14,7 @@ type Os {
 }
 
 type File {
-  internal any,
+  inner any,
 }
 
 type fdReadResult {
@@ -92,7 +92,7 @@ OpenFileWithOptions = \(os Os, path string, opts OpenFileOptions) File | error {
   r = os.openFile(path, opts)
 
   if r.error == -1 {
-    File{internal: r.file}
+    File{inner: r.file}
   } else {
     error(r.error)
   }
@@ -107,7 +107,7 @@ OpenFile = \(os Os, path string) File | error {
 }
 
 ReadFile = \(os Os, file File) string | error {
-  r = os.readFile(file.internal)
+  r = os.readFile(file.inner)
 
   if r.error == -1 {
     r.data
@@ -117,7 +117,7 @@ ReadFile = \(os Os, file File) string | error {
 }
 
 WriteFile = \(os Os, file File, data string) none | error {
-  r = os.writeFile(file.internal, data)
+  r = os.writeFile(file.inner, data)
 
   if r.error == -1 {
     none
