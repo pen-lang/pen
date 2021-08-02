@@ -82,14 +82,14 @@ extern "C" fn _pen_os_read_file(file: ffi::Any) -> ffi::Arc<FfiResult<ffi::ByteS
 extern "C" fn _pen_os_write_file(
     file: ffi::Any,
     bytes: ffi::ByteString,
-) -> ffi::Arc<FfiResult<ffi::None>> {
+) -> ffi::Arc<FfiResult<ffi::Number>> {
     let result = match unsafe { FfiFile::from_any(file) }.get_mut() {
-        Ok(mut file) => file.write_all(bytes.as_slice()),
+        Ok(mut file) => file.write(bytes.as_slice()),
         Err(_) => return FfiResult::error(LOCK_FILE_ERROR).into(),
     };
 
     match result {
-        Ok(_) => FfiResult::ok(ffi::None::new()),
+        Ok(count) => FfiResult::ok(ffi::Number::new(count as f64)),
         Err(_) => FfiResult::error(WRITE_FILE_ERROR),
     }
     .into()

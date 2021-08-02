@@ -38,7 +38,7 @@ type readFileResult {
 }
 
 type writeFileResult {
-  _ none,
+  count number,
   error number,
 }
 
@@ -116,11 +116,11 @@ ReadFile = \(os Os, file File) string | error {
   }
 }
 
-WriteFile = \(os Os, file File, data string) none | error {
+WriteFile = \(os Os, file File, data string) number | error {
   r = os.writeFile(file.inner, data)
 
   if r.error == -1 {
-    none
+    r.count
   } else {
     error(r.error)
   }
