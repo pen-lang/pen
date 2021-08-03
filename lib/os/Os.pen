@@ -14,8 +14,16 @@ type Os {
 }
 
 type File {
+  inner file | specialFile,
+}
+
+type file {
   inner any,
 }
+
+type stdIn {}
+type stdOut {}
+type stdErr {}
 
 type ffiOpenResult {
   file any,
@@ -41,6 +49,20 @@ type OpenFileOptions {
   Write boolean,
 }
 
+type specialFile = stdIn | stdOut | stdErr
+
+StdIn = \() File {
+  File{inner: stdIn}
+}
+
+StdOut = \() File {
+  File{inner: stdOut}
+}
+
+StdErr = \() File {
+  File{inner: stdErr}
+}
+
 DefaultOpenFileOptions = \() OpenFileOptions {
   OpenFileOptions{
     Append: false,
@@ -52,37 +74,11 @@ DefaultOpenFileOptions = \() OpenFileOptions {
   }
 }
 
-FdRead = \(os Os, fd number, count number) string | error {
-  r = os.fdRead(fd, count)
-
-  if r.error == -1 {
-    r.data
-  } else {
-    error(r.error)
-  }
-}
-
-FdWrite = \(os Os, fd number, data string) number | error {
-  r = os.fdWrite(fd, data)
-
-  if r.error == -1 {
-    r.count
-  } else {
-    error(r.error)
-  }
-}
-
-StdIn = \() number { 0 }
-
-StdOut = \() number { 1 }
-
-StdErr = \() number { 2 }
-
 OpenFileWithOptions = \(os Os, path string, opts OpenFileOptions) File | error {
   r = os.openFile(path, opts)
 
   if r.error == -1 {
-    File{inner: r.file}
+    File{inner: file{inner: r.file}}
   } else {
     error(r.error)
   }
@@ -97,7 +93,15 @@ OpenFile = \(os Os, path string) File | error {
 }
 
 ReadFile = \(os Os, file File) string | error {
-  r = os.readFile(file.inner)
+  r = if f = file.inner; stdIn {
+    os.fdRead(0, 1024)
+  } else if stdOut {
+    error("cannot read from stdout")
+  } else if stdErr {
+    error("cannot read from stderr")
+  } else if file {
+    os.readFile(f.inner)
+  }?
 
   if r.error == -1 {
     r.data
@@ -107,7 +111,15 @@ ReadFile = \(os Os, file File) string | error {
 }
 
 WriteFile = \(os Os, file File, data string) number | error {
-  r = os.writeFile(file.inner, data)
+  r = if f = file.inner; stdIn {
+    error("cannot write to stdin")
+  } else if stdOut {
+    os.fdWrite(1, data)
+  } else if stdErr {
+    os.fdWrite(2, data)
+  } else if file {
+    os.writeFile(f.inner, data)
+  }?
 
   if r.error == -1 {
     r.count
