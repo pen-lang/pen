@@ -125,7 +125,7 @@ dependencies = [
 name = "core"
 version = "0.1.0"
 dependencies = [
- "pen-ffi 0.1.6 (registry+https://github.com/rust-lang/crates.io-index)",
+ "pen-ffi 0.1.8 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -159,7 +159,7 @@ checksum = "398ea4fabe40b9b0d885340a2a991a44c8a645624075ad966d21f88688e2b69e"
 [[package]]
 name = "fmm"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#5f682f94358c6c439a8e9e533535fd4912a166b4"
+source = "git+https://github.com/raviqqe/fmm?branch=main#06345f282c517a5cc2625adbf043f073e181dad1"
 dependencies = [
  "once_cell",
  "petgraph",
@@ -169,7 +169,7 @@ dependencies = [
 [[package]]
 name = "fmm-c"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#5f682f94358c6c439a8e9e533535fd4912a166b4"
+source = "git+https://github.com/raviqqe/fmm?branch=main#06345f282c517a5cc2625adbf043f073e181dad1"
 dependencies = [
  "fmm",
  "tempfile",
@@ -178,7 +178,7 @@ dependencies = [
 [[package]]
 name = "fmm-llvm"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#5f682f94358c6c439a8e9e533535fd4912a166b4"
+source = "git+https://github.com/raviqqe/fmm?branch=main#06345f282c517a5cc2625adbf043f073e181dad1"
 dependencies = [
  "fmm",
  "inkwell",
@@ -403,7 +403,7 @@ checksum = "692fcb63b64b1758029e0a96ee63e049ce8c5948587f2f7208df04625e5f6b56"
 name = "os"
 version = "0.1.0"
 dependencies = [
- "pen-ffi 0.1.6 (registry+https://github.com/rust-lang/crates.io-index)",
+ "pen-ffi 0.1.8 (registry+https://github.com/rust-lang/crates.io-index)",
  "tempfile",
 ]
 
@@ -455,13 +455,13 @@ dependencies = [
 
 [[package]]
 name = "pen-ffi"
-version = "0.1.6"
+version = "0.1.8"
 
 [[package]]
 name = "pen-ffi"
-version = "0.1.6"
+version = "0.1.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "64f6be902a68566c24632584c3ebd7a431094e44a50fe80a06f841bf4bfbc6fa"
+checksum = "3a72c952866d21269dcecc171309c00b9450b05b8aa69b930249f6d2d59e3341"
 
 [[package]]
 name = "percent-encoding"
@@ -498,7 +498,7 @@ checksum = "ac74c624d6b2d21f425f752262f42188365d7b8ff1aff74c82e45136510a4857"
 name = "prelude"
 version = "0.1.0"
 dependencies = [
- "pen-ffi 0.1.6 (registry+https://github.com/rust-lang/crates.io-index)",
+ "pen-ffi 0.1.8 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]

@@ -44,14 +44,26 @@ pub struct TypeInformation {
 macro_rules! type_information {
     ($name: ident, $type: ty) => {
         mod $name {
+            unsafe fn transmute_to_payload<T>(data: T) -> u64 {
+                let mut payload = 0;
+
+                std::ptr::write(&mut payload as *mut u64 as *mut T, data);
+
+                payload
+            }
+
+            unsafe fn transmute_from_payload<T>(payload: u64) -> T {
+                std::ptr::read(&payload as *const u64 as *const T)
+            }
+
             extern "C" fn clone(x: u64) {
-                let x = unsafe { std::intrinsics::transmute::<_, $type>(x) };
+                let x = unsafe { transmute_from_payload::<$type>(x) };
                 std::mem::forget(x.clone());
                 std::mem::forget(x);
             }
 
             extern "C" fn drop(x: u64) {
-                unsafe { std::intrinsics::transmute::<_, $type>(x) };
+                unsafe { transmute_from_payload::<$type>(x) };
             }
 
             static TYPE_INFORMATION: $crate::TypeInformation =
@@ -60,12 +72,12 @@ macro_rules! type_information {
             impl $type {
                 #[allow(unused)]
                 pub unsafe fn into_any(self) -> $crate::Any {
-                    $crate::Any::new(&TYPE_INFORMATION, std::mem::transmute(self))
+                    $crate::Any::new(&TYPE_INFORMATION, transmute_to_payload(self))
                 }
 
                 #[allow(unused)]
                 pub unsafe fn from_any(any: $crate::Any) -> $type {
-                    let x = std::mem::transmute(any.payload());
+                    let x = transmute_from_payload(any.payload());
                     std::mem::forget(any);
                     x
                 }
@@ -89,7 +101,6 @@ impl Default for Any {
 
 #[cfg(test)]
 mod tests {
-
     mod rc {
         use super::*;
         use std::rc::Rc;
