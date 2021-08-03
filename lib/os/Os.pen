@@ -1,85 +1,88 @@
-import foreign "c" _pen_os_fd_read \(number, number) fdReadResult
-import foreign "c" _pen_os_fd_write \(number, string) fdWriteResult
-import foreign "c" _pen_os_open_file \(string, OpenFileOptions) openFileResult
-import foreign "c" _pen_os_write_file \(any, string) writeFileResult
+import foreign "c" _pen_os_read_stdin \() ffiReadResult
+import foreign "c" _pen_os_write_stdout \(string) ffiWriteResult
+import foreign "c" _pen_os_write_stderr \(string) ffiWriteResult
+import foreign "c" _pen_os_open_file \(string, OpenFileOptions) ffiOpenResult
+import foreign "c" _pen_os_read_file \(any) ffiReadResult
+import foreign "c" _pen_os_write_file \(any, string) ffiWriteResult
 import foreign _pen_main \(Os) number
 
 type Os {
-  fdRead \(number, number) fdReadResult,
-  fdWrite \(number, string) fdWriteResult,
-  openFile \(string, OpenFileOptions) openFileResult,
-  writeFile \(any, string) writeFileResult,
+  readStdIn \() ffiReadResult,
+  writeStdOut \(string) ffiWriteResult,
+  writeStdErr \(string) ffiWriteResult,
+  openFile \(string, OpenFileOptions) ffiOpenResult,
+  readFile \(any) ffiReadResult,
+  writeFile \(any, string) ffiWriteResult,
 }
 
 type File {
-  internal any,
+  inner file | specialFile,
 }
 
-type fdReadResult {
-  bytes string,
-  error number,
+type file {
+  inner any,
 }
 
-type fdWriteResult {
-  bytes number,
-  error number,
-}
+type stdIn {}
+type stdOut {}
+type stdErr {}
 
-type openFileResult {
+type ffiOpenResult {
   file any,
   error number,
 }
 
-type writeFileResult {
-  _ none,
+type ffiReadResult {
+  data string,
+  error number,
+}
+
+type ffiWriteResult {
+  count number,
   error number,
 }
 
 type OpenFileOptions {
+  Append boolean,
+  Create boolean,
+  CreateNew boolean,
   Read boolean,
+  Truncate boolean,
   Write boolean,
+}
+
+type specialFile = stdIn | stdOut | stdErr
+
+StdIn = \() File {
+  File{inner: stdIn}
+}
+
+StdOut = \() File {
+  File{inner: stdOut}
+}
+
+StdErr = \() File {
+  File{inner: stdErr}
 }
 
 DefaultOpenFileOptions = \() OpenFileOptions {
   OpenFileOptions{
+    Append: false,
+    Create: false,
+    CreateNew: false,
     Read: false,
+    Truncate: false,
     Write: false,
   }
 }
 
-FdRead = \(os Os, fd number, count number) string | error {
-  r = os.fdRead(fd, count)
-
-  if r.error == -1 {
-    r.bytes
-  } else {
-    error(r.error)
-  }
-}
-
-FdWrite = \(os Os, fd number, data string) number | error {
-  r = os.fdWrite(fd, data)
-
-  if r.error == -1 {
-    r.bytes
-  } else {
-    error(r.error)
-  }
-}
-
-StdIn = \() number { 0 }
-
-StdOut = \() number { 1 }
-
-StdErr = \() number { 2 }
-
 OpenFileWithOptions = \(os Os, path string, opts OpenFileOptions) File | error {
   r = os.openFile(path, opts)
 
-  if r.error == -1 {
-    File{internal: r.file}
+  if r.error == 0 {
+    File{inner: file{inner: r.file}}
   } else {
-    error(r.error)
+    error(translateError(r.error))
   }
 }
 
@@ -91,30 +94,66 @@ OpenFile = \(os Os, path string) File | error {
   )
 }
 
-OpenWriteFile = \(os Os, path string) File | error {
-  OpenFileWithOptions(
-    os,
-    path,
-    OpenFileOptions{...DefaultOpenFileOptions(), Write: true}
-  )
+ReadFile = \(os Os, file File) string | error {
+  r = if f = file.inner; stdIn {
+    os.readStdIn()
+  } else if stdOut {
+    error("cannot read from stdout")
+  } else if stdErr {
+    error("cannot read from stderr")
+  } else if file {
+    os.readFile(f.inner)
+  }?
+
+  if r.error == 0 {
+    r.data
+  } else {
+    error(translateError(r.error))
+  }
 }
 
-WriteFile = \(os Os, file File, data string) none | error {
-  r = os.writeFile(file.internal, data)
+WriteFile = \(os Os, file File, data string) number | error {
+  r = if f = file.inner; stdIn {
+    error("cannot write to stdin")
+  } else if stdOut {
+    os.writeStdOut(data)
+  } else if stdErr {
+    os.writeStdErr(data)
+  } else if file {
+    os.writeFile(f.inner, data)
+  }?
 
-  if r.error == -1 {
-    none
+  if r.error == 0 {
+    r.count
   } else {
-    error(r.error)
+    error(translateError(r.error))
+  }
+}
+
+translateError = \(code number) string {
+  if code == 1 {
+    "cannot decode path"
+  } else if code == 2 {
+    "cannot open file"
+  } else if code == 3 {
+    "cannot lock file"
+  } else if code == 4 {
+    "cannot read file"
+  } else if code == 5 {
+    "cannot write file"
+  } else {
+    "unknown io error"
   }
 }
 
 export foreign _pen_os_main = \(_ none) number {
   _pen_main(
     Os{
-      fdRead: _pen_os_fd_read,
-      fdWrite: _pen_os_fd_write,
+      readStdIn: _pen_os_read_stdin,
+      writeStdOut: _pen_os_write_stdout,
+      writeStdErr: _pen_os_write_stderr,
       openFile: _pen_os_open_file,
+      readFile: _pen_os_read_file,
       writeFile: _pen_os_write_file,
     },
   )

@@ -8,7 +8,7 @@ impl<T: Default> FfiResult<T> {
     pub fn ok(value: T) -> Self {
         Self {
             value,
-            error: (-1.0).into(),
+            error: (0.0).into(),
         }
     }
 

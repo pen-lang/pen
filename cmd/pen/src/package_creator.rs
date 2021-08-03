@@ -34,7 +34,7 @@ pub fn create(package_directory: &str, library: bool) -> Result<(), Box<dyn std:
                 import System'Os
 
                 main = \\(os Os'Os) number {
-                  Os'FdWrite(os, Os'StdOut(), \"Hello, world!\")
+                  Os'WriteFile(os, Os'StdOut(), \"Hello, world!\\n\")
 
                   0
                 }

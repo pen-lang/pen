@@ -34,7 +34,7 @@ Feature: Memory leak
     import System'Os
 
     main = \(os Os'Os) number {
-      Os'FdWrite(os, Os'StdOut(), "Hello, world!\n")
+      Os'WriteFile(os, Os'StdOut(), "Hello, world!\n")
 
       main(os)
     }
