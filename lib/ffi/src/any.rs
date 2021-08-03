@@ -45,13 +45,13 @@ macro_rules! type_information {
     ($name: ident, $type: ty) => {
         mod $name {
             extern "C" fn clone(x: u64) {
-                let x = unsafe { std::intrinsics::transmute::<_, $type>(x) };
+                let x = unsafe { $crate::any::transmute_from_payload::<$type>(x) };
                 std::mem::forget(x.clone());
                 std::mem::forget(x);
             }
 
             extern "C" fn drop(x: u64) {
-                unsafe { std::intrinsics::transmute::<_, $type>(x) };
+                unsafe { $crate::any::transmute_from_payload::<$type>(x) };
             }
 
             static TYPE_INFORMATION: $crate::TypeInformation =
@@ -60,18 +60,30 @@ macro_rules! type_information {
             impl $type {
                 #[allow(unused)]
                 pub unsafe fn into_any(self) -> $crate::Any {
-                    $crate::Any::new(&TYPE_INFORMATION, std::mem::transmute(self))
+                    $crate::Any::new(&TYPE_INFORMATION, $crate::any::transmute_to_payload(self))
                 }
 
                 #[allow(unused)]
                 pub unsafe fn from_any(any: $crate::Any) -> $type {
-                    let x = std::mem::transmute(any.payload());
+                    let x = $crate::any::transmute_from_payload(any.payload());
                     std::mem::forget(any);
                     x
                 }
             }
         }
     };
+}
+
+unsafe fn transmute_to_payload<T>(data: T) -> u64 {
+    let mut payload = 0;
+
+    std::ptr::write(&mut payload as *mut u64 as *mut T, data);
+
+    payload
+}
+
+unsafe fn transmute_from_payload<T>(payload: u64) -> T {
+    std::ptr::read(&payload as *const u64 as *const T)
 }
 
 #[derive(Clone, Default)]
@@ -89,6 +101,24 @@ impl Default for Any {
 
 #[cfg(test)]
 mod tests {
+    use super::*;
+
+    #[test]
+    fn transmute_payload() {
+        unsafe {
+            transmute_from_payload::<Box<usize>>(transmute_to_payload(Box::new(42)));
+        }
+    }
+
+    #[test]
+    fn transmute_payload_of_different_size() {
+        unsafe {
+            assert_eq!(
+                transmute_from_payload::<u8>(transmute_to_payload::<u8>(42)),
+                42
+            );
+        }
+    }
 
     mod rc {
         use super::*;
