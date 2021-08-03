@@ -4,6 +4,7 @@ use super::{
     utilities,
 };
 use crate::result::FfiResult;
+use std::fs;
 use std::{
     fs::{File, OpenOptions},
     ops::Deref,
@@ -76,6 +77,27 @@ extern "C" fn _pen_os_write_file(
         Ok(file) => utilities::write(&mut file.deref(), bytes),
         Err(_) => FfiResult::error(LOCK_FILE_ERROR).into(),
     }
+}
+
+#[no_mangle]
+extern "C" fn _pen_os_copy_file(
+    src: ffi::ByteString,
+    dest: ffi::ByteString,
+) -> ffi::Arc<FfiResult<ffi::None>> {
+    match fs::copy(
+        match str::from_utf8(src.as_slice()) {
+            Ok(path) => path,
+            Err(_) => return FfiResult::error(DECODE_PATH_ERROR).into(),
+        },
+        match str::from_utf8(dest.as_slice()) {
+            Ok(path) => path,
+            Err(_) => return FfiResult::error(DECODE_PATH_ERROR).into(),
+        },
+    ) {
+        Ok(_) => FfiResult::ok(ffi::None::new()),
+        Err(_) => FfiResult::error(LOCK_FILE_ERROR),
+    }
+    .into()
 }
 
 #[cfg(test)]

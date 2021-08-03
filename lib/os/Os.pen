@@ -4,6 +4,7 @@ import foreign "c" _pen_os_write_stderr \(string) ffiWriteResult
 import foreign "c" _pen_os_open_file \(string, OpenFileOptions) ffiOpenResult
 import foreign "c" _pen_os_read_file \(any) ffiReadResult
 import foreign "c" _pen_os_write_file \(any, string) ffiWriteResult
+import foreign "c" _pen_os_copy_file \(string, string) ffiNoneResult
 import foreign _pen_main \(Os) number
 
 type Os {
@@ -13,6 +14,7 @@ type Os {
   openFile \(string, OpenFileOptions) ffiOpenResult,
   readFile \(any) ffiReadResult,
   writeFile \(any, string) ffiWriteResult,
+  copyFile \(string, string) ffiNoneResult,
 }
 
 type File {
@@ -39,6 +41,11 @@ type ffiReadResult {
 
 type ffiWriteResult {
   count number,
+  error number,
+}
+
+type ffiNoneResult {
+  _ none,
   error number,
 }
 
@@ -130,6 +137,16 @@ WriteFile = \(os Os, file File, data string) number | error {
   }
 }
 
+CopyFile = \(os Os, src string, dest string) none | error {
+  r = os.copyFile(src, dest)
+
+  if r.error == 0 {
+    none
+  } else {
+    error(translateError(r.error))
+  }
+}
+
 translateError = \(code number) string {
   if code == 1 {
     "cannot decode path"
@@ -155,6 +172,7 @@ export foreign _pen_os_main = \(_ none) number {
       openFile: _pen_os_open_file,
       readFile: _pen_os_read_file,
       writeFile: _pen_os_write_file,
+      copyFile: _pen_os_copy_file,
     },
   )
 }
