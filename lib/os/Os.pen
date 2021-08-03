@@ -1,5 +1,8 @@
 import foreign "c" _pen_os_fd_read \(number, number) ffiReadResult
 import foreign "c" _pen_os_fd_write \(number, string) ffiWriteResult
+import foreign "c" _pen_os_read_stdin \() ffiReadResult
+import foreign "c" _pen_os_write_stdout \(string) ffiWriteResult
+import foreign "c" _pen_os_write_stderr \(string) ffiWriteResult
 import foreign "c" _pen_os_open_file \(string, OpenFileOptions) ffiOpenResult
 import foreign "c" _pen_os_read_file \(any) ffiReadResult
 import foreign "c" _pen_os_write_file \(any, string) ffiWriteResult

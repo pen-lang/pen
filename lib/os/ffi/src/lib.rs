@@ -1,6 +1,8 @@
+mod error;
 mod file;
 mod open_file_options;
 mod result;
+mod stdio;
 
 use result::FfiResult;
 #[cfg(not(test))]

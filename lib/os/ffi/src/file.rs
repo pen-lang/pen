@@ -1,3 +1,6 @@
+use super::error::{
+    LOCK_FILE_ERROR, OPEN_FILE_ERROR, READ_FILE_ERROR, UTF8_DECODE_ERROR, WRITE_FILE_ERROR,
+};
 use super::open_file_options::OpenFileOptions;
 use crate::result::FfiResult;
 use std::{
@@ -9,12 +12,6 @@ use std::{
     str,
     sync::{Arc, LockResult, RwLock, RwLockWriteGuard},
 };
-
-const UTF8_DECODE_ERROR: f64 = 0.0;
-const OPEN_FILE_ERROR: f64 = 1.0;
-const LOCK_FILE_ERROR: f64 = 2.0;
-const READ_FILE_ERROR: f64 = 3.0;
-const WRITE_FILE_ERROR: f64 = 4.0;
 
 #[derive(Clone, Debug)]
 pub struct FfiFile {
