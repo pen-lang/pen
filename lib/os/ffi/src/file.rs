@@ -1,12 +1,13 @@
-use super::error::{
-    LOCK_FILE_ERROR, OPEN_FILE_ERROR, READ_FILE_ERROR, UTF8_DECODE_ERROR, WRITE_FILE_ERROR,
+use super::{
+    error::{
+        LOCK_FILE_ERROR, OPEN_FILE_ERROR, READ_FILE_ERROR, UTF8_DECODE_ERROR, WRITE_FILE_ERROR,
+    },
+    open_file_options::OpenFileOptions,
 };
-use super::open_file_options::OpenFileOptions;
 use crate::result::FfiResult;
 use std::{
     fs::{File, OpenOptions},
-    io::Read,
-    io::Write,
+    io::{Read, Write},
     ops::Deref,
     path::Path,
     str,
