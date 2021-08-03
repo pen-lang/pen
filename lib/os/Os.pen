@@ -82,7 +82,7 @@ OpenFileWithOptions = \(os Os, path string, opts OpenFileOptions) File | error {
   if r.error == 0 {
     File{inner: file{inner: r.file}}
   } else {
-    error(r.error)
+    error(translateError(r.error))
   }
 }
 
@@ -108,7 +108,7 @@ ReadFile = \(os Os, file File) string | error {
   if r.error == 0 {
     r.data
   } else {
-    error(r.error)
+    error(translateError(r.error))
   }
 }
 
@@ -126,7 +126,23 @@ WriteFile = \(os Os, file File, data string) number | error {
   if r.error == 0 {
     r.count
   } else {
-    error(r.error)
+    error(translateError(r.error))
+  }
+}
+
+translateError = \(code number) string {
+  if code == 1 {
+    "cannot decode path"
+  } else if code == 2 {
+    "cannot open file"
+  } else if code == 3 {
+    "cannot lock file"
+  } else if code == 4 {
+    "cannot read file"
+  } else if code == 5 {
+    "cannot write file"
+  } else {
+    "unknown io error"
   }
 }
 
