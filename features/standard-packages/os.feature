@@ -90,3 +90,21 @@ Feature: OS
     When I successfully run `pen build`
     Then I successfully run `./app`
     And the file "foo.txt" should contain "foo"
+
+  Scenario: Copy a file
+    Given a file named "Main.pen" with:
+    """pen
+    import System'Os
+
+    main = \(os Os'Os) number {
+      if _ = Os'CopyFile(os, "foo.txt", "bar.txt"); none {
+        0
+      } else {
+        1
+      }
+    }
+    """
+    And a file named "foo.txt" with "foo"
+    When I successfully run `pen build`
+    Then I successfully run `./app`
+    And the file "bar.txt" should contain "foo"
