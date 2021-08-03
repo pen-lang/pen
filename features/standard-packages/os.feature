@@ -108,3 +108,21 @@ Feature: OS
     When I successfully run `pen build`
     Then I successfully run `./app`
     And the file "bar.txt" should contain "foo"
+
+  Scenario: Remove a file
+    Given a file named "Main.pen" with:
+    """pen
+    import System'Os
+
+    main = \(os Os'Os) number {
+      if _ = Os'RemoveFile(os, "foo.txt"); none {
+        0
+      } else {
+        1
+      }
+    }
+    """
+    And a file named "foo.txt" with ""
+    When I successfully run `pen build`
+    Then I successfully run `./app`
+    And the file "foo.txt" does not exist

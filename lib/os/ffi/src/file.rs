@@ -1,8 +1,4 @@
-use super::{
-    error::{DECODE_PATH_ERROR, LOCK_FILE_ERROR, OPEN_FILE_ERROR},
-    open_file_options::OpenFileOptions,
-    utilities,
-};
+use super::{error::*, open_file_options::OpenFileOptions, utilities};
 use crate::result::FfiResult;
 use std::fs;
 use std::{
@@ -95,7 +91,19 @@ extern "C" fn _pen_os_copy_file(
         },
     ) {
         Ok(_) => FfiResult::ok(ffi::None::new()),
-        Err(_) => FfiResult::error(LOCK_FILE_ERROR),
+        Err(_) => FfiResult::error(COPY_FILE_ERROR),
+    }
+    .into()
+}
+
+#[no_mangle]
+extern "C" fn _pen_os_remove_file(path: ffi::ByteString) -> ffi::Arc<FfiResult<ffi::None>> {
+    match fs::remove_file(match str::from_utf8(path.as_slice()) {
+        Ok(path) => path,
+        Err(_) => return FfiResult::error(DECODE_PATH_ERROR).into(),
+    }) {
+        Ok(_) => FfiResult::ok(ffi::None::new()),
+        Err(_) => FfiResult::error(REMOVE_FILE_ERROR),
     }
     .into()
 }
