@@ -1,5 +1,5 @@
 use super::{
-    error::{LOCK_FILE_ERROR, OPEN_FILE_ERROR, UTF8_DECODE_ERROR},
+    error::{DECODE_PATH_ERROR, LOCK_FILE_ERROR, OPEN_FILE_ERROR},
     open_file_options::OpenFileOptions,
     utilities,
 };
@@ -48,7 +48,7 @@ extern "C" fn _pen_os_open_file(
                 path.as_slice(),
             ) {
                 Ok(path) => path,
-                Err(_) => return FfiResult::error(UTF8_DECODE_ERROR).into(),
+                Err(_) => return FfiResult::error(DECODE_PATH_ERROR).into(),
             })) {
                 Ok(file) => file,
                 Err(_) => return FfiResult::error(OPEN_FILE_ERROR).into(),
