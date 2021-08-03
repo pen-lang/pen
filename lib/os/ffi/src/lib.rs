@@ -3,6 +3,7 @@ mod file;
 mod open_file_options;
 mod result;
 mod stdio;
+mod utilities;
 
 #[cfg(not(test))]
 use std::os::raw::c_int;

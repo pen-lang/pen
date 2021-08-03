@@ -1,13 +1,11 @@
+use super::utilities;
 use super::{
-    error::{
-        LOCK_FILE_ERROR, OPEN_FILE_ERROR, READ_FILE_ERROR, UTF8_DECODE_ERROR, WRITE_FILE_ERROR,
-    },
+    error::{LOCK_FILE_ERROR, OPEN_FILE_ERROR, UTF8_DECODE_ERROR},
     open_file_options::OpenFileOptions,
 };
 use crate::result::FfiResult;
 use std::{
     fs::{File, OpenOptions},
-    io::{Read, Write},
     ops::Deref,
     path::Path,
     str,
@@ -63,17 +61,10 @@ extern "C" fn _pen_os_open_file(
 
 #[no_mangle]
 extern "C" fn _pen_os_read_file(file: ffi::Any) -> ffi::Arc<FfiResult<ffi::ByteString>> {
-    let mut buffer = vec![];
-    let result = match unsafe { FfiFile::from_any(file) }.get_mut() {
-        Ok(mut file) => file.read_to_end(&mut buffer),
+    match unsafe { FfiFile::from_any(file) }.get_mut() {
+        Ok(file) => utilities::read(&mut file.deref()),
         Err(_) => return FfiResult::error(LOCK_FILE_ERROR).into(),
-    };
-
-    match result {
-        Ok(_) => FfiResult::ok(buffer.into()),
-        Err(_) => FfiResult::error(READ_FILE_ERROR),
     }
-    .into()
 }
 
 #[no_mangle]
@@ -81,21 +72,16 @@ extern "C" fn _pen_os_write_file(
     file: ffi::Any,
     bytes: ffi::ByteString,
 ) -> ffi::Arc<FfiResult<ffi::Number>> {
-    let result = match unsafe { FfiFile::from_any(file) }.get_mut() {
-        Ok(mut file) => file.write(bytes.as_slice()),
+    match unsafe { FfiFile::from_any(file) }.get_mut() {
+        Ok(file) => utilities::write(&mut file.deref(), bytes),
         Err(_) => return FfiResult::error(LOCK_FILE_ERROR).into(),
-    };
-
-    match result {
-        Ok(count) => FfiResult::ok(ffi::Number::new(count as f64)),
-        Err(_) => FfiResult::error(WRITE_FILE_ERROR),
     }
-    .into()
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::io::Write;
 
     #[test]
     fn convert_to_any() {
