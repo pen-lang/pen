@@ -1,7 +1,7 @@
-use super::utilities;
 use super::{
     error::{LOCK_FILE_ERROR, OPEN_FILE_ERROR, UTF8_DECODE_ERROR},
     open_file_options::OpenFileOptions,
+    utilities,
 };
 use crate::result::FfiResult;
 use std::{
@@ -63,7 +63,7 @@ extern "C" fn _pen_os_open_file(
 extern "C" fn _pen_os_read_file(file: ffi::Any) -> ffi::Arc<FfiResult<ffi::ByteString>> {
     match unsafe { FfiFile::from_any(file) }.get_mut() {
         Ok(file) => utilities::read(&mut file.deref()),
-        Err(_) => return FfiResult::error(LOCK_FILE_ERROR).into(),
+        Err(_) => FfiResult::error(LOCK_FILE_ERROR).into(),
     }
 }
 
@@ -74,7 +74,7 @@ extern "C" fn _pen_os_write_file(
 ) -> ffi::Arc<FfiResult<ffi::Number>> {
     match unsafe { FfiFile::from_any(file) }.get_mut() {
         Ok(file) => utilities::write(&mut file.deref(), bytes),
-        Err(_) => return FfiResult::error(LOCK_FILE_ERROR).into(),
+        Err(_) => FfiResult::error(LOCK_FILE_ERROR).into(),
     }
 }
 
