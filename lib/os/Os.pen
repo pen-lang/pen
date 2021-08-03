@@ -79,7 +79,7 @@ DefaultOpenFileOptions = \() OpenFileOptions {
 OpenFileWithOptions = \(os Os, path string, opts OpenFileOptions) File | error {
   r = os.openFile(path, opts)
 
-  if r.error == -1 {
+  if r.error == 0 {
     File{inner: file{inner: r.file}}
   } else {
     error(r.error)
@@ -105,7 +105,7 @@ ReadFile = \(os Os, file File) string | error {
     os.readFile(f.inner)
   }?
 
-  if r.error == -1 {
+  if r.error == 0 {
     r.data
   } else {
     error(r.error)
@@ -123,7 +123,7 @@ WriteFile = \(os Os, file File, data string) number | error {
     os.writeFile(f.inner, data)
   }?
 
-  if r.error == -1 {
+  if r.error == 0 {
     r.count
   } else {
     error(r.error)
