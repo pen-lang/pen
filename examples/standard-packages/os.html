@@ -230,6 +230,38 @@ main = \(os Os'Os) number {
 <p><em>When</em> I successfully run <code>pen build</code></p>
 <p><em>Then</em> I successfully run <code>./app</code></p>
 <p><em>And</em> the file &quot;foo.txt&quot; should contain &quot;foo&quot;.</p>
+<h2 id="copy-a-file"><a class="header" href="#copy-a-file">Copy a file</a></h2>
+<p><em>Given</em> a file named &quot;Main.pen&quot; with:</p>
+<pre><code class="language-pen">import System'Os
+
+main = \(os Os'Os) number {
+  if _ = Os'CopyFile(os, &quot;foo.txt&quot;, &quot;bar.txt&quot;); none {
+    0
+  } else {
+    1
+  }
+}
+</code></pre>
+<p><em>And</em> a file named &quot;foo.txt&quot; with &quot;foo&quot;</p>
+<p><em>When</em> I successfully run <code>pen build</code></p>
+<p><em>Then</em> I successfully run <code>./app</code></p>
+<p><em>And</em> the file &quot;bar.txt&quot; should contain &quot;foo&quot;.</p>
+<h2 id="remove-a-file"><a class="header" href="#remove-a-file">Remove a file</a></h2>
+<p><em>Given</em> a file named &quot;Main.pen&quot; with:</p>
+<pre><code class="language-pen">import System'Os
+
+main = \(os Os'Os) number {
+  if _ = Os'RemoveFile(os, &quot;foo.txt&quot;); none {
+    0
+  } else {
+    1
+  }
+}
+</code></pre>
+<p><em>And</em> a file named &quot;foo.txt&quot; with &quot;&quot;</p>
+<p><em>When</em> I successfully run <code>pen build</code></p>
+<p><em>Then</em> I successfully run <code>./app</code></p>
+<p><em>And</em> the file &quot;foo.txt&quot; does not exist.</p>
 
                     </main>
 
