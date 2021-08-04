@@ -39,7 +39,13 @@ jobs:
         with:
           files: "**/*.{md,pen,rs}"
   integration-test:
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - macos-latest
+    runs-on: ${{ matrix.os }}
     steps:
       - run: curl -fsSL https://apt.llvm.org/llvm.sh | sudo bash -s 12
       - uses: actions/checkout@v2
