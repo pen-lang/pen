@@ -1,3 +1,5 @@
+use super::error::OsError;
+
 #[repr(C)]
 pub struct FfiResult<T: Default> {
     value: T,
@@ -20,8 +22,11 @@ impl<T: Default> FfiResult<T> {
     }
 }
 
-impl<T: Default> From<std::io::Error> for FfiResult<T> {
-    fn from(error: std::io::Error) -> Self {
-        Self::error(error.raw_os_error().map(f64::from).unwrap_or(std::f64::NAN))
+impl<T: Default> From<Result<T, OsError>> for FfiResult<T> {
+    fn from(result: Result<T, OsError>) -> Self {
+        match result {
+            Ok(data) => FfiResult::ok(data),
+            Err(error) => FfiResult::error(f64::from(error)),
+        }
     }
 }

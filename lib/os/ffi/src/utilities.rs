@@ -1,23 +1,14 @@
-use crate::{
-    error::{READ_FILE_ERROR, WRITE_FILE_ERROR},
-    result::FfiResult,
-};
+use crate::error::OsError;
 use std::io::{Read, Write};
 
-pub fn read(reader: &mut impl Read) -> ffi::Arc<FfiResult<ffi::ByteString>> {
+pub fn read(reader: &mut impl Read) -> Result<ffi::ByteString, OsError> {
     let mut buffer = vec![];
 
-    match reader.read_to_end(&mut buffer) {
-        Ok(_) => FfiResult::ok(buffer.into()),
-        Err(_) => FfiResult::error(READ_FILE_ERROR),
-    }
-    .into()
+    reader.read_to_end(&mut buffer)?;
+
+    Ok(buffer.into())
 }
 
-pub fn write(writer: &mut impl Write, bytes: ffi::ByteString) -> ffi::Arc<FfiResult<ffi::Number>> {
-    match writer.write(bytes.as_slice()) {
-        Ok(count) => FfiResult::ok(ffi::Number::new(count as f64)),
-        Err(_) => FfiResult::error(WRITE_FILE_ERROR),
-    }
-    .into()
+pub fn write(writer: &mut impl Write, bytes: ffi::ByteString) -> Result<ffi::Number, OsError> {
+    Ok(ffi::Number::new(writer.write(bytes.as_slice())? as f64))
 }
