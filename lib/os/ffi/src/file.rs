@@ -49,7 +49,7 @@ fn open_file(
     let file =
         FfiFile::new(OpenOptions::from(options.deref()).open(&Path::new(&decode_path(&path)?))?);
 
-    Ok(unsafe { file.into_any() })
+    Ok(file.into_any())
 }
 
 #[no_mangle]
@@ -58,7 +58,7 @@ extern "C" fn _pen_os_read_file(file: ffi::Any) -> ffi::Arc<FfiResult<ffi::ByteS
 }
 
 fn read_file(file: ffi::Any) -> Result<ffi::ByteString, OsError> {
-    utilities::read(&mut lock_file(&unsafe { FfiFile::from_any(file) })?.deref())
+    utilities::read(&mut lock_file(&FfiFile::from_any(file).unwrap())?.deref())
 }
 
 #[no_mangle]
@@ -71,7 +71,7 @@ extern "C" fn _pen_os_write_file(
 
 fn write_file(file: ffi::Any, bytes: ffi::ByteString) -> Result<ffi::Number, OsError> {
     utilities::write(
-        &mut lock_file(&unsafe { FfiFile::from_any(file) })?.deref(),
+        &mut lock_file(&FfiFile::from_any(file).unwrap())?.deref(),
         bytes,
     )
 }
@@ -116,7 +116,8 @@ mod tests {
 
     #[test]
     fn convert_to_any() {
-        unsafe { FfiFile::from_any(FfiFile::new(tempfile::tempfile().unwrap()).into_any()) }
+        FfiFile::from_any(FfiFile::new(tempfile::tempfile().unwrap()).into_any())
+            .unwrap()
             .get_mut()
             .unwrap()
             .write_all(b"foo")
