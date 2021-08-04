@@ -49,9 +49,12 @@ jobs:
     steps:
       - run: curl -fsSL https://apt.llvm.org/llvm.sh | sudo bash -s 12
         if: startsWith(matrix.os, 'ubuntu-')
+      - run: sudo apt install clang ninja-build valgrind
+        if: startsWith(matrix.os, 'ubuntu-')
+      - run: brew install ninja valgrind
+        if: startsWith(matrix.os, 'macos-')
       - uses: actions/checkout@v2
       - uses: actions/setup-ruby@v1
-      - run: sudo apt install clang ninja-build valgrind
       - run: bundler install
       - run: rustup target add wasm32-unknown-unknown
       - run: cargo build --release
