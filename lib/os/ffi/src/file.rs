@@ -1,4 +1,4 @@
-use super::{error::*, open_file_options::OpenFileOptions, utilities};
+use super::{error::OsError, open_file_options::OpenFileOptions, utilities};
 use crate::result::FfiResult;
 use std::fs;
 use std::{
@@ -42,12 +42,12 @@ extern "C" fn _pen_os_open_file(
     ffi::Arc::new(open_file(path, options).into())
 }
 
-fn open_file(path: ffi::ByteString, options: ffi::Arc<OpenFileOptions>) -> Result<ffi::Any, f64> {
-    let file = FfiFile::new(
-        OpenOptions::from(options.deref())
-            .open(&Path::new(&decode_path(&path)?))
-            .map_err(|_| OPEN_FILE_ERROR)?,
-    );
+fn open_file(
+    path: ffi::ByteString,
+    options: ffi::Arc<OpenFileOptions>,
+) -> Result<ffi::Any, OsError> {
+    let file =
+        FfiFile::new(OpenOptions::from(options.deref()).open(&Path::new(&decode_path(&path)?))?);
 
     Ok(unsafe { file.into_any() })
 }
@@ -57,7 +57,7 @@ extern "C" fn _pen_os_read_file(file: ffi::Any) -> ffi::Arc<FfiResult<ffi::ByteS
     ffi::Arc::new(read_file(file).into())
 }
 
-fn read_file(file: ffi::Any) -> Result<ffi::ByteString, f64> {
+fn read_file(file: ffi::Any) -> Result<ffi::ByteString, OsError> {
     utilities::read(&mut lock_file(&unsafe { FfiFile::from_any(file) })?.deref())
 }
 
@@ -69,15 +69,15 @@ extern "C" fn _pen_os_write_file(
     ffi::Arc::new(write_file(file, bytes).into())
 }
 
-fn write_file(file: ffi::Any, bytes: ffi::ByteString) -> Result<ffi::Number, f64> {
+fn write_file(file: ffi::Any, bytes: ffi::ByteString) -> Result<ffi::Number, OsError> {
     utilities::write(
         &mut lock_file(&unsafe { FfiFile::from_any(file) })?.deref(),
         bytes,
     )
 }
 
-fn lock_file(file: &FfiFile) -> Result<RwLockWriteGuard<File>, f64> {
-    Ok(file.get_mut().map_err(|_| LOCK_FILE_ERROR)?)
+fn lock_file(file: &FfiFile) -> Result<RwLockWriteGuard<File>, OsError> {
+    Ok(file.get_mut()?)
 }
 
 #[no_mangle]
@@ -88,8 +88,8 @@ extern "C" fn _pen_os_copy_file(
     ffi::Arc::new(copy_file(src, dest).into())
 }
 
-fn copy_file(src: ffi::ByteString, dest: ffi::ByteString) -> Result<ffi::None, f64> {
-    fs::copy(decode_path(&src)?, decode_path(&dest)?).map_err(|_| COPY_FILE_ERROR)?;
+fn copy_file(src: ffi::ByteString, dest: ffi::ByteString) -> Result<ffi::None, OsError> {
+    fs::copy(decode_path(&src)?, decode_path(&dest)?)?;
 
     Ok(ffi::None::new())
 }
@@ -99,14 +99,14 @@ extern "C" fn _pen_os_remove_file(path: ffi::ByteString) -> ffi::Arc<FfiResult<f
     ffi::Arc::new(remove_file(path).into())
 }
 
-fn remove_file(path: ffi::ByteString) -> Result<ffi::None, f64> {
-    fs::remove_file(decode_path(&path)?).map_err(|_| REMOVE_FILE_ERROR)?;
+fn remove_file(path: ffi::ByteString) -> Result<ffi::None, OsError> {
+    fs::remove_file(decode_path(&path)?)?;
 
     Ok(ffi::None::new())
 }
 
-fn decode_path(path: &ffi::ByteString) -> Result<&str, f64> {
-    str::from_utf8(path.as_slice()).map_err(|_| DECODE_PATH_ERROR)
+fn decode_path(path: &ffi::ByteString) -> Result<&str, OsError> {
+    Ok(str::from_utf8(path.as_slice())?)
 }
 
 #[cfg(test)]

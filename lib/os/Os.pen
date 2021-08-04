@@ -161,15 +161,19 @@ RemoveFile = \(os Os, path string) none | error {
 
 translateError = \(code number) string {
   if code == 1 {
-    "cannot decode path"
+    "operation not permitted"
   } else if code == 2 {
-    "cannot open file"
-  } else if code == 3 {
+    "no such file or directory"
+  } else if code == 13 {
+    "permission denied"
+  } else if code == 17 {
+    "file exists"
+  } else if code == 20 {
+    "not a directory"
+  } else if code == 257 {
     "cannot lock file"
-  } else if code == 4 {
-    "cannot read file"
-  } else if code == 5 {
-    "cannot write file"
+  } else if code == 258 {
+    "cannot decode path as utf8"
   } else {
     "unknown io error"
   }
