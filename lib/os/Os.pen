@@ -173,7 +173,7 @@ translateError = \(code number) string {
   } else if code == 257 {
     "cannot lock file"
   } else if code == 258 {
-    "cannot decode path as utf8"
+    "cannot decode path as utf-8"
   } else {
     "unknown io error"
   }
