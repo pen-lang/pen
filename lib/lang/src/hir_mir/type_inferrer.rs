@@ -817,6 +817,81 @@ mod tests {
         }
 
         #[test]
+        fn infer_else_branch_type_with_bound_variable() {
+            let function_type = types::Function::new(
+                vec![],
+                types::None::new(Position::dummy()),
+                Position::dummy(),
+            );
+            let union_type = types::Union::new(
+                function_type.clone(),
+                types::None::new(Position::dummy()),
+                Position::dummy(),
+            );
+            let branches = vec![IfTypeBranch::new(
+                types::None::new(Position::dummy()),
+                None::new(Position::dummy()),
+            )];
+
+            assert_eq!(
+                infer_module(
+                    &Module::empty().set_definitions(vec![Definition::without_source(
+                        "x",
+                        Lambda::new(
+                            vec![Argument::new("x", union_type.clone())],
+                            types::None::new(Position::dummy()),
+                            IfType::new(
+                                "y",
+                                Variable::new("x", Position::dummy()),
+                                branches.clone(),
+                                Some(ElseBranch::new(
+                                    None,
+                                    Call::new(
+                                        None,
+                                        Variable::new("y", Position::dummy()),
+                                        vec![],
+                                        Position::dummy()
+                                    ),
+                                    Position::dummy()
+                                )),
+                                Position::dummy()
+                            ),
+                            Position::dummy(),
+                        ),
+                        false,
+                    )],)
+                ),
+                Ok(
+                    Module::empty().set_definitions(vec![Definition::without_source(
+                        "x",
+                        Lambda::new(
+                            vec![Argument::new("x", union_type)],
+                            types::None::new(Position::dummy()),
+                            IfType::new(
+                                "y",
+                                Variable::new("x", Position::dummy()),
+                                branches,
+                                Some(ElseBranch::new(
+                                    Some(function_type.clone().into()),
+                                    Call::new(
+                                        Some(function_type.clone().into()),
+                                        Variable::new("y", Position::dummy()),
+                                        vec![],
+                                        Position::dummy()
+                                    ),
+                                    Position::dummy()
+                                )),
+                                Position::dummy()
+                            ),
+                            Position::dummy(),
+                        ),
+                        false,
+                    )],)
+                )
+            );
+        }
+
+        #[test]
         fn infer_else_branch_type_of_any() {
             let any_type = types::Any::new(Position::dummy());
             let branches = vec![IfTypeBranch::new(
