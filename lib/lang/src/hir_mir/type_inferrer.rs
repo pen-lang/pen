@@ -153,35 +153,34 @@ fn infer_expression(
             let else_ = if_
                 .else_()
                 .map(|branch| -> Result<_, CompileError> {
-                    let argument_type = type_extractor::extract_from_expression(
-                        &argument,
-                        variables,
-                        type_context,
-                    )?;
-                    let branch_type = union_type_creator::create(
-                        &if_.branches()
-                            .iter()
-                            .map(|branch| branch.type_().clone())
-                            .collect::<Vec<_>>(),
-                        if_.position(),
-                    )
-                    .unwrap();
+                    let type_ = type_difference_calculator::calculate(
+                        &type_extractor::extract_from_expression(
+                            &argument,
+                            variables,
+                            type_context,
+                        )?,
+                        &union_type_creator::create(
+                            &if_.branches()
+                                .iter()
+                                .map(|branch| branch.type_().clone())
+                                .collect::<Vec<_>>(),
+                            if_.position(),
+                        )
+                        .unwrap(),
+                        type_context.types(),
+                    )?
+                    .ok_or_else(|| CompileError::UnreachableCode(branch.position().clone()))?;
 
                     Ok(ElseBranch::new(
-                        Some(
-                            if let Some(type_) = type_difference_calculator::calculate(
-                                &argument_type,
-                                &branch_type,
-                                type_context.types(),
-                            )? {
-                                type_
-                            } else {
-                                return Err(CompileError::UnreachableCode(
-                                    branch.position().clone(),
-                                ));
-                            },
-                        ),
-                        infer_expression(branch.expression(), variables)?,
+                        Some(type_.clone()),
+                        infer_expression(
+                            branch.expression(),
+                            &variables
+                                .clone()
+                                .into_iter()
+                                .chain(vec![(if_.name().into(), type_)])
+                                .collect(),
+                        )?,
                         branch.position().clone(),
                     ))
                 })
@@ -804,6 +803,81 @@ mod tests {
                                         .into()
                                     ),
                                     None::new(Position::dummy()),
+                                    Position::dummy()
+                                )),
+                                Position::dummy()
+                            ),
+                            Position::dummy(),
+                        ),
+                        false,
+                    )],)
+                )
+            );
+        }
+
+        #[test]
+        fn infer_else_branch_type_with_bound_variable() {
+            let function_type = types::Function::new(
+                vec![],
+                types::None::new(Position::dummy()),
+                Position::dummy(),
+            );
+            let union_type = types::Union::new(
+                function_type.clone(),
+                types::None::new(Position::dummy()),
+                Position::dummy(),
+            );
+            let branches = vec![IfTypeBranch::new(
+                types::None::new(Position::dummy()),
+                None::new(Position::dummy()),
+            )];
+
+            assert_eq!(
+                infer_module(
+                    &Module::empty().set_definitions(vec![Definition::without_source(
+                        "x",
+                        Lambda::new(
+                            vec![Argument::new("x", union_type.clone())],
+                            types::None::new(Position::dummy()),
+                            IfType::new(
+                                "y",
+                                Variable::new("x", Position::dummy()),
+                                branches.clone(),
+                                Some(ElseBranch::new(
+                                    None,
+                                    Call::new(
+                                        None,
+                                        Variable::new("y", Position::dummy()),
+                                        vec![],
+                                        Position::dummy()
+                                    ),
+                                    Position::dummy()
+                                )),
+                                Position::dummy()
+                            ),
+                            Position::dummy(),
+                        ),
+                        false,
+                    )],)
+                ),
+                Ok(
+                    Module::empty().set_definitions(vec![Definition::without_source(
+                        "x",
+                        Lambda::new(
+                            vec![Argument::new("x", union_type)],
+                            types::None::new(Position::dummy()),
+                            IfType::new(
+                                "y",
+                                Variable::new("x", Position::dummy()),
+                                branches,
+                                Some(ElseBranch::new(
+                                    Some(function_type.clone().into()),
+                                    Call::new(
+                                        Some(function_type.into()),
+                                        Variable::new("y", Position::dummy()),
+                                        vec![],
+                                        Position::dummy()
+                                    ),
                                     Position::dummy()
                                 )),
                                 Position::dummy()
