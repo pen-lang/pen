@@ -13,7 +13,7 @@ impl From<OsError> for f64 {
             OsError::Raw(code) => code.into(),
             OsError::LockFile => 257.0,
             OsError::Utf8Decode => 258.0,
-            OsError::Unknown => 259.0,
+            OsError::Unknown => 512.0,
         }
     }
 }

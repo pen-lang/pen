@@ -12,6 +12,10 @@ impl Any {
         }
     }
 
+    pub fn type_information(&self) -> &'static TypeInformation {
+        self.type_information
+    }
+
     pub fn payload(&self) -> u64 {
         self.payload
     }
@@ -71,15 +75,19 @@ macro_rules! type_information {
 
             impl $type {
                 #[allow(unused)]
-                pub unsafe fn into_any(self) -> $crate::Any {
-                    $crate::Any::new(&TYPE_INFORMATION, transmute_to_payload(self))
+                pub fn into_any(self) -> $crate::Any {
+                    $crate::Any::new(&TYPE_INFORMATION, unsafe { transmute_to_payload(self) })
                 }
 
                 #[allow(unused)]
-                pub unsafe fn from_any(any: $crate::Any) -> $type {
-                    let x = transmute_from_payload(any.payload());
-                    std::mem::forget(any);
-                    x
+                pub fn from_any(any: $crate::Any) -> Option<$type> {
+                    if std::ptr::eq(any.type_information(), &TYPE_INFORMATION) {
+                        let x = unsafe { transmute_from_payload(any.payload()) };
+                        std::mem::forget(any);
+                        Some(x)
+                    } else {
+                        None
+                    }
                 }
             }
         }
@@ -95,7 +103,7 @@ type_information!(dummy, crate::any::Dummy);
 
 impl Default for Any {
     fn default() -> Self {
-        unsafe { Dummy::default().into_any() }
+        Dummy::default().into_any()
     }
 }
 
@@ -121,22 +129,18 @@ mod tests {
 
         #[test]
         fn drop_any() {
-            unsafe {
-                TypeA {
-                    value: Rc::new(42.0),
-                }
-                .into_any()
-            };
+            TypeA {
+                value: Rc::new(42.0),
+            }
+            .into_any();
         }
 
         #[test]
         fn clone_any() {
-            let x = unsafe {
-                TypeA {
-                    value: Rc::new(42.0),
-                }
-                .into_any()
-            };
+            let x = TypeA {
+                value: Rc::new(42.0),
+            }
+            .into_any();
 
             drop(x.clone());
             drop(x)
@@ -155,12 +159,12 @@ mod tests {
 
         #[test]
         fn drop_any() {
-            unsafe { Type { value: 42.0 }.into_any() };
+            Type { value: 42.0 }.into_any();
         }
 
         #[test]
         fn clone_any() {
-            let x = unsafe { Type { value: 42.0 }.into_any() };
+            let x = Type { value: 42.0 }.into_any();
 
             drop(x.clone());
             drop(x)
