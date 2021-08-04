@@ -25,3 +25,12 @@ impl<T: Default> From<std::io::Error> for FfiResult<T> {
         Self::error(error.raw_os_error().map(f64::from).unwrap_or(std::f64::NAN))
     }
 }
+
+impl<T: Default> From<Result<T, f64>> for FfiResult<T> {
+    fn from(result: Result<T, f64>) -> Self {
+        match result {
+            Ok(data) => FfiResult::ok(data).into(),
+            Err(error) => FfiResult::error(error),
+        }
+    }
+}

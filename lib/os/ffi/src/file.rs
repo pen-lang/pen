@@ -39,29 +39,26 @@ extern "C" fn _pen_os_open_file(
     path: ffi::ByteString,
     options: ffi::Arc<OpenFileOptions>,
 ) -> ffi::Arc<FfiResult<ffi::Any>> {
-    FfiResult::ok(unsafe {
-        FfiFile::new(
-            match OpenOptions::from(options.deref()).open(&Path::new(&match str::from_utf8(
-                path.as_slice(),
-            ) {
-                Ok(path) => path,
-                Err(_) => return FfiResult::error(DECODE_PATH_ERROR).into(),
-            })) {
-                Ok(file) => file,
-                Err(_) => return FfiResult::error(OPEN_FILE_ERROR).into(),
-            },
-        )
-        .into_any()
-    })
-    .into()
+    ffi::Arc::new(open_file(path, options).into())
+}
+
+fn open_file(path: ffi::ByteString, options: ffi::Arc<OpenFileOptions>) -> Result<ffi::Any, f64> {
+    let file = FfiFile::new(
+        OpenOptions::from(options.deref())
+            .open(&Path::new(&decode_path(&path)?))
+            .map_err(|_| OPEN_FILE_ERROR)?,
+    );
+
+    Ok(unsafe { file.into_any() })
 }
 
 #[no_mangle]
 extern "C" fn _pen_os_read_file(file: ffi::Any) -> ffi::Arc<FfiResult<ffi::ByteString>> {
-    match unsafe { FfiFile::from_any(file) }.get_mut() {
-        Ok(file) => utilities::read(&mut file.deref()),
-        Err(_) => FfiResult::error(LOCK_FILE_ERROR).into(),
-    }
+    ffi::Arc::new(read_file(file).into())
+}
+
+fn read_file(file: ffi::Any) -> Result<ffi::ByteString, f64> {
+    utilities::read(&mut lock_file(&unsafe { FfiFile::from_any(file) })?.deref())
 }
 
 #[no_mangle]
@@ -69,10 +66,18 @@ extern "C" fn _pen_os_write_file(
     file: ffi::Any,
     bytes: ffi::ByteString,
 ) -> ffi::Arc<FfiResult<ffi::Number>> {
-    match unsafe { FfiFile::from_any(file) }.get_mut() {
-        Ok(file) => utilities::write(&mut file.deref(), bytes),
-        Err(_) => FfiResult::error(LOCK_FILE_ERROR).into(),
-    }
+    ffi::Arc::new(write_file(file, bytes).into())
+}
+
+fn write_file(file: ffi::Any, bytes: ffi::ByteString) -> Result<ffi::Number, f64> {
+    utilities::write(
+        &mut lock_file(&unsafe { FfiFile::from_any(file) })?.deref(),
+        bytes,
+    )
+}
+
+fn lock_file(file: &FfiFile) -> Result<RwLockWriteGuard<File>, f64> {
+    Ok(file.get_mut().map_err(|_| LOCK_FILE_ERROR)?)
 }
 
 #[no_mangle]
@@ -80,32 +85,28 @@ extern "C" fn _pen_os_copy_file(
     src: ffi::ByteString,
     dest: ffi::ByteString,
 ) -> ffi::Arc<FfiResult<ffi::None>> {
-    match fs::copy(
-        match str::from_utf8(src.as_slice()) {
-            Ok(path) => path,
-            Err(_) => return FfiResult::error(DECODE_PATH_ERROR).into(),
-        },
-        match str::from_utf8(dest.as_slice()) {
-            Ok(path) => path,
-            Err(_) => return FfiResult::error(DECODE_PATH_ERROR).into(),
-        },
-    ) {
-        Ok(_) => FfiResult::ok(ffi::None::new()),
-        Err(_) => FfiResult::error(COPY_FILE_ERROR),
-    }
-    .into()
+    ffi::Arc::new(copy_file(src, dest).into())
+}
+
+fn copy_file(src: ffi::ByteString, dest: ffi::ByteString) -> Result<ffi::None, f64> {
+    fs::copy(decode_path(&src)?, decode_path(&dest)?).map_err(|_| COPY_FILE_ERROR)?;
+
+    Ok(ffi::None::new())
 }
 
 #[no_mangle]
 extern "C" fn _pen_os_remove_file(path: ffi::ByteString) -> ffi::Arc<FfiResult<ffi::None>> {
-    match fs::remove_file(match str::from_utf8(path.as_slice()) {
-        Ok(path) => path,
-        Err(_) => return FfiResult::error(DECODE_PATH_ERROR).into(),
-    }) {
-        Ok(_) => FfiResult::ok(ffi::None::new()),
-        Err(_) => FfiResult::error(REMOVE_FILE_ERROR),
-    }
-    .into()
+    ffi::Arc::new(remove_file(path).into())
+}
+
+fn remove_file(path: ffi::ByteString) -> Result<ffi::None, f64> {
+    fs::remove_file(decode_path(&path)?).map_err(|_| REMOVE_FILE_ERROR)?;
+
+    Ok(ffi::None::new())
+}
+
+fn decode_path(path: &ffi::ByteString) -> Result<&str, f64> {
+    str::from_utf8(path.as_slice()).map_err(|_| DECODE_PATH_ERROR)
 }
 
 #[cfg(test)]
