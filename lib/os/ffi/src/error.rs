@@ -1,5 +1,4 @@
-use std::str::Utf8Error;
-use std::sync::PoisonError;
+use std::{str::Utf8Error, sync::PoisonError};
 
 pub enum OsError {
     Raw(i32),

@@ -1,7 +1,7 @@
 use super::{error::OsError, open_file_options::OpenFileOptions, utilities};
 use crate::result::FfiResult;
-use std::fs;
 use std::{
+    fs,
     fs::{File, OpenOptions},
     ops::Deref,
     path::Path,
