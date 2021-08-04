@@ -443,7 +443,7 @@ dependencies = [
 
 [[package]]
 name = "pen"
-version = "0.1.10"
+version = "0.1.11"
 dependencies = [
  "app",
  "clap",
