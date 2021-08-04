@@ -873,7 +873,7 @@ mod tests {
                                 Some(ElseBranch::new(
                                     Some(function_type.clone().into()),
                                     Call::new(
-                                        Some(function_type.clone().into()),
+                                        Some(function_type.into()),
                                         Variable::new("y", Position::dummy()),
                                         vec![],
                                         Position::dummy()
