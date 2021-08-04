@@ -128,7 +128,7 @@ WriteFile = \(os Os, file File, data string) number | error {
     os.writeStdOut(data)
   } else if stdErr {
     os.writeStdErr(data)
-  } else if file {
+  } else {
     os.writeFile(f.inner, data)
   }?
 
