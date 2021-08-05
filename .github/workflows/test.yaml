@@ -14,11 +14,11 @@ jobs:
           - macos-latest
     runs-on: ${{ matrix.os }}
     steps:
+      - uses: actions/checkout@v2
       - run: tools/ci/set_up_ubuntu.sh
         if: startsWith(matrix.os, 'ubuntu-')
       - run: tools/ci/set_up_macos.sh
         if: startsWith(matrix.os, 'macos-')
-      - uses: actions/checkout@v2
       - run: cargo build
       - run: git diff --exit-code
   unit-test:
@@ -30,11 +30,11 @@ jobs:
           - macos-latest
     runs-on: ${{ matrix.os }}
     steps:
+      - uses: actions/checkout@v2
       - run: tools/ci/set_up_ubuntu.sh
         if: startsWith(matrix.os, 'ubuntu-')
       - run: tools/ci/set_up_macos.sh
         if: startsWith(matrix.os, 'macos-')
-      - uses: actions/checkout@v2
       - run: cargo test
         env:
           RUST_MIN_STACK: 8388608
@@ -47,11 +47,11 @@ jobs:
           - macos-latest
     runs-on: ${{ matrix.os }}
     steps:
+      - uses: actions/checkout@v2
       - run: tools/ci/set_up_ubuntu.sh
         if: startsWith(matrix.os, 'ubuntu-')
       - run: tools/ci/set_up_macos.sh
         if: startsWith(matrix.os, 'macos-')
-      - uses: actions/checkout@v2
       - uses: actions/setup-ruby@v1
       - run: bundler install
       - run: rustup target add wasm32-unknown-unknown
