@@ -18,8 +18,8 @@ jobs:
       - run: curl -fsSL https://apt.llvm.org/llvm.sh | sudo bash -s 12
         if: startsWith(matrix.os, 'ubuntu-')
       - run: |
-          brew install llvm
-          echo LLVM_SYS_120_PREFIX=$(brew --prefix)/opt/llvm >> $GITHUB_ENV
+          brew install llvm@12
+          echo LLVM_SYS_120_PREFIX=$(brew --prefix)/opt/llvm@12 >> $GITHUB_ENV
         if: startsWith(matrix.os, 'macos-')
       - run: cargo build --release
       - run: strip target/release/pen
