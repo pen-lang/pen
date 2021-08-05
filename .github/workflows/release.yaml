@@ -5,7 +5,20 @@ on:
       - main
   pull_request:
 jobs:
+  tag-check:
+    runs-on: ubuntu-latest
+    outputs:
+      new_tag: ${{ env.new_tag }}
+    steps:
+      - uses: actions/checkout@v2
+      - run: |
+          git fetch --prune --unshallow --tags
+
+          if ! git tag | grep v$version; then
+            echo new_tag=true >> $GITHUB_ENV
+          fi
   release:
+    needs: tag-check
     strategy:
       fail-fast: false
       matrix:
@@ -29,9 +42,10 @@ jobs:
         with:
           name: ${{ env.asset }}
           path: ${{ env.asset }}
-      - uses: ncipollo/release-action@v1
-        if: github.ref == 'refs/heads/main'
+      - uses: softprops/action-gh-release@v1
+        if: github.ref == 'refs/heads/main' && needs.tag-check.outputs.new_tag == 'true'
         with:
-          tag: v${{ env.version }}
-          artifacts: ${{ env.asset }}
-          token: ${{ secrets.GITHUB_TOKEN }}
+          tag_name: v${{ env.version }}
+          files: ${{ env.asset }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
