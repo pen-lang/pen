@@ -37,7 +37,7 @@ impl Error for InfrastructureError {
             Self::PackageUrlSchemeNotSupported(_) => None,
             Self::ReadDirectory { path: _, source } => Some(source),
             Self::ReadFile { path: _, source } => Some(source),
-            Self::TooManyFfiBuildScripts(path) => None,
+            Self::TooManyFfiBuildScripts(_) => None,
             Self::WriteFile { path: _, source } => Some(source),
         }
     }
