@@ -51,7 +51,9 @@ jobs:
           curl -fsSL https://apt.llvm.org/llvm.sh | sudo bash -s 12
           sudo apt install clang ninja-build valgrind
         if: startsWith(matrix.os, 'ubuntu-')
-      - run: brew install ninja
+      - run: |
+          brew install ninja llvm@12
+          echo LLVM_SYS_120_PREFIX=$(brew --prefix)/opt/llvm@12 >> $GITHUB_ENV
         if: startsWith(matrix.os, 'macos-')
       - uses: actions/checkout@v2
       - uses: actions/setup-ruby@v1
