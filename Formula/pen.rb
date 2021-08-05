@@ -1,9 +1,9 @@
 class Pen < Formula
-  version '0.1.8'
+  version '0.1.12'
   desc 'Pen programming language'
   homepage 'https://github.com/pen-lang/pen'
   url "https://github.com/pen-lang/pen/archive/refs/tags/v#{version}.tar.gz"
-  sha256 '9c5f180d1b9e86b6a2d9a714b83b0fe2817262a6fda15e4cae71f6a05d614c28'
+  sha256 '2e0d9ca41db76d4801726bc0190bd07206049ceba5c6a315b402b5e48d0b693c'
   license 'MIT'
 
   conflicts_with 'pen'
