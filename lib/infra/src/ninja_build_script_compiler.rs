@@ -198,8 +198,6 @@ impl NinjaBuildScriptCompiler {
                 .to_string_lossy()
                 + ".*"),
         )?
-        .collect::<Vec<_>>()
-        .into_iter()
         .collect::<Result<Vec<_>, _>>()?;
         let archive_file = self.file_path_converter.convert_to_os_path(archive_file);
 
