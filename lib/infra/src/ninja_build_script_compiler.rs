@@ -213,11 +213,7 @@ impl NinjaBuildScriptCompiler {
                 ),
                 format!("default {}", archive_file.display()),
             ],
-            _ => {
-                return Err(
-                    InfrastructureError::TooManyFfiBuildScripts(package_directory.into()).into(),
-                )
-            }
+            _ => return Err(InfrastructureError::TooManyFfiBuildScripts(package_directory).into()),
         })
     }
 }
