@@ -1,0 +1,25 @@
+name: lint
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: cargo fmt -- --check
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - run: curl -fsSL https://apt.llvm.org/llvm.sh | sudo bash -s 12
+      - uses: actions/checkout@v2
+      - run: cargo clippy -- -D warnings
+  spell-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: streetsidesoftware/cspell-action@main
+        with:
+          files: "**/*.{md,pen,rs}"
