@@ -14,7 +14,10 @@ jobs:
           - macos-latest
     runs-on: ${{ matrix.os }}
     steps:
-      - run: curl -fsSL https://apt.llvm.org/llvm.sh | sudo bash -s 12
+      - run: tools/ci/set_up_ubuntu.sh
+        if: startsWith(matrix.os, 'ubuntu-')
+      - run: tools/ci/set_up_macos.sh
+        if: startsWith(matrix.os, 'macos-')
       - uses: actions/checkout@v2
       - run: cargo build
       - run: git diff --exit-code
@@ -27,7 +30,10 @@ jobs:
           - macos-latest
     runs-on: ${{ matrix.os }}
     steps:
-      - run: curl -fsSL https://apt.llvm.org/llvm.sh | sudo bash -s 12
+      - run: tools/ci/set_up_ubuntu.sh
+        if: startsWith(matrix.os, 'ubuntu-')
+      - run: tools/ci/set_up_macos.sh
+        if: startsWith(matrix.os, 'macos-')
       - uses: actions/checkout@v2
       - run: cargo test
         env:
@@ -41,14 +47,9 @@ jobs:
           - macos-latest
     runs-on: ${{ matrix.os }}
     steps:
-      - run: |
-          curl -fsSL https://apt.llvm.org/llvm.sh | sudo bash -s 12
-          sudo apt install clang ninja-build valgrind
+      - run: tools/ci/set_up_ubuntu.sh
         if: startsWith(matrix.os, 'ubuntu-')
-      - run: |
-          brew install ninja llvm@12
-          echo LLVM_SYS_120_PREFIX=$(brew --prefix)/opt/llvm@12 >> $GITHUB_ENV
-          echo PATH=$(brew --prefix)/opt/llvm@12/bin:$PATH >> $GITHUB_ENV
+      - run: tools/ci/set_up_macos.sh
         if: startsWith(matrix.os, 'macos-')
       - uses: actions/checkout@v2
       - uses: actions/setup-ruby@v1
