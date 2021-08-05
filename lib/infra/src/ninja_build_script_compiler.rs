@@ -1,5 +1,5 @@
 use super::file_path_converter::FilePathConverter;
-use crate::{default_target_finder, llvm_command_finder};
+use crate::{default_target_finder, llvm_command_finder, InfrastructureError};
 use app::infra::FilePath;
 use std::{error::Error, sync::Arc};
 
@@ -85,8 +85,8 @@ impl NinjaBuildScriptCompiler {
         module_targets: &[app::infra::ModuleTarget],
         ffi_archive_file: &FilePath,
         package_directory: &FilePath,
-    ) -> Vec<String> {
-        module_targets
+    ) -> Result<Vec<String>, Box<dyn Error>> {
+        Ok(module_targets
             .iter()
             .flat_map(|target| {
                 let package_directory = self
@@ -149,8 +149,8 @@ impl NinjaBuildScriptCompiler {
                         .join(" ")
                 ))
             })
-            .chain(self.compile_ffi_build(package_directory, ffi_archive_file))
-            .collect()
+            .chain(self.compile_ffi_build(package_directory, ffi_archive_file)?)
+            .collect())
     }
 
     // TODO Remove this hack to circumvent ninja's bug where dynamic dependency files
@@ -188,25 +188,37 @@ impl NinjaBuildScriptCompiler {
         &self,
         package_directory: &FilePath,
         archive_file: &FilePath,
-    ) -> Vec<String> {
+    ) -> Result<Vec<String>, Box<dyn Error>> {
         let package_directory = self
             .file_path_converter
             .convert_to_os_path(package_directory);
-        let ffi_build_script = package_directory.join(self.ffi_build_script);
+        let ffi_build_scripts = glob::glob(
+            &(package_directory
+                .join(self.ffi_build_script)
+                .to_string_lossy()
+                + ".*"),
+        )?
+        .collect::<Vec<_>>()
+        .into_iter()
+        .collect::<Result<Vec<_>, _>>()?;
         let archive_file = self.file_path_converter.convert_to_os_path(archive_file);
 
-        if ffi_build_script.exists() {
-            vec![
+        Ok(match ffi_build_scripts.as_slice() {
+            [] => vec![],
+            [script] => vec![
                 format!(
                     "build {}: compile_ffi {}",
                     archive_file.display(),
-                    ffi_build_script.display()
+                    script.display()
                 ),
                 format!("default {}", archive_file.display()),
-            ]
-        } else {
-            vec![]
-        }
+            ],
+            _ => {
+                return Err(
+                    InfrastructureError::TooManyFfiBuildScripts(package_directory.into()).into(),
+                )
+            }
+        })
     }
 }
 
@@ -233,7 +245,7 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
         ]
         .into_iter()
         .chain(self.compile_rules(prelude_interface_files, target_triple)?)
-        .chain(self.compile_module_targets(module_targets, ffi_archive_file, package_directory))
+        .chain(self.compile_module_targets(module_targets, ffi_archive_file, package_directory)?)
         .chain(if let Some(main_module_target) = main_module_target {
             let source_file = self
                 .file_path_converter
@@ -305,7 +317,7 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
         package_directory: &FilePath,
     ) -> Result<String, Box<dyn Error>> {
         Ok(self
-            .compile_module_targets(module_targets, ffi_archive_file, package_directory)
+            .compile_module_targets(module_targets, ffi_archive_file, package_directory)?
             .join("\n")
             + "\n")
     }
@@ -359,7 +371,7 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
                     .collect::<Vec<_>>()
                     .join(" ")
             )])
-            .chain(self.compile_ffi_build(package_directory, ffi_archive_file))
+            .chain(self.compile_ffi_build(package_directory, ffi_archive_file)?)
             .collect::<Vec<String>>()
             .join("\n")
             + "\n")

@@ -20,6 +20,7 @@ pub enum InfrastructureError {
         path: std::path::PathBuf,
         source: std::io::Error,
     },
+    TooManyFfiBuildScripts(std::path::PathBuf),
     WriteFile {
         path: std::path::PathBuf,
         source: std::io::Error,
@@ -36,6 +37,7 @@ impl Error for InfrastructureError {
             Self::PackageUrlSchemeNotSupported(_) => None,
             Self::ReadDirectory { path: _, source } => Some(source),
             Self::ReadFile { path: _, source } => Some(source),
+            Self::TooManyFfiBuildScripts(path) => None,
             Self::WriteFile { path: _, source } => Some(source),
         }
     }
@@ -71,6 +73,13 @@ impl Display for InfrastructureError {
             ),
             Self::ReadFile { path, source: _ } => {
                 write!(formatter, "failed to read file {}", path.to_string_lossy())
+            }
+            Self::TooManyFfiBuildScripts(path) => {
+                write!(
+                    formatter,
+                    "too many FFI build scripts in directory \"{}\"",
+                    path.display()
+                )
             }
             Self::WriteFile { path, source: _ } => {
                 write!(formatter, "failed to write file {}", path.to_string_lossy())
