@@ -77,7 +77,7 @@ impl Display for InfrastructureError {
             Self::TooManyFfiBuildScripts(path) => {
                 write!(
                     formatter,
-                    "too many FFI build scripts in directory \"{}\"",
+                    "too many FFI build scripts in package directory \"{}\"",
                     path.display()
                 )
             }
