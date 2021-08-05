@@ -6,6 +6,7 @@ edition = "2018"
 
 [dependencies]
 app = { path = "../app" }
+glob = "0.3"
 lang = { path = "../lang" }
 regex = "1"
 termcolor = "1"
