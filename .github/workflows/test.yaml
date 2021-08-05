@@ -51,13 +51,13 @@ jobs:
           curl -fsSL https://apt.llvm.org/llvm.sh | sudo bash -s 12
           sudo apt install clang ninja-build valgrind
         if: startsWith(matrix.os, 'ubuntu-')
-      - run: |
-          brew install ninja
-          port install valgrind
+      - run: brew install ninja
         if: startsWith(matrix.os, 'macos-')
       - uses: actions/checkout@v2
       - uses: actions/setup-ruby@v1
       - run: bundler install
       - run: rustup target add wasm32-unknown-unknown
       - run: cargo build --release
+      - run: rm features/smoke/memory_leak.feature
+        if: startsWith(matrix.os, 'macos-')
       - run: PEN_ROOT=$PWD PATH=$PWD/target/release:$PWD/tools:$PATH cucumber --publish-quiet
