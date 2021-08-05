@@ -34,4 +34,5 @@ jobs:
         with:
           tag: v${{ env.version }}
           artifacts: ${{ env.asset }}
-          token: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
