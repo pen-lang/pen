@@ -16,7 +16,7 @@ jobs:
 
           new_tag=true
 
-          if git tag | grep v$version; then
+          if git tag | grep v$(tools/version.sh); then
             new_tag=false
           fi
 
@@ -40,8 +40,7 @@ jobs:
         if: startsWith(matrix.os, 'macos-')
       - run: cargo build --release
       - run: strip target/release/pen
-      - run: echo version=$(cat cmd/pen/Cargo.toml | grep 'version = ' | sed 's/.*"\(.*\)"/\1/') >> $GITHUB_ENV
-      - run: echo asset=$(tools/build_asset.sh $version) >> $GITHUB_ENV
+      - run: echo asset=$(tools/build_asset.sh) >> $GITHUB_ENV
       - uses: actions/upload-artifact@v2
         with:
           name: ${{ env.asset }}
