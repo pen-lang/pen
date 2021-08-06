@@ -14,13 +14,9 @@ jobs:
       - run: |
           git fetch --prune --unshallow --tags
 
-          new_tag=true
-
-          if git tag | grep v$version; then
-            new_tag=false
+          if ! git tag | grep v$(tools/version.sh); then
+            echo new_tag=true >> $GITHUB_ENV
           fi
-
-          echo new_tag=$new_tag >> $GITHUB_ENV
   release:
     needs: tag-check
     strategy:
@@ -40,12 +36,12 @@ jobs:
         if: startsWith(matrix.os, 'macos-')
       - run: cargo build --release
       - run: strip target/release/pen
-      - run: echo version=$(cat cmd/pen/Cargo.toml | grep 'version = ' | sed 's/.*"\(.*\)"/\1/') >> $GITHUB_ENV
-      - run: echo asset=$(tools/build_asset.sh $version) >> $GITHUB_ENV
+      - run: echo asset=$(tools/build_asset.sh) >> $GITHUB_ENV
       - uses: actions/upload-artifact@v2
         with:
           name: ${{ env.asset }}
           path: ${{ env.asset }}
+      - run: echo version=$(tools/version.sh) >> $GITHUB_ENV
       - uses: softprops/action-gh-release@v1
         if: github.ref == 'refs/heads/main' && needs.tag-check.outputs.new_tag == 'true'
         with:
