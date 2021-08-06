@@ -46,6 +46,8 @@ jobs:
         with:
           name: ${{ env.asset }}
           path: ${{ env.asset }}
+      - run: echo ${{ needs.tag-check.outputs.new_tag }}
+        if: needs.tag-check.outputs.new_tag == 'false'
       - uses: softprops/action-gh-release@v1
         if: github.ref == 'refs/heads/main' && needs.tag-check.outputs.new_tag == 'true'
         with:
