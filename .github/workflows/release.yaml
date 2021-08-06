@@ -32,6 +32,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - run: echo ${{ needs.tag-check.outputs.new_tag }}
+        if: needs.tag-check.outputs.new_tag == 'false'
       - uses: actions/checkout@v2
       - run: curl -fsSL https://apt.llvm.org/llvm.sh | sudo bash -s 12
         if: startsWith(matrix.os, 'ubuntu-')
