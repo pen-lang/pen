@@ -95,9 +95,7 @@ macro_rules! type_information {
 }
 
 #[derive(Clone, Default)]
-struct Dummy {
-    _dummy: u64,
-}
+struct Dummy {}
 
 type_information!(dummy, crate::any::Dummy);
 
