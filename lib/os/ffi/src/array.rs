@@ -40,7 +40,7 @@ impl ArrayInner {
 extern "C" fn _pen_ffi_array_get(array: ffi::Arc<Array>, index: ffi::Number) -> ffi::Any {
     array
         .get(f64::from(index) as usize)
-        .unwrap_or_else(|| ffi::Any::default())
+        .unwrap_or_else(ffi::Any::default)
 }
 
 #[cfg(test)]
