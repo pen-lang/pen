@@ -41,6 +41,7 @@ jobs:
         with:
           name: ${{ env.asset }}
           path: ${{ env.asset }}
+      - run: echo version=$(tools/version.sh) >> $GITHUB_ENV
       - uses: softprops/action-gh-release@v1
         if: github.ref == 'refs/heads/main' && needs.tag-check.outputs.new_tag == 'true'
         with:
