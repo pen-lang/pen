@@ -1,3 +1,5 @@
+<p align="center"><img width="300px" src="https://i.imgur.com/GKkEXok.png" /></p>
+
 # Pen programming language
 
 This is a pen.
