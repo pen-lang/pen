@@ -8,4 +8,4 @@ edition = "2018"
 crate-type = ["staticlib"]
 
 [dependencies]
-ffi = { package = "pen-ffi", version = "0.1" }
+ffi = { package = "pen-ffi", version = "0.2" }
