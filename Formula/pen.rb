@@ -3,7 +3,7 @@ class Pen < Formula
   desc 'Pen programming language'
   homepage 'https://github.com/pen-lang/pen'
   url "https://github.com/pen-lang/pen/archive/refs/tags/v#{version}.tar.gz"
-  sha256 '2a9e2fcb776039523d98cd7f78330d618450d316a4a4c1618aad1458cd764e03'
+  sha256 '90b05be4241281118ef3fcf42c879635d8079e116e648198372cb3af5e7fd368'
   license 'MIT'
 
   conflicts_with 'pen'
