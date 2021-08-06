@@ -14,13 +14,9 @@ jobs:
       - run: |
           git fetch --prune --unshallow --tags
 
-          new_tag=true
-
-          if git tag | grep v$(tools/version.sh); then
-            new_tag=false
+          if ! git tag | grep v$(tools/version.sh); then
+            echo new_tag=true >> $GITHUB_ENV
           fi
-
-          echo new_tag=$new_tag >> $GITHUB_ENV
   release:
     needs: tag-check
     strategy:
