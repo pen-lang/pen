@@ -16,6 +16,12 @@ impl From<Number> for f64 {
     }
 }
 
+impl From<Number> for usize {
+    fn from(number: Number) -> Self {
+        number.value as usize
+    }
+}
+
 impl From<f64> for Number {
     fn from(value: f64) -> Self {
         Self { value }
