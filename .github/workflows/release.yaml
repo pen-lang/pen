@@ -55,7 +55,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          repository: https://github.com/pen-lang/homebrew-pen
+          repository: pen-lang/homebrew-pen
       - run: echo version=$(tools/version.sh) >> $GITHUB_ENV
       - run: sed -i "s/version .*/version '$version'/"
       - run: |
