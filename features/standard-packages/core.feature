@@ -27,7 +27,7 @@ Feature: Core
     import Core'String
 
     f = \() string {
-      String'Join([string; "hello", "world"])
+      String'Join([string; "hello", "world"], " ")
     }
     """
     When I run `pen build`
