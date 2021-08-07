@@ -18,6 +18,12 @@ impl Array {
     }
 }
 
+impl<T: ffi::AnyLike> From<Vec<T>> for Array {
+    fn from(vector: Vec<T>) -> Self {
+        Self::new(vector.into_iter().map(|x| x.into_any()).collect())
+    }
+}
+
 #[derive(Clone)]
 struct ArrayInner {
     vector: Box<Arc<[ffi::Any]>>,
