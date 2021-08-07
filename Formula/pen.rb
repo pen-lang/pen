@@ -13,7 +13,7 @@ class Pen < Formula
   depends_on 'git'
   depends_on 'llvm@12'
   depends_on 'ninja'
-  depends_on 'rust' => :build
+  depends_on 'rust'
 
   def install
     system 'cargo', 'build', '--locked', '--release'
@@ -24,7 +24,8 @@ class Pen < Formula
       'uutils-coreutils',
       'git',
       'llvm@12',
-      'ninja'
+      'ninja',
+      'rust'
     ].map do |name|
       Formula[name].opt_bin
     end.join(':')
