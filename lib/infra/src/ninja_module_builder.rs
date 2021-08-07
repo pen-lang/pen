@@ -17,13 +17,14 @@ impl app::infra::ModuleBuilder for NinjaModuleBuilder {
     fn build(&self, build_script_file: &app::infra::FilePath) -> Result<(), Box<dyn Error>> {
         command_runner::run(
             std::process::Command::new("sh")
+                .arg("-o")
+                .arg("pipefail")
                 .arg("-ec")
                 .arg(format!(
-                    "(ninja -f {}; status=$?) | \
-                        (grep -v ^ninja: || :) | \
-                        sed s/FAILED/error/ | \
-                        sed 's/^error:/\\x1b[0;31merror\\x1b[0m:/'; \
-                        exit $status",
+                    "ninja -f {} | \
+                        (stdbuf -o0 grep -v ^ninja: || :) | \
+                        stdbuf -o0 sed s/FAILED/error/ | \
+                        stdbuf -o0 sed 's/^error:/\\x1b[0;31merror\\x1b[0m:/'",
                     self.file_path_converter
                         .convert_to_os_path(build_script_file)
                         .display()
