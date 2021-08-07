@@ -2,6 +2,7 @@ use ffi::AnyLike;
 use std::sync::Arc;
 
 #[repr(C)]
+#[derive(Clone)]
 pub struct Array {
     inner: ffi::Any,
 }
@@ -30,7 +31,7 @@ impl<T: ffi::AnyLike> From<Vec<T>> for Array {
 
 #[derive(Clone)]
 struct ArrayInner {
-    vector: Box<Arc<[ffi::Any]>>,
+    vector: Arc<Arc<[ffi::Any]>>,
 }
 
 ffi::type_information!(array_inner, crate::array::ArrayInner);
@@ -38,7 +39,7 @@ ffi::type_information!(array_inner, crate::array::ArrayInner);
 impl ArrayInner {
     pub fn new(vector: Vec<ffi::Any>) -> Self {
         Self {
-            vector: Box::new(vector.into()),
+            vector: Arc::new(vector.into()),
         }
     }
 
@@ -54,7 +55,7 @@ impl ArrayInner {
 #[no_mangle]
 extern "C" fn _pen_ffi_array_get(array: ffi::Arc<Array>, index: ffi::Number) -> ffi::Any {
     array
-        .get(f64::from(index) as usize)
+        .get(f64::from(index) as usize - 1)
         .unwrap_or_else(ffi::Any::default)
 }
 
@@ -66,10 +67,68 @@ extern "C" fn _pen_ffi_array_length(array: ffi::Arc<Array>) -> ffi::Number {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::mem::size_of;
+    use std::mem::{drop, forget, size_of};
+    use std::rc::Rc;
 
-    #[test]
-    fn array_inner_is_small_enough() {
-        assert!(size_of::<ArrayInner>() <= size_of::<usize>());
+    #[derive(Clone, Debug, PartialEq)]
+    struct Foo {
+        x: Rc<f64>,
+    }
+
+    ffi::type_information!(foo, crate::array::tests::Foo);
+
+    mod array {
+        use super::*;
+
+        #[test]
+        fn clone() {
+            let x = Array::from(vec![Foo { x: 42.0.into() }]);
+
+            forget(x.clone());
+            forget(x);
+        }
+
+        #[test]
+        fn drop_() {
+            let x = Array::from(vec![Foo { x: 42.0.into() }]);
+
+            drop(x.clone());
+            drop(x);
+        }
+
+        #[test]
+        fn get_element() {
+            _pen_ffi_array_get(Array::from(vec![Foo { x: 42.0.into() }]).into(), 1.0.into());
+        }
+    }
+
+    mod array_inner {
+        use super::*;
+
+        #[test]
+        fn is_small_enough() {
+            assert!(size_of::<ArrayInner>() <= size_of::<usize>());
+        }
+
+        #[test]
+        fn drop_() {
+            let x = ArrayInner::new(vec![Foo { x: 42.0.into() }.into_any()]);
+
+            drop(x.clone());
+            drop(x);
+        }
+
+        #[test]
+        fn get_element() {
+            assert_eq!(
+                Foo::from_any(
+                    ArrayInner::new(vec![Foo { x: 42.0.into() }.into_any()])
+                        .get(0)
+                        .unwrap()
+                )
+                .unwrap(),
+                Foo { x: 42.0.into() }
+            );
+        }
     }
 }
