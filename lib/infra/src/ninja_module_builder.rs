@@ -16,7 +16,7 @@ impl NinjaModuleBuilder {
 impl app::infra::ModuleBuilder for NinjaModuleBuilder {
     fn build(&self, build_script_file: &app::infra::FilePath) -> Result<(), Box<dyn Error>> {
         command_runner::run(
-            std::process::Command::new("sh")
+            std::process::Command::new("bash")
                 .arg("-o")
                 .arg("pipefail")
                 .arg("-ec")
