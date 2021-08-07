@@ -15,7 +15,7 @@ jobs:
         if: startsWith(matrix.os, 'macos-')
       - run: cargo build
       - run: git diff --exit-code
-  unit-test:
+  unit_test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -26,7 +26,7 @@ jobs:
       - run: cargo test
         env:
           RUST_MIN_STACK: 8388608
-  integration-test:
+  integration_test:
     strategy:
       fail-fast: false
       matrix:
