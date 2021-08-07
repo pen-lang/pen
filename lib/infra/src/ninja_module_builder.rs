@@ -19,7 +19,10 @@ impl app::infra::ModuleBuilder for NinjaModuleBuilder {
             std::process::Command::new("sh")
                 .arg("-ec")
                 .arg(format!(
-                    "ninja -f {} | (grep -v ^ninja: || :) | sed s/FAILED/error/",
+                    "ninja -f {} | \
+                        (grep -v ^ninja: || :) | \
+                        sed s/FAILED/error/ | \
+                        sed 's/^error:/\\x1b[1;31merror\\x1b[0m:/'",
                     self.file_path_converter
                         .convert_to_os_path(build_script_file)
                         .display()
