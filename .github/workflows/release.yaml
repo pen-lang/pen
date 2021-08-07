@@ -57,10 +57,10 @@ jobs:
         with:
           repository: pen-lang/homebrew-pen
       - run: echo version=$(tools/version.sh) >> $GITHUB_ENV
-      - run: sed -i "s/version .*/version '$version'/"
+      - run: sed -i "s/version .*/version '$version'/" Formula/pen.rb
       - run: |
           hash=$(curl -fsSL https://github.com/pen-lang/pen/archive/refs/tags/v$version.tar.gz | sha256sum)
-          sed -i "s/sha256 .*/sha256 '$hash'/"
+          sed -i "s/sha256 .*/sha256 '$hash'/" Formula/pen.rb
       - uses: peter-evans/create-pull-request@v3
         with:
           title: Bump version
