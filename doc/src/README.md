@@ -1,4 +1,4 @@
-<p align="center"><img width="300px" src="https://i.imgur.com/GKkEXok.png" /></p>
+<p align="center"><img width="300px" src="https://svgshare.com/i/ZvF.svg" /></p>
 
 # Pen
 
