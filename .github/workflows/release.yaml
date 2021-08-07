@@ -49,3 +49,14 @@ jobs:
           files: ${{ env.asset }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  homebrew:
+    needs: release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          repository: https://github.com/pen-lang/homebrew-pen
+      - uses: peter-evans/create-pull-request@v3
+        with:
+          title: Bump version
+          branch: chore/bump-version
