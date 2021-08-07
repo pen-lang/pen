@@ -16,6 +16,10 @@ impl Array {
     pub fn get(&self, index: usize) -> Option<ffi::Any> {
         ArrayInner::from_any(self.inner.clone()).unwrap().get(index)
     }
+
+    pub fn len(&self) -> usize {
+        ArrayInner::from_any(self.inner.clone()).unwrap().len()
+    }
 }
 
 impl<T: ffi::AnyLike> From<Vec<T>> for Array {
@@ -41,6 +45,10 @@ impl ArrayInner {
     pub fn get(&self, index: usize) -> Option<ffi::Any> {
         self.vector.get(index).cloned()
     }
+
+    pub fn len(&self) -> usize {
+        self.vector.len()
+    }
 }
 
 #[no_mangle]
@@ -48,6 +56,11 @@ extern "C" fn _pen_ffi_array_get(array: ffi::Arc<Array>, index: ffi::Number) -> 
     array
         .get(f64::from(index) as usize)
         .unwrap_or_else(ffi::Any::default)
+}
+
+#[no_mangle]
+extern "C" fn _pen_ffi_array_length(array: ffi::Arc<Array>) -> ffi::Number {
+    (array.len() as f64).into()
 }
 
 #[cfg(test)]
