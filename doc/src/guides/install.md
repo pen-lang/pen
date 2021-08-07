@@ -6,7 +6,6 @@
 1.  Run the following commands in your terminal.
 
     ```sh
-    brew tap pen-lang/pen https://github.com/pen-lang/pen
     brew install pen-lang/pen/pen
     ```
 
