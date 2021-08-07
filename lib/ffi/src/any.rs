@@ -65,6 +65,7 @@ macro_rules! type_information {
                 std::ptr::read(&payload as *const u64 as *const T)
             }
 
+            #[allow(clippy::forget_copy)]
             extern "C" fn clone(x: u64) {
                 let x = unsafe { transmute_from_payload::<$type>(x) };
                 std::mem::forget(x.clone());

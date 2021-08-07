@@ -29,6 +29,7 @@ impl<T: ffi::AnyLike> From<Vec<T>> for Array {
     }
 }
 
+#[allow(clippy::redundant_allocation)]
 #[derive(Clone)]
 struct ArrayInner {
     vector: Arc<Arc<[ffi::Any]>>,
@@ -67,8 +68,10 @@ extern "C" fn _pen_ffi_array_length(array: ffi::Arc<Array>) -> ffi::Number {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::mem::{drop, forget, size_of};
-    use std::rc::Rc;
+    use std::{
+        mem::{drop, forget, size_of},
+        rc::Rc,
+    };
 
     #[derive(Clone, Debug, PartialEq)]
     struct Foo {

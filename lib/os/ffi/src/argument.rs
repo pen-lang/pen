@@ -6,7 +6,7 @@ extern "C" fn _pen_os_get_arguments() -> ffi::Arc<Array> {
     ffi::Arc::new(
         std::env::args()
             .skip(1)
-            .map(|string| ffi::ByteString::from(string))
+            .map(ffi::ByteString::from)
             .collect::<Vec<_>>()
             .into(),
     )
