@@ -17,7 +17,7 @@ impl app::infra::ModuleBuilder for NinjaModuleBuilder {
     fn build(&self, build_script_file: &app::infra::FilePath) -> Result<(), Box<dyn Error>> {
         // spell-checker:disable
         command_runner::run(
-            std::process::Command::new("bash")
+            std::process::Command::new("zsh")
                 .arg("-o")
                 .arg("pipefail")
                 .arg("-ec")
