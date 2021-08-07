@@ -16,12 +16,14 @@ impl NinjaModuleBuilder {
 impl app::infra::ModuleBuilder for NinjaModuleBuilder {
     fn build(&self, build_script_file: &app::infra::FilePath) -> Result<(), Box<dyn Error>> {
         command_runner::run(
-            std::process::Command::new("ninja")
-                .arg("-f")
-                .arg(
+            std::process::Command::new("sh")
+                .arg("-c")
+                .arg(format!(
+                    "set -e; ninja -f {} | (grep -v ^ninja: || :)",
                     self.file_path_converter
-                        .convert_to_os_path(build_script_file),
-                )
+                        .convert_to_os_path(build_script_file)
+                        .display()
+                ))
                 .stdout(Stdio::inherit())
                 .stderr(Stdio::inherit()),
         )?;
