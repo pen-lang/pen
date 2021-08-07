@@ -2,11 +2,13 @@ use super::array::Array;
 use ffi::AnyLike;
 
 #[no_mangle]
-extern "C" fn _pen_os_get_arguments() -> Array {
-    std::env::args()
-        .map(|string| ffi::ByteString::from(string))
-        .collect::<Vec<ffi::ByteString>>()
-        .into()
+extern "C" fn _pen_os_get_arguments() -> ffi::Arc<Array> {
+    ffi::Arc::new(
+        std::env::args()
+            .map(|string| ffi::ByteString::from(string))
+            .collect::<Vec<ffi::ByteString>>()
+            .into(),
+    )
 }
 
 #[no_mangle]
