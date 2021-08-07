@@ -22,7 +22,7 @@ impl app::infra::ModuleBuilder for NinjaModuleBuilder {
                     "(ninja -f {}; status=$?) | \
                         (grep -v ^ninja: || :) | \
                         sed s/FAILED/error/ | \
-                        sed 's/^error:/\\x1b[1;31merror\\x1b[0m:/'; \
+                        sed 's/^error:/\\x1b[0;31merror\\x1b[0m:/'; \
                         exit $status",
                     self.file_path_converter
                         .convert_to_os_path(build_script_file)
