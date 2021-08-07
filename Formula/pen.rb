@@ -9,7 +9,7 @@ class Pen < Formula
   conflicts_with 'pen'
 
   depends_on 'bash'
-  depends_on 'coreutils'
+  depends_on 'uutils-coreutils'
   depends_on 'git'
   depends_on 'llvm@12'
   depends_on 'ninja'
@@ -19,7 +19,13 @@ class Pen < Formula
     system 'cargo', 'build', '--locked', '--release'
     libexec.install 'target/release/pen'
 
-    paths = ['bash', 'coreutils', 'git', 'llvm@12', 'ninja'].map do |name|
+    paths = [
+      'bash',
+      'uutils-coreutils',
+      'git',
+      'llvm@12',
+      'ninja'
+    ].map do |name|
       Formula[name].opt_bin
     end.join(':')
 
