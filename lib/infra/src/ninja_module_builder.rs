@@ -15,6 +15,7 @@ impl NinjaModuleBuilder {
 
 impl app::infra::ModuleBuilder for NinjaModuleBuilder {
     fn build(&self, build_script_file: &app::infra::FilePath) -> Result<(), Box<dyn Error>> {
+        // spell-checker:disable
         command_runner::run(
             std::process::Command::new("bash")
                 .arg("-o")
@@ -32,6 +33,7 @@ impl app::infra::ModuleBuilder for NinjaModuleBuilder {
                 .stdout(Stdio::inherit())
                 .stderr(Stdio::inherit()),
         )?;
+        // spell-checker:enable
 
         Ok(())
     }
