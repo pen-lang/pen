@@ -192,7 +192,7 @@ Feature: Memory leak
     import System'Os
 
     f = \() none {
-      String'Join([string; "hello", "world"])
+      String'Join([string; "hello", "world"], " ")
 
       f()
     }
