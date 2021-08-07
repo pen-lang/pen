@@ -8,18 +8,25 @@ class Pen < Formula
 
   conflicts_with 'pen'
 
-  depends_on 'bash'
-  depends_on 'coreutils'
+  depends_on 'zsh'
+  depends_on 'uutils-coreutils'
   depends_on 'git'
   depends_on 'llvm@12'
   depends_on 'ninja'
-  depends_on 'rust' => :build
+  depends_on 'rust'
 
   def install
     system 'cargo', 'build', '--locked', '--release'
     libexec.install 'target/release/pen'
 
-    paths = ['bash', 'coreutils', 'git', 'llvm@12', 'ninja'].map do |name|
+    paths = [
+      'zsh',
+      'uutils-coreutils',
+      'git',
+      'llvm@12',
+      'ninja',
+      'rust'
+    ].map do |name|
       Formula[name].opt_bin
     end.join(':')
 
