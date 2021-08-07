@@ -135,11 +135,11 @@ Feature: OS
     import System'Os
 
     main = \(os Os'Os) number {
-    if _ = Os'WriteFile(os, Os'StdOut(), String'Join(Os'Arguments(), " ")); number {
-      0
-    } else {
-      1
-    }
+      if _ = Os'WriteFile(os, Os'StdOut(), String'Join(Os'Arguments(), " ")); number {
+        0
+      } else {
+        1
+      }
     }
     """
     When I successfully run `pen build`
