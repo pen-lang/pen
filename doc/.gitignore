@@ -1,2 +1,3 @@
+*.svg
 book
 src/examples/**/*.md
