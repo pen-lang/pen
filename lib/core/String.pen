@@ -2,16 +2,16 @@ import foreign "c" _pen_join_strings \(string, string) string
 import foreign "c" _pen_slice_string \(string, number, number) string
 
 Join = \(ss [string], sep string) string {
-  joinTo("", ss, sep)
+  if [s, ...ss] = ss {
+    joinTo(s, ss, sep)
+  } else {
+    ""
+  }
 }
 
 joinTo = \(s string, ss [string], sep string) string {
   if [t, ...ss] = ss {
-    if s == "" {
-      joinTo(t, ss, sep)
-    } else {
-      joinTo(_pen_join_strings(s, _pen_join_strings(sep, t)), ss, sep)
-    }
+    joinTo(_pen_join_strings(s, _pen_join_strings(sep, t)), ss, sep)
   } else {
     s
   }
