@@ -51,7 +51,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   homebrew:
-    needs: release
+    needs:
+      - tag-check
+      - release
+    if: github.ref == 'refs/heads/main' && needs.tag-check.outputs.new_tag == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
