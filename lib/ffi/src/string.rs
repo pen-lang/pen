@@ -1,4 +1,5 @@
 use super::{arc::ArcBuffer, number::Number};
+use crate::type_information;
 use std::{cmp::max, str::from_utf8_unchecked};
 
 #[repr(C)]
@@ -111,6 +112,8 @@ impl From<Vec<u8>> for ByteString {
         vec.as_slice().into()
     }
 }
+
+type_information!(byte_string, crate::string::ByteString);
 
 #[cfg(test)]
 mod tests {
