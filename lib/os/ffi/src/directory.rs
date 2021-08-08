@@ -14,14 +14,14 @@ fn read_directory(path: ffi::ByteString) -> Result<ffi::Arc<Array>, OsError> {
             .collect::<Result<Vec<_>, _>>()?
             .into_iter()
             .map(|entry| {
-                ffi::ByteString::from(
+                Ok(ffi::ByteString::from(
                     entry
                         .file_name()
                         .into_string()
                         .map_err(|_| OsError::Utf8Decode)?,
-                )
+                ))
             })
-            .collect::<Vec<_>>()
+            .collect::<Result<Vec<_>, OsError>>()?
             .into(),
     ))
 }
