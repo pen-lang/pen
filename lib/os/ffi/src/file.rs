@@ -6,7 +6,6 @@ use std::{
     fs::{File, OpenOptions},
     ops::Deref,
     path::Path,
-    str,
     sync::{Arc, LockResult, RwLock, RwLockWriteGuard},
 };
 
@@ -47,8 +46,9 @@ fn open_file(
     path: ffi::ByteString,
     options: ffi::Arc<OpenFileOptions>,
 ) -> Result<ffi::Any, OsError> {
-    let file =
-        FfiFile::new(OpenOptions::from(options.deref()).open(&Path::new(&decode_path(&path)?))?);
+    let file = FfiFile::new(
+        OpenOptions::from(options.deref()).open(&Path::new(&utilities::decode_path(&path)?))?,
+    );
 
     Ok(file.into_any())
 }
@@ -90,7 +90,10 @@ extern "C" fn _pen_os_copy_file(
 }
 
 fn copy_file(src: ffi::ByteString, dest: ffi::ByteString) -> Result<ffi::None, OsError> {
-    fs::copy(decode_path(&src)?, decode_path(&dest)?)?;
+    fs::copy(
+        utilities::decode_path(&src)?,
+        utilities::decode_path(&dest)?,
+    )?;
 
     Ok(ffi::None::new())
 }
@@ -101,13 +104,9 @@ extern "C" fn _pen_os_remove_file(path: ffi::ByteString) -> ffi::Arc<FfiResult<f
 }
 
 fn remove_file(path: ffi::ByteString) -> Result<ffi::None, OsError> {
-    fs::remove_file(decode_path(&path)?)?;
+    fs::remove_file(utilities::decode_path(&path)?)?;
 
     Ok(ffi::None::new())
-}
-
-fn decode_path(path: &ffi::ByteString) -> Result<&str, OsError> {
-    Ok(str::from_utf8(path.as_slice())?)
 }
 
 #[cfg(test)]

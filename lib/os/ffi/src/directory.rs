@@ -1,5 +1,5 @@
-use crate::{array::Array, error::OsError, result::FfiResult};
-use std::{fs, str};
+use crate::{array::Array, error::OsError, result::FfiResult, utilities};
+use std::fs;
 
 #[no_mangle]
 extern "C" fn _pen_os_read_directory(
@@ -10,7 +10,7 @@ extern "C" fn _pen_os_read_directory(
 
 fn read_directory(path: ffi::ByteString) -> Result<ffi::Arc<Array>, OsError> {
     Ok(ffi::Arc::new(
-        fs::read_dir(decode_path(&path)?)?
+        fs::read_dir(utilities::decode_path(&path)?)?
             .collect::<Result<Vec<_>, _>>()?
             .into_iter()
             .map(|entry| {
@@ -24,8 +24,4 @@ fn read_directory(path: ffi::ByteString) -> Result<ffi::Arc<Array>, OsError> {
             .collect::<Result<Vec<_>, OsError>>()?
             .into(),
     ))
-}
-
-fn decode_path(path: &ffi::ByteString) -> Result<&str, OsError> {
-    Ok(str::from_utf8(path.as_slice())?)
 }
