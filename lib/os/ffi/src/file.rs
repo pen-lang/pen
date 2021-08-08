@@ -1,5 +1,6 @@
 use super::{error::OsError, open_file_options::OpenFileOptions, utilities};
 use crate::result::FfiResult;
+use ffi::AnyLike;
 use std::{
     fs,
     fs::{File, OpenOptions},

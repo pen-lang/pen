@@ -38,6 +38,11 @@ impl Drop for Any {
     }
 }
 
+pub trait AnyLike: Sized {
+    fn into_any(self) -> Any;
+    fn from_any(any: Any) -> Option<Self>;
+}
+
 #[repr(C)]
 pub struct TypeInformation {
     pub clone: extern "C" fn(u64),
@@ -60,6 +65,7 @@ macro_rules! type_information {
                 std::ptr::read(&payload as *const u64 as *const T)
             }
 
+            #[allow(clippy::forget_copy)]
             extern "C" fn clone(x: u64) {
                 let x = unsafe { transmute_from_payload::<$type>(x) };
                 std::mem::forget(x.clone());
@@ -73,14 +79,12 @@ macro_rules! type_information {
             static TYPE_INFORMATION: $crate::TypeInformation =
                 $crate::TypeInformation { clone, drop };
 
-            impl $type {
-                #[allow(unused)]
-                pub fn into_any(self) -> $crate::Any {
+            impl $crate::AnyLike for $type {
+                fn into_any(self) -> $crate::Any {
                     $crate::Any::new(&TYPE_INFORMATION, unsafe { transmute_to_payload(self) })
                 }
 
-                #[allow(unused)]
-                pub fn from_any(any: $crate::Any) -> Option<$type> {
+                fn from_any(any: $crate::Any) -> Option<$type> {
                     if std::ptr::eq(any.type_information(), &TYPE_INFORMATION) {
                         let x = unsafe { transmute_from_payload(any.payload()) };
                         std::mem::forget(any);
@@ -95,9 +99,7 @@ macro_rules! type_information {
 }
 
 #[derive(Clone, Default)]
-struct Dummy {
-    _dummy: u64,
-}
+struct Dummy {}
 
 type_information!(dummy, crate::any::Dummy);
 
@@ -109,6 +111,8 @@ impl Default for Any {
 
 #[cfg(test)]
 mod tests {
+    use super::*;
+
     mod rc {
         use super::*;
         use std::rc::Rc;

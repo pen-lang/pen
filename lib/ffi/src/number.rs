@@ -1,3 +1,5 @@
+use crate::type_information;
+
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct Number {
@@ -16,8 +18,16 @@ impl From<Number> for f64 {
     }
 }
 
+impl From<Number> for usize {
+    fn from(number: Number) -> Self {
+        number.value as usize
+    }
+}
+
 impl From<f64> for Number {
     fn from(value: f64) -> Self {
         Self { value }
     }
 }
+
+type_information!(byte_string, crate::number::Number);

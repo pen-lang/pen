@@ -1,3 +1,5 @@
+use crate::type_information;
+
 #[repr(C)]
 #[derive(Clone, Copy, Default, PartialEq)]
 pub struct None {
@@ -9,3 +11,5 @@ impl None {
         Self { _private: [] }
     }
 }
+
+type_information!(byte_string, crate::none::None);

@@ -1,3 +1,5 @@
+use crate::type_information;
+
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub struct Boolean {
@@ -23,3 +25,5 @@ impl From<bool> for Boolean {
         Self::new(value)
     }
 }
+
+type_information!(boolean, crate::boolean::Boolean);
