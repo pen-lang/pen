@@ -1,5 +1,6 @@
 mod argument;
 mod array;
+mod directory;
 mod error;
 mod file;
 mod heap;
