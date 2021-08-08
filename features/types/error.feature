@@ -5,7 +5,7 @@ Feature: Error
     { "dependencies": {} }
     """
 
-  Scenario: Call a error function
+  Scenario: Call an error function
     Given a file named "Foo.pen" with:
     """pen
     f = \() error {
