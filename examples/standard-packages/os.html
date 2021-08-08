@@ -150,7 +150,8 @@
 <p><em>Given</em> a file named &quot;pen.json&quot; with:</p>
 <pre><code class="language-json">{
   &quot;dependencies&quot;: {
-    &quot;System&quot;: &quot;file://pen-root/lib/os&quot;
+    &quot;System&quot;: &quot;file://pen-root/lib/os&quot;,
+    &quot;Core&quot;: &quot;file://pen-root/lib/core&quot;
   }
 }
 </code></pre>
@@ -262,6 +263,22 @@ main = \(os Os'Os) number {
 <p><em>When</em> I successfully run <code>pen build</code></p>
 <p><em>Then</em> I successfully run <code>./app</code></p>
 <p><em>And</em> the file &quot;foo.txt&quot; does not exist.</p>
+<h2 id="get-arguments"><a class="header" href="#get-arguments">Get arguments</a></h2>
+<p><em>Given</em> a file named &quot;Main.pen&quot; with:</p>
+<pre><code class="language-pen">import Core'String
+import System'Os
+
+main = \(os Os'Os) number {
+  if _ = Os'WriteFile(os, Os'StdOut(), String'Join(Os'Arguments(), &quot; &quot;)); number {
+    0
+  } else {
+    1
+  }
+}
+</code></pre>
+<p><em>When</em> I successfully run <code>pen build</code></p>
+<p><em>Then</em> I successfully run <code>./app foo bar</code></p>
+<p><em>And</em> stdout from &quot;./app foo bar&quot; should contain exactly &quot;foo bar&quot;.</p>
 
                     </main>
 
