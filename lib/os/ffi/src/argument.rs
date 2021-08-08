@@ -3,6 +3,7 @@ use ffi::AnyLike;
 
 #[no_mangle]
 extern "C" fn _pen_os_get_arguments() -> ffi::Arc<Array> {
+    dbg!(std::env::args().collect::<Vec<_>>());
     ffi::Arc::new(
         std::env::args()
             .skip(1)
