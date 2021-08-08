@@ -56,6 +56,12 @@ impl<T> Drop for Arc<T> {
     }
 }
 
+impl<T: Default> Default for Arc<T> {
+    fn default() -> Self {
+        Self::new(T::default())
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
