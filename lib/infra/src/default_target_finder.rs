@@ -41,7 +41,7 @@ mod tests {
     }
 
     #[test]
-    fn remove_darwin_version_for_apple_target() {
+    fn replace_64_bit_arm_isa() {
         assert_eq!(
             &replace_target("arm64-apple-darwin"),
             "aarch64-apple-darwin"
