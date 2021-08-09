@@ -12,7 +12,9 @@ fn replace_target(target: &str) -> String {
     regex::Regex::new("-darwin.*")
         .unwrap()
         .replace(
-            &target.replace("-pc-linux-gnu", "-unknown-linux-gnu"),
+            &target
+                .replace("-pc-linux-gnu", "-unknown-linux-gnu")
+                .replace("arm64-", "aarch64-"),
             "-darwin",
         )
         .into()
@@ -35,6 +37,14 @@ mod tests {
         assert_eq!(
             &replace_target("x86_64-apple-darwin19"),
             "x86_64-apple-darwin"
+        );
+    }
+
+    #[test]
+    fn remove_darwin_version_for_apple_target() {
+        assert_eq!(
+            &replace_target("arm64-apple-darwin"),
+            "aarch64-apple-darwin"
         );
     }
 }
