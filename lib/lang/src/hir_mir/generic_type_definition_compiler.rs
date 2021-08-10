@@ -6,10 +6,8 @@ pub fn compile(
     module: &Module,
     type_context: &TypeContext,
 ) -> Result<Vec<mir::ir::TypeDefinition>, CompileError> {
-    module
-        .definitions()
-        .iter()
-        .flat_map(collect_from_definition)
+    collect_from_module(module)
+        .into_iter()
         .map(|type_| compile_type_definition(&type_, type_context))
         .collect()
 }
@@ -31,6 +29,14 @@ fn compile_type_definition(
 }
 
 // TODO Generalize this logic into an expression transformer.
+fn collect_from_module(module: &Module) -> HashSet<Type> {
+    module
+        .definitions()
+        .iter()
+        .flat_map(collect_from_definition)
+        .collect()
+}
+
 fn collect_from_definition(definition: &Definition) -> HashSet<Type> {
     collect_from_expression(definition.lambda().body())
 }
@@ -168,6 +174,47 @@ mod tests {
                     ),
                     false,
                 )]),
+                &type_context,
+            ),
+            Ok(vec![mir::ir::TypeDefinition::new(
+                type_compiler::compile_concrete_list_name(&list_type, type_context.types())
+                    .unwrap(),
+                mir::types::RecordBody::new(vec![mir::types::Record::new(
+                    &type_context.list_type_configuration().list_type_name
+                )
+                .into()]),
+            )])
+        );
+    }
+
+    #[test]
+    fn compile_duplicate_list_type_definitions() {
+        let list_type = types::List::new(types::None::new(Position::dummy()), Position::dummy());
+        let union_type = types::Union::new(
+            list_type.clone(),
+            types::None::new(Position::dummy()),
+            Position::dummy(),
+        );
+        let type_context = TypeContext::dummy(Default::default(), Default::default());
+        let definition = Definition::without_source(
+            "foo",
+            Lambda::new(
+                vec![Argument::new("x", list_type.clone())],
+                types::None::new(Position::dummy()),
+                TypeCoercion::new(
+                    list_type.clone(),
+                    union_type,
+                    Variable::new("x", Position::dummy()),
+                    Position::dummy(),
+                ),
+                Position::dummy(),
+            ),
+            false,
+        );
+
+        assert_eq!(
+            compile(
+                &Module::empty().set_definitions(vec![definition.clone(), definition]),
                 &type_context,
             ),
             Ok(vec![mir::ir::TypeDefinition::new(
