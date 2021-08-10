@@ -1,5 +1,5 @@
 type error {
-  source any,
+  source any
 }
 
 error = \(source any) error {
