@@ -163,11 +163,7 @@ fn type_definition<'a>() -> impl Parser<Stream<'a>, Output = TypeDefinition> {
         position(),
         keyword("type"),
         identifier(),
-        between(
-            sign("{"),
-            sign("}"),
-            sep_end_by((identifier(), type_()), sign(",")),
-        ),
+        between(sign("{"), sign("}"), many((identifier(), type_()))),
     )
         .map(|(position, _, name, elements): (_, _, _, Vec<_>)| {
             TypeDefinition::new(
@@ -1051,29 +1047,7 @@ mod tests {
                 ),
             ),
             (
-                "type Foo {foo number,}",
-                TypeDefinition::new(
-                    "Foo",
-                    vec![types::RecordElement::new(
-                        "foo",
-                        types::Number::new(Position::dummy()),
-                    )],
-                    Position::dummy(),
-                ),
-            ),
-            (
-                "type Foo {foo number,bar number}",
-                TypeDefinition::new(
-                    "Foo",
-                    vec![
-                        types::RecordElement::new("foo", types::Number::new(Position::dummy())),
-                        types::RecordElement::new("bar", types::Number::new(Position::dummy())),
-                    ],
-                    Position::dummy(),
-                ),
-            ),
-            (
-                "type Foo {foo number,bar number,}",
+                "type Foo {foo number bar number}",
                 TypeDefinition::new(
                     "Foo",
                     vec![
