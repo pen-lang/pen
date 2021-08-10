@@ -13,22 +13,22 @@ import foreign "c" _pen_ffi_any_to_string \(any) string
 import foreign _pen_main \(Os) number
 
 type Os {
-  readStdIn \() ffiReadResult,
-  writeStdOut \(string) ffiWriteResult,
-  writeStdErr \(string) ffiWriteResult,
-  openFile \(string, OpenFileOptions) ffiOpenResult,
-  readFile \(any) ffiReadResult,
-  writeFile \(any, string) ffiWriteResult,
-  copyFile \(string, string) ffiNoneResult,
-  removeFile \(string) ffiNoneResult,
+  readStdIn \() ffiReadResult
+  writeStdOut \(string) ffiWriteResult
+  writeStdErr \(string) ffiWriteResult
+  openFile \(string, OpenFileOptions) ffiOpenResult
+  readFile \(any) ffiReadResult
+  writeFile \(any, string) ffiWriteResult
+  copyFile \(string, string) ffiNoneResult
+  removeFile \(string) ffiNoneResult
 }
 
 type File {
-  inner file | specialFile,
+  inner file | specialFile
 }
 
 type file {
-  inner any,
+  inner any
 }
 
 type stdIn {}
@@ -36,36 +36,36 @@ type stdOut {}
 type stdErr {}
 
 type ffiOpenResult {
-  file any,
-  error number,
+  file any
+  error number
 }
 
 type ffiReadResult {
-  data string,
-  error number,
+  data string
+  error number
 }
 
 type ffiWriteResult {
-  count number,
-  error number,
+  count number
+  error number
 }
 
 type ffiNoneResult {
-  _ none,
-  error number,
+  _ none
+  error number
 }
 
 type OpenFileOptions {
-  Append boolean,
-  Create boolean,
-  CreateNew boolean,
-  Read boolean,
-  Truncate boolean,
-  Write boolean,
+  Append boolean
+  Create boolean
+  CreateNew boolean
+  Read boolean
+  Truncate boolean
+  Write boolean
 }
 
 type array {
-  array any,
+  array any
 }
 
 type specialFile = stdIn | stdOut | stdErr
