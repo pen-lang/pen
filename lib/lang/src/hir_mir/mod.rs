@@ -5,6 +5,7 @@ mod environment_creator;
 mod error;
 mod error_type_configuration;
 mod expression_compiler;
+mod generic_type_definition_compiler;
 mod list_type_configuration;
 mod main_function_compiler;
 mod main_module_configuration;
