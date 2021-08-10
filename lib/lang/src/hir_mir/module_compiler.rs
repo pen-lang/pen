@@ -1,4 +1,7 @@
-use super::{expression_compiler, type_compiler, type_context::TypeContext, CompileError};
+use super::{
+    expression_compiler, generic_type_definition_compiler, type_compiler,
+    type_context::TypeContext, CompileError,
+};
 use crate::hir::*;
 
 pub fn compile(
@@ -10,7 +13,13 @@ pub fn compile(
             .type_definitions()
             .iter()
             .map(|type_definition| compile_type_definition(type_definition, type_context))
-            .collect::<Result<Vec<_>, _>>()?,
+            .collect::<Result<Vec<_>, _>>()?
+            .into_iter()
+            .chain(generic_type_definition_compiler::compile(
+                module,
+                type_context,
+            )?)
+            .collect(),
         module
             .foreign_declarations()
             .iter()
