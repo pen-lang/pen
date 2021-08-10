@@ -163,11 +163,7 @@ fn type_definition<'a>() -> impl Parser<Stream<'a>, Output = TypeDefinition> {
         position(),
         keyword("type"),
         identifier(),
-        between(
-            sign("{"),
-            sign("}"),
-            sep_end_by((identifier(), type_()), sign(",")),
-        ),
+        between(sign("{"), sign("}"), many((identifier(), type_()))),
     )
         .map(|(position, _, name, elements): (_, _, _, Vec<_>)| {
             TypeDefinition::new(
