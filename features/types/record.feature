@@ -9,7 +9,7 @@ Feature: Record
     Given a file named "Foo.pen" with:
     """pen
     type r {
-      x number,
+      x number
     }
 
     f = \() r {
@@ -23,8 +23,8 @@ Feature: Record
     Given a file named "Foo.pen" with:
     """pen
     type r {
-      x number,
-      y none,
+      x number
+      y none
     }
 
     f = \() r {
@@ -50,8 +50,8 @@ Feature: Record
     Given a file named "Foo.pen" with:
     """pen
     type r {
-      x number,
-      y none,
+      x number
+      y none
     }
 
     f = \(x r) r {
@@ -65,7 +65,7 @@ Feature: Record
     Given a file named "Foo.pen" with:
     """pen
     type r {
-      x number,
+      x number
     }
 
     f = \(x r) number {
@@ -79,7 +79,7 @@ Feature: Record
     Given a file named "Foo.pen" with:
     """pen
     type r {
-      x number,
+      x number
     }
 
     f = \(x r, y r) boolean {
@@ -93,7 +93,7 @@ Feature: Record
     Given a file named "Foo.pen" with:
     """pen
     type r {
-      x number,
+      x number
     }
 
     f = \(x r, y r) boolean {
