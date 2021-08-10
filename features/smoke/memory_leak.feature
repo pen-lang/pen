@@ -48,7 +48,7 @@ Feature: Memory leak
     import System'Os
 
     type foo {
-      x number,
+      x number
     }
 
     f = \() none {
@@ -72,7 +72,7 @@ Feature: Memory leak
     import System'Os
 
     type foo {
-      x number,
+      x number
     }
 
     f = \() none {
@@ -120,7 +120,7 @@ Feature: Memory leak
     import System'Os
 
     type foo {
-      x number,
+      x number
     }
 
     f = \() none {
@@ -145,7 +145,7 @@ Feature: Memory leak
     import System'Os
 
     type foo {
-      x number,
+      x number
     }
 
     f = \() none {

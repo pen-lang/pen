@@ -1,15 +1,15 @@
 type _AnyList {
-  node _Node | none,
+  node _Node | none
 }
 
 type _Node {
-  first any,
-  rest _Node | none,
+  first any
+  rest _Node | none
 }
 
 type _FirstRest {
-  first any,
-  rest _AnyList,
+  first any
+  rest _AnyList
 }
 
 _first = \(fr _FirstRest) any {

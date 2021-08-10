@@ -73,8 +73,8 @@ string
 
 ```pen
 type person {
-  name string,
-  age number,
+  name string
+  age number
 }
 ```
 
