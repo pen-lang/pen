@@ -5,11 +5,21 @@ Feature: Union
     { "dependencies": {} }
     """
 
-  Scenario: Use a union type
+  Scenario: Upcast a number into a union
     Given a file named "Foo.pen" with:
     """pen
     f = \() number | none {
       42
+    }
+    """
+    When I run `pen build`
+    Then the exit status should be 0
+
+  Scenario: Upcast a number list into a union
+    Given a file named "Foo.pen" with:
+    """pen
+    f = \() [number] | none {
+      [number; 42]
     }
     """
     When I run `pen build`
