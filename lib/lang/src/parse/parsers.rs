@@ -1051,29 +1051,7 @@ mod tests {
                 ),
             ),
             (
-                "type Foo {foo number,}",
-                TypeDefinition::new(
-                    "Foo",
-                    vec![types::RecordElement::new(
-                        "foo",
-                        types::Number::new(Position::dummy()),
-                    )],
-                    Position::dummy(),
-                ),
-            ),
-            (
-                "type Foo {foo number,bar number}",
-                TypeDefinition::new(
-                    "Foo",
-                    vec![
-                        types::RecordElement::new("foo", types::Number::new(Position::dummy())),
-                        types::RecordElement::new("bar", types::Number::new(Position::dummy())),
-                    ],
-                    Position::dummy(),
-                ),
-            ),
-            (
-                "type Foo {foo number,bar number,}",
+                "type Foo {foo number bar number}",
                 TypeDefinition::new(
                     "Foo",
                     vec![
