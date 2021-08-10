@@ -30,7 +30,7 @@ fn compile_type_definition(
     })
 }
 
-// TODO Generalize this logic into an expression tranformer.
+// TODO Generalize this logic into an expression transformer.
 fn collect_from_definition(definition: &Definition) -> HashSet<Type> {
     collect_from_expression(definition.lambda().body())
 }
