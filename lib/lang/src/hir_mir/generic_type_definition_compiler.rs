@@ -1,8 +1,5 @@
-use super::type_compiler;
-use super::type_context::TypeContext;
-use super::CompileError;
-use crate::hir::*;
-use crate::types::Type;
+use super::{type_compiler, type_context::TypeContext, CompileError};
+use crate::{hir::*, types::Type};
 use std::collections::HashSet;
 
 pub fn compile(
@@ -142,8 +139,7 @@ fn collect_from_type_coercion(coercion: &TypeCoercion) -> Option<Type> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::position::Position;
-    use crate::types;
+    use crate::{position::Position, types};
 
     #[test]
     fn compile_list_type_definition() {
@@ -164,7 +160,7 @@ mod tests {
                         types::None::new(Position::dummy()),
                         TypeCoercion::new(
                             list_type.clone(),
-                            union_type.clone(),
+                            union_type,
                             Variable::new("x", Position::dummy()),
                             Position::dummy()
                         ),
