@@ -174,3 +174,21 @@ Feature: OS
     Then I successfully run `./app`
     And the stdout from "./app" should contain "Main.pen"
     And the stdout from "./app" should contain "pen.json"
+
+  Scenario: Create a directory
+    Given a file named "Main.pen" with:
+    """pen
+    import System'Os
+    import Core'String
+
+    main = \(os Os'Os) number {
+      if _ = Os'CreateDirectory(os, "foo"); none {
+        0
+      } else {
+        1
+      }
+    }
+    """
+    When I successfully run `pen build`
+    Then I successfully run `./app`
+    And I successfully run `sh -c '[ -d foo ]'`

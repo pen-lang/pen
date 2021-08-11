@@ -7,6 +7,7 @@ import foreign "c" _pen_os_write_file \(any, string) ffiWriteResult
 import foreign "c" _pen_os_copy_file \(string, string) ffiNoneResult
 import foreign "c" _pen_os_remove_file \(string) ffiNoneResult
 import foreign "c" _pen_os_read_directory \(string) ffiReadDirectoryResult
+import foreign "c" _pen_os_create_directory \(string) ffiNoneResult
 import foreign "c" _pen_os_get_arguments \() array
 import foreign "c" _pen_ffi_array_get \(array, number) any
 import foreign "c" _pen_ffi_array_length \(array) number
@@ -23,6 +24,7 @@ type Os {
   copyFile \(string, string) ffiNoneResult
   removeFile \(string) ffiNoneResult
   readDirectory \(string) ffiReadDirectoryResult
+  createDirectory \(string) ffiNoneResult
 }
 
 type File {
@@ -184,6 +186,16 @@ ReadDirectory = \(os Os, path string) [string] | error {
   }
 }
 
+CreateDirectory = \(os Os, path string) none | error {
+  r = os.createDirectory(path)
+
+  if r.error == 0 {
+    none
+  } else {
+    error(translateError(r.error))
+  }
+}
+
 Arguments = \() [string] {
   convertArrayToStrings(_pen_os_get_arguments())
 }
@@ -235,6 +247,7 @@ export foreign _pen_os_main = \(_ none) number {
       copyFile: _pen_os_copy_file,
       removeFile: _pen_os_remove_file,
       readDirectory: _pen_os_read_directory,
+      createDirectory: _pen_os_create_directory,
     },
   )
 }

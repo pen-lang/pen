@@ -25,3 +25,12 @@ fn read_directory(path: ffi::ByteString) -> Result<ffi::Arc<Array>, OsError> {
             .into(),
     ))
 }
+
+#[no_mangle]
+extern "C" fn _pen_os_create_directory(path: ffi::ByteString) -> ffi::Arc<FfiResult<ffi::None>> {
+    ffi::Arc::new(create_directory(path).into())
+}
+
+fn create_directory(path: ffi::ByteString) -> Result<(), OsError> {
+    Ok(fs::create_dir(utilities::decode_path(&path)?)?)
+}
