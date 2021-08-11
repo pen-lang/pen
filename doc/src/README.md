@@ -21,7 +21,7 @@ To make such development efficient, it focuses on:
 ### Minimal design
 
 - Its syntax and type system are simple and easy to learn.
-- Its minimal language features keep codes consistent.
+- Its minimal language features keep codes comprehensive and consistent.
 
 ### System injection
 
