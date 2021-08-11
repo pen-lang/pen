@@ -10,6 +10,24 @@ Feature: OS
     }
     """
 
+  Scenario: Get arguments
+    Given a file named "Main.pen" with:
+    """pen
+    import Core'String
+    import System'Os
+
+    main = \(os Os'Os) number {
+      if _ = Os'WriteFile(os, Os'StdOut(), String'Join(Os'Arguments(), " ")); number {
+        0
+      } else {
+        1
+      }
+    }
+    """
+    When I successfully run `pen build`
+    Then I successfully run `./app foo bar`
+    And stdout from "./app foo bar" should contain exactly "foo bar"
+
   Scenario: Open a file
     Given a file named "Main.pen" with:
     """pen
@@ -127,21 +145,3 @@ Feature: OS
     When I successfully run `pen build`
     Then I successfully run `./app`
     And the file "foo.txt" does not exist
-
-  Scenario: Get arguments
-    Given a file named "Main.pen" with:
-    """pen
-    import Core'String
-    import System'Os
-
-    main = \(os Os'Os) number {
-      if _ = Os'WriteFile(os, Os'StdOut(), String'Join(Os'Arguments(), " ")); number {
-        0
-      } else {
-        1
-      }
-    }
-    """
-    When I successfully run `pen build`
-    Then I successfully run `./app foo bar`
-    And stdout from "./app foo bar" should contain exactly "foo bar"
