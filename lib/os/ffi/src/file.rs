@@ -89,13 +89,13 @@ extern "C" fn _pen_os_copy_file(
     ffi::Arc::new(copy_file(src, dest).into())
 }
 
-fn copy_file(src: ffi::ByteString, dest: ffi::ByteString) -> Result<ffi::None, OsError> {
+fn copy_file(src: ffi::ByteString, dest: ffi::ByteString) -> Result<(), OsError> {
     fs::copy(
         utilities::decode_path(&src)?,
         utilities::decode_path(&dest)?,
     )?;
 
-    Ok(ffi::None::new())
+    Ok(())
 }
 
 #[no_mangle]
@@ -103,10 +103,10 @@ extern "C" fn _pen_os_remove_file(path: ffi::ByteString) -> ffi::Arc<FfiResult<f
     ffi::Arc::new(remove_file(path).into())
 }
 
-fn remove_file(path: ffi::ByteString) -> Result<ffi::None, OsError> {
+fn remove_file(path: ffi::ByteString) -> Result<(), OsError> {
     fs::remove_file(utilities::decode_path(&path)?)?;
 
-    Ok(ffi::None::new())
+    Ok(())
 }
 
 #[cfg(test)]
