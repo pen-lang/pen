@@ -10,6 +10,24 @@ Feature: OS
     }
     """
 
+  Scenario: Get arguments
+    Given a file named "Main.pen" with:
+    """pen
+    import Core'String
+    import System'Os
+
+    main = \(os Os'Os) number {
+      if _ = Os'WriteFile(os, Os'StdOut(), String'Join(Os'Arguments(), " ")); number {
+        0
+      } else {
+        1
+      }
+    }
+    """
+    When I successfully run `pen build`
+    Then I successfully run `./app foo bar`
+    And stdout from "./app foo bar" should contain exactly "foo bar"
+
   Scenario: Open a file
     Given a file named "Main.pen" with:
     """pen
@@ -128,14 +146,24 @@ Feature: OS
     Then I successfully run `./app`
     And the file "foo.txt" does not exist
 
-  Scenario: Get arguments
+  Scenario: Read a directory
     Given a file named "Main.pen" with:
     """pen
-    import Core'String
     import System'Os
+    import Core'String
+
+    readDirectory = \(os Os'Os) none | error {
+      Os'WriteFile(
+        os,
+        Os'StdOut(),
+        String'Join(Os'ReadDirectory(os, ".")?, "\n"),
+      )?
+
+      none
+    }
 
     main = \(os Os'Os) number {
-      if _ = Os'WriteFile(os, Os'StdOut(), String'Join(Os'Arguments(), " ")); number {
+      if _ = readDirectory(os); none {
         0
       } else {
         1
@@ -143,5 +171,41 @@ Feature: OS
     }
     """
     When I successfully run `pen build`
-    Then I successfully run `./app foo bar`
-    And stdout from "./app foo bar" should contain exactly "foo bar"
+    Then I successfully run `./app`
+    And the stdout from "./app" should contain "Main.pen"
+    And the stdout from "./app" should contain "pen.json"
+
+  Scenario: Create a directory
+    Given a file named "Main.pen" with:
+    """pen
+    import System'Os
+
+    main = \(os Os'Os) number {
+      if _ = Os'CreateDirectory(os, "foo"); none {
+        0
+      } else {
+        1
+      }
+    }
+    """
+    When I successfully run `pen build`
+    Then I successfully run `./app`
+    And a directory named "foo" should exist
+
+  Scenario: Create a directory
+    Given a file named "Main.pen" with:
+    """pen
+    import System'Os
+
+    main = \(os Os'Os) number {
+      if _ = Os'RemoveDirectory(os, "foo"); none {
+        0
+      } else {
+        1
+      }
+    }
+    """
+    And a directory named "foo"
+    When I successfully run `pen build`
+    Then I successfully run `./app`
+    And a directory named "foo" should not exist
