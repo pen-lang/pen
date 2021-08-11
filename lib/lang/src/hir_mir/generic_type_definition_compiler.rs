@@ -300,7 +300,7 @@ mod tests {
                 &Module::empty().set_definitions(vec![Definition::without_source(
                     "foo",
                     Lambda::new(
-                        vec![Argument::new("x", union_type.clone())],
+                        vec![Argument::new("x", union_type)],
                         types::None::new(Position::dummy()),
                         TryOperation::new(
                             Some(list_type.clone().into()),

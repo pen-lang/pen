@@ -249,7 +249,7 @@ fn compile_alternatives(
             Ok(if let Type::List(list_type) = &member_type {
                 let any_list_type = type_compiler::compile(&member_type, type_context)?;
                 let concrete_list_type =
-                    type_compiler::compile_concrete_list(&list_type, type_context.types())?;
+                    type_compiler::compile_concrete_list(list_type, type_context.types())?;
 
                 mir::ir::Alternative::new(concrete_list_type.clone(), name, {
                     if type_.is_union() {
@@ -648,7 +648,7 @@ mod tests {
                         "y",
                         Variable::new("x", Position::dummy()),
                         vec![IfTypeBranch::new(
-                            list_type.clone(),
+                            list_type,
                             Variable::new("y", Position::dummy()),
                         )],
                         None,
@@ -696,7 +696,7 @@ mod tests {
                         Variable::new("x", Position::dummy()),
                         vec![IfTypeBranch::new(
                             types::Union::new(
-                                list_type.clone(),
+                                list_type,
                                 types::None::new(Position::dummy()),
                                 Position::dummy()
                             ),
