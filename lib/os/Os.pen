@@ -6,6 +6,9 @@ import foreign "c" _pen_os_read_file \(any) ffiReadResult
 import foreign "c" _pen_os_write_file \(any, string) ffiWriteResult
 import foreign "c" _pen_os_copy_file \(string, string) ffiNoneResult
 import foreign "c" _pen_os_remove_file \(string) ffiNoneResult
+import foreign "c" _pen_os_read_directory \(string) ffiReadDirectoryResult
+import foreign "c" _pen_os_create_directory \(string) ffiNoneResult
+import foreign "c" _pen_os_remove_directory \(string) ffiNoneResult
 import foreign "c" _pen_os_get_arguments \() array
 import foreign "c" _pen_ffi_array_get \(array, number) any
 import foreign "c" _pen_ffi_array_length \(array) number
@@ -21,6 +24,9 @@ type Os {
   writeFile \(any, string) ffiWriteResult
   copyFile \(string, string) ffiNoneResult
   removeFile \(string) ffiNoneResult
+  readDirectory \(string) ffiReadDirectoryResult
+  createDirectory \(string) ffiNoneResult
+  removeDirectory \(string) ffiNoneResult
 }
 
 type File {
@@ -52,6 +58,11 @@ type ffiWriteResult {
 
 type ffiNoneResult {
   _ none
+  error number
+}
+
+type ffiReadDirectoryResult {
+  paths array
   error number
 }
 
@@ -167,6 +178,36 @@ RemoveFile = \(os Os, path string) none | error {
   }
 }
 
+ReadDirectory = \(os Os, path string) [string] | error {
+  r = os.readDirectory(path)
+
+  if r.error == 0 {
+    convertArrayToStrings(r.paths)
+  } else {
+    error(translateError(r.error))
+  }
+}
+
+CreateDirectory = \(os Os, path string) none | error {
+  r = os.createDirectory(path)
+
+  if r.error == 0 {
+    none
+  } else {
+    error(translateError(r.error))
+  }
+}
+
+RemoveDirectory = \(os Os, path string) none | error {
+  r = os.removeDirectory(path)
+
+  if r.error == 0 {
+    none
+  } else {
+    error(translateError(r.error))
+  }
+}
+
 Arguments = \() [string] {
   convertArrayToStrings(_pen_os_get_arguments())
 }
@@ -217,6 +258,9 @@ export foreign _pen_os_main = \(_ none) number {
       writeFile: _pen_os_write_file,
       copyFile: _pen_os_copy_file,
       removeFile: _pen_os_remove_file,
+      readDirectory: _pen_os_read_directory,
+      createDirectory: _pen_os_create_directory,
+      removeDirectory: _pen_os_remove_directory,
     },
   )
 }
