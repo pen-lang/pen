@@ -1,39 +1,52 @@
 use super::{type_compiler, type_context::TypeContext, CompileError};
-use crate::{hir::*, types::Type};
-use std::collections::HashSet;
+use crate::{
+    hir::*,
+    types::{
+        analysis::{type_canonicalizer, TypeError},
+        Type,
+    },
+};
+use std::collections::{HashMap, HashSet};
 
 pub fn compile(
     module: &Module,
     type_context: &TypeContext,
 ) -> Result<Vec<mir::ir::TypeDefinition>, CompileError> {
-    collect_from_module(module)
+    Ok(collect_from_module(module, type_context.types())?
         .into_iter()
         .map(|type_| compile_type_definition(&type_, type_context))
-        .collect()
+        .collect::<Result<Vec<_>, _>>()?
+        .into_iter()
+        .flatten()
+        .collect())
 }
 
 fn compile_type_definition(
     type_: &Type,
     type_context: &TypeContext,
-) -> Result<mir::ir::TypeDefinition, CompileError> {
+) -> Result<Option<mir::ir::TypeDefinition>, CompileError> {
     Ok(match type_ {
-        Type::List(list_type) => mir::ir::TypeDefinition::new(
+        Type::List(list_type) => Some(mir::ir::TypeDefinition::new(
             type_compiler::compile_concrete_list_name(list_type, type_context.types())?,
             mir::types::RecordBody::new(vec![mir::types::Record::new(
                 &type_context.list_type_configuration().list_type_name,
             )
             .into()]),
-        ),
-        _ => unreachable!(),
+        )),
+        _ => None,
     })
 }
 
 // TODO Generalize this logic into an expression transformer.
-fn collect_from_module(module: &Module) -> HashSet<Type> {
+fn collect_from_module(
+    module: &Module,
+    types: &HashMap<String, Type>,
+) -> Result<HashSet<Type>, TypeError> {
     module
         .definitions()
         .iter()
         .flat_map(collect_from_definition)
+        .map(|type_| type_canonicalizer::canonicalize(&type_, types))
         .collect()
 }
 
@@ -57,8 +70,13 @@ fn collect_from_expression(expression: &Expression) -> HashSet<Type> {
             .chain(collect_from_expression(if_.then()))
             .chain(collect_from_expression(if_.else_()))
             .collect(),
-        Expression::IfType(if_) => collect_from_expression(if_.argument())
-            .into_iter()
+        Expression::IfType(if_) => if_
+            .branches()
+            .iter()
+            .map(|branch| branch.type_())
+            .chain(if_.else_().map(|branch| branch.type_()).flatten())
+            .cloned()
+            .chain(collect_from_expression(if_.argument()))
             .chain(
                 if_.branches()
                     .iter()
@@ -70,7 +88,7 @@ fn collect_from_expression(expression: &Expression) -> HashSet<Type> {
                     .flat_map(|branch| collect_from_expression(branch.expression())),
             )
             .collect(),
-        Expression::TypeCoercion(coercion) => collect_from_type_coercion(coercion)
+        Expression::TypeCoercion(coercion) => vec![coercion.from().clone()]
             .into_iter()
             .chain(collect_from_expression(coercion.argument()))
             .collect(),
@@ -107,7 +125,12 @@ fn collect_from_expression(expression: &Expression) -> HashSet<Type> {
                 .into_iter()
                 .chain(collect_from_expression(operation.rhs()))
                 .collect(),
-            Operation::Try(operation) => collect_from_expression(operation.expression()),
+            Operation::Try(operation) => operation
+                .type_()
+                .cloned()
+                .into_iter()
+                .chain(collect_from_expression(operation.expression()))
+                .collect(),
         },
         Expression::RecordConstruction(construction) => construction
             .elements()
@@ -131,14 +154,6 @@ fn collect_from_expression(expression: &Expression) -> HashSet<Type> {
         | Expression::Number(_)
         | Expression::String(_)
         | Expression::Variable(_) => Default::default(),
-    }
-}
-
-fn collect_from_type_coercion(coercion: &TypeCoercion) -> Option<Type> {
-    match coercion.from() {
-        // TODO Support function types.
-        type_ @ Type::List(_) => Some(type_.clone()),
-        _ => None,
     }
 }
 
@@ -215,6 +230,87 @@ mod tests {
         assert_eq!(
             compile(
                 &Module::empty().set_definitions(vec![definition.clone(), definition]),
+                &type_context,
+            ),
+            Ok(vec![mir::ir::TypeDefinition::new(
+                type_compiler::compile_concrete_list_name(&list_type, type_context.types())
+                    .unwrap(),
+                mir::types::RecordBody::new(vec![mir::types::Record::new(
+                    &type_context.list_type_configuration().list_type_name
+                )
+                .into()]),
+            )])
+        );
+    }
+
+    #[test]
+    fn collect_type_from_if_type() {
+        let list_type = types::List::new(types::None::new(Position::dummy()), Position::dummy());
+        let type_context = TypeContext::dummy(Default::default(), Default::default());
+
+        assert_eq!(
+            compile(
+                &Module::empty().set_definitions(vec![Definition::without_source(
+                    "foo",
+                    Lambda::new(
+                        vec![Argument::new("x", list_type.clone())],
+                        types::None::new(Position::dummy()),
+                        IfType::new(
+                            "x",
+                            Variable::new("x", Position::dummy()),
+                            vec![IfTypeBranch::new(
+                                list_type.clone(),
+                                None::new(Position::dummy())
+                            )],
+                            None,
+                            Position::dummy()
+                        ),
+                        Position::dummy(),
+                    ),
+                    false,
+                )]),
+                &type_context,
+            ),
+            Ok(vec![mir::ir::TypeDefinition::new(
+                type_compiler::compile_concrete_list_name(&list_type, type_context.types())
+                    .unwrap(),
+                mir::types::RecordBody::new(vec![mir::types::Record::new(
+                    &type_context.list_type_configuration().list_type_name
+                )
+                .into()]),
+            )])
+        );
+    }
+
+    #[test]
+    fn collect_type_from_try_operation() {
+        let type_context = TypeContext::dummy(Default::default(), Default::default());
+        let list_type = types::List::new(types::None::new(Position::dummy()), Position::dummy());
+        let union_type = types::Union::new(
+            list_type.clone(),
+            types::Record::new(
+                &type_context.error_type_configuration().error_type_name,
+                Position::dummy(),
+            ),
+            Position::dummy(),
+        );
+
+        assert_eq!(
+            compile(
+                &Module::empty().set_definitions(vec![Definition::without_source(
+                    "foo",
+                    Lambda::new(
+                        vec![Argument::new("x", union_type)],
+                        types::None::new(Position::dummy()),
+                        TryOperation::new(
+                            Some(list_type.clone().into()),
+                            Variable::new("x", Position::dummy()),
+                            Position::dummy(),
+                        ),
+                        Position::dummy(),
+                    ),
+                    false,
+                )]),
                 &type_context,
             ),
             Ok(vec![mir::ir::TypeDefinition::new(
