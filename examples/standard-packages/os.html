@@ -155,6 +155,22 @@
   }
 }
 </code></pre>
+<h2 id="get-arguments"><a class="header" href="#get-arguments">Get arguments</a></h2>
+<p><em>Given</em> a file named &quot;Main.pen&quot; with:</p>
+<pre><code class="language-pen">import Core'String
+import System'Os
+
+main = \(os Os'Os) number {
+  if _ = Os'WriteFile(os, Os'StdOut(), String'Join(Os'Arguments(), &quot; &quot;)); number {
+    0
+  } else {
+    1
+  }
+}
+</code></pre>
+<p><em>When</em> I successfully run <code>pen build</code></p>
+<p><em>Then</em> I successfully run <code>./app foo bar</code></p>
+<p><em>And</em> stdout from &quot;./app foo bar&quot; should contain exactly &quot;foo bar&quot;.</p>
 <h2 id="open-a-file"><a class="header" href="#open-a-file">Open a file</a></h2>
 <p><em>Given</em> a file named &quot;Main.pen&quot; with:</p>
 <pre><code class="language-pen">import System'Os
@@ -263,13 +279,23 @@ main = \(os Os'Os) number {
 <p><em>When</em> I successfully run <code>pen build</code></p>
 <p><em>Then</em> I successfully run <code>./app</code></p>
 <p><em>And</em> the file &quot;foo.txt&quot; does not exist.</p>
-<h2 id="get-arguments"><a class="header" href="#get-arguments">Get arguments</a></h2>
+<h2 id="read-a-directory"><a class="header" href="#read-a-directory">Read a directory</a></h2>
 <p><em>Given</em> a file named &quot;Main.pen&quot; with:</p>
-<pre><code class="language-pen">import Core'String
-import System'Os
+<pre><code class="language-pen">import System'Os
+import Core'String
+
+readDirectory = \(os Os'Os) none | error {
+  Os'WriteFile(
+    os,
+    Os'StdOut(),
+    String'Join(Os'ReadDirectory(os, &quot;.&quot;)?, &quot;\n&quot;),
+  )?
+
+  none
+}
 
 main = \(os Os'Os) number {
-  if _ = Os'WriteFile(os, Os'StdOut(), String'Join(Os'Arguments(), &quot; &quot;)); number {
+  if _ = readDirectory(os); none {
     0
   } else {
     1
@@ -277,8 +303,40 @@ main = \(os Os'Os) number {
 }
 </code></pre>
 <p><em>When</em> I successfully run <code>pen build</code></p>
-<p><em>Then</em> I successfully run <code>./app foo bar</code></p>
-<p><em>And</em> stdout from &quot;./app foo bar&quot; should contain exactly &quot;foo bar&quot;.</p>
+<p><em>Then</em> I successfully run <code>./app</code></p>
+<p><em>And</em> the stdout from &quot;./app&quot; should contain &quot;Main.pen&quot;</p>
+<p><em>And</em> the stdout from &quot;./app&quot; should contain &quot;pen.json&quot;.</p>
+<h2 id="create-a-directory"><a class="header" href="#create-a-directory">Create a directory</a></h2>
+<p><em>Given</em> a file named &quot;Main.pen&quot; with:</p>
+<pre><code class="language-pen">import System'Os
+
+main = \(os Os'Os) number {
+  if _ = Os'CreateDirectory(os, &quot;foo&quot;); none {
+    0
+  } else {
+    1
+  }
+}
+</code></pre>
+<p><em>When</em> I successfully run <code>pen build</code></p>
+<p><em>Then</em> I successfully run <code>./app</code></p>
+<p><em>And</em> a directory named &quot;foo&quot; should exist.</p>
+<h2 id="create-a-directory-1"><a class="header" href="#create-a-directory-1">Create a directory</a></h2>
+<p><em>Given</em> a file named &quot;Main.pen&quot; with:</p>
+<pre><code class="language-pen">import System'Os
+
+main = \(os Os'Os) number {
+  if _ = Os'RemoveDirectory(os, &quot;foo&quot;); none {
+    0
+  } else {
+    1
+  }
+}
+</code></pre>
+<p><em>And</em> a directory named &quot;foo&quot;</p>
+<p><em>When</em> I successfully run <code>pen build</code></p>
+<p><em>Then</em> I successfully run <code>./app</code></p>
+<p><em>And</em> a directory named &quot;foo&quot; should not exist.</p>
 
                     </main>
 
