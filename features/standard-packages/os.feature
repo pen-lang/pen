@@ -145,3 +145,32 @@ Feature: OS
     When I successfully run `pen build`
     Then I successfully run `./app`
     And the file "foo.txt" does not exist
+
+  Scenario: Read a directory
+    Given a file named "Main.pen" with:
+    """pen
+    import System'Os
+    import Core'String
+
+    readDirectory = \(os Os'Os) none | error {
+      Os'WriteFile(
+        os,
+        Os'StdOut(),
+        String'Join(Os'ReadDirectory(os, ".")?, "\n"),
+      )?
+
+      none
+    }
+
+    main = \(os Os'Os) number {
+      if _ = readDirectory(os); none {
+        0
+      } else {
+        1
+      }
+    }
+    """
+    When I successfully run `pen build`
+    Then I successfully run `./app`
+    And the stdout from "./app" should contain "Main.pen"
+    And the stdout from "./app" should contain "pen.json"
