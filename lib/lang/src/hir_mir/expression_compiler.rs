@@ -246,21 +246,49 @@ fn compile_alternatives(
     union_type_member_calculator::calculate(&type_, type_context.types())?
         .into_iter()
         .map(|member_type| {
-            let member_type = type_compiler::compile(&member_type, type_context)?;
+            Ok(if let Type::List(list_type) = &member_type {
+                let any_list_type = type_compiler::compile(&member_type, type_context)?;
+                let concrete_list_type =
+                    type_compiler::compile_concrete_list(&list_type, type_context.types())?;
 
-            Ok(mir::ir::Alternative::new(member_type.clone(), name, {
-                if type_.is_union() {
-                    mir::ir::Let::new(
-                        name,
-                        mir::types::Type::Variant,
-                        mir::ir::Variant::new(member_type, mir::ir::Variable::new(name)),
-                        expression.clone(),
-                    )
-                    .into()
-                } else {
-                    expression.clone()
-                }
-            }))
+                mir::ir::Alternative::new(concrete_list_type.clone(), name, {
+                    if type_.is_union() {
+                        mir::ir::Let::new(
+                            name,
+                            mir::types::Type::Variant,
+                            mir::ir::Variant::new(concrete_list_type, mir::ir::Variable::new(name)),
+                            expression.clone(),
+                        )
+                    } else {
+                        mir::ir::Let::new(
+                            name,
+                            any_list_type,
+                            mir::ir::RecordElement::new(
+                                concrete_list_type,
+                                0,
+                                mir::ir::Variable::new(name),
+                            ),
+                            expression.clone(),
+                        )
+                    }
+                })
+            } else {
+                let member_type = type_compiler::compile(&member_type, type_context)?;
+
+                mir::ir::Alternative::new(member_type.clone(), name, {
+                    if type_.is_union() {
+                        mir::ir::Let::new(
+                            name,
+                            mir::types::Type::Variant,
+                            mir::ir::Variant::new(member_type, mir::ir::Variable::new(name)),
+                            expression.clone(),
+                        )
+                        .into()
+                    } else {
+                        expression.clone()
+                    }
+                })
+            })
         })
         .collect::<Result<_, _>>()
 }
@@ -599,6 +627,116 @@ mod tests {
                                 mir::ir::Expression::None
                             )
                         ),
+                    ],
+                    None
+                )
+                .into())
+            );
+        }
+
+        #[test]
+        fn compile_list_branch() {
+            let type_context = TypeContext::dummy(Default::default(), Default::default());
+            let list_type =
+                types::List::new(types::None::new(Position::dummy()), Position::dummy());
+            let concrete_list_type =
+                type_compiler::compile_concrete_list(&list_type, type_context.types()).unwrap();
+
+            assert_eq!(
+                compile(
+                    &IfType::new(
+                        "y",
+                        Variable::new("x", Position::dummy()),
+                        vec![IfTypeBranch::new(
+                            list_type.clone(),
+                            Variable::new("y", Position::dummy()),
+                        )],
+                        None,
+                        Position::dummy(),
+                    )
+                    .into(),
+                    &type_context,
+                ),
+                Ok(mir::ir::Case::new(
+                    mir::ir::Variable::new("x"),
+                    vec![mir::ir::Alternative::new(
+                        concrete_list_type.clone(),
+                        "y",
+                        mir::ir::Let::new(
+                            "y",
+                            mir::types::Record::new(
+                                &type_context.list_type_configuration().list_type_name
+                            ),
+                            mir::ir::RecordElement::new(
+                                concrete_list_type,
+                                0,
+                                mir::ir::Variable::new("y")
+                            ),
+                            mir::ir::Variable::new("y")
+                        ),
+                    )],
+                    None
+                )
+                .into())
+            );
+        }
+
+        #[test]
+        fn compile_union_branch_including_list() {
+            let type_context = TypeContext::dummy(Default::default(), Default::default());
+            let list_type =
+                types::List::new(types::None::new(Position::dummy()), Position::dummy());
+            let concrete_list_type =
+                type_compiler::compile_concrete_list(&list_type, type_context.types()).unwrap();
+
+            assert_eq!(
+                compile(
+                    &IfType::new(
+                        "y",
+                        Variable::new("x", Position::dummy()),
+                        vec![IfTypeBranch::new(
+                            types::Union::new(
+                                list_type.clone(),
+                                types::None::new(Position::dummy()),
+                                Position::dummy()
+                            ),
+                            Variable::new("y", Position::dummy()),
+                        )],
+                        None,
+                        Position::dummy(),
+                    )
+                    .into(),
+                    &type_context,
+                ),
+                Ok(mir::ir::Case::new(
+                    mir::ir::Variable::new("x"),
+                    vec![
+                        mir::ir::Alternative::new(
+                            concrete_list_type.clone(),
+                            "y",
+                            mir::ir::Let::new(
+                                "y",
+                                mir::types::Type::Variant,
+                                mir::ir::Variant::new(
+                                    concrete_list_type,
+                                    mir::ir::Variable::new("y")
+                                ),
+                                mir::ir::Variable::new("y")
+                            ),
+                        ),
+                        mir::ir::Alternative::new(
+                            mir::types::Type::None,
+                            "y",
+                            mir::ir::Let::new(
+                                "y",
+                                mir::types::Type::Variant,
+                                mir::ir::Variant::new(
+                                    mir::types::Type::None,
+                                    mir::ir::Variable::new("y")
+                                ),
+                                mir::ir::Variable::new("y")
+                            ),
+                        )
                     ],
                     None
                 )
