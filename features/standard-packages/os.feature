@@ -179,7 +179,6 @@ Feature: OS
     Given a file named "Main.pen" with:
     """pen
     import System'Os
-    import Core'String
 
     main = \(os Os'Os) number {
       if _ = Os'CreateDirectory(os, "foo"); none {
@@ -191,4 +190,22 @@ Feature: OS
     """
     When I successfully run `pen build`
     Then I successfully run `./app`
-    And I successfully run `sh -c '[ -d foo ]'`
+    And a directory named "foo" should exist
+
+  Scenario: Create a directory
+    Given a file named "Main.pen" with:
+    """pen
+    import System'Os
+
+    main = \(os Os'Os) number {
+      if _ = Os'RemoveDirectory(os, "foo"); none {
+        0
+      } else {
+        1
+      }
+    }
+    """
+    And a directory named "foo"
+    When I successfully run `pen build`
+    Then I successfully run `./app`
+    And a directory named "foo" should not exist
