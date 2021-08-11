@@ -1,4 +1,4 @@
-<p align="center"><img width="300px" src="https://svgshare.com/i/ZvF.svg" /></p>
+<p align="center"><img width="300px" src="https://pen-lang.org/favicon.svg" /></p>
 
 # Pen programming language
 
