@@ -21,12 +21,12 @@ To make such development efficient, it focuses on:
 ### Minimal design
 
 - Its syntax and type system are simple and easy to learn.
-- Its minimal language features keep codes consistent.
+- Its minimal language features keep codes comprehensive and consistent.
 
 ### System injection
 
 - System APIs are always injected into entry points of applications.
-- That isolates and protects application logic from implementation details bringing software's long expectancy as well as maintainability.
+- That isolates and protects application logic from implementation details for maintainability.
 - Developers can define their own system APIs and build applications on top of them.
 
 ### Even more...
