@@ -26,7 +26,7 @@ To make such development efficient, it focuses on:
 ### System injection
 
 - System APIs are always injected into entry points of applications.
-- That isolates and protects application logic from implementation details bringing software's long expectancy as well as maintainability.
+- That isolates and protects application logic from implementation details for maintainability.
 - Developers can define their own system APIs and build applications on top of them.
 
 ### Even more...
