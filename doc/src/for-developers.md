@@ -19,3 +19,5 @@
    ```sh
    export PEN_ROOT=<directory>
    ```
+
+1. You are ready to build packages with the custom-built `pen` command and libraries!
