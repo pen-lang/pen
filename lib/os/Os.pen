@@ -28,6 +28,7 @@ type Os {
   readDirectory \(string) ffiReadDirectoryResult
   createDirectory \(string) ffiNoneResult
   removeDirectory \(string) ffiNoneResult
+  getArguments \() array
   getEnvironmentVariable \(string) ffiStringResult
 }
 
@@ -210,8 +211,8 @@ RemoveDirectory = \(os Os, path string) none | error {
   }
 }
 
-Arguments = \() [string] {
-  convertArrayToStrings(_pen_os_get_arguments())
+Arguments = \(os Os) [string] {
+  convertArrayToStrings(os.getArguments())
 }
 
 EnvironmentVariable = \(os Os, name string) string | error {
@@ -277,6 +278,7 @@ export foreign _pen_os_main = \(_ none) number {
       readDirectory: _pen_os_read_directory,
       createDirectory: _pen_os_create_directory,
       removeDirectory: _pen_os_remove_directory,
+      getArguments: _pen_os_get_arguments,
       getEnvironmentVariable: _pen_os_get_environment_variable,
     },
   )
