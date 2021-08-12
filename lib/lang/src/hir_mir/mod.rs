@@ -11,6 +11,7 @@ mod main_function_compiler;
 mod main_module_configuration;
 mod module_compiler;
 mod module_interface_compiler;
+mod record_element_validator;
 mod string_type_configuration;
 mod transformation;
 mod type_checker;
@@ -92,6 +93,7 @@ fn compile_module(
 ) -> Result<(mir::ir::Module, interface::Module), CompileError> {
     duplicate_function_name_validator::validate(module)?;
     duplicate_type_name_validator::validate(module)?;
+    record_element_validator::validate(module)?;
 
     let module = record_equal_function_transformer::transform(module, type_context)?;
     let module = type_inferrer::infer_types(&module, type_context)?;
