@@ -56,12 +56,11 @@ fn collect_types(
         Expression::TypeCoercion(coercion) => {
             lower_types.insert(coercion.from().clone());
         }
-        Expression::Operation(operation) => match operation {
-            Operation::Try(operation) => {
+        Expression::Operation(operation) => {
+            if let Operation::Try(operation) = operation {
                 lower_types.extend(operation.type_().cloned());
             }
-            _ => {}
-        },
+        }
         _ => {}
     });
 
