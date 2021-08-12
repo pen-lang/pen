@@ -28,6 +28,31 @@ Feature: OS
     Then I successfully run `./app foo bar`
     And stdout from "./app foo bar" should contain exactly "foo bar"
 
+  Scenario: Get an environment variable
+    Given a file named "Main.pen" with:
+    """pen
+    import Core'String
+    import System'Os
+
+    printEnvironmentVariable = \(os Os'Os) none | error {
+      Os'WriteFile(os, Os'StdOut(), Os'EnvironmentVariable(os, "FOO")?)?
+
+      none
+    }
+
+    main = \(os Os'Os) number {
+      if _ = printEnvironmentVariable(os); none {
+        0
+      } else {
+        1
+      }
+    }
+    """
+    And I append "foo" to the environment variable "FOO"
+    When I successfully run `pen build`
+    Then I successfully run `./app`
+    And stdout from "./app" should contain exactly "foo"
+
   Scenario: Open a file
     Given a file named "Main.pen" with:
     """pen

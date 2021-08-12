@@ -1,6 +1,7 @@
 mod argument;
 mod array;
 mod directory;
+mod environment_variable;
 mod error;
 mod file;
 mod heap;

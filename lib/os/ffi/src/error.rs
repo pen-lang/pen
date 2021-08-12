@@ -1,6 +1,8 @@
-use std::{str::Utf8Error, sync::PoisonError};
+use std::{env::VarError, str::Utf8Error, sync::PoisonError};
 
 pub enum OsError {
+    EnvironmentVariableNotPresent,
+    EnvironmentVariableNotUnicode,
     Raw(i32),
     LockFile,
     Utf8Decode,
@@ -13,6 +15,8 @@ impl From<OsError> for f64 {
             OsError::Raw(code) => code.into(),
             OsError::LockFile => 257.0,
             OsError::Utf8Decode => 258.0,
+            OsError::EnvironmentVariableNotPresent => 259.0,
+            OsError::EnvironmentVariableNotUnicode => 260.0,
             OsError::Unknown => 512.0,
         }
     }
@@ -37,5 +41,14 @@ impl From<std::io::Error> for OsError {
 impl From<Utf8Error> for OsError {
     fn from(_: std::str::Utf8Error) -> OsError {
         OsError::Utf8Decode
+    }
+}
+
+impl From<VarError> for OsError {
+    fn from(error: VarError) -> OsError {
+        match error {
+            VarError::NotPresent => OsError::EnvironmentVariableNotPresent,
+            VarError::NotUnicode(_) => OsError::EnvironmentVariableNotUnicode,
+        }
     }
 }

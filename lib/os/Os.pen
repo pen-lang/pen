@@ -1,8 +1,8 @@
-import foreign "c" _pen_os_read_stdin \() ffiReadResult
+import foreign "c" _pen_os_read_stdin \() ffiStringResult
 import foreign "c" _pen_os_write_stdout \(string) ffiWriteResult
 import foreign "c" _pen_os_write_stderr \(string) ffiWriteResult
 import foreign "c" _pen_os_open_file \(string, OpenFileOptions) ffiOpenResult
-import foreign "c" _pen_os_read_file \(any) ffiReadResult
+import foreign "c" _pen_os_read_file \(any) ffiStringResult
 import foreign "c" _pen_os_write_file \(any, string) ffiWriteResult
 import foreign "c" _pen_os_copy_file \(string, string) ffiNoneResult
 import foreign "c" _pen_os_remove_file \(string) ffiNoneResult
@@ -10,23 +10,25 @@ import foreign "c" _pen_os_read_directory \(string) ffiReadDirectoryResult
 import foreign "c" _pen_os_create_directory \(string) ffiNoneResult
 import foreign "c" _pen_os_remove_directory \(string) ffiNoneResult
 import foreign "c" _pen_os_get_arguments \() array
+import foreign "c" _pen_os_get_environment_variable \(string) ffiStringResult
 import foreign "c" _pen_ffi_array_get \(array, number) any
 import foreign "c" _pen_ffi_array_length \(array) number
 import foreign "c" _pen_ffi_any_to_string \(any) string
 import foreign _pen_main \(Os) number
 
 type Os {
-  readStdIn \() ffiReadResult
+  readStdIn \() ffiStringResult
   writeStdOut \(string) ffiWriteResult
   writeStdErr \(string) ffiWriteResult
   openFile \(string, OpenFileOptions) ffiOpenResult
-  readFile \(any) ffiReadResult
+  readFile \(any) ffiStringResult
   writeFile \(any, string) ffiWriteResult
   copyFile \(string, string) ffiNoneResult
   removeFile \(string) ffiNoneResult
   readDirectory \(string) ffiReadDirectoryResult
   createDirectory \(string) ffiNoneResult
   removeDirectory \(string) ffiNoneResult
+  getEnvironmentVariable \(string) ffiStringResult
 }
 
 type File {
@@ -46,8 +48,8 @@ type ffiOpenResult {
   error number
 }
 
-type ffiReadResult {
-  data string
+type ffiStringResult {
+  value string
   error number
 }
 
@@ -134,7 +136,7 @@ ReadFile = \(os Os, file File) string | error {
   }?
 
   if r.error == 0 {
-    r.data
+    r.value
   } else {
     error(translateError(r.error))
   }
@@ -212,6 +214,16 @@ Arguments = \() [string] {
   convertArrayToStrings(_pen_os_get_arguments())
 }
 
+EnvironmentVariable = \(os Os, name string) string | error {
+  r = os.getEnvironmentVariable(name)
+
+  if r.error == 0 {
+    r.value
+  } else {
+    error(translateError(r.error))
+  }
+}
+
 convertArrayToStrings = \(array array) [string] {
   convertArrayToStringsFromIndex(array, 1)
 }
@@ -242,6 +254,10 @@ translateError = \(code number) string {
     "cannot lock file"
   } else if code == 258 {
     "cannot decode path as utf-8"
+  } else if code == 259 {
+    "environment variable not present"
+  } else if code == 260 {
+    "environment variable not unicode"
   } else {
     "unknown io error"
   }
@@ -261,6 +277,7 @@ export foreign _pen_os_main = \(_ none) number {
       readDirectory: _pen_os_read_directory,
       createDirectory: _pen_os_create_directory,
       removeDirectory: _pen_os_remove_directory,
+      getEnvironmentVariable: _pen_os_get_environment_variable,
     },
   )
 }
