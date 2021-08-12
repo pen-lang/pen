@@ -31,11 +31,11 @@ impl From<Result<(), OsError>> for FfiResult<ffi::None> {
     }
 }
 
-impl<T: Default> From<Result<T, OsError>> for FfiResult<T> {
-    fn from(result: Result<T, OsError>) -> Self {
+impl<T: Default, E: Into<OsError>> From<Result<T, E>> for FfiResult<T> {
+    fn from(result: Result<T, E>) -> Self {
         match result {
             Ok(data) => FfiResult::ok(data),
-            Err(error) => FfiResult::error(f64::from(error)),
+            Err(error) => FfiResult::error(f64::from(error.into())),
         }
     }
 }
