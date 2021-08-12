@@ -17,7 +17,7 @@ Feature: OS
     import System'Os
 
     main = \(os Os'Os) number {
-      if _ = Os'WriteFile(os, Os'StdOut(), String'Join(Os'Arguments(), " ")); number {
+      if _ = Os'WriteFile(os, Os'StdOut(), String'Join(Os'Arguments(os), " ")); number {
         0
       } else {
         1
