@@ -217,7 +217,7 @@ Feature: OS
     Then I successfully run `./app`
     And a directory named "foo" should exist
 
-  Scenario: Create a directory
+  Scenario: Remove a directory
     Given a file named "Main.pen" with:
     """pen
     import System'Os
