@@ -171,6 +171,29 @@ main = \(os Os'Os) number {
 <p><em>When</em> I successfully run <code>pen build</code></p>
 <p><em>Then</em> I successfully run <code>./app foo bar</code></p>
 <p><em>And</em> stdout from &quot;./app foo bar&quot; should contain exactly &quot;foo bar&quot;.</p>
+<h2 id="get-an-environment-variable"><a class="header" href="#get-an-environment-variable">Get an environment variable</a></h2>
+<p><em>Given</em> a file named &quot;Main.pen&quot; with:</p>
+<pre><code class="language-pen">import Core'String
+import System'Os
+
+printEnvironmentVariable = \(os Os'Os) none | error {
+  Os'WriteFile(os, Os'StdOut(), Os'EnvironmentVariable(os, &quot;FOO&quot;)?)?
+
+  none
+}
+
+main = \(os Os'Os) number {
+  if _ = printEnvironmentVariable(os); none {
+    0
+  } else {
+    1
+  }
+}
+</code></pre>
+<p><em>And</em> I append &quot;foo&quot; to the environment variable &quot;FOO&quot;</p>
+<p><em>When</em> I successfully run <code>pen build</code></p>
+<p><em>Then</em> I successfully run <code>./app</code></p>
+<p><em>And</em> stdout from &quot;./app&quot; should contain exactly &quot;foo&quot;.</p>
 <h2 id="open-a-file"><a class="header" href="#open-a-file">Open a file</a></h2>
 <p><em>Given</em> a file named &quot;Main.pen&quot; with:</p>
 <pre><code class="language-pen">import System'Os
