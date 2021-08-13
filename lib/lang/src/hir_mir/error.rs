@@ -22,6 +22,7 @@ pub enum CompileError {
     MainFunctionTypeUndefined(Position),
     MirTypeCheck(mir::analysis::TypeCheckError),
     MissingElseBlock(Position),
+    RecordElementPrivate(Position),
     RecordElementUnknown(Position),
     RecordElementMissing(Position),
     RecordExpected(Position),
@@ -95,6 +96,9 @@ impl Display for CompileError {
                     "missing else block in if-type expression\n{}",
                     position
                 )
+            }
+            Self::RecordElementPrivate(position) => {
+                write!(formatter, "private record element\n{}", position)
             }
             Self::RecordElementUnknown(position) => {
                 write!(formatter, "unknown record element\n{}", position)
