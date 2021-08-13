@@ -93,11 +93,11 @@ fn compile_module(
 ) -> Result<(mir::ir::Module, interface::Module), CompileError> {
     duplicate_function_name_validator::validate(module)?;
     duplicate_type_name_validator::validate(module)?;
-    record_element_validator::validate(module, type_context)?;
 
     let module = record_equal_function_transformer::transform(module, type_context)?;
     let module = type_inferrer::infer_types(&module, type_context)?;
     type_checker::check_types(&module, type_context)?;
+    record_element_validator::validate(&module, type_context)?;
     let module = type_coercer::coerce_types(&module, type_context)?;
     type_checker::check_types(&module, type_context)?;
 
@@ -212,7 +212,7 @@ mod tests {
     }
 
     #[test]
-    fn compile_record() -> Result<(), CompileError> {
+    fn compile_record_construction() {
         let reference_type = types::Reference::new("foo", Position::dummy());
 
         compile_module(
@@ -245,9 +245,43 @@ mod tests {
                     ),
                     false,
                 )]),
-        )?;
+        )
+        .unwrap();
+    }
 
-        Ok(())
+    #[test]
+    fn compile_record_deconstruction() {
+        let reference_type = types::Reference::new("foo", Position::dummy());
+
+        compile_module(
+            &Module::empty()
+                .set_type_definitions(vec![TypeDefinition::without_source(
+                    "foo",
+                    vec![types::RecordElement::new(
+                        "x",
+                        types::None::new(Position::dummy()),
+                    )],
+                    false,
+                    false,
+                    false,
+                )])
+                .set_definitions(vec![Definition::without_source(
+                    "x",
+                    Lambda::new(
+                        vec![Argument::new("r", reference_type.clone())],
+                        types::None::new(Position::dummy()),
+                        RecordDeconstruction::new(
+                            None,
+                            Variable::new("r", Position::dummy()),
+                            "x",
+                            Position::dummy(),
+                        ),
+                        Position::dummy(),
+                    ),
+                    false,
+                )]),
+        )
+        .unwrap();
     }
 
     #[test]

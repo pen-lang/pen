@@ -11,41 +11,39 @@ pub fn validate(module: &Module, type_context: &TypeContext) -> Result<(), Compi
     for expression in collect_expressions(module) {
         match expression {
             Expression::RecordConstruction(construction) => {
-                if !open_records.contains(
-                    type_canonicalizer::canonicalize_record(
-                        construction.type_(),
-                        type_context.types(),
-                    )?
-                    .ok_or_else(|| CompileError::RecordExpected(construction.position().clone()))?
-                    .name(),
-                ) {
+                let record_type = type_canonicalizer::canonicalize_record(
+                    construction.type_(),
+                    type_context.types(),
+                )?
+                .ok_or_else(|| CompileError::RecordExpected(construction.position().clone()))?;
+
+                if !open_records.contains(record_type.name()) {
                     return Err(CompileError::RecordElementPrivate(
                         construction.position().clone(),
                     ));
                 }
             }
             Expression::RecordDeconstruction(deconstruction) => {
-                if !open_records.contains(
-                    type_canonicalizer::canonicalize_record(
-                        deconstruction.type_().ok_or_else(|| {
-                            CompileError::TypeNotInferred(deconstruction.position().clone())
-                        })?,
-                        type_context.types(),
-                    )?
-                    .ok_or_else(|| CompileError::RecordExpected(deconstruction.position().clone()))?
-                    .name(),
-                ) {
+                let record_type = type_canonicalizer::canonicalize_record(
+                    deconstruction.type_().ok_or_else(|| {
+                        CompileError::TypeNotInferred(deconstruction.position().clone())
+                    })?,
+                    type_context.types(),
+                )?
+                .ok_or_else(|| CompileError::RecordExpected(deconstruction.position().clone()))?;
+
+                if !open_records.contains(record_type.name()) {
                     return Err(CompileError::RecordElementPrivate(
                         deconstruction.position().clone(),
                     ));
                 }
             }
             Expression::RecordUpdate(update) => {
-                if !open_records.contains(
+                let record_type =
                     type_canonicalizer::canonicalize_record(update.type_(), type_context.types())?
-                        .ok_or_else(|| CompileError::RecordExpected(update.position().clone()))?
-                        .name(),
-                ) {
+                        .ok_or_else(|| CompileError::RecordExpected(update.position().clone()))?;
+
+                if !open_records.contains(record_type.name()) {
                     return Err(CompileError::RecordElementPrivate(
                         update.position().clone(),
                     ));
