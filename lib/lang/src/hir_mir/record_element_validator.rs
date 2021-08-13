@@ -1,6 +1,8 @@
 use super::{type_context::TypeContext, CompileError};
-use crate::hir::{analysis::expression_visitor, *};
-use crate::types::analysis::type_canonicalizer;
+use crate::{
+    hir::{analysis::expression_visitor, *},
+    types::analysis::type_canonicalizer,
+};
 use std::collections::HashSet;
 
 pub fn validate(module: &Module, type_context: &TypeContext) -> Result<(), CompileError> {
@@ -88,14 +90,15 @@ fn is_record_open(definition: &TypeDefinition) -> bool {
 
 #[cfg(test)]
 mod tests {
-    use super::super::{
-        error_type_configuration::ERROR_TYPE_CONFIGURATION,
-        list_type_configuration::LIST_TYPE_CONFIGURATION,
-        string_type_configuration::STRING_TYPE_CONFIGURATION,
+    use super::{
+        super::{
+            error_type_configuration::ERROR_TYPE_CONFIGURATION,
+            list_type_configuration::LIST_TYPE_CONFIGURATION,
+            string_type_configuration::STRING_TYPE_CONFIGURATION,
+        },
+        *,
     };
-    use super::*;
-    use crate::position::Position;
-    use crate::types;
+    use crate::{position::Position, types};
 
     fn validate_module(module: &Module) -> Result<(), CompileError> {
         validate(
