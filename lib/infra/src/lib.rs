@@ -16,6 +16,7 @@ mod logger;
 mod ninja_build_script_compiler;
 mod ninja_build_script_dependency_compiler;
 mod ninja_module_builder;
+mod package_script_finder;
 
 pub use application_linker::*;
 pub use error::*;

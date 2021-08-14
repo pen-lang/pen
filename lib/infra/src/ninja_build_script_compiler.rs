@@ -1,12 +1,12 @@
 use super::file_path_converter::FilePathConverter;
-use crate::{default_target_finder, llvm_command_finder, InfrastructureError};
+use crate::{default_target_finder, llvm_command_finder, package_script_finder};
 use app::infra::FilePath;
 use std::{error::Error, sync::Arc};
 
 pub struct NinjaBuildScriptCompiler {
     file_path_converter: Arc<FilePathConverter>,
     bit_code_file_extension: &'static str,
-    ffi_build_script: &'static str,
+    ffi_build_script_basename: &'static str,
 }
 
 impl NinjaBuildScriptCompiler {
@@ -18,7 +18,7 @@ impl NinjaBuildScriptCompiler {
         Self {
             file_path_converter,
             bit_code_file_extension,
-            ffi_build_script,
+            ffi_build_script_basename: ffi_build_script,
         }
     }
 
@@ -189,30 +189,27 @@ impl NinjaBuildScriptCompiler {
         package_directory: &FilePath,
         archive_file: &FilePath,
     ) -> Result<Vec<String>, Box<dyn Error>> {
-        let package_directory = self
-            .file_path_converter
-            .convert_to_os_path(package_directory);
-        let ffi_build_scripts = glob::glob(
-            &(package_directory
-                .join(self.ffi_build_script)
-                .to_string_lossy()
-                + ".*"),
-        )?
-        .collect::<Result<Vec<_>, _>>()?;
-        let archive_file = self.file_path_converter.convert_to_os_path(archive_file);
+        Ok(
+            if let Some(script) = package_script_finder::find(
+                &self
+                    .file_path_converter
+                    .convert_to_os_path(package_directory),
+                self.ffi_build_script_basename,
+            )? {
+                let archive_file = self.file_path_converter.convert_to_os_path(archive_file);
 
-        Ok(match ffi_build_scripts.as_slice() {
-            [] => vec![],
-            [script] => vec![
-                format!(
-                    "build {}: compile_ffi {}",
-                    archive_file.display(),
-                    script.display()
-                ),
-                format!("default {}", archive_file.display()),
-            ],
-            _ => return Err(InfrastructureError::TooManyFfiBuildScripts(package_directory).into()),
-        })
+                vec![
+                    format!(
+                        "build {}: compile_ffi {}",
+                        archive_file.display(),
+                        script.display()
+                    ),
+                    format!("default {}", archive_file.display()),
+                ]
+            } else {
+                vec![]
+            },
+        )
     }
 }
 
