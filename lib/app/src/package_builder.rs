@@ -26,7 +26,7 @@ pub fn build(
         infrastructure,
         main_package_directory,
         output_directory,
-        &find_external_package_build_script(infrastructure, output_directory)?,
+        &find_external_package_build_scripts(infrastructure, output_directory)?,
         &build_script_file,
         target_triple,
         prelude_package_url,
@@ -76,7 +76,7 @@ pub fn build(
     Ok(())
 }
 
-fn find_external_package_build_script(
+fn find_external_package_build_scripts(
     infrastructure: &Infrastructure,
     output_directory: &FilePath,
 ) -> Result<Vec<FilePath>, Box<dyn Error>> {
