@@ -26,7 +26,7 @@ pub fn build(
         infrastructure,
         main_package_directory,
         output_directory,
-        &find_external_package_build_script(infrastructure, output_directory)?,
+        &find_external_package_build_scripts(infrastructure, output_directory)?,
         &build_script_file,
         target_triple,
         prelude_package_url,
@@ -39,14 +39,11 @@ pub fn build(
         &file_path_resolver::resolve_object_directory(output_directory),
     )?;
 
-    if infrastructure
-        .file_system
-        .exists(&file_path_resolver::resolve_source_file(
-            main_package_directory,
-            &[application_configuration.main_module_basename.clone()],
-            &infrastructure.file_path_configuration,
-        ))
-    {
+    if is_main_package(
+        infrastructure,
+        main_package_directory,
+        application_configuration,
+    )? {
         infrastructure.application_linker.link(
             &files
                 .iter()
@@ -76,7 +73,21 @@ pub fn build(
     Ok(())
 }
 
-fn find_external_package_build_script(
+fn is_main_package(
+    infrastructure: &Infrastructure,
+    main_package_directory: &FilePath,
+    application_configuration: &ApplicationConfiguration,
+) -> Result<bool, Box<dyn Error>> {
+    Ok(infrastructure
+        .file_system
+        .exists(&file_path_resolver::resolve_source_file(
+            main_package_directory,
+            &[application_configuration.main_module_basename.clone()],
+            &infrastructure.file_path_configuration,
+        )))
+}
+
+fn find_external_package_build_scripts(
     infrastructure: &Infrastructure,
     output_directory: &FilePath,
 ) -> Result<Vec<FilePath>, Box<dyn Error>> {
