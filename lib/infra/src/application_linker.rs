@@ -1,7 +1,6 @@
 use super::{command_runner, file_path_converter::FilePathConverter};
 use crate::{package_script_finder, InfrastructureError};
-use std::process::Command;
-use std::{error::Error, sync::Arc};
+use std::{error::Error, process::Command, sync::Arc};
 
 pub struct ApplicationLinker {
     file_path_converter: Arc<FilePathConverter>,
@@ -36,9 +35,7 @@ impl app::infra::ApplicationLinker for ApplicationLinker {
         command_runner::run(
             Command::new(
                 package_script_finder::find(&system_package_directory, self.link_script_basename)?
-                    .ok_or_else(|| {
-                        InfrastructureError::LinkScriptNotFound(system_package_directory)
-                    })?,
+                    .ok_or({ InfrastructureError::LinkScriptNotFound(system_package_directory) })?,
             )
             .args(if let Some(target) = target {
                 vec!["-t", target]

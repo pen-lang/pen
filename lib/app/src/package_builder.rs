@@ -47,13 +47,13 @@ pub fn build(
     )? {
         infrastructure.application_linker.link(
             &file_path_resolver::resolve_package_directory(
-                &output_directory,
+                output_directory,
                 infrastructure
                     .package_configuration_reader
                     .read(main_package_directory)?
                     .dependencies
                     .get(&application_configuration.system_package_name)
-                    .ok_or_else(|| ApplicationError::SystemPackageNotFound)?,
+                    .ok_or(ApplicationError::SystemPackageNotFound)?,
             ),
             &files
                 .iter()

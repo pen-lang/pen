@@ -1,6 +1,8 @@
 use crate::InfrastructureError;
-use std::error::Error;
-use std::path::{Path, PathBuf};
+use std::{
+    error::Error,
+    path::{Path, PathBuf},
+};
 
 pub fn find(
     package_directory: &Path,
