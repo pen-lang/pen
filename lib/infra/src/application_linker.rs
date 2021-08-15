@@ -53,11 +53,7 @@ impl app::infra::ApplicationLinker for ApplicationLinker {
             .args(
                 object_files
                     .iter()
-                    .map(|file| self.file_path_converter.convert_to_os_path(file)),
-            )
-            .args(
-                archive_files
-                    .iter()
+                    .chain(archive_files)
                     .map(|file| self.file_path_converter.convert_to_os_path(file)),
             ),
         )?;
