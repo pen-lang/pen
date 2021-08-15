@@ -1,11 +1,18 @@
 use super::package_id_calculator;
 use crate::{
     common::module_id_calculator,
-    infra::{FilePath, FilePathConfiguration, EXTERNAL_PACKAGE_DIRECTORY, OBJECT_DIRECTORY},
+    infra::{
+        FilePath, FilePathConfiguration, ARCHIVE_DIRECTORY, EXTERNAL_PACKAGE_DIRECTORY,
+        OBJECT_DIRECTORY,
+    },
 };
 
 pub fn resolve_object_directory(output_directory: &FilePath) -> FilePath {
     output_directory.join(&FilePath::new([OBJECT_DIRECTORY]))
+}
+
+pub fn resolve_archive_directory(output_directory: &FilePath) -> FilePath {
+    output_directory.join(&FilePath::new([ARCHIVE_DIRECTORY]))
 }
 
 pub fn resolve_source_file(
@@ -64,7 +71,7 @@ fn resolve_package_ffi_archive_file(
     package_id: &str,
     file_path_configuration: &FilePathConfiguration,
 ) -> FilePath {
-    resolve_object_directory(output_directory)
+    resolve_archive_directory(output_directory)
         .join(&FilePath::new([package_id]))
         .with_extension(file_path_configuration.archive_file_extension)
 }

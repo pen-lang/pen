@@ -36,10 +36,6 @@ pub fn build(
 
     infrastructure.module_builder.build(&build_script_file)?;
 
-    let files = infrastructure.file_system.read_directory(
-        &file_path_resolver::resolve_object_directory(output_directory),
-    )?;
-
     if is_main_package(
         infrastructure,
         main_package_directory,
@@ -55,14 +51,22 @@ pub fn build(
                     .get(&application_configuration.system_package_name)
                     .ok_or(ApplicationError::SystemPackageNotFound)?,
             ),
-            &files
+            &infrastructure
+                .file_system
+                .read_directory(&file_path_resolver::resolve_object_directory(
+                    output_directory,
+                ))?
                 .iter()
                 .filter(|file| {
                     file.has_extension(infrastructure.file_path_configuration.object_file_extension)
                 })
                 .cloned()
                 .collect::<Vec<_>>(),
-            &files
+            &infrastructure
+                .file_system
+                .read_directory(&file_path_resolver::resolve_archive_directory(
+                    output_directory,
+                ))?
                 .iter()
                 .filter(|file| {
                     file.has_extension(
