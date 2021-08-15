@@ -40,6 +40,7 @@ dependencies = [
  "mir",
  "mir-fmm",
  "once_cell",
+ "petgraph",
  "regex",
  "serde",
  "url",
