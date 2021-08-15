@@ -1,5 +1,6 @@
 mod application_configuration;
 mod common;
+mod error;
 pub mod infra;
 pub mod module_compiler;
 pub mod module_dependency_resolver;

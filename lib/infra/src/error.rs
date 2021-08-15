@@ -11,6 +11,7 @@ pub enum InfrastructureError {
         source: std::io::Error,
     },
     EnvironmentVariableNotFound(String),
+    LinkScriptNotFound(std::path::PathBuf),
     PackageUrlSchemeNotSupported(url::Url),
     ReadDirectory {
         path: std::path::PathBuf,
@@ -34,6 +35,7 @@ impl Error for InfrastructureError {
             Self::CommandNotFound(_) => None,
             Self::CreateDirectory { path: _, source } => Some(source),
             Self::EnvironmentVariableNotFound(_) => None,
+            Self::LinkScriptNotFound(_) => None,
             Self::PackageUrlSchemeNotSupported(_) => None,
             Self::ReadDirectory { path: _, source } => Some(source),
             Self::ReadFile { path: _, source } => Some(source),
@@ -63,6 +65,11 @@ impl Display for InfrastructureError {
             Self::EnvironmentVariableNotFound(name) => {
                 write!(formatter, "environment variable \"{}\" not found", name)
             }
+            Self::LinkScriptNotFound(directory) => write!(
+                formatter,
+                "link script not found in system package \"{}\"",
+                directory.display()
+            ),
             Self::PackageUrlSchemeNotSupported(url) => {
                 write!(formatter, "package URL scheme not supported {}", url)
             }

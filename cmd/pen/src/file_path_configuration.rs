@@ -6,7 +6,8 @@ pub const LANGUAGE_ROOT_ENVIRONMENT_VARIABLE: &str = "PEN_ROOT";
 
 pub const DEFAULT_SYSTEM_PACKAGE_URL: &str = "file://pen-root/lib/os";
 pub const PRELUDE_PACKAGE_URL: &str = "file://pen-root/lib/prelude";
-pub const FFI_BUILD_SCRIPT: &str = "pen-ffi";
+pub const FFI_BUILD_SCRIPT_BASENAME: &str = "pen-ffi";
+pub const LINK_SCRIPT_BASENAME: &str = "pen-link";
 
 pub const FILE_PATH_CONFIGURATION: app::infra::FilePathConfiguration =
     app::infra::FilePathConfiguration {

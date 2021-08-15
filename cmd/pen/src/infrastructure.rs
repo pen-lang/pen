@@ -1,9 +1,9 @@
-use std::{error::Error, sync::Arc};
-
 use crate::file_path_configuration::{
-    BIT_CODE_FILE_EXTENSION, BUILD_CONFIGURATION_FILENAME, FFI_BUILD_SCRIPT,
+    BIT_CODE_FILE_EXTENSION, BUILD_CONFIGURATION_FILENAME, FFI_BUILD_SCRIPT_BASENAME,
     FILE_PATH_CONFIGURATION, LANGUAGE_ROOT_ENVIRONMENT_VARIABLE, LANGUAGE_ROOT_HOST_NAME,
+    LINK_SCRIPT_BASENAME,
 };
+use std::{error::Error, sync::Arc};
 
 pub fn create(
     file_path_converter: Arc<infra::FilePathConverter>,
@@ -13,11 +13,14 @@ pub fn create(
     let build_script_compiler = Arc::new(infra::NinjaBuildScriptCompiler::new(
         file_path_converter.clone(),
         BIT_CODE_FILE_EXTENSION,
-        FFI_BUILD_SCRIPT,
+        FFI_BUILD_SCRIPT_BASENAME,
     ));
 
     Ok(app::infra::Infrastructure {
-        application_linker: Arc::new(infra::ApplicationLinker::new(file_path_converter.clone())),
+        application_linker: Arc::new(infra::ApplicationLinker::new(
+            file_path_converter.clone(),
+            LINK_SCRIPT_BASENAME,
+        )),
         build_script_dependency_compiler: Arc::new(infra::NinjaBuildScriptDependencyCompiler::new(
             file_path_converter.clone(),
         )),
