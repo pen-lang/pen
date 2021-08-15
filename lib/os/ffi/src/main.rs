@@ -10,9 +10,9 @@ mod result;
 mod stdio;
 mod utilities;
 
-#[cfg(not(test))]
 const INITIAL_STACK_CAPACITY: usize = 256;
 
+#[link(name = "main")]
 extern "C" {
     fn _pen_os_main(
         stack: *mut ffi::cps::Stack,
@@ -21,9 +21,7 @@ extern "C" {
     ) -> ffi::cps::Result;
 }
 
-#[cfg(not(test))]
-#[no_mangle]
-pub extern "C" fn main() -> std::os::raw::c_int {
+fn main() {
     let mut stack = ffi::cps::Stack::new(INITIAL_STACK_CAPACITY);
 
     unsafe { _pen_os_main(&mut stack, exit, ffi::None::new()) };
@@ -31,7 +29,6 @@ pub extern "C" fn main() -> std::os::raw::c_int {
     unreachable!()
 }
 
-#[cfg(not(test))]
 extern "C" fn exit(_: *mut ffi::cps::Stack, code: f64) -> ffi::cps::Result {
     std::process::exit(code as i32)
 }

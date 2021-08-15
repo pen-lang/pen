@@ -52,17 +52,8 @@ pub fn build(
                     .get(&application_configuration.system_package_name)
                     .ok_or(ApplicationError::SystemPackageNotFound)?,
             ),
-            &infrastructure
-                .file_system
-                .read_directory(&file_path_resolver::resolve_object_directory(
-                    output_directory,
-                ))?
-                .iter()
-                .filter(|file| {
-                    file.has_extension(infrastructure.file_path_configuration.object_file_extension)
-                })
-                .cloned()
-                .collect::<Vec<_>>(),
+            // TODO Remove this.
+            &[],
             &vec![file_path_resolver::resolve_main_package_archive_file(
                 output_directory,
                 &infrastructure.file_path_configuration,
