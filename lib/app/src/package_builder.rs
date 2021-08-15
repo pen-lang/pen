@@ -52,8 +52,6 @@ pub fn build(
                     .get(&application_configuration.system_package_name)
                     .ok_or(ApplicationError::SystemPackageNotFound)?,
             ),
-            // TODO Remove this.
-            &[],
             &vec![file_path_resolver::resolve_main_package_archive_file(
                 output_directory,
                 &infrastructure.file_path_configuration,
