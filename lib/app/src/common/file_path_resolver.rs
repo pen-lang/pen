@@ -8,6 +8,7 @@ use crate::{
 };
 
 const MAIN_ARCHIVE_BASENAME: &str = "main";
+const FFI_ARCHIVE_SUFFIX: &str = "_ffi";
 
 pub fn resolve_object_directory(output_directory: &FilePath) -> FilePath {
     output_directory.join(&FilePath::new([OBJECT_DIRECTORY]))
@@ -102,7 +103,7 @@ fn resolve_package_ffi_archive_file(
 ) -> FilePath {
     resolve_package_archive_file(
         output_directory,
-        &(basename.to_owned() + "-ffi"),
+        &(basename.to_owned() + FFI_ARCHIVE_SUFFIX),
         file_path_configuration,
     )
 }
