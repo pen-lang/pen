@@ -63,9 +63,9 @@ pub fn compile_main(
                                                         &application_configuration
                                                             .system_package_name,
                                                     )
-                                                    .ok_or({
-                                                        ApplicationError::SystemPackageNotFound
-                                                    })?,
+                                                    .ok_or(
+                                                        ApplicationError::SystemPackageNotFound,
+                                                    )?,
                                             ),
                                             &[application_configuration
                                                 .main_function_module_basename
