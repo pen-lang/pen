@@ -9,13 +9,13 @@ pub fn read_recursively(
     package_directory: &FilePath,
     output_directory: &FilePath,
 ) -> Result<HashMap<url::Url, PackageConfiguration>, Box<dyn Error>> {
-    Ok(read_dependencies(
+    read_dependencies(
         infrastructure,
         &infrastructure
             .package_configuration_reader
             .read(package_directory)?,
         output_directory,
-    )?)
+    )
 }
 
 pub fn read_dependencies(

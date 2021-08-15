@@ -10,12 +10,10 @@ pub fn sort(
     package_directory: &FilePath,
     output_directory: &FilePath,
 ) -> Result<Vec<url::Url>, Box<dyn Error>> {
-    Ok(sort_external_packages(
-        &external_package_configuration_reader::read_recursively(
-            infrastructure,
-            package_directory,
-            output_directory,
-        )?,
+    sort_external_packages(&external_package_configuration_reader::read_recursively(
+        infrastructure,
+        package_directory,
+        output_directory,
     )?)
 }
 

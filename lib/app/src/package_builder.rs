@@ -169,7 +169,7 @@ fn resolve_external_package_archive_files(
 }
 
 fn ensure_file(infrastructure: &Infrastructure, ffi_archive_file: &FilePath) -> Option<FilePath> {
-    if infrastructure.file_system.exists(&ffi_archive_file) {
+    if infrastructure.file_system.exists(ffi_archive_file) {
         Some(ffi_archive_file.clone())
     } else {
         None
