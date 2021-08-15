@@ -73,7 +73,7 @@ impl NinjaBuildScriptCompiler {
             &resolve_dependency_command,
             "  description = resolving dependency of $in",
             "rule ar",
-            "  command = ar -rs $out $in",
+            "  command = ar rs $out $in",
             "  description = archiving package at $package_directory",
             "rule compile_ffi",
             "  command = $in -t $target $out",
