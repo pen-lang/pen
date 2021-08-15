@@ -268,7 +268,7 @@ mod tests {
                 .set_definitions(vec![Definition::without_source(
                     "x",
                     Lambda::new(
-                        vec![Argument::new("r", reference_type.clone())],
+                        vec![Argument::new("r", reference_type)],
                         types::None::new(Position::dummy()),
                         RecordDeconstruction::new(
                             None,

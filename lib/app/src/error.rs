@@ -1,13 +1,13 @@
 use std::{error::Error, fmt::Display};
 
 #[derive(Debug)]
-pub enum PackageBuildScriptCompilerError {
+pub enum ApplicationError {
     SystemPackageNotFound,
 }
 
-impl Error for PackageBuildScriptCompilerError {}
+impl Error for ApplicationError {}
 
-impl Display for PackageBuildScriptCompilerError {
+impl Display for ApplicationError {
     fn fmt(&self, formatter: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
         match self {
             Self::SystemPackageNotFound => {

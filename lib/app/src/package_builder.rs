@@ -1,6 +1,7 @@
 use super::application_configuration::ApplicationConfiguration;
 use crate::{
     common::file_path_resolver,
+    error::ApplicationError,
     infra::{FilePath, Infrastructure, EXTERNAL_PACKAGE_DIRECTORY},
     package_build_script_compiler,
 };
@@ -45,6 +46,15 @@ pub fn build(
         application_configuration,
     )? {
         infrastructure.application_linker.link(
+            &file_path_resolver::resolve_package_directory(
+                output_directory,
+                infrastructure
+                    .package_configuration_reader
+                    .read(main_package_directory)?
+                    .dependencies
+                    .get(&application_configuration.system_package_name)
+                    .ok_or(ApplicationError::SystemPackageNotFound)?,
+            ),
             &files
                 .iter()
                 .filter(|file| {

@@ -1,9 +1,8 @@
-mod error;
 mod module_target_collector;
 
-use self::error::PackageBuildScriptCompilerError;
 use crate::{
     common::file_path_resolver,
+    error::ApplicationError,
     infra::{FilePath, Infrastructure, MainModuleTarget},
     module_finder, prelude_interface_file_finder, ApplicationConfiguration,
 };
@@ -41,7 +40,8 @@ pub fn compile_main(
             .build_script_compiler
             .compile_main(
                 &module_targets,
-                main_module_targets.get(0)
+                main_module_targets
+                    .get(0)
                     .map(|target| -> Result<_, Box<dyn Error>> {
                         let package_configuration = infrastructure
                             .package_configuration_reader
@@ -59,9 +59,13 @@ pub fn compile_main(
                                                 output_directory,
                                                 package_configuration
                                                     .dependencies
-                                                    .get(&application_configuration.system_package_name).ok_or({
-                                                        PackageBuildScriptCompilerError::SystemPackageNotFound
-                                                    })?,
+                                                    .get(
+                                                        &application_configuration
+                                                            .system_package_name,
+                                                    )
+                                                    .ok_or(
+                                                        ApplicationError::SystemPackageNotFound,
+                                                    )?,
                                             ),
                                             &[application_configuration
                                                 .main_function_module_basename
