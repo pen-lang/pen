@@ -2,8 +2,11 @@
 
 set -e
 
-while getopts t: option; do
+while getopts o:t: option; do
   case $option in
+  o)
+    output=$OPTARG
+    ;;
   t)
     target=$OPTARG
     ;;
@@ -12,8 +15,10 @@ done
 
 shift $(expr $OPTIND - 1)
 
-if [ -n "$target" ]; then
+if [ -z "$output" ]; then
+  exit 1
+elif [ -n "$target" ]; then
   target_option="-t $target"
 fi
 
-clang $target_option -o "$@" -ldl -lpthread
+clang $target_option -o "$output" "$@" -ldl -lpthread
