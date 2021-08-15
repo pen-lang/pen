@@ -7,6 +7,8 @@ use crate::{
     },
 };
 
+const MAIN_ARCHIVE_BASENAME: &str = "main";
+
 pub fn resolve_object_directory(output_directory: &FilePath) -> FilePath {
     output_directory.join(&FilePath::new([OBJECT_DIRECTORY]))
 }
@@ -47,11 +49,38 @@ pub fn resolve_package_directory(output_directory: &FilePath, url: &url::Url) ->
     ]))
 }
 
+pub fn resolve_main_package_archive_file(
+    output_directory: &FilePath,
+    file_path_configuration: &FilePathConfiguration,
+) -> FilePath {
+    resolve_package_archive_file(
+        output_directory,
+        MAIN_ARCHIVE_BASENAME,
+        file_path_configuration,
+    )
+}
+
 pub fn resolve_main_package_ffi_archive_file(
     output_directory: &FilePath,
     file_path_configuration: &FilePathConfiguration,
 ) -> FilePath {
-    resolve_package_ffi_archive_file(output_directory, "main", file_path_configuration)
+    resolve_package_ffi_archive_file(
+        output_directory,
+        MAIN_ARCHIVE_BASENAME,
+        file_path_configuration,
+    )
+}
+
+pub fn resolve_external_package_archive_file(
+    output_directory: &FilePath,
+    url: &url::Url,
+    file_path_configuration: &FilePathConfiguration,
+) -> FilePath {
+    resolve_package_archive_file(
+        output_directory,
+        &package_id_calculator::calculate(url),
+        file_path_configuration,
+    )
 }
 
 pub fn resolve_external_package_ffi_archive_file(
@@ -68,10 +97,22 @@ pub fn resolve_external_package_ffi_archive_file(
 
 fn resolve_package_ffi_archive_file(
     output_directory: &FilePath,
-    package_id: &str,
+    basename: &str,
+    file_path_configuration: &FilePathConfiguration,
+) -> FilePath {
+    resolve_package_archive_file(
+        output_directory,
+        &(basename.to_owned() + "-ffi"),
+        file_path_configuration,
+    )
+}
+
+fn resolve_package_archive_file(
+    output_directory: &FilePath,
+    basename: &str,
     file_path_configuration: &FilePathConfiguration,
 ) -> FilePath {
     resolve_archive_directory(output_directory)
-        .join(&FilePath::new([package_id]))
+        .join(&FilePath::new([basename]))
         .with_extension(file_path_configuration.archive_file_extension)
 }

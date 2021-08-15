@@ -72,6 +72,9 @@ impl NinjaBuildScriptCompiler {
             "rule resolve_dependency",
             &resolve_dependency_command,
             "  description = resolving dependency of $in",
+            "rule ar",
+            "  command = ar -rs $out $in",
+            "  description = archiving package at $package_directory",
             "rule compile_ffi",
             "  command = $in -t $target $out",
         ]
@@ -132,25 +135,63 @@ impl NinjaBuildScriptCompiler {
                     &package_directory,
                 ))
             })
-            .chain(if module_targets.is_empty() {
-                None
-            } else {
-                Some(format!(
-                    "default {}",
-                    module_targets
-                        .iter()
-                        .map(|target| format!(
-                            "{}",
-                            self.file_path_converter
-                                .convert_to_os_path(target.object_file())
-                                .display()
-                        ))
-                        .collect::<Vec<_>>()
-                        .join(" ")
-                ))
-            })
             .chain(self.compile_ffi_build(package_directory, ffi_archive_file)?)
             .collect())
+    }
+
+    fn compile_main_module_target(
+        &self,
+        main_module_target: &app::infra::MainModuleTarget,
+        package_directory: &FilePath,
+    ) -> Result<Vec<String>, Box<dyn Error>> {
+        let source_file = self
+            .file_path_converter
+            .convert_to_os_path(main_module_target.source_file());
+        let object_file = self
+            .file_path_converter
+            .convert_to_os_path(main_module_target.object_file());
+        let dependency_file = object_file.with_extension("dep");
+        let ninja_dependency_file = object_file.with_extension("dd");
+        let bit_code_file = object_file.with_extension(self.bit_code_file_extension);
+        let main_function_interface_file = self
+            .file_path_converter
+            .convert_to_os_path(main_module_target.main_function_interface_file());
+
+        Ok(vec![
+            format!(
+                "build {}: compile_main {} {} | {} || {}",
+                bit_code_file.display(),
+                source_file.display(),
+                dependency_file.display(),
+                main_function_interface_file.display(),
+                ninja_dependency_file.display(),
+            ),
+            format!(
+                "  main_function_interface_file = {}",
+                main_function_interface_file.display()
+            ),
+            format!("  dyndep = {}", ninja_dependency_file.display()),
+            format!("  source_file = {}", source_file.display()),
+            format!(
+                "build {}: llc {}",
+                object_file.display(),
+                bit_code_file.display(),
+            ),
+            format!("  source_file = {}", source_file.display()),
+        ]
+        .into_iter()
+        .chain(
+            self.compile_dependency(
+                &source_file,
+                &bit_code_file,
+                &dependency_file,
+                &ninja_dependency_file,
+                &self
+                    .file_path_converter
+                    .convert_to_os_path(package_directory),
+            ),
+        )
+        .collect())
     }
 
     // TODO Remove this hack to circumvent ninja's bug where dynamic dependency files
@@ -211,6 +252,39 @@ impl NinjaBuildScriptCompiler {
             },
         )
     }
+
+    fn compile_archive(
+        &self,
+        object_files: &[&FilePath],
+        archive_file: &FilePath,
+        package_directory: &FilePath,
+    ) -> Result<Vec<String>, Box<dyn Error>> {
+        let archive_file = self.file_path_converter.convert_to_os_path(archive_file);
+
+        Ok(vec![
+            format!(
+                "build {}: ar {}",
+                archive_file.display(),
+                object_files
+                    .iter()
+                    .map(|object_file| format!(
+                        "{}",
+                        self.file_path_converter
+                            .convert_to_os_path(object_file)
+                            .display()
+                    ))
+                    .collect::<Vec<_>>()
+                    .join(" ")
+            ),
+            format!(
+                "  package_directory = {}",
+                self.file_path_converter
+                    .convert_to_os_path(package_directory)
+                    .display()
+            ),
+            format!("default {}", archive_file.display()),
+        ])
+    }
 }
 
 impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
@@ -220,6 +294,7 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
         main_module_target: Option<&app::infra::MainModuleTarget>,
         child_build_script_files: &[FilePath],
         prelude_interface_files: &[FilePath],
+        archive_file: &FilePath,
         ffi_archive_file: &FilePath,
         package_directory: &FilePath,
         output_directory: &FilePath,
@@ -238,58 +313,21 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
         .chain(self.compile_rules(prelude_interface_files, target_triple)?)
         .chain(self.compile_module_targets(module_targets, ffi_archive_file, package_directory)?)
         .chain(if let Some(main_module_target) = main_module_target {
-            let source_file = self
-                .file_path_converter
-                .convert_to_os_path(main_module_target.source_file());
-            let object_file = self
-                .file_path_converter
-                .convert_to_os_path(main_module_target.object_file());
-            let dependency_file = object_file.with_extension("dep");
-            let ninja_dependency_file = object_file.with_extension("dd");
-            let bit_code_file = object_file.with_extension(self.bit_code_file_extension);
-            let main_function_interface_file = self
-                .file_path_converter
-                .convert_to_os_path(main_module_target.main_function_interface_file());
-
-            vec![
-                format!(
-                    "build {}: compile_main {} {} | {} || {}",
-                    bit_code_file.display(),
-                    source_file.display(),
-                    dependency_file.display(),
-                    main_function_interface_file.display(),
-                    ninja_dependency_file.display(),
-                ),
-                format!(
-                    "  main_function_interface_file = {}",
-                    main_function_interface_file.display()
-                ),
-                format!("  dyndep = {}", ninja_dependency_file.display()),
-                format!("  source_file = {}", source_file.display()),
-                format!(
-                    "build {}: llc {}",
-                    object_file.display(),
-                    bit_code_file.display(),
-                ),
-                format!("  source_file = {}", source_file.display()),
-                format!("default {}", object_file.display()),
-            ]
-            .into_iter()
-            .chain(
-                self.compile_dependency(
-                    &source_file,
-                    &bit_code_file,
-                    &dependency_file,
-                    &ninja_dependency_file,
-                    &self
-                        .file_path_converter
-                        .convert_to_os_path(package_directory),
-                ),
-            )
-            .collect()
+            self.compile_main_module_target(main_module_target, package_directory)?
         } else {
             vec![]
         })
+        .chain(
+            self.compile_archive(
+                &module_targets
+                    .iter()
+                    .map(|target| target.object_file())
+                    .chain(main_module_target.map(|target| target.object_file()))
+                    .collect::<Vec<_>>(),
+                archive_file,
+                package_directory,
+            )?,
+        )
         .chain(child_build_script_files.iter().map(|file| {
             format!(
                 "subninja {}",
@@ -304,11 +342,24 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
     fn compile_external(
         &self,
         module_targets: &[app::infra::ModuleTarget],
+        archive_file: &FilePath,
         ffi_archive_file: &FilePath,
         package_directory: &FilePath,
     ) -> Result<String, Box<dyn Error>> {
         Ok(self
             .compile_module_targets(module_targets, ffi_archive_file, package_directory)?
+            .into_iter()
+            .chain(
+                self.compile_archive(
+                    &module_targets
+                        .iter()
+                        .map(|target| target.object_file())
+                        .collect::<Vec<_>>(),
+                    archive_file,
+                    package_directory,
+                )?,
+            )
+            .collect::<Vec<_>>()
             .join("\n")
             + "\n")
     }
@@ -316,6 +367,7 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
     fn compile_prelude(
         &self,
         module_targets: &[app::infra::ModuleTarget],
+        archive_file: &FilePath,
         ffi_archive_file: &FilePath,
         package_directory: &FilePath,
     ) -> Result<String, Box<dyn Error>> {
@@ -349,21 +401,18 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
                     format!("  source_file = {}", source_file.display()),
                 ]
             })
-            .chain(vec![format!(
-                "default {}",
-                module_targets
-                    .iter()
-                    .map(|target| format!(
-                        "{}",
-                        self.file_path_converter
-                            .convert_to_os_path(target.object_file())
-                            .display()
-                    ))
-                    .collect::<Vec<_>>()
-                    .join(" ")
-            )])
+            .chain(
+                self.compile_archive(
+                    &module_targets
+                        .iter()
+                        .map(|target| target.object_file())
+                        .collect::<Vec<_>>(),
+                    archive_file,
+                    package_directory,
+                )?,
+            )
             .chain(self.compile_ffi_build(package_directory, ffi_archive_file)?)
-            .collect::<Vec<String>>()
+            .collect::<Vec<_>>()
             .join("\n")
             + "\n")
     }
