@@ -35,7 +35,9 @@ impl app::infra::ApplicationLinker for ApplicationLinker {
         command_runner::run(
             Command::new(
                 package_script_finder::find(&system_package_directory, self.link_script_basename)?
-                    .ok_or({ InfrastructureError::LinkScriptNotFound(system_package_directory) })?,
+                    .ok_or(InfrastructureError::LinkScriptNotFound(
+                        system_package_directory,
+                    ))?,
             )
             .args(if let Some(target) = target {
                 vec!["-t", target]
