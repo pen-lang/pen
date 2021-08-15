@@ -18,7 +18,7 @@ pub fn read_recursively(
     )
 }
 
-pub fn read_dependencies(
+fn read_dependencies(
     infrastructure: &Infrastructure,
     configuration: &PackageConfiguration,
     output_directory: &FilePath,
