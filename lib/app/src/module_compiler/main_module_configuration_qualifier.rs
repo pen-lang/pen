@@ -1,5 +1,4 @@
-use crate::application_configuration::MainModuleConfiguration;
-use crate::error::ApplicationError;
+use crate::{application_configuration::MainModuleConfiguration, error::ApplicationError};
 use std::error::Error;
 
 pub fn qualify(

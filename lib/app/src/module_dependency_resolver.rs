@@ -1,6 +1,6 @@
-use crate::error::ApplicationError;
 use crate::{
     common::{dependency_serializer, file_path_resolver, module_id_calculator},
+    error::ApplicationError,
     infra::{FilePath, Infrastructure, OBJECT_DIRECTORY},
 };
 use std::{collections::HashMap, error::Error};

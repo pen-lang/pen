@@ -1,6 +1,4 @@
-use std::io;
-use std::path::PathBuf;
-use std::{error::Error, fmt::Display};
+use std::{error::Error, fmt::Display, io, path::PathBuf};
 
 #[derive(Debug)]
 pub enum InfrastructureError {
