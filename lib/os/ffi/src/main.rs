@@ -17,14 +17,13 @@ extern "C" {
     fn _pen_os_main(
         stack: *mut ffi::cps::Stack,
         continuation: extern "C" fn(*mut ffi::cps::Stack, f64) -> ffi::cps::Result,
-        argument: ffi::None,
     ) -> ffi::cps::Result;
 }
 
 fn main() {
     let mut stack = ffi::cps::Stack::new(INITIAL_STACK_CAPACITY);
 
-    unsafe { _pen_os_main(&mut stack, exit, ffi::None::new()) };
+    unsafe { _pen_os_main(&mut stack, exit) };
 
     unreachable!()
 }
