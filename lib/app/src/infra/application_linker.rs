@@ -5,7 +5,6 @@ pub trait ApplicationLinker {
     fn link(
         &self,
         system_package_directory: &FilePath,
-        object_files: &[FilePath],
         archive_files: &[FilePath],
         application_file: &FilePath,
         target_triple: Option<&str>,

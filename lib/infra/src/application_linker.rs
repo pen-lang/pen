@@ -23,7 +23,6 @@ impl app::infra::ApplicationLinker for ApplicationLinker {
     fn link(
         &self,
         system_package_directory: &app::infra::FilePath,
-        object_files: &[app::infra::FilePath],
         archive_files: &[app::infra::FilePath],
         application_file: &app::infra::FilePath,
         target: Option<&str>,
@@ -50,9 +49,8 @@ impl app::infra::ApplicationLinker for ApplicationLinker {
                     .convert_to_os_path(application_file),
             )
             .args(
-                object_files
+                archive_files
                     .iter()
-                    .chain(archive_files)
                     .map(|file| self.file_path_converter.convert_to_os_path(file)),
             ),
         )?;

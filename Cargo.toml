@@ -8,7 +8,6 @@ members = [
   "lib/lang",
   "lib/mir",
   "lib/mir-fmm",
-  "lib/os/ffi",
   "lib/prelude/ffi",
 ]
-exclude = ["lib/os/.pen", "lib/core/.pen", "tmp"]
+exclude = ["lib/os", "lib/core/.pen", "tmp"]

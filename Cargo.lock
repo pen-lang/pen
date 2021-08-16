@@ -40,6 +40,7 @@ dependencies = [
  "mir",
  "mir-fmm",
  "once_cell",
+ "petgraph",
  "regex",
  "serde",
  "url",
@@ -405,14 +406,6 @@ name = "once_cell"
 version = "1.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "692fcb63b64b1758029e0a96ee63e049ce8c5948587f2f7208df04625e5f6b56"
-
-[[package]]
-name = "os"
-version = "0.1.0"
-dependencies = [
- "pen-ffi 0.2.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "tempfile",
-]
 
 [[package]]
 name = "output_vt100"

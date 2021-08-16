@@ -2,6 +2,7 @@ use super::application_configuration::ApplicationConfiguration;
 use crate::{
     common::file_path_resolver,
     error::ApplicationError,
+    external_package_archive_sorter,
     infra::{FilePath, Infrastructure, EXTERNAL_PACKAGE_DIRECTORY},
     package_build_script_compiler,
 };
@@ -51,32 +52,35 @@ pub fn build(
                     .get(&application_configuration.system_package_name)
                     .ok_or(ApplicationError::SystemPackageNotFound)?,
             ),
-            &infrastructure
-                .file_system
-                .read_directory(&file_path_resolver::resolve_object_directory(
+            &vec![file_path_resolver::resolve_main_package_archive_file(
+                output_directory,
+                &infrastructure.file_path_configuration,
+            )]
+            .into_iter()
+            .chain(ensure_file(
+                infrastructure,
+                &file_path_resolver::resolve_main_package_ffi_archive_file(
                     output_directory,
-                ))?
-                .iter()
-                .filter(|file| {
-                    file.has_extension(infrastructure.file_path_configuration.object_file_extension)
-                })
-                .cloned()
-                .collect::<Vec<_>>(),
-            &infrastructure
-                .file_system
-                .read_directory(&file_path_resolver::resolve_archive_directory(
+                    &infrastructure.file_path_configuration,
+                ),
+            ))
+            .chain(
+                external_package_archive_sorter::sort(
+                    infrastructure,
+                    main_package_directory,
                     output_directory,
-                ))?
+                )?
                 .iter()
-                .filter(|file| {
-                    file.has_extension(
-                        infrastructure
-                            .file_path_configuration
-                            .archive_file_extension,
-                    )
-                })
-                .cloned()
-                .collect::<Vec<_>>(),
+                .flat_map(|url| {
+                    resolve_external_package_archive_files(infrastructure, url, output_directory)
+                }),
+            )
+            .chain(resolve_external_package_archive_files(
+                infrastructure,
+                prelude_package_url,
+                output_directory,
+            ))
+            .collect::<Vec<_>>(),
             &main_package_directory.join(&FilePath::new([
                 &application_configuration.application_filename
             ])),
@@ -129,4 +133,34 @@ fn find_external_package_build_scripts(
             vec![]
         },
     )
+}
+
+fn resolve_external_package_archive_files(
+    infrastructure: &Infrastructure,
+    package_url: &url::Url,
+    output_directory: &FilePath,
+) -> Vec<FilePath> {
+    vec![file_path_resolver::resolve_external_package_archive_file(
+        output_directory,
+        package_url,
+        &infrastructure.file_path_configuration,
+    )]
+    .into_iter()
+    .chain(ensure_file(
+        infrastructure,
+        &file_path_resolver::resolve_external_package_ffi_archive_file(
+            output_directory,
+            package_url,
+            &infrastructure.file_path_configuration,
+        ),
+    ))
+    .collect()
+}
+
+fn ensure_file(infrastructure: &Infrastructure, file: &FilePath) -> Option<FilePath> {
+    if infrastructure.file_system.exists(file) {
+        Some(file.clone())
+    } else {
+        None
+    }
 }

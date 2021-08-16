@@ -1,6 +1,7 @@
 {
   "words": [
     "aarch",
+    "algo",
     "arity",
     "bincode",
     "builddir",
@@ -20,6 +21,7 @@
     "itertools",
     "malloc",
     "mtriple",
+    "petgraph",
     "realloc",
     "renamer",
     "repr",
@@ -28,6 +30,7 @@
     "tailcallopt",
     "tempfile",
     "termcolor",
+    "toposort",
     "wasi"
   ]
 }
