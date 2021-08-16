@@ -1,31 +1,19 @@
+use std::io;
+use std::path::PathBuf;
 use std::{error::Error, fmt::Display};
 
 #[derive(Debug)]
 pub enum InfrastructureError {
-    CommandExit {
-        status_code: Option<i32>,
-    },
+    CommandExit { status_code: Option<i32> },
     CommandNotFound(String),
-    CreateDirectory {
-        path: std::path::PathBuf,
-        source: std::io::Error,
-    },
+    CreateDirectory { path: PathBuf, source: io::Error },
     EnvironmentVariableNotFound(String),
-    LinkScriptNotFound(std::path::PathBuf),
+    LinkScriptNotFound(PathBuf),
     PackageUrlSchemeNotSupported(url::Url),
-    ReadDirectory {
-        path: std::path::PathBuf,
-        source: std::io::Error,
-    },
-    ReadFile {
-        path: std::path::PathBuf,
-        source: std::io::Error,
-    },
-    TooManyFfiBuildScripts(std::path::PathBuf),
-    WriteFile {
-        path: std::path::PathBuf,
-        source: std::io::Error,
-    },
+    ReadDirectory { path: PathBuf, source: io::Error },
+    ReadFile { path: PathBuf, source: io::Error },
+    TooManyFfiBuildScripts(PathBuf),
+    WriteFile { path: PathBuf, source: io::Error },
 }
 
 impl Error for InfrastructureError {
