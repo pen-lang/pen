@@ -157,9 +157,9 @@ fn resolve_external_package_archive_files(
     .collect()
 }
 
-fn ensure_file(infrastructure: &Infrastructure, ffi_archive_file: &FilePath) -> Option<FilePath> {
-    if infrastructure.file_system.exists(ffi_archive_file) {
-        Some(ffi_archive_file.clone())
+fn ensure_file(infrastructure: &Infrastructure, file: &FilePath) -> Option<FilePath> {
+    if infrastructure.file_system.exists(file) {
+        Some(file.clone())
     } else {
         None
     }
