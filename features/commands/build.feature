@@ -64,5 +64,5 @@ Feature: Building packages
       x
     }
     """
-    When I run `pen build --target wasm32-unknown-unknown`
+    When I run `pen build --target wasm32-wasi`
     Then the exit status should be 0
