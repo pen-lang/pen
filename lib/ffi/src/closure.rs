@@ -24,8 +24,6 @@ unsafe impl Sync for Closure {}
 
 impl Drop for Closure {
     fn drop(&mut self) {
-        let drop = self.drop_function;
-
-        drop(self as *mut Self as *mut u8);
+        (self.drop_function)(self as *mut Self as *mut u8);
     }
 }

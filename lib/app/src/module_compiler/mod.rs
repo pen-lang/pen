@@ -1,5 +1,4 @@
 mod compile_configuration;
-mod error;
 mod main_module_configuration_qualifier;
 mod prelude_type_configuration_qualifier;
 

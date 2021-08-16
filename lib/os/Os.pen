@@ -264,7 +264,7 @@ translateError = \(code number) string {
   }
 }
 
-export foreign _pen_os_main = \(_ none) number {
+export foreign _pen_os_main = \() number {
   _pen_main(
     Os{
       readStdIn: _pen_os_read_stdin,
