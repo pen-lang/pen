@@ -42,12 +42,6 @@ jobs:
         if: startsWith(matrix.os, 'macos-')
       - uses: actions/setup-ruby@v1
       - run: bundler install
-      - run: |
-          rustup target add \
-            i686-unknown-linux-musl \
-            x86_64-unknown-linux-musl \
-            aarch64-unknown-linux-musl \
-            wasm32-wasi
       - run: cargo build --release
       - run: rm features/smoke/memory_leak.feature
         if: startsWith(matrix.os, 'macos-')
