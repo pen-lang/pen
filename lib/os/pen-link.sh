@@ -30,6 +30,7 @@ if [ -z "$output" ]; then
   exit 1
 elif [ -n "$target" ]; then
   target_option="--target $target"
+  rustup target add $target
 fi
 
 cd $(dirname $0)
