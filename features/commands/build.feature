@@ -50,10 +50,17 @@ Feature: Building packages
       0
     }
     """
-    When I run `pen build --target aarch64-unknown-linux-gnu`
+    And I successfully run `rustup target add <triple>`
+    When I run `pen build --target <triple>`
     Then the exit status should be 0
 
-  Scenario: Cross-build a library package
+    Examples:
+      | triple                     |
+      | i686-unknown-linux-musl    |
+      | x86_64-unknown-linux-musl  |
+      | aarch64-unknown-linux-musl |
+
+  Scenario Outline: Cross-build a library package
     Given a file named "pen.json" with:
     """json
     { "dependencies": {} }
@@ -64,5 +71,13 @@ Feature: Building packages
       x
     }
     """
-    When I run `pen build --target wasm32-wasi`
+    And I successfully run `rustup target add <triple>`
+    When I run `pen build --target <triple>`
     Then the exit status should be 0
+
+    Examples:
+      | triple                     |
+      | i686-unknown-linux-musl    |
+      | x86_64-unknown-linux-musl  |
+      | aarch64-unknown-linux-musl |
+      | wasm32-wasi                |
