@@ -28,6 +28,7 @@ impl NinjaBuildScriptCompiler {
         target_triple: Option<&str>,
     ) -> Result<Vec<String>, Box<dyn Error>> {
         let llc = llvm_command_finder::find("llc")?;
+        let ar = llvm_command_finder::find("llvm-ar")?;
 
         let resolve_dependency_command = format!(
             "  command = pen resolve-dependency -o $builddir -p $package_directory {} $in $object_file $out",
@@ -73,7 +74,7 @@ impl NinjaBuildScriptCompiler {
             &resolve_dependency_command,
             "  description = resolving dependency of $in",
             "rule ar",
-            "  command = llvm-ar crs $out $in",
+            &format!("  command = {} crs $out $in", ar.display()),
             "  description = archiving package at $package_directory",
             "rule compile_ffi",
             "  command = $in -t $target $out",
