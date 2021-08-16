@@ -1,10 +1,8 @@
-mod error;
-
+use crate::error::ApplicationError;
 use crate::{
     common::{dependency_serializer, file_path_resolver, module_id_calculator},
     infra::{FilePath, Infrastructure, OBJECT_DIRECTORY},
 };
-use error::ModuleDependencyResolverError;
 use std::{collections::HashMap, error::Error};
 
 #[allow(clippy::too_many_arguments)]
@@ -41,9 +39,7 @@ pub fn resolve(
                     package_configuration
                         .dependencies
                         .get(path.package())
-                        .ok_or_else(|| {
-                            ModuleDependencyResolverError::PackageNotFound(path.package().into())
-                        })?,
+                        .ok_or_else(|| ApplicationError::PackageNotFound(path.package().into()))?,
                 ),
                 path.components(),
                 &infrastructure.file_path_configuration,

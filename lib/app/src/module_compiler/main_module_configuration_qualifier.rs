@@ -1,5 +1,5 @@
-use super::error::ModuleCompilerError;
 use crate::application_configuration::MainModuleConfiguration;
+use crate::error::ApplicationError;
 use std::error::Error;
 
 pub fn qualify(
@@ -15,7 +15,7 @@ pub fn qualify(
             .find(|alias| {
                 alias.original_name() == configuration.main_function_type_name && alias.is_public()
             })
-            .ok_or(ModuleCompilerError::MainFunctionTypeNotFound)?
+            .ok_or(ApplicationError::MainFunctionTypeNotFound)?
             .name()
             .into(),
     })
