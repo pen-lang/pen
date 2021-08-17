@@ -52,7 +52,7 @@ cargo build --release --quiet $target_option
 binary=target/$target/release/os-app
 
 if [ -r $binary.wasm ]; then
-  cp $binary.wasm $output
-else
-  cp $binary $output
+  binary=$binary.wasm
 fi
+
+cp $binary $output
