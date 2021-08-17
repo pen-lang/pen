@@ -1,8 +1,15 @@
 github.com/cucumber/gherkin-go v5.1.0+incompatible h1:RCvyVI6KQLI2IJkijZBeJcE4K3U7DnhQ1RjD7VV+AIk=
 github.com/cucumber/gherkin-go v5.1.0+incompatible/go.mod h1:bYJ65F+CDEAL70FXAu7/ef4ayC/NhRXO8zEW3IB21w0=
+github.com/cucumber/gherkin-go/v19 v19.0.3 h1:mMSKu1077ffLbTJULUfM5HPokgeBcIGboyeNUof1MdE=
+github.com/cucumber/gherkin-go/v19 v19.0.3/go.mod h1:jY/NP6jUtRSArQQJ5h1FXOUgk5fZK24qtE7vKi776Vw=
+github.com/cucumber/messages-go/v16 v16.0.0/go.mod h1:EJcyR5Mm5ZuDsKJnT2N9KRnBK30BGjtYotDKpwQ0v6g=
+github.com/cucumber/messages-go/v16 v16.0.1 h1:fvkpwsLgnIm0qugftrw2YwNlio+ABe2Iu94Ap8GMYIY=
+github.com/cucumber/messages-go/v16 v16.0.1/go.mod h1:EJcyR5Mm5ZuDsKJnT2N9KRnBK30BGjtYotDKpwQ0v6g=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/docopt/docopt-go v0.0.0-20180111231733-ee0de3bc6815 h1:bWDMxwH3px2JBh6AyO7hdCn/PkvCZXii8TGj7sbtEbQ=
 github.com/docopt/docopt-go v0.0.0-20180111231733-ee0de3bc6815/go.mod h1:WwZ+bS3ebgob9U8Nd0kOddGdZWjyMGR8Wziv+TBNwSE=
+github.com/gofrs/uuid v4.0.0+incompatible h1:1SD/1F5pU8p29ybwgQSwpQk+mwdRrXCYuPhW6m+TnJw=
+github.com/gofrs/uuid v4.0.0+incompatible/go.mod h1:b2aQJv3Z4Fp6yNu3cdSllBxTCLRxnplIgP/c0N/04lM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/raviqqe/gherkin2markdown v0.0.0-20210719155857-e67d7070d01c h1:oPpilw3zwViiffDgDWcA4nKdfiSTC22TLqRcJZNGgqU=
 github.com/raviqqe/gherkin2markdown v0.0.0-20210719155857-e67d7070d01c/go.mod h1:wABwkm4MYdyFNenLnkFWFS6rcKf06IjqGS4AcarSj04=
@@ -10,6 +17,8 @@ github.com/raviqqe/gherkin2markdown v0.0.0-20210720005402-04d498e21684 h1:SyjUPI
 github.com/raviqqe/gherkin2markdown v0.0.0-20210720005402-04d498e21684/go.mod h1:wABwkm4MYdyFNenLnkFWFS6rcKf06IjqGS4AcarSj04=
 github.com/raviqqe/gherkin2markdown v0.0.0-20210720061714-b8cc673d62bc h1:aboKy2zZItp+zwRHPB9fuxzW0Bj14oRpAs52dU4+vW4=
 github.com/raviqqe/gherkin2markdown v0.0.0-20210720061714-b8cc673d62bc/go.mod h1:wABwkm4MYdyFNenLnkFWFS6rcKf06IjqGS4AcarSj04=
+github.com/raviqqe/gherkin2markdown v0.0.0-20210817012807-29d4bf48914b h1:wQriAbt38JYfu2VYiLfnNiF/WuIXiS4AeCR1ap9koFI=
+github.com/raviqqe/gherkin2markdown v0.0.0-20210817012807-29d4bf48914b/go.mod h1:aHcRXHoelgyheBcHb1O2QjF9UhOyrRXhIwoub6TqRnQ=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/testify v1.7.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/willf/pad v0.0.0-20200313202418-172aa767f2a4 h1:Y+IMUhhlO9FLTZpNrUAMWOr7Lh0tHDKu0nrDVhp6A7o=
