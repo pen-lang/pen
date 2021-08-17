@@ -1,5 +1,5 @@
 #[no_mangle]
-extern "C" fn _pen_convert_number_to_string(number: ffi::Number) -> ffi::ByteString {
+fn _pen_convert_number_to_string(number: ffi::Number) -> ffi::ByteString {
     format!("{}", f64::from(number)).into()
 }
 

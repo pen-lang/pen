@@ -1,10 +1,10 @@
 #[no_mangle]
-extern "C" fn _pen_join_strings(one: ffi::ByteString, other: ffi::ByteString) -> ffi::ByteString {
+fn _pen_join_strings(one: ffi::ByteString, other: ffi::ByteString) -> ffi::ByteString {
     one.join(&other)
 }
 
 #[no_mangle]
-extern "C" fn _pen_slice_string(
+fn _pen_slice_string(
     string: ffi::ByteString,
     start: ffi::Number,
     end: ffi::Number,

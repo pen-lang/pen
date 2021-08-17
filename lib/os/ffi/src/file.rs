@@ -35,7 +35,7 @@ impl From<File> for FfiFile {
 }
 
 #[no_mangle]
-extern "C" fn _pen_os_open_file(
+fn _pen_os_open_file(
     path: ffi::ByteString,
     options: ffi::Arc<OpenFileOptions>,
 ) -> ffi::Arc<FfiResult<ffi::Any>> {
@@ -54,7 +54,7 @@ fn open_file(
 }
 
 #[no_mangle]
-extern "C" fn _pen_os_read_file(file: ffi::Any) -> ffi::Arc<FfiResult<ffi::ByteString>> {
+fn _pen_os_read_file(file: ffi::Any) -> ffi::Arc<FfiResult<ffi::ByteString>> {
     ffi::Arc::new(read_file(file).into())
 }
 
@@ -63,10 +63,7 @@ fn read_file(file: ffi::Any) -> Result<ffi::ByteString, OsError> {
 }
 
 #[no_mangle]
-extern "C" fn _pen_os_write_file(
-    file: ffi::Any,
-    bytes: ffi::ByteString,
-) -> ffi::Arc<FfiResult<ffi::Number>> {
+fn _pen_os_write_file(file: ffi::Any, bytes: ffi::ByteString) -> ffi::Arc<FfiResult<ffi::Number>> {
     ffi::Arc::new(write_file(file, bytes).into())
 }
 
@@ -82,7 +79,7 @@ fn lock_file(file: &FfiFile) -> Result<RwLockWriteGuard<File>, OsError> {
 }
 
 #[no_mangle]
-extern "C" fn _pen_os_copy_file(
+fn _pen_os_copy_file(
     src: ffi::ByteString,
     dest: ffi::ByteString,
 ) -> ffi::Arc<FfiResult<ffi::None>> {
@@ -99,7 +96,7 @@ fn copy_file(src: ffi::ByteString, dest: ffi::ByteString) -> Result<(), OsError>
 }
 
 #[no_mangle]
-extern "C" fn _pen_os_remove_file(path: ffi::ByteString) -> ffi::Arc<FfiResult<ffi::None>> {
+fn _pen_os_remove_file(path: ffi::ByteString) -> ffi::Arc<FfiResult<ffi::None>> {
     ffi::Arc::new(remove_file(path).into())
 }
 
