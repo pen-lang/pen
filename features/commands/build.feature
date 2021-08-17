@@ -59,6 +59,7 @@ Feature: Building packages
       | i686-unknown-linux-musl    |
       | x86_64-unknown-linux-musl  |
       | aarch64-unknown-linux-musl |
+      | wasm32-wasi                |
 
   Scenario Outline: Cross-build a library package
     Given a file named "pen.json" with:
