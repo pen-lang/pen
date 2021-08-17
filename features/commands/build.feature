@@ -50,12 +50,12 @@ Feature: Building packages
       0
     }
     """
-    And I successfully run `rustup target add <triple>`
-    When I run `pen build --target <triple>`
+    And I successfully run `rustup target add <target>`
+    When I run `pen build --target <target>`
     Then the exit status should be 0
 
     Examples:
-      | triple                     |
+      | target                     |
       | i686-unknown-linux-musl    |
       | x86_64-unknown-linux-musl  |
       | aarch64-unknown-linux-musl |
@@ -71,12 +71,12 @@ Feature: Building packages
       x
     }
     """
-    And I successfully run `rustup target add <triple>`
-    When I run `pen build --target <triple>`
+    And I successfully run `rustup target add <target>`
+    When I run `pen build --target <target>`
     Then the exit status should be 0
 
     Examples:
-      | triple                     |
+      | target                     |
       | i686-unknown-linux-musl    |
       | x86_64-unknown-linux-musl  |
       | aarch64-unknown-linux-musl |
