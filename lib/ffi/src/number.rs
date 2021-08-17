@@ -1,6 +1,6 @@
 use crate::type_information;
 
-#[repr(C)]
+#[repr(transparent)]
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct Number {
     value: f64,
