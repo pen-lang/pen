@@ -2,5 +2,4 @@
 
 set -e
 
-curl -fsSL https://apt.llvm.org/llvm.sh | sudo bash -s 12
-sudo apt install clang ninja-build valgrind zsh
+brew install llvm@12 ninja rust valgrind
