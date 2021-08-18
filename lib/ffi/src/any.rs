@@ -16,8 +16,8 @@ impl Any {
         self.type_information
     }
 
-    pub fn payload(&self) -> u64 {
-        self.payload
+    pub fn payload(&self) -> &u64 {
+        &self.payload
     }
 }
 
@@ -41,6 +41,7 @@ impl Drop for Any {
 pub trait AnyLike: Sized {
     fn into_any(self) -> Any;
     fn from_any(any: Any) -> Option<Self>;
+    fn as_inner(any: &Any) -> Option<&Self>;
 }
 
 #[repr(C)]
@@ -86,9 +87,17 @@ macro_rules! type_information {
 
                 fn from_any(any: $crate::Any) -> Option<$type> {
                     if std::ptr::eq(any.type_information(), &TYPE_INFORMATION) {
-                        let x = unsafe { transmute_from_payload(any.payload()) };
+                        let x = unsafe { transmute_from_payload(*any.payload()) };
                         std::mem::forget(any);
                         Some(x)
+                    } else {
+                        None
+                    }
+                }
+
+                fn as_inner(any: &$crate::Any) -> Option<&$type> {
+                    if std::ptr::eq(any.type_information(), &TYPE_INFORMATION) {
+                        Some(unsafe { std::mem::transmute(any.payload()) })
                     } else {
                         None
                     }
@@ -148,6 +157,18 @@ mod tests {
 
             drop(x.clone());
             drop(x)
+        }
+
+        #[test]
+        fn as_inner() {
+            let x = TypeA {
+                value: Rc::new(42.0),
+            }
+            .into_any();
+
+            let y: Option<&TypeA> = AnyLike::as_inner(&x);
+
+            drop(y.clone());
         }
     }
 
