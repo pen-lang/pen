@@ -126,7 +126,7 @@ dependencies = [
 name = "core"
 version = "0.1.0"
 dependencies = [
- "pen-ffi 0.2.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "pen-ffi 0.2.4 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -377,9 +377,9 @@ checksum = "a3e378b66a060d48947b590737b30a1be76706c8dd7b8ba0f2fe3989c68a853f"
 
 [[package]]
 name = "memchr"
-version = "2.4.0"
+version = "2.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b16bd47d9e329435e309c58469fe0791c2d0d1ba96ec0954152a5ae2b04387dc"
+checksum = "308cc39be01b73d0d18f82a0e7b2a3df85245f84af96fdddc5d202d27e47b86a"
 
 [[package]]
 name = "mir"
@@ -455,13 +455,13 @@ dependencies = [
 
 [[package]]
 name = "pen-ffi"
-version = "0.2.3"
+version = "0.2.4"
 
 [[package]]
 name = "pen-ffi"
-version = "0.2.3"
+version = "0.2.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e8b5b3843a93f44e098bc699031b5ceec71df1e27cb6e460eab228577f2bb1fe"
+checksum = "150e275fde223298ff1d85f74e4fb8f0558edba03293c1964f236602479c2f63"
 
 [[package]]
 name = "percent-encoding"
@@ -498,7 +498,7 @@ checksum = "ac74c624d6b2d21f425f752262f42188365d7b8ff1aff74c82e45136510a4857"
 name = "prelude"
 version = "0.1.0"
 dependencies = [
- "pen-ffi 0.2.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "pen-ffi 0.2.4 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
