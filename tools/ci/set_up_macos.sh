@@ -2,8 +2,9 @@
 
 set -e
 
-. $(dirname $0)/utilities.sh
+brew install coreutils ninja llvm@12
 
-brew install llvm@12 ninja
+llvm_prefix=$(brew --prefix)/opt/llvm@12
 
-set_homebrew_llvm_environment_variables
+echo LLVM_SYS_120_PREFIX=$llvm_prefix >>$GITHUB_ENV
+echo PATH=$llvm_prefix/bin:$PATH >>$GITHUB_ENV

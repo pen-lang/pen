@@ -2,8 +2,5 @@
 
 set -e
 
-. $(dirname $0)/utilities.sh
-
-brew install llvm@12 ninja valgrind
-
-set_homebrew_llvm_environment_variables
+curl -fsSL https://apt.llvm.org/llvm.sh | sudo bash -s 12
+sudo apt install clang ninja-build valgrind zsh
