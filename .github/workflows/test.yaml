@@ -9,20 +9,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - run: tools/ci/set_up_ubuntu.sh
-        if: startsWith(matrix.os, 'ubuntu-')
-      - run: tools/ci/set_up_macos.sh
-        if: startsWith(matrix.os, 'macos-')
+      - run: tools/ci/set_up_os.sh ${{ matrix.os }}
       - run: cargo build
       - run: git diff --exit-code
   unit_test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - run: tools/ci/set_up_ubuntu.sh
-        if: startsWith(matrix.os, 'ubuntu-')
-      - run: tools/ci/set_up_macos.sh
-        if: startsWith(matrix.os, 'macos-')
+      - run: tools/ci/set_up_os.sh ${{ matrix.os }}
       - run: cargo test
         env:
           RUST_MIN_STACK: 8388608
@@ -36,10 +30,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
-      - run: tools/ci/set_up_ubuntu.sh
-        if: startsWith(matrix.os, 'ubuntu-')
-      - run: tools/ci/set_up_macos.sh
-        if: startsWith(matrix.os, 'macos-')
+      - run: tools/ci/set_up_os.sh ${{ matrix.os }}
       - uses: actions/setup-ruby@v1
       - run: bundler install
       - run: cargo build --release
