@@ -2,7 +2,7 @@
 
 set -e
 
-brew install ninja llvm@12 rust
+brew install coreutils ninja llvm@12
 
 llvm_prefix=$(brew --prefix)/opt/llvm@12
 
