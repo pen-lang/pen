@@ -2,12 +2,6 @@
 
 set -e
 
-if [ $# -ne 1 ]; then
-  exit 1
-fi
-
-os=$1
-
 brew install llvm@12 ninja
 
 llvm_prefix=$(brew --prefix)/opt/llvm@12
