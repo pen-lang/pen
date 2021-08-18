@@ -4,7 +4,7 @@ use std::os::raw::c_void;
 #[derive(Clone)]
 pub struct Closure {
     entry_pointer: *const c_void,
-    drop_function: fn(*mut u8),
+    drop_function: extern "C" fn(*mut u8),
     arity: usize,
 }
 
@@ -18,7 +18,7 @@ impl Closure {
     }
 }
 
-fn drop_nothing(_: *mut u8) {}
+extern "C" fn drop_nothing(_: *mut u8) {}
 
 unsafe impl Sync for Closure {}
 

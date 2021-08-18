@@ -60,14 +60,14 @@ impl ArrayInner {
 }
 
 #[no_mangle]
-fn _pen_ffi_array_get(array: ffi::Arc<Array>, index: ffi::Number) -> ffi::Any {
+extern "C" fn _pen_ffi_array_get(array: ffi::Arc<Array>, index: ffi::Number) -> ffi::Any {
     array
         .get(f64::from(index) as usize - 1)
         .unwrap_or_else(ffi::Any::default)
 }
 
 #[no_mangle]
-fn _pen_ffi_array_length(array: ffi::Arc<Array>) -> ffi::Number {
+extern "C" fn _pen_ffi_array_length(array: ffi::Arc<Array>) -> ffi::Number {
     (array.len() as f64).into()
 }
 

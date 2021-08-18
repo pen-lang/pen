@@ -13,10 +13,10 @@ mod utilities;
 const INITIAL_STACK_CAPACITY: usize = 256;
 
 #[link(name = "main")]
-extern "Rust" {
+extern "C" {
     fn _pen_os_main(
         stack: *mut ffi::cps::Stack,
-        continuation: fn(*mut ffi::cps::Stack, f64) -> ffi::cps::Result,
+        continuation: extern "C" fn(*mut ffi::cps::Stack, f64) -> ffi::cps::Result,
     ) -> ffi::cps::Result;
 }
 
@@ -28,6 +28,6 @@ fn main() {
     unreachable!()
 }
 
-fn exit(_: *mut ffi::cps::Stack, code: f64) -> ffi::cps::Result {
+extern "C" fn exit(_: *mut ffi::cps::Stack, code: f64) -> ffi::cps::Result {
     std::process::exit(code as i32)
 }

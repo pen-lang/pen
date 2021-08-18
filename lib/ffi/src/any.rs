@@ -45,8 +45,8 @@ pub trait AnyLike: Sized {
 
 #[repr(C)]
 pub struct TypeInformation {
-    pub clone: fn(u64),
-    pub drop: fn(u64),
+    pub clone: extern "C" fn(u64),
+    pub drop: extern "C" fn(u64),
 }
 
 #[macro_export]
@@ -66,13 +66,13 @@ macro_rules! type_information {
             }
 
             #[allow(clippy::forget_copy)]
-            fn clone(x: u64) {
+            extern "C" fn clone(x: u64) {
                 let x = unsafe { transmute_from_payload::<$type>(x) };
                 std::mem::forget(x.clone());
                 std::mem::forget(x);
             }
 
-            fn drop(x: u64) {
+            extern "C" fn drop(x: u64) {
                 unsafe { transmute_from_payload::<$type>(x) };
             }
 
