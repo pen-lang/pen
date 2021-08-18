@@ -9,14 +9,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - run: tools/ci/set_up_os.sh ${{ matrix.os }}
+      - run: tools/ci/set_up_os.sh
       - run: cargo build
       - run: git diff --exit-code
   unit_test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - run: tools/ci/set_up_os.sh ${{ matrix.os }}
+      - run: tools/ci/set_up_os.sh
       - run: cargo test
         env:
           RUST_MIN_STACK: 8388608
@@ -30,7 +30,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
-      - run: tools/ci/set_up_os.sh ${{ matrix.os }}
+      - run: tools/ci/set_up_os.sh
       - uses: actions/setup-ruby@v1
       - run: bundler install
       - run: cargo build --release
