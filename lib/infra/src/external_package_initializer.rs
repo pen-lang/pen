@@ -39,12 +39,12 @@ impl app::infra::ExternalPackageInitializer for ExternalPackageInitializer {
             .file_path_converter
             .convert_to_os_path(package_directory);
 
+        if let Some(directory) = directory.parent() {
+            std::fs::create_dir_all(directory)?;
+        }
+
         match url.scheme() {
             "file" | "file+relative" => {
-                if let Some(directory) = directory.parent() {
-                    std::fs::create_dir_all(directory)?;
-                }
-
                 command_runner::run(Command::new("cp").arg("-r").arg(url.path()).arg(directory))?;
             }
             "git" => {
