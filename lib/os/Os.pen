@@ -11,9 +11,8 @@ import foreign "c" _pen_os_create_directory \(string) ffiNoneResult
 import foreign "c" _pen_os_remove_directory \(string) ffiNoneResult
 import foreign "c" _pen_os_get_arguments \() array
 import foreign "c" _pen_os_get_environment_variable \(string) ffiStringResult
-import foreign "c" _pen_ffi_array_get \(array, number) any
-import foreign "c" _pen_ffi_array_length \(array) number
-import foreign "c" _pen_ffi_any_to_string \(any) string
+import foreign "c" _pen_ffi_string_array_get \(array, number) string
+import foreign "c" _pen_ffi_string_array_length \(array) number
 import foreign _pen_main \(Os) number
 
 type Os {
@@ -230,11 +229,11 @@ convertArrayToStrings = \(array array) [string] {
 }
 
 convertArrayToStringsFromIndex = \(array array, index number) [string] {
-  if index > _pen_ffi_array_length(array) {
+  if index > _pen_ffi_string_array_length(array) {
     [string;]
   } else {
     [string;
-      _pen_ffi_any_to_string(_pen_ffi_array_get(array, index)),
+      _pen_ffi_string_array_get(array, index),
       ...convertArrayToStringsFromIndex(array, index + 1),
     ]
   }

@@ -1,8 +1,8 @@
-use super::array::Array;
+use super::string_array::StringArray;
 use ffi::AnyLike;
 
 #[no_mangle]
-extern "C" fn _pen_os_get_arguments() -> ffi::Arc<Array> {
+extern "C" fn _pen_os_get_arguments() -> ffi::Arc<StringArray> {
     ffi::Arc::new(
         std::env::args()
             .skip(1)

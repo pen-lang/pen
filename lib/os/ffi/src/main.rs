@@ -1,5 +1,4 @@
 mod argument;
-mod array;
 mod directory;
 mod environment_variable;
 mod error;
@@ -8,6 +7,7 @@ mod heap;
 mod open_file_options;
 mod result;
 mod stdio;
+mod string_array;
 mod utilities;
 
 const INITIAL_STACK_CAPACITY: usize = 256;
