@@ -16,7 +16,7 @@ Feature: OS
     import Core'String
     import System'Os
 
-    main = \(os Os'Os) number {
+    main = \(os Os'Context) number {
       if _ = Os'WriteFile(os, Os'StdOut(), String'Join(Os'Arguments(os), " ")); number {
         0
       } else {
@@ -34,13 +34,13 @@ Feature: OS
     import Core'String
     import System'Os
 
-    printEnvironmentVariable = \(os Os'Os) none | error {
+    printEnvironmentVariable = \(os Os'Context) none | error {
       Os'WriteFile(os, Os'StdOut(), Os'EnvironmentVariable(os, "FOO")?)?
 
       none
     }
 
-    main = \(os Os'Os) number {
+    main = \(os Os'Context) number {
       if _ = printEnvironmentVariable(os); none {
         0
       } else {
@@ -58,7 +58,7 @@ Feature: OS
     """pen
     import System'Os
 
-    main = \(os Os'Os) number {
+    main = \(os Os'Context) number {
       if f = Os'OpenFile(os, "./foo.txt"); Os'File {
         0
       } else {
@@ -75,7 +75,7 @@ Feature: OS
     """pen
     import System'Os
 
-    readFile = \(os Os'Os) none | error {
+    readFile = \(os Os'Context) none | error {
       f = Os'OpenFile(os, "foo.txt")?
       d = Os'ReadFile(os, f)?
       f = Os'OpenFileWithOptions(
@@ -92,7 +92,7 @@ Feature: OS
       none
     }
 
-    main = \(os Os'Os) number {
+    main = \(os Os'Context) number {
       if _ = readFile(os); none {
         0
       } else {
@@ -110,7 +110,7 @@ Feature: OS
     """pen
     import System'Os
 
-    writeFile = \(os Os'Os) none | error {
+    writeFile = \(os Os'Context) none | error {
       f = Os'OpenFileWithOptions(
         os,
         "./foo.txt",
@@ -122,7 +122,7 @@ Feature: OS
       none
     }
 
-    main = \(os Os'Os) number {
+    main = \(os Os'Context) number {
       if _ = writeFile(os); none {
         0
       } else {
@@ -140,7 +140,7 @@ Feature: OS
     """pen
     import System'Os
 
-    main = \(os Os'Os) number {
+    main = \(os Os'Context) number {
       if _ = Os'CopyFile(os, "foo.txt", "bar.txt"); none {
         0
       } else {
@@ -158,7 +158,7 @@ Feature: OS
     """pen
     import System'Os
 
-    main = \(os Os'Os) number {
+    main = \(os Os'Context) number {
       if _ = Os'RemoveFile(os, "foo.txt"); none {
         0
       } else {
@@ -177,7 +177,7 @@ Feature: OS
     import System'Os
     import Core'String
 
-    readDirectory = \(os Os'Os) none | error {
+    readDirectory = \(os Os'Context) none | error {
       Os'WriteFile(
         os,
         Os'StdOut(),
@@ -187,7 +187,7 @@ Feature: OS
       none
     }
 
-    main = \(os Os'Os) number {
+    main = \(os Os'Context) number {
       if _ = readDirectory(os); none {
         0
       } else {
@@ -205,7 +205,7 @@ Feature: OS
     """pen
     import System'Os
 
-    main = \(os Os'Os) number {
+    main = \(os Os'Context) number {
       if _ = Os'CreateDirectory(os, "foo"); none {
         0
       } else {
@@ -222,7 +222,7 @@ Feature: OS
     """pen
     import System'Os
 
-    main = \(os Os'Os) number {
+    main = \(os Os'Context) number {
       if _ = Os'RemoveDirectory(os, "foo"); none {
         0
       } else {
