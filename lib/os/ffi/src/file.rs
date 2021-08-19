@@ -116,3 +116,19 @@ fn remove_file(path: ffi::ByteString) -> Result<(), OsError> {
 
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::io::Write;
+
+    #[test]
+    fn convert_to_any() {
+        OsFileInner::from_any(OsFileInner::new(tempfile::tempfile().unwrap()).into_any())
+            .unwrap()
+            .get_mut()
+            .unwrap()
+            .write_all(b"foo")
+            .unwrap();
+    }
+}

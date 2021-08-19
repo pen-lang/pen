@@ -20,6 +20,7 @@ jobs:
       - run: cargo test
         env:
           RUST_MIN_STACK: 8388608
+      - run: cd lib/os/ffi && cargo test
   integration_test:
     strategy:
       fail-fast: false
