@@ -36,7 +36,7 @@ Feature: Memory leak
     main = \(ctx Os'Context) number {
       Os'WriteFile(ctx, Os'StdOut(), "Hello, world!\n")
 
-      main(os)
+      main(ctx)
     }
     """
     When I successfully run `pen build`

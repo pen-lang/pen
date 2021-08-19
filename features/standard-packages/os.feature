@@ -17,7 +17,7 @@ Feature: OS
     import System'Os
 
     main = \(ctx Os'Context) number {
-      if _ = Os'WriteFile(ctx, Os'StdOut(), String'Join(Os'Arguments(os), " ")); number {
+      if _ = Os'WriteFile(ctx, Os'StdOut(), String'Join(Os'Arguments(ctx), " ")); number {
         0
       } else {
         1
@@ -41,7 +41,7 @@ Feature: OS
     }
 
     main = \(ctx Os'Context) number {
-      if _ = printEnvironmentVariable(os); none {
+      if _ = printEnvironmentVariable(ctx); none {
         0
       } else {
         1
@@ -93,7 +93,7 @@ Feature: OS
     }
 
     main = \(ctx Os'Context) number {
-      if _ = readFile(os); none {
+      if _ = readFile(ctx); none {
         0
       } else {
         1
@@ -123,7 +123,7 @@ Feature: OS
     }
 
     main = \(ctx Os'Context) number {
-      if _ = writeFile(os); none {
+      if _ = writeFile(ctx); none {
         0
       } else {
         1
@@ -188,7 +188,7 @@ Feature: OS
     }
 
     main = \(ctx Os'Context) number {
-      if _ = readDirectory(os); none {
+      if _ = readDirectory(ctx); none {
         0
       } else {
         1
