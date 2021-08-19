@@ -160,8 +160,8 @@
 <pre><code class="language-pen">import Core'String
 import System'Os
 
-main = \(os Os'Os) number {
-  if _ = Os'WriteFile(os, Os'StdOut(), String'Join(Os'Arguments(os), &quot; &quot;)); number {
+main = \(ctx Os'Context) number {
+  if _ = Os'WriteFile(ctx, Os'StdOut(), String'Join(Os'Arguments(ctx), &quot; &quot;)); number {
     0
   } else {
     1
@@ -176,14 +176,14 @@ main = \(os Os'Os) number {
 <pre><code class="language-pen">import Core'String
 import System'Os
 
-printEnvironmentVariable = \(os Os'Os) none | error {
-  Os'WriteFile(os, Os'StdOut(), Os'EnvironmentVariable(os, &quot;FOO&quot;)?)?
+printEnvironmentVariable = \(ctx Os'Context) none | error {
+  Os'WriteFile(ctx, Os'StdOut(), Os'EnvironmentVariable(ctx, &quot;FOO&quot;)?)?
 
   none
 }
 
-main = \(os Os'Os) number {
-  if _ = printEnvironmentVariable(os); none {
+main = \(ctx Os'Context) number {
+  if _ = printEnvironmentVariable(ctx); none {
     0
   } else {
     1
@@ -198,8 +198,8 @@ main = \(os Os'Os) number {
 <p><em>Given</em> a file named &quot;Main.pen&quot; with:</p>
 <pre><code class="language-pen">import System'Os
 
-main = \(os Os'Os) number {
-  if f = Os'OpenFile(os, &quot;./foo.txt&quot;); Os'File {
+main = \(ctx Os'Context) number {
+  if f = Os'OpenFile(ctx, &quot;./foo.txt&quot;); Os'File {
     0
   } else {
     1
@@ -213,11 +213,11 @@ main = \(os Os'Os) number {
 <p><em>Given</em> a file named &quot;Main.pen&quot; with:</p>
 <pre><code class="language-pen">import System'Os
 
-readFile = \(os Os'Os) none | error {
-  f = Os'OpenFile(os, &quot;foo.txt&quot;)?
-  d = Os'ReadFile(os, f)?
+readFile = \(ctx Os'Context) none | error {
+  f = Os'OpenFile(ctx, &quot;foo.txt&quot;)?
+  d = Os'ReadFile(ctx, f)?
   f = Os'OpenFileWithOptions(
-    os,
+    ctx,
     &quot;bar.txt&quot;,
     Os'OpenFileOptions{
       ...Os'DefaultOpenFileOptions(),
@@ -225,13 +225,13 @@ readFile = \(os Os'Os) none | error {
       Write: true,
     },
   )?
-  Os'WriteFile(os, f, d)?
+  Os'WriteFile(ctx, f, d)?
 
   none
 }
 
-main = \(os Os'Os) number {
-  if _ = readFile(os); none {
+main = \(ctx Os'Context) number {
+  if _ = readFile(ctx); none {
     0
   } else {
     1
@@ -246,20 +246,20 @@ main = \(os Os'Os) number {
 <p><em>Given</em> a file named &quot;Main.pen&quot; with:</p>
 <pre><code class="language-pen">import System'Os
 
-writeFile = \(os Os'Os) none | error {
+writeFile = \(ctx Os'Context) none | error {
   f = Os'OpenFileWithOptions(
-    os,
+    ctx,
     &quot;./foo.txt&quot;,
     Os'OpenFileOptions{...Os'DefaultOpenFileOptions(), Write: true},
   )?
 
-  Os'WriteFile(os, f, &quot;foo&quot;)?
+  Os'WriteFile(ctx, f, &quot;foo&quot;)?
 
   none
 }
 
-main = \(os Os'Os) number {
-  if _ = writeFile(os); none {
+main = \(ctx Os'Context) number {
+  if _ = writeFile(ctx); none {
     0
   } else {
     1
@@ -274,8 +274,8 @@ main = \(os Os'Os) number {
 <p><em>Given</em> a file named &quot;Main.pen&quot; with:</p>
 <pre><code class="language-pen">import System'Os
 
-main = \(os Os'Os) number {
-  if _ = Os'CopyFile(os, &quot;foo.txt&quot;, &quot;bar.txt&quot;); none {
+main = \(ctx Os'Context) number {
+  if _ = Os'CopyFile(ctx, &quot;foo.txt&quot;, &quot;bar.txt&quot;); none {
     0
   } else {
     1
@@ -290,8 +290,8 @@ main = \(os Os'Os) number {
 <p><em>Given</em> a file named &quot;Main.pen&quot; with:</p>
 <pre><code class="language-pen">import System'Os
 
-main = \(os Os'Os) number {
-  if _ = Os'RemoveFile(os, &quot;foo.txt&quot;); none {
+main = \(ctx Os'Context) number {
+  if _ = Os'RemoveFile(ctx, &quot;foo.txt&quot;); none {
     0
   } else {
     1
@@ -307,18 +307,18 @@ main = \(os Os'Os) number {
 <pre><code class="language-pen">import System'Os
 import Core'String
 
-readDirectory = \(os Os'Os) none | error {
+readDirectory = \(ctx Os'Context) none | error {
   Os'WriteFile(
-    os,
+    ctx,
     Os'StdOut(),
-    String'Join(Os'ReadDirectory(os, &quot;.&quot;)?, &quot;\n&quot;),
+    String'Join(Os'ReadDirectory(ctx, &quot;.&quot;)?, &quot;\n&quot;),
   )?
 
   none
 }
 
-main = \(os Os'Os) number {
-  if _ = readDirectory(os); none {
+main = \(ctx Os'Context) number {
+  if _ = readDirectory(ctx); none {
     0
   } else {
     1
@@ -333,8 +333,8 @@ main = \(os Os'Os) number {
 <p><em>Given</em> a file named &quot;Main.pen&quot; with:</p>
 <pre><code class="language-pen">import System'Os
 
-main = \(os Os'Os) number {
-  if _ = Os'CreateDirectory(os, &quot;foo&quot;); none {
+main = \(ctx Os'Context) number {
+  if _ = Os'CreateDirectory(ctx, &quot;foo&quot;); none {
     0
   } else {
     1
@@ -348,8 +348,8 @@ main = \(os Os'Os) number {
 <p><em>Given</em> a file named &quot;Main.pen&quot; with:</p>
 <pre><code class="language-pen">import System'Os
 
-main = \(os Os'Os) number {
-  if _ = Os'RemoveDirectory(os, &quot;foo&quot;); none {
+main = \(ctx Os'Context) number {
+  if _ = Os'RemoveDirectory(ctx, &quot;foo&quot;); none {
     0
   } else {
     1
