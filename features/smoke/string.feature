@@ -14,7 +14,7 @@ Feature: String
     """pen
     import System'Os
 
-    main = \(os Os'Os) number {
+    main = \(ctx Os'Context) number {
       if "foo" == "foo" {
         0
       } else {

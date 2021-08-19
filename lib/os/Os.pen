@@ -13,9 +13,9 @@ import foreign "c" _pen_os_get_arguments \() array
 import foreign "c" _pen_os_get_environment_variable \(string) ffiStringResult
 import foreign "c" _pen_ffi_string_array_get \(array, number) string
 import foreign "c" _pen_ffi_string_array_length \(array) number
-import foreign _pen_main \(Os) number
+import foreign _pen_main \(Context) number
 
-type Os {
+type Context {
   readStdIn \() ffiStringResult
   writeStdOut \(string) ffiWriteResult
   writeStdErr \(string) ffiWriteResult
@@ -106,8 +106,8 @@ DefaultOpenFileOptions = \() OpenFileOptions {
   }
 }
 
-OpenFileWithOptions = \(os Os, path string, opts OpenFileOptions) File | error {
-  r = os.openFile(path, opts)
+OpenFileWithOptions = \(ctx Context, path string, opts OpenFileOptions) File | error {
+  r = ctx.openFile(path, opts)
 
   if r.error == 0 {
     File{inner: r.file}
@@ -116,23 +116,23 @@ OpenFileWithOptions = \(os Os, path string, opts OpenFileOptions) File | error {
   }
 }
 
-OpenFile = \(os Os, path string) File | error {
+OpenFile = \(ctx Context, path string) File | error {
   OpenFileWithOptions(
-    os,
+    ctx,
     path,
     OpenFileOptions{...DefaultOpenFileOptions(), Read: true}
   )
 }
 
-ReadFile = \(os Os, file File) string | error {
+ReadFile = \(ctx Context, file File) string | error {
   r = if f = file.inner; stdIn {
-    os.readStdIn()
+    ctx.readStdIn()
   } else if stdOut {
     error("cannot read from stdout")
   } else if stdErr {
     error("cannot read from stderr")
   } else if file {
-    os.readFile(f)
+    ctx.readFile(f)
   }?
 
   if r.error == 0 {
@@ -142,15 +142,15 @@ ReadFile = \(os Os, file File) string | error {
   }
 }
 
-WriteFile = \(os Os, file File, data string) number | error {
+WriteFile = \(ctx Context, file File, data string) number | error {
   r = if f = file.inner; stdIn {
     error("cannot write to stdin")
   } else if stdOut {
-    os.writeStdOut(data)
+    ctx.writeStdOut(data)
   } else if stdErr {
-    os.writeStdErr(data)
+    ctx.writeStdErr(data)
   } else {
-    os.writeFile(f, data)
+    ctx.writeFile(f, data)
   }?
 
   if r.error == 0 {
@@ -160,8 +160,8 @@ WriteFile = \(os Os, file File, data string) number | error {
   }
 }
 
-CopyFile = \(os Os, src string, dest string) none | error {
-  r = os.copyFile(src, dest)
+CopyFile = \(ctx Context, src string, dest string) none | error {
+  r = ctx.copyFile(src, dest)
 
   if r.error == 0 {
     none
@@ -170,8 +170,8 @@ CopyFile = \(os Os, src string, dest string) none | error {
   }
 }
 
-RemoveFile = \(os Os, path string) none | error {
-  r = os.removeFile(path)
+RemoveFile = \(ctx Context, path string) none | error {
+  r = ctx.removeFile(path)
 
   if r.error == 0 {
     none
@@ -180,8 +180,8 @@ RemoveFile = \(os Os, path string) none | error {
   }
 }
 
-ReadDirectory = \(os Os, path string) [string] | error {
-  r = os.readDirectory(path)
+ReadDirectory = \(ctx Context, path string) [string] | error {
+  r = ctx.readDirectory(path)
 
   if r.error == 0 {
     convertArrayToStrings(r.paths)
@@ -190,8 +190,8 @@ ReadDirectory = \(os Os, path string) [string] | error {
   }
 }
 
-CreateDirectory = \(os Os, path string) none | error {
-  r = os.createDirectory(path)
+CreateDirectory = \(ctx Context, path string) none | error {
+  r = ctx.createDirectory(path)
 
   if r.error == 0 {
     none
@@ -200,8 +200,8 @@ CreateDirectory = \(os Os, path string) none | error {
   }
 }
 
-RemoveDirectory = \(os Os, path string) none | error {
-  r = os.removeDirectory(path)
+RemoveDirectory = \(ctx Context, path string) none | error {
+  r = ctx.removeDirectory(path)
 
   if r.error == 0 {
     none
@@ -210,12 +210,12 @@ RemoveDirectory = \(os Os, path string) none | error {
   }
 }
 
-Arguments = \(os Os) [string] {
-  convertArrayToStrings(os.getArguments())
+Arguments = \(ctx Context) [string] {
+  convertArrayToStrings(ctx.getArguments())
 }
 
-EnvironmentVariable = \(os Os, name string) string | error {
-  r = os.getEnvironmentVariable(name)
+EnvironmentVariable = \(ctx Context, name string) string | error {
+  r = ctx.getEnvironmentVariable(name)
 
   if r.error == 0 {
     r.value
@@ -265,7 +265,7 @@ translateError = \(code number) string {
 
 export foreign _pen_os_main = \() number {
   _pen_main(
-    Os{
+    Context{
       readStdIn: _pen_os_read_stdin,
       writeStdOut: _pen_os_write_stdout,
       writeStdErr: _pen_os_write_stderr,
