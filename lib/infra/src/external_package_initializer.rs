@@ -5,7 +5,7 @@ use std::{error::Error, path::PathBuf, process::Command, sync::Arc};
 pub struct ExternalPackageInitializer {
     file_system: Arc<dyn app::infra::FileSystem>,
     file_path_converter: Arc<FilePathConverter>,
-    language_root_host_name: &'static str,
+    language_root_scheme: &'static str,
     language_root_environment_variable: &'static str,
 }
 
@@ -13,13 +13,13 @@ impl ExternalPackageInitializer {
     pub fn new(
         file_system: Arc<dyn app::infra::FileSystem>,
         file_path_converter: Arc<FilePathConverter>,
-        language_root_host_name: &'static str,
+        language_root_scheme: &'static str,
         language_root_environment_variable: &'static str,
     ) -> Self {
         Self {
             file_system,
             file_path_converter,
-            language_root_host_name,
+            language_root_scheme,
             language_root_environment_variable,
         }
     }
@@ -35,43 +35,45 @@ impl app::infra::ExternalPackageInitializer for ExternalPackageInitializer {
             return Ok(());
         }
 
+        let directory = self
+            .file_path_converter
+            .convert_to_os_path(package_directory);
+
+        if let Some(directory) = directory.parent() {
+            std::fs::create_dir_all(directory)?;
+        }
+
         match url.scheme() {
             "file" | "file+relative" => {
-                let directory = self
-                    .file_path_converter
-                    .convert_to_os_path(package_directory);
-
-                if let Some(directory) = directory.parent() {
-                    std::fs::create_dir_all(directory)?;
-                }
-
-                command_runner::run(
-                    Command::new("cp")
-                        .arg("-r")
-                        .arg({
-                            let path = PathBuf::from(url.path());
-
-                            if url.host() == Some(url::Host::Domain(self.language_root_host_name)) {
-                                PathBuf::from(environment_variable_reader::read(
-                                    self.language_root_environment_variable,
-                                )?)
-                                .join(path.strip_prefix("/")?)
-                            } else {
-                                path
-                            }
-                        })
-                        .arg(directory),
-                )?;
+                command_runner::run(Command::new("cp").arg("-r").arg(url.path()).arg(directory))?;
             }
             "git" => {
                 command_runner::run(
-                    Command::new("git").arg("clone").arg(url.as_str()).arg(
-                        self.file_path_converter
-                            .convert_to_os_path(package_directory),
-                    ),
+                    Command::new("git")
+                        .arg("clone")
+                        .arg(url.as_str())
+                        .arg(directory),
                 )?;
             }
-            _ => return Err(InfrastructureError::PackageUrlSchemeNotSupported(url.clone()).into()),
+            _ => {
+                if url.scheme() == self.language_root_scheme {
+                    command_runner::run(
+                        Command::new("cp")
+                            .arg("-r")
+                            .arg(
+                                PathBuf::from(environment_variable_reader::read(
+                                    self.language_root_environment_variable,
+                                )?)
+                                .join(url.path().strip_prefix('/').unwrap_or_default()),
+                            )
+                            .arg(directory),
+                    )?;
+                } else {
+                    return Err(
+                        InfrastructureError::PackageUrlSchemeNotSupported(url.clone()).into(),
+                    );
+                }
+            }
         }
 
         Ok(())

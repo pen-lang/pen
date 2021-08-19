@@ -1,5 +1,4 @@
-use super::any::Any;
-use super::arc::Arc;
+use super::{any::Any, arc::Arc};
 use std::ops::Deref;
 
 #[repr(C)]

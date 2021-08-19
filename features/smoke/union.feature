@@ -4,7 +4,7 @@ Feature: Union
     """json
     {
       "dependencies": {
-        "System": "file://pen-root/lib/os"
+        "System": "pen:///lib/os"
       }
     }
     """

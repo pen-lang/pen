@@ -24,8 +24,8 @@
 ```json
 {
   "dependencies": {
-    "System": "file://pen-root/lib/os",
-    "Core": "file://pen-root/lib/core",
+    "System": "pen:///lib/os",
+    "Core": "pen:///lib/core",
     "MyLibrary": "git://github.com/john-doe/super-hello-world"
   }
 }

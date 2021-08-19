@@ -1,6 +1,6 @@
 use crate::file_path_configuration::{
     BIT_CODE_FILE_EXTENSION, BUILD_CONFIGURATION_FILENAME, FFI_BUILD_SCRIPT_BASENAME,
-    FILE_PATH_CONFIGURATION, LANGUAGE_ROOT_ENVIRONMENT_VARIABLE, LANGUAGE_ROOT_HOST_NAME,
+    FILE_PATH_CONFIGURATION, LANGUAGE_ROOT_ENVIRONMENT_VARIABLE, LANGUAGE_ROOT_SCHEME,
     LINK_SCRIPT_BASENAME,
 };
 use std::{error::Error, sync::Arc};
@@ -27,7 +27,7 @@ pub fn create(
         external_package_initializer: Arc::new(infra::ExternalPackageInitializer::new(
             file_system.clone(),
             file_path_converter.clone(),
-            LANGUAGE_ROOT_HOST_NAME,
+            LANGUAGE_ROOT_SCHEME,
             LANGUAGE_ROOT_ENVIRONMENT_VARIABLE,
         )),
         file_system: file_system.clone(),
