@@ -45,12 +45,7 @@ impl app::infra::ExternalPackageInitializer for ExternalPackageInitializer {
                     std::fs::create_dir_all(directory)?;
                 }
 
-                command_runner::run(
-                    Command::new("cp")
-                        .arg("-r")
-                        .arg(PathBuf::from(url.path()))
-                        .arg(directory),
-                )?;
+                command_runner::run(Command::new("cp").arg("-r").arg(url.path()).arg(directory))?;
             }
             "git" => {
                 command_runner::run(
