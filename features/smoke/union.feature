@@ -14,7 +14,7 @@ Feature: Union
     """pen
     import System'Os
 
-    main = \(os Os'Os) number {
+    main = \(ctx Os'Context) number {
       x = if true {
         [none;]
       } else {
