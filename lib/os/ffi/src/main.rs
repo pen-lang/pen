@@ -1,5 +1,4 @@
 mod argument;
-mod array;
 mod directory;
 mod environment_variable;
 mod error;
@@ -8,16 +7,26 @@ mod heap;
 mod open_file_options;
 mod result;
 mod stdio;
+mod string_array;
 mod utilities;
 
 const INITIAL_STACK_CAPACITY: usize = 256;
 
+#[cfg(not(test))]
 #[link(name = "main")]
 extern "C" {
     fn _pen_os_main(
         stack: *mut ffi::cps::Stack,
         continuation: extern "C" fn(*mut ffi::cps::Stack, f64) -> ffi::cps::Result,
     ) -> ffi::cps::Result;
+}
+
+#[cfg(test)]
+unsafe extern "C" fn _pen_os_main(
+    _: *mut ffi::cps::Stack,
+    _: extern "C" fn(*mut ffi::cps::Stack, f64) -> ffi::cps::Result,
+) -> ffi::cps::Result {
+    ffi::cps::Result::new()
 }
 
 fn main() {

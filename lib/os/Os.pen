@@ -2,8 +2,8 @@ import foreign "c" _pen_os_read_stdin \() ffiStringResult
 import foreign "c" _pen_os_write_stdout \(string) ffiWriteResult
 import foreign "c" _pen_os_write_stderr \(string) ffiWriteResult
 import foreign "c" _pen_os_open_file \(string, OpenFileOptions) ffiOpenResult
-import foreign "c" _pen_os_read_file \(any) ffiStringResult
-import foreign "c" _pen_os_write_file \(any, string) ffiWriteResult
+import foreign "c" _pen_os_read_file \(file) ffiStringResult
+import foreign "c" _pen_os_write_file \(file, string) ffiWriteResult
 import foreign "c" _pen_os_copy_file \(string, string) ffiNoneResult
 import foreign "c" _pen_os_remove_file \(string) ffiNoneResult
 import foreign "c" _pen_os_read_directory \(string) ffiReadDirectoryResult
@@ -11,9 +11,8 @@ import foreign "c" _pen_os_create_directory \(string) ffiNoneResult
 import foreign "c" _pen_os_remove_directory \(string) ffiNoneResult
 import foreign "c" _pen_os_get_arguments \() array
 import foreign "c" _pen_os_get_environment_variable \(string) ffiStringResult
-import foreign "c" _pen_ffi_array_get \(array, number) any
-import foreign "c" _pen_ffi_array_length \(array) number
-import foreign "c" _pen_ffi_any_to_string \(any) string
+import foreign "c" _pen_ffi_string_array_get \(array, number) string
+import foreign "c" _pen_ffi_string_array_length \(array) number
 import foreign _pen_main \(Os) number
 
 type Os {
@@ -21,8 +20,8 @@ type Os {
   writeStdOut \(string) ffiWriteResult
   writeStdErr \(string) ffiWriteResult
   openFile \(string, OpenFileOptions) ffiOpenResult
-  readFile \(any) ffiStringResult
-  writeFile \(any, string) ffiWriteResult
+  readFile \(file) ffiStringResult
+  writeFile \(file, string) ffiWriteResult
   copyFile \(string, string) ffiNoneResult
   removeFile \(string) ffiNoneResult
   readDirectory \(string) ffiReadDirectoryResult
@@ -45,7 +44,7 @@ type stdOut {}
 type stdErr {}
 
 type ffiOpenResult {
-  file any
+  file file
   error number
 }
 
@@ -111,7 +110,7 @@ OpenFileWithOptions = \(os Os, path string, opts OpenFileOptions) File | error {
   r = os.openFile(path, opts)
 
   if r.error == 0 {
-    File{inner: file{inner: r.file}}
+    File{inner: r.file}
   } else {
     error(translateError(r.error))
   }
@@ -133,7 +132,7 @@ ReadFile = \(os Os, file File) string | error {
   } else if stdErr {
     error("cannot read from stderr")
   } else if file {
-    os.readFile(f.inner)
+    os.readFile(f)
   }?
 
   if r.error == 0 {
@@ -151,7 +150,7 @@ WriteFile = \(os Os, file File, data string) number | error {
   } else if stdErr {
     os.writeStdErr(data)
   } else {
-    os.writeFile(f.inner, data)
+    os.writeFile(f, data)
   }?
 
   if r.error == 0 {
@@ -230,11 +229,11 @@ convertArrayToStrings = \(array array) [string] {
 }
 
 convertArrayToStringsFromIndex = \(array array, index number) [string] {
-  if index > _pen_ffi_array_length(array) {
+  if index > _pen_ffi_string_array_length(array) {
     [string;]
   } else {
     [string;
-      _pen_ffi_any_to_string(_pen_ffi_array_get(array, index)),
+      _pen_ffi_string_array_get(array, index),
       ...convertArrayToStringsFromIndex(array, index + 1),
     ]
   }

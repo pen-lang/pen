@@ -48,4 +48,11 @@ EOF
 cd ffi
 
 cargo build --release --quiet $target_option
-cp target/$target/release/os-app $output
+
+binary=target/$target/release/os-app
+
+if [ -r $binary.wasm ]; then
+  binary=$binary.wasm
+fi
+
+cp $binary $output

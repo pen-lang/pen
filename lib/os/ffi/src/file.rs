@@ -9,14 +9,31 @@ use std::{
     sync::{Arc, LockResult, RwLock, RwLockWriteGuard},
 };
 
+#[derive(Clone, Default)]
+pub struct OsFile {
+    inner: ffi::Any,
+}
+
+impl OsFile {
+    pub fn new(file: File) -> ffi::Arc<Self> {
+        ffi::Arc::new(Self {
+            inner: OsFileInner::new(file).into_any(),
+        })
+    }
+
+    pub fn lock(&self) -> Result<RwLockWriteGuard<File>, OsError> {
+        Ok(OsFileInner::as_inner(&self.inner).unwrap().get_mut()?)
+    }
+}
+
 #[derive(Clone, Debug)]
-pub struct FfiFile {
+pub struct OsFileInner {
     file: Arc<RwLock<File>>,
 }
 
-ffi::type_information!(ffi_file, crate::file::FfiFile);
+ffi::type_information!(ffi_file, crate::file::OsFileInner);
 
-impl FfiFile {
+impl OsFileInner {
     pub fn new(file: File) -> Self {
         Self {
             file: Arc::new(RwLock::new(file)),
@@ -28,7 +45,7 @@ impl FfiFile {
     }
 }
 
-impl From<File> for FfiFile {
+impl From<File> for OsFileInner {
     fn from(file: File) -> Self {
         Self::new(file)
     }
@@ -38,47 +55,38 @@ impl From<File> for FfiFile {
 extern "C" fn _pen_os_open_file(
     path: ffi::ByteString,
     options: ffi::Arc<OpenFileOptions>,
-) -> ffi::Arc<FfiResult<ffi::Any>> {
+) -> ffi::Arc<FfiResult<ffi::Arc<OsFile>>> {
     ffi::Arc::new(open_file(path, options).into())
 }
 
 fn open_file(
     path: ffi::ByteString,
     options: ffi::Arc<OpenFileOptions>,
-) -> Result<ffi::Any, OsError> {
-    let file = FfiFile::new(
+) -> Result<ffi::Arc<OsFile>, OsError> {
+    Ok(OsFile::new(
         OpenOptions::from(options.deref()).open(&Path::new(&utilities::decode_path(&path)?))?,
-    );
-
-    Ok(file.into_any())
+    ))
 }
 
 #[no_mangle]
-extern "C" fn _pen_os_read_file(file: ffi::Any) -> ffi::Arc<FfiResult<ffi::ByteString>> {
+extern "C" fn _pen_os_read_file(file: ffi::Arc<OsFile>) -> ffi::Arc<FfiResult<ffi::ByteString>> {
     ffi::Arc::new(read_file(file).into())
 }
 
-fn read_file(file: ffi::Any) -> Result<ffi::ByteString, OsError> {
-    utilities::read(&mut lock_file(&FfiFile::from_any(file).unwrap())?.deref())
+fn read_file(file: ffi::Arc<OsFile>) -> Result<ffi::ByteString, OsError> {
+    utilities::read(&mut file.lock()?.deref())
 }
 
 #[no_mangle]
 extern "C" fn _pen_os_write_file(
-    file: ffi::Any,
+    file: ffi::Arc<OsFile>,
     bytes: ffi::ByteString,
 ) -> ffi::Arc<FfiResult<ffi::Number>> {
     ffi::Arc::new(write_file(file, bytes).into())
 }
 
-fn write_file(file: ffi::Any, bytes: ffi::ByteString) -> Result<ffi::Number, OsError> {
-    utilities::write(
-        &mut lock_file(&FfiFile::from_any(file).unwrap())?.deref(),
-        bytes,
-    )
-}
-
-fn lock_file(file: &FfiFile) -> Result<RwLockWriteGuard<File>, OsError> {
-    Ok(file.get_mut()?)
+fn write_file(file: ffi::Arc<OsFile>, bytes: ffi::ByteString) -> Result<ffi::Number, OsError> {
+    utilities::write(&mut file.lock()?.deref(), bytes)
 }
 
 #[no_mangle]
@@ -116,7 +124,7 @@ mod tests {
 
     #[test]
     fn convert_to_any() {
-        FfiFile::from_any(FfiFile::new(tempfile::tempfile().unwrap()).into_any())
+        OsFileInner::from_any(OsFileInner::new(tempfile::tempfile().unwrap()).into_any())
             .unwrap()
             .get_mut()
             .unwrap()
