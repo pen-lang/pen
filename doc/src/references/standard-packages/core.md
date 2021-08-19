@@ -5,7 +5,7 @@
 ```json
 {
   "dependencies": {
-    "Core": "file://pen-root/lib/core"
+    "Core": "pen:///lib/core"
   }
 }
 ```
