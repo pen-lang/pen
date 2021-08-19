@@ -15,10 +15,11 @@ impl From<&OpenFileOptions> for OpenOptions {
     fn from(options: &OpenFileOptions) -> Self {
         let mut open_options = OpenOptions::new();
 
+        // Set the create option after the create_new option because the latter is prioritized.
         open_options
             .append(options.append)
-            .create(options.create)
             .create_new(options.create_new)
+            .create(options.create)
             .read(options.read)
             .truncate(options.truncate)
             .write(options.write);
