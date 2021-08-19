@@ -12,7 +12,7 @@ Feature: Building packages
     """pen
     import System'Os
 
-    main = \(os Os'Context) number {
+    main = \(ctx Os'Context) number {
       0
     }
     """
@@ -46,7 +46,7 @@ Feature: Building packages
     """pen
     import System'Os
 
-    main = \(os Os'Context) number {
+    main = \(ctx Os'Context) number {
       0
     }
     """

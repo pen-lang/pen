@@ -19,7 +19,7 @@ Feature: Memory leak
       f()
     }
 
-    main = \(os Os'Context) number {
+    main = \(ctx Os'Context) number {
       f()
 
       0
@@ -33,8 +33,8 @@ Feature: Memory leak
     """pen
     import System'Os
 
-    main = \(os Os'Context) number {
-      Os'WriteFile(os, Os'StdOut(), "Hello, world!\n")
+    main = \(ctx Os'Context) number {
+      Os'WriteFile(ctx, Os'StdOut(), "Hello, world!\n")
 
       main(os)
     }
@@ -57,7 +57,7 @@ Feature: Memory leak
       f()
     }
 
-    main = \(os Os'Context) number {
+    main = \(ctx Os'Context) number {
       f()
 
       0
@@ -81,7 +81,7 @@ Feature: Memory leak
       f()
     }
 
-    main = \(os Os'Context) number {
+    main = \(ctx Os'Context) number {
       f()
 
       0
@@ -105,7 +105,7 @@ Feature: Memory leak
       g()
     }
 
-    main = \(os Os'Context) number {
+    main = \(ctx Os'Context) number {
       g()
 
       0
@@ -130,7 +130,7 @@ Feature: Memory leak
       f()
     }
 
-    main = \(os Os'Context) number {
+    main = \(ctx Os'Context) number {
       f()
 
       0
@@ -155,7 +155,7 @@ Feature: Memory leak
       f()
     }
 
-    main = \(os Os'Context) number {
+    main = \(ctx Os'Context) number {
       f()
 
       0
@@ -176,7 +176,7 @@ Feature: Memory leak
       f()
     }
 
-    main = \(os Os'Context) number {
+    main = \(ctx Os'Context) number {
       f()
 
       0
@@ -197,7 +197,7 @@ Feature: Memory leak
       f()
     }
 
-    main = \(os Os'Context) number {
+    main = \(ctx Os'Context) number {
       f()
 
       0
