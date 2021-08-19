@@ -69,7 +69,7 @@ impl app::infra::ExternalPackageInitializer for ExternalPackageInitializer {
                                 PathBuf::from(environment_variable_reader::read(
                                     self.language_root_environment_variable,
                                 )?)
-                                .join(url.path().strip_prefix("/").unwrap_or_default()),
+                                .join(url.path().strip_prefix('/').unwrap_or_default()),
                             )
                             .arg(directory),
                     )?;

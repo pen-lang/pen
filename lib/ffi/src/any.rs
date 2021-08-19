@@ -166,9 +166,7 @@ mod tests {
             }
             .into_any();
 
-            let y: Option<&TypeA> = AnyLike::as_inner(&x);
-
-            drop(y.clone());
+            let _: Option<&TypeA> = AnyLike::as_inner(&x);
         }
     }
 
