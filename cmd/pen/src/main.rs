@@ -1,3 +1,5 @@
+use compile_configuration::CROSS_COMPILE_TARGETS;
+
 mod application_configuration;
 mod compile_configuration;
 mod dependency_resolver;
@@ -31,7 +33,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         .subcommand(
             clap::SubCommand::with_name("build")
                 .about("Builds a package")
-                .arg(build_target_triple_argument()),
+                .arg(build_target_triple_argument().possible_values(CROSS_COMPILE_TARGETS)),
         )
         .subcommand(
             clap::SubCommand::with_name("create")
