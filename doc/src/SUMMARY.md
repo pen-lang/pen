@@ -15,6 +15,7 @@
   - [Command line tools](references/command-line-tools.md)
   - [Standard packages](references/standard-packages/README.md)
     - [Core](references/standard-packages/core.md)
+    - [Os](references/standard-packages/os.md)
 - [Examples](examples/README.md)
   - [Types](examples/types/README.md)
     - [Number](examples/types/number.md)
