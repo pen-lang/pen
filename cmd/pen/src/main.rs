@@ -1,3 +1,5 @@
+use compile_configuration::CROSS_COMPILE_TARGETS;
+
 mod application_configuration;
 mod compile_configuration;
 mod dependency_resolver;
@@ -187,5 +189,6 @@ fn build_target_triple_argument() -> clap::Arg<'static, 'static> {
         .short("t")
         .long("target")
         .takes_value(true)
+        .possble_values(CROSS_COMPILE_TARGETS)
         .help("Sets a target triple")
 }
