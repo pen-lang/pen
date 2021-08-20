@@ -33,7 +33,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         .subcommand(
             clap::SubCommand::with_name("build")
                 .about("Builds a package")
-                .arg(build_target_triple_argument()),
+                .arg(build_target_triple_argument().possible_values(CROSS_COMPILE_TARGETS)),
         )
         .subcommand(
             clap::SubCommand::with_name("create")
@@ -189,6 +189,5 @@ fn build_target_triple_argument() -> clap::Arg<'static, 'static> {
         .short("t")
         .long("target")
         .takes_value(true)
-        .possible_values(CROSS_COMPILE_TARGETS)
         .help("Sets a target triple")
 }
