@@ -4,6 +4,7 @@
 - [Guides](guides/README.md)
   - [Getting started](guides/getting-started.md)
   - [Install](guides/install.md)
+  - [Cross compile](guides/cross-compile.md)
   - [Naming convention](guides/naming-convention.md)
 - [References](references/README.md)
   - [Language](references/language/README.md)
