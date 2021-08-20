@@ -3,27 +3,19 @@ use crate::{
     common::module_id_calculator,
     infra::{
         FilePath, FilePathConfiguration, ARCHIVE_DIRECTORY, EXTERNAL_PACKAGE_DIRECTORY,
-        OBJECT_DIRECTORY, TARGET_DIRECTORY,
+        OBJECT_DIRECTORY,
     },
 };
 
 const MAIN_ARCHIVE_BASENAME: &str = "main";
 const FFI_ARCHIVE_SUFFIX: &str = "_ffi";
-const DEFAULT_TARGET_DIRECTORY: &str = "default";
 
-fn resolve_target_directory(output_directory: &FilePath, target: Option<&str>) -> FilePath {
-    output_directory.join(&FilePath::new([
-        TARGET_DIRECTORY,
-        target.unwrap_or_else(|| DEFAULT_TARGET_DIRECTORY),
-    ]))
+pub fn resolve_object_directory(output_directory: &FilePath) -> FilePath {
+    output_directory.join(&FilePath::new([OBJECT_DIRECTORY]))
 }
 
-fn resolve_object_directory(output_directory: &FilePath, target: Option<&str>) -> FilePath {
-    resolve_target_directory(output_directory, target).join(&FilePath::new([OBJECT_DIRECTORY]))
-}
-
-fn resolve_archive_directory(output_directory: &FilePath, target: Option<&str>) -> FilePath {
-    resolve_target_directory(output_directory, target).join(&FilePath::new([ARCHIVE_DIRECTORY]))
+pub fn resolve_archive_directory(output_directory: &FilePath) -> FilePath {
+    output_directory.join(&FilePath::new([ARCHIVE_DIRECTORY]))
 }
 
 pub fn resolve_source_file(
@@ -39,10 +31,9 @@ pub fn resolve_source_file(
 pub fn resolve_target_files(
     output_directory: &FilePath,
     source_file: &FilePath,
-    target: Option<&str>,
     file_path_configuration: &FilePathConfiguration,
 ) -> (FilePath, FilePath) {
-    let target_file = resolve_object_directory(output_directory, target).join(&FilePath::new([
+    let target_file = resolve_object_directory(output_directory).join(&FilePath::new([
         &module_id_calculator::calculate(source_file),
     ]));
 
@@ -61,26 +52,22 @@ pub fn resolve_package_directory(output_directory: &FilePath, url: &url::Url) ->
 
 pub fn resolve_main_package_archive_file(
     output_directory: &FilePath,
-    target: Option<&str>,
     file_path_configuration: &FilePathConfiguration,
 ) -> FilePath {
     resolve_package_archive_file(
         output_directory,
         MAIN_ARCHIVE_BASENAME,
-        target,
         file_path_configuration,
     )
 }
 
 pub fn resolve_main_package_ffi_archive_file(
     output_directory: &FilePath,
-    target: Option<&str>,
     file_path_configuration: &FilePathConfiguration,
 ) -> FilePath {
     resolve_package_ffi_archive_file(
         output_directory,
         MAIN_ARCHIVE_BASENAME,
-        target,
         file_path_configuration,
     )
 }
@@ -88,13 +75,11 @@ pub fn resolve_main_package_ffi_archive_file(
 pub fn resolve_external_package_archive_file(
     output_directory: &FilePath,
     url: &url::Url,
-    target: Option<&str>,
     file_path_configuration: &FilePathConfiguration,
 ) -> FilePath {
     resolve_package_archive_file(
         output_directory,
         &package_id_calculator::calculate(url),
-        target,
         file_path_configuration,
     )
 }
@@ -114,13 +99,11 @@ pub fn resolve_external_package_ffi_archive_file(
 fn resolve_package_ffi_archive_file(
     output_directory: &FilePath,
     basename: &str,
-    target: Option<&str>,
     file_path_configuration: &FilePathConfiguration,
 ) -> FilePath {
     resolve_package_archive_file(
         output_directory,
         &(basename.to_owned() + FFI_ARCHIVE_SUFFIX),
-        target,
         file_path_configuration,
     )
 }
@@ -128,10 +111,9 @@ fn resolve_package_ffi_archive_file(
 fn resolve_package_archive_file(
     output_directory: &FilePath,
     basename: &str,
-    target: Option<&str>,
     file_path_configuration: &FilePathConfiguration,
 ) -> FilePath {
-    resolve_archive_directory(output_directory, target)
+    resolve_archive_directory(output_directory)
         .join(&FilePath::new([format!("lib{}", basename)]))
         .with_extension(file_path_configuration.archive_file_extension)
 }
