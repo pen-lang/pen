@@ -1,11 +1,10 @@
 use super::main_package_directory_finder;
 use crate::{
     application_configuration::APPLICATION_CONFIGURATION,
-    file_path_configuration::PRELUDE_PACKAGE_URL, infrastructure,
+    file_path_configuration::{DEFAULT_TARGET_DIRECTORY, OUTPUT_DIRECTORY, PRELUDE_PACKAGE_URL},
+    infrastructure,
 };
 use std::sync::Arc;
-
-pub const OUTPUT_DIRECTORY: &str = ".pen";
 
 pub fn build(target_triple: Option<&str>, verbose: bool) -> Result<(), Box<dyn std::error::Error>> {
     let main_package_directory = main_package_directory_finder::find()?;
@@ -15,8 +14,12 @@ pub fn build(target_triple: Option<&str>, verbose: bool) -> Result<(), Box<dyn s
     let infrastructure = infrastructure::create(file_path_converter.clone())?;
     let main_package_directory =
         file_path_converter.convert_to_file_path(&main_package_directory)?;
-    let output_directory =
-        main_package_directory.join(&app::infra::FilePath::new(vec![OUTPUT_DIRECTORY]));
+    // TODO Share an external package directory to avoid initializing them multiple times for
+    // different targets.
+    let output_directory = main_package_directory.join(&app::infra::FilePath::new([
+        OUTPUT_DIRECTORY,
+        target_triple.unwrap_or(DEFAULT_TARGET_DIRECTORY),
+    ]));
 
     if verbose {
         infra::log_info("initializing external packages")?;
