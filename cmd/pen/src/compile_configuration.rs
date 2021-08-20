@@ -1,6 +1,13 @@
 use once_cell::sync::Lazy;
 use std::sync::Arc;
 
+pub const CROSS_COMPILE_TARGETS: &[&str] = &[
+    "i686-unknown-linux-musl",
+    "x86_64-unknown-linux-musl",
+    "aarch64-unknown-linux-musl",
+    "wasm32-wasi",
+];
+
 pub static COMPILE_CONFIGURATION: Lazy<Arc<app::module_compiler::CompileConfiguration>> =
     Lazy::new(|| {
         app::module_compiler::CompileConfiguration {
