@@ -9,6 +9,7 @@ pub fn find(
     infrastructure: &Infrastructure,
     output_directory: &FilePath,
     prelude_package_url: &url::Url,
+    target: Option<&str>,
 ) -> Result<Vec<FilePath>, Box<dyn Error>> {
     Ok(module_finder::find(
         infrastructure,
@@ -19,6 +20,7 @@ pub fn find(
         let (_, interface_file) = file_path_resolver::resolve_target_files(
             output_directory,
             source_file,
+            target,
             &infrastructure.file_path_configuration,
         );
 

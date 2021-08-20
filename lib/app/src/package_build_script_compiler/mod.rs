@@ -72,6 +72,7 @@ pub fn compile_main(
                                                 .clone()],
                                             &infrastructure.file_path_configuration,
                                         ),
+                                        target_triple,
                                         &infrastructure.file_path_configuration,
                                     );
 
@@ -86,13 +87,16 @@ pub fn compile_main(
                     infrastructure,
                     output_directory,
                     prelude_package_url,
+                    target_triple,
                 )?,
                 &file_path_resolver::resolve_main_package_archive_file(
                     output_directory,
+                    target_triple,
                     &infrastructure.file_path_configuration,
                 ),
                 &file_path_resolver::resolve_main_package_ffi_archive_file(
                     output_directory,
+                    target_triple,
                     &infrastructure.file_path_configuration,
                 ),
                 package_directory,
@@ -164,6 +168,7 @@ pub fn compile_prelude(
                 &file_path_resolver::resolve_external_package_archive_file(
                     output_directory,
                     package_url,
+                    target,
                     &infrastructure.file_path_configuration,
                 ),
                 &file_path_resolver::resolve_external_package_ffi_archive_file(

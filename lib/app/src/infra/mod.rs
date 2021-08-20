@@ -31,5 +31,6 @@ pub use package_configuration_reader::*;
 pub use package_configuration_writer::*;
 
 pub const EXTERNAL_PACKAGE_DIRECTORY: &str = "packages";
+pub const TARGET_DIRECTORY: &str = "targets";
 pub const OBJECT_DIRECTORY: &str = "objects";
 pub const ARCHIVE_DIRECTORY: &str = "archives";
