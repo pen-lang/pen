@@ -1,7 +1,8 @@
 use super::application_configuration::ApplicationConfiguration;
 use crate::{
     common::file_path_resolver,
-    infra::{FilePath, Infrastructure, EXTERNAL_PACKAGE_DIRECTORY},
+    external_package_topological_sorter,
+    infra::{FilePath, Infrastructure},
     package_build_script_compiler,
 };
 use std::error::Error;
@@ -14,13 +15,16 @@ pub fn build(
     prelude_package_url: &url::Url,
     application_configuration: &ApplicationConfiguration,
 ) -> Result<(), Box<dyn Error>> {
-    let file_extension = infrastructure
-        .file_path_configuration
-        .build_script_file_extension;
-    let rule_build_script_file =
-        output_directory.join(&FilePath::new(vec!["rules"]).with_extension(file_extension));
-    let package_build_script_file =
-        output_directory.join(&FilePath::new(vec!["main"]).with_extension(file_extension));
+    let rule_build_script_file = file_path_resolver::resolve_special_build_script_file(
+        output_directory,
+        "rules",
+        &infrastructure.file_path_configuration,
+    );
+    let package_build_script_file = file_path_resolver::resolve_special_build_script_file(
+        output_directory,
+        "main",
+        &infrastructure.file_path_configuration,
+    );
 
     package_build_script_compiler::compile_rules(
         infrastructure,
@@ -35,32 +39,48 @@ pub fn build(
         main_package_directory,
         output_directory,
         &rule_build_script_file,
-        &find_external_package_build_scripts(infrastructure, output_directory)?
-            .into_iter()
-            .chain(
-                if is_application_package(
+        &external_package_topological_sorter::sort(
+            infrastructure,
+            main_package_directory,
+            output_directory,
+        )?
+        .iter()
+        .map(|url| {
+            file_path_resolver::resolve_external_package_build_script_file(
+                output_directory,
+                url,
+                &infrastructure.file_path_configuration,
+            )
+        })
+        .into_iter()
+        .chain(
+            if is_application_package(
+                infrastructure,
+                main_package_directory,
+                application_configuration,
+            )? {
+                let application_build_script_file =
+                    file_path_resolver::resolve_special_build_script_file(
+                        output_directory,
+                        "application",
+                        &infrastructure.file_path_configuration,
+                    );
+
+                package_build_script_compiler::compile_application(
                     infrastructure,
                     main_package_directory,
+                    output_directory,
+                    prelude_package_url,
                     application_configuration,
-                )? {
-                    let application_build_script_file = output_directory
-                        .join(&FilePath::new(vec!["application"]).with_extension(file_extension));
+                    &application_build_script_file,
+                )?;
 
-                    package_build_script_compiler::compile_application(
-                        infrastructure,
-                        main_package_directory,
-                        output_directory,
-                        prelude_package_url,
-                        application_configuration,
-                        &application_build_script_file,
-                    )?;
-
-                    Some(application_build_script_file)
-                } else {
-                    None
-                },
-            )
-            .collect::<Vec<_>>(),
+                Some(application_build_script_file)
+            } else {
+                None
+            },
+        )
+        .collect::<Vec<_>>(),
         &package_build_script_file,
         application_configuration,
     )?;
@@ -84,34 +104,4 @@ fn is_application_package(
             &[application_configuration.main_module_basename.clone()],
             &infrastructure.file_path_configuration,
         )))
-}
-
-fn find_external_package_build_scripts(
-    infrastructure: &Infrastructure,
-    output_directory: &FilePath,
-) -> Result<Vec<FilePath>, Box<dyn Error>> {
-    let external_package_directory =
-        output_directory.join(&FilePath::new(vec![EXTERNAL_PACKAGE_DIRECTORY]));
-
-    Ok(
-        if infrastructure
-            .file_system
-            .exists(&external_package_directory)
-        {
-            infrastructure
-                .file_system
-                .read_directory(&external_package_directory)?
-                .into_iter()
-                .filter(|path| {
-                    path.has_extension(
-                        infrastructure
-                            .file_path_configuration
-                            .build_script_file_extension,
-                    )
-                })
-                .collect()
-        } else {
-            vec![]
-        },
-    )
 }

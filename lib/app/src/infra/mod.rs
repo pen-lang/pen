@@ -31,3 +31,4 @@ pub use package_configuration_writer::*;
 pub const EXTERNAL_PACKAGE_DIRECTORY: &str = "packages";
 pub const OBJECT_DIRECTORY: &str = "objects";
 pub const ARCHIVE_DIRECTORY: &str = "archives";
+pub const BUILD_SCRIPT_DIRECTORY: &str = "scripts";

@@ -37,10 +37,10 @@ fn initialize(
         infrastructure,
         package_url,
         output_directory,
-        &package_directory.with_extension(
-            infrastructure
-                .file_path_configuration
-                .build_script_file_extension,
+        &file_path_resolver::resolve_external_package_build_script_file(
+            output_directory,
+            package_url,
+            &infrastructure.file_path_configuration,
         ),
     )?;
 
