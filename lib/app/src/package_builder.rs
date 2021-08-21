@@ -66,7 +66,7 @@ pub fn build(
     )?;
 
     infrastructure
-        .module_builder
+        .package_builder
         .build(&package_build_script_file)?;
 
     Ok(())

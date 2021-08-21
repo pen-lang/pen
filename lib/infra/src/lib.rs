@@ -15,7 +15,7 @@ mod llvm_command_finder;
 mod logger;
 mod ninja_build_script_compiler;
 mod ninja_build_script_dependency_compiler;
-mod ninja_module_builder;
+mod ninja_package_builder;
 mod package_script_finder;
 
 pub use application_linker::*;
@@ -29,4 +29,4 @@ pub use json_package_configuration_writer::*;
 pub use logger::*;
 pub use ninja_build_script_compiler::*;
 pub use ninja_build_script_dependency_compiler::*;
-pub use ninja_module_builder::*;
+pub use ninja_package_builder::*;

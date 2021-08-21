@@ -5,11 +5,11 @@ use std::{
     sync::Arc,
 };
 
-pub struct NinjaModuleBuilder {
+pub struct NinjaPackageBuilder {
     file_path_converter: Arc<FilePathConverter>,
 }
 
-impl NinjaModuleBuilder {
+impl NinjaPackageBuilder {
     pub fn new(file_path_converter: Arc<FilePathConverter>) -> Self {
         Self {
             file_path_converter,
@@ -17,7 +17,7 @@ impl NinjaModuleBuilder {
     }
 }
 
-impl app::infra::ModuleBuilder for NinjaModuleBuilder {
+impl app::infra::PackageBuilder for NinjaPackageBuilder {
     fn build(&self, build_script_file: &app::infra::FilePath) -> Result<(), Box<dyn Error>> {
         // spell-checker:disable
         command_runner::run(
