@@ -37,7 +37,7 @@ pub fn build(
 
     infrastructure.module_builder.build(&build_script_file)?;
 
-    if is_main_package(
+    if is_application_package(
         infrastructure,
         main_package_directory,
         application_configuration,
@@ -91,7 +91,7 @@ pub fn build(
     Ok(())
 }
 
-fn is_main_package(
+fn is_application_package(
     infrastructure: &Infrastructure,
     main_package_directory: &FilePath,
     application_configuration: &ApplicationConfiguration,
