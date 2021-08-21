@@ -18,10 +18,6 @@ pub fn create(
     ));
 
     Ok(app::infra::Infrastructure {
-        application_linker: Arc::new(infra::ApplicationLinker::new(
-            file_path_converter.clone(),
-            LINK_SCRIPT_BASENAME,
-        )),
         build_script_dependency_compiler: Arc::new(infra::NinjaBuildScriptDependencyCompiler::new(
             file_path_converter.clone(),
         )),

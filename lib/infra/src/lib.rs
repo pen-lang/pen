@@ -1,4 +1,3 @@
-mod application_linker;
 mod command_finder;
 mod command_runner;
 mod default_target_finder;
@@ -18,7 +17,6 @@ mod ninja_build_script_dependency_compiler;
 mod ninja_package_builder;
 mod package_script_finder;
 
-pub use application_linker::*;
 pub use error::*;
 pub use external_package_initializer::*;
 pub use file_path_converter::*;

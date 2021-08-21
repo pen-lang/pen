@@ -1,4 +1,3 @@
-mod application_linker;
 mod build_script_compiler;
 mod build_script_dependency_compiler;
 mod external_package_initializer;
@@ -14,7 +13,6 @@ mod package_configuration;
 mod package_configuration_reader;
 mod package_configuration_writer;
 
-pub use application_linker::*;
 pub use build_script_compiler::*;
 pub use build_script_dependency_compiler::*;
 pub use external_package_initializer::*;
