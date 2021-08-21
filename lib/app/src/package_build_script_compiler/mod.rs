@@ -88,7 +88,7 @@ pub fn compile_main(
                     &infrastructure.file_path_configuration,
                 ),
                 package_directory,
-                &rule_build_script_file,
+                rule_build_script_file,
                 child_build_script_files,
             )?
             .as_bytes(),

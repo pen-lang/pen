@@ -2,6 +2,7 @@ use super::{FilePath, MainModuleTarget, ModuleTarget};
 use std::error::Error;
 
 pub trait BuildScriptCompiler {
+    #[allow(clippy::too_many_arguments)]
     fn compile_main(
         &self,
         module_targets: &[ModuleTarget],
