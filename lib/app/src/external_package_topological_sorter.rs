@@ -3,7 +3,10 @@ use crate::{
     infra::{FilePath, Infrastructure, PackageConfiguration},
 };
 use petgraph::{algo::toposort, Graph};
-use std::{collections::HashMap, error::Error};
+use std::{
+    collections::{BTreeMap, HashMap},
+    error::Error,
+};
 
 pub fn sort(
     infrastructure: &Infrastructure,
@@ -18,7 +21,7 @@ pub fn sort(
 }
 
 fn sort_external_packages(
-    package_configurations: &HashMap<url::Url, PackageConfiguration>,
+    package_configurations: &BTreeMap<url::Url, PackageConfiguration>,
 ) -> Result<Vec<url::Url>, Box<dyn std::error::Error>> {
     let mut graph = Graph::<url::Url, ()>::new();
     let mut indices = HashMap::<url::Url, _>::new();

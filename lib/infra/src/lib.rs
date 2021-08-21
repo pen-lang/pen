@@ -1,4 +1,3 @@
-mod application_linker;
 mod command_finder;
 mod command_runner;
 mod default_target_finder;
@@ -15,10 +14,9 @@ mod llvm_command_finder;
 mod logger;
 mod ninja_build_script_compiler;
 mod ninja_build_script_dependency_compiler;
-mod ninja_module_builder;
+mod ninja_package_builder;
 mod package_script_finder;
 
-pub use application_linker::*;
 pub use error::*;
 pub use external_package_initializer::*;
 pub use file_path_converter::*;
@@ -29,4 +27,4 @@ pub use json_package_configuration_writer::*;
 pub use logger::*;
 pub use ninja_build_script_compiler::*;
 pub use ninja_build_script_dependency_compiler::*;
-pub use ninja_module_builder::*;
+pub use ninja_package_builder::*;

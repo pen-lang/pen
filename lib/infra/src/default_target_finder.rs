@@ -2,9 +2,12 @@ use crate::{command_runner, llvm_command_finder};
 use std::{error::Error, process::Command};
 
 pub fn find() -> Result<String, Box<dyn Error>> {
-    Ok(replace_target(&command_runner::run(
-        Command::new(&llvm_command_finder::find("llvm-config")?).arg("--host-target"),
-    )?))
+    Ok(replace_target(
+        command_runner::run(
+            Command::new(&llvm_command_finder::find("llvm-config")?).arg("--host-target"),
+        )?
+        .trim(),
+    ))
 }
 
 // HACK Map a given target to a known Rust target in the best effort way.

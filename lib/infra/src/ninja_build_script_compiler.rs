@@ -1,5 +1,7 @@
 use super::file_path_converter::FilePathConverter;
-use crate::{default_target_finder, llvm_command_finder, package_script_finder};
+use crate::{
+    default_target_finder, llvm_command_finder, package_script_finder, InfrastructureError,
+};
 use app::infra::FilePath;
 use std::{error::Error, sync::Arc};
 
@@ -7,18 +9,21 @@ pub struct NinjaBuildScriptCompiler {
     file_path_converter: Arc<FilePathConverter>,
     bit_code_file_extension: &'static str,
     ffi_build_script_basename: &'static str,
+    link_script_basename: &'static str,
 }
 
 impl NinjaBuildScriptCompiler {
     pub fn new(
         file_path_converter: Arc<FilePathConverter>,
         bit_code_file_extension: &'static str,
-        ffi_build_script: &'static str,
+        ffi_build_script_basename: &'static str,
+        link_script_basename: &'static str,
     ) -> Self {
         Self {
             file_path_converter,
             bit_code_file_extension,
-            ffi_build_script_basename: ffi_build_script,
+            ffi_build_script_basename,
+            link_script_basename,
         }
     }
 
@@ -58,7 +63,7 @@ impl NinjaBuildScriptCompiler {
             "  description = compiling module of $source_file",
             "rule compile_main",
             "  command = pen compile-main --target $target \
-                -f $main_function_interface_file $in $out",
+                 -f $main_function_interface_file $in $out",
             "  description = compiling module of $source_file",
             "rule compile_prelude",
             "  command = pen compile-prelude --target $target $in $out",
@@ -66,7 +71,7 @@ impl NinjaBuildScriptCompiler {
             "rule llc",
             &format!(
                 "  command = {} -O3 -tailcallopt --relocation-model pic \
-                    -mtriple $target -filetype obj -o $out $in",
+                     -mtriple $target -filetype obj -o $out $in",
                 llc.display()
             ),
             "  description = generating object file for $source_file",
@@ -289,15 +294,9 @@ impl NinjaBuildScriptCompiler {
 }
 
 impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
-    fn compile_main(
+    fn compile_rules(
         &self,
-        module_targets: &[app::infra::ModuleTarget],
-        main_module_target: Option<&app::infra::MainModuleTarget>,
-        child_build_script_files: &[FilePath],
         prelude_interface_files: &[FilePath],
-        archive_file: &FilePath,
-        ffi_archive_file: &FilePath,
-        package_directory: &FilePath,
         output_directory: &FilePath,
         target_triple: Option<&str>,
     ) -> Result<String, Box<dyn Error>> {
@@ -312,6 +311,28 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
         ]
         .into_iter()
         .chain(self.compile_rules(prelude_interface_files, target_triple)?)
+        .collect::<Vec<_>>()
+        .join("\n")
+            + "\n")
+    }
+
+    fn compile_main(
+        &self,
+        module_targets: &[app::infra::ModuleTarget],
+        main_module_target: Option<&app::infra::MainModuleTarget>,
+        archive_file: &FilePath,
+        ffi_archive_file: &FilePath,
+        package_directory: &FilePath,
+        rule_build_script_file: &FilePath,
+        child_build_script_files: &[FilePath],
+    ) -> Result<String, Box<dyn Error>> {
+        Ok(vec![format!(
+            "include {}",
+            self.file_path_converter
+                .convert_to_os_path(rule_build_script_file)
+                .display()
+        )]
+        .into_iter()
         .chain(self.compile_module_targets(module_targets, ffi_archive_file, package_directory)?)
         .chain(if let Some(main_module_target) = main_module_target {
             self.compile_main_module_target(main_module_target, package_directory)?
@@ -362,6 +383,48 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
             )
             .collect::<Vec<_>>()
             .join("\n")
+            + "\n")
+    }
+
+    fn compile_application(
+        &self,
+        system_package_directory: &FilePath,
+        archive_files: &[FilePath],
+        application_file: &FilePath,
+    ) -> Result<String, Box<dyn Error>> {
+        let system_package_directory = self
+            .file_path_converter
+            .convert_to_os_path(system_package_directory);
+        let application_file = self
+            .file_path_converter
+            .convert_to_os_path(application_file);
+
+        Ok(vec![
+            "rule link".into(),
+            format!(
+                "  command = {} -t $target -o $out $in",
+                package_script_finder::find(&system_package_directory, self.link_script_basename)?
+                    .ok_or(InfrastructureError::LinkScriptNotFound(
+                        system_package_directory,
+                    ))?
+                    .display(),
+            ),
+            format!(
+                "build {}: link {}",
+                application_file.display(),
+                archive_files
+                    .iter()
+                    .map(|file| self
+                        .file_path_converter
+                        .convert_to_os_path(file)
+                        .display()
+                        .to_string())
+                    .collect::<Vec<_>>()
+                    .join(" ")
+            ),
+            format!("default {}", application_file.display()),
+        ]
+        .join("\n")
             + "\n")
     }
 

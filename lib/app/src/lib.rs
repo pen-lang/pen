@@ -1,8 +1,8 @@
 mod application_configuration;
 mod common;
 mod error;
-mod external_package_archive_sorter;
 mod external_package_configuration_reader;
+mod external_package_topological_sorter;
 pub mod infra;
 pub mod module_compiler;
 pub mod module_dependency_resolver;
