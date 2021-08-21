@@ -1,8 +1,6 @@
 use super::application_configuration::ApplicationConfiguration;
 use crate::{
     common::file_path_resolver,
-    error::ApplicationError,
-    external_package_archive_sorter,
     infra::{FilePath, Infrastructure, EXTERNAL_PACKAGE_DIRECTORY},
     package_build_script_compiler,
 };
@@ -48,7 +46,7 @@ pub fn build(
                     let application_build_script_file = output_directory
                         .join(&FilePath::new(vec!["application"]).with_extension(file_extension));
 
-                    compile_application_build_script(
+                    package_build_script_compiler::compile_application(
                         infrastructure,
                         main_package_directory,
                         output_directory,
@@ -70,72 +68,6 @@ pub fn build(
     infrastructure
         .module_builder
         .build(&package_build_script_file)?;
-
-    Ok(())
-}
-
-fn compile_application_build_script(
-    infrastructure: &Infrastructure,
-    main_package_directory: &FilePath,
-    output_directory: &FilePath,
-    prelude_package_url: &url::Url,
-    application_configuration: &ApplicationConfiguration,
-    build_script_file: &FilePath,
-) -> Result<(), Box<dyn Error>> {
-    package_build_script_compiler::compile_application(
-        infrastructure,
-        &file_path_resolver::resolve_package_directory(
-            output_directory,
-            infrastructure
-                .package_configuration_reader
-                .read(main_package_directory)?
-                .dependencies
-                .get(&application_configuration.system_package_name)
-                .ok_or(ApplicationError::SystemPackageNotFound)?,
-        ),
-        &vec![file_path_resolver::resolve_main_package_archive_file(
-            output_directory,
-            &infrastructure.file_path_configuration,
-        )]
-        .into_iter()
-        .chain(
-            if infrastructure
-                .package_configuration_reader
-                .is_ffi_enabled(main_package_directory)?
-            {
-                Some(file_path_resolver::resolve_main_package_ffi_archive_file(
-                    output_directory,
-                    &infrastructure.file_path_configuration,
-                ))
-            } else {
-                None
-            },
-        )
-        .chain(
-            external_package_archive_sorter::sort(
-                infrastructure,
-                main_package_directory,
-                output_directory,
-            )?
-            .iter()
-            .map(|url| {
-                resolve_external_package_archive_files(infrastructure, url, output_directory)
-            })
-            .collect::<Result<Vec<_>, _>>()?
-            .into_iter()
-            .flatten(),
-        )
-        .chain(resolve_external_package_archive_files(
-            infrastructure,
-            prelude_package_url,
-            output_directory,
-        )?)
-        .collect::<Vec<_>>(),
-        &main_package_directory.join(&FilePath::new([
-            &application_configuration.application_filename
-        ])),
-        build_script_file,
-    )?;
 
     Ok(())
 }
@@ -181,36 +113,5 @@ fn find_external_package_build_scripts(
         } else {
             vec![]
         },
-    )
-}
-
-fn resolve_external_package_archive_files(
-    infrastructure: &Infrastructure,
-    package_url: &url::Url,
-    output_directory: &FilePath,
-) -> Result<Vec<FilePath>, Box<dyn Error>> {
-    Ok(
-        vec![file_path_resolver::resolve_external_package_archive_file(
-            output_directory,
-            package_url,
-            &infrastructure.file_path_configuration,
-        )]
-        .into_iter()
-        .chain(
-            if infrastructure.package_configuration_reader.is_ffi_enabled(
-                &file_path_resolver::resolve_package_directory(output_directory, package_url),
-            )? {
-                Some(
-                    file_path_resolver::resolve_external_package_ffi_archive_file(
-                        output_directory,
-                        package_url,
-                        &infrastructure.file_path_configuration,
-                    ),
-                )
-            } else {
-                None
-            },
-        )
-        .collect(),
     )
 }
