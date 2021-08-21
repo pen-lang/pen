@@ -97,6 +97,24 @@ pub fn compile_main(
     Ok(())
 }
 
+pub fn compile_application(
+    infrastructure: &Infrastructure,
+    system_package_directory: &FilePath,
+    archive_files: &[FilePath],
+    application_file: &FilePath,
+    build_script_file: &FilePath,
+) -> Result<(), Box<dyn Error>> {
+    infrastructure.file_system.write(
+        build_script_file,
+        infrastructure
+            .build_script_compiler
+            .compile_application(system_package_directory, archive_files, application_file)?
+            .as_bytes(),
+    )?;
+
+    Ok(())
+}
+
 pub fn compile_external(
     infrastructure: &Infrastructure,
     package_url: &url::Url,

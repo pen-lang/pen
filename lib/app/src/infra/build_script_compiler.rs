@@ -21,6 +21,13 @@ pub trait BuildScriptCompiler {
         child_build_script_files: &[FilePath],
     ) -> Result<String, Box<dyn Error>>;
 
+    fn compile_application(
+        &self,
+        system_package_directory: &FilePath,
+        archive_files: &[FilePath],
+        application_file: &FilePath,
+    ) -> Result<String, Box<dyn Error>>;
+
     fn compile_external(
         &self,
         module_targets: &[ModuleTarget],

@@ -1,5 +1,7 @@
 use super::file_path_converter::FilePathConverter;
-use crate::{default_target_finder, llvm_command_finder, package_script_finder};
+use crate::{
+    default_target_finder, llvm_command_finder, package_script_finder, InfrastructureError,
+};
 use app::infra::FilePath;
 use std::{error::Error, sync::Arc};
 
@@ -7,18 +9,21 @@ pub struct NinjaBuildScriptCompiler {
     file_path_converter: Arc<FilePathConverter>,
     bit_code_file_extension: &'static str,
     ffi_build_script_basename: &'static str,
+    link_script_basename: &'static str,
 }
 
 impl NinjaBuildScriptCompiler {
     pub fn new(
         file_path_converter: Arc<FilePathConverter>,
         bit_code_file_extension: &'static str,
-        ffi_build_script: &'static str,
+        ffi_build_script_basename: &'static str,
+        link_script_basename: &'static str,
     ) -> Self {
         Self {
             file_path_converter,
             bit_code_file_extension,
-            ffi_build_script_basename: ffi_build_script,
+            ffi_build_script_basename,
+            link_script_basename,
         }
     }
 
@@ -378,6 +383,48 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
             )
             .collect::<Vec<_>>()
             .join("\n")
+            + "\n")
+    }
+
+    fn compile_application(
+        &self,
+        system_package_directory: &FilePath,
+        archive_files: &[FilePath],
+        application_file: &FilePath,
+    ) -> Result<String, Box<dyn Error>> {
+        let system_package_directory = self
+            .file_path_converter
+            .convert_to_os_path(system_package_directory);
+        let application_file = self
+            .file_path_converter
+            .convert_to_os_path(application_file);
+
+        Ok(vec![
+            "rule link".into(),
+            format!(
+                "  command = {} -t $target -o $out $in",
+                package_script_finder::find(&system_package_directory, self.link_script_basename)?
+                    .ok_or(InfrastructureError::LinkScriptNotFound(
+                        system_package_directory,
+                    ))?
+                    .display(),
+            ),
+            format!(
+                "build {}: link {}",
+                application_file.display(),
+                archive_files
+                    .iter()
+                    .map(|file| self
+                        .file_path_converter
+                        .convert_to_os_path(file)
+                        .display()
+                        .to_string())
+                    .collect::<Vec<_>>()
+                    .join(" ")
+            ),
+            format!("default {}", application_file.display()),
+        ]
+        .join("\n")
             + "\n")
     }
 
