@@ -3,7 +3,7 @@ mod module_target_collector;
 use crate::{
     common::file_path_resolver,
     error::ApplicationError,
-    external_package_archive_sorter,
+    external_package_topological_sorter,
     infra::{FilePath, Infrastructure, MainModuleTarget},
     module_finder, prelude_interface_file_finder, ApplicationConfiguration,
 };
@@ -139,7 +139,7 @@ pub fn compile_application(
                     },
                 )
                 .chain(
-                    external_package_archive_sorter::sort(
+                    external_package_topological_sorter::sort(
                         infrastructure,
                         main_package_directory,
                         output_directory,
