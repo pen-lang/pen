@@ -80,7 +80,7 @@ fn compile_application_build_script(
     output_directory: &FilePath,
     prelude_package_url: &url::Url,
     application_configuration: &ApplicationConfiguration,
-    application_build_script_file: &FilePath,
+    build_script_file: &FilePath,
 ) -> Result<(), Box<dyn Error>> {
     package_build_script_compiler::compile_application(
         infrastructure,
@@ -134,7 +134,7 @@ fn compile_application_build_script(
         &main_package_directory.join(&FilePath::new([
             &application_configuration.application_filename
         ])),
-        application_build_script_file,
+        build_script_file,
     )?;
 
     Ok(())
