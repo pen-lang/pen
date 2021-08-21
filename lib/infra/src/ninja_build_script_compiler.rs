@@ -58,7 +58,7 @@ impl NinjaBuildScriptCompiler {
             "  description = compiling module of $source_file",
             "rule compile_main",
             "  command = pen compile-main --target $target \
-                -f $main_function_interface_file $in $out",
+                 -f $main_function_interface_file $in $out",
             "  description = compiling module of $source_file",
             "rule compile_prelude",
             "  command = pen compile-prelude --target $target $in $out",
@@ -66,7 +66,7 @@ impl NinjaBuildScriptCompiler {
             "rule llc",
             &format!(
                 "  command = {} -O3 -tailcallopt --relocation-model pic \
-                    -mtriple $target -filetype obj -o $out $in",
+                     -mtriple $target -filetype obj -o $out $in",
                 llc.display()
             ),
             "  description = generating object file for $source_file",
