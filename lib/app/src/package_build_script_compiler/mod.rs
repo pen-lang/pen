@@ -8,15 +8,13 @@ use crate::{
 };
 use std::error::Error;
 
-#[allow(clippy::too_many_arguments)]
 pub fn compile_main(
     infrastructure: &Infrastructure,
     package_directory: &FilePath,
     output_directory: &FilePath,
+    rule_build_script_file: &FilePath,
     child_build_script_files: &[FilePath],
     build_script_file: &FilePath,
-    target_triple: Option<&str>,
-    prelude_package_url: &url::Url,
     application_configuration: &ApplicationConfiguration,
 ) -> Result<(), Box<dyn Error>> {
     let (main_module_targets, module_targets) = module_target_collector::collect_module_targets(
@@ -81,12 +79,6 @@ pub fn compile_main(
                     })
                     .transpose()?
                     .as_ref(),
-                child_build_script_files,
-                &prelude_interface_file_finder::find(
-                    infrastructure,
-                    output_directory,
-                    prelude_package_url,
-                )?,
                 &file_path_resolver::resolve_main_package_archive_file(
                     output_directory,
                     &infrastructure.file_path_configuration,
@@ -96,8 +88,8 @@ pub fn compile_main(
                     &infrastructure.file_path_configuration,
                 ),
                 package_directory,
-                output_directory,
-                target_triple,
+                &rule_build_script_file,
+                child_build_script_files,
             )?
             .as_bytes(),
     )?;
@@ -172,6 +164,32 @@ pub fn compile_prelude(
                     &infrastructure.file_path_configuration,
                 ),
                 &package_directory,
+            )?
+            .as_bytes(),
+    )?;
+
+    Ok(())
+}
+
+pub fn compile_rules(
+    infrastructure: &Infrastructure,
+    prelude_package_url: &url::Url,
+    output_directory: &FilePath,
+    target_triple: Option<&str>,
+    build_script_file: &FilePath,
+) -> Result<(), Box<dyn Error>> {
+    infrastructure.file_system.write(
+        build_script_file,
+        infrastructure
+            .build_script_compiler
+            .compile_rules(
+                &prelude_interface_file_finder::find(
+                    infrastructure,
+                    output_directory,
+                    prelude_package_url,
+                )?,
+                output_directory,
+                target_triple,
             )?
             .as_bytes(),
     )?;

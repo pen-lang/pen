@@ -16,26 +16,35 @@ pub fn build(
     prelude_package_url: &url::Url,
     application_configuration: &ApplicationConfiguration,
 ) -> Result<(), Box<dyn Error>> {
-    let build_script_file = output_directory.join(
-        &FilePath::new(vec!["main"]).with_extension(
-            infrastructure
-                .file_path_configuration
-                .build_script_file_extension,
-        ),
-    );
+    let file_extension = infrastructure
+        .file_path_configuration
+        .build_script_file_extension;
+    let rule_build_script_file =
+        output_directory.join(&FilePath::new(vec!["rules"]).with_extension(file_extension));
+    let package_build_script_file =
+        output_directory.join(&FilePath::new(vec!["main"]).with_extension(file_extension));
+
+    package_build_script_compiler::compile_rules(
+        infrastructure,
+        prelude_package_url,
+        output_directory,
+        target_triple,
+        &rule_build_script_file,
+    )?;
 
     package_build_script_compiler::compile_main(
         infrastructure,
         main_package_directory,
         output_directory,
+        &rule_build_script_file,
         &find_external_package_build_scripts(infrastructure, output_directory)?,
-        &build_script_file,
-        target_triple,
-        prelude_package_url,
+        &package_build_script_file,
         application_configuration,
     )?;
 
-    infrastructure.module_builder.build(&build_script_file)?;
+    infrastructure
+        .module_builder
+        .build(&package_build_script_file)?;
 
     if is_application_package(
         infrastructure,

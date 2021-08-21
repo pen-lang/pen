@@ -289,15 +289,9 @@ impl NinjaBuildScriptCompiler {
 }
 
 impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
-    fn compile_main(
+    fn compile_rules(
         &self,
-        module_targets: &[app::infra::ModuleTarget],
-        main_module_target: Option<&app::infra::MainModuleTarget>,
-        child_build_script_files: &[FilePath],
         prelude_interface_files: &[FilePath],
-        archive_file: &FilePath,
-        ffi_archive_file: &FilePath,
-        package_directory: &FilePath,
         output_directory: &FilePath,
         target_triple: Option<&str>,
     ) -> Result<String, Box<dyn Error>> {
@@ -312,6 +306,28 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
         ]
         .into_iter()
         .chain(self.compile_rules(prelude_interface_files, target_triple)?)
+        .collect::<Vec<_>>()
+        .join("\n")
+            + "\n")
+    }
+
+    fn compile_main(
+        &self,
+        module_targets: &[app::infra::ModuleTarget],
+        main_module_target: Option<&app::infra::MainModuleTarget>,
+        archive_file: &FilePath,
+        ffi_archive_file: &FilePath,
+        package_directory: &FilePath,
+        rule_build_script_file: &FilePath,
+        child_build_script_files: &[FilePath],
+    ) -> Result<String, Box<dyn Error>> {
+        Ok(vec![format!(
+            "include {}",
+            self.file_path_converter
+                .convert_to_os_path(rule_build_script_file)
+                .display()
+        )]
+        .into_iter()
         .chain(self.compile_module_targets(module_targets, ffi_archive_file, package_directory)?)
         .chain(if let Some(main_module_target) = main_module_target {
             self.compile_main_module_target(main_module_target, package_directory)?
