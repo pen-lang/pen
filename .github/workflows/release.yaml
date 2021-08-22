@@ -30,6 +30,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
       - run: git log --pretty='- %s by %aN' > changes.md
       - run: cat changes.md
       - run: curl -fsSL https://apt.llvm.org/llvm.sh | sudo bash -s 12
