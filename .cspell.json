@@ -26,10 +26,12 @@
     "renamer",
     "repr",
     "roadmap",
+    "rustup",
     "subninja",
     "tailcallopt",
     "tempfile",
     "termcolor",
+    "toolchains",
     "toposort",
     "wasi"
   ]

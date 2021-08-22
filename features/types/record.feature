@@ -61,7 +61,7 @@ Feature: Record
     When I run `pen build`
     Then the exit status should be 0
 
-  Scenario: Get an elemnt in a record
+  Scenario: Get an element in a record
     Given a file named "Foo.pen" with:
     """pen
     type r {
