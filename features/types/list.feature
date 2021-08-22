@@ -55,7 +55,7 @@ Feature: List
     When I run `pen build`
     Then the exit status should be 0
 
-  Scenario: Coerce elements of a spraed list
+  Scenario: Coerce elements of a spread list
     Given a file named "Foo.pen" with:
     """pen
     f = \(xs [number]) [number | none] {
