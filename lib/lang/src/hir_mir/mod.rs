@@ -305,4 +305,48 @@ mod tests {
             ))
         );
     }
+
+    #[test]
+    fn fail_to_compile_invalid_try_operator_in_function() {
+        assert_eq!(
+            compile_module(
+                &Module::empty()
+                    .set_type_definitions(vec![TypeDefinition::without_source(
+                        "error",
+                        vec![],
+                        false,
+                        false,
+                        false
+                    )])
+                    .set_definitions(vec![Definition::without_source(
+                        "x",
+                        Lambda::new(
+                            vec![Argument::new(
+                                "x",
+                                types::Union::new(
+                                    types::None::new(Position::dummy()),
+                                    types::Reference::new(
+                                        &ERROR_TYPE_CONFIGURATION.error_type_name,
+                                        Position::dummy(),
+                                    ),
+                                    Position::dummy(),
+                                ),
+                            )],
+                            types::None::new(Position::dummy()),
+                            TryOperation::new(
+                                None,
+                                Variable::new("x", Position::dummy()),
+                                Position::dummy(),
+                            ),
+                            Position::dummy(),
+                        ),
+                        false,
+                    )])
+            ),
+            Err(CompileError::TypesNotMatched(
+                Position::dummy(),
+                Position::dummy()
+            ))
+        );
+    }
 }
