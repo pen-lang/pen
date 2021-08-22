@@ -20,6 +20,9 @@ Items are ordered by priority.
   - [ ] Language server
 - [ ] Asynchronous operations
 - [ ] Parallel computation
+- [ ] Full OS interface
+  - [ ] TCP/UDP sockets
+  - [ ] Process
 - [ ] Web browser interface
 - [ ] Binary support
 - [ ] Mutable state
