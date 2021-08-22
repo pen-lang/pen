@@ -45,6 +45,7 @@ pub fn build(
             output_directory,
         )?
         .iter()
+        .chain([prelude_package_url])
         .map(|url| {
             file_path_resolver::resolve_external_package_build_script_file(
                 output_directory,
