@@ -36,7 +36,7 @@
 ```json
 {
   "dependencies": {
-    "Core": "pen://pen-root/lib/core",
+    "Core": "pen:///lib/core",
     "MyLibrary": "git://github.com/john-doe/super-hello-world"
   }
 }
