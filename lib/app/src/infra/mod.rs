@@ -9,7 +9,6 @@ mod infrastructure;
 mod main_module_target;
 mod module_target;
 mod package_builder;
-mod package_configuration;
 mod package_configuration_reader;
 mod package_configuration_writer;
 
@@ -24,7 +23,6 @@ pub use infrastructure::*;
 pub use main_module_target::*;
 pub use module_target::*;
 pub use package_builder::*;
-pub use package_configuration::*;
 pub use package_configuration_reader::*;
 pub use package_configuration_writer::*;
 

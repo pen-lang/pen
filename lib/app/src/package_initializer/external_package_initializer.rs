@@ -10,11 +10,11 @@ pub fn initialize_recursively(
     package_directory: &FilePath,
     output_directory: &FilePath,
 ) -> Result<(), Box<dyn Error>> {
-    let package_configuration = infrastructure
+    for url in infrastructure
         .package_configuration_reader
-        .read(package_directory)?;
-
-    for url in package_configuration.dependencies.values() {
+        .get_dependencies(package_directory)?
+        .values()
+    {
         initialize(infrastructure, url, output_directory)?;
     }
 

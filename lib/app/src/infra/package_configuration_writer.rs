@@ -1,10 +1,10 @@
-use super::{file_path::FilePath, package_configuration::PackageConfiguration};
-use std::error::Error;
+use super::file_path::FilePath;
+use std::{collections::HashMap, error::Error};
 
 pub trait PackageConfigurationWriter {
     fn write(
         &self,
-        package_configuration: &PackageConfiguration,
+        dependencies: &HashMap<String, url::Url>,
         package_directory: &FilePath,
     ) -> Result<(), Box<dyn Error>>;
 }

@@ -1,6 +1,6 @@
 use super::json_package_configuration::JsonPackageConfiguration;
 use crate::{package_script_finder, FilePathConverter};
-use std::{convert::TryInto, error::Error, sync::Arc};
+use std::{collections::HashMap, error::Error, sync::Arc};
 
 pub struct JsonPackageConfigurationReader {
     file_system: Arc<dyn app::infra::FileSystem>,
@@ -26,17 +26,17 @@ impl JsonPackageConfigurationReader {
 }
 
 impl app::infra::PackageConfigurationReader for JsonPackageConfigurationReader {
-    fn read(
+    fn get_dependencies(
         &self,
         package_directory: &app::infra::FilePath,
-    ) -> Result<app::infra::PackageConfiguration, Box<dyn Error>> {
+    ) -> Result<HashMap<String, url::Url>, Box<dyn Error>> {
         Ok(
             serde_json::from_str::<JsonPackageConfiguration>(&self.file_system.read_to_string(
                 &package_directory.join(&app::infra::FilePath::new(vec![
                     self.build_configuration_filename,
                 ])),
             )?)?
-            .try_into()?,
+            .get_dependencies()?,
         )
     }
 
