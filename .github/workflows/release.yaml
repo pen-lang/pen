@@ -31,21 +31,11 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - run: tools/ci/set_up_os.sh
-      - run: cargo build --release
-      - run: strip target/release/pen
       - run: echo asset=$(tools/build_asset.sh) >> $GITHUB_ENV
       - uses: actions/upload-artifact@v2
         with:
           name: ${{ env.asset }}
           path: ${{ env.asset }}
-      - uses: softprops/action-gh-release@v1
-        if: needs.tag_check.outputs.should_release == 'true'
-        with:
-          tag_name: v${{ needs.tag_check.outputs.version }}
-          files: ${{ env.asset }}
-          draft: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   release:
     needs:
       - tag_check
@@ -56,11 +46,13 @@ jobs:
         with:
           fetch-depth: 0
       - run: git log --pretty='- %s by %aN' $(git describe --tags --abbrev=0 HEAD^)..HEAD > changes.md
+      - uses: actions/download-artifact@v2
       - uses: softprops/action-gh-release@v1
         if: needs.tag_check.outputs.should_release == 'true'
         with:
           tag_name: v${{ needs.tag_check.outputs.version }}
           body_path: changes.md
+          files: "*.tar.xz"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   homebrew:
