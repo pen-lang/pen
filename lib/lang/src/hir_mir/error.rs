@@ -17,6 +17,7 @@ pub enum CompileError {
     FunctionEqualOperation(Position),
     FunctionExpected(Position),
     InvalidRecordEqualOperation(Position),
+    InvalidTryOperation(Position),
     ListExpected(Position),
     MainFunctionNotFound(Position),
     MainFunctionTypeUndefined(Position),
@@ -75,6 +76,13 @@ impl Display for CompileError {
                 write!(
                     formatter,
                     "equal operator cannot be used with record type containing any or function types\n{}",
+                    position
+                )
+            }
+            Self::InvalidTryOperation(position) => {
+                write!(
+                    formatter,
+                    "try operation cannot be used in function not returning error\n{}",
                     position
                 )
             }
