@@ -14,6 +14,7 @@ mod module_interface_compiler;
 mod record_element_validator;
 mod string_type_configuration;
 mod transformation;
+mod try_operation_validator;
 mod type_checker;
 mod type_coercer;
 mod type_compiler;
@@ -97,6 +98,7 @@ fn compile_module(
     let module = record_equal_function_transformer::transform(module, type_context)?;
     let module = type_inferrer::infer_types(&module, type_context)?;
     type_checker::check_types(&module, type_context)?;
+    try_operation_validator::validate(&module, type_context)?;
     record_element_validator::validate(&module, type_context)?;
     let module = type_coercer::coerce_types(&module, type_context)?;
     type_checker::check_types(&module, type_context)?;
@@ -343,10 +345,7 @@ mod tests {
                         false,
                     )])
             ),
-            Err(CompileError::TypesNotMatched(
-                Position::dummy(),
-                Position::dummy()
-            ))
+            Err(CompileError::InvalidTryOperation(Position::dummy()))
         );
     }
 }
