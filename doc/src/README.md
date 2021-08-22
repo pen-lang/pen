@@ -49,7 +49,7 @@ Errors are merely data. Its special syntax provides a convenient way to handle e
 
 #### Cross compile
 
-The compiler and runtime support different CPU architectures, operating systems, web browsers and [WASI](https://wasi.dev/) (WIP.)
+The compiler and runtime support different CPU architectures, operating systems, web browsers and [WASI](https://wasi.dev/).
 
 #### Foreign Function Interface (FFI)
 
