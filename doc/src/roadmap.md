@@ -12,7 +12,7 @@ Items are ordered by priority.
 - [x] WASM backend
 - [ ] Stream-based list type
 - [ ] Code formatter
-- [ ] Persistent map type
+- [ ] Map type
 - [ ] Testing framework
 - [ ] IDE/editor support
   - [ ] Language server
