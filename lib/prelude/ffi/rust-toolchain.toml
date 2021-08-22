@@ -1,1 +1,8 @@
-../../../rust-toolchain.toml
+[toolchain]
+channel = "stable"
+targets = [
+  "i686-unknown-linux-musl",
+  "x86_64-unknown-linux-musl",
+  "aarch64-unknown-linux-musl",
+  "wasm32-wasi",
+]
