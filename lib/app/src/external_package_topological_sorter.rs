@@ -1,6 +1,6 @@
 use crate::{
     external_package_configuration_reader,
-    infra::{FilePath, Infrastructure, PackageConfiguration},
+    infra::{FilePath, Infrastructure},
 };
 use petgraph::{algo::toposort, Graph};
 use std::{
@@ -21,20 +21,20 @@ pub fn sort(
 }
 
 fn sort_external_packages(
-    package_configurations: &BTreeMap<url::Url, PackageConfiguration>,
+    dependencies: &BTreeMap<url::Url, HashMap<String, url::Url>>,
 ) -> Result<Vec<url::Url>, Box<dyn std::error::Error>> {
     let mut graph = Graph::<url::Url, ()>::new();
     let mut indices = HashMap::<url::Url, _>::new();
 
-    for external_package in package_configurations.keys() {
+    for external_package in dependencies.keys() {
         indices.insert(
             external_package.clone(),
             graph.add_node(external_package.clone()),
         );
     }
 
-    for (url, package_configuration) in package_configurations {
-        for dependency_url in package_configuration.dependencies.values() {
+    for (url, dependencies) in dependencies {
+        for dependency_url in dependencies.values() {
             graph.add_edge(indices[dependency_url], indices[url], ());
         }
     }

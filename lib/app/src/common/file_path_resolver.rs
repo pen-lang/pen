@@ -2,8 +2,8 @@ use super::package_id_calculator;
 use crate::{
     common::module_id_calculator,
     infra::{
-        FilePath, FilePathConfiguration, ARCHIVE_DIRECTORY, EXTERNAL_PACKAGE_DIRECTORY,
-        OBJECT_DIRECTORY,
+        FilePath, FilePathConfiguration, ARCHIVE_DIRECTORY, BUILD_SCRIPT_DIRECTORY,
+        EXTERNAL_PACKAGE_DIRECTORY, OBJECT_DIRECTORY,
     },
 };
 
@@ -16,6 +16,10 @@ pub fn resolve_object_directory(output_directory: &FilePath) -> FilePath {
 
 pub fn resolve_archive_directory(output_directory: &FilePath) -> FilePath {
     output_directory.join(&FilePath::new([ARCHIVE_DIRECTORY]))
+}
+
+pub fn resolve_build_script_directory(output_directory: &FilePath) -> FilePath {
+    output_directory.join(&FilePath::new([BUILD_SCRIPT_DIRECTORY]))
 }
 
 pub fn resolve_source_file(
@@ -116,4 +120,25 @@ fn resolve_package_archive_file(
     resolve_archive_directory(output_directory)
         .join(&FilePath::new([format!("lib{}", basename)]))
         .with_extension(file_path_configuration.archive_file_extension)
+}
+
+pub fn resolve_special_build_script_file(
+    output_directory: &FilePath,
+    name: &str,
+    file_path_configuration: &FilePathConfiguration,
+) -> FilePath {
+    resolve_build_script_directory(output_directory).join(
+        &FilePath::new([name]).with_extension(file_path_configuration.build_script_file_extension),
+    )
+}
+
+pub fn resolve_external_package_build_script_file(
+    output_directory: &FilePath,
+    url: &url::Url,
+    file_path_configuration: &FilePathConfiguration,
+) -> FilePath {
+    resolve_build_script_directory(output_directory).join(
+        &FilePath::new([package_id_calculator::calculate(url)])
+            .with_extension(file_path_configuration.build_script_file_extension),
+    )
 }

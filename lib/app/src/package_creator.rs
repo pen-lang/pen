@@ -1,6 +1,6 @@
 use crate::{
     common::file_path_resolver,
-    infra::{FilePath, Infrastructure, PackageConfiguration},
+    infra::{FilePath, Infrastructure},
     ApplicationConfiguration,
 };
 use std::{collections::HashMap, error::Error};
@@ -48,12 +48,9 @@ fn create(
     module_content: &str,
     package_directory: &FilePath,
 ) -> Result<(), Box<dyn Error>> {
-    infrastructure.package_configuration_writer.write(
-        &PackageConfiguration {
-            dependencies: dependencies.clone(),
-        },
-        package_directory,
-    )?;
+    infrastructure
+        .package_configuration_writer
+        .write(dependencies, package_directory)?;
 
     infrastructure.file_system.write(
         &file_path_resolver::resolve_source_file(
