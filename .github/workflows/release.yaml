@@ -54,7 +54,7 @@ jobs:
         with:
           tag_name: v${{ needs.tag_check.outputs.version }}
           body_path: changes.md
-          files: artifacts/*
+          files: artifacts/**
           fail_on_unmatched_files: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
