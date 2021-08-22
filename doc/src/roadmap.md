@@ -23,9 +23,9 @@ Items are ordered by priority.
 - [ ] Full OS interface
   - [ ] TCP/UDP sockets
   - [ ] Process
-- [ ] Web browser interface
-- [ ] Binary support
 - [ ] Mutable state
   - [ ] Thread safety
   - [ ] Internal DSL
+- [ ] Web browser interface
+- [ ] Binary support
 - [ ] Self-hosting
