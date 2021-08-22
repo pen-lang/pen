@@ -47,7 +47,9 @@ jobs:
           fetch-depth: 0
       - run: git log --pretty='- %s by %aN' $(git describe --tags --abbrev=0 HEAD^)..HEAD > changes.md
       - uses: actions/download-artifact@v2
-      - run: ls -l && ls *.tar.xz
+        with:
+          path: artifacts
+      - run: ls -R artifacts
       - uses: softprops/action-gh-release@v1
         if: needs.tag_check.outputs.should_release == 'true'
         with:
