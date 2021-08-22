@@ -47,12 +47,15 @@ jobs:
           fetch-depth: 0
       - run: git log --pretty='- %s by %aN' $(git describe --tags --abbrev=0 HEAD^)..HEAD > changes.md
       - uses: actions/download-artifact@v2
+        with:
+          path: artifacts
       - uses: softprops/action-gh-release@v1
         if: needs.tag_check.outputs.should_release == 'true'
         with:
           tag_name: v${{ needs.tag_check.outputs.version }}
           body_path: changes.md
-          files: "*.tar.xz"
+          files: artifacts/**
+          fail_on_unmatched_files: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   homebrew:
