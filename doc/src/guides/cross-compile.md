@@ -16,4 +16,4 @@ Run `pen build --help` to see all supported targets.
 
 Cross compile support of system packages are totally up to their developers.
 
-For example, [the standard system package of `Os`](/references/standard-packages/os.md) supports most targets as long as their platforms expose OS-like APIs.
+For example, [the standard system package of `Os`](/references/standard-packages/os.md) supports most targets as long as their platforms expose OS-like APIs. However, some custom system packages might not be worth suppporting all those targets because of their limited use cases.
