@@ -1,6 +1,6 @@
 # Cross compile
 
-The language's compiler also supports [cross compile](https://en.wikipedia.org/wiki/cross_compiler). To compile applications and libraries for different targets, specify the `--target` option of the `pen build` subcommand.
+The language's compiler supports [cross compile](https://en.wikipedia.org/wiki/cross_compiler). To compile applications and libraries for different targets, specify the `--target` option of the `pen build` subcommand.
 
 For example, run the following command to compile a `wasm32` binary for the WASI platform.
 
