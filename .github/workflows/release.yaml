@@ -9,15 +9,15 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       version: ${{ env.version }}
-      new_tag: ${{ env.new_tag }}
+      should_release: ${{ env.should_release }}
     steps:
       - uses: actions/checkout@v2
       - run: echo version=$(tools/version.sh) >> $GITHUB_ENV
       - run: |
           git fetch --prune --unshallow --tags
 
-          if ! git tag | grep v$version; then
-            echo new_tag=true >> $GITHUB_ENV
+          if [ ${{ github.ref }} = 'refs/heads/main' ] && ! git tag | grep v$version; then
+            echo should_release=true >> $GITHUB_ENV
           fi
   build_asset:
     needs: tag_check
@@ -39,7 +39,7 @@ jobs:
           name: ${{ env.asset }}
           path: ${{ env.asset }}
       - uses: softprops/action-gh-release@v1
-        if: github.ref == 'refs/heads/main' && needs.tag_check.outputs.new_tag == 'true'
+        if: needs.tag_check.outputs.should_release == 'true'
         with:
           tag_name: v${{ needs.tag_check.outputs.version }}
           files: ${{ env.asset }}
@@ -57,7 +57,7 @@ jobs:
           fetch-depth: 0
       - run: git log --pretty='- %s by %aN' $(git describe --tags --abbrev=0 HEAD^)..HEAD > changes.md
       - uses: softprops/action-gh-release@v1
-        if: github.ref == 'refs/heads/main' && needs.tag_check.outputs.new_tag == 'true'
+        if: needs.tag_check.outputs.should_release == 'true'
         with:
           tag_name: v${{ needs.tag_check.outputs.version }}
           body_path: changes.md
@@ -67,7 +67,7 @@ jobs:
     needs:
       - tag_check
       - release
-    if: github.ref == 'refs/heads/main' && needs.tag_check.outputs.new_tag == 'true'
+    if: needs.tag_check.outputs.should_release == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
