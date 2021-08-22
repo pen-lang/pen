@@ -8,21 +8,22 @@ Items are ordered by priority.
 - [x] Performant GC
   - [x] Automatic reference counting
 - [x] Foreign function interface
-- [ ] OS interface
-- [ ] Asynchronous operations
-- [ ] WASM backend
-- [ ] Code formatter
-- [ ] Efficient persistent data structures
-  - [ ] Array type
-  - [ ] Map type
-- [ ] Testing framework
+- [x] Basic OS interface
+- [x] WASM backend
 - [ ] Stream-based list type
+- [ ] Code formatter
+- [ ] Map type
+- [ ] Testing framework
 - [ ] IDE/editor support
   - [ ] Language server
+- [ ] Asynchronous operations
 - [ ] Parallel computation
-- [ ] Web browser interface
-- [ ] Binary support
+- [ ] Full OS interface
+  - [ ] TCP/UDP sockets
+  - [ ] Process
 - [ ] Mutable state
   - [ ] Thread safety
   - [ ] Internal DSL
+- [ ] Web browser interface
+- [ ] Binary support
 - [ ] Self-hosting
