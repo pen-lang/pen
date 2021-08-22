@@ -30,6 +30,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
       - run: curl -fsSL https://apt.llvm.org/llvm.sh | sudo bash -s 12
         if: startsWith(matrix.os, 'ubuntu-')
       - run: |
@@ -39,11 +41,11 @@ jobs:
       - run: cargo build --release
       - run: strip target/release/pen
       - run: echo asset=$(tools/build_asset.sh) >> $GITHUB_ENV
-      - run: git log --pretty='- %s by %aN' > changes.md
       - uses: actions/upload-artifact@v2
         with:
           name: ${{ env.asset }}
           path: ${{ env.asset }}
+      - run: git log --pretty='- %s by %aN' $(git describe --tags --abbrev=0 HEAD^)..HEAD > changes.md
       - uses: softprops/action-gh-release@v1
         if: github.ref == 'refs/heads/main' && needs.tag_check.outputs.new_tag == 'true'
         with:
