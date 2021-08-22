@@ -30,7 +30,9 @@ pub fn create(
         file_system: file_system.clone(),
         file_path_displayer: Arc::new(infra::FilePathDisplayer::new(file_path_converter.clone())),
         file_path_configuration: FILE_PATH_CONFIGURATION.clone().into(),
-        package_builder: Arc::new(infra::NinjaPackageBuilder::new(file_path_converter.clone())),
+        build_script_runner: Arc::new(infra::NinjaBuildScriptRunner::new(
+            file_path_converter.clone(),
+        )),
         build_script_compiler,
         package_configuration_reader: Arc::new(infra::JsonPackageConfigurationReader::new(
             file_system.clone(),

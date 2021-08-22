@@ -87,8 +87,8 @@ pub fn build(
     )?;
 
     infrastructure
-        .package_builder
-        .build(&package_build_script_file)?;
+        .build_script_runner
+        .run(&package_build_script_file)?;
 
     Ok(())
 }
