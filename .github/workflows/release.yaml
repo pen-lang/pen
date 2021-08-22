@@ -52,7 +52,7 @@ jobs:
         with:
           tag_name: v${{ needs.tag_check.outputs.version }}
           body_path: changes.md
-          files: *.tar.xz
+          files: "*.tar.xz"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   homebrew:
