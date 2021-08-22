@@ -13,8 +13,8 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - run: curl -fsSL https://apt.llvm.org/llvm.sh | sudo bash -s 12
       - uses: actions/checkout@v2
+      - run: tools/ci/set_up_os.sh
       - run: cargo clippy -- -D warnings
   spell_check:
     runs-on: ubuntu-latest
