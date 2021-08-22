@@ -32,8 +32,6 @@ jobs:
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0
-      - run: git log --pretty='- %s by %aN' $(git describe --tags --abbrev=0 HEAD^)..HEAD > changes.md
-      - run: cat changes.md
       - run: curl -fsSL https://apt.llvm.org/llvm.sh | sudo bash -s 12
         if: startsWith(matrix.os, 'ubuntu-')
       - run: |
@@ -47,6 +45,7 @@ jobs:
         with:
           name: ${{ env.asset }}
           path: ${{ env.asset }}
+      - run: git log --pretty='- %s by %aN' $(git describe --tags --abbrev=0 HEAD^)..HEAD > changes.md
       - uses: softprops/action-gh-release@v1
         if: github.ref == 'refs/heads/main' && needs.tag_check.outputs.new_tag == 'true'
         with:
