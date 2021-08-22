@@ -10,6 +10,6 @@ cd $(dirname $0)/..
 
 tar caf $tarball \
   README.md LICENSE.md LICENSE-MIT LICENSE-APACHE \
-  doc lib target/release/pen
+  doc lib rust-toolchain.toml target/release/pen
 
 echo $tarball
