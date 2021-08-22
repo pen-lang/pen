@@ -1,8 +1,6 @@
 # Cross compile
 
-Cross compile is a feature of programming languages where their compilers can compile binary files, such as executable files and libraries, for targets of different platforms or CPU architectures that are not of the current host.
-
-Pen's compiler also supports cross compile. To compile applications and libraries for different targets, specify the `--target` option of the `pen build` subcommand.
+The language's compiler also supports [cross compile](https://en.wikipedia.org/wiki/cross_compiler). To compile applications and libraries for different targets, specify the `--target` option of the `pen build` subcommand.
 
 For example, run the following command to compile a `wasm32` binary for the WASI platform.
 
