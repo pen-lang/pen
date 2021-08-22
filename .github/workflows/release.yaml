@@ -30,12 +30,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
-      - run: curl -fsSL https://apt.llvm.org/llvm.sh | sudo bash -s 12
-        if: startsWith(matrix.os, 'ubuntu-')
-      - run: |
-          brew install llvm@12
-          echo LLVM_SYS_120_PREFIX=$(brew --prefix)/opt/llvm@12 >> $GITHUB_ENV
-        if: startsWith(matrix.os, 'macos-')
+      - run: tools/ci/set_up_os.sh
       - run: cargo build --release
       - run: strip target/release/pen
       - run: echo asset=$(tools/build_asset.sh) >> $GITHUB_ENV
