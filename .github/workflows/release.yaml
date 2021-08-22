@@ -31,8 +31,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - run: tools/ci/set_up_os.sh
-      - run: cargo build --release
-      - run: strip target/release/pen
       - run: echo asset=$(tools/build_asset.sh) >> $GITHUB_ENV
       - uses: actions/upload-artifact@v2
         with:
