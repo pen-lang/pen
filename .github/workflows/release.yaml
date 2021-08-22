@@ -19,7 +19,7 @@ jobs:
           if ! git tag | grep v$version; then
             echo new_tag=true >> $GITHUB_ENV
           fi
-  release:
+  build_asset:
     needs: tag_check
     strategy:
       fail-fast: false
@@ -30,8 +30,6 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
       - run: curl -fsSL https://apt.llvm.org/llvm.sh | sudo bash -s 12
         if: startsWith(matrix.os, 'ubuntu-')
       - run: |
@@ -45,13 +43,29 @@ jobs:
         with:
           name: ${{ env.asset }}
           path: ${{ env.asset }}
+      - uses: softprops/action-gh-release@v1
+        if: github.ref == 'refs/heads/main' && needs.tag_check.outputs.new_tag == 'true'
+        with:
+          tag_name: v${{ needs.tag_check.outputs.version }}
+          files: ${{ env.asset }}
+          draft: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  release:
+    needs:
+      - tag_check
+      - build_asset
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
       - run: git log --pretty='- %s by %aN' $(git describe --tags --abbrev=0 HEAD^)..HEAD > changes.md
       - uses: softprops/action-gh-release@v1
         if: github.ref == 'refs/heads/main' && needs.tag_check.outputs.new_tag == 'true'
         with:
           tag_name: v${{ needs.tag_check.outputs.version }}
           body_path: changes.md
-          files: ${{ env.asset }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   homebrew:
