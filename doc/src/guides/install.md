@@ -1,6 +1,6 @@
 # Install
 
-### On Linux or macOS
+### On Linux, macOS or [WSL](https://docs.microsoft.com/en-us/windows/wsl/about)
 
 1.  Install [Homebrew](https://brew.sh).
 1.  Run the following command in your terminal.

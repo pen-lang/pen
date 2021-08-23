@@ -57,7 +57,7 @@ Its C/[Rust](https://www.rust-lang.org/) FFI provides interoperability with othe
 
 #### Deterministic tests (WIP)
 
-Unit tests are deterministic and realize reliable continuous integration.
+Unit tests are deterministic to realize reliable continuous integration.
 
 #### Asynchronous operation (WIP)
 
