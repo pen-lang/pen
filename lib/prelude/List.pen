@@ -36,12 +36,12 @@ _emptyList = \() _AnyList {
 }
 
 _getListLength = \(l _AnyList) number {
-  _getLengthFromNode(l.node)
+  _getLengthFromNode(l.node())
 }
 
-_getLengthFromNode = \(n \() _Node | none) number {
-  if n = n(); _Node {
-    1 + _getLengthFromNode(n.rest)
+_getLengthFromNode = \(n _Node | none) number {
+  if n = n; _Node {
+    1 + _getLengthFromNode(n.rest())
   } else {
     0
   }
