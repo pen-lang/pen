@@ -50,7 +50,12 @@ fn transform_list(
             Some(
                 types::Function::new(
                     vec![
-                        types::Any::new(position.clone()).into(),
+                        types::Function::new(
+                            vec![],
+                            types::Any::new(position.clone()),
+                            position.clone(),
+                        )
+                        .into(),
                         any_list_type.clone().into(),
                     ],
                     any_list_type,
@@ -60,10 +65,15 @@ fn transform_list(
             ),
             Variable::new(&configuration.prepend_function_name, position.clone()),
             vec![
-                TypeCoercion::new(
-                    type_.clone(),
+                Lambda::new(
+                    vec![],
                     types::Any::new(position.clone()),
-                    expression.clone(),
+                    TypeCoercion::new(
+                        type_.clone(),
+                        types::Any::new(position.clone()),
+                        expression.clone(),
+                        position.clone(),
+                    ),
                     position.clone(),
                 )
                 .into(),
@@ -81,16 +91,34 @@ mod tests {
     use crate::hir_mir::dummy_type_configurations::DUMMY_LIST_TYPE_CONFIGURATION;
     use pretty_assertions::assert_eq;
 
-    fn create_list_type() -> types::Reference {
+    fn get_list_type() -> types::Reference {
         types::Reference::new(
             DUMMY_LIST_TYPE_CONFIGURATION.list_type_name.clone(),
             Position::dummy(),
         )
     }
 
+    fn get_prepend_function_type() -> types::Function {
+        let list_type = get_list_type();
+
+        types::Function::new(
+            vec![
+                types::Function::new(
+                    vec![],
+                    types::Any::new(Position::dummy()),
+                    Position::dummy(),
+                )
+                .into(),
+                list_type.clone().into(),
+            ],
+            list_type.clone(),
+            Position::dummy(),
+        )
+    }
+
     #[test]
     fn transform_empty_list() {
-        let list_type = create_list_type();
+        let list_type = get_list_type();
 
         assert_eq!(
             transform(
@@ -116,7 +144,7 @@ mod tests {
 
     #[test]
     fn transform_list_with_one_element() {
-        let list_type = create_list_type();
+        let list_type = get_list_type();
 
         assert_eq!(
             transform(
@@ -128,26 +156,21 @@ mod tests {
                 &DUMMY_LIST_TYPE_CONFIGURATION,
             ),
             Call::new(
-                Some(
-                    types::Function::new(
-                        vec![
-                            types::Any::new(Position::dummy()).into(),
-                            list_type.clone().into(),
-                        ],
-                        list_type.clone(),
-                        Position::dummy(),
-                    )
-                    .into(),
-                ),
+                Some(get_prepend_function_type().into()),
                 Variable::new(
                     &DUMMY_LIST_TYPE_CONFIGURATION.prepend_function_name,
                     Position::dummy()
                 ),
                 vec![
-                    TypeCoercion::new(
-                        types::None::new(Position::dummy()),
+                    Lambda::new(
+                        vec![],
                         types::Any::new(Position::dummy()),
-                        None::new(Position::dummy()),
+                        TypeCoercion::new(
+                            types::None::new(Position::dummy()),
+                            types::Any::new(Position::dummy()),
+                            None::new(Position::dummy()),
+                            Position::dummy(),
+                        ),
                         Position::dummy(),
                     )
                     .into(),
@@ -170,7 +193,8 @@ mod tests {
 
     #[test]
     fn transform_list_with_two_elements() {
-        let list_type = create_list_type();
+        let list_type = get_list_type();
+        let prepend_function_type = get_prepend_function_type();
 
         assert_eq!(
             transform(
@@ -185,51 +209,41 @@ mod tests {
                 &DUMMY_LIST_TYPE_CONFIGURATION,
             ),
             Call::new(
-                Some(
-                    types::Function::new(
-                        vec![
-                            types::Any::new(Position::dummy()).into(),
-                            list_type.clone().into(),
-                        ],
-                        list_type.clone(),
-                        Position::dummy(),
-                    )
-                    .into(),
-                ),
+                Some(prepend_function_type.clone().into()),
                 Variable::new(
                     &DUMMY_LIST_TYPE_CONFIGURATION.prepend_function_name,
                     Position::dummy()
                 ),
                 vec![
-                    TypeCoercion::new(
-                        types::None::new(Position::dummy()),
+                    Lambda::new(
+                        vec![],
                         types::Any::new(Position::dummy()),
-                        None::new(Position::dummy()),
-                        Position::dummy(),
+                        TypeCoercion::new(
+                            types::None::new(Position::dummy()),
+                            types::Any::new(Position::dummy()),
+                            None::new(Position::dummy()),
+                            Position::dummy(),
+                        ),
+                        Position::dummy()
                     )
                     .into(),
                     Call::new(
-                        Some(
-                            types::Function::new(
-                                vec![
-                                    types::Any::new(Position::dummy()).into(),
-                                    list_type.clone().into(),
-                                ],
-                                list_type.clone(),
-                                Position::dummy(),
-                            )
-                            .into(),
-                        ),
+                        Some(prepend_function_type.clone().into(),),
                         Variable::new(
                             &DUMMY_LIST_TYPE_CONFIGURATION.prepend_function_name,
                             Position::dummy()
                         ),
                         vec![
-                            TypeCoercion::new(
-                                types::None::new(Position::dummy()),
+                            Lambda::new(
+                                vec![],
                                 types::Any::new(Position::dummy()),
-                                None::new(Position::dummy()),
-                                Position::dummy(),
+                                TypeCoercion::new(
+                                    types::None::new(Position::dummy()),
+                                    types::Any::new(Position::dummy()),
+                                    None::new(Position::dummy()),
+                                    Position::dummy(),
+                                ),
+                                Position::dummy()
                             )
                             .into(),
                             Call::new(
