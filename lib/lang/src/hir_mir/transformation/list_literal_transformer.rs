@@ -132,7 +132,7 @@ mod tests {
                     types::Function::new(
                         vec![
                             types::Any::new(Position::dummy()).into(),
-                            list_type.clone().clone().into(),
+                            list_type.clone().into(),
                         ],
                         list_type.clone(),
                         Position::dummy(),
@@ -189,7 +189,7 @@ mod tests {
                     types::Function::new(
                         vec![
                             types::Any::new(Position::dummy()).into(),
-                            list_type.clone().clone().into(),
+                            list_type.clone().into(),
                         ],
                         list_type.clone(),
                         Position::dummy(),
@@ -213,7 +213,7 @@ mod tests {
                             types::Function::new(
                                 vec![
                                     types::Any::new(Position::dummy()).into(),
-                                    list_type.clone().clone().into(),
+                                    list_type.clone().into(),
                                 ],
                                 list_type.clone(),
                                 Position::dummy(),
