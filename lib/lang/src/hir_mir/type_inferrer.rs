@@ -108,19 +108,27 @@ fn infer_expression(
         }
         Expression::IfList(if_) => {
             let list = infer_expression(if_.argument(), variables)?;
-            let then = infer_expression(if_.then(), variables)?;
+            let list_type = type_canonicalizer::canonicalize_list(
+                &type_extractor::extract_from_expression(&list, variables, type_context)?,
+                type_context.types(),
+            )?
+            .ok_or_else(|| CompileError::ListExpected(if_.argument().position().clone()))?;
+
+            let then = infer_expression(
+                if_.then(),
+                &variables
+                    .clone()
+                    .into_iter()
+                    .chain(vec![
+                        (if_.first_name().into(), list_type.element().clone()),
+                        (if_.rest_name().into(), list_type.clone().into()),
+                    ])
+                    .collect(),
+            )?;
             let else_ = infer_expression(if_.else_(), variables)?;
 
             IfList::new(
-                Some(
-                    type_canonicalizer::canonicalize_list(
-                        &type_extractor::extract_from_expression(&list, variables, type_context)?,
-                        type_context.types(),
-                    )?
-                    .ok_or_else(|| CompileError::ListExpected(if_.argument().position().clone()))?
-                    .element()
-                    .clone(),
-                ),
+                Some(list_type.element().clone()),
                 list,
                 if_.first_name(),
                 if_.rest_name(),
@@ -1119,6 +1127,134 @@ mod tests {
                                 "y",
                                 "ys",
                                 Variable::new("y", Position::dummy()),
+                                None::new(Position::dummy()),
+                                Position::dummy(),
+                            ),
+                            Position::dummy(),
+                        ),
+                        false,
+                    )],)
+                )
+            );
+        }
+
+        #[test]
+        fn infer_with_first_name_in_let() {
+            let list_type =
+                types::List::new(types::None::new(Position::dummy()), Position::dummy());
+
+            assert_eq!(
+                infer_module(
+                    &Module::empty().set_definitions(vec![Definition::without_source(
+                        "f",
+                        Lambda::new(
+                            vec![Argument::new("x", list_type.clone())],
+                            types::None::new(Position::dummy()),
+                            IfList::new(
+                                None,
+                                Variable::new("x", Position::dummy()),
+                                "y",
+                                "ys",
+                                Let::new(
+                                    Some("z".into()),
+                                    None,
+                                    Variable::new("y", Position::dummy()),
+                                    Variable::new("z", Position::dummy()),
+                                    Position::dummy()
+                                ),
+                                None::new(Position::dummy()),
+                                Position::dummy(),
+                            ),
+                            Position::dummy(),
+                        ),
+                        false,
+                    )])
+                ),
+                Ok(
+                    Module::empty().set_definitions(vec![Definition::without_source(
+                        "f",
+                        Lambda::new(
+                            vec![Argument::new("x", list_type)],
+                            types::None::new(Position::dummy()),
+                            IfList::new(
+                                Some(types::None::new(Position::dummy()).into()),
+                                Variable::new("x", Position::dummy()),
+                                "y",
+                                "ys",
+                                Let::new(
+                                    Some("z".into()),
+                                    Some(types::None::new(Position::dummy()).into()),
+                                    Variable::new("y", Position::dummy()),
+                                    Variable::new("z", Position::dummy()),
+                                    Position::dummy()
+                                ),
+                                None::new(Position::dummy()),
+                                Position::dummy(),
+                            ),
+                            Position::dummy(),
+                        ),
+                        false,
+                    )],)
+                )
+            );
+        }
+
+        #[test]
+        fn infer_with_rest_name_in_let() {
+            let list_type =
+                types::List::new(types::None::new(Position::dummy()), Position::dummy());
+
+            assert_eq!(
+                infer_module(
+                    &Module::empty().set_definitions(vec![Definition::without_source(
+                        "f",
+                        Lambda::new(
+                            vec![Argument::new("x", list_type.clone())],
+                            types::None::new(Position::dummy()),
+                            IfList::new(
+                                None,
+                                Variable::new("x", Position::dummy()),
+                                "y",
+                                "ys",
+                                Let::new(
+                                    Some("z".into()),
+                                    None,
+                                    Variable::new("ys", Position::dummy()),
+                                    Variable::new("z", Position::dummy()),
+                                    Position::dummy()
+                                ),
+                                None::new(Position::dummy()),
+                                Position::dummy(),
+                            ),
+                            Position::dummy(),
+                        ),
+                        false,
+                    )])
+                ),
+                Ok(
+                    Module::empty().set_definitions(vec![Definition::without_source(
+                        "f",
+                        Lambda::new(
+                            vec![Argument::new("x", list_type)],
+                            types::None::new(Position::dummy()),
+                            IfList::new(
+                                Some(types::None::new(Position::dummy()).into()),
+                                Variable::new("x", Position::dummy()),
+                                "y",
+                                "ys",
+                                Let::new(
+                                    Some("z".into()),
+                                    Some(
+                                        types::List::new(
+                                            types::None::new(Position::dummy()),
+                                            Position::dummy()
+                                        )
+                                        .into()
+                                    ),
+                                    Variable::new("ys", Position::dummy()),
+                                    Variable::new("z", Position::dummy()),
+                                    Position::dummy()
+                                ),
                                 None::new(Position::dummy()),
                                 Position::dummy(),
                             ),
