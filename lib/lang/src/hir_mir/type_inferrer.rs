@@ -1198,5 +1198,72 @@ mod tests {
                 )
             );
         }
+
+        #[test]
+        fn infer_with_rest_name_in_let() {
+            let list_type =
+                types::List::new(types::None::new(Position::dummy()), Position::dummy());
+
+            assert_eq!(
+                infer_module(
+                    &Module::empty().set_definitions(vec![Definition::without_source(
+                        "f",
+                        Lambda::new(
+                            vec![Argument::new("x", list_type.clone())],
+                            types::None::new(Position::dummy()),
+                            IfList::new(
+                                None,
+                                Variable::new("x", Position::dummy()),
+                                "y",
+                                "ys",
+                                Let::new(
+                                    Some("z".into()),
+                                    None,
+                                    Variable::new("ys", Position::dummy()),
+                                    Variable::new("z", Position::dummy()),
+                                    Position::dummy()
+                                ),
+                                None::new(Position::dummy()),
+                                Position::dummy(),
+                            ),
+                            Position::dummy(),
+                        ),
+                        false,
+                    )])
+                ),
+                Ok(
+                    Module::empty().set_definitions(vec![Definition::without_source(
+                        "f",
+                        Lambda::new(
+                            vec![Argument::new("x", list_type)],
+                            types::None::new(Position::dummy()),
+                            IfList::new(
+                                Some(types::None::new(Position::dummy()).into()),
+                                Variable::new("x", Position::dummy()),
+                                "y",
+                                "ys",
+                                Let::new(
+                                    Some("z".into()),
+                                    Some(
+                                        types::List::new(
+                                            types::None::new(Position::dummy()),
+                                            Position::dummy()
+                                        )
+                                        .into()
+                                    ),
+                                    Variable::new("ys", Position::dummy()),
+                                    Variable::new("z", Position::dummy()),
+                                    Position::dummy()
+                                ),
+                                None::new(Position::dummy()),
+                                Position::dummy(),
+                            ),
+                            Position::dummy(),
+                        ),
+                        false,
+                    )],)
+                )
+            );
+        }
     }
 }
