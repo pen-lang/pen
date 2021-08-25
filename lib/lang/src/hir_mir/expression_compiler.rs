@@ -246,8 +246,8 @@ fn compile_alternatives(
     union_type_member_calculator::calculate(&type_, type_context.types())?
         .into_iter()
         .map(|member_type| {
+            let compiled_member_type = type_compiler::compile(&member_type, type_context)?;
             Ok(if let Type::List(list_type) = &member_type {
-                let any_list_type = type_compiler::compile(&member_type, type_context)?;
                 let concrete_list_type =
                     type_compiler::compile_concrete_list(list_type, type_context.types())?;
 
@@ -262,7 +262,7 @@ fn compile_alternatives(
                     } else {
                         mir::ir::Let::new(
                             name,
-                            any_list_type,
+                            compiled_member_type,
                             mir::ir::RecordElement::new(
                                 concrete_list_type,
                                 0,
@@ -273,9 +273,7 @@ fn compile_alternatives(
                     }
                 })
             } else {
-                let member_type = type_compiler::compile(&member_type, type_context)?;
-
-                mir::ir::Alternative::new(member_type.clone(), name, {
+                mir::ir::Alternative::new(compiled_member_type.clone(), name, {
                     if type_.is_union() {
                         mir::ir::Let::new(
                             name,
