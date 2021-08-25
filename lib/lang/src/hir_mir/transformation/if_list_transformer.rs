@@ -16,6 +16,8 @@ pub fn transform(
     let first_rest_type =
         types::Reference::new(&configuration.first_rest_type_name, position.clone());
     let none_type = types::None::new(position.clone());
+    let any_thunk_type =
+        types::Function::new(vec![], types::Any::new(position.clone()), position.clone());
 
     Ok(IfType::new(
         FIRST_REST_NAME,
@@ -37,14 +39,17 @@ pub fn transform(
                 first_rest_type.clone(),
                 Let::new(
                     Some(if_.first_name().into()),
-                    Some(element_type.clone()),
-                    IfType::new(
-                        if_.first_name(),
+                    Some(
+                        types::Function::new(vec![], element_type.clone(), position.clone()).into(),
+                    ),
+                    Let::new(
+                        Some(if_.first_name().into()),
+                        Some(any_thunk_type.clone().into()),
                         Call::new(
                             Some(
                                 types::Function::new(
                                     vec![first_rest_type.clone().into()],
-                                    types::Any::new(position.clone()),
+                                    any_thunk_type.clone(),
                                     position.clone(),
                                 )
                                 .into(),
@@ -53,11 +58,26 @@ pub fn transform(
                             vec![Variable::new(FIRST_REST_NAME, position.clone()).into()],
                             position.clone(),
                         ),
-                        vec![IfTypeBranch::new(
+                        Lambda::new(
+                            vec![],
                             element_type.clone(),
-                            Variable::new(if_.first_name(), position.clone()),
-                        )],
-                        None,
+                            IfType::new(
+                                if_.first_name(),
+                                Call::new(
+                                    Some(any_thunk_type.clone().into()),
+                                    Variable::new(if_.first_name(), position.clone()),
+                                    vec![],
+                                    position.clone(),
+                                ),
+                                vec![IfTypeBranch::new(
+                                    element_type.clone(),
+                                    Variable::new(if_.first_name(), position.clone()),
+                                )],
+                                None,
+                                position.clone(),
+                            ),
+                            position.clone(),
+                        ),
                         position.clone(),
                     ),
                     Let::new(

@@ -3,7 +3,7 @@ import foreign "c" _pen_slice_string \(string, number, number) string
 
 Join = \(ss [string], sep string) string {
   if [s, ...ss] = ss {
-    joinTo(s, ss, sep)
+    joinTo(s(), ss, sep)
   } else {
     ""
   }
@@ -11,7 +11,7 @@ Join = \(ss [string], sep string) string {
 
 joinTo = \(s string, ss [string], sep string) string {
   if [t, ...ss] = ss {
-    joinTo(_pen_join_strings(s, _pen_join_strings(sep, t)), ss, sep)
+    joinTo(_pen_join_strings(s, _pen_join_strings(sep, t())), ss, sep)
   } else {
     s
   }
