@@ -120,7 +120,15 @@ fn infer_expression(
                     .clone()
                     .into_iter()
                     .chain(vec![
-                        (if_.first_name().into(), list_type.element().clone()),
+                        (
+                            if_.first_name().into(),
+                            types::Function::new(
+                                vec![],
+                                list_type.element().clone(),
+                                if_.position().clone(),
+                            )
+                            .into(),
+                        ),
                         (if_.rest_name().into(), list_type.clone().into()),
                     ])
                     .collect(),
@@ -1183,7 +1191,14 @@ mod tests {
                                 "ys",
                                 Let::new(
                                     Some("z".into()),
-                                    Some(types::None::new(Position::dummy()).into()),
+                                    Some(
+                                        types::Function::new(
+                                            vec![],
+                                            types::None::new(Position::dummy()),
+                                            Position::dummy()
+                                        )
+                                        .into()
+                                    ),
                                     Variable::new("y", Position::dummy()),
                                     Variable::new("z", Position::dummy()),
                                     Position::dummy()

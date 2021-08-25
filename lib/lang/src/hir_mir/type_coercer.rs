@@ -592,6 +592,19 @@ mod tests {
             Position::dummy(),
         );
         let list_type = types::List::new(types::Number::new(Position::dummy()), Position::dummy());
+        let element_call = Call::new(
+            Some(
+                types::Function::new(
+                    vec![],
+                    types::Number::new(Position::dummy()),
+                    Position::dummy(),
+                )
+                .into(),
+            ),
+            Variable::new("x", Position::dummy()),
+            vec![],
+            Position::dummy(),
+        );
 
         assert_eq!(
             coerce_module(
@@ -605,7 +618,7 @@ mod tests {
                             Variable::new("xs", Position::dummy()),
                             "x",
                             "xs",
-                            Variable::new("x", Position::dummy()),
+                            element_call.clone(),
                             None::new(Position::dummy()),
                             Position::dummy(),
                         ),
@@ -628,7 +641,7 @@ mod tests {
                             TypeCoercion::new(
                                 types::Number::new(Position::dummy()),
                                 union_type.clone(),
-                                Variable::new("x", Position::dummy()),
+                                element_call,
                                 Position::dummy(),
                             ),
                             TypeCoercion::new(

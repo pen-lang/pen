@@ -47,7 +47,15 @@ pub fn extract_from_expression(
                         .clone()
                         .into_iter()
                         .chain(vec![
-                            (if_.first_name().into(), list_type.element().clone()),
+                            (
+                                if_.first_name().into(),
+                                types::Function::new(
+                                    vec![],
+                                    list_type.element().clone(),
+                                    if_.position().clone(),
+                                )
+                                .into(),
+                            ),
                             (if_.rest_name().into(), list_type.clone().into()),
                         ])
                         .collect(),
