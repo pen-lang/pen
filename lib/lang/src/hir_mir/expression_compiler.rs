@@ -278,7 +278,10 @@ fn compile_alternatives(
                         mir::ir::Let::new(
                             name,
                             mir::types::Type::Variant,
-                            mir::ir::Variant::new(member_type, mir::ir::Variable::new(name)),
+                            mir::ir::Variant::new(
+                                compiled_member_type,
+                                mir::ir::Variable::new(name),
+                            ),
                             expression.clone(),
                         )
                         .into()
