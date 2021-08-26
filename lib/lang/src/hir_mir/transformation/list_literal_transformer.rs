@@ -111,7 +111,7 @@ mod tests {
                 .into(),
                 list_type.clone().into(),
             ],
-            list_type.clone(),
+            list_type,
             Position::dummy(),
         )
     }
@@ -228,7 +228,7 @@ mod tests {
                     )
                     .into(),
                     Call::new(
-                        Some(prepend_function_type.clone().into(),),
+                        Some(prepend_function_type.into(),),
                         Variable::new(
                             &DUMMY_LIST_TYPE_CONFIGURATION.prepend_function_name,
                             Position::dummy()

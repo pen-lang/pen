@@ -64,7 +64,7 @@ pub fn transform(
                             IfType::new(
                                 if_.first_name(),
                                 Call::new(
-                                    Some(any_thunk_type.clone().into()),
+                                    Some(any_thunk_type.into()),
                                     Variable::new(if_.first_name(), position.clone()),
                                     vec![],
                                     position.clone(),
