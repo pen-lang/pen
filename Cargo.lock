@@ -80,9 +80,9 @@ checksum = "bef38d45163c2f1dde094a7dfd33ccf595c92905c8f8f4fdc18d06fb1037718a"
 
 [[package]]
 name = "bytes"
-version = "1.0.1"
+version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b700ce4376041dcd0a327fd0097c41095743c4c8af8887265942faf1100bd040"
+checksum = "c4872d67bab6358e59559027aa3b9157c53d9358c51423c17554809a8858e0f8"
 
 [[package]]
 name = "cc"
@@ -160,7 +160,7 @@ checksum = "398ea4fabe40b9b0d885340a2a991a44c8a645624075ad966d21f88688e2b69e"
 [[package]]
 name = "fmm"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#8075bb3148abbc94070bdf0df06f2227421ee793"
+source = "git+https://github.com/raviqqe/fmm?branch=main#8dee83644de190e53107ad1531baa7abb9c2fe9a"
 dependencies = [
  "once_cell",
  "petgraph",
@@ -170,7 +170,7 @@ dependencies = [
 [[package]]
 name = "fmm-c"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#8075bb3148abbc94070bdf0df06f2227421ee793"
+source = "git+https://github.com/raviqqe/fmm?branch=main#8dee83644de190e53107ad1531baa7abb9c2fe9a"
 dependencies = [
  "fmm",
  "tempfile",
@@ -179,7 +179,7 @@ dependencies = [
 [[package]]
 name = "fmm-llvm"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#8075bb3148abbc94070bdf0df06f2227421ee793"
+source = "git+https://github.com/raviqqe/fmm?branch=main#8dee83644de190e53107ad1531baa7abb9c2fe9a"
 dependencies = [
  "fmm",
  "inkwell",
@@ -343,9 +343,9 @@ checksum = "e2abad23fbc42b3700f2f279844dc832adb2b2eb069b2df918f455c4e18cc646"
 
 [[package]]
 name = "libc"
-version = "0.2.100"
+version = "0.2.101"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a1fa8cddc8fbbee11227ef194b5317ed014b8acbf15139bd716a18ad3fe99ec5"
+checksum = "3cb00336871be5ed2c8ed44b60ae9959dc5b9f08539422ed43f09e34ecaeba21"
 
 [[package]]
 name = "llvm-sys"
