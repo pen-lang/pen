@@ -10,6 +10,8 @@ use std::sync::Arc;
 // - In reference counting, we need to access closure objects inside their
 //   functions themselves to drop them properly because they are moved into
 //   function calls.
+//   - This requirement can be potentially removed by dropping every functions
+//     used in function calls inside the funtions themselves.
 #[derive(Clone, Debug, PartialEq)]
 pub struct LetRecursive {
     definition: Arc<Definition>,
