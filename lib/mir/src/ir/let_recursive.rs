@@ -1,6 +1,15 @@
 use super::{definition::Definition, expression::Expression};
 use std::sync::Arc;
 
+// Function definitions in let-recursive expressions are recursive for the
+// following reasons although we don't have any recursive function
+// definitions in practice.
+//
+// - Variants of typed lambda calculus used in other languages like OCaml are
+//   also implemented like this.
+// - In reference counting, we need to access closure objects inside their
+//   functions themselves to drop them properly because they are moved into
+//   function calls.
 #[derive(Clone, Debug, PartialEq)]
 pub struct LetRecursive {
     definition: Arc<Definition>,
