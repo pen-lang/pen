@@ -562,7 +562,7 @@ mod tests {
     }
 
     #[test]
-    fn fail_to_check_types_of_recursive_let_recursive() {
+    fn check_types_of_recursive_let_recursive() {
         let module = create_module_from_definitions(vec![Definition::new(
             "f",
             vec![Argument::new("x", Type::Number)],
@@ -586,10 +586,7 @@ mod tests {
             Type::Number,
         )]);
 
-        assert_eq!(
-            check_types(&module),
-            Err(TypeCheckError::VariableNotFound(Variable::new("g")))
-        );
+        assert_eq!(check_types(&module), Ok(()));
     }
 
     #[test]
