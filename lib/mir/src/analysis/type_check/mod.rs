@@ -177,7 +177,7 @@ fn check_expression(
                 &variables
                     .clone()
                     .into_iter()
-                    .chain(vec![(let_.name(), let_.type_().clone().into())])
+                    .chain(vec![(let_.name(), let_.type_().clone())])
                     .collect(),
             )?
         }
