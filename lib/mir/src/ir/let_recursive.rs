@@ -12,6 +12,8 @@ use std::sync::Arc;
 //   function calls.
 //   - This requirement can be potentially removed by dropping every functions
 //     used in function calls inside the functions themselves.
+//     - This is safe because only global function definitions can be
+//       recursive.
 #[derive(Clone, Debug, PartialEq)]
 pub struct LetRecursive {
     definition: Arc<Definition>,
