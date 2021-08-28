@@ -8,7 +8,7 @@ use crate::{
     infra::{FilePath, Infrastructure},
 };
 pub use compile_configuration::{
-    CompileConfiguration, ErrorTypeConfiguration, HeapConfiguration, ListTypeConfiguration,
+    CompileConfiguration, ErrorTypeConfiguration, InstructionConfiguration, ListTypeConfiguration,
     StringTypeConfiguration,
 };
 use std::error::Error;
@@ -45,7 +45,7 @@ pub fn compile(
         &module,
         object_file,
         target_triple,
-        &compile_configuration.heap,
+        &compile_configuration.instruction,
     )?;
     infrastructure.file_system.write(
         interface_file,
@@ -100,7 +100,7 @@ pub fn compile_main(
         )?,
         object_file,
         target_triple,
-        &compile_configuration.heap,
+        &compile_configuration.instruction,
     )?;
 
     Ok(())
@@ -154,7 +154,7 @@ pub fn compile_prelude(
     object_file: &FilePath,
     interface_file: &FilePath,
     target_triple: Option<&str>,
-    heap_configuration: &HeapConfiguration,
+    instruction_configuration: &InstructionConfiguration,
 ) -> Result<(), Box<dyn Error>> {
     let (module, module_interface) =
         lang::hir_mir::compile_prelude(&lang::ast_hir::compile_prelude(
@@ -170,7 +170,7 @@ pub fn compile_prelude(
         &module,
         object_file,
         target_triple,
-        heap_configuration,
+        instruction_configuration,
     )?;
     infrastructure.file_system.write(
         interface_file,
@@ -185,7 +185,7 @@ fn compile_mir_module(
     module: &mir::ir::Module,
     object_file: &FilePath,
     target_triple: Option<&str>,
-    heap_configuration: &HeapConfiguration,
+    instruction_configuration: &InstructionConfiguration,
 ) -> Result<(), Box<dyn Error>> {
     infrastructure.file_system.write(
         object_file,
@@ -194,7 +194,7 @@ fn compile_mir_module(
                 &mir_fmm::compile(module)?,
                 fmm::types::VOID_TYPE.clone(),
             )?,
-            heap_configuration,
+            instruction_configuration,
             target_triple,
         )?,
     )?;

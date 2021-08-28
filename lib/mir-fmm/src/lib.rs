@@ -159,10 +159,11 @@ mod tests {
 
         fmm_llvm::compile_to_object(
             module,
-            &fmm_llvm::HeapConfiguration {
+            &fmm_llvm::InstructionConfiguration {
                 allocate_function_name: "allocate_heap".into(),
                 reallocate_function_name: "reallocate_heap".into(),
                 free_function_name: "free_heap".into(),
+                unreachable_function_name: None,
             },
             None,
         )
