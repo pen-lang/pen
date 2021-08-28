@@ -530,6 +530,65 @@ mod tests {
     }
 
     #[test]
+    fn check_types_of_let_recursive() {
+        let module = create_module_from_definitions(vec![Definition::new(
+            "f",
+            vec![Argument::new("x", Type::Number)],
+            LetRecursive::new(
+                Definition::new(
+                    "g",
+                    vec![Argument::new("y", Type::Number)],
+                    ArithmeticOperation::new(
+                        ArithmeticOperator::Add,
+                        Variable::new("x"),
+                        Variable::new("y"),
+                    ),
+                    Type::Number,
+                ),
+                Call::new(
+                    types::Function::new(vec![Type::Number], Type::Number),
+                    Variable::new("g"),
+                    vec![42.0.into()],
+                ),
+            ),
+            Type::Number,
+        )]);
+
+        assert_eq!(check_types(&module), Ok(()));
+    }
+
+    #[test]
+    fn fail_to_check_types_of_recursive_let_recursive() {
+        let module = create_module_from_definitions(vec![Definition::new(
+            "f",
+            vec![Argument::new("x", Type::Number)],
+            LetRecursive::new(
+                Definition::new(
+                    "g",
+                    vec![Argument::new("y", Type::Number)],
+                    Call::new(
+                        types::Function::new(vec![Type::Number], Type::Number),
+                        Variable::new("g"),
+                        vec![42.0.into()],
+                    ),
+                    Type::Number,
+                ),
+                Call::new(
+                    types::Function::new(vec![Type::Number], Type::Number),
+                    Variable::new("g"),
+                    vec![42.0.into()],
+                ),
+            ),
+            Type::Number,
+        )]);
+
+        assert_eq!(
+            check_types(&module),
+            Err(TypeCheckError::VariableNotFound(Variable::new("g")))
+        );
+    }
+
+    #[test]
     fn check_types_of_declarations() {
         let module = Module::new(
             vec![],
