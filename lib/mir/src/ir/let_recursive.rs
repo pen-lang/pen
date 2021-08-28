@@ -11,7 +11,7 @@ use std::sync::Arc;
 //   functions themselves to drop them properly because they are moved into
 //   function calls.
 //   - This requirement can be potentially removed by dropping every functions
-//     used in function calls inside the funtions themselves.
+//     used in function calls inside the functions themselves.
 #[derive(Clone, Debug, PartialEq)]
 pub struct LetRecursive {
     definition: Arc<Definition>,
