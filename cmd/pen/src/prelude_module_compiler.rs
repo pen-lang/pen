@@ -18,7 +18,7 @@ pub fn compile(
         &file_path_converter.convert_to_file_path(object_file)?,
         &file_path_converter.convert_to_file_path(interface_file)?,
         target_triple,
-        &COMPILE_CONFIGURATION.heap,
+        &COMPILE_CONFIGURATION.instruction,
     )?;
 
     Ok(())
