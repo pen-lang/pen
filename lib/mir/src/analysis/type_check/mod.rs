@@ -172,10 +172,14 @@ fn check_expression(
                 let_.type_(),
             )?;
 
-            let mut variables = variables.clone();
-            variables.insert(let_.name(), let_.type_().clone());
-
-            check_expression(let_.expression(), &variables)?
+            check_expression(
+                let_.expression(),
+                &variables
+                    .clone()
+                    .into_iter()
+                    .chain(vec![(let_.name(), let_.type_().clone().into())])
+                    .collect(),
+            )?
         }
         Expression::None => Type::None,
         Expression::Number(_) => Type::Number,
