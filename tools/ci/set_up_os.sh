@@ -10,6 +10,6 @@ echo LLVM_SYS_120_PREFIX=$llvm_prefix >>$GITHUB_ENV
 echo PATH=$llvm_prefix/bin:$PATH >>$GITHUB_ENV
 
 if [ $RUNNER_OS = Linux ]; then
-  apt install libc6-dbg # for valgrind
+  sudo apt install libc6-dbg # for valgrind
   brew install valgrind
 fi
