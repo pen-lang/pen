@@ -11,7 +11,7 @@ pub fn compile_definition(
     module_builder.define_variable(
         definition.name(),
         closures::compile_closure_content(
-            entry_functions::compile(module_builder, definition, global_variables, types)?,
+            entry_functions::compile(module_builder, definition, true, global_variables, types)?,
             closures::compile_drop_function(module_builder, definition, types)?,
             fmm::ir::Undefined::new(types::compile_closure_payload(definition, types)),
         ),
