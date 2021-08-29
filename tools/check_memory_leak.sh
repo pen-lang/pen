@@ -4,5 +4,5 @@ set -ex
 
 . $(dirname $0)/utilities.sh
 
-valgrind --log-file=valgrind.log "$@"
+valgrind "$@"
 test_valgrind_log valgrind.log
