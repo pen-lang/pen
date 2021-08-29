@@ -217,7 +217,7 @@ mod tests {
             types::Reference::new(&ERROR_TYPE_CONFIGURATION.error_type_name, Position::dummy());
         let union_type = types::Union::new(
             types::None::new(Position::dummy()),
-            error_type.clone(),
+            error_type,
             Position::dummy(),
         );
 
@@ -280,7 +280,7 @@ mod tests {
                                 "x",
                                 types::Union::new(
                                     types::None::new(Position::dummy()),
-                                    error_type.clone(),
+                                    error_type,
                                     Position::dummy(),
                                 ),
                             )],

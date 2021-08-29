@@ -560,8 +560,7 @@ mod tests {
                         vec![],
                         types::None::new(Position::dummy()),
                         Position::dummy(),
-                    )
-                    .clone(),
+                    ),
                     Thunk::new(
                         Some(types::None::new(Position::dummy()).into()),
                         None::new(Position::dummy()),
