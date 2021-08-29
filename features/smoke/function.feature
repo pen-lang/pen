@@ -35,4 +35,4 @@ Feature: Function
     }
     """
     When I successfully run `pen build`
-    Then I successfully run `./app`
+    Then I successfully run `check_memory_leak.sh ./app`
