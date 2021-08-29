@@ -372,7 +372,7 @@ fn compile_let_recursive(
 
     instruction_builder.store(
         closures::compile_closure_content(
-            entry_functions::compile(module_builder, let_.definition(), variables, types)?,
+            entry_functions::compile(module_builder, let_.definition(), false, variables, types)?,
             closures::compile_drop_function(module_builder, let_.definition(), types)?,
             fmm::build::record(
                 let_.definition()

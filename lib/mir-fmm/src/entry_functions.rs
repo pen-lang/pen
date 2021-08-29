@@ -7,19 +7,21 @@ const CLOSURE_NAME: &str = "_closure";
 pub fn compile(
     module_builder: &fmm::build::ModuleBuilder,
     definition: &mir::ir::Definition,
+    global: bool,
     variables: &HashMap<String, fmm::build::TypedExpression>,
     types: &HashMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     Ok(if definition.is_thunk() {
-        compile_thunk(module_builder, definition, variables, types)?
+        compile_thunk(module_builder, definition, global, variables, types)?
     } else {
-        compile_non_thunk(module_builder, definition, variables, types)?
+        compile_non_thunk(module_builder, definition, global, variables, types)?
     })
 }
 
 fn compile_non_thunk(
     module_builder: &fmm::build::ModuleBuilder,
     definition: &mir::ir::Definition,
+    global: bool,
     variables: &HashMap<String, fmm::build::TypedExpression>,
     types: &HashMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
@@ -30,6 +32,7 @@ fn compile_non_thunk(
                 module_builder,
                 &instruction_builder,
                 definition,
+                global,
                 variables,
                 types,
             )?))
@@ -42,12 +45,14 @@ fn compile_non_thunk(
 fn compile_thunk(
     module_builder: &fmm::build::ModuleBuilder,
     definition: &mir::ir::Definition,
+    global: bool,
     variables: &HashMap<String, fmm::build::TypedExpression>,
     types: &HashMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     compile_initial_thunk_entry(
         module_builder,
         definition,
+        global,
         compile_normal_thunk_entry(module_builder, definition, types)?,
         compile_locked_thunk_entry(module_builder, definition, types)?,
         variables,
@@ -59,6 +64,7 @@ fn compile_body(
     module_builder: &fmm::build::ModuleBuilder,
     instruction_builder: &fmm::build::InstructionBuilder,
     definition: &mir::ir::Definition,
+    global: bool,
     variables: &HashMap<String, fmm::build::TypedExpression>,
     types: &HashMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
@@ -98,10 +104,14 @@ fn compile_body(
                     })
                     .collect::<Result<Vec<_>, _>>()?,
             )
-            .chain(vec![(
-                definition.name().into(),
-                compile_closure_pointer(definition.type_(), types)?,
-            )])
+            .chain(if global {
+                vec![]
+            } else {
+                vec![(
+                    definition.name().into(),
+                    compile_closure_pointer(definition.type_(), types)?,
+                )]
+            })
             .chain(definition.arguments().iter().map(|argument| {
                 (
                     argument.name().into(),
@@ -116,6 +126,7 @@ fn compile_body(
 fn compile_initial_thunk_entry(
     module_builder: &fmm::build::ModuleBuilder,
     definition: &mir::ir::Definition,
+    global: bool,
     normal_entry_function: fmm::build::TypedExpression,
     lock_entry_function: fmm::build::TypedExpression,
     variables: &HashMap<String, fmm::build::TypedExpression>,
@@ -144,6 +155,7 @@ fn compile_initial_thunk_entry(
                         module_builder,
                         &instruction_builder,
                         definition,
+                        global,
                         variables,
                         types,
                     )?;
@@ -334,4 +346,54 @@ fn compile_closure_pointer(
 
 fn compile_untyped_closure_pointer() -> fmm::build::TypedExpression {
     fmm::build::variable(CLOSURE_NAME, types::compile_untyped_closure_pointer())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn do_not_overwrite_global_functions_in_variables() {
+        let function_type = mir::types::Function::new(vec![], mir::types::Type::Number);
+        let module_builder = fmm::build::ModuleBuilder::new();
+
+        compile(
+            &module_builder,
+            &mir::ir::Definition::new(
+                "f",
+                vec![],
+                mir::ir::LetRecursive::new(
+                    mir::ir::Definition::new(
+                        "g",
+                        vec![],
+                        mir::ir::Call::new(
+                            function_type.clone(),
+                            mir::ir::Variable::new("f"),
+                            vec![],
+                        ),
+                        mir::types::Type::Number,
+                    ),
+                    mir::ir::Call::new(function_type.clone(), mir::ir::Variable::new("g"), vec![]),
+                ),
+                mir::types::Type::Number,
+            ),
+            true,
+            &vec![(
+                "f".into(),
+                fmm::build::TypedExpression::new(
+                    fmm::ir::Variable::new("f"),
+                    fmm::types::Pointer::new(types::compile_unsized_closure(
+                        &function_type,
+                        &Default::default(),
+                    )),
+                ),
+            )]
+            .into_iter()
+            .collect(),
+            &Default::default(),
+        )
+        .unwrap();
+
+        insta::assert_snapshot!(fmm::analysis::format_module(&module_builder.as_module()));
+    }
 }
