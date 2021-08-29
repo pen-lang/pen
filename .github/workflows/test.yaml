@@ -32,6 +32,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - run: tools/ci/set_up_os.sh
+      - run: which valgrind
       - uses: actions/setup-ruby@v1
       - run: bundler install
       - run: cargo build --release
