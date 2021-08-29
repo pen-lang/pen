@@ -1,3 +1,4 @@
+*.new
 *.tar.*
 .pen
 target
