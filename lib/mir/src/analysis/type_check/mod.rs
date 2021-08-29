@@ -172,10 +172,14 @@ fn check_expression(
                 let_.type_(),
             )?;
 
-            let mut variables = variables.clone();
-            variables.insert(let_.name(), let_.type_().clone());
-
-            check_expression(let_.expression(), &variables)?
+            check_expression(
+                let_.expression(),
+                &variables
+                    .clone()
+                    .into_iter()
+                    .chain(vec![(let_.name(), let_.type_().clone())])
+                    .collect(),
+            )?
         }
         Expression::None => Type::None,
         Expression::Number(_) => Type::Number,
@@ -527,6 +531,62 @@ mod tests {
             check_types(&module),
             Err(TypeCheckError::TypesNotMatched(_, _))
         ));
+    }
+
+    #[test]
+    fn check_types_of_let_recursive() {
+        let module = create_module_from_definitions(vec![Definition::new(
+            "f",
+            vec![Argument::new("x", Type::Number)],
+            LetRecursive::new(
+                Definition::new(
+                    "g",
+                    vec![Argument::new("y", Type::Number)],
+                    ArithmeticOperation::new(
+                        ArithmeticOperator::Add,
+                        Variable::new("x"),
+                        Variable::new("y"),
+                    ),
+                    Type::Number,
+                ),
+                Call::new(
+                    types::Function::new(vec![Type::Number], Type::Number),
+                    Variable::new("g"),
+                    vec![42.0.into()],
+                ),
+            ),
+            Type::Number,
+        )]);
+
+        assert_eq!(check_types(&module), Ok(()));
+    }
+
+    #[test]
+    fn check_types_of_recursive_let_recursive() {
+        let module = create_module_from_definitions(vec![Definition::new(
+            "f",
+            vec![Argument::new("x", Type::Number)],
+            LetRecursive::new(
+                Definition::new(
+                    "g",
+                    vec![Argument::new("y", Type::Number)],
+                    Call::new(
+                        types::Function::new(vec![Type::Number], Type::Number),
+                        Variable::new("g"),
+                        vec![42.0.into()],
+                    ),
+                    Type::Number,
+                ),
+                Call::new(
+                    types::Function::new(vec![Type::Number], Type::Number),
+                    Variable::new("g"),
+                    vec![42.0.into()],
+                ),
+            ),
+            Type::Number,
+        )]);
+
+        assert_eq!(check_types(&module), Ok(()));
     }
 
     #[test]
