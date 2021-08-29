@@ -2,7 +2,7 @@ use super::{
     boolean::Boolean, call::Call, if_::If, if_list::IfList, if_type::IfType, list::List,
     none::None, number::Number, operation::Operation, record_construction::RecordConstruction,
     record_deconstruction::RecordDeconstruction, record_update::RecordUpdate, string::ByteString,
-    type_coercion::TypeCoercion, variable::Variable, Lambda, Let,
+    type_coercion::TypeCoercion, variable::Variable, Lambda, Let, Thunk,
 };
 use crate::position::Position;
 
@@ -23,6 +23,7 @@ pub enum Expression {
     RecordDeconstruction(RecordDeconstruction),
     RecordUpdate(RecordUpdate),
     String(ByteString),
+    Thunk(Thunk),
     TypeCoercion(TypeCoercion),
     Variable(Variable),
 }
@@ -45,6 +46,7 @@ impl Expression {
             Self::RecordDeconstruction(deconstruction) => deconstruction.position(),
             Self::RecordUpdate(record_update) => record_update.position(),
             Self::String(string) => string.position(),
+            Self::Thunk(thunk) => thunk.position(),
             Self::TypeCoercion(coercion) => coercion.position(),
             Self::Variable(variable) => variable.position(),
         }
@@ -138,6 +140,12 @@ impl From<Number> for Expression {
 impl<T: Into<Operation>> From<T> for Expression {
     fn from(operation: T) -> Self {
         Self::Operation(operation.into())
+    }
+}
+
+impl From<Thunk> for Expression {
+    fn from(thunk: Thunk) -> Self {
+        Self::Thunk(thunk)
     }
 }
 

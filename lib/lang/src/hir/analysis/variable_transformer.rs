@@ -190,6 +190,12 @@ fn transform_expression(
             update.position().clone(),
         )
         .into(),
+        Expression::Thunk(thunk) => Thunk::new(
+            thunk.type_().cloned(),
+            transform_expression(thunk.expression(), transform),
+            thunk.position().clone(),
+        )
+        .into(),
         Expression::TypeCoercion(coercion) => TypeCoercion::new(
             coercion.from().clone(),
             coercion.to().clone(),

@@ -162,6 +162,15 @@ pub fn extract_from_expression(
         .clone(),
         Expression::RecordUpdate(update) => update.type_().clone(),
         Expression::String(string) => types::ByteString::new(string.position().clone()).into(),
+        Expression::Thunk(thunk) => types::Function::new(
+            vec![],
+            thunk
+                .type_()
+                .ok_or_else(|| CompileError::TypeNotInferred(thunk.position().clone()))?
+                .clone(),
+            thunk.position().clone(),
+        )
+        .into(),
         Expression::TypeCoercion(coercion) => coercion.to().clone(),
         Expression::Variable(variable) => variables
             .get(variable.name())
@@ -223,6 +232,45 @@ mod tests {
             )
             .unwrap(),
             types::None::new(Position::dummy()).into(),
+        );
+    }
+
+    #[test]
+    fn extract_from_thunk() {
+        assert_eq!(
+            extract_from_expression(
+                &Thunk::new(
+                    Some(types::None::new(Position::dummy()).into()),
+                    Variable::new("x", Position::dummy()),
+                    Position::dummy()
+                )
+                .into(),
+                &Default::default(),
+                &TypeContext::dummy(Default::default(), Default::default()),
+            ),
+            Ok(types::Function::new(
+                vec![],
+                types::None::new(Position::dummy()),
+                Position::dummy()
+            )
+            .into())
+        );
+    }
+
+    #[test]
+    fn fail_to_extract_from_thunk() {
+        assert_eq!(
+            extract_from_expression(
+                &Thunk::new(
+                    None,
+                    Variable::new("x", Position::dummy()),
+                    Position::dummy()
+                )
+                .into(),
+                &Default::default(),
+                &TypeContext::dummy(Default::default(), Default::default()),
+            ),
+            Err(CompileError::TypeNotInferred(Position::dummy())),
         );
     }
 }

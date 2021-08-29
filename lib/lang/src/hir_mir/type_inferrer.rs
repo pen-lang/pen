@@ -388,6 +388,16 @@ fn infer_expression(
             update.position().clone(),
         )
         .into(),
+        Expression::Thunk(thunk) => Thunk::new(
+            Some(type_extractor::extract_from_expression(
+                thunk.expression(),
+                variables,
+                type_context,
+            )?),
+            infer_expression(thunk.expression(), variables)?,
+            thunk.position().clone(),
+        )
+        .into(),
         Expression::TypeCoercion(coercion) => TypeCoercion::new(
             coercion.from().clone(),
             coercion.to().clone(),
@@ -693,6 +703,42 @@ mod tests {
                     ),
                     false,
                 )]))
+        );
+    }
+
+    #[test]
+    fn infer_thunk() {
+        let none_type = types::None::new(Position::dummy());
+
+        assert_eq!(
+            infer_module(
+                &Module::empty().set_definitions(vec![Definition::without_source(
+                    "x",
+                    Lambda::new(
+                        vec![],
+                        none_type.clone(),
+                        Thunk::new(None, None::new(Position::dummy()), Position::dummy()),
+                        Position::dummy(),
+                    ),
+                    false,
+                )])
+            ),
+            Ok(
+                Module::empty().set_definitions(vec![Definition::without_source(
+                    "x",
+                    Lambda::new(
+                        vec![],
+                        none_type.clone(),
+                        Thunk::new(
+                            Some(none_type.into()),
+                            None::new(Position::dummy()),
+                            Position::dummy()
+                        ),
+                        Position::dummy(),
+                    ),
+                    false,
+                )])
+            )
         );
     }
 

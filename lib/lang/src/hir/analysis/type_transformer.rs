@@ -255,6 +255,12 @@ fn transform_expression(expression: &Expression, transform: &impl Fn(&Type) -> T
             update.position().clone(),
         )
         .into(),
+        Expression::Thunk(thunk) => Thunk::new(
+            thunk.type_().map(transform),
+            transform_expression(thunk.expression(), transform),
+            thunk.position().clone(),
+        )
+        .into(),
         Expression::TypeCoercion(coercion) => TypeCoercion::new(
             transform(coercion.from()),
             transform(coercion.to()),

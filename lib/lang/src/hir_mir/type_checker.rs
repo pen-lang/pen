@@ -344,6 +344,15 @@ fn check_expression(
             update.type_().clone()
         }
         Expression::String(string) => types::ByteString::new(string.position().clone()).into(),
+        Expression::Thunk(thunk) => {
+            let type_ = thunk
+                .type_()
+                .ok_or_else(|| CompileError::TypeNotInferred(thunk.position().clone()))?;
+
+            check_subsumption(&check_expression(thunk.expression(), variables)?, type_)?;
+
+            type_extractor::extract_from_expression(expression, variables, type_context)?
+        }
         Expression::TypeCoercion(coercion) => {
             check_subsumption(
                 &check_expression(coercion.argument(), variables)?,
@@ -538,6 +547,32 @@ mod tests {
                 Position::dummy()
             ))
         );
+    }
+
+    #[test]
+    fn check_thunk() {
+        check_module(
+            &Module::empty().set_definitions(vec![Definition::without_source(
+                "x",
+                Lambda::new(
+                    vec![],
+                    types::Function::new(
+                        vec![],
+                        types::None::new(Position::dummy()),
+                        Position::dummy(),
+                    )
+                    .clone(),
+                    Thunk::new(
+                        Some(types::None::new(Position::dummy()).into()),
+                        None::new(Position::dummy()),
+                        Position::dummy(),
+                    ),
+                    Position::dummy(),
+                ),
+                false,
+            )]),
+        )
+        .unwrap();
     }
 
     mod lambda {

@@ -99,6 +99,9 @@ fn visit_expression(expression: &Expression, visit: &mut impl FnMut(&Expression)
                 visit_expression(element.expression());
             }
         }
+        Expression::Thunk(thunk) => {
+            visit_expression(thunk.expression());
+        }
         Expression::Boolean(_)
         | Expression::None(_)
         | Expression::Number(_)

@@ -22,6 +22,7 @@ use crate::{
 use std::collections::HashMap;
 
 const CLOSURE_NAME: &str = "$closure";
+const THUNK_NAME: &str = "$thunk";
 
 pub fn compile(
     expression: &Expression,
@@ -196,6 +197,21 @@ pub fn compile(
             compile(&record_update_transformer::transform(update, type_context)?)?
         }
         Expression::String(string) => mir::ir::ByteString::new(string.value()).into(),
+        Expression::Thunk(thunk) => mir::ir::LetRecursive::new(
+            mir::ir::Definition::thunk(
+                THUNK_NAME,
+                vec![],
+                compile(thunk.expression())?,
+                type_compiler::compile(
+                    thunk
+                        .type_()
+                        .ok_or_else(|| CompileError::TypeNotInferred(thunk.position().clone()))?,
+                    type_context,
+                )?,
+            ),
+            mir::ir::Variable::new(THUNK_NAME),
+        )
+        .into(),
         Expression::TypeCoercion(coercion) => {
             let from = type_canonicalizer::canonicalize(coercion.from(), type_context.types())?;
             let to = type_canonicalizer::canonicalize(coercion.to(), type_context.types())?;

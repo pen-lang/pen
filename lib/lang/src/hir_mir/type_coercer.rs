@@ -353,6 +353,18 @@ fn transform_expression(
             update.position().clone(),
         )
         .into(),
+        Expression::Thunk(thunk) => Thunk::new(
+            thunk.type_().cloned(),
+            transform_and_coerce_expression(
+                thunk.expression(),
+                thunk
+                    .type_()
+                    .ok_or_else(|| CompileError::TypeNotInferred(thunk.position().clone()))?,
+                variables,
+            )?,
+            thunk.position().clone(),
+        )
+        .into(),
         Expression::TypeCoercion(coercion) => TypeCoercion::new(
             coercion.from().clone(),
             coercion.to().clone(),
@@ -1119,6 +1131,55 @@ mod tests {
                     ),
                     false,
                 )]))
+        );
+    }
+
+    #[test]
+    fn coerce_thunk() {
+        let union_type = types::Union::new(
+            types::Number::new(Position::dummy()),
+            types::None::new(Position::dummy()),
+            Position::dummy(),
+        );
+
+        assert_eq!(
+            coerce_module(
+                &Module::empty().set_definitions(vec![Definition::without_source(
+                    "f",
+                    Lambda::new(
+                        vec![],
+                        types::Function::new(vec![], union_type.clone(), Position::dummy()),
+                        Thunk::new(
+                            Some(union_type.clone().into()),
+                            None::new(Position::dummy()),
+                            Position::dummy()
+                        ),
+                        Position::dummy(),
+                    ),
+                    false,
+                )],)
+            ),
+            Ok(
+                Module::empty().set_definitions(vec![Definition::without_source(
+                    "f",
+                    Lambda::new(
+                        vec![],
+                        types::Function::new(vec![], union_type.clone(), Position::dummy()),
+                        Thunk::new(
+                            Some(union_type.clone().into()),
+                            TypeCoercion::new(
+                                types::None::new(Position::dummy()),
+                                union_type,
+                                None::new(Position::dummy()),
+                                Position::dummy()
+                            ),
+                            Position::dummy()
+                        ),
+                        Position::dummy(),
+                    ),
+                    false,
+                )],)
+            )
         );
     }
 }
