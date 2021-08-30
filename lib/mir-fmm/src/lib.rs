@@ -1100,4 +1100,68 @@ mod tests {
             ));
         }
     }
+
+    mod thunks {
+        use super::*;
+
+        #[test]
+        fn compile_global_thunk() {
+            compile_module(&create_module_with_definitions(vec![
+                mir::ir::Definition::thunk(
+                    "f",
+                    vec![],
+                    mir::ir::Expression::None,
+                    mir::types::Type::None,
+                ),
+            ]));
+        }
+
+        #[test]
+        fn compile_local_thunk() {
+            compile_module(&create_module_with_definitions(vec![
+                mir::ir::Definition::thunk(
+                    "f",
+                    vec![],
+                    mir::ir::LetRecursive::new(
+                        mir::ir::Definition::thunk(
+                            "g",
+                            vec![],
+                            mir::ir::Expression::None,
+                            mir::types::Type::None,
+                        ),
+                        mir::ir::Call::new(
+                            mir::types::Function::new(vec![], mir::types::Type::None),
+                            mir::ir::Variable::new("g"),
+                            vec![],
+                        ),
+                    ),
+                    mir::types::Type::None,
+                ),
+            ]));
+        }
+
+        #[test]
+        fn compile_local_thunk_with_environment() {
+            compile_module(&create_module_with_definitions(vec![
+                mir::ir::Definition::thunk(
+                    "f",
+                    vec![mir::ir::Argument::new("x", mir::types::Type::Number)],
+                    mir::ir::LetRecursive::new(
+                        mir::ir::Definition::thunk(
+                            "g",
+                            vec![],
+                            mir::ir::Variable::new("x"),
+                            mir::types::Type::Number,
+                        ),
+                        mir::ir::Call::new(
+                            mir::types::Function::new(vec![], mir::types::Type::Number),
+                            mir::ir::Variable::new("g"),
+                            vec![],
+                        ),
+                    ),
+                    mir::types::Type::Number,
+                ),
+            ]));
+        }
+    }
 }
