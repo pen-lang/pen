@@ -79,13 +79,9 @@ pub fn compile(
         mir::ir::Expression::Let(let_) => {
             compile_let(module_builder, instruction_builder, let_, variables, types)?
         }
-        mir::ir::Expression::LetRecursive(let_recursive) => compile_let_recursive(
-            module_builder,
-            instruction_builder,
-            let_recursive,
-            variables,
-            types,
-        )?,
+        mir::ir::Expression::LetRecursive(let_) => {
+            compile_let_recursive(module_builder, instruction_builder, let_, variables, types)?
+        }
         mir::ir::Expression::None => fmm::ir::Undefined::new(types::compile_none()).into(),
         mir::ir::Expression::Number(number) => fmm::ir::Primitive::Float64(*number).into(),
         mir::ir::Expression::Record(record) => {
