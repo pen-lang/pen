@@ -55,3 +55,52 @@ Feature: List as stream
     When I successfully run `pen build`
     Then I successfully run `./app`
     And the stdout from "./app" should contain exactly "hello"
+
+  Scenario: Evaluate multiple elements lazily
+    Given a file named "Main.pen" with:
+    """pen
+    import System'Os
+    import 'Hello
+
+    foo = \(ctx Os'Context) [none] {
+      Hello'Hello(ctx)
+
+      [none;]
+    }
+
+    main = \(ctx Os'Context) number {
+      [none; ...foo(ctx)]
+
+      0
+    }
+    """
+    When I successfully run `pen build`
+    Then I successfully run `./app`
+    And the stdout from "./app" should not contain "hello"
+
+  Scenario: Evaluate multiple elements lazily but only once
+    Given a file named "Main.pen" with:
+    """pen
+    import System'Os
+    import 'Hello
+
+    foo = \(ctx Os'Context) [none] {
+      Hello'Hello(ctx)
+
+      [none;]
+    }
+
+    main = \(ctx Os'Context) number {
+      if [x, ...xs] = [none; ...foo(ctx)] {
+        x()
+        x()
+      } else {
+        none
+      }
+
+      0
+    }
+    """
+    When I successfully run `pen build`
+    Then I successfully run `./app`
+    And the stdout from "./app" should contain exactly "hello"
