@@ -65,9 +65,8 @@ fn transform_list(
             ),
             Variable::new(&configuration.prepend_function_name, position.clone()),
             vec![
-                Lambda::new(
-                    vec![],
-                    types::Any::new(position.clone()),
+                Thunk::new(
+                    Some(types::Any::new(position.clone()).into()),
                     TypeCoercion::new(
                         type_.clone(),
                         types::Any::new(position.clone()),
@@ -162,9 +161,8 @@ mod tests {
                     Position::dummy()
                 ),
                 vec![
-                    Lambda::new(
-                        vec![],
-                        types::Any::new(Position::dummy()),
+                    Thunk::new(
+                        Some(types::Any::new(Position::dummy()).into()),
                         TypeCoercion::new(
                             types::None::new(Position::dummy()),
                             types::Any::new(Position::dummy()),
@@ -215,9 +213,8 @@ mod tests {
                     Position::dummy()
                 ),
                 vec![
-                    Lambda::new(
-                        vec![],
-                        types::Any::new(Position::dummy()),
+                    Thunk::new(
+                        Some(types::Any::new(Position::dummy()).into()),
                         TypeCoercion::new(
                             types::None::new(Position::dummy()),
                             types::Any::new(Position::dummy()),
@@ -234,9 +231,8 @@ mod tests {
                             Position::dummy()
                         ),
                         vec![
-                            Lambda::new(
-                                vec![],
-                                types::Any::new(Position::dummy()),
+                            Thunk::new(
+                                Some(types::Any::new(Position::dummy()).into()),
                                 TypeCoercion::new(
                                     types::None::new(Position::dummy()),
                                     types::Any::new(Position::dummy()),

@@ -112,14 +112,20 @@ pub fn compile_closure_payload(
     types: &HashMap<String, mir::types::RecordBody>,
 ) -> fmm::types::Type {
     if definition.is_thunk() {
-        fmm::types::Union::new(vec![
-            compile_environment(definition, types).into(),
-            compile(definition.result_type(), types),
-        ])
-        .into()
+        compile_thunk_payload(definition, types).into()
     } else {
         compile_environment(definition, types).into()
     }
+}
+
+pub fn compile_thunk_payload(
+    definition: &mir::ir::Definition,
+    types: &HashMap<String, mir::types::RecordBody>,
+) -> fmm::types::Union {
+    fmm::types::Union::new(vec![
+        compile_environment(definition, types).into(),
+        compile(definition.result_type(), types),
+    ])
 }
 
 pub fn compile_unsized_closure(

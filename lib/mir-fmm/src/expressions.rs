@@ -374,13 +374,25 @@ fn compile_let_recursive(
         closures::compile_closure_content(
             entry_functions::compile(module_builder, let_.definition(), false, variables, types)?,
             closures::compile_drop_function(module_builder, let_.definition(), types)?,
-            fmm::build::record(
-                let_.definition()
-                    .environment()
-                    .iter()
-                    .map(|free_variable| variables[free_variable.name()].clone())
-                    .collect(),
-            ),
+            {
+                let environment = fmm::build::record(
+                    let_.definition()
+                        .environment()
+                        .iter()
+                        .map(|free_variable| variables[free_variable.name()].clone())
+                        .collect(),
+                );
+
+                if let_.definition().is_thunk() {
+                    fmm::build::TypedExpression::from(fmm::ir::Union::new(
+                        types::compile_thunk_payload(let_.definition(), types),
+                        0,
+                        environment,
+                    ))
+                } else {
+                    environment.into()
+                }
+            },
         ),
         closure_pointer.clone(),
     );
