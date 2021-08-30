@@ -249,3 +249,43 @@ Feature: Memory leak
     """
     When I successfully run `pen build`
     Then I successfully run `check_memory_leak_in_loop.sh ./app`
+
+  Scenario: Drop an unforced list with no environment
+    Given a file named "Main.pen" with:
+    """pen
+    import System'Os
+
+    type foo {
+      x number
+    }
+
+    main = \(ctx Os'Context) number {
+      [foo; foo{x: 42}]
+
+      main(ctx)
+    }
+    """
+    When I successfully run `pen build`
+    Then I successfully run `check_memory_leak_in_loop.sh ./app`
+
+  Scenario: Drop a forced list with no environment
+    Given a file named "Main.pen" with:
+    """pen
+    import System'Os
+
+    type foo {
+      x number
+    }
+
+    main = \(ctx Os'Context) number {
+      if [x, ...xs] = [foo; foo{x: 42}] {
+        x()
+      } else {
+        none
+      }
+
+      main(ctx)
+    }
+    """
+    When I successfully run `pen build`
+    Then I successfully run `check_memory_leak_in_loop.sh ./app`
