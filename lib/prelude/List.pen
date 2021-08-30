@@ -58,8 +58,16 @@ _prependToNode = \(x \() any, n \() _Node | none) _Node {
   }
 }
 
-_concatenateLists = \(x _AnyList, y _AnyList) _AnyList {
-  _AnyList{node: _concatenateNodes(x.node, y.node)}
+_concatenateLists = \(x \() _AnyList, y _AnyList) _AnyList {
+  _AnyList{
+    node: \() _Node | none {
+      if x = x().node(); _Node {
+        _prependToNode(x.first, _concatenateNodes(x.rest, y.node))
+      } else {
+        y.node()
+      }
+    }
+  }
 }
 
 _concatenateNodes = \(x \() _Node | none, y \() _Node | none) \() _Node | none {

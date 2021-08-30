@@ -35,14 +35,26 @@ fn transform_list(
         [ListElement::Multiple(expression), ..] => Call::new(
             Some(
                 types::Function::new(
-                    vec![any_list_type.clone().into(), any_list_type.clone().into()],
-                    any_list_type,
+                    vec![
+                        types::Function::new(vec![], any_list_type.clone(), position.clone())
+                            .into(),
+                        any_list_type.clone().into(),
+                    ],
+                    any_list_type.clone(),
                     position.clone(),
                 )
                 .into(),
             ),
             Variable::new(&configuration.concatenate_function_name, position.clone()),
-            vec![expression.clone(), rest_expression()],
+            vec![
+                Thunk::new(
+                    Some(any_list_type.into()),
+                    expression.clone(),
+                    position.clone(),
+                )
+                .into(),
+                rest_expression(),
+            ],
             position.clone(),
         )
         .into(),
@@ -108,6 +120,19 @@ mod tests {
                     Position::dummy(),
                 )
                 .into(),
+                list_type.clone().into(),
+            ],
+            list_type,
+            Position::dummy(),
+        )
+    }
+
+    fn get_concatenate_function_type() -> types::Function {
+        let list_type = get_list_type();
+
+        types::Function::new(
+            vec![
+                types::Function::new(vec![], list_type.clone(), Position::dummy()).into(),
                 list_type.clone().into(),
             ],
             list_type,
@@ -257,6 +282,51 @@ mod tests {
                             .into(),
                         ],
                         Position::dummy(),
+                    )
+                    .into(),
+                ],
+                Position::dummy(),
+            )
+            .into(),
+        );
+    }
+
+    #[test]
+    fn transform_multiple_elements() {
+        let list_type = get_list_type();
+
+        assert_eq!(
+            transform(
+                &List::new(
+                    types::None::new(Position::dummy()),
+                    vec![ListElement::Multiple(
+                        Variable::new("xs", Position::dummy()).into()
+                    )],
+                    Position::dummy()
+                ),
+                &DUMMY_LIST_TYPE_CONFIGURATION,
+            ),
+            Call::new(
+                Some(get_concatenate_function_type().into()),
+                Variable::new(
+                    &DUMMY_LIST_TYPE_CONFIGURATION.concatenate_function_name,
+                    Position::dummy()
+                ),
+                vec![
+                    Thunk::new(
+                        Some(list_type.clone().into()),
+                        Variable::new("xs", Position::dummy()),
+                        Position::dummy(),
+                    )
+                    .into(),
+                    Call::new(
+                        Some(types::Function::new(vec![], list_type, Position::dummy()).into()),
+                        Variable::new(
+                            &DUMMY_LIST_TYPE_CONFIGURATION.empty_list_function_name,
+                            Position::dummy()
+                        ),
+                        vec![],
+                        Position::dummy()
                     )
                     .into(),
                 ],
