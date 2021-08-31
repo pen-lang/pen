@@ -70,7 +70,7 @@ Feature: List
     """pen
     f = \(xs [number]) [number] {
       if [y, ...ys] = xs {
-        [number; y, ...ys]
+        [number; y(), ...ys]
       } else {
         [number;]
       }

@@ -35,6 +35,4 @@ jobs:
       - uses: actions/setup-ruby@v1
       - run: bundler install
       - run: cargo build --release
-      - run: rm features/smoke/memory_leak.feature
-        if: startsWith(matrix.os, 'macos-')
       - run: tools/integration_test.sh

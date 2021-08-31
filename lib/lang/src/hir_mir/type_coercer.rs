@@ -147,7 +147,15 @@ fn transform_expression(
                         .clone()
                         .into_iter()
                         .chain(vec![
-                            (if_.first_name().into(), list_type.element().clone()),
+                            (
+                                if_.first_name().into(),
+                                types::Function::new(
+                                    vec![],
+                                    list_type.element().clone(),
+                                    if_.position().clone(),
+                                )
+                                .into(),
+                            ),
                             (if_.rest_name().into(), list_type.clone().into()),
                         ])
                         .collect(),
@@ -343,6 +351,18 @@ fn transform_expression(
                 type_context,
             )?,
             update.position().clone(),
+        )
+        .into(),
+        Expression::Thunk(thunk) => Thunk::new(
+            thunk.type_().cloned(),
+            transform_and_coerce_expression(
+                thunk.expression(),
+                thunk
+                    .type_()
+                    .ok_or_else(|| CompileError::TypeNotInferred(thunk.position().clone()))?,
+                variables,
+            )?,
+            thunk.position().clone(),
         )
         .into(),
         Expression::TypeCoercion(coercion) => TypeCoercion::new(
@@ -592,6 +612,87 @@ mod tests {
             Position::dummy(),
         );
         let list_type = types::List::new(types::Number::new(Position::dummy()), Position::dummy());
+        let element_call = Call::new(
+            Some(
+                types::Function::new(
+                    vec![],
+                    types::Number::new(Position::dummy()),
+                    Position::dummy(),
+                )
+                .into(),
+            ),
+            Variable::new("x", Position::dummy()),
+            vec![],
+            Position::dummy(),
+        );
+
+        assert_eq!(
+            coerce_module(
+                &Module::empty().set_definitions(vec![Definition::without_source(
+                    "f",
+                    Lambda::new(
+                        vec![Argument::new("xs", list_type.clone())],
+                        union_type.clone(),
+                        IfList::new(
+                            Some(types::Number::new(Position::dummy()).into()),
+                            Variable::new("xs", Position::dummy()),
+                            "x",
+                            "xs",
+                            element_call.clone(),
+                            None::new(Position::dummy()),
+                            Position::dummy(),
+                        ),
+                        Position::dummy(),
+                    ),
+                    false,
+                )],)
+            ),
+            Ok(
+                Module::empty().set_definitions(vec![Definition::without_source(
+                    "f",
+                    Lambda::new(
+                        vec![Argument::new("xs", list_type)],
+                        union_type.clone(),
+                        IfList::new(
+                            Some(types::Number::new(Position::dummy()).into()),
+                            Variable::new("xs", Position::dummy()),
+                            "x",
+                            "xs",
+                            TypeCoercion::new(
+                                types::Number::new(Position::dummy()),
+                                union_type.clone(),
+                                element_call,
+                                Position::dummy(),
+                            ),
+                            TypeCoercion::new(
+                                types::None::new(Position::dummy()),
+                                union_type,
+                                None::new(Position::dummy()),
+                                Position::dummy(),
+                            ),
+                            Position::dummy(),
+                        ),
+                        Position::dummy(),
+                    ),
+                    false,
+                )],)
+            )
+        );
+    }
+
+    #[test]
+    fn coerce_if_list_with_function_union_type() {
+        let number_thunk_type = types::Function::new(
+            vec![],
+            types::Number::new(Position::dummy()),
+            Position::dummy(),
+        );
+        let union_type = types::Union::new(
+            number_thunk_type.clone(),
+            types::None::new(Position::dummy()),
+            Position::dummy(),
+        );
+        let list_type = types::List::new(types::Number::new(Position::dummy()), Position::dummy());
 
         assert_eq!(
             coerce_module(
@@ -626,7 +727,7 @@ mod tests {
                             "x",
                             "xs",
                             TypeCoercion::new(
-                                types::Number::new(Position::dummy()),
+                                number_thunk_type,
                                 union_type.clone(),
                                 Variable::new("x", Position::dummy()),
                                 Position::dummy(),
@@ -1030,6 +1131,55 @@ mod tests {
                     ),
                     false,
                 )]))
+        );
+    }
+
+    #[test]
+    fn coerce_thunk() {
+        let union_type = types::Union::new(
+            types::Number::new(Position::dummy()),
+            types::None::new(Position::dummy()),
+            Position::dummy(),
+        );
+
+        assert_eq!(
+            coerce_module(
+                &Module::empty().set_definitions(vec![Definition::without_source(
+                    "f",
+                    Lambda::new(
+                        vec![],
+                        types::Function::new(vec![], union_type.clone(), Position::dummy()),
+                        Thunk::new(
+                            Some(union_type.clone().into()),
+                            None::new(Position::dummy()),
+                            Position::dummy()
+                        ),
+                        Position::dummy(),
+                    ),
+                    false,
+                )],)
+            ),
+            Ok(
+                Module::empty().set_definitions(vec![Definition::without_source(
+                    "f",
+                    Lambda::new(
+                        vec![],
+                        types::Function::new(vec![], union_type.clone(), Position::dummy()),
+                        Thunk::new(
+                            Some(union_type.clone().into()),
+                            TypeCoercion::new(
+                                types::None::new(Position::dummy()),
+                                union_type,
+                                None::new(Position::dummy()),
+                                Position::dummy()
+                            ),
+                            Position::dummy()
+                        ),
+                        Position::dummy(),
+                    ),
+                    false,
+                )],)
+            )
         );
     }
 }

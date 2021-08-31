@@ -95,10 +95,14 @@ fn check_expression(
             type_extractor::extract_from_expression(expression, variables, type_context)?
         }
         Expression::IfList(if_) => {
-            let element_type = if_
-                .type_()
-                .ok_or_else(|| CompileError::TypeNotInferred(if_.argument().position().clone()))?;
-            let list_type = types::List::new(element_type.clone(), if_.position().clone());
+            let list_type = types::List::new(
+                if_.type_()
+                    .ok_or_else(|| {
+                        CompileError::TypeNotInferred(if_.argument().position().clone())
+                    })?
+                    .clone(),
+                if_.position().clone(),
+            );
 
             check_subsumption(
                 &check_expression(if_.argument(), variables)?,
@@ -111,7 +115,15 @@ fn check_expression(
                     .clone()
                     .into_iter()
                     .chain(vec![
-                        (if_.first_name().into(), element_type.clone()),
+                        (
+                            if_.first_name().into(),
+                            types::Function::new(
+                                vec![],
+                                list_type.element().clone(),
+                                if_.position().clone(),
+                            )
+                            .into(),
+                        ),
                         (if_.rest_name().into(), list_type.into()),
                     ])
                     .collect(),
@@ -332,6 +344,15 @@ fn check_expression(
             update.type_().clone()
         }
         Expression::String(string) => types::ByteString::new(string.position().clone()).into(),
+        Expression::Thunk(thunk) => {
+            let type_ = thunk
+                .type_()
+                .ok_or_else(|| CompileError::TypeNotInferred(thunk.position().clone()))?;
+
+            check_subsumption(&check_expression(thunk.expression(), variables)?, type_)?;
+
+            type_extractor::extract_from_expression(expression, variables, type_context)?
+        }
         Expression::TypeCoercion(coercion) => {
             check_subsumption(
                 &check_expression(coercion.argument(), variables)?,
@@ -526,6 +547,31 @@ mod tests {
                 Position::dummy()
             ))
         );
+    }
+
+    #[test]
+    fn check_thunk() {
+        check_module(
+            &Module::empty().set_definitions(vec![Definition::without_source(
+                "x",
+                Lambda::new(
+                    vec![],
+                    types::Function::new(
+                        vec![],
+                        types::None::new(Position::dummy()),
+                        Position::dummy(),
+                    ),
+                    Thunk::new(
+                        Some(types::None::new(Position::dummy()).into()),
+                        None::new(Position::dummy()),
+                        Position::dummy(),
+                    ),
+                    Position::dummy(),
+                ),
+                false,
+            )]),
+        )
+        .unwrap();
     }
 
     mod lambda {
@@ -1924,7 +1970,19 @@ mod tests {
                             Variable::new("x", Position::dummy()),
                             "y",
                             "ys",
-                            Variable::new("y", Position::dummy()),
+                            Call::new(
+                                Some(
+                                    types::Function::new(
+                                        vec![],
+                                        types::None::new(Position::dummy()),
+                                        Position::dummy(),
+                                    )
+                                    .into(),
+                                ),
+                                Variable::new("y", Position::dummy()),
+                                vec![],
+                                Position::dummy(),
+                            ),
                             None::new(Position::dummy()),
                             Position::dummy(),
                         ),
@@ -1982,7 +2040,19 @@ mod tests {
                             Variable::new("x", Position::dummy()),
                             "y",
                             "ys",
-                            Variable::new("y", Position::dummy()),
+                            Call::new(
+                                Some(
+                                    types::Function::new(
+                                        vec![],
+                                        types::None::new(Position::dummy()),
+                                        Position::dummy(),
+                                    )
+                                    .into(),
+                                ),
+                                Variable::new("y", Position::dummy()),
+                                vec![],
+                                Position::dummy(),
+                            ),
                             Number::new(42.0, Position::dummy()),
                             Position::dummy(),
                         ),

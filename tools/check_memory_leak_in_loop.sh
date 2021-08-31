@@ -4,6 +4,8 @@ set -ex
 
 . $(dirname $0)/utilities.sh
 
+check_valgrind_command "$@"
+
 test_duration=1
 test_retry_count=3
 

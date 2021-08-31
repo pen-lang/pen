@@ -13,116 +13,136 @@ pub fn validate(module: &Module, type_context: &TypeContext) -> Result<(), Compi
 }
 
 fn validate_lambda(lambda: &Lambda, type_context: &TypeContext) -> Result<(), CompileError> {
-    validate_expression(lambda.body(), lambda.result_type(), type_context)
+    validate_expression(lambda.body(), Some(lambda.result_type()), type_context)
 }
 
 fn validate_expression(
     expression: &Expression,
-    result_type: &Type,
+    result_type: Option<&Type>,
     type_context: &TypeContext,
 ) -> Result<(), CompileError> {
-    let validate_expression =
-        |expression| validate_expression(expression, result_type, type_context);
+    let validate = |expression| validate_expression(expression, result_type, type_context);
 
     match expression {
         Expression::Call(call) => {
-            validate_expression(call.function())?;
+            validate(call.function())?;
 
             for argument in call.arguments() {
-                validate_expression(argument)?;
+                validate(argument)?;
             }
         }
         Expression::If(if_) => {
-            validate_expression(if_.condition())?;
-            validate_expression(if_.then())?;
-            validate_expression(if_.else_())?;
+            validate(if_.condition())?;
+            validate(if_.then())?;
+            validate(if_.else_())?;
         }
         Expression::IfList(if_) => {
-            validate_expression(if_.argument())?;
-            validate_expression(if_.then())?;
-            validate_expression(if_.else_())?;
+            validate(if_.argument())?;
+            validate(if_.then())?;
+            validate(if_.else_())?;
         }
         Expression::IfType(if_) => {
-            validate_expression(if_.argument())?;
+            validate(if_.argument())?;
 
             for branch in if_.branches() {
-                validate_expression(branch.expression())?;
+                validate(branch.expression())?;
             }
 
             if let Some(branch) = if_.else_() {
-                validate_expression(branch.expression())?;
+                validate(branch.expression())?;
             }
         }
         Expression::TypeCoercion(coercion) => {
-            validate_expression(coercion.argument())?;
+            validate(coercion.argument())?;
         }
         Expression::Lambda(lambda) => {
             validate_lambda(lambda, type_context)?;
         }
         Expression::Let(let_) => {
-            validate_expression(let_.bound_expression())?;
-            validate_expression(let_.expression())?;
+            validate(let_.bound_expression())?;
+            validate(let_.expression())?;
         }
         Expression::List(list) => {
             for element in list.elements() {
-                validate_expression(match element {
-                    ListElement::Multiple(expression) => expression,
-                    ListElement::Single(expression) => expression,
-                })?;
+                validate_expression(
+                    match element {
+                        ListElement::Multiple(expression) => expression,
+                        ListElement::Single(expression) => expression,
+                    },
+                    None,
+                    type_context,
+                )?;
             }
         }
         Expression::Operation(operation) => match operation {
             Operation::Arithmetic(operation) => {
-                validate_expression(operation.lhs())?;
-                validate_expression(operation.rhs())?;
+                validate(operation.lhs())?;
+                validate(operation.rhs())?;
             }
             Operation::Boolean(operation) => {
-                validate_expression(operation.lhs())?;
-                validate_expression(operation.rhs())?;
+                validate(operation.lhs())?;
+                validate(operation.rhs())?;
             }
             Operation::Equality(operation) => {
-                validate_expression(operation.lhs())?;
-                validate_expression(operation.rhs())?;
+                validate(operation.lhs())?;
+                validate(operation.rhs())?;
             }
             Operation::Not(operation) => {
-                validate_expression(operation.expression())?;
+                validate(operation.expression())?;
             }
             Operation::Order(operation) => {
-                validate_expression(operation.lhs())?;
-                validate_expression(operation.rhs())?;
+                validate(operation.lhs())?;
+                validate(operation.rhs())?;
             }
             Operation::Try(operation) => {
-                if !type_subsumption_checker::check(
-                    &types::Reference::new(
-                        &type_context.error_type_configuration().error_type_name,
-                        result_type.position().clone(),
-                    )
-                    .into(),
-                    result_type,
-                    type_context.types(),
-                )? {
-                    return Err(CompileError::InvalidTryOperation(
+                if let Some(result_type) = result_type {
+                    if !type_subsumption_checker::check(
+                        &types::Reference::new(
+                            &type_context.error_type_configuration().error_type_name,
+                            result_type.position().clone(),
+                        )
+                        .into(),
+                        result_type,
+                        type_context.types(),
+                    )? {
+                        return Err(CompileError::InvalidTryOperation(
+                            operation.position().clone(),
+                        ));
+                    }
+                } else {
+                    return Err(CompileError::TryOperationInList(
                         operation.position().clone(),
                     ));
                 }
 
-                validate_expression(operation.expression())?;
+                validate(operation.expression())?;
             }
         },
         Expression::RecordConstruction(construction) => {
             for element in construction.elements() {
-                validate_expression(element.expression())?;
+                validate(element.expression())?;
             }
         }
         Expression::RecordDeconstruction(deconstruction) => {
-            validate_expression(deconstruction.record())?;
+            validate(deconstruction.record())?;
         }
         Expression::RecordUpdate(update) => {
-            validate_expression(update.record())?;
+            validate(update.record())?;
 
             for element in update.elements() {
-                validate_expression(element.expression())?;
+                validate(element.expression())?;
             }
+        }
+        Expression::Thunk(thunk) => {
+            validate_expression(
+                thunk.expression(),
+                Some(
+                    thunk
+                        .type_()
+                        .ok_or_else(|| CompileError::TypeNotInferred(thunk.position().clone()))?,
+                ),
+                type_context,
+            )?;
         }
         Expression::Boolean(_)
         | Expression::None(_)
@@ -163,7 +183,7 @@ mod tests {
     }
 
     #[test]
-    fn fail_to_validate_try_operator() {
+    fn fail_to_validate_lambda() {
         assert_eq!(
             validate_module(
                 &Module::empty()
@@ -200,6 +220,154 @@ mod tests {
                     )])
             ),
             Err(CompileError::InvalidTryOperation(Position::dummy()))
+        );
+    }
+
+    #[test]
+    fn validate_thunk() {
+        let error_type =
+            types::Reference::new(&ERROR_TYPE_CONFIGURATION.error_type_name, Position::dummy());
+        let union_type = types::Union::new(
+            types::None::new(Position::dummy()),
+            error_type,
+            Position::dummy(),
+        );
+
+        assert_eq!(
+            validate_module(
+                &Module::empty()
+                    .set_type_definitions(vec![TypeDefinition::without_source(
+                        "error",
+                        vec![],
+                        false,
+                        false,
+                        false
+                    )])
+                    .set_definitions(vec![Definition::without_source(
+                        "x",
+                        Lambda::new(
+                            vec![Argument::new("x", union_type.clone())],
+                            types::Function::new(
+                                vec![],
+                                types::None::new(Position::dummy()),
+                                Position::dummy()
+                            ),
+                            Thunk::new(
+                                Some(union_type.into()),
+                                TryOperation::new(
+                                    None,
+                                    Variable::new("x", Position::dummy()),
+                                    Position::dummy(),
+                                ),
+                                Position::dummy()
+                            ),
+                            Position::dummy(),
+                        ),
+                        false,
+                    )])
+            ),
+            Ok(())
+        );
+    }
+
+    #[test]
+    fn fail_to_validate_thunk() {
+        let error_type =
+            types::Reference::new(&ERROR_TYPE_CONFIGURATION.error_type_name, Position::dummy());
+
+        assert_eq!(
+            validate_module(
+                &Module::empty()
+                    .set_type_definitions(vec![TypeDefinition::without_source(
+                        "error",
+                        vec![],
+                        false,
+                        false,
+                        false
+                    )])
+                    .set_definitions(vec![Definition::without_source(
+                        "x",
+                        Lambda::new(
+                            vec![Argument::new(
+                                "x",
+                                types::Union::new(
+                                    types::None::new(Position::dummy()),
+                                    error_type,
+                                    Position::dummy(),
+                                ),
+                            )],
+                            types::Function::new(
+                                vec![],
+                                types::None::new(Position::dummy()),
+                                Position::dummy()
+                            ),
+                            Thunk::new(
+                                Some(types::None::new(Position::dummy()).into()),
+                                TryOperation::new(
+                                    None,
+                                    Variable::new("x", Position::dummy()),
+                                    Position::dummy(),
+                                ),
+                                Position::dummy()
+                            ),
+                            Position::dummy(),
+                        ),
+                        false,
+                    )])
+            ),
+            Err(CompileError::InvalidTryOperation(Position::dummy()))
+        );
+    }
+
+    #[test]
+    fn fail_to_validate_list() {
+        let error_type =
+            types::Reference::new(&ERROR_TYPE_CONFIGURATION.error_type_name, Position::dummy());
+
+        assert_eq!(
+            validate_module(
+                &Module::empty()
+                    .set_type_definitions(vec![TypeDefinition::without_source(
+                        "error",
+                        vec![],
+                        false,
+                        false,
+                        false
+                    )])
+                    .set_definitions(vec![Definition::without_source(
+                        "x",
+                        Lambda::new(
+                            vec![Argument::new(
+                                "x",
+                                types::Union::new(
+                                    types::None::new(Position::dummy()),
+                                    error_type,
+                                    Position::dummy(),
+                                ),
+                            )],
+                            types::Function::new(
+                                vec![],
+                                types::None::new(Position::dummy()),
+                                Position::dummy()
+                            ),
+                            List::new(
+                                types::None::new(Position::dummy()),
+                                vec![ListElement::Single(
+                                    TryOperation::new(
+                                        None,
+                                        Variable::new("x", Position::dummy()),
+                                        Position::dummy(),
+                                    )
+                                    .into()
+                                )],
+                                Position::dummy()
+                            ),
+                            Position::dummy(),
+                        ),
+                        false,
+                    )])
+            ),
+            Err(CompileError::TryOperationInList(Position::dummy()))
         );
     }
 }

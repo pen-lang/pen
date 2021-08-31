@@ -151,6 +151,15 @@ fn compile_initial_thunk_entry(
                     fmm::ir::AtomicOrdering::Relaxed,
                 ),
                 |instruction_builder| -> Result<_, CompileError> {
+                    let closure = compile_closure_pointer(definition.type_(), types)?;
+
+                    reference_count::clone_expression(
+                        &instruction_builder,
+                        &closure,
+                        &definition.type_().clone().into(),
+                        types,
+                    )?;
+
                     let value = compile_body(
                         module_builder,
                         &instruction_builder,
@@ -186,6 +195,13 @@ fn compile_initial_thunk_entry(
                         entry_function_pointer.clone(),
                         fmm::ir::AtomicOrdering::Release,
                     );
+
+                    reference_count::drop_expression(
+                        &instruction_builder,
+                        &closure,
+                        &definition.type_().clone().into(),
+                        types,
+                    )?;
 
                     Ok(instruction_builder.return_(value))
                 },
