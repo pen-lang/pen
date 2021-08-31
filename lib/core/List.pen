@@ -1,0 +1,11 @@
+Length = \(xs [any]) number {
+  LengthRecursive(xs, 0)
+}
+
+LengthRecursive = \(xs [any], n number) number {
+  if [_, ...xs] = xs {
+    LengthRecursive(xs, n + 1)
+  } else {
+    n
+  }
+}
