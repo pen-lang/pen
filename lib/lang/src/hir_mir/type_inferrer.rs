@@ -1,4 +1,3 @@
-
 use super::{environment_creator, type_context::TypeContext, type_extractor, CompileError};
 use crate::{
     hir::*,

@@ -1,4 +1,3 @@
-
 use crate::hir::*;
 
 pub fn transform(operation: &BooleanOperation) -> Expression {

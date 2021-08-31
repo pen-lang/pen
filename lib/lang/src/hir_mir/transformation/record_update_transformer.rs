@@ -1,4 +1,3 @@
-
 use super::super::error::CompileError;
 use crate::{hir::*, hir_mir::type_context::TypeContext, types::analysis::record_element_resolver};
 use std::collections::HashSet;

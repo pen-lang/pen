@@ -1,4 +1,3 @@
-
 use super::module_path::ModulePath;
 
 #[derive(Clone, Debug, PartialEq)]

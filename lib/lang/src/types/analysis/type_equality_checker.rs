@@ -1,4 +1,3 @@
-
 use super::{super::Type, type_canonicalizer, TypeError};
 use std::collections::HashMap;
 

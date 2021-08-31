@@ -1,4 +1,3 @@
-
 use super::{error::CompileError, type_extractor};
 use crate::{hir, interface};
 

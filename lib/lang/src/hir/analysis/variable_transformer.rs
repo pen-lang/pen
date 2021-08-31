@@ -1,4 +1,3 @@
-
 use crate::hir::*;
 
 pub fn transform(module: &Module, transform: &dyn Fn(&Variable) -> Expression) -> Module {

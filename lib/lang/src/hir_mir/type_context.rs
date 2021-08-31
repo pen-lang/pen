@@ -1,4 +1,3 @@
-
 use super::{
     error_type_configuration::ErrorTypeConfiguration,
     list_type_configuration::ListTypeConfiguration,

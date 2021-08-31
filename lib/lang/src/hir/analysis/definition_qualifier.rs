@@ -1,4 +1,3 @@
-
 use super::variable_renamer;
 use crate::hir::*;
 use std::collections::HashMap;

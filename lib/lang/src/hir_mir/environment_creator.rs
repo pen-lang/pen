@@ -1,4 +1,3 @@
-
 use super::type_extractor;
 use crate::{hir::*, types::Type};
 use std::collections::HashMap;

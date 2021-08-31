@@ -1,4 +1,3 @@
-
 use crate::ast;
 
 pub fn qualify(path: &ast::ModulePath, name: &str) -> String {

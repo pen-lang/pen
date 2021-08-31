@@ -1,4 +1,3 @@
-
 use crate::types::Type;
 
 #[derive(Clone, Debug, PartialEq)]

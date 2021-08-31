@@ -1,4 +1,3 @@
-
 use super::{Declaration, TypeAlias, TypeDefinition};
 use serde::{Deserialize, Serialize};
 

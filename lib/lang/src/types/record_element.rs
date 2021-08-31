@@ -1,4 +1,3 @@
-
 use super::Type;
 use serde::{Deserialize, Serialize};
 

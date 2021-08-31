@@ -1,4 +1,3 @@
-
 use super::{error::TypeError, type_canonicalizer};
 use crate::types::Type;
 use std::{
