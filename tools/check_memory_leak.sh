@@ -4,7 +4,10 @@ set -ex
 
 . $(dirname $0)/utilities.sh
 
-check_valgrind_command "$@"
+if ! which valgrind; then
+  "$@"
+  exit
+fi
 
 valgrind --log-file=valgrind.log "$@"
 test_valgrind_log valgrind.log

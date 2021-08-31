@@ -4,13 +4,17 @@ set -ex
 
 . $(dirname $0)/utilities.sh
 
-check_valgrind_command "$@"
-
 test_duration=1
 test_retry_count=3
 
 test() {
-  valgrind --log-file=valgrind.log "$@" >/dev/null &
+  command="valgrind --log-file=valgrind.log $@"
+
+  if ! which valgrind; then
+    command="$@"
+  fi
+
+  $command >/dev/null &
   pid=$!
 
   sleep $test_duration
