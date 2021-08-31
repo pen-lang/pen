@@ -12,7 +12,6 @@ pub static DUMMY_LIST_TYPE_CONFIGURATION: Lazy<ListTypeConfiguration> =
         rest_function_name: "<dummy>".into(),
         list_type_name: "<dummy>".into(),
         first_rest_type_name: "<dummy>".into(),
-        map_function_name: "<dummy>".into(),
     });
 
 pub static DUMMY_STRING_TYPE_CONFIGURATION: Lazy<StringTypeConfiguration> =

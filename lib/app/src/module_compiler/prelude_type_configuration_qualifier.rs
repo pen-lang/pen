@@ -15,7 +15,6 @@ pub fn qualify_list_type_configuration(
         rest_function_name: [prelude_prefix, &configuration.rest_function_name].join(""),
         list_type_name: [prelude_prefix, &configuration.list_type_name].join(""),
         first_rest_type_name: [prelude_prefix, &configuration.first_rest_type_name].join(""),
-        map_function_name: [prelude_prefix, &configuration.map_function_name].join(""),
     }
 }
 

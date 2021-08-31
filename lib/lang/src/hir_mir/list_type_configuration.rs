@@ -13,7 +13,6 @@ pub static LIST_TYPE_CONFIGURATION: Lazy<ListTypeConfiguration> =
         rest_function_name: "rest".into(),
         list_type_name: "GenericList".into(),
         first_rest_type_name: "FirstRest".into(),
-        map_function_name: "mapList".into(),
     });
 
 #[derive(Clone, Debug, PartialEq)]
@@ -27,5 +26,4 @@ pub struct ListTypeConfiguration {
     pub rest_function_name: String,
     pub list_type_name: String,
     pub first_rest_type_name: String,
-    pub map_function_name: String,
 }

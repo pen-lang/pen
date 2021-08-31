@@ -20,18 +20,18 @@ impl Definition {
         name: impl Into<String>,
         arguments: Vec<Argument>,
         body: impl Into<Expression>,
-        result_type: impl Into<Type> + Clone,
+        result_type: impl Into<Type>,
     ) -> Self {
-        Self::with_options(name, vec![], arguments, body, result_type, false)
+        Self::with_options(name, vec![], arguments, body, result_type.into(), false)
     }
 
     pub fn thunk(
         name: impl Into<String>,
         arguments: Vec<Argument>,
         body: impl Into<Expression>,
-        result_type: impl Into<Type> + Clone,
+        result_type: impl Into<Type>,
     ) -> Self {
-        Self::with_options(name, vec![], arguments, body, result_type, true)
+        Self::with_options(name, vec![], arguments, body, result_type.into(), true)
     }
 
     #[cfg(test)]
@@ -50,9 +50,11 @@ impl Definition {
         environment: Vec<Argument>,
         arguments: Vec<Argument>,
         body: impl Into<Expression>,
-        result_type: impl Into<Type> + Clone,
+        result_type: impl Into<Type>,
         is_thunk: bool,
     ) -> Self {
+        let result_type = result_type.into();
+
         Self {
             type_: types::Function::new(
                 arguments
@@ -66,7 +68,7 @@ impl Definition {
             environment,
             arguments,
             body: body.into(),
-            result_type: result_type.into(),
+            result_type,
             is_thunk,
         }
     }
