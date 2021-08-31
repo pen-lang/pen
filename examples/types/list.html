@@ -202,7 +202,7 @@
 <p><em>Given</em> a file named &quot;Foo.pen&quot; with:</p>
 <pre><code class="language-pen">f = \(xs [number]) [number] {
   if [y, ...ys] = xs {
-    [number; y, ...ys]
+    [number; y(), ...ys]
   } else {
     [number;]
   }
