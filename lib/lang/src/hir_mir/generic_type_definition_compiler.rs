@@ -1,3 +1,4 @@
+
 use super::{type_compiler, type_context::TypeContext, CompileError};
 use crate::{
     hir::{analysis::expression_visitor, *},
@@ -71,7 +72,8 @@ fn collect_types(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{position::Position, types};
+    use crate::types;
+    use position::Position;
 
     #[test]
     fn compile_list_type_definition() {

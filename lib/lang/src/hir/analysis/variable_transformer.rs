@@ -1,3 +1,4 @@
+
 use crate::hir::*;
 
 pub fn transform(module: &Module, transform: &dyn Fn(&Variable) -> Expression) -> Module {
@@ -262,7 +263,8 @@ fn transform_operation(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{position::Position, types};
+    use crate::types;
+    use position::Position;
     use pretty_assertions::assert_eq;
 
     #[test]

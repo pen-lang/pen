@@ -1,3 +1,4 @@
+
 use crate::{
     ast,
     hir::{analysis::variable_transformer, *},
@@ -55,7 +56,7 @@ pub fn compile(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::position::Position;
+    use position::Position;
     use pretty_assertions::assert_eq;
 
     #[test]

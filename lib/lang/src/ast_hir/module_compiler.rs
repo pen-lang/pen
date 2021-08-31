@@ -1,5 +1,6 @@
 use super::error::CompileError;
-use crate::{ast, hir, position::Position, types};
+use crate::{ast, hir, types};
+use position::Position;
 
 pub fn compile(module: &ast::Module) -> Result<hir::Module, CompileError> {
     Ok(hir::Module::new(
@@ -346,6 +347,7 @@ fn is_name_public(name: &str) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use position::Position;
     use pretty_assertions::assert_eq;
 
     #[test]

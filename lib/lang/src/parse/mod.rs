@@ -19,7 +19,8 @@ pub fn parse(source_content: &str, path: &str) -> Result<ast::Module, ParseError
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{ast::*, position::Position};
+    use crate::ast::*;
+    use position::Position;
 
     #[test]
     fn parse_empty_module() {

@@ -1,4 +1,5 @@
-use crate::{position::Position, types};
+use crate::types;
+use position::Position;
 
 #[derive(Clone, Debug, Hash, PartialEq)]
 pub struct TypeDefinition {

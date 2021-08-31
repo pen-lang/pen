@@ -1,5 +1,6 @@
 use super::{super::*, type_canonicalizer, TypeError};
-use crate::{position::Position, types};
+use crate::types;
+use position::Position;
 use std::collections::HashMap;
 
 pub fn resolve<'a>(

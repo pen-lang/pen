@@ -1,3 +1,4 @@
+
 use super::{type_context::TypeContext, CompileError};
 use crate::{
     hir::*,
@@ -157,13 +158,11 @@ fn validate_expression(
 #[cfg(test)]
 mod tests {
     use super::{super::list_type_configuration::LIST_TYPE_CONFIGURATION, *};
-    use crate::{
-        hir_mir::{
-            error_type_configuration::ERROR_TYPE_CONFIGURATION,
-            string_type_configuration::STRING_TYPE_CONFIGURATION,
-        },
-        position::Position,
+    use crate::hir_mir::{
+        error_type_configuration::ERROR_TYPE_CONFIGURATION,
+        string_type_configuration::STRING_TYPE_CONFIGURATION,
     };
+    use position::Position;
 
     fn validate_module(module: &Module) -> Result<(), CompileError> {
         validate(

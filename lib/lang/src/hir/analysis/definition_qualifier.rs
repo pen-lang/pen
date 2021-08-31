@@ -1,3 +1,4 @@
+
 use super::variable_renamer;
 use crate::hir::*;
 use std::collections::HashMap;
@@ -61,7 +62,8 @@ pub fn qualify(module: &Module, prefix: &str) -> Module {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{position::Position, types};
+    use crate::types;
+    use position::Position;
     use pretty_assertions::assert_eq;
 
     #[test]

@@ -2,7 +2,7 @@ use super::{
     any::Any, boolean::Boolean, byte_string::ByteString, function::Function, list::List,
     none::None, number::Number, record::Record, reference::Reference, union::Union,
 };
-use crate::position::Position;
+use position::Position;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]

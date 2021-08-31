@@ -28,7 +28,6 @@ impl Position {
         }
     }
 
-    #[cfg(test)]
     pub fn dummy() -> Self {
         Self {
             path: "".into(),

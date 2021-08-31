@@ -1,3 +1,4 @@
+
 use super::name_qualifier;
 use crate::{
     ast,
@@ -191,7 +192,8 @@ fn rename_types(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{position::Position, types};
+    use crate::types;
+    use position::Position;
     use pretty_assertions::assert_eq;
 
     #[test]

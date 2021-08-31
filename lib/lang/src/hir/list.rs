@@ -1,5 +1,6 @@
 use super::list_element::ListElement;
-use crate::{position::Position, types::Type};
+use crate::types::Type;
+use position::Position;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct List {

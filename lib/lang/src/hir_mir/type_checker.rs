@@ -1,3 +1,4 @@
+
 use super::{environment_creator, type_context::TypeContext, type_extractor, CompileError};
 use crate::{
     hir::*,
@@ -470,13 +471,11 @@ fn check_subsumption(
 #[cfg(test)]
 mod tests {
     use super::{super::list_type_configuration::LIST_TYPE_CONFIGURATION, *};
-    use crate::{
-        hir_mir::{
-            error_type_configuration::ERROR_TYPE_CONFIGURATION,
-            string_type_configuration::STRING_TYPE_CONFIGURATION,
-        },
-        position::Position,
+    use crate::hir_mir::{
+        error_type_configuration::ERROR_TYPE_CONFIGURATION,
+        string_type_configuration::STRING_TYPE_CONFIGURATION,
     };
+    use position::Position;
 
     fn check_module(module: &Module) -> Result<(), CompileError> {
         check_types(

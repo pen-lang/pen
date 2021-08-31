@@ -119,9 +119,8 @@ mod tests {
         error_type_configuration::ERROR_TYPE_CONFIGURATION,
         list_type_configuration::LIST_TYPE_CONFIGURATION, *,
     };
-    use crate::{
-        hir_mir::string_type_configuration::STRING_TYPE_CONFIGURATION, position::Position, types,
-    };
+    use crate::{hir_mir::string_type_configuration::STRING_TYPE_CONFIGURATION, types};
+    use position::Position;
 
     fn compile_module(
         module: &Module,

@@ -1,5 +1,6 @@
 use super::CompileError;
-use crate::{hir::*, position::Position};
+use crate::hir::*;
+use position::Position;
 use std::collections::HashMap;
 
 pub fn validate(module: &Module) -> Result<(), CompileError> {
@@ -33,6 +34,7 @@ pub fn validate(module: &Module) -> Result<(), CompileError> {
 mod tests {
     use super::*;
     use crate::types;
+    use position::Position;
 
     #[test]
     fn validate_type_definitions() {

@@ -1,3 +1,4 @@
+
 use std::{error::Error, fmt::Display};
 
 #[derive(Debug, PartialEq)]

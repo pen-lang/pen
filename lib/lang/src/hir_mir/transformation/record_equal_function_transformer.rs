@@ -1,3 +1,4 @@
+
 use crate::{
     hir::*,
     hir_mir::{
@@ -126,14 +127,12 @@ fn compile_equal_function_declaration(type_definition: &TypeDefinition) -> Decla
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{
-        hir_mir::{
-            error_type_configuration::ERROR_TYPE_CONFIGURATION,
-            list_type_configuration::LIST_TYPE_CONFIGURATION,
-            string_type_configuration::STRING_TYPE_CONFIGURATION,
-        },
-        position::Position,
+    use crate::hir_mir::{
+        error_type_configuration::ERROR_TYPE_CONFIGURATION,
+        list_type_configuration::LIST_TYPE_CONFIGURATION,
+        string_type_configuration::STRING_TYPE_CONFIGURATION,
     };
+    use position::Position;
     use pretty_assertions::assert_eq;
 
     fn transform_module(module: &Module) -> Result<Module, CompileError> {

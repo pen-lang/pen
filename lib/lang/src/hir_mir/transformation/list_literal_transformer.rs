@@ -1,9 +1,9 @@
 use crate::{
     hir::*,
     hir_mir::ListTypeConfiguration,
-    position::Position,
     types::{self, Type},
 };
+use position::Position;
 
 pub fn transform(list: &List, configuration: &ListTypeConfiguration) -> Expression {
     transform_list(
@@ -100,6 +100,7 @@ fn transform_list(
 mod tests {
     use super::*;
     use crate::hir_mir::dummy_type_configurations::DUMMY_LIST_TYPE_CONFIGURATION;
+    use position::Position;
     use pretty_assertions::assert_eq;
 
     fn get_list_type() -> types::Reference {

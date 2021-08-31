@@ -1,3 +1,4 @@
+
 use super::{super::Type, type_canonicalizer, TypeError};
 use std::collections::HashMap;
 
@@ -47,7 +48,7 @@ fn check_canonical(
 #[cfg(test)]
 mod tests {
     use super::{super::super::*, *};
-    use crate::position::Position;
+    use position::Position;
 
     #[test]
     fn check_numbers() {

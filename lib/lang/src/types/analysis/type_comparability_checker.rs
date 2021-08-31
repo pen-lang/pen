@@ -1,3 +1,4 @@
+
 use super::TypeError;
 use crate::types::{
     analysis::{record_element_resolver, type_resolver},
@@ -61,7 +62,8 @@ fn check_with_cache(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{position::Position, types};
+    use crate::types;
+    use position::Position;
 
     #[test]
     fn check_record_type() {

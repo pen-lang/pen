@@ -1,3 +1,4 @@
+
 use super::{environment_creator, type_context::TypeContext, type_extractor, CompileError};
 use crate::{
     hir::*,
@@ -416,14 +417,12 @@ fn infer_expression(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{
-        hir_mir::{
-            error_type_configuration::ERROR_TYPE_CONFIGURATION,
-            list_type_configuration::LIST_TYPE_CONFIGURATION,
-            string_type_configuration::STRING_TYPE_CONFIGURATION,
-        },
-        position::Position,
+    use crate::hir_mir::{
+        error_type_configuration::ERROR_TYPE_CONFIGURATION,
+        list_type_configuration::LIST_TYPE_CONFIGURATION,
+        string_type_configuration::STRING_TYPE_CONFIGURATION,
     };
+    use position::Position;
     use pretty_assertions::assert_eq;
 
     fn infer_module(module: &Module) -> Result<Module, CompileError> {

@@ -4,7 +4,6 @@ use super::{
 };
 use crate::{
     ast::*,
-    position::Position,
     types::{self, Type},
 };
 use combine::{
@@ -15,13 +14,11 @@ use combine::{
         regex::find,
         sequence::between,
     },
-    stream::{
-        position::{self, SourcePosition},
-        state,
-    },
+    stream::{self, position::SourcePosition, state},
     unexpected_any, value, Parser, Positioned,
 };
 use once_cell::sync::Lazy;
+use position::Position;
 use std::collections::HashSet;
 
 const KEYWORDS: &[&str] = &["else", "export", "foreign", "if", "import", "type"];
@@ -37,11 +34,11 @@ pub struct State<'a> {
 }
 
 pub type Stream<'a> =
-    easy::Stream<state::Stream<position::Stream<&'a str, SourcePosition>, State<'a>>>;
+    easy::Stream<state::Stream<stream::position::Stream<&'a str, SourcePosition>, State<'a>>>;
 
 pub fn stream<'a>(source: &'a str, path: &'a str) -> Stream<'a> {
     state::Stream {
-        stream: position::Stream::new(source),
+        stream: stream::position::Stream::new(source),
         state: State {
             path,
             lines: source.split('\n').collect(),
@@ -766,6 +763,7 @@ fn comment<'a>() -> impl Parser<Stream<'a>, Output = ()> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use position::Position;
     use pretty_assertions::assert_eq;
 
     #[test]

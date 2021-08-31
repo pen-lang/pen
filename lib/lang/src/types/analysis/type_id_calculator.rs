@@ -1,3 +1,4 @@
+
 use super::{error::TypeError, type_canonicalizer};
 use crate::types::Type;
 use std::{
@@ -53,7 +54,8 @@ fn calculate_string(type_: &Type, types: &HashMap<String, Type>) -> Result<Strin
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{position::Position, types};
+    use crate::types;
+    use position::Position;
 
     #[test]
     fn calculate_none_list_type_id() {

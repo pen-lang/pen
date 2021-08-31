@@ -1,3 +1,4 @@
+
 use super::type_transformer;
 use crate::{
     hir::*,
@@ -92,7 +93,7 @@ pub fn qualify(module: &Module, prefix: &str) -> Module {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::position::Position;
+    use position::Position;
     use pretty_assertions::assert_eq;
 
     #[test]

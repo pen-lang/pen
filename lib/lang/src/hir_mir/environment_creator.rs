@@ -1,3 +1,4 @@
+
 use super::type_extractor;
 use crate::{hir::*, types::Type};
 use std::collections::HashMap;
@@ -30,7 +31,8 @@ pub fn create_from_module(module: &Module) -> HashMap<String, Type> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{position::Position, types};
+    use crate::types;
+    use position::Position;
 
     #[test]
     fn create_with_foreign_declaration() {

@@ -1,3 +1,4 @@
+
 use super::{type_context::TypeContext, CompileError};
 use crate::{
     hir::{analysis::expression_visitor, *},
@@ -96,7 +97,8 @@ mod tests {
         },
         *,
     };
-    use crate::{position::Position, types};
+    use crate::types;
+    use position::Position;
 
     fn validate_module(module: &Module) -> Result<(), CompileError> {
         validate(

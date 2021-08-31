@@ -1,3 +1,4 @@
+
 use super::{type_context::TypeContext, CompileError};
 use crate::{
     hir::*,
@@ -194,7 +195,7 @@ pub fn extract_from_lambda(lambda: &Lambda) -> types::Function {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::position::Position;
+    use position::Position;
     use pretty_assertions::assert_eq;
 
     #[test]

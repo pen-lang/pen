@@ -1,3 +1,4 @@
+
 use super::{error::CompileError, type_extractor};
 use crate::{hir, interface};
 
@@ -52,7 +53,8 @@ pub fn compile(module: &hir::Module) -> Result<interface::Module, CompileError> 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{position::Position, types};
+    use crate::types;
+    use position::Position;
 
     #[test]
     fn compile_empty_module() {

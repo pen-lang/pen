@@ -1,13 +1,13 @@
 use super::{environment_creator, type_context::TypeContext, type_extractor, CompileError};
 use crate::{
     hir::*,
-    position::Position,
     types::{
         self,
         analysis::{record_element_resolver, type_canonicalizer, type_equality_checker},
         Type,
     },
 };
+use position::Position;
 use std::collections::HashMap;
 
 pub fn coerce_types(module: &Module, type_context: &TypeContext) -> Result<Module, CompileError> {
@@ -449,9 +449,9 @@ mod tests {
             list_type_configuration::LIST_TYPE_CONFIGURATION,
             string_type_configuration::STRING_TYPE_CONFIGURATION,
         },
-        position::Position,
         types,
     };
+    use position::Position;
     use pretty_assertions::assert_eq;
 
     fn coerce_module(module: &Module) -> Result<Module, CompileError> {

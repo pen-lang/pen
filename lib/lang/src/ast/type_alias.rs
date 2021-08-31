@@ -1,4 +1,5 @@
-use crate::{position::Position, types::Type};
+use crate::types::Type;
+use position::Position;
 
 #[derive(Clone, Debug, Hash, PartialEq)]
 pub struct TypeAlias {

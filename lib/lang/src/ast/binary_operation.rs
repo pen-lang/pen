@@ -1,5 +1,5 @@
 use super::{binary_operator::BinaryOperator, expression::Expression};
-use crate::position::Position;
+use position::Position;
 use std::sync::Arc;
 
 #[derive(Clone, Debug, PartialEq)]

@@ -1,3 +1,4 @@
+
 use crate::hir::*;
 
 pub fn visit(module: &Module, mut visit: impl FnMut(&Expression)) {

@@ -370,6 +370,7 @@ dependencies = [
  "itertools",
  "mir",
  "once_cell",
+ "position",
  "pretty_assertions",
  "regex",
  "serde",

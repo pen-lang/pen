@@ -1,3 +1,4 @@
+
 use crate::hir::*;
 
 pub fn transform(operation: &BooleanOperation) -> Expression {
@@ -24,7 +25,7 @@ pub fn transform(operation: &BooleanOperation) -> Expression {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::position::Position;
+    use position::Position;
     use pretty_assertions::assert_eq;
 
     #[test]

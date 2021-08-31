@@ -2,7 +2,6 @@ use super::super::error::CompileError;
 use crate::{
     hir::*,
     hir_mir::{transformation::record_type_information_compiler, type_context::TypeContext},
-    position::Position,
     types::{
         self,
         analysis::{
@@ -12,6 +11,7 @@ use crate::{
         Type,
     },
 };
+use position::Position;
 
 const LHS_NAME: &str = "$lhs";
 const RHS_NAME: &str = "$rhs";
@@ -247,6 +247,7 @@ fn transform_equal_operation(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use position::Position;
     use pretty_assertions::assert_eq;
 
     #[test]

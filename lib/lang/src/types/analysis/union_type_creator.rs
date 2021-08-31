@@ -1,7 +1,5 @@
-use crate::{
-    position::Position,
-    types::{self, Type},
-};
+use crate::types::{self, Type};
+use position::Position;
 
 pub fn create(types: &[Type], position: &Position) -> Option<Type> {
     types

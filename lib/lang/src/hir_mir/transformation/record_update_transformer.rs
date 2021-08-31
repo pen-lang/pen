@@ -1,3 +1,4 @@
+
 use super::super::error::CompileError;
 use crate::{hir::*, hir_mir::type_context::TypeContext, types::analysis::record_element_resolver};
 use std::collections::HashSet;
@@ -57,7 +58,8 @@ pub fn transform(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{position::Position, types};
+    use crate::types;
+    use position::Position;
     use pretty_assertions::assert_eq;
 
     #[test]

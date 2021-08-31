@@ -1,3 +1,4 @@
+
 use super::{super::*, type_resolver, TypeError};
 use std::collections::{BTreeSet, HashMap};
 
@@ -91,7 +92,7 @@ fn collect_types(type_: &Type, types: &HashMap<String, Type>) -> Result<BTreeSet
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::position::Position;
+    use position::Position;
 
     #[test]
     fn canonicalize_number() {
