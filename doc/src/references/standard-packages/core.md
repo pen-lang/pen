@@ -26,6 +26,30 @@ It converts a number to its string representation.
 \(number) string
 ```
 
+#### `Sum`
+
+It calculates a sum of numbers.
+
+```pen
+\([number]) number
+```
+
+## `List` module
+
+```pen
+import Core'List
+```
+
+### Functions
+
+#### `Length`
+
+It returns a length of a list.
+
+```pen
+\([any]) number
+```
+
 ## `String` module
 
 ```pen
