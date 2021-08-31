@@ -164,6 +164,16 @@ f = \() string {
 </code></pre>
 <p><em>When</em> I run <code>pen build</code></p>
 <p><em>Then</em> the exit status should be 0.</p>
+<h2 id="sum-numbers"><a class="header" href="#sum-numbers">Sum numbers</a></h2>
+<p><em>Given</em> a file named &quot;Foo.pen&quot; with:</p>
+<pre><code class="language-pen">import Core'Number
+
+f = \() number {
+  Number'Sum([number; 1, 2, 3])
+}
+</code></pre>
+<p><em>When</em> I run <code>pen build</code></p>
+<p><em>Then</em> the exit status should be 0.</p>
 <h2 id="join-strings"><a class="header" href="#join-strings">Join strings</a></h2>
 <p><em>Given</em> a file named &quot;Foo.pen&quot; with:</p>
 <pre><code class="language-pen">import Core'String
@@ -180,6 +190,18 @@ f = \() string {
 
 f = \() string {
   String'Slice(&quot;foo&quot;, 1, 2)
+}
+</code></pre>
+<p><em>When</em> I run <code>pen build</code></p>
+<p><em>Then</em> the exit status should be 0.</p>
+<h2 id="get-a-length-of-a-list"><a class="header" href="#get-a-length-of-a-list">Get a length of a list</a></h2>
+<p><em>Given</em> a file named &quot;Foo.pen&quot; with:</p>
+<pre><code class="language-pen">import Core'List
+
+f = \() number {
+  xs = [none;]
+
+  List'Length([any; ...xs])
 }
 </code></pre>
 <p><em>When</em> I run <code>pen build</code></p>
