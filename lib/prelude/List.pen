@@ -35,18 +35,6 @@ _emptyList = \() _AnyList {
   _AnyList{node: \() _Node | none { none }}
 }
 
-_getListLength = \(l _AnyList) number {
-  _getLengthFromNode(l.node())
-}
-
-_getLengthFromNode = \(n _Node | none) number {
-  if n = n; _Node {
-    1 + _getLengthFromNode(n.rest())
-  } else {
-    0
-  }
-}
-
 _prependToList = \(x \() any, l _AnyList) _AnyList {
   _AnyList{node: \() _Node | none { _prependToNode(x, l.node) }}
 }
@@ -96,23 +84,6 @@ _equalNodes = \(f \(any, any) boolean, x _Node | none, y _Node | none) boolean {
       false
     } else {
       true
-    }
-  }
-}
-
-_mapList = \(f \(\() any) \() any, l _AnyList) _AnyList {
-  _AnyList{node: _mapNodes(f, l.node)}
-}
-
-_mapNodes = \(f \(\() any) \() any, n \() _Node | none) \() _Node | none {
-  \() _Node | none {
-    if n = n(); _Node {
-      _Node{
-        first: f(n.first),
-        rest: _mapNodes(f, n.rest),
-      }
-    } else {
-      none
     }
   }
 }
