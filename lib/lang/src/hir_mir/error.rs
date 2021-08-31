@@ -28,6 +28,7 @@ pub enum CompileError {
     RecordElementMissing(Position),
     RecordExpected(Position),
     RecordNotFound(types::Record),
+    TryOperationInList(Position),
     TypeAnalysis(TypeError),
     TypeNotFound(types::Reference),
     TypeNotInferred(Position),
@@ -123,6 +124,13 @@ impl Display for CompileError {
                 record.name(),
                 record.position()
             ),
+            Self::TryOperationInList(position) => {
+                write!(
+                    formatter,
+                    "try operation not allowed in list literal\n{}",
+                    position
+                )
+            }
             Self::TypeAnalysis(error) => write!(formatter, "{}", error),
             Self::TypeNotFound(reference) => write!(
                 formatter,

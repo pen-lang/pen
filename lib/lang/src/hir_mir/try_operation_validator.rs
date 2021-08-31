@@ -13,12 +13,12 @@ pub fn validate(module: &Module, type_context: &TypeContext) -> Result<(), Compi
 }
 
 fn validate_lambda(lambda: &Lambda, type_context: &TypeContext) -> Result<(), CompileError> {
-    validate_expression(lambda.body(), lambda.result_type(), type_context)
+    validate_expression(lambda.body(), Some(lambda.result_type()), type_context)
 }
 
 fn validate_expression(
     expression: &Expression,
-    result_type: &Type,
+    result_type: Option<&Type>,
     type_context: &TypeContext,
 ) -> Result<(), CompileError> {
     let validate = |expression| validate_expression(expression, result_type, type_context);
@@ -64,10 +64,14 @@ fn validate_expression(
         }
         Expression::List(list) => {
             for element in list.elements() {
-                validate(match element {
-                    ListElement::Multiple(expression) => expression,
-                    ListElement::Single(expression) => expression,
-                })?;
+                validate_expression(
+                    match element {
+                        ListElement::Multiple(expression) => expression,
+                        ListElement::Single(expression) => expression,
+                    },
+                    None,
+                    type_context,
+                )?;
             }
         }
         Expression::Operation(operation) => match operation {
@@ -91,16 +95,22 @@ fn validate_expression(
                 validate(operation.rhs())?;
             }
             Operation::Try(operation) => {
-                if !type_subsumption_checker::check(
-                    &types::Reference::new(
-                        &type_context.error_type_configuration().error_type_name,
-                        result_type.position().clone(),
-                    )
-                    .into(),
-                    result_type,
-                    type_context.types(),
-                )? {
-                    return Err(CompileError::InvalidTryOperation(
+                if let Some(result_type) = result_type {
+                    if !type_subsumption_checker::check(
+                        &types::Reference::new(
+                            &type_context.error_type_configuration().error_type_name,
+                            result_type.position().clone(),
+                        )
+                        .into(),
+                        result_type,
+                        type_context.types(),
+                    )? {
+                        return Err(CompileError::InvalidTryOperation(
+                            operation.position().clone(),
+                        ));
+                    }
+                } else {
+                    return Err(CompileError::TryOperationInList(
                         operation.position().clone(),
                     ));
                 }
@@ -126,9 +136,11 @@ fn validate_expression(
         Expression::Thunk(thunk) => {
             validate_expression(
                 thunk.expression(),
-                thunk
-                    .type_()
-                    .ok_or_else(|| CompileError::TypeNotInferred(thunk.position().clone()))?,
+                Some(
+                    thunk
+                        .type_()
+                        .ok_or_else(|| CompileError::TypeNotInferred(thunk.position().clone()))?,
+                ),
                 type_context,
             )?;
         }
@@ -304,6 +316,58 @@ mod tests {
                     )])
             ),
             Err(CompileError::InvalidTryOperation(Position::dummy()))
+        );
+    }
+
+    #[test]
+    fn fail_to_validate_list() {
+        let error_type =
+            types::Reference::new(&ERROR_TYPE_CONFIGURATION.error_type_name, Position::dummy());
+
+        assert_eq!(
+            validate_module(
+                &Module::empty()
+                    .set_type_definitions(vec![TypeDefinition::without_source(
+                        "error",
+                        vec![],
+                        false,
+                        false,
+                        false
+                    )])
+                    .set_definitions(vec![Definition::without_source(
+                        "x",
+                        Lambda::new(
+                            vec![Argument::new(
+                                "x",
+                                types::Union::new(
+                                    types::None::new(Position::dummy()),
+                                    error_type,
+                                    Position::dummy(),
+                                ),
+                            )],
+                            types::Function::new(
+                                vec![],
+                                types::None::new(Position::dummy()),
+                                Position::dummy()
+                            ),
+                            List::new(
+                                types::None::new(Position::dummy()),
+                                vec![ListElement::Single(
+                                    TryOperation::new(
+                                        None,
+                                        Variable::new("x", Position::dummy()),
+                                        Position::dummy(),
+                                    )
+                                    .into()
+                                )],
+                                Position::dummy()
+                            ),
+                            Position::dummy(),
+                        ),
+                        false,
+                    )])
+            ),
+            Err(CompileError::TryOperationInList(Position::dummy()))
         );
     }
 }
