@@ -3,3 +3,15 @@ import foreign "c" _pen_convert_number_to_string \(number) string
 String = \(x number) string {
   _pen_convert_number_to_string(x)
 }
+
+Sum = \(ns [number]) number {
+  SumRecursive(ns, 0)
+}
+
+SumRecursive = \(ns [number], m number) number {
+  if [n, ...ns] = ns {
+    SumRecursive(ns, m + n())
+  } else {
+    m
+  }
+}
