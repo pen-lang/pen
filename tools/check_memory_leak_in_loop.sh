@@ -4,11 +4,7 @@ set -ex
 
 . $(dirname $0)/utilities.sh
 
-if ! which valgrind; then
-  echo Valgrind not found! >&2
-  "$@"
-  exit
-fi
+check_valgrind_command "$@"
 
 test_duration=1
 test_retry_count=3
