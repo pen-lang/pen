@@ -8,13 +8,13 @@ test_duration=1
 test_retry_count=3
 
 test() {
-  command="valgrind --log-file=valgrind.log $@"
+  valgrind=""
 
-  if ! which valgrind; then
-    command="$@"
+  if which valgrind; then
+    valgrind="valgrind --log-file=valgrind.log"
   fi
 
-  $command >/dev/null &
+  $valgrind "$@" >/dev/null &
   pid=$!
 
   sleep $test_duration
@@ -22,7 +22,9 @@ test() {
   kill $pid
   wait $pid || :
 
-  test_valgrind_log valgrind.log
+  if which valgrind; then
+    test_valgrind_log valgrind.log
+  fi
 }
 
 for _ in $(seq $test_retry_count); do
