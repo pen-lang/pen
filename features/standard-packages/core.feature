@@ -48,7 +48,7 @@ Feature: Core
   Scenario: Get a length of a list
     Given a file named "Foo.pen" with:
     """pen
-    import Core'String
+    import Core'List
 
     f = \() number {
       xs = [none;]
