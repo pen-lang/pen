@@ -7,6 +7,7 @@ edition = "2018"
 [dependencies]
 combine = { version = "4", features = ["regex"] }
 hir = { path = "../hir" }
+interface = { path = "../interface" }
 itertools = "0.10"
 mir = { path = "../mir" }
 once_cell = "1"

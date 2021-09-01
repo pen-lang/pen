@@ -3,7 +3,7 @@ use std::error::Error;
 
 pub fn qualify(
     configuration: &MainModuleConfiguration,
-    main_function_interface: &lang::interface::Module,
+    main_function_interface: &interface::Module,
 ) -> Result<MainModuleConfiguration, Box<dyn Error>> {
     Ok(MainModuleConfiguration {
         source_main_function_name: configuration.source_main_function_name.clone(),

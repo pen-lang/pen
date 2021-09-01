@@ -6,4 +6,4 @@ pub struct ApplicationConfiguration {
     pub main_module: MainModuleConfiguration,
 }
 
-pub type MainModuleConfiguration = lang::hir_mir::MainModuleConfiguration;
+pub type MainModuleConfiguration = hir_mir::MainModuleConfiguration;

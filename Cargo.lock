@@ -37,6 +37,8 @@ dependencies = [
  "fmm",
  "fmm-llvm",
  "hir",
+ "hir_mir",
+ "interface",
  "lang",
  "mir",
  "mir-fmm",
@@ -274,7 +276,6 @@ dependencies = [
  "once_cell",
  "position",
  "pretty_assertions",
- "serde",
 ]
 
 [[package]]
@@ -400,6 +401,7 @@ version = "0.1.0"
 dependencies = [
  "combine",
  "hir",
+ "interface",
  "itertools",
  "mir",
  "once_cell",

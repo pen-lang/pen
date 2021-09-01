@@ -1,4 +1,4 @@
-use crate::{ast, interface, types};
+use crate::{ast, types};
 use hir::{analysis::ir::variable_transformer, ir::*};
 use std::collections::HashMap;
 

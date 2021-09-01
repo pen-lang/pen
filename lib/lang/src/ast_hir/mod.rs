@@ -5,7 +5,7 @@ mod name_qualifier;
 mod prelude_module_modifier;
 mod singleton_record_compiler;
 
-use crate::{ast, interface};
+use crate::ast;
 use error::CompileError;
 use hir::{
     analysis::ir::{definition_qualifier, type_qualifier},
