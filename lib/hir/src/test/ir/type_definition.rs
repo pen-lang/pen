@@ -1,7 +1,6 @@
-use crate::position::position;
-use hir::{ir::*, types};
+use crate::{ir::*, test::position, types};
 
-pub trait FakeTypeDefinition {
+pub trait TypeDefinitionFake {
     fn fake(
         name: impl Into<String>,
         elements: Vec<types::RecordElement>,
@@ -11,7 +10,7 @@ pub trait FakeTypeDefinition {
     ) -> Self;
 }
 
-impl FakeTypeDefinition for TypeDefinition {
+impl TypeDefinitionFake for TypeDefinition {
     fn fake(
         name: impl Into<String>,
         elements: Vec<types::RecordElement>,

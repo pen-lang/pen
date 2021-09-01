@@ -1,11 +1,10 @@
-use crate::position::position;
-use hir::{ir::*, types::Type};
+use crate::{ir::*, test::position, types::Type};
 
-pub trait FakeTypeAlias {
+pub trait TypeAliasFake {
     fn fake(name: impl Into<String>, type_: impl Into<Type>, public: bool, external: bool) -> Self;
 }
 
-impl FakeTypeAlias for TypeAlias {
+impl TypeAliasFake for TypeAlias {
     fn fake(name: impl Into<String>, type_: impl Into<Type>, public: bool, external: bool) -> Self {
         Self::new(name, "", type_, public, external, position())
     }

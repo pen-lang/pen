@@ -1,11 +1,10 @@
-use crate::position::position;
-use hir::ir::*;
+use crate::{ir::*, test::position};
 
-pub trait FakeDefinition {
+pub trait DefinitionFake {
     fn fake(name: impl Into<String>, lambda: Lambda, public: bool) -> Self;
 }
 
-impl FakeDefinition for Definition {
+impl DefinitionFake for Definition {
     fn fake(name: impl Into<String>, lambda: Lambda, public: bool) -> Self {
         Self::new(name, "", lambda, false, public, position())
     }

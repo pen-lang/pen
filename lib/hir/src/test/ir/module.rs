@@ -1,7 +1,6 @@
-use crate::position::position;
-use hir::ir::*;
+use crate::{ir::*, test::position};
 
-pub trait FakeModule {
+pub trait ModuleFake {
     fn empty() -> Self;
     fn set_type_definitions(&self, type_definitions: Vec<TypeDefinition>) -> Self;
     fn set_type_aliases(&self, type_aliases: Vec<TypeAlias>) -> Self;
@@ -10,7 +9,7 @@ pub trait FakeModule {
     fn set_definitions(&self, definitions: Vec<Definition>) -> Self;
 }
 
-impl FakeModule for Module {
+impl ModuleFake for Module {
     fn empty() -> Self {
         Self::new(vec![], vec![], vec![], vec![], vec![], position())
     }
