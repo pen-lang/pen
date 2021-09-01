@@ -1,0 +1,12 @@
+[package]
+name = "hir"
+version = "0.1.0"
+authors = ["Yota Toyama <raviqqe@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+position = { path = "../position" }
+serde = { version = "1", features = ["derive", "rc"] }
+
+[dev-dependencies]
+pretty_assertions = "0.7"
