@@ -1,8 +1,5 @@
-use super::TypeError;
-use crate::types::{
-    analysis::{record_element_resolver, type_resolver},
-    RecordElement, Type,
-};
+use super::{record_element_resolver, type_resolver, TypeError};
+use crate::types::{RecordElement, Type};
 use std::collections::{HashMap, HashSet};
 
 pub fn check(

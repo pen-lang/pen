@@ -1,4 +1,5 @@
-use super::{super::*, TypeError};
+use super::TypeError;
+use crate::types::*;
 use std::collections::HashMap;
 
 pub fn resolve(reference: &Reference, types: &HashMap<String, Type>) -> Result<Type, TypeError> {
