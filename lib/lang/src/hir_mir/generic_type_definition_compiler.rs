@@ -1,10 +1,11 @@
 use super::{type_compiler, type_context::TypeContext, CompileError};
-use crate::{
-    hir::{analysis::expression_visitor, *},
-    types::{
-        analysis::{type_canonicalizer, TypeError},
-        Type,
+use crate::types::Type;
+use hir::{
+    analysis::{
+        ir::expression_visitor,
+        types::{type_canonicalizer, TypeError},
     },
+    ir::*,
 };
 use std::collections::{HashMap, HashSet};
 
@@ -72,6 +73,7 @@ fn collect_types(
 mod tests {
     use super::*;
     use crate::{test, types};
+    use hir::test::{DefinitionFake, ModuleFake};
 
     #[test]
     fn compile_list_type_definition() {
@@ -85,7 +87,7 @@ mod tests {
 
         assert_eq!(
             compile(
-                &Module::empty().set_definitions(vec![Definition::without_source(
+                &Module::empty().set_definitions(vec![Definition::fake(
                     "foo",
                     Lambda::new(
                         vec![Argument::new("x", list_type.clone())],
@@ -122,7 +124,7 @@ mod tests {
             test::position(),
         );
         let type_context = TypeContext::dummy(Default::default(), Default::default());
-        let definition = Definition::without_source(
+        let definition = Definition::fake(
             "foo",
             Lambda::new(
                 vec![Argument::new("x", list_type.clone())],
@@ -161,7 +163,7 @@ mod tests {
 
         assert_eq!(
             compile(
-                &Module::empty().set_definitions(vec![Definition::without_source(
+                &Module::empty().set_definitions(vec![Definition::fake(
                     "foo",
                     Lambda::new(
                         vec![Argument::new("x", list_type.clone())],
@@ -208,7 +210,7 @@ mod tests {
 
         assert_eq!(
             compile(
-                &Module::empty().set_definitions(vec![Definition::without_source(
+                &Module::empty().set_definitions(vec![Definition::fake(
                     "foo",
                     Lambda::new(
                         vec![Argument::new("x", union_type)],

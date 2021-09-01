@@ -1,7 +1,5 @@
-use crate::{
-    hir::*,
-    types::{self, analysis::TypeError},
-};
+use crate::types;
+use hir::{analysis::types::TypeError, ir::*};
 use position::Position;
 use std::{
     error::Error,

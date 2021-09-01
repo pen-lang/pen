@@ -1,5 +1,5 @@
 use super::CompileError;
-use crate::hir::*;
+use hir::ir::*;
 use position::Position;
 use std::collections::HashMap;
 
@@ -24,10 +24,11 @@ pub fn validate(module: &Module) -> Result<(), CompileError> {
 mod tests {
     use super::*;
     use crate::{test, types};
+    use hir::test::{DefinitionFake, ModuleFake};
 
     #[test]
     fn validate_module() {
-        let definition = Definition::without_source(
+        let definition = Definition::fake(
             "x",
             Lambda::new(
                 vec![],

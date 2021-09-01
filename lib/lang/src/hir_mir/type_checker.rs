@@ -1,14 +1,11 @@
 use super::{environment_creator, type_context::TypeContext, type_extractor, CompileError};
-use crate::{
-    hir::*,
-    types::{
-        self,
-        analysis::{
-            record_element_resolver, type_canonicalizer, type_equality_checker,
-            type_subsumption_checker, union_type_creator,
-        },
-        Type,
+use crate::types::{self, Type};
+use hir::{
+    analysis::types::{
+        record_element_resolver, type_canonicalizer, type_equality_checker,
+        type_subsumption_checker, union_type_creator,
     },
+    ir::*,
 };
 use std::collections::{HashMap, HashSet};
 
@@ -477,6 +474,7 @@ mod tests {
         },
         test,
     };
+    use hir::test::{DefinitionFake, ForeignDeclarationFake, ModuleFake, TypeDefinitionFake};
 
     fn check_module(module: &Module) -> Result<(), CompileError> {
         check_types(
@@ -497,18 +495,16 @@ mod tests {
 
     #[test]
     fn check_definition() -> Result<(), CompileError> {
-        check_module(
-            &Module::empty().set_definitions(vec![Definition::without_source(
-                "x",
-                Lambda::new(
-                    vec![],
-                    types::None::new(test::position()),
-                    None::new(test::position()),
-                    test::position(),
-                ),
-                false,
-            )]),
-        )
+        check_module(&Module::empty().set_definitions(vec![Definition::fake(
+            "x",
+            Lambda::new(
+                vec![],
+                types::None::new(test::position()),
+                None::new(test::position()),
+                test::position(),
+            ),
+            false,
+        )]))
     }
 
     #[test]
@@ -522,7 +518,7 @@ mod tests {
         assert_eq!(
             check_module(
                 &Module::empty()
-                    .set_definitions(vec![Definition::without_source(
+                    .set_definitions(vec![Definition::fake(
                         "x",
                         Lambda::new(
                             vec![],
@@ -537,10 +533,7 @@ mod tests {
                         ),
                         false,
                     )])
-                    .set_foreign_declarations(vec![ForeignDeclaration::without_source(
-                        "y",
-                        function_type,
-                    )])
+                    .set_foreign_declarations(vec![ForeignDeclaration::fake("y", function_type,)])
             ),
             Err(CompileError::TypesNotMatched(
                 test::position(),
@@ -551,26 +544,20 @@ mod tests {
 
     #[test]
     fn check_thunk() {
-        check_module(
-            &Module::empty().set_definitions(vec![Definition::without_source(
-                "x",
-                Lambda::new(
-                    vec![],
-                    types::Function::new(
-                        vec![],
-                        types::None::new(test::position()),
-                        test::position(),
-                    ),
-                    Thunk::new(
-                        Some(types::None::new(test::position()).into()),
-                        None::new(test::position()),
-                        test::position(),
-                    ),
+        check_module(&Module::empty().set_definitions(vec![Definition::fake(
+            "x",
+            Lambda::new(
+                vec![],
+                types::Function::new(vec![], types::None::new(test::position()), test::position()),
+                Thunk::new(
+                    Some(types::None::new(test::position()).into()),
+                    None::new(test::position()),
                     test::position(),
                 ),
-                false,
-            )]),
-        )
+                test::position(),
+            ),
+            false,
+        )]))
         .unwrap();
     }
 
@@ -579,39 +566,35 @@ mod tests {
 
         #[test]
         fn check_subsumption_of_function_result_type() -> Result<(), CompileError> {
-            check_module(
-                &Module::empty().set_definitions(vec![Definition::without_source(
-                    "x",
-                    Lambda::new(
-                        vec![],
-                        types::Union::new(
-                            types::Number::new(test::position()),
-                            types::None::new(test::position()),
-                            test::position(),
-                        ),
-                        None::new(test::position()),
+            check_module(&Module::empty().set_definitions(vec![Definition::fake(
+                "x",
+                Lambda::new(
+                    vec![],
+                    types::Union::new(
+                        types::Number::new(test::position()),
+                        types::None::new(test::position()),
                         test::position(),
                     ),
-                    false,
-                )]),
-            )
+                    None::new(test::position()),
+                    test::position(),
+                ),
+                false,
+            )]))
         }
 
         #[test]
         fn fail_to_check_function_result_type() {
             assert_eq!(
-                check_module(
-                    &Module::empty().set_definitions(vec![Definition::without_source(
-                        "x",
-                        Lambda::new(
-                            vec![],
-                            types::Number::new(test::position()),
-                            None::new(test::position()),
-                            test::position(),
-                        ),
-                        false,
-                    )])
-                ),
+                check_module(&Module::empty().set_definitions(vec![Definition::fake(
+                    "x",
+                    Lambda::new(
+                        vec![],
+                        types::Number::new(test::position()),
+                        None::new(test::position()),
+                        test::position(),
+                    ),
+                    false,
+                )])),
                 Err(CompileError::TypesNotMatched(
                     test::position(),
                     test::position()
@@ -625,8 +608,29 @@ mod tests {
 
         #[test]
         fn check_let() {
-            check_module(
-                &Module::empty().set_definitions(vec![Definition::without_source(
+            check_module(&Module::empty().set_definitions(vec![Definition::fake(
+                "x",
+                Lambda::new(
+                    vec![],
+                    types::None::new(test::position()),
+                    Let::new(
+                        Some("x".into()),
+                        Some(types::None::new(test::position()).into()),
+                        None::new(test::position()),
+                        Variable::new("x", test::position()),
+                        test::position(),
+                    ),
+                    test::position(),
+                ),
+                false,
+            )]))
+            .unwrap();
+        }
+
+        #[test]
+        fn fail_to_check_expression_in_let() {
+            assert_eq!(
+                check_module(&Module::empty().set_definitions(vec![Definition::fake(
                     "x",
                     Lambda::new(
                         vec![],
@@ -635,38 +639,13 @@ mod tests {
                             Some("x".into()),
                             Some(types::None::new(test::position()).into()),
                             None::new(test::position()),
-                            Variable::new("x", test::position()),
+                            NotOperation::new(None::new(test::position()), test::position()),
                             test::position(),
                         ),
                         test::position(),
                     ),
                     false,
-                )]),
-            )
-            .unwrap();
-        }
-
-        #[test]
-        fn fail_to_check_expression_in_let() {
-            assert_eq!(
-                check_module(
-                    &Module::empty().set_definitions(vec![Definition::without_source(
-                        "x",
-                        Lambda::new(
-                            vec![],
-                            types::None::new(test::position()),
-                            Let::new(
-                                Some("x".into()),
-                                Some(types::None::new(test::position()).into()),
-                                None::new(test::position()),
-                                NotOperation::new(None::new(test::position()), test::position()),
-                                test::position(),
-                            ),
-                            test::position(),
-                        ),
-                        false,
-                    )])
-                ),
+                )])),
                 Err(CompileError::TypesNotMatched(
                     test::position(),
                     test::position()
@@ -680,72 +659,66 @@ mod tests {
 
         #[test]
         fn check_if() {
-            check_module(
-                &Module::empty().set_definitions(vec![Definition::without_source(
-                    "f",
-                    Lambda::new(
-                        vec![],
-                        types::Number::new(test::position()),
-                        If::new(
-                            Boolean::new(true, test::position()),
-                            Number::new(0.0, test::position()),
-                            Number::new(0.0, test::position()),
-                            test::position(),
-                        ),
+            check_module(&Module::empty().set_definitions(vec![Definition::fake(
+                "f",
+                Lambda::new(
+                    vec![],
+                    types::Number::new(test::position()),
+                    If::new(
+                        Boolean::new(true, test::position()),
+                        Number::new(0.0, test::position()),
+                        Number::new(0.0, test::position()),
                         test::position(),
                     ),
-                    false,
-                )]),
-            )
+                    test::position(),
+                ),
+                false,
+            )]))
             .unwrap()
         }
 
         #[test]
         fn check_if_of_union_type() {
-            check_module(
-                &Module::empty().set_definitions(vec![Definition::without_source(
-                    "f",
-                    Lambda::new(
-                        vec![],
-                        types::Union::new(
-                            types::Number::new(test::position()),
-                            types::None::new(test::position()),
-                            test::position(),
-                        ),
-                        If::new(
-                            Boolean::new(true, test::position()),
-                            Number::new(0.0, test::position()),
-                            None::new(test::position()),
-                            test::position(),
-                        ),
+            check_module(&Module::empty().set_definitions(vec![Definition::fake(
+                "f",
+                Lambda::new(
+                    vec![],
+                    types::Union::new(
+                        types::Number::new(test::position()),
+                        types::None::new(test::position()),
                         test::position(),
                     ),
-                    false,
-                )]),
-            )
+                    If::new(
+                        Boolean::new(true, test::position()),
+                        Number::new(0.0, test::position()),
+                        None::new(test::position()),
+                        test::position(),
+                    ),
+                    test::position(),
+                ),
+                false,
+            )]))
             .unwrap()
         }
 
         #[test]
         fn fail_to_check_then_expression() {
             assert_eq!(
-                check_module(
-                    &Module::empty().set_definitions(vec![Definition::without_source(
-                        "f",
-                        Lambda::new(
-                            vec![],
-                            types::Number::new(test::position()),
-                            If::new(
-                                Boolean::new(true, test::position()),
-                                NotOperation::new(None::new(test::position()), test::position()),
-                                Number::new(0.0, test::position()),
-                                test::position(),
-                            ),
+                check_module(&Module::empty().set_definitions(vec![Definition::fake(
+                    "f",
+                    Lambda::new(
+                        vec![],
+                        types::Number::new(test::position()),
+                        If::new(
+                            Boolean::new(true, test::position()),
+                            NotOperation::new(None::new(test::position()), test::position()),
+                            Number::new(0.0, test::position()),
                             test::position(),
                         ),
-                        false,
-                    )]),
-                ),
+                        test::position(),
+                    ),
+                    false,
+                )]),),
                 Err(CompileError::TypesNotMatched(
                     test::position(),
                     test::position()
@@ -756,23 +729,21 @@ mod tests {
         #[test]
         fn fail_to_check_else_expression() {
             assert_eq!(
-                check_module(
-                    &Module::empty().set_definitions(vec![Definition::without_source(
-                        "f",
-                        Lambda::new(
-                            vec![],
-                            types::Number::new(test::position()),
-                            If::new(
-                                Boolean::new(true, test::position()),
-                                Number::new(0.0, test::position()),
-                                NotOperation::new(None::new(test::position()), test::position()),
-                                test::position(),
-                            ),
+                check_module(&Module::empty().set_definitions(vec![Definition::fake(
+                    "f",
+                    Lambda::new(
+                        vec![],
+                        types::Number::new(test::position()),
+                        If::new(
+                            Boolean::new(true, test::position()),
+                            Number::new(0.0, test::position()),
+                            NotOperation::new(None::new(test::position()), test::position()),
                             test::position(),
                         ),
-                        false,
-                    )]),
-                ),
+                        test::position(),
+                    ),
+                    false,
+                )]),),
                 Err(CompileError::TypesNotMatched(
                     test::position(),
                     test::position()
@@ -792,253 +763,237 @@ mod tests {
                 test::position(),
             );
 
-            check_module(
-                &Module::empty().set_definitions(vec![Definition::without_source(
-                    "f",
-                    Lambda::new(
-                        vec![Argument::new("x", union_type)],
-                        types::None::new(test::position()),
-                        IfType::new(
-                            "y",
-                            Variable::new("x", test::position()),
-                            vec![
-                                IfTypeBranch::new(
-                                    types::Number::new(test::position()),
-                                    None::new(test::position()),
-                                ),
-                                IfTypeBranch::new(
-                                    types::None::new(test::position()),
-                                    None::new(test::position()),
-                                ),
-                            ],
-                            None,
-                            test::position(),
-                        ),
+            check_module(&Module::empty().set_definitions(vec![Definition::fake(
+                "f",
+                Lambda::new(
+                    vec![Argument::new("x", union_type)],
+                    types::None::new(test::position()),
+                    IfType::new(
+                        "y",
+                        Variable::new("x", test::position()),
+                        vec![
+                            IfTypeBranch::new(
+                                types::Number::new(test::position()),
+                                None::new(test::position()),
+                            ),
+                            IfTypeBranch::new(
+                                types::None::new(test::position()),
+                                None::new(test::position()),
+                            ),
+                        ],
+                        None,
                         test::position(),
                     ),
-                    false,
-                )]),
-            )
+                    test::position(),
+                ),
+                false,
+            )]))
             .unwrap()
         }
 
         #[test]
         fn check_with_any() {
-            check_module(
-                &Module::empty().set_definitions(vec![Definition::without_source(
-                    "f",
-                    Lambda::new(
-                        vec![Argument::new("x", types::Any::new(test::position()))],
-                        types::None::new(test::position()),
-                        IfType::new(
-                            "y",
-                            Variable::new("x", test::position()),
-                            vec![IfTypeBranch::new(
-                                types::None::new(test::position()),
-                                None::new(test::position()),
-                            )],
-                            Some(ElseBranch::new(
-                                Some(types::Any::new(test::position()).into()),
-                                None::new(test::position()),
-                                test::position(),
-                            )),
+            check_module(&Module::empty().set_definitions(vec![Definition::fake(
+                "f",
+                Lambda::new(
+                    vec![Argument::new("x", types::Any::new(test::position()))],
+                    types::None::new(test::position()),
+                    IfType::new(
+                        "y",
+                        Variable::new("x", test::position()),
+                        vec![IfTypeBranch::new(
+                            types::None::new(test::position()),
+                            None::new(test::position()),
+                        )],
+                        Some(ElseBranch::new(
+                            Some(types::Any::new(test::position()).into()),
+                            None::new(test::position()),
                             test::position(),
-                        ),
+                        )),
                         test::position(),
                     ),
-                    false,
-                )]),
-            )
+                    test::position(),
+                ),
+                false,
+            )]))
             .unwrap()
         }
 
         #[test]
         fn check_result_of_union() {
-            check_module(
-                &Module::empty().set_definitions(vec![Definition::without_source(
-                    "f",
-                    Lambda::new(
-                        vec![Argument::new("x", types::Any::new(test::position()))],
-                        types::Union::new(
-                            types::Number::new(test::position()),
-                            types::None::new(test::position()),
-                            test::position(),
-                        ),
-                        IfType::new(
-                            "y",
-                            Variable::new("x", test::position()),
-                            vec![IfTypeBranch::new(
-                                types::None::new(test::position()),
-                                Number::new(42.0, test::position()),
-                            )],
-                            Some(ElseBranch::new(
-                                Some(types::Any::new(test::position()).into()),
-                                None::new(test::position()),
-                                test::position(),
-                            )),
-                            test::position(),
-                        ),
+            check_module(&Module::empty().set_definitions(vec![Definition::fake(
+                "f",
+                Lambda::new(
+                    vec![Argument::new("x", types::Any::new(test::position()))],
+                    types::Union::new(
+                        types::Number::new(test::position()),
+                        types::None::new(test::position()),
                         test::position(),
                     ),
-                    false,
-                )]),
-            )
+                    IfType::new(
+                        "y",
+                        Variable::new("x", test::position()),
+                        vec![IfTypeBranch::new(
+                            types::None::new(test::position()),
+                            Number::new(42.0, test::position()),
+                        )],
+                        Some(ElseBranch::new(
+                            Some(types::Any::new(test::position()).into()),
+                            None::new(test::position()),
+                            test::position(),
+                        )),
+                        test::position(),
+                    ),
+                    test::position(),
+                ),
+                false,
+            )]))
             .unwrap()
         }
 
         #[test]
         fn check_result_of_any() {
-            check_module(
-                &Module::empty().set_definitions(vec![Definition::without_source(
-                    "f",
-                    Lambda::new(
-                        vec![Argument::new("x", types::Any::new(test::position()))],
-                        types::Any::new(test::position()),
-                        IfType::new(
-                            "y",
-                            Variable::new("x", test::position()),
-                            vec![IfTypeBranch::new(
-                                types::None::new(test::position()),
-                                None::new(test::position()),
-                            )],
-                            Some(ElseBranch::new(
-                                Some(types::Any::new(test::position()).into()),
-                                Variable::new("y", test::position()),
-                                test::position(),
-                            )),
+            check_module(&Module::empty().set_definitions(vec![Definition::fake(
+                "f",
+                Lambda::new(
+                    vec![Argument::new("x", types::Any::new(test::position()))],
+                    types::Any::new(test::position()),
+                    IfType::new(
+                        "y",
+                        Variable::new("x", test::position()),
+                        vec![IfTypeBranch::new(
+                            types::None::new(test::position()),
+                            None::new(test::position()),
+                        )],
+                        Some(ElseBranch::new(
+                            Some(types::Any::new(test::position()).into()),
+                            Variable::new("y", test::position()),
                             test::position(),
-                        ),
+                        )),
                         test::position(),
                     ),
-                    false,
-                )]),
-            )
+                    test::position(),
+                ),
+                false,
+            )]))
             .unwrap()
         }
 
         #[test]
         #[should_panic]
         fn fail_to_check_due_to_wrong_argument_type() {
-            check_module(
-                &Module::empty().set_definitions(vec![Definition::without_source(
-                    "f",
-                    Lambda::new(
-                        vec![],
-                        types::None::new(test::position()),
-                        IfType::new(
-                            "y",
+            check_module(&Module::empty().set_definitions(vec![Definition::fake(
+                "f",
+                Lambda::new(
+                    vec![],
+                    types::None::new(test::position()),
+                    IfType::new(
+                        "y",
+                        None::new(test::position()),
+                        vec![IfTypeBranch::new(
+                            types::None::new(test::position()),
                             None::new(test::position()),
-                            vec![IfTypeBranch::new(
-                                types::None::new(test::position()),
-                                None::new(test::position()),
-                            )],
-                            None,
-                            test::position(),
-                        ),
+                        )],
+                        None,
                         test::position(),
                     ),
-                    false,
-                )]),
-            )
+                    test::position(),
+                ),
+                false,
+            )]))
             .unwrap()
         }
 
         #[test]
         #[should_panic]
         fn fail_to_check_union_due_to_missing_else() {
-            check_module(
-                &Module::empty().set_definitions(vec![Definition::without_source(
-                    "f",
-                    Lambda::new(
-                        vec![Argument::new(
-                            "x",
-                            types::Union::new(
-                                types::Number::new(test::position()),
-                                types::None::new(test::position()),
-                                test::position(),
-                            ),
-                        )],
-                        types::None::new(test::position()),
-                        IfType::new(
-                            "y",
-                            Variable::new("x", test::position()),
-                            vec![IfTypeBranch::new(
-                                types::Number::new(test::position()),
-                                None::new(test::position()),
-                            )],
-                            None,
+            check_module(&Module::empty().set_definitions(vec![Definition::fake(
+                "f",
+                Lambda::new(
+                    vec![Argument::new(
+                        "x",
+                        types::Union::new(
+                            types::Number::new(test::position()),
+                            types::None::new(test::position()),
                             test::position(),
                         ),
+                    )],
+                    types::None::new(test::position()),
+                    IfType::new(
+                        "y",
+                        Variable::new("x", test::position()),
+                        vec![IfTypeBranch::new(
+                            types::Number::new(test::position()),
+                            None::new(test::position()),
+                        )],
+                        None,
                         test::position(),
                     ),
-                    false,
-                )]),
-            )
+                    test::position(),
+                ),
+                false,
+            )]))
             .unwrap();
         }
 
         #[test]
         #[should_panic]
         fn fail_to_check_any_due_to_missing_else() {
-            check_module(
-                &Module::empty().set_definitions(vec![Definition::without_source(
-                    "f",
-                    Lambda::new(
-                        vec![Argument::new(
-                            "x",
-                            types::Union::new(
-                                types::Number::new(test::position()),
-                                types::None::new(test::position()),
-                                test::position(),
-                            ),
-                        )],
-                        types::None::new(test::position()),
-                        IfType::new(
-                            "y",
-                            Variable::new("x", test::position()),
-                            vec![IfTypeBranch::new(
-                                types::Number::new(test::position()),
-                                None::new(test::position()),
-                            )],
-                            None,
+            check_module(&Module::empty().set_definitions(vec![Definition::fake(
+                "f",
+                Lambda::new(
+                    vec![Argument::new(
+                        "x",
+                        types::Union::new(
+                            types::Number::new(test::position()),
+                            types::None::new(test::position()),
                             test::position(),
                         ),
+                    )],
+                    types::None::new(test::position()),
+                    IfType::new(
+                        "y",
+                        Variable::new("x", test::position()),
+                        vec![IfTypeBranch::new(
+                            types::Number::new(test::position()),
+                            None::new(test::position()),
+                        )],
+                        None,
                         test::position(),
                     ),
-                    false,
-                )]),
-            )
+                    test::position(),
+                ),
+                false,
+            )]))
             .unwrap();
         }
 
         #[test]
         #[should_panic]
         fn fail_to_check_due_to_any_type_branch() {
-            check_module(
-                &Module::empty().set_definitions(vec![Definition::without_source(
-                    "f",
-                    Lambda::new(
-                        vec![Argument::new("x", types::Any::new(test::position()))],
-                        types::None::new(test::position()),
-                        IfType::new(
-                            "y",
-                            Variable::new("x", test::position()),
-                            vec![IfTypeBranch::new(
-                                types::Any::new(test::position()),
-                                None::new(test::position()),
-                            )],
-                            Some(ElseBranch::new(
-                                Some(types::Any::new(test::position()).into()),
-                                None::new(test::position()),
-                                test::position(),
-                            )),
+            check_module(&Module::empty().set_definitions(vec![Definition::fake(
+                "f",
+                Lambda::new(
+                    vec![Argument::new("x", types::Any::new(test::position()))],
+                    types::None::new(test::position()),
+                    IfType::new(
+                        "y",
+                        Variable::new("x", test::position()),
+                        vec![IfTypeBranch::new(
+                            types::Any::new(test::position()),
+                            None::new(test::position()),
+                        )],
+                        Some(ElseBranch::new(
+                            Some(types::Any::new(test::position()).into()),
+                            None::new(test::position()),
                             test::position(),
-                        ),
+                        )),
                         test::position(),
                     ),
-                    false,
-                )]),
-            )
+                    test::position(),
+                ),
+                false,
+            )]))
             .unwrap();
         }
     }
@@ -1048,8 +1003,7 @@ mod tests {
 
         #[test]
         fn check_call() {
-            check_module(
-                &Module::empty().set_definitions(vec![Definition::without_source(
+            check_module(&Module::empty().set_definitions(vec![Definition::fake(
                     "f",
                     Lambda::new(
                         vec![],
@@ -1070,15 +1024,13 @@ mod tests {
                         test::position(),
                     ),
                     false,
-                )]),
-            )
+                )]))
             .unwrap()
         }
 
         #[test]
         fn check_call_with_arguments() {
-            check_module(
-                &Module::empty().set_definitions(vec![Definition::without_source(
+            check_module(&Module::empty().set_definitions(vec![Definition::fake(
                     "f",
                     Lambda::new(
                         vec![Argument::new("x", types::None::new(test::position()))],
@@ -1099,16 +1051,14 @@ mod tests {
                         test::position(),
                     ),
                     false,
-                )]),
-            )
+                )]))
             .unwrap()
         }
 
         #[test]
         #[should_panic]
         fn fail_to_check_call_with_wrong_argument_type() {
-            check_module(
-                &Module::empty().set_definitions(vec![Definition::without_source(
+            check_module(&Module::empty().set_definitions(vec![Definition::fake(
                     "f",
                     Lambda::new(
                         vec![Argument::new("x", types::None::new(test::position()))],
@@ -1129,16 +1079,14 @@ mod tests {
                         test::position(),
                     ),
                     false,
-                )]),
-            )
+                )]))
             .unwrap()
         }
 
         #[test]
         #[should_panic]
         fn fail_to_check_call_with_wrong_argument_count() {
-            check_module(
-                &Module::empty().set_definitions(vec![Definition::without_source(
+            check_module(&Module::empty().set_definitions(vec![Definition::fake(
                     "f",
                     Lambda::new(
                         vec![Argument::new("x", types::None::new(test::position()))],
@@ -1159,8 +1107,7 @@ mod tests {
                         test::position(),
                     ),
                     false,
-                )]),
-            )
+                )]))
             .unwrap()
         }
     }
@@ -1170,68 +1117,62 @@ mod tests {
 
         #[test]
         fn check_arithmetic_operation() {
-            check_module(
-                &Module::empty().set_definitions(vec![Definition::without_source(
-                    "x",
-                    Lambda::new(
-                        vec![],
-                        types::Number::new(test::position()),
-                        ArithmeticOperation::new(
-                            ArithmeticOperator::Add,
-                            Number::new(0.0, test::position()),
-                            Number::new(0.0, test::position()),
-                            test::position(),
-                        ),
+            check_module(&Module::empty().set_definitions(vec![Definition::fake(
+                "x",
+                Lambda::new(
+                    vec![],
+                    types::Number::new(test::position()),
+                    ArithmeticOperation::new(
+                        ArithmeticOperator::Add,
+                        Number::new(0.0, test::position()),
+                        Number::new(0.0, test::position()),
                         test::position(),
                     ),
-                    false,
-                )]),
-            )
+                    test::position(),
+                ),
+                false,
+            )]))
             .unwrap();
         }
 
         #[test]
         fn check_boolean_operation() {
-            check_module(
-                &Module::empty().set_definitions(vec![Definition::without_source(
-                    "x",
-                    Lambda::new(
-                        vec![],
-                        types::Boolean::new(test::position()),
-                        BooleanOperation::new(
-                            BooleanOperator::And,
-                            Boolean::new(true, test::position()),
-                            Boolean::new(true, test::position()),
-                            test::position(),
-                        ),
+            check_module(&Module::empty().set_definitions(vec![Definition::fake(
+                "x",
+                Lambda::new(
+                    vec![],
+                    types::Boolean::new(test::position()),
+                    BooleanOperation::new(
+                        BooleanOperator::And,
+                        Boolean::new(true, test::position()),
+                        Boolean::new(true, test::position()),
                         test::position(),
                     ),
-                    false,
-                )]),
-            )
+                    test::position(),
+                ),
+                false,
+            )]))
             .unwrap();
         }
 
         #[test]
         fn fail_to_check_boolean_operation() {
             assert_eq!(
-                check_module(
-                    &Module::empty().set_definitions(vec![Definition::without_source(
-                        "x",
-                        Lambda::new(
-                            vec![],
-                            types::Boolean::new(test::position()),
-                            BooleanOperation::new(
-                                BooleanOperator::And,
-                                Number::new(42.0, test::position()),
-                                Boolean::new(true, test::position()),
-                                test::position(),
-                            ),
+                check_module(&Module::empty().set_definitions(vec![Definition::fake(
+                    "x",
+                    Lambda::new(
+                        vec![],
+                        types::Boolean::new(test::position()),
+                        BooleanOperation::new(
+                            BooleanOperator::And,
+                            Number::new(42.0, test::position()),
+                            Boolean::new(true, test::position()),
                             test::position(),
                         ),
-                        false,
-                    )],)
-                ),
+                        test::position(),
+                    ),
+                    false,
+                )],)),
                 Err(CompileError::TypesNotMatched(
                     test::position(),
                     test::position()
@@ -1241,31 +1182,28 @@ mod tests {
 
         #[test]
         fn check_equality_operation() {
-            check_module(
-                &Module::empty().set_definitions(vec![Definition::without_source(
-                    "x",
-                    Lambda::new(
-                        vec![],
-                        types::Boolean::new(test::position()),
-                        EqualityOperation::new(
-                            Some(types::Number::new(test::position()).into()),
-                            EqualityOperator::Equal,
-                            Number::new(0.0, test::position()),
-                            Number::new(0.0, test::position()),
-                            test::position(),
-                        ),
+            check_module(&Module::empty().set_definitions(vec![Definition::fake(
+                "x",
+                Lambda::new(
+                    vec![],
+                    types::Boolean::new(test::position()),
+                    EqualityOperation::new(
+                        Some(types::Number::new(test::position()).into()),
+                        EqualityOperator::Equal,
+                        Number::new(0.0, test::position()),
+                        Number::new(0.0, test::position()),
                         test::position(),
                     ),
-                    false,
-                )]),
-            )
+                    test::position(),
+                ),
+                false,
+            )]))
             .unwrap();
         }
 
         #[test]
         fn check_equality_operation_with_subsumption() {
-            check_module(
-                &Module::empty().set_definitions(vec![Definition::without_source(
+            check_module(&Module::empty().set_definitions(vec![Definition::fake(
                     "x",
                     Lambda::new(
                         vec![],
@@ -1287,47 +1225,42 @@ mod tests {
                         test::position(),
                     ),
                     false,
-                )]),
-            )
+                )]))
             .unwrap();
         }
 
         #[test]
         fn check_not_operation() {
-            check_module(
-                &Module::empty().set_definitions(vec![Definition::without_source(
-                    "x",
-                    Lambda::new(
-                        vec![],
-                        types::Boolean::new(test::position()),
-                        NotOperation::new(Boolean::new(true, test::position()), test::position()),
-                        test::position(),
-                    ),
-                    false,
-                )]),
-            )
+            check_module(&Module::empty().set_definitions(vec![Definition::fake(
+                "x",
+                Lambda::new(
+                    vec![],
+                    types::Boolean::new(test::position()),
+                    NotOperation::new(Boolean::new(true, test::position()), test::position()),
+                    test::position(),
+                ),
+                false,
+            )]))
             .unwrap();
         }
 
         #[test]
         fn check_order_operation() {
-            check_module(
-                &Module::empty().set_definitions(vec![Definition::without_source(
-                    "x",
-                    Lambda::new(
-                        vec![],
-                        types::Boolean::new(test::position()),
-                        OrderOperation::new(
-                            OrderOperator::LessThan,
-                            Number::new(0.0, test::position()),
-                            Number::new(0.0, test::position()),
-                            test::position(),
-                        ),
+            check_module(&Module::empty().set_definitions(vec![Definition::fake(
+                "x",
+                Lambda::new(
+                    vec![],
+                    types::Boolean::new(test::position()),
+                    OrderOperation::new(
+                        OrderOperator::LessThan,
+                        Number::new(0.0, test::position()),
+                        Number::new(0.0, test::position()),
                         test::position(),
                     ),
-                    false,
-                )]),
-            )
+                    test::position(),
+                ),
+                false,
+            )]))
             .unwrap();
         }
 
@@ -1341,14 +1274,14 @@ mod tests {
 
             check_module(
                 &Module::empty()
-                    .set_type_definitions(vec![TypeDefinition::without_source(
+                    .set_type_definitions(vec![TypeDefinition::fake(
                         "error",
                         vec![],
                         false,
                         false,
                         false,
                     )])
-                    .set_definitions(vec![Definition::without_source(
+                    .set_definitions(vec![Definition::fake(
                         "f",
                         Lambda::new(
                             vec![Argument::new("x", union_type.clone())],
@@ -1376,14 +1309,14 @@ mod tests {
 
             check_module(
                 &Module::empty()
-                    .set_type_definitions(vec![TypeDefinition::without_source(
+                    .set_type_definitions(vec![TypeDefinition::fake(
                         "error",
                         vec![],
                         false,
                         false,
                         false,
                     )])
-                    .set_definitions(vec![Definition::without_source(
+                    .set_definitions(vec![Definition::fake(
                         "f",
                         Lambda::new(
                             vec![Argument::new("x", union_type.clone())],
@@ -1412,14 +1345,14 @@ mod tests {
 
             check_module(
                 &Module::empty()
-                    .set_type_definitions(vec![TypeDefinition::without_source(
+                    .set_type_definitions(vec![TypeDefinition::fake(
                         "error",
                         vec![],
                         false,
                         false,
                         false,
                     )])
-                    .set_definitions(vec![Definition::without_source(
+                    .set_definitions(vec![Definition::fake(
                         "f",
                         Lambda::new(
                             vec![Argument::new("x", any_type.clone())],
@@ -1448,14 +1381,14 @@ mod tests {
             assert_eq!(
                 check_module(
                     &Module::empty()
-                        .set_type_definitions(vec![TypeDefinition::without_source(
+                        .set_type_definitions(vec![TypeDefinition::fake(
                             "error",
                             vec![],
                             false,
                             false,
                             false,
                         )])
-                        .set_definitions(vec![Definition::without_source(
+                        .set_definitions(vec![Definition::fake(
                             "f",
                             Lambda::new(
                                 vec![Argument::new("x", union_type.clone())],
@@ -1482,14 +1415,14 @@ mod tests {
             assert_eq!(
                 check_module(
                     &Module::empty()
-                        .set_type_definitions(vec![TypeDefinition::without_source(
+                        .set_type_definitions(vec![TypeDefinition::fake(
                             "error",
                             vec![],
                             false,
                             false,
                             false,
                         )])
-                        .set_definitions(vec![Definition::without_source(
+                        .set_definitions(vec![Definition::fake(
                             "f",
                             Lambda::new(
                                 vec![Argument::new("x", types::None::new(test::position()))],
@@ -1525,7 +1458,7 @@ mod tests {
 
             check_module(
                 &Module::empty()
-                    .set_type_definitions(vec![TypeDefinition::without_source(
+                    .set_type_definitions(vec![TypeDefinition::fake(
                         "r",
                         vec![types::RecordElement::new(
                             "x",
@@ -1535,7 +1468,7 @@ mod tests {
                         false,
                         false,
                     )])
-                    .set_definitions(vec![Definition::without_source(
+                    .set_definitions(vec![Definition::fake(
                         "x",
                         Lambda::new(
                             vec![],
@@ -1563,7 +1496,7 @@ mod tests {
             assert!(matches!(
                 check_module(
                     &Module::empty()
-                        .set_type_definitions(vec![TypeDefinition::without_source(
+                        .set_type_definitions(vec![TypeDefinition::fake(
                             "r",
                             vec![types::RecordElement::new(
                                 "x",
@@ -1573,7 +1506,7 @@ mod tests {
                             false,
                             false
                         )])
-                        .set_definitions(vec![Definition::without_source(
+                        .set_definitions(vec![Definition::fake(
                             "x",
                             Lambda::new(
                                 vec![],
@@ -1599,14 +1532,14 @@ mod tests {
             assert!(matches!(
                 check_module(
                     &Module::empty()
-                        .set_type_definitions(vec![TypeDefinition::without_source(
+                        .set_type_definitions(vec![TypeDefinition::fake(
                             "r",
                             vec![],
                             false,
                             false,
                             false
                         )])
-                        .set_definitions(vec![Definition::without_source(
+                        .set_definitions(vec![Definition::fake(
                             "x",
                             Lambda::new(
                                 vec![],
@@ -1635,7 +1568,7 @@ mod tests {
 
             check_module(
                 &Module::empty()
-                    .set_type_definitions(vec![TypeDefinition::without_source(
+                    .set_type_definitions(vec![TypeDefinition::fake(
                         "r",
                         vec![types::RecordElement::new(
                             "x",
@@ -1645,7 +1578,7 @@ mod tests {
                         false,
                         false,
                     )])
-                    .set_definitions(vec![Definition::without_source(
+                    .set_definitions(vec![Definition::fake(
                         "x",
                         Lambda::new(
                             vec![Argument::new("x", reference_type.clone())],
@@ -1673,7 +1606,7 @@ mod tests {
 
             check_module(
                 &Module::empty()
-                    .set_type_definitions(vec![TypeDefinition::without_source(
+                    .set_type_definitions(vec![TypeDefinition::fake(
                         "r",
                         vec![types::RecordElement::new(
                             "x",
@@ -1683,7 +1616,7 @@ mod tests {
                         false,
                         false,
                     )])
-                    .set_definitions(vec![Definition::without_source(
+                    .set_definitions(vec![Definition::fake(
                         "x",
                         Lambda::new(
                             vec![Argument::new("x", reference_type.clone())],
@@ -1708,7 +1641,7 @@ mod tests {
             assert_eq!(
                 check_module(
                     &Module::empty()
-                        .set_type_definitions(vec![TypeDefinition::without_source(
+                        .set_type_definitions(vec![TypeDefinition::fake(
                             "r",
                             vec![types::RecordElement::new(
                                 "x",
@@ -1718,7 +1651,7 @@ mod tests {
                             false,
                             false,
                         )])
-                        .set_definitions(vec![Definition::without_source(
+                        .set_definitions(vec![Definition::fake(
                             "x",
                             Lambda::new(
                                 vec![Argument::new("x", reference_type.clone())],
@@ -1744,10 +1677,10 @@ mod tests {
                 check_module(
                     &Module::empty()
                         .set_type_definitions(vec![
-                            TypeDefinition::without_source("r1", vec![], false, false, false,),
-                            TypeDefinition::without_source("r2", vec![], false, false, false,)
+                            TypeDefinition::fake("r1", vec![], false, false, false,),
+                            TypeDefinition::fake("r2", vec![], false, false, false,)
                         ])
-                        .set_definitions(vec![Definition::without_source(
+                        .set_definitions(vec![Definition::fake(
                             "x",
                             Lambda::new(
                                 vec![Argument::new(
@@ -1775,22 +1708,20 @@ mod tests {
 
         #[test]
         fn check_list_with_single_element() {
-            check_module(
-                &Module::empty().set_definitions(vec![Definition::without_source(
-                    "x",
-                    Lambda::new(
-                        vec![],
-                        types::List::new(types::None::new(test::position()), test::position()),
-                        List::new(
-                            types::None::new(test::position()),
-                            vec![ListElement::Single(None::new(test::position()).into())],
-                            test::position(),
-                        ),
+            check_module(&Module::empty().set_definitions(vec![Definition::fake(
+                "x",
+                Lambda::new(
+                    vec![],
+                    types::List::new(types::None::new(test::position()), test::position()),
+                    List::new(
+                        types::None::new(test::position()),
+                        vec![ListElement::Single(None::new(test::position()).into())],
                         test::position(),
                     ),
-                    false,
-                )]),
-            )
+                    test::position(),
+                ),
+                false,
+            )]))
             .unwrap();
         }
 
@@ -1798,48 +1729,44 @@ mod tests {
         fn check_list_with_multiple_element() {
             let list_type = types::List::new(types::None::new(test::position()), test::position());
 
-            check_module(
-                &Module::empty().set_definitions(vec![Definition::without_source(
-                    "x",
-                    Lambda::new(
-                        vec![Argument::new("x", list_type.clone())],
-                        list_type,
-                        List::new(
-                            types::None::new(test::position()),
-                            vec![ListElement::Multiple(
-                                Variable::new("x", test::position()).into(),
-                            )],
-                            test::position(),
-                        ),
+            check_module(&Module::empty().set_definitions(vec![Definition::fake(
+                "x",
+                Lambda::new(
+                    vec![Argument::new("x", list_type.clone())],
+                    list_type,
+                    List::new(
+                        types::None::new(test::position()),
+                        vec![ListElement::Multiple(
+                            Variable::new("x", test::position()).into(),
+                        )],
                         test::position(),
                     ),
-                    false,
-                )]),
-            )
+                    test::position(),
+                ),
+                false,
+            )]))
             .unwrap();
         }
 
         #[test]
         fn fail_to_check_list_with_single_element() {
             assert_eq!(
-                check_module(
-                    &Module::empty().set_definitions(vec![Definition::without_source(
-                        "x",
-                        Lambda::new(
-                            vec![],
-                            types::List::new(types::None::new(test::position()), test::position()),
-                            List::new(
-                                types::None::new(test::position()),
-                                vec![ListElement::Single(
-                                    Number::new(42.0, test::position()).into(),
-                                )],
-                                test::position(),
-                            ),
+                check_module(&Module::empty().set_definitions(vec![Definition::fake(
+                    "x",
+                    Lambda::new(
+                        vec![],
+                        types::List::new(types::None::new(test::position()), test::position()),
+                        List::new(
+                            types::None::new(test::position()),
+                            vec![ListElement::Single(
+                                Number::new(42.0, test::position()).into(),
+                            )],
                             test::position(),
                         ),
-                        false,
-                    )])
-                ),
+                        test::position(),
+                    ),
+                    false,
+                )])),
                 Err(CompileError::TypesNotMatched(
                     test::position(),
                     test::position()
@@ -1850,30 +1777,28 @@ mod tests {
         #[test]
         fn fail_to_check_list_with_multiple_element() {
             assert_eq!(
-                check_module(
-                    &Module::empty().set_definitions(vec![Definition::without_source(
-                        "x",
-                        Lambda::new(
-                            vec![Argument::new(
-                                "x",
-                                types::List::new(
-                                    types::Number::new(test::position()),
-                                    test::position()
-                                )
+                check_module(&Module::empty().set_definitions(vec![Definition::fake(
+                    "x",
+                    Lambda::new(
+                        vec![Argument::new(
+                            "x",
+                            types::List::new(
+                                types::Number::new(test::position()),
+                                test::position()
+                            )
+                        )],
+                        types::List::new(types::None::new(test::position()), test::position()),
+                        List::new(
+                            types::None::new(test::position()),
+                            vec![ListElement::Multiple(
+                                Variable::new("x", test::position()).into(),
                             )],
-                            types::List::new(types::None::new(test::position()), test::position()),
-                            List::new(
-                                types::None::new(test::position()),
-                                vec![ListElement::Multiple(
-                                    Variable::new("x", test::position()).into(),
-                                )],
-                                test::position(),
-                            ),
                             test::position(),
                         ),
-                        false,
-                    )]),
-                ),
+                        test::position(),
+                    ),
+                    false,
+                )]),),
                 Err(CompileError::TypesNotMatched(
                     test::position(),
                     test::position(),
@@ -1889,22 +1814,20 @@ mod tests {
                 test::position(),
             );
 
-            check_module(
-                &Module::empty().set_definitions(vec![Definition::without_source(
-                    "x",
-                    Lambda::new(
-                        vec![],
-                        types::List::new(union_type.clone(), test::position()),
-                        List::new(
-                            union_type,
-                            vec![ListElement::Single(None::new(test::position()).into())],
-                            test::position(),
-                        ),
+            check_module(&Module::empty().set_definitions(vec![Definition::fake(
+                "x",
+                Lambda::new(
+                    vec![],
+                    types::List::new(union_type.clone(), test::position()),
+                    List::new(
+                        union_type,
+                        vec![ListElement::Single(None::new(test::position()).into())],
                         test::position(),
                     ),
-                    false,
-                )]),
-            )
+                    test::position(),
+                ),
+                false,
+            )]))
             .unwrap();
         }
 
@@ -1916,27 +1839,25 @@ mod tests {
                 test::position(),
             );
 
-            check_module(
-                &Module::empty().set_definitions(vec![Definition::without_source(
-                    "x",
-                    Lambda::new(
-                        vec![Argument::new(
-                            "x",
-                            types::List::new(types::None::new(test::position()), test::position()),
+            check_module(&Module::empty().set_definitions(vec![Definition::fake(
+                "x",
+                Lambda::new(
+                    vec![Argument::new(
+                        "x",
+                        types::List::new(types::None::new(test::position()), test::position()),
+                    )],
+                    types::List::new(union_type.clone(), test::position()),
+                    List::new(
+                        union_type,
+                        vec![ListElement::Multiple(
+                            Variable::new("x", test::position()).into(),
                         )],
-                        types::List::new(union_type.clone(), test::position()),
-                        List::new(
-                            union_type,
-                            vec![ListElement::Multiple(
-                                Variable::new("x", test::position()).into(),
-                            )],
-                            test::position(),
-                        ),
                         test::position(),
                     ),
-                    false,
-                )]),
-            )
+                    test::position(),
+                ),
+                false,
+            )]))
             .unwrap();
         }
     }
@@ -1948,8 +1869,7 @@ mod tests {
         #[test]
         fn check_first_variable() {
             let list_type = types::List::new(types::None::new(test::position()), test::position());
-            check_module(
-                &Module::empty().set_definitions(vec![Definition::without_source(
+            check_module(&Module::empty().set_definitions(vec![Definition::fake(
                     "x",
                     Lambda::new(
                         vec![Argument::new("x", list_type)],
@@ -1978,42 +1898,38 @@ mod tests {
                         test::position(),
                     ),
                     false,
-                )]),
-            )
+                )]))
             .unwrap();
         }
 
         #[test]
         fn check_rest_variable() {
             let list_type = types::List::new(types::None::new(test::position()), test::position());
-            check_module(
-                &Module::empty().set_definitions(vec![Definition::without_source(
-                    "x",
-                    Lambda::new(
-                        vec![Argument::new("x", list_type.clone())],
-                        list_type,
-                        IfList::new(
-                            Some(types::None::new(test::position()).into()),
-                            Variable::new("x", test::position()),
-                            "y",
-                            "ys",
-                            Variable::new("ys", test::position()),
-                            Variable::new("x", test::position()),
-                            test::position(),
-                        ),
+            check_module(&Module::empty().set_definitions(vec![Definition::fake(
+                "x",
+                Lambda::new(
+                    vec![Argument::new("x", list_type.clone())],
+                    list_type,
+                    IfList::new(
+                        Some(types::None::new(test::position()).into()),
+                        Variable::new("x", test::position()),
+                        "y",
+                        "ys",
+                        Variable::new("ys", test::position()),
+                        Variable::new("x", test::position()),
                         test::position(),
                     ),
-                    false,
-                )]),
-            )
+                    test::position(),
+                ),
+                false,
+            )]))
             .unwrap();
         }
 
         #[test]
         fn check_union_type_result() {
             let list_type = types::List::new(types::None::new(test::position()), test::position());
-            check_module(
-                &Module::empty().set_definitions(vec![Definition::without_source(
+            check_module(&Module::empty().set_definitions(vec![Definition::fake(
                     "x",
                     Lambda::new(
                         vec![Argument::new("x", list_type)],
@@ -2046,8 +1962,7 @@ mod tests {
                         test::position(),
                     ),
                     false,
-                )]),
-            )
+                )]))
             .unwrap();
         }
 
@@ -2057,26 +1972,24 @@ mod tests {
                 types::List::new(types::Number::new(test::position()), test::position());
 
             assert_eq!(
-                check_module(
-                    &Module::empty().set_definitions(vec![Definition::without_source(
-                        "x",
-                        Lambda::new(
-                            vec![Argument::new("x", list_type)],
-                            types::None::new(test::position()),
-                            IfList::new(
-                                Some(types::None::new(test::position()).into()),
-                                Variable::new("x", test::position()),
-                                "y",
-                                "ys",
-                                Variable::new("y", test::position()),
-                                None::new(test::position()),
-                                test::position(),
-                            ),
+                check_module(&Module::empty().set_definitions(vec![Definition::fake(
+                    "x",
+                    Lambda::new(
+                        vec![Argument::new("x", list_type)],
+                        types::None::new(test::position()),
+                        IfList::new(
+                            Some(types::None::new(test::position()).into()),
+                            Variable::new("x", test::position()),
+                            "y",
+                            "ys",
+                            Variable::new("y", test::position()),
+                            None::new(test::position()),
                             test::position(),
                         ),
-                        false,
-                    )]),
-                ),
+                        test::position(),
+                    ),
+                    false,
+                )]),),
                 Err(CompileError::TypesNotMatched(
                     test::position(),
                     test::position()
@@ -2089,26 +2002,24 @@ mod tests {
             let list_type = types::List::new(types::None::new(test::position()), test::position());
 
             assert_eq!(
-                check_module(
-                    &Module::empty().set_definitions(vec![Definition::without_source(
-                        "x",
-                        Lambda::new(
-                            vec![Argument::new("x", list_type)],
-                            types::None::new(test::position()),
-                            IfList::new(
-                                Some(types::None::new(test::position()).into()),
-                                Variable::new("x", test::position()),
-                                "y",
-                                "ys",
-                                Variable::new("y", test::position()),
-                                Number::new(42.0, test::position()),
-                                test::position(),
-                            ),
+                check_module(&Module::empty().set_definitions(vec![Definition::fake(
+                    "x",
+                    Lambda::new(
+                        vec![Argument::new("x", list_type)],
+                        types::None::new(test::position()),
+                        IfList::new(
+                            Some(types::None::new(test::position()).into()),
+                            Variable::new("x", test::position()),
+                            "y",
+                            "ys",
+                            Variable::new("y", test::position()),
+                            Number::new(42.0, test::position()),
                             test::position(),
                         ),
-                        false,
-                    )]),
-                ),
+                        test::position(),
+                    ),
+                    false,
+                )]),),
                 Err(CompileError::TypesNotMatched(
                     test::position(),
                     test::position()
@@ -2128,45 +2039,41 @@ mod tests {
                 test::position(),
             );
 
-            check_module(
-                &Module::empty().set_definitions(vec![Definition::without_source(
-                    "x",
-                    Lambda::new(
-                        vec![],
-                        union_type.clone(),
-                        TypeCoercion::new(
-                            types::None::new(test::position()),
-                            union_type,
-                            None::new(test::position()),
-                            test::position(),
-                        ),
+            check_module(&Module::empty().set_definitions(vec![Definition::fake(
+                "x",
+                Lambda::new(
+                    vec![],
+                    union_type.clone(),
+                    TypeCoercion::new(
+                        types::None::new(test::position()),
+                        union_type,
+                        None::new(test::position()),
                         test::position(),
                     ),
-                    false,
-                )]),
-            )
+                    test::position(),
+                ),
+                false,
+            )]))
             .unwrap();
         }
 
         #[test]
         fn check_any() {
-            check_module(
-                &Module::empty().set_definitions(vec![Definition::without_source(
-                    "x",
-                    Lambda::new(
-                        vec![],
+            check_module(&Module::empty().set_definitions(vec![Definition::fake(
+                "x",
+                Lambda::new(
+                    vec![],
+                    types::Any::new(test::position()),
+                    TypeCoercion::new(
+                        types::None::new(test::position()),
                         types::Any::new(test::position()),
-                        TypeCoercion::new(
-                            types::None::new(test::position()),
-                            types::Any::new(test::position()),
-                            None::new(test::position()),
-                            test::position(),
-                        ),
+                        None::new(test::position()),
                         test::position(),
                     ),
-                    false,
-                )]),
-            )
+                    test::position(),
+                ),
+                false,
+            )]))
             .unwrap();
         }
 
@@ -2177,23 +2084,21 @@ mod tests {
             let any_list_type =
                 types::List::new(types::Any::new(test::position()), test::position());
 
-            check_module(
-                &Module::empty().set_definitions(vec![Definition::without_source(
-                    "x",
-                    Lambda::new(
-                        vec![Argument::new("x", none_list_type.clone())],
-                        any_list_type.clone(),
-                        TypeCoercion::new(
-                            none_list_type,
-                            any_list_type,
-                            Variable::new("x", test::position()),
-                            test::position(),
-                        ),
+            check_module(&Module::empty().set_definitions(vec![Definition::fake(
+                "x",
+                Lambda::new(
+                    vec![Argument::new("x", none_list_type.clone())],
+                    any_list_type.clone(),
+                    TypeCoercion::new(
+                        none_list_type,
+                        any_list_type,
+                        Variable::new("x", test::position()),
                         test::position(),
                     ),
-                    false,
-                )]),
-            )
+                    test::position(),
+                ),
+                false,
+            )]))
             .unwrap();
         }
     }

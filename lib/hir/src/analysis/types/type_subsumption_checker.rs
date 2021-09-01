@@ -1,4 +1,5 @@
-use super::{super::Type, type_canonicalizer, type_equality_checker, TypeError};
+use super::{type_canonicalizer, type_equality_checker, TypeError};
+use crate::types::Type;
 use std::collections::HashMap;
 
 pub fn check(lower: &Type, upper: &Type, types: &HashMap<String, Type>) -> Result<bool, TypeError> {
@@ -28,8 +29,8 @@ fn check_canonical(
 
 #[cfg(test)]
 mod tests {
-    use super::{super::super::*, *};
-    use crate::test;
+    use super::*;
+    use crate::{test, types::*};
 
     #[test]
     fn check_numbers() {

@@ -1,8 +1,5 @@
-use crate::{
-    ast,
-    hir::{analysis::variable_transformer, *},
-    interface, types,
-};
+use crate::{ast, interface, types};
+use hir::{analysis::ir::variable_transformer, ir::*};
 use std::collections::HashMap;
 
 use super::name_qualifier;
@@ -56,6 +53,7 @@ pub fn compile(
 mod tests {
     use super::*;
     use crate::test;
+    use hir::test::{DefinitionFake, ModuleFake};
     use pretty_assertions::assert_eq;
 
     #[test]
@@ -67,7 +65,7 @@ mod tests {
             compile(
                 &Module::empty()
                     .set_type_definitions(vec![type_definition.clone()])
-                    .set_definitions(vec![Definition::without_source(
+                    .set_definitions(vec![Definition::fake(
                         "f",
                         Lambda::new(
                             vec![],
@@ -81,7 +79,7 @@ mod tests {
             ),
             Module::empty()
                 .set_type_definitions(vec![type_definition])
-                .set_definitions(vec![Definition::without_source(
+                .set_definitions(vec![Definition::fake(
                     "f",
                     Lambda::new(
                         vec![],
@@ -112,7 +110,7 @@ mod tests {
             false,
             test::position(),
         );
-        let definition = Definition::without_source(
+        let definition = Definition::fake(
             "f",
             Lambda::new(
                 vec![],
@@ -140,7 +138,7 @@ mod tests {
     fn compile_imported_singleton_record() {
         assert_eq!(
             compile(
-                &Module::empty().set_definitions(vec![Definition::without_source(
+                &Module::empty().set_definitions(vec![Definition::fake(
                     "f",
                     Lambda::new(
                         vec![],
@@ -168,7 +166,7 @@ mod tests {
                 .into_iter()
                 .collect(),
             ),
-            Module::empty().set_definitions(vec![Definition::without_source(
+            Module::empty().set_definitions(vec![Definition::fake(
                 "f",
                 Lambda::new(
                     vec![],
@@ -187,7 +185,7 @@ mod tests {
 
     #[test]
     fn do_not_compile_imported_non_singleton_record() {
-        let definition = Definition::without_source(
+        let definition = Definition::fake(
             "f",
             Lambda::new(
                 vec![],
@@ -228,7 +226,7 @@ mod tests {
 
     #[test]
     fn do_not_compile_imported_private_record() {
-        let definition = Definition::without_source(
+        let definition = Definition::fake(
             "f",
             Lambda::new(
                 vec![],

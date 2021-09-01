@@ -1,4 +1,4 @@
-use crate::hir::*;
+use crate::ir::*;
 
 pub fn transform(module: &Module, transform: &dyn Fn(&Variable) -> Expression) -> Module {
     Module::new(
@@ -262,14 +262,18 @@ fn transform_operation(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{test, types};
+    use crate::{
+        test,
+        test::{DefinitionFake, ModuleFake},
+        types,
+    };
     use pretty_assertions::assert_eq;
 
     #[test]
     fn transform_variable() {
         assert_eq!(
             transform(
-                &Module::empty().set_definitions(vec![Definition::without_source(
+                &Module::empty().set_definitions(vec![Definition::fake(
                     "x",
                     Lambda::new(
                         vec![],
@@ -285,7 +289,7 @@ mod tests {
                     variable.clone().into()
                 }
             ),
-            Module::empty().set_definitions(vec![Definition::without_source(
+            Module::empty().set_definitions(vec![Definition::fake(
                 "x",
                 Lambda::new(
                     vec![],
@@ -300,7 +304,7 @@ mod tests {
 
     #[test]
     fn do_not_transform_variable_shadowed_by_argument() {
-        let module = Module::empty().set_definitions(vec![Definition::without_source(
+        let module = Module::empty().set_definitions(vec![Definition::fake(
             "x",
             Lambda::new(
                 vec![Argument::new("x", types::None::new(test::position()))],
@@ -323,7 +327,7 @@ mod tests {
 
     #[test]
     fn do_not_transform_variable_shadowed_by_statement() {
-        let module = Module::empty().set_definitions(vec![Definition::without_source(
+        let module = Module::empty().set_definitions(vec![Definition::fake(
             "x",
             Lambda::new(
                 vec![],
@@ -352,7 +356,7 @@ mod tests {
 
     #[test]
     fn do_not_transform_shadowed_variable_in_let() {
-        let module = Module::empty().set_definitions(vec![Definition::without_source(
+        let module = Module::empty().set_definitions(vec![Definition::fake(
             "x",
             Lambda::new(
                 vec![],

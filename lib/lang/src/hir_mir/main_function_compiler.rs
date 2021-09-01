@@ -1,8 +1,6 @@
 use super::{error::CompileError, main_module_configuration::MainModuleConfiguration};
-use crate::{
-    hir::*,
-    types::{analysis::type_canonicalizer, Type},
-};
+use crate::types::Type;
+use hir::{analysis::types::type_canonicalizer, ir::*};
 use std::collections::HashMap;
 
 const MAIN_FUNCTION_WRAPPER_SUFFIX: &str = "__wrapper";

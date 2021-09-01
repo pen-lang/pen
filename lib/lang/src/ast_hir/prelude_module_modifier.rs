@@ -1,4 +1,4 @@
-use crate::hir::*;
+use hir::ir::*;
 
 pub fn modify(module: &Module) -> Module {
     Module::new(

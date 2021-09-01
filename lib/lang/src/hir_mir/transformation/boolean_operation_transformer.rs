@@ -1,4 +1,4 @@
-use crate::hir::*;
+use hir::ir::*;
 
 pub fn transform(operation: &BooleanOperation) -> Expression {
     let position = operation.position();

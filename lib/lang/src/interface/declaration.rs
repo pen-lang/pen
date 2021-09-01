@@ -26,11 +26,7 @@ impl Declaration {
     }
 
     #[cfg(test)]
-    pub fn without_source(
-        name: impl Into<String>,
-        type_: types::Function,
-        position: Position,
-    ) -> Self {
+    pub fn fake(name: impl Into<String>, type_: types::Function, position: Position) -> Self {
         Self::new(name, "", type_, position)
     }
 

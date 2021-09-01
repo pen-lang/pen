@@ -2,7 +2,7 @@ use super::{
     expression_compiler, generic_type_definition_compiler, type_compiler,
     type_context::TypeContext, CompileError,
 };
-use crate::hir::*;
+use hir::ir::*;
 
 pub fn compile(
     module: &Module,
@@ -132,6 +132,7 @@ mod tests {
         },
         test, types,
     };
+    use hir::test::ModuleFake;
     use pretty_assertions::assert_eq;
 
     fn compile_module(module: &Module) -> Result<mir::ir::Module, CompileError> {

@@ -1,4 +1,4 @@
-use super::super::*;
+use crate::types::*;
 use position::Position;
 use std::{
     error::Error,

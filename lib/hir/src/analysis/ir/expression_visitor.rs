@@ -1,4 +1,4 @@
-use crate::hir::*;
+use crate::ir::*;
 
 pub fn visit(module: &Module, mut visit: impl FnMut(&Expression)) {
     for definition in module.definitions() {

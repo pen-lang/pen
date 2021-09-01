@@ -1,4 +1,5 @@
-use super::{super::*, type_resolver, TypeError};
+use super::{type_resolver, TypeError};
+use crate::types::*;
 use std::collections::{BTreeSet, HashMap};
 
 // Canonicalize a type deeply.

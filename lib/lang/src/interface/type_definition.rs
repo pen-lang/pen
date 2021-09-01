@@ -32,7 +32,7 @@ impl TypeDefinition {
     }
 
     #[cfg(test)]
-    pub fn without_source(
+    pub fn fake(
         name: impl Into<String>,
         elements: Vec<types::RecordElement>,
         open: bool,

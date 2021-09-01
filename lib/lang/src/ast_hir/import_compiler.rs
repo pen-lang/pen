@@ -1,21 +1,20 @@
 use super::name_qualifier;
 use crate::{
-    ast,
-    hir::{
-        self,
-        analysis::{type_transformer, variable_renamer},
-    },
-    interface,
+    ast, interface,
     types::{self, Type},
+};
+use hir::{
+    analysis::ir::{type_transformer, variable_renamer},
+    ir,
 };
 use itertools::Itertools;
 use std::collections::HashMap;
 
 pub fn compile(
-    module: &hir::Module,
+    module: &ir::Module,
     module_interfaces: &HashMap<ast::ModulePath, interface::Module>,
     prelude_module_interfaces: &[interface::Module],
-) -> hir::Module {
+) -> ir::Module {
     let module = compile_imports(
         module,
         &module_interfaces
@@ -28,8 +27,8 @@ pub fn compile(
     rename_variables(&module, module_interfaces, prelude_module_interfaces)
 }
 
-fn compile_imports(module: &hir::Module, module_interfaces: &[&interface::Module]) -> hir::Module {
-    hir::Module::new(
+fn compile_imports(module: &ir::Module, module_interfaces: &[&interface::Module]) -> ir::Module {
+    ir::Module::new(
         module_interfaces
             .iter()
             .flat_map(|module_interface| {
@@ -37,7 +36,7 @@ fn compile_imports(module: &hir::Module, module_interfaces: &[&interface::Module
                     .type_definitions()
                     .iter()
                     .map(|definition| {
-                        hir::TypeDefinition::new(
+                        ir::TypeDefinition::new(
                             definition.name(),
                             definition.original_name(),
                             definition.elements().to_vec(),
@@ -55,7 +54,7 @@ fn compile_imports(module: &hir::Module, module_interfaces: &[&interface::Module
             .iter()
             .flat_map(|module_interface| {
                 module_interface.type_aliases().iter().map(|alias| {
-                    hir::TypeAlias::new(
+                    ir::TypeAlias::new(
                         alias.name(),
                         alias.original_name(),
                         alias.type_().clone(),
@@ -73,7 +72,7 @@ fn compile_imports(module: &hir::Module, module_interfaces: &[&interface::Module
             .iter()
             .flat_map(|interface| interface.declarations())
             .map(|declaration| {
-                hir::Declaration::new(
+                ir::Declaration::new(
                     declaration.name(),
                     declaration.type_().clone(),
                     declaration.position().clone(),
@@ -88,10 +87,10 @@ fn compile_imports(module: &hir::Module, module_interfaces: &[&interface::Module
 }
 
 fn rename_variables(
-    module: &hir::Module,
+    module: &ir::Module,
     module_interfaces: &HashMap<ast::ModulePath, interface::Module>,
     prelude_module_interfaces: &[interface::Module],
-) -> hir::Module {
+) -> ir::Module {
     variable_renamer::rename(
         module,
         &module_interfaces
@@ -121,10 +120,10 @@ fn rename_variables(
 }
 
 fn rename_types(
-    module: &hir::Module,
+    module: &ir::Module,
     module_interfaces: &HashMap<ast::ModulePath, interface::Module>,
     prelude_module_interfaces: &[interface::Module],
-) -> hir::Module {
+) -> ir::Module {
     let names = module_interfaces
         .iter()
         .flat_map(|(path, module)| {
@@ -192,13 +191,14 @@ fn rename_types(
 mod tests {
     use super::*;
     use crate::{test, types};
+    use hir::test::{DefinitionFake, ModuleFake, TypeDefinitionFake};
     use pretty_assertions::assert_eq;
 
     #[test]
     fn compile_empty_module() {
         assert_eq!(
-            compile(&hir::Module::empty(), &Default::default(), &[]),
-            hir::Module::empty()
+            compile(&ir::Module::empty(), &Default::default(), &[]),
+            ir::Module::empty()
         );
     }
 
@@ -206,12 +206,12 @@ mod tests {
     fn rename_variable() {
         assert_eq!(
             compile(
-                &hir::Module::empty().set_definitions(vec![hir::Definition::without_source(
+                &ir::Module::empty().set_definitions(vec![ir::Definition::fake(
                     "Foo",
-                    hir::Lambda::new(
+                    ir::Lambda::new(
                         vec![],
                         types::None::new(test::position()),
-                        hir::Variable::new("Bar'Bar", test::position()),
+                        ir::Variable::new("Bar'Bar", test::position()),
                         test::position(),
                     ),
                     true,
@@ -237,8 +237,8 @@ mod tests {
                 .collect(),
                 &[]
             ),
-            hir::Module::empty()
-                .set_declarations(vec![hir::Declaration::new(
+            ir::Module::empty()
+                .set_declarations(vec![ir::Declaration::new(
                     "RealBar",
                     types::Function::new(
                         vec![],
@@ -247,12 +247,12 @@ mod tests {
                     ),
                     test::position()
                 )])
-                .set_definitions(vec![hir::Definition::without_source(
+                .set_definitions(vec![ir::Definition::fake(
                     "Foo",
-                    hir::Lambda::new(
+                    ir::Lambda::new(
                         vec![],
                         types::None::new(test::position()),
-                        hir::Variable::new("RealBar", test::position()),
+                        ir::Variable::new("RealBar", test::position()),
                         test::position(),
                     ),
                     true,
@@ -264,8 +264,8 @@ mod tests {
     fn rename_type_definition() {
         assert_eq!(
             compile(
-                &hir::Module::empty()
-                    .set_type_definitions(vec![hir::TypeDefinition::without_source(
+                &ir::Module::empty()
+                    .set_type_definitions(vec![ir::TypeDefinition::fake(
                         "Foo",
                         vec![types::RecordElement::new(
                             "foo",
@@ -275,12 +275,12 @@ mod tests {
                         false,
                         false,
                     )])
-                    .set_definitions(vec![hir::Definition::without_source(
+                    .set_definitions(vec![ir::Definition::fake(
                         "Foo",
-                        hir::Lambda::new(
+                        ir::Lambda::new(
                             vec![],
                             types::Reference::new("Bar'Bar", test::position()),
-                            hir::None::new(test::position()),
+                            ir::None::new(test::position()),
                             test::position(),
                         ),
                         true,
@@ -304,9 +304,9 @@ mod tests {
                 .collect(),
                 &[]
             ),
-            hir::Module::empty()
+            ir::Module::empty()
                 .set_type_definitions(vec![
-                    hir::TypeDefinition::new(
+                    ir::TypeDefinition::new(
                         "RealBar",
                         "Bar",
                         vec![],
@@ -315,7 +315,7 @@ mod tests {
                         true,
                         test::position()
                     ),
-                    hir::TypeDefinition::without_source(
+                    ir::TypeDefinition::fake(
                         "Foo",
                         vec![types::RecordElement::new(
                             "foo",
@@ -326,12 +326,12 @@ mod tests {
                         false,
                     )
                 ])
-                .set_definitions(vec![hir::Definition::without_source(
+                .set_definitions(vec![ir::Definition::fake(
                     "Foo",
-                    hir::Lambda::new(
+                    ir::Lambda::new(
                         vec![],
                         types::Reference::new("RealBar", test::position()),
-                        hir::None::new(test::position()),
+                        ir::None::new(test::position()),
                         test::position(),
                     ),
                     true,
@@ -343,8 +343,8 @@ mod tests {
     fn rename_type_alias() {
         assert_eq!(
             compile(
-                &hir::Module::empty()
-                    .set_type_definitions(vec![hir::TypeDefinition::without_source(
+                &ir::Module::empty()
+                    .set_type_definitions(vec![ir::TypeDefinition::fake(
                         "Foo",
                         vec![types::RecordElement::new(
                             "foo",
@@ -354,12 +354,12 @@ mod tests {
                         false,
                         false,
                     )])
-                    .set_definitions(vec![hir::Definition::without_source(
+                    .set_definitions(vec![ir::Definition::fake(
                         "Foo",
-                        hir::Lambda::new(
+                        ir::Lambda::new(
                             vec![],
                             types::Reference::new("Bar'Bar", test::position()),
-                            hir::None::new(test::position()),
+                            ir::None::new(test::position()),
                             test::position(),
                         ),
                         true,
@@ -382,8 +382,8 @@ mod tests {
                 .collect(),
                 &[]
             ),
-            hir::Module::empty()
-                .set_type_definitions(vec![hir::TypeDefinition::without_source(
+            ir::Module::empty()
+                .set_type_definitions(vec![ir::TypeDefinition::fake(
                     "Foo",
                     vec![types::RecordElement::new(
                         "foo",
@@ -393,7 +393,7 @@ mod tests {
                     false,
                     false,
                 )])
-                .set_type_aliases(vec![hir::TypeAlias::new(
+                .set_type_aliases(vec![ir::TypeAlias::new(
                     "RealBar",
                     "Bar",
                     types::None::new(test::position()),
@@ -401,12 +401,12 @@ mod tests {
                     true,
                     test::position(),
                 )])
-                .set_definitions(vec![hir::Definition::without_source(
+                .set_definitions(vec![ir::Definition::fake(
                     "Foo",
-                    hir::Lambda::new(
+                    ir::Lambda::new(
                         vec![],
                         types::Reference::new("RealBar", test::position()),
-                        hir::None::new(test::position()),
+                        ir::None::new(test::position()),
                         test::position(),
                     ),
                     true,
@@ -416,7 +416,7 @@ mod tests {
 
     #[test]
     fn do_not_rename_private_type_definition() {
-        let type_definition = hir::TypeDefinition::without_source(
+        let type_definition = ir::TypeDefinition::fake(
             "Foo",
             vec![types::RecordElement::new(
                 "foo",
@@ -426,12 +426,12 @@ mod tests {
             false,
             false,
         );
-        let definition = hir::Definition::without_source(
+        let definition = ir::Definition::fake(
             "Foo",
-            hir::Lambda::new(
+            ir::Lambda::new(
                 vec![],
                 types::Reference::new("Bar'Bar", test::position()),
-                hir::None::new(test::position()),
+                ir::None::new(test::position()),
                 test::position(),
             ),
             true,
@@ -439,7 +439,7 @@ mod tests {
 
         assert_eq!(
             compile(
-                &hir::Module::empty()
+                &ir::Module::empty()
                     .set_type_definitions(vec![type_definition.clone()])
                     .set_definitions(vec![definition.clone()]),
                 &vec![(
@@ -461,9 +461,9 @@ mod tests {
                 .collect(),
                 &[]
             ),
-            hir::Module::empty()
+            ir::Module::empty()
                 .set_type_definitions(vec![
-                    hir::TypeDefinition::new(
+                    ir::TypeDefinition::new(
                         "RealBar",
                         "Bar",
                         vec![],
@@ -480,7 +480,7 @@ mod tests {
 
     #[test]
     fn do_not_rename_private_type_alias() {
-        let type_definition = hir::TypeDefinition::without_source(
+        let type_definition = ir::TypeDefinition::fake(
             "Foo",
             vec![types::RecordElement::new(
                 "foo",
@@ -490,12 +490,12 @@ mod tests {
             false,
             false,
         );
-        let definition = hir::Definition::without_source(
+        let definition = ir::Definition::fake(
             "Foo",
-            hir::Lambda::new(
+            ir::Lambda::new(
                 vec![],
                 types::Reference::new("Bar'Bar", test::position()),
-                hir::None::new(test::position()),
+                ir::None::new(test::position()),
                 test::position(),
             ),
             true,
@@ -503,7 +503,7 @@ mod tests {
 
         assert_eq!(
             compile(
-                &hir::Module::empty()
+                &ir::Module::empty()
                     .set_type_definitions(vec![type_definition.clone()])
                     .set_definitions(vec![definition.clone()]),
                 &vec![(
@@ -524,9 +524,9 @@ mod tests {
                 .collect(),
                 &[],
             ),
-            hir::Module::empty()
+            ir::Module::empty()
                 .set_type_definitions(vec![type_definition])
-                .set_type_aliases(vec![hir::TypeAlias::new(
+                .set_type_aliases(vec![ir::TypeAlias::new(
                     "RealBar",
                     "Bar",
                     types::None::new(test::position()),

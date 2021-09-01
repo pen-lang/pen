@@ -1,5 +1,5 @@
 use crate::{
-    hir::*,
+    ir::*,
     types::{self, Type},
 };
 

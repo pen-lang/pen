@@ -1,5 +1,5 @@
 use super::CompileError;
-use crate::hir::*;
+use hir::ir::*;
 use position::Position;
 use std::collections::HashMap;
 
@@ -34,10 +34,11 @@ pub fn validate(module: &Module) -> Result<(), CompileError> {
 mod tests {
     use super::*;
     use crate::{test, types};
+    use hir::test::{ModuleFake, TypeAliasFake, TypeDefinitionFake};
 
     #[test]
     fn validate_type_definitions() {
-        let definition = TypeDefinition::without_source("x", vec![], false, false, false);
+        let definition = TypeDefinition::fake("x", vec![], false, false, false);
 
         assert_eq!(
             validate(&Module::empty().set_type_definitions(vec![definition.clone(), definition])),
@@ -50,8 +51,7 @@ mod tests {
 
     #[test]
     fn validate_type_aliases() {
-        let alias =
-            TypeAlias::without_source("x", types::None::new(test::position()), false, false);
+        let alias = TypeAlias::fake("x", types::None::new(test::position()), false, false);
 
         assert_eq!(
             validate(&Module::empty().set_type_aliases(vec![alias.clone(), alias])),
@@ -67,14 +67,14 @@ mod tests {
         assert_eq!(
             validate(
                 &Module::empty()
-                    .set_type_definitions(vec![TypeDefinition::without_source(
+                    .set_type_definitions(vec![TypeDefinition::fake(
                         "x",
                         vec![],
                         false,
                         false,
                         false
                     )])
-                    .set_type_aliases(vec![TypeAlias::without_source(
+                    .set_type_aliases(vec![TypeAlias::fake(
                         "x",
                         types::None::new(test::position()),
                         false,

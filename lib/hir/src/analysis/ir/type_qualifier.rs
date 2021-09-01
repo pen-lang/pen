@@ -1,6 +1,6 @@
 use super::type_transformer;
 use crate::{
-    hir::*,
+    ir::*,
     types::{self, Type},
 };
 use std::collections::HashMap;
@@ -92,7 +92,10 @@ pub fn qualify(module: &Module, prefix: &str) -> Module {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test;
+    use crate::{
+        test,
+        test::{ModuleFake, TypeAliasFake, TypeDefinitionFake},
+    };
     use pretty_assertions::assert_eq;
 
     #[test]
@@ -100,7 +103,7 @@ mod tests {
         assert_eq!(
             qualify(
                 &Module::empty()
-                    .set_type_definitions(vec![TypeDefinition::without_source(
+                    .set_type_definitions(vec![TypeDefinition::fake(
                         "x",
                         vec![],
                         false,
@@ -111,7 +114,7 @@ mod tests {
                 "foo."
             ),
             Module::empty()
-                .set_type_definitions(vec![TypeDefinition::without_source(
+                .set_type_definitions(vec![TypeDefinition::fake(
                     "foo.x",
                     vec![],
                     false,
@@ -127,7 +130,7 @@ mod tests {
         assert_eq!(
             qualify(
                 &Module::empty()
-                    .set_type_definitions(vec![TypeDefinition::without_source(
+                    .set_type_definitions(vec![TypeDefinition::fake(
                         "x",
                         vec![types::RecordElement::new(
                             "x",
@@ -141,7 +144,7 @@ mod tests {
                 "foo."
             ),
             Module::empty()
-                .set_type_definitions(vec![TypeDefinition::without_source(
+                .set_type_definitions(vec![TypeDefinition::fake(
                     "foo.x",
                     vec![types::RecordElement::new(
                         "x",
@@ -159,7 +162,7 @@ mod tests {
     fn qualify_type_alias() {
         assert_eq!(
             qualify(
-                &Module::empty().set_type_aliases(vec![TypeAlias::without_source(
+                &Module::empty().set_type_aliases(vec![TypeAlias::fake(
                     "x",
                     types::Reference::new("x", test::position()),
                     false,
@@ -167,7 +170,7 @@ mod tests {
                 )]),
                 "foo."
             ),
-            Module::empty().set_type_aliases(vec![TypeAlias::without_source(
+            Module::empty().set_type_aliases(vec![TypeAlias::fake(
                 "foo.x",
                 types::Reference::new("foo.x", test::position()),
                 false,

@@ -28,17 +28,6 @@ impl ForeignDeclaration {
         }
     }
 
-    #[cfg(test)]
-    pub fn without_source(name: impl Into<String>, type_: impl Into<Type>) -> Self {
-        Self::new(
-            name,
-            "",
-            CallingConvention::C,
-            type_,
-            crate::test::position(),
-        )
-    }
-
     pub fn name(&self) -> &str {
         &self.name
     }

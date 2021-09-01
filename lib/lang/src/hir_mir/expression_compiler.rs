@@ -8,16 +8,15 @@ use super::{
     CompileError,
 };
 use crate::{
-    hir::*,
     hir_mir::transformation::{list_literal_transformer, record_update_transformer},
-    types::{
-        self,
-        analysis::{
-            record_element_resolver, type_canonicalizer, type_equality_checker,
-            union_type_member_calculator,
-        },
-        Type,
+    types::{self, Type},
+};
+use hir::{
+    analysis::types::{
+        record_element_resolver, type_canonicalizer, type_equality_checker,
+        union_type_member_calculator,
     },
+    ir::*,
 };
 use std::collections::HashMap;
 

@@ -1,7 +1,8 @@
 use super::{error::CompileError, type_extractor};
-use crate::{hir, interface};
+use crate::interface;
+use hir::ir;
 
-pub fn compile(module: &hir::Module) -> Result<interface::Module, CompileError> {
+pub fn compile(module: &ir::Module) -> Result<interface::Module, CompileError> {
     Ok(interface::Module::new(
         module
             .type_definitions()
@@ -53,11 +54,12 @@ pub fn compile(module: &hir::Module) -> Result<interface::Module, CompileError> 
 mod tests {
     use super::*;
     use crate::{test, types};
+    use hir::test::{DefinitionFake, ModuleFake};
 
     #[test]
     fn compile_empty_module() {
         assert_eq!(
-            compile(&hir::Module::empty()),
+            compile(&ir::Module::empty()),
             Ok(interface::Module::new(vec![], vec![], vec![]))
         );
     }
@@ -66,12 +68,12 @@ mod tests {
     fn compile_without_private_declaration() {
         assert_eq!(
             compile(
-                &hir::Module::empty().set_definitions(vec![hir::Definition::without_source(
+                &ir::Module::empty().set_definitions(vec![ir::Definition::fake(
                     "foo",
-                    hir::Lambda::new(
+                    ir::Lambda::new(
                         vec![],
                         types::None::new(test::position()),
-                        hir::None::new(test::position()),
+                        ir::None::new(test::position()),
                         test::position(),
                     ),
                     false,

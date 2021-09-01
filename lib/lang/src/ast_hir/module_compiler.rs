@@ -1,14 +1,15 @@
 use super::error::CompileError;
-use crate::{ast, hir, types};
+use crate::{ast, types};
+use hir::ir;
 use position::Position;
 
-pub fn compile(module: &ast::Module) -> Result<hir::Module, CompileError> {
-    Ok(hir::Module::new(
+pub fn compile(module: &ast::Module) -> Result<ir::Module, CompileError> {
+    Ok(ir::Module::new(
         module
             .type_definitions()
             .iter()
             .map(|definition| {
-                hir::TypeDefinition::new(
+                ir::TypeDefinition::new(
                     definition.name(),
                     definition.name(),
                     definition.elements().to_vec(),
@@ -23,7 +24,7 @@ pub fn compile(module: &ast::Module) -> Result<hir::Module, CompileError> {
             .type_aliases()
             .iter()
             .map(|alias| {
-                hir::TypeAlias::new(
+                ir::TypeAlias::new(
                     alias.name(),
                     alias.name(),
                     alias.type_().clone(),
@@ -37,12 +38,12 @@ pub fn compile(module: &ast::Module) -> Result<hir::Module, CompileError> {
             .foreign_imports()
             .iter()
             .map(|import| {
-                hir::ForeignDeclaration::new(
+                ir::ForeignDeclaration::new(
                     import.name(),
                     import.foreign_name(),
                     match import.calling_convention() {
-                        ast::CallingConvention::C => hir::CallingConvention::C,
-                        ast::CallingConvention::Native => hir::CallingConvention::Native,
+                        ast::CallingConvention::C => ir::CallingConvention::C,
+                        ast::CallingConvention::Native => ir::CallingConvention::Native,
                     },
                     import.type_().clone(),
                     import.position().clone(),
@@ -59,8 +60,8 @@ pub fn compile(module: &ast::Module) -> Result<hir::Module, CompileError> {
     ))
 }
 
-fn compile_definition(definition: &ast::Definition) -> Result<hir::Definition, CompileError> {
-    Ok(hir::Definition::new(
+fn compile_definition(definition: &ast::Definition) -> Result<ir::Definition, CompileError> {
+    Ok(ir::Definition::new(
         definition.name(),
         definition.name(),
         compile_lambda(definition.lambda())?,
@@ -70,12 +71,12 @@ fn compile_definition(definition: &ast::Definition) -> Result<hir::Definition, C
     ))
 }
 
-fn compile_lambda(lambda: &ast::Lambda) -> Result<hir::Lambda, CompileError> {
-    Ok(hir::Lambda::new(
+fn compile_lambda(lambda: &ast::Lambda) -> Result<ir::Lambda, CompileError> {
+    Ok(ir::Lambda::new(
         lambda
             .arguments()
             .iter()
-            .map(|argument| hir::Argument::new(argument.name(), argument.type_().clone()))
+            .map(|argument| ir::Argument::new(argument.name(), argument.type_().clone()))
             .collect(),
         lambda.result_type().clone(),
         compile_block(lambda.body())?,
@@ -83,11 +84,11 @@ fn compile_lambda(lambda: &ast::Lambda) -> Result<hir::Lambda, CompileError> {
     ))
 }
 
-fn compile_block(block: &ast::Block) -> Result<hir::Expression, CompileError> {
+fn compile_block(block: &ast::Block) -> Result<ir::Expression, CompileError> {
     let mut expression = compile_expression(block.expression())?;
 
     for statement in block.statements().iter().rev() {
-        expression = hir::Let::new(
+        expression = ir::Let::new(
             statement.name().map(String::from),
             None,
             compile_expression(statement.expression())?,
@@ -100,7 +101,7 @@ fn compile_block(block: &ast::Block) -> Result<hir::Expression, CompileError> {
     Ok(expression)
 }
 
-fn compile_expression(expression: &ast::Expression) -> Result<hir::Expression, CompileError> {
+fn compile_expression(expression: &ast::Expression) -> Result<ir::Expression, CompileError> {
     Ok(match expression {
         ast::Expression::BinaryOperation(operation) => {
             let lhs = compile_expression(operation.lhs())?;
@@ -109,49 +110,46 @@ fn compile_expression(expression: &ast::Expression) -> Result<hir::Expression, C
 
             match operation.operator() {
                 ast::BinaryOperator::Add => {
-                    hir::ArithmeticOperation::new(hir::ArithmeticOperator::Add, lhs, rhs, position)
+                    ir::ArithmeticOperation::new(ir::ArithmeticOperator::Add, lhs, rhs, position)
                         .into()
                 }
-                ast::BinaryOperator::Subtract => hir::ArithmeticOperation::new(
-                    hir::ArithmeticOperator::Subtract,
+                ast::BinaryOperator::Subtract => ir::ArithmeticOperation::new(
+                    ir::ArithmeticOperator::Subtract,
                     lhs,
                     rhs,
                     position,
                 )
                 .into(),
-                ast::BinaryOperator::Multiply => hir::ArithmeticOperation::new(
-                    hir::ArithmeticOperator::Multiply,
+                ast::BinaryOperator::Multiply => ir::ArithmeticOperation::new(
+                    ir::ArithmeticOperator::Multiply,
                     lhs,
                     rhs,
                     position,
                 )
                 .into(),
-                ast::BinaryOperator::Divide => hir::ArithmeticOperation::new(
-                    hir::ArithmeticOperator::Divide,
-                    lhs,
-                    rhs,
-                    position,
-                )
-                .into(),
+                ast::BinaryOperator::Divide => {
+                    ir::ArithmeticOperation::new(ir::ArithmeticOperator::Divide, lhs, rhs, position)
+                        .into()
+                }
 
                 ast::BinaryOperator::And => {
-                    hir::BooleanOperation::new(hir::BooleanOperator::And, lhs, rhs, position).into()
+                    ir::BooleanOperation::new(ir::BooleanOperator::And, lhs, rhs, position).into()
                 }
                 ast::BinaryOperator::Or => {
-                    hir::BooleanOperation::new(hir::BooleanOperator::Or, lhs, rhs, position).into()
+                    ir::BooleanOperation::new(ir::BooleanOperator::Or, lhs, rhs, position).into()
                 }
 
-                ast::BinaryOperator::Equal => hir::EqualityOperation::new(
+                ast::BinaryOperator::Equal => ir::EqualityOperation::new(
                     None,
-                    hir::EqualityOperator::Equal,
+                    ir::EqualityOperator::Equal,
                     lhs,
                     rhs,
                     position,
                 )
                 .into(),
-                ast::BinaryOperator::NotEqual => hir::EqualityOperation::new(
+                ast::BinaryOperator::NotEqual => ir::EqualityOperation::new(
                     None,
-                    hir::EqualityOperator::NotEqual,
+                    ir::EqualityOperator::NotEqual,
                     lhs,
                     rhs,
                     position,
@@ -159,22 +157,18 @@ fn compile_expression(expression: &ast::Expression) -> Result<hir::Expression, C
                 .into(),
 
                 ast::BinaryOperator::LessThan => {
-                    hir::OrderOperation::new(hir::OrderOperator::LessThan, lhs, rhs, position)
+                    ir::OrderOperation::new(ir::OrderOperator::LessThan, lhs, rhs, position).into()
+                }
+                ast::BinaryOperator::LessThanOrEqual => {
+                    ir::OrderOperation::new(ir::OrderOperator::LessThanOrEqual, lhs, rhs, position)
                         .into()
                 }
-                ast::BinaryOperator::LessThanOrEqual => hir::OrderOperation::new(
-                    hir::OrderOperator::LessThanOrEqual,
-                    lhs,
-                    rhs,
-                    position,
-                )
-                .into(),
                 ast::BinaryOperator::GreaterThan => {
-                    hir::OrderOperation::new(hir::OrderOperator::GreaterThan, lhs, rhs, position)
+                    ir::OrderOperation::new(ir::OrderOperator::GreaterThan, lhs, rhs, position)
                         .into()
                 }
-                ast::BinaryOperator::GreaterThanOrEqual => hir::OrderOperation::new(
-                    hir::OrderOperator::GreaterThanOrEqual,
+                ast::BinaryOperator::GreaterThanOrEqual => ir::OrderOperation::new(
+                    ir::OrderOperator::GreaterThanOrEqual,
                     lhs,
                     rhs,
                     position,
@@ -183,9 +177,9 @@ fn compile_expression(expression: &ast::Expression) -> Result<hir::Expression, C
             }
         }
         ast::Expression::Boolean(boolean) => {
-            hir::Boolean::new(boolean.value(), boolean.position().clone()).into()
+            ir::Boolean::new(boolean.value(), boolean.position().clone()).into()
         }
-        ast::Expression::Call(call) => hir::Call::new(
+        ast::Expression::Call(call) => ir::Call::new(
             None,
             compile_expression(call.function())?,
             call.arguments()
@@ -195,7 +189,7 @@ fn compile_expression(expression: &ast::Expression) -> Result<hir::Expression, C
             call.position().clone(),
         )
         .into(),
-        ast::Expression::RecordDeconstruction(operation) => hir::RecordDeconstruction::new(
+        ast::Expression::RecordDeconstruction(operation) => ir::RecordDeconstruction::new(
             None,
             compile_expression(operation.expression())?,
             operation.name(),
@@ -203,7 +197,7 @@ fn compile_expression(expression: &ast::Expression) -> Result<hir::Expression, C
         )
         .into(),
         ast::Expression::If(if_) => compile_if(if_.branches(), if_.else_(), if_.position())?.into(),
-        ast::Expression::IfList(if_) => hir::IfList::new(
+        ast::Expression::IfList(if_) => ir::IfList::new(
             None,
             compile_expression(if_.argument())?,
             if_.first_name(),
@@ -213,13 +207,13 @@ fn compile_expression(expression: &ast::Expression) -> Result<hir::Expression, C
             if_.position().clone(),
         )
         .into(),
-        ast::Expression::IfType(if_) => hir::IfType::new(
+        ast::Expression::IfType(if_) => ir::IfType::new(
             if_.name(),
             compile_expression(if_.argument())?,
             if_.branches()
                 .iter()
                 .map(|branch| {
-                    Ok(hir::IfTypeBranch::new(
+                    Ok(ir::IfTypeBranch::new(
                         branch.type_().clone(),
                         compile_block(branch.block())?,
                     ))
@@ -227,7 +221,7 @@ fn compile_expression(expression: &ast::Expression) -> Result<hir::Expression, C
                 .collect::<Result<_, _>>()?,
             if_.else_()
                 .map(|block| {
-                    Ok(hir::ElseBranch::new(
+                    Ok(ir::ElseBranch::new(
                         None,
                         compile_block(block)?,
                         block.position().clone(),
@@ -238,17 +232,17 @@ fn compile_expression(expression: &ast::Expression) -> Result<hir::Expression, C
         )
         .into(),
         ast::Expression::Lambda(lambda) => compile_lambda(lambda)?.into(),
-        ast::Expression::List(list) => hir::List::new(
+        ast::Expression::List(list) => ir::List::new(
             list.type_().clone(),
             list.elements()
                 .iter()
                 .map(|element| {
                     Ok(match element {
                         ast::ListElement::Multiple(element) => {
-                            hir::ListElement::Multiple(compile_expression(element)?)
+                            ir::ListElement::Multiple(compile_expression(element)?)
                         }
                         ast::ListElement::Single(element) => {
-                            hir::ListElement::Single(compile_expression(element)?)
+                            ir::ListElement::Single(compile_expression(element)?)
                         }
                     })
                 })
@@ -256,16 +250,16 @@ fn compile_expression(expression: &ast::Expression) -> Result<hir::Expression, C
             list.position().clone(),
         )
         .into(),
-        ast::Expression::None(none) => hir::None::new(none.position().clone()).into(),
+        ast::Expression::None(none) => ir::None::new(none.position().clone()).into(),
         ast::Expression::Number(number) => {
-            hir::Number::new(number.value(), number.position().clone()).into()
+            ir::Number::new(number.value(), number.position().clone()).into()
         }
         ast::Expression::Record(record) => {
             let elements = record
                 .elements()
                 .iter()
                 .map(|element| {
-                    Ok(hir::RecordElement::new(
+                    Ok(ir::RecordElement::new(
                         element.name(),
                         compile_expression(element.expression())?,
                         element.position().clone(),
@@ -274,7 +268,7 @@ fn compile_expression(expression: &ast::Expression) -> Result<hir::Expression, C
                 .collect::<Result<_, _>>()?;
 
             if let Some(old_record) = record.record() {
-                hir::RecordUpdate::new(
+                ir::RecordUpdate::new(
                     record.type_().clone(),
                     compile_expression(old_record)?,
                     elements,
@@ -282,7 +276,7 @@ fn compile_expression(expression: &ast::Expression) -> Result<hir::Expression, C
                 )
                 .into()
             } else {
-                hir::RecordConstruction::new(
+                ir::RecordConstruction::new(
                     record.type_().clone(),
                     elements,
                     record.position().clone(),
@@ -291,22 +285,22 @@ fn compile_expression(expression: &ast::Expression) -> Result<hir::Expression, C
             }
         }
         ast::Expression::String(string) => {
-            hir::ByteString::new(string.value(), string.position().clone()).into()
+            ir::ByteString::new(string.value(), string.position().clone()).into()
         }
         ast::Expression::UnaryOperation(operation) => {
             let operand = compile_expression(operation.expression())?;
 
             match operation.operator() {
                 ast::UnaryOperator::Not => {
-                    hir::NotOperation::new(operand, operation.position().clone()).into()
+                    ir::NotOperation::new(operand, operation.position().clone()).into()
                 }
                 ast::UnaryOperator::Try => {
-                    hir::TryOperation::new(None, operand, operation.position().clone()).into()
+                    ir::TryOperation::new(None, operand, operation.position().clone()).into()
                 }
             }
         }
         ast::Expression::Variable(variable) => {
-            hir::Variable::new(variable.name(), variable.position().clone()).into()
+            ir::Variable::new(variable.name(), variable.position().clone()).into()
         }
     })
 }
@@ -315,16 +309,16 @@ fn compile_if(
     branches: &[ast::IfBranch],
     else_: &ast::Block,
     position: &Position,
-) -> Result<hir::If, CompileError> {
+) -> Result<ir::If, CompileError> {
     Ok(match branches {
         [] => return Err(CompileError::TooFewBranchesInIf(position.clone())),
-        [then] => hir::If::new(
+        [then] => ir::If::new(
             compile_expression(then.condition())?,
             compile_block(then.block())?,
             compile_block(else_)?,
             position.clone(),
         ),
-        [then, ..] => hir::If::new(
+        [then, ..] => ir::If::new(
             compile_expression(then.condition())?,
             compile_block(then.block())?,
             compile_if(&branches[1..], else_, position)?,
@@ -348,6 +342,7 @@ fn is_name_public(name: &str) -> bool {
 mod tests {
     use super::*;
     use crate::test;
+    use hir::test::ModuleFake;
     use pretty_assertions::assert_eq;
 
     #[test]
@@ -361,7 +356,7 @@ mod tests {
                 vec![],
                 test::position()
             )),
-            Ok(hir::Module::empty())
+            Ok(ir::Module::empty())
         );
     }
 
@@ -390,8 +385,8 @@ mod tests {
                 )],
                 test::position(),
             )),
-            Ok(hir::Module::empty()
-                .set_type_definitions(vec![hir::TypeDefinition::new(
+            Ok(ir::Module::empty()
+                .set_type_definitions(vec![ir::TypeDefinition::new(
                     "Foo1",
                     "Foo1",
                     vec![],
@@ -400,7 +395,7 @@ mod tests {
                     false,
                     test::position()
                 )])
-                .set_type_aliases(vec![hir::TypeAlias::new(
+                .set_type_aliases(vec![ir::TypeAlias::new(
                     "Foo2",
                     "Foo2",
                     types::None::new(test::position()),
@@ -408,13 +403,13 @@ mod tests {
                     false,
                     test::position()
                 )])
-                .set_definitions(vec![hir::Definition::new(
+                .set_definitions(vec![ir::Definition::new(
                     "Foo3",
                     "Foo3",
-                    hir::Lambda::new(
+                    ir::Lambda::new(
                         vec![],
                         types::None::new(test::position()),
-                        hir::None::new(test::position()),
+                        ir::None::new(test::position()),
                         test::position(),
                     ),
                     false,

@@ -1,5 +1,6 @@
 use super::super::error::CompileError;
-use crate::{hir::*, hir_mir::type_context::TypeContext, types::analysis::record_element_resolver};
+use crate::hir_mir::type_context::TypeContext;
+use hir::{analysis::types::record_element_resolver, ir::*};
 use std::collections::HashSet;
 
 const RECORD_NAME: &str = "$record";

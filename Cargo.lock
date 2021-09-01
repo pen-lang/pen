@@ -36,6 +36,7 @@ dependencies = [
  "bincode",
  "fmm",
  "fmm-llvm",
+ "hir",
  "lang",
  "mir",
  "mir-fmm",
@@ -255,6 +256,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "hir"
+version = "0.1.0"
+dependencies = [
+ "position",
+ "pretty_assertions",
+ "serde",
+]
+
+[[package]]
 name = "idna"
 version = "0.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -367,6 +377,7 @@ name = "lang"
 version = "0.1.0"
 dependencies = [
  "combine",
+ "hir",
  "itertools",
  "mir",
  "once_cell",

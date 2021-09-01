@@ -1,24 +1,22 @@
-use crate::types;
+use crate::types::Type;
 use position::Position;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Deserialize, Hash, PartialEq, Serialize)]
-pub struct TypeDefinition {
+pub struct TypeAlias {
     name: String,
     original_name: String,
-    elements: Vec<types::RecordElement>,
-    open: bool,
+    type_: Type,
     public: bool,
     external: bool,
     position: Position,
 }
 
-impl TypeDefinition {
+impl TypeAlias {
     pub fn new(
         name: impl Into<String>,
         original_name: impl Into<String>,
-        elements: Vec<types::RecordElement>,
-        open: bool,
+        type_: impl Into<Type>,
         public: bool,
         external: bool,
         position: Position,
@@ -26,31 +24,11 @@ impl TypeDefinition {
         Self {
             name: name.into(),
             original_name: original_name.into(),
-            elements,
-            open,
+            type_: type_.into(),
             public,
             external,
             position,
         }
-    }
-
-    #[cfg(test)]
-    pub fn without_source(
-        name: impl Into<String>,
-        elements: Vec<types::RecordElement>,
-        open: bool,
-        public: bool,
-        external: bool,
-    ) -> Self {
-        Self::new(
-            name,
-            "",
-            elements,
-            open,
-            public,
-            external,
-            crate::test::position(),
-        )
     }
 
     pub fn name(&self) -> &str {
@@ -61,12 +39,8 @@ impl TypeDefinition {
         &self.original_name
     }
 
-    pub fn elements(&self) -> &[types::RecordElement] {
-        &self.elements
-    }
-
-    pub fn is_open(&self) -> bool {
-        self.open
+    pub fn type_(&self) -> &Type {
+        &self.type_
     }
 
     pub fn is_public(&self) -> bool {
