@@ -24,8 +24,10 @@ pub fn validate(module: &Module) -> Result<(), CompileError> {
 mod tests {
     use super::*;
     use crate::test;
-    use hir::test::{DefinitionFake, ModuleFake};
-    use hir::types;
+    use hir::{
+        test::{DefinitionFake, ModuleFake},
+        types,
+    };
 
     #[test]
     fn validate_module() {

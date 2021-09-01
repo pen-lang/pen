@@ -6,7 +6,6 @@ mod error;
 mod error_type_configuration;
 mod expression_compiler;
 mod generic_type_definition_compiler;
-mod interface;
 mod list_type_configuration;
 mod main_function_compiler;
 mod main_module_configuration;
@@ -122,8 +121,10 @@ mod tests {
         list_type_configuration::LIST_TYPE_CONFIGURATION, *,
     };
     use crate::{string_type_configuration::STRING_TYPE_CONFIGURATION, test};
-    use hir::test::{DefinitionFake, ModuleFake, TypeDefinitionFake};
-    use hir::types;
+    use hir::{
+        test::{DefinitionFake, ModuleFake, TypeDefinitionFake},
+        types,
+    };
 
     fn compile_module(
         module: &Module,

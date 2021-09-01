@@ -1,8 +1,8 @@
 use super::{environment_creator, type_context::TypeContext, type_extractor, CompileError};
-use hir::types::{self, Type};
 use hir::{
     analysis::types::{record_element_resolver, type_canonicalizer, type_equality_checker},
     ir::*,
+    types::{self, Type},
 };
 use position::Position;
 use std::collections::HashMap;
@@ -441,12 +441,9 @@ fn coerce_expression(
 mod tests {
     use super::*;
     use crate::{
-        test,
-        {
-            error_type_configuration::ERROR_TYPE_CONFIGURATION,
-            list_type_configuration::LIST_TYPE_CONFIGURATION,
-            string_type_configuration::STRING_TYPE_CONFIGURATION,
-        },
+        error_type_configuration::ERROR_TYPE_CONFIGURATION,
+        list_type_configuration::LIST_TYPE_CONFIGURATION,
+        string_type_configuration::STRING_TYPE_CONFIGURATION, test,
     };
     use hir::test::{DefinitionFake, ModuleFake, TypeDefinitionFake};
     use pretty_assertions::assert_eq;

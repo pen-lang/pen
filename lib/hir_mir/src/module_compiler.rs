@@ -125,15 +125,11 @@ fn compile_definition(
 mod tests {
     use super::*;
     use crate::{
-        test,
-        {
-            error_type_configuration::ERROR_TYPE_CONFIGURATION,
-            list_type_configuration::LIST_TYPE_CONFIGURATION,
-            string_type_configuration::STRING_TYPE_CONFIGURATION,
-        },
+        error_type_configuration::ERROR_TYPE_CONFIGURATION,
+        list_type_configuration::LIST_TYPE_CONFIGURATION,
+        string_type_configuration::STRING_TYPE_CONFIGURATION, test,
     };
-    use hir::test::ModuleFake;
-    use hir::types;
+    use hir::{test::ModuleFake, types};
     use pretty_assertions::assert_eq;
 
     fn compile_module(module: &Module) -> Result<mir::ir::Module, CompileError> {

@@ -1,6 +1,5 @@
 use super::type_extractor;
-use hir::ir::*;
-use hir::types::Type;
+use hir::{ir::*, types::Type};
 use std::collections::HashMap;
 
 pub fn create_from_module(module: &Module) -> HashMap<String, Type> {
@@ -32,8 +31,7 @@ pub fn create_from_module(module: &Module) -> HashMap<String, Type> {
 mod tests {
     use super::*;
     use crate::test;
-    use hir::test::ModuleFake;
-    use hir::types;
+    use hir::{test::ModuleFake, types};
 
     #[test]
     fn create_with_foreign_declaration() {

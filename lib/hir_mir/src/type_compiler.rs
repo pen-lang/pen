@@ -1,6 +1,8 @@
 use super::{type_context::TypeContext, CompileError};
-use hir::types::{self, Type};
-use hir::analysis::types::{type_canonicalizer, type_id_calculator};
+use hir::{
+    analysis::types::{type_canonicalizer, type_id_calculator},
+    types::{self, Type},
+};
 
 use std::collections::HashMap;
 

@@ -269,6 +269,7 @@ name = "hir_mir"
 version = "0.1.0"
 dependencies = [
  "hir",
+ "interface",
  "mir",
  "once_cell",
  "position",
@@ -367,6 +368,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bee0328b1209d157ef001c94dd85b4f8f64139adb0eac2659f4b08382b2f474d"
 dependencies = [
  "cfg-if",
+]
+
+[[package]]
+name = "interface"
+version = "0.1.0"
+dependencies = [
+ "hir",
+ "position",
+ "serde",
 ]
 
 [[package]]

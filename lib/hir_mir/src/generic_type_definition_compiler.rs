@@ -1,11 +1,11 @@
 use super::{type_compiler, type_context::TypeContext, CompileError};
-use hir::types::Type;
 use hir::{
     analysis::{
         ir::expression_visitor,
         types::{type_canonicalizer, TypeError},
     },
     ir::*,
+    types::Type,
 };
 use std::collections::{HashMap, HashSet};
 
@@ -73,8 +73,10 @@ fn collect_types(
 mod tests {
     use super::*;
     use crate::test;
-    use hir::test::{DefinitionFake, ModuleFake};
-    use hir::types;
+    use hir::{
+        test::{DefinitionFake, ModuleFake},
+        types,
+    };
 
     #[test]
     fn compile_list_type_definition() {

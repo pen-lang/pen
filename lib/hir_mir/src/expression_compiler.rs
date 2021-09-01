@@ -8,13 +8,13 @@ use super::{
     CompileError,
 };
 use crate::transformation::{list_literal_transformer, record_update_transformer};
-use hir::types::{self, Type};
 use hir::{
     analysis::types::{
         record_element_resolver, type_canonicalizer, type_equality_checker,
         union_type_member_calculator,
     },
     ir::*,
+    types::{self, Type},
 };
 use std::collections::HashMap;
 

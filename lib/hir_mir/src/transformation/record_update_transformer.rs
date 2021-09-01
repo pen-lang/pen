@@ -1,5 +1,4 @@
-use crate::error::CompileError;
-use crate::type_context::TypeContext;
+use crate::{error::CompileError, type_context::TypeContext};
 use hir::{analysis::types::record_element_resolver, ir::*};
 use std::collections::HashSet;
 

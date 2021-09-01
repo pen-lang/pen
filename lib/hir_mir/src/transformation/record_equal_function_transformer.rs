@@ -1,8 +1,7 @@
 use crate::{
     transformation::record_type_information_compiler, type_context::TypeContext, CompileError,
 };
-use hir::types;
-use hir::{analysis::types::type_comparability_checker, ir::*};
+use hir::{analysis::types::type_comparability_checker, ir::*, types};
 
 const LHS_NAME: &str = "$lhs";
 const RHS_NAME: &str = "$rhs";
@@ -124,12 +123,9 @@ fn compile_equal_function_declaration(type_definition: &TypeDefinition) -> Decla
 mod tests {
     use super::*;
     use crate::{
-        {
-            error_type_configuration::ERROR_TYPE_CONFIGURATION,
-            list_type_configuration::LIST_TYPE_CONFIGURATION,
-            string_type_configuration::STRING_TYPE_CONFIGURATION,
-        },
-        test,
+        error_type_configuration::ERROR_TYPE_CONFIGURATION,
+        list_type_configuration::LIST_TYPE_CONFIGURATION,
+        string_type_configuration::STRING_TYPE_CONFIGURATION, test,
     };
     use hir::test::ModuleFake;
     use pretty_assertions::assert_eq;

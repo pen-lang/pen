@@ -3,8 +3,10 @@ use super::{
     list_type_configuration::ListTypeConfiguration,
     string_type_configuration::StringTypeConfiguration,
 };
-use hir::types::{self, Type};
-use hir::ir::*;
+use hir::{
+    ir::*,
+    types::{self, Type},
+};
 use std::collections::HashMap;
 
 #[derive(Debug)]

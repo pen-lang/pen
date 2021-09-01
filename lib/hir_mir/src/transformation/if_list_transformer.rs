@@ -1,6 +1,5 @@
 use super::super::{error::CompileError, list_type_configuration::ListTypeConfiguration};
-use hir::types;
-use hir::ir::*;
+use hir::{ir::*, types};
 
 const FIRST_REST_NAME: &str = "$firstRest";
 

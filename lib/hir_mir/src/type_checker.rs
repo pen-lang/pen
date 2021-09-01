@@ -1,11 +1,11 @@
 use super::{environment_creator, type_context::TypeContext, type_extractor, CompileError};
-use hir::types::{self, Type};
 use hir::{
     analysis::types::{
         record_element_resolver, type_canonicalizer, type_equality_checker,
         type_subsumption_checker, union_type_creator,
     },
     ir::*,
+    types::{self, Type},
 };
 use std::collections::{HashMap, HashSet};
 
@@ -468,11 +468,8 @@ fn check_subsumption(
 mod tests {
     use super::{super::list_type_configuration::LIST_TYPE_CONFIGURATION, *};
     use crate::{
-        test,
-        {
-            error_type_configuration::ERROR_TYPE_CONFIGURATION,
-            string_type_configuration::STRING_TYPE_CONFIGURATION,
-        },
+        error_type_configuration::ERROR_TYPE_CONFIGURATION,
+        string_type_configuration::STRING_TYPE_CONFIGURATION, test,
     };
     use hir::test::{DefinitionFake, ForeignDeclarationFake, ModuleFake, TypeDefinitionFake};
 

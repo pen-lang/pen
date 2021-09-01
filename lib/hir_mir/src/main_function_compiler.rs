@@ -1,6 +1,5 @@
 use super::{error::CompileError, main_module_configuration::MainModuleConfiguration};
-use hir::types::Type;
-use hir::{analysis::types::type_canonicalizer, ir::*};
+use hir::{analysis::types::type_canonicalizer, ir::*, types::Type};
 use std::collections::HashMap;
 
 const MAIN_FUNCTION_WRAPPER_SUFFIX: &str = "__wrapper";

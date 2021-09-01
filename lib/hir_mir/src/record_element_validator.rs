@@ -97,8 +97,10 @@ mod tests {
         *,
     };
     use crate::test;
-    use hir::test::{DefinitionFake, ModuleFake, TypeDefinitionFake};
-    use hir::types;
+    use hir::{
+        test::{DefinitionFake, ModuleFake, TypeDefinitionFake},
+        types,
+    };
 
     fn validate_module(module: &Module) -> Result<(), CompileError> {
         validate(

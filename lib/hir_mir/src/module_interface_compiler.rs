@@ -1,5 +1,4 @@
 use super::{error::CompileError, type_extractor};
-use crate::interface;
 use hir::ir;
 
 pub fn compile(module: &ir::Module) -> Result<interface::Module, CompileError> {
@@ -54,8 +53,10 @@ pub fn compile(module: &ir::Module) -> Result<interface::Module, CompileError> {
 mod tests {
     use super::*;
     use crate::test;
-    use hir::test::{DefinitionFake, ModuleFake};
-    use hir::types;
+    use hir::{
+        test::{DefinitionFake, ModuleFake},
+        types,
+    };
 
     #[test]
     fn compile_empty_module() {

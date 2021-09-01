@@ -1,6 +1,9 @@
 use super::{type_context::TypeContext, CompileError};
-use hir::types::{self, Type};
-use hir::{analysis::types::type_subsumption_checker, ir::*};
+use hir::{
+    analysis::types::type_subsumption_checker,
+    ir::*,
+    types::{self, Type},
+};
 
 pub fn validate(module: &Module, type_context: &TypeContext) -> Result<(), CompileError> {
     for definition in module.definitions() {
@@ -156,11 +159,8 @@ fn validate_expression(
 mod tests {
     use super::{super::list_type_configuration::LIST_TYPE_CONFIGURATION, *};
     use crate::{
-        {
-            error_type_configuration::ERROR_TYPE_CONFIGURATION,
-            string_type_configuration::STRING_TYPE_CONFIGURATION,
-        },
-        test,
+        error_type_configuration::ERROR_TYPE_CONFIGURATION,
+        string_type_configuration::STRING_TYPE_CONFIGURATION, test,
     };
     use hir::test::{DefinitionFake, ModuleFake, TypeDefinitionFake};
 

@@ -1,5 +1,4 @@
-use hir::types;
-use hir::{analysis::types::TypeError, ir::*};
+use hir::{analysis::types::TypeError, ir::*, types};
 use position::Position;
 use std::{
     error::Error,
