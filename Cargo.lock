@@ -403,10 +403,12 @@ dependencies = [
  "hir",
  "interface",
  "itertools",
+ "mir",
  "once_cell",
  "position",
  "pretty_assertions",
  "regex",
+ "serde",
 ]
 
 [[package]]
