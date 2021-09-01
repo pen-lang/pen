@@ -1,4 +1,3 @@
-
 use super::{
     boolean::Boolean, call::Call, if_::If, if_list::IfList, if_type::IfType, list::List,
     none::None, number::Number, record::Record, string::ByteString, variable::Variable,

@@ -1,4 +1,3 @@
-
 use super::{expression::Expression, if_type_branch::IfTypeBranch, Block};
 use position::Position;
 use std::sync::Arc;

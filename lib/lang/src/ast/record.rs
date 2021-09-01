@@ -1,4 +1,3 @@
-
 use super::{expression::Expression, RecordElement};
 use crate::types::Type;
 use position::Position;

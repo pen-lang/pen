@@ -1,4 +1,3 @@
-
 use crate::types;
 use position::Position;
 

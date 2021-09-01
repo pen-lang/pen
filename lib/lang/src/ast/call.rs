@@ -1,4 +1,3 @@
-
 use super::expression::Expression;
 use position::Position;
 use std::sync::Arc;
