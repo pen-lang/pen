@@ -121,6 +121,7 @@ mod tests {
         list_type_configuration::LIST_TYPE_CONFIGURATION, *,
     };
     use crate::{hir_mir::string_type_configuration::STRING_TYPE_CONFIGURATION, test, types};
+    use hir::test::{DefinitionFake, ModuleFake, TypeDefinitionFake};
 
     fn compile_module(
         module: &Module,
@@ -142,72 +143,64 @@ mod tests {
 
     #[test]
     fn compile_boolean() -> Result<(), CompileError> {
-        compile_module(
-            &Module::empty().set_definitions(vec![Definition::without_source(
-                "x",
-                Lambda::new(
-                    vec![],
-                    types::Boolean::new(test::position()),
-                    Boolean::new(false, test::position()),
-                    test::position(),
-                ),
-                false,
-            )]),
-        )?;
+        compile_module(&Module::empty().set_definitions(vec![Definition::fake(
+            "x",
+            Lambda::new(
+                vec![],
+                types::Boolean::new(test::position()),
+                Boolean::new(false, test::position()),
+                test::position(),
+            ),
+            false,
+        )]))?;
 
         Ok(())
     }
 
     #[test]
     fn compile_none() -> Result<(), CompileError> {
-        compile_module(
-            &Module::empty().set_definitions(vec![Definition::without_source(
-                "x",
-                Lambda::new(
-                    vec![],
-                    types::None::new(test::position()),
-                    None::new(test::position()),
-                    test::position(),
-                ),
-                false,
-            )]),
-        )?;
+        compile_module(&Module::empty().set_definitions(vec![Definition::fake(
+            "x",
+            Lambda::new(
+                vec![],
+                types::None::new(test::position()),
+                None::new(test::position()),
+                test::position(),
+            ),
+            false,
+        )]))?;
 
         Ok(())
     }
 
     #[test]
     fn compile_number() -> Result<(), CompileError> {
-        compile_module(
-            &Module::empty().set_definitions(vec![Definition::without_source(
-                "x",
-                Lambda::new(
-                    vec![],
-                    types::Number::new(test::position()),
-                    Number::new(42.0, test::position()),
-                    test::position(),
-                ),
-                false,
-            )]),
-        )?;
+        compile_module(&Module::empty().set_definitions(vec![Definition::fake(
+            "x",
+            Lambda::new(
+                vec![],
+                types::Number::new(test::position()),
+                Number::new(42.0, test::position()),
+                test::position(),
+            ),
+            false,
+        )]))?;
 
         Ok(())
     }
 
     #[test]
     fn compile_string() -> Result<(), CompileError> {
-        compile_module(
-            &Module::empty().set_definitions(vec![Definition::without_source(
-                "x",
-                Lambda::new(
-                    vec![],
-                    types::ByteString::new(test::position()),
-                    ByteString::new("foo", test::position()),
-                    test::position(),
-                ),
-                false,
-            )]),
-        )?;
+        compile_module(&Module::empty().set_definitions(vec![Definition::fake(
+            "x",
+            Lambda::new(
+                vec![],
+                types::ByteString::new(test::position()),
+                ByteString::new("foo", test::position()),
+                test::position(),
+            ),
+            false,
+        )]))?;
 
         Ok(())
     }
@@ -218,7 +211,7 @@ mod tests {
 
         compile_module(
             &Module::empty()
-                .set_type_definitions(vec![TypeDefinition::without_source(
+                .set_type_definitions(vec![TypeDefinition::fake(
                     "foo",
                     vec![types::RecordElement::new(
                         "x",
@@ -228,7 +221,7 @@ mod tests {
                     false,
                     false,
                 )])
-                .set_definitions(vec![Definition::without_source(
+                .set_definitions(vec![Definition::fake(
                     "x",
                     Lambda::new(
                         vec![],
@@ -256,7 +249,7 @@ mod tests {
 
         compile_module(
             &Module::empty()
-                .set_type_definitions(vec![TypeDefinition::without_source(
+                .set_type_definitions(vec![TypeDefinition::fake(
                     "foo",
                     vec![types::RecordElement::new(
                         "x",
@@ -266,7 +259,7 @@ mod tests {
                     false,
                     false,
                 )])
-                .set_definitions(vec![Definition::without_source(
+                .set_definitions(vec![Definition::fake(
                     "x",
                     Lambda::new(
                         vec![Argument::new("r", reference_type)],
@@ -287,7 +280,7 @@ mod tests {
 
     #[test]
     fn fail_to_compile_duplicate_function_names() {
-        let definition = Definition::without_source(
+        let definition = Definition::fake(
             "x",
             Lambda::new(
                 vec![],
@@ -312,14 +305,14 @@ mod tests {
         assert_eq!(
             compile_module(
                 &Module::empty()
-                    .set_type_definitions(vec![TypeDefinition::without_source(
+                    .set_type_definitions(vec![TypeDefinition::fake(
                         "error",
                         vec![],
                         false,
                         false,
                         false
                     )])
-                    .set_definitions(vec![Definition::without_source(
+                    .set_definitions(vec![Definition::fake(
                         "x",
                         Lambda::new(
                             vec![Argument::new(

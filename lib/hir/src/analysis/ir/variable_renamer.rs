@@ -15,14 +15,18 @@ pub fn rename(module: &Module, names: &HashMap<String, String>) -> Module {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{test, types};
+    use crate::{
+        test,
+        test::{DefinitionFake, ModuleFake},
+        types,
+    };
     use pretty_assertions::assert_eq;
 
     #[test]
     fn rename_variable() {
         assert_eq!(
             rename(
-                &Module::empty().set_definitions(vec![Definition::without_source(
+                &Module::empty().set_definitions(vec![Definition::fake(
                     "x",
                     Lambda::new(
                         vec![],
@@ -34,7 +38,7 @@ mod tests {
                 )],),
                 &vec![("x".into(), "foo.x".into())].into_iter().collect()
             ),
-            Module::empty().set_definitions(vec![Definition::without_source(
+            Module::empty().set_definitions(vec![Definition::fake(
                 "x",
                 Lambda::new(
                     vec![],
@@ -49,7 +53,7 @@ mod tests {
 
     #[test]
     fn do_not_rename_variable_shadowed_by_argument() {
-        let module = Module::empty().set_definitions(vec![Definition::without_source(
+        let module = Module::empty().set_definitions(vec![Definition::fake(
             "x",
             Lambda::new(
                 vec![Argument::new("x", types::None::new(test::position()))],
@@ -73,7 +77,7 @@ mod tests {
     fn do_not_rename_variable_shadowed_by_statement() {
         assert_eq!(
             rename(
-                &Module::empty().set_definitions(vec![Definition::without_source(
+                &Module::empty().set_definitions(vec![Definition::fake(
                     "x",
                     Lambda::new(
                         vec![],
@@ -91,7 +95,7 @@ mod tests {
                 )],),
                 &vec![("x".into(), "foo.x".into())].into_iter().collect()
             ),
-            Module::empty().set_definitions(vec![Definition::without_source(
+            Module::empty().set_definitions(vec![Definition::fake(
                 "x",
                 Lambda::new(
                     vec![],
@@ -112,7 +116,7 @@ mod tests {
 
     #[test]
     fn do_not_rename_shadowed_variable_in_let() {
-        let module = Module::empty().set_definitions(vec![Definition::without_source(
+        let module = Module::empty().set_definitions(vec![Definition::fake(
             "x",
             Lambda::new(
                 vec![],

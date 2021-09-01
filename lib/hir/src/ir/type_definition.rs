@@ -34,25 +34,6 @@ impl TypeDefinition {
         }
     }
 
-    // TODO Move to a hir_test crate.
-    pub fn without_source(
-        name: impl Into<String>,
-        elements: Vec<types::RecordElement>,
-        open: bool,
-        public: bool,
-        external: bool,
-    ) -> Self {
-        Self::new(
-            name,
-            "",
-            elements,
-            open,
-            public,
-            external,
-            crate::test::position(),
-        )
-    }
-
     pub fn name(&self) -> &str {
         &self.name
     }

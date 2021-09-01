@@ -132,6 +132,7 @@ mod tests {
         },
         test, types,
     };
+    use hir::test::ModuleFake;
     use pretty_assertions::assert_eq;
 
     fn compile_module(module: &Module) -> Result<mir::ir::Module, CompileError> {

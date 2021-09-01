@@ -162,6 +162,7 @@ mod tests {
         },
         test,
     };
+    use hir::test::{DefinitionFake, ModuleFake, TypeDefinitionFake};
 
     fn validate_module(module: &Module) -> Result<(), CompileError> {
         validate(
@@ -185,14 +186,14 @@ mod tests {
         assert_eq!(
             validate_module(
                 &Module::empty()
-                    .set_type_definitions(vec![TypeDefinition::without_source(
+                    .set_type_definitions(vec![TypeDefinition::fake(
                         "error",
                         vec![],
                         false,
                         false,
                         false
                     )])
-                    .set_definitions(vec![Definition::without_source(
+                    .set_definitions(vec![Definition::fake(
                         "x",
                         Lambda::new(
                             vec![Argument::new(
@@ -234,14 +235,14 @@ mod tests {
         assert_eq!(
             validate_module(
                 &Module::empty()
-                    .set_type_definitions(vec![TypeDefinition::without_source(
+                    .set_type_definitions(vec![TypeDefinition::fake(
                         "error",
                         vec![],
                         false,
                         false,
                         false
                     )])
-                    .set_definitions(vec![Definition::without_source(
+                    .set_definitions(vec![Definition::fake(
                         "x",
                         Lambda::new(
                             vec![Argument::new("x", union_type.clone())],
@@ -276,14 +277,14 @@ mod tests {
         assert_eq!(
             validate_module(
                 &Module::empty()
-                    .set_type_definitions(vec![TypeDefinition::without_source(
+                    .set_type_definitions(vec![TypeDefinition::fake(
                         "error",
                         vec![],
                         false,
                         false,
                         false
                     )])
-                    .set_definitions(vec![Definition::without_source(
+                    .set_definitions(vec![Definition::fake(
                         "x",
                         Lambda::new(
                             vec![Argument::new(
@@ -325,14 +326,14 @@ mod tests {
         assert_eq!(
             validate_module(
                 &Module::empty()
-                    .set_type_definitions(vec![TypeDefinition::without_source(
+                    .set_type_definitions(vec![TypeDefinition::fake(
                         "error",
                         vec![],
                         false,
                         false,
                         false
                     )])
-                    .set_definitions(vec![Definition::without_source(
+                    .set_definitions(vec![Definition::fake(
                         "x",
                         Lambda::new(
                             vec![Argument::new(

@@ -54,6 +54,7 @@ pub fn compile(module: &ir::Module) -> Result<interface::Module, CompileError> {
 mod tests {
     use super::*;
     use crate::{test, types};
+    use hir::test::{DefinitionFake, ModuleFake};
 
     #[test]
     fn compile_empty_module() {
@@ -67,7 +68,7 @@ mod tests {
     fn compile_without_private_declaration() {
         assert_eq!(
             compile(
-                &ir::Module::empty().set_definitions(vec![ir::Definition::without_source(
+                &ir::Module::empty().set_definitions(vec![ir::Definition::fake(
                     "foo",
                     ir::Lambda::new(
                         vec![],

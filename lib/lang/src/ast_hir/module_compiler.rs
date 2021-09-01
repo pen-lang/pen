@@ -342,6 +342,7 @@ fn is_name_public(name: &str) -> bool {
 mod tests {
     use super::*;
     use crate::test;
+    use hir::test::ModuleFake;
     use pretty_assertions::assert_eq;
 
     #[test]

@@ -31,16 +31,6 @@ impl TypeAlias {
         }
     }
 
-    // TODO Move to a hir_test crate.
-    pub fn without_source(
-        name: impl Into<String>,
-        type_: impl Into<Type>,
-        public: bool,
-        external: bool,
-    ) -> Self {
-        Self::new(name, "", type_, public, external, crate::test::position())
-    }
-
     pub fn name(&self) -> &str {
         &self.name
     }

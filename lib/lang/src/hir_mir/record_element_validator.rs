@@ -97,6 +97,7 @@ mod tests {
         *,
     };
     use crate::{test, types};
+    use hir::test::{DefinitionFake, ModuleFake, TypeDefinitionFake};
 
     fn validate_module(module: &Module) -> Result<(), CompileError> {
         validate(
@@ -116,7 +117,7 @@ mod tests {
 
         validate_module(
             &Module::empty()
-                .set_type_definitions(vec![TypeDefinition::without_source(
+                .set_type_definitions(vec![TypeDefinition::fake(
                     "r",
                     vec![types::RecordElement::new(
                         "x",
@@ -126,7 +127,7 @@ mod tests {
                     false,
                     false,
                 )])
-                .set_definitions(vec![Definition::without_source(
+                .set_definitions(vec![Definition::fake(
                     "x",
                     Lambda::new(
                         vec![],
@@ -155,7 +156,7 @@ mod tests {
 
         validate_module(
             &Module::empty()
-                .set_type_definitions(vec![TypeDefinition::without_source(
+                .set_type_definitions(vec![TypeDefinition::fake(
                     "r",
                     vec![types::RecordElement::new(
                         "x",
@@ -165,7 +166,7 @@ mod tests {
                     false,
                     true,
                 )])
-                .set_definitions(vec![Definition::without_source(
+                .set_definitions(vec![Definition::fake(
                     "x",
                     Lambda::new(
                         vec![],
@@ -193,7 +194,7 @@ mod tests {
 
         validate_module(
             &Module::empty()
-                .set_type_definitions(vec![TypeDefinition::without_source(
+                .set_type_definitions(vec![TypeDefinition::fake(
                     "r",
                     vec![types::RecordElement::new(
                         "x",
@@ -203,7 +204,7 @@ mod tests {
                     false,
                     false,
                 )])
-                .set_definitions(vec![Definition::without_source(
+                .set_definitions(vec![Definition::fake(
                     "x",
                     Lambda::new(
                         vec![Argument::new("x", record_type.clone())],
@@ -229,7 +230,7 @@ mod tests {
 
         validate_module(
             &Module::empty()
-                .set_type_definitions(vec![TypeDefinition::without_source(
+                .set_type_definitions(vec![TypeDefinition::fake(
                     "r",
                     vec![types::RecordElement::new(
                         "x",
@@ -239,7 +240,7 @@ mod tests {
                     false,
                     true,
                 )])
-                .set_definitions(vec![Definition::without_source(
+                .set_definitions(vec![Definition::fake(
                     "x",
                     Lambda::new(
                         vec![Argument::new("x", record_type.clone())],
@@ -264,7 +265,7 @@ mod tests {
 
         validate_module(
             &Module::empty()
-                .set_type_definitions(vec![TypeDefinition::without_source(
+                .set_type_definitions(vec![TypeDefinition::fake(
                     "r",
                     vec![types::RecordElement::new(
                         "x",
@@ -274,7 +275,7 @@ mod tests {
                     false,
                     false,
                 )])
-                .set_definitions(vec![Definition::without_source(
+                .set_definitions(vec![Definition::fake(
                     "x",
                     Lambda::new(
                         vec![Argument::new("x", record_type.clone())],
@@ -304,7 +305,7 @@ mod tests {
 
         validate_module(
             &Module::empty()
-                .set_type_definitions(vec![TypeDefinition::without_source(
+                .set_type_definitions(vec![TypeDefinition::fake(
                     "r",
                     vec![types::RecordElement::new(
                         "x",
@@ -314,7 +315,7 @@ mod tests {
                     false,
                     true,
                 )])
-                .set_definitions(vec![Definition::without_source(
+                .set_definitions(vec![Definition::fake(
                     "x",
                     Lambda::new(
                         vec![Argument::new("x", record_type.clone())],

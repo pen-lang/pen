@@ -191,6 +191,7 @@ fn rename_types(
 mod tests {
     use super::*;
     use crate::{test, types};
+    use hir::test::{DefinitionFake, ModuleFake, TypeDefinitionFake};
     use pretty_assertions::assert_eq;
 
     #[test]
@@ -205,7 +206,7 @@ mod tests {
     fn rename_variable() {
         assert_eq!(
             compile(
-                &ir::Module::empty().set_definitions(vec![ir::Definition::without_source(
+                &ir::Module::empty().set_definitions(vec![ir::Definition::fake(
                     "Foo",
                     ir::Lambda::new(
                         vec![],
@@ -246,7 +247,7 @@ mod tests {
                     ),
                     test::position()
                 )])
-                .set_definitions(vec![ir::Definition::without_source(
+                .set_definitions(vec![ir::Definition::fake(
                     "Foo",
                     ir::Lambda::new(
                         vec![],
@@ -264,7 +265,7 @@ mod tests {
         assert_eq!(
             compile(
                 &ir::Module::empty()
-                    .set_type_definitions(vec![ir::TypeDefinition::without_source(
+                    .set_type_definitions(vec![ir::TypeDefinition::fake(
                         "Foo",
                         vec![types::RecordElement::new(
                             "foo",
@@ -274,7 +275,7 @@ mod tests {
                         false,
                         false,
                     )])
-                    .set_definitions(vec![ir::Definition::without_source(
+                    .set_definitions(vec![ir::Definition::fake(
                         "Foo",
                         ir::Lambda::new(
                             vec![],
@@ -314,7 +315,7 @@ mod tests {
                         true,
                         test::position()
                     ),
-                    ir::TypeDefinition::without_source(
+                    ir::TypeDefinition::fake(
                         "Foo",
                         vec![types::RecordElement::new(
                             "foo",
@@ -325,7 +326,7 @@ mod tests {
                         false,
                     )
                 ])
-                .set_definitions(vec![ir::Definition::without_source(
+                .set_definitions(vec![ir::Definition::fake(
                     "Foo",
                     ir::Lambda::new(
                         vec![],
@@ -343,7 +344,7 @@ mod tests {
         assert_eq!(
             compile(
                 &ir::Module::empty()
-                    .set_type_definitions(vec![ir::TypeDefinition::without_source(
+                    .set_type_definitions(vec![ir::TypeDefinition::fake(
                         "Foo",
                         vec![types::RecordElement::new(
                             "foo",
@@ -353,7 +354,7 @@ mod tests {
                         false,
                         false,
                     )])
-                    .set_definitions(vec![ir::Definition::without_source(
+                    .set_definitions(vec![ir::Definition::fake(
                         "Foo",
                         ir::Lambda::new(
                             vec![],
@@ -382,7 +383,7 @@ mod tests {
                 &[]
             ),
             ir::Module::empty()
-                .set_type_definitions(vec![ir::TypeDefinition::without_source(
+                .set_type_definitions(vec![ir::TypeDefinition::fake(
                     "Foo",
                     vec![types::RecordElement::new(
                         "foo",
@@ -400,7 +401,7 @@ mod tests {
                     true,
                     test::position(),
                 )])
-                .set_definitions(vec![ir::Definition::without_source(
+                .set_definitions(vec![ir::Definition::fake(
                     "Foo",
                     ir::Lambda::new(
                         vec![],
@@ -415,7 +416,7 @@ mod tests {
 
     #[test]
     fn do_not_rename_private_type_definition() {
-        let type_definition = ir::TypeDefinition::without_source(
+        let type_definition = ir::TypeDefinition::fake(
             "Foo",
             vec![types::RecordElement::new(
                 "foo",
@@ -425,7 +426,7 @@ mod tests {
             false,
             false,
         );
-        let definition = ir::Definition::without_source(
+        let definition = ir::Definition::fake(
             "Foo",
             ir::Lambda::new(
                 vec![],
@@ -479,7 +480,7 @@ mod tests {
 
     #[test]
     fn do_not_rename_private_type_alias() {
-        let type_definition = ir::TypeDefinition::without_source(
+        let type_definition = ir::TypeDefinition::fake(
             "Foo",
             vec![types::RecordElement::new(
                 "foo",
@@ -489,7 +490,7 @@ mod tests {
             false,
             false,
         );
-        let definition = ir::Definition::without_source(
+        let definition = ir::Definition::fake(
             "Foo",
             ir::Lambda::new(
                 vec![],

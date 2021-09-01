@@ -133,6 +133,7 @@ mod tests {
         },
         test,
     };
+    use hir::test::ModuleFake;
     use pretty_assertions::assert_eq;
 
     fn transform_module(module: &Module) -> Result<Module, CompileError> {
