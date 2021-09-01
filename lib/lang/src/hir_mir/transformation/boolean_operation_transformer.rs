@@ -24,7 +24,7 @@ pub fn transform(operation: &BooleanOperation) -> Expression {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::position::Position;
+    use crate::test;
     use pretty_assertions::assert_eq;
 
     #[test]
@@ -32,15 +32,15 @@ mod tests {
         assert_eq!(
             transform(&BooleanOperation::new(
                 BooleanOperator::And,
-                Boolean::new(true, Position::dummy()),
-                Boolean::new(true, Position::dummy()),
-                Position::dummy(),
+                Boolean::new(true, test::position()),
+                Boolean::new(true, test::position()),
+                test::position(),
             )),
             If::new(
-                Boolean::new(true, Position::dummy()),
-                Boolean::new(true, Position::dummy()),
-                Boolean::new(false, Position::dummy()),
-                Position::dummy(),
+                Boolean::new(true, test::position()),
+                Boolean::new(true, test::position()),
+                Boolean::new(false, test::position()),
+                test::position(),
             )
             .into(),
         );
@@ -51,15 +51,15 @@ mod tests {
         assert_eq!(
             transform(&BooleanOperation::new(
                 BooleanOperator::Or,
-                Boolean::new(false, Position::dummy()),
-                Boolean::new(false, Position::dummy()),
-                Position::dummy(),
+                Boolean::new(false, test::position()),
+                Boolean::new(false, test::position()),
+                test::position(),
             )),
             If::new(
-                Boolean::new(false, Position::dummy()),
-                Boolean::new(true, Position::dummy()),
-                Boolean::new(false, Position::dummy()),
-                Position::dummy(),
+                Boolean::new(false, test::position()),
+                Boolean::new(true, test::position()),
+                Boolean::new(false, test::position()),
+                test::position(),
             )
             .into(),
         );

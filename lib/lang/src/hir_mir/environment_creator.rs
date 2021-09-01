@@ -30,15 +30,12 @@ pub fn create_from_module(module: &Module) -> HashMap<String, Type> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{position::Position, types};
+    use crate::{test, types};
 
     #[test]
     fn create_with_foreign_declaration() {
-        let type_ = types::Function::new(
-            vec![],
-            types::None::new(Position::dummy()),
-            Position::dummy(),
-        );
+        let type_ =
+            types::Function::new(vec![], types::None::new(test::position()), test::position());
 
         assert_eq!(
             create_from_module(&Module::empty().set_foreign_declarations(vec![
@@ -47,7 +44,7 @@ mod tests {
                     "bar",
                     CallingConvention::Native,
                     type_.clone(),
-                    Position::dummy()
+                    test::position()
                 )
             ])),
             vec![("foo".into(), type_.into())].into_iter().collect()

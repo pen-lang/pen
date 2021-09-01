@@ -15,7 +15,7 @@ pub fn rename(module: &Module, names: &HashMap<String, String>) -> Module {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{position::Position, types};
+    use crate::{test, types};
     use pretty_assertions::assert_eq;
 
     #[test]
@@ -26,9 +26,9 @@ mod tests {
                     "x",
                     Lambda::new(
                         vec![],
-                        types::None::new(Position::dummy()),
-                        Variable::new("x", Position::dummy()),
-                        Position::dummy()
+                        types::None::new(test::position()),
+                        Variable::new("x", test::position()),
+                        test::position()
                     ),
                     false
                 )],),
@@ -38,9 +38,9 @@ mod tests {
                 "x",
                 Lambda::new(
                     vec![],
-                    types::None::new(Position::dummy()),
-                    Variable::new("foo.x", Position::dummy()),
-                    Position::dummy()
+                    types::None::new(test::position()),
+                    Variable::new("foo.x", test::position()),
+                    test::position()
                 ),
                 false
             )],)
@@ -52,10 +52,10 @@ mod tests {
         let module = Module::empty().set_definitions(vec![Definition::without_source(
             "x",
             Lambda::new(
-                vec![Argument::new("x", types::None::new(Position::dummy()))],
-                types::None::new(Position::dummy()),
-                Variable::new("x", Position::dummy()),
-                Position::dummy(),
+                vec![Argument::new("x", types::None::new(test::position()))],
+                types::None::new(test::position()),
+                Variable::new("x", test::position()),
+                test::position(),
             ),
             false,
         )]);
@@ -77,15 +77,15 @@ mod tests {
                     "x",
                     Lambda::new(
                         vec![],
-                        types::None::new(Position::dummy()),
+                        types::None::new(test::position()),
                         Let::new(
                             Some("x".into()),
                             None,
-                            None::new(Position::dummy()),
-                            Variable::new("x", Position::dummy()),
-                            Position::dummy(),
+                            None::new(test::position()),
+                            Variable::new("x", test::position()),
+                            test::position(),
                         ),
-                        Position::dummy()
+                        test::position()
                     ),
                     false
                 )],),
@@ -95,15 +95,15 @@ mod tests {
                 "x",
                 Lambda::new(
                     vec![],
-                    types::None::new(Position::dummy()),
+                    types::None::new(test::position()),
                     Let::new(
                         Some("x".into()),
                         None,
-                        None::new(Position::dummy()),
-                        Variable::new("x", Position::dummy()),
-                        Position::dummy(),
+                        None::new(test::position()),
+                        Variable::new("x", test::position()),
+                        test::position(),
                     ),
-                    Position::dummy()
+                    test::position()
                 ),
                 false
             )],)
@@ -116,15 +116,15 @@ mod tests {
             "x",
             Lambda::new(
                 vec![],
-                types::None::new(Position::dummy()),
+                types::None::new(test::position()),
                 Let::new(
                     Some("x".into()),
                     None,
-                    None::new(Position::dummy()),
-                    Variable::new("x", Position::dummy()),
-                    Position::dummy(),
+                    None::new(test::position()),
+                    Variable::new("x", test::position()),
+                    test::position(),
                 ),
-                Position::dummy(),
+                test::position(),
             ),
             false,
         )]);

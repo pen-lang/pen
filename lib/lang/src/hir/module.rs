@@ -2,7 +2,7 @@ use super::{
     definition::Definition, type_definition::TypeDefinition, Declaration, ForeignDeclaration,
     TypeAlias,
 };
-use crate::position::Position;
+use position::Position;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Module {
@@ -35,7 +35,14 @@ impl Module {
 
     #[cfg(test)]
     pub fn empty() -> Self {
-        Self::new(vec![], vec![], vec![], vec![], vec![], Position::dummy())
+        Self::new(
+            vec![],
+            vec![],
+            vec![],
+            vec![],
+            vec![],
+            crate::test::position(),
+        )
     }
 
     #[cfg(test)]

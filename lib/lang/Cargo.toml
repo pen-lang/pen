@@ -9,6 +9,7 @@ combine = { version = "4", features = ["regex"] }
 itertools = "0.10"
 mir = { path = "../mir" }
 once_cell = "1"
+position = { path = "../position" }
 regex = "1"
 serde = { version = "1", features = ["derive", "rc"] }
 

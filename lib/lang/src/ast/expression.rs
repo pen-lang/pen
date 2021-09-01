@@ -3,7 +3,7 @@ use super::{
     none::None, number::Number, record::Record, string::ByteString, variable::Variable,
     BinaryOperation, Lambda, RecordDeconstruction, UnaryOperation,
 };
-use crate::position::Position;
+use position::Position;
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum Expression {

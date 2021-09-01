@@ -3,7 +3,7 @@ use super::{
     equality_operation::EqualityOperation, not_operation::NotOperation,
     order_operation::OrderOperation, try_operation::TryOperation,
 };
-use crate::position::Position;
+use position::Position;
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum Operation {

@@ -1,4 +1,5 @@
-use crate::{position::Position, types::Type};
+use crate::types::Type;
+use position::Position;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Deserialize, Hash, PartialEq, Serialize)]
@@ -37,7 +38,7 @@ impl TypeAlias {
         public: bool,
         external: bool,
     ) -> Self {
-        Self::new(name, "", type_, public, external, Position::dummy())
+        Self::new(name, "", type_, public, external, crate::test::position())
     }
 
     pub fn name(&self) -> &str {

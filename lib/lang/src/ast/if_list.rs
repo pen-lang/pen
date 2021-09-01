@@ -1,5 +1,5 @@
 use super::{expression::Expression, Block};
-use crate::position::Position;
+use position::Position;
 use std::sync::Arc;
 
 #[derive(Clone, Debug, PartialEq)]

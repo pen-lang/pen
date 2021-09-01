@@ -1,5 +1,5 @@
 use super::super::*;
-use crate::position::Position;
+use position::Position;
 use std::{
     error::Error,
     fmt::{self, Display, Formatter},

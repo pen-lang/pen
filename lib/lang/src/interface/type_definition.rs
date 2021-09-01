@@ -1,4 +1,5 @@
-use crate::{position::Position, types};
+use crate::types;
+use position::Position;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Deserialize, Hash, PartialEq, Serialize)]
@@ -37,7 +38,7 @@ impl TypeDefinition {
         open: bool,
         public: bool,
     ) -> Self {
-        Self::new(name, "", elements, open, public, Position::dummy())
+        Self::new(name, "", elements, open, public, crate::test::position())
     }
 
     pub fn name(&self) -> &str {

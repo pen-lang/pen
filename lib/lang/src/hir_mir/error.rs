@@ -1,8 +1,8 @@
 use crate::{
     hir::*,
-    position::Position,
     types::{self, analysis::TypeError},
 };
+use position::Position;
 use std::{
     error::Error,
     fmt::{self, Display, Formatter},

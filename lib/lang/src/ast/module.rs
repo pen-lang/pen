@@ -1,7 +1,7 @@
 use super::{
     definition::Definition, type_definition::TypeDefinition, ForeignImport, Import, TypeAlias,
 };
-use crate::position::Position;
+use position::Position;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Module {

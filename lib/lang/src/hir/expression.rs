@@ -4,7 +4,7 @@ use super::{
     record_deconstruction::RecordDeconstruction, record_update::RecordUpdate, string::ByteString,
     type_coercion::TypeCoercion, variable::Variable, Lambda, Let, Thunk,
 };
-use crate::position::Position;
+use position::Position;
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum Expression {

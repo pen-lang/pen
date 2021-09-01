@@ -1,5 +1,6 @@
 use super::{expression::Expression, RecordElement};
-use crate::{position::Position, types::Type};
+use crate::types::Type;
+use position::Position;
 use std::sync::Arc;
 
 #[derive(Clone, Debug, PartialEq)]

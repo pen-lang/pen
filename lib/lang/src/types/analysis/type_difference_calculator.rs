@@ -28,15 +28,15 @@ pub fn calculate(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{position::Position, types};
+    use crate::{test, types};
     use pretty_assertions::assert_eq;
 
     #[test]
     fn calculate_with_any_and_any() {
         assert_eq!(
             calculate(
-                &types::Any::new(Position::dummy()).into(),
-                &types::Any::new(Position::dummy()).into(),
+                &types::Any::new(test::position()).into(),
+                &types::Any::new(test::position()).into(),
                 &Default::default(),
             ),
             Ok(None)
@@ -47,11 +47,11 @@ mod tests {
     fn calculate_with_any_and_number() {
         assert_eq!(
             calculate(
-                &types::Any::new(Position::dummy()).into(),
-                &types::Number::new(Position::dummy()).into(),
+                &types::Any::new(test::position()).into(),
+                &types::Number::new(test::position()).into(),
                 &Default::default(),
             ),
-            Ok(Some(types::Any::new(Position::dummy()).into()))
+            Ok(Some(types::Any::new(test::position()).into()))
         );
     }
 
@@ -59,8 +59,8 @@ mod tests {
     fn calculate_with_number_and_any() {
         assert_eq!(
             calculate(
-                &types::Number::new(Position::dummy()).into(),
-                &types::Any::new(Position::dummy()).into(),
+                &types::Number::new(test::position()).into(),
+                &types::Any::new(test::position()).into(),
                 &Default::default(),
             ),
             Ok(None)
@@ -71,8 +71,8 @@ mod tests {
     fn calculate_with_number_and_number() {
         assert_eq!(
             calculate(
-                &types::Number::new(Position::dummy()).into(),
-                &types::Number::new(Position::dummy()).into(),
+                &types::Number::new(test::position()).into(),
+                &types::Number::new(test::position()).into(),
                 &Default::default(),
             ),
             Ok(None)
@@ -84,15 +84,15 @@ mod tests {
         assert_eq!(
             calculate(
                 &types::Union::new(
-                    types::Number::new(Position::dummy()),
-                    types::None::new(Position::dummy()),
-                    Position::dummy()
+                    types::Number::new(test::position()),
+                    types::None::new(test::position()),
+                    test::position()
                 )
                 .into(),
-                &types::Number::new(Position::dummy()).into(),
+                &types::Number::new(test::position()).into(),
                 &Default::default(),
             ),
-            Ok(Some(types::None::new(Position::dummy()).into()))
+            Ok(Some(types::None::new(test::position()).into()))
         );
     }
 
@@ -102,23 +102,23 @@ mod tests {
             calculate(
                 &types::Union::new(
                     types::Union::new(
-                        types::Number::new(Position::dummy()),
-                        types::Boolean::new(Position::dummy()),
-                        Position::dummy()
+                        types::Number::new(test::position()),
+                        types::Boolean::new(test::position()),
+                        test::position()
                     ),
-                    types::None::new(Position::dummy()),
-                    Position::dummy()
+                    types::None::new(test::position()),
+                    test::position()
                 )
                 .into(),
                 &types::Union::new(
-                    types::Boolean::new(Position::dummy()),
-                    types::None::new(Position::dummy()),
-                    Position::dummy()
+                    types::Boolean::new(test::position()),
+                    types::None::new(test::position()),
+                    test::position()
                 )
                 .into(),
                 &Default::default(),
             ),
-            Ok(Some(types::Number::new(Position::dummy()).into()))
+            Ok(Some(types::Number::new(test::position()).into()))
         );
     }
 }

@@ -1,5 +1,6 @@
 use super::error::CompileError;
-use crate::{ast, hir, position::Position, types};
+use crate::{ast, hir, types};
+use position::Position;
 
 pub fn compile(module: &ast::Module) -> Result<hir::Module, CompileError> {
     Ok(hir::Module::new(
@@ -346,6 +347,7 @@ fn is_name_public(name: &str) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::test;
     use pretty_assertions::assert_eq;
 
     #[test]
@@ -357,7 +359,7 @@ mod tests {
                 vec![],
                 vec![],
                 vec![],
-                Position::dummy()
+                test::position()
             )),
             Ok(hir::Module::empty())
         );
@@ -369,28 +371,24 @@ mod tests {
             compile(&ast::Module::new(
                 vec![],
                 vec![],
-                vec![ast::TypeDefinition::new("Foo1", vec![], Position::dummy())],
+                vec![ast::TypeDefinition::new("Foo1", vec![], test::position())],
                 vec![ast::TypeAlias::new(
                     "Foo2",
-                    types::None::new(Position::dummy()),
-                    Position::dummy(),
+                    types::None::new(test::position()),
+                    test::position(),
                 )],
                 vec![ast::Definition::new(
                     "Foo3",
                     ast::Lambda::new(
                         vec![],
-                        types::None::new(Position::dummy()),
-                        ast::Block::new(
-                            vec![],
-                            ast::None::new(Position::dummy()),
-                            Position::dummy()
-                        ),
-                        Position::dummy(),
+                        types::None::new(test::position()),
+                        ast::Block::new(vec![], ast::None::new(test::position()), test::position()),
+                        test::position(),
                     ),
                     false,
-                    Position::dummy(),
+                    test::position(),
                 )],
-                Position::dummy(),
+                test::position(),
             )),
             Ok(hir::Module::empty()
                 .set_type_definitions(vec![hir::TypeDefinition::new(
@@ -400,28 +398,28 @@ mod tests {
                     false,
                     true,
                     false,
-                    Position::dummy()
+                    test::position()
                 )])
                 .set_type_aliases(vec![hir::TypeAlias::new(
                     "Foo2",
                     "Foo2",
-                    types::None::new(Position::dummy()),
+                    types::None::new(test::position()),
                     true,
                     false,
-                    Position::dummy()
+                    test::position()
                 )])
                 .set_definitions(vec![hir::Definition::new(
                     "Foo3",
                     "Foo3",
                     hir::Lambda::new(
                         vec![],
-                        types::None::new(Position::dummy()),
-                        hir::None::new(Position::dummy()),
-                        Position::dummy(),
+                        types::None::new(test::position()),
+                        hir::None::new(test::position()),
+                        test::position(),
                     ),
                     false,
                     true,
-                    Position::dummy()
+                    test::position()
                 )]))
         );
     }

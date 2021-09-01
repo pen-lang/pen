@@ -1,5 +1,6 @@
 use super::CompileError;
-use crate::{hir::*, position::Position};
+use crate::hir::*;
+use position::Position;
 use std::collections::HashMap;
 
 pub fn validate(module: &Module) -> Result<(), CompileError> {
@@ -22,7 +23,7 @@ pub fn validate(module: &Module) -> Result<(), CompileError> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::types;
+    use crate::{test, types};
 
     #[test]
     fn validate_module() {
@@ -30,9 +31,9 @@ mod tests {
             "x",
             Lambda::new(
                 vec![],
-                types::None::new(Position::dummy()),
-                None::new(Position::dummy()),
-                Position::dummy(),
+                types::None::new(test::position()),
+                None::new(test::position()),
+                test::position(),
             ),
             false,
         );
@@ -40,8 +41,8 @@ mod tests {
         assert_eq!(
             validate(&Module::empty().set_definitions(vec![definition.clone(), definition])),
             Err(CompileError::DuplicateFunctionNames(
-                Position::dummy(),
-                Position::dummy()
+                test::position(),
+                test::position()
             ))
         );
     }

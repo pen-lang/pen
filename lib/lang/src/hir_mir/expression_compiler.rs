@@ -467,7 +467,7 @@ fn compile_record_elements(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::position::Position;
+    use crate::test;
 
     mod if_type {
         use super::*;
@@ -479,19 +479,19 @@ mod tests {
                 compile(
                     &IfType::new(
                         "y",
-                        Variable::new("x", Position::dummy()),
+                        Variable::new("x", test::position()),
                         vec![
                             IfTypeBranch::new(
-                                types::Number::new(Position::dummy()),
-                                None::new(Position::dummy()),
+                                types::Number::new(test::position()),
+                                None::new(test::position()),
                             ),
                             IfTypeBranch::new(
-                                types::None::new(Position::dummy()),
-                                None::new(Position::dummy()),
+                                types::None::new(test::position()),
+                                None::new(test::position()),
                             )
                         ],
                         None,
-                        Position::dummy(),
+                        test::position(),
                     )
                     .into(),
                     &TypeContext::dummy(Default::default(), Default::default()),
@@ -522,17 +522,17 @@ mod tests {
                 compile(
                     &IfType::new(
                         "y",
-                        Variable::new("x", Position::dummy()),
+                        Variable::new("x", test::position()),
                         vec![IfTypeBranch::new(
-                            types::Number::new(Position::dummy()),
-                            None::new(Position::dummy()),
+                            types::Number::new(test::position()),
+                            None::new(test::position()),
                         )],
                         Some(ElseBranch::new(
-                            Some(types::None::new(Position::dummy()).into()),
-                            None::new(Position::dummy()),
-                            Position::dummy()
+                            Some(types::None::new(test::position()).into()),
+                            None::new(test::position()),
+                            test::position()
                         )),
-                        Position::dummy(),
+                        test::position(),
                     )
                     .into(),
                     &TypeContext::dummy(Default::default(), Default::default()),
@@ -563,17 +563,17 @@ mod tests {
                 compile(
                     &IfType::new(
                         "y",
-                        Variable::new("x", Position::dummy()),
+                        Variable::new("x", test::position()),
                         vec![IfTypeBranch::new(
-                            types::Number::new(Position::dummy()),
-                            None::new(Position::dummy()),
+                            types::Number::new(test::position()),
+                            None::new(test::position()),
                         )],
                         Some(ElseBranch::new(
-                            Some(types::Any::new(Position::dummy()).into()),
-                            None::new(Position::dummy()),
-                            Position::dummy()
+                            Some(types::Any::new(test::position()).into()),
+                            None::new(test::position()),
+                            test::position()
                         )),
-                        Position::dummy(),
+                        test::position(),
                     )
                     .into(),
                     &TypeContext::dummy(Default::default(), Default::default()),
@@ -600,17 +600,17 @@ mod tests {
                 compile(
                     &IfType::new(
                         "y",
-                        Variable::new("x", Position::dummy()),
+                        Variable::new("x", test::position()),
                         vec![IfTypeBranch::new(
                             types::Union::new(
-                                types::Number::new(Position::dummy()),
-                                types::None::new(Position::dummy()),
-                                Position::dummy()
+                                types::Number::new(test::position()),
+                                types::None::new(test::position()),
+                                test::position()
                             ),
-                            None::new(Position::dummy()),
+                            None::new(test::position()),
                         )],
                         None,
-                        Position::dummy(),
+                        test::position(),
                     )
                     .into(),
                     &TypeContext::dummy(Default::default(), Default::default()),
@@ -654,8 +654,7 @@ mod tests {
         #[test]
         fn compile_list_branch() {
             let type_context = TypeContext::dummy(Default::default(), Default::default());
-            let list_type =
-                types::List::new(types::None::new(Position::dummy()), Position::dummy());
+            let list_type = types::List::new(types::None::new(test::position()), test::position());
             let concrete_list_type =
                 type_compiler::compile_concrete_list(&list_type, type_context.types()).unwrap();
 
@@ -663,13 +662,13 @@ mod tests {
                 compile(
                     &IfType::new(
                         "y",
-                        Variable::new("x", Position::dummy()),
+                        Variable::new("x", test::position()),
                         vec![IfTypeBranch::new(
                             list_type,
-                            Variable::new("y", Position::dummy()),
+                            Variable::new("y", test::position()),
                         )],
                         None,
-                        Position::dummy(),
+                        test::position(),
                     )
                     .into(),
                     &type_context,
@@ -701,8 +700,7 @@ mod tests {
         #[test]
         fn compile_union_branch_including_list() {
             let type_context = TypeContext::dummy(Default::default(), Default::default());
-            let list_type =
-                types::List::new(types::None::new(Position::dummy()), Position::dummy());
+            let list_type = types::List::new(types::None::new(test::position()), test::position());
             let concrete_list_type =
                 type_compiler::compile_concrete_list(&list_type, type_context.types()).unwrap();
 
@@ -710,17 +708,17 @@ mod tests {
                 compile(
                     &IfType::new(
                         "y",
-                        Variable::new("x", Position::dummy()),
+                        Variable::new("x", test::position()),
                         vec![IfTypeBranch::new(
                             types::Union::new(
                                 list_type,
-                                types::None::new(Position::dummy()),
-                                Position::dummy()
+                                types::None::new(test::position()),
+                                test::position()
                             ),
-                            Variable::new("y", Position::dummy()),
+                            Variable::new("y", test::position()),
                         )],
                         None,
-                        Position::dummy(),
+                        test::position(),
                     )
                     .into(),
                     &type_context,
@@ -771,13 +769,13 @@ mod tests {
             assert_eq!(
                 compile(
                     &RecordConstruction::new(
-                        types::Record::new("r", Position::dummy()),
+                        types::Record::new("r", test::position()),
                         vec![RecordElement::new(
                             "x",
-                            None::new(Position::dummy()),
-                            Position::dummy()
+                            None::new(test::position()),
+                            test::position()
                         )],
-                        Position::dummy()
+                        test::position()
                     )
                     .into(),
                     &TypeContext::dummy(
@@ -786,7 +784,7 @@ mod tests {
                             "r".into(),
                             vec![types::RecordElement::new(
                                 "x",
-                                types::None::new(Position::dummy())
+                                types::None::new(test::position())
                             )]
                         )]
                         .into_iter()
@@ -811,20 +809,16 @@ mod tests {
             assert_eq!(
                 compile(
                     &RecordConstruction::new(
-                        types::Record::new("r", Position::dummy()),
+                        types::Record::new("r", test::position()),
                         vec![
                             RecordElement::new(
                                 "x",
-                                Number::new(42.0, Position::dummy()),
-                                Position::dummy()
+                                Number::new(42.0, test::position()),
+                                test::position()
                             ),
-                            RecordElement::new(
-                                "y",
-                                None::new(Position::dummy()),
-                                Position::dummy()
-                            )
+                            RecordElement::new("y", None::new(test::position()), test::position())
                         ],
-                        Position::dummy()
+                        test::position()
                     )
                     .into(),
                     &TypeContext::dummy(
@@ -834,9 +828,9 @@ mod tests {
                             vec![
                                 types::RecordElement::new(
                                     "x",
-                                    types::Number::new(Position::dummy())
+                                    types::Number::new(test::position())
                                 ),
-                                types::RecordElement::new("y", types::None::new(Position::dummy()))
+                                types::RecordElement::new("y", types::None::new(test::position()))
                             ]
                         )]
                         .into_iter()
@@ -869,9 +863,9 @@ mod tests {
             assert_eq!(
                 compile(
                     &RecordConstruction::new(
-                        types::Record::new("r", Position::dummy()),
+                        types::Record::new("r", test::position()),
                         vec![],
-                        Position::dummy()
+                        test::position()
                     )
                     .into(),
                     &TypeContext::dummy(
@@ -888,18 +882,15 @@ mod tests {
             assert_eq!(
                 compile(
                     &RecordConstruction::new(
-                        types::Reference::new("r", Position::dummy()),
+                        types::Reference::new("r", test::position()),
                         vec![],
-                        Position::dummy()
+                        test::position()
                     )
                     .into(),
                     &TypeContext::dummy(
-                        vec![(
-                            "r".into(),
-                            types::Record::new("r", Position::dummy()).into()
-                        )]
-                        .into_iter()
-                        .collect(),
+                        vec![("r".into(), types::Record::new("r", test::position()).into())]
+                            .into_iter()
+                            .collect(),
                         vec![("r".into(), vec![])].into_iter().collect()
                     ),
                 ),
@@ -919,15 +910,15 @@ mod tests {
             assert_eq!(
                 compile(
                     &TryOperation::new(
-                        Some(types::None::new(Position::dummy()).into()),
-                        Variable::new("x", Position::dummy()),
-                        Position::dummy(),
+                        Some(types::None::new(test::position()).into()),
+                        Variable::new("x", test::position()),
+                        test::position(),
                     )
                     .into(),
                     &TypeContext::dummy(
                         vec![(
                             "error".into(),
-                            types::Record::new("error", Position::dummy()).into()
+                            types::Record::new("error", test::position()).into()
                         )]
                         .into_iter()
                         .collect(),
@@ -961,20 +952,20 @@ mod tests {
                     &TryOperation::new(
                         Some(
                             types::Union::new(
-                                types::Number::new(Position::dummy()),
-                                types::None::new(Position::dummy()),
-                                Position::dummy()
+                                types::Number::new(test::position()),
+                                types::None::new(test::position()),
+                                test::position()
                             )
                             .into()
                         ),
-                        Variable::new("x", Position::dummy()),
-                        Position::dummy(),
+                        Variable::new("x", test::position()),
+                        test::position(),
                     )
                     .into(),
                     &TypeContext::dummy(
                         vec![(
                             "error".into(),
-                            types::Record::new("error", Position::dummy()).into()
+                            types::Record::new("error", test::position()).into()
                         )]
                         .into_iter()
                         .collect(),

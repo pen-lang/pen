@@ -1,4 +1,5 @@
-use crate::{ast::*, position::Position};
+use crate::ast::*;
+use position::Position;
 
 #[derive(Clone, Debug)]
 pub enum SuffixOperator {

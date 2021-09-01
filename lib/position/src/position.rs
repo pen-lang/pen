@@ -27,16 +27,6 @@ impl Position {
             line: line.into(),
         }
     }
-
-    #[cfg(test)]
-    pub fn dummy() -> Self {
-        Self {
-            path: "".into(),
-            line_number: 0,
-            column_number: 0,
-            line: "".into(),
-        }
-    }
 }
 
 impl Display for Position {

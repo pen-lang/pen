@@ -162,7 +162,7 @@ mod tests {
             error_type_configuration::ERROR_TYPE_CONFIGURATION,
             string_type_configuration::STRING_TYPE_CONFIGURATION,
         },
-        position::Position,
+        test,
     };
 
     fn validate_module(module: &Module) -> Result<(), CompileError> {
@@ -200,37 +200,37 @@ mod tests {
                             vec![Argument::new(
                                 "x",
                                 types::Union::new(
-                                    types::None::new(Position::dummy()),
+                                    types::None::new(test::position()),
                                     types::Reference::new(
                                         &ERROR_TYPE_CONFIGURATION.error_type_name,
-                                        Position::dummy(),
+                                        test::position(),
                                     ),
-                                    Position::dummy(),
+                                    test::position(),
                                 ),
                             )],
-                            types::None::new(Position::dummy()),
+                            types::None::new(test::position()),
                             TryOperation::new(
                                 None,
-                                Variable::new("x", Position::dummy()),
-                                Position::dummy(),
+                                Variable::new("x", test::position()),
+                                test::position(),
                             ),
-                            Position::dummy(),
+                            test::position(),
                         ),
                         false,
                     )])
             ),
-            Err(CompileError::InvalidTryOperation(Position::dummy()))
+            Err(CompileError::InvalidTryOperation(test::position()))
         );
     }
 
     #[test]
     fn validate_thunk() {
         let error_type =
-            types::Reference::new(&ERROR_TYPE_CONFIGURATION.error_type_name, Position::dummy());
+            types::Reference::new(&ERROR_TYPE_CONFIGURATION.error_type_name, test::position());
         let union_type = types::Union::new(
-            types::None::new(Position::dummy()),
+            types::None::new(test::position()),
             error_type,
-            Position::dummy(),
+            test::position(),
         );
 
         assert_eq!(
@@ -249,19 +249,19 @@ mod tests {
                             vec![Argument::new("x", union_type.clone())],
                             types::Function::new(
                                 vec![],
-                                types::None::new(Position::dummy()),
-                                Position::dummy()
+                                types::None::new(test::position()),
+                                test::position()
                             ),
                             Thunk::new(
                                 Some(union_type.into()),
                                 TryOperation::new(
                                     None,
-                                    Variable::new("x", Position::dummy()),
-                                    Position::dummy(),
+                                    Variable::new("x", test::position()),
+                                    test::position(),
                                 ),
-                                Position::dummy()
+                                test::position()
                             ),
-                            Position::dummy(),
+                            test::position(),
                         ),
                         false,
                     )])
@@ -273,7 +273,7 @@ mod tests {
     #[test]
     fn fail_to_validate_thunk() {
         let error_type =
-            types::Reference::new(&ERROR_TYPE_CONFIGURATION.error_type_name, Position::dummy());
+            types::Reference::new(&ERROR_TYPE_CONFIGURATION.error_type_name, test::position());
 
         assert_eq!(
             validate_module(
@@ -291,38 +291,38 @@ mod tests {
                             vec![Argument::new(
                                 "x",
                                 types::Union::new(
-                                    types::None::new(Position::dummy()),
+                                    types::None::new(test::position()),
                                     error_type,
-                                    Position::dummy(),
+                                    test::position(),
                                 ),
                             )],
                             types::Function::new(
                                 vec![],
-                                types::None::new(Position::dummy()),
-                                Position::dummy()
+                                types::None::new(test::position()),
+                                test::position()
                             ),
                             Thunk::new(
-                                Some(types::None::new(Position::dummy()).into()),
+                                Some(types::None::new(test::position()).into()),
                                 TryOperation::new(
                                     None,
-                                    Variable::new("x", Position::dummy()),
-                                    Position::dummy(),
+                                    Variable::new("x", test::position()),
+                                    test::position(),
                                 ),
-                                Position::dummy()
+                                test::position()
                             ),
-                            Position::dummy(),
+                            test::position(),
                         ),
                         false,
                     )])
             ),
-            Err(CompileError::InvalidTryOperation(Position::dummy()))
+            Err(CompileError::InvalidTryOperation(test::position()))
         );
     }
 
     #[test]
     fn fail_to_validate_list() {
         let error_type =
-            types::Reference::new(&ERROR_TYPE_CONFIGURATION.error_type_name, Position::dummy());
+            types::Reference::new(&ERROR_TYPE_CONFIGURATION.error_type_name, test::position());
 
         assert_eq!(
             validate_module(
@@ -340,34 +340,34 @@ mod tests {
                             vec![Argument::new(
                                 "x",
                                 types::Union::new(
-                                    types::None::new(Position::dummy()),
+                                    types::None::new(test::position()),
                                     error_type,
-                                    Position::dummy(),
+                                    test::position(),
                                 ),
                             )],
                             types::Function::new(
                                 vec![],
-                                types::None::new(Position::dummy()),
-                                Position::dummy()
+                                types::None::new(test::position()),
+                                test::position()
                             ),
                             List::new(
-                                types::None::new(Position::dummy()),
+                                types::None::new(test::position()),
                                 vec![ListElement::Single(
                                     TryOperation::new(
                                         None,
-                                        Variable::new("x", Position::dummy()),
-                                        Position::dummy(),
+                                        Variable::new("x", test::position()),
+                                        test::position(),
                                     )
                                     .into()
                                 )],
-                                Position::dummy()
+                                test::position()
                             ),
-                            Position::dummy(),
+                            test::position(),
                         ),
                         false,
                     )])
             ),
-            Err(CompileError::TryOperationInList(Position::dummy()))
+            Err(CompileError::TryOperationInList(test::position()))
         );
     }
 }

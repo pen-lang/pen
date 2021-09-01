@@ -1,5 +1,5 @@
 use super::expression::Expression;
-use crate::position::Position;
+use position::Position;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct RecordElement {

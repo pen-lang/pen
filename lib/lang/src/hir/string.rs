@@ -1,4 +1,4 @@
-use crate::position::*;
+use position::Position;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct ByteString {

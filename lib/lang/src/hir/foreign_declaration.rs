@@ -1,5 +1,6 @@
 use super::calling_convention::CallingConvention;
-use crate::{position::Position, types::Type};
+use crate::types::Type;
+use position::Position;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct ForeignDeclaration {
@@ -29,7 +30,13 @@ impl ForeignDeclaration {
 
     #[cfg(test)]
     pub fn without_source(name: impl Into<String>, type_: impl Into<Type>) -> Self {
-        Self::new(name, "", CallingConvention::C, type_, Position::dummy())
+        Self::new(
+            name,
+            "",
+            CallingConvention::C,
+            type_,
+            crate::test::position(),
+        )
     }
 
     pub fn name(&self) -> &str {

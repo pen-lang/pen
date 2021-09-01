@@ -61,18 +61,18 @@ fn check_with_cache(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{position::Position, types};
+    use crate::{test, types};
 
     #[test]
     fn check_record_type() {
         assert!(check(
-            &types::Record::new("foo", Position::dummy()).into(),
+            &types::Record::new("foo", test::position()).into(),
             &Default::default(),
             &vec![(
                 "foo".into(),
                 vec![types::RecordElement::new(
                     "foo",
-                    types::None::new(Position::dummy())
+                    types::None::new(test::position())
                 )]
             )]
             .into_iter()
@@ -84,7 +84,7 @@ mod tests {
     #[test]
     fn check_record_type_with_function_element() {
         assert!(!check(
-            &types::Record::new("foo", Position::dummy()).into(),
+            &types::Record::new("foo", test::position()).into(),
             &Default::default(),
             &vec![(
                 "foo".into(),
@@ -92,8 +92,8 @@ mod tests {
                     "x",
                     types::Function::new(
                         vec![],
-                        types::None::new(Position::dummy()),
-                        Position::dummy(),
+                        types::None::new(test::position()),
+                        test::position(),
                     )
                 )]
             )]
@@ -106,13 +106,13 @@ mod tests {
     #[test]
     fn check_comparability_of_record_type_with_any_element() {
         assert!(!check(
-            &types::Record::new("foo", Position::dummy()).into(),
+            &types::Record::new("foo", test::position()).into(),
             &Default::default(),
             &vec![(
                 "foo".into(),
                 vec![types::RecordElement::new(
                     "x",
-                    types::Any::new(Position::dummy())
+                    types::Any::new(test::position())
                 )]
             )]
             .into_iter()
@@ -125,9 +125,9 @@ mod tests {
     fn check_union_type() {
         assert!(check(
             &types::Union::new(
-                types::Number::new(Position::dummy()),
-                types::None::new(Position::dummy()),
-                Position::dummy()
+                types::Number::new(test::position()),
+                types::None::new(test::position()),
+                test::position()
             )
             .into(),
             &Default::default(),
@@ -140,13 +140,9 @@ mod tests {
     fn check_union_type_with_function() {
         assert!(!check(
             &types::Union::new(
-                types::Function::new(
-                    vec![],
-                    types::None::new(Position::dummy()),
-                    Position::dummy(),
-                ),
-                types::None::new(Position::dummy()),
-                Position::dummy()
+                types::Function::new(vec![], types::None::new(test::position()), test::position(),),
+                types::None::new(test::position()),
+                test::position()
             )
             .into(),
             &Default::default(),

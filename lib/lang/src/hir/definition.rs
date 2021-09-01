@@ -1,5 +1,5 @@
 use super::lambda::Lambda;
-use crate::position::Position;
+use position::Position;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Definition {
@@ -32,7 +32,7 @@ impl Definition {
 
     #[cfg(test)]
     pub fn without_source(name: impl Into<String>, lambda: Lambda, public: bool) -> Self {
-        Self::new(name, "", lambda, false, public, Position::dummy())
+        Self::new(name, "", lambda, false, public, crate::test::position())
     }
 
     pub fn name(&self) -> &str {

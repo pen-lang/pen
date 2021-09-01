@@ -57,32 +57,32 @@ pub fn transform(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{position::Position, types};
+    use crate::{test, types};
     use pretty_assertions::assert_eq;
 
     #[test]
     fn transform_record_update() {
-        let record_type = types::Record::new("r", Position::dummy());
+        let record_type = types::Record::new("r", test::position());
 
         assert_eq!(
             transform(
                 &RecordUpdate::new(
                     record_type.clone(),
-                    Variable::new("r", Position::dummy()),
+                    Variable::new("r", test::position()),
                     vec![RecordElement::new(
                         "y",
-                        None::new(Position::dummy()),
-                        Position::dummy()
+                        None::new(test::position()),
+                        test::position()
                     )],
-                    Position::dummy()
+                    test::position()
                 ),
                 &TypeContext::dummy(
                     Default::default(),
                     vec![(
                         "r".into(),
                         vec![
-                            types::RecordElement::new("x", types::Number::new(Position::dummy())),
-                            types::RecordElement::new("y", types::None::new(Position::dummy()))
+                            types::RecordElement::new("x", types::Number::new(test::position())),
+                            types::RecordElement::new("y", types::None::new(test::position()))
                         ]
                     )]
                     .into_iter()
@@ -92,7 +92,7 @@ mod tests {
             Ok(Let::new(
                 Some(RECORD_NAME.into()),
                 Some(record_type.clone().into()),
-                Variable::new("r", Position::dummy()),
+                Variable::new("r", test::position()),
                 RecordConstruction::new(
                     record_type.clone(),
                     vec![
@@ -100,17 +100,17 @@ mod tests {
                             "x",
                             RecordDeconstruction::new(
                                 Some(record_type.into()),
-                                Variable::new(RECORD_NAME, Position::dummy()),
+                                Variable::new(RECORD_NAME, test::position()),
                                 "x",
-                                Position::dummy()
+                                test::position()
                             ),
-                            Position::dummy()
+                            test::position()
                         ),
-                        RecordElement::new("y", None::new(Position::dummy()), Position::dummy())
+                        RecordElement::new("y", None::new(test::position()), test::position())
                     ],
-                    Position::dummy()
+                    test::position()
                 ),
-                Position::dummy()
+                test::position()
             )
             .into())
         );
