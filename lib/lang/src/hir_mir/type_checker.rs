@@ -1,14 +1,11 @@
 use super::{environment_creator, type_context::TypeContext, type_extractor, CompileError};
-use crate::{
-    hir::*,
-    types::{
-        self,
-        analysis::{
-            record_element_resolver, type_canonicalizer, type_equality_checker,
-            type_subsumption_checker, union_type_creator,
-        },
-        Type,
+use crate::types::{self, Type};
+use hir::{
+    analysis::types::{
+        record_element_resolver, type_canonicalizer, type_equality_checker,
+        type_subsumption_checker, union_type_creator,
     },
+    ir::*,
 };
 use std::collections::{HashMap, HashSet};
 

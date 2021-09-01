@@ -1,5 +1,6 @@
 use super::type_extractor;
-use crate::{hir::*, types::Type};
+use crate::types::Type;
+use hir::ir::*;
 use std::collections::HashMap;
 
 pub fn create_from_module(module: &Module) -> HashMap<String, Type> {

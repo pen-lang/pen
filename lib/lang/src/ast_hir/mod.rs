@@ -5,15 +5,12 @@ mod name_qualifier;
 mod prelude_module_modifier;
 mod singleton_record_compiler;
 
-use crate::{
-    ast,
-    hir::{
-        self,
-        analysis::{definition_qualifier, type_qualifier},
-    },
-    interface,
-};
+use crate::{ast, interface};
 use error::CompileError;
+use hir::{
+    analysis::ir::{definition_qualifier, type_qualifier},
+    ir,
+};
 use std::collections::HashMap;
 
 pub fn compile(
@@ -21,7 +18,7 @@ pub fn compile(
     prefix: &str,
     module_interfaces: &HashMap<ast::ModulePath, interface::Module>,
     prelude_module_interfaces: &[interface::Module],
-) -> Result<hir::Module, CompileError> {
+) -> Result<ir::Module, CompileError> {
     let module = module_compiler::compile(module)?;
     let module = import_compiler::compile(&module, module_interfaces, prelude_module_interfaces);
 
@@ -33,7 +30,7 @@ pub fn compile(
     Ok(module)
 }
 
-pub fn compile_prelude(module: &ast::Module, prefix: &str) -> Result<hir::Module, CompileError> {
+pub fn compile_prelude(module: &ast::Module, prefix: &str) -> Result<ir::Module, CompileError> {
     let module = module_compiler::compile(module)?;
     let module = definition_qualifier::qualify(&module, prefix);
     let module = type_qualifier::qualify(&module, prefix);

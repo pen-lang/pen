@@ -1,11 +1,8 @@
 use super::{type_context::TypeContext, CompileError};
-use crate::{
-    hir::*,
-    types::{
-        self,
-        analysis::{record_element_resolver, type_canonicalizer, union_type_creator},
-        Type,
-    },
+use crate::types::{self, Type};
+use hir::{
+    analysis::types::{record_element_resolver, type_canonicalizer, union_type_creator},
+    ir::*,
 };
 use std::collections::HashMap;
 

@@ -1,5 +1,5 @@
 use super::CompileError;
-use crate::hir::*;
+use hir::ir::*;
 use position::Position;
 use std::collections::HashMap;
 

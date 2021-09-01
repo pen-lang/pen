@@ -34,7 +34,7 @@ impl TypeDefinition {
         }
     }
 
-    #[cfg(test)]
+    // TODO Move to a hir_test crate.
     pub fn without_source(
         name: impl Into<String>,
         elements: Vec<types::RecordElement>,

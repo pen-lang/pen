@@ -1,11 +1,10 @@
 use crate::{
-    hir::*,
     hir_mir::{
         transformation::record_type_information_compiler, type_context::TypeContext, CompileError,
     },
     types,
-    types::analysis::type_comparability_checker,
 };
+use hir::{analysis::types::type_comparability_checker, ir::*};
 
 const LHS_NAME: &str = "$lhs";
 const RHS_NAME: &str = "$rhs";

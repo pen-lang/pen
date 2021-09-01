@@ -1,7 +1,7 @@
 use super::{type_context::TypeContext, CompileError};
-use crate::{
-    hir::{analysis::expression_visitor, *},
-    types::analysis::type_canonicalizer,
+use hir::{
+    analysis::{ir::expression_visitor, types::type_canonicalizer},
+    ir::*,
 };
 use std::collections::HashSet;
 

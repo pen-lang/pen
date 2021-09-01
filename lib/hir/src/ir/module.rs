@@ -33,7 +33,7 @@ impl Module {
         }
     }
 
-    #[cfg(test)]
+    // TODO Move to a hir_test crate.
     pub fn empty() -> Self {
         Self::new(
             vec![],
@@ -45,7 +45,7 @@ impl Module {
         )
     }
 
-    #[cfg(test)]
+    // TODO Move to a hir_test crate.
     pub fn set_type_definitions(&self, type_definitions: Vec<TypeDefinition>) -> Self {
         Self::new(
             type_definitions,
@@ -57,7 +57,7 @@ impl Module {
         )
     }
 
-    #[cfg(test)]
+    // TODO Move to a hir_test crate.
     pub fn set_type_aliases(&self, type_aliases: Vec<TypeAlias>) -> Self {
         Self::new(
             self.type_definitions.clone(),
@@ -69,7 +69,7 @@ impl Module {
         )
     }
 
-    #[cfg(test)]
+    // TODO Move to a hir_test crate.
     pub fn set_foreign_declarations(&self, declarations: Vec<ForeignDeclaration>) -> Self {
         Self::new(
             self.type_definitions.clone(),
@@ -81,7 +81,7 @@ impl Module {
         )
     }
 
-    #[cfg(test)]
+    // TODO Move to a hir_test crate.
     pub fn set_declarations(&self, declarations: Vec<Declaration>) -> Self {
         Self::new(
             self.type_definitions.clone(),
@@ -93,7 +93,7 @@ impl Module {
         )
     }
 
-    #[cfg(test)]
+    // TODO Move to a hir_test crate.
     pub fn set_definitions(&self, definitions: Vec<Definition>) -> Self {
         Self::new(
             self.type_definitions.clone(),

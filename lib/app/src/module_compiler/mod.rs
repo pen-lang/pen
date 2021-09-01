@@ -111,7 +111,7 @@ fn compile_to_hir(
     source_file: &FilePath,
     dependency_file: &FilePath,
     main_function_interface: Option<&lang::interface::Module>,
-) -> Result<lang::hir::Module, Box<dyn Error>> {
+) -> Result<hir::ir::Module, Box<dyn Error>> {
     let (interface_files, prelude_interface_files) = dependency_serializer::deserialize(
         &infrastructure.file_system.read_to_vec(dependency_file)?,
     )?;

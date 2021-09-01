@@ -8,6 +8,7 @@ edition = "2018"
 bincode = "1"
 fmm = { git = "https://github.com/raviqqe/fmm", branch = "main" }
 fmm-llvm = { git = "https://github.com/raviqqe/fmm", branch = "main" }
+hir = { path = "../hir" }
 lang = { path = "../lang" }
 mir = { path = "../mir" }
 mir-fmm = { path = "../mir-fmm" }

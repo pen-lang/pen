@@ -1,5 +1,6 @@
 use super::super::{error::CompileError, list_type_configuration::ListTypeConfiguration};
-use crate::{hir::*, types};
+use crate::types;
+use hir::ir::*;
 
 const FIRST_REST_NAME: &str = "$firstRest";
 

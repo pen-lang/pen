@@ -31,7 +31,7 @@ impl TypeAlias {
         }
     }
 
-    #[cfg(test)]
+    // TODO Move to a hir_test crate.
     pub fn without_source(
         name: impl Into<String>,
         type_: impl Into<Type>,

@@ -1,8 +1,8 @@
 use crate::{
-    hir::*,
     hir_mir::ListTypeConfiguration,
     types::{self, Type},
 };
+use hir::ir::*;
 use position::Position;
 
 pub fn transform(list: &List, configuration: &ListTypeConfiguration) -> Expression {

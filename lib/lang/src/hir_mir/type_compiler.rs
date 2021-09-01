@@ -1,9 +1,7 @@
 use super::{type_context::TypeContext, CompileError};
-use crate::types::{
-    self,
-    analysis::{type_canonicalizer, type_id_calculator},
-    Type,
-};
+use crate::types::{self, Type};
+use hir::analysis::types::{type_canonicalizer, type_id_calculator};
+
 use std::collections::HashMap;
 
 pub fn compile(type_: &Type, type_context: &TypeContext) -> Result<mir::types::Type, CompileError> {

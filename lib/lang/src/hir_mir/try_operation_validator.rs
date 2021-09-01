@@ -1,8 +1,6 @@
 use super::{type_context::TypeContext, CompileError};
-use crate::{
-    hir::*,
-    types::{self, analysis::type_subsumption_checker, Type},
-};
+use crate::types::{self, Type};
+use hir::{analysis::types::type_subsumption_checker, ir::*};
 
 pub fn validate(module: &Module, type_context: &TypeContext) -> Result<(), CompileError> {
     for definition in module.definitions() {

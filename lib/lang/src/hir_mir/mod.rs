@@ -30,9 +30,10 @@ use self::{
     transformation::record_equal_function_transformer,
     type_context::TypeContext,
 };
-use crate::{hir::*, interface};
+use crate::interface;
 pub use error::CompileError;
 pub use error_type_configuration::ErrorTypeConfiguration;
+use hir::ir::*;
 pub use list_type_configuration::ListTypeConfiguration;
 pub use main_module_configuration::MainModuleConfiguration;
 pub use string_type_configuration::StringTypeConfiguration;

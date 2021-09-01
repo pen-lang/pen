@@ -1,10 +1,11 @@
 use super::{type_compiler, type_context::TypeContext, CompileError};
-use crate::{
-    hir::{analysis::expression_visitor, *},
-    types::{
-        analysis::{type_canonicalizer, TypeError},
-        Type,
+use crate::types::Type;
+use hir::{
+    analysis::{
+        ir::expression_visitor,
+        types::{type_canonicalizer, TypeError},
     },
+    ir::*,
 };
 use std::collections::{HashMap, HashSet};
 

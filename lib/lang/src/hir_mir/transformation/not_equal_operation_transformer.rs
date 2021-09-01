@@ -1,4 +1,4 @@
-use crate::hir::*;
+use hir::ir::*;
 
 pub fn transform(operation: &EqualityOperation) -> Expression {
     if operation.operator() == EqualityOperator::NotEqual {

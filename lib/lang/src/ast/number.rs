@@ -1,3 +1,4 @@
+
 use position::Position;
 
 #[derive(Clone, Debug, PartialEq)]

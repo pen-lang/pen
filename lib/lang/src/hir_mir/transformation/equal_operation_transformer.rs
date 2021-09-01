@@ -1,15 +1,14 @@
 use super::super::error::CompileError;
 use crate::{
-    hir::*,
     hir_mir::{transformation::record_type_information_compiler, type_context::TypeContext},
-    types::{
-        self,
-        analysis::{
-            type_canonicalizer, type_comparability_checker, type_equality_checker, type_resolver,
-            union_type_member_calculator,
-        },
-        Type,
+    types::{self, Type},
+};
+use hir::{
+    analysis::types::{
+        type_canonicalizer, type_comparability_checker, type_equality_checker, type_resolver,
+        union_type_member_calculator,
     },
+    ir::*,
 };
 use position::Position;
 

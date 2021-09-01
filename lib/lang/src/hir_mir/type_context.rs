@@ -3,10 +3,8 @@ use super::{
     list_type_configuration::ListTypeConfiguration,
     string_type_configuration::StringTypeConfiguration,
 };
-use crate::{
-    hir::Module,
-    types::{self, Type},
-};
+use crate::types::{self, Type};
+use hir::ir::*;
 use std::collections::HashMap;
 
 #[derive(Debug)]

@@ -30,7 +30,7 @@ impl Definition {
         }
     }
 
-    #[cfg(test)]
+    // TODO Move to a hir_test crate.
     pub fn without_source(name: impl Into<String>, lambda: Lambda, public: bool) -> Self {
         Self::new(name, "", lambda, false, public, crate::test::position())
     }
