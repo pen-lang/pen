@@ -1,5 +1,5 @@
 use super::variable_transformer;
-use crate::hir::*;
+use crate::ir::*;
 use std::collections::HashMap;
 
 pub fn rename(module: &Module, names: &HashMap<String, String>) -> Module {

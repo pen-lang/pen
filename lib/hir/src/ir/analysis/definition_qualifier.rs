@@ -1,5 +1,5 @@
 use super::variable_renamer;
-use crate::hir::*;
+use crate::ir::*;
 use std::collections::HashMap;
 
 pub fn qualify(module: &Module, prefix: &str) -> Module {

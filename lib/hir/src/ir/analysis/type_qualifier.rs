@@ -1,6 +1,6 @@
 use super::type_transformer;
 use crate::{
-    hir::*,
+    ir::*,
     types::{self, Type},
 };
 use std::collections::HashMap;

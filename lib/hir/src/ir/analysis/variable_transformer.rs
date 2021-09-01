@@ -1,4 +1,4 @@
-use crate::hir::*;
+use crate::ir::*;
 
 pub fn transform(module: &Module, transform: &dyn Fn(&Variable) -> Expression) -> Module {
     Module::new(
