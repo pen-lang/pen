@@ -126,12 +126,14 @@ fn compile_equal_function_declaration(type_definition: &TypeDefinition) -> Decla
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::hir_mir::{
-        error_type_configuration::ERROR_TYPE_CONFIGURATION,
-        list_type_configuration::LIST_TYPE_CONFIGURATION,
-        string_type_configuration::STRING_TYPE_CONFIGURATION,
+    use crate::{
+        hir_mir::{
+            error_type_configuration::ERROR_TYPE_CONFIGURATION,
+            list_type_configuration::LIST_TYPE_CONFIGURATION,
+            string_type_configuration::STRING_TYPE_CONFIGURATION,
+        },
+        test,
     };
-    use position::Position;
     use pretty_assertions::assert_eq;
 
     fn transform_module(module: &Module) -> Result<Module, CompileError> {
@@ -152,15 +154,15 @@ mod tests {
             "foo",
             "foo",
             vec![
-                types::RecordElement::new("x", types::None::new(Position::dummy())),
-                types::RecordElement::new("y", types::None::new(Position::dummy())),
+                types::RecordElement::new("x", types::None::new(test::position())),
+                types::RecordElement::new("y", types::None::new(test::position())),
             ],
             false,
             false,
             false,
-            Position::dummy(),
+            test::position(),
         );
-        let record_type = types::Record::new(type_definition.name(), Position::dummy());
+        let record_type = types::Record::new(type_definition.name(), test::position());
 
         assert_eq!(
             transform_module(&Module::empty().set_type_definitions(vec![type_definition.clone()])),
@@ -174,55 +176,55 @@ mod tests {
                             Argument::new(LHS_NAME, record_type.clone()),
                             Argument::new(RHS_NAME, record_type.clone()),
                         ],
-                        types::Boolean::new(Position::dummy()),
+                        types::Boolean::new(test::position()),
                         If::new(
                             EqualityOperation::new(
-                                Some(types::None::new(Position::dummy()).into()),
+                                Some(types::None::new(test::position()).into()),
                                 EqualityOperator::Equal,
                                 RecordDeconstruction::new(
                                     Some(record_type.clone().into()),
-                                    Variable::new(LHS_NAME, Position::dummy()),
+                                    Variable::new(LHS_NAME, test::position()),
                                     "x",
-                                    Position::dummy(),
+                                    test::position(),
                                 ),
                                 RecordDeconstruction::new(
                                     Some(record_type.clone().into()),
-                                    Variable::new(RHS_NAME, Position::dummy()),
+                                    Variable::new(RHS_NAME, test::position()),
                                     "x",
-                                    Position::dummy(),
+                                    test::position(),
                                 ),
-                                Position::dummy(),
+                                test::position(),
                             ),
                             If::new(
                                 EqualityOperation::new(
-                                    Some(types::None::new(Position::dummy()).into()),
+                                    Some(types::None::new(test::position()).into()),
                                     EqualityOperator::Equal,
                                     RecordDeconstruction::new(
                                         Some(record_type.clone().into()),
-                                        Variable::new(LHS_NAME, Position::dummy()),
+                                        Variable::new(LHS_NAME, test::position()),
                                         "y",
-                                        Position::dummy(),
+                                        test::position(),
                                     ),
                                     RecordDeconstruction::new(
                                         Some(record_type.into()),
-                                        Variable::new(RHS_NAME, Position::dummy()),
+                                        Variable::new(RHS_NAME, test::position()),
                                         "y",
-                                        Position::dummy(),
+                                        test::position(),
                                     ),
-                                    Position::dummy(),
+                                    test::position(),
                                 ),
-                                Boolean::new(true, Position::dummy()),
-                                Boolean::new(false, Position::dummy()),
-                                Position::dummy(),
+                                Boolean::new(true, test::position()),
+                                Boolean::new(false, test::position()),
+                                test::position(),
                             ),
-                            Boolean::new(false, Position::dummy()),
-                            Position::dummy(),
+                            Boolean::new(false, test::position()),
+                            test::position(),
                         ),
-                        Position::dummy(),
+                        test::position(),
                     ),
                     false,
                     false,
-                    Position::dummy()
+                    test::position()
                 )]))
         );
     }
@@ -233,15 +235,15 @@ mod tests {
             "foo",
             "foo",
             vec![
-                types::RecordElement::new("x", types::None::new(Position::dummy())),
-                types::RecordElement::new("y", types::None::new(Position::dummy())),
+                types::RecordElement::new("x", types::None::new(test::position())),
+                types::RecordElement::new("y", types::None::new(test::position())),
             ],
             false,
             false,
             true,
-            Position::dummy(),
+            test::position(),
         );
-        let record_type = types::Record::new(type_definition.name(), Position::dummy());
+        let record_type = types::Record::new(type_definition.name(), test::position());
 
         assert_eq!(
             transform_module(&Module::empty().set_type_definitions(vec![type_definition.clone()])),
@@ -251,10 +253,10 @@ mod tests {
                     "foo.$equal",
                     types::Function::new(
                         vec![record_type.clone().into(), record_type.into()],
-                        types::Boolean::new(Position::dummy()),
-                        Position::dummy()
+                        types::Boolean::new(test::position()),
+                        test::position()
                     ),
-                    Position::dummy()
+                    test::position()
                 )]))
         );
     }

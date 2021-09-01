@@ -30,7 +30,7 @@ impl TypeAlias {
 
     #[cfg(test)]
     pub fn without_source(name: impl Into<String>, type_: impl Into<Type>, public: bool) -> Self {
-        Self::new(name, "", type_, public, Position::dummy())
+        Self::new(name, "", type_, public, crate::test::position())
     }
 
     pub fn name(&self) -> &str {

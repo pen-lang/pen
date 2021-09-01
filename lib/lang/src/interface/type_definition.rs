@@ -38,7 +38,7 @@ impl TypeDefinition {
         open: bool,
         public: bool,
     ) -> Self {
-        Self::new(name, "", elements, open, public, Position::dummy())
+        Self::new(name, "", elements, open, public, crate::test::position())
     }
 
     pub fn name(&self) -> &str {

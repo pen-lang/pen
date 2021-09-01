@@ -35,7 +35,14 @@ impl Module {
 
     #[cfg(test)]
     pub fn empty() -> Self {
-        Self::new(vec![], vec![], vec![], vec![], vec![], Position::dummy())
+        Self::new(
+            vec![],
+            vec![],
+            vec![],
+            vec![],
+            vec![],
+            crate::test::position(),
+        )
     }
 
     #[cfg(test)]

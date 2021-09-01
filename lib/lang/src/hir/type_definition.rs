@@ -49,7 +49,7 @@ impl TypeDefinition {
             open,
             public,
             external,
-            Position::dummy(),
+            crate::test::position(),
         )
     }
 

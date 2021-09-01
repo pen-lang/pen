@@ -119,8 +119,7 @@ mod tests {
         error_type_configuration::ERROR_TYPE_CONFIGURATION,
         list_type_configuration::LIST_TYPE_CONFIGURATION, *,
     };
-    use crate::{hir_mir::string_type_configuration::STRING_TYPE_CONFIGURATION, types};
-    use position::Position;
+    use crate::{hir_mir::string_type_configuration::STRING_TYPE_CONFIGURATION, test, types};
 
     fn compile_module(
         module: &Module,
@@ -147,9 +146,9 @@ mod tests {
                 "x",
                 Lambda::new(
                     vec![],
-                    types::Boolean::new(Position::dummy()),
-                    Boolean::new(false, Position::dummy()),
-                    Position::dummy(),
+                    types::Boolean::new(test::position()),
+                    Boolean::new(false, test::position()),
+                    test::position(),
                 ),
                 false,
             )]),
@@ -165,9 +164,9 @@ mod tests {
                 "x",
                 Lambda::new(
                     vec![],
-                    types::None::new(Position::dummy()),
-                    None::new(Position::dummy()),
-                    Position::dummy(),
+                    types::None::new(test::position()),
+                    None::new(test::position()),
+                    test::position(),
                 ),
                 false,
             )]),
@@ -183,9 +182,9 @@ mod tests {
                 "x",
                 Lambda::new(
                     vec![],
-                    types::Number::new(Position::dummy()),
-                    Number::new(42.0, Position::dummy()),
-                    Position::dummy(),
+                    types::Number::new(test::position()),
+                    Number::new(42.0, test::position()),
+                    test::position(),
                 ),
                 false,
             )]),
@@ -201,9 +200,9 @@ mod tests {
                 "x",
                 Lambda::new(
                     vec![],
-                    types::ByteString::new(Position::dummy()),
-                    ByteString::new("foo", Position::dummy()),
-                    Position::dummy(),
+                    types::ByteString::new(test::position()),
+                    ByteString::new("foo", test::position()),
+                    test::position(),
                 ),
                 false,
             )]),
@@ -214,7 +213,7 @@ mod tests {
 
     #[test]
     fn compile_record_construction() {
-        let reference_type = types::Reference::new("foo", Position::dummy());
+        let reference_type = types::Reference::new("foo", test::position());
 
         compile_module(
             &Module::empty()
@@ -222,7 +221,7 @@ mod tests {
                     "foo",
                     vec![types::RecordElement::new(
                         "x",
-                        types::None::new(Position::dummy()),
+                        types::None::new(test::position()),
                     )],
                     false,
                     false,
@@ -237,12 +236,12 @@ mod tests {
                             reference_type,
                             vec![RecordElement::new(
                                 "x",
-                                None::new(Position::dummy()),
-                                Position::dummy(),
+                                None::new(test::position()),
+                                test::position(),
                             )],
-                            Position::dummy(),
+                            test::position(),
                         ),
-                        Position::dummy(),
+                        test::position(),
                     ),
                     false,
                 )]),
@@ -252,7 +251,7 @@ mod tests {
 
     #[test]
     fn compile_record_deconstruction() {
-        let reference_type = types::Reference::new("foo", Position::dummy());
+        let reference_type = types::Reference::new("foo", test::position());
 
         compile_module(
             &Module::empty()
@@ -260,7 +259,7 @@ mod tests {
                     "foo",
                     vec![types::RecordElement::new(
                         "x",
-                        types::None::new(Position::dummy()),
+                        types::None::new(test::position()),
                     )],
                     false,
                     false,
@@ -270,14 +269,14 @@ mod tests {
                     "x",
                     Lambda::new(
                         vec![Argument::new("r", reference_type)],
-                        types::None::new(Position::dummy()),
+                        types::None::new(test::position()),
                         RecordDeconstruction::new(
                             None,
-                            Variable::new("r", Position::dummy()),
+                            Variable::new("r", test::position()),
                             "x",
-                            Position::dummy(),
+                            test::position(),
                         ),
-                        Position::dummy(),
+                        test::position(),
                     ),
                     false,
                 )]),
@@ -291,9 +290,9 @@ mod tests {
             "x",
             Lambda::new(
                 vec![],
-                types::None::new(Position::dummy()),
-                None::new(Position::dummy()),
-                Position::dummy(),
+                types::None::new(test::position()),
+                None::new(test::position()),
+                test::position(),
             ),
             false,
         );
@@ -301,8 +300,8 @@ mod tests {
         assert_eq!(
             compile_module(&Module::empty().set_definitions(vec![definition.clone(), definition])),
             Err(CompileError::DuplicateFunctionNames(
-                Position::dummy(),
-                Position::dummy()
+                test::position(),
+                test::position()
             ))
         );
     }
@@ -325,26 +324,26 @@ mod tests {
                             vec![Argument::new(
                                 "x",
                                 types::Union::new(
-                                    types::None::new(Position::dummy()),
+                                    types::None::new(test::position()),
                                     types::Reference::new(
                                         &ERROR_TYPE_CONFIGURATION.error_type_name,
-                                        Position::dummy(),
+                                        test::position(),
                                     ),
-                                    Position::dummy(),
+                                    test::position(),
                                 ),
                             )],
-                            types::None::new(Position::dummy()),
+                            types::None::new(test::position()),
                             TryOperation::new(
                                 None,
-                                Variable::new("x", Position::dummy()),
-                                Position::dummy(),
+                                Variable::new("x", test::position()),
+                                test::position(),
                             ),
-                            Position::dummy(),
+                            test::position(),
                         ),
                         false,
                     )])
             ),
-            Err(CompileError::InvalidTryOperation(Position::dummy()))
+            Err(CompileError::InvalidTryOperation(test::position()))
         );
     }
 }

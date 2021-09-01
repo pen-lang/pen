@@ -47,13 +47,13 @@ fn check_canonical(
 #[cfg(test)]
 mod tests {
     use super::{super::super::*, *};
-    use position::Position;
+    use crate::test;
 
     #[test]
     fn check_numbers() {
         assert!(check(
-            &Number::new(Position::dummy()).into(),
-            &Number::new(Position::dummy()).into(),
+            &Number::new(test::position()).into(),
+            &Number::new(test::position()).into(),
             &Default::default(),
         )
         .unwrap());
@@ -62,8 +62,8 @@ mod tests {
     #[test]
     fn fail_to_check_number_and_none() {
         assert!(!check(
-            &Number::new(Position::dummy()).into(),
-            &None::new(Position::dummy()).into(),
+            &Number::new(test::position()).into(),
+            &None::new(test::position()).into(),
             &Default::default(),
         )
         .unwrap());
@@ -72,8 +72,8 @@ mod tests {
     #[test]
     fn check_lists() {
         assert!(check(
-            &List::new(Number::new(Position::dummy()), Position::dummy()).into(),
-            &List::new(Number::new(Position::dummy()), Position::dummy()).into(),
+            &List::new(Number::new(test::position()), test::position()).into(),
+            &List::new(Number::new(test::position()), test::position()).into(),
             &Default::default(),
         )
         .unwrap());
@@ -82,8 +82,8 @@ mod tests {
     #[test]
     fn check_functions() {
         assert!(check(
-            &Function::new(vec![], Number::new(Position::dummy()), Position::dummy()).into(),
-            &Function::new(vec![], Number::new(Position::dummy()), Position::dummy()).into(),
+            &Function::new(vec![], Number::new(test::position()), test::position()).into(),
+            &Function::new(vec![], Number::new(test::position()), test::position()).into(),
             &Default::default(),
         )
         .unwrap());
@@ -92,8 +92,8 @@ mod tests {
     #[test]
     fn check_function_arguments() {
         assert!(check(
-            &Function::new(vec![], Number::new(Position::dummy()), Position::dummy()).into(),
-            &Function::new(vec![], Number::new(Position::dummy()), Position::dummy()).into(),
+            &Function::new(vec![], Number::new(test::position()), test::position()).into(),
+            &Function::new(vec![], Number::new(test::position()), test::position()).into(),
             &Default::default(),
         )
         .unwrap());
@@ -103,12 +103,12 @@ mod tests {
     fn check_union_and_number() {
         assert!(check(
             &Union::new(
-                Number::new(Position::dummy()),
-                Number::new(Position::dummy()),
-                Position::dummy(),
+                Number::new(test::position()),
+                Number::new(test::position()),
+                test::position(),
             )
             .into(),
-            &Number::new(Position::dummy()).into(),
+            &Number::new(test::position()).into(),
             &Default::default(),
         )
         .unwrap());
@@ -118,15 +118,15 @@ mod tests {
     fn check_unions() {
         assert!(check(
             &Union::new(
-                Number::new(Position::dummy()),
-                None::new(Position::dummy()),
-                Position::dummy(),
+                Number::new(test::position()),
+                None::new(test::position()),
+                test::position(),
             )
             .into(),
             &Union::new(
-                None::new(Position::dummy()),
-                Number::new(Position::dummy()),
-                Position::dummy(),
+                None::new(test::position()),
+                Number::new(test::position()),
+                test::position(),
             )
             .into(),
             &Default::default(),
@@ -137,8 +137,8 @@ mod tests {
     #[test]
     fn check_records() {
         assert!(!check(
-            &Record::new("x", Position::dummy()).into(),
-            &Record::new("y", Position::dummy()).into(),
+            &Record::new("x", test::position()).into(),
+            &Record::new("y", test::position()).into(),
             &Default::default(),
         )
         .unwrap());

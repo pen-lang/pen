@@ -130,9 +130,8 @@ mod tests {
             list_type_configuration::LIST_TYPE_CONFIGURATION,
             string_type_configuration::STRING_TYPE_CONFIGURATION,
         },
-        types,
+        test, types,
     };
-    use position::Position;
     use pretty_assertions::assert_eq;
 
     fn compile_module(module: &Module) -> Result<mir::ir::Module, CompileError> {
@@ -154,14 +153,14 @@ mod tests {
                 "foo",
                 "bar",
                 Lambda::new(
-                    vec![Argument::new("x", types::None::new(Position::dummy()))],
-                    types::None::new(Position::dummy()),
-                    None::new(Position::dummy()),
-                    Position::dummy(),
+                    vec![Argument::new("x", types::None::new(test::position()))],
+                    types::None::new(test::position()),
+                    None::new(test::position()),
+                    test::position(),
                 ),
                 true,
                 false,
-                Position::dummy(),
+                test::position(),
             )])),
             Ok(mir::ir::Module::new(
                 vec![],

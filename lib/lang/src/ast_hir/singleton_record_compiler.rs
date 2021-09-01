@@ -55,13 +55,13 @@ pub fn compile(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use position::Position;
+    use crate::test;
     use pretty_assertions::assert_eq;
 
     #[test]
     fn compile_singleton_record() {
         let type_definition =
-            TypeDefinition::new("bar", "foo", vec![], false, false, false, Position::dummy());
+            TypeDefinition::new("bar", "foo", vec![], false, false, false, test::position());
 
         assert_eq!(
             compile(
@@ -71,9 +71,9 @@ mod tests {
                         "f",
                         Lambda::new(
                             vec![],
-                            types::None::new(Position::dummy()),
-                            Variable::new("foo", Position::dummy()),
-                            Position::dummy()
+                            types::None::new(test::position()),
+                            Variable::new("foo", test::position()),
+                            test::position()
                         ),
                         false
                     )]),
@@ -85,13 +85,13 @@ mod tests {
                     "f",
                     Lambda::new(
                         vec![],
-                        types::None::new(Position::dummy()),
+                        types::None::new(test::position()),
                         RecordConstruction::new(
-                            types::Record::new("bar", Position::dummy()),
+                            types::Record::new("bar", test::position()),
                             vec![],
-                            Position::dummy()
+                            test::position()
                         ),
-                        Position::dummy()
+                        test::position()
                     ),
                     false
                 )])
@@ -105,20 +105,20 @@ mod tests {
             "foo",
             vec![types::RecordElement::new(
                 "x",
-                types::None::new(Position::dummy()),
+                types::None::new(test::position()),
             )],
             false,
             false,
             false,
-            Position::dummy(),
+            test::position(),
         );
         let definition = Definition::without_source(
             "f",
             Lambda::new(
                 vec![],
-                types::None::new(Position::dummy()),
-                Variable::new("foo", Position::dummy()),
-                Position::dummy(),
+                types::None::new(test::position()),
+                Variable::new("foo", test::position()),
+                test::position(),
             ),
             false,
         );
@@ -144,9 +144,9 @@ mod tests {
                     "f",
                     Lambda::new(
                         vec![],
-                        types::None::new(Position::dummy()),
-                        Variable::new("Foo'Foo", Position::dummy()),
-                        Position::dummy()
+                        types::None::new(test::position()),
+                        Variable::new("Foo'Foo", test::position()),
+                        test::position()
                     ),
                     false
                 )]),
@@ -159,7 +159,7 @@ mod tests {
                             vec![],
                             false,
                             true,
-                            Position::dummy()
+                            test::position()
                         )],
                         vec![],
                         vec![]
@@ -172,13 +172,13 @@ mod tests {
                 "f",
                 Lambda::new(
                     vec![],
-                    types::None::new(Position::dummy()),
+                    types::None::new(test::position()),
                     RecordConstruction::new(
-                        types::Record::new("RealFoo", Position::dummy()),
+                        types::Record::new("RealFoo", test::position()),
                         vec![],
-                        Position::dummy()
+                        test::position()
                     ),
-                    Position::dummy()
+                    test::position()
                 ),
                 false
             )])
@@ -191,9 +191,9 @@ mod tests {
             "f",
             Lambda::new(
                 vec![],
-                types::None::new(Position::dummy()),
-                Variable::new("Foo'Foo", Position::dummy()),
-                Position::dummy(),
+                types::None::new(test::position()),
+                Variable::new("Foo'Foo", test::position()),
+                test::position(),
             ),
             false,
         );
@@ -209,11 +209,11 @@ mod tests {
                             "Foo",
                             vec![types::RecordElement::new(
                                 "x",
-                                types::None::new(Position::dummy()),
+                                types::None::new(test::position()),
                             )],
                             false,
                             true,
-                            Position::dummy()
+                            test::position()
                         )],
                         vec![],
                         vec![]
@@ -232,9 +232,9 @@ mod tests {
             "f",
             Lambda::new(
                 vec![],
-                types::None::new(Position::dummy()),
-                Variable::new("Foo'Foo", Position::dummy()),
-                Position::dummy(),
+                types::None::new(test::position()),
+                Variable::new("Foo'Foo", test::position()),
+                test::position(),
             ),
             false,
         );
@@ -251,7 +251,7 @@ mod tests {
                             vec![],
                             false,
                             false,
-                            Position::dummy()
+                            test::position()
                         )],
                         vec![],
                         vec![]

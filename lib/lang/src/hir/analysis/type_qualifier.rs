@@ -92,7 +92,7 @@ pub fn qualify(module: &Module, prefix: &str) -> Module {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use position::Position;
+    use crate::test;
     use pretty_assertions::assert_eq;
 
     #[test]
@@ -131,7 +131,7 @@ mod tests {
                         "x",
                         vec![types::RecordElement::new(
                             "x",
-                            types::Reference::new("x", Position::dummy())
+                            types::Reference::new("x", test::position())
                         )],
                         false,
                         false,
@@ -145,7 +145,7 @@ mod tests {
                     "foo.x",
                     vec![types::RecordElement::new(
                         "x",
-                        types::Reference::new("foo.x", Position::dummy())
+                        types::Reference::new("foo.x", test::position())
                     )],
                     false,
                     false,
@@ -161,7 +161,7 @@ mod tests {
             qualify(
                 &Module::empty().set_type_aliases(vec![TypeAlias::without_source(
                     "x",
-                    types::Reference::new("x", Position::dummy()),
+                    types::Reference::new("x", test::position()),
                     false,
                     false
                 )]),
@@ -169,7 +169,7 @@ mod tests {
             ),
             Module::empty().set_type_aliases(vec![TypeAlias::without_source(
                 "foo.x",
-                types::Reference::new("foo.x", Position::dummy()),
+                types::Reference::new("foo.x", test::position()),
                 false,
                 false
             )])

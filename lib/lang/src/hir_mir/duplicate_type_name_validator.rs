@@ -33,8 +33,7 @@ pub fn validate(module: &Module) -> Result<(), CompileError> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::types;
-    use position::Position;
+    use crate::{test, types};
 
     #[test]
     fn validate_type_definitions() {
@@ -43,8 +42,8 @@ mod tests {
         assert_eq!(
             validate(&Module::empty().set_type_definitions(vec![definition.clone(), definition])),
             Err(CompileError::DuplicateTypeNames(
-                Position::dummy(),
-                Position::dummy()
+                test::position(),
+                test::position()
             ))
         );
     }
@@ -52,13 +51,13 @@ mod tests {
     #[test]
     fn validate_type_aliases() {
         let alias =
-            TypeAlias::without_source("x", types::None::new(Position::dummy()), false, false);
+            TypeAlias::without_source("x", types::None::new(test::position()), false, false);
 
         assert_eq!(
             validate(&Module::empty().set_type_aliases(vec![alias.clone(), alias])),
             Err(CompileError::DuplicateTypeNames(
-                Position::dummy(),
-                Position::dummy()
+                test::position(),
+                test::position()
             ))
         );
     }
@@ -77,14 +76,14 @@ mod tests {
                     )])
                     .set_type_aliases(vec![TypeAlias::without_source(
                         "x",
-                        types::None::new(Position::dummy()),
+                        types::None::new(test::position()),
                         false,
                         false
                     )])
             ),
             Err(CompileError::DuplicateTypeNames(
-                Position::dummy(),
-                Position::dummy()
+                test::position(),
+                test::position()
             ))
         );
     }

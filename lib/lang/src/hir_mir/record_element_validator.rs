@@ -96,8 +96,7 @@ mod tests {
         },
         *,
     };
-    use crate::types;
-    use position::Position;
+    use crate::{test, types};
 
     fn validate_module(module: &Module) -> Result<(), CompileError> {
         validate(
@@ -113,7 +112,7 @@ mod tests {
 
     #[test]
     fn validate_record_construction() {
-        let record_type = types::Record::new("r", Position::dummy());
+        let record_type = types::Record::new("r", test::position());
 
         validate_module(
             &Module::empty()
@@ -121,7 +120,7 @@ mod tests {
                     "r",
                     vec![types::RecordElement::new(
                         "x",
-                        types::None::new(Position::dummy()),
+                        types::None::new(test::position()),
                     )],
                     false,
                     false,
@@ -136,12 +135,12 @@ mod tests {
                             record_type,
                             vec![RecordElement::new(
                                 "x",
-                                None::new(Position::dummy()),
-                                Position::dummy(),
+                                None::new(test::position()),
+                                test::position(),
                             )],
-                            Position::dummy(),
+                            test::position(),
                         ),
-                        Position::dummy(),
+                        test::position(),
                     ),
                     false,
                 )]),
@@ -152,7 +151,7 @@ mod tests {
     #[test]
     #[should_panic]
     fn fail_to_validate_record_construction() {
-        let record_type = types::Record::new("r", Position::dummy());
+        let record_type = types::Record::new("r", test::position());
 
         validate_module(
             &Module::empty()
@@ -160,7 +159,7 @@ mod tests {
                     "r",
                     vec![types::RecordElement::new(
                         "x",
-                        types::None::new(Position::dummy()),
+                        types::None::new(test::position()),
                     )],
                     false,
                     false,
@@ -175,12 +174,12 @@ mod tests {
                             record_type,
                             vec![RecordElement::new(
                                 "x",
-                                None::new(Position::dummy()),
-                                Position::dummy(),
+                                None::new(test::position()),
+                                test::position(),
                             )],
-                            Position::dummy(),
+                            test::position(),
                         ),
-                        Position::dummy(),
+                        test::position(),
                     ),
                     false,
                 )]),
@@ -190,7 +189,7 @@ mod tests {
 
     #[test]
     fn validate_record_deconstruction() {
-        let record_type = types::Record::new("r", Position::dummy());
+        let record_type = types::Record::new("r", test::position());
 
         validate_module(
             &Module::empty()
@@ -198,7 +197,7 @@ mod tests {
                     "r",
                     vec![types::RecordElement::new(
                         "x",
-                        types::None::new(Position::dummy()),
+                        types::None::new(test::position()),
                     )],
                     false,
                     false,
@@ -208,14 +207,14 @@ mod tests {
                     "x",
                     Lambda::new(
                         vec![Argument::new("x", record_type.clone())],
-                        types::None::new(Position::dummy()),
+                        types::None::new(test::position()),
                         RecordDeconstruction::new(
                             Some(record_type.into()),
-                            Variable::new("x", Position::dummy()),
+                            Variable::new("x", test::position()),
                             "x",
-                            Position::dummy(),
+                            test::position(),
                         ),
-                        Position::dummy(),
+                        test::position(),
                     ),
                     false,
                 )]),
@@ -226,7 +225,7 @@ mod tests {
     #[test]
     #[should_panic]
     fn fail_to_validate_record_deconstruction() {
-        let record_type = types::Record::new("r", Position::dummy());
+        let record_type = types::Record::new("r", test::position());
 
         validate_module(
             &Module::empty()
@@ -234,7 +233,7 @@ mod tests {
                     "r",
                     vec![types::RecordElement::new(
                         "x",
-                        types::None::new(Position::dummy()),
+                        types::None::new(test::position()),
                     )],
                     false,
                     false,
@@ -244,14 +243,14 @@ mod tests {
                     "x",
                     Lambda::new(
                         vec![Argument::new("x", record_type.clone())],
-                        types::None::new(Position::dummy()),
+                        types::None::new(test::position()),
                         RecordDeconstruction::new(
                             Some(record_type.into()),
-                            Variable::new("x", Position::dummy()),
+                            Variable::new("x", test::position()),
                             "x",
-                            Position::dummy(),
+                            test::position(),
                         ),
-                        Position::dummy(),
+                        test::position(),
                     ),
                     false,
                 )]),
@@ -261,7 +260,7 @@ mod tests {
 
     #[test]
     fn validate_record_update() {
-        let record_type = types::Record::new("r", Position::dummy());
+        let record_type = types::Record::new("r", test::position());
 
         validate_module(
             &Module::empty()
@@ -269,7 +268,7 @@ mod tests {
                     "r",
                     vec![types::RecordElement::new(
                         "x",
-                        types::None::new(Position::dummy()),
+                        types::None::new(test::position()),
                     )],
                     false,
                     false,
@@ -279,18 +278,18 @@ mod tests {
                     "x",
                     Lambda::new(
                         vec![Argument::new("x", record_type.clone())],
-                        types::None::new(Position::dummy()),
+                        types::None::new(test::position()),
                         RecordUpdate::new(
                             record_type,
-                            Variable::new("x", Position::dummy()),
+                            Variable::new("x", test::position()),
                             vec![RecordElement::new(
                                 "x",
-                                None::new(Position::dummy()),
-                                Position::dummy(),
+                                None::new(test::position()),
+                                test::position(),
                             )],
-                            Position::dummy(),
+                            test::position(),
                         ),
-                        Position::dummy(),
+                        test::position(),
                     ),
                     false,
                 )]),
@@ -301,7 +300,7 @@ mod tests {
     #[test]
     #[should_panic]
     fn fail_to_validate_record_update() {
-        let record_type = types::Record::new("r", Position::dummy());
+        let record_type = types::Record::new("r", test::position());
 
         validate_module(
             &Module::empty()
@@ -309,7 +308,7 @@ mod tests {
                     "r",
                     vec![types::RecordElement::new(
                         "x",
-                        types::None::new(Position::dummy()),
+                        types::None::new(test::position()),
                     )],
                     false,
                     false,
@@ -319,18 +318,18 @@ mod tests {
                     "x",
                     Lambda::new(
                         vec![Argument::new("x", record_type.clone())],
-                        types::None::new(Position::dummy()),
+                        types::None::new(test::position()),
                         RecordUpdate::new(
                             record_type,
-                            Variable::new("x", Position::dummy()),
+                            Variable::new("x", test::position()),
                             vec![RecordElement::new(
                                 "x",
-                                None::new(Position::dummy()),
-                                Position::dummy(),
+                                None::new(test::position()),
+                                test::position(),
                             )],
-                            Position::dummy(),
+                            test::position(),
                         ),
-                        Position::dummy(),
+                        test::position(),
                     ),
                     false,
                 )]),

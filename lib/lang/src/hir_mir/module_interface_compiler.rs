@@ -52,8 +52,7 @@ pub fn compile(module: &hir::Module) -> Result<interface::Module, CompileError> 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::types;
-    use position::Position;
+    use crate::{test, types};
 
     #[test]
     fn compile_empty_module() {
@@ -71,9 +70,9 @@ mod tests {
                     "foo",
                     hir::Lambda::new(
                         vec![],
-                        types::None::new(Position::dummy()),
-                        hir::None::new(Position::dummy()),
-                        Position::dummy(),
+                        types::None::new(test::position()),
+                        hir::None::new(test::position()),
+                        test::position(),
                     ),
                     false,
                 )])

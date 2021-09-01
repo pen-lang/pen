@@ -71,16 +71,15 @@ fn collect_types(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::types;
-    use position::Position;
+    use crate::{test, types};
 
     #[test]
     fn compile_list_type_definition() {
-        let list_type = types::List::new(types::None::new(Position::dummy()), Position::dummy());
+        let list_type = types::List::new(types::None::new(test::position()), test::position());
         let union_type = types::Union::new(
             list_type.clone(),
-            types::None::new(Position::dummy()),
-            Position::dummy(),
+            types::None::new(test::position()),
+            test::position(),
         );
         let type_context = TypeContext::dummy(Default::default(), Default::default());
 
@@ -90,14 +89,14 @@ mod tests {
                     "foo",
                     Lambda::new(
                         vec![Argument::new("x", list_type.clone())],
-                        types::None::new(Position::dummy()),
+                        types::None::new(test::position()),
                         TypeCoercion::new(
                             list_type.clone(),
                             union_type,
-                            Variable::new("x", Position::dummy()),
-                            Position::dummy()
+                            Variable::new("x", test::position()),
+                            test::position()
                         ),
-                        Position::dummy(),
+                        test::position(),
                     ),
                     false,
                 )]),
@@ -116,25 +115,25 @@ mod tests {
 
     #[test]
     fn compile_duplicate_list_type_definitions() {
-        let list_type = types::List::new(types::None::new(Position::dummy()), Position::dummy());
+        let list_type = types::List::new(types::None::new(test::position()), test::position());
         let union_type = types::Union::new(
             list_type.clone(),
-            types::None::new(Position::dummy()),
-            Position::dummy(),
+            types::None::new(test::position()),
+            test::position(),
         );
         let type_context = TypeContext::dummy(Default::default(), Default::default());
         let definition = Definition::without_source(
             "foo",
             Lambda::new(
                 vec![Argument::new("x", list_type.clone())],
-                types::None::new(Position::dummy()),
+                types::None::new(test::position()),
                 TypeCoercion::new(
                     list_type.clone(),
                     union_type,
-                    Variable::new("x", Position::dummy()),
-                    Position::dummy(),
+                    Variable::new("x", test::position()),
+                    test::position(),
                 ),
-                Position::dummy(),
+                test::position(),
             ),
             false,
         );
@@ -157,7 +156,7 @@ mod tests {
 
     #[test]
     fn collect_type_from_if_type() {
-        let list_type = types::List::new(types::None::new(Position::dummy()), Position::dummy());
+        let list_type = types::List::new(types::None::new(test::position()), test::position());
         let type_context = TypeContext::dummy(Default::default(), Default::default());
 
         assert_eq!(
@@ -166,18 +165,18 @@ mod tests {
                     "foo",
                     Lambda::new(
                         vec![Argument::new("x", list_type.clone())],
-                        types::None::new(Position::dummy()),
+                        types::None::new(test::position()),
                         IfType::new(
                             "x",
-                            Variable::new("x", Position::dummy()),
+                            Variable::new("x", test::position()),
                             vec![IfTypeBranch::new(
                                 list_type.clone(),
-                                None::new(Position::dummy())
+                                None::new(test::position())
                             )],
                             None,
-                            Position::dummy()
+                            test::position()
                         ),
-                        Position::dummy(),
+                        test::position(),
                     ),
                     false,
                 )]),
@@ -197,14 +196,14 @@ mod tests {
     #[test]
     fn collect_type_from_try_operation() {
         let type_context = TypeContext::dummy(Default::default(), Default::default());
-        let list_type = types::List::new(types::None::new(Position::dummy()), Position::dummy());
+        let list_type = types::List::new(types::None::new(test::position()), test::position());
         let union_type = types::Union::new(
             list_type.clone(),
             types::Record::new(
                 &type_context.error_type_configuration().error_type_name,
-                Position::dummy(),
+                test::position(),
             ),
-            Position::dummy(),
+            test::position(),
         );
 
         assert_eq!(
@@ -213,13 +212,13 @@ mod tests {
                     "foo",
                     Lambda::new(
                         vec![Argument::new("x", union_type)],
-                        types::None::new(Position::dummy()),
+                        types::None::new(test::position()),
                         TryOperation::new(
                             Some(list_type.clone().into()),
-                            Variable::new("x", Position::dummy()),
-                            Position::dummy(),
+                            Variable::new("x", test::position()),
+                            test::position(),
                         ),
-                        Position::dummy(),
+                        test::position(),
                     ),
                     false,
                 )]),
