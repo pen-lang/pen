@@ -5,7 +5,7 @@ members = [
   "lib/core/ffi",
   "lib/ffi",
   "lib/hir",
-  "lib/hir_mir",
+  "lib/hir-mir",
   "lib/infra",
   "lib/interface",
   "lib/lang",
