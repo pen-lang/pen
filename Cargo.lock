@@ -37,6 +37,8 @@ dependencies = [
  "fmm",
  "fmm-llvm",
  "hir",
+ "hir_mir",
+ "interface",
  "lang",
  "mir",
  "mir-fmm",
@@ -265,6 +267,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "hir_mir"
+version = "0.1.0"
+dependencies = [
+ "hir",
+ "interface",
+ "mir",
+ "once_cell",
+ "position",
+ "pretty_assertions",
+]
+
+[[package]]
 name = "idna"
 version = "0.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -358,6 +372,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "interface"
+version = "0.1.0"
+dependencies = [
+ "hir",
+ "position",
+ "serde",
+]
+
+[[package]]
 name = "itertools"
 version = "0.10.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -378,8 +401,8 @@ version = "0.1.0"
 dependencies = [
  "combine",
  "hir",
+ "interface",
  "itertools",
- "mir",
  "once_cell",
  "position",
  "pretty_assertions",

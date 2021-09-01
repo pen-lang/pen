@@ -1,6 +1,6 @@
 use super::name_qualifier;
 use crate::{
-    ast, interface,
+    ast,
     types::{self, Type},
 };
 use hir::{

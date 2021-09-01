@@ -9,6 +9,8 @@ bincode = "1"
 fmm = { git = "https://github.com/raviqqe/fmm", branch = "main" }
 fmm-llvm = { git = "https://github.com/raviqqe/fmm", branch = "main" }
 hir = { path = "../hir" }
+hir_mir = { path = "../hir-mir" }
+interface = { path = "../interface" }
 lang = { path = "../lang" }
 mir = { path = "../mir" }
 mir-fmm = { path = "../mir-fmm" }

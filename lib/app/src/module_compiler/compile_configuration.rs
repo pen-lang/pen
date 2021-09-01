@@ -6,6 +6,6 @@ pub struct CompileConfiguration {
 }
 
 pub type InstructionConfiguration = fmm_llvm::InstructionConfiguration;
-pub type ListTypeConfiguration = lang::hir_mir::ListTypeConfiguration;
-pub type StringTypeConfiguration = lang::hir_mir::StringTypeConfiguration;
-pub type ErrorTypeConfiguration = lang::hir_mir::ErrorTypeConfiguration;
+pub type ListTypeConfiguration = hir_mir::ListTypeConfiguration;
+pub type StringTypeConfiguration = hir_mir::StringTypeConfiguration;
+pub type ErrorTypeConfiguration = hir_mir::ErrorTypeConfiguration;

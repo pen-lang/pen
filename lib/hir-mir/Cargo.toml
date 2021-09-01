@@ -1,18 +1,15 @@
 [package]
-name = "lang"
+name = "hir_mir"
 version = "0.1.0"
 authors = ["Yota Toyama <raviqqe@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-combine = { version = "4", features = ["regex"] }
 hir = { path = "../hir" }
 interface = { path = "../interface" }
-itertools = "0.10"
+mir = { path = "../mir" }
 once_cell = "1"
 position = { path = "../position" }
-regex = "1"
-serde = { version = "1", features = ["derive", "rc"] }
 
 [dev-dependencies]
 pretty_assertions = "0.7"

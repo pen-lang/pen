@@ -24,7 +24,7 @@ pub fn compile(
     target_triple: Option<&str>,
     compile_configuration: &CompileConfiguration,
 ) -> Result<(), Box<dyn Error>> {
-    let (module, module_interface) = lang::hir_mir::compile(
+    let (module, module_interface) = hir_mir::compile(
         &compile_to_hir(infrastructure, source_file, dependency_file, None)?,
         &prelude_type_configuration_qualifier::qualify_list_type_configuration(
             &compile_configuration.list_type,
@@ -74,7 +74,7 @@ pub fn compile_main(
 
     compile_mir_module(
         infrastructure,
-        &lang::hir_mir::compile_main(
+        &hir_mir::compile_main(
             &compile_to_hir(
                 infrastructure,
                 source_file,
@@ -110,7 +110,7 @@ fn compile_to_hir(
     infrastructure: &Infrastructure,
     source_file: &FilePath,
     dependency_file: &FilePath,
-    main_function_interface: Option<&lang::interface::Module>,
+    main_function_interface: Option<&interface::Module>,
 ) -> Result<hir::ir::Module, Box<dyn Error>> {
     let (interface_files, prelude_interface_files) = dependency_serializer::deserialize(
         &infrastructure.file_system.read_to_vec(dependency_file)?,
@@ -156,14 +156,13 @@ pub fn compile_prelude(
     target_triple: Option<&str>,
     instruction_configuration: &InstructionConfiguration,
 ) -> Result<(), Box<dyn Error>> {
-    let (module, module_interface) =
-        lang::hir_mir::compile_prelude(&lang::ast_hir::compile_prelude(
-            &lang::parse::parse(
-                &infrastructure.file_system.read_to_string(source_file)?,
-                &infrastructure.file_path_displayer.display(source_file),
-            )?,
-            PRELUDE_PREFIX,
-        )?)?;
+    let (module, module_interface) = hir_mir::compile_prelude(&lang::ast_hir::compile_prelude(
+        &lang::parse::parse(
+            &infrastructure.file_system.read_to_string(source_file)?,
+            &infrastructure.file_path_displayer.display(source_file),
+        )?,
+        PRELUDE_PREFIX,
+    )?)?;
 
     compile_mir_module(
         infrastructure,
