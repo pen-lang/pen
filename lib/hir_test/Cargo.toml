@@ -1,0 +1,9 @@
+[package]
+name = "hir_test"
+version = "0.1.0"
+authors = ["Yota Toyama <raviqqe@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+hir = { path = "../hir" }
+position = { path = "../position" }
