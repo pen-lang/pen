@@ -25,11 +25,6 @@ impl Declaration {
         }
     }
 
-    #[cfg(test)]
-    pub fn fake(name: impl Into<String>, type_: types::Function, position: Position) -> Self {
-        Self::new(name, "", type_, position)
-    }
-
     pub fn name(&self) -> &str {
         &self.name
     }

@@ -31,16 +31,6 @@ impl TypeDefinition {
         }
     }
 
-    #[cfg(test)]
-    pub fn fake(
-        name: impl Into<String>,
-        elements: Vec<types::RecordElement>,
-        open: bool,
-        public: bool,
-    ) -> Self {
-        Self::new(name, "", elements, open, public, crate::test::position())
-    }
-
     pub fn name(&self) -> &str {
         &self.name
     }

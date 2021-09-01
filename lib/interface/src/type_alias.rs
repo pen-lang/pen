@@ -28,11 +28,6 @@ impl TypeAlias {
         }
     }
 
-    #[cfg(test)]
-    pub fn fake(name: impl Into<String>, type_: impl Into<Type>, public: bool) -> Self {
-        Self::new(name, "", type_, public, crate::test::position())
-    }
-
     pub fn name(&self) -> &str {
         &self.name
     }

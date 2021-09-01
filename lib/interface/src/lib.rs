@@ -1,6 +1,5 @@
 mod declaration;
 mod module;
-pub mod test;
 mod type_alias;
 mod type_definition;
 
