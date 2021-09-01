@@ -1,7 +1,6 @@
 use super::{external_module_path::ExternalModulePath, internal_module_path::InternalModulePath};
-use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum ModulePath {
     External(ExternalModulePath),
     Internal(InternalModulePath),
