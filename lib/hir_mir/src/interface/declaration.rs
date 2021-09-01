@@ -1,4 +1,4 @@
-use crate::types;
+use hir::types;
 use position::Position;
 use serde::{Deserialize, Serialize};
 

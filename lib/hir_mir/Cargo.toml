@@ -1,0 +1,15 @@
+[package]
+name = "hir_mir"
+version = "0.1.0"
+authors = ["Yota Toyama <raviqqe@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+hir = { path = "../hir" }
+mir = { path = "../mir" }
+once_cell = "1"
+position = { path = "../position" }
+serde = { version = "1", features = ["derive", "rc"] }
+
+[dev-dependencies]
+pretty_assertions = "0.7"

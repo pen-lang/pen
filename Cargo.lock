@@ -265,6 +265,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "hir_mir"
+version = "0.1.0"
+dependencies = [
+ "hir",
+ "mir",
+ "once_cell",
+ "position",
+ "pretty_assertions",
+ "serde",
+]
+
+[[package]]
 name = "idna"
 version = "0.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
