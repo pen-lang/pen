@@ -4,7 +4,6 @@ mod module_compiler;
 mod name_qualifier;
 mod prelude_module_modifier;
 mod singleton_record_compiler;
-mod test;
 
 use error::CompileError;
 use hir::{
