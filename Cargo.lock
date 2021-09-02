@@ -33,6 +33,7 @@ dependencies = [
 name = "app"
 version = "0.1.0"
 dependencies = [
+ "ast_hir",
  "bincode",
  "fmm",
  "fmm-llvm",
@@ -47,6 +48,18 @@ dependencies = [
  "regex",
  "serde",
  "url",
+]
+
+[[package]]
+name = "ast_hir"
+version = "0.1.0"
+dependencies = [
+ "hir",
+ "interface",
+ "itertools",
+ "lang",
+ "position",
+ "pretty_assertions",
 ]
 
 [[package]]

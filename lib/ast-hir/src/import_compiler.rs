@@ -1,13 +1,11 @@
 use super::name_qualifier;
-use crate::{
-    ast,
-    types::{self, Type},
-};
 use hir::{
     analysis::ir::{type_transformer, variable_renamer},
     ir,
+    types::{self, Type},
 };
 use itertools::Itertools;
+use lang::ast;
 use std::collections::HashMap;
 
 pub fn compile(
@@ -190,8 +188,11 @@ fn rename_types(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{test, types};
-    use hir::test::{DefinitionFake, ModuleFake, TypeDefinitionFake};
+    use crate::test;
+    use hir::{
+        test::{DefinitionFake, ModuleFake, TypeDefinitionFake},
+        types,
+    };
     use pretty_assertions::assert_eq;
 
     #[test]

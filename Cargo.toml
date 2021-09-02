@@ -2,6 +2,7 @@
 members = [
   "cmd/pen",
   "lib/app",
+  "lib/ast-hir",
   "lib/core/ffi",
   "lib/ffi",
   "lib/hir",

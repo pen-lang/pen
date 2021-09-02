@@ -121,7 +121,7 @@ fn compile_to_hir(
         &infrastructure.file_path_displayer.display(source_file),
     )?;
 
-    Ok(lang::ast_hir::compile(
+    Ok(ast_hir::compile(
         &ast_module,
         &format!("{}:", source_file),
         &ast_module
@@ -156,7 +156,7 @@ pub fn compile_prelude(
     target_triple: Option<&str>,
     instruction_configuration: &InstructionConfiguration,
 ) -> Result<(), Box<dyn Error>> {
-    let (module, module_interface) = hir_mir::compile_prelude(&lang::ast_hir::compile_prelude(
+    let (module, module_interface) = hir_mir::compile_prelude(&ast_hir::compile_prelude(
         &lang::parse::parse(
             &infrastructure.file_system.read_to_string(source_file)?,
             &infrastructure.file_path_displayer.display(source_file),
