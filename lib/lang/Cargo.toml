@@ -8,7 +8,6 @@ edition = "2018"
 combine = { version = "4", features = ["regex"] }
 hir = { path = "../hir" }
 interface = { path = "../interface" }
-itertools = "0.10"
 once_cell = "1"
 position = { path = "../position" }
 regex = "1"

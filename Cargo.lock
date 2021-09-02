@@ -415,7 +415,6 @@ dependencies = [
  "combine",
  "hir",
  "interface",
- "itertools",
  "once_cell",
  "position",
  "pretty_assertions",
