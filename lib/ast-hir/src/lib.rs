@@ -4,13 +4,14 @@ mod module_compiler;
 mod name_qualifier;
 mod prelude_module_modifier;
 mod singleton_record_compiler;
+mod test;
 
-use crate::ast;
 use error::CompileError;
 use hir::{
     analysis::ir::{definition_qualifier, type_qualifier},
     ir,
 };
+use lang::ast;
 use std::collections::HashMap;
 
 pub fn compile(

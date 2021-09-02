@@ -1,6 +1,6 @@
 use super::error::CompileError;
-use crate::{ast, types};
-use hir::ir;
+use crate::ast;
+use hir::{ir, types};
 use position::Position;
 
 pub fn compile(module: &ast::Module) -> Result<ir::Module, CompileError> {
