@@ -763,22 +763,22 @@ fn comment<'a>() -> impl Parser<Stream<'a>, Output = ()> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test;
+    use position::test::PositionFake;
     use pretty_assertions::assert_eq;
 
     #[test]
     fn parse_module() {
         assert_eq!(
             module().parse(stream("", "")).unwrap().0,
-            Module::new(vec![], vec![], vec![], vec![], vec![], test::position())
+            Module::new(vec![], vec![], vec![], vec![], vec![], Position::fake())
         );
         assert_eq!(
             module().parse(stream(" ", "")).unwrap().0,
-            Module::new(vec![], vec![], vec![], vec![], vec![], test::position())
+            Module::new(vec![], vec![], vec![], vec![], vec![], Position::fake())
         );
         assert_eq!(
             module().parse(stream("\n", "")).unwrap().0,
-            Module::new(vec![], vec![], vec![], vec![], vec![], test::position())
+            Module::new(vec![], vec![], vec![], vec![], vec![], Position::fake())
         );
         assert_eq!(
             module().parse(stream("import Foo'Bar", "")).unwrap().0,
@@ -791,7 +791,7 @@ mod tests {
                 vec![],
                 vec![],
                 vec![],
-                test::position()
+                Position::fake()
             )
         );
         assert_eq!(
@@ -802,11 +802,11 @@ mod tests {
                 vec![],
                 vec![TypeAlias::new(
                     "foo",
-                    types::Number::new(test::position()),
-                    test::position()
+                    types::Number::new(Position::fake()),
+                    Position::fake()
                 )],
                 vec![],
-                test::position()
+                Position::fake()
             )
         );
         assert_eq!(
@@ -822,19 +822,19 @@ mod tests {
                 vec![Definition::new(
                     "x",
                     Lambda::new(
-                        vec![Argument::new("x", types::Number::new(test::position()))],
-                        types::Number::new(test::position()),
+                        vec![Argument::new("x", types::Number::new(Position::fake()))],
+                        types::Number::new(Position::fake()),
                         Block::new(
                             vec![],
-                            Number::new(42.0, test::position()),
-                            test::position()
+                            Number::new(42.0, Position::fake()),
+                            Position::fake()
                         ),
-                        test::position()
+                        Position::fake()
                     ),
                     false,
-                    test::position()
+                    Position::fake()
                 )],
-                test::position()
+                Position::fake()
             )
         );
         assert_eq!(
@@ -854,35 +854,35 @@ mod tests {
                     Definition::new(
                         "x",
                         Lambda::new(
-                            vec![Argument::new("x", types::Number::new(test::position()))],
-                            types::Number::new(test::position()),
+                            vec![Argument::new("x", types::Number::new(Position::fake()))],
+                            types::Number::new(Position::fake()),
                             Block::new(
                                 vec![],
-                                Number::new(42.0, test::position()),
-                                test::position()
+                                Number::new(42.0, Position::fake()),
+                                Position::fake()
                             ),
-                            test::position()
+                            Position::fake()
                         ),
                         false,
-                        test::position()
+                        Position::fake()
                     ),
                     Definition::new(
                         "y",
                         Lambda::new(
-                            vec![Argument::new("y", types::Number::new(test::position()))],
-                            types::Number::new(test::position()),
+                            vec![Argument::new("y", types::Number::new(Position::fake()))],
+                            types::Number::new(Position::fake()),
                             Block::new(
                                 vec![],
-                                Number::new(42.0, test::position()),
-                                test::position()
+                                Number::new(42.0, Position::fake()),
+                                Position::fake()
                             ),
-                            test::position()
+                            Position::fake()
                         ),
                         false,
-                        test::position()
+                        Position::fake()
                     )
                 ],
-                test::position()
+                Position::fake()
             )
         );
     }
@@ -952,11 +952,11 @@ mod tests {
                 "foo",
                 CallingConvention::Native,
                 types::Function::new(
-                    vec![types::Number::new(test::position()).into()],
-                    types::Number::new(test::position()),
-                    test::position()
+                    vec![types::Number::new(Position::fake()).into()],
+                    types::Number::new(Position::fake()),
+                    Position::fake()
                 ),
-                test::position()
+                Position::fake()
             ),
         );
 
@@ -970,11 +970,11 @@ mod tests {
                 "foo",
                 CallingConvention::C,
                 types::Function::new(
-                    vec![types::Number::new(test::position()).into()],
-                    types::Number::new(test::position()),
-                    test::position()
+                    vec![types::Number::new(Position::fake()).into()],
+                    types::Number::new(Position::fake()),
+                    Position::fake()
                 ),
-                test::position()
+                Position::fake()
             ),
         );
     }
@@ -989,17 +989,17 @@ mod tests {
             Definition::new(
                 "x",
                 Lambda::new(
-                    vec![Argument::new("x", types::Number::new(test::position()))],
-                    types::Number::new(test::position()),
+                    vec![Argument::new("x", types::Number::new(Position::fake()))],
+                    types::Number::new(Position::fake()),
                     Block::new(
                         vec![],
-                        Number::new(42.0, test::position()),
-                        test::position()
+                        Number::new(42.0, Position::fake()),
+                        Position::fake()
                     ),
-                    test::position()
+                    Position::fake()
                 ),
                 false,
-                test::position()
+                Position::fake()
             ),
         );
 
@@ -1011,17 +1011,17 @@ mod tests {
             Definition::new(
                 "x",
                 Lambda::new(
-                    vec![Argument::new("x", types::Number::new(test::position()))],
-                    types::Number::new(test::position()),
+                    vec![Argument::new("x", types::Number::new(Position::fake()))],
+                    types::Number::new(Position::fake()),
                     Block::new(
                         vec![],
-                        Number::new(42.0, test::position()),
-                        test::position()
+                        Number::new(42.0, Position::fake()),
+                        Position::fake()
                     ),
-                    test::position()
+                    Position::fake()
                 ),
                 true,
-                test::position()
+                Position::fake()
             ),
         );
     }
@@ -1031,7 +1031,7 @@ mod tests {
         for (source, expected) in &[
             (
                 "type Foo {}",
-                TypeDefinition::new("Foo", vec![], test::position()),
+                TypeDefinition::new("Foo", vec![], Position::fake()),
             ),
             (
                 "type Foo {foo number}",
@@ -1039,9 +1039,9 @@ mod tests {
                     "Foo",
                     vec![types::RecordElement::new(
                         "foo",
-                        types::Number::new(test::position()),
+                        types::Number::new(Position::fake()),
                     )],
-                    test::position(),
+                    Position::fake(),
                 ),
             ),
             (
@@ -1049,10 +1049,10 @@ mod tests {
                 TypeDefinition::new(
                     "Foo",
                     vec![
-                        types::RecordElement::new("foo", types::Number::new(test::position())),
-                        types::RecordElement::new("bar", types::Number::new(test::position())),
+                        types::RecordElement::new("foo", types::Number::new(Position::fake())),
+                        types::RecordElement::new("bar", types::Number::new(Position::fake())),
                     ],
-                    test::position(),
+                    Position::fake(),
                 ),
             ),
         ] {
@@ -1070,16 +1070,16 @@ mod tests {
                 "type foo=number",
                 TypeAlias::new(
                     "foo",
-                    types::Number::new(test::position()),
-                    test::position(),
+                    types::Number::new(Position::fake()),
+                    Position::fake(),
                 ),
             ),
             (
                 "type foo = number",
                 TypeAlias::new(
                     "foo",
-                    types::Number::new(test::position()),
-                    test::position(),
+                    types::Number::new(Position::fake()),
+                    Position::fake(),
                 ),
             ),
             (
@@ -1087,11 +1087,11 @@ mod tests {
                 TypeAlias::new(
                     "foo",
                     types::Union::new(
-                        types::Number::new(test::position()),
-                        types::None::new(test::position()),
-                        test::position(),
+                        types::Number::new(Position::fake()),
+                        types::None::new(Position::fake()),
+                        Position::fake(),
                     ),
-                    test::position(),
+                    Position::fake(),
                 ),
             ),
         ] {
@@ -1108,30 +1108,30 @@ mod tests {
             assert!(type_().parse(stream("", "")).is_err());
             assert_eq!(
                 type_().parse(stream("boolean", "")).unwrap().0,
-                types::Boolean::new(test::position()).into()
+                types::Boolean::new(Position::fake()).into()
             );
             assert_eq!(
                 type_().parse(stream("none", "")).unwrap().0,
-                types::None::new(test::position()).into()
+                types::None::new(Position::fake()).into()
             );
             assert_eq!(
                 type_().parse(stream("number", "")).unwrap().0,
-                types::Number::new(test::position()).into()
+                types::Number::new(Position::fake()).into()
             );
             assert_eq!(
                 type_().parse(stream("Foo", "")).unwrap().0,
-                types::Reference::new("Foo", test::position()).into()
+                types::Reference::new("Foo", Position::fake()).into()
             );
             assert_eq!(
                 type_().parse(stream("Foo'Bar", "")).unwrap().0,
-                types::Reference::new("Foo'Bar", test::position()).into()
+                types::Reference::new("Foo'Bar", Position::fake()).into()
             );
             assert_eq!(
                 type_().parse(stream("\\(number)number", "")).unwrap().0,
                 types::Function::new(
-                    vec![types::Number::new(test::position()).into()],
-                    types::Number::new(test::position()),
-                    test::position()
+                    vec![types::Number::new(Position::fake()).into()],
+                    types::Number::new(Position::fake()),
+                    Position::fake()
                 )
                 .into()
             );
@@ -1142,11 +1142,11 @@ mod tests {
                     .0,
                 types::Function::new(
                     vec![
-                        types::Number::new(test::position()).into(),
-                        types::Number::new(test::position()).into(),
+                        types::Number::new(Position::fake()).into(),
+                        types::Number::new(Position::fake()).into(),
                     ],
-                    types::Number::new(test::position()),
-                    test::position()
+                    types::Number::new(Position::fake()),
+                    Position::fake()
                 )
                 .into()
             );
@@ -1157,22 +1157,22 @@ mod tests {
                     .0,
                 types::Function::new(
                     vec![types::Function::new(
-                        vec![types::Number::new(test::position()).into()],
-                        types::Number::new(test::position()),
-                        test::position()
+                        vec![types::Number::new(Position::fake()).into()],
+                        types::Number::new(Position::fake()),
+                        Position::fake()
                     )
                     .into()],
-                    types::Number::new(test::position()),
-                    test::position()
+                    types::Number::new(Position::fake()),
+                    Position::fake()
                 )
                 .into()
             );
             assert_eq!(
                 type_().parse(stream("number|none", "")).unwrap().0,
                 types::Union::new(
-                    types::Number::new(test::position()),
-                    types::None::new(test::position()),
-                    test::position()
+                    types::Number::new(Position::fake()),
+                    types::None::new(Position::fake()),
+                    Position::fake()
                 )
                 .into()
             );
@@ -1180,12 +1180,12 @@ mod tests {
                 type_().parse(stream("boolean|number|none", "")).unwrap().0,
                 types::Union::new(
                     types::Union::new(
-                        types::Boolean::new(test::position()),
-                        types::Number::new(test::position()),
-                        test::position()
+                        types::Boolean::new(Position::fake()),
+                        types::Number::new(Position::fake()),
+                        Position::fake()
                     ),
-                    types::None::new(test::position()),
-                    test::position()
+                    types::None::new(Position::fake()),
+                    Position::fake()
                 )
                 .into()
             );
@@ -1195,13 +1195,13 @@ mod tests {
                     .unwrap()
                     .0,
                 types::Function::new(
-                    vec![types::Number::new(test::position()).into()],
+                    vec![types::Number::new(Position::fake()).into()],
                     types::Union::new(
-                        types::Number::new(test::position()),
-                        types::None::new(test::position()),
-                        test::position()
+                        types::Number::new(Position::fake()),
+                        types::None::new(Position::fake()),
+                        Position::fake()
                     ),
-                    test::position()
+                    Position::fake()
                 )
                 .into()
             );
@@ -1212,12 +1212,12 @@ mod tests {
                     .0,
                 types::Union::new(
                     types::Function::new(
-                        vec![types::Number::new(test::position()).into()],
-                        types::Number::new(test::position()),
-                        test::position()
+                        vec![types::Number::new(Position::fake()).into()],
+                        types::Number::new(Position::fake()),
+                        Position::fake()
                     ),
-                    types::None::new(test::position()),
-                    test::position()
+                    types::None::new(Position::fake()),
+                    Position::fake()
                 )
                 .into()
             );
@@ -1227,7 +1227,7 @@ mod tests {
         fn parse_any_type() {
             assert_eq!(
                 any_type().parse(stream("any", "")).unwrap().0,
-                types::Any::new(test::position())
+                types::Any::new(Position::fake())
             );
         }
 
@@ -1236,11 +1236,11 @@ mod tests {
             assert!(type_().parse(stream("", "")).is_err());
             assert_eq!(
                 type_().parse(stream("Foo", "")).unwrap().0,
-                types::Reference::new("Foo", test::position()).into()
+                types::Reference::new("Foo", Position::fake()).into()
             );
             assert_eq!(
                 type_().parse(stream("Foo'Bar", "")).unwrap().0,
-                types::Reference::new("Foo'Bar", test::position()).into()
+                types::Reference::new("Foo'Bar", Position::fake()).into()
             );
         }
 
@@ -1248,14 +1248,14 @@ mod tests {
         fn parse_list_type() {
             assert_eq!(
                 type_().parse(stream("[number]", "")).unwrap().0,
-                types::List::new(types::Number::new(test::position()), test::position()).into()
+                types::List::new(types::Number::new(Position::fake()), Position::fake()).into()
             );
 
             assert_eq!(
                 type_().parse(stream("[[number]]", "")).unwrap().0,
                 types::List::new(
-                    types::List::new(types::Number::new(test::position()), test::position()),
-                    test::position()
+                    types::List::new(types::Number::new(Position::fake()), Position::fake()),
+                    Position::fake()
                 )
                 .into()
             );
@@ -1263,9 +1263,9 @@ mod tests {
             assert_eq!(
                 type_().parse(stream("[number]|[none]", "")).unwrap().0,
                 types::Union::new(
-                    types::List::new(types::Number::new(test::position()), test::position()),
-                    types::List::new(types::None::new(test::position()), test::position()),
-                    test::position()
+                    types::List::new(types::Number::new(Position::fake()), Position::fake()),
+                    types::List::new(types::None::new(Position::fake()), Position::fake()),
+                    Position::fake()
                 )
                 .into()
             );
@@ -1274,11 +1274,11 @@ mod tests {
                 type_().parse(stream("\\([number])[none]", "")).unwrap().0,
                 types::Function::new(
                     vec![
-                        types::List::new(types::Number::new(test::position()), test::position())
+                        types::List::new(types::Number::new(Position::fake()), Position::fake())
                             .into()
                     ],
-                    types::List::new(types::None::new(test::position()), test::position()),
-                    test::position()
+                    types::List::new(types::None::new(Position::fake()), Position::fake()),
+                    Position::fake()
                 )
                 .into()
             );
@@ -1294,19 +1294,19 @@ mod tests {
             assert!(expression().parse(stream("", "")).is_err());
             assert_eq!(
                 expression().parse(stream("1", "")).unwrap().0,
-                Number::new(1.0, test::position()).into()
+                Number::new(1.0, Position::fake()).into()
             );
             assert_eq!(
                 expression().parse(stream("x", "")).unwrap().0,
-                Variable::new("x", test::position()).into()
+                Variable::new("x", Position::fake()).into()
             );
             assert_eq!(
                 expression().parse(stream("x + 1", "")).unwrap().0,
                 BinaryOperation::new(
                     BinaryOperator::Add,
-                    Variable::new("x", test::position()),
-                    Number::new(1.0, test::position()),
-                    test::position()
+                    Variable::new("x", Position::fake()),
+                    Number::new(1.0, Position::fake()),
+                    Position::fake()
                 )
                 .into()
             );
@@ -1314,13 +1314,13 @@ mod tests {
                 expression().parse(stream("x + y(z)", "")).unwrap().0,
                 BinaryOperation::new(
                     BinaryOperator::Add,
-                    Variable::new("x", test::position()),
+                    Variable::new("x", Position::fake()),
                     Call::new(
-                        Variable::new("y", test::position()),
-                        vec![Variable::new("z", test::position()).into()],
-                        test::position()
+                        Variable::new("y", Position::fake()),
+                        vec![Variable::new("z", Position::fake()).into()],
+                        Position::fake()
                     ),
-                    test::position()
+                    Position::fake()
                 )
                 .into()
             );
@@ -1329,12 +1329,12 @@ mod tests {
                 Call::new(
                     BinaryOperation::new(
                         BinaryOperator::Add,
-                        Variable::new("x", test::position()),
-                        Variable::new("y", test::position()),
-                        test::position()
+                        Variable::new("x", Position::fake()),
+                        Variable::new("y", Position::fake()),
+                        Position::fake()
                     ),
-                    vec![Variable::new("z", test::position()).into()],
-                    test::position()
+                    vec![Variable::new("z", Position::fake()).into()],
+                    Position::fake()
                 )
                 .into()
             );
@@ -1344,7 +1344,7 @@ mod tests {
         fn parse_deeply_nested_expression() {
             assert_eq!(
                 expression().parse(stream("(((((42)))))", "")).unwrap().0,
-                Number::new(42.0, test::position()).into()
+                Number::new(42.0, Position::fake()).into()
             )
         }
 
@@ -1353,15 +1353,15 @@ mod tests {
             assert!(atomic_expression().parse(stream("", "")).is_err());
             assert_eq!(
                 atomic_expression().parse(stream("1", "")).unwrap().0,
-                Number::new(1.0, test::position()).into()
+                Number::new(1.0, Position::fake()).into()
             );
             assert_eq!(
                 atomic_expression().parse(stream("x", "")).unwrap().0,
-                Variable::new("x", test::position()).into()
+                Variable::new("x", Position::fake()).into()
             );
             assert_eq!(
                 atomic_expression().parse(stream("(x)", "")).unwrap().0,
-                Variable::new("x", test::position()).into()
+                Variable::new("x", Position::fake()).into()
             );
         }
 
@@ -1373,14 +1373,14 @@ mod tests {
                     .unwrap()
                     .0,
                 Lambda::new(
-                    vec![Argument::new("x", types::Number::new(test::position()))],
-                    types::Number::new(test::position()),
+                    vec![Argument::new("x", types::Number::new(Position::fake()))],
+                    types::Number::new(Position::fake()),
                     Block::new(
                         vec![],
-                        Number::new(42.0, test::position()),
-                        test::position()
+                        Number::new(42.0, Position::fake()),
+                        Position::fake()
                     ),
-                    test::position()
+                    Position::fake()
                 ),
             );
 
@@ -1391,16 +1391,16 @@ mod tests {
                     .0,
                 Lambda::new(
                     vec![
-                        Argument::new("x", types::Number::new(test::position())),
-                        Argument::new("y", types::Number::new(test::position()))
+                        Argument::new("x", types::Number::new(Position::fake())),
+                        Argument::new("y", types::Number::new(Position::fake()))
                     ],
-                    types::Number::new(test::position()),
+                    types::Number::new(Position::fake()),
                     Block::new(
                         vec![],
-                        Number::new(42.0, test::position()),
-                        test::position()
+                        Number::new(42.0, Position::fake()),
+                        Position::fake()
                     ),
-                    test::position()
+                    Position::fake()
                 ),
             );
         }
@@ -1411,13 +1411,13 @@ mod tests {
                 lambda().parse(stream("\\() Foo { 42 }", "")).unwrap().0,
                 Lambda::new(
                     vec![],
-                    types::Reference::new("Foo", test::position()),
+                    types::Reference::new("Foo", Position::fake()),
                     Block::new(
                         vec![],
-                        Number::new(42.0, test::position()),
-                        test::position()
+                        Number::new(42.0, Position::fake()),
+                        Position::fake()
                     ),
-                    test::position()
+                    Position::fake()
                 ),
             );
         }
@@ -1426,29 +1426,29 @@ mod tests {
         fn parse_block() {
             assert_eq!(
                 block().parse(stream("{none}", "")).unwrap().0,
-                Block::new(vec![], None::new(test::position()), test::position()),
+                Block::new(vec![], None::new(Position::fake()), Position::fake()),
             );
             assert_eq!(
                 block().parse(stream("{none none}", "")).unwrap().0,
                 Block::new(
                     vec![Statement::new(
                         None,
-                        None::new(test::position()),
-                        test::position()
+                        None::new(Position::fake()),
+                        Position::fake()
                     )],
-                    None::new(test::position()),
-                    test::position()
+                    None::new(Position::fake()),
+                    Position::fake()
                 ),
             );
             assert_eq!(
                 block().parse(stream("{none none none}", "")).unwrap().0,
                 Block::new(
                     vec![
-                        Statement::new(None, None::new(test::position()), test::position()),
-                        Statement::new(None, None::new(test::position()), test::position())
+                        Statement::new(None, None::new(Position::fake()), Position::fake()),
+                        Statement::new(None, None::new(Position::fake()), Position::fake())
                     ],
-                    None::new(test::position()),
-                    test::position()
+                    None::new(Position::fake()),
+                    Position::fake()
                 ),
             );
             assert_eq!(
@@ -1456,11 +1456,11 @@ mod tests {
                 Block::new(
                     vec![Statement::new(
                         Some("x".into()),
-                        None::new(test::position()),
-                        test::position()
+                        None::new(Position::fake()),
+                        Position::fake()
                     )],
-                    None::new(test::position()),
-                    test::position()
+                    None::new(Position::fake()),
+                    Position::fake()
                 ),
             );
             assert_eq!(
@@ -1469,11 +1469,11 @@ mod tests {
                     vec![],
                     BinaryOperation::new(
                         BinaryOperator::Equal,
-                        Variable::new("x", test::position()),
-                        Variable::new("x", test::position()),
-                        test::position()
+                        Variable::new("x", Position::fake()),
+                        Variable::new("x", Position::fake()),
+                        Position::fake()
                     ),
-                    test::position()
+                    Position::fake()
                 ),
             );
         }
@@ -1486,11 +1486,11 @@ mod tests {
                     None,
                     BinaryOperation::new(
                         BinaryOperator::Equal,
-                        Variable::new("x", test::position()),
-                        Variable::new("x", test::position()),
-                        test::position()
+                        Variable::new("x", Position::fake()),
+                        Variable::new("x", Position::fake()),
+                        Position::fake()
                     ),
-                    test::position()
+                    Position::fake()
                 ),
             );
         }
@@ -1504,19 +1504,19 @@ mod tests {
                     .0,
                 If::new(
                     vec![IfBranch::new(
-                        Boolean::new(true, test::position()),
+                        Boolean::new(true, Position::fake()),
                         Block::new(
                             vec![],
-                            Number::new(42.0, test::position()),
-                            test::position()
+                            Number::new(42.0, Position::fake()),
+                            Position::fake()
                         ),
                     )],
                     Block::new(
                         vec![],
-                        Number::new(13.0, test::position()),
-                        test::position()
+                        Number::new(13.0, Position::fake()),
+                        Position::fake()
                     ),
-                    test::position(),
+                    Position::fake(),
                 )
             );
             assert_eq!(
@@ -1528,32 +1528,32 @@ mod tests {
                     vec![IfBranch::new(
                         If::new(
                             vec![IfBranch::new(
-                                Boolean::new(true, test::position()),
+                                Boolean::new(true, Position::fake()),
                                 Block::new(
                                     vec![],
-                                    Boolean::new(true, test::position()),
-                                    test::position()
+                                    Boolean::new(true, Position::fake()),
+                                    Position::fake()
                                 ),
                             )],
                             Block::new(
                                 vec![],
-                                Boolean::new(true, test::position()),
-                                test::position()
+                                Boolean::new(true, Position::fake()),
+                                Position::fake()
                             ),
-                            test::position(),
+                            Position::fake(),
                         ),
                         Block::new(
                             vec![],
-                            Number::new(42.0, test::position()),
-                            test::position()
+                            Number::new(42.0, Position::fake()),
+                            Position::fake()
                         ),
                     )],
                     Block::new(
                         vec![],
-                        Number::new(13.0, test::position()),
-                        test::position()
+                        Number::new(13.0, Position::fake()),
+                        Position::fake()
                     ),
-                    test::position(),
+                    Position::fake(),
                 )
             );
             assert_eq!(
@@ -1564,24 +1564,24 @@ mod tests {
                 If::new(
                     vec![
                         IfBranch::new(
-                            Boolean::new(true, test::position()),
+                            Boolean::new(true, Position::fake()),
                             Block::new(
                                 vec![],
-                                Number::new(1.0, test::position()),
-                                test::position()
+                                Number::new(1.0, Position::fake()),
+                                Position::fake()
                             ),
                         ),
                         IfBranch::new(
-                            Boolean::new(true, test::position()),
+                            Boolean::new(true, Position::fake()),
                             Block::new(
                                 vec![],
-                                Number::new(2.0, test::position()),
-                                test::position()
+                                Number::new(2.0, Position::fake()),
+                                Position::fake()
                             ),
                         )
                     ],
-                    Block::new(vec![], Number::new(3.0, test::position()), test::position()),
-                    test::position(),
+                    Block::new(vec![], Number::new(3.0, Position::fake()), Position::fake()),
+                    Position::fake(),
                 )
             );
         }
@@ -1595,17 +1595,17 @@ mod tests {
                     .0,
                 IfType::new(
                     "x",
-                    Variable::new("y", test::position()),
+                    Variable::new("y", Position::fake()),
                     vec![IfTypeBranch::new(
-                        types::Boolean::new(test::position()),
-                        Block::new(vec![], None::new(test::position()), test::position()),
+                        types::Boolean::new(Position::fake()),
+                        Block::new(vec![], None::new(Position::fake()), Position::fake()),
                     )],
                     Some(Block::new(
                         vec![],
-                        None::new(test::position()),
-                        test::position()
+                        None::new(Position::fake()),
+                        Position::fake()
                     )),
-                    test::position(),
+                    Position::fake(),
                 )
             );
 
@@ -1619,23 +1619,23 @@ mod tests {
                     .0,
                 IfType::new(
                     "x",
-                    Variable::new("y", test::position()),
+                    Variable::new("y", Position::fake()),
                     vec![
                         IfTypeBranch::new(
-                            types::Boolean::new(test::position()),
-                            Block::new(vec![], None::new(test::position()), test::position()),
+                            types::Boolean::new(Position::fake()),
+                            Block::new(vec![], None::new(Position::fake()), Position::fake()),
                         ),
                         IfTypeBranch::new(
-                            types::None::new(test::position()),
-                            Block::new(vec![], None::new(test::position()), test::position()),
+                            types::None::new(Position::fake()),
+                            Block::new(vec![], None::new(Position::fake()), Position::fake()),
                         )
                     ],
                     Some(Block::new(
                         vec![],
-                        None::new(test::position()),
-                        test::position()
+                        None::new(Position::fake()),
+                        Position::fake()
                     )),
-                    test::position()
+                    Position::fake()
                 )
             );
 
@@ -1646,19 +1646,19 @@ mod tests {
                     .0,
                 IfType::new(
                     "x",
-                    Variable::new("y", test::position()),
+                    Variable::new("y", Position::fake()),
                     vec![
                         IfTypeBranch::new(
-                            types::Boolean::new(test::position()),
-                            Block::new(vec![], None::new(test::position()), test::position()),
+                            types::Boolean::new(Position::fake()),
+                            Block::new(vec![], None::new(Position::fake()), Position::fake()),
                         ),
                         IfTypeBranch::new(
-                            types::None::new(test::position()),
-                            Block::new(vec![], None::new(test::position()), test::position()),
+                            types::None::new(Position::fake()),
+                            Block::new(vec![], None::new(Position::fake()), Position::fake()),
                         )
                     ],
                     None,
-                    test::position()
+                    Position::fake()
                 )
             );
         }
@@ -1671,12 +1671,12 @@ mod tests {
                     .unwrap()
                     .0,
                 IfList::new(
-                    Variable::new("xs", test::position()),
+                    Variable::new("xs", Position::fake()),
                     "x",
                     "xs",
-                    Block::new(vec![], None::new(test::position()), test::position()),
-                    Block::new(vec![], None::new(test::position()), test::position()),
-                    test::position(),
+                    Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                    Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                    Position::fake(),
                 )
             );
         }
@@ -1686,9 +1686,9 @@ mod tests {
             assert_eq!(
                 expression().parse(stream("f()", "")).unwrap().0,
                 Call::new(
-                    Variable::new("f", test::position()),
+                    Variable::new("f", Position::fake()),
                     vec![],
-                    test::position()
+                    Position::fake()
                 )
                 .into()
             );
@@ -1697,12 +1697,12 @@ mod tests {
                 expression().parse(stream("f()()", "")).unwrap().0,
                 Call::new(
                     Call::new(
-                        Variable::new("f", test::position()),
+                        Variable::new("f", Position::fake()),
                         vec![],
-                        test::position()
+                        Position::fake()
                     ),
                     vec![],
-                    test::position()
+                    Position::fake()
                 )
                 .into()
             );
@@ -1710,9 +1710,9 @@ mod tests {
             assert_eq!(
                 expression().parse(stream("f(1)", "")).unwrap().0,
                 Call::new(
-                    Variable::new("f", test::position()),
-                    vec![Number::new(1.0, test::position()).into()],
-                    test::position()
+                    Variable::new("f", Position::fake()),
+                    vec![Number::new(1.0, Position::fake()).into()],
+                    Position::fake()
                 )
                 .into()
             );
@@ -1720,9 +1720,9 @@ mod tests {
             assert_eq!(
                 expression().parse(stream("f(1,)", "")).unwrap().0,
                 Call::new(
-                    Variable::new("f", test::position()),
-                    vec![Number::new(1.0, test::position()).into()],
-                    test::position()
+                    Variable::new("f", Position::fake()),
+                    vec![Number::new(1.0, Position::fake()).into()],
+                    Position::fake()
                 )
                 .into()
             );
@@ -1730,12 +1730,12 @@ mod tests {
             assert_eq!(
                 expression().parse(stream("f(1, 2)", "")).unwrap().0,
                 Call::new(
-                    Variable::new("f", test::position()),
+                    Variable::new("f", Position::fake()),
                     vec![
-                        Number::new(1.0, test::position()).into(),
-                        Number::new(2.0, test::position()).into()
+                        Number::new(1.0, Position::fake()).into(),
+                        Number::new(2.0, Position::fake()).into()
                     ],
-                    test::position()
+                    Position::fake()
                 )
                 .into()
             );
@@ -1743,12 +1743,12 @@ mod tests {
             assert_eq!(
                 expression().parse(stream("f(1, 2,)", "")).unwrap().0,
                 Call::new(
-                    Variable::new("f", test::position()),
+                    Variable::new("f", Position::fake()),
                     vec![
-                        Number::new(1.0, test::position()).into(),
-                        Number::new(2.0, test::position()).into()
+                        Number::new(1.0, Position::fake()).into(),
+                        Number::new(2.0, Position::fake()).into()
                     ],
-                    test::position()
+                    Position::fake()
                 )
                 .into()
             );
@@ -1760,8 +1760,8 @@ mod tests {
                 expression().parse(stream("x?", "")).unwrap().0,
                 UnaryOperation::new(
                     UnaryOperator::Try,
-                    Variable::new("x", test::position()),
-                    test::position()
+                    Variable::new("x", Position::fake()),
+                    Position::fake()
                 )
                 .into()
             );
@@ -1776,8 +1776,8 @@ mod tests {
                     "!42",
                     UnaryOperation::new(
                         UnaryOperator::Not,
-                        Number::new(42.0, test::position()),
-                        test::position(),
+                        Number::new(42.0, Position::fake()),
+                        Position::fake(),
                     ),
                 ),
                 (
@@ -1785,11 +1785,11 @@ mod tests {
                     UnaryOperation::new(
                         UnaryOperator::Not,
                         Call::new(
-                            Variable::new("f", test::position()),
-                            vec![Number::new(42.0, test::position()).into()],
-                            test::position(),
+                            Variable::new("f", Position::fake()),
+                            vec![Number::new(42.0, Position::fake()).into()],
+                            Position::fake(),
                         ),
-                        test::position(),
+                        Position::fake(),
                     ),
                 ),
                 (
@@ -1798,21 +1798,21 @@ mod tests {
                         UnaryOperator::Not,
                         If::new(
                             vec![IfBranch::new(
-                                Boolean::new(true, test::position()),
+                                Boolean::new(true, Position::fake()),
                                 Block::new(
                                     vec![],
-                                    Boolean::new(true, test::position()),
-                                    test::position(),
+                                    Boolean::new(true, Position::fake()),
+                                    Position::fake(),
                                 ),
                             )],
                             Block::new(
                                 vec![],
-                                Boolean::new(true, test::position()),
-                                test::position(),
+                                Boolean::new(true, Position::fake()),
+                                Position::fake(),
                             ),
-                            test::position(),
+                            Position::fake(),
                         ),
-                        test::position(),
+                        Position::fake(),
                     ),
                 ),
                 (
@@ -1821,10 +1821,10 @@ mod tests {
                         UnaryOperator::Not,
                         UnaryOperation::new(
                             UnaryOperator::Not,
-                            Number::new(42.0, test::position()),
-                            test::position(),
+                            Number::new(42.0, Position::fake()),
+                            Position::fake(),
                         ),
-                        test::position(),
+                        Position::fake(),
                     ),
                 ),
             ] {
@@ -1854,9 +1854,9 @@ mod tests {
                     "1+1",
                     BinaryOperation::new(
                         BinaryOperator::Add,
-                        Number::new(1.0, test::position()),
-                        Number::new(1.0, test::position()),
-                        test::position(),
+                        Number::new(1.0, Position::fake()),
+                        Number::new(1.0, Position::fake()),
+                        Position::fake(),
                     )
                     .into(),
                 ),
@@ -1866,12 +1866,12 @@ mod tests {
                         BinaryOperator::Add,
                         BinaryOperation::new(
                             BinaryOperator::Add,
-                            Number::new(1.0, test::position()),
-                            Number::new(1.0, test::position()),
-                            test::position(),
+                            Number::new(1.0, Position::fake()),
+                            Number::new(1.0, Position::fake()),
+                            Position::fake(),
                         ),
-                        Number::new(1.0, test::position()),
-                        test::position(),
+                        Number::new(1.0, Position::fake()),
+                        Position::fake(),
                     )
                     .into(),
                 ),
@@ -1879,14 +1879,14 @@ mod tests {
                     "1+(1+1)",
                     BinaryOperation::new(
                         BinaryOperator::Add,
-                        Number::new(1.0, test::position()),
+                        Number::new(1.0, Position::fake()),
                         BinaryOperation::new(
                             BinaryOperator::Add,
-                            Number::new(1.0, test::position()),
-                            Number::new(1.0, test::position()),
-                            test::position(),
+                            Number::new(1.0, Position::fake()),
+                            Number::new(1.0, Position::fake()),
+                            Position::fake(),
                         ),
-                        test::position(),
+                        Position::fake(),
                     )
                     .into(),
                 ),
@@ -1896,12 +1896,12 @@ mod tests {
                         BinaryOperator::Subtract,
                         BinaryOperation::new(
                             BinaryOperator::Multiply,
-                            Number::new(1.0, test::position()),
-                            Number::new(2.0, test::position()),
-                            test::position(),
+                            Number::new(1.0, Position::fake()),
+                            Number::new(2.0, Position::fake()),
+                            Position::fake(),
                         ),
-                        Number::new(3.0, test::position()),
-                        test::position(),
+                        Number::new(3.0, Position::fake()),
+                        Position::fake(),
                     )
                     .into(),
                 ),
@@ -1909,14 +1909,14 @@ mod tests {
                     "1+2*3",
                     BinaryOperation::new(
                         BinaryOperator::Add,
-                        Number::new(1.0, test::position()),
+                        Number::new(1.0, Position::fake()),
                         BinaryOperation::new(
                             BinaryOperator::Multiply,
-                            Number::new(2.0, test::position()),
-                            Number::new(3.0, test::position()),
-                            test::position(),
+                            Number::new(2.0, Position::fake()),
+                            Number::new(3.0, Position::fake()),
+                            Position::fake(),
                         ),
-                        test::position(),
+                        Position::fake(),
                     )
                     .into(),
                 ),
@@ -1926,17 +1926,17 @@ mod tests {
                         BinaryOperator::Subtract,
                         BinaryOperation::new(
                             BinaryOperator::Multiply,
-                            Number::new(1.0, test::position()),
-                            Number::new(2.0, test::position()),
-                            test::position(),
+                            Number::new(1.0, Position::fake()),
+                            Number::new(2.0, Position::fake()),
+                            Position::fake(),
                         ),
                         BinaryOperation::new(
                             BinaryOperator::Divide,
-                            Number::new(3.0, test::position()),
-                            Number::new(4.0, test::position()),
-                            test::position(),
+                            Number::new(3.0, Position::fake()),
+                            Number::new(4.0, Position::fake()),
+                            Position::fake(),
                         ),
-                        test::position(),
+                        Position::fake(),
                     )
                     .into(),
                 ),
@@ -1944,9 +1944,9 @@ mod tests {
                     "1==1",
                     BinaryOperation::new(
                         BinaryOperator::Equal,
-                        Number::new(1.0, test::position()),
-                        Number::new(1.0, test::position()),
-                        test::position(),
+                        Number::new(1.0, Position::fake()),
+                        Number::new(1.0, Position::fake()),
+                        Position::fake(),
                     )
                     .into(),
                 ),
@@ -1954,9 +1954,9 @@ mod tests {
                     "true&true",
                     BinaryOperation::new(
                         BinaryOperator::And,
-                        Boolean::new(true, test::position()),
-                        Boolean::new(true, test::position()),
-                        test::position(),
+                        Boolean::new(true, Position::fake()),
+                        Boolean::new(true, Position::fake()),
+                        Position::fake(),
                     )
                     .into(),
                 ),
@@ -1964,9 +1964,9 @@ mod tests {
                     "true|true",
                     BinaryOperation::new(
                         BinaryOperator::Or,
-                        Boolean::new(true, test::position()),
-                        Boolean::new(true, test::position()),
-                        test::position(),
+                        Boolean::new(true, Position::fake()),
+                        Boolean::new(true, Position::fake()),
+                        Position::fake(),
                     )
                     .into(),
                 ),
@@ -1974,14 +1974,14 @@ mod tests {
                     "true&1<2",
                     BinaryOperation::new(
                         BinaryOperator::And,
-                        Boolean::new(true, test::position()),
+                        Boolean::new(true, Position::fake()),
                         BinaryOperation::new(
                             BinaryOperator::LessThan,
-                            Number::new(1.0, test::position()),
-                            Number::new(2.0, test::position()),
-                            test::position(),
+                            Number::new(1.0, Position::fake()),
+                            Number::new(2.0, Position::fake()),
+                            Position::fake(),
                         ),
-                        test::position(),
+                        Position::fake(),
                     )
                     .into(),
                 ),
@@ -1989,14 +1989,14 @@ mod tests {
                     "true|true&true",
                     BinaryOperation::new(
                         BinaryOperator::Or,
-                        Boolean::new(true, test::position()),
+                        Boolean::new(true, Position::fake()),
                         BinaryOperation::new(
                             BinaryOperator::And,
-                            Boolean::new(true, test::position()),
-                            Boolean::new(true, test::position()),
-                            test::position(),
+                            Boolean::new(true, Position::fake()),
+                            Boolean::new(true, Position::fake()),
+                            Position::fake(),
                         ),
-                        test::position(),
+                        Position::fake(),
                     )
                     .into(),
                 ),
@@ -2004,9 +2004,9 @@ mod tests {
                     "x+x",
                     BinaryOperation::new(
                         BinaryOperator::Add,
-                        Variable::new("x", test::position()),
-                        Variable::new("x", test::position()),
-                        test::position(),
+                        Variable::new("x", Position::fake()),
+                        Variable::new("x", Position::fake()),
+                        Position::fake(),
                     )
                     .into(),
                 ),
@@ -2050,14 +2050,14 @@ mod tests {
             assert_eq!(
                 expression().parse(stream("Foo {foo:42}", "")).unwrap().0,
                 Record::new(
-                    types::Reference::new("Foo", test::position()),
+                    types::Reference::new("Foo", Position::fake()),
                     None,
                     vec![RecordElement::new(
                         "foo",
-                        Number::new(42.0, test::position()),
-                        test::position()
+                        Number::new(42.0, Position::fake()),
+                        Position::fake()
                     )],
-                    test::position()
+                    Position::fake()
                 )
                 .into()
             );
@@ -2065,35 +2065,35 @@ mod tests {
             assert_eq!(
                 record().parse(stream("Foo{foo:42}", "")).unwrap().0,
                 Record::new(
-                    types::Reference::new("Foo", test::position()),
+                    types::Reference::new("Foo", Position::fake()),
                     None,
                     vec![RecordElement::new(
                         "foo",
-                        Number::new(42.0, test::position()),
-                        test::position()
+                        Number::new(42.0, Position::fake()),
+                        Position::fake()
                     )],
-                    test::position()
+                    Position::fake()
                 )
             );
 
             assert_eq!(
                 record().parse(stream("Foo{foo:42,bar:42}", "")).unwrap().0,
                 Record::new(
-                    types::Reference::new("Foo", test::position()),
+                    types::Reference::new("Foo", Position::fake()),
                     None,
                     vec![
                         RecordElement::new(
                             "foo",
-                            Number::new(42.0, test::position()),
-                            test::position()
+                            Number::new(42.0, Position::fake()),
+                            Position::fake()
                         ),
                         RecordElement::new(
                             "bar",
-                            Number::new(42.0, test::position()),
-                            test::position()
+                            Number::new(42.0, Position::fake()),
+                            Position::fake()
                         )
                     ],
-                    test::position()
+                    Position::fake()
                 )
             );
 
@@ -2105,19 +2105,19 @@ mod tests {
                     .unwrap()
                     .0,
                 Call::new(
-                    Variable::new("foo", test::position()),
+                    Variable::new("foo", Position::fake()),
                     vec![Record::new(
-                        types::Reference::new("Foo", test::position()),
+                        types::Reference::new("Foo", Position::fake()),
                         None,
                         vec![RecordElement::new(
                             "foo",
-                            Number::new(42.0, test::position()),
-                            test::position()
+                            Number::new(42.0, Position::fake()),
+                            Position::fake()
                         )],
-                        test::position()
+                        Position::fake()
                     )
                     .into()],
-                    test::position()
+                    Position::fake()
                 )
                 .into()
             );
@@ -2125,46 +2125,46 @@ mod tests {
             assert_eq!(
                 record().parse(stream("Foo{foo:bar(42)}", "")).unwrap().0,
                 Record::new(
-                    types::Reference::new("Foo", test::position()),
+                    types::Reference::new("Foo", Position::fake()),
                     None,
                     vec![RecordElement::new(
                         "foo",
                         Call::new(
-                            Variable::new("bar", test::position()),
-                            vec![Number::new(42.0, test::position()).into()],
-                            test::position()
+                            Variable::new("bar", Position::fake()),
+                            vec![Number::new(42.0, Position::fake()).into()],
+                            Position::fake()
                         ),
-                        test::position()
+                        Position::fake()
                     )],
-                    test::position()
+                    Position::fake()
                 )
             );
 
             assert_eq!(
                 record().parse(stream("Foo{...foo,bar:42}", "")).unwrap().0,
                 Record::new(
-                    types::Reference::new("Foo", test::position()),
-                    Some(Variable::new("foo", test::position()).into()),
+                    types::Reference::new("Foo", Position::fake()),
+                    Some(Variable::new("foo", Position::fake()).into()),
                     vec![RecordElement::new(
                         "bar",
-                        Number::new(42.0, test::position()),
-                        test::position()
+                        Number::new(42.0, Position::fake()),
+                        Position::fake()
                     )],
-                    test::position()
+                    Position::fake()
                 )
             );
 
             assert_eq!(
                 record().parse(stream("Foo{...foo,bar:42,}", "")).unwrap().0,
                 Record::new(
-                    types::Reference::new("Foo", test::position()),
-                    Some(Variable::new("foo", test::position()).into()),
+                    types::Reference::new("Foo", Position::fake()),
+                    Some(Variable::new("foo", Position::fake()).into()),
                     vec![RecordElement::new(
                         "bar",
-                        Number::new(42.0, test::position()),
-                        test::position()
+                        Number::new(42.0, Position::fake()),
+                        Position::fake()
                     )],
-                    test::position()
+                    Position::fake()
                 )
             );
 
@@ -2174,14 +2174,14 @@ mod tests {
                     .unwrap()
                     .0,
                 Record::new(
-                    types::Reference::new("Foo", test::position()),
-                    Some(Variable::new("foo", test::position()).into()),
+                    types::Reference::new("Foo", Position::fake()),
+                    Some(Variable::new("foo", Position::fake()).into()),
                     vec![RecordElement::new(
                         "bar",
-                        Number::new(42.0, test::position()),
-                        test::position()
+                        Number::new(42.0, Position::fake()),
+                        Position::fake()
                     )],
-                    test::position()
+                    Position::fake()
                 )
                 .into(),
             );
@@ -2205,12 +2205,12 @@ mod tests {
 
             assert_eq!(
                 variable().parse(stream("x", "")).unwrap().0,
-                Variable::new("x", test::position()),
+                Variable::new("x", Position::fake()),
             );
 
             assert_eq!(
                 variable().parse(stream("Foo.x", "")).unwrap().0,
-                Variable::new("Foo", test::position()),
+                Variable::new("Foo", Position::fake()),
             );
         }
 
@@ -2219,11 +2219,11 @@ mod tests {
             assert!(boolean_literal().parse(stream("", "")).is_err());
             assert_eq!(
                 boolean_literal().parse(stream("false", "")).unwrap().0,
-                Boolean::new(false, test::position())
+                Boolean::new(false, Position::fake())
             );
             assert_eq!(
                 boolean_literal().parse(stream("true", "")).unwrap().0,
-                Boolean::new(true, test::position())
+                Boolean::new(true, Position::fake())
             );
         }
 
@@ -2232,7 +2232,7 @@ mod tests {
             assert!(none_literal().parse(stream("", "")).is_err());
             assert_eq!(
                 none_literal().parse(stream("none", "")).unwrap().0,
-                None::new(test::position())
+                None::new(Position::fake())
             );
         }
 
@@ -2252,7 +2252,7 @@ mod tests {
             ] {
                 assert_eq!(
                     number_literal().parse(stream(source, "")).unwrap().0,
-                    Number::new(*value, test::position())
+                    Number::new(*value, Position::fake())
                 );
             }
         }
@@ -2274,7 +2274,7 @@ mod tests {
             ] {
                 assert_eq!(
                     string_literal().parse(stream(source, "")).unwrap().0,
-                    ByteString::new(*value, test::position())
+                    ByteString::new(*value, Position::fake())
                 );
             }
         }
@@ -2284,108 +2284,108 @@ mod tests {
             for (source, target) in vec![
                 (
                     "[none;]",
-                    List::new(types::None::new(test::position()), vec![], test::position()),
+                    List::new(types::None::new(Position::fake()), vec![], Position::fake()),
                 ),
                 (
                     "[none;none]",
                     List::new(
-                        types::None::new(test::position()),
-                        vec![ListElement::Single(None::new(test::position()).into())],
-                        test::position(),
+                        types::None::new(Position::fake()),
+                        vec![ListElement::Single(None::new(Position::fake()).into())],
+                        Position::fake(),
                     ),
                 ),
                 (
                     "[none;none,]",
                     List::new(
-                        types::None::new(test::position()),
-                        vec![ListElement::Single(None::new(test::position()).into())],
-                        test::position(),
+                        types::None::new(Position::fake()),
+                        vec![ListElement::Single(None::new(Position::fake()).into())],
+                        Position::fake(),
                     ),
                 ),
                 (
                     "[none;none,none]",
                     List::new(
-                        types::None::new(test::position()),
+                        types::None::new(Position::fake()),
                         vec![
-                            ListElement::Single(None::new(test::position()).into()),
-                            ListElement::Single(None::new(test::position()).into()),
+                            ListElement::Single(None::new(Position::fake()).into()),
+                            ListElement::Single(None::new(Position::fake()).into()),
                         ],
-                        test::position(),
+                        Position::fake(),
                     ),
                 ),
                 (
                     "[none;none,none,]",
                     List::new(
-                        types::None::new(test::position()),
+                        types::None::new(Position::fake()),
                         vec![
-                            ListElement::Single(None::new(test::position()).into()),
-                            ListElement::Single(None::new(test::position()).into()),
+                            ListElement::Single(None::new(Position::fake()).into()),
+                            ListElement::Single(None::new(Position::fake()).into()),
                         ],
-                        test::position(),
+                        Position::fake(),
                     ),
                 ),
                 (
                     "[none;...foo]",
                     List::new(
-                        types::None::new(test::position()),
+                        types::None::new(Position::fake()),
                         vec![ListElement::Multiple(
-                            Variable::new("foo", test::position()).into(),
+                            Variable::new("foo", Position::fake()).into(),
                         )],
-                        test::position(),
+                        Position::fake(),
                     ),
                 ),
                 (
                     "[none;...foo,]",
                     List::new(
-                        types::None::new(test::position()),
+                        types::None::new(Position::fake()),
                         vec![ListElement::Multiple(
-                            Variable::new("foo", test::position()).into(),
+                            Variable::new("foo", Position::fake()).into(),
                         )],
-                        test::position(),
+                        Position::fake(),
                     ),
                 ),
                 (
                     "[none;...foo,...bar]",
                     List::new(
-                        types::None::new(test::position()),
+                        types::None::new(Position::fake()),
                         vec![
-                            ListElement::Multiple(Variable::new("foo", test::position()).into()),
-                            ListElement::Multiple(Variable::new("bar", test::position()).into()),
+                            ListElement::Multiple(Variable::new("foo", Position::fake()).into()),
+                            ListElement::Multiple(Variable::new("bar", Position::fake()).into()),
                         ],
-                        test::position(),
+                        Position::fake(),
                     ),
                 ),
                 (
                     "[none;...foo,...bar,]",
                     List::new(
-                        types::None::new(test::position()),
+                        types::None::new(Position::fake()),
                         vec![
-                            ListElement::Multiple(Variable::new("foo", test::position()).into()),
-                            ListElement::Multiple(Variable::new("bar", test::position()).into()),
+                            ListElement::Multiple(Variable::new("foo", Position::fake()).into()),
+                            ListElement::Multiple(Variable::new("bar", Position::fake()).into()),
                         ],
-                        test::position(),
+                        Position::fake(),
                     ),
                 ),
                 (
                     "[none;foo,...bar]",
                     List::new(
-                        types::None::new(test::position()),
+                        types::None::new(Position::fake()),
                         vec![
-                            ListElement::Single(Variable::new("foo", test::position()).into()),
-                            ListElement::Multiple(Variable::new("bar", test::position()).into()),
+                            ListElement::Single(Variable::new("foo", Position::fake()).into()),
+                            ListElement::Multiple(Variable::new("bar", Position::fake()).into()),
                         ],
-                        test::position(),
+                        Position::fake(),
                     ),
                 ),
                 (
                     "[none;...foo,bar]",
                     List::new(
-                        types::None::new(test::position()),
+                        types::None::new(Position::fake()),
                         vec![
-                            ListElement::Multiple(Variable::new("foo", test::position()).into()),
-                            ListElement::Single(Variable::new("bar", test::position()).into()),
+                            ListElement::Multiple(Variable::new("foo", Position::fake()).into()),
+                            ListElement::Single(Variable::new("bar", Position::fake()).into()),
                         ],
-                        test::position(),
+                        Position::fake(),
                     ),
                 ),
             ] {
