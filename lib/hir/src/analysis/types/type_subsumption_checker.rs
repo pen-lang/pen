@@ -30,13 +30,14 @@ fn check_canonical(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{test, types::*};
+    use crate::types::*;
+    use position::{test::PositionFake, Position};
 
     #[test]
     fn check_numbers() {
         assert!(check(
-            &Number::new(test::position()).into(),
-            &Number::new(test::position()).into(),
+            &Number::new(Position::fake()).into(),
+            &Number::new(Position::fake()).into(),
             &Default::default()
         )
         .unwrap());
@@ -45,11 +46,11 @@ mod tests {
     #[test]
     fn check_number_and_union() {
         assert!(check(
-            &Number::new(test::position()).into(),
+            &Number::new(Position::fake()).into(),
             &Union::new(
-                Number::new(test::position()),
-                None::new(test::position()),
-                test::position()
+                Number::new(Position::fake()),
+                None::new(Position::fake()),
+                Position::fake()
             )
             .into(),
             &Default::default()
@@ -61,12 +62,12 @@ mod tests {
     fn check_non_canonical_union_and_number() {
         assert!(check(
             &Union::new(
-                Number::new(test::position()),
-                Number::new(test::position()),
-                test::position()
+                Number::new(Position::fake()),
+                Number::new(Position::fake()),
+                Position::fake()
             )
             .into(),
-            &Number::new(test::position()).into(),
+            &Number::new(Position::fake()).into(),
             &Default::default()
         )
         .unwrap());
@@ -75,8 +76,8 @@ mod tests {
     #[test]
     fn check_lists() {
         assert!(check(
-            &List::new(Number::new(test::position()), test::position()).into(),
-            &List::new(Number::new(test::position()), test::position()).into(),
+            &List::new(Number::new(Position::fake()), Position::fake()).into(),
+            &List::new(Number::new(Position::fake()), Position::fake()).into(),
             &Default::default()
         )
         .unwrap());
@@ -86,14 +87,14 @@ mod tests {
     fn fail_to_check_lists_with_covariance() {
         assert_eq!(
             check(
-                &List::new(Number::new(test::position()), test::position()).into(),
+                &List::new(Number::new(Position::fake()), Position::fake()).into(),
                 &List::new(
                     Union::new(
-                        Number::new(test::position()),
-                        None::new(test::position()),
-                        test::position()
+                        Number::new(Position::fake()),
+                        None::new(Position::fake()),
+                        Position::fake()
                     ),
-                    test::position()
+                    Position::fake()
                 )
                 .into(),
                 &Default::default()

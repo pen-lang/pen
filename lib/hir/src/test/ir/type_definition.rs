@@ -1,4 +1,5 @@
-use crate::{ir::*, test::position, types};
+use crate::{ir::*, types};
+use position::{test::PositionFake, Position};
 
 pub trait TypeDefinitionFake {
     fn fake(
@@ -18,6 +19,6 @@ impl TypeDefinitionFake for TypeDefinition {
         public: bool,
         external: bool,
     ) -> Self {
-        Self::new(name, "", elements, open, public, external, position())
+        Self::new(name, "", elements, open, public, external, Position::fake())
     }
 }

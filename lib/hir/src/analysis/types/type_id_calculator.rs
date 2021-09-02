@@ -53,13 +53,14 @@ fn calculate_string(type_: &Type, types: &HashMap<String, Type>) -> Result<Strin
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{test, types};
+    use crate::types;
+    use position::{test::PositionFake, Position};
 
     #[test]
     fn calculate_none_list_type_id() {
         assert_eq!(
             calculate_canonical_string(
-                &types::List::new(types::None::new(test::position()), test::position()).into(),
+                &types::List::new(types::None::new(Position::fake()), Position::fake()).into(),
                 &Default::default()
             ),
             Ok("[none]".into())
@@ -70,7 +71,7 @@ mod tests {
     fn calculate_any_list_type_id() {
         assert_eq!(
             calculate_canonical_string(
-                &types::List::new(types::Any::new(test::position()), test::position()).into(),
+                &types::List::new(types::Any::new(Position::fake()), Position::fake()).into(),
                 &Default::default(),
             ),
             Ok("[any]".into())
@@ -83,11 +84,11 @@ mod tests {
             calculate_canonical_string(
                 &types::List::new(
                     types::Union::new(
-                        types::Number::new(test::position()),
-                        types::None::new(test::position()),
-                        test::position()
+                        types::Number::new(Position::fake()),
+                        types::None::new(Position::fake()),
+                        Position::fake()
                     ),
-                    test::position()
+                    Position::fake()
                 )
                 .into(),
                 &Default::default(),
@@ -101,18 +102,18 @@ mod tests {
         assert_eq!(
             calculate(
                 &types::Union::new(
-                    types::Number::new(test::position()),
-                    types::None::new(test::position()),
-                    test::position()
+                    types::Number::new(Position::fake()),
+                    types::None::new(Position::fake()),
+                    Position::fake()
                 )
                 .into(),
                 &Default::default(),
             ),
             calculate(
                 &types::Union::new(
-                    types::None::new(test::position()),
-                    types::Number::new(test::position()),
-                    test::position()
+                    types::None::new(Position::fake()),
+                    types::Number::new(Position::fake()),
+                    Position::fake()
                 )
                 .into(),
                 &Default::default(),

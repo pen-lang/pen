@@ -28,15 +28,16 @@ pub fn calculate(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{test, types};
+    use crate::types;
+    use position::{test::PositionFake, Position};
     use pretty_assertions::assert_eq;
 
     #[test]
     fn calculate_with_any_and_any() {
         assert_eq!(
             calculate(
-                &types::Any::new(test::position()).into(),
-                &types::Any::new(test::position()).into(),
+                &types::Any::new(Position::fake()).into(),
+                &types::Any::new(Position::fake()).into(),
                 &Default::default(),
             ),
             Ok(None)
@@ -47,11 +48,11 @@ mod tests {
     fn calculate_with_any_and_number() {
         assert_eq!(
             calculate(
-                &types::Any::new(test::position()).into(),
-                &types::Number::new(test::position()).into(),
+                &types::Any::new(Position::fake()).into(),
+                &types::Number::new(Position::fake()).into(),
                 &Default::default(),
             ),
-            Ok(Some(types::Any::new(test::position()).into()))
+            Ok(Some(types::Any::new(Position::fake()).into()))
         );
     }
 
@@ -59,8 +60,8 @@ mod tests {
     fn calculate_with_number_and_any() {
         assert_eq!(
             calculate(
-                &types::Number::new(test::position()).into(),
-                &types::Any::new(test::position()).into(),
+                &types::Number::new(Position::fake()).into(),
+                &types::Any::new(Position::fake()).into(),
                 &Default::default(),
             ),
             Ok(None)
@@ -71,8 +72,8 @@ mod tests {
     fn calculate_with_number_and_number() {
         assert_eq!(
             calculate(
-                &types::Number::new(test::position()).into(),
-                &types::Number::new(test::position()).into(),
+                &types::Number::new(Position::fake()).into(),
+                &types::Number::new(Position::fake()).into(),
                 &Default::default(),
             ),
             Ok(None)
@@ -84,15 +85,15 @@ mod tests {
         assert_eq!(
             calculate(
                 &types::Union::new(
-                    types::Number::new(test::position()),
-                    types::None::new(test::position()),
-                    test::position()
+                    types::Number::new(Position::fake()),
+                    types::None::new(Position::fake()),
+                    Position::fake()
                 )
                 .into(),
-                &types::Number::new(test::position()).into(),
+                &types::Number::new(Position::fake()).into(),
                 &Default::default(),
             ),
-            Ok(Some(types::None::new(test::position()).into()))
+            Ok(Some(types::None::new(Position::fake()).into()))
         );
     }
 
@@ -102,23 +103,23 @@ mod tests {
             calculate(
                 &types::Union::new(
                     types::Union::new(
-                        types::Number::new(test::position()),
-                        types::Boolean::new(test::position()),
-                        test::position()
+                        types::Number::new(Position::fake()),
+                        types::Boolean::new(Position::fake()),
+                        Position::fake()
                     ),
-                    types::None::new(test::position()),
-                    test::position()
+                    types::None::new(Position::fake()),
+                    Position::fake()
                 )
                 .into(),
                 &types::Union::new(
-                    types::Boolean::new(test::position()),
-                    types::None::new(test::position()),
-                    test::position()
+                    types::Boolean::new(Position::fake()),
+                    types::None::new(Position::fake()),
+                    Position::fake()
                 )
                 .into(),
                 &Default::default(),
             ),
-            Ok(Some(types::Number::new(test::position()).into()))
+            Ok(Some(types::Number::new(Position::fake()).into()))
         );
     }
 }

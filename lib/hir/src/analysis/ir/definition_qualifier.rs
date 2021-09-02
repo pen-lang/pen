@@ -62,10 +62,10 @@ pub fn qualify(module: &Module, prefix: &str) -> Module {
 mod tests {
     use super::*;
     use crate::{
-        test,
         test::{DefinitionFake, ModuleFake},
         types,
     };
+    use position::{test::PositionFake, Position};
     use pretty_assertions::assert_eq;
 
     #[test]
@@ -76,9 +76,9 @@ mod tests {
                     "x",
                     Lambda::new(
                         vec![],
-                        types::None::new(test::position()),
-                        None::new(test::position()),
-                        test::position()
+                        types::None::new(Position::fake()),
+                        None::new(Position::fake()),
+                        Position::fake()
                     ),
                     false
                 )],),
@@ -88,9 +88,9 @@ mod tests {
                 "foo.x",
                 Lambda::new(
                     vec![],
-                    types::None::new(test::position()),
-                    None::new(test::position()),
-                    test::position()
+                    types::None::new(Position::fake()),
+                    None::new(Position::fake()),
+                    Position::fake()
                 ),
                 false
             )],)
@@ -105,9 +105,9 @@ mod tests {
                     "x",
                     Lambda::new(
                         vec![],
-                        types::None::new(test::position()),
-                        Variable::new("x", test::position()),
-                        test::position()
+                        types::None::new(Position::fake()),
+                        Variable::new("x", Position::fake()),
+                        Position::fake()
                     ),
                     false
                 )],),
@@ -117,9 +117,9 @@ mod tests {
                 "foo.x",
                 Lambda::new(
                     vec![],
-                    types::None::new(test::position()),
-                    Variable::new("foo.x", test::position()),
-                    test::position()
+                    types::None::new(Position::fake()),
+                    Variable::new("foo.x", Position::fake()),
+                    Position::fake()
                 ),
                 false
             )],)
@@ -133,10 +133,10 @@ mod tests {
                 &Module::empty().set_definitions(vec![Definition::fake(
                     "x",
                     Lambda::new(
-                        vec![Argument::new("x", types::None::new(test::position()))],
-                        types::None::new(test::position()),
-                        Variable::new("x", test::position()),
-                        test::position()
+                        vec![Argument::new("x", types::None::new(Position::fake()))],
+                        types::None::new(Position::fake()),
+                        Variable::new("x", Position::fake()),
+                        Position::fake()
                     ),
                     false
                 )],),
@@ -145,10 +145,10 @@ mod tests {
             Module::empty().set_definitions(vec![Definition::fake(
                 "foo.x",
                 Lambda::new(
-                    vec![Argument::new("x", types::None::new(test::position()))],
-                    types::None::new(test::position()),
-                    Variable::new("x", test::position()),
-                    test::position()
+                    vec![Argument::new("x", types::None::new(Position::fake()))],
+                    types::None::new(Position::fake()),
+                    Variable::new("x", Position::fake()),
+                    Position::fake()
                 ),
                 false
             )],)
@@ -163,15 +163,15 @@ mod tests {
                     "x",
                     Lambda::new(
                         vec![],
-                        types::None::new(test::position()),
+                        types::None::new(Position::fake()),
                         Let::new(
                             Some("x".into()),
                             None,
-                            None::new(test::position()),
-                            Variable::new("x", test::position()),
-                            test::position(),
+                            None::new(Position::fake()),
+                            Variable::new("x", Position::fake()),
+                            Position::fake(),
                         ),
-                        test::position()
+                        Position::fake()
                     ),
                     false
                 )],),
@@ -181,15 +181,15 @@ mod tests {
                 "foo.x",
                 Lambda::new(
                     vec![],
-                    types::None::new(test::position()),
+                    types::None::new(Position::fake()),
                     Let::new(
                         Some("x".into()),
                         None,
-                        None::new(test::position()),
-                        Variable::new("x", test::position()),
-                        test::position(),
+                        None::new(Position::fake()),
+                        Variable::new("x", Position::fake()),
+                        Position::fake(),
                     ),
-                    test::position()
+                    Position::fake()
                 ),
                 false
             )],)
