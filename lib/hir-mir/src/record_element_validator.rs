@@ -96,11 +96,11 @@ mod tests {
         },
         *,
     };
-    use position::test::PositionFake; use position::Position;
     use hir::{
         test::{DefinitionFake, ModuleFake, TypeDefinitionFake},
         types,
     };
+    use position::{test::PositionFake, Position};
 
     fn validate_module(module: &Module) -> Result<(), CompileError> {
         validate(

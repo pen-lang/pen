@@ -33,11 +33,11 @@ pub fn validate(module: &Module) -> Result<(), CompileError> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use position::test::PositionFake; use position::Position;
     use hir::{
         test::{ModuleFake, TypeAliasFake, TypeDefinitionFake},
         types,
     };
+    use position::{test::PositionFake, Position};
 
     #[test]
     fn validate_type_definitions() {

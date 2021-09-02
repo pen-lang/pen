@@ -99,7 +99,7 @@ fn transform_list(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{dummy_type_configurations::DUMMY_LIST_TYPE_CONFIGURATION};
+    use crate::dummy_type_configurations::DUMMY_LIST_TYPE_CONFIGURATION;
     use position::{test::PositionFake, Position};
     use pretty_assertions::assert_eq;
 

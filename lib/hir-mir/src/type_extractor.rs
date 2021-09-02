@@ -191,8 +191,7 @@ pub fn extract_from_lambda(lambda: &Lambda) -> types::Function {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use position::test::PositionFake;
-    use position::Position;
+    use position::{test::PositionFake, Position};
     use pretty_assertions::assert_eq;
 
     #[test]

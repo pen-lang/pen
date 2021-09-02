@@ -52,11 +52,11 @@ pub fn compile(module: &ir::Module) -> Result<interface::Module, CompileError> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use position::test::PositionFake; use position::Position;
     use hir::{
         test::{DefinitionFake, ModuleFake},
         types,
     };
+    use position::{test::PositionFake, Position};
 
     #[test]
     fn compile_empty_module() {

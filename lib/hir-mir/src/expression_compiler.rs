@@ -464,7 +464,7 @@ fn compile_record_elements(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use position::test::PositionFake; use position::Position;
+    use position::{test::PositionFake, Position};
 
     mod if_type {
         use super::*;
