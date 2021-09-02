@@ -244,15 +244,15 @@ fn transform_equal_operation(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test;
+    use position::test::PositionFake; use position::Position;
     use pretty_assertions::assert_eq;
 
     #[test]
     fn transform_with_union() {
         let union_type = types::Union::new(
-            types::Number::new(test::position()),
-            types::None::new(test::position()),
-            test::position(),
+            types::Number::new(Position::fake()),
+            types::None::new(Position::fake()),
+            Position::fake(),
         );
 
         assert_eq!(
@@ -260,63 +260,63 @@ mod tests {
                 &EqualityOperation::new(
                     Some(union_type.into()),
                     EqualityOperator::Equal,
-                    Variable::new("x", test::position()),
-                    Variable::new("y", test::position()),
-                    test::position()
+                    Variable::new("x", Position::fake()),
+                    Variable::new("y", Position::fake()),
+                    Position::fake()
                 ),
                 &TypeContext::dummy(Default::default(), Default::default())
             ),
             Ok(IfType::new(
                 LHS_NAME,
-                Variable::new("x", test::position()),
+                Variable::new("x", Position::fake()),
                 vec![
                     IfTypeBranch::new(
-                        types::None::new(test::position()),
+                        types::None::new(Position::fake()),
                         IfType::new(
                             RHS_NAME,
-                            Variable::new("y", test::position()),
+                            Variable::new("y", Position::fake()),
                             vec![
                                 IfTypeBranch::new(
-                                    types::None::new(test::position()),
-                                    Boolean::new(true, test::position()),
+                                    types::None::new(Position::fake()),
+                                    Boolean::new(true, Position::fake()),
                                 ),
                                 IfTypeBranch::new(
-                                    types::Number::new(test::position()),
-                                    Boolean::new(false, test::position()),
+                                    types::Number::new(Position::fake()),
+                                    Boolean::new(false, Position::fake()),
                                 ),
                             ],
                             None,
-                            test::position(),
+                            Position::fake(),
                         ),
                     ),
                     IfTypeBranch::new(
-                        types::Number::new(test::position()),
+                        types::Number::new(Position::fake()),
                         IfType::new(
                             RHS_NAME,
-                            Variable::new("y", test::position()),
+                            Variable::new("y", Position::fake()),
                             vec![
                                 IfTypeBranch::new(
-                                    types::None::new(test::position()),
-                                    Boolean::new(false, test::position()),
+                                    types::None::new(Position::fake()),
+                                    Boolean::new(false, Position::fake()),
                                 ),
                                 IfTypeBranch::new(
-                                    types::Number::new(test::position()),
+                                    types::Number::new(Position::fake()),
                                     EqualityOperation::new(
-                                        Some(types::Number::new(test::position()).into()),
+                                        Some(types::Number::new(Position::fake()).into()),
                                         EqualityOperator::Equal,
-                                        Variable::new(LHS_NAME, test::position()),
-                                        Variable::new(RHS_NAME, test::position()),
-                                        test::position(),
+                                        Variable::new(LHS_NAME, Position::fake()),
+                                        Variable::new(RHS_NAME, Position::fake()),
+                                        Position::fake(),
                                     ),
                                 ),
                             ],
                             None,
-                            test::position(),
+                            Position::fake(),
                         ),
                     ),
                 ],
                 None,
-                test::position(),
+                Position::fake(),
             )
             .into())
         );
@@ -324,16 +324,16 @@ mod tests {
 
     #[test]
     fn transform_with_record() {
-        let record_type = types::Record::new("foo", test::position());
+        let record_type = types::Record::new("foo", Position::fake());
 
         assert_eq!(
             transform(
                 &EqualityOperation::new(
                     Some(record_type.clone().into()),
                     EqualityOperator::Equal,
-                    Variable::new("x", test::position()),
-                    Variable::new("y", test::position()),
-                    test::position()
+                    Variable::new("x", Position::fake()),
+                    Variable::new("y", Position::fake()),
+                    Position::fake()
                 ),
                 &TypeContext::dummy(
                     Default::default(),
@@ -341,7 +341,7 @@ mod tests {
                         "foo".into(),
                         vec![types::RecordElement::new(
                             "x",
-                            types::None::new(test::position())
+                            types::None::new(Position::fake())
                         )]
                     )]
                     .into_iter()
@@ -352,20 +352,20 @@ mod tests {
                 Some(
                     types::Function::new(
                         vec![record_type.clone().into(), record_type.clone().into()],
-                        types::Boolean::new(test::position()),
-                        test::position(),
+                        types::Boolean::new(Position::fake()),
+                        Position::fake(),
                     )
                     .into(),
                 ),
                 Variable::new(
                     record_type_information_compiler::compile_equal_function_name(&record_type),
-                    test::position(),
+                    Position::fake(),
                 ),
                 vec![
-                    Variable::new("x", test::position()).into(),
-                    Variable::new("y", test::position()).into(),
+                    Variable::new("x", Position::fake()).into(),
+                    Variable::new("y", Position::fake()).into(),
                 ],
-                test::position()
+                Position::fake()
             )
             .into())
         );
@@ -376,15 +376,15 @@ mod tests {
         assert_eq!(
             transform(
                 &EqualityOperation::new(
-                    Some(types::Any::new(test::position()).into()),
+                    Some(types::Any::new(Position::fake()).into()),
                     EqualityOperator::Equal,
-                    Variable::new("x", test::position()),
-                    Variable::new("y", test::position()),
-                    test::position()
+                    Variable::new("x", Position::fake()),
+                    Variable::new("y", Position::fake()),
+                    Position::fake()
                 ),
                 &TypeContext::dummy(Default::default(), Default::default())
             ),
-            Err(CompileError::AnyEqualOperation(test::position()))
+            Err(CompileError::AnyEqualOperation(Position::fake()))
         );
     }
 
@@ -396,19 +396,19 @@ mod tests {
                     Some(
                         types::Function::new(
                             vec![],
-                            types::None::new(test::position()),
-                            test::position()
+                            types::None::new(Position::fake()),
+                            Position::fake()
                         )
                         .into()
                     ),
                     EqualityOperator::Equal,
-                    Variable::new("x", test::position()),
-                    Variable::new("y", test::position()),
-                    test::position()
+                    Variable::new("x", Position::fake()),
+                    Variable::new("y", Position::fake()),
+                    Position::fake()
                 ),
                 &TypeContext::dummy(Default::default(), Default::default())
             ),
-            Err(CompileError::FunctionEqualOperation(test::position()))
+            Err(CompileError::FunctionEqualOperation(Position::fake()))
         );
     }
 }

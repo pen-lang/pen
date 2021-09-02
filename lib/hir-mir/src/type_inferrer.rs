@@ -416,9 +416,10 @@ mod tests {
     use crate::{
         error_type_configuration::ERROR_TYPE_CONFIGURATION,
         list_type_configuration::LIST_TYPE_CONFIGURATION,
-        string_type_configuration::STRING_TYPE_CONFIGURATION, test,
+        string_type_configuration::STRING_TYPE_CONFIGURATION,
     };
     use hir::test::{DefinitionFake, ModuleFake, TypeDefinitionFake};
+    use position::{test::PositionFake, Position};
     use pretty_assertions::assert_eq;
 
     fn infer_module(module: &Module) -> Result<Module, CompileError> {
@@ -445,14 +446,14 @@ mod tests {
                 "x",
                 Lambda::new(
                     vec![],
-                    types::None::new(test::position()),
+                    types::None::new(Position::fake()),
                     Call::new(
                         None,
-                        Variable::new("x", test::position()),
+                        Variable::new("x", Position::fake()),
                         vec![],
-                        test::position()
+                        Position::fake()
                     ),
-                    test::position(),
+                    Position::fake(),
                 ),
                 false,
             )],)),
@@ -460,21 +461,21 @@ mod tests {
                 "x",
                 Lambda::new(
                     vec![],
-                    types::None::new(test::position()),
+                    types::None::new(Position::fake()),
                     Call::new(
                         Some(
                             types::Function::new(
                                 vec![],
-                                types::None::new(test::position()),
-                                test::position()
+                                types::None::new(Position::fake()),
+                                Position::fake()
                             )
                             .into()
                         ),
-                        Variable::new("x", test::position()),
+                        Variable::new("x", Position::fake()),
                         vec![],
-                        test::position()
+                        Position::fake()
                     ),
-                    test::position(),
+                    Position::fake(),
                 ),
                 false,
             )],))
@@ -488,15 +489,15 @@ mod tests {
                 "x",
                 Lambda::new(
                     vec![],
-                    types::None::new(test::position()),
+                    types::None::new(Position::fake()),
                     EqualityOperation::new(
                         None,
                         EqualityOperator::Equal,
-                        None::new(test::position()),
-                        None::new(test::position()),
-                        test::position()
+                        None::new(Position::fake()),
+                        None::new(Position::fake()),
+                        Position::fake()
                     ),
-                    test::position(),
+                    Position::fake(),
                 ),
                 false,
             )],)),
@@ -504,22 +505,22 @@ mod tests {
                 "x",
                 Lambda::new(
                     vec![],
-                    types::None::new(test::position()),
+                    types::None::new(Position::fake()),
                     EqualityOperation::new(
                         Some(
                             types::Union::new(
-                                types::None::new(test::position()),
-                                types::None::new(test::position()),
-                                test::position()
+                                types::None::new(Position::fake()),
+                                types::None::new(Position::fake()),
+                                Position::fake()
                             )
                             .into()
                         ),
                         EqualityOperator::Equal,
-                        None::new(test::position()),
-                        None::new(test::position()),
-                        test::position()
+                        None::new(Position::fake()),
+                        None::new(Position::fake()),
+                        Position::fake()
                     ),
-                    test::position(),
+                    Position::fake(),
                 ),
                 false,
             )],))
@@ -533,15 +534,15 @@ mod tests {
                 "x",
                 Lambda::new(
                     vec![],
-                    types::None::new(test::position()),
+                    types::None::new(Position::fake()),
                     Let::new(
                         Some("x".into()),
                         None,
-                        None::new(test::position()),
-                        Variable::new("x", test::position()),
-                        test::position(),
+                        None::new(Position::fake()),
+                        Variable::new("x", Position::fake()),
+                        Position::fake(),
                     ),
-                    test::position(),
+                    Position::fake(),
                 ),
                 false,
             )],)),
@@ -549,15 +550,15 @@ mod tests {
                 "x",
                 Lambda::new(
                     vec![],
-                    types::None::new(test::position()),
+                    types::None::new(Position::fake()),
                     Let::new(
                         Some("x".into()),
-                        Some(types::None::new(test::position()).into()),
-                        None::new(test::position()),
-                        Variable::new("x", test::position()),
-                        test::position(),
+                        Some(types::None::new(Position::fake()).into()),
+                        None::new(Position::fake()),
+                        Variable::new("x", Position::fake()),
+                        Position::fake(),
                     ),
-                    test::position(),
+                    Position::fake(),
                 ),
                 false,
             )],))
@@ -568,8 +569,8 @@ mod tests {
     fn infer_let_with_call() {
         let declaration = Declaration::new(
             "f",
-            types::Function::new(vec![], types::None::new(test::position()), test::position()),
-            test::position(),
+            types::Function::new(vec![], types::None::new(Position::fake()), Position::fake()),
+            Position::fake(),
         );
 
         assert_eq!(
@@ -580,20 +581,20 @@ mod tests {
                         "x",
                         Lambda::new(
                             vec![],
-                            types::None::new(test::position()),
+                            types::None::new(Position::fake()),
                             Let::new(
                                 Some("x".into()),
                                 None,
                                 Call::new(
                                     None,
-                                    Variable::new("f", test::position()),
+                                    Variable::new("f", Position::fake()),
                                     vec![],
-                                    test::position()
+                                    Position::fake()
                                 ),
-                                Variable::new("x", test::position()),
-                                test::position(),
+                                Variable::new("x", Position::fake()),
+                                Position::fake(),
                             ),
-                            test::position(),
+                            Position::fake(),
                         ),
                         false,
                     )],)
@@ -604,20 +605,20 @@ mod tests {
                     "x",
                     Lambda::new(
                         vec![],
-                        types::None::new(test::position()),
+                        types::None::new(Position::fake()),
                         Let::new(
                             Some("x".into()),
-                            Some(types::None::new(test::position()).into()),
+                            Some(types::None::new(Position::fake()).into()),
                             Call::new(
                                 Some(declaration.type_().clone().into()),
-                                Variable::new("f", test::position()),
+                                Variable::new("f", Position::fake()),
                                 vec![],
-                                test::position()
+                                Position::fake()
                             ),
-                            Variable::new("x", test::position()),
-                            test::position(),
+                            Variable::new("x", Position::fake()),
+                            Position::fake(),
                         ),
-                        test::position(),
+                        Position::fake(),
                     ),
                     false,
                 )]))
@@ -631,12 +632,12 @@ mod tests {
             "",
             vec![types::RecordElement::new(
                 "x",
-                types::None::new(test::position()),
+                types::None::new(Position::fake()),
             )],
             false,
             false,
             false,
-            test::position(),
+            Position::fake(),
         );
 
         assert_eq!(
@@ -648,16 +649,16 @@ mod tests {
                         Lambda::new(
                             vec![Argument::new(
                                 "x",
-                                types::Record::new("r", test::position())
+                                types::Record::new("r", Position::fake())
                             )],
-                            types::None::new(test::position()),
+                            types::None::new(Position::fake()),
                             RecordDeconstruction::new(
                                 None,
-                                Variable::new("x", test::position()),
+                                Variable::new("x", Position::fake()),
                                 "x",
-                                test::position()
+                                Position::fake()
                             ),
-                            test::position(),
+                            Position::fake(),
                         ),
                         false,
                     )])
@@ -669,16 +670,16 @@ mod tests {
                     Lambda::new(
                         vec![Argument::new(
                             "x",
-                            types::Record::new("r", test::position())
+                            types::Record::new("r", Position::fake())
                         )],
-                        types::None::new(test::position()),
+                        types::None::new(Position::fake()),
                         RecordDeconstruction::new(
-                            Some(types::Record::new("r", test::position()).into()),
-                            Variable::new("x", test::position()),
+                            Some(types::Record::new("r", Position::fake()).into()),
+                            Variable::new("x", Position::fake()),
                             "x",
-                            test::position()
+                            Position::fake()
                         ),
-                        test::position(),
+                        Position::fake(),
                     ),
                     false,
                 )]))
@@ -687,7 +688,7 @@ mod tests {
 
     #[test]
     fn infer_thunk() {
-        let none_type = types::None::new(test::position());
+        let none_type = types::None::new(Position::fake());
 
         assert_eq!(
             infer_module(&Module::empty().set_definitions(vec![Definition::fake(
@@ -695,8 +696,8 @@ mod tests {
                 Lambda::new(
                     vec![],
                     none_type.clone(),
-                    Thunk::new(None, None::new(test::position()), test::position()),
-                    test::position(),
+                    Thunk::new(None, None::new(Position::fake()), Position::fake()),
+                    Position::fake(),
                 ),
                 false,
             )])),
@@ -707,10 +708,10 @@ mod tests {
                     none_type.clone(),
                     Thunk::new(
                         Some(none_type.into()),
-                        None::new(test::position()),
-                        test::position()
+                        None::new(Position::fake()),
+                        Position::fake()
                     ),
-                    test::position(),
+                    Position::fake(),
                 ),
                 false,
             )]))
@@ -724,13 +725,13 @@ mod tests {
         #[test]
         fn infer_else_branch_type_of_none() {
             let union_type = types::Union::new(
-                types::Number::new(test::position()),
-                types::None::new(test::position()),
-                test::position(),
+                types::Number::new(Position::fake()),
+                types::None::new(Position::fake()),
+                Position::fake(),
             );
             let branches = vec![IfTypeBranch::new(
-                types::Number::new(test::position()),
-                None::new(test::position()),
+                types::Number::new(Position::fake()),
+                None::new(Position::fake()),
             )];
 
             assert_eq!(
@@ -738,19 +739,19 @@ mod tests {
                     "x",
                     Lambda::new(
                         vec![Argument::new("x", union_type.clone())],
-                        types::None::new(test::position()),
+                        types::None::new(Position::fake()),
                         IfType::new(
                             "x",
-                            Variable::new("x", test::position()),
+                            Variable::new("x", Position::fake()),
                             branches.clone(),
                             Some(ElseBranch::new(
                                 None,
-                                None::new(test::position()),
-                                test::position()
+                                None::new(Position::fake()),
+                                Position::fake()
                             )),
-                            test::position()
+                            Position::fake()
                         ),
-                        test::position(),
+                        Position::fake(),
                     ),
                     false,
                 )],)),
@@ -758,19 +759,19 @@ mod tests {
                     "x",
                     Lambda::new(
                         vec![Argument::new("x", union_type)],
-                        types::None::new(test::position()),
+                        types::None::new(Position::fake()),
                         IfType::new(
                             "x",
-                            Variable::new("x", test::position()),
+                            Variable::new("x", Position::fake()),
                             branches,
                             Some(ElseBranch::new(
-                                Some(types::None::new(test::position()).into()),
-                                None::new(test::position()),
-                                test::position()
+                                Some(types::None::new(Position::fake()).into()),
+                                None::new(Position::fake()),
+                                Position::fake()
                             )),
-                            test::position()
+                            Position::fake()
                         ),
-                        test::position(),
+                        Position::fake(),
                     ),
                     false,
                 )],))
@@ -781,16 +782,16 @@ mod tests {
         fn infer_else_branch_type_of_union() {
             let union_type = types::Union::new(
                 types::Union::new(
-                    types::Number::new(test::position()),
-                    types::Boolean::new(test::position()),
-                    test::position(),
+                    types::Number::new(Position::fake()),
+                    types::Boolean::new(Position::fake()),
+                    Position::fake(),
                 ),
-                types::None::new(test::position()),
-                test::position(),
+                types::None::new(Position::fake()),
+                Position::fake(),
             );
             let branches = vec![IfTypeBranch::new(
-                types::Number::new(test::position()),
-                None::new(test::position()),
+                types::Number::new(Position::fake()),
+                None::new(Position::fake()),
             )];
 
             assert_eq!(
@@ -798,19 +799,19 @@ mod tests {
                     "x",
                     Lambda::new(
                         vec![Argument::new("x", union_type.clone())],
-                        types::None::new(test::position()),
+                        types::None::new(Position::fake()),
                         IfType::new(
                             "x",
-                            Variable::new("x", test::position()),
+                            Variable::new("x", Position::fake()),
                             branches.clone(),
                             Some(ElseBranch::new(
                                 None,
-                                None::new(test::position()),
-                                test::position()
+                                None::new(Position::fake()),
+                                Position::fake()
                             )),
-                            test::position()
+                            Position::fake()
                         ),
-                        test::position(),
+                        Position::fake(),
                     ),
                     false,
                 )],)),
@@ -818,26 +819,26 @@ mod tests {
                     "x",
                     Lambda::new(
                         vec![Argument::new("x", union_type)],
-                        types::None::new(test::position()),
+                        types::None::new(Position::fake()),
                         IfType::new(
                             "x",
-                            Variable::new("x", test::position()),
+                            Variable::new("x", Position::fake()),
                             branches,
                             Some(ElseBranch::new(
                                 Some(
                                     types::Union::new(
-                                        types::Boolean::new(test::position()),
-                                        types::None::new(test::position()),
-                                        test::position(),
+                                        types::Boolean::new(Position::fake()),
+                                        types::None::new(Position::fake()),
+                                        Position::fake(),
                                     )
                                     .into()
                                 ),
-                                None::new(test::position()),
-                                test::position()
+                                None::new(Position::fake()),
+                                Position::fake()
                             )),
-                            test::position()
+                            Position::fake()
                         ),
-                        test::position(),
+                        Position::fake(),
                     ),
                     false,
                 )],))
@@ -847,15 +848,15 @@ mod tests {
         #[test]
         fn infer_else_branch_type_with_bound_variable() {
             let function_type =
-                types::Function::new(vec![], types::None::new(test::position()), test::position());
+                types::Function::new(vec![], types::None::new(Position::fake()), Position::fake());
             let union_type = types::Union::new(
                 function_type.clone(),
-                types::None::new(test::position()),
-                test::position(),
+                types::None::new(Position::fake()),
+                Position::fake(),
             );
             let branches = vec![IfTypeBranch::new(
-                types::None::new(test::position()),
-                None::new(test::position()),
+                types::None::new(Position::fake()),
+                None::new(Position::fake()),
             )];
 
             assert_eq!(
@@ -863,24 +864,24 @@ mod tests {
                     "x",
                     Lambda::new(
                         vec![Argument::new("x", union_type.clone())],
-                        types::None::new(test::position()),
+                        types::None::new(Position::fake()),
                         IfType::new(
                             "y",
-                            Variable::new("x", test::position()),
+                            Variable::new("x", Position::fake()),
                             branches.clone(),
                             Some(ElseBranch::new(
                                 None,
                                 Call::new(
                                     None,
-                                    Variable::new("y", test::position()),
+                                    Variable::new("y", Position::fake()),
                                     vec![],
-                                    test::position()
+                                    Position::fake()
                                 ),
-                                test::position()
+                                Position::fake()
                             )),
-                            test::position()
+                            Position::fake()
                         ),
-                        test::position(),
+                        Position::fake(),
                     ),
                     false,
                 )],)),
@@ -888,24 +889,24 @@ mod tests {
                     "x",
                     Lambda::new(
                         vec![Argument::new("x", union_type)],
-                        types::None::new(test::position()),
+                        types::None::new(Position::fake()),
                         IfType::new(
                             "y",
-                            Variable::new("x", test::position()),
+                            Variable::new("x", Position::fake()),
                             branches,
                             Some(ElseBranch::new(
                                 Some(function_type.clone().into()),
                                 Call::new(
                                     Some(function_type.into()),
-                                    Variable::new("y", test::position()),
+                                    Variable::new("y", Position::fake()),
                                     vec![],
-                                    test::position()
+                                    Position::fake()
                                 ),
-                                test::position()
+                                Position::fake()
                             )),
-                            test::position()
+                            Position::fake()
                         ),
-                        test::position(),
+                        Position::fake(),
                     ),
                     false,
                 )],))
@@ -914,10 +915,10 @@ mod tests {
 
         #[test]
         fn infer_else_branch_type_of_any() {
-            let any_type = types::Any::new(test::position());
+            let any_type = types::Any::new(Position::fake());
             let branches = vec![IfTypeBranch::new(
-                types::Number::new(test::position()),
-                None::new(test::position()),
+                types::Number::new(Position::fake()),
+                None::new(Position::fake()),
             )];
 
             assert_eq!(
@@ -925,19 +926,19 @@ mod tests {
                     "x",
                     Lambda::new(
                         vec![Argument::new("x", any_type.clone())],
-                        types::None::new(test::position()),
+                        types::None::new(Position::fake()),
                         IfType::new(
                             "x",
-                            Variable::new("x", test::position()),
+                            Variable::new("x", Position::fake()),
                             branches.clone(),
                             Some(ElseBranch::new(
                                 None,
-                                None::new(test::position()),
-                                test::position()
+                                None::new(Position::fake()),
+                                Position::fake()
                             )),
-                            test::position()
+                            Position::fake()
                         ),
-                        test::position(),
+                        Position::fake(),
                     ),
                     false,
                 )],)),
@@ -945,19 +946,19 @@ mod tests {
                     "x",
                     Lambda::new(
                         vec![Argument::new("x", any_type.clone())],
-                        types::None::new(test::position()),
+                        types::None::new(Position::fake()),
                         IfType::new(
                             "x",
-                            Variable::new("x", test::position()),
+                            Variable::new("x", Position::fake()),
                             branches,
                             Some(ElseBranch::new(
                                 Some(any_type.into()),
-                                None::new(test::position()),
-                                test::position()
+                                None::new(Position::fake()),
+                                Position::fake()
                             )),
-                            test::position()
+                            Position::fake()
                         ),
-                        test::position(),
+                        Position::fake(),
                     ),
                     false,
                 )],))
@@ -967,9 +968,9 @@ mod tests {
         #[test]
         fn fail_to_infer_else_branch_type_due_to_unreachable_code() {
             let union_type = types::Union::new(
-                types::Number::new(test::position()),
-                types::None::new(test::position()),
-                test::position(),
+                types::Number::new(Position::fake()),
+                types::None::new(Position::fake()),
+                Position::fake(),
             );
 
             assert_eq!(
@@ -977,32 +978,32 @@ mod tests {
                     "x",
                     Lambda::new(
                         vec![Argument::new("x", union_type)],
-                        types::None::new(test::position()),
+                        types::None::new(Position::fake()),
                         IfType::new(
                             "x",
-                            Variable::new("x", test::position()),
+                            Variable::new("x", Position::fake()),
                             vec![
                                 IfTypeBranch::new(
-                                    types::Number::new(test::position()),
-                                    None::new(test::position()),
+                                    types::Number::new(Position::fake()),
+                                    None::new(Position::fake()),
                                 ),
                                 IfTypeBranch::new(
-                                    types::None::new(test::position()),
-                                    None::new(test::position()),
+                                    types::None::new(Position::fake()),
+                                    None::new(Position::fake()),
                                 )
                             ],
                             Some(ElseBranch::new(
                                 None,
-                                None::new(test::position()),
-                                test::position()
+                                None::new(Position::fake()),
+                                Position::fake()
                             )),
-                            test::position()
+                            Position::fake()
                         ),
-                        test::position(),
+                        Position::fake(),
                     ),
                     false,
                 )],)),
-                Err(CompileError::UnreachableCode(test::position()))
+                Err(CompileError::UnreachableCode(Position::fake()))
             );
         }
     }
@@ -1014,9 +1015,9 @@ mod tests {
         #[test]
         fn infer() {
             let union_type = types::Union::new(
-                types::None::new(test::position()),
-                types::Reference::new("error", test::position()),
-                test::position(),
+                types::None::new(Position::fake()),
+                types::Reference::new("error", Position::fake()),
+                Position::fake(),
             );
             let module = Module::empty().set_type_definitions(vec![TypeDefinition::fake(
                 "error",
@@ -1034,10 +1035,10 @@ mod tests {
                         union_type.clone(),
                         TryOperation::new(
                             None,
-                            Variable::new("x", test::position()),
-                            test::position(),
+                            Variable::new("x", Position::fake()),
+                            Position::fake(),
                         ),
-                        test::position(),
+                        Position::fake(),
                     ),
                     false,
                 )])),
@@ -1047,11 +1048,11 @@ mod tests {
                         vec![Argument::new("x", union_type.clone())],
                         union_type,
                         TryOperation::new(
-                            Some(types::None::new(test::position()).into()),
-                            Variable::new("x", test::position()),
-                            test::position(),
+                            Some(types::None::new(Position::fake()).into()),
+                            Variable::new("x", Position::fake()),
+                            Position::fake(),
                         ),
-                        test::position(),
+                        Position::fake(),
                     ),
                     false,
                 )],))
@@ -1060,7 +1061,7 @@ mod tests {
 
         #[test]
         fn fail_to_infer_with_error() {
-            let error_type = types::Reference::new("error", test::position());
+            let error_type = types::Reference::new("error", Position::fake());
 
             assert_eq!(
                 infer_module(
@@ -1079,15 +1080,15 @@ mod tests {
                                 error_type,
                                 TryOperation::new(
                                     None,
-                                    Variable::new("x", test::position()),
-                                    test::position(),
+                                    Variable::new("x", Position::fake()),
+                                    Position::fake(),
                                 ),
-                                test::position(),
+                                Position::fake(),
                             ),
                             false,
                         )],)
                 ),
-                Err(CompileError::UnionTypeExpected(test::position()))
+                Err(CompileError::UnionTypeExpected(Position::fake()))
             );
         }
     }
@@ -1098,24 +1099,24 @@ mod tests {
 
         #[test]
         fn infer() {
-            let list_type = types::List::new(types::None::new(test::position()), test::position());
+            let list_type = types::List::new(types::None::new(Position::fake()), Position::fake());
 
             assert_eq!(
                 infer_module(&Module::empty().set_definitions(vec![Definition::fake(
                     "f",
                     Lambda::new(
                         vec![Argument::new("x", list_type.clone())],
-                        types::None::new(test::position()),
+                        types::None::new(Position::fake()),
                         IfList::new(
                             None,
-                            Variable::new("x", test::position()),
+                            Variable::new("x", Position::fake()),
                             "y",
                             "ys",
-                            Variable::new("y", test::position()),
-                            None::new(test::position()),
-                            test::position(),
+                            Variable::new("y", Position::fake()),
+                            None::new(Position::fake()),
+                            Position::fake(),
                         ),
-                        test::position(),
+                        Position::fake(),
                     ),
                     false,
                 )])),
@@ -1123,17 +1124,17 @@ mod tests {
                     "f",
                     Lambda::new(
                         vec![Argument::new("x", list_type)],
-                        types::None::new(test::position()),
+                        types::None::new(Position::fake()),
                         IfList::new(
-                            Some(types::None::new(test::position()).into()),
-                            Variable::new("x", test::position()),
+                            Some(types::None::new(Position::fake()).into()),
+                            Variable::new("x", Position::fake()),
                             "y",
                             "ys",
-                            Variable::new("y", test::position()),
-                            None::new(test::position()),
-                            test::position(),
+                            Variable::new("y", Position::fake()),
+                            None::new(Position::fake()),
+                            Position::fake(),
                         ),
-                        test::position(),
+                        Position::fake(),
                     ),
                     false,
                 )],))
@@ -1142,30 +1143,30 @@ mod tests {
 
         #[test]
         fn infer_with_first_name_in_let() {
-            let list_type = types::List::new(types::None::new(test::position()), test::position());
+            let list_type = types::List::new(types::None::new(Position::fake()), Position::fake());
 
             assert_eq!(
                 infer_module(&Module::empty().set_definitions(vec![Definition::fake(
                     "f",
                     Lambda::new(
                         vec![Argument::new("x", list_type.clone())],
-                        types::None::new(test::position()),
+                        types::None::new(Position::fake()),
                         IfList::new(
                             None,
-                            Variable::new("x", test::position()),
+                            Variable::new("x", Position::fake()),
                             "y",
                             "ys",
                             Let::new(
                                 Some("z".into()),
                                 None,
-                                Variable::new("y", test::position()),
-                                Variable::new("z", test::position()),
-                                test::position()
+                                Variable::new("y", Position::fake()),
+                                Variable::new("z", Position::fake()),
+                                Position::fake()
                             ),
-                            None::new(test::position()),
-                            test::position(),
+                            None::new(Position::fake()),
+                            Position::fake(),
                         ),
-                        test::position(),
+                        Position::fake(),
                     ),
                     false,
                 )])),
@@ -1173,10 +1174,10 @@ mod tests {
                     "f",
                     Lambda::new(
                         vec![Argument::new("x", list_type)],
-                        types::None::new(test::position()),
+                        types::None::new(Position::fake()),
                         IfList::new(
-                            Some(types::None::new(test::position()).into()),
-                            Variable::new("x", test::position()),
+                            Some(types::None::new(Position::fake()).into()),
+                            Variable::new("x", Position::fake()),
                             "y",
                             "ys",
                             Let::new(
@@ -1184,19 +1185,19 @@ mod tests {
                                 Some(
                                     types::Function::new(
                                         vec![],
-                                        types::None::new(test::position()),
-                                        test::position()
+                                        types::None::new(Position::fake()),
+                                        Position::fake()
                                     )
                                     .into()
                                 ),
-                                Variable::new("y", test::position()),
-                                Variable::new("z", test::position()),
-                                test::position()
+                                Variable::new("y", Position::fake()),
+                                Variable::new("z", Position::fake()),
+                                Position::fake()
                             ),
-                            None::new(test::position()),
-                            test::position(),
+                            None::new(Position::fake()),
+                            Position::fake(),
                         ),
-                        test::position(),
+                        Position::fake(),
                     ),
                     false,
                 )],))
@@ -1205,30 +1206,30 @@ mod tests {
 
         #[test]
         fn infer_with_rest_name_in_let() {
-            let list_type = types::List::new(types::None::new(test::position()), test::position());
+            let list_type = types::List::new(types::None::new(Position::fake()), Position::fake());
 
             assert_eq!(
                 infer_module(&Module::empty().set_definitions(vec![Definition::fake(
                     "f",
                     Lambda::new(
                         vec![Argument::new("x", list_type.clone())],
-                        types::None::new(test::position()),
+                        types::None::new(Position::fake()),
                         IfList::new(
                             None,
-                            Variable::new("x", test::position()),
+                            Variable::new("x", Position::fake()),
                             "y",
                             "ys",
                             Let::new(
                                 Some("z".into()),
                                 None,
-                                Variable::new("ys", test::position()),
-                                Variable::new("z", test::position()),
-                                test::position()
+                                Variable::new("ys", Position::fake()),
+                                Variable::new("z", Position::fake()),
+                                Position::fake()
                             ),
-                            None::new(test::position()),
-                            test::position(),
+                            None::new(Position::fake()),
+                            Position::fake(),
                         ),
-                        test::position(),
+                        Position::fake(),
                     ),
                     false,
                 )])),
@@ -1236,29 +1237,29 @@ mod tests {
                     "f",
                     Lambda::new(
                         vec![Argument::new("x", list_type)],
-                        types::None::new(test::position()),
+                        types::None::new(Position::fake()),
                         IfList::new(
-                            Some(types::None::new(test::position()).into()),
-                            Variable::new("x", test::position()),
+                            Some(types::None::new(Position::fake()).into()),
+                            Variable::new("x", Position::fake()),
                             "y",
                             "ys",
                             Let::new(
                                 Some("z".into()),
                                 Some(
                                     types::List::new(
-                                        types::None::new(test::position()),
-                                        test::position()
+                                        types::None::new(Position::fake()),
+                                        Position::fake()
                                     )
                                     .into()
                                 ),
-                                Variable::new("ys", test::position()),
-                                Variable::new("z", test::position()),
-                                test::position()
+                                Variable::new("ys", Position::fake()),
+                                Variable::new("z", Position::fake()),
+                                Position::fake()
                             ),
-                            None::new(test::position()),
-                            test::position(),
+                            None::new(Position::fake()),
+                            Position::fake(),
                         ),
-                        test::position(),
+                        Position::fake(),
                     ),
                     false,
                 )],))

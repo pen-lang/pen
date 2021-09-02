@@ -24,7 +24,7 @@ pub fn transform(operation: &BooleanOperation) -> Expression {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test;
+    use position::test::PositionFake; use position::Position;
     use pretty_assertions::assert_eq;
 
     #[test]
@@ -32,15 +32,15 @@ mod tests {
         assert_eq!(
             transform(&BooleanOperation::new(
                 BooleanOperator::And,
-                Boolean::new(true, test::position()),
-                Boolean::new(true, test::position()),
-                test::position(),
+                Boolean::new(true, Position::fake()),
+                Boolean::new(true, Position::fake()),
+                Position::fake(),
             )),
             If::new(
-                Boolean::new(true, test::position()),
-                Boolean::new(true, test::position()),
-                Boolean::new(false, test::position()),
-                test::position(),
+                Boolean::new(true, Position::fake()),
+                Boolean::new(true, Position::fake()),
+                Boolean::new(false, Position::fake()),
+                Position::fake(),
             )
             .into(),
         );
@@ -51,15 +51,15 @@ mod tests {
         assert_eq!(
             transform(&BooleanOperation::new(
                 BooleanOperator::Or,
-                Boolean::new(false, test::position()),
-                Boolean::new(false, test::position()),
-                test::position(),
+                Boolean::new(false, Position::fake()),
+                Boolean::new(false, Position::fake()),
+                Position::fake(),
             )),
             If::new(
-                Boolean::new(false, test::position()),
-                Boolean::new(true, test::position()),
-                Boolean::new(false, test::position()),
-                test::position(),
+                Boolean::new(false, Position::fake()),
+                Boolean::new(true, Position::fake()),
+                Boolean::new(false, Position::fake()),
+                Position::fake(),
             )
             .into(),
         );

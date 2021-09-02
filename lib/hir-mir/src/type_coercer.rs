@@ -443,9 +443,10 @@ mod tests {
     use crate::{
         error_type_configuration::ERROR_TYPE_CONFIGURATION,
         list_type_configuration::LIST_TYPE_CONFIGURATION,
-        string_type_configuration::STRING_TYPE_CONFIGURATION, test,
+        string_type_configuration::STRING_TYPE_CONFIGURATION,
     };
     use hir::test::{DefinitionFake, ModuleFake, TypeDefinitionFake};
+    use position::{test::PositionFake, Position};
     use pretty_assertions::assert_eq;
 
     fn coerce_module(module: &Module) -> Result<Module, CompileError> {
@@ -463,9 +464,9 @@ mod tests {
     #[test]
     fn coerce_function_result() {
         let union_type = types::Union::new(
-            types::Number::new(test::position()),
-            types::None::new(test::position()),
-            test::position(),
+            types::Number::new(Position::fake()),
+            types::None::new(Position::fake()),
+            Position::fake(),
         );
 
         assert_eq!(
@@ -474,8 +475,8 @@ mod tests {
                 Lambda::new(
                     vec![],
                     union_type.clone(),
-                    None::new(test::position()),
-                    test::position(),
+                    None::new(Position::fake()),
+                    Position::fake(),
                 ),
                 false,
             )],)),
@@ -485,12 +486,12 @@ mod tests {
                     vec![],
                     union_type.clone(),
                     TypeCoercion::new(
-                        types::None::new(test::position()),
+                        types::None::new(Position::fake()),
                         union_type,
-                        None::new(test::position()),
-                        test::position()
+                        None::new(Position::fake()),
+                        Position::fake()
                     ),
-                    test::position(),
+                    Position::fake(),
                 ),
                 false,
             )],))
@@ -500,34 +501,34 @@ mod tests {
     #[test]
     fn coerce_function_result_of_variable() {
         let union_type = types::Union::new(
-            types::Number::new(test::position()),
-            types::None::new(test::position()),
-            test::position(),
+            types::Number::new(Position::fake()),
+            types::None::new(Position::fake()),
+            Position::fake(),
         );
 
         assert_eq!(
             coerce_module(&Module::empty().set_definitions(vec![Definition::fake(
                 "f",
                 Lambda::new(
-                    vec![Argument::new("x", types::None::new(test::position()))],
+                    vec![Argument::new("x", types::None::new(Position::fake()))],
                     union_type.clone(),
-                    Variable::new("x", test::position()),
-                    test::position(),
+                    Variable::new("x", Position::fake()),
+                    Position::fake(),
                 ),
                 false,
             )],)),
             Ok(Module::empty().set_definitions(vec![Definition::fake(
                 "f",
                 Lambda::new(
-                    vec![Argument::new("x", types::None::new(test::position()))],
+                    vec![Argument::new("x", types::None::new(Position::fake()))],
                     union_type.clone(),
                     TypeCoercion::new(
-                        types::None::new(test::position()),
+                        types::None::new(Position::fake()),
                         union_type,
-                        Variable::new("x", test::position()),
-                        test::position()
+                        Variable::new("x", Position::fake()),
+                        Position::fake()
                     ),
-                    test::position(),
+                    Position::fake(),
                 ),
                 false,
             )],))
@@ -537,9 +538,9 @@ mod tests {
     #[test]
     fn coerce_if() {
         let union_type = types::Union::new(
-            types::Number::new(test::position()),
-            types::None::new(test::position()),
-            test::position(),
+            types::Number::new(Position::fake()),
+            types::None::new(Position::fake()),
+            Position::fake(),
         );
 
         assert_eq!(
@@ -549,12 +550,12 @@ mod tests {
                     vec![],
                     union_type.clone(),
                     If::new(
-                        Boolean::new(true, test::position()),
-                        Number::new(42.0, test::position()),
-                        None::new(test::position()),
-                        test::position(),
+                        Boolean::new(true, Position::fake()),
+                        Number::new(42.0, Position::fake()),
+                        None::new(Position::fake()),
+                        Position::fake(),
                     ),
-                    test::position(),
+                    Position::fake(),
                 ),
                 false,
             )],)),
@@ -564,22 +565,22 @@ mod tests {
                     vec![],
                     union_type.clone(),
                     If::new(
-                        Boolean::new(true, test::position()),
+                        Boolean::new(true, Position::fake()),
                         TypeCoercion::new(
-                            types::Number::new(test::position()),
+                            types::Number::new(Position::fake()),
                             union_type.clone(),
-                            Number::new(42.0, test::position()),
-                            test::position(),
+                            Number::new(42.0, Position::fake()),
+                            Position::fake(),
                         ),
                         TypeCoercion::new(
-                            types::None::new(test::position()),
+                            types::None::new(Position::fake()),
                             union_type,
-                            None::new(test::position()),
-                            test::position(),
+                            None::new(Position::fake()),
+                            Position::fake(),
                         ),
-                        test::position(),
+                        Position::fake(),
                     ),
-                    test::position(),
+                    Position::fake(),
                 ),
                 false,
             )],))
@@ -589,23 +590,23 @@ mod tests {
     #[test]
     fn coerce_if_list() {
         let union_type = types::Union::new(
-            types::Number::new(test::position()),
-            types::None::new(test::position()),
-            test::position(),
+            types::Number::new(Position::fake()),
+            types::None::new(Position::fake()),
+            Position::fake(),
         );
-        let list_type = types::List::new(types::Number::new(test::position()), test::position());
+        let list_type = types::List::new(types::Number::new(Position::fake()), Position::fake());
         let element_call = Call::new(
             Some(
                 types::Function::new(
                     vec![],
-                    types::Number::new(test::position()),
-                    test::position(),
+                    types::Number::new(Position::fake()),
+                    Position::fake(),
                 )
                 .into(),
             ),
-            Variable::new("x", test::position()),
+            Variable::new("x", Position::fake()),
             vec![],
-            test::position(),
+            Position::fake(),
         );
 
         assert_eq!(
@@ -615,15 +616,15 @@ mod tests {
                     vec![Argument::new("xs", list_type.clone())],
                     union_type.clone(),
                     IfList::new(
-                        Some(types::Number::new(test::position()).into()),
-                        Variable::new("xs", test::position()),
+                        Some(types::Number::new(Position::fake()).into()),
+                        Variable::new("xs", Position::fake()),
                         "x",
                         "xs",
                         element_call.clone(),
-                        None::new(test::position()),
-                        test::position(),
+                        None::new(Position::fake()),
+                        Position::fake(),
                     ),
-                    test::position(),
+                    Position::fake(),
                 ),
                 false,
             )],)),
@@ -633,25 +634,25 @@ mod tests {
                     vec![Argument::new("xs", list_type)],
                     union_type.clone(),
                     IfList::new(
-                        Some(types::Number::new(test::position()).into()),
-                        Variable::new("xs", test::position()),
+                        Some(types::Number::new(Position::fake()).into()),
+                        Variable::new("xs", Position::fake()),
                         "x",
                         "xs",
                         TypeCoercion::new(
-                            types::Number::new(test::position()),
+                            types::Number::new(Position::fake()),
                             union_type.clone(),
                             element_call,
-                            test::position(),
+                            Position::fake(),
                         ),
                         TypeCoercion::new(
-                            types::None::new(test::position()),
+                            types::None::new(Position::fake()),
                             union_type,
-                            None::new(test::position()),
-                            test::position(),
+                            None::new(Position::fake()),
+                            Position::fake(),
                         ),
-                        test::position(),
+                        Position::fake(),
                     ),
-                    test::position(),
+                    Position::fake(),
                 ),
                 false,
             )],))
@@ -662,15 +663,15 @@ mod tests {
     fn coerce_if_list_with_function_union_type() {
         let number_thunk_type = types::Function::new(
             vec![],
-            types::Number::new(test::position()),
-            test::position(),
+            types::Number::new(Position::fake()),
+            Position::fake(),
         );
         let union_type = types::Union::new(
             number_thunk_type.clone(),
-            types::None::new(test::position()),
-            test::position(),
+            types::None::new(Position::fake()),
+            Position::fake(),
         );
-        let list_type = types::List::new(types::Number::new(test::position()), test::position());
+        let list_type = types::List::new(types::Number::new(Position::fake()), Position::fake());
 
         assert_eq!(
             coerce_module(&Module::empty().set_definitions(vec![Definition::fake(
@@ -679,15 +680,15 @@ mod tests {
                     vec![Argument::new("xs", list_type.clone())],
                     union_type.clone(),
                     IfList::new(
-                        Some(types::Number::new(test::position()).into()),
-                        Variable::new("xs", test::position()),
+                        Some(types::Number::new(Position::fake()).into()),
+                        Variable::new("xs", Position::fake()),
                         "x",
                         "xs",
-                        Variable::new("x", test::position()),
-                        None::new(test::position()),
-                        test::position(),
+                        Variable::new("x", Position::fake()),
+                        None::new(Position::fake()),
+                        Position::fake(),
                     ),
-                    test::position(),
+                    Position::fake(),
                 ),
                 false,
             )],)),
@@ -697,25 +698,25 @@ mod tests {
                     vec![Argument::new("xs", list_type)],
                     union_type.clone(),
                     IfList::new(
-                        Some(types::Number::new(test::position()).into()),
-                        Variable::new("xs", test::position()),
+                        Some(types::Number::new(Position::fake()).into()),
+                        Variable::new("xs", Position::fake()),
                         "x",
                         "xs",
                         TypeCoercion::new(
                             number_thunk_type,
                             union_type.clone(),
-                            Variable::new("x", test::position()),
-                            test::position(),
+                            Variable::new("x", Position::fake()),
+                            Position::fake(),
                         ),
                         TypeCoercion::new(
-                            types::None::new(test::position()),
+                            types::None::new(Position::fake()),
                             union_type,
-                            None::new(test::position()),
-                            test::position(),
+                            None::new(Position::fake()),
+                            Position::fake(),
                         ),
-                        test::position(),
+                        Position::fake(),
                     ),
-                    test::position(),
+                    Position::fake(),
                 ),
                 false,
             )],))
@@ -725,9 +726,9 @@ mod tests {
     #[test]
     fn coerce_if_type() {
         let union_type = types::Union::new(
-            types::Number::new(test::position()),
-            types::None::new(test::position()),
-            test::position(),
+            types::Number::new(Position::fake()),
+            types::None::new(Position::fake()),
+            Position::fake(),
         );
 
         assert_eq!(
@@ -738,19 +739,19 @@ mod tests {
                     union_type.clone(),
                     IfType::new(
                         "y",
-                        Variable::new("x", test::position()),
+                        Variable::new("x", Position::fake()),
                         vec![IfTypeBranch::new(
-                            types::Number::new(test::position()),
-                            Variable::new("y", test::position()),
+                            types::Number::new(Position::fake()),
+                            Variable::new("y", Position::fake()),
                         )],
                         Some(ElseBranch::new(
-                            Some(types::None::new(test::position()).into()),
-                            None::new(test::position()),
-                            test::position(),
+                            Some(types::None::new(Position::fake()).into()),
+                            None::new(Position::fake()),
+                            Position::fake(),
                         )),
-                        test::position(),
+                        Position::fake(),
                     ),
-                    test::position(),
+                    Position::fake(),
                 ),
                 false,
             )],)),
@@ -761,29 +762,29 @@ mod tests {
                     union_type.clone(),
                     IfType::new(
                         "y",
-                        Variable::new("x", test::position()),
+                        Variable::new("x", Position::fake()),
                         vec![IfTypeBranch::new(
-                            types::Number::new(test::position()),
+                            types::Number::new(Position::fake()),
                             TypeCoercion::new(
-                                types::Number::new(test::position()),
+                                types::Number::new(Position::fake()),
                                 union_type.clone(),
-                                Variable::new("y", test::position()),
-                                test::position(),
+                                Variable::new("y", Position::fake()),
+                                Position::fake(),
                             ),
                         )],
                         Some(ElseBranch::new(
-                            Some(types::None::new(test::position()).into()),
+                            Some(types::None::new(Position::fake()).into()),
                             TypeCoercion::new(
-                                types::None::new(test::position()),
+                                types::None::new(Position::fake()),
                                 union_type,
-                                None::new(test::position()),
-                                test::position(),
+                                None::new(Position::fake()),
+                                Position::fake(),
                             ),
-                            test::position()
+                            Position::fake()
                         )),
-                        test::position(),
+                        Position::fake(),
                     ),
-                    test::position(),
+                    Position::fake(),
                 ),
                 false,
             )],))
@@ -793,9 +794,9 @@ mod tests {
     #[test]
     fn coerce_equality_operation() {
         let union_type = types::Union::new(
-            types::Number::new(test::position()),
-            types::None::new(test::position()),
-            test::position(),
+            types::Number::new(Position::fake()),
+            types::None::new(Position::fake()),
+            Position::fake(),
         );
 
         assert_eq!(
@@ -803,15 +804,15 @@ mod tests {
                 "f",
                 Lambda::new(
                     vec![],
-                    types::Boolean::new(test::position()),
+                    types::Boolean::new(Position::fake()),
                     EqualityOperation::new(
                         Some(union_type.clone().into()),
                         EqualityOperator::Equal,
-                        Number::new(42.0, test::position()),
-                        None::new(test::position()),
-                        test::position(),
+                        Number::new(42.0, Position::fake()),
+                        None::new(Position::fake()),
+                        Position::fake(),
                     ),
-                    test::position(),
+                    Position::fake(),
                 ),
                 false,
             )],)),
@@ -819,25 +820,25 @@ mod tests {
                 "f",
                 Lambda::new(
                     vec![],
-                    types::Boolean::new(test::position()),
+                    types::Boolean::new(Position::fake()),
                     EqualityOperation::new(
                         Some(union_type.clone().into()),
                         EqualityOperator::Equal,
                         TypeCoercion::new(
-                            types::Number::new(test::position()),
+                            types::Number::new(Position::fake()),
                             union_type.clone(),
-                            Number::new(42.0, test::position()),
-                            test::position(),
+                            Number::new(42.0, Position::fake()),
+                            Position::fake(),
                         ),
                         TypeCoercion::new(
-                            types::None::new(test::position()),
+                            types::None::new(Position::fake()),
                             union_type,
-                            None::new(test::position()),
-                            test::position(),
+                            None::new(Position::fake()),
+                            Position::fake(),
                         ),
-                        test::position(),
+                        Position::fake(),
                     ),
-                    test::position(),
+                    Position::fake(),
                 ),
                 false,
             )],))
@@ -847,11 +848,11 @@ mod tests {
     #[test]
     fn coerce_single_element_in_list() {
         let union_type = types::Union::new(
-            types::Number::new(test::position()),
-            types::None::new(test::position()),
-            test::position(),
+            types::Number::new(Position::fake()),
+            types::None::new(Position::fake()),
+            Position::fake(),
         );
-        let list_type = types::List::new(union_type.clone(), test::position());
+        let list_type = types::List::new(union_type.clone(), Position::fake());
 
         assert_eq!(
             coerce_module(&Module::empty().set_definitions(vec![Definition::fake(
@@ -861,10 +862,10 @@ mod tests {
                     list_type.clone(),
                     List::new(
                         union_type.clone(),
-                        vec![ListElement::Single(None::new(test::position()).into())],
-                        test::position(),
+                        vec![ListElement::Single(None::new(Position::fake()).into())],
+                        Position::fake(),
                     ),
-                    test::position(),
+                    Position::fake(),
                 ),
                 false,
             )],)),
@@ -877,16 +878,16 @@ mod tests {
                         union_type.clone(),
                         vec![ListElement::Single(
                             TypeCoercion::new(
-                                types::None::new(test::position()),
+                                types::None::new(Position::fake()),
                                 union_type,
-                                None::new(test::position()),
-                                test::position(),
+                                None::new(Position::fake()),
+                                Position::fake(),
                             )
                             .into()
                         )],
-                        test::position(),
+                        Position::fake(),
                     ),
-                    test::position(),
+                    Position::fake(),
                 ),
                 false,
             )],))
@@ -896,11 +897,11 @@ mod tests {
     #[test]
     fn coerce_multiple_element_in_list() {
         let union_type = types::Union::new(
-            types::Number::new(test::position()),
-            types::None::new(test::position()),
-            test::position(),
+            types::Number::new(Position::fake()),
+            types::None::new(Position::fake()),
+            Position::fake(),
         );
-        let list_type = types::List::new(union_type.clone(), test::position());
+        let list_type = types::List::new(union_type.clone(), Position::fake());
 
         assert_eq!(
             coerce_module(&Module::empty().set_definitions(vec![Definition::fake(
@@ -912,15 +913,15 @@ mod tests {
                         union_type.clone(),
                         vec![ListElement::Multiple(
                                 List::new(
-                                    types::None::new(test::position()),
+                                    types::None::new(Position::fake()),
                                     vec![],
-                                    test::position()
+                                    Position::fake()
                                 )
                                 .into()
                             )],
-                        test::position(),
+                        Position::fake(),
                     ),
-                    test::position(),
+                    Position::fake(),
                 ),
                 false,
             )],)),
@@ -934,22 +935,22 @@ mod tests {
                         vec![ListElement::Multiple(
                             TypeCoercion::new(
                                 types::List::new(
-                                    types::None::new(test::position()),
-                                    test::position()
+                                    types::None::new(Position::fake()),
+                                    Position::fake()
                                 ),
                                 list_type,
                                 List::new(
-                                    types::None::new(test::position()),
+                                    types::None::new(Position::fake()),
                                     vec![],
-                                    test::position()
+                                    Position::fake()
                                 ),
-                                test::position(),
+                                Position::fake(),
                             )
                             .into()
                         )],
-                        test::position(),
+                        Position::fake(),
                     ),
-                    test::position(),
+                    Position::fake(),
                 ),
                 false,
             )],))
@@ -959,9 +960,9 @@ mod tests {
     #[test]
     fn coerce_record_construction() {
         let union_type = types::Union::new(
-            types::Number::new(test::position()),
-            types::None::new(test::position()),
-            test::position(),
+            types::Number::new(Position::fake()),
+            types::None::new(Position::fake()),
+            Position::fake(),
         );
         let type_definition = TypeDefinition::fake(
             "r",
@@ -970,7 +971,7 @@ mod tests {
             false,
             false,
         );
-        let record_type = types::Record::new("r", test::position());
+        let record_type = types::Record::new("r", Position::fake());
 
         assert_eq!(
             coerce_module(
@@ -985,12 +986,12 @@ mod tests {
                                 record_type.clone(),
                                 vec![RecordElement::new(
                                     "x",
-                                    None::new(test::position()),
-                                    test::position()
+                                    None::new(Position::fake()),
+                                    Position::fake()
                                 )],
-                                test::position(),
+                                Position::fake(),
                             ),
-                            test::position(),
+                            Position::fake(),
                         ),
                         false,
                     )])
@@ -1007,16 +1008,16 @@ mod tests {
                             vec![RecordElement::new(
                                 "x",
                                 TypeCoercion::new(
-                                    types::None::new(test::position()),
+                                    types::None::new(Position::fake()),
                                     union_type,
-                                    None::new(test::position()),
-                                    test::position(),
+                                    None::new(Position::fake()),
+                                    Position::fake(),
                                 ),
-                                test::position(),
+                                Position::fake(),
                             )],
-                            test::position(),
+                            Position::fake(),
                         ),
-                        test::position(),
+                        Position::fake(),
                     ),
                     false,
                 )]))
@@ -1026,9 +1027,9 @@ mod tests {
     #[test]
     fn coerce_record_update() {
         let union_type = types::Union::new(
-            types::Number::new(test::position()),
-            types::None::new(test::position()),
-            test::position(),
+            types::Number::new(Position::fake()),
+            types::None::new(Position::fake()),
+            Position::fake(),
         );
         let type_definition = TypeDefinition::fake(
             "r",
@@ -1037,7 +1038,7 @@ mod tests {
             false,
             false,
         );
-        let record_type = types::Record::new("r", test::position());
+        let record_type = types::Record::new("r", Position::fake());
 
         assert_eq!(
             coerce_module(
@@ -1050,15 +1051,15 @@ mod tests {
                             record_type.clone(),
                             RecordUpdate::new(
                                 record_type.clone(),
-                                Variable::new("r", test::position()),
+                                Variable::new("r", Position::fake()),
                                 vec![RecordElement::new(
                                     "x",
-                                    None::new(test::position()),
-                                    test::position()
+                                    None::new(Position::fake()),
+                                    Position::fake()
                                 )],
-                                test::position(),
+                                Position::fake(),
                             ),
-                            test::position(),
+                            Position::fake(),
                         ),
                         false,
                     )])
@@ -1072,20 +1073,20 @@ mod tests {
                         record_type.clone(),
                         RecordUpdate::new(
                             record_type,
-                            Variable::new("r", test::position()),
+                            Variable::new("r", Position::fake()),
                             vec![RecordElement::new(
                                 "x",
                                 TypeCoercion::new(
-                                    types::None::new(test::position()),
+                                    types::None::new(Position::fake()),
                                     union_type,
-                                    None::new(test::position()),
-                                    test::position(),
+                                    None::new(Position::fake()),
+                                    Position::fake(),
                                 ),
-                                test::position(),
+                                Position::fake(),
                             )],
-                            test::position(),
+                            Position::fake(),
                         ),
-                        test::position(),
+                        Position::fake(),
                     ),
                     false,
                 )]))
@@ -1095,9 +1096,9 @@ mod tests {
     #[test]
     fn coerce_thunk() {
         let union_type = types::Union::new(
-            types::Number::new(test::position()),
-            types::None::new(test::position()),
-            test::position(),
+            types::Number::new(Position::fake()),
+            types::None::new(Position::fake()),
+            Position::fake(),
         );
 
         assert_eq!(
@@ -1105,13 +1106,13 @@ mod tests {
                 "f",
                 Lambda::new(
                     vec![],
-                    types::Function::new(vec![], union_type.clone(), test::position()),
+                    types::Function::new(vec![], union_type.clone(), Position::fake()),
                     Thunk::new(
                         Some(union_type.clone().into()),
-                        None::new(test::position()),
-                        test::position()
+                        None::new(Position::fake()),
+                        Position::fake()
                     ),
-                    test::position(),
+                    Position::fake(),
                 ),
                 false,
             )],)),
@@ -1119,18 +1120,18 @@ mod tests {
                 "f",
                 Lambda::new(
                     vec![],
-                    types::Function::new(vec![], union_type.clone(), test::position()),
+                    types::Function::new(vec![], union_type.clone(), Position::fake()),
                     Thunk::new(
                         Some(union_type.clone().into()),
                         TypeCoercion::new(
-                            types::None::new(test::position()),
+                            types::None::new(Position::fake()),
                             union_type,
-                            None::new(test::position()),
-                            test::position()
+                            None::new(Position::fake()),
+                            Position::fake()
                         ),
-                        test::position()
+                        Position::fake()
                     ),
-                    test::position(),
+                    Position::fake(),
                 ),
                 false,
             )],))

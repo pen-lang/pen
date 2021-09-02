@@ -99,13 +99,14 @@ fn transform_list(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{dummy_type_configurations::DUMMY_LIST_TYPE_CONFIGURATION, test};
+    use crate::{dummy_type_configurations::DUMMY_LIST_TYPE_CONFIGURATION};
+    use position::{test::PositionFake, Position};
     use pretty_assertions::assert_eq;
 
     fn get_list_type() -> types::Reference {
         types::Reference::new(
             DUMMY_LIST_TYPE_CONFIGURATION.list_type_name.clone(),
-            test::position(),
+            Position::fake(),
         )
     }
 
@@ -114,12 +115,12 @@ mod tests {
 
         types::Function::new(
             vec![
-                types::Function::new(vec![], types::Any::new(test::position()), test::position())
+                types::Function::new(vec![], types::Any::new(Position::fake()), Position::fake())
                     .into(),
                 list_type.clone().into(),
             ],
             list_type,
-            test::position(),
+            Position::fake(),
         )
     }
 
@@ -128,11 +129,11 @@ mod tests {
 
         types::Function::new(
             vec![
-                types::Function::new(vec![], list_type.clone(), test::position()).into(),
+                types::Function::new(vec![], list_type.clone(), Position::fake()).into(),
                 list_type.clone().into(),
             ],
             list_type,
-            test::position(),
+            Position::fake(),
         )
     }
 
@@ -142,17 +143,17 @@ mod tests {
 
         assert_eq!(
             transform(
-                &List::new(types::None::new(test::position()), vec![], test::position()),
+                &List::new(types::None::new(Position::fake()), vec![], Position::fake()),
                 &DUMMY_LIST_TYPE_CONFIGURATION,
             ),
             Call::new(
-                Some(types::Function::new(vec![], list_type, test::position()).into()),
+                Some(types::Function::new(vec![], list_type, Position::fake()).into()),
                 Variable::new(
                     &DUMMY_LIST_TYPE_CONFIGURATION.empty_list_function_name,
-                    test::position()
+                    Position::fake()
                 ),
                 vec![],
-                test::position()
+                Position::fake()
             )
             .into()
         );
@@ -165,9 +166,9 @@ mod tests {
         assert_eq!(
             transform(
                 &List::new(
-                    types::None::new(test::position()),
-                    vec![ListElement::Single(None::new(test::position()).into())],
-                    test::position()
+                    types::None::new(Position::fake()),
+                    vec![ListElement::Single(None::new(Position::fake()).into())],
+                    Position::fake()
                 ),
                 &DUMMY_LIST_TYPE_CONFIGURATION,
             ),
@@ -175,32 +176,32 @@ mod tests {
                 Some(get_prepend_function_type().into()),
                 Variable::new(
                     &DUMMY_LIST_TYPE_CONFIGURATION.prepend_function_name,
-                    test::position()
+                    Position::fake()
                 ),
                 vec![
                     Thunk::new(
-                        Some(types::Any::new(test::position()).into()),
+                        Some(types::Any::new(Position::fake()).into()),
                         TypeCoercion::new(
-                            types::None::new(test::position()),
-                            types::Any::new(test::position()),
-                            None::new(test::position()),
-                            test::position(),
+                            types::None::new(Position::fake()),
+                            types::Any::new(Position::fake()),
+                            None::new(Position::fake()),
+                            Position::fake(),
                         ),
-                        test::position(),
+                        Position::fake(),
                     )
                     .into(),
                     Call::new(
-                        Some(types::Function::new(vec![], list_type, test::position()).into()),
+                        Some(types::Function::new(vec![], list_type, Position::fake()).into()),
                         Variable::new(
                             &DUMMY_LIST_TYPE_CONFIGURATION.empty_list_function_name,
-                            test::position()
+                            Position::fake()
                         ),
                         vec![],
-                        test::position()
+                        Position::fake()
                     )
                     .into(),
                 ],
-                test::position(),
+                Position::fake(),
             )
             .into(),
         );
@@ -214,12 +215,12 @@ mod tests {
         assert_eq!(
             transform(
                 &List::new(
-                    types::None::new(test::position()),
+                    types::None::new(Position::fake()),
                     vec![
-                        ListElement::Single(None::new(test::position()).into()),
-                        ListElement::Single(None::new(test::position()).into())
+                        ListElement::Single(None::new(Position::fake()).into()),
+                        ListElement::Single(None::new(Position::fake()).into())
                     ],
-                    test::position()
+                    Position::fake()
                 ),
                 &DUMMY_LIST_TYPE_CONFIGURATION,
             ),
@@ -227,57 +228,57 @@ mod tests {
                 Some(prepend_function_type.clone().into()),
                 Variable::new(
                     &DUMMY_LIST_TYPE_CONFIGURATION.prepend_function_name,
-                    test::position()
+                    Position::fake()
                 ),
                 vec![
                     Thunk::new(
-                        Some(types::Any::new(test::position()).into()),
+                        Some(types::Any::new(Position::fake()).into()),
                         TypeCoercion::new(
-                            types::None::new(test::position()),
-                            types::Any::new(test::position()),
-                            None::new(test::position()),
-                            test::position(),
+                            types::None::new(Position::fake()),
+                            types::Any::new(Position::fake()),
+                            None::new(Position::fake()),
+                            Position::fake(),
                         ),
-                        test::position()
+                        Position::fake()
                     )
                     .into(),
                     Call::new(
                         Some(prepend_function_type.into(),),
                         Variable::new(
                             &DUMMY_LIST_TYPE_CONFIGURATION.prepend_function_name,
-                            test::position()
+                            Position::fake()
                         ),
                         vec![
                             Thunk::new(
-                                Some(types::Any::new(test::position()).into()),
+                                Some(types::Any::new(Position::fake()).into()),
                                 TypeCoercion::new(
-                                    types::None::new(test::position()),
-                                    types::Any::new(test::position()),
-                                    None::new(test::position()),
-                                    test::position(),
+                                    types::None::new(Position::fake()),
+                                    types::Any::new(Position::fake()),
+                                    None::new(Position::fake()),
+                                    Position::fake(),
                                 ),
-                                test::position()
+                                Position::fake()
                             )
                             .into(),
                             Call::new(
                                 Some(
-                                    types::Function::new(vec![], list_type, test::position())
+                                    types::Function::new(vec![], list_type, Position::fake())
                                         .into()
                                 ),
                                 Variable::new(
                                     &DUMMY_LIST_TYPE_CONFIGURATION.empty_list_function_name,
-                                    test::position()
+                                    Position::fake()
                                 ),
                                 vec![],
-                                test::position()
+                                Position::fake()
                             )
                             .into(),
                         ],
-                        test::position(),
+                        Position::fake(),
                     )
                     .into(),
                 ],
-                test::position(),
+                Position::fake(),
             )
             .into(),
         );
@@ -290,11 +291,11 @@ mod tests {
         assert_eq!(
             transform(
                 &List::new(
-                    types::None::new(test::position()),
+                    types::None::new(Position::fake()),
                     vec![ListElement::Multiple(
-                        Variable::new("xs", test::position()).into()
+                        Variable::new("xs", Position::fake()).into()
                     )],
-                    test::position()
+                    Position::fake()
                 ),
                 &DUMMY_LIST_TYPE_CONFIGURATION,
             ),
@@ -302,27 +303,27 @@ mod tests {
                 Some(get_concatenate_function_type().into()),
                 Variable::new(
                     &DUMMY_LIST_TYPE_CONFIGURATION.concatenate_function_name,
-                    test::position()
+                    Position::fake()
                 ),
                 vec![
                     Thunk::new(
                         Some(list_type.clone().into()),
-                        Variable::new("xs", test::position()),
-                        test::position(),
+                        Variable::new("xs", Position::fake()),
+                        Position::fake(),
                     )
                     .into(),
                     Call::new(
-                        Some(types::Function::new(vec![], list_type, test::position()).into()),
+                        Some(types::Function::new(vec![], list_type, Position::fake()).into()),
                         Variable::new(
                             &DUMMY_LIST_TYPE_CONFIGURATION.empty_list_function_name,
-                            test::position()
+                            Position::fake()
                         ),
                         vec![],
-                        test::position()
+                        Position::fake()
                     )
                     .into(),
                 ],
-                test::position(),
+                Position::fake(),
             )
             .into(),
         );
