@@ -1,19 +1,17 @@
-use super::{
-    attempt::{many, many1, optional, sep_end_by, sep_end_by1},
-    utilities::*,
-};
+use super::utilities::*;
 use crate::{
     ast::*,
     types::{self, Type},
 };
 use combine::{
-    easy, from_str, none_of, one_of,
+    attempt, choice, easy, from_str, many, many1, none_of, one_of, optional,
     parser::{
         char::{alpha_num, char as character, digit, letter, space, spaces, string},
         combinator::{lazy, no_partial, not_followed_by},
         regex::find,
         sequence::between,
     },
+    sep_end_by, sep_end_by1,
     stream::{self, position::SourcePosition, state},
     unexpected_any, value, Parser, Positioned,
 };
@@ -88,10 +86,10 @@ fn import<'a>() -> impl Parser<Stream<'a>, Output = Import> {
 }
 
 fn module_path<'a>() -> impl Parser<Stream<'a>, Output = ModulePath> {
-    token(choice!(
+    token(choice((
         internal_module_path().map(ModulePath::from),
         external_module_path().map(ModulePath::from),
-    ))
+    )))
     .expected("module path")
 }
 
@@ -227,7 +225,7 @@ fn list_type<'a>() -> impl Parser<Stream<'a>, Output = types::List> {
 }
 
 fn atomic_type<'a>() -> impl Parser<Stream<'a>, Output = Type> {
-    choice!(
+    choice((
         boolean_type().map(Type::from),
         none_type().map(Type::from),
         number_type().map(Type::from),
@@ -236,7 +234,7 @@ fn atomic_type<'a>() -> impl Parser<Stream<'a>, Output = Type> {
         reference_type().map(Type::from),
         list_type().map(Type::from),
         between(sign("("), sign(")"), type_()),
-    )
+    ))
 }
 
 fn boolean_type<'a>() -> impl Parser<Stream<'a>, Output = types::Boolean> {
@@ -336,7 +334,7 @@ fn binary_operation_like<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
 }
 
 fn binary_operator<'a>() -> impl Parser<Stream<'a>, Output = BinaryOperator> {
-    choice!(
+    choice((
         concrete_binary_operator("+", BinaryOperator::Add),
         concrete_binary_operator("-", BinaryOperator::Subtract),
         concrete_binary_operator("*", BinaryOperator::Multiply),
@@ -349,7 +347,7 @@ fn binary_operator<'a>() -> impl Parser<Stream<'a>, Output = BinaryOperator> {
         concrete_binary_operator(">=", BinaryOperator::GreaterThanOrEqual),
         concrete_binary_operator("&", BinaryOperator::And),
         concrete_binary_operator("|", BinaryOperator::Or),
-    )
+    ))
     .expected("binary operator")
 }
 
@@ -370,10 +368,10 @@ fn concrete_binary_operator<'a>(
 
 fn prefix_operation_like<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
     lazy(|| {
-        no_partial(choice!(
+        no_partial(choice((
             prefix_operation().map(Expression::from),
             suffix_operation_like().map(Expression::from),
-        ))
+        )))
     })
     .boxed()
 }
@@ -384,7 +382,7 @@ fn prefix_operation<'a>() -> impl Parser<Stream<'a>, Output = UnaryOperation> {
 }
 
 fn prefix_operator<'a>() -> impl Parser<Stream<'a>, Output = UnaryOperator> {
-    choice!(concrete_prefix_operator("!", UnaryOperator::Not),).expected("unary operator")
+    choice((concrete_prefix_operator("!", UnaryOperator::Not),)).expected("unary operator")
 }
 
 fn concrete_prefix_operator<'a>(
@@ -426,11 +424,11 @@ fn suffix_operation_like<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
 }
 
 fn suffix_operator<'a>() -> impl Parser<Stream<'a>, Output = SuffixOperator> {
-    choice!(
+    choice((
         call_operator().map(SuffixOperator::Call),
         element_operator().map(SuffixOperator::Element),
         try_operator().map(|_| SuffixOperator::Try),
-    )
+    ))
 }
 
 fn call_operator<'a>() -> impl Parser<Stream<'a>, Output = Vec<Expression>> {
@@ -447,7 +445,7 @@ fn try_operator<'a>() -> impl Parser<Stream<'a>, Output = ()> {
 
 fn atomic_expression<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
     lazy(|| {
-        no_partial(choice!(
+        no_partial(choice((
             if_().map(Expression::from),
             if_type().map(Expression::from),
             if_list().map(Expression::from),
@@ -460,7 +458,7 @@ fn atomic_expression<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
             string_literal().map(Expression::from),
             variable().map(Expression::from),
             between(sign("("), sign(")"), expression()),
-        ))
+        )))
     })
     .boxed()
 }
@@ -605,14 +603,14 @@ fn record_element<'a>() -> impl Parser<Stream<'a>, Output = RecordElement> {
 }
 
 fn boolean_literal<'a>() -> impl Parser<Stream<'a>, Output = Boolean> {
-    token(choice!(
+    token(choice((
         position()
             .skip(keyword("false"))
             .map(|position| Boolean::new(false, position)),
         position()
             .skip(keyword("true"))
             .map(|position| Boolean::new(true, position)),
-    ))
+    )))
     .expected("boolean literal")
 }
 
@@ -699,8 +697,8 @@ fn identifier<'a>() -> impl Parser<Stream<'a>, Output = String> {
 
 fn raw_identifier<'a>() -> impl Parser<Stream<'a>, Output = String> {
     (
-        choice!(letter(), combine::parser::char::char('_')),
-        many(choice!(alpha_num(), combine::parser::char::char('_'))),
+        choice((letter(), combine::parser::char::char('_'))),
+        many(choice((alpha_num(), combine::parser::char::char('_')))),
     )
         .map(|(head, tail): (char, String)| [head.into(), tail].concat())
         .then(|identifier| {
