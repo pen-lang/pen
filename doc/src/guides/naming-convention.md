@@ -1,13 +1,13 @@
 # Naming convention
 
-| Kind               | Case style       | Examples                      |
-| ------------------ | ---------------- | ----------------------------- |
-| Variables          | Camel case       | `fooBar`, `FooBar`, `i`, `x`  |
-| Functions          | Camel case       | `fooBar`, `FooBar`, `f`, `g`  |
-| Types              | Camel case       | `fooBar`, `FooBar`            |
-| Modules            | Upper camel case | `FooBar`                      |
-| Module directories | Upper camel case | `FooBar`                      |
-| Packages           | Kebab case       | `github.com/foo-bar/baz-blah` |
+| Kind               | Case style       | Examples                     |
+| ------------------ | ---------------- | ---------------------------- |
+| Variables          | Camel case       | `fooBar`, `FooBar`, `i`, `x` |
+| Functions          | Camel case       | `fooBar`, `FooBar`, `f`, `g` |
+| Types              | Camel case       | `fooBar`, `FooBar`           |
+| Modules            | Upper camel case | `FooBar`                     |
+| Module directories | Upper camel case | `FooBar`                     |
+| Packages           | Upper camel case | `FooBar`                     |
 
 ## Global and local names
 
