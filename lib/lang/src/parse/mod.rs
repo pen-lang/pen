@@ -19,7 +19,8 @@ pub fn parse(source_content: &str, path: &str) -> Result<ast::Module, ParseError
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{ast::*, test};
+    use crate::ast::*;
+    use position::{test::PositionFake, Position};
 
     #[test]
     fn parse_empty_module() {
@@ -31,7 +32,7 @@ mod tests {
                 vec![],
                 vec![],
                 vec![],
-                test::position()
+                Position::fake()
             ))
         );
     }

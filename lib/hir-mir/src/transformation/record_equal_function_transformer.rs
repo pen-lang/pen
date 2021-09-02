@@ -125,9 +125,10 @@ mod tests {
     use crate::{
         error_type_configuration::ERROR_TYPE_CONFIGURATION,
         list_type_configuration::LIST_TYPE_CONFIGURATION,
-        string_type_configuration::STRING_TYPE_CONFIGURATION, test,
+        string_type_configuration::STRING_TYPE_CONFIGURATION,
     };
     use hir::test::ModuleFake;
+    use position::{test::PositionFake, Position};
     use pretty_assertions::assert_eq;
 
     fn transform_module(module: &Module) -> Result<Module, CompileError> {
@@ -148,15 +149,15 @@ mod tests {
             "foo",
             "foo",
             vec![
-                types::RecordElement::new("x", types::None::new(test::position())),
-                types::RecordElement::new("y", types::None::new(test::position())),
+                types::RecordElement::new("x", types::None::new(Position::fake())),
+                types::RecordElement::new("y", types::None::new(Position::fake())),
             ],
             false,
             false,
             false,
-            test::position(),
+            Position::fake(),
         );
-        let record_type = types::Record::new(type_definition.name(), test::position());
+        let record_type = types::Record::new(type_definition.name(), Position::fake());
 
         assert_eq!(
             transform_module(&Module::empty().set_type_definitions(vec![type_definition.clone()])),
@@ -170,55 +171,55 @@ mod tests {
                             Argument::new(LHS_NAME, record_type.clone()),
                             Argument::new(RHS_NAME, record_type.clone()),
                         ],
-                        types::Boolean::new(test::position()),
+                        types::Boolean::new(Position::fake()),
                         If::new(
                             EqualityOperation::new(
-                                Some(types::None::new(test::position()).into()),
+                                Some(types::None::new(Position::fake()).into()),
                                 EqualityOperator::Equal,
                                 RecordDeconstruction::new(
                                     Some(record_type.clone().into()),
-                                    Variable::new(LHS_NAME, test::position()),
+                                    Variable::new(LHS_NAME, Position::fake()),
                                     "x",
-                                    test::position(),
+                                    Position::fake(),
                                 ),
                                 RecordDeconstruction::new(
                                     Some(record_type.clone().into()),
-                                    Variable::new(RHS_NAME, test::position()),
+                                    Variable::new(RHS_NAME, Position::fake()),
                                     "x",
-                                    test::position(),
+                                    Position::fake(),
                                 ),
-                                test::position(),
+                                Position::fake(),
                             ),
                             If::new(
                                 EqualityOperation::new(
-                                    Some(types::None::new(test::position()).into()),
+                                    Some(types::None::new(Position::fake()).into()),
                                     EqualityOperator::Equal,
                                     RecordDeconstruction::new(
                                         Some(record_type.clone().into()),
-                                        Variable::new(LHS_NAME, test::position()),
+                                        Variable::new(LHS_NAME, Position::fake()),
                                         "y",
-                                        test::position(),
+                                        Position::fake(),
                                     ),
                                     RecordDeconstruction::new(
                                         Some(record_type.into()),
-                                        Variable::new(RHS_NAME, test::position()),
+                                        Variable::new(RHS_NAME, Position::fake()),
                                         "y",
-                                        test::position(),
+                                        Position::fake(),
                                     ),
-                                    test::position(),
+                                    Position::fake(),
                                 ),
-                                Boolean::new(true, test::position()),
-                                Boolean::new(false, test::position()),
-                                test::position(),
+                                Boolean::new(true, Position::fake()),
+                                Boolean::new(false, Position::fake()),
+                                Position::fake(),
                             ),
-                            Boolean::new(false, test::position()),
-                            test::position(),
+                            Boolean::new(false, Position::fake()),
+                            Position::fake(),
                         ),
-                        test::position(),
+                        Position::fake(),
                     ),
                     false,
                     false,
-                    test::position()
+                    Position::fake()
                 )]))
         );
     }
@@ -229,15 +230,15 @@ mod tests {
             "foo",
             "foo",
             vec![
-                types::RecordElement::new("x", types::None::new(test::position())),
-                types::RecordElement::new("y", types::None::new(test::position())),
+                types::RecordElement::new("x", types::None::new(Position::fake())),
+                types::RecordElement::new("y", types::None::new(Position::fake())),
             ],
             false,
             false,
             true,
-            test::position(),
+            Position::fake(),
         );
-        let record_type = types::Record::new(type_definition.name(), test::position());
+        let record_type = types::Record::new(type_definition.name(), Position::fake());
 
         assert_eq!(
             transform_module(&Module::empty().set_type_definitions(vec![type_definition.clone()])),
@@ -247,10 +248,10 @@ mod tests {
                     "foo.$equal",
                     types::Function::new(
                         vec![record_type.clone().into(), record_type.into()],
-                        types::Boolean::new(test::position()),
-                        test::position()
+                        types::Boolean::new(Position::fake()),
+                        Position::fake()
                     ),
-                    test::position()
+                    Position::fake()
                 )]))
         );
     }

@@ -341,8 +341,8 @@ fn is_name_public(name: &str) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test;
     use hir::test::ModuleFake;
+    use position::{test::PositionFake, Position};
     use pretty_assertions::assert_eq;
 
     #[test]
@@ -354,7 +354,7 @@ mod tests {
                 vec![],
                 vec![],
                 vec![],
-                test::position()
+                Position::fake()
             )),
             Ok(ir::Module::empty())
         );
@@ -366,24 +366,24 @@ mod tests {
             compile(&ast::Module::new(
                 vec![],
                 vec![],
-                vec![ast::TypeDefinition::new("Foo1", vec![], test::position())],
+                vec![ast::TypeDefinition::new("Foo1", vec![], Position::fake())],
                 vec![ast::TypeAlias::new(
                     "Foo2",
-                    types::None::new(test::position()),
-                    test::position(),
+                    types::None::new(Position::fake()),
+                    Position::fake(),
                 )],
                 vec![ast::Definition::new(
                     "Foo3",
                     ast::Lambda::new(
                         vec![],
-                        types::None::new(test::position()),
-                        ast::Block::new(vec![], ast::None::new(test::position()), test::position()),
-                        test::position(),
+                        types::None::new(Position::fake()),
+                        ast::Block::new(vec![], ast::None::new(Position::fake()), Position::fake()),
+                        Position::fake(),
                     ),
                     false,
-                    test::position(),
+                    Position::fake(),
                 )],
-                test::position(),
+                Position::fake(),
             )),
             Ok(ir::Module::empty()
                 .set_type_definitions(vec![ir::TypeDefinition::new(
@@ -393,28 +393,28 @@ mod tests {
                     false,
                     true,
                     false,
-                    test::position()
+                    Position::fake()
                 )])
                 .set_type_aliases(vec![ir::TypeAlias::new(
                     "Foo2",
                     "Foo2",
-                    types::None::new(test::position()),
+                    types::None::new(Position::fake()),
                     true,
                     false,
-                    test::position()
+                    Position::fake()
                 )])
                 .set_definitions(vec![ir::Definition::new(
                     "Foo3",
                     "Foo3",
                     ir::Lambda::new(
                         vec![],
-                        types::None::new(test::position()),
-                        ir::None::new(test::position()),
-                        test::position(),
+                        types::None::new(Position::fake()),
+                        ir::None::new(Position::fake()),
+                        Position::fake(),
                     ),
                     false,
                     true,
-                    test::position()
+                    Position::fake()
                 )]))
         );
     }

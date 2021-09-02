@@ -263,10 +263,10 @@ fn transform_operation(
 mod tests {
     use super::*;
     use crate::{
-        test,
         test::{DefinitionFake, ModuleFake},
         types,
     };
+    use position::{test::PositionFake, Position};
     use pretty_assertions::assert_eq;
 
     #[test]
@@ -277,9 +277,9 @@ mod tests {
                     "x",
                     Lambda::new(
                         vec![],
-                        types::None::new(test::position()),
-                        Variable::new("x", test::position()),
-                        test::position()
+                        types::None::new(Position::fake()),
+                        Variable::new("x", Position::fake()),
+                        Position::fake()
                     ),
                     false
                 )],),
@@ -293,9 +293,9 @@ mod tests {
                 "x",
                 Lambda::new(
                     vec![],
-                    types::None::new(test::position()),
-                    Variable::new("y", test::position()),
-                    test::position()
+                    types::None::new(Position::fake()),
+                    Variable::new("y", Position::fake()),
+                    Position::fake()
                 ),
                 false
             )])
@@ -307,10 +307,10 @@ mod tests {
         let module = Module::empty().set_definitions(vec![Definition::fake(
             "x",
             Lambda::new(
-                vec![Argument::new("x", types::None::new(test::position()))],
-                types::None::new(test::position()),
-                Variable::new("x", test::position()),
-                test::position(),
+                vec![Argument::new("x", types::None::new(Position::fake()))],
+                types::None::new(Position::fake()),
+                Variable::new("x", Position::fake()),
+                Position::fake(),
             ),
             false,
         )]);
@@ -331,15 +331,15 @@ mod tests {
             "x",
             Lambda::new(
                 vec![],
-                types::None::new(test::position()),
+                types::None::new(Position::fake()),
                 Let::new(
                     Some("x".into()),
                     None,
-                    None::new(test::position()),
-                    Variable::new("x", test::position()),
-                    test::position(),
+                    None::new(Position::fake()),
+                    Variable::new("x", Position::fake()),
+                    Position::fake(),
                 ),
-                test::position(),
+                Position::fake(),
             ),
             false,
         )]);
@@ -360,15 +360,15 @@ mod tests {
             "x",
             Lambda::new(
                 vec![],
-                types::None::new(test::position()),
+                types::None::new(Position::fake()),
                 Let::new(
                     Some("x".into()),
                     None,
-                    None::new(test::position()),
-                    Variable::new("x", test::position()),
-                    test::position(),
+                    None::new(Position::fake()),
+                    Variable::new("x", Position::fake()),
+                    Position::fake(),
                 ),
-                test::position(),
+                Position::fake(),
             ),
             false,
         )]);

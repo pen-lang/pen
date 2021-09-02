@@ -127,9 +127,10 @@ mod tests {
     use crate::{
         error_type_configuration::ERROR_TYPE_CONFIGURATION,
         list_type_configuration::LIST_TYPE_CONFIGURATION,
-        string_type_configuration::STRING_TYPE_CONFIGURATION, test,
+        string_type_configuration::STRING_TYPE_CONFIGURATION,
     };
     use hir::{test::ModuleFake, types};
+    use position::{test::PositionFake, Position};
     use pretty_assertions::assert_eq;
 
     fn compile_module(module: &Module) -> Result<mir::ir::Module, CompileError> {
@@ -151,14 +152,14 @@ mod tests {
                 "foo",
                 "bar",
                 Lambda::new(
-                    vec![Argument::new("x", types::None::new(test::position()))],
-                    types::None::new(test::position()),
-                    None::new(test::position()),
-                    test::position(),
+                    vec![Argument::new("x", types::None::new(Position::fake()))],
+                    types::None::new(Position::fake()),
+                    None::new(Position::fake()),
+                    Position::fake(),
                 ),
                 true,
                 false,
-                test::position(),
+                Position::fake(),
             )])),
             Ok(mir::ir::Module::new(
                 vec![],

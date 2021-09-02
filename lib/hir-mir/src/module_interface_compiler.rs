@@ -52,11 +52,11 @@ pub fn compile(module: &ir::Module) -> Result<interface::Module, CompileError> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test;
     use hir::{
         test::{DefinitionFake, ModuleFake},
         types,
     };
+    use position::{test::PositionFake, Position};
 
     #[test]
     fn compile_empty_module() {
@@ -74,9 +74,9 @@ mod tests {
                     "foo",
                     ir::Lambda::new(
                         vec![],
-                        types::None::new(test::position()),
-                        ir::None::new(test::position()),
-                        test::position(),
+                        types::None::new(Position::fake()),
+                        ir::None::new(Position::fake()),
+                        Position::fake(),
                     ),
                     false,
                 )])

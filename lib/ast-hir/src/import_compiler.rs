@@ -188,11 +188,11 @@ fn rename_types(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test;
     use hir::{
         test::{DefinitionFake, ModuleFake, TypeDefinitionFake},
         types,
     };
+    use position::{test::PositionFake, Position};
     use pretty_assertions::assert_eq;
 
     #[test]
@@ -211,9 +211,9 @@ mod tests {
                     "Foo",
                     ir::Lambda::new(
                         vec![],
-                        types::None::new(test::position()),
-                        ir::Variable::new("Bar'Bar", test::position()),
-                        test::position(),
+                        types::None::new(Position::fake()),
+                        ir::Variable::new("Bar'Bar", Position::fake()),
+                        Position::fake(),
                     ),
                     true,
                 )]),
@@ -227,10 +227,10 @@ mod tests {
                             "Bar",
                             types::Function::new(
                                 vec![],
-                                types::None::new(test::position()),
-                                test::position()
+                                types::None::new(Position::fake()),
+                                Position::fake()
                             ),
-                            test::position()
+                            Position::fake()
                         )]
                     )
                 )]
@@ -243,18 +243,18 @@ mod tests {
                     "RealBar",
                     types::Function::new(
                         vec![],
-                        types::None::new(test::position()),
-                        test::position()
+                        types::None::new(Position::fake()),
+                        Position::fake()
                     ),
-                    test::position()
+                    Position::fake()
                 )])
                 .set_definitions(vec![ir::Definition::fake(
                     "Foo",
                     ir::Lambda::new(
                         vec![],
-                        types::None::new(test::position()),
-                        ir::Variable::new("RealBar", test::position()),
-                        test::position(),
+                        types::None::new(Position::fake()),
+                        ir::Variable::new("RealBar", Position::fake()),
+                        Position::fake(),
                     ),
                     true,
                 )])
@@ -270,7 +270,7 @@ mod tests {
                         "Foo",
                         vec![types::RecordElement::new(
                             "foo",
-                            types::Reference::new("Bar'Bar", test::position())
+                            types::Reference::new("Bar'Bar", Position::fake())
                         )],
                         false,
                         false,
@@ -280,9 +280,9 @@ mod tests {
                         "Foo",
                         ir::Lambda::new(
                             vec![],
-                            types::Reference::new("Bar'Bar", test::position()),
-                            ir::None::new(test::position()),
-                            test::position(),
+                            types::Reference::new("Bar'Bar", Position::fake()),
+                            ir::None::new(Position::fake()),
+                            Position::fake(),
                         ),
                         true,
                     )]),
@@ -295,7 +295,7 @@ mod tests {
                             vec![],
                             false,
                             true,
-                            test::position()
+                            Position::fake()
                         )],
                         vec![],
                         vec![]
@@ -314,13 +314,13 @@ mod tests {
                         false,
                         true,
                         true,
-                        test::position()
+                        Position::fake()
                     ),
                     ir::TypeDefinition::fake(
                         "Foo",
                         vec![types::RecordElement::new(
                             "foo",
-                            types::Reference::new("RealBar", test::position())
+                            types::Reference::new("RealBar", Position::fake())
                         )],
                         false,
                         false,
@@ -331,9 +331,9 @@ mod tests {
                     "Foo",
                     ir::Lambda::new(
                         vec![],
-                        types::Reference::new("RealBar", test::position()),
-                        ir::None::new(test::position()),
-                        test::position(),
+                        types::Reference::new("RealBar", Position::fake()),
+                        ir::None::new(Position::fake()),
+                        Position::fake(),
                     ),
                     true,
                 )])
@@ -349,7 +349,7 @@ mod tests {
                         "Foo",
                         vec![types::RecordElement::new(
                             "foo",
-                            types::Reference::new("Bar'Bar", test::position())
+                            types::Reference::new("Bar'Bar", Position::fake())
                         )],
                         false,
                         false,
@@ -359,9 +359,9 @@ mod tests {
                         "Foo",
                         ir::Lambda::new(
                             vec![],
-                            types::Reference::new("Bar'Bar", test::position()),
-                            ir::None::new(test::position()),
-                            test::position(),
+                            types::Reference::new("Bar'Bar", Position::fake()),
+                            ir::None::new(Position::fake()),
+                            Position::fake(),
                         ),
                         true,
                     )]),
@@ -372,9 +372,9 @@ mod tests {
                         vec![interface::TypeAlias::new(
                             "RealBar",
                             "Bar",
-                            types::None::new(test::position()),
+                            types::None::new(Position::fake()),
                             true,
-                            test::position(),
+                            Position::fake(),
                         )],
                         vec![]
                     )
@@ -388,7 +388,7 @@ mod tests {
                     "Foo",
                     vec![types::RecordElement::new(
                         "foo",
-                        types::Reference::new("RealBar", test::position())
+                        types::Reference::new("RealBar", Position::fake())
                     )],
                     false,
                     false,
@@ -397,18 +397,18 @@ mod tests {
                 .set_type_aliases(vec![ir::TypeAlias::new(
                     "RealBar",
                     "Bar",
-                    types::None::new(test::position()),
+                    types::None::new(Position::fake()),
                     true,
                     true,
-                    test::position(),
+                    Position::fake(),
                 )])
                 .set_definitions(vec![ir::Definition::fake(
                     "Foo",
                     ir::Lambda::new(
                         vec![],
-                        types::Reference::new("RealBar", test::position()),
-                        ir::None::new(test::position()),
-                        test::position(),
+                        types::Reference::new("RealBar", Position::fake()),
+                        ir::None::new(Position::fake()),
+                        Position::fake(),
                     ),
                     true,
                 )])
@@ -421,7 +421,7 @@ mod tests {
             "Foo",
             vec![types::RecordElement::new(
                 "foo",
-                types::Reference::new("Bar'Bar", test::position()),
+                types::Reference::new("Bar'Bar", Position::fake()),
             )],
             false,
             false,
@@ -431,9 +431,9 @@ mod tests {
             "Foo",
             ir::Lambda::new(
                 vec![],
-                types::Reference::new("Bar'Bar", test::position()),
-                ir::None::new(test::position()),
-                test::position(),
+                types::Reference::new("Bar'Bar", Position::fake()),
+                ir::None::new(Position::fake()),
+                Position::fake(),
             ),
             true,
         );
@@ -452,7 +452,7 @@ mod tests {
                             vec![],
                             false,
                             false,
-                            test::position()
+                            Position::fake()
                         )],
                         vec![],
                         vec![],
@@ -471,7 +471,7 @@ mod tests {
                         false,
                         false,
                         true,
-                        test::position()
+                        Position::fake()
                     ),
                     type_definition
                 ])
@@ -485,7 +485,7 @@ mod tests {
             "Foo",
             vec![types::RecordElement::new(
                 "foo",
-                types::Reference::new("Bar'Bar", test::position()),
+                types::Reference::new("Bar'Bar", Position::fake()),
             )],
             false,
             false,
@@ -495,9 +495,9 @@ mod tests {
             "Foo",
             ir::Lambda::new(
                 vec![],
-                types::Reference::new("Bar'Bar", test::position()),
-                ir::None::new(test::position()),
-                test::position(),
+                types::Reference::new("Bar'Bar", Position::fake()),
+                ir::None::new(Position::fake()),
+                Position::fake(),
             ),
             true,
         );
@@ -514,9 +514,9 @@ mod tests {
                         vec![interface::TypeAlias::new(
                             "RealBar",
                             "Bar",
-                            types::None::new(test::position()),
+                            types::None::new(Position::fake()),
                             false,
-                            test::position(),
+                            Position::fake(),
                         )],
                         vec![]
                     )
@@ -530,10 +530,10 @@ mod tests {
                 .set_type_aliases(vec![ir::TypeAlias::new(
                     "RealBar",
                     "Bar",
-                    types::None::new(test::position()),
+                    types::None::new(Position::fake()),
                     false,
                     true,
-                    test::position()
+                    Position::fake()
                 )])
                 .set_definitions(vec![definition])
         );

@@ -191,7 +191,7 @@ pub fn extract_from_lambda(lambda: &Lambda) -> types::Function {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test;
+    use position::{test::PositionFake, Position};
     use pretty_assertions::assert_eq;
 
     #[test]
@@ -200,17 +200,17 @@ mod tests {
             extract_from_expression(
                 &Let::new(
                     Some("x".into()),
-                    Some(types::None::new(test::position()).into()),
-                    None::new(test::position()),
-                    Variable::new("x", test::position()),
-                    test::position(),
+                    Some(types::None::new(Position::fake()).into()),
+                    None::new(Position::fake()),
+                    Variable::new("x", Position::fake()),
+                    Position::fake(),
                 )
                 .into(),
                 &Default::default(),
                 &TypeContext::dummy(Default::default(), Default::default()),
             )
             .unwrap(),
-            types::None::new(test::position()).into(),
+            types::None::new(Position::fake()).into(),
         );
     }
 
@@ -219,16 +219,16 @@ mod tests {
         assert_eq!(
             extract_from_expression(
                 &TryOperation::new(
-                    Some(types::None::new(test::position()).into()),
-                    Variable::new("x", test::position()),
-                    test::position()
+                    Some(types::None::new(Position::fake()).into()),
+                    Variable::new("x", Position::fake()),
+                    Position::fake()
                 )
                 .into(),
                 &Default::default(),
                 &TypeContext::dummy(Default::default(), Default::default()),
             )
             .unwrap(),
-            types::None::new(test::position()).into(),
+            types::None::new(Position::fake()).into(),
         );
     }
 
@@ -237,16 +237,16 @@ mod tests {
         assert_eq!(
             extract_from_expression(
                 &Thunk::new(
-                    Some(types::None::new(test::position()).into()),
-                    Variable::new("x", test::position()),
-                    test::position()
+                    Some(types::None::new(Position::fake()).into()),
+                    Variable::new("x", Position::fake()),
+                    Position::fake()
                 )
                 .into(),
                 &Default::default(),
                 &TypeContext::dummy(Default::default(), Default::default()),
             ),
             Ok(
-                types::Function::new(vec![], types::None::new(test::position()), test::position())
+                types::Function::new(vec![], types::None::new(Position::fake()), Position::fake())
                     .into()
             )
         );
@@ -256,11 +256,11 @@ mod tests {
     fn fail_to_extract_from_thunk() {
         assert_eq!(
             extract_from_expression(
-                &Thunk::new(None, Variable::new("x", test::position()), test::position()).into(),
+                &Thunk::new(None, Variable::new("x", Position::fake()), Position::fake()).into(),
                 &Default::default(),
                 &TypeContext::dummy(Default::default(), Default::default()),
             ),
-            Err(CompileError::TypeNotInferred(test::position())),
+            Err(CompileError::TypeNotInferred(Position::fake())),
         );
     }
 }

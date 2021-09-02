@@ -92,10 +92,8 @@ pub fn qualify(module: &Module, prefix: &str) -> Module {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{
-        test,
-        test::{ModuleFake, TypeAliasFake, TypeDefinitionFake},
-    };
+    use crate::test::{ModuleFake, TypeAliasFake, TypeDefinitionFake};
+    use position::{test::PositionFake, Position};
     use pretty_assertions::assert_eq;
 
     #[test]
@@ -134,7 +132,7 @@ mod tests {
                         "x",
                         vec![types::RecordElement::new(
                             "x",
-                            types::Reference::new("x", test::position())
+                            types::Reference::new("x", Position::fake())
                         )],
                         false,
                         false,
@@ -148,7 +146,7 @@ mod tests {
                     "foo.x",
                     vec![types::RecordElement::new(
                         "x",
-                        types::Reference::new("foo.x", test::position())
+                        types::Reference::new("foo.x", Position::fake())
                     )],
                     false,
                     false,
@@ -164,7 +162,7 @@ mod tests {
             qualify(
                 &Module::empty().set_type_aliases(vec![TypeAlias::fake(
                     "x",
-                    types::Reference::new("x", test::position()),
+                    types::Reference::new("x", Position::fake()),
                     false,
                     false
                 )]),
@@ -172,7 +170,7 @@ mod tests {
             ),
             Module::empty().set_type_aliases(vec![TypeAlias::fake(
                 "foo.x",
-                types::Reference::new("foo.x", test::position()),
+                types::Reference::new("foo.x", Position::fake()),
                 false,
                 false
             )])

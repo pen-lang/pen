@@ -92,13 +92,13 @@ fn collect_types(type_: &Type, types: &HashMap<String, Type>) -> Result<BTreeSet
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test;
+    use position::{test::PositionFake, Position};
 
     #[test]
     fn canonicalize_number() {
         assert_eq!(
-            canonicalize(&Number::new(test::position()).into(), &Default::default(),),
-            Ok(Number::new(test::position()).into())
+            canonicalize(&Number::new(Position::fake()).into(), &Default::default(),),
+            Ok(Number::new(Position::fake()).into())
         );
     }
 
@@ -107,14 +107,14 @@ mod tests {
         assert_eq!(
             canonicalize(
                 &Union::new(
-                    Number::new(test::position()),
-                    Number::new(test::position()),
-                    test::position()
+                    Number::new(Position::fake()),
+                    Number::new(Position::fake()),
+                    Position::fake()
                 )
                 .into(),
                 &Default::default(),
             ),
-            Ok(Number::new(test::position()).into())
+            Ok(Number::new(Position::fake()).into())
         );
     }
 
@@ -123,25 +123,25 @@ mod tests {
         assert_eq!(
             canonicalize(
                 &Union::new(
-                    Number::new(test::position()),
+                    Number::new(Position::fake()),
                     Union::new(
-                        Boolean::new(test::position()),
-                        None::new(test::position()),
-                        test::position()
+                        Boolean::new(Position::fake()),
+                        None::new(Position::fake()),
+                        Position::fake()
                     ),
-                    test::position()
+                    Position::fake()
                 )
                 .into(),
                 &Default::default(),
             ),
             Ok(Union::new(
                 Union::new(
-                    Boolean::new(test::position()),
-                    None::new(test::position()),
-                    test::position()
+                    Boolean::new(Position::fake()),
+                    None::new(Position::fake()),
+                    Position::fake()
                 ),
-                Number::new(test::position()),
-                test::position()
+                Number::new(Position::fake()),
+                Position::fake()
             )
             .into())
         );
@@ -153,21 +153,21 @@ mod tests {
             canonicalize(
                 &Function::new(
                     vec![Union::new(
-                        Number::new(test::position()),
-                        Number::new(test::position()),
-                        test::position()
+                        Number::new(Position::fake()),
+                        Number::new(Position::fake()),
+                        Position::fake()
                     )
                     .into()],
-                    None::new(test::position()),
-                    test::position(),
+                    None::new(Position::fake()),
+                    Position::fake(),
                 )
                 .into(),
                 &Default::default(),
             ),
             Ok(Function::new(
-                vec![Number::new(test::position()).into()],
-                None::new(test::position()),
-                test::position(),
+                vec![Number::new(Position::fake()).into()],
+                None::new(Position::fake()),
+                Position::fake(),
             )
             .into())
         );
@@ -180,16 +180,16 @@ mod tests {
                 &Function::new(
                     vec![],
                     Union::new(
-                        Number::new(test::position()),
-                        Number::new(test::position()),
-                        test::position()
+                        Number::new(Position::fake()),
+                        Number::new(Position::fake()),
+                        Position::fake()
                     ),
-                    test::position(),
+                    Position::fake(),
                 )
                 .into(),
                 &Default::default(),
             ),
-            Ok(Function::new(vec![], Number::new(test::position()), test::position(),).into())
+            Ok(Function::new(vec![], Number::new(Position::fake()), Position::fake(),).into())
         );
     }
 
@@ -199,16 +199,16 @@ mod tests {
             canonicalize(
                 &List::new(
                     Union::new(
-                        Number::new(test::position()),
-                        Number::new(test::position()),
-                        test::position()
+                        Number::new(Position::fake()),
+                        Number::new(Position::fake()),
+                        Position::fake()
                     ),
-                    test::position(),
+                    Position::fake(),
                 )
                 .into(),
                 &Default::default(),
             ),
-            Ok(List::new(Number::new(test::position()), test::position(),).into())
+            Ok(List::new(Number::new(Position::fake()), Position::fake(),).into())
         );
     }
 
@@ -217,14 +217,14 @@ mod tests {
         assert_eq!(
             canonicalize(
                 &Union::new(
-                    Number::new(test::position()),
-                    Any::new(test::position()),
-                    test::position()
+                    Number::new(Position::fake()),
+                    Any::new(Position::fake()),
+                    Position::fake()
                 )
                 .into(),
                 &Default::default(),
             ),
-            Ok(Any::new(test::position()).into())
+            Ok(Any::new(Position::fake()).into())
         );
     }
 
@@ -232,12 +232,12 @@ mod tests {
     fn canonicalize_reference() {
         assert_eq!(
             canonicalize(
-                &Reference::new("t", test::position()).into(),
-                &vec![("t".into(), Number::new(test::position()).into())]
+                &Reference::new("t", Position::fake()).into(),
+                &vec![("t".into(), Number::new(Position::fake()).into())]
                     .into_iter()
                     .collect(),
             ),
-            Ok(Number::new(test::position()).into())
+            Ok(Number::new(Position::fake()).into())
         );
     }
 
@@ -249,24 +249,24 @@ mod tests {
                     Function::new(
                         vec![],
                         Union::new(
-                            None::new(test::position()),
-                            None::new(test::position()),
-                            test::position()
+                            None::new(Position::fake()),
+                            None::new(Position::fake()),
+                            Position::fake()
                         ),
-                        test::position()
+                        Position::fake()
                     ),
-                    None::new(test::position()),
-                    test::position()
+                    None::new(Position::fake()),
+                    Position::fake()
                 )
                 .into(),
-                &vec![("t".into(), Number::new(test::position()).into())]
+                &vec![("t".into(), Number::new(Position::fake()).into())]
                     .into_iter()
                     .collect(),
             ),
             Ok(Union::new(
-                Function::new(vec![], None::new(test::position()), test::position()),
-                None::new(test::position()),
-                test::position()
+                Function::new(vec![], None::new(Position::fake()), Position::fake()),
+                None::new(Position::fake()),
+                Position::fake()
             )
             .into())
         );

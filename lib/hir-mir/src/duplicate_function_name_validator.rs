@@ -23,11 +23,11 @@ pub fn validate(module: &Module) -> Result<(), CompileError> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test;
     use hir::{
         test::{DefinitionFake, ModuleFake},
         types,
     };
+    use position::{test::PositionFake, Position};
 
     #[test]
     fn validate_module() {
@@ -35,9 +35,9 @@ mod tests {
             "x",
             Lambda::new(
                 vec![],
-                types::None::new(test::position()),
-                None::new(test::position()),
-                test::position(),
+                types::None::new(Position::fake()),
+                None::new(Position::fake()),
+                Position::fake(),
             ),
             false,
         );
@@ -45,8 +45,8 @@ mod tests {
         assert_eq!(
             validate(&Module::empty().set_definitions(vec![definition.clone(), definition])),
             Err(CompileError::DuplicateFunctionNames(
-                test::position(),
-                test::position()
+                Position::fake(),
+                Position::fake()
             ))
         );
     }
