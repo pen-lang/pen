@@ -729,18 +729,16 @@ fn token<'a, O, P: Parser<Stream<'a>, Output = O>>(p: P) -> impl Parser<Stream<'
 }
 
 fn position<'a>() -> impl Parser<Stream<'a>, Output = Position> {
-    value(())
-        .map_input(|_, stream: &mut Stream<'a>| {
-            let position = stream.position();
+    value(()).map_input(|_, stream: &mut Stream<'a>| {
+        let position = stream.position();
 
-            Position::new(
-                stream.0.state.path,
-                position.line as usize,
-                position.column as usize,
-                stream.0.state.lines[position.line as usize - 1],
-            )
-        })
-        .expected("position")
+        Position::new(
+            stream.0.state.path,
+            position.line as usize,
+            position.column as usize,
+            stream.0.state.lines[position.line as usize - 1],
+        )
+    })
 }
 
 fn eof<'a>() -> impl Parser<Stream<'a>, Output = ()> {
