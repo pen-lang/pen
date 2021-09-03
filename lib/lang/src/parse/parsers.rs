@@ -149,6 +149,7 @@ fn definition<'a>() -> impl Parser<Stream<'a>, Output = Definition> {
         .map(|(foreign_export, position, name, _, lambda)| {
             Definition::new(name, lambda, foreign_export.is_some(), position)
         })
+        .expected("definition")
 }
 
 fn foreign_export<'a>() -> impl Parser<Stream<'a>, Output = ()> {
