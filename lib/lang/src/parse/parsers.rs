@@ -632,6 +632,7 @@ fn number_literal<'a>() -> impl Parser<Stream<'a>, Output = Number> {
     token(attempt((position(), from_str(find(regex)))))
         .skip(not_followed_by(digit()))
         .map(|(position, number)| Number::new(number, position))
+        .silent()
         .expected("number literal")
 }
 
@@ -712,6 +713,7 @@ fn raw_identifier<'a>() -> impl Parser<Stream<'a>, Output = String> {
                 value(identifier).right()
             }
         })
+        .silent()
 }
 
 fn keyword<'a>(name: &'static str) -> impl Parser<Stream<'a>, Output = ()> {
