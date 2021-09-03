@@ -1,13 +1,10 @@
-use super::{
-    attempt::{many, many1},
-    utilities::*,
-};
+use super::{attempt::many, utilities::*};
 use crate::{
     ast::*,
     types::{self, Type},
 };
 use combine::{
-    attempt, choice, easy, from_str, none_of, one_of, optional,
+    attempt, choice, easy, from_str, many1, none_of, one_of, optional,
     parser::{
         char::{alpha_num, char as character, digit, letter, space, spaces, string},
         combinator::{lazy, no_partial, not_followed_by},
@@ -317,8 +314,9 @@ fn statement_with_result<'a>() -> impl Parser<Stream<'a>, Output = Statement> {
 }
 
 fn statement_without_result<'a>() -> impl Parser<Stream<'a>, Output = Statement> {
-    (position(), expression())
-        .map(|(position, expression)| Statement::new(None, expression, position))
+    // Get positions from parsed expressions to avoid use of the attempt combinator.
+    expression()
+        .map(|expression| Statement::new(None, expression.clone(), expression.position().clone()))
 }
 
 fn expression<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
