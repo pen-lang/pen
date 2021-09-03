@@ -538,7 +538,14 @@ fn if_list<'a>() -> impl Parser<Stream<'a>, Output = IfList> {
 
 fn if_type<'a>() -> impl Parser<Stream<'a>, Output = IfType> {
     (
-        attempt((position(), keyword("if"), identifier(), sign("="))),
+        attempt((
+            position(),
+            keyword("if"),
+            identifier(),
+            // TODO Implement a sign combinator like a binary operator by consuming all operator
+            // like characters.
+            sign("=").skip(not_followed_by(one_of(OPERATOR_CHARACTERS.chars()))),
+        )),
         expression(),
         sign(";"),
         if_type_branch(),
@@ -1611,6 +1618,30 @@ mod tests {
                     Block::new(vec![], Number::new(3.0, Position::fake()), Position::fake()),
                     Position::fake(),
                 )
+            );
+        }
+
+        #[test]
+        fn parse_if_with_equal_operator() {
+            assert_eq!(
+                expression()
+                    .parse(stream("if x==y {none}else{none}", ""))
+                    .unwrap()
+                    .0,
+                If::new(
+                    vec![IfBranch::new(
+                        BinaryOperation::new(
+                            BinaryOperator::Equal,
+                            Variable::new("x", Position::fake()),
+                            Variable::new("y", Position::fake()),
+                            Position::fake()
+                        ),
+                        Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                    )],
+                    Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                    Position::fake(),
+                )
+                .into()
             );
         }
 
