@@ -1,5 +1,5 @@
 use super::{
-    attempt::{many, many1, sep_end_by, sep_end_by1},
+    attempt::{many, many1, sep_end_by},
     utilities::*,
 };
 use crate::{
@@ -14,6 +14,7 @@ use combine::{
         regex::find,
         sequence::between,
     },
+    sep_end_by1,
     stream::{self, position::SourcePosition, state},
     unexpected_any, value, Parser, Positioned,
 };
@@ -608,8 +609,8 @@ fn record<'a>() -> impl Parser<Stream<'a>, Output = Record> {
 }
 
 fn record_element<'a>() -> impl Parser<Stream<'a>, Output = RecordElement> {
-    (position(), identifier(), sign(":"), expression())
-        .map(|(position, name, _, expression)| RecordElement::new(name, expression, position))
+    (attempt((position(), identifier())), sign(":"), expression())
+        .map(|((position, name), _, expression)| RecordElement::new(name, expression, position))
 }
 
 fn boolean_literal<'a>() -> impl Parser<Stream<'a>, Output = Boolean> {
