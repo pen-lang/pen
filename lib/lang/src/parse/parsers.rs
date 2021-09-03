@@ -65,12 +65,15 @@ pub fn module<'a>() -> impl Parser<Stream<'a>, Output = Module> {
                 record_definitions,
                 type_aliases,
                 definitions,
-            )| {
+            ): (_, _, _, _, Vec<_>, Vec<_>, _)| {
                 Module::new(
                     imports,
                     foreign_imports,
-                    record_definitions,
-                    type_aliases,
+                    record_definitions
+                        .into_iter()
+                        .map(TypeDefinition::from)
+                        .chain(type_aliases.into_iter().map(TypeDefinition::from))
+                        .collect(),
                     definitions,
                     position,
                 )
@@ -775,15 +778,15 @@ mod tests {
         fn parse_module() {
             assert_eq!(
                 module().parse(stream("", "")).unwrap().0,
-                Module::new(vec![], vec![], vec![], vec![], vec![], Position::fake())
+                Module::new(vec![], vec![], vec![], vec![], Position::fake())
             );
             assert_eq!(
                 module().parse(stream(" ", "")).unwrap().0,
-                Module::new(vec![], vec![], vec![], vec![], vec![], Position::fake())
+                Module::new(vec![], vec![], vec![], vec![], Position::fake())
             );
             assert_eq!(
                 module().parse(stream("\n", "")).unwrap().0,
-                Module::new(vec![], vec![], vec![], vec![], vec![], Position::fake())
+                Module::new(vec![], vec![], vec![], vec![], Position::fake())
             );
             assert_eq!(
                 module().parse(stream("import Foo'Bar", "")).unwrap().0,
@@ -795,7 +798,6 @@ mod tests {
                     vec![],
                     vec![],
                     vec![],
-                    vec![],
                     Position::fake()
                 )
             );
@@ -804,12 +806,12 @@ mod tests {
                 Module::new(
                     vec![],
                     vec![],
-                    vec![],
                     vec![TypeAlias::new(
                         "foo",
                         types::Number::new(Position::fake()),
                         Position::fake()
-                    )],
+                    )
+                    .into()],
                     vec![],
                     Position::fake()
                 )
@@ -820,7 +822,6 @@ mod tests {
                     .unwrap()
                     .0,
                 Module::new(
-                    vec![],
                     vec![],
                     vec![],
                     vec![],
@@ -851,7 +852,6 @@ mod tests {
                     .unwrap()
                     .0,
                 Module::new(
-                    vec![],
                     vec![],
                     vec![],
                     vec![],
@@ -914,7 +914,6 @@ mod tests {
                         ),
                         Position::fake()
                     )],
-                    vec![],
                     vec![],
                     vec![],
                     Position::fake()

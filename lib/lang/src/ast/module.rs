@@ -1,14 +1,11 @@
-use super::{
-    definition::Definition, record_definition::RecordDefinition, ForeignImport, Import, TypeAlias,
-};
+use super::{definition::Definition, type_definition::TypeDefinition, ForeignImport, Import};
 use position::Position;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Module {
     imports: Vec<Import>,
     foreign_imports: Vec<ForeignImport>,
-    record_definitions: Vec<RecordDefinition>,
-    type_aliases: Vec<TypeAlias>,
+    type_definitions: Vec<TypeDefinition>,
     definitions: Vec<Definition>,
     position: Position,
 }
@@ -17,16 +14,14 @@ impl Module {
     pub fn new(
         imports: Vec<Import>,
         foreign_imports: Vec<ForeignImport>,
-        record_definitions: Vec<RecordDefinition>,
-        type_aliases: Vec<TypeAlias>,
+        type_definitions: Vec<TypeDefinition>,
         definitions: Vec<Definition>,
         position: Position,
     ) -> Self {
         Self {
             imports,
             foreign_imports,
-            record_definitions,
-            type_aliases,
+            type_definitions,
             definitions,
             position,
         }
@@ -40,12 +35,8 @@ impl Module {
         &self.foreign_imports
     }
 
-    pub fn record_definitions(&self) -> &[RecordDefinition] {
-        &self.record_definitions
-    }
-
-    pub fn type_aliases(&self) -> &[TypeAlias] {
-        &self.type_aliases
+    pub fn type_definitions(&self) -> &[TypeDefinition] {
+        &self.type_definitions
     }
 
     pub fn definitions(&self) -> &[Definition] {

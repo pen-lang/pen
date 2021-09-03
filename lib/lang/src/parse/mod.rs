@@ -29,7 +29,6 @@ mod tests {
                 vec![],
                 vec![],
                 vec![],
-                vec![],
                 Position::fake()
             ))
         );
