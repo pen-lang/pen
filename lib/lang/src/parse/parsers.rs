@@ -310,11 +310,7 @@ fn block<'a>() -> impl Parser<Stream<'a>, Output = Block> {
 }
 
 fn statement<'a>() -> impl Parser<Stream<'a>, Output = Statement> {
-    choice((
-        attempt(statement_with_result()),
-        attempt(statement_without_result()),
-    ))
-    .expected("statement")
+    choice((attempt(statement_with_result()), statement_without_result())).expected("statement")
 }
 
 fn statement_with_result<'a>() -> impl Parser<Stream<'a>, Output = Statement> {
@@ -381,7 +377,7 @@ fn prefix_operation_like<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
     lazy(|| {
         no_partial(choice((
             attempt(prefix_operation().map(Expression::from)),
-            attempt(suffix_operation_like().map(Expression::from)),
+            suffix_operation_like().map(Expression::from),
         )))
     })
     .boxed()
@@ -438,7 +434,7 @@ fn suffix_operator<'a>() -> impl Parser<Stream<'a>, Output = SuffixOperator> {
     choice((
         attempt(call_operator().map(SuffixOperator::Call)),
         attempt(element_operator().map(SuffixOperator::Element)),
-        attempt(try_operator().map(|_| SuffixOperator::Try)),
+        try_operator().map(|_| SuffixOperator::Try),
     ))
 }
 
@@ -463,12 +459,12 @@ fn atomic_expression<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
             attempt(lambda().map(Expression::from)),
             attempt(record().map(Expression::from)),
             attempt(list_literal().map(Expression::from)),
-            attempt(boolean_literal().map(Expression::from)),
-            attempt(none_literal().map(Expression::from)),
+            boolean_literal().map(Expression::from),
+            none_literal().map(Expression::from),
             attempt(number_literal().map(Expression::from)),
             attempt(string_literal().map(Expression::from)),
             attempt(variable().map(Expression::from)),
-            attempt(between(sign("("), sign(")"), expression())),
+            (between(sign("("), sign(")"), expression())),
         )))
     })
     .boxed()
@@ -622,7 +618,7 @@ fn boolean_literal<'a>() -> impl Parser<Stream<'a>, Output = Boolean> {
 }
 
 fn none_literal<'a>() -> impl Parser<Stream<'a>, Output = None> {
-    token(position().skip(keyword("none")))
+    token(attempt(position().skip(keyword("none"))))
         .map(None::new)
         .expected("none literal")
 }
