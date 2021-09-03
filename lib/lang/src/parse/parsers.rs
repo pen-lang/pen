@@ -27,18 +27,18 @@ static NUMBER_REGEX: Lazy<regex::Regex> =
 static STRING_REGEX: Lazy<regex::Regex> = Lazy::new(|| regex::Regex::new(r#"^[^\\"]"#).unwrap());
 
 pub struct State<'a> {
-    path: &'a str,
+    path: String,
     lines: Vec<&'a str>,
 }
 
 pub type Stream<'a> =
     easy::Stream<state::Stream<stream::position::Stream<&'a str, SourcePosition>, State<'a>>>;
 
-pub fn stream<'a>(source: &'a str, path: &'a str) -> Stream<'a> {
+pub fn stream<'a>(source: &'a str, path: &str) -> Stream<'a> {
     state::Stream {
         stream: stream::position::Stream::new(source),
         state: State {
-            path,
+            path: path.into(),
             lines: source.split('\n').collect(),
         },
     }
@@ -734,7 +734,7 @@ fn position<'a>() -> impl Parser<Stream<'a>, Output = Position> {
         let position = stream.position();
 
         Position::new(
-            stream.0.state.path,
+            &stream.0.state.path,
             position.line as usize,
             position.column as usize,
             stream.0.state.lines[position.line as usize - 1],
