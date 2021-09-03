@@ -711,7 +711,7 @@ fn raw_identifier<'a>() -> impl Parser<Stream<'a>, Output = String> {
 }
 
 fn keyword<'a>(name: &'static str) -> impl Parser<Stream<'a>, Output = ()> {
-    token(string(name).skip(not_followed_by(alpha_num())))
+    token(attempt(string(name)).skip(not_followed_by(alpha_num())))
         .with(value(()))
         .expected("keyword")
 }
@@ -977,51 +977,81 @@ mod tests {
         );
     }
 
-    #[test]
-    fn parse_definition() {
-        assert_eq!(
-            definition()
-                .parse(stream("x=\\(x number)number{42}", ""))
-                .unwrap()
-                .0,
-            Definition::new(
-                "x",
-                Lambda::new(
-                    vec![Argument::new("x", types::Number::new(Position::fake()))],
-                    types::Number::new(Position::fake()),
-                    Block::new(
-                        vec![],
-                        Number::new(42.0, Position::fake()),
-                        Position::fake()
-                    ),
-                    Position::fake()
-                ),
-                false,
-                Position::fake()
-            ),
-        );
+    mod definition {
+        use super::*;
+        use pretty_assertions::assert_eq;
 
-        assert_eq!(
-            definition()
-                .parse(stream("export foreign x=\\(x number)number{42}", ""))
-                .unwrap()
-                .0,
-            Definition::new(
-                "x",
-                Lambda::new(
-                    vec![Argument::new("x", types::Number::new(Position::fake()))],
-                    types::Number::new(Position::fake()),
-                    Block::new(
-                        vec![],
-                        Number::new(42.0, Position::fake()),
+        #[test]
+        fn parse() {
+            assert_eq!(
+                definition()
+                    .parse(stream("x=\\(x number)number{42}", ""))
+                    .unwrap()
+                    .0,
+                Definition::new(
+                    "x",
+                    Lambda::new(
+                        vec![Argument::new("x", types::Number::new(Position::fake()))],
+                        types::Number::new(Position::fake()),
+                        Block::new(
+                            vec![],
+                            Number::new(42.0, Position::fake()),
+                            Position::fake()
+                        ),
                         Position::fake()
                     ),
+                    false,
                     Position::fake()
                 ),
-                true,
-                Position::fake()
-            ),
-        );
+            );
+
+            assert_eq!(
+                definition()
+                    .parse(stream("export foreign x=\\(x number)number{42}", ""))
+                    .unwrap()
+                    .0,
+                Definition::new(
+                    "x",
+                    Lambda::new(
+                        vec![Argument::new("x", types::Number::new(Position::fake()))],
+                        types::Number::new(Position::fake()),
+                        Block::new(
+                            vec![],
+                            Number::new(42.0, Position::fake()),
+                            Position::fake()
+                        ),
+                        Position::fake()
+                    ),
+                    true,
+                    Position::fake()
+                ),
+            );
+        }
+
+        #[test]
+        fn parse_keyword_like_name() {
+            assert_eq!(
+                definition()
+                    .parse(stream("importA = \\() number { 42 }", ""))
+                    .unwrap()
+                    .0,
+                Definition::new(
+                    "importA",
+                    Lambda::new(
+                        vec![],
+                        types::Number::new(Position::fake()),
+                        Block::new(
+                            vec![],
+                            Number::new(42.0, Position::fake()),
+                            Position::fake()
+                        ),
+                        Position::fake()
+                    ),
+                    false,
+                    Position::fake()
+                ),
+            );
+        }
     }
 
     #[test]
