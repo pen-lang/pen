@@ -89,8 +89,8 @@ fn import<'a>() -> impl Parser<Stream<'a>, Output = Import> {
 
 fn module_path<'a>() -> impl Parser<Stream<'a>, Output = ModulePath> {
     token(choice((
-        attempt(internal_module_path().map(ModulePath::from)),
-        attempt(external_module_path().map(ModulePath::from)),
+        internal_module_path().map(ModulePath::from),
+        external_module_path().map(ModulePath::from),
     )))
     .expected("module path")
 }
@@ -188,27 +188,19 @@ fn type_alias<'a>() -> impl Parser<Stream<'a>, Output = TypeAlias> {
 }
 
 fn type_<'a>() -> impl Parser<Stream<'a>, Output = Type> {
-    lazy(|| {
-        no_partial(choice((
-            attempt(function_type()).map(Type::from),
-            attempt(union_type()),
-        )))
-    })
-    .boxed()
-    .expected("type")
+    lazy(|| no_partial(choice((function_type().map(Type::from), union_type()))))
+        .boxed()
+        .expected("type")
 }
 
 fn function_type<'a>() -> impl Parser<Stream<'a>, Output = types::Function> {
     (
-        position(),
-        sign("\\("),
+        attempt(position().skip(sign("\\("))),
         sep_end_by(type_(), sign(",")),
         sign(")"),
         type_(),
     )
-        .map(|(position, _, arguments, _, result)| {
-            types::Function::new(arguments, result, position)
-        })
+        .map(|(position, arguments, _, result)| types::Function::new(arguments, result, position))
         .expected("function type")
 }
 
@@ -226,61 +218,56 @@ fn union_type<'a>() -> impl Parser<Stream<'a>, Output = Type> {
 }
 
 fn list_type<'a>() -> impl Parser<Stream<'a>, Output = types::List> {
-    (position(), between(sign("["), sign("]"), type_()))
-        .map(|(position, element)| types::List::new(element, position))
+    (attempt(position().skip(sign("["))), type_(), sign("]"))
+        .map(|(position, element, _)| types::List::new(element, position))
         .expected("list type")
 }
 
 fn atomic_type<'a>() -> impl Parser<Stream<'a>, Output = Type> {
     choice((
-        attempt(boolean_type().map(Type::from)),
-        attempt(none_type().map(Type::from)),
-        attempt(number_type().map(Type::from)),
-        attempt(string_type().map(Type::from)),
-        attempt(any_type().map(Type::from)),
-        attempt(reference_type().map(Type::from)),
-        attempt(list_type().map(Type::from)),
-        attempt(between(sign("("), sign(")"), type_())),
+        boolean_type().map(Type::from),
+        none_type().map(Type::from),
+        number_type().map(Type::from),
+        string_type().map(Type::from),
+        any_type().map(Type::from),
+        reference_type().map(Type::from),
+        list_type().map(Type::from),
+        between(sign("("), sign(")"), type_()),
     ))
 }
 
 fn boolean_type<'a>() -> impl Parser<Stream<'a>, Output = types::Boolean> {
-    position()
-        .skip(keyword("boolean"))
+    attempt(position().skip(keyword("boolean")))
         .map(types::Boolean::new)
         .expected("boolean type")
 }
 
 fn none_type<'a>() -> impl Parser<Stream<'a>, Output = types::None> {
-    position()
-        .skip(keyword("none"))
+    attempt(position().skip(keyword("none")))
         .map(types::None::new)
         .expected("none type")
 }
 
 fn number_type<'a>() -> impl Parser<Stream<'a>, Output = types::Number> {
-    position()
-        .skip(keyword("number"))
+    attempt(position().skip(keyword("number")))
         .map(types::Number::new)
         .expected("number type")
 }
 
 fn string_type<'a>() -> impl Parser<Stream<'a>, Output = types::ByteString> {
-    position()
-        .skip(keyword("string"))
+    attempt(position().skip(keyword("string")))
         .map(types::ByteString::new)
         .expected("string type")
 }
 
 fn any_type<'a>() -> impl Parser<Stream<'a>, Output = types::Any> {
-    position()
-        .skip(keyword("any"))
+    attempt(position().skip(keyword("any")))
         .map(types::Any::new)
         .expected("any type")
 }
 
 fn reference_type<'a>() -> impl Parser<Stream<'a>, Output = types::Reference> {
-    token((position(), qualified_identifier()))
+    token(attempt((position(), qualified_identifier())))
         .map(|(position, identifier)| types::Reference::new(identifier, position))
         .expected("reference type")
 }
@@ -310,12 +297,21 @@ fn block<'a>() -> impl Parser<Stream<'a>, Output = Block> {
 }
 
 fn statement<'a>() -> impl Parser<Stream<'a>, Output = Statement> {
-    choice((attempt(statement_with_result()), statement_without_result())).expected("statement")
+    choice((statement_with_result(), statement_without_result())).expected("statement")
 }
 
 fn statement_with_result<'a>() -> impl Parser<Stream<'a>, Output = Statement> {
-    (position(), identifier(), sign("="), expression())
-        .map(|(position, name, _, expression)| Statement::new(Some(name), expression, position))
+    (
+        attempt((
+            position(),
+            identifier(),
+            // TODO Implement a sign combinator like a binary operator by consuming all operator
+            // like characters.
+            sign("=").skip(not_followed_by(one_of(OPERATOR_CHARACTERS.chars()))),
+        )),
+        expression(),
+    )
+        .map(|((position, name, _), expression)| Statement::new(Some(name), expression, position))
 }
 
 fn statement_without_result<'a>() -> impl Parser<Stream<'a>, Output = Statement> {
@@ -376,7 +372,7 @@ fn concrete_binary_operator<'a>(
 fn prefix_operation_like<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
     lazy(|| {
         no_partial(choice((
-            attempt(prefix_operation().map(Expression::from)),
+            prefix_operation().map(Expression::from),
             suffix_operation_like().map(Expression::from),
         )))
     })
@@ -384,8 +380,13 @@ fn prefix_operation_like<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
 }
 
 fn prefix_operation<'a>() -> impl Parser<Stream<'a>, Output = UnaryOperation> {
-    (position(), prefix_operator(), prefix_operation_like())
-        .map(|(position, operator, expression)| UnaryOperation::new(operator, expression, position))
+    (
+        attempt((position(), prefix_operator())),
+        prefix_operation_like(),
+    )
+        .map(|((position, operator), expression)| {
+            UnaryOperation::new(operator, expression, position)
+        })
 }
 
 fn prefix_operator<'a>() -> impl Parser<Stream<'a>, Output = UnaryOperator> {
@@ -432,8 +433,8 @@ fn suffix_operation_like<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
 
 fn suffix_operator<'a>() -> impl Parser<Stream<'a>, Output = SuffixOperator> {
     choice((
-        attempt(call_operator().map(SuffixOperator::Call)),
-        attempt(element_operator().map(SuffixOperator::Element)),
+        call_operator().map(SuffixOperator::Call),
+        element_operator().map(SuffixOperator::Element),
         try_operator().map(|_| SuffixOperator::Try),
     ))
 }
@@ -453,18 +454,18 @@ fn try_operator<'a>() -> impl Parser<Stream<'a>, Output = ()> {
 fn atomic_expression<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
     lazy(|| {
         no_partial(choice((
-            attempt(if_().map(Expression::from)),
-            attempt(if_type().map(Expression::from)),
-            attempt(if_list().map(Expression::from)),
-            attempt(lambda().map(Expression::from)),
-            attempt(record().map(Expression::from)),
-            attempt(list_literal().map(Expression::from)),
+            if_type().map(Expression::from),
+            if_list().map(Expression::from),
+            if_().map(Expression::from),
+            lambda().map(Expression::from),
+            record().map(Expression::from),
+            list_literal().map(Expression::from),
             boolean_literal().map(Expression::from),
             none_literal().map(Expression::from),
-            attempt(number_literal().map(Expression::from)),
-            attempt(string_literal().map(Expression::from)),
-            attempt(variable().map(Expression::from)),
-            (between(sign("("), sign(")"), expression())),
+            number_literal().map(Expression::from),
+            string_literal().map(Expression::from),
+            variable().map(Expression::from),
+            between(sign("("), sign(")"), expression()),
         )))
     })
     .boxed()
@@ -472,14 +473,13 @@ fn atomic_expression<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
 
 fn lambda<'a>() -> impl Parser<Stream<'a>, Output = Lambda> {
     (
-        position(),
-        sign("\\("),
+        attempt(position().skip(sign("\\("))),
         sep_end_by(argument(), sign(",")),
         sign(")"),
         type_(),
         block(),
     )
-        .map(|(position, _, arguments, _, result_type, body)| {
+        .map(|(position, arguments, _, result_type, body)| {
             Lambda::new(arguments, result_type, body, position)
         })
         .expected("function expression")
@@ -491,15 +491,14 @@ fn argument<'a>() -> impl Parser<Stream<'a>, Output = Argument> {
 
 fn if_<'a>() -> impl Parser<Stream<'a>, Output = If> {
     (
-        position(),
-        keyword("if"),
+        attempt(position().skip(keyword("if"))),
         if_branch(),
         many((keyword("else"), keyword("if")).with(if_branch())),
         keyword("else"),
         block(),
     )
         .map(
-            |(position, _, first_branch, branches, _, else_block): (_, _, _, Vec<_>, _, _)| {
+            |(position, first_branch, branches, _, else_block): (_, _, Vec<_>, _, _)| {
                 If::new(
                     vec![first_branch].into_iter().chain(branches).collect(),
                     else_block,
@@ -516,9 +515,7 @@ fn if_branch<'a>() -> impl Parser<Stream<'a>, Output = IfBranch> {
 
 fn if_list<'a>() -> impl Parser<Stream<'a>, Output = IfList> {
     (
-        position(),
-        keyword("if"),
-        sign("["),
+        attempt(position().skip((keyword("if"), sign("[")))),
         identifier(),
         sign(","),
         sign("..."),
@@ -531,7 +528,7 @@ fn if_list<'a>() -> impl Parser<Stream<'a>, Output = IfList> {
         block(),
     )
         .map(
-            |(position, _, _, first_name, _, _, rest_name, _, _, argument, then, _, else_)| {
+            |(position, first_name, _, _, rest_name, _, _, argument, then, _, else_)| {
                 IfList::new(argument, first_name, rest_name, then, else_, position)
             },
         )
@@ -540,10 +537,7 @@ fn if_list<'a>() -> impl Parser<Stream<'a>, Output = IfList> {
 
 fn if_type<'a>() -> impl Parser<Stream<'a>, Output = IfType> {
     (
-        position(),
-        keyword("if"),
-        identifier(),
-        sign("="),
+        attempt((position(), keyword("if"), identifier(), sign("="))),
         expression(),
         sign(";"),
         if_type_branch(),
@@ -551,10 +545,7 @@ fn if_type<'a>() -> impl Parser<Stream<'a>, Output = IfType> {
         optional(keyword("else").with(block())),
     )
         .map(
-            |(position, _, identifier, _, argument, _, first_branch, branches, else_): (
-                _,
-                _,
-                _,
+            |((position, _, identifier, _), argument, _, first_branch, branches, else_): (
                 _,
                 _,
                 _,
@@ -580,14 +571,12 @@ fn if_type_branch<'a>() -> impl Parser<Stream<'a>, Output = IfTypeBranch> {
 
 fn record<'a>() -> impl Parser<Stream<'a>, Output = Record> {
     (
-        position(),
-        reference_type(),
-        sign("{"),
+        attempt((position(), qualified_identifier(), sign("{"))),
         optional(between(sign("..."), sign(","), expression())),
         sep_end_by1(record_element(), sign(",")),
         sign("}"),
     )
-        .then(|(position, reference_type, _, record, elements, _)| {
+        .then(|((position, name, _), record, elements, _)| {
             let elements: Vec<_> = elements;
 
             if elements
@@ -597,7 +586,13 @@ fn record<'a>() -> impl Parser<Stream<'a>, Output = Record> {
                 .len()
                 == elements.len()
             {
-                value(Record::new(reference_type, record, elements, position)).left()
+                value(Record::new(
+                    types::Reference::new(name, position.clone()),
+                    record,
+                    elements,
+                    position,
+                ))
+                .left()
             } else {
                 unexpected_any("duplicate keys in record literal").right()
             }
@@ -626,7 +621,7 @@ fn none_literal<'a>() -> impl Parser<Stream<'a>, Output = None> {
 fn number_literal<'a>() -> impl Parser<Stream<'a>, Output = Number> {
     let regex: &'static regex::Regex = &NUMBER_REGEX;
 
-    token((position(), from_str(find(regex))))
+    token(attempt((position(), from_str(find(regex)))))
         .skip(not_followed_by(digit()))
         .map(|(position, number)| Number::new(number, position))
         .expected("number literal")
@@ -636,33 +631,34 @@ fn string_literal<'a>() -> impl Parser<Stream<'a>, Output = ByteString> {
     let regex: &'static regex::Regex = &STRING_REGEX;
 
     token((
-        position(),
-        character('"'),
+        attempt(position().skip(character('"'))),
         many(choice((
-            attempt(from_str(find(regex))),
-            attempt(string("\\\\").map(|_| "\\".into())),
-            attempt(string("\\\"").map(|_| "\"".into())),
-            attempt(string("\\n").map(|_| "\n".into())),
-            attempt(string("\\t").map(|_| "\t".into())),
+            from_str(find(regex)),
+            character('\\').with(
+                choice((
+                    character('\\').map(|_| "\\"),
+                    character('"').map(|_| "\""),
+                    character('n').map(|_| "\n"),
+                    character('t').map(|_| "\t"),
+                ))
+                .map(|string| string.into()),
+            ),
         ))),
         character('"'),
     ))
-    .map(|(position, _, strings, _): (_, _, Vec<String>, _)| {
-        ByteString::new(strings.join(""), position)
-    })
+    .map(|(position, strings, _): (_, Vec<String>, _)| ByteString::new(strings.join(""), position))
     .expected("string literal")
 }
 
 fn list_literal<'a>() -> impl Parser<Stream<'a>, Output = List> {
     (
-        position(),
-        sign("["),
+        attempt(position().skip(sign("["))),
         type_(),
         sign(";"),
         sep_end_by(list_element(), sign(",")),
         sign("]"),
     )
-        .map(|(position, _, type_, _, elements, _)| List::new(type_, elements, position))
+        .map(|(position, type_, _, elements, _)| List::new(type_, elements, position))
         .expected("list literal")
 }
 
@@ -677,7 +673,7 @@ fn list_element<'a>() -> impl Parser<Stream<'a>, Output = ListElement> {
 }
 
 fn variable<'a>() -> impl Parser<Stream<'a>, Output = Variable> {
-    token((position(), qualified_identifier()))
+    token(attempt((position(), qualified_identifier())))
         .map(|(position, identifier)| Variable::new(identifier, position))
         .expected("variable")
 }
@@ -747,14 +743,14 @@ fn eof<'a>() -> impl Parser<Stream<'a>, Output = ()> {
 }
 
 fn blank<'a>() -> impl Parser<Stream<'a>, Output = ()> {
-    many::<Vec<_>, _, _>(choice((space().with(value(())), attempt(comment())))).with(value(()))
+    many::<Vec<_>, _, _>(choice((space().with(value(())), comment()))).with(value(()))
 }
 
 fn comment<'a>() -> impl Parser<Stream<'a>, Output = ()> {
     string("#")
         .with(many::<Vec<_>, _, _>(none_of("\n".chars())))
         .with(choice((
-            attempt(combine::parser::char::newline().with(value(()))),
+            combine::parser::char::newline().with(value(())),
             eof(),
         )))
         .with(spaces())
@@ -1522,7 +1518,7 @@ mod tests {
             );
             assert_eq!(
                 if_()
-                    .parse(stream("if if true{true}else{true}{42}else{13}", ""))
+                    .parse(stream("if if true {true}else{true}{42}else{13}", ""))
                     .unwrap()
                     .0,
                 If::new(
@@ -1559,7 +1555,7 @@ mod tests {
             );
             assert_eq!(
                 if_()
-                    .parse(stream("if true{1}else if true{2}else{3}", ""))
+                    .parse(stream("if true {1}else if true {2}else{3}", ""))
                     .unwrap()
                     .0,
                 If::new(
@@ -1591,7 +1587,7 @@ mod tests {
         fn parse_if_type() {
             assert_eq!(
                 if_type()
-                    .parse(stream("if x=y;boolean{none}else{none}", ""))
+                    .parse(stream("if x=y;boolean {none}else{none}", ""))
                     .unwrap()
                     .0,
                 IfType::new(
@@ -1668,7 +1664,7 @@ mod tests {
         fn parse_if_list() {
             assert_eq!(
                 if_list()
-                    .parse(stream("if[x,...xs]=xs{none}else{none}", ""))
+                    .parse(stream("if[x,...xs]=xs {none}else{none}", ""))
                     .unwrap()
                     .0,
                 IfList::new(
@@ -1794,7 +1790,7 @@ mod tests {
                     ),
                 ),
                 (
-                    "!if true{true}else{true}",
+                    "!if true {true}else{true}",
                     UnaryOperation::new(
                         UnaryOperator::Not,
                         If::new(
@@ -2046,10 +2042,10 @@ mod tests {
         fn parse_record() {
             assert!(record().parse(stream("Foo", "")).is_err());
 
-            assert!(record().parse(stream("Foo {}", "")).is_err());
+            assert!(record().parse(stream("Foo{}", "")).is_err());
 
             assert_eq!(
-                expression().parse(stream("Foo {foo:42}", "")).unwrap().0,
+                expression().parse(stream("Foo{foo:42}", "")).unwrap().0,
                 Record::new(
                     types::Reference::new("Foo", Position::fake()),
                     None,
@@ -2171,7 +2167,7 @@ mod tests {
 
             assert_eq!(
                 expression()
-                    .parse(stream("Foo {...foo,bar:42}", ""))
+                    .parse(stream("Foo{...foo,bar:42}", ""))
                     .unwrap()
                     .0,
                 Record::new(
