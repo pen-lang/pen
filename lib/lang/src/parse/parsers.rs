@@ -51,7 +51,7 @@ pub fn module<'a>() -> impl Parser<Stream<'a>, Output = Module> {
         blank(),
         many(import()),
         many(foreign_import()),
-        many(type_definition()),
+        many(record_definition()),
         many(type_alias()),
         many(definition()),
     )
@@ -62,14 +62,14 @@ pub fn module<'a>() -> impl Parser<Stream<'a>, Output = Module> {
                 _,
                 imports,
                 foreign_imports,
-                type_definitions,
+                record_definitions,
                 type_aliases,
                 definitions,
             )| {
                 Module::new(
                     imports,
                     foreign_imports,
-                    type_definitions,
+                    record_definitions,
                     type_aliases,
                     definitions,
                     position,
@@ -150,15 +150,15 @@ fn foreign_export<'a>() -> impl Parser<Stream<'a>, Output = ()> {
     (keyword("export"), keyword("foreign")).with(value(()))
 }
 
-fn type_definition<'a>() -> impl Parser<Stream<'a>, Output = TypeDefinition> {
+fn record_definition<'a>() -> impl Parser<Stream<'a>, Output = RecordDefinition> {
     (
-        // TODO Simplify commitment to this parser after allow mixing type definitions and aliases.
+        // TODO Simplify commitment to this parser after allow mixing record definitions and aliases.
         attempt((position(), keyword("type"), identifier(), sign("{"))),
         many((identifier(), type_())),
         sign("}"),
     )
         .map(|((position, _, name, _), elements, _): (_, Vec<_>, _)| {
-            TypeDefinition::new(
+            RecordDefinition::new(
                 name,
                 elements
                     .into_iter()
@@ -167,7 +167,7 @@ fn type_definition<'a>() -> impl Parser<Stream<'a>, Output = TypeDefinition> {
                 position,
             )
         })
-        .expected("type definition")
+        .expected("record definition")
 }
 
 fn type_alias<'a>() -> impl Parser<Stream<'a>, Output = TypeAlias> {
@@ -1091,15 +1091,15 @@ mod tests {
     }
 
     #[test]
-    fn parse_type_definition() {
+    fn parse_record_definition() {
         for (source, expected) in &[
             (
                 "type Foo {}",
-                TypeDefinition::new("Foo", vec![], Position::fake()),
+                RecordDefinition::new("Foo", vec![], Position::fake()),
             ),
             (
                 "type Foo {foo number}",
-                TypeDefinition::new(
+                RecordDefinition::new(
                     "Foo",
                     vec![types::RecordElement::new(
                         "foo",
@@ -1110,7 +1110,7 @@ mod tests {
             ),
             (
                 "type Foo {foo number bar number}",
-                TypeDefinition::new(
+                RecordDefinition::new(
                     "Foo",
                     vec![
                         types::RecordElement::new("foo", types::Number::new(Position::fake())),
@@ -1121,7 +1121,7 @@ mod tests {
             ),
         ] {
             assert_eq!(
-                &type_definition().parse(stream(source, "")).unwrap().0,
+                &record_definition().parse(stream(source, "")).unwrap().0,
                 expected
             );
         }

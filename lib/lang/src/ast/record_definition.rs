@@ -2,13 +2,13 @@ use crate::types;
 use position::Position;
 
 #[derive(Clone, Debug, Hash, PartialEq)]
-pub struct TypeDefinition {
+pub struct RecordDefinition {
     name: String,
     elements: Vec<types::RecordElement>,
     position: Position,
 }
 
-impl TypeDefinition {
+impl RecordDefinition {
     pub fn new(
         name: impl Into<String>,
         elements: Vec<types::RecordElement>,

@@ -6,7 +6,7 @@ use position::Position;
 pub fn compile(module: &ast::Module) -> Result<ir::Module, CompileError> {
     Ok(ir::Module::new(
         module
-            .type_definitions()
+            .record_definitions()
             .iter()
             .map(|definition| {
                 ir::TypeDefinition::new(
@@ -366,7 +366,7 @@ mod tests {
             compile(&ast::Module::new(
                 vec![],
                 vec![],
-                vec![ast::TypeDefinition::new("Foo1", vec![], Position::fake())],
+                vec![ast::RecordDefinition::new("Foo1", vec![], Position::fake())],
                 vec![ast::TypeAlias::new(
                     "Foo2",
                     types::None::new(Position::fake()),
