@@ -1,12 +1,5 @@
 use combine::{attempt, Parser};
 
-#[macro_export]
-macro_rules! choice {
-    ($($x:expr),* $(,)?) => {
-        combine::choice(($(combine::attempt($x),)*))
-    }
-}
-
 pub fn many<F: Extend<P::Output> + Default, I: combine::Stream, P: Parser<I>>(
     p: P,
 ) -> combine::parser::repeat::Many<F, combine::parser::combinator::Try<P>> {
