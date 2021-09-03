@@ -569,7 +569,7 @@ fn if_type<'a>() -> impl Parser<Stream<'a>, Output = IfType> {
                 )
             },
         )
-        .expected("type case expression")
+        .expected("if-type expression")
 }
 
 fn if_type_branch<'a>() -> impl Parser<Stream<'a>, Output = IfTypeBranch> {
@@ -604,6 +604,7 @@ fn record<'a>() -> impl Parser<Stream<'a>, Output = Record> {
                 unexpected_any("duplicate keys in record literal").right()
             }
         })
+        .expected("record literal")
 }
 
 fn record_element<'a>() -> impl Parser<Stream<'a>, Output = RecordElement> {
