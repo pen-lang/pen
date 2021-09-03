@@ -1,5 +1,5 @@
 use super::{
-    attempt::{many, many1, optional, sep_end_by, sep_end_by1},
+    attempt::{many, many1, sep_end_by, sep_end_by1},
     utilities::*,
 };
 use crate::{
@@ -7,7 +7,7 @@ use crate::{
     types::{self, Type},
 };
 use combine::{
-    attempt, choice, easy, from_str, none_of, one_of,
+    attempt, choice, easy, from_str, none_of, one_of, optional,
     parser::{
         char::{alpha_num, char as character, digit, letter, space, spaces, string},
         combinator::{lazy, no_partial, not_followed_by},
@@ -680,13 +680,13 @@ fn variable<'a>() -> impl Parser<Stream<'a>, Output = Variable> {
 
 fn qualified_identifier<'a>() -> impl Parser<Stream<'a>, Output = String> {
     (
-        optional(raw_identifier().skip(string(IDENTIFIER_SEPARATOR))),
         raw_identifier(),
+        optional(string(IDENTIFIER_SEPARATOR).with(raw_identifier())),
     )
-        .map(|(prefix, identifier)| {
-            prefix
-                .map(|prefix| [&prefix, IDENTIFIER_SEPARATOR, &identifier].concat())
-                .unwrap_or(identifier)
+        .map(|(former, latter)| {
+            latter
+                .map(|latter| [&former, IDENTIFIER_SEPARATOR, &latter].concat())
+                .unwrap_or(former)
         })
 }
 

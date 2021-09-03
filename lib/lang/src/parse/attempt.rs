@@ -12,12 +12,6 @@ pub fn many1<F: Extend<P::Output> + Default, I: combine::Stream, P: Parser<I>>(
     combine::many1(attempt(p))
 }
 
-pub fn optional<I: combine::Stream, P: Parser<I>>(
-    p: P,
-) -> combine::parser::choice::Optional<combine::parser::combinator::Try<P>> {
-    combine::optional(attempt(p))
-}
-
 pub fn sep_end_by<
     F: Extend<P::Output> + Default,
     I: combine::Stream,
