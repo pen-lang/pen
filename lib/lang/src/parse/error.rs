@@ -7,10 +7,10 @@ pub struct ParseError {
 }
 
 impl ParseError {
-    pub fn new(path: &str, errors: &impl Error) -> Self {
+    pub fn new(path: &str, error: &impl Error) -> Self {
         Self {
             path: path.into(),
-            details: format!("{}", errors),
+            details: format!("{}", error),
         }
     }
 }
