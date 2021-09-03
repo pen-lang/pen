@@ -39,7 +39,7 @@ impl ParseError {
                 errors.position.line as usize,
                 errors.position.column as usize,
                 source
-                    .split("\n")
+                    .split('\n')
                     .nth(errors.position.line as usize - 1)
                     .unwrap_or_default(),
             ),
