@@ -717,7 +717,7 @@ fn raw_identifier<'a>() -> impl Parser<Stream<'a>, Output = String> {
 fn keyword<'a>(name: &'static str) -> impl Parser<Stream<'a>, Output = ()> {
     token(attempt(string(name)).skip(not_followed_by(alpha_num())))
         .with(value(()))
-        .expected("keyword")
+        .expected(name)
 }
 
 fn sign<'a>(sign: &'static str) -> impl Parser<Stream<'a>, Output = ()> {
