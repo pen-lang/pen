@@ -1,4 +1,4 @@
-use std::{error::Error, fmt::Display};
+use std::{error::Error, fmt, fmt::Display};
 
 #[derive(Debug, PartialEq)]
 pub struct ParseError {
@@ -7,7 +7,7 @@ pub struct ParseError {
 }
 
 impl ParseError {
-    pub fn new(path: &str, errors: &impl std::error::Error) -> Self {
+    pub fn new(path: &str, errors: &impl Error) -> Self {
         Self {
             path: path.into(),
             details: format!("{}", errors),
@@ -18,7 +18,7 @@ impl ParseError {
 impl Error for ParseError {}
 
 impl Display for ParseError {
-    fn fmt(&self, formatter: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> Result<(), fmt::Error> {
         write!(
             formatter,
             "failed to parse module {}\n{}",
