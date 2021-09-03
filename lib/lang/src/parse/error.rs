@@ -4,9 +4,8 @@ use std::{error::Error, fmt, fmt::Display};
 
 #[derive(Debug, PartialEq)]
 pub struct ParseError {
+    message: String,
     expected: Vec<String>,
-    unexpected: Vec<String>,
-    messages: Vec<String>,
     position: Position,
 }
 
@@ -17,28 +16,21 @@ impl ParseError {
         errors: combine::easy::Errors<char, &str, SourcePosition>,
     ) -> Self {
         Self {
+            message: errors
+                .errors
+                .iter()
+                .find_map(|error| match error {
+                    easy::Error::Expected(_) => None,
+                    easy::Error::Message(info) => Some(info.to_string()),
+                    easy::Error::Other(error) => Some(error.to_string()),
+                    easy::Error::Unexpected(info) => Some(format!("unexpected {}", info)),
+                })
+                .unwrap_or_else(|| "failed to parse module".into()),
             expected: errors
                 .errors
                 .iter()
                 .filter_map(|error| match error {
                     easy::Error::Expected(info) => Some(info.to_string()),
-                    _ => None,
-                })
-                .collect(),
-            unexpected: errors
-                .errors
-                .iter()
-                .filter_map(|error| match error {
-                    easy::Error::Unexpected(info) => Some(info.to_string()),
-                    _ => None,
-                })
-                .collect(),
-            messages: errors
-                .errors
-                .iter()
-                .filter_map(|error| match error {
-                    easy::Error::Message(info) => Some(info.to_string()),
-                    easy::Error::Other(error) => Some(error.to_string()),
                     _ => None,
                 })
                 .collect(),
@@ -63,16 +55,7 @@ impl Display for ParseError {
             formatter,
             "{}",
             vec![
-                Some(if self.messages.is_empty() {
-                    "failed to parse module".into()
-                } else {
-                    self.messages.join(". ")
-                }),
-                if self.unexpected.is_empty() {
-                    None
-                } else {
-                    Some(format!("unexpected: {}", self.unexpected.join(", ")))
-                },
+                Some(self.message.clone()),
                 if self.expected.is_empty() {
                     None
                 } else {
