@@ -1,5 +1,5 @@
 use super::{
-    attempt::{many, many1, sep_end_by},
+    attempt::{many, many1},
     utilities::*,
 };
 use crate::{
@@ -14,7 +14,7 @@ use combine::{
         regex::find,
         sequence::between,
     },
-    sep_end_by1,
+    sep_end_by, sep_end_by1,
     stream::{self, position::SourcePosition, state},
     unexpected_any, value, Parser, Positioned,
 };
@@ -672,13 +672,10 @@ fn list_literal<'a>() -> impl Parser<Stream<'a>, Output = List> {
 }
 
 fn list_element<'a>() -> impl Parser<Stream<'a>, Output = ListElement> {
-    (optional(sign("...")), expression()).map(|(ellipsis, expression)| {
-        if ellipsis.is_some() {
-            ListElement::Multiple(expression)
-        } else {
-            ListElement::Single(expression)
-        }
-    })
+    choice((
+        expression().map(ListElement::Single),
+        sign("...").with(expression()).map(ListElement::Multiple),
+    ))
 }
 
 fn variable<'a>() -> impl Parser<Stream<'a>, Output = Variable> {
