@@ -115,7 +115,6 @@ fn foreign_import<'a>() -> impl Parser<Stream<'a>, Output = ForeignImport> {
         .map(|(position, calling_convention, name, type_)| {
             ForeignImport::new(
                 &name,
-                &name,
                 calling_convention.unwrap_or(CallingConvention::Native),
                 type_,
                 position,
@@ -907,7 +906,6 @@ mod tests {
                     ))],
                     vec![ForeignImport::new(
                         "foo",
-                        "foo",
                         CallingConvention::Native,
                         types::Function::new(
                             vec![],
@@ -987,7 +985,6 @@ mod tests {
                 .0,
             ForeignImport::new(
                 "foo",
-                "foo",
                 CallingConvention::Native,
                 types::Function::new(
                     vec![types::Number::new(Position::fake()).into()],
@@ -1004,7 +1001,6 @@ mod tests {
                 .unwrap()
                 .0,
             ForeignImport::new(
-                "foo",
                 "foo",
                 CallingConvention::C,
                 types::Function::new(

@@ -40,7 +40,7 @@ pub fn compile(module: &ast::Module) -> Result<ir::Module, CompileError> {
             .map(|import| {
                 ir::ForeignDeclaration::new(
                     import.name(),
-                    import.foreign_name(),
+                    import.name(),
                     match import.calling_convention() {
                         ast::CallingConvention::C => ir::CallingConvention::C,
                         ast::CallingConvention::Native => ir::CallingConvention::Native,
