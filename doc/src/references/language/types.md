@@ -78,12 +78,17 @@ It is a list of values of some type. The element type is put between `[` and `]`
 
 ### Literals
 
-List literals contain elements or other lists prefixed by `...` which are joined into the lists. Element types need to be specified explicitly before semicolons like `[number; ... ]`.
+List literals contain their elements. Element types need to be specified explicitly before semicolons like `[number; ... ]`.
 
-Expressions within list literals are evaluated lazily; they are evaluated only if their values are needed.
+Expressions within list literals are evaluated lazily; they are evaluated only if their values are required.
 
 ```pen
 [number; 1, 2, 3]
+```
+
+You can create new lists from existing ones by spreading elements of the old ones prefixed by `...` into the new ones.
+
+```pen
 [person; x, ...xs]
 ```
 
@@ -102,19 +107,19 @@ type person {
 
 ### Literals
 
-Record values are constructed by their literals containing their field names and values.
+Record values are constructed using record literals containing their field names and values.
 
 ```pen
 person{name: "foo", age: 42}
 ```
 
-You can also create new records from existing ones spreading fields of the old records into the literals.
+You can also create new records from existing ones spreading fields of the old ones into the literals.
 
 ```pen
 person{...john, name: "bar"}
 ```
 
-You can append field names prefixed by `.` to expressions of record types to access their values.
+You can access field values by appending their names with `.` prefixes to expressions of record types.
 
 ```pen
 john.name
