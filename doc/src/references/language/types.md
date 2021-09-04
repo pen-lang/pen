@@ -2,7 +2,7 @@
 
 ## Number
 
-It represents a real number. Under the hood, it is implemented as a 64-bit floating point number of [IEEE 754](https://en.wikipedia.org/wiki/IEEE_754).
+It represents a real number. It is implemented as a 64-bit floating point number of [IEEE 754](https://en.wikipedia.org/wiki/IEEE_754) under the hood.
 
 ```pen
 number
