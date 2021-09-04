@@ -105,7 +105,7 @@ type person {
 }
 ```
 
-To expose fields as well as the type itself, you need to capitalize their names.
+To expose fields as well as the type itself to other modules, you need to capitalize their names.
 
 ```pen
 type Person {
