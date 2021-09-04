@@ -129,7 +129,7 @@ foo{x: 0} == foo{x: 1}
 
 ##### Ordering
 
-Order operators compare two numbers and return the condition is correct or not as a boolean value.
+Order operators compare two numbers and return a boolean value indicating if it is correct or not.
 
 ```pen
 1 < 1
