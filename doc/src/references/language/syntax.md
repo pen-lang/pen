@@ -63,6 +63,18 @@ foo = \(x number, y number) number {
 }
 ```
 
+### Foreign function definition
+
+It defines a new foreign function.
+
+See [Foreign Function Interface](/guides/ffi.md) for more details.
+
+```pen
+export foreign foo = \(x number, y number) number {
+  x + y
+}
+```
+
 ## Block
 
 A block consists of 1 or more expressions wrapped in `{` and `}`. Values of the last expressions are treated as resulting values of the blocks.
