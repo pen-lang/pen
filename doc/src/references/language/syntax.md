@@ -15,7 +15,7 @@ It imports types and functions from another module in the current or another pac
 See [Modules](modules.md) for more details.
 
 ```pen
-import Foo'Bar'Baz
+import Foo'Bar
 ```
 
 ### Foreign import statement
