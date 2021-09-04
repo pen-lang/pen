@@ -8,8 +8,8 @@ pub fn compile(module: &ast::Module) -> Result<ir::Module, CompileError> {
         module
             .type_definitions()
             .iter()
-            .map(|definition| {
-                ir::TypeDefinition::new(
+            .filter_map(|definition| match definition {
+                ast::TypeDefinition::RecordDefinition(definition) => Some(ir::TypeDefinition::new(
                     definition.name(),
                     definition.name(),
                     definition.elements().to_vec(),
@@ -17,21 +17,23 @@ pub fn compile(module: &ast::Module) -> Result<ir::Module, CompileError> {
                     is_name_public(definition.name()),
                     false,
                     definition.position().clone(),
-                )
+                )),
+                ast::TypeDefinition::TypeAlias(_) => None,
             })
             .collect(),
         module
-            .type_aliases()
+            .type_definitions()
             .iter()
-            .map(|alias| {
-                ir::TypeAlias::new(
+            .filter_map(|definition| match definition {
+                ast::TypeDefinition::RecordDefinition(_) => None,
+                ast::TypeDefinition::TypeAlias(alias) => Some(ir::TypeAlias::new(
                     alias.name(),
                     alias.name(),
                     alias.type_().clone(),
                     is_name_public(alias.name()),
                     false,
                     alias.position().clone(),
-                )
+                )),
             })
             .collect(),
         module
@@ -353,7 +355,6 @@ mod tests {
                 vec![],
                 vec![],
                 vec![],
-                vec![],
                 Position::fake()
             )),
             Ok(ir::Module::empty())
@@ -366,12 +367,15 @@ mod tests {
             compile(&ast::Module::new(
                 vec![],
                 vec![],
-                vec![ast::TypeDefinition::new("Foo1", vec![], Position::fake())],
-                vec![ast::TypeAlias::new(
-                    "Foo2",
-                    types::None::new(Position::fake()),
-                    Position::fake(),
-                )],
+                vec![
+                    ast::RecordDefinition::new("Foo1", vec![], Position::fake()).into(),
+                    ast::TypeAlias::new(
+                        "Foo2",
+                        types::None::new(Position::fake()),
+                        Position::fake(),
+                    )
+                    .into()
+                ],
                 vec![ast::Definition::new(
                     "Foo3",
                     ast::Lambda::new(
