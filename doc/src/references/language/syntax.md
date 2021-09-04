@@ -87,9 +87,19 @@ If you want to save results of intermediate expressions and use them somewhere e
 
 ## Expressions
 
+### Function call
+
+It calls a function to evaluate it with given arguments returning its result value.
+
+```pen
+f(x, y)
+```
+
 ### Operators
 
 #### Arithmetic
+
+Arithmetic operators add, subtract, multiply or divide a number with another one.
 
 ```pen
 1 + 1
@@ -109,9 +119,16 @@ If you want to save results of intermediate expressions and use them somewhere e
 1 >= 1
 ```
 
-##### Generic equality
+##### Equality
 
-`==` and `!=` operators can be used for any types except functions and types that include them.
+Equal (`==`) and not-equal (`!=`) operators compare two values and return a boolean value indicating if they are equal or not.
+
+```pen
+1 == 1
+1 != 1
+```
+
+They can be used for any types except functions and types that include them.
 
 ```pen
 "foo" == "bar"
@@ -129,7 +146,8 @@ true | false
 
 #### Error handling
 
-- The `?` suffix operator immediately exits the current function with an operand's value if it is of [the `error` type][error-type].
+The `?` suffix operator immediately exits the current function with an operand's value if it is of [the `error` type][error-type].
+
 - An operand must be a union type including [the `error` type][error-type].
 
 ```
@@ -137,14 +155,6 @@ x?
 ```
 
 [error-type]: built-ins#error
-
-### Function call
-
-It calls a function to evaluate it with given arguments returning its result value.
-
-```pen
-f(x, y)
-```
 
 ### Conditionals
 
