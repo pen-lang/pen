@@ -5,12 +5,12 @@ mod name_qualifier;
 mod prelude_module_modifier;
 mod singleton_record_compiler;
 
+use ast::ast;
 use error::CompileError;
 use hir::{
     analysis::ir::{definition_qualifier, type_qualifier},
     ir,
 };
-use ast::ast;
 use std::collections::HashMap;
 
 pub fn compile(

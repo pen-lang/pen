@@ -1,5 +1,5 @@
-use hir::{analysis::ir::variable_transformer, ir::*, types};
 use ast::ast;
+use hir::{analysis::ir::variable_transformer, ir::*, types};
 use std::collections::HashMap;
 
 use super::name_qualifier;

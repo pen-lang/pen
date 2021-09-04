@@ -1,11 +1,11 @@
 use super::name_qualifier;
+use ast::ast;
 use hir::{
     analysis::ir::{type_transformer, variable_renamer},
     ir,
     types::{self, Type},
 };
 use itertools::Itertools;
-use ast::ast;
 use std::collections::HashMap;
 
 pub fn compile(
