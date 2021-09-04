@@ -147,6 +147,7 @@
                     <main>
                         <h1 id="types"><a class="header" href="#types">Types</a></h1>
 <h2 id="number"><a class="header" href="#number">Number</a></h2>
+<p>It represents a real number. Under the hood, it is implemented as a 64-bit floating point number of <a href="https://en.wikipedia.org/wiki/IEEE_754">IEEE 754</a>.</p>
 <pre><code class="language-pen">number
 </code></pre>
 <h3 id="literals"><a class="header" href="#literals">Literals</a></h3>
@@ -154,69 +155,77 @@
 -42
 </code></pre>
 <h2 id="boolean"><a class="header" href="#boolean">Boolean</a></h2>
+<p>It is a boolean value of <code>true</code> or <code>false</code> denoting if a statement is correct or not.</p>
 <pre><code class="language-pen">boolean
 </code></pre>
 <h3 id="literals-1"><a class="header" href="#literals-1">Literals</a></h3>
-<pre><code class="language-pen">false
-true
+<pre><code class="language-pen">true
+false
 </code></pre>
 <h2 id="none"><a class="header" href="#none">None</a></h2>
+<p>It represents a missing value. It has only a single literal of <code>none</code>.</p>
 <pre><code class="language-pen">none
 </code></pre>
 <h3 id="literals-2"><a class="header" href="#literals-2">Literals</a></h3>
 <pre><code class="language-pen">none
 </code></pre>
 <h2 id="string"><a class="header" href="#string">String</a></h2>
+<p>It represents texts encoded in <a href="https://en.wikipedia.org/wiki/UTF-8">UTF-8</a> or byte arrays.</p>
 <pre><code class="language-pen">string
 </code></pre>
 <h3 id="literals-3"><a class="header" href="#literals-3">Literals</a></h3>
 <pre><code class="language-pen">&quot;foo&quot;
 </code></pre>
 <h2 id="functions"><a class="header" href="#functions">Functions</a></h2>
+<p>It is a function with a list of arguments and a result.</p>
+<p>In the language, functions represent not only pure mathematical ones but also &quot;routines&quot; which execute side effects, such as I/O.</p>
 <pre><code class="language-pen">\(number, number) number
 </code></pre>
 <h2 id="lists"><a class="header" href="#lists">Lists</a></h2>
-<pre><code class="language-pen">[a]
+<p>It is a list of values of some type. The element type is put between <code>[</code> and <code>]</code>.</p>
+<pre><code class="language-pen">[number]
 </code></pre>
 <h3 id="literals-4"><a class="header" href="#literals-4">Literals</a></h3>
+<p>List literals contain their elements. Element types need to be specified explicitly before semicolons like <code>[number; ... ]</code>.</p>
+<p>Expressions within list literals are evaluated lazily; they are evaluated only if their values are required.</p>
 <pre><code class="language-pen">[number; 1, 2, 3]
-[myType; x, ...xs]
+</code></pre>
+<p>You can create new lists from existing ones by spreading elements of the old ones prefixed by <code>...</code> into the new ones.</p>
+<pre><code class="language-pen">[person; x, ...xs]
 </code></pre>
 <h2 id="records"><a class="header" href="#records">Records</a></h2>
+<p>It is a combination of types banded into a single type. Each field of a record type is composed of its name and type.</p>
+<p>Fields are not accessible outside modules where they are defined by default.</p>
 <pre><code class="language-pen">type person {
   name string
   age number
 }
 </code></pre>
 <h3 id="literals-5"><a class="header" href="#literals-5">Literals</a></h3>
-<ul>
-<li>Fields are private outside modules where they are defined.</li>
-<li>Append a suffix of a field name to an expression of a record type to access its value.</li>
-</ul>
+<p>Record values are constructed using record literals containing their field names and values.</p>
 <pre><code class="language-pen">person{name: &quot;foo&quot;, age: 42}
-person{...john, name: &quot;bar&quot;}
-john.name
+</code></pre>
+<p>You can also create new records from existing ones spreading fields of the old ones into the literals.</p>
+<pre><code class="language-pen">person{...john, name: &quot;bar&quot;}
+</code></pre>
+<p>You can access field values by appending their names with <code>.</code> prefixes to expressions of the record types.</p>
+<pre><code class="language-pen">john.name
 </code></pre>
 <h2 id="singleton-records"><a class="header" href="#singleton-records">Singleton records</a></h2>
+<p>Singleton records are special record types which have only one kind of values.</p>
 <pre><code class="language-pen">type foo {}
 </code></pre>
 <h3 id="literals-6"><a class="header" href="#literals-6">Literals</a></h3>
-<ul>
-<li>Their values can be referenced as variables of their names.</li>
-</ul>
+<p>Their values are accessible as variables of their names.</p>
 <pre><code class="language-pen">foo
 </code></pre>
 <h2 id="unions"><a class="header" href="#unions">Unions</a></h2>
-<ul>
-<li>Unions combine different types into a type.</li>
-</ul>
-<pre><code class="language-pen">foo | bar
+<p>It is a segregated union of types.</p>
+<p>For example, the type below represents one of values which can be either <code>number</code> or <code>none</code>. But values of the type cannot be <code>number</code> and <code>none</code> types at the same time.</p>
+<pre><code class="language-pen">number | none
 </code></pre>
 <h2 id="any"><a class="header" href="#any">Any</a></h2>
-<ul>
-<li><code>any</code> is something called a &quot;top&quot; type.</li>
-<li>Any types can be casted to <code>any</code> type.</li>
-</ul>
+<p>Literally, it's an <em>any</em> type. Any values can be converted to the type.</p>
 <pre><code class="language-pen">any
 </code></pre>
 
