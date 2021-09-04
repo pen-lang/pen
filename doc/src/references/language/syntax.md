@@ -156,7 +156,7 @@ An operand must be a union type including [the `error` type][error-type].
 x?
 ```
 
-[error-type]: built-ins#error
+[error-type]: built-ins.md#error
 
 ### Conditionals
 
