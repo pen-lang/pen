@@ -33,6 +33,7 @@ dependencies = [
 name = "app"
 version = "0.1.0"
 dependencies = [
+ "ast",
  "ast_hir",
  "bincode",
  "fmm",
@@ -40,10 +41,10 @@ dependencies = [
  "hir",
  "hir_mir",
  "interface",
- "lang",
  "mir",
  "mir-fmm",
  "once_cell",
+ "parse",
  "petgraph",
  "regex",
  "serde",
@@ -51,13 +52,23 @@ dependencies = [
 ]
 
 [[package]]
-name = "ast_hir"
+name = "ast"
 version = "0.1.0"
 dependencies = [
  "hir",
+ "position",
+ "pretty_assertions",
+ "serde",
+]
+
+[[package]]
+name = "ast_hir"
+version = "0.1.0"
+dependencies = [
+ "ast",
+ "hir",
  "interface",
  "itertools",
- "lang",
  "position",
  "pretty_assertions",
 ]
@@ -327,7 +338,6 @@ version = "0.1.0"
 dependencies = [
  "app",
  "glob",
- "lang",
  "regex",
  "serde",
  "serde_json",
@@ -407,20 +417,6 @@ name = "itoa"
 version = "0.4.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b71991ff56294aa922b450139ee08b3bfc70982c6b2c7562771375cf73542dd4"
-
-[[package]]
-name = "lang"
-version = "0.1.0"
-dependencies = [
- "combine",
- "hir",
- "interface",
- "once_cell",
- "position",
- "pretty_assertions",
- "regex",
- "serde",
-]
 
 [[package]]
 name = "lazy_static"
@@ -533,6 +529,18 @@ dependencies = [
  "redox_syscall",
  "smallvec",
  "winapi",
+]
+
+[[package]]
+name = "parse"
+version = "0.1.0"
+dependencies = [
+ "ast",
+ "combine",
+ "once_cell",
+ "position",
+ "pretty_assertions",
+ "regex",
 ]
 
 [[package]]
