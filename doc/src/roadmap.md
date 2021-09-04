@@ -16,6 +16,7 @@ Items are ordered by priority.
 - [ ] Testing framework
 - [ ] IDE/editor support
   - [ ] Language server
+- [ ] Serialization / deserialization
 - [ ] Asynchronous operations
 - [ ] Parallel computation
 - [ ] Full OS interface
