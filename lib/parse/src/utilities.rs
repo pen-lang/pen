@@ -1,4 +1,4 @@
-use crate::ast::*;
+use ast::ast::*;
 use position::Position;
 
 #[derive(Clone, Debug)]

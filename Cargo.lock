@@ -44,6 +44,7 @@ dependencies = [
  "mir",
  "mir-fmm",
  "once_cell",
+ "parse",
  "petgraph",
  "regex",
  "serde",
@@ -532,6 +533,18 @@ dependencies = [
  "redox_syscall",
  "smallvec",
  "winapi",
+]
+
+[[package]]
+name = "parse"
+version = "0.1.0"
+dependencies = [
+ "ast",
+ "combine",
+ "once_cell",
+ "position",
+ "pretty_assertions",
+ "regex",
 ]
 
 [[package]]

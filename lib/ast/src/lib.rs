@@ -1,3 +1,2 @@
 pub mod ast;
-pub mod parse;
-mod types;
+pub mod types;

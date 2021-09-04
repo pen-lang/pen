@@ -16,7 +16,7 @@ pub fn resolve(
     dependency_file: &FilePath,
     build_script_dependency_file: &FilePath,
 ) -> Result<(), Box<dyn Error>> {
-    let interface_files = ast::parse::parse(
+    let interface_files = parse::parse(
         &infrastructure.file_system.read_to_string(source_file)?,
         &infrastructure.file_path_displayer.display(source_file),
     )?

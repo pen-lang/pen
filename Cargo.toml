@@ -12,6 +12,7 @@ members = [
   "lib/interface",
   "lib/mir",
   "lib/mir-fmm",
+  "lib/parse",
   "lib/position",
   "lib/prelude/ffi",
 ]

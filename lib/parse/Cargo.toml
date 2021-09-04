@@ -1,13 +1,15 @@
 [package]
-name = "ast"
+name = "parse"
 version = "0.1.0"
 authors = ["Yota Toyama <raviqqe@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-hir = { path = "../hir" }
+ast = { path = "../ast" }
+combine = { version = "4", features = ["regex"] }
+once_cell = "1"
 position = { path = "../position" }
-serde = { version = "1", features = ["derive", "rc"] }
+regex = "1"
 
 [dev-dependencies]
 pretty_assertions = "0.7"

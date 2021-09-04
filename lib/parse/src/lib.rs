@@ -2,7 +2,7 @@ mod error;
 mod parsers;
 mod utilities;
 
-use crate::ast;
+use ast::ast;
 use combine::Parser;
 pub use error::ParseError;
 use parsers::{module, stream};
