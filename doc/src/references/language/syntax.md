@@ -110,15 +110,6 @@ Arithmetic operators add, subtract, multiply or divide a number with another one
 
 #### Comparison
 
-```pen
-1 == 1
-1 != 1
-1 < 1
-1 <= 1
-1 > 1
-1 >= 1
-```
-
 ##### Equality
 
 Equal (`==`) and not-equal (`!=`) operators compare two values and return a boolean value indicating if they are equal or not.
@@ -134,6 +125,17 @@ They can be used for any types except functions and types that include them.
 "foo" == "bar"
 foo{x: 0} == foo{x: 1}
 42 != none
+```
+
+##### Ordering
+
+Order operators compare two numbers and return the condition is correct or not as a boolean value.
+
+```pen
+1 < 1
+1 <= 1
+1 > 1
+1 >= 1
 ```
 
 #### Boolean
