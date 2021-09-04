@@ -51,29 +51,19 @@ pub fn module<'a>() -> impl Parser<Stream<'a>, Output = Module> {
         blank(),
         many(import()),
         many(foreign_import()),
-        many(record_definition()),
-        many(type_alias()),
+        many(choice((
+            type_alias().map(TypeDefinition::from),
+            record_definition().map(TypeDefinition::from),
+        ))),
         many(definition()),
     )
         .skip(eof())
         .map(
-            |(
-                position,
-                _,
-                imports,
-                foreign_imports,
-                record_definitions,
-                type_aliases,
-                definitions,
-            ): (_, _, _, _, Vec<_>, Vec<_>, _)| {
+            |(position, _, imports, foreign_imports, type_definitions, definitions)| {
                 Module::new(
                     imports,
                     foreign_imports,
-                    record_definitions
-                        .into_iter()
-                        .map(TypeDefinition::from)
-                        .chain(type_aliases.into_iter().map(TypeDefinition::from))
-                        .collect(),
+                    type_definitions,
                     definitions,
                     position,
                 )
@@ -915,6 +905,31 @@ mod tests {
                         Position::fake()
                     )],
                     vec![],
+                    vec![],
+                    Position::fake()
+                )
+            );
+        }
+
+        #[test]
+        fn parse_record_definition_after_type_alias() {
+            assert_eq!(
+                module()
+                    .parse(stream("type foo = number type bar {}", ""))
+                    .unwrap()
+                    .0,
+                Module::new(
+                    vec![],
+                    vec![],
+                    vec![
+                        TypeAlias::new(
+                            "foo",
+                            types::Number::new(Position::fake()),
+                            Position::fake()
+                        )
+                        .into(),
+                        RecordDefinition::new("bar", vec![], Position::fake()).into(),
+                    ],
                     vec![],
                     Position::fake()
                 )
