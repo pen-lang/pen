@@ -4,8 +4,7 @@ Using FFI, you can import or export functions in foreign languages.
 
 ## Importing functions in foreign languages
 
-You can import a function in a foreign language using [foreign import statements](/references/language/syntax.md#foreign-import-statement).
-You need to specify the function's calling convention, name and type.
+You can import functions in foreign languages using [foreign import statements](/references/language/syntax.md#foreign-import-statement) which specify the functions' calling convention, names and types. Then, the functions are available under the names.
 
 ```pen
 import foreign "c" foo \(number, number) number
