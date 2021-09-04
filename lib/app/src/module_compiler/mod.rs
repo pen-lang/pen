@@ -116,7 +116,7 @@ fn compile_to_hir(
         &infrastructure.file_system.read_to_vec(dependency_file)?,
     )?;
 
-    let ast_module = lang::parse::parse(
+    let ast_module = ast::parse::parse(
         &infrastructure.file_system.read_to_string(source_file)?,
         &infrastructure.file_path_displayer.display(source_file),
     )?;
@@ -157,7 +157,7 @@ pub fn compile_prelude(
     instruction_configuration: &InstructionConfiguration,
 ) -> Result<(), Box<dyn Error>> {
     let (module, module_interface) = hir_mir::compile_prelude(&ast_hir::compile_prelude(
-        &lang::parse::parse(
+        &ast::parse::parse(
             &infrastructure.file_system.read_to_string(source_file)?,
             &infrastructure.file_path_displayer.display(source_file),
         )?,

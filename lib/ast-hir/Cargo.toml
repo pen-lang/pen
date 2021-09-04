@@ -5,7 +5,7 @@ authors = ["Yota Toyama <raviqqe@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-lang = { path = "../lang" }
+ast = { path = "../ast" }
 hir = { path = "../hir" }
 interface = { path = "../interface" }
 itertools = "0.10"

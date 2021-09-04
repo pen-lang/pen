@@ -5,7 +5,7 @@ use hir::{
     types::{self, Type},
 };
 use itertools::Itertools;
-use lang::ast;
+use ast::ast;
 use std::collections::HashMap;
 
 pub fn compile(

@@ -10,7 +10,7 @@ use hir::{
     analysis::ir::{definition_qualifier, type_qualifier},
     ir,
 };
-use lang::ast;
+use ast::ast;
 use std::collections::HashMap;
 
 pub fn compile(

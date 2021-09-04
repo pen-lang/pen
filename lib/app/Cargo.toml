@@ -5,6 +5,7 @@ authors = ["Yota Toyama <raviqqe@gmail.com>"]
 edition = "2018"
 
 [dependencies]
+ast = { path = "../ast" }
 ast_hir = { path = "../ast-hir" }
 bincode = "1"
 fmm = { git = "https://github.com/raviqqe/fmm", branch = "main" }
@@ -12,7 +13,6 @@ fmm-llvm = { git = "https://github.com/raviqqe/fmm", branch = "main" }
 hir = { path = "../hir" }
 hir_mir = { path = "../hir-mir" }
 interface = { path = "../interface" }
-lang = { path = "../lang" }
 mir = { path = "../mir" }
 mir-fmm = { path = "../mir-fmm" }
 once_cell = "1"
