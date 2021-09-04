@@ -2,7 +2,7 @@
 
 ## Number
 
-It is a 64-bit floating point number of [IEEE 754](https://en.wikipedia.org/wiki/IEEE_754).
+It represents a real number. Under the hood, it is implemented as a 64-bit floating point number of [IEEE 754](https://en.wikipedia.org/wiki/IEEE_754).
 
 ```pen
 number
@@ -127,13 +127,15 @@ john.name
 
 ## Singleton records
 
+Singleton records are special record types which have only one kind of values.
+
 ```pen
 type foo {}
 ```
 
 ### Literals
 
-- Their values can be referenced as variables of their names.
+Their values are accessible as variables of their names.
 
 ```pen
 foo
@@ -141,16 +143,17 @@ foo
 
 ## Unions
 
-- Unions combine different types into a type.
+It is a segregated union of types.
+
+For example, the type below represents one of values which can be either `number` or `none`. But values of the type cannot be `number` and `none` types at the same time.
 
 ```pen
-foo | bar
+number | none
 ```
 
 ## Any
 
-- `any` is something called a "top" type.
-- Any types can be casted to `any` type.
+Literally, it's an _any_ type. Any values can be converted to the type.
 
 ```pen
 any
