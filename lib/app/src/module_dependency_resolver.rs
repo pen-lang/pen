@@ -24,12 +24,12 @@ pub fn resolve(
     .iter()
     .map(|import| {
         let source_file = match import.module_path() {
-            ast::ast::ModulePath::Internal(path) => file_path_resolver::resolve_source_file(
+            ast::ModulePath::Internal(path) => file_path_resolver::resolve_source_file(
                 package_directory,
                 path.components(),
                 &infrastructure.file_path_configuration,
             ),
-            ast::ast::ModulePath::External(path) => file_path_resolver::resolve_source_file(
+            ast::ModulePath::External(path) => file_path_resolver::resolve_source_file(
                 &file_path_resolver::resolve_package_directory(
                     output_directory,
                     infrastructure

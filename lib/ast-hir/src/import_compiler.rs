@@ -1,5 +1,4 @@
 use super::name_qualifier;
-use ast::ast;
 use hir::{
     analysis::ir::{type_transformer, variable_renamer},
     ir,

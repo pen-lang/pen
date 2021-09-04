@@ -2,7 +2,6 @@ mod error;
 mod parsers;
 mod utilities;
 
-use ast::ast;
 use combine::Parser;
 pub use error::ParseError;
 use parsers::{module, stream};
@@ -17,7 +16,7 @@ pub fn parse(source: &str, path: &str) -> Result<ast::Module, ParseError> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::ast::*;
+    use ast::*;
     use position::{test::PositionFake, Position};
 
     #[test]

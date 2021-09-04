@@ -1,6 +1,8 @@
 use super::utilities::*;
-use ast::ast::*;
-use ast::types::{self, Type};
+use ast::{
+    types::{self, Type},
+    *,
+};
 use combine::{
     attempt, choice, easy, from_str, many, many1, none_of, one_of, optional,
     parser::{

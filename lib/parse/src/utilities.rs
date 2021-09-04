@@ -1,4 +1,4 @@
-use ast::ast::*;
+use ast::*;
 use position::Position;
 
 #[derive(Clone, Debug)]

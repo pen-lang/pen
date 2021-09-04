@@ -1,5 +1,4 @@
 use super::error::CompileError;
-use crate::ast;
 use hir::{ir, types};
 use position::Position;
 

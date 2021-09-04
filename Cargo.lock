@@ -55,13 +55,9 @@ dependencies = [
 name = "ast"
 version = "0.1.0"
 dependencies = [
- "combine",
  "hir",
- "interface",
- "once_cell",
  "position",
  "pretty_assertions",
- "regex",
  "serde",
 ]
 
