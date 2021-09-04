@@ -16,7 +16,7 @@ pub fn resolve(
     dependency_file: &FilePath,
     build_script_dependency_file: &FilePath,
 ) -> Result<(), Box<dyn Error>> {
-    let interface_files = lang::parse::parse(
+    let interface_files = parse::parse(
         &infrastructure.file_system.read_to_string(source_file)?,
         &infrastructure.file_path_displayer.display(source_file),
     )?
@@ -24,12 +24,12 @@ pub fn resolve(
     .iter()
     .map(|import| {
         let source_file = match import.module_path() {
-            lang::ast::ModulePath::Internal(path) => file_path_resolver::resolve_source_file(
+            ast::ModulePath::Internal(path) => file_path_resolver::resolve_source_file(
                 package_directory,
                 path.components(),
                 &infrastructure.file_path_configuration,
             ),
-            lang::ast::ModulePath::External(path) => file_path_resolver::resolve_source_file(
+            ast::ModulePath::External(path) => file_path_resolver::resolve_source_file(
                 &file_path_resolver::resolve_package_directory(
                     output_directory,
                     infrastructure
