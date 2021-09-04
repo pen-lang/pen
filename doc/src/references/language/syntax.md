@@ -150,7 +150,7 @@ f(x, y)
 
 #### If expression
 
-It evaluates one of blocks depending of a expression of a boolean type.
+It evaluates one of blocks depending on an expression of a boolean type.
 
 - It evaluates the first block if a given boolean value is `true`.
 - Otherwise, it evaluates the second block.
