@@ -21,6 +21,7 @@ Items are ordered by priority.
 - [ ] Full OS interface
   - [ ] TCP/UDP sockets
   - [ ] Process
+- [ ] Serialization / deserialization
 - [ ] Mutable state
   - [ ] Thread safety
   - [ ] Internal DSL

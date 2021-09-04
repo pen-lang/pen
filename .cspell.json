@@ -12,6 +12,7 @@
     "combinator",
     "concat",
     "dealloc",
+    "deserialization",
     "displayer",
     "dyndep",
     "hasher",
