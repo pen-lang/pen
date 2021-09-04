@@ -11,8 +11,12 @@ You need to specify the function's calling convention, name and type.
 import foreign "c" foo \(number, number) number
 ```
 
-## Exporting functions for foreign languages
+## Exporting functions to foreign languages
+
+You can export functions to foreign languages using [foreign function definitions](/references/language/syntax.md#foreign-function-definition) which have `export foreign` keywords in front of normal function definitions.
 
 ```pen
-export foreign foo
+export foreign foo = \(x number, y number) number {
+  ...
+}
 ```
