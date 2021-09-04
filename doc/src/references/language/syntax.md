@@ -140,9 +140,21 @@ Order operators compare two numbers and return a boolean value indicating if it 
 
 #### Boolean
 
+A not operator flips a boolean value.
+
 ```pen
 !true
+```
+
+An _and_ (`&`) operator returns `true` if both operands are `true`, or `false` otherwise.
+
+```pen
 true & false
+```
+
+An _or_ (`|`) operator returns `true` if either operand is `true`, or `false` otherwise.
+
+```pen
 true | false
 ```
 
