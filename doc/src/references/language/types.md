@@ -105,6 +105,15 @@ type person {
 }
 ```
 
+To expose fields as well as the type itself, you need to capitalize their names.
+
+```pen
+type Person {
+  Name string
+  Age number
+}
+```
+
 ### Literals
 
 Record values are constructed using record literals containing their field names and values.
