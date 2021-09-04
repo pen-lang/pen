@@ -51,26 +51,19 @@ pub fn module<'a>() -> impl Parser<Stream<'a>, Output = Module> {
         blank(),
         many(import()),
         many(foreign_import()),
-        many(type_definition()),
-        many(type_alias()),
+        many(choice((
+            type_alias().map(TypeDefinition::from),
+            record_definition().map(TypeDefinition::from),
+        ))),
         many(definition()),
     )
         .skip(eof())
         .map(
-            |(
-                position,
-                _,
-                imports,
-                foreign_imports,
-                type_definitions,
-                type_aliases,
-                definitions,
-            )| {
+            |(position, _, imports, foreign_imports, type_definitions, definitions)| {
                 Module::new(
                     imports,
                     foreign_imports,
                     type_definitions,
-                    type_aliases,
                     definitions,
                     position,
                 )
@@ -150,15 +143,15 @@ fn foreign_export<'a>() -> impl Parser<Stream<'a>, Output = ()> {
     (keyword("export"), keyword("foreign")).with(value(()))
 }
 
-fn type_definition<'a>() -> impl Parser<Stream<'a>, Output = TypeDefinition> {
+fn record_definition<'a>() -> impl Parser<Stream<'a>, Output = RecordDefinition> {
     (
-        // TODO Simplify commitment to this parser after allow mixing type definitions and aliases.
+        // TODO Simplify commitment to this parser after allow mixing record definitions and aliases.
         attempt((position(), keyword("type"), identifier(), sign("{"))),
         many((identifier(), type_())),
         sign("}"),
     )
         .map(|((position, _, name, _), elements, _): (_, Vec<_>, _)| {
-            TypeDefinition::new(
+            RecordDefinition::new(
                 name,
                 elements
                     .into_iter()
@@ -167,7 +160,7 @@ fn type_definition<'a>() -> impl Parser<Stream<'a>, Output = TypeDefinition> {
                 position,
             )
         })
-        .expected("type definition")
+        .expected("record definition")
 }
 
 fn type_alias<'a>() -> impl Parser<Stream<'a>, Output = TypeAlias> {
@@ -775,15 +768,15 @@ mod tests {
         fn parse_module() {
             assert_eq!(
                 module().parse(stream("", "")).unwrap().0,
-                Module::new(vec![], vec![], vec![], vec![], vec![], Position::fake())
+                Module::new(vec![], vec![], vec![], vec![], Position::fake())
             );
             assert_eq!(
                 module().parse(stream(" ", "")).unwrap().0,
-                Module::new(vec![], vec![], vec![], vec![], vec![], Position::fake())
+                Module::new(vec![], vec![], vec![], vec![], Position::fake())
             );
             assert_eq!(
                 module().parse(stream("\n", "")).unwrap().0,
-                Module::new(vec![], vec![], vec![], vec![], vec![], Position::fake())
+                Module::new(vec![], vec![], vec![], vec![], Position::fake())
             );
             assert_eq!(
                 module().parse(stream("import Foo'Bar", "")).unwrap().0,
@@ -795,7 +788,6 @@ mod tests {
                     vec![],
                     vec![],
                     vec![],
-                    vec![],
                     Position::fake()
                 )
             );
@@ -804,12 +796,12 @@ mod tests {
                 Module::new(
                     vec![],
                     vec![],
-                    vec![],
                     vec![TypeAlias::new(
                         "foo",
                         types::Number::new(Position::fake()),
                         Position::fake()
-                    )],
+                    )
+                    .into()],
                     vec![],
                     Position::fake()
                 )
@@ -820,7 +812,6 @@ mod tests {
                     .unwrap()
                     .0,
                 Module::new(
-                    vec![],
                     vec![],
                     vec![],
                     vec![],
@@ -851,7 +842,6 @@ mod tests {
                     .unwrap()
                     .0,
                 Module::new(
-                    vec![],
                     vec![],
                     vec![],
                     vec![],
@@ -916,6 +906,30 @@ mod tests {
                     )],
                     vec![],
                     vec![],
+                    Position::fake()
+                )
+            );
+        }
+
+        #[test]
+        fn parse_record_definition_after_type_alias() {
+            assert_eq!(
+                module()
+                    .parse(stream("type foo = number type bar {}", ""))
+                    .unwrap()
+                    .0,
+                Module::new(
+                    vec![],
+                    vec![],
+                    vec![
+                        TypeAlias::new(
+                            "foo",
+                            types::Number::new(Position::fake()),
+                            Position::fake()
+                        )
+                        .into(),
+                        RecordDefinition::new("bar", vec![], Position::fake()).into(),
+                    ],
                     vec![],
                     Position::fake()
                 )
@@ -1091,15 +1105,15 @@ mod tests {
     }
 
     #[test]
-    fn parse_type_definition() {
+    fn parse_record_definition() {
         for (source, expected) in &[
             (
                 "type Foo {}",
-                TypeDefinition::new("Foo", vec![], Position::fake()),
+                RecordDefinition::new("Foo", vec![], Position::fake()),
             ),
             (
                 "type Foo {foo number}",
-                TypeDefinition::new(
+                RecordDefinition::new(
                     "Foo",
                     vec![types::RecordElement::new(
                         "foo",
@@ -1110,7 +1124,7 @@ mod tests {
             ),
             (
                 "type Foo {foo number bar number}",
-                TypeDefinition::new(
+                RecordDefinition::new(
                     "Foo",
                     vec![
                         types::RecordElement::new("foo", types::Number::new(Position::fake())),
@@ -1121,7 +1135,7 @@ mod tests {
             ),
         ] {
             assert_eq!(
-                &type_definition().parse(stream(source, "")).unwrap().0,
+                &record_definition().parse(stream(source, "")).unwrap().0,
                 expected
             );
         }
