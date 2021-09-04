@@ -6,6 +6,7 @@
   - [Install](guides/install.md)
   - [Cross compile](guides/cross-compile.md)
   - [Naming convention](guides/naming-convention.md)
+  - [FFI](guides/ffi.md)
 - [References](references/README.md)
   - [Language](references/language/README.md)
     - [Syntax](references/language/syntax.md)

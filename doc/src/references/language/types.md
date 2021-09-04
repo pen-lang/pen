@@ -2,7 +2,7 @@
 
 ## Number
 
-It represents a real number. Under the hood, it is implemented as a 64-bit floating point number of [IEEE 754](https://en.wikipedia.org/wiki/IEEE_754).
+It represents a real number. It is implemented as a 64-bit floating point number of [IEEE 754](https://en.wikipedia.org/wiki/Double-precision_floating-point_format) under the hood.
 
 ```pen
 number
@@ -102,6 +102,15 @@ Fields are not accessible outside modules where they are defined by default.
 type person {
   name string
   age number
+}
+```
+
+To expose fields as well as the type itself to other modules, you need to capitalize their names.
+
+```pen
+type Person {
+  Name string
+  Age number
 }
 ```
 

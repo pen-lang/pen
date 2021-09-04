@@ -9,3 +9,4 @@
 ## References
 
 - [The Zen of Python](https://www.python.org/dev/peps/pep-0020/)
+- [Zen | The Zig programming language](https://ziglang.org/documentation/master/#Zen)
