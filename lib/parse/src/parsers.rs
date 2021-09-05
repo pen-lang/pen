@@ -145,21 +145,24 @@ fn foreign_export<'a>() -> impl Parser<Stream<'a>, Output = ()> {
 
 fn record_definition<'a>() -> impl Parser<Stream<'a>, Output = RecordDefinition> {
     (
-        // TODO Simplify commitment to this parser after allow mixing record definitions and aliases.
-        attempt((position(), keyword("type"), identifier(), sign("{"))),
+        attempt((position(), keyword("type"))),
+        identifier(),
+        sign("{"),
         many((identifier(), type_())),
         sign("}"),
     )
-        .map(|((position, _, name, _), elements, _): (_, Vec<_>, _)| {
-            RecordDefinition::new(
-                name,
-                elements
-                    .into_iter()
-                    .map(|(name, type_)| types::RecordElement::new(name, type_))
-                    .collect(),
-                position,
-            )
-        })
+        .map(
+            |((position, _), name, _, elements, _): (_, _, _, Vec<_>, _)| {
+                RecordDefinition::new(
+                    name,
+                    elements
+                        .into_iter()
+                        .map(|(name, type_)| types::RecordElement::new(name, type_))
+                        .collect(),
+                    position,
+                )
+            },
+        )
         .expected("record definition")
 }
 
@@ -286,16 +289,7 @@ fn statement<'a>() -> impl Parser<Stream<'a>, Output = Statement> {
 }
 
 fn statement_with_result<'a>() -> impl Parser<Stream<'a>, Output = Statement> {
-    (
-        attempt((
-            position(),
-            identifier(),
-            // TODO Implement a sign combinator like a binary operator by consuming all operator
-            // like characters.
-            sign("=").skip(not_followed_by(one_of(OPERATOR_CHARACTERS.chars()))),
-        )),
-        expression(),
-    )
+    (attempt((position(), identifier(), sign("="))), expression())
         .map(|((position, name, _), expression)| Statement::new(Some(name), expression, position))
 }
 
@@ -529,14 +523,7 @@ fn if_list<'a>() -> impl Parser<Stream<'a>, Output = IfList> {
 
 fn if_type<'a>() -> impl Parser<Stream<'a>, Output = IfType> {
     (
-        attempt((
-            position(),
-            keyword("if"),
-            identifier(),
-            // TODO Implement a sign combinator like a binary operator by consuming all operator
-            // like characters.
-            sign("=").skip(not_followed_by(one_of(OPERATOR_CHARACTERS.chars()))),
-        )),
+        attempt((position(), keyword("if"), identifier(), sign("="))),
         expression(),
         sign(";"),
         if_type_branch(),
@@ -715,7 +702,22 @@ fn keyword<'a>(name: &'static str) -> impl Parser<Stream<'a>, Output = ()> {
 }
 
 fn sign<'a>(sign: &'static str) -> impl Parser<Stream<'a>, Output = ()> {
-    token(string(sign)).with(value(())).expected(sign)
+    let parser = string(sign);
+
+    token(
+        if sign
+            .chars()
+            .any(|character| OPERATOR_CHARACTERS.contains(character))
+        {
+            parser
+                .skip(not_followed_by(one_of(OPERATOR_CHARACTERS.chars())))
+                .left()
+        } else {
+            parser.right()
+        },
+    )
+    .with(value(()))
+    .expected(sign)
 }
 
 fn token<'a, O, P: Parser<Stream<'a>, Output = O>>(p: P) -> impl Parser<Stream<'a>, Output = O> {
@@ -2526,6 +2528,7 @@ mod tests {
         assert!(sign("+").parse(stream("-", "")).is_err());
         assert!(sign("+").parse(stream("+", "")).is_ok());
         assert!(sign("++").parse(stream("++", "")).is_ok());
+        assert!(sign("+").parse(stream("++", "")).is_err());
     }
 
     #[test]
