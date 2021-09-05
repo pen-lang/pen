@@ -46,13 +46,15 @@ none
 
 ## String
 
-It represents texts encoded in [UTF-8](https://en.wikipedia.org/wiki/UTF-8) or byte arrays.
+It is a byte array.
 
 ```pen
 string
 ```
 
 ### Literals
+
+They represent texts encoded in [UTF-8](https://en.wikipedia.org/wiki/UTF-8).
 
 ```pen
 "foo"
