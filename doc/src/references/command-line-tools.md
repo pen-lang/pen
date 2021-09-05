@@ -6,7 +6,7 @@ For more information, see help by running `pen --help`.
 
 ## `build` command
 
-It builds a package in a current directory.
+It builds a package in the current directory.
 
 ```sh
 pen build
