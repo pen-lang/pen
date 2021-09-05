@@ -6,7 +6,7 @@ Built-in types and functions are accessible from any modules.
 
 ### `error`
 
-It is a special record type used for error handling.
+It is a special record type used for error handling. See also [Error handling](/references/language/syntax.md#error-handling).
 
 ```pen
 type error {
