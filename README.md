@@ -4,7 +4,7 @@
 
 [![GitHub Action](https://img.shields.io/github/workflow/status/pen-lang/pen/test?style=flat-square)](https://github.com/pen-lang/pen/actions)
 [![License](https://img.shields.io/badge/license-MIT%20%2B%20Apache%202.0-green?style=flat-square)](LICENSE.md)
-[![Twitter](https://img.shields.io/twitter/follow/pen_language?style=social)](https://twitter.com/pen_language)
+[![Twitter](https://img.shields.io/badge/twitter-%40pen__language-blue?style=flat-square)](https://twitter.com/pen_language)
 
 This is a pen.
 
