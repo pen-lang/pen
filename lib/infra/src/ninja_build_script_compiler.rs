@@ -71,8 +71,16 @@ impl NinjaBuildScriptCompiler {
             "rule llc",
             &format!(
                 "  command = {} -O3 -tailcallopt --relocation-model pic \
-                     -mtriple $target -filetype obj -o $out $in",
-                llc.display()
+                     -mtriple $target {} -filetype obj -o $out $in",
+                llc.display(),
+                if target_triple
+                    .map(|target| target.contains("wasm"))
+                    .unwrap_or_default()
+                {
+                    "-mattr +tail-call"
+                } else {
+                    ""
+                }
             ),
             "  description = generating object file for $source_file",
             "rule resolve_dependency",
