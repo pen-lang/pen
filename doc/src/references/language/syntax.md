@@ -172,7 +172,7 @@ true | false
 
 #### Error handling
 
-`?` suffix operator immediately exits the current function with an operand if it has [the `error` type][error-type].
+`?` suffix operator immediately exits the current function with an operand if it is of [the `error` type][error-type].
 
 An operand must be a union type including [the `error` type][error-type].
 
