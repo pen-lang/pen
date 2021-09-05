@@ -1,5 +1,7 @@
 # Core
 
+This package provides common utility functions and types that are agnostic about platforms.
+
 ## Install
 
 ```json
