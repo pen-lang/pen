@@ -70,13 +70,14 @@ impl NinjaBuildScriptCompiler {
             "  description = compiling module of $source_file",
             "rule llc",
             &format!(
-                // spell-checker: disable-next-line
-                "  command = {} -O3 -tailcallopt --relocation-model pic -mtriple $target {} -filetype obj -o $out $in",
+                "  command = {} -O3 -tailcallopt --relocation-model pic \
+                    -mtriple $target {} -filetype obj -o $out $in",
                 llc.display(),
                 if target_triple
                     .map(|target| target.starts_with("wasm"))
                     .unwrap_or_default()
                 {
+                    // spell-checker: disable-next-line
                     "-mattr +tail-call"
                 } else {
                     ""
