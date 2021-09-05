@@ -12,7 +12,7 @@ To create your first package, run the following command.
 pen create foo
 ```
 
-Then, you should see a `foo` directory under your current directory. When you switch to the `foo` directory, you should see a `Main.pen` source file and a `pen.json` package configuration file there.
+Then, you should see a `foo` directory under your current directory. When you go to the `foo` directory, you should see a `Main.pen` source file and a `pen.json` package configuration file there.
 
 ## Building a package
 
