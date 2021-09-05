@@ -12,7 +12,7 @@
 ## Global and local names
 
 - Use descriptive names for top-level functions and types.
-- Use abbreviated names for function-local ones.
+- Use abbreviated names for function-local ones as long as that doesn't incur ambiguity.
   - `i` for `index`
   - `c` for `requestCount`
   - `sys` for `system`
