@@ -145,21 +145,24 @@ fn foreign_export<'a>() -> impl Parser<Stream<'a>, Output = ()> {
 
 fn record_definition<'a>() -> impl Parser<Stream<'a>, Output = RecordDefinition> {
     (
-        // TODO Simplify commitment to this parser after allow mixing record definitions and aliases.
-        attempt((position(), keyword("type"), identifier(), sign("{"))),
+        attempt((position(), keyword("type"))),
+        identifier(),
+        sign("{"),
         many((identifier(), type_())),
         sign("}"),
     )
-        .map(|((position, _, name, _), elements, _): (_, Vec<_>, _)| {
-            RecordDefinition::new(
-                name,
-                elements
-                    .into_iter()
-                    .map(|(name, type_)| types::RecordElement::new(name, type_))
-                    .collect(),
-                position,
-            )
-        })
+        .map(
+            |((position, _), name, _, elements, _): (_, _, _, Vec<_>, _)| {
+                RecordDefinition::new(
+                    name,
+                    elements
+                        .into_iter()
+                        .map(|(name, type_)| types::RecordElement::new(name, type_))
+                        .collect(),
+                    position,
+                )
+            },
+        )
         .expected("record definition")
 }
 
