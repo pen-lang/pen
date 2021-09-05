@@ -53,7 +53,7 @@ The compiler and runtime support different CPU architectures, operating systems,
 
 #### Foreign Function Interface (FFI)
 
-Its C/[Rust](https://www.rust-lang.org/) FFI provides interoperability with other languages.
+Its [Rust](https://www.rust-lang.org/)/C FFI provides interoperability with other languages.
 
 #### Deterministic tests (WIP)
 
