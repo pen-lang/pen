@@ -50,7 +50,7 @@ bar = \(x number) number {
 
 Modules in the same package are referenced by their paths relative to the root directory of the package.
 
-For example, a module of a file `<package directory>/Foo/Bar.pen` is imported as below.
+For example, a module of a file at `<package directory>/Foo/Bar.pen` is imported as below.
 
 ```pen
 import 'Foo'Bar
@@ -60,7 +60,7 @@ import 'Foo'Bar
 
 Modules in other packages are referenced by their package names defined in [`pen.json` files][package-configuration] and module paths.
 
-For example, a module of a file `<package directory>/Bar/Baz.pen` in a package `Foo` is imported as below.
+For example, a module of a file at `<package directory>/Bar/Baz.pen` in a package `Foo` is imported as below.
 
 ```pen
 import Foo'Bar'Baz
