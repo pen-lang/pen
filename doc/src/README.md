@@ -26,7 +26,7 @@ To make such development efficient, it focuses on:
 ### System injection
 
 - System APIs are always injected into entry points of applications.
-- That isolates and protects application logic from implementation details for maintainability.
+- That isolates and protects application logic from implementation details for both maintainability and portability.
 - Developers can define their own system APIs and build applications on top of them.
 
 ### Even more...
@@ -53,7 +53,7 @@ The compiler and runtime support different CPU architectures, operating systems,
 
 #### Foreign Function Interface (FFI)
 
-Its C/[Rust](https://www.rust-lang.org/) FFI provides interoperability with other languages.
+Its [Rust](https://www.rust-lang.org/)/C FFI provides interoperability with other languages.
 
 #### Deterministic tests (WIP)
 
@@ -61,7 +61,7 @@ Unit tests are deterministic to realize reliable continuous integration.
 
 #### Asynchronous operation (WIP)
 
-Every function is possibly asynchronous while called in the same way as synchronous ones.
+Every function can be asynchronous while called in the same way as synchronous ones.
 
 #### Parallel computation (WIP)
 

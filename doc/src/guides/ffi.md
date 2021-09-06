@@ -1,6 +1,6 @@
 # Foreign Function Interface (FFI)
 
-Using FFI, you can import or export functions in foreign languages.
+Using FFI, you can import or export functions in foreign languages, such as [Rust](https://www.rust-lang.org/) and C.
 
 ## Importing functions in foreign languages
 

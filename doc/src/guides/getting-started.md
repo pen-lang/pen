@@ -12,7 +12,7 @@ To create your first package, run the following command.
 pen create foo
 ```
 
-Then, you should see a `foo` directory under your current directory. When you switch to the `foo` directory, you should see a `Main.pen` source file and a `pen.json` package configuration file there.
+Then, you should see a `foo` directory under your current directory. When you go to the `foo` directory, you should see a `Main.pen` source file and a `pen.json` package configuration file there.
 
 ## Building a package
 
@@ -30,7 +30,9 @@ Then, you will see an executable file named `app` in the directory. Run it to se
 
 ## For more information...
 
-Now, you can start editing `*.pen` files and build your own application!
+Now, you can start editing `.pen` files and build your own application!
 
-- To know more about the language, see [the language reference](/references/language).
-- To know more about the standard packages, see [the standard package references](/references/standard-packages).
+- To know more about the language components, see [Syntax](/references/language/syntax.md) and [Types](/references/language/types.md).
+- To know how to use the standard packages, see [Standard packages](/references/standard-packages).
+- To know how to add and use more modules in your package, see [Modules](/references/language/modules.md).
+- To know how to use other packages, see [Packages](/references/language/packages.md).
