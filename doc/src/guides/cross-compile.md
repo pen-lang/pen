@@ -8,13 +8,7 @@ For example, run the following command to compile a `wasm32` binary for the WASI
 pen build --target wasm32-wasi
 ```
 
-Note that we currently support those targets via [Rust](https://www.rust-lang.org/)'s cross compiler toolchain. Please install Rust compiler through [`rustup`](https://rust-lang.github.io/rustup/) and refer to [its documentation](https://rust-lang.github.io/rustup/cross-compilation.html) on how to install cross compiler toolchains for specific targets.
-
-For example, if you want to cross-compile binaries for and install a toolchain of a `wasm32-wasi` target, run the following command.
-
-```sh
-rustup target add wasm32-wasi
-```
+Note that we currently support those targets via [Rust](https://www.rust-lang.org/)'s cross compiler toolchain. Please install Rust compiler through [`rustup`](https://rust-lang.github.io/rustup/) to enable installlation of toolchains for different targets.
 
 ## Supported targets
 
