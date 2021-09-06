@@ -15,6 +15,7 @@ To make such development efficient, it focuses on:
   - Developers can focus on application logic rather than ever-changing implementation details.
 - Portability
   - Programs written in the language can be ported to different platforms.
+  - Platform-dependent codes are isolated from application logic.
 
 ## Features
 
