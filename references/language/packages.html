@@ -146,31 +146,34 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="packages"><a class="header" href="#packages">Packages</a></h1>
-<h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
+<p>Packages are sets of modules. They are built by the <code>pen build</code> command as applications or libraries depending on their configurations.</p>
+<h2 id="what-composes-a-package"><a class="header" href="#what-composes-a-package">What composes a package?</a></h2>
+<p>The following entities can compose packages.</p>
 <ul>
-<li>Each repository of a version control system (VCS) or directory with a package configuration file on a file system composes a package.
+<li>Repositories of version control systems (VCS)
 <ul>
 <li>Currently, only <a href="https://git-scm.com/">Git</a> is supported as a VCS.</li>
 </ul>
 </li>
-<li>A package contains multiple modules.</li>
-<li>Packages are either application or library packages.
+<li>Directories with <a href="#package-configuration">package configuration files</a> on file systems</li>
+<li>Standard packages that come with the <code>pen</code> command
 <ul>
-<li>Packages are considered to be of applications if they have <code>Main.pen</code> files at their top directories. Otherwise, they are library ones.</li>
+<li>They have a special protocol scheme of <code>pen</code> if imported in package configuration files.</li>
 </ul>
 </li>
-<li>Modules in library packages can be imported from other packages.</li>
-<li>To import modules in other packages, see <a href="modules">Modules</a>.</li>
 </ul>
+<h2 id="kinds-of-packages"><a class="header" href="#kinds-of-packages">Kinds of packages</a></h2>
+<p>There are two kinds of packages: applications and libraries.</p>
+<p>Application packages build applications that are often executable files on host platforms. Library packages are meant to be imported and used by other packages which can be of both applications and libraries.</p>
+<p>Packages are considered to be of applications if they have <code>Main.pen</code> files at their top directories. Otherwise, they are library ones.</p>
+<p>Note that every application package needs to have a system package entry named <code>System</code> in their <a href="#package-configuration">package configuration files</a>.</p>
 <h2 id="package-configuration"><a class="header" href="#package-configuration">Package configuration</a></h2>
+<p>Each package has its configuration file named <code>pen.json</code> in a <a href="https://www.json.org/json-en.html">JSON</a> format at its top directory. The JSON file has a single field named <code>dependencies</code> specifying package names and URLs to their locations.</p>
+<p>Package URLs have different protocol schemes depending on where they are located.</p>
 <ul>
-<li>Each package has its configuration file named <code>pen.json</code> at its top directory.</li>
-<li>The configuration file is in JSON.</li>
-<li>It has a single field named <code>dependencies</code> specifying package names and URLs to their locations.
-<ul>
-<li>Every application package needs to have a system package entry named <code>System</code>.</li>
-</ul>
-</li>
+<li>Git repositories: <code>git</code></li>
+<li>Directories on file systems: <code>file</code></li>
+<li>Standard packages: <code>pen</code></li>
 </ul>
 <h3 id="examples"><a class="header" href="#examples">Examples</a></h3>
 <h4 id="application"><a class="header" href="#application">Application</a></h4>

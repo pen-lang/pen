@@ -146,14 +146,15 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="modules"><a class="header" href="#modules">Modules</a></h1>
+<p>Modules are sets of functions and types. You can split programs into reasonable sizes of modules to make them comprehensive, readable and reusable.</p>
 <h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
 <ul>
-<li>Each source file composes a module.</li>
-<li>Modules contain their functions and types.</li>
-<li>They are exported to and imported from other modules.</li>
+<li>Modules contain multiple functions and types.</li>
+<li>Each source file suffixed with a <code>.pen</code> file extension composes a module.</li>
+<li>Modules are exported to and imported from other modules.</li>
 </ul>
-<h2 id="exporting-functions-and-types-from-a-module"><a class="header" href="#exporting-functions-and-types-from-a-module">Exporting functions and types from a module</a></h2>
-<p>Name functions and types in an upper camel case.</p>
+<h2 id="exporting-functions-and-types-from-modules"><a class="header" href="#exporting-functions-and-types-from-modules">Exporting functions and types from modules</a></h2>
+<p>You can name functions and types in an upper camel case for them to be accessible from other modules using <a href="#importing-functions-and-types-from-modules">import statements</a>.</p>
 <pre><code class="language-pen">type Foo {
   ...
 }
@@ -164,9 +165,9 @@ Foo = \() number {
   ...
 }
 </code></pre>
-<h2 id="importing-functions-and-types-from-a-module"><a class="header" href="#importing-functions-and-types-from-a-module">Importing functions and types from a module</a></h2>
-<p>First, place an <code>import</code> statement to import a module at the top of a module you want to import them into.</p>
-<p>The first component of a path in the statement is a name of an external package you declare in <a href="packages#package-configuration">a <code>pen.json</code> file</a> (<code>Foo</code>.) It is omitted if the imported module is in the same package. The rest of the path components are directory names where a module exists (<code>Bar</code>) and the basename of the module filename (<code>Baz</code>.)</p>
+<h2 id="importing-functions-and-types-from-modules"><a class="header" href="#importing-functions-and-types-from-modules">Importing functions and types from modules</a></h2>
+<p>In order to import functions and types from a module, first, place <a href="/references/language/syntax.html#import-statement">an <code>import</code> statement</a> with the name of the module you want to import at the top of the current module.</p>
+<p>The first component of a module name in the statement is a name of a package you declare in <a href="packages.html#package-configuration">a <code>pen.json</code> file</a> (<code>Foo</code>.) It is omitted if the imported module is in the same package as the current one. The rest of the components are directory names where a module exists (<code>Bar</code>) and the basename of the module filename without its file extension (<code>Baz</code> for <code>Baz.pen</code>.)</p>
 <pre><code class="language-pen">import Foo'Bar'Baz
 </code></pre>
 <p>Then, you can access exported members of the module with its prefix.</p>
@@ -178,20 +179,20 @@ bar = \(x number) number {
 </code></pre>
 <h3 id="module-names"><a class="header" href="#module-names">Module names</a></h3>
 <h4 id="modules-in-the-same-package"><a class="header" href="#modules-in-the-same-package">Modules in the same package</a></h4>
-<p>Modules in the same package are referenced by their paths relative to their package root directories.</p>
-<p>For example, a module of a file <code>&lt;package directory&gt;/Foo/Bar.pen</code> is imported as below.</p>
+<p>Modules in the same package are referenced by their paths relative to the root directory of the package.</p>
+<p>For example, a module of a file at <code>&lt;package directory&gt;/Foo/Bar.pen</code> is imported as below.</p>
 <pre><code class="language-pen">import 'Foo'Bar
 </code></pre>
 <h4 id="modules-in-other-packages"><a class="header" href="#modules-in-other-packages">Modules in other packages</a></h4>
-<p>Modules in other packages are referenced by their package names and module paths.</p>
-<p>For example, a module of a file <code>&lt;package directory&gt;/Bar/Baz.pen</code> in a package <code>Foo</code> is imported as below.</p>
+<p>Modules in other packages are referenced by their package names defined in <a href="packages.html#package-configuration"><code>pen.json</code> files</a> and module paths.</p>
+<p>For example, a module of a file at <code>&lt;package directory&gt;/Bar/Baz.pen</code> in a package <code>Foo</code> is imported as below.</p>
 <pre><code class="language-pen">import Foo'Bar'Baz
 </code></pre>
 <h3 id="custom-prefixes"><a class="header" href="#custom-prefixes">Custom prefixes</a></h3>
 <blockquote>
 <p>This feature is work in progress.</p>
 </blockquote>
-<p>Imported modules can have prefixes different from their names.</p>
+<p>Imported modules can have prefixes different from their names by giving them new names.</p>
 <pre><code class="language-pen">import Bar Foo'Bar'Baz
 </code></pre>
 

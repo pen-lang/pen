@@ -173,7 +173,7 @@
 <h3 id="system-injection"><a class="header" href="#system-injection">System injection</a></h3>
 <ul>
 <li>System APIs are always injected into entry points of applications.</li>
-<li>That isolates and protects application logic from implementation details for maintainability.</li>
+<li>That isolates and protects application logic from implementation details for both maintainability and portability.</li>
 <li>Developers can define their own system APIs and build applications on top of them.</li>
 </ul>
 <h3 id="even-more"><a class="header" href="#even-more">Even more...</a></h3>
@@ -188,11 +188,11 @@
 <h4 id="cross-compile"><a class="header" href="#cross-compile">Cross compile</a></h4>
 <p>The compiler and runtime support different CPU architectures, operating systems, web browsers and <a href="https://wasi.dev/">WASI</a>.</p>
 <h4 id="foreign-function-interface-ffi"><a class="header" href="#foreign-function-interface-ffi">Foreign Function Interface (FFI)</a></h4>
-<p>Its C/<a href="https://www.rust-lang.org/">Rust</a> FFI provides interoperability with other languages.</p>
+<p>Its <a href="https://www.rust-lang.org/">Rust</a>/C FFI provides interoperability with other languages.</p>
 <h4 id="deterministic-tests-wip"><a class="header" href="#deterministic-tests-wip">Deterministic tests (WIP)</a></h4>
 <p>Unit tests are deterministic to realize reliable continuous integration.</p>
 <h4 id="asynchronous-operation-wip"><a class="header" href="#asynchronous-operation-wip">Asynchronous operation (WIP)</a></h4>
-<p>Every function is possibly asynchronous while called in the same way as synchronous ones.</p>
+<p>Every function can be asynchronous while called in the same way as synchronous ones.</p>
 <h4 id="parallel-computation-wip"><a class="header" href="#parallel-computation-wip">Parallel computation (WIP)</a></h4>
 <p>The runtime and library provide tools for thread-safe parallel computation that leverage multi-core CPUs.</p>
 <h2 id="license"><a class="header" href="#license">License</a></h2>
