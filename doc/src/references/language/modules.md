@@ -10,7 +10,7 @@ Modules are sets of functions and types. You can split programs into reasonable 
 
 ## Exporting functions and types from modules
 
-You can functions and types in an upper camel case. Then, they are accessible from other modules using [import statements](#importing-functions-and-types-from-modules).
+You can name functions and types in an upper camel case for them to be accessible from other modules using [import statements](#importing-functions-and-types-from-modules).
 
 ```pen
 type Foo {
