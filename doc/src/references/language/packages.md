@@ -16,7 +16,7 @@ The following entities can compose packages.
 
 There are two kinds of packages: applications and libraries.
 
-Applicaiton packages build applications that are often executable files on host platforms. Library packages are meant to be imported and used by other packages which can be of both applications and libraries.
+Application packages build applications that are often executable files on host platforms. Library packages are meant to be imported and used by other packages which can be of both applications and libraries.
 
 Packages are considered to be of applications if they have `Main.pen` files at their top directories. Otherwise, they are library ones.
 
