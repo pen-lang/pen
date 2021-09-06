@@ -26,7 +26,7 @@ Note that every application package needs to have a system package entry named `
 
 Each package has its configuration file named `pen.json` in a [JSON](https://www.json.org/json-en.html) format at its top directory. The JSON file has a single field named `dependencies` specifying package names and URLs to their locations.
 
-Package URLs have different protocols depending on where they are located.
+Package URLs have different protocol schemes depending on where they are located.
 
 - Git repositories: `git`
 - Directories on file systems: `file`
