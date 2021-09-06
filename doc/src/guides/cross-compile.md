@@ -8,7 +8,7 @@ For example, run the following command to compile a `wasm32` binary for the WASI
 pen build --target wasm32-wasi
 ```
 
-Note that we currently support those targets via [Rust](https://www.rust-lang.org/)'s cross compiler toolchain. Please install Rust compiler through [`rustup`](https://rust-lang.github.io/rustup/) to enable installation of toolchains for different targets.
+Note that we currently support those targets via [Rust](https://www.rust-lang.org/)'s cross compiler toolchain. Please install a Rust compiler through [`rustup`](https://rust-lang.github.io/rustup/) to enable installation of toolchains for different targets.
 
 ## Supported targets
 
@@ -18,4 +18,4 @@ Run `pen build --help` to see all supported targets.
 
 Cross compile support of system packages are totally up to their developers.
 
-For example, [the standard system package of `Os`](/references/standard-packages/os.md) supports most targets as long as their platforms expose OS-like APIs. However, some custom system packages might not support all those targets because of their limited use cases.
+For example, [the standard system package of `Os`](/references/standard-packages/os.md) supports most targets as long as their platforms expose OS-like APIs. However, some custom system packages might not support those targets because of their limited use cases.
