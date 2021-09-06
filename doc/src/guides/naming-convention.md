@@ -1,5 +1,7 @@
 # Naming convention
 
+Naming consistently is important to keep codes consistent. The language currently has the following naming conventions.
+
 | Kind               | Case style       | Examples                     |
 | ------------------ | ---------------- | ---------------------------- |
 | Variables          | Camel case       | `fooBar`, `FooBar`, `i`, `x` |
