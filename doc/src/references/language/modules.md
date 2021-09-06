@@ -70,7 +70,7 @@ import Foo'Bar'Baz
 
 > This feature is work in progress.
 
-Imported modules can have prefixes different from their names.
+Imported modules can have prefixes different from their names by giving them new names.
 
 ```pen
 import Bar Foo'Bar'Baz
