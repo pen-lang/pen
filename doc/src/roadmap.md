@@ -10,7 +10,7 @@ Items are ordered by priority.
 - [x] Foreign function interface
 - [x] Basic OS interface
 - [x] WASM backend
-- [ ] Stream-based list type
+- [x] Stream-based list type
 - [ ] Code formatter
 - [ ] Map type
 - [ ] Testing framework
