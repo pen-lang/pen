@@ -1,5 +1,7 @@
 # Types
 
+This page describes different data types in the language.
+
 ## Number
 
 It represents a real number. It is implemented as a 64-bit floating point number of [IEEE 754](https://en.wikipedia.org/wiki/Double-precision_floating-point_format) under the hood.
@@ -32,7 +34,7 @@ false
 
 ## None
 
-It represents a missing value. It has only a single literal of `none`.
+It represents a missing value. It has only a single value of `none`.
 
 ```pen
 none
@@ -62,9 +64,9 @@ They represent texts encoded in [UTF-8](https://en.wikipedia.org/wiki/UTF-8).
 
 ## Functions
 
-It is a function with a list of arguments and a result.
+A function is a set of operations with a list of arguments and a result.
 
-In the language, functions represent not only pure mathematical ones but also "routines" which execute side effects, such as I/O.
+Functions represent not only pure computation but also "routines" which might execute side effects, such as I/O.
 
 ```pen
 \(number, number) number
@@ -72,7 +74,7 @@ In the language, functions represent not only pure mathematical ones but also "r
 
 ## Lists
 
-It is a list of values of some type. The element type is put between `[` and `]`.
+It is a list of values of a type. The element type is put between `[` and `]`.
 
 ```pen
 [number]
@@ -82,7 +84,7 @@ It is a list of values of some type. The element type is put between `[` and `]`
 
 List literals contain their elements. Element types need to be specified explicitly before semicolons like `[number; ... ]`.
 
-Expressions within list literals are evaluated lazily; they are evaluated only if their values are required.
+Expressions within list literals are evaluated lazily; they are evaluated only if their values are required but only once.
 
 ```pen
 [number; 1, 2, 3]
@@ -124,13 +126,13 @@ Record values are constructed using record literals containing their field names
 person{name: "foo", age: 42}
 ```
 
-You can also create new records from existing ones spreading fields of the old ones into the literals.
+You can also create new records from existing ones spreading fields of the old ones into the new ones.
 
 ```pen
 person{...john, name: "bar"}
 ```
 
-You can access field values by appending their names with `.` prefixes to expressions of the record types.
+You can access field values by appending their names with `.` prefixes to expressions of record types.
 
 ```pen
 john.name
@@ -138,7 +140,7 @@ john.name
 
 ## Singleton records
 
-Singleton records are special record types which have only one kind of values.
+Singleton records are special record types which have no field and, therefore, only one kind of values.
 
 ```pen
 type foo {}
@@ -156,7 +158,7 @@ foo
 
 It is a segregated union of types.
 
-For example, the type below represents one of values which can be either `number` or `none`. But values of the type cannot be `number` and `none` types at the same time.
+For example, the type below represents values which can be either `number` or `none`. But values of the type cannot be `number` and `none` types at the same time.
 
 ```pen
 number | none

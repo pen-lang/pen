@@ -10,10 +10,11 @@ Items are ordered by priority.
 - [x] Foreign function interface
 - [x] Basic OS interface
 - [x] WASM backend
-- [ ] Stream-based list type
-- [ ] Code formatter
-- [ ] Map type
+- [x] Stream-based list type
 - [ ] Testing framework
+- [ ] Serialization / deserialization
+- [ ] Map type
+- [ ] Code formatter
 - [ ] IDE/editor support
   - [ ] Language server
 - [ ] Asynchronous operations
@@ -21,10 +22,8 @@ Items are ordered by priority.
 - [ ] Full OS interface
   - [ ] TCP/UDP sockets
   - [ ] Process
-- [ ] Serialization / deserialization
 - [ ] Mutable state
   - [ ] Thread safety
-  - [ ] Internal DSL
 - [ ] Web browser interface
 - [ ] Binary support
 - [ ] Self-hosting

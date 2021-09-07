@@ -38,7 +38,7 @@ type File { ... }
 
 #### `OpenFileOptions`
 
-It is options to open a file. Each flag is described below.
+It is options to open a file. Its flags are described below.
 
 - `Append` allows appending data to the file.
 - `Create` creates a new file if the file doesn't exist or opens it otherwise.

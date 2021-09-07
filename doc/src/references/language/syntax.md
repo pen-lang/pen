@@ -1,8 +1,10 @@
 # Syntax
 
+The language lets you compose programs building up its small constructs. This page describes the syntactical components of the language. See also [Types](types.md) about ones for specific data types.
+
 ## Module
 
-Modules are sets of types and functions. One file composes a module. Modules can import functions and types from other modules.
+Modules are sets of types and functions. One file composes a module. Modules can import functions and types from other modules. See also [Modules](modules.md) to know how modules interact with each other.
 
 A module consists of [statements](#statements).
 
@@ -22,7 +24,7 @@ import Foo'Bar
 
 It imports a function in a foreign language.
 
-You can specify calling convention of foreign languages in a format of string literals after `import foreign` optionally. Currently, only the C calling convention is supported as `"c"`.
+You can specify calling convention of foreign languages in a format of string literals after `import foreign` keywords optionally. Currently, only the C calling convention is supported as `"c"`.
 
 See [FFI](/guides/ffi.md) for more details.
 
@@ -131,7 +133,7 @@ Equal (`==`) and not-equal (`!=`) operators compare two values and return a bool
 1 != 1
 ```
 
-They can be used for any types except functions and types that include them.
+The operators can be used for any types except functions and types that include them.
 
 ```pen
 "foo" == "bar"
@@ -141,7 +143,7 @@ foo{x: 0} == foo{x: 1}
 
 ##### Ordering
 
-Order operators compare two numbers and return a boolean value indicating if it is correct or not.
+Order operators compare two numbers and return a boolean value indicating if the condition is correct or not.
 
 ```pen
 1 < 1
@@ -158,13 +160,13 @@ A not operator flips a boolean value.
 !true
 ```
 
-An _and_ (`&`) operator returns `true` if both operands are `true`, or `false` otherwise.
+An _and_ operator returns `true` if both operands are `true`, or `false` otherwise.
 
 ```pen
 true & false
 ```
 
-An _or_ (`|`) operator returns `true` if either operand is `true`, or `false` otherwise.
+An _or_ operator returns `true` if either operand is `true`, or `false` otherwise.
 
 ```pen
 true | false
@@ -186,7 +188,7 @@ x?
 
 #### If expression
 
-It evaluates one of blocks depending on an expression of a boolean type.
+It evaluates one of blocks depending on a value of an expression of a boolean type.
 
 - It evaluates the first block if a given boolean value is `true`.
 - Otherwise, it evaluates the second block.
@@ -201,7 +203,7 @@ if x {
 
 #### If-type expression
 
-It evaluates one of blocks depending on the type of a given expression. The given expression (`foo()`) needs to be bound to a variable (`x`) and, in each block, the variable is treated as its specified type.
+It evaluates one of blocks depending on the type of a given expression. The expression (`foo()`) needs to be bound to a variable (`x`) and, in each block, the variable is treated as its specified type.
 
 ```pen
 if x = foo(); number {
