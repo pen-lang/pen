@@ -132,7 +132,7 @@ You can also create new records from existing ones spreading fields of the old o
 person{...john, name: "bar"}
 ```
 
-You can access field values by appending their names with `.` prefixes to expressions of the record types.
+You can access field values by appending their names with `.` prefixes to expressions of record types.
 
 ```pen
 john.name
