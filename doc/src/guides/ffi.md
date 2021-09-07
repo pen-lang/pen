@@ -26,8 +26,8 @@ You might want to build your own libraries in foreign languages for your package
 
 The `pen-ffi` scripts should accept the following command line arguments.
 
-| Argument      | Optional | Description             |
-| ------------- | -------- | ----------------------- |
-| `-t <target>` | Yes      | Target triple of builds |
+| Argument      | Required | Description                    |
+| ------------- | -------- | ------------------------------ |
+| `-t <target>` | No       | Custom target triple of builds |
 
 One of examples in practice is [a `pen-ffi.sh` file in the core library](https://github.com/pen-lang/pen/blob/main/lib/core/pen-ffi.sh).
