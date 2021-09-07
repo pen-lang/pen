@@ -126,7 +126,7 @@ Record values are constructed using record literals containing their field names
 person{name: "foo", age: 42}
 ```
 
-You can also create new records from existing ones spreading fields of the old ones into the literals.
+You can also create new records from existing ones spreading fields of the old ones into the new ones.
 
 ```pen
 person{...john, name: "bar"}
