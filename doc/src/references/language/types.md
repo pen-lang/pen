@@ -34,7 +34,7 @@ false
 
 ## None
 
-It represents a missing value. It has only a single literal of `none`.
+It represents a missing value. It has only a single value of `none`.
 
 ```pen
 none
