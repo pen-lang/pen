@@ -150,15 +150,12 @@
 <p>For example, run the following command to compile a <code>wasm32</code> binary for the WASI platform.</p>
 <pre><code class="language-sh">pen build --target wasm32-wasi
 </code></pre>
-<p>Note that we currently support those targets via <a href="https://www.rust-lang.org/">Rust</a>'s cross compiler toolchain. Please install Rust compiler through <a href="https://rust-lang.github.io/rustup/"><code>rustup</code></a> and refer to <a href="https://rust-lang.github.io/rustup/cross-compilation.html">its documentation</a> on how to install cross compiler toolchains for specific targets.</p>
-<p>For example, if you want to cross-compile binaries for and install a toolchain of a <code>wasm32-wasi</code> target, run the following command.</p>
-<pre><code class="language-sh">rustup target add wasm32-wasi
-</code></pre>
+<p>Note that we currently support those targets via <a href="https://www.rust-lang.org/">Rust</a>'s cross compiler toolchain. Please install a Rust compiler through <a href="https://rust-lang.github.io/rustup/"><code>rustup</code></a> to enable installation of toolchains for different targets.</p>
 <h2 id="supported-targets"><a class="header" href="#supported-targets">Supported targets</a></h2>
 <p>Run <code>pen build --help</code> to see all supported targets.</p>
 <h2 id="system-package-support"><a class="header" href="#system-package-support">System package support</a></h2>
 <p>Cross compile support of system packages are totally up to their developers.</p>
-<p>For example, <a href="/references/standard-packages/os.html">the standard system package of <code>Os</code></a> supports most targets as long as their platforms expose OS-like APIs. However, some custom system packages might not support all those targets because of their limited use cases.</p>
+<p>For example, <a href="/references/standard-packages/os.html">the standard system package of <code>Os</code></a> supports most targets as long as their platforms expose OS-like APIs. However, some custom system packages might not support those targets because of their limited use cases.</p>
 
                     </main>
 
