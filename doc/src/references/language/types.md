@@ -140,7 +140,7 @@ john.name
 
 ## Singleton records
 
-Singleton records are special record types which have only one kind of values.
+Singleton records are special record types which have no field and, therefore, only one kind of values.
 
 ```pen
 type foo {}
@@ -158,7 +158,7 @@ foo
 
 It is a segregated union of types.
 
-For example, the type below represents one of values which can be either `number` or `none`. But values of the type cannot be `number` and `none` types at the same time.
+For example, the type below represents values which can be either `number` or `none`. But values of the type cannot be `number` and `none` types at the same time.
 
 ```pen
 number | none
