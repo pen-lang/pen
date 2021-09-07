@@ -1,5 +1,7 @@
 # Types
 
+This page describes different data types in the language.
+
 ## Number
 
 It represents a real number. It is implemented as a 64-bit floating point number of [IEEE 754](https://en.wikipedia.org/wiki/Double-precision_floating-point_format) under the hood.
