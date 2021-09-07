@@ -24,7 +24,6 @@ Items are ordered by priority.
   - [ ] Process
 - [ ] Mutable state
   - [ ] Thread safety
-  - [ ] Internal DSL
 - [ ] Web browser interface
 - [ ] Binary support
 - [ ] Self-hosting
