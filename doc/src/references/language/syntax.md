@@ -1,8 +1,10 @@
 # Syntax
 
+The language lets you compose programs building up its small constructs. This page describes the syntactical components of the language. See also [Types](types.md) about ones for specific data types.
+
 ## Module
 
-Modules are sets of types and functions. One file composes a module. Modules can import functions and types from other modules.
+Modules are sets of types and functions. One file composes a module. Modules can import functions and types from other modules. See also [Modules](modules.md) to know how modules interact with each other.
 
 A module consists of [statements](#statements).
 
