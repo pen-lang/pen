@@ -19,3 +19,7 @@ export foreign foo = \(x number, y number) number {
   ...
 }
 ```
+
+## Building custom libraries in foreign languages in packages
+
+You might want to build your own libraries in foreign languages for your packages. Then, you can set up a `pen-ffi` script in your package. The executable script file is run on every package build accepting some command line arguments and returns a path to an `.a` archive file of the custom library.
