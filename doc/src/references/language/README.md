@@ -1,3 +1,3 @@
 # Language
 
-These are references of language constructs and its module and package systems.
+These are references of language constructs and its type, module and package systems.
