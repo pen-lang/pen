@@ -66,7 +66,7 @@ They represent texts encoded in [UTF-8](https://en.wikipedia.org/wiki/UTF-8).
 
 A function is a set of operations with a list of arguments and a result.
 
-In the language, functions represent not only pure mathematical ones but also "routines" which execute side effects, such as I/O.
+Functions represent not only pure computation but also "routines" which might execute side effects, such as I/O.
 
 ```pen
 \(number, number) number
@@ -74,7 +74,7 @@ In the language, functions represent not only pure mathematical ones but also "r
 
 ## Lists
 
-It is a list of values of some type. The element type is put between `[` and `]`.
+It is a list of values of a type. The element type is put between `[` and `]`.
 
 ```pen
 [number]
@@ -84,7 +84,7 @@ It is a list of values of some type. The element type is put between `[` and `]`
 
 List literals contain their elements. Element types need to be specified explicitly before semicolons like `[number; ... ]`.
 
-Expressions within list literals are evaluated lazily; they are evaluated only if their values are required.
+Expressions within list literals are evaluated lazily; they are evaluated only if their values are required but only once.
 
 ```pen
 [number; 1, 2, 3]
