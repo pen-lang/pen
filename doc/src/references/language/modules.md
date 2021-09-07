@@ -37,10 +37,10 @@ import Foo'Bar'Baz
 Then, you can access exported members of the module with its prefix.
 
 ```pen
-type Foo = Baz'Foo
+type Foo = Baz'Type
 
 bar = \(x number) number {
-  Baz'Foo(x)
+  Baz'Function(x)
 }
 ```
 
