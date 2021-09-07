@@ -64,7 +64,7 @@ They represent texts encoded in [UTF-8](https://en.wikipedia.org/wiki/UTF-8).
 
 ## Functions
 
-It is a function with a list of arguments and a result.
+A function is a set of operations with a list of arguments and a result.
 
 In the language, functions represent not only pure mathematical ones but also "routines" which execute side effects, such as I/O.
 
