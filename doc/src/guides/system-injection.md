@@ -1,10 +1,24 @@
 # System injection
 
-System injection is one of the most particular features of the language where you can define your own system APIs and build applications in your own formats.
+Using system injection, you can define your own system APIs and build applications in file formats of your choice. Those system APIs and application linking logic are bundled into [system packages](#system-packages).
 
 ## System packages
 
-In [their package configurations](/references/language/packages.md#package-configuration), application packages need to specify system packages that are special kinds of library packages and define system APIs for the programs to interact with the world outside.
+In [their package configurations](/references/language/packages.md#package-configuration), [application packages](/references/language/packages.md#kinds-of-packages) need to specify system packages that are special kinds of library packages and define system APIs for the programs to interact with the world outside.
+
+System packages do the following three things.
+
+### Define main function types
+
+A system package has a module named `MainFunction` where a `MainFunction` function type is defined at the top level.
+
+### Providing system APIs
+
+> WIP
+
+### Linking application files
+
+> WIP
 
 ## `pen-link` scripts
 
