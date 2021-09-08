@@ -1,6 +1,6 @@
 # System injection
 
-System injection is one of the biggest features of the language where you can define your own system APIs and build applications in your own formats.
+System injection is one of the most particular features of the language where you can define your own system APIs and build applications in your own formats.
 
 ## System packages
 
