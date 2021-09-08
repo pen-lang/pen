@@ -7,6 +7,7 @@
   - [Naming convention](guides/naming-convention.md)
   - [Cross compile](guides/cross-compile.md)
   - [FFI](guides/ffi.md)
+  - [System injection](guides/system-injection.md)
 - [References](references/README.md)
   - [Language](references/language/README.md)
     - [Syntax](references/language/syntax.md)
