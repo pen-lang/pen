@@ -23,7 +23,7 @@ To make such development efficient, it focuses on:
 - Its syntax and type system are simple and easy to learn.
 - Its minimal language features keep codes comprehensive and consistent.
 
-### System injection
+### [System injection](/guides/system-injection.md)
 
 - System APIs are always injected into entry points of applications.
 - That isolates and protects application logic from implementation details for both maintainability and portability.
