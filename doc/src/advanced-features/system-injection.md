@@ -28,11 +28,11 @@ Each system package has a script file named `pen-link` at its top directory. The
 
 The scripts should accept the following command line arguments. Outputs of the scripts are simply discarded unless some errors occur during runs.
 
-| Argument           | Required | Description                         |
-| ------------------ | -------- | ----------------------------------- |
-| `-t <target>`      | No       | Target triple of builds             |
-| `-o <application>` | Yes      | Path of a application file to build |
-| `<archive>...`     | Yes      | Paths of archive files to link      |
+| Argument           | Required | Description                          |
+| ------------------ | -------- | ------------------------------------ |
+| `-t <target>`      | No       | Target triple of builds              |
+| `-o <application>` | Yes      | Path of an application file to build |
+| `<archive>...`     | Yes      | Paths of archive files to link       |
 
 ## Examples
 
