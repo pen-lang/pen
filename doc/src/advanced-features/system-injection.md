@@ -24,13 +24,9 @@ System packages are the only places where we can define functions that have side
 
 ### Linking application files
 
-> WIP
+Each system package has a script file named `pen-link` at its top directory. The executable file is run with object files specified by command line arguments to build and link an application file on every build. The script files may or may not have file extensions.
 
-#### `pen-link` scripts
-
-Each system package has a `pen-link` script file at the its directory. The executable file is run with object files specified by command line arguments to build an application file on every build. The script files may or may not have file extensions.
-
-The scripts should accept the following command line arguments. Outputs of the scripts are simply discarded unless any error occurs during runs.
+The scripts should accept the following command line arguments. Outputs of the scripts are simply discarded unless some errors occur during runs.
 
 | Argument           | Required | Description                         |
 | ------------------ | -------- | ----------------------------------- |
