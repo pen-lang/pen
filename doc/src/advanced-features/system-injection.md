@@ -1,6 +1,6 @@
 # System injection
 
-> Caution: Providing bad system packages which do not conform to conventions can break the ecosystem of the language. Please be careful to follow them and keep applications maintainable and portable!
+> Caveat: Providing bad system packages which do not conform to conventions can break the ecosystem of the language. Please be careful to follow them and keep applications maintainable and portable!
 
 Using system injection, you can define your own system APIs and build applications in file formats of your choice. Those system APIs and application linking logic are bundled into [system packages](#system-packages).
 
