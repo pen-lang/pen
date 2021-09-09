@@ -18,6 +18,10 @@ A system package must have a module named `MainFunction` in which a `MainFunctio
 
 System packages are the only places where we can define functions that have side effects. As they provide those system functions, applications can perform I/O, such as console output and file system operations, to make actual effects to the world.
 
+#### Conventions
+
+**System packages should never expose side effects directly through functions**; all exported functions of their APIs must be pure. Instead, every system package should provide (usually) one _context_ type on which those functions depend to make side effects.
+
 For example, a system package for command line applications might have the following API:
 
 ```pen
@@ -42,10 +46,6 @@ Print = \(s string) none | error {
   _pen_put_string(s)
 }
 ```
-
-#### Conventions
-
-**System packages should never expose side effects directly through functions**; all exported functions of their APIs must be pure. Instead, every system package should provide (usually) one _context_ type on which those functions depend to make side effects.
 
 ### Linking application files
 
