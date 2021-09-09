@@ -14,6 +14,14 @@ System packages do the following three things.
 
 A system package must have a module named `MainFunction.pen` in which a `MainFunction` function type is defined. Literally, the function type is used as a type of `main` functions in `Main.pen` modules in application packages.
 
+For example, a system package for command line applications might have the following `MainFunction.pen` module:
+
+```pen
+import 'Context
+
+type MainFunction = \(ctx Context'Context) none | error
+```
+
 ### Providing system APIs
 
 System packages are the only places where we can define functions that have side effects. As they provide those system functions, applications can perform I/O, such as console output and file system operations, to make actual effects to the world.
