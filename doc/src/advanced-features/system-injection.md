@@ -30,7 +30,7 @@ The scripts should accept the following command line arguments. Outputs of the s
 
 | Argument           | Required | Description                          |
 | ------------------ | -------- | ------------------------------------ |
-| `-t <target>`      | No       | Target triple of builds              |
+| `-t <target>`      | No       | Target triple                        |
 | `-o <application>` | Yes      | Path of an application file to build |
 | `<archive>...`     | Yes      | Paths of archive files to link       |
 
