@@ -7,7 +7,6 @@ pull_request_rules:
         method: squash
   - name: auto-merge
     conditions:
-      - base=main
       - label=auto-merge
     actions:
       merge:
