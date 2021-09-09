@@ -6,23 +6,21 @@ Using system injection, you can define your own system APIs and build applicatio
 
 ## System packages
 
-In [their package configurations](/references/language/packages.md#package-configuration), [application packages](/references/language/packages.md#kinds-of-packages) need to specify system packages that are special kinds of library packages and define system APIs for the programs to interact with the world outside.
+In [their package configurations](/references/language/packages.md#package-configuration), [application packages](/references/language/packages.md#kinds-of-packages) need to specify system packages that are special kinds of library packages and define system APIs for the programs to interact with the world.
 
 System packages do the following three things.
 
-### Define main function types
+### Defining main function types
 
-A system package has a module named `MainFunction` where a `MainFunction` function type is defined. Literally, the function type is used as a type of `main` functions in `Main.pen` modules in application packages.
+A system package must have a module named `MainFunction` in which a `MainFunction` function type is defined. Literally, the function type is used as a type of `main` functions in `Main.pen` modules in application packages.
 
 ### Providing system APIs
 
-System packages are the only places where we can define functions that have side effects. As the packages provide those system APIs, applications can run I/O to make actual effects to the world.
+System packages are the only places where we can define functions that have side effects. As they provide those system functions, applications can perform I/O, such as console output and file system operations, to make actual effects to the world.
 
 #### Conventions
 
-**System packages should never expose side effects directly through functions**; all exported functions of their APIs must be pure.
-
-Every system package should rather provide (usually) one _context_ type on which those functions depend on to make side effects.
+**System packages should never expose side effects directly through functions**; all exported functions of their APIs must be pure. Instead, every system package should provide (usually) one _context_ type on which those functions depend to make side effects.
 
 ### Linking application files
 
