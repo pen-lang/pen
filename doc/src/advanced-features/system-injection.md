@@ -10,17 +10,23 @@ System packages do the following three things.
 
 ### Define main function types
 
-A system package has a module named `MainFunction` where a `MainFunction` function type is defined at the top level.
+A system package has a module named `MainFunction` where a `MainFunction` function type is defined. Literally, the function type is used as a type of `main` functions in `Main.pen` modules in application packages.
 
 ### Providing system APIs
 
-> WIP
+System packages are the only places where we can define functions that have side effects. As the packages provide those system APIs, applications can run I/O to make actual effects to the world.
+
+#### Conventions
+
+**System packages should never expose side effects directly through functions**; all exported functions of their APIs must be pure.
+
+Every system package should rather provide (usually) one _context_ type on which those functions depend on to make side effects.
 
 ### Linking application files
 
 > WIP
 
-## `pen-link` scripts
+#### `pen-link` scripts
 
 Each system package has a `pen-link` script file at the its directory. The executable file is run with object files specified by command line arguments to build an application file on every build. The script files may or may not have file extensions.
 
