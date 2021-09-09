@@ -26,7 +26,7 @@ It imports a function in a foreign language.
 
 You can specify calling convention of foreign languages in a format of string literals after `import foreign` keywords optionally. Currently, only the C calling convention is supported as `"c"`.
 
-See [FFI](/guides/ffi.md) for more details.
+See [FFI](/advanced-features/ffi.md) for more details.
 
 ```pen
 import foreign "c" foo \(number, number) number
@@ -69,7 +69,7 @@ foo = \(x number, y number) number {
 
 It defines a new foreign function.
 
-See [FFI](/guides/ffi.md) for more details.
+See [FFI](/advanced-features/ffi.md) for more details.
 
 ```pen
 export foreign foo = \(x number, y number) number {
