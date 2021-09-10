@@ -4,6 +4,8 @@ Using FFI, you can import or export functions in foreign languages, such as [Rus
 
 ## Importing functions in foreign languages
 
+> Caveat: You can import foreign functions that might make side effects only in [system packages](system-injection.md#system-packages). See also [System injection](system-injection.md).
+
 You can import functions in foreign languages using [foreign import statements](/references/language/syntax.md#foreign-import-statement) which specify the functions' calling convention, names and types. Then, the functions are available under the names.
 
 ```pen

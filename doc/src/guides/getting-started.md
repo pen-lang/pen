@@ -2,7 +2,7 @@
 
 ## Install
 
-See [Install](install).
+See [Install](install.md).
 
 ## Creating a package
 
