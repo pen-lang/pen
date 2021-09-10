@@ -43,6 +43,8 @@ type stdIn {}
 type stdOut {}
 type stdErr {}
 
+type specialFile = stdIn | stdOut | stdErr
+
 type ffiOpenResult {
   file file
   error number
@@ -81,7 +83,6 @@ type array {
   array any
 }
 
-type specialFile = stdIn | stdOut | stdErr
 
 StdIn = \() File {
   File{inner: stdIn}
