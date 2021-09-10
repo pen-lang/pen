@@ -161,7 +161,7 @@
 <h2 id="downcast-an-any-type"><a class="header" href="#downcast-an-any-type">Downcast an any type</a></h2>
 <p><em>Given</em> a file named &quot;Foo.pen&quot; with:</p>
 <pre><code class="language-pen">f = \(x any) number {
-  if x = x; number {
+  if x = x as number {
     x
   } else {
     0

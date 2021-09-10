@@ -169,7 +169,7 @@
 <h2 id="downcast-a-union-type"><a class="header" href="#downcast-a-union-type">Downcast a union type</a></h2>
 <p><em>Given</em> a file named &quot;Foo.pen&quot; with:</p>
 <pre><code class="language-pen">f = \(x number | none) number {
-  if x = x; number {
+  if x = x as number {
     x
   } else if none {
     0
@@ -181,7 +181,7 @@
 <h2 id="downcast-a-union-type-with-an-else-block"><a class="header" href="#downcast-a-union-type-with-an-else-block">Downcast a union type with an else block</a></h2>
 <p><em>Given</em> a file named &quot;Foo.pen&quot; with:</p>
 <pre><code class="language-pen">f = \(x number | none) number {
-  if x = x; none {
+  if x = x as none {
     0
   } else {
     x
@@ -193,7 +193,7 @@
 <h2 id="downcast-a-union-type-to-another-union-type"><a class="header" href="#downcast-a-union-type-to-another-union-type">Downcast a union type to another union type</a></h2>
 <p><em>Given</em> a file named &quot;Foo.pen&quot; with:</p>
 <pre><code class="language-pen">f = \(x number | boolean | none) number | none {
-  if x = x; number | none {
+  if x = x as number | none {
     x
   } else {
     none

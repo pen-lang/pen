@@ -161,7 +161,7 @@
 import System'Os
 
 main = \(ctx Os'Context) number {
-  if _ = Os'WriteFile(ctx, Os'StdOut(), String'Join(Os'Arguments(ctx), &quot; &quot;)); number {
+  if _ = Os'WriteFile(ctx, Os'StdOut(), String'Join(Os'Arguments(ctx), &quot; &quot;)) as number {
     0
   } else {
     1
@@ -183,7 +183,7 @@ printEnvironmentVariable = \(ctx Os'Context) none | error {
 }
 
 main = \(ctx Os'Context) number {
-  if _ = printEnvironmentVariable(ctx); none {
+  if _ = printEnvironmentVariable(ctx) as none {
     0
   } else {
     1
@@ -199,7 +199,7 @@ main = \(ctx Os'Context) number {
 <pre><code class="language-pen">import System'Os
 
 main = \(ctx Os'Context) number {
-  if f = Os'OpenFile(ctx, &quot;./foo.txt&quot;); Os'File {
+  if f = Os'OpenFile(ctx, &quot;./foo.txt&quot;) as Os'File {
     0
   } else {
     1
@@ -231,7 +231,7 @@ readFile = \(ctx Os'Context) none | error {
 }
 
 main = \(ctx Os'Context) number {
-  if _ = readFile(ctx); none {
+  if _ = readFile(ctx) as none {
     0
   } else {
     1
@@ -259,7 +259,7 @@ writeFile = \(ctx Os'Context) none | error {
 }
 
 main = \(ctx Os'Context) number {
-  if _ = writeFile(ctx); none {
+  if _ = writeFile(ctx) as none {
     0
   } else {
     1
@@ -275,7 +275,7 @@ main = \(ctx Os'Context) number {
 <pre><code class="language-pen">import System'Os
 
 main = \(ctx Os'Context) number {
-  if _ = Os'CopyFile(ctx, &quot;foo.txt&quot;, &quot;bar.txt&quot;); none {
+  if _ = Os'CopyFile(ctx, &quot;foo.txt&quot;, &quot;bar.txt&quot;) as none {
     0
   } else {
     1
@@ -291,7 +291,7 @@ main = \(ctx Os'Context) number {
 <pre><code class="language-pen">import System'Os
 
 main = \(ctx Os'Context) number {
-  if _ = Os'RemoveFile(ctx, &quot;foo.txt&quot;); none {
+  if _ = Os'RemoveFile(ctx, &quot;foo.txt&quot;) as none {
     0
   } else {
     1
@@ -318,7 +318,7 @@ readDirectory = \(ctx Os'Context) none | error {
 }
 
 main = \(ctx Os'Context) number {
-  if _ = readDirectory(ctx); none {
+  if _ = readDirectory(ctx) as none {
     0
   } else {
     1
@@ -334,7 +334,7 @@ main = \(ctx Os'Context) number {
 <pre><code class="language-pen">import System'Os
 
 main = \(ctx Os'Context) number {
-  if _ = Os'CreateDirectory(ctx, &quot;foo&quot;); none {
+  if _ = Os'CreateDirectory(ctx, &quot;foo&quot;) as none {
     0
   } else {
     1
@@ -349,7 +349,7 @@ main = \(ctx Os'Context) number {
 <pre><code class="language-pen">import System'Os
 
 main = \(ctx Os'Context) number {
-  if _ = Os'RemoveDirectory(ctx, &quot;foo&quot;); none {
+  if _ = Os'RemoveDirectory(ctx, &quot;foo&quot;) as none {
     0
   } else {
     1

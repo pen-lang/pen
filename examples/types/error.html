@@ -177,7 +177,7 @@
 <h2 id="use-a-try-operator-with-a-union-type"><a class="header" href="#use-a-try-operator-with-a-union-type">Use a try operator with a union type</a></h2>
 <p><em>Given</em> a file named &quot;Foo.pen&quot; with:</p>
 <pre><code class="language-pen">f = \(x number | none | error) number | error {
-  if x = x?; number {
+  if x = x? as number {
     x + 1
   } else if none {
     0
