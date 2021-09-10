@@ -15,7 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - run: tools/ci/set_up_os.sh
-      - run: cargo clippy -- -D warnings -D clippy::mod_module_files
+      - run: cargo clippy -- -D warnings
   spell_check:
     runs-on: ubuntu-latest
     steps:
