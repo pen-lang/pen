@@ -21,7 +21,7 @@ use std::collections::HashSet;
 
 const BUILT_IN_LITERALS: &[&str] = &["false", "none", "true"];
 const BUILT_IN_TYPES: &[&str] = &["any", "boolean", "none", "number", "string"];
-const KEYWORDS: Lazy<Vec<&str>> = Lazy::new(|| {
+static KEYWORDS: Lazy<Vec<&str>> = Lazy::new(|| {
     ["as", "else", "export", "foreign", "if", "import", "type"]
         .iter()
         .chain(BUILT_IN_LITERALS)
