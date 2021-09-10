@@ -124,7 +124,7 @@ fn transform_expression(
             let_.type_().cloned(),
             transform_expression(let_.bound_expression(), transform),
             transform_expression(let_.expression(), &|variable| {
-                if let_.name().as_deref() == Some(variable.name()) {
+                if let_.name() == Some(variable.name()) {
                     variable.clone().into()
                 } else {
                     transform(variable)

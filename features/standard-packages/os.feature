@@ -17,7 +17,7 @@ Feature: OS
     import System'Os
 
     main = \(ctx Os'Context) number {
-      if _ = Os'WriteFile(ctx, Os'StdOut(), String'Join(Os'Arguments(ctx), " ")); number {
+      if _ = Os'WriteFile(ctx, Os'StdOut(), String'Join(Os'Arguments(ctx), " ")) as number {
         0
       } else {
         1
@@ -41,7 +41,7 @@ Feature: OS
     }
 
     main = \(ctx Os'Context) number {
-      if _ = printEnvironmentVariable(ctx); none {
+      if _ = printEnvironmentVariable(ctx) as none {
         0
       } else {
         1
@@ -59,7 +59,7 @@ Feature: OS
     import System'Os
 
     main = \(ctx Os'Context) number {
-      if f = Os'OpenFile(ctx, "./foo.txt"); Os'File {
+      if f = Os'OpenFile(ctx, "./foo.txt") as Os'File {
         0
       } else {
         1
@@ -93,7 +93,7 @@ Feature: OS
     }
 
     main = \(ctx Os'Context) number {
-      if _ = readFile(ctx); none {
+      if _ = readFile(ctx) as none {
         0
       } else {
         1
@@ -123,7 +123,7 @@ Feature: OS
     }
 
     main = \(ctx Os'Context) number {
-      if _ = writeFile(ctx); none {
+      if _ = writeFile(ctx) as none {
         0
       } else {
         1
@@ -141,7 +141,7 @@ Feature: OS
     import System'Os
 
     main = \(ctx Os'Context) number {
-      if _ = Os'CopyFile(ctx, "foo.txt", "bar.txt"); none {
+      if _ = Os'CopyFile(ctx, "foo.txt", "bar.txt") as none {
         0
       } else {
         1
@@ -159,7 +159,7 @@ Feature: OS
     import System'Os
 
     main = \(ctx Os'Context) number {
-      if _ = Os'RemoveFile(ctx, "foo.txt"); none {
+      if _ = Os'RemoveFile(ctx, "foo.txt") as none {
         0
       } else {
         1
@@ -188,7 +188,7 @@ Feature: OS
     }
 
     main = \(ctx Os'Context) number {
-      if _ = readDirectory(ctx); none {
+      if _ = readDirectory(ctx) as none {
         0
       } else {
         1
@@ -206,7 +206,7 @@ Feature: OS
     import System'Os
 
     main = \(ctx Os'Context) number {
-      if _ = Os'CreateDirectory(ctx, "foo"); none {
+      if _ = Os'CreateDirectory(ctx, "foo") as none {
         0
       } else {
         1
@@ -223,7 +223,7 @@ Feature: OS
     import System'Os
 
     main = \(ctx Os'Context) number {
-      if _ = Os'RemoveDirectory(ctx, "foo"); none {
+      if _ = Os'RemoveDirectory(ctx, "foo") as none {
         0
       } else {
         1

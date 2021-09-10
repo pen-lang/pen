@@ -19,7 +19,16 @@ use once_cell::sync::Lazy;
 use position::Position;
 use std::collections::HashSet;
 
-const KEYWORDS: &[&str] = &["else", "export", "foreign", "if", "import", "type"];
+const BUILT_IN_LITERALS: &[&str] = &["false", "none", "true"];
+const BUILT_IN_TYPES: &[&str] = &["any", "boolean", "none", "number", "string"];
+static KEYWORDS: Lazy<Vec<&str>> = Lazy::new(|| {
+    ["as", "else", "export", "foreign", "if", "import", "type"]
+        .iter()
+        .chain(BUILT_IN_LITERALS)
+        .chain(BUILT_IN_TYPES)
+        .copied()
+        .collect()
+});
 const OPERATOR_CHARACTERS: &str = "+-*/=<>&|!?";
 
 static NUMBER_REGEX: Lazy<regex::Regex> =
@@ -525,7 +534,7 @@ fn if_type<'a>() -> impl Parser<Stream<'a>, Output = IfType> {
     (
         attempt((position(), keyword("if"), identifier(), sign("="))),
         expression(),
-        sign(";"),
+        keyword("as"),
         if_type_branch(),
         many(attempt((keyword("else"), keyword("if"))).with(if_type_branch())),
         optional(keyword("else").with(block())),
@@ -696,6 +705,10 @@ fn raw_identifier<'a>() -> impl Parser<Stream<'a>, Output = String> {
 }
 
 fn keyword<'a>(name: &'static str) -> impl Parser<Stream<'a>, Output = ()> {
+    if !KEYWORDS.contains(&name) {
+        unreachable!("undefined keyword");
+    }
+
     token(attempt(string(name)).skip(not_followed_by(alpha_num())))
         .with(value(()))
         .expected(name)
@@ -1694,7 +1707,7 @@ mod tests {
         fn parse_if_type() {
             assert_eq!(
                 if_type()
-                    .parse(stream("if x=y;boolean {none}else{none}", ""))
+                    .parse(stream("if x=y as boolean {none}else{none}", ""))
                     .unwrap()
                     .0,
                 IfType::new(
@@ -1716,7 +1729,7 @@ mod tests {
             assert_eq!(
                 if_type()
                     .parse(stream(
-                        "if x=y;boolean{none}else if none{none}else{none}",
+                        "if x=y as boolean{none}else if none{none}else{none}",
                         ""
                     ))
                     .unwrap()
@@ -1745,7 +1758,7 @@ mod tests {
 
             assert_eq!(
                 if_type()
-                    .parse(stream("if x=y;boolean{none}else if none{none}", ""))
+                    .parse(stream("if x=y as boolean{none}else if none{none}", ""))
                     .unwrap()
                     .0,
                 IfType::new(
@@ -2517,9 +2530,10 @@ mod tests {
 
     #[test]
     fn parse_keyword() {
-        assert!(keyword("foo").parse(stream("bar", "")).is_err());
-        assert!(keyword("fo").parse(stream("foo", "")).is_err());
-        assert!(keyword("foo").parse(stream("foo", "")).is_ok());
+        assert!(keyword("type").parse(stream("bar", "")).is_err());
+        // spell-checker: disable-next-line
+        assert!(keyword("type").parse(stream("typer", "")).is_err());
+        assert!(keyword("type").parse(stream("type", "")).is_ok());
     }
 
     #[test]
