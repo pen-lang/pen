@@ -2,8 +2,8 @@ import foreign "c" _pen_os_read_stdin \() ffiStringResult
 import foreign "c" _pen_os_write_stdout \(string) ffiWriteResult
 import foreign "c" _pen_os_write_stderr \(string) ffiWriteResult
 import foreign "c" _pen_os_open_file \(string, OpenFileOptions) ffiOpenResult
-import foreign "c" _pen_os_read_file \(file) ffiStringResult
-import foreign "c" _pen_os_write_file \(file, string) ffiWriteResult
+import foreign "c" _pen_os_read_file \(normalFile) ffiStringResult
+import foreign "c" _pen_os_write_file \(normalFile, string) ffiWriteResult
 import foreign "c" _pen_os_copy_file \(string, string) ffiNoneResult
 import foreign "c" _pen_os_remove_file \(string) ffiNoneResult
 import foreign "c" _pen_os_read_directory \(string) ffiReadDirectoryResult
@@ -20,8 +20,8 @@ type Context {
   writeStdOut \(string) ffiWriteResult
   writeStdErr \(string) ffiWriteResult
   openFile \(string, OpenFileOptions) ffiOpenResult
-  readFile \(file) ffiStringResult
-  writeFile \(file, string) ffiWriteResult
+  readFile \(normalFile) ffiStringResult
+  writeFile \(normalFile, string) ffiWriteResult
   copyFile \(string, string) ffiNoneResult
   removeFile \(string) ffiNoneResult
   readDirectory \(string) ffiReadDirectoryResult
@@ -32,10 +32,10 @@ type Context {
 }
 
 type File {
-  inner file | specialFile
+  inner normalFile | specialFile
 }
 
-type file {
+type normalFile {
   inner any
 }
 
@@ -46,7 +46,7 @@ type stdErr {}
 type specialFile = stdIn | stdOut | stdErr
 
 type ffiOpenResult {
-  file file
+  file normalFile
   error number
 }
 
@@ -132,7 +132,7 @@ ReadFile = \(ctx Context, file File) string | error {
     error("cannot read from stdout")
   } else if stdErr {
     error("cannot read from stderr")
-  } else if file {
+  } else if normalFile {
     ctx.readFile(f)
   }?
 
