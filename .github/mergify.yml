@@ -8,6 +8,9 @@ pull_request_rules:
   - name: auto-merge
     conditions:
       - label=auto-merge
+      - or:
+          - author=raviqqe
+          - "#approved-reviews-by>=1"
     actions:
       merge:
         method: squash
