@@ -206,7 +206,7 @@ if x {
 It evaluates one of blocks depending on the type of a given expression. The expression (`foo()`) needs to be bound to a variable (`x`) and, in each block, the variable is treated as its specified type.
 
 ```pen
-if x = foo(); number {
+if x = foo() as number {
   ...
 } else if string | none {
   ...

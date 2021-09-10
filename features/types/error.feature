@@ -39,7 +39,7 @@ Feature: Error
     Given a file named "Foo.pen" with:
     """pen
     f = \(x number | none | error) number | error {
-      if x = x?; number {
+      if x = x? as number {
         x + 1
       } else if none {
         0

@@ -21,7 +21,7 @@ Feature: Union
         none
       }
 
-      if x = x; [none] {
+      if x = x as [none] {
         none
       } else {
         none

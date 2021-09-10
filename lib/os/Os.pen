@@ -125,7 +125,7 @@ OpenFile = \(ctx Context, path string) File | error {
 }
 
 ReadFile = \(ctx Context, file File) string | error {
-  r = if f = file.inner; stdIn {
+  r = if f = file.inner as stdIn {
     ctx.readStdIn()
   } else if stdOut {
     error("cannot read from stdout")
@@ -143,7 +143,7 @@ ReadFile = \(ctx Context, file File) string | error {
 }
 
 WriteFile = \(ctx Context, file File, data string) number | error {
-  r = if f = file.inner; stdIn {
+  r = if f = file.inner as stdIn {
     error("cannot write to stdin")
   } else if stdOut {
     ctx.writeStdOut(data)

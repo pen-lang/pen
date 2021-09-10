@@ -19,7 +19,7 @@ Feature: Any
     Given a file named "Foo.pen" with:
     """pen
     f = \(x any) number {
-      if x = x; number {
+      if x = x as number {
         x
       } else {
         0
