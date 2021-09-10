@@ -2531,6 +2531,7 @@ mod tests {
     #[test]
     fn parse_keyword() {
         assert!(keyword("type").parse(stream("bar", "")).is_err());
+        // spell-checker: disable-next-line
         assert!(keyword("type").parse(stream("typer", "")).is_err());
         assert!(keyword("type").parse(stream("type", "")).is_ok());
     }
