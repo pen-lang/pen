@@ -1,0 +1,19 @@
+type OpenFileOptions {
+  Append boolean
+  Create boolean
+  CreateNew boolean
+  Read boolean
+  Truncate boolean
+  Write boolean
+}
+
+Default = \() OpenFileOptions {
+  OpenFileOptions{
+    Append: false,
+    Create: false,
+    CreateNew: false,
+    Read: false,
+    Truncate: false,
+    Write: false,
+  }
+}

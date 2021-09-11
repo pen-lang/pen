@@ -1,0 +1,86 @@
+import 'array
+import 'Os'normalFile
+import 'Os'openFileOptions
+
+import foreign "c" _pen_os_read_stdin \() ffiStringResult
+import foreign "c" _pen_os_write_stdout \(string) ffiWriteResult
+import foreign "c" _pen_os_write_stderr \(string) ffiWriteResult
+import foreign "c" _pen_os_open_file \(string, openFileOptions'OpenFileOptions) ffiOpenResult
+import foreign "c" _pen_os_read_file \(normalFile'NormalFile) ffiStringResult
+import foreign "c" _pen_os_write_file \(normalFile'NormalFile, string) ffiWriteResult
+import foreign "c" _pen_os_copy_file \(string, string) ffiNoneResult
+import foreign "c" _pen_os_remove_file \(string) ffiNoneResult
+import foreign "c" _pen_os_read_directory \(string) ffiReadDirectoryResult
+import foreign "c" _pen_os_create_directory \(string) ffiNoneResult
+import foreign "c" _pen_os_remove_directory \(string) ffiNoneResult
+import foreign "c" _pen_os_get_arguments \() array'Array
+import foreign "c" _pen_os_get_environment_variable \(string) ffiStringResult
+
+type Context {
+  inner InnerContext
+}
+
+type InnerContext {
+  ReadStdIn \() ffiStringResult
+  WriteStdOut \(string) ffiWriteResult
+  WriteStdErr \(string) ffiWriteResult
+  OpenFile \(string, openFileOptions'OpenFileOptions) ffiOpenResult
+  ReadFile \(normalFile'NormalFile) ffiStringResult
+  WriteFile \(normalFile'NormalFile, string) ffiWriteResult
+  CopyFile \(string, string) ffiNoneResult
+  RemoveFile \(string) ffiNoneResult
+  ReadDirectory \(string) ffiReadDirectoryResult
+  CreateDirectory \(string) ffiNoneResult
+  RemoveDirectory \(string) ffiNoneResult
+  GetArguments \() array'Array
+  GetEnvironmentVariable \(string) ffiStringResult
+}
+
+type ffiOpenResult {
+  File normalFile'NormalFile
+  Error number
+}
+
+type ffiStringResult {
+  Value string
+  Error number
+}
+
+type ffiWriteResult {
+  Count number
+  Error number
+}
+
+type ffiNoneResult {
+  None none
+  Error number
+}
+
+type ffiReadDirectoryResult {
+  Paths array'Array
+  Error number
+}
+
+New = \() Context {
+  Context{
+    inner: InnerContext{
+      ReadStdIn: _pen_os_read_stdin,
+      WriteStdOut: _pen_os_write_stdout,
+      WriteStdErr: _pen_os_write_stderr,
+      OpenFile: _pen_os_open_file,
+      ReadFile: _pen_os_read_file,
+      WriteFile: _pen_os_write_file,
+      CopyFile: _pen_os_copy_file,
+      RemoveFile: _pen_os_remove_file,
+      ReadDirectory: _pen_os_read_directory,
+      CreateDirectory: _pen_os_create_directory,
+      RemoveDirectory: _pen_os_remove_directory,
+      GetArguments: _pen_os_get_arguments,
+      GetEnvironmentVariable: _pen_os_get_environment_variable,
+    }
+  }
+}
+
+Inner = \(ctx Context) InnerContext {
+  ctx.inner
+}
