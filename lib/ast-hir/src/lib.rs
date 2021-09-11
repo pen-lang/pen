@@ -19,11 +19,18 @@ pub fn compile(
     module_interfaces: &HashMap<ast::ModulePath, interface::Module>,
     prelude_module_interfaces: &[interface::Module],
 ) -> Result<ir::Module, CompileError> {
-    let module_prefixes = module_prefix_collector::collect(module);
-    let imported_modules = module_interfaces
+    let imported_modules = module_prefix_collector::collect(module)
         .iter()
-        .map(|(path, interface)| (module_prefixes[path].clone(), interface.clone()))
-        .collect();
+        .map(|(path, prefix)| {
+            Ok((
+                prefix.clone(),
+                module_interfaces
+                    .get(path)
+                    .ok_or_else(|| CompileError::ModuleNotFound(path.clone()))?
+                    .clone(),
+            ))
+        })
+        .collect::<Result<_, _>>()?;
     let module = module_compiler::compile(module)?;
     let module = import_compiler::compile(&module, &imported_modules, prelude_module_interfaces);
 
@@ -42,4 +49,45 @@ pub fn compile_prelude(module: &ast::Module, prefix: &str) -> Result<ir::Module,
     let module = prelude_module_modifier::modify(&module);
 
     Ok(module)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use hir::test::ModuleFake;
+    use position::{test::PositionFake, Position};
+
+    #[test]
+    fn compile_empty_module() {
+        assert_eq!(
+            compile(
+                &ast::Module::new(vec![], vec![], vec![], vec![], Position::fake()),
+                "",
+                &Default::default(),
+                &[],
+            ),
+            Ok(ir::Module::empty()),
+        );
+    }
+
+    #[test]
+    fn compile_module_with_() {
+        let path = ast::InternalModulePath::new(vec!["Foo".into()]);
+
+        assert_eq!(
+            compile(
+                &ast::Module::new(
+                    vec![ast::Import::new(path.clone(), None)],
+                    vec![],
+                    vec![],
+                    vec![],
+                    Position::fake()
+                ),
+                "",
+                &Default::default(),
+                &[],
+            ),
+            Err(CompileError::ModuleNotFound(path.into())),
+        );
+    }
 }
