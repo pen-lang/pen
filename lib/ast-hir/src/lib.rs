@@ -55,8 +55,7 @@ pub fn compile_prelude(module: &ast::Module, prefix: &str) -> Result<ir::Module,
 mod tests {
     use super::*;
     use hir::test::ModuleFake;
-    use position::test::PositionFake;
-    use position::Position;
+    use position::{test::PositionFake, Position};
 
     #[test]
     fn compile_empty_module() {
