@@ -21,8 +21,7 @@ fn calculate_prefix(import: &ast::Import) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use position::test::PositionFake;
-    use position::Position;
+    use position::{test::PositionFake, Position};
 
     #[test]
     fn collect_no_prefix() {

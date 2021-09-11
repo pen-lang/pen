@@ -1,7 +1,7 @@
 mod error;
 mod import_compiler;
-mod module_prefix_collector;
 mod module_compiler;
+mod module_prefix_collector;
 mod name_qualifier;
 mod prelude_module_modifier;
 mod singleton_record_compiler;
