@@ -1,3 +1,4 @@
+import 'array
 import 'Os'normalFile
 import 'Os'openFileOptions
 
@@ -12,70 +13,76 @@ import foreign "c" _pen_os_remove_file \(string) ffiNoneResult
 import foreign "c" _pen_os_read_directory \(string) ffiReadDirectoryResult
 import foreign "c" _pen_os_create_directory \(string) ffiNoneResult
 import foreign "c" _pen_os_remove_directory \(string) ffiNoneResult
-import foreign "c" _pen_os_get_arguments \() array
+import foreign "c" _pen_os_get_arguments \() array'Array
 import foreign "c" _pen_os_get_environment_variable \(string) ffiStringResult
-import foreign "c" _pen_ffi_string_array_get \(array, number) string
-import foreign "c" _pen_ffi_string_array_length \(array) number
+import foreign "c" _pen_ffi_string_array_get \(array'Array, number) string
+import foreign "c" _pen_ffi_string_array_length \(array'Array) number
 
 type Context {
-  readStdIn \() ffiStringResult
-  writeStdOut \(string) ffiWriteResult
-  writeStdErr \(string) ffiWriteResult
-  openFile \(string, openFileOptions'OpenFileOptions) ffiOpenResult
-  readFile \(normalFile'NormalFile) ffiStringResult
-  writeFile \(normalFile'NormalFile, string) ffiWriteResult
-  copyFile \(string, string) ffiNoneResult
-  removeFile \(string) ffiNoneResult
-  readDirectory \(string) ffiReadDirectoryResult
-  createDirectory \(string) ffiNoneResult
-  removeDirectory \(string) ffiNoneResult
-  getArguments \() array
-  getEnvironmentVariable \(string) ffiStringResult
+  inner InnerContext
+}
+
+type InnerContext {
+  ReadStdIn \() ffiStringResult
+  WriteStdOut \(string) ffiWriteResult
+  WriteStdErr \(string) ffiWriteResult
+  OpenFile \(string, openFileOptions'OpenFileOptions) ffiOpenResult
+  ReadFile \(normalFile'NormalFile) ffiStringResult
+  WriteFile \(normalFile'NormalFile, string) ffiWriteResult
+  CopyFile \(string, string) ffiNoneResult
+  RemoveFile \(string) ffiNoneResult
+  ReadDirectory \(string) ffiReadDirectoryResult
+  CreateDirectory \(string) ffiNoneResult
+  RemoveDirectory \(string) ffiNoneResult
+  GetArguments \() array'Array
+  GetEnvironmentVariable \(string) ffiStringResult
 }
 
 type ffiOpenResult {
-  file normalFile'NormalFile
-  error number
+  File normalFile'NormalFile
+  Error number
 }
 
 type ffiStringResult {
-  value string
-  error number
+  Value string
+  Error number
 }
 
 type ffiWriteResult {
-  count number
-  error number
+  Count number
+  Error number
 }
 
 type ffiNoneResult {
-  _ none
-  error number
+  None none
+  Error number
 }
 
 type ffiReadDirectoryResult {
-  paths array
-  error number
-}
-
-type array {
-  array any
+  Paths array'Array
+  Error number
 }
 
 New = \() Context {
   Context{
-    readStdIn: _pen_os_read_stdin,
-    writeStdOut: _pen_os_write_stdout,
-    writeStdErr: _pen_os_write_stderr,
-    openFile: _pen_os_open_file,
-    readFile: _pen_os_read_file,
-    writeFile: _pen_os_write_file,
-    copyFile: _pen_os_copy_file,
-    removeFile: _pen_os_remove_file,
-    readDirectory: _pen_os_read_directory,
-    createDirectory: _pen_os_create_directory,
-    removeDirectory: _pen_os_remove_directory,
-    getArguments: _pen_os_get_arguments,
-    getEnvironmentVariable: _pen_os_get_environment_variable,
+    inner: InnerContext{
+      ReadStdIn: _pen_os_read_stdin,
+      WriteStdOut: _pen_os_write_stdout,
+      WriteStdErr: _pen_os_write_stderr,
+      OpenFile: _pen_os_open_file,
+      ReadFile: _pen_os_read_file,
+      WriteFile: _pen_os_write_file,
+      CopyFile: _pen_os_copy_file,
+      RemoveFile: _pen_os_remove_file,
+      ReadDirectory: _pen_os_read_directory,
+      CreateDirectory: _pen_os_create_directory,
+      RemoveDirectory: _pen_os_remove_directory,
+      GetArguments: _pen_os_get_arguments,
+      GetEnvironmentVariable: _pen_os_get_environment_variable,
+    }
   }
+}
+
+Inner = \(ctx Context) InnerContext {
+  ctx.inner
 }

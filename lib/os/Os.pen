@@ -1,42 +1,12 @@
-import foreign "c" _pen_os_read_stdin \() ffiStringResult
-import foreign "c" _pen_os_write_stdout \(string) ffiWriteResult
-import foreign "c" _pen_os_write_stderr \(string) ffiWriteResult
-import foreign "c" _pen_os_open_file \(string, OpenFileOptions) ffiOpenResult
-import foreign "c" _pen_os_read_file \(normalFile) ffiStringResult
-import foreign "c" _pen_os_write_file \(normalFile, string) ffiWriteResult
-import foreign "c" _pen_os_copy_file \(string, string) ffiNoneResult
-import foreign "c" _pen_os_remove_file \(string) ffiNoneResult
-import foreign "c" _pen_os_read_directory \(string) ffiReadDirectoryResult
-import foreign "c" _pen_os_create_directory \(string) ffiNoneResult
-import foreign "c" _pen_os_remove_directory \(string) ffiNoneResult
-import foreign "c" _pen_os_get_arguments \() array
-import foreign "c" _pen_os_get_environment_variable \(string) ffiStringResult
-import foreign "c" _pen_ffi_string_array_get \(array, number) string
-import foreign "c" _pen_ffi_string_array_length \(array) number
-import foreign _pen_main \(Context) number
+import 'array
+import 'Os'context
+import 'Os'normalFile
+import 'Os'openFileOptions
 
-type Context {
-  readStdIn \() ffiStringResult
-  writeStdOut \(string) ffiWriteResult
-  writeStdErr \(string) ffiWriteResult
-  openFile \(string, OpenFileOptions) ffiOpenResult
-  readFile \(normalFile) ffiStringResult
-  writeFile \(normalFile, string) ffiWriteResult
-  copyFile \(string, string) ffiNoneResult
-  removeFile \(string) ffiNoneResult
-  readDirectory \(string) ffiReadDirectoryResult
-  createDirectory \(string) ffiNoneResult
-  removeDirectory \(string) ffiNoneResult
-  getArguments \() array
-  getEnvironmentVariable \(string) ffiStringResult
-}
+import foreign _pen_main \(context'Context) number
 
 type File {
-  inner normalFile | specialFile
-}
-
-type normalFile {
-  inner any
+  inner normalFile'NormalFile | specialFile
 }
 
 type stdIn {}
@@ -45,44 +15,9 @@ type stdErr {}
 
 type specialFile = stdIn | stdOut | stdErr
 
-type ffiOpenResult {
-  file normalFile
-  error number
-}
+type Context = context'Context
 
-type ffiStringResult {
-  value string
-  error number
-}
-
-type ffiWriteResult {
-  count number
-  error number
-}
-
-type ffiNoneResult {
-  _ none
-  error number
-}
-
-type ffiReadDirectoryResult {
-  paths array
-  error number
-}
-
-type OpenFileOptions {
-  Append boolean
-  Create boolean
-  CreateNew boolean
-  Read boolean
-  Truncate boolean
-  Write boolean
-}
-
-type array {
-  array any
-}
-
+type OpenFileOptions = openFileOptions'OpenFileOptions
 
 StdIn = \() File {
   File{inner: stdIn}
@@ -96,147 +31,127 @@ StdErr = \() File {
   File{inner: stdErr}
 }
 
-DefaultOpenFileOptions = \() OpenFileOptions {
-  OpenFileOptions{
-    Append: false,
-    Create: false,
-    CreateNew: false,
-    Read: false,
-    Truncate: false,
-    Write: false,
-  }
+DefaultOpenFileOptions = \() openFileOptions'OpenFileOptions {
+  openFileOptions'Default()
 }
 
-OpenFileWithOptions = \(ctx Context, path string, opts OpenFileOptions) File | error {
-  r = ctx.openFile(path, opts)
+OpenFileWithOptions = \(ctx context'Context, path string, opts openFileOptions'OpenFileOptions) File | error {
+  r = context'Inner(ctx).OpenFile(path, opts)
 
-  if r.error == 0 {
-    File{inner: r.file}
+  if r.Error == 0 {
+    File{inner: r.File}
   } else {
-    error(translateError(r.error))
+    error(translateError(r.Error))
   }
 }
 
-OpenFile = \(ctx Context, path string) File | error {
+OpenFile = \(ctx context'Context, path string) File | error {
   OpenFileWithOptions(
     ctx,
     path,
-    OpenFileOptions{...DefaultOpenFileOptions(), Read: true}
+    openFileOptions'OpenFileOptions{...openFileOptions'Default(), Read: true}
   )
 }
 
-ReadFile = \(ctx Context, file File) string | error {
+ReadFile = \(ctx context'Context, file File) string | error {
   r = if f = file.inner as stdIn {
-    ctx.readStdIn()
+    context'Inner(ctx).ReadStdIn()
   } else if stdOut {
     error("cannot read from stdout")
   } else if stdErr {
     error("cannot read from stderr")
-  } else if normalFile {
-    ctx.readFile(f)
+  } else if normalFile'NormalFile {
+    context'Inner(ctx).ReadFile(f)
   }?
 
-  if r.error == 0 {
-    r.value
+  if r.Error == 0 {
+    r.Value
   } else {
-    error(translateError(r.error))
+    error(translateError(r.Error))
   }
 }
 
-WriteFile = \(ctx Context, file File, data string) number | error {
+WriteFile = \(ctx context'Context, file File, data string) number | error {
+  inner = context'Inner(ctx)
+
   r = if f = file.inner as stdIn {
     error("cannot write to stdin")
   } else if stdOut {
-    ctx.writeStdOut(data)
+    inner.WriteStdOut(data)
   } else if stdErr {
-    ctx.writeStdErr(data)
+    inner.WriteStdErr(data)
   } else {
-    ctx.writeFile(f, data)
+    inner.WriteFile(f, data)
   }?
 
-  if r.error == 0 {
-    r.count
+  if r.Error == 0 {
+    r.Count
   } else {
-    error(translateError(r.error))
+    error(translateError(r.Error))
   }
 }
 
-CopyFile = \(ctx Context, src string, dest string) none | error {
-  r = ctx.copyFile(src, dest)
+CopyFile = \(ctx context'Context, src string, dest string) none | error {
+  r = context'Inner(ctx).CopyFile(src, dest)
 
-  if r.error == 0 {
+  if r.Error == 0 {
     none
   } else {
-    error(translateError(r.error))
+    error(translateError(r.Error))
   }
 }
 
-RemoveFile = \(ctx Context, path string) none | error {
-  r = ctx.removeFile(path)
+RemoveFile = \(ctx context'Context, path string) none | error {
+  r = context'Inner(ctx).RemoveFile(path)
 
-  if r.error == 0 {
+  if r.Error == 0 {
     none
   } else {
-    error(translateError(r.error))
+    error(translateError(r.Error))
   }
 }
 
-ReadDirectory = \(ctx Context, path string) [string] | error {
-  r = ctx.readDirectory(path)
+ReadDirectory = \(ctx context'Context, path string) [string] | error {
+  r = context'Inner(ctx).ReadDirectory(path)
 
-  if r.error == 0 {
-    convertArrayToStrings(r.paths)
+  if r.Error == 0 {
+    array'ConvertArrayToStrings(r.Paths)
   } else {
-    error(translateError(r.error))
+    error(translateError(r.Error))
   }
 }
 
-CreateDirectory = \(ctx Context, path string) none | error {
-  r = ctx.createDirectory(path)
+CreateDirectory = \(ctx context'Context, path string) none | error {
+  r = context'Inner(ctx).CreateDirectory(path)
 
-  if r.error == 0 {
+  if r.Error == 0 {
     none
   } else {
-    error(translateError(r.error))
+    error(translateError(r.Error))
   }
 }
 
-RemoveDirectory = \(ctx Context, path string) none | error {
-  r = ctx.removeDirectory(path)
+RemoveDirectory = \(ctx context'Context, path string) none | error {
+  r = context'Inner(ctx).RemoveDirectory(path)
 
-  if r.error == 0 {
+  if r.Error == 0 {
     none
   } else {
-    error(translateError(r.error))
+    error(translateError(r.Error))
   }
 }
 
-Arguments = \(ctx Context) [string] {
-  convertArrayToStrings(ctx.getArguments())
+Arguments = \(ctx context'Context) [string] {
+  array'ConvertArrayToStrings(context'Inner(ctx).GetArguments())
 }
 
-EnvironmentVariable = \(ctx Context, name string) string | error {
-  r = ctx.getEnvironmentVariable(name)
+EnvironmentVariable = \(ctx context'Context, name string) string | error {
+  r = context'Inner(ctx).GetEnvironmentVariable(name)
 
-  if r.error == 0 {
-    r.value
+  if r.Error == 0 {
+    r.Value
   } else {
-    error(translateError(r.error))
-  }
-}
-
-convertArrayToStrings = \(xs array) [string] {
-  convertArrayToStringsFromIndex(xs, 1)
-}
-
-convertArrayToStringsFromIndex = \(xs array, index number) [string] {
-  if index > _pen_ffi_string_array_length(xs) {
-    [string;]
-  } else {
-    [string;
-      _pen_ffi_string_array_get(xs, index),
-      ...convertArrayToStringsFromIndex(xs, index + 1),
-    ]
+    error(translateError(r.Error))
   }
 }
 
@@ -281,21 +196,5 @@ translateError = \(code number) string {
 }
 
 export foreign _pen_os_main = \() number {
-  _pen_main(
-    Context{
-      readStdIn: _pen_os_read_stdin,
-      writeStdOut: _pen_os_write_stdout,
-      writeStdErr: _pen_os_write_stderr,
-      openFile: _pen_os_open_file,
-      readFile: _pen_os_read_file,
-      writeFile: _pen_os_write_file,
-      copyFile: _pen_os_copy_file,
-      removeFile: _pen_os_remove_file,
-      readDirectory: _pen_os_read_directory,
-      createDirectory: _pen_os_create_directory,
-      removeDirectory: _pen_os_remove_directory,
-      getArguments: _pen_os_get_arguments,
-      getEnvironmentVariable: _pen_os_get_environment_variable,
-    },
-  )
+  _pen_main(context'New())
 }
