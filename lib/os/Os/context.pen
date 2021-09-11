@@ -15,8 +15,6 @@ import foreign "c" _pen_os_create_directory \(string) ffiNoneResult
 import foreign "c" _pen_os_remove_directory \(string) ffiNoneResult
 import foreign "c" _pen_os_get_arguments \() array'Array
 import foreign "c" _pen_os_get_environment_variable \(string) ffiStringResult
-import foreign "c" _pen_ffi_string_array_get \(array'Array, number) string
-import foreign "c" _pen_ffi_string_array_length \(array'Array) number
 
 type Context {
   inner InnerContext
