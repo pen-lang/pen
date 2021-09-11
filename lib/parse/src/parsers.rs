@@ -81,8 +81,11 @@ pub fn module<'a>() -> impl Parser<Stream<'a>, Output = Module> {
 }
 
 fn import<'a>() -> impl Parser<Stream<'a>, Output = Import> {
-    attempt(keyword("import").with(module_path()))
-        .map(Import::new)
+    (
+        attempt(keyword("import").with(module_path())),
+        optional(keyword("as").with(identifier())),
+    )
+        .map(|(path, prefix)| Import::new(path, prefix))
         .expected("import statement")
 }
 
@@ -796,10 +799,10 @@ mod tests {
             assert_eq!(
                 module().parse(stream("import Foo'Bar", "")).unwrap().0,
                 Module::new(
-                    vec![Import::new(ExternalModulePath::new(
-                        "Foo",
-                        vec!["Bar".into()]
-                    ))],
+                    vec![Import::new(
+                        ExternalModulePath::new("Foo", vec!["Bar".into()]),
+                        None
+                    )],
                     vec![],
                     vec![],
                     vec![],
@@ -905,10 +908,10 @@ mod tests {
                     .unwrap()
                     .0,
                 Module::new(
-                    vec![Import::new(ExternalModulePath::new(
-                        "Foo",
-                        vec!["Bar".into()]
-                    ))],
+                    vec![Import::new(
+                        ExternalModulePath::new("Foo", vec!["Bar".into()]),
+                        None
+                    )],
                     vec![ForeignImport::new(
                         "foo",
                         CallingConvention::Native,
@@ -952,57 +955,73 @@ mod tests {
         }
     }
 
-    #[test]
-    fn parse_import() {
-        assert_eq!(
-            import().parse(stream("import 'Foo", "")).unwrap().0,
-            Import::new(InternalModulePath::new(vec!["Foo".into()])),
-        );
-        assert_eq!(
-            import().parse(stream("import Foo'Bar", "")).unwrap().0,
-            Import::new(ExternalModulePath::new("Foo", vec!["Bar".into()])),
-        );
-    }
+    mod import {
+        use super::*;
+        use pretty_assertions::assert_eq;
 
-    #[test]
-    fn parse_module_path() {
-        assert!(module_path().parse(stream("", "")).is_err());
-        assert_eq!(
-            module_path().parse(stream("'Foo", "")).unwrap().0,
-            InternalModulePath::new(vec!["Foo".into()]).into(),
-        );
-        assert_eq!(
-            module_path().parse(stream("Foo'Bar", "")).unwrap().0,
-            ExternalModulePath::new("Foo", vec!["Bar".into()]).into(),
-        );
-    }
+        #[test]
+        fn parse_import() {
+            assert_eq!(
+                import().parse(stream("import 'Foo", "")).unwrap().0,
+                Import::new(InternalModulePath::new(vec!["Foo".into()]), None),
+            );
+            assert_eq!(
+                import().parse(stream("import Foo'Bar", "")).unwrap().0,
+                Import::new(ExternalModulePath::new("Foo", vec!["Bar".into()]), None),
+            );
+        }
 
-    #[test]
-    fn parse_internal_module_path() {
-        assert!(internal_module_path().parse(stream("", "")).is_err());
-        assert_eq!(
-            internal_module_path().parse(stream("'Foo", "")).unwrap().0,
-            InternalModulePath::new(vec!["Foo".into()]),
-        );
-        assert_eq!(
-            internal_module_path()
-                .parse(stream("'Foo'Bar", ""))
-                .unwrap()
-                .0,
-            InternalModulePath::new(vec!["Foo".into(), "Bar".into()]),
-        );
-    }
+        #[test]
+        fn parse_import_with_custom_prefix() {
+            assert_eq!(
+                import().parse(stream("import 'Foo as foo", "")).unwrap().0,
+                Import::new(
+                    InternalModulePath::new(vec!["Foo".into()]),
+                    Some("foo".into())
+                ),
+            );
+        }
 
-    #[test]
-    fn parse_external_module_path() {
-        assert!(external_module_path().parse(stream("", "")).is_err());
-        assert_eq!(
-            external_module_path()
-                .parse(stream("Foo'Bar", ""))
-                .unwrap()
-                .0,
-            ExternalModulePath::new("Foo", vec!["Bar".into()]),
-        );
+        #[test]
+        fn parse_module_path() {
+            assert!(module_path().parse(stream("", "")).is_err());
+            assert_eq!(
+                module_path().parse(stream("'Foo", "")).unwrap().0,
+                InternalModulePath::new(vec!["Foo".into()]).into(),
+            );
+            assert_eq!(
+                module_path().parse(stream("Foo'Bar", "")).unwrap().0,
+                ExternalModulePath::new("Foo", vec!["Bar".into()]).into(),
+            );
+        }
+
+        #[test]
+        fn parse_internal_module_path() {
+            assert!(internal_module_path().parse(stream("", "")).is_err());
+            assert_eq!(
+                internal_module_path().parse(stream("'Foo", "")).unwrap().0,
+                InternalModulePath::new(vec!["Foo".into()]),
+            );
+            assert_eq!(
+                internal_module_path()
+                    .parse(stream("'Foo'Bar", ""))
+                    .unwrap()
+                    .0,
+                InternalModulePath::new(vec!["Foo".into(), "Bar".into()]),
+            );
+        }
+
+        #[test]
+        fn parse_external_module_path() {
+            assert!(external_module_path().parse(stream("", "")).is_err());
+            assert_eq!(
+                external_module_path()
+                    .parse(stream("Foo'Bar", ""))
+                    .unwrap()
+                    .0,
+                ExternalModulePath::new("Foo", vec!["Bar".into()]),
+            );
+        }
     }
 
     #[test]
