@@ -20,10 +20,18 @@ pub fn compile(
     prelude_module_interfaces: &[interface::Module],
 ) -> Result<ir::Module, CompileError> {
     let module_prefixes = module_prefix_collector::collect(module);
-    let imported_modules = module_interfaces
+    let imported_modules = module_prefixes
         .iter()
-        .map(|(path, interface)| (module_prefixes[path].clone(), interface.clone()))
-        .collect();
+        .map(|(path, prefix)| {
+            Ok((
+                prefix.clone(),
+                module_interfaces
+                    .get(path)
+                    .ok_or_else(|| CompileError::ModuleNotFound(path.clone()))?
+                    .clone(),
+            ))
+        })
+        .collect::<Result<_, _>>()?;
     let module = module_compiler::compile(module)?;
     let module = import_compiler::compile(&module, &imported_modules, prelude_module_interfaces);
 

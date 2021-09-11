@@ -1,5 +1,6 @@
 use super::{external_module_path::ExternalModulePath, internal_module_path::InternalModulePath};
 use serde::{Deserialize, Serialize};
+use std::fmt::{self, Display, Formatter};
 
 #[derive(Clone, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
 pub enum ModulePath {
@@ -16,5 +17,14 @@ impl From<ExternalModulePath> for ModulePath {
 impl From<InternalModulePath> for ModulePath {
     fn from(path: InternalModulePath) -> Self {
         Self::Internal(path)
+    }
+}
+
+impl Display for ModulePath {
+    fn fmt(&self, formatter: &mut Formatter) -> fmt::Result {
+        match self {
+            Self::External(path) => write!(formatter, "{}", path),
+            Self::Internal(path) => write!(formatter, "{}", path),
+        }
     }
 }
