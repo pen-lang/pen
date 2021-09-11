@@ -54,3 +54,21 @@ Feature: Modules
     """
     When I run `pen build`
     Then the exit status should be 0
+
+  Scenario: Import a module with a custom prefix
+    Given a file named "Foo.pen" with:
+    """pen
+    Foo = \() number {
+      42
+    }
+    """
+    And a file named "Bar.pen" with:
+    """pen
+    import 'Foo as Bar
+
+    Bar = \() number {
+      Bar'Foo()
+    }
+    """
+    When I run `pen build`
+    Then the exit status should be 0

@@ -64,12 +64,10 @@ import Foo'Bar'Baz
 
 ### Custom prefixes
 
-> This feature is work in progress.
-
-Imported modules can have prefixes different from their names by giving them new names.
+Imported modules can have custom prefixes given different names after the `as` keywords.
 
 ```pen
-import Bar Foo'Bar'Baz
+import Foo'Bar'Baz as Blah
 ```
 
 [package-configuration]: packages.md#package-configuration
