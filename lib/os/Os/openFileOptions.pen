@@ -1,0 +1,8 @@
+type OpenFileOptions {
+  Append boolean
+  Create boolean
+  CreateNew boolean
+  Read boolean
+  Truncate boolean
+  Write boolean
+}
