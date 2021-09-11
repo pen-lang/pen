@@ -9,7 +9,7 @@ use std::collections::HashMap;
 
 pub fn compile(
     module: &ir::Module,
-    module_interfaces: &HashMap<ast::ModulePath, interface::Module>,
+    module_interfaces: &HashMap<String, interface::Module>,
     prelude_module_interfaces: &[interface::Module],
 ) -> ir::Module {
     let module = compile_imports(
@@ -85,20 +85,20 @@ fn compile_imports(module: &ir::Module, module_interfaces: &[&interface::Module]
 
 fn rename_variables(
     module: &ir::Module,
-    module_interfaces: &HashMap<ast::ModulePath, interface::Module>,
+    module_interfaces: &HashMap<String, interface::Module>,
     prelude_module_interfaces: &[interface::Module],
 ) -> ir::Module {
     variable_renamer::rename(
         module,
         &module_interfaces
             .iter()
-            .flat_map(|(path, module)| {
+            .flat_map(|(prefix, module)| {
                 module
                     .declarations()
                     .iter()
                     .map(|declaration| {
                         (
-                            name_qualifier::qualify(path, declaration.original_name()),
+                            name_qualifier::qualify(prefix, declaration.original_name()),
                             declaration.name().into(),
                         )
                     })
@@ -118,19 +118,19 @@ fn rename_variables(
 
 fn rename_types(
     module: &ir::Module,
-    module_interfaces: &HashMap<ast::ModulePath, interface::Module>,
+    module_interfaces: &HashMap<String, interface::Module>,
     prelude_module_interfaces: &[interface::Module],
 ) -> ir::Module {
     let names = module_interfaces
         .iter()
-        .flat_map(|(path, module)| {
+        .flat_map(|(prefix, module)| {
             module
                 .type_definitions()
                 .iter()
                 .filter_map(|definition| {
                     if definition.is_public() {
                         Some((
-                            name_qualifier::qualify(path, definition.original_name()),
+                            name_qualifier::qualify(prefix, definition.original_name()),
                             definition.name().into(),
                         ))
                     } else {
@@ -140,7 +140,7 @@ fn rename_types(
                 .chain(module.type_aliases().iter().filter_map(|alias| {
                     if alias.is_public() {
                         Some((
-                            name_qualifier::qualify(path, alias.original_name()),
+                            name_qualifier::qualify(prefix, alias.original_name()),
                             alias.name().into(),
                         ))
                     } else {
@@ -217,7 +217,7 @@ mod tests {
                     true,
                 )]),
                 &vec![(
-                    ast::InternalModulePath::new(vec!["Bar".into()]).into(),
+                    "Bar".into(),
                     interface::Module::new(
                         vec![],
                         vec![],
@@ -286,7 +286,7 @@ mod tests {
                         true,
                     )]),
                 &vec![(
-                    ast::InternalModulePath::new(vec!["Bar".into()]).into(),
+                    "Bar".into(),
                     interface::Module::new(
                         vec![interface::TypeDefinition::new(
                             "RealBar",
@@ -365,7 +365,7 @@ mod tests {
                         true,
                     )]),
                 &vec![(
-                    ast::InternalModulePath::new(vec!["Bar".into()]).into(),
+                    "Bar".into(),
                     interface::Module::new(
                         vec![],
                         vec![interface::TypeAlias::new(
@@ -443,7 +443,7 @@ mod tests {
                     .set_type_definitions(vec![type_definition.clone()])
                     .set_definitions(vec![definition.clone()]),
                 &vec![(
-                    ast::InternalModulePath::new(vec!["Bar".into()]).into(),
+                    "Bar".into(),
                     interface::Module::new(
                         vec![interface::TypeDefinition::new(
                             "RealBar",
@@ -507,7 +507,7 @@ mod tests {
                     .set_type_definitions(vec![type_definition.clone()])
                     .set_definitions(vec![definition.clone()]),
                 &vec![(
-                    ast::InternalModulePath::new(vec!["Bar".into()]).into(),
+                    "Bar".into(),
                     interface::Module::new(
                         vec![],
                         vec![interface::TypeAlias::new(

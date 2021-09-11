@@ -3,20 +3,17 @@ use std::collections::HashMap;
 
 use super::name_qualifier;
 
-pub fn compile(
-    module: &Module,
-    module_interfaces: &HashMap<ast::ModulePath, interface::Module>,
-) -> Module {
+pub fn compile(module: &Module, module_interfaces: &HashMap<String, interface::Module>) -> Module {
     let names = module_interfaces
         .iter()
-        .flat_map(|(path, module)| {
+        .flat_map(|(prefix, module)| {
             module
                 .type_definitions()
                 .iter()
                 .filter_map(|definition| {
                     if definition.elements().is_empty() && definition.is_public() {
                         Some((
-                            name_qualifier::qualify(path, definition.original_name()),
+                            name_qualifier::qualify(prefix, definition.original_name()),
                             definition.name().into(),
                         ))
                     } else {
@@ -148,7 +145,7 @@ mod tests {
                     false
                 )]),
                 &vec![(
-                    ast::InternalModulePath::new(vec!["Foo".into()]).into(),
+                    "Foo".into(),
                     interface::Module::new(
                         vec![interface::TypeDefinition::new(
                             "RealFoo",
@@ -199,7 +196,7 @@ mod tests {
             compile(
                 &Module::empty().set_definitions(vec![definition.clone()]),
                 &vec![(
-                    ast::InternalModulePath::new(vec!["Foo".into()]).into(),
+                    "Foo".into(),
                     interface::Module::new(
                         vec![interface::TypeDefinition::new(
                             "RealFoo",
@@ -240,7 +237,7 @@ mod tests {
             compile(
                 &Module::empty().set_definitions(vec![definition.clone()]),
                 &vec![(
-                    ast::InternalModulePath::new(vec!["Foo".into()]).into(),
+                    "Foo".into(),
                     interface::Module::new(
                         vec![interface::TypeDefinition::new(
                             "RealFoo",
