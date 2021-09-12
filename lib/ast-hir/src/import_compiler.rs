@@ -44,6 +44,7 @@ fn compile_imports(module: &ir::Module, module_interfaces: &[&interface::Module]
                         )
                     })
             })
+            .sorted_by_key(|definition| (definition.name().to_string(), !definition.is_public()))
             .unique_by(|definition| definition.name().to_string())
             .chain(module.type_definitions().iter().cloned())
             .collect(),
@@ -61,6 +62,7 @@ fn compile_imports(module: &ir::Module, module_interfaces: &[&interface::Module]
                     )
                 })
             })
+            .sorted_by_key(|alias| (alias.name().to_string(), !alias.is_public()))
             .unique_by(|alias| alias.name().to_string())
             .chain(module.type_aliases().iter().cloned())
             .collect(),
@@ -188,7 +190,7 @@ fn rename_types(
 mod tests {
     use super::*;
     use hir::{
-        test::{DefinitionFake, ModuleFake, TypeDefinitionFake},
+        test::{DefinitionFake, ModuleFake, TypeAliasFake, TypeDefinitionFake},
         types,
     };
     use position::{test::PositionFake, Position};
@@ -535,6 +537,77 @@ mod tests {
                     Position::fake()
                 )])
                 .set_definitions(vec![definition])
+        );
+    }
+
+    #[test]
+    fn prefer_loose_definition_of_same_type_definition() {
+        let create_type_definition = |public| {
+            interface::TypeDefinition::new("Foo", "", vec![], false, public, Position::fake())
+        };
+
+        assert_eq!(
+            compile(
+                &ir::Module::empty(),
+                &vec![
+                    (
+                        "Foo".into(),
+                        interface::Module::new(vec![create_type_definition(false)], vec![], vec![]),
+                    ),
+                    (
+                        "Bar".into(),
+                        interface::Module::new(vec![create_type_definition(true)], vec![], vec![])
+                    )
+                ]
+                .into_iter()
+                .collect(),
+                &[],
+            ),
+            ir::Module::empty().set_type_definitions(vec![ir::TypeDefinition::fake(
+                "Foo",
+                vec![],
+                false,
+                true,
+                true,
+            )])
+        );
+    }
+
+    #[test]
+    fn prefer_loose_definition_of_same_type_alias() {
+        let create_type_alias = |public| {
+            interface::TypeAlias::new(
+                "Foo",
+                "",
+                types::None::new(Position::fake()),
+                public,
+                Position::fake(),
+            )
+        };
+
+        assert_eq!(
+            compile(
+                &ir::Module::empty(),
+                &vec![
+                    (
+                        "Foo".into(),
+                        interface::Module::new(vec![], vec![create_type_alias(false)], vec![]),
+                    ),
+                    (
+                        "Bar".into(),
+                        interface::Module::new(vec![], vec![create_type_alias(true)], vec![])
+                    )
+                ]
+                .into_iter()
+                .collect(),
+                &[],
+            ),
+            ir::Module::empty().set_type_aliases(vec![ir::TypeAlias::fake(
+                "Foo",
+                types::None::new(Position::fake()),
+                true,
+                true,
+            )])
         );
     }
 }
