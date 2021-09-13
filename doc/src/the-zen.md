@@ -14,7 +14,6 @@ In the order of priority,
 - Readability
 - Consistency
 - Writability
-- Easiness
 
 ## References
 
