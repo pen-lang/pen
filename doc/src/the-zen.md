@@ -6,6 +6,16 @@
 - One way to do one thing.
 - Single solution to solve multiple problems.
 
+## Language qualities
+
+In the order of priority,
+
+- Simplicity
+- Readability
+- Consistency
+- Writability
+- Easiness
+
 ## References
 
 - [The Zen of Python](https://www.python.org/dev/peps/pep-0020/)
