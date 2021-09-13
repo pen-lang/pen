@@ -1,11 +1,11 @@
 import 'array
 import 'Os'normalFile
-import 'Os'openFileOptions
+import 'Os'OpenFileOptions
 
 import foreign "c" _pen_os_read_stdin \() FfiStringResult
 import foreign "c" _pen_os_write_stdout \(string) FfiWriteResult
 import foreign "c" _pen_os_write_stderr \(string) FfiWriteResult
-import foreign "c" _pen_os_open_file \(string, openFileOptions'OpenFileOptions) FfiOpenResult
+import foreign "c" _pen_os_open_file \(string, OpenFileOptions'OpenFileOptions) FfiOpenResult
 import foreign "c" _pen_os_read_file \(normalFile'NormalFile) FfiStringResult
 import foreign "c" _pen_os_write_file \(normalFile'NormalFile, string) FfiWriteResult
 import foreign "c" _pen_os_copy_file \(string, string) FfiNoneResult
@@ -24,7 +24,7 @@ type InnerContext {
   ReadStdIn \() FfiStringResult
   WriteStdOut \(string) FfiWriteResult
   WriteStdErr \(string) FfiWriteResult
-  OpenFile \(string, openFileOptions'OpenFileOptions) FfiOpenResult
+  OpenFile \(string, OpenFileOptions'OpenFileOptions) FfiOpenResult
   ReadFile \(normalFile'NormalFile) FfiStringResult
   WriteFile \(normalFile'NormalFile, string) FfiWriteResult
   CopyFile \(string, string) FfiNoneResult
