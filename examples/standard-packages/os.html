@@ -212,6 +212,7 @@ main = \(ctx Os'Context) number {
 <h2 id="read-a-file"><a class="header" href="#read-a-file">Read a file</a></h2>
 <p><em>Given</em> a file named &quot;Main.pen&quot; with:</p>
 <pre><code class="language-pen">import System'Os
+import System'Os'OpenFileOptions
 
 readFile = \(ctx Os'Context) none | error {
   f = Os'OpenFile(ctx, &quot;foo.txt&quot;)?
@@ -220,7 +221,7 @@ readFile = \(ctx Os'Context) none | error {
     ctx,
     &quot;bar.txt&quot;,
     Os'OpenFileOptions{
-      ...Os'DefaultOpenFileOptions(),
+      ...OpenFileOptions'Default(),
       Create: true,
       Write: true,
     },
@@ -245,12 +246,13 @@ main = \(ctx Os'Context) number {
 <h2 id="write-a-file"><a class="header" href="#write-a-file">Write a file</a></h2>
 <p><em>Given</em> a file named &quot;Main.pen&quot; with:</p>
 <pre><code class="language-pen">import System'Os
+import System'Os'OpenFileOptions
 
 writeFile = \(ctx Os'Context) none | error {
   f = Os'OpenFileWithOptions(
     ctx,
     &quot;./foo.txt&quot;,
-    Os'OpenFileOptions{...Os'DefaultOpenFileOptions(), Write: true},
+    Os'OpenFileOptions{...OpenFileOptions'Default(), Write: true},
   )?
 
   Os'WriteFile(ctx, f, &quot;foo&quot;)?
