@@ -74,6 +74,7 @@ Feature: OS
     Given a file named "Main.pen" with:
     """pen
     import System'Os
+    import System'Os'OpenFileOptions
 
     readFile = \(ctx Os'Context) none | error {
       f = Os'OpenFile(ctx, "foo.txt")?
@@ -82,7 +83,7 @@ Feature: OS
         ctx,
         "bar.txt",
         Os'OpenFileOptions{
-          ...Os'DefaultOpenFileOptions(),
+          ...OpenFileOptions'Default(),
           Create: true,
           Write: true,
         },
@@ -109,12 +110,13 @@ Feature: OS
     Given a file named "Main.pen" with:
     """pen
     import System'Os
+    import System'Os'OpenFileOptions
 
     writeFile = \(ctx Os'Context) none | error {
       f = Os'OpenFileWithOptions(
         ctx,
         "./foo.txt",
-        Os'OpenFileOptions{...Os'DefaultOpenFileOptions(), Write: true},
+        Os'OpenFileOptions{...OpenFileOptions'Default(), Write: true},
       )?
 
       Os'WriteFile(ctx, f, "foo")?
