@@ -35,6 +35,7 @@
     "termcolor",
     "toolchains",
     "toposort",
-    "wasi"
+    "wasi",
+    "writability"
   ]
 }
