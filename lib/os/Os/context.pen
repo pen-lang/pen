@@ -2,61 +2,61 @@ import 'array
 import 'Os'normalFile
 import 'Os'OpenFileOptions
 
-import foreign "c" _pen_os_read_stdin \() ffiStringResult
-import foreign "c" _pen_os_write_stdout \(string) ffiWriteResult
-import foreign "c" _pen_os_write_stderr \(string) ffiWriteResult
-import foreign "c" _pen_os_open_file \(string, OpenFileOptions'OpenFileOptions) ffiOpenResult
-import foreign "c" _pen_os_read_file \(normalFile'NormalFile) ffiStringResult
-import foreign "c" _pen_os_write_file \(normalFile'NormalFile, string) ffiWriteResult
-import foreign "c" _pen_os_copy_file \(string, string) ffiNoneResult
-import foreign "c" _pen_os_remove_file \(string) ffiNoneResult
-import foreign "c" _pen_os_read_directory \(string) ffiReadDirectoryResult
-import foreign "c" _pen_os_create_directory \(string) ffiNoneResult
-import foreign "c" _pen_os_remove_directory \(string) ffiNoneResult
+import foreign "c" _pen_os_read_stdin \() FfiStringResult
+import foreign "c" _pen_os_write_stdout \(string) FfiWriteResult
+import foreign "c" _pen_os_write_stderr \(string) FfiWriteResult
+import foreign "c" _pen_os_open_file \(string, OpenFileOptions'OpenFileOptions) FfiOpenResult
+import foreign "c" _pen_os_read_file \(normalFile'NormalFile) FfiStringResult
+import foreign "c" _pen_os_write_file \(normalFile'NormalFile, string) FfiWriteResult
+import foreign "c" _pen_os_copy_file \(string, string) FfiNoneResult
+import foreign "c" _pen_os_remove_file \(string) FfiNoneResult
+import foreign "c" _pen_os_read_directory \(string) FfiReadDirectoryResult
+import foreign "c" _pen_os_create_directory \(string) FfiNoneResult
+import foreign "c" _pen_os_remove_directory \(string) FfiNoneResult
 import foreign "c" _pen_os_get_arguments \() array'Array
-import foreign "c" _pen_os_get_environment_variable \(string) ffiStringResult
+import foreign "c" _pen_os_get_environment_variable \(string) FfiStringResult
 
 type Context {
   inner InnerContext
 }
 
 type InnerContext {
-  ReadStdIn \() ffiStringResult
-  WriteStdOut \(string) ffiWriteResult
-  WriteStdErr \(string) ffiWriteResult
-  OpenFile \(string, OpenFileOptions'OpenFileOptions) ffiOpenResult
-  ReadFile \(normalFile'NormalFile) ffiStringResult
-  WriteFile \(normalFile'NormalFile, string) ffiWriteResult
-  CopyFile \(string, string) ffiNoneResult
-  RemoveFile \(string) ffiNoneResult
-  ReadDirectory \(string) ffiReadDirectoryResult
-  CreateDirectory \(string) ffiNoneResult
-  RemoveDirectory \(string) ffiNoneResult
+  ReadStdIn \() FfiStringResult
+  WriteStdOut \(string) FfiWriteResult
+  WriteStdErr \(string) FfiWriteResult
+  OpenFile \(string, OpenFileOptions'OpenFileOptions) FfiOpenResult
+  ReadFile \(normalFile'NormalFile) FfiStringResult
+  WriteFile \(normalFile'NormalFile, string) FfiWriteResult
+  CopyFile \(string, string) FfiNoneResult
+  RemoveFile \(string) FfiNoneResult
+  ReadDirectory \(string) FfiReadDirectoryResult
+  CreateDirectory \(string) FfiNoneResult
+  RemoveDirectory \(string) FfiNoneResult
   GetArguments \() array'Array
-  GetEnvironmentVariable \(string) ffiStringResult
+  GetEnvironmentVariable \(string) FfiStringResult
 }
 
-type ffiOpenResult {
+type FfiOpenResult {
   File normalFile'NormalFile
   Error number
 }
 
-type ffiStringResult {
+type FfiStringResult {
   Value string
   Error number
 }
 
-type ffiWriteResult {
+type FfiWriteResult {
   Count number
   Error number
 }
 
-type ffiNoneResult {
+type FfiNoneResult {
   None none
   Error number
 }
 
-type ffiReadDirectoryResult {
+type FfiReadDirectoryResult {
   Paths array'Array
   Error number
 }
