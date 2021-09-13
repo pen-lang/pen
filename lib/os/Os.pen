@@ -2,7 +2,7 @@ import 'array
 import 'Os'context
 import 'Os'errorTranslator
 import 'Os'normalFile
-import 'Os'openFileOptions
+import 'Os'OpenFileOptions
 
 import foreign _pen_main \(context'Context) number
 
@@ -18,7 +18,7 @@ type specialFile = stdIn | stdOut | stdErr
 
 type Context = context'Context
 
-type OpenFileOptions = openFileOptions'OpenFileOptions
+type OpenFileOptions = OpenFileOptions'OpenFileOptions
 
 StdIn = \() File {
   File{inner: stdIn}
@@ -32,11 +32,7 @@ StdErr = \() File {
   File{inner: stdErr}
 }
 
-DefaultOpenFileOptions = \() openFileOptions'OpenFileOptions {
-  openFileOptions'Default()
-}
-
-OpenFileWithOptions = \(ctx context'Context, path string, opts openFileOptions'OpenFileOptions) File | error {
+OpenFileWithOptions = \(ctx context'Context, path string, opts OpenFileOptions'OpenFileOptions) File | error {
   r = context'Inner(ctx).OpenFile(path, opts)
 
   if r.Error == 0 {
@@ -50,7 +46,7 @@ OpenFile = \(ctx context'Context, path string) File | error {
   OpenFileWithOptions(
     ctx,
     path,
-    openFileOptions'OpenFileOptions{...openFileOptions'Default(), Read: true}
+    OpenFileOptions'OpenFileOptions{...OpenFileOptions'Default(), Read: true}
   )
 }
 
