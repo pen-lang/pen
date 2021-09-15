@@ -84,8 +84,6 @@ It is a list of values of a type. The element type is put between `[` and `]`.
 
 A list literal contains its element type and elements as expressions.
 
-Expressions within list literals are evaluated lazily; they are evaluated only if their values are required but only once.
-
 ```pen
 [number]
 [number 1]
@@ -97,6 +95,8 @@ You can create new lists from existing ones by spreading elements of the old one
 ```pen
 [person x, ...xs]
 ```
+
+**Expressions within list literals are evaluated lazily**; they are evaluated only if their values are required but only once.
 
 ## Records
 
