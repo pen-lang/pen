@@ -58,6 +58,7 @@ pub fn module<'a>() -> impl Parser<Stream<'a>, Output = Module> {
     (
         position(),
         blank(),
+        many(export()),
         many(import()),
         many(foreign_import()),
         many(choice((
@@ -68,9 +69,9 @@ pub fn module<'a>() -> impl Parser<Stream<'a>, Output = Module> {
     )
         .skip(eof())
         .map(
-            |(position, _, imports, foreign_imports, type_definitions, definitions)| {
+            |(position, _, exports, imports, foreign_imports, type_definitions, definitions)| {
                 Module::new(
-                    vec![], // TODO
+                    exports,
                     imports,
                     foreign_imports,
                     type_definitions,
@@ -79,6 +80,15 @@ pub fn module<'a>() -> impl Parser<Stream<'a>, Output = Module> {
                 )
             },
         )
+}
+
+fn export<'a>() -> impl Parser<Stream<'a>, Output = Export> {
+    (
+        attempt(keyword("export").with(module_path())),
+        between(sign("{"), sign("}"), sep_end_by1(identifier(), sign(","))),
+    )
+        .map(|(path, names)| Export::new(path, names))
+        .expected("export statement")
 }
 
 fn import<'a>() -> impl Parser<Stream<'a>, Output = Import> {
@@ -966,6 +976,18 @@ mod tests {
                 )
             );
         }
+    }
+
+    #[test]
+    fn parse_export() {
+        assert!(export().parse(stream("export 'Foo {}", "")).is_err());
+        assert_eq!(
+            export().parse(stream("export 'Foo { Foo }", "")).unwrap().0,
+            Export::new(
+                InternalModulePath::new(vec!["Foo".into()]),
+                vec!["Foo".into()]
+            ),
+        );
     }
 
     mod import {
