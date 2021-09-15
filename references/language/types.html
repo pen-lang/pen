@@ -188,12 +188,14 @@ false
 <pre><code class="language-pen">[number]
 </code></pre>
 <h3 id="literals-4"><a class="header" href="#literals-4">Literals</a></h3>
-<p>List literals contain their elements. Element types need to be specified explicitly before semicolons like <code>[number; ... ]</code>.</p>
+<p>A list literal contains its element type and elements as expressions.</p>
 <p>Expressions within list literals are evaluated lazily; they are evaluated only if their values are required but only once.</p>
-<pre><code class="language-pen">[number; 1, 2, 3]
+<pre><code class="language-pen">[number]
+[number 1]
+[number 1, 2, 3]
 </code></pre>
 <p>You can create new lists from existing ones by spreading elements of the old ones prefixed by <code>...</code> into the new ones.</p>
-<pre><code class="language-pen">[person; x, ...xs]
+<pre><code class="language-pen">[person x, ...xs]
 </code></pre>
 <h2 id="records"><a class="header" href="#records">Records</a></h2>
 <p>It is a combination of types banded into a single type. Each field of a record type is composed of its name and type.</p>
