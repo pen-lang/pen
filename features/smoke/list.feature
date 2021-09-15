@@ -15,7 +15,7 @@ Feature: List
     import System'Os
 
     main = \(ctx Os'Context) number {
-      if [x, ...xs] = [none; ...[none; none]] {
+      if [x, ...xs] = [none ...[none none]] {
         x()
       } else {
         none

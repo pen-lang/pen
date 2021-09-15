@@ -16,7 +16,7 @@ Feature: Union
 
     main = \(ctx Os'Context) number {
       x = if true {
-        [none;]
+        [none]
       } else {
         none
       }

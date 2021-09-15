@@ -27,7 +27,7 @@ Feature: Core
     import Core'Number
 
     f = \() number {
-      Number'Sum([number; 1, 2, 3])
+      Number'Sum([number 1, 2, 3])
     }
     """
     When I run `pen build`
@@ -39,7 +39,7 @@ Feature: Core
     import Core'String
 
     f = \() string {
-      String'Join([string; "hello", "world"], " ")
+      String'Join([string "hello", "world"], " ")
     }
     """
     When I run `pen build`
@@ -63,9 +63,9 @@ Feature: Core
     import Core'List
 
     f = \() number {
-      xs = [none;]
+      xs = [none]
 
-      List'Length([any; ...xs])
+      List'Length([any ...xs])
     }
     """
     When I run `pen build`

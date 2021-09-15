@@ -9,7 +9,7 @@ Feature: List
     Given a file named "Foo.pen" with:
     """pen
     f = \() [number] {
-      [number;]
+      [number]
     }
     """
     When I run `pen build`
@@ -19,7 +19,7 @@ Feature: List
     Given a file named "Foo.pen" with:
     """pen
     f = \() [number] {
-      [number; 1]
+      [number 1]
     }
     """
     When I run `pen build`
@@ -29,7 +29,7 @@ Feature: List
     Given a file named "Foo.pen" with:
     """pen
     f = \() [number] {
-      [number; 1, 2]
+      [number 1, 2]
     }
     """
     When I run `pen build`
@@ -39,7 +39,7 @@ Feature: List
     Given a file named "Foo.pen" with:
     """pen
     f = \(xs [number]) [number] {
-      [number; ...xs, ...xs]
+      [number ...xs, ...xs]
     }
     """
     When I run `pen build`
@@ -49,7 +49,7 @@ Feature: List
     Given a file named "Foo.pen" with:
     """pen
     f = \() [number | none] {
-      [number | none; 1, none]
+      [number | none 1, none]
     }
     """
     When I run `pen build`
@@ -59,7 +59,7 @@ Feature: List
     Given a file named "Foo.pen" with:
     """pen
     f = \(xs [number]) [number | none] {
-      [number | none; ...xs]
+      [number | none ...xs]
     }
     """
     When I run `pen build`
@@ -70,9 +70,9 @@ Feature: List
     """pen
     f = \(xs [number]) [number] {
       if [y, ...ys] = xs {
-        [number; y(), ...ys]
+        [number y(), ...ys]
       } else {
-        [number;]
+        [number]
       }
     }
     """

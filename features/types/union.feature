@@ -19,7 +19,7 @@ Feature: Union
     Given a file named "Foo.pen" with:
     """pen
     f = \() [number] | none {
-      [number; 42]
+      [number 42]
     }
     """
     When I run `pen build`
