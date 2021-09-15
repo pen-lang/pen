@@ -65,7 +65,7 @@ mod tests {
     fn compile_empty_module() {
         assert_eq!(
             compile(
-                &ast::Module::new(vec![], vec![], vec![], vec![], Position::fake()),
+                &ast::Module::new(vec![], vec![], vec![], vec![], vec![], Position::fake()),
                 "",
                 &Default::default(),
                 &[],
@@ -81,6 +81,7 @@ mod tests {
         assert_eq!(
             compile(
                 &ast::Module::new(
+                    vec![],
                     vec![ast::Import::new(path.clone(), None, vec![])],
                     vec![],
                     vec![],

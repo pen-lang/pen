@@ -354,6 +354,7 @@ mod tests {
                 vec![],
                 vec![],
                 vec![],
+                vec![],
                 Position::fake()
             )),
             Ok(ir::Module::empty())
@@ -364,6 +365,7 @@ mod tests {
     fn compile_module() {
         assert_eq!(
             compile(&ast::Module::new(
+                vec![],
                 vec![],
                 vec![],
                 vec![

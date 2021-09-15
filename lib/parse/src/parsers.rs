@@ -70,6 +70,7 @@ pub fn module<'a>() -> impl Parser<Stream<'a>, Output = Module> {
         .map(
             |(position, _, imports, foreign_imports, type_definitions, definitions)| {
                 Module::new(
+                    vec![], // TODO
                     imports,
                     foreign_imports,
                     type_definitions,
@@ -790,19 +791,20 @@ mod tests {
         fn parse_module() {
             assert_eq!(
                 module().parse(stream("", "")).unwrap().0,
-                Module::new(vec![], vec![], vec![], vec![], Position::fake())
+                Module::new(vec![], vec![], vec![], vec![], vec![], Position::fake())
             );
             assert_eq!(
                 module().parse(stream(" ", "")).unwrap().0,
-                Module::new(vec![], vec![], vec![], vec![], Position::fake())
+                Module::new(vec![], vec![], vec![], vec![], vec![], Position::fake())
             );
             assert_eq!(
                 module().parse(stream("\n", "")).unwrap().0,
-                Module::new(vec![], vec![], vec![], vec![], Position::fake())
+                Module::new(vec![], vec![], vec![], vec![], vec![], Position::fake())
             );
             assert_eq!(
                 module().parse(stream("import Foo'Bar", "")).unwrap().0,
                 Module::new(
+                    vec![],
                     vec![Import::new(
                         ExternalModulePath::new("Foo", vec!["Bar".into()]),
                         None,
@@ -817,6 +819,7 @@ mod tests {
             assert_eq!(
                 module().parse(stream("type foo = number", "")).unwrap().0,
                 Module::new(
+                    vec![],
                     vec![],
                     vec![],
                     vec![TypeAlias::new(
@@ -835,6 +838,7 @@ mod tests {
                     .unwrap()
                     .0,
                 Module::new(
+                    vec![],
                     vec![],
                     vec![],
                     vec![],
@@ -865,6 +869,7 @@ mod tests {
                     .unwrap()
                     .0,
                 Module::new(
+                    vec![],
                     vec![],
                     vec![],
                     vec![],
@@ -913,6 +918,7 @@ mod tests {
                     .unwrap()
                     .0,
                 Module::new(
+                    vec![],
                     vec![Import::new(
                         ExternalModulePath::new("Foo", vec!["Bar".into()]),
                         None,
@@ -943,6 +949,7 @@ mod tests {
                     .unwrap()
                     .0,
                 Module::new(
+                    vec![],
                     vec![],
                     vec![],
                     vec![
