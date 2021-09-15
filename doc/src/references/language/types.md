@@ -82,18 +82,20 @@ It is a list of values of a type. The element type is put between `[` and `]`.
 
 ### Literals
 
-List literals contain their elements. Element types need to be specified explicitly before semicolons like `[number; ... ]`.
+A list literal contains its element type and their elements as expressions.
 
 Expressions within list literals are evaluated lazily; they are evaluated only if their values are required but only once.
 
 ```pen
-[number; 1, 2, 3]
+[number]
+[number 1]
+[number 1, 2, 3]
 ```
 
 You can create new lists from existing ones by spreading elements of the old ones prefixed by `...` into the new ones.
 
 ```pen
-[person; x, ...xs]
+[person x, ...xs]
 ```
 
 ## Records
