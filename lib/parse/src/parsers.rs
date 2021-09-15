@@ -654,11 +654,10 @@ fn list_literal<'a>() -> impl Parser<Stream<'a>, Output = List> {
     (
         attempt(position().skip(sign("["))),
         type_(),
-        sign(";"),
         sep_end_by(list_element(), sign(",")),
         sign("]"),
     )
-        .map(|(position, type_, _, elements, _)| List::new(type_, elements, position))
+        .map(|(position, type_, elements, _)| List::new(type_, elements, position))
         .expected("list literal")
 }
 
@@ -2419,11 +2418,11 @@ mod tests {
         fn parse_list() {
             for (source, target) in vec![
                 (
-                    "[none;]",
+                    "[none]",
                     List::new(types::None::new(Position::fake()), vec![], Position::fake()),
                 ),
                 (
-                    "[none;none]",
+                    "[none none]",
                     List::new(
                         types::None::new(Position::fake()),
                         vec![ListElement::Single(None::new(Position::fake()).into())],
@@ -2431,7 +2430,7 @@ mod tests {
                     ),
                 ),
                 (
-                    "[none;none,]",
+                    "[none none,]",
                     List::new(
                         types::None::new(Position::fake()),
                         vec![ListElement::Single(None::new(Position::fake()).into())],
@@ -2439,7 +2438,7 @@ mod tests {
                     ),
                 ),
                 (
-                    "[none;none,none]",
+                    "[none none,none]",
                     List::new(
                         types::None::new(Position::fake()),
                         vec![
@@ -2450,7 +2449,7 @@ mod tests {
                     ),
                 ),
                 (
-                    "[none;none,none,]",
+                    "[none none,none,]",
                     List::new(
                         types::None::new(Position::fake()),
                         vec![
@@ -2461,7 +2460,7 @@ mod tests {
                     ),
                 ),
                 (
-                    "[none;...foo]",
+                    "[none ...foo]",
                     List::new(
                         types::None::new(Position::fake()),
                         vec![ListElement::Multiple(
@@ -2471,7 +2470,7 @@ mod tests {
                     ),
                 ),
                 (
-                    "[none;...foo,]",
+                    "[none ...foo,]",
                     List::new(
                         types::None::new(Position::fake()),
                         vec![ListElement::Multiple(
@@ -2481,7 +2480,7 @@ mod tests {
                     ),
                 ),
                 (
-                    "[none;...foo,...bar]",
+                    "[none ...foo,...bar]",
                     List::new(
                         types::None::new(Position::fake()),
                         vec![
@@ -2492,7 +2491,7 @@ mod tests {
                     ),
                 ),
                 (
-                    "[none;...foo,...bar,]",
+                    "[none ...foo,...bar,]",
                     List::new(
                         types::None::new(Position::fake()),
                         vec![
@@ -2503,7 +2502,7 @@ mod tests {
                     ),
                 ),
                 (
-                    "[none;foo,...bar]",
+                    "[none foo,...bar]",
                     List::new(
                         types::None::new(Position::fake()),
                         vec![
@@ -2514,7 +2513,7 @@ mod tests {
                     ),
                 ),
                 (
-                    "[none;...foo,bar]",
+                    "[none ...foo,bar]",
                     List::new(
                         types::None::new(Position::fake()),
                         vec![
