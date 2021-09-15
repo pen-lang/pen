@@ -82,7 +82,7 @@ It is a list of values of a type. The element type is put between `[` and `]`.
 
 ### Literals
 
-A list literal contains its element type and their elements as expressions.
+A list literal contains its element type and elements as expressions.
 
 Expressions within list literals are evaluated lazily; they are evaluated only if their values are required but only once.
 
