@@ -988,6 +988,16 @@ mod tests {
                 vec!["Foo".into()]
             ),
         );
+        assert_eq!(
+            export()
+                .parse(stream("export 'Foo { Foo, Bar }", ""))
+                .unwrap()
+                .0,
+            Export::new(
+                InternalModulePath::new(vec!["Foo".into()]),
+                vec!["Foo".into(), "Bar".into()]
+            ),
+        );
     }
 
     mod import {
