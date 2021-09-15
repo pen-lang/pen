@@ -192,7 +192,7 @@ Feature: Memory leak
     import System'Os
 
     f = \() none {
-      String'Join([string; "hello", "world"], " ")
+      String'Join([string "hello", "world"], " ")
 
       f()
     }
@@ -218,7 +218,7 @@ Feature: Memory leak
     main = \(ctx Os'Context) number {
       x = foo{x: 42}
 
-      [foo; x]
+      [foo x]
 
       main(ctx)
     }
@@ -238,7 +238,7 @@ Feature: Memory leak
     main = \(ctx Os'Context) number {
       x = foo{x: 42}
 
-      if [x, ...xs] = [foo; x] {
+      if [x, ...xs] = [foo x] {
         x()
       } else {
         none
@@ -260,7 +260,7 @@ Feature: Memory leak
     }
 
     main = \(ctx Os'Context) number {
-      [foo; foo{x: 42}]
+      [foo foo{x: 42}]
 
       main(ctx)
     }
@@ -278,7 +278,7 @@ Feature: Memory leak
     }
 
     main = \(ctx Os'Context) number {
-      if [x, ...xs] = [foo; foo{x: 42}] {
+      if [x, ...xs] = [foo foo{x: 42}] {
         x()
       } else {
         none

@@ -26,7 +26,7 @@ Feature: List as stream
     import 'Hello
 
     main = \(ctx Os'Context) number {
-      [none; Hello'Hello(ctx)]
+      [none Hello'Hello(ctx)]
 
       0
     }
@@ -42,7 +42,7 @@ Feature: List as stream
     import 'Hello
 
     main = \(ctx Os'Context) number {
-      if [x, ...xs] = [none; Hello'Hello(ctx)] {
+      if [x, ...xs] = [none Hello'Hello(ctx)] {
         x()
         x()
       } else {
@@ -65,11 +65,11 @@ Feature: List as stream
     foo = \(ctx Os'Context) [none] {
       Hello'Hello(ctx)
 
-      [none;]
+      [none]
     }
 
     main = \(ctx Os'Context) number {
-      [none; ...foo(ctx)]
+      [none ...foo(ctx)]
 
       0
     }
@@ -87,11 +87,11 @@ Feature: List as stream
     foo = \(ctx Os'Context) [none] {
       Hello'Hello(ctx)
 
-      [none;]
+      [none]
     }
 
     main = \(ctx Os'Context) number {
-      if [x, ...xs] = [none; ...foo(ctx)] {
+      if [x, ...xs] = [none ...foo(ctx)] {
         x()
         x()
       } else {
