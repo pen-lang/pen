@@ -6,7 +6,7 @@ Read = \(ctx Context, path string) [string] | error {
   r = Context'Inner(ctx).ReadDirectory(path)
 
   if r.Error == 0 {
-    array'ConvertArrayToStrings(r.Paths)
+    array'ConvertToStrings(r.Paths)
   } else {
     error(errorTranslator'Translate(r.Error))
   }

@@ -5,7 +5,7 @@ type Array {
   array any
 }
 
-ConvertArrayToStrings = \(xs Array) [string] {
+ConvertToStrings = \(xs Array) [string] {
   convertArrayToStringsFromIndex(xs, 1)
 }
 

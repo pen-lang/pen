@@ -2,5 +2,5 @@ import 'array
 import 'Context { Context }
 
 Get = \(ctx Context) [string] {
-  array'ConvertArrayToStrings(Context'Inner(ctx).GetArguments())
+  array'ConvertToStrings(Context'Inner(ctx).GetArguments())
 }
