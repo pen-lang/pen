@@ -145,7 +145,7 @@ mod tests {
                     ),
                     false
                 )]),
-                &vec![ImportedModule::new(
+                &[ImportedModule::new(
                     interface::Module::new(
                         vec![interface::TypeDefinition::new(
                             "RealFoo",
@@ -235,7 +235,7 @@ mod tests {
         assert_eq!(
             compile(
                 &Module::empty().set_definitions(vec![definition.clone()]),
-                &vec![ImportedModule::new(
+                &[ImportedModule::new(
                     interface::Module::new(
                         vec![interface::TypeDefinition::new(
                             "RealFoo",

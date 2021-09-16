@@ -375,7 +375,7 @@ mod tests {
                         ),
                         true,
                     )]),
-                &vec![ImportedModule::new(
+                &[ImportedModule::new(
                     interface::Module::new(
                         vec![],
                         vec![interface::TypeAlias::new(
@@ -452,7 +452,7 @@ mod tests {
                 &ir::Module::empty()
                     .set_type_definitions(vec![type_definition.clone()])
                     .set_definitions(vec![definition.clone()]),
-                &vec![ImportedModule::new(
+                &[ImportedModule::new(
                     interface::Module::new(
                         vec![interface::TypeDefinition::new(
                             "RealBar",
@@ -781,7 +781,7 @@ mod tests {
                             ),
                             true,
                         )]),
-                    &vec![ImportedModule::new(
+                    &[ImportedModule::new(
                         interface::Module::new(
                             vec![],
                             vec![interface::TypeAlias::new(
