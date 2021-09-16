@@ -71,3 +71,19 @@ import Foo'Bar'Baz as Blah
 ```
 
 [package-configuration]: packages.md#package-configuration
+
+### Unqualifed import
+
+Functions and types can be imported without prefixes by putting their names between `{` and `}` after normal import statements.
+
+```pen
+import Foo'Bar { Foo, Bar }
+
+type Baz = Foo
+
+Blah = \() number {
+  Bar()
+}
+```
+
+[package-configuration]: packages.md#package-configuration
