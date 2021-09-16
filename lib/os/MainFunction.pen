@@ -1,3 +1,3 @@
-import 'Context
+import 'Context { Context }
 
 type MainFunction = \(Context) number
