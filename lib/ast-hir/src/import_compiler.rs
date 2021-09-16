@@ -103,7 +103,17 @@ fn rename_variables(
                     .iter()
                     .map(|declaration| {
                         (
-                            name_qualifier::qualify(module.prefix(), declaration.original_name()),
+                            if module
+                                .unqualified_names()
+                                .contains(declaration.original_name())
+                            {
+                                declaration.original_name().into()
+                            } else {
+                                name_qualifier::qualify(
+                                    module.prefix(),
+                                    declaration.original_name(),
+                                )
+                            },
                             declaration.name().into(),
                         )
                     })
@@ -133,32 +143,26 @@ fn rename_types(
                 .interface()
                 .type_definitions()
                 .iter()
-                .filter_map(|definition| {
-                    if definition.is_public() {
-                        Some((
-                            name_qualifier::qualify(module.prefix(), definition.original_name()),
-                            definition.name().into(),
-                        ))
-                    } else {
-                        None
-                    }
-                })
+                .filter(|definition| definition.is_public())
+                .map(|definition| (definition.original_name(), definition.name()))
                 .chain(
                     module
                         .interface()
                         .type_aliases()
                         .iter()
-                        .filter_map(|alias| {
-                            if alias.is_public() {
-                                Some((
-                                    name_qualifier::qualify(module.prefix(), alias.original_name()),
-                                    alias.name().into(),
-                                ))
-                            } else {
-                                None
-                            }
-                        }),
+                        .filter(|alias| alias.is_public())
+                        .map(|alias| (alias.original_name(), alias.name())),
                 )
+                .map(|(original_name, name)| {
+                    (
+                        if module.unqualified_names().contains(original_name) {
+                            original_name.into()
+                        } else {
+                            name_qualifier::qualify(module.prefix(), original_name)
+                        },
+                        name.into(),
+                    )
+                })
                 .collect::<Vec<_>>()
         })
         .chain(prelude_module_interfaces.iter().flat_map(|module| {
@@ -611,5 +615,219 @@ mod tests {
                 true,
             )])
         );
+    }
+
+    mod unqualified_import {
+        use super::*;
+        use pretty_assertions::assert_eq;
+
+        #[test]
+        fn rename_variable() {
+            assert_eq!(
+                compile(
+                    &ir::Module::empty().set_definitions(vec![ir::Definition::fake(
+                        "Foo",
+                        ir::Lambda::new(
+                            vec![],
+                            types::None::new(Position::fake()),
+                            ir::Variable::new("Bar", Position::fake()),
+                            Position::fake(),
+                        ),
+                        true,
+                    )]),
+                    &[ImportedModule::new(
+                        interface::Module::new(
+                            vec![],
+                            vec![],
+                            vec![interface::Declaration::new(
+                                "RealBar",
+                                "Bar",
+                                types::Function::new(
+                                    vec![],
+                                    types::None::new(Position::fake()),
+                                    Position::fake()
+                                ),
+                                Position::fake()
+                            )]
+                        ),
+                        "Bar",
+                        vec!["Bar".into()].into_iter().collect()
+                    )],
+                    &[]
+                ),
+                ir::Module::empty()
+                    .set_declarations(vec![ir::Declaration::new(
+                        "RealBar",
+                        types::Function::new(
+                            vec![],
+                            types::None::new(Position::fake()),
+                            Position::fake()
+                        ),
+                        Position::fake()
+                    )])
+                    .set_definitions(vec![ir::Definition::fake(
+                        "Foo",
+                        ir::Lambda::new(
+                            vec![],
+                            types::None::new(Position::fake()),
+                            ir::Variable::new("RealBar", Position::fake()),
+                            Position::fake(),
+                        ),
+                        true,
+                    )])
+            );
+        }
+
+        #[test]
+        fn rename_type_definition() {
+            assert_eq!(
+                compile(
+                    &ir::Module::empty()
+                        .set_type_definitions(vec![ir::TypeDefinition::fake(
+                            "Foo",
+                            vec![types::RecordElement::new(
+                                "foo",
+                                types::Reference::new("Bar", Position::fake())
+                            )],
+                            false,
+                            false,
+                            false,
+                        )])
+                        .set_definitions(vec![ir::Definition::fake(
+                            "Foo",
+                            ir::Lambda::new(
+                                vec![],
+                                types::Reference::new("Bar", Position::fake()),
+                                ir::None::new(Position::fake()),
+                                Position::fake(),
+                            ),
+                            true,
+                        )]),
+                    &[ImportedModule::new(
+                        interface::Module::new(
+                            vec![interface::TypeDefinition::new(
+                                "RealBar",
+                                "Bar",
+                                vec![],
+                                false,
+                                true,
+                                Position::fake()
+                            )],
+                            vec![],
+                            vec![]
+                        ),
+                        "Bar",
+                        vec!["Bar".into()].into_iter().collect()
+                    )],
+                    &[]
+                ),
+                ir::Module::empty()
+                    .set_type_definitions(vec![
+                        ir::TypeDefinition::new(
+                            "RealBar",
+                            "Bar",
+                            vec![],
+                            false,
+                            true,
+                            true,
+                            Position::fake()
+                        ),
+                        ir::TypeDefinition::fake(
+                            "Foo",
+                            vec![types::RecordElement::new(
+                                "foo",
+                                types::Reference::new("RealBar", Position::fake())
+                            )],
+                            false,
+                            false,
+                            false,
+                        )
+                    ])
+                    .set_definitions(vec![ir::Definition::fake(
+                        "Foo",
+                        ir::Lambda::new(
+                            vec![],
+                            types::Reference::new("RealBar", Position::fake()),
+                            ir::None::new(Position::fake()),
+                            Position::fake(),
+                        ),
+                        true,
+                    )])
+            );
+        }
+
+        #[test]
+        fn rename_type_alias() {
+            assert_eq!(
+                compile(
+                    &ir::Module::empty()
+                        .set_type_definitions(vec![ir::TypeDefinition::fake(
+                            "Foo",
+                            vec![types::RecordElement::new(
+                                "foo",
+                                types::Reference::new("Bar", Position::fake())
+                            )],
+                            false,
+                            false,
+                            false,
+                        )])
+                        .set_definitions(vec![ir::Definition::fake(
+                            "Foo",
+                            ir::Lambda::new(
+                                vec![],
+                                types::Reference::new("Bar", Position::fake()),
+                                ir::None::new(Position::fake()),
+                                Position::fake(),
+                            ),
+                            true,
+                        )]),
+                    &vec![ImportedModule::new(
+                        interface::Module::new(
+                            vec![],
+                            vec![interface::TypeAlias::new(
+                                "RealBar",
+                                "Bar",
+                                types::None::new(Position::fake()),
+                                true,
+                                Position::fake(),
+                            )],
+                            vec![]
+                        ),
+                        "Bar",
+                        vec!["Bar".into()].into_iter().collect()
+                    )],
+                    &[]
+                ),
+                ir::Module::empty()
+                    .set_type_definitions(vec![ir::TypeDefinition::fake(
+                        "Foo",
+                        vec![types::RecordElement::new(
+                            "foo",
+                            types::Reference::new("RealBar", Position::fake())
+                        )],
+                        false,
+                        false,
+                        false,
+                    )])
+                    .set_type_aliases(vec![ir::TypeAlias::new(
+                        "RealBar",
+                        "Bar",
+                        types::None::new(Position::fake()),
+                        true,
+                        true,
+                        Position::fake(),
+                    )])
+                    .set_definitions(vec![ir::Definition::fake(
+                        "Foo",
+                        ir::Lambda::new(
+                            vec![],
+                            types::Reference::new("RealBar", Position::fake()),
+                            ir::None::new(Position::fake()),
+                            Position::fake(),
+                        ),
+                        true,
+                    )])
+            );
+        }
     }
 }
