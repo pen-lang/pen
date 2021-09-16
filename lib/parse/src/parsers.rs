@@ -84,8 +84,13 @@ fn import<'a>() -> impl Parser<Stream<'a>, Output = Import> {
     (
         attempt(keyword("import").with(module_path())),
         optional(keyword("as").with(identifier())),
+        optional(between(
+            sign("{"),
+            sign("}"),
+            sep_end_by1(identifier(), sign(",")),
+        )),
     )
-        .map(|(path, prefix)| Import::new(path, prefix))
+        .map(|(path, prefix, names)| Import::new(path, prefix, names.unwrap_or_default()))
         .expected("import statement")
 }
 
@@ -800,7 +805,8 @@ mod tests {
                 Module::new(
                     vec![Import::new(
                         ExternalModulePath::new("Foo", vec!["Bar".into()]),
-                        None
+                        None,
+                        vec![]
                     )],
                     vec![],
                     vec![],
@@ -909,7 +915,8 @@ mod tests {
                 Module::new(
                     vec![Import::new(
                         ExternalModulePath::new("Foo", vec!["Bar".into()]),
-                        None
+                        None,
+                        vec![]
                     )],
                     vec![ForeignImport::new(
                         "foo",
@@ -962,11 +969,15 @@ mod tests {
         fn parse_import() {
             assert_eq!(
                 import().parse(stream("import 'Foo", "")).unwrap().0,
-                Import::new(InternalModulePath::new(vec!["Foo".into()]), None),
+                Import::new(InternalModulePath::new(vec!["Foo".into()]), None, vec![]),
             );
             assert_eq!(
                 import().parse(stream("import Foo'Bar", "")).unwrap().0,
-                Import::new(ExternalModulePath::new("Foo", vec!["Bar".into()]), None),
+                Import::new(
+                    ExternalModulePath::new("Foo", vec!["Bar".into()]),
+                    None,
+                    vec![]
+                ),
             );
         }
 
@@ -976,7 +987,35 @@ mod tests {
                 import().parse(stream("import 'Foo as foo", "")).unwrap().0,
                 Import::new(
                     InternalModulePath::new(vec!["Foo".into()]),
-                    Some("foo".into())
+                    Some("foo".into()),
+                    vec![]
+                ),
+            );
+        }
+
+        #[test]
+        fn parse_unqualified_import() {
+            assert_eq!(
+                import().parse(stream("import 'Foo { Foo }", "")).unwrap().0,
+                Import::new(
+                    InternalModulePath::new(vec!["Foo".into()]),
+                    None,
+                    vec!["Foo".into()]
+                ),
+            );
+        }
+
+        #[test]
+        fn parse_unqualified_import_with_multiple_identifiers() {
+            assert_eq!(
+                import()
+                    .parse(stream("import 'Foo { Foo, Bar }", ""))
+                    .unwrap()
+                    .0,
+                Import::new(
+                    InternalModulePath::new(vec!["Foo".into()]),
+                    None,
+                    vec!["Foo".into(), "Bar".into()]
                 ),
             );
         }

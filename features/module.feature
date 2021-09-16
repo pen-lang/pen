@@ -72,3 +72,49 @@ Feature: Modules
     """
     When I run `pen build`
     Then the exit status should be 0
+
+  Scenario: Import a type definition with no prefix
+    Given a file named "Foo.pen" with:
+    """pen
+    type Foo {}
+    """
+    And a file named "Bar.pen" with:
+    """pen
+    import 'Foo { Foo }
+
+    type Bar = Foo
+    """
+    When I run `pen build`
+    Then the exit status should be 0
+
+  Scenario: Import a type alias with no prefix
+    Given a file named "Foo.pen" with:
+    """pen
+    type Foo = number
+    """
+    And a file named "Bar.pen" with:
+    """pen
+    import 'Foo { Foo }
+
+    type Bar = Foo
+    """
+    When I run `pen build`
+    Then the exit status should be 0
+
+  Scenario: Import a function with no prefix
+    Given a file named "Foo.pen" with:
+    """pen
+    Foo = \() number {
+      42
+    }
+    """
+    And a file named "Bar.pen" with:
+    """pen
+    import 'Foo { Foo }
+
+    Bar = \() number {
+      Foo()
+    }
+    """
+    When I run `pen build`
+    Then the exit status should be 0

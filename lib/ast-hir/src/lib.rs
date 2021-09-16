@@ -1,5 +1,6 @@
 mod error;
 mod import_compiler;
+mod imported_module;
 mod module_compiler;
 mod module_prefix_collector;
 mod name_qualifier;
@@ -11,6 +12,7 @@ use hir::{
     analysis::ir::{definition_qualifier, type_qualifier},
     ir,
 };
+use imported_module::ImportedModule;
 use std::collections::HashMap;
 
 pub fn compile(
@@ -19,18 +21,20 @@ pub fn compile(
     module_interfaces: &HashMap<ast::ModulePath, interface::Module>,
     prelude_module_interfaces: &[interface::Module],
 ) -> Result<ir::Module, CompileError> {
-    let imported_modules = module_prefix_collector::collect(module)
+    let imported_modules = module
+        .imports()
         .iter()
-        .map(|(path, prefix)| {
-            Ok((
-                prefix.clone(),
+        .map(|import| {
+            Ok(ImportedModule::new(
                 module_interfaces
-                    .get(path)
-                    .ok_or_else(|| CompileError::ModuleNotFound(path.clone()))?
+                    .get(import.module_path())
+                    .ok_or_else(|| CompileError::ModuleNotFound(import.module_path().clone()))?
                     .clone(),
+                module_prefix_collector::calculate(import),
+                import.unqualified_names().iter().cloned().collect(),
             ))
         })
-        .collect::<Result<_, _>>()?;
+        .collect::<Result<Vec<_>, _>>()?;
     let module = module_compiler::compile(module)?;
     let module = import_compiler::compile(&module, &imported_modules, prelude_module_interfaces);
 
@@ -77,7 +81,7 @@ mod tests {
         assert_eq!(
             compile(
                 &ast::Module::new(
-                    vec![ast::Import::new(path.clone(), None)],
+                    vec![ast::Import::new(path.clone(), None, vec![])],
                     vec![],
                     vec![],
                     vec![],

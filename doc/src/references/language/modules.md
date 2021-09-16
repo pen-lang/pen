@@ -71,3 +71,19 @@ import Foo'Bar'Baz as Blah
 ```
 
 [package-configuration]: packages.md#package-configuration
+
+### Unqualified import
+
+Functions and types can be imported without prefixes by putting their names between `{` and `}` after normal import statements. This is especially useful when module names and imported entities have the same names like `import 'MyType { MyType }` to make them less redundant.
+
+```pen
+import Foo'Bar { Foo, Bar }
+
+type Baz = Foo
+
+Blah = \() number {
+  Bar()
+}
+```
+
+[package-configuration]: packages.md#package-configuration
