@@ -1,0 +1,33 @@
+import 'array
+import 'Context { Context }
+import 'errorTranslator
+
+Read = \(ctx Context, path string) [string] | error {
+  r = Context'Inner(ctx).ReadDirectory(path)
+
+  if r.Error == 0 {
+    array'ConvertArrayToStrings(r.Paths)
+  } else {
+    error(errorTranslator'Translate(r.Error))
+  }
+}
+
+Create = \(ctx Context, path string) none | error {
+  r = Context'Inner(ctx).CreateDirectory(path)
+
+  if r.Error == 0 {
+    none
+  } else {
+    error(errorTranslator'Translate(r.Error))
+  }
+}
+
+Remove = \(ctx Context, path string) none | error {
+  r = Context'Inner(ctx).RemoveDirectory(path)
+
+  if r.Error == 0 {
+    none
+  } else {
+    error(errorTranslator'Translate(r.Error))
+  }
+}
