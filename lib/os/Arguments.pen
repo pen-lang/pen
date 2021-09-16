@@ -1,6 +1,0 @@
-import 'array
-import 'Context { Context }
-
-Get = \(ctx Context) [string] {
-  array'ConvertToStrings(Context'Inner(ctx).GetArguments())
-}

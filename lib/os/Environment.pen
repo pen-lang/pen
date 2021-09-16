@@ -1,7 +1,12 @@
+import 'array
 import 'Context { Context }
 import 'errorTranslator
 
-Get = \(ctx Context, name string) string | error {
+Arguments = \(ctx Context) [string] {
+  array'ConvertToStrings(Context'Inner(ctx).GetArguments())
+}
+
+Variable = \(ctx Context, name string) string | error {
   r = Context'Inner(ctx).GetEnvironmentVariable(name)
 
   if r.Error == 0 {

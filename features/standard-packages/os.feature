@@ -14,12 +14,12 @@ Feature: OS
     Given a file named "Main.pen" with:
     """pen
     import Core'String
-    import System'Arguments
     import System'Context { Context }
+    import System'Environment
     import System'File
 
     main = \(ctx Context) number {
-      if _ = File'Write(ctx, File'StdOut(), String'Join(Arguments'Get(ctx), " ")) as number {
+      if _ = File'Write(ctx, File'StdOut(), String'Join(Environment'Arguments(ctx), " ")) as number {
         0
       } else {
         1
@@ -36,10 +36,10 @@ Feature: OS
     import Core'String
     import System'Context { Context }
     import System'File
-    import System'EnvironmentVariable
+    import System'Environment
 
     printEnvironmentVariable = \(ctx Context) none | error {
-      File'Write(ctx, File'StdOut(), EnvironmentVariable'Get(ctx, "FOO")?)?
+      File'Write(ctx, File'StdOut(), Environment'Variable(ctx, "FOO")?)?
 
       none
     }

@@ -28,7 +28,11 @@ It is a context of the operating system. It must be passed to functions in this 
 type Context { ... }
 ```
 
-## `Arguments` module
+## `Environment` module
+
+```pen
+import System'Environment
+```
 
 ### Functions
 
@@ -40,11 +44,7 @@ It gets command line arguments.
 \(ctx Context) [string]
 ```
 
-## `EnvironmentVariable` module
-
-### Functions
-
-#### `EnvironmentVariable`
+#### `Variable`
 
 It gets an environment variable of a given name. It returns an error if the variable is undefined.
 
@@ -53,6 +53,10 @@ It gets an environment variable of a given name. It returns an error if the vari
 ```
 
 ## `File` module
+
+```pen
+import System'File
+```
 
 ### Types
 
@@ -103,7 +107,7 @@ It opens a file for read-only.
 It opens a file with options.
 
 ```pen
-\(ctx Context, path string, opts OpenOptions) File | error
+\(ctx Context, path string, opt OpenOptions) File | error
 ```
 
 #### `Read`
@@ -140,6 +144,10 @@ It removes a file at a path.
 
 ## `File'OpenOptions` module
 
+```pen
+import System'File'OpenOptions
+```
+
 ### Types
 
 #### `OpenOptions`
@@ -168,13 +176,17 @@ type OpenOptions {
 
 #### `Default`
 
-It gets default open file options where all flags are set `false`.
+It gets default options where all flags are set `false`.
 
 ```pen
 \() OpenOptions
 ```
 
 ## `Directory` module
+
+```pen
+import System'Directory
+```
 
 ### Functions
 
