@@ -13,13 +13,13 @@ Feature: Memory leak
   Scenario: Run an infinite loop
     Given a file named "Main.pen" with:
     """pen
-    import System'Os
+    import System'Context { Context }
 
     f = \() none {
       f()
     }
 
-    main = \(ctx Os'Context) number {
+    main = \(ctx Context) number {
       f()
 
       0
@@ -31,9 +31,9 @@ Feature: Memory leak
   Scenario: Run hello world
     Given a file named "Main.pen" with:
     """pen
-    import System'Os
+    import System'Context { Context }
 
-    main = \(ctx Os'Context) number {
+    main = \(ctx Context) number {
       Os'WriteFile(ctx, Os'StdOut(), "Hello, world!\n")
 
       main(ctx)
@@ -45,7 +45,7 @@ Feature: Memory leak
   Scenario: Create a record
     Given a file named "Main.pen" with:
     """pen
-    import System'Os
+    import System'Context { Context }
 
     type foo {
       x number
@@ -57,7 +57,7 @@ Feature: Memory leak
       f()
     }
 
-    main = \(ctx Os'Context) number {
+    main = \(ctx Context) number {
       f()
 
       0
@@ -69,7 +69,7 @@ Feature: Memory leak
   Scenario: Deconstruct a record
     Given a file named "Main.pen" with:
     """pen
-    import System'Os
+    import System'Context { Context }
 
     type foo {
       x number
@@ -81,7 +81,7 @@ Feature: Memory leak
       f()
     }
 
-    main = \(ctx Os'Context) number {
+    main = \(ctx Context) number {
       f()
 
       0
@@ -93,7 +93,7 @@ Feature: Memory leak
   Scenario: Put a string into a value of any type
     Given a file named "Main.pen" with:
     """pen
-    import System'Os
+    import System'Context { Context }
 
     f = \(x any) any {
       x
@@ -105,7 +105,7 @@ Feature: Memory leak
       g()
     }
 
-    main = \(ctx Os'Context) number {
+    main = \(ctx Context) number {
       g()
 
       0
@@ -117,7 +117,7 @@ Feature: Memory leak
   Scenario: Shadow a variable in a block
     Given a file named "Main.pen" with:
     """pen
-    import System'Os
+    import System'Context { Context }
 
     type foo {
       x number
@@ -130,7 +130,7 @@ Feature: Memory leak
       f()
     }
 
-    main = \(ctx Os'Context) number {
+    main = \(ctx Context) number {
       f()
 
       0
@@ -142,7 +142,7 @@ Feature: Memory leak
   Scenario: Define a function in a let expression with a free variable
     Given a file named "Main.pen" with:
     """pen
-    import System'Os
+    import System'Context { Context }
 
     type foo {
       x number
@@ -155,7 +155,7 @@ Feature: Memory leak
       f()
     }
 
-    main = \(ctx Os'Context) number {
+    main = \(ctx Context) number {
       f()
 
       0
@@ -168,7 +168,7 @@ Feature: Memory leak
     Given a file named "Main.pen" with:
     """pen
     import Core'Number
-    import System'Os
+    import System'Context { Context }
 
     f = \() none {
       Number'String(42)
@@ -176,7 +176,7 @@ Feature: Memory leak
       f()
     }
 
-    main = \(ctx Os'Context) number {
+    main = \(ctx Context) number {
       f()
 
       0
@@ -189,7 +189,7 @@ Feature: Memory leak
     Given a file named "Main.pen" with:
     """pen
     import Core'String
-    import System'Os
+    import System'Context { Context }
 
     f = \() none {
       String'Join([string "hello", "world"], " ")
@@ -197,7 +197,7 @@ Feature: Memory leak
       f()
     }
 
-    main = \(ctx Os'Context) number {
+    main = \(ctx Context) number {
       f()
 
       0
@@ -209,13 +209,13 @@ Feature: Memory leak
   Scenario: Drop an unforced list
     Given a file named "Main.pen" with:
     """pen
-    import System'Os
+    import System'Context { Context }
 
     type foo {
       x number
     }
 
-    main = \(ctx Os'Context) number {
+    main = \(ctx Context) number {
       x = foo{x: 42}
 
       [foo x]
@@ -229,13 +229,13 @@ Feature: Memory leak
   Scenario: Drop a forced list
     Given a file named "Main.pen" with:
     """pen
-    import System'Os
+    import System'Context { Context }
 
     type foo {
       x number
     }
 
-    main = \(ctx Os'Context) number {
+    main = \(ctx Context) number {
       x = foo{x: 42}
 
       if [x, ...xs] = [foo x] {
@@ -253,13 +253,13 @@ Feature: Memory leak
   Scenario: Drop an unforced list with no environment
     Given a file named "Main.pen" with:
     """pen
-    import System'Os
+    import System'Context { Context }
 
     type foo {
       x number
     }
 
-    main = \(ctx Os'Context) number {
+    main = \(ctx Context) number {
       [foo foo{x: 42}]
 
       main(ctx)
@@ -271,13 +271,13 @@ Feature: Memory leak
   Scenario: Drop a forced list with no environment
     Given a file named "Main.pen" with:
     """pen
-    import System'Os
+    import System'Context { Context }
 
     type foo {
       x number
     }
 
-    main = \(ctx Os'Context) number {
+    main = \(ctx Context) number {
       if [x, ...xs] = [foo foo{x: 42}] {
         x()
       } else {
