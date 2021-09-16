@@ -4,13 +4,19 @@ use super::module_path::ModulePath;
 pub struct Import {
     module_path: ModulePath,
     prefix: Option<String>,
+    names: Vec<String>,
 }
 
 impl Import {
-    pub fn new(module_path: impl Into<ModulePath>, prefix: Option<String>) -> Self {
+    pub fn new(
+        module_path: impl Into<ModulePath>,
+        prefix: Option<String>,
+        names: Vec<String>,
+    ) -> Self {
         Self {
             module_path: module_path.into(),
             prefix,
+            names,
         }
     }
 
@@ -20,5 +26,9 @@ impl Import {
 
     pub fn prefix(&self) -> Option<&str> {
         self.prefix.as_deref()
+    }
+
+    pub fn names(&self) -> &[String] {
+        &self.names
     }
 }
