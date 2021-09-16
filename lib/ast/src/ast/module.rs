@@ -32,6 +32,10 @@ impl Module {
         }
     }
 
+    pub fn exports(&self) -> &[Export] {
+        &self.exports
+    }
+
     pub fn imports(&self) -> &[Import] {
         &self.imports
     }

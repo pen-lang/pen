@@ -16,49 +16,47 @@ pub fn resolve(
     dependency_file: &FilePath,
     build_script_dependency_file: &FilePath,
 ) -> Result<(), Box<dyn Error>> {
-    let interface_files = parse::parse(
-        &infrastructure.file_system.read_to_string(source_file)?,
-        &infrastructure.file_path_displayer.display(source_file),
-    )?
-    .imports()
-    .iter()
-    .map(|import| {
-        let source_file = match import.module_path() {
-            ast::ModulePath::Internal(path) => file_path_resolver::resolve_source_file(
-                package_directory,
-                path.components(),
-                &infrastructure.file_path_configuration,
-            ),
-            ast::ModulePath::External(path) => file_path_resolver::resolve_source_file(
-                &file_path_resolver::resolve_package_directory(
-                    output_directory,
-                    infrastructure
-                        .package_configuration_reader
-                        .get_dependencies(package_directory)?
-                        .get(path.package())
-                        .ok_or_else(|| ApplicationError::PackageNotFound(path.package().into()))?,
+    let interface_files = get_dependencies(infrastructure, source_file)?
+        .into_iter()
+        .map(|module_path| {
+            let source_file = match &module_path {
+                ast::ModulePath::Internal(path) => file_path_resolver::resolve_source_file(
+                    package_directory,
+                    path.components(),
+                    &infrastructure.file_path_configuration,
                 ),
-                path.components(),
-                &infrastructure.file_path_configuration,
-            ),
-        };
+                ast::ModulePath::External(path) => file_path_resolver::resolve_source_file(
+                    &file_path_resolver::resolve_package_directory(
+                        output_directory,
+                        infrastructure
+                            .package_configuration_reader
+                            .get_dependencies(package_directory)?
+                            .get(path.package())
+                            .ok_or_else(|| {
+                                ApplicationError::PackageNotFound(path.package().into())
+                            })?,
+                    ),
+                    path.components(),
+                    &infrastructure.file_path_configuration,
+                ),
+            };
 
-        Ok((
-            import.module_path().clone(),
-            output_directory.join(
-                &FilePath::new(vec![
-                    OBJECT_DIRECTORY,
-                    &module_id_calculator::calculate(&source_file),
-                ])
-                .with_extension(
-                    infrastructure
-                        .file_path_configuration
-                        .interface_file_extension,
+            Ok((
+                module_path,
+                output_directory.join(
+                    &FilePath::new(vec![
+                        OBJECT_DIRECTORY,
+                        &module_id_calculator::calculate(&source_file),
+                    ])
+                    .with_extension(
+                        infrastructure
+                            .file_path_configuration
+                            .interface_file_extension,
+                    ),
                 ),
-            ),
-        ))
-    })
-    .collect::<Result<HashMap<_, _>, Box<dyn Error>>>()?;
+            ))
+        })
+        .collect::<Result<HashMap<_, _>, Box<dyn Error>>>()?;
 
     infrastructure.file_system.write(
         dependency_file,
@@ -81,4 +79,26 @@ pub fn resolve(
     )?;
 
     Ok(())
+}
+
+fn get_dependencies(
+    infrastructure: &Infrastructure,
+    source_file: &FilePath,
+) -> Result<Vec<ast::ModulePath>, Box<dyn Error>> {
+    let module = parse::parse(
+        &infrastructure.file_system.read_to_string(source_file)?,
+        &infrastructure.file_path_displayer.display(source_file),
+    )?;
+
+    Ok(module
+        .exports()
+        .iter()
+        .map(|export| export.module_path().clone())
+        .chain(
+            module
+                .imports()
+                .iter()
+                .map(|import| import.module_path().clone()),
+        )
+        .collect())
 }
