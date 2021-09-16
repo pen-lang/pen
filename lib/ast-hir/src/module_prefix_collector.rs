@@ -43,7 +43,7 @@ mod tests {
 
         assert_eq!(
             collect(&ast::Module::new(
-                vec![ast::Import::new(path.clone(), None)],
+                vec![ast::Import::new(path.clone(), None, vec![])],
                 vec![],
                 vec![],
                 vec![],
@@ -59,7 +59,7 @@ mod tests {
 
         assert_eq!(
             collect(&ast::Module::new(
-                vec![ast::Import::new(path.clone(), None)],
+                vec![ast::Import::new(path.clone(), None, vec![])],
                 vec![],
                 vec![],
                 vec![],
@@ -75,7 +75,7 @@ mod tests {
 
         assert_eq!(
             collect(&ast::Module::new(
-                vec![ast::Import::new(path.clone(), Some("Bar".into()))],
+                vec![ast::Import::new(path.clone(), Some("Bar".into()), vec![])],
                 vec![],
                 vec![],
                 vec![],
