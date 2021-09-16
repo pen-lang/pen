@@ -25,7 +25,7 @@ StdErr = \() File {
   File{inner: stdErr}
 }
 
-OpenWithOptions = \(ctx Context'Context, path string, opts OpenOptions) File | error {
+OpenWithOptions = \(ctx Context, path string, opts OpenOptions) File | error {
   r = Context'Inner(ctx).OpenFile(path, opts)
 
   if r.Error == 0 {
@@ -35,7 +35,7 @@ OpenWithOptions = \(ctx Context'Context, path string, opts OpenOptions) File | e
   }
 }
 
-Open = \(ctx Context'Context, path string) File | error {
+Open = \(ctx Context, path string) File | error {
   OpenWithOptions(
     ctx,
     path,
@@ -43,7 +43,7 @@ Open = \(ctx Context'Context, path string) File | error {
   )
 }
 
-Read = \(ctx Context'Context, file File) string | error {
+Read = \(ctx Context, file File) string | error {
   r = if f = file.inner as stdIn {
     Context'Inner(ctx).ReadStdIn()
   } else if stdOut {
@@ -61,7 +61,7 @@ Read = \(ctx Context'Context, file File) string | error {
   }
 }
 
-Write = \(ctx Context'Context, file File, data string) number | error {
+Write = \(ctx Context, file File, data string) number | error {
   inner = Context'Inner(ctx)
 
   r = if f = file.inner as stdIn {
@@ -81,7 +81,7 @@ Write = \(ctx Context'Context, file File, data string) number | error {
   }
 }
 
-Copy = \(ctx Context'Context, src string, dest string) none | error {
+Copy = \(ctx Context, src string, dest string) none | error {
   r = Context'Inner(ctx).CopyFile(src, dest)
 
   if r.Error == 0 {
@@ -91,7 +91,7 @@ Copy = \(ctx Context'Context, src string, dest string) none | error {
   }
 }
 
-Remove = \(ctx Context'Context, path string) none | error {
+Remove = \(ctx Context, path string) none | error {
   r = Context'Inner(ctx).RemoveFile(path)
 
   if r.Error == 0 {

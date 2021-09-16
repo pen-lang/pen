@@ -1,3 +1,3 @@
 import 'Context
 
-type MainFunction = \(Context'Context) number
+type MainFunction = \(Context) number
