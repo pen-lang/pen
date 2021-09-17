@@ -10,9 +10,9 @@ Feature: List as stream
     """
     And a file named "Hello.pen" with:
     """pen
-    import System'Os
+    import System'Context { Context }
 
-    Hello = \(ctx Os'Context) none {
+    Hello = \(ctx Context) none {
       Os'WriteFile(ctx, Os'StdOut(), "hello")
 
       none
@@ -22,10 +22,10 @@ Feature: List as stream
   Scenario: Evaluate an element lazily
     Given a file named "Main.pen" with:
     """pen
-    import System'Os
+    import System'Context { Context }
     import 'Hello
 
-    main = \(ctx Os'Context) number {
+    main = \(ctx Context) number {
       [none Hello'Hello(ctx)]
 
       0
@@ -38,10 +38,10 @@ Feature: List as stream
   Scenario: Evaluate an element lazily but only once
     Given a file named "Main.pen" with:
     """pen
-    import System'Os
+    import System'Context { Context }
     import 'Hello
 
-    main = \(ctx Os'Context) number {
+    main = \(ctx Context) number {
       if [x, ...xs] = [none Hello'Hello(ctx)] {
         x()
         x()
@@ -59,16 +59,16 @@ Feature: List as stream
   Scenario: Evaluate multiple elements lazily
     Given a file named "Main.pen" with:
     """pen
-    import System'Os
+    import System'Context { Context }
     import 'Hello
 
-    foo = \(ctx Os'Context) [none] {
+    foo = \(ctx Context) [none] {
       Hello'Hello(ctx)
 
       [none]
     }
 
-    main = \(ctx Os'Context) number {
+    main = \(ctx Context) number {
       [none ...foo(ctx)]
 
       0
@@ -81,16 +81,16 @@ Feature: List as stream
   Scenario: Evaluate multiple elements lazily but only once
     Given a file named "Main.pen" with:
     """pen
-    import System'Os
+    import System'Context { Context }
     import 'Hello
 
-    foo = \(ctx Os'Context) [none] {
+    foo = \(ctx Context) [none] {
       Hello'Hello(ctx)
 
       [none]
     }
 
-    main = \(ctx Os'Context) number {
+    main = \(ctx Context) number {
       if [x, ...xs] = [none ...foo(ctx)] {
         x()
         x()
