@@ -159,7 +159,7 @@
 </code></pre>
 <h3 id="types"><a class="header" href="#types">Types</a></h3>
 <h4 id="context"><a class="header" href="#context"><code>Context</code></a></h4>
-<p>It is a context of the operating system. It must be passed to functions in this module.</p>
+<p>It is a context of an operating system.</p>
 <pre><code class="language-pen">type Context { ... }
 </code></pre>
 <h2 id="environment-module"><a class="header" href="#environment-module"><code>Environment</code> module</a></h2>
@@ -184,19 +184,19 @@
 </code></pre>
 <h3 id="functions-1"><a class="header" href="#functions-1">Functions</a></h3>
 <h4 id="stdin"><a class="header" href="#stdin"><code>StdIn</code></a></h4>
-<p>It gets a file for standard input.</p>
+<p>It returns a file for standard input.</p>
 <pre><code class="language-pen">\() File
 </code></pre>
 <h4 id="stdout"><a class="header" href="#stdout"><code>StdOut</code></a></h4>
-<p>It gets a file for standard output.</p>
+<p>It returns a file for standard output.</p>
 <pre><code class="language-pen">\() File
 </code></pre>
 <h4 id="stderr"><a class="header" href="#stderr"><code>StdErr</code></a></h4>
-<p>It gets a file for standard error.</p>
+<p>It returns a file for standard error.</p>
 <pre><code class="language-pen">\() File
 </code></pre>
 <h4 id="open"><a class="header" href="#open"><code>Open</code></a></h4>
-<p>It opens a file for read-only.</p>
+<p>It opens a file to read.</p>
 <pre><code class="language-pen">\(ctx Context, path string) File | error
 </code></pre>
 <h4 id="openwithoptions"><a class="header" href="#openwithoptions"><code>OpenWithOptions</code></a></h4>
@@ -228,9 +228,9 @@
 <ul>
 <li><code>Append</code> allows appending data to the file.</li>
 <li><code>Create</code> creates a new file if the file doesn't exist or opens it otherwise.</li>
-<li><code>CreateNew</code> creates a new file. If the file already exists, it fails to open the file.</li>
+<li><code>CreateNew</code> creates a new file. If the file already exists, it emits an error.</li>
 <li><code>Read</code> allows reading data from the file.</li>
-<li><code>Truncate</code> truncates the file first to 0-byte size.</li>
+<li><code>Truncate</code> truncates the file to zero byte.</li>
 <li><code>Write</code> allows writing data to the file.</li>
 </ul>
 <pre><code class="language-pen">type OpenOptions {
