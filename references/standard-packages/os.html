@@ -154,46 +154,35 @@
   }
 }
 </code></pre>
-<h2 id="os-module"><a class="header" href="#os-module"><code>Os</code> module</a></h2>
-<pre><code class="language-pen">import System'Os
+<h2 id="context-module"><a class="header" href="#context-module"><code>Context</code> module</a></h2>
+<pre><code class="language-pen">import System'Context
 </code></pre>
 <h3 id="types"><a class="header" href="#types">Types</a></h3>
 <h4 id="context"><a class="header" href="#context"><code>Context</code></a></h4>
 <p>It is a context of the operating system. It must be passed to functions in this module.</p>
 <pre><code class="language-pen">type Context { ... }
 </code></pre>
-<h4 id="file"><a class="header" href="#file"><code>File</code></a></h4>
-<p>It is a file.</p>
-<pre><code class="language-pen">type File { ... }
-</code></pre>
-<h4 id="openfileoptions"><a class="header" href="#openfileoptions"><code>OpenFileOptions</code></a></h4>
-<p>It is options to open a file. Its flags are described below.</p>
-<ul>
-<li><code>Append</code> allows appending data to the file.</li>
-<li><code>Create</code> creates a new file if the file doesn't exist or opens it otherwise.</li>
-<li><code>CreateNew</code> creates a new file. If the file already exists, it fails to open the file.</li>
-<li><code>Read</code> allows reading data from the file.</li>
-<li><code>Truncate</code> truncates the file first to 0-byte size.</li>
-<li><code>Write</code> allows writing data to the file.</li>
-</ul>
-<pre><code class="language-pen">type OpenFileOptions {
-  Append boolean
-  Create boolean
-  CreateNew boolean
-  Read boolean
-  Truncate boolean
-  Write boolean
-}
+<h2 id="environment-module"><a class="header" href="#environment-module"><code>Environment</code> module</a></h2>
+<pre><code class="language-pen">import System'Environment
 </code></pre>
 <h3 id="functions"><a class="header" href="#functions">Functions</a></h3>
 <h4 id="arguments"><a class="header" href="#arguments"><code>Arguments</code></a></h4>
 <p>It gets command line arguments.</p>
 <pre><code class="language-pen">\(ctx Context) [string]
 </code></pre>
-<h4 id="environmentvariable"><a class="header" href="#environmentvariable"><code>EnvironmentVariable</code></a></h4>
+<h4 id="variable"><a class="header" href="#variable"><code>Variable</code></a></h4>
 <p>It gets an environment variable of a given name. It returns an error if the variable is undefined.</p>
 <pre><code class="language-pen">\(ctx Context, name string) string | error
 </code></pre>
+<h2 id="file-module"><a class="header" href="#file-module"><code>File</code> module</a></h2>
+<pre><code class="language-pen">import System'File
+</code></pre>
+<h3 id="types-1"><a class="header" href="#types-1">Types</a></h3>
+<h4 id="file"><a class="header" href="#file"><code>File</code></a></h4>
+<p>It is a file.</p>
+<pre><code class="language-pen">type File { ... }
+</code></pre>
+<h3 id="functions-1"><a class="header" href="#functions-1">Functions</a></h3>
 <h4 id="stdin"><a class="header" href="#stdin"><code>StdIn</code></a></h4>
 <p>It gets a file for standard input.</p>
 <pre><code class="language-pen">\() File
@@ -206,43 +195,71 @@
 <p>It gets a file for standard error.</p>
 <pre><code class="language-pen">\() File
 </code></pre>
-<h4 id="defaultopenfileoptions"><a class="header" href="#defaultopenfileoptions"><code>DefaultOpenFileOptions</code></a></h4>
-<p>It gets default open file options where all flags are set <code>false</code>.</p>
-<pre><code class="language-pen">\() OpenFileOptions
-</code></pre>
-<h4 id="openfilewithoptions"><a class="header" href="#openfilewithoptions"><code>OpenFileWithOptions</code></a></h4>
-<p>It opens a file with options.</p>
-<pre><code class="language-pen">\(ctx Context, path string, opts OpenFileOptions) File | error
-</code></pre>
-<h4 id="openfile"><a class="header" href="#openfile"><code>OpenFile</code></a></h4>
+<h4 id="open"><a class="header" href="#open"><code>Open</code></a></h4>
 <p>It opens a file for read-only.</p>
 <pre><code class="language-pen">\(ctx Context, path string) File | error
 </code></pre>
-<h4 id="readfile"><a class="header" href="#readfile"><code>ReadFile</code></a></h4>
+<h4 id="openwithoptions"><a class="header" href="#openwithoptions"><code>OpenWithOptions</code></a></h4>
+<p>It opens a file with options.</p>
+<pre><code class="language-pen">\(ctx Context, path string, opt OpenOptions) File | error
+</code></pre>
+<h4 id="read"><a class="header" href="#read"><code>Read</code></a></h4>
 <p>It reads all data from a file.</p>
 <pre><code class="language-pen">\(ctx Context, file File) string | error
 </code></pre>
-<h4 id="writefile"><a class="header" href="#writefile"><code>WriteFile</code></a></h4>
+<h4 id="write"><a class="header" href="#write"><code>Write</code></a></h4>
 <p>It writes data to a file and returns a number of bytes written to the file.</p>
 <pre><code class="language-pen">\(ctx Context, file File, data string) number | error
 </code></pre>
-<h4 id="copyfile"><a class="header" href="#copyfile"><code>CopyFile</code></a></h4>
+<h4 id="copy"><a class="header" href="#copy"><code>Copy</code></a></h4>
 <p>It copies a file to another path.</p>
 <pre><code class="language-pen">\(ctx Context, src string, dest string) none | error
 </code></pre>
-<h4 id="removefile"><a class="header" href="#removefile"><code>RemoveFile</code></a></h4>
+<h4 id="remove"><a class="header" href="#remove"><code>Remove</code></a></h4>
 <p>It removes a file at a path.</p>
 <pre><code class="language-pen">\(ctx Context, path string) none | error
 </code></pre>
-<h4 id="readdirectory"><a class="header" href="#readdirectory"><code>ReadDirectory</code></a></h4>
+<h2 id="fileopenoptions-module"><a class="header" href="#fileopenoptions-module"><code>File'OpenOptions</code> module</a></h2>
+<pre><code class="language-pen">import System'File'OpenOptions
+</code></pre>
+<h3 id="types-2"><a class="header" href="#types-2">Types</a></h3>
+<h4 id="openoptions"><a class="header" href="#openoptions"><code>OpenOptions</code></a></h4>
+<p>It is options to open a file. Its flags are described below.</p>
+<ul>
+<li><code>Append</code> allows appending data to the file.</li>
+<li><code>Create</code> creates a new file if the file doesn't exist or opens it otherwise.</li>
+<li><code>CreateNew</code> creates a new file. If the file already exists, it fails to open the file.</li>
+<li><code>Read</code> allows reading data from the file.</li>
+<li><code>Truncate</code> truncates the file first to 0-byte size.</li>
+<li><code>Write</code> allows writing data to the file.</li>
+</ul>
+<pre><code class="language-pen">type OpenOptions {
+  Append boolean
+  Create boolean
+  CreateNew boolean
+  Read boolean
+  Truncate boolean
+  Write boolean
+}
+</code></pre>
+<h3 id="functions-2"><a class="header" href="#functions-2">Functions</a></h3>
+<h4 id="default"><a class="header" href="#default"><code>Default</code></a></h4>
+<p>It gets default options where all flags are set <code>false</code>.</p>
+<pre><code class="language-pen">\() OpenOptions
+</code></pre>
+<h2 id="directory-module"><a class="header" href="#directory-module"><code>Directory</code> module</a></h2>
+<pre><code class="language-pen">import System'Directory
+</code></pre>
+<h3 id="functions-3"><a class="header" href="#functions-3">Functions</a></h3>
+<h4 id="read-1"><a class="header" href="#read-1"><code>Read</code></a></h4>
 <p>It reads a directory and returns a list of files and directories inside.</p>
 <pre><code class="language-pen">\(ctx Context, path string) [string] | error
 </code></pre>
-<h4 id="createdirectory"><a class="header" href="#createdirectory"><code>CreateDirectory</code></a></h4>
+<h4 id="create"><a class="header" href="#create"><code>Create</code></a></h4>
 <p>It creates a directory.</p>
 <pre><code class="language-pen">\(ctx Context, path string) none | error
 </code></pre>
-<h4 id="removedirectory"><a class="header" href="#removedirectory"><code>RemoveDirectory</code></a></h4>
+<h4 id="remove-1"><a class="header" href="#remove-1"><code>Remove</code></a></h4>
 <p>It removes a directory.</p>
 <pre><code class="language-pen">\(ctx Context, path string) none | error
 </code></pre>
