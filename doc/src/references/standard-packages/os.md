@@ -22,7 +22,7 @@ import System'Context
 
 #### `Context`
 
-It is a context of the operating system.
+It is a context of an operating system.
 
 ```pen
 type Context { ... }
