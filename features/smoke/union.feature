@@ -12,9 +12,9 @@ Feature: Union
   Scenario: Downcast a union to a list
     Given a file named "Main.pen" with:
     """pen
-    import System'Os
+    import System'Context { Context }
 
-    main = \(ctx Os'Context) number {
+    main = \(ctx Context) number {
       x = if true {
         [none]
       } else {

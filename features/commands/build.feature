@@ -10,9 +10,9 @@ Feature: Building packages
     """
     And a file named "Main.pen" with:
     """pen
-    import System'Os
+    import System'Context { Context }
 
-    main = \(ctx Os'Context) number {
+    main = \(ctx Context) number {
       0
     }
     """
@@ -44,9 +44,9 @@ Feature: Building packages
     """
     And a file named "Main.pen" with:
     """pen
-    import System'Os
+    import System'Context { Context }
 
-    main = \(ctx Os'Context) number {
+    main = \(ctx Context) number {
       0
     }
     """

@@ -1,4 +1,4 @@
-type OpenFileOptions {
+type OpenOptions {
   Append boolean
   Create boolean
   CreateNew boolean
@@ -7,8 +7,8 @@ type OpenFileOptions {
   Write boolean
 }
 
-Default = \() OpenFileOptions {
-  OpenFileOptions{
+Default = \() OpenOptions {
+  OpenOptions{
     Append: false,
     Create: false,
     CreateNew: false,

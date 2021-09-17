@@ -1,0 +1,7 @@
+import 'Context { Context }
+
+import foreign _pen_main \(Context) number
+
+export foreign _pen_os_main = \() number {
+  _pen_main(Context'New())
+}

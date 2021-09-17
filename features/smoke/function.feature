@@ -12,7 +12,7 @@ Feature: Function
   Scenario: Reference an inner closure in nested closures
     Given a file named "Main.pen" with:
     """pen
-    import System'Os
+    import System'Context { Context }
 
     f = \(x number) \() number {
       \() number {
@@ -28,7 +28,7 @@ Feature: Function
       }
     }
 
-    main = \(ctx Os'Context) number {
+    main = \(ctx Context) number {
       f(1)()
 
       0
