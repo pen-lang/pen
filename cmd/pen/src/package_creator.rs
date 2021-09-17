@@ -31,10 +31,11 @@ pub fn create(package_directory: &str, library: bool) -> Result<(), Box<dyn std:
             &infrastructure,
             indoc::indoc!(
                 "
-                import System'Os
+                import System'Context { Context }
+                import System'File
 
-                main = \\(ctx Os'Context) number {
-                  Os'WriteFile(ctx, Os'StdOut(), \"Hello, world!\\n\")
+                main = \\(ctx Context) number {
+                  File'Write(ctx, File'StdOut(), \"Hello, world!\\n\")
 
                   0
                 }

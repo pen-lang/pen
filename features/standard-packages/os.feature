@@ -14,10 +14,12 @@ Feature: OS
     Given a file named "Main.pen" with:
     """pen
     import Core'String
-    import System'Os
+    import System'Context { Context }
+    import System'Environment
+    import System'File
 
-    main = \(ctx Os'Context) number {
-      if _ = Os'WriteFile(ctx, Os'StdOut(), String'Join(Os'Arguments(ctx), " ")) as number {
+    main = \(ctx Context) number {
+      if _ = File'Write(ctx, File'StdOut(), String'Join(Environment'Arguments(ctx), " ")) as number {
         0
       } else {
         1
@@ -32,15 +34,17 @@ Feature: OS
     Given a file named "Main.pen" with:
     """pen
     import Core'String
-    import System'Os
+    import System'Context { Context }
+    import System'File
+    import System'Environment
 
-    printEnvironmentVariable = \(ctx Os'Context) none | error {
-      Os'WriteFile(ctx, Os'StdOut(), Os'EnvironmentVariable(ctx, "FOO")?)?
+    printEnvironmentVariable = \(ctx Context) none | error {
+      File'Write(ctx, File'StdOut(), Environment'Variable(ctx, "FOO")?)?
 
       none
     }
 
-    main = \(ctx Os'Context) number {
+    main = \(ctx Context) number {
       if _ = printEnvironmentVariable(ctx) as none {
         0
       } else {
@@ -56,10 +60,11 @@ Feature: OS
   Scenario: Open a file
     Given a file named "Main.pen" with:
     """pen
-    import System'Os
+    import System'Context { Context }
+    import System'File { File }
 
-    main = \(ctx Os'Context) number {
-      if f = Os'OpenFile(ctx, "./foo.txt") as Os'File {
+    main = \(ctx Context) number {
+      if f = File'Open(ctx, "./foo.txt") as File {
         0
       } else {
         1
@@ -73,27 +78,28 @@ Feature: OS
   Scenario: Read a file
     Given a file named "Main.pen" with:
     """pen
-    import System'Os
-    import System'Os'OpenFileOptions
+    import System'Context { Context }
+    import System'File
+    import System'File'OpenOptions
 
-    readFile = \(ctx Os'Context) none | error {
-      f = Os'OpenFile(ctx, "foo.txt")?
-      d = Os'ReadFile(ctx, f)?
-      f = Os'OpenFileWithOptions(
+    readFile = \(ctx Context) none | error {
+      f = File'Open(ctx, "foo.txt")?
+      d = File'Read(ctx, f)?
+      f = File'OpenWithOptions(
         ctx,
         "bar.txt",
-        Os'OpenFileOptions{
-          ...OpenFileOptions'Default(),
+        OpenOptions{
+          ...OpenOptions'Default(),
           Create: true,
           Write: true,
         },
       )?
-      Os'WriteFile(ctx, f, d)?
+      File'Write(ctx, f, d)?
 
       none
     }
 
-    main = \(ctx Os'Context) number {
+    main = \(ctx Context) number {
       if _ = readFile(ctx) as none {
         0
       } else {
@@ -109,22 +115,23 @@ Feature: OS
   Scenario: Write a file
     Given a file named "Main.pen" with:
     """pen
-    import System'Os
-    import System'Os'OpenFileOptions
+    import System'Context { Context }
+    import System'File
+    import System'File'OpenOptions
 
-    writeFile = \(ctx Os'Context) none | error {
-      f = Os'OpenFileWithOptions(
+    writeFile = \(ctx Context) none | error {
+      f = File'OpenWithOptions(
         ctx,
         "./foo.txt",
-        Os'OpenFileOptions{...OpenFileOptions'Default(), Write: true},
+        OpenOptions{...OpenOptions'Default(), Write: true},
       )?
 
-      Os'WriteFile(ctx, f, "foo")?
+      File'Write(ctx, f, "foo")?
 
       none
     }
 
-    main = \(ctx Os'Context) number {
+    main = \(ctx Context) number {
       if _ = writeFile(ctx) as none {
         0
       } else {
@@ -140,10 +147,11 @@ Feature: OS
   Scenario: Copy a file
     Given a file named "Main.pen" with:
     """pen
-    import System'Os
+    import System'Context { Context }
+    import System'File
 
-    main = \(ctx Os'Context) number {
-      if _ = Os'CopyFile(ctx, "foo.txt", "bar.txt") as none {
+    main = \(ctx Context) number {
+      if _ = File'Copy(ctx, "foo.txt", "bar.txt") as none {
         0
       } else {
         1
@@ -158,10 +166,11 @@ Feature: OS
   Scenario: Remove a file
     Given a file named "Main.pen" with:
     """pen
-    import System'Os
+    import System'Context { Context }
+    import System'File
 
-    main = \(ctx Os'Context) number {
-      if _ = Os'RemoveFile(ctx, "foo.txt") as none {
+    main = \(ctx Context) number {
+      if _ = File'Remove(ctx, "foo.txt") as none {
         0
       } else {
         1
@@ -176,20 +185,22 @@ Feature: OS
   Scenario: Read a directory
     Given a file named "Main.pen" with:
     """pen
-    import System'Os
     import Core'String
+    import System'Context { Context }
+    import System'File
+    import System'Directory
 
-    readDirectory = \(ctx Os'Context) none | error {
-      Os'WriteFile(
+    readDirectory = \(ctx Context) none | error {
+      File'Write(
         ctx,
-        Os'StdOut(),
-        String'Join(Os'ReadDirectory(ctx, ".")?, "\n"),
+        File'StdOut(),
+        String'Join(Directory'Read(ctx, ".")?, "\n"),
       )?
 
       none
     }
 
-    main = \(ctx Os'Context) number {
+    main = \(ctx Context) number {
       if _ = readDirectory(ctx) as none {
         0
       } else {
@@ -205,10 +216,11 @@ Feature: OS
   Scenario: Create a directory
     Given a file named "Main.pen" with:
     """pen
-    import System'Os
+    import System'Context { Context }
+    import System'Directory
 
-    main = \(ctx Os'Context) number {
-      if _ = Os'CreateDirectory(ctx, "foo") as none {
+    main = \(ctx Context) number {
+      if _ = Directory'Create(ctx, "foo") as none {
         0
       } else {
         1
@@ -222,10 +234,11 @@ Feature: OS
   Scenario: Remove a directory
     Given a file named "Main.pen" with:
     """pen
-    import System'Os
+    import System'Context { Context }
+    import System'Directory
 
-    main = \(ctx Os'Context) number {
-      if _ = Os'RemoveDirectory(ctx, "foo") as none {
+    main = \(ctx Context) number {
+      if _ = Directory'Remove(ctx, "foo") as none {
         0
       } else {
         1

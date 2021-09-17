@@ -12,10 +12,10 @@ This package provides an interface for operating systems. Currently, it supports
 }
 ```
 
-## `Os` module
+## `Context` module
 
 ```pen
-import System'Os
+import System'Context
 ```
 
 ### Types
@@ -28,34 +28,10 @@ It is a context of the operating system. It must be passed to functions in this 
 type Context { ... }
 ```
 
-#### `File`
-
-It is a file.
+## `Environment` module
 
 ```pen
-type File { ... }
-```
-
-#### `OpenFileOptions`
-
-It is options to open a file. Its flags are described below.
-
-- `Append` allows appending data to the file.
-- `Create` creates a new file if the file doesn't exist or opens it otherwise.
-- `CreateNew` creates a new file. If the file already exists, it fails to open the file.
-- `Read` allows reading data from the file.
-- `Truncate` truncates the file first to 0-byte size.
-- `Write` allows writing data to the file.
-
-```pen
-type OpenFileOptions {
-  Append boolean
-  Create boolean
-  CreateNew boolean
-  Read boolean
-  Truncate boolean
-  Write boolean
-}
+import System'Environment
 ```
 
 ### Functions
@@ -68,13 +44,31 @@ It gets command line arguments.
 \(ctx Context) [string]
 ```
 
-#### `EnvironmentVariable`
+#### `Variable`
 
 It gets an environment variable of a given name. It returns an error if the variable is undefined.
 
 ```pen
 \(ctx Context, name string) string | error
 ```
+
+## `File` module
+
+```pen
+import System'File
+```
+
+### Types
+
+#### `File`
+
+It is a file.
+
+```pen
+type File { ... }
+```
+
+### Functions
 
 #### `StdIn`
 
@@ -100,23 +94,7 @@ It gets a file for standard error.
 \() File
 ```
 
-#### `DefaultOpenFileOptions`
-
-It gets default open file options where all flags are set `false`.
-
-```pen
-\() OpenFileOptions
-```
-
-#### `OpenFileWithOptions`
-
-It opens a file with options.
-
-```pen
-\(ctx Context, path string, opts OpenFileOptions) File | error
-```
-
-#### `OpenFile`
+#### `Open`
 
 It opens a file for read-only.
 
@@ -124,7 +102,15 @@ It opens a file for read-only.
 \(ctx Context, path string) File | error
 ```
 
-#### `ReadFile`
+#### `OpenWithOptions`
+
+It opens a file with options.
+
+```pen
+\(ctx Context, path string, opt OpenOptions) File | error
+```
+
+#### `Read`
 
 It reads all data from a file.
 
@@ -132,7 +118,7 @@ It reads all data from a file.
 \(ctx Context, file File) string | error
 ```
 
-#### `WriteFile`
+#### `Write`
 
 It writes data to a file and returns a number of bytes written to the file.
 
@@ -140,7 +126,7 @@ It writes data to a file and returns a number of bytes written to the file.
 \(ctx Context, file File, data string) number | error
 ```
 
-#### `CopyFile`
+#### `Copy`
 
 It copies a file to another path.
 
@@ -148,7 +134,7 @@ It copies a file to another path.
 \(ctx Context, src string, dest string) none | error
 ```
 
-#### `RemoveFile`
+#### `Remove`
 
 It removes a file at a path.
 
@@ -156,7 +142,55 @@ It removes a file at a path.
 \(ctx Context, path string) none | error
 ```
 
-#### `ReadDirectory`
+## `File'OpenOptions` module
+
+```pen
+import System'File'OpenOptions
+```
+
+### Types
+
+#### `OpenOptions`
+
+It is options to open a file. Its flags are described below.
+
+- `Append` allows appending data to the file.
+- `Create` creates a new file if the file doesn't exist or opens it otherwise.
+- `CreateNew` creates a new file. If the file already exists, it fails to open the file.
+- `Read` allows reading data from the file.
+- `Truncate` truncates the file first to 0-byte size.
+- `Write` allows writing data to the file.
+
+```pen
+type OpenOptions {
+  Append boolean
+  Create boolean
+  CreateNew boolean
+  Read boolean
+  Truncate boolean
+  Write boolean
+}
+```
+
+### Functions
+
+#### `Default`
+
+It gets default options where all flags are set `false`.
+
+```pen
+\() OpenOptions
+```
+
+## `Directory` module
+
+```pen
+import System'Directory
+```
+
+### Functions
+
+#### `Read`
 
 It reads a directory and returns a list of files and directories inside.
 
@@ -164,7 +198,7 @@ It reads a directory and returns a list of files and directories inside.
 \(ctx Context, path string) [string] | error
 ```
 
-#### `CreateDirectory`
+#### `Create`
 
 It creates a directory.
 
@@ -172,7 +206,7 @@ It creates a directory.
 \(ctx Context, path string) none | error
 ```
 
-#### `RemoveDirectory`
+#### `Remove`
 
 It removes a directory.
 

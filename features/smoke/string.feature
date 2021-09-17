@@ -12,9 +12,9 @@ Feature: String
   Scenario: Compare strings
     Given a file named "Main.pen" with:
     """pen
-    import System'Os
+    import System'Context { Context }
 
-    main = \(ctx Os'Context) number {
+    main = \(ctx Context) number {
       if "foo" == "foo" {
         0
       } else {
