@@ -22,7 +22,7 @@ import System'Context
 
 #### `Context`
 
-It is a context of the operating system. It must be passed to functions in this module.
+It is a context of an operating system.
 
 ```pen
 type Context { ... }
@@ -72,7 +72,7 @@ type File { ... }
 
 #### `StdIn`
 
-It gets a file for standard input.
+It returns a file for standard input.
 
 ```pen
 \() File
@@ -80,7 +80,7 @@ It gets a file for standard input.
 
 #### `StdOut`
 
-It gets a file for standard output.
+It returns a file for standard output.
 
 ```pen
 \() File
@@ -88,7 +88,7 @@ It gets a file for standard output.
 
 #### `StdErr`
 
-It gets a file for standard error.
+It returns a file for standard error.
 
 ```pen
 \() File
@@ -96,7 +96,7 @@ It gets a file for standard error.
 
 #### `Open`
 
-It opens a file for read-only.
+It opens a file to read.
 
 ```pen
 \(ctx Context, path string) File | error
@@ -156,9 +156,9 @@ It is options to open a file. Its flags are described below.
 
 - `Append` allows appending data to the file.
 - `Create` creates a new file if the file doesn't exist or opens it otherwise.
-- `CreateNew` creates a new file. If the file already exists, it fails to open the file.
+- `CreateNew` creates a new file. If the file already exists, it emits an error.
 - `Read` allows reading data from the file.
-- `Truncate` truncates the file first to 0-byte size.
+- `Truncate` truncates the file to zero byte.
 - `Write` allows writing data to the file.
 
 ```pen
