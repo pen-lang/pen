@@ -11,9 +11,10 @@ Feature: List as stream
     And a file named "Hello.pen" with:
     """pen
     import System'Context { Context }
+    import System'File
 
     Hello = \(ctx Context) none {
-      Os'WriteFile(ctx, Os'StdOut(), "hello")
+      File'Write(ctx, File'StdOut(), "hello")
 
       none
     }

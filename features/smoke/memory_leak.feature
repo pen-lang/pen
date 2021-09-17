@@ -32,9 +32,10 @@ Feature: Memory leak
     Given a file named "Main.pen" with:
     """pen
     import System'Context { Context }
+    import System'File
 
     main = \(ctx Context) number {
-      Os'WriteFile(ctx, Os'StdOut(), "Hello, world!\n")
+      File'Write(ctx, File'StdOut(), "Hello, world!\n")
 
       main(ctx)
     }
