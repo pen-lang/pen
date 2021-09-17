@@ -72,7 +72,7 @@ type File { ... }
 
 #### `StdIn`
 
-It gets a file for standard input.
+It returns a file for standard input.
 
 ```pen
 \() File
@@ -80,7 +80,7 @@ It gets a file for standard input.
 
 #### `StdOut`
 
-It gets a file for standard output.
+It returns a file for standard output.
 
 ```pen
 \() File
@@ -88,7 +88,7 @@ It gets a file for standard output.
 
 #### `StdErr`
 
-It gets a file for standard error.
+It returns a file for standard error.
 
 ```pen
 \() File
