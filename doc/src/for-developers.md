@@ -20,4 +20,4 @@
    export PEN_ROOT=<directory>
    ```
 
-1. You are ready to build packages with the customized `pen` command and libraries!
+Now, you are ready to build packages with the customized `pen` command and libraries!
