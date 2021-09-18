@@ -74,4 +74,4 @@ Items are ordered by priority.
 
 Dual-licensed under [MIT](LICENSE-MIT) and [Apache 2.0](LICENSE-APACHE).
 
-[go]: https://github.com/golang/go
+[go]: https://golang.org
