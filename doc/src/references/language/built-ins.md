@@ -1,6 +1,6 @@
 # Built-ins
 
-Built-in types and functions are the ones accessible from any modules.
+Built-in types and functions are ones implicitly defined in every module.
 
 ## Types
 
@@ -21,7 +21,7 @@ type error {
 It creates an error with its source information.
 
 ```pen
-error \(any) error
+\(info any) error
 ```
 
 ### `source`
@@ -29,5 +29,5 @@ error \(any) error
 It extracts source information from an error.
 
 ```pen
-source \(error) any
+\(e error) any
 ```

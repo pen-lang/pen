@@ -4,13 +4,15 @@ Using FFI, you can import or export functions in foreign languages, such as [Rus
 
 ## Importing functions in foreign languages
 
-> Caveat: You can import foreign functions that might make side effects only in [system packages](system-injection.md#system-packages). See also [System injection](system-injection.md).
+You can import functions in foreign languages using [foreign import statements](/references/language/syntax.md#foreign-import-statement). The statements specify the foreign functions' calling convention, names and types. After imported, the functions are available under the names.
 
-You can import functions in foreign languages using [foreign import statements](/references/language/syntax.md#foreign-import-statement) which specify the functions' calling convention, names and types. Then, the functions are available under the names.
+You might specify calling conventions of foreign functions in a format of string literals after `import foreign` keywords optionally. Currently, only the C calling convention is supported as `"c"`. If the options are omitted, the functions are imported with the native calling convention of the language.
 
 ```pen
 import foreign "c" foo \(number, number) number
 ```
+
+> Caveat: You can import foreign functions that might make side effects **only in [system packages](system-injection.md#system-packages)**. See also [System injection](system-injection.md).
 
 ## Exporting functions to foreign languages
 
@@ -22,9 +24,9 @@ foreign foo = \(x number, y number) number {
 }
 ```
 
-## Building custom libraries in foreign languages in packages
+## Building custom libraries in foreign languages
 
-You might want to build your own libraries in foreign languages for your packages to link them with your applications. If that's your case, you can set up a `pen-ffi` script in your package. The executable script file is run on every package build accepting some command line arguments and returns an absolute path to an `.a` archive file of your custom library built by the script. The `pen-ffi` script files may or may not have file extensions.
+You might want to build libraries in foreign languages so that you can use their functions in your packages. If that's your case, you can set up `pen-ffi` scripts in your packages. The script files run on every build and output absolute paths to `.a` archive files of your libraries in foreign languages built by the scripts. The script files may or may not have file extensions.
 
 The `pen-ffi` scripts should accept the following command line arguments.
 

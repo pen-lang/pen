@@ -4,7 +4,7 @@
 - [Guides](guides/README.md)
   - [Getting started](guides/getting-started.md)
   - [Install](guides/install.md)
-  - [Naming convention](guides/naming-convention.md)
+  - [Coding style](guides/coding-style.md)
 - [References](references/README.md)
   - [Language](references/language/README.md)
     - [Syntax](references/language/syntax.md)

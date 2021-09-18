@@ -1,12 +1,12 @@
 # Modules
 
-Modules are sets of functions and types. Using modules, you can split large programs into reasonable sizes of chunks to make them comprehensive and reusable.
+Modules are sets of functions and types. Using modules, you can split large programs into smaller chunks to make them comprehensive and reusable.
 
 Each source file suffixed with a `.pen` file extension composes a module. Modules are exported to and imported from other modules.
 
 ## Exporting functions and types from modules
 
-You can name functions and types in an upper camel case for them to be accessible from other modules using [import statements](#importing-functions-and-types-from-modules).
+You can name functions and types in an upper camel case for them to be accessible from other modules by [import statements](#importing-functions-and-types-from-modules).
 
 ```pen
 type Foo {
@@ -22,18 +22,18 @@ Foo = \() number {
 
 ## Importing functions and types from modules
 
-In order to import functions and types from a module, first, place [an `import` statement](/references/language/syntax.md#import-statement) with the name of the module you want to import at the top of the current module.
+In order to import functions and types from other modules, place [import statements](/references/language/syntax.md#import-statement) at the top of the current module.
 
-The first component of a module name in the statement is a name of a package you declare in [a `pen.json` file][package-configuration] (`Foo`.) It is omitted if the imported module is in the same package as the current one. The rest of the components are directory names where a module exists (`Bar`) and the basename of the module filename without its file extension (`Baz` for `Baz.pen`.)
+The first components in the statements are names of external packages you declare in [package configuration files][package-configuration] (`Foo`.) They are omitted if the imported modules are in the same packages. The rest of the components are directory names where the modules exist (`Bar`) and the modules' filenames without their file extensions (`Baz` for `Baz.pen`.)
 
 ```pen
 import Foo'Bar'Baz
 ```
 
-Then, you can access exported members of the module with its prefix.
+Then, you can access exported members of the modules with their prefixes.
 
 ```pen
-type Foo = Baz'Type
+type foo = Baz'Type
 
 bar = \(x number) number {
   Baz'Function(x)
@@ -44,7 +44,7 @@ bar = \(x number) number {
 
 #### Modules in the same package
 
-Modules in the same package are referenced by their paths relative to the root directory of the package.
+Modules in the same package are referenced by their paths relative to a root directory of the package.
 
 For example, a module of a file at `<package directory>/Foo/Bar.pen` is imported as below.
 
@@ -54,7 +54,7 @@ import 'Foo'Bar
 
 #### Modules in other packages
 
-Modules in other packages are referenced by their package names defined in [`pen.json` files][package-configuration] and module paths.
+Modules in other packages are referenced by their package names defined in [package configuration files][package-configuration] and module paths.
 
 For example, a module of a file at `<package directory>/Bar/Baz.pen` in a package `Foo` is imported as below.
 
@@ -74,12 +74,14 @@ import Foo'Bar'Baz as Blah
 
 ### Unqualified import
 
-Functions and types can be imported without prefixes by putting their names between `{` and `}` after normal import statements. This is especially useful when module names and imported entities have the same names like `import 'MyType { MyType }` to make them less redundant.
+You can import functions and types without prefixes by putting their names between `{` and `}` in [import statements](/references/language/syntax.md#import-statement). This is especially useful when module names and imported entities have the same names like `import 'MyType { MyType }`.
 
 ```pen
 import Foo'Bar { Foo, Bar }
 
-type Baz = Foo
+type Baz {
+  foo Foo
+}
 
 Blah = \() number {
   Bar()

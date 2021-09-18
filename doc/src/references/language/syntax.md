@@ -1,18 +1,20 @@
 # Syntax
 
-The language lets you compose programs building up its small constructs. This page describes the syntactical components of the language. See also [Types](types.md) about ones for specific data types.
+This page describes the syntactical components of the language. You can compose programs building up those constructs. See also [Types](types.md) about syntax for specific data types.
 
 ## Module
 
-Modules are sets of types and functions. One file composes a module. Modules can import functions and types from other modules. See also [Modules](modules.md) to know how modules interact with each other.
+Modules are sets of types and functions. See [Modules](modules.md) for more information.
 
-A module consists of [statements](#statements).
+Syntactically, a module consists of [statements](#statements).
 
 ## Statements
 
+Statements are constructs that declare functions and types in modules.
+
 ### Import statement
 
-It imports types and functions from another module in the current or another package.
+It imports types and functions from another module in the same or another package.
 
 See [Modules](modules.md) for more details.
 
@@ -23,8 +25,6 @@ import Foo'Bar
 ### Foreign import statement
 
 It imports a function in a foreign language.
-
-You can specify calling convention of foreign languages in a format of string literals after `import foreign` keywords optionally. Currently, only the C calling convention is supported as `"c"`.
 
 See [FFI](/advanced-features/ffi.md) for more details.
 
@@ -57,7 +57,7 @@ type foo = number | none
 
 It defines a new function.
 
-First, followed by a function name (`foo`), it declares its argument names and types (`x number` and `y number`) and its result type (`number`). Then, function bodies describe what the functions do. The function bodies are [blocks](#block).
+First, followed by a function name (`foo`), it declares its argument names and types (`x number` and `y number`) and its result type (`number`). Then, function bodies describe what the functions do as [blocks](#block).
 
 ```pen
 foo = \(x number, y number) number {
@@ -67,7 +67,7 @@ foo = \(x number, y number) number {
 
 ### Foreign function definition
 
-It defines a new foreign function.
+It defines a new function exported for foreign languages.
 
 See [FFI](/advanced-features/ffi.md) for more details.
 
@@ -89,7 +89,7 @@ A block consists of 1 or more expressions wrapped in `{` and `}`. Values of the 
 }
 ```
 
-If you want to save results of intermediate expressions and use them somewhere else, you can define variables putting their names and `=` operators in front of the expressions.
+If you want to save results of intermediate expressions for later use, you can define variables putting their names and `=` operators in front of the expressions.
 
 ```
 {
@@ -100,6 +100,8 @@ If you want to save results of intermediate expressions and use them somewhere e
 ```
 
 ## Expressions
+
+Expressions express what programs actually compute. Notably, expressions can be nested; many expressions contain other expressions inside.
 
 ### Function call
 
@@ -133,7 +135,7 @@ Equal (`==`) and not-equal (`!=`) operators compare two values and return a bool
 1 != 1
 ```
 
-The operators can be used for any types except functions and types that include them.
+The operators can compare any types except functions and types that include them.
 
 ```pen
 "foo" == "bar"
@@ -154,7 +156,7 @@ Order operators compare two numbers and return a boolean value indicating if the
 
 #### Boolean
 
-A not operator flips a boolean value.
+A _not_ operator flips a boolean value.
 
 ```pen
 !true
@@ -174,9 +176,7 @@ true | false
 
 #### Error handling
 
-`?` suffix operator immediately exits the current function with an operand if it is of [the `error` type][error-type].
-
-An operand must be a union type including [the `error` type][error-type].
+`?` suffix operator immediately exits the current function with an operand if it is of [the `error` type][error-type]. The operand must be a union type containing [the `error` type][error-type].
 
 ```
 x?
