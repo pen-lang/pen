@@ -60,7 +60,7 @@ Unit tests are deterministic to enable reliable continuous integration.
 
 #### Asynchronous operation (WIP)
 
-Functions can be called asynchronously without waiting for blocking I/O.
+Functions can be called asynchronously to run multiple tasks concurrently.
 
 #### Parallel computation (WIP)
 
