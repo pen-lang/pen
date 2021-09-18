@@ -15,7 +15,7 @@ To realize that, it focuses on software **maintainability** and **portability**.
   - Developers can focus on application logic rather than ever-changing implementation details.
   - The language keeps codes testable by injecting non-testable codes explicitly.
 - Portability
-  - Programs written in the language can be ported to different platforms.
+  - Programs written in the language can be ported to different platforms including [WASM](https://wasm.dev).
 
 ## Background
 
