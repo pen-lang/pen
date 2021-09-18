@@ -6,15 +6,22 @@
 [![License](https://img.shields.io/badge/license-MIT%20%2B%20Apache%202.0-yellow?style=flat-square)](LICENSE.md)
 [![Twitter](https://img.shields.io/badge/twitter-%40pen__language-blue?style=flat-square)](https://twitter.com/pen_language)
 
-Pen is a statically typed, strictly evaluated, functional programming language heavily inspired by [the Go programming language][go]. It aims to make large-scale software development efficient where a large number of people can develop software together over a long time.
+Pen is a statically typed, strictly evaluated, functional programming language heavily inspired by [the Go programming language][go]. It aims to make large-scale software development efficient where a large number of people develop software together over a long time.
 
 To realize that, it focuses on software **maintainability** and **portability**.
 
+- Maintainability
+  - Everyone can learn the language and participate in actual development quickly.
+  - Developers can focus on application logic rather than ever-changing implementation details.
+  - The language keeps codes testable by injecting non-testable codes explicitly.
+- Portability
+  - Programs written in the language can be ported to different platforms.
+
 ## Background
 
-[The Go programming language][go] has been notably successful since it emerged on 2010 while it's been one of the most simple but practical languages ever made. It has proved importance of simplicity for development scalability and the cost of language features that incur complexity and inconsistency at a large scale.
+[The Go programming language][go] has been notably successful since it emerged on 2010 as it's been one of the most simple but practical programming languages ever made. It has proved importance of simplicity for development scalability and the cost of language features that incur complexity and inconsistency at a large scale. Recently, [Go 2](https://go.dev/blog/go2-here-we-come) has decided to compromise increased complexity for additional features, such as [generics](https://github.com/golang/go/issues/43651) for broader adoption and convenience.
 
-Although [Go 2](https://go.dev/blog/go2-here-we-come) has decided to compromise increased complexity for additional features like [generics](https://github.com/golang/go/issues/43651),
+On the other hand, Pen aims to be even simpler by **focusing only on application programming**. goes forward on the path of Go 1 to be more like Go 1. While Pen borrows many features from Go, it has even more minimal language design.
 
 ## Features
 
@@ -24,6 +31,8 @@ Although [Go 2](https://go.dev/blog/go2-here-we-come) has decided to compromise 
 - Functional programming
 - Immutable values
 - Pure functions by default
+- Automatic memory management
+  - Ownership-based reference counting
 - [Side effect injection](https://pen-lang.org/advanced-features/system-injection.html)
 
 ## Install
