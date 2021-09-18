@@ -19,7 +19,7 @@ To realize that, it focuses on software **maintainability** and **portability**.
 
 ## Background
 
-[The Go programming language][go] has been notably successful since it emerged on 2010 as it's been one of the most simple but practical programming languages ever made. It has proved importance of simplicity for development scalability and the cost of language features that incur complexity and inconsistency at a large scale. Recently, [Go 2](https://go.dev/blog/go2-here-we-come) has decided to compromise increased complexity for additional features, such as [generics](https://github.com/golang/go/issues/43651) for broader adoption and convenience.
+[The Go programming language][go] has been notably successful since it emerged on 2009 as it's been one of the most simple but practical programming languages ever made. It has proved importance of simplicity for development scalability and the cost of language features that incur complexity and inconsistency at a large scale. Recently, [Go 2](https://go.dev/blog/go2-here-we-come) has decided to compromise increased complexity for additional features, such as [generics](https://github.com/golang/go/issues/43651) for broader adoption and convenience.
 
 On the other hand, Pen aims to be even simpler by **focusing only on application programming**. goes forward on the path of Go 1 to be more like Go 1. While Pen borrows many features from Go, it has even more minimal language design.
 
