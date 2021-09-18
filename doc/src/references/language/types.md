@@ -4,7 +4,7 @@ This page describes different data types in the language.
 
 ## Number
 
-It represents a real number. It is implemented as a 64-bit floating point number of [IEEE 754](https://en.wikipedia.org/wiki/Double-precision_floating-point_format) under the hood.
+It represents a real number. It is implemented as a 64-bit floating point number of [IEEE 754](https://en.wikipedia.org/wiki/Double-precision_floating-point_format).
 
 ```pen
 number
@@ -19,7 +19,7 @@ number
 
 ## Boolean
 
-It is a boolean value of `true` or `false` denoting if a statement is correct or not.
+It is a boolean value of `true` or `false`.
 
 ```pen
 boolean
@@ -64,9 +64,9 @@ They represent texts encoded in [UTF-8](https://en.wikipedia.org/wiki/UTF-8).
 
 ## Functions
 
-A function is a set of operations with a list of arguments and a result.
+A function is a set of operations with arguments and a result.
 
-Functions represent not only pure computation but also "routines" which might execute side effects, such as I/O.
+Functions represent not only pure computation but may also execute side effects, such as I/O.
 
 ```pen
 \(number, number) number
@@ -74,7 +74,7 @@ Functions represent not only pure computation but also "routines" which might ex
 
 ## Lists
 
-It is a list of values of a type. The element type is put between `[` and `]`.
+It is a list of values of a type. Its element type is put between `[` and `]`.
 
 ```pen
 [number]
@@ -122,7 +122,7 @@ type Person {
 
 ### Literals
 
-Record values are constructed using record literals containing their field names and values.
+Record values are constructed using record literals containing their field names and values separated by commas.
 
 ```pen
 person{name: "foo", age: 42}

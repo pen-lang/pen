@@ -10,7 +10,7 @@ Syntactically, a module consists of [statements](#statements).
 
 ## Statements
 
-Statements are constructs that declare functions and types in mdoules.
+Statements are constructs that declare functions and types in modules.
 
 ### Import statement
 
