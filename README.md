@@ -75,11 +75,11 @@ Items are ordered by priority.
 - [ ] Code formatter
 - [ ] Asynchronous operations
 - [ ] Parallel computation
-- [ ] IDE/editor support
-  - [ ] Language server
 - [ ] Full OS interface
   - [ ] TCP/UDP sockets
   - [ ] Process
+- [ ] IDE/editor support
+  - [ ] Language server
 - [ ] Mutable state
   - [ ] Thread safety
 - [ ] Web browser interface
