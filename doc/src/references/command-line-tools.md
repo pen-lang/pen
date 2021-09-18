@@ -2,7 +2,7 @@
 
 The `pen` command has the following sub-commands.
 
-For more information, see help by running `pen --help`.
+For more information, see its help message by running `pen --help`.
 
 ## `build` command
 
