@@ -6,13 +6,12 @@ The programming language for scalable software development
 
 ## Vision
 
-Pen is designed for software development by a large number of people and/or over a long time.
-
-To make such development efficient, it focuses on:
+Pen is designed for software development by a large number of people and/or over a long time. To make such development efficient, it focuses on:
 
 - Maintainability
   - Everyone can learn the language and participate in actual development quickly.
   - Developers can focus on application logic rather than ever-changing implementation details.
+  - The language keeps your codes testable.
 - Portability
   - Programs written in the language can be ported to different platforms.
 
@@ -25,9 +24,9 @@ To make such development efficient, it focuses on:
 
 ### [System injection](/advanced-features/system-injection.md)
 
-- System APIs are always injected into entry points of applications.
+- System functions are always injected through entry points of applications.
 - That isolates and protects application logic from implementation details for both maintainability and portability.
-- Developers can define their own system APIs and build applications on top of them.
+- Developers can define their own system functions and build applications on top of them.
 
 ### Even more...
 
@@ -45,7 +44,7 @@ Functions are pure; they work just like math functions unless developers inject 
 
 #### Errors as values
 
-Errors are merely data. Its special syntax provides a convenient way to handle errors inside each function.
+Errors are merely data. Its special syntax provides a convenient way to handle errors.
 
 #### Cross compile
 
@@ -57,11 +56,11 @@ Its [Rust](https://www.rust-lang.org/)/C FFI provides interoperability with othe
 
 #### Deterministic tests (WIP)
 
-Unit tests are deterministic to realize reliable continuous integration.
+Unit tests are deterministic to enable reliable continuous integration.
 
 #### Asynchronous operation (WIP)
 
-Every function can be asynchronous while called in the same way as synchronous ones.
+Functions can be called asynchronously without waiting for blocking I/O.
 
 #### Parallel computation (WIP)
 
