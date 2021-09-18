@@ -1129,7 +1129,7 @@ mod tests {
 
             assert_eq!(
                 definition()
-                    .parse(stream("export foreign x=\\(x number)number{42}", ""))
+                    .parse(stream("foreign x=\\(x number)number{42}", ""))
                     .unwrap()
                     .0,
                 Definition::new(

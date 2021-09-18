@@ -32,7 +32,7 @@ Feature: FFI
   Scenario: Export a foreign function
     Given a file named "Foo.pen" with:
     """pen
-    export foreign f = \(x number) number {
+    foreign f = \(x number) number {
       x
     }
     """
