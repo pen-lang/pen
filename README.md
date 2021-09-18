@@ -6,7 +6,7 @@
 [![License](https://img.shields.io/badge/license-MIT%20%2B%20Apache%202.0-yellow?style=flat-square)](LICENSE.md)
 [![Twitter](https://img.shields.io/badge/twitter-%40pen__language-blue?style=flat-square)](https://twitter.com/pen_language)
 
-Pen is a statically typed, strictly evaluated, functional programming language heavily inspired by [the Go programming language][go]. It aims to make large-scale software development efficient where a large number of people develop software together over a long time.
+Pen is a statically typed, strictly evaluated, functional programming language. Its design is heavily inspired by [the Go programming language][go] and many functional programming languages like [Koka](https://koka-lang.github.io/koka/doc/index.html). It aims to make large-scale software development efficient where a large number of people develop software together over a long time.
 
 To realize that, it focuses on software **maintainability** and **portability**.
 
