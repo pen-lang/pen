@@ -22,7 +22,7 @@ Foo = \() number {
 
 ## Importing functions and types from modules
 
-In order to import functions and types from other modules, place [`import` statements](/references/language/syntax.md#import-statement) at the top of the current module.
+In order to import functions and types from other modules, place [import statements](/references/language/syntax.md#import-statement) at the top of the current module.
 
 The first components in the statements are names of external packages you declare in [package configuration files][package-configuration] (`Foo`.) They are omitted if the imported modules are in the same packages. The rest of the components are directory names where the modules exist (`Bar`) and the modules' filenames without their file extensions (`Baz` for `Baz.pen`.)
 
@@ -74,12 +74,14 @@ import Foo'Bar'Baz as Blah
 
 ### Unqualified import
 
-Functions and types can be imported without prefixes by putting their names between `{` and `}` after normal import statements. This is especially useful when module names and imported entities have the same names like `import 'MyType { MyType }` to make them less redundant.
+You can import functions and types without prefixes by putting their names between `{` and `}` in [import statements](/references/language/syntax.md#import-statement). This is especially useful when module names and imported entities have the same names like `import 'MyType { MyType }`.
 
 ```pen
 import Foo'Bar { Foo, Bar }
 
-type Baz = Foo
+type Baz {
+  foo Foo
+}
 
 Blah = \() number {
   Bar()
