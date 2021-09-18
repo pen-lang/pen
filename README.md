@@ -41,7 +41,7 @@ On the other hand, Pen aims to be even simpler by focusing only on application p
 
 - Deterministic testing framework
 - Asynchronous operations
-  - Based on CPS transformation
+  - Based on continuations
 - Thread-safe parallel computation
 
 ## Install
