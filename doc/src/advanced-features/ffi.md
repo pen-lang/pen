@@ -22,7 +22,7 @@ foreign foo = \(x number, y number) number {
 }
 ```
 
-## Building custom libraries in foreign languages in packages
+## Building custom libraries in foreign languages
 
 You might want to build libraries in foreign languages so that you can use their functions in your packages. If that's your case, you can set up `pen-ffi` scripts in your packages. The script files run on every build and output absolute paths to `.a` archive files of your libraries in foreign languages built by the scripts. The script files may or may not have file extensions.
 
