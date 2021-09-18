@@ -25,7 +25,7 @@ On the other hand, Pen aims to be even simpler by focusing only on application p
 
 ## Features
 
-- Minimal language design
+- [Minimal language design](https://pen-lang.org/references/language/syntax.html)
   - It's even smaller than [Go][go]!
 - Static typing
 - Functional programming
