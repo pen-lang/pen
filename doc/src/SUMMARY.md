@@ -44,6 +44,5 @@
   - [Cross compile](advanced-features/cross-compile.md)
   - [FFI](advanced-features/ffi.md)
   - [System injection](advanced-features/system-injection.md)
-- [Roadmap](roadmap.md)
 - [The Zen](the-zen.md)
 - [For developers](for-developers.md)
