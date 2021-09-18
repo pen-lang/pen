@@ -6,7 +6,7 @@
 [![License](https://img.shields.io/badge/license-MIT%20%2B%20Apache%202.0-yellow?style=flat-square)](LICENSE.md)
 [![Twitter](https://img.shields.io/badge/twitter-%40pen__language-blue?style=flat-square)](https://twitter.com/pen_language)
 
-Pen is a statically typed, strictly evaluated, functional programming language. Its design is heavily inspired by [the Go programming language][go] and many functional programming languages like [Haskell](https://www.haskell.org/) and [Koka](https://koka-lang.github.io/koka/doc/index.html).
+Pen is a statically typed, strictly evaluated, functional programming language for application programming. Its design is heavily inspired by [the Go programming language][go] and many functional programming languages like [Haskell](https://www.haskell.org/) and [Koka](https://koka-lang.github.io/koka/doc/index.html).
 
 Pen aims to make large-scale software development efficient where a large number of people develop software together over a long time. To realize that, it focuses on software **maintainability** and **portability**.
 
@@ -21,7 +21,7 @@ Pen aims to make large-scale software development efficient where a large number
 
 [The Go programming language][go] has been notably successful since it emerged on 2009 as it's been one of the most simple but practical programming languages ever made. It has proved importance of simplicity for development scalability and the cost of language features that incur complexity and inconsistency at a large scale. Recently, [Go 2](https://go.dev/blog/go2-here-we-come) has decided to compromise increased complexity for additional features, such as [generics](https://github.com/golang/go/issues/43651), for broader adoption and convenience.
 
-On the other hand, Pen aims to be even simpler by **focusing only on application programming** while adopting the same philosophy of simplicity. It has even more minimal language design removing several features like mutability, global variables, circular references, etc.
+On the other hand, Pen aims to be even simpler by focusing only on application programming while adopting the same philosophy of simplicity. It has even more minimal language design removing several features like mutability, global variables, circular references, etc.
 
 ## Features
 
