@@ -67,7 +67,7 @@ Print = \(s string) none {
 
 Each system package has a script file named `pen-link` at its top directory. On every build, the executable file is run with object files specified as command line arguments to link an application file. The script files may or may not have file extensions.
 
-The scripts should accept the following command line arguments. Outputs of the scripts are discarded unless some errors occur during runs.
+The scripts should accept the following command line arguments. Outputs of the scripts are discarded unless some errors occur during linking.
 
 | Argument           | Required | Description                          |
 | ------------------ | -------- | ------------------------------------ |
