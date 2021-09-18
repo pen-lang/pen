@@ -21,7 +21,7 @@ type error {
 It creates an error with its source information.
 
 ```pen
-\(any) error
+\(info any) error
 ```
 
 ### `source`
@@ -29,5 +29,5 @@ It creates an error with its source information.
 It extracts source information from an error.
 
 ```pen
-\(error) any
+\(e error) any
 ```
