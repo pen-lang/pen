@@ -69,11 +69,11 @@ Each system package has a script file named `pen-link` at its top directory. On 
 
 The scripts should accept the following command line arguments. Outputs of the scripts are discarded unless some errors occur during linking.
 
-| Argument           | Required | Description                          |
-| ------------------ | -------- | ------------------------------------ |
-| `-t <target>`      | No       | Target triple                        |
-| `-o <application>` | Yes      | Path of an application file to build |
-| `<archive>...`     | Yes      | Paths of archive files to link       |
+| Argument           | Required | Description                    |
+| ------------------ | -------- | ------------------------------ |
+| `-t <target>`      | No       | Target triple                  |
+| `-o <application>` | Yes      | Path of an application file    |
+| `<archive>...`     | Yes      | Paths of archive files to link |
 
 ## Examples
 
