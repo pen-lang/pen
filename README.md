@@ -37,7 +37,7 @@ On the other hand, Pen aims to be even simpler by focusing only on application p
 - [System injection](https://pen-lang.org/advanced-features/system-injection.html)
   - Whole-program dependency injection of side effects
 
-### Upcoming more...
+### Upcoming...
 
 - Deterministic testing framework
 - Asynchronous operations
