@@ -1,6 +1,6 @@
 # Packages
 
-Packages are sets of modules. They are built by the `pen build` command as applications or libraries depending on their configurations.
+Packages are sets of [modules](/references/language/modules.md). They are built by the `pen build` command as applications or libraries depending on their configurations.
 
 ## What composes a package?
 
