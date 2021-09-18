@@ -6,7 +6,7 @@
 [![License](https://img.shields.io/badge/license-MIT%20%2B%20Apache%202.0-yellow?style=flat-square)](LICENSE.md)
 [![Twitter](https://img.shields.io/badge/twitter-%40pen__language-blue?style=flat-square)](https://twitter.com/pen_language)
 
-The programming language for scalable development
+> The programming language for scalable development
 
 Pen is a statically typed, strictly evaluated, functional programming language heavily inspired by [the Go programming language][go]. It aims to make large-scale software development efficient where a large number of people can develop software together over a long time.
 
@@ -16,7 +16,7 @@ To realize that, it focuses on software **maintainability** and **portability**.
 
 [The Go programming language][go] has been notably successful since it emerged on 2010 while it's been one of the most simple but practical languages ever made. It has proved importance of simplicity for development scalability and the cost of language features that incur complexity and inconsistency at a large scale.
 
-Although [Go 2](https://go.dev/blog/go2-here-we-come) has decided to accept increased complexity for additional features like [generics](https://github.com/golang/go/issues/43651),
+Although [Go 2](https://go.dev/blog/go2-here-we-come) has decided to compromise increased complexity for additional features like [generics](https://github.com/golang/go/issues/43651),
 
 ## Features
 
