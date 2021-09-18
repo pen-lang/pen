@@ -155,8 +155,8 @@
 <pre><code class="language-pen">import foreign &quot;c&quot; foo \(number, number) number
 </code></pre>
 <h2 id="exporting-functions-to-foreign-languages"><a class="header" href="#exporting-functions-to-foreign-languages">Exporting functions to foreign languages</a></h2>
-<p>You can export functions to foreign languages using <a href="/references/language/syntax.html#foreign-function-definition">foreign function definitions</a> which have <code>export foreign</code> keywords in front of normal function definitions.</p>
-<pre><code class="language-pen">export foreign foo = \(x number, y number) number {
+<p>You can export functions to foreign languages using <a href="/references/language/syntax.html#foreign-function-definition">foreign function definitions</a> which have <code>foreign</code> keywords in front of normal function definitions.</p>
+<pre><code class="language-pen">foreign foo = \(x number, y number) number {
   ...
 }
 </code></pre>
