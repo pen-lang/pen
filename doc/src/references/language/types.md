@@ -158,9 +158,9 @@ foo
 
 ## Unions
 
-It is a segregated union of types.
+It is a union of multiple types.
 
-For example, the type below represents values which can be either `number` or `none`. But values of the type cannot be `number` and `none` types at the same time.
+For example, the type below represents values that can be either `number` or `none`.
 
 ```pen
 number | none
