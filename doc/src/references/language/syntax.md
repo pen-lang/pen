@@ -72,7 +72,7 @@ It defines a new foreign function.
 See [FFI](/advanced-features/ffi.md) for more details.
 
 ```pen
-export foreign foo = \(x number, y number) number {
+foreign foo = \(x number, y number) number {
   x + y
 }
 ```

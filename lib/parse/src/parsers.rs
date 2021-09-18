@@ -144,7 +144,7 @@ fn calling_convention<'a>() -> impl Parser<Stream<'a>, Output = CallingConventio
 
 fn definition<'a>() -> impl Parser<Stream<'a>, Output = Definition> {
     (
-        optional(foreign_export()),
+        optional(keyword("foreign")),
         position(),
         identifier(),
         sign("="),
@@ -154,10 +154,6 @@ fn definition<'a>() -> impl Parser<Stream<'a>, Output = Definition> {
             Definition::new(name, lambda, foreign_export.is_some(), position)
         })
         .expected("definition")
-}
-
-fn foreign_export<'a>() -> impl Parser<Stream<'a>, Output = ()> {
-    (keyword("export"), keyword("foreign")).with(value(()))
 }
 
 fn record_definition<'a>() -> impl Parser<Stream<'a>, Output = RecordDefinition> {
@@ -1129,7 +1125,7 @@ mod tests {
 
             assert_eq!(
                 definition()
-                    .parse(stream("export foreign x=\\(x number)number{42}", ""))
+                    .parse(stream("foreign x=\\(x number)number{42}", ""))
                     .unwrap()
                     .0,
                 Definition::new(
