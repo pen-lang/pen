@@ -73,10 +73,10 @@ Items are ordered by priority.
 - [ ] Serialization / deserialization
 - [ ] Map type
 - [ ] Code formatter
-- [ ] IDE/editor support
-  - [ ] Language server
 - [ ] Asynchronous operations
 - [ ] Parallel computation
+- [ ] IDE/editor support
+  - [ ] Language server
 - [ ] Full OS interface
   - [ ] TCP/UDP sockets
   - [ ] Process
