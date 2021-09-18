@@ -1,6 +1,6 @@
 # Built-ins
 
-Built-in types and functions are the ones accessible from any modules.
+Built-in types and functions are ones implicitly defined in every module.
 
 ## Types
 
