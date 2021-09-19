@@ -23,7 +23,7 @@ Pen aims to make large-scale software development efficient where a large number
 
 [The Go programming language][go] has been notably successful since it emerged on 2009 as it's been one of the most simple but practical programming languages ever made. It has proved effectiveness of simplicity for development scalability. Recently, [Go 2](https://go.dev/blog/go2-here-we-come) has decided to compromise increased complexity for the [generics](https://github.com/golang/go/issues/43651) proposal.
 
-On the other hand, Pen aims to be **even simpler by focusing only on application programming** as its target domain while adopting the same philosophy of simplicity. It has even more minimal language design after removing several features from Go like pointers, mutability, method syntax, global variables, circular references, etc.
+On the other hand, Pen aims to be **even simpler by focusing only on application programming** as its target domain while adopting the same philosophy of simplicity. It pursues the minimal language design further after removing several features from Go like pointers, mutability, method syntax, global variables, circular references, etc.
 
 ## Features
 
