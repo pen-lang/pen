@@ -10,7 +10,7 @@ Pen is a statically typed, strictly evaluated, functional programming language f
 
 ## Vision
 
-Pen aims to make large-scale software development where a number of people develop software together over a long time efficient. To realize that, it focuses on software **maintainability** and **portability**.
+Pen aims to make large-scale software development efficient where a number of people develop software together over a long time. To realize that, it focuses on software **maintainability** and **portability**.
 
 - Maintainability
   - Everyone can learn the language and participate in actual development quickly.
