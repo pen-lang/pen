@@ -51,7 +51,7 @@ On the other hand, Pen aims to be **even simpler by focusing only on application
 - Automatic memory management
   - Ownership-based reference counting
 - Cross compile
-- Foreign function interface
+- Foreign Function Interface (FFI)
 - Tail call optimization
 - CPS transformation
 - Deterministic testing framework (WIP)
