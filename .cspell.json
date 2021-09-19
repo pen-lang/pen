@@ -21,6 +21,7 @@
     "insta",
     "intrinsics",
     "itertools",
+    "koka",
     "malloc",
     "mtriple",
     "petgraph",
