@@ -46,6 +46,8 @@ It's even smaller than [Go][go]!
 
 - Automatic memory management
   - Ownership-based reference counting
+- Cross compile
+- Foreign function interface
 - Tail call optimization
 - CPS transformation
 - Deterministic testing framework (WIP)
