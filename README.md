@@ -48,9 +48,6 @@ It's even smaller than [Go][go]!
   - Ownership-based reference counting
 - Tail call optimization
 - CPS transformation
-
-### Upcoming features...
-
 - Deterministic testing framework (WIP)
 - Asynchronous operations (WIP)
   - Based on continuations
