@@ -29,20 +29,22 @@ On the other hand, Pen aims to be **even simpler by focusing only on application
 
 ### [Minimal language design](https://pen-lang.org/references/language/syntax.html)
 
-It's even smaller than [Go][go]!
+- Even smaller than [Go][go]!
 
 ### Static typing
 
+- Type inference
 - Subtyping
+- No generics
 
 ### Functional programming
 
 - Immutable values
 - Pure functions by default
 
-### [System injection](https://pen-lang.org/advanced-features/system-injection.html)
+### [Dependency injection](https://pen-lang.org/advanced-features/system-injection.html)
 
-- Whole-program dependency injection of side effects
+- System functions are always injected through entry points of programs
 
 ### Others
 
