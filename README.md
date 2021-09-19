@@ -25,24 +25,36 @@ On the other hand, Pen aims to be even simpler by focusing only on application p
 
 ## Features
 
-- [Minimal language design](https://pen-lang.org/references/language/syntax.html)
-  - It's even smaller than [Go][go]!
-- Static typing
-- Functional programming
+### [Minimal language design](https://pen-lang.org/references/language/syntax.html)
+
+It's even smaller than [Go][go]!
+
+### Static typing
+
+- Subtyping
+
+### Functional programming
+
 - Immutable values
 - Pure functions by default
+
+### [System injection](https://pen-lang.org/advanced-features/system-injection.html)
+
+- Whole-program dependency injection of side effects
+
+### Others
+
 - Automatic memory management
   - Ownership-based reference counting
 - Tail call optimization
-- [System injection](https://pen-lang.org/advanced-features/system-injection.html)
-  - Whole-program dependency injection of side effects
+- CPS transformation
 
-### Upcoming...
+### Upcoming features...
 
-- Deterministic testing framework
-- Asynchronous operations
+- Deterministic testing framework (WIP)
+- Asynchronous operations (WIP)
   - Based on continuations
-- Thread-safe parallel computation
+- Thread-safe parallel computation (WIP)
 
 ## Install
 
