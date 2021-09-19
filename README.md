@@ -8,6 +8,8 @@
 
 Pen is a statically typed, strictly evaluated, functional programming language for application programming. Its design is heavily inspired by [the Go programming language][go] and many functional programming languages like [Haskell](https://www.haskell.org/) and [Koka](https://koka-lang.github.io/koka/doc/index.html).
 
+## Vision
+
 Pen aims to make large-scale software development efficient where a large number of people develop software together over a long time. To realize that, it focuses on software **maintainability** and **portability**.
 
 - Maintainability
