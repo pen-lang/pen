@@ -80,6 +80,8 @@ brew install pen-lang/pen/pen
 
 ### Building from source
 
+You can also build Pen from source on your local machine.
+
 1. Clone the Git repository.
 
    ```sh
