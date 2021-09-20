@@ -78,12 +78,6 @@ On Linux, macOS and [WSL](https://docs.microsoft.com/en-us/windows/wsl/about), y
 brew install pen-lang/pen/pen
 ```
 
-## Documentation
-
-[Here](https://pen-lang.org)
-
-## For developers
-
 ### Building from source
 
 1. Clone the Git repository.
@@ -105,6 +99,10 @@ brew install pen-lang/pen/pen
    ```
 
 Now, you are ready to use the `pen` command built manually!
+
+## Documentation
+
+[Here](https://pen-lang.org)
 
 ## Roadmap
 
