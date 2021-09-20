@@ -8,6 +8,27 @@
 
 Pen is a statically typed functional programming language for application programming with [system injection](#system-injection). Its design is heavily inspired by [the Go programming language][go] and many functional programming languages like [Haskell](https://www.haskell.org/) and [Koka](https://koka-lang.github.io/koka/doc/index.html).
 
+```pen
+import System'Context { Context }
+import System'File
+
+sayHello = \(ctx Context) none | error {
+  File'Write(ctx, File'StdOut(), "Hello, world!\n")?
+
+  none
+}
+
+main = \(ctx Context) number {
+  e = sayHello(ctx)
+
+  if e = e as none {
+    0
+  } else if error {
+    1
+  }
+}
+```
+
 ## Vision
 
 Pen aims to make large-scale software development efficient where a number of people develop software together over a long time. To realize that, it focuses on software **maintainability** and **portability**.
@@ -102,9 +123,11 @@ You can also build Pen from source on your local machine.
 
 Now, you are ready to use the `pen` command built manually!
 
-## Documentation
+## [Documentation](https://pen-lang.org)
 
-[Here](https://pen-lang.org)
+- [Getting started](https://pen-lang.org/guides/getting-started.html)
+- [Language reference](https://pen-lang.org/references/language/)
+- [Code examples](https://pen-lang.org/examples/)
 
 ## Roadmap
 
