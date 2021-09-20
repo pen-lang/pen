@@ -34,7 +34,7 @@ On the other hand, Pen aims to be **even simpler by focusing only on application
 
 ### [System injection](https://pen-lang.org/advanced-features/system-injection.html)
 
-- A mechanism to inject system functions explicitly into pure functions
+- A mechanism to inject system functions into pure functions
 - In other words, it's a dynamically typed effect system.
 - You can even define your own system APIs!
 
