@@ -29,7 +29,7 @@ On the other hand, Pen aims to be **even simpler by focusing only on application
 
 ### [Minimal language design][syntax]
 
-- Its [syntax][syntax] and [type system](https://pen-lang.org/references/language/types.html) are made as small as possible.
+- [Syntax][syntax] and [type system](https://pen-lang.org/references/language/types.html) are made as small as possible.
 - Even smaller than Go!
 
 ### [System injection](https://pen-lang.org/advanced-features/system-injection.html)
@@ -47,6 +47,7 @@ On the other hand, Pen aims to be **even simpler by focusing only on application
 
 ### Functional programming
 
+- Closures
 - Immutable values
 - Pure functions by default
 
