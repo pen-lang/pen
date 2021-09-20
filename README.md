@@ -51,6 +51,7 @@ On the other hand, Pen aims to be **even simpler by focusing only on application
 
 - Automatic memory management
   - Ownership-based reference counting
+- [Stress-free error handling](https://pen-lang.org/references/language/syntax.html#error-handling)
 - Cross compile
 - Foreign Function Interface (FFI)
 - Tail call optimization
