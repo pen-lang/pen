@@ -104,7 +104,7 @@ brew install pen-lang/pen/pen
    export PEN_ROOT=<directory>
    ```
 
-Now, you are ready to use the `pen` command built locally!
+Now, you are ready to use the `pen` command built manually!
 
 ## Roadmap
 
