@@ -58,7 +58,7 @@ On the other hand, Pen aims to be **even simpler by focusing only on application
 - [Stress-free error handling](https://pen-lang.org/references/language/syntax.html#error-handling)
 - Cross compile
 - Foreign Function Interface (FFI)
-- Tail call optimization
+- Tail call elimination
 - CPS transformation
 
 #### Work in progress...
