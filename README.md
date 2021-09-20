@@ -35,13 +35,14 @@ On the other hand, Pen aims to be **even simpler by focusing only on application
 ### [System injection](https://pen-lang.org/advanced-features/system-injection.html)
 
 - A mechanism to inject system functions into pure functions
-- In other words, it's a dynamically typed effect system.
+- In other words, a _dynamically typed_ effect system
 - You can even define your own system APIs!
 
 ### Static typing
 
 - Type inference
 - Subtyping
+- [Union types](https://pen-lang.org/references/language/types.html#unions)
 - No generics
 
 ### Functional programming
