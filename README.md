@@ -72,11 +72,35 @@ Furthermore, although many programming languages have been solving problems of *
 
 ## Install
 
-You can install Pen via [Homebrew](https://brew.sh/) by running the following command in your terminal.
+On Linux, macOS and [WSL](https://docs.microsoft.com/en-us/windows/wsl/about), you can install Pen via [Homebrew](https://brew.sh/) by running the following command in your terminal.
 
 ```sh
 brew install pen-lang/pen/pen
 ```
+
+### Building from source
+
+You can also build Pen from source on your local machine.
+
+1. Clone the Git repository.
+
+   ```sh
+   git clone https://github.com/pen-lang/pen
+   ```
+
+1. Run a `cargo` command in the repository's directory.
+
+   ```sh
+   cargo install --path cmd/pen
+   ```
+
+1. Set a `PEN_ROOT` environment variable to the directory.
+
+   ```sh
+   export PEN_ROOT=<directory>
+   ```
+
+Now, you are ready to use the `pen` command built manually!
 
 ## Documentation
 
