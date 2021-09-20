@@ -58,8 +58,8 @@ Furthremore, although many programming languages have been solving problems of *
 - Automatic memory management
   - Ownership-based reference counting
 - [Stress-free error handling](https://pen-lang.org/references/language/syntax.html#error-handling)
-- Cross compile
-- Foreign Function Interface (FFI)
+- [Cross compile](https://pen-lang.org/advanced-features/cross-compile.html)
+- [Foreign Function Interface (FFI)](https://pen-lang.org/advanced-features/ffi.html)
 - Tail call elimination
 - CPS transformation
 
