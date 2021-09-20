@@ -106,6 +106,9 @@ Now, you are ready to use the `pen` command built manually!
 
 [Here](https://pen-lang.org)
 
+- [Getting started](https://pen-lang.org/guides/getting-started.html)
+- [Code examples](https://pen-lang.org/examples/index.html)
+
 ## Roadmap
 
 Items are ordered by priority.
