@@ -60,10 +60,13 @@ On the other hand, Pen aims to be **even simpler by focusing only on application
 - Foreign Function Interface (FFI)
 - Tail call optimization
 - CPS transformation
-- Deterministic testing framework (WIP)
-- Asynchronous operations (WIP)
+
+#### Work in progress...
+
+- Deterministic testing framework
+- Asynchronous operations
   - Based on continuations
-- Thread-safe parallel computation (WIP)
+- Thread-safe parallel computation
 
 ## Install
 
