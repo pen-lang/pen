@@ -126,8 +126,8 @@ Now, you are ready to use the `pen` command built manually!
 ## [Documentation](https://pen-lang.org)
 
 - [Getting started](https://pen-lang.org/guides/getting-started.html)
-- [Language reference](https://pen-lang.org/references)
-- [Code examples](https://pen-lang.org/examples)
+- [Language reference](https://pen-lang.org/references/language/)
+- [Code examples](https://pen-lang.org/examples/)
 
 ## Roadmap
 
