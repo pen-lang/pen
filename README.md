@@ -27,8 +27,9 @@ On the other hand, Pen aims to be **even simpler by focusing only on application
 
 ## Features
 
-### [Minimal language design](https://pen-lang.org/references/language/syntax.html)
+### [Minimal language design][syntax]
 
+- Its [syntax][syntax] and [type system](https://pen-lang.org/references/language/types.html) are made as small as possible.
 - Even smaller than [Go][go]!
 
 ### Static typing
@@ -105,3 +106,4 @@ Items are ordered by priority.
 Dual-licensed under [MIT](LICENSE-MIT) and [Apache 2.0](LICENSE-APACHE).
 
 [go]: https://golang.org
+[syntax]: https://pen-lang.org/references/language/syntax.html
