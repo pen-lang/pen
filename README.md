@@ -72,7 +72,7 @@ Furthermore, although many programming languages have been solving problems of *
 
 ## Install
 
-You can install Pen via [Homebrew](https://brew.sh/) by running the following command in your terminal.
+On Linux, macOs and [WSL](https://docs.microsoft.com/en-us/windows/wsl/about), you can install Pen via [Homebrew](https://brew.sh/) by running the following command in your terminal.
 
 ```sh
 brew install pen-lang/pen/pen
