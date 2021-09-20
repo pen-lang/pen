@@ -30,7 +30,7 @@ On the other hand, Pen aims to be **even simpler by focusing only on application
 ### [Minimal language design][syntax]
 
 - Its [syntax][syntax] and [type system](https://pen-lang.org/references/language/types.html) are made as small as possible.
-- Even smaller than [Go][go]!
+- Even smaller than Go!
 
 ### Static typing
 
