@@ -32,6 +32,11 @@ On the other hand, Pen aims to be **even simpler by focusing only on application
 - Its [syntax][syntax] and [type system](https://pen-lang.org/references/language/types.html) are made as small as possible.
 - Even smaller than Go!
 
+### [System injection](https://pen-lang.org/advanced-features/system-injection.html)
+
+- A mechanism to inject system functions explicitly into functions
+- In other words, it's a dynamically typed effect system.
+
 ### Static typing
 
 - Type inference
@@ -42,11 +47,6 @@ On the other hand, Pen aims to be **even simpler by focusing only on application
 
 - Immutable values
 - Pure functions by default
-
-### [System injection](https://pen-lang.org/advanced-features/system-injection.html)
-
-- A mechanism to inject system functions explicitly into functions
-- In other words, it's a dynamically typed effect system.
 
 ### Others
 
