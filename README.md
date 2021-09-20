@@ -123,12 +123,11 @@ You can also build Pen from source on your local machine.
 
 Now, you are ready to use the `pen` command built manually!
 
-## Documentation
-
-[Here](https://pen-lang.org)
+## [Documentation](https://pen-lang.org)
 
 - [Getting started](https://pen-lang.org/guides/getting-started.html)
-- [Code examples](https://pen-lang.org/examples/index.html)
+- [Language reference](https://pen-lang.org/references)
+- [Code examples](https://pen-lang.org/examples)
 
 ## Roadmap
 
