@@ -25,7 +25,7 @@ Simplicity enables efficient collaboration of developers. [The Go programming la
 
 On the other hand, Pen aims to be **even simpler by focusing only on application programming** as its target domain while adopting the same philosophy of simplicity. It pursues its minimal language design further after removing several features from Go like pointers, mutability, method syntax, global variables, circular references, etc.
 
-Furthremore, although many programming languages have been solving problems of **programming** in history, few of them actually tackled ones of **software engineering** where you also need to maintain and keep making changes to existing software continuously. Pen's approach to that is embracing battle-tested ideas of such field, such as [Clean Architecture](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html), into the language and its ecosystem.
+Furthremore, although many programming languages have been solving problems of **programming** in history, few of them actually tackled ones of **software engineering** where you also need to maintain and keep making changes to existing software continuously. Pen's approach to that is embracing battle-tested ideas of such field, such as [Clean Architecture](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html), into the language's princibles and its ecosystem. One of its most clear examples is [system injection](#system-injection).
 
 ## Features
 
