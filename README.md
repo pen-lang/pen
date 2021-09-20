@@ -45,7 +45,8 @@ On the other hand, Pen aims to be **even simpler by focusing only on application
 
 ### [System injection](https://pen-lang.org/advanced-features/system-injection.html)
 
-- System functions are always injected through entry points of programs
+- A mechanism to inject system functions explicitly into functions
+- In other words, it's a dynamically typed effect system.
 
 ### Others
 
