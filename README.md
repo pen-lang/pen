@@ -33,7 +33,7 @@ main = \(ctx Context) number {
 
 See [Install](https://pen-lang.org/guides/install.html).
 
-## [Documentation](https://pen-lang.org)
+## Documentation
 
 - [Getting started](https://pen-lang.org/guides/getting-started.html)
 - [Language reference](https://pen-lang.org/references/language/)
