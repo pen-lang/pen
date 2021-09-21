@@ -29,6 +29,16 @@ main = \(ctx Context) number {
 }
 ```
 
+## Install
+
+See [Install](https://pen-lang.org/guides/install.html).
+
+## Documentation
+
+- [Getting started](https://pen-lang.org/guides/getting-started.html)
+- [Language reference](https://pen-lang.org/references/language/)
+- [Code examples](https://pen-lang.org/examples/)
+
 ## Vision
 
 Pen aims to make large-scale software development efficient where a number of people develop software together over a long time. To realize that, it focuses on software **maintainability** and **portability**.
@@ -90,44 +100,6 @@ Furthermore, although many programming languages have been solving problems of *
 - Asynchronous operations
   - Based on continuations
 - Thread-safe parallel computation
-
-## Install
-
-On Linux, macOS and [WSL](https://docs.microsoft.com/en-us/windows/wsl/about), you can install Pen via [Homebrew](https://brew.sh/) by running the following command in your terminal.
-
-```sh
-brew install pen-lang/pen/pen
-```
-
-### Building from source
-
-You can also build Pen from source on your local machine.
-
-1. Clone the Git repository.
-
-   ```sh
-   git clone https://github.com/pen-lang/pen
-   ```
-
-1. Run a `cargo` command in the repository's directory.
-
-   ```sh
-   cargo install --path cmd/pen
-   ```
-
-1. Set a `PEN_ROOT` environment variable to the directory.
-
-   ```sh
-   export PEN_ROOT=<directory>
-   ```
-
-Now, you are ready to use the `pen` command built manually!
-
-## [Documentation](https://pen-lang.org)
-
-- [Getting started](https://pen-lang.org/guides/getting-started.html)
-- [Language reference](https://pen-lang.org/references/language/)
-- [Code examples](https://pen-lang.org/examples/)
 
 ## Roadmap
 

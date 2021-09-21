@@ -6,7 +6,7 @@ The programming language for scalable development
 
 ## Vision
 
-Pen is designed for large-scale software development; it empowers a large number of people to develop software together over a long time. To make such development efficient, it focuses on:
+Pen is designed for large-scale software development; it empowers a number of people to develop software together over a long time. To make such development efficient, it focuses on:
 
 - Maintainability
   - Everyone can learn the language and participate in actual development quickly.
