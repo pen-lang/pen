@@ -64,7 +64,7 @@ import Foo'Bar'Baz
 
 #### Private modules
 
-For modules to be private and not accessible from other packages, you can give the modules names which starts with lower case letters (e.g. `fooBar`).
+For modules to be private and not accessible from other packages, you can give the modules names which start with lower case letters (e.g. `fooBar`).
 
 ```pen
 import 'fooBar
