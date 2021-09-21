@@ -13,6 +13,11 @@ extern "C" fn _pen_core_power(x: ffi::Number, y: ffi::Number) -> ffi::Number {
     f64::from(x).powf(y.into()).into()
 }
 
+#[no_mangle]
+extern "C" fn _pen_core_square_root(x: ffi::Number) -> ffi::Number {
+    f64::from(x).sqrt().into()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -30,5 +35,10 @@ mod tests {
     #[test]
     fn power() {
         assert_eq!(_pen_core_power(2.0.into(), 3.0.into()), 8.0.into());
+    }
+
+    #[test]
+    fn square_root() {
+        assert_eq!(_pen_core_square_root(4.0.into()), 2.0.into());
     }
 }
