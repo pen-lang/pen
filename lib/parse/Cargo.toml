@@ -12,4 +12,5 @@ position = { path = "../position" }
 regex = "1"
 
 [dev-dependencies]
+insta = "1"
 pretty_assertions = "0.7"

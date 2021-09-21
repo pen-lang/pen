@@ -537,6 +537,7 @@ version = "0.1.0"
 dependencies = [
  "ast",
  "combine",
+ "insta",
  "once_cell",
  "position",
  "pretty_assertions",

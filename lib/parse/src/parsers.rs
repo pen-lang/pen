@@ -4,7 +4,7 @@ use ast::{
     *,
 };
 use combine::{
-    attempt, choice, easy, from_str, many, many1, none_of, one_of, optional,
+    attempt, choice, easy, from_str, look_ahead, many, many1, none_of, one_of, optional,
     parser::{
         char::{alpha_num, char as character, digit, letter, space, spaces, string},
         combinator::{lazy, no_partial, not_followed_by},
@@ -82,7 +82,8 @@ pub fn module<'a>() -> impl Parser<Stream<'a>, Output = Module> {
 
 fn import<'a>() -> impl Parser<Stream<'a>, Output = Import> {
     (
-        attempt(keyword("import").with(module_path())),
+        attempt(keyword("import").with(not_followed_by(keyword("foreign").with(value("foreign"))))),
+        module_path(),
         optional(keyword("as").with(identifier())),
         optional(between(
             sign("{"),
@@ -90,7 +91,7 @@ fn import<'a>() -> impl Parser<Stream<'a>, Output = Import> {
             sep_end_by1(identifier(), sign(",")),
         )),
     )
-        .map(|(path, prefix, names)| Import::new(path, prefix, names.unwrap_or_default()))
+        .map(|(_, path, prefix, names)| Import::new(path, prefix, names.unwrap_or_default()))
         .expected("import statement")
 }
 
@@ -103,16 +104,33 @@ fn module_path<'a>() -> impl Parser<Stream<'a>, Output = ModulePath> {
 }
 
 fn internal_module_path<'a>() -> impl Parser<Stream<'a>, Output = InternalModulePath> {
-    module_path_components().map(InternalModulePath::new)
+    module_path_components(identifier()).map(InternalModulePath::new)
 }
 
 fn external_module_path<'a>() -> impl Parser<Stream<'a>, Output = ExternalModulePath> {
-    (identifier(), module_path_components())
+    (
+        identifier(),
+        module_path_components(public_module_path_component()),
+    )
         .map(|(package, components)| ExternalModulePath::new(package, components))
 }
 
-fn module_path_components<'a>() -> impl Parser<Stream<'a>, Output = Vec<String>> {
-    many1(string(IDENTIFIER_SEPARATOR).with(identifier()))
+fn module_path_components<'a>(
+    component: impl Parser<Stream<'a>, Output = String>,
+) -> impl Parser<Stream<'a>, Output = Vec<String>> {
+    many1(string(IDENTIFIER_SEPARATOR).with(component))
+}
+
+fn public_module_path_component<'a>() -> impl Parser<Stream<'a>, Output = String> {
+    look_ahead(identifier().expected("public module path"))
+        .then(|name| {
+            if ast::analysis::is_name_public(&name) {
+                value(()).left()
+            } else {
+                unexpected_any("private module path").right()
+            }
+        })
+        .with(identifier())
 }
 
 fn foreign_import<'a>() -> impl Parser<Stream<'a>, Output = ForeignImport> {
@@ -775,6 +793,7 @@ fn comment<'a>() -> impl Parser<Stream<'a>, Output = ()> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::error::ParseError;
     use position::test::PositionFake;
     use pretty_assertions::assert_eq;
 
@@ -1055,6 +1074,26 @@ mod tests {
                     .0,
                 ExternalModulePath::new("Foo", vec!["Bar".into()]),
             );
+        }
+
+        #[test]
+        fn fail_to_parse_private_external_module_file() {
+            let source = "Foo'bar";
+
+            insta::assert_debug_snapshot!(external_module_path()
+                .parse(stream(source, ""))
+                .map_err(|error| ParseError::new(source, "", error))
+                .err());
+        }
+
+        #[test]
+        fn fail_to_parse_private_external_module_directory() {
+            let source = "Foo'bar'Baz";
+
+            insta::assert_debug_snapshot!(external_module_path()
+                .parse(stream(source, ""))
+                .map_err(|error| ParseError::new(source, "", error))
+                .err());
         }
     }
 
