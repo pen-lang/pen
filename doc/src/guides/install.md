@@ -9,8 +9,8 @@
     brew install pen-lang/pen/pen
     ```
 
-1.  You should be able to run a `pen` command in your shell.
+You should be able to run a `pen` command in your shell.
 
-    ```sh
-    pen --version
-    ```
+```sh
+pen --version
+```
