@@ -188,6 +188,10 @@ bar = \(x number) number {
 <p>For example, a module of a file at <code>&lt;package directory&gt;/Bar/Baz.pen</code> in a package <code>Foo</code> is imported as below.</p>
 <pre><code class="language-pen">import Foo'Bar'Baz
 </code></pre>
+<h4 id="private-modules"><a class="header" href="#private-modules">Private modules</a></h4>
+<p>For modules to be private and not accessible from other packages, you can give the modules names which start with lower case letters (e.g. <code>fooBar</code>).</p>
+<pre><code class="language-pen">import 'fooBar
+</code></pre>
 <h3 id="custom-prefixes"><a class="header" href="#custom-prefixes">Custom prefixes</a></h3>
 <p>Imported modules can have custom prefixes given different names after the <code>as</code> keywords.</p>
 <pre><code class="language-pen">import Foo'Bar'Baz as Blah
