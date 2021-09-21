@@ -41,4 +41,4 @@ You can also build Pen from source on your local machine.
    export PEN_ROOT=<directory>
    ```
 
-Now, you are ready to use the `pen` command built manually!
+Now, you are ready to use the `pen` command built manually.
