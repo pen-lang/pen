@@ -107,8 +107,16 @@ fn internal_module_path<'a>() -> impl Parser<Stream<'a>, Output = InternalModule
 }
 
 fn external_module_path<'a>() -> impl Parser<Stream<'a>, Output = ExternalModulePath> {
-    (identifier(), module_path_components())
-        .map(|(package, components)| ExternalModulePath::new(package, components))
+    (identifier(), module_path_components()).then(|(package, components)| {
+        if components
+            .iter()
+            .all(|name| ast::analysis::is_name_public(name))
+        {
+            value(ExternalModulePath::new(package, components)).right()
+        } else {
+            unexpected_any("private module path").left()
+        }
+    })
 }
 
 fn module_path_components<'a>() -> impl Parser<Stream<'a>, Output = Vec<String>> {
@@ -1055,6 +1063,14 @@ mod tests {
                     .0,
                 ExternalModulePath::new("Foo", vec!["Bar".into()]),
             );
+        }
+
+        #[test]
+        fn fail_to_parse_private_external_module_path() {
+            assert!(external_module_path().parse(stream("Foo'bar", "")).is_err());
+            assert!(external_module_path()
+                .parse(stream("Foo'bar'Baz", ""))
+                .is_err());
         }
     }
 
