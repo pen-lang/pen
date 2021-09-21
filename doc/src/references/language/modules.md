@@ -62,6 +62,14 @@ For example, a module of a file at `<package directory>/Bar/Baz.pen` in a packag
 import Foo'Bar'Baz
 ```
 
+#### Private modules
+
+For modules to be private and not accessible from other packages, you can give the modules names which starts with lower case letters (e.g. `fooBar`).
+
+```pen
+import 'fooBar
+```
+
 ### Custom prefixes
 
 Imported modules can have custom prefixes given different names after the `as` keywords.
