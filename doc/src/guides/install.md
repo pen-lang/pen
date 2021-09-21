@@ -1,6 +1,6 @@
 # Install
 
-### Via Homebrew
+## Via Homebrew
 
 On Linux, macOS and [WSL](https://docs.microsoft.com/en-us/windows/wsl/about), you can install Pen through [Homebrew][homebrew].
 
@@ -19,7 +19,7 @@ pen --version
 
 [homebrew]: https://brew.sh
 
-### Building from source
+## Building from source
 
 You can also build Pen from source on your local machine.
 
