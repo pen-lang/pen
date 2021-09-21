@@ -3,7 +3,7 @@ import foreign "c" _pen_core_power \(number, number) number
 import foreign "c" _pen_core_remainder \(number, number) number
 
 String = \(x number) string {
-  _pen_convert_number_to_string(x)
+  _pen_core_convert_number_to_string(x)
 }
 
 Sum = \(ns [number]) number {
