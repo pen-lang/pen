@@ -4,7 +4,7 @@ use ast::{
     *,
 };
 use combine::{
-    attempt, choice, easy, from_str, many, many1, none_of, one_of, optional,
+    attempt, choice, easy, from_str, look_ahead, many, many1, none_of, one_of, optional,
     parser::{
         char::{alpha_num, char as character, digit, letter, space, spaces, string},
         combinator::{lazy, no_partial, not_followed_by},
@@ -82,7 +82,8 @@ pub fn module<'a>() -> impl Parser<Stream<'a>, Output = Module> {
 
 fn import<'a>() -> impl Parser<Stream<'a>, Output = Import> {
     (
-        attempt(keyword("import").with(module_path())),
+        attempt(keyword("import").with(not_followed_by(keyword("foreign").with(value("foreign"))))),
+        module_path(),
         optional(keyword("as").with(identifier())),
         optional(between(
             sign("{"),
@@ -90,7 +91,7 @@ fn import<'a>() -> impl Parser<Stream<'a>, Output = Import> {
             sep_end_by1(identifier(), sign(",")),
         )),
     )
-        .map(|(path, prefix, names)| Import::new(path, prefix, names.unwrap_or_default()))
+        .map(|(_, path, prefix, names)| Import::new(path, prefix, names.unwrap_or_default()))
         .expected("import statement")
 }
 
@@ -103,24 +104,24 @@ fn module_path<'a>() -> impl Parser<Stream<'a>, Output = ModulePath> {
 }
 
 fn internal_module_path<'a>() -> impl Parser<Stream<'a>, Output = InternalModulePath> {
-    module_path_components().map(InternalModulePath::new)
+    many1(string(IDENTIFIER_SEPARATOR).with(identifier())).map(InternalModulePath::new)
 }
 
 fn external_module_path<'a>() -> impl Parser<Stream<'a>, Output = ExternalModulePath> {
-    (identifier(), module_path_components()).then(|(package, components)| {
-        if components
-            .iter()
-            .all(|name| ast::analysis::is_name_public(name))
-        {
-            value(ExternalModulePath::new(package, components)).right()
-        } else {
-            unexpected_any("private module path").left()
-        }
-    })
+    (identifier(), many1(public_module_path_component()))
+        .map(|(package, components)| ExternalModulePath::new(package, components))
 }
 
-fn module_path_components<'a>() -> impl Parser<Stream<'a>, Output = Vec<String>> {
-    many1(string(IDENTIFIER_SEPARATOR).with(identifier()))
+fn public_module_path_component<'a>() -> impl Parser<Stream<'a>, Output = String> {
+    string(IDENTIFIER_SEPARATOR)
+        .with(look_ahead(identifier()).then(|name| {
+            if ast::analysis::is_name_public(&name) {
+                value(()).left()
+            } else {
+                unexpected_any("private module path").right()
+            }
+        }))
+        .with(identifier())
 }
 
 fn foreign_import<'a>() -> impl Parser<Stream<'a>, Output = ForeignImport> {
