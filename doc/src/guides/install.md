@@ -2,7 +2,7 @@
 
 ### Via Homebrew
 
-On Linux, macOS and [WSL](https://docs.microsoft.com/en-us/windows/wsl/about), you can install Pen through [Homebrew][homebrew] by running the following command in your terminal.
+On Linux, macOS and [WSL](https://docs.microsoft.com/en-us/windows/wsl/about), you can install Pen through [Homebrew][homebrew].
 
 1.  Install [Homebrew][homebrew].
 1.  Run the following command in your terminal.
