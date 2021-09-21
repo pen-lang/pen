@@ -104,23 +104,32 @@ fn module_path<'a>() -> impl Parser<Stream<'a>, Output = ModulePath> {
 }
 
 fn internal_module_path<'a>() -> impl Parser<Stream<'a>, Output = InternalModulePath> {
-    many1(string(IDENTIFIER_SEPARATOR).with(identifier())).map(InternalModulePath::new)
+    module_path_components(identifier()).map(InternalModulePath::new)
 }
 
 fn external_module_path<'a>() -> impl Parser<Stream<'a>, Output = ExternalModulePath> {
-    (identifier(), many1(public_module_path_component()))
+    (
+        identifier(),
+        module_path_components(public_module_path_component()),
+    )
         .map(|(package, components)| ExternalModulePath::new(package, components))
 }
 
+fn module_path_components<'a>(
+    component: impl Parser<Stream<'a>, Output = String>,
+) -> impl Parser<Stream<'a>, Output = Vec<String>> {
+    many1(string(IDENTIFIER_SEPARATOR).with(component))
+}
+
 fn public_module_path_component<'a>() -> impl Parser<Stream<'a>, Output = String> {
-    string(IDENTIFIER_SEPARATOR)
-        .with(look_ahead(identifier()).then(|name| {
+    look_ahead(identifier().expected("public module path"))
+        .then(|name| {
             if ast::analysis::is_name_public(&name) {
                 value(()).left()
             } else {
                 unexpected_any("private module path").right()
             }
-        }))
+        })
         .with(identifier())
 }
 
