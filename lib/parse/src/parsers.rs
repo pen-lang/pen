@@ -793,6 +793,7 @@ fn comment<'a>() -> impl Parser<Stream<'a>, Output = ()> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::error::ParseError;
     use position::test::PositionFake;
     use pretty_assertions::assert_eq;
 
@@ -1076,11 +1077,23 @@ mod tests {
         }
 
         #[test]
-        fn fail_to_parse_private_external_module_path() {
-            assert!(external_module_path().parse(stream("Foo'bar", "")).is_err());
-            assert!(external_module_path()
-                .parse(stream("Foo'bar'Baz", ""))
-                .is_err());
+        fn fail_to_parse_private_external_module_file() {
+            let source = "Foo'bar";
+
+            insta::assert_debug_snapshot!(external_module_path()
+                .parse(stream(source, ""))
+                .map_err(|error| ParseError::new(source, "", error))
+                .err());
+        }
+
+        #[test]
+        fn fail_to_parse_private_external_module_directory() {
+            let source = "Foo'bar'Baz";
+
+            insta::assert_debug_snapshot!(external_module_path()
+                .parse(stream(source, ""))
+                .map_err(|error| ParseError::new(source, "", error))
+                .err());
         }
     }
 
