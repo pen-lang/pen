@@ -45,4 +45,3 @@
   - [FFI](advanced-features/ffi.md)
   - [System injection](advanced-features/system-injection.md)
 - [The Zen](the-zen.md)
-- [For developers](for-developers.md)
