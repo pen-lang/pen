@@ -10,6 +10,7 @@ extern "C" fn _pen_core_remainder(x: ffi::Number, y: ffi::Number) -> ffi::Number
 
 #[no_mangle]
 extern "C" fn _pen_core_power(x: ffi::Number, y: ffi::Number) -> ffi::Number {
+    // spell-checker: disable-next-line
     f64::from(x).powf(y.into()).into()
 }
 
