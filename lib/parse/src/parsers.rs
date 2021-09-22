@@ -423,49 +423,44 @@ fn concrete_prefix_operator<'a>(
 }
 
 fn suffix_operation_like<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
-    (
-        atomic_expression(),
-        // TODO Move positions into suffix operators.
-        many(attempt((position(), suffix_operator()))),
-    )
-        .map(|(expression, suffix_operators): (_, Vec<_>)| {
+    (atomic_expression(), many(suffix_operator())).map(
+        |(expression, suffix_operators): (_, Vec<_>)| {
             suffix_operators
                 .into_iter()
-                .fold(
-                    expression,
-                    |expression, (position, operator)| match operator {
-                        SuffixOperator::Call(arguments) => {
-                            Call::new(expression, arguments, position).into()
-                        }
-                        SuffixOperator::Element(name) => {
-                            RecordDeconstruction::new(expression, name, position).into()
-                        }
-                        SuffixOperator::Try => {
-                            UnaryOperation::new(UnaryOperator::Try, expression, position).into()
-                        }
-                    },
-                )
-        })
+                .fold(expression, |expression, operator| match operator {
+                    SuffixOperator::Call(arguments, position) => {
+                        Call::new(expression, arguments, position).into()
+                    }
+                    SuffixOperator::Element(name, position) => {
+                        RecordDeconstruction::new(expression, name, position).into()
+                    }
+                    SuffixOperator::Try(position) => {
+                        UnaryOperation::new(UnaryOperator::Try, expression, position).into()
+                    }
+                })
+        },
+    )
 }
 
 fn suffix_operator<'a>() -> impl Parser<Stream<'a>, Output = SuffixOperator> {
-    choice((
-        call_operator().map(SuffixOperator::Call),
-        element_operator().map(SuffixOperator::Element),
-        try_operator().map(|_| SuffixOperator::Try),
-    ))
+    choice((call_operator(), element_operator(), try_operator()))
 }
 
-fn call_operator<'a>() -> impl Parser<Stream<'a>, Output = Vec<Expression>> {
-    between(sign("("), sign(")"), sep_end_by(expression(), sign(",")))
+fn call_operator<'a>() -> impl Parser<Stream<'a>, Output = SuffixOperator> {
+    (
+        attempt(position().skip(sign("("))),
+        sep_end_by(expression(), sign(",")).skip(sign(")")),
+    )
+        .map(|(position, arguments)| SuffixOperator::Call(arguments, position))
 }
 
-fn element_operator<'a>() -> impl Parser<Stream<'a>, Output = String> {
-    sign(".").with(identifier())
+fn element_operator<'a>() -> impl Parser<Stream<'a>, Output = SuffixOperator> {
+    (attempt(position().skip(sign("."))), identifier())
+        .map(|(position, identifier)| SuffixOperator::Element(identifier, position))
 }
 
-fn try_operator<'a>() -> impl Parser<Stream<'a>, Output = ()> {
-    sign("?")
+fn try_operator<'a>() -> impl Parser<Stream<'a>, Output = SuffixOperator> {
+    position().skip(sign("?")).map(SuffixOperator::Try)
 }
 
 fn atomic_expression<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
@@ -1890,77 +1885,92 @@ mod tests {
             );
         }
 
-        #[test]
-        fn parse_call() {
-            assert_eq!(
-                expression().parse(stream("f()", "")).unwrap().0,
-                Call::new(
-                    Variable::new("f", Position::fake()),
-                    vec![],
-                    Position::fake()
-                )
-                .into()
-            );
+        mod call {
+            use super::*;
+            use pretty_assertions::assert_eq;
 
-            assert_eq!(
-                expression().parse(stream("f()()", "")).unwrap().0,
-                Call::new(
+            #[test]
+            fn parse_call() {
+                assert_eq!(
+                    expression().parse(stream("f()", "")).unwrap().0,
                     Call::new(
                         Variable::new("f", Position::fake()),
                         vec![],
                         Position::fake()
-                    ),
-                    vec![],
-                    Position::fake()
-                )
-                .into()
-            );
+                    )
+                    .into()
+                );
 
-            assert_eq!(
-                expression().parse(stream("f(1)", "")).unwrap().0,
-                Call::new(
-                    Variable::new("f", Position::fake()),
-                    vec![Number::new(1.0, Position::fake()).into()],
-                    Position::fake()
-                )
-                .into()
-            );
+                assert_eq!(
+                    expression().parse(stream("f()()", "")).unwrap().0,
+                    Call::new(
+                        Call::new(
+                            Variable::new("f", Position::fake()),
+                            vec![],
+                            Position::fake()
+                        ),
+                        vec![],
+                        Position::fake()
+                    )
+                    .into()
+                );
 
-            assert_eq!(
-                expression().parse(stream("f(1,)", "")).unwrap().0,
-                Call::new(
-                    Variable::new("f", Position::fake()),
-                    vec![Number::new(1.0, Position::fake()).into()],
-                    Position::fake()
-                )
-                .into()
-            );
+                assert_eq!(
+                    expression().parse(stream("f(1)", "")).unwrap().0,
+                    Call::new(
+                        Variable::new("f", Position::fake()),
+                        vec![Number::new(1.0, Position::fake()).into()],
+                        Position::fake()
+                    )
+                    .into()
+                );
 
-            assert_eq!(
-                expression().parse(stream("f(1, 2)", "")).unwrap().0,
-                Call::new(
-                    Variable::new("f", Position::fake()),
-                    vec![
-                        Number::new(1.0, Position::fake()).into(),
-                        Number::new(2.0, Position::fake()).into()
-                    ],
-                    Position::fake()
-                )
-                .into()
-            );
+                assert_eq!(
+                    expression().parse(stream("f(1,)", "")).unwrap().0,
+                    Call::new(
+                        Variable::new("f", Position::fake()),
+                        vec![Number::new(1.0, Position::fake()).into()],
+                        Position::fake()
+                    )
+                    .into()
+                );
 
-            assert_eq!(
-                expression().parse(stream("f(1, 2,)", "")).unwrap().0,
-                Call::new(
-                    Variable::new("f", Position::fake()),
-                    vec![
-                        Number::new(1.0, Position::fake()).into(),
-                        Number::new(2.0, Position::fake()).into()
-                    ],
-                    Position::fake()
-                )
-                .into()
-            );
+                assert_eq!(
+                    expression().parse(stream("f(1, 2)", "")).unwrap().0,
+                    Call::new(
+                        Variable::new("f", Position::fake()),
+                        vec![
+                            Number::new(1.0, Position::fake()).into(),
+                            Number::new(2.0, Position::fake()).into()
+                        ],
+                        Position::fake()
+                    )
+                    .into()
+                );
+
+                assert_eq!(
+                    expression().parse(stream("f(1, 2,)", "")).unwrap().0,
+                    Call::new(
+                        Variable::new("f", Position::fake()),
+                        vec![
+                            Number::new(1.0, Position::fake()).into(),
+                            Number::new(2.0, Position::fake()).into()
+                        ],
+                        Position::fake()
+                    )
+                    .into()
+                );
+            }
+
+            #[test]
+            fn fail_to_parse_call() {
+                let source = "f(1+)";
+
+                insta::assert_debug_snapshot!(expression()
+                    .parse(stream(source, ""))
+                    .map_err(|error| ParseError::new(source, "", error))
+                    .err());
+            }
         }
 
         #[test]
