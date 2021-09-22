@@ -55,9 +55,7 @@ type foo = number | none
 
 ### Function definition
 
-It defines a new function.
-
-First, followed by a function name (`foo`), it declares its argument names and types (`x number` and `y number`) and its result type (`number`). Then, function bodies describe what the functions do as [blocks](#block).
+It defines a function with a given name. The right hand side of `=` signs must be [function expressions](#function).
 
 ```pen
 foo = \(x number, y number) number {
@@ -67,7 +65,7 @@ foo = \(x number, y number) number {
 
 ### Foreign function definition
 
-It defines a new function exported for foreign languages.
+It defines a function exported for foreign languages.
 
 See [FFI](/advanced-features/ffi.md) for more details.
 
@@ -184,11 +182,23 @@ x?
 
 [error-type]: built-ins.md#error
 
+### Function
+
+It creates a function.
+
+First, functions declare their argument names and types (`x number` and `y number`) and their result types (`number`). After that, function bodies describe what the functions do as [blocks](#block).
+
+```pen
+\(x number, y number) number {
+  x + y
+}
+```
+
 ### Conditionals
 
 #### If expression
 
-It evaluates one of blocks depending on a value of an expression of a boolean type.
+It evaluates one of [blocks](#block) depending on a value of an expression of a boolean type.
 
 - It evaluates the first block if a given boolean value is `true`.
 - Otherwise, it evaluates the second block.
@@ -203,7 +213,7 @@ if x {
 
 #### If-type expression
 
-It evaluates one of blocks depending on the type of a given expression. The expression (`foo()`) needs to be bound to a variable (`x`) and, in each block, the variable is treated as its specified type.
+It evaluates one of [blocks](#block) depending on the type of a given expression. The expression (`foo()`) needs to be bound to a variable (`x`) and, in each block, the variable is treated as its specified type.
 
 ```pen
 if x = foo() as number {
@@ -217,7 +227,7 @@ if x = foo() as number {
 
 #### If-list expression
 
-It deconstructs a list and evaluates one of blocks depending on if the list is empty or not.
+It deconstructs a list and evaluates one of [blocks](#block) depending on if the list is empty or not.
 
 - If a given list has 1 or more element, it evaluates the first block with a function which returns its first element (`x`) and rest of elements as a list (`xs`).
 - If it has no element, it evaluates the second block.
