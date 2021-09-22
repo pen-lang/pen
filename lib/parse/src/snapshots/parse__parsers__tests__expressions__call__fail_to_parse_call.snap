@@ -1,0 +1,37 @@
+---
+source: lib/parse/src/parsers.rs
+expression: "expression().parse(stream(source,\n                          \"\")).map_err(|error|\n                                           ParseError::new(source, \"\",\n                                                           error)).err()"
+
+---
+Some(
+    ParseError {
+        message: "unexpected )",
+        expected: [
+            "unary operator",
+            "if",
+            "\\(",
+            "[",
+            "false",
+            "true",
+            "none",
+            "\"",
+            "if-type expression",
+            "if-list expression",
+            "if expression",
+            "function expression",
+            "record literal",
+            "list literal",
+            "boolean literal",
+            "none literal",
+            "number literal",
+            "string literal",
+            "variable",
+        ],
+        position: Position {
+            path: "",
+            line_number: 1,
+            column_number: 5,
+            line: "f(1+)",
+        },
+    },
+)

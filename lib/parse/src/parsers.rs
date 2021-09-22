@@ -423,12 +423,8 @@ fn concrete_prefix_operator<'a>(
 }
 
 fn suffix_operation_like<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
-    (
-        atomic_expression(),
-        // TODO Move positions into suffix operators.
-        many(attempt((position(), suffix_operator()))),
-    )
-        .map(|(expression, suffix_operators): (_, Vec<_>)| {
+    (atomic_expression(), many(suffix_operator())).map(
+        |(expression, suffix_operators): (_, Vec<_>)| {
             suffix_operators
                 .into_iter()
                 .fold(
@@ -445,27 +441,32 @@ fn suffix_operation_like<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
                         }
                     },
                 )
-        })
+        },
+    )
 }
 
-fn suffix_operator<'a>() -> impl Parser<Stream<'a>, Output = SuffixOperator> {
+fn suffix_operator<'a>() -> impl Parser<Stream<'a>, Output = (Position, SuffixOperator)> {
     choice((
-        call_operator().map(SuffixOperator::Call),
-        element_operator().map(SuffixOperator::Element),
-        try_operator().map(|_| SuffixOperator::Try),
+        call_operator().map(|(position, arguments)| (position, SuffixOperator::Call(arguments))),
+        element_operator()
+            .map(|(position, identifier)| (position, SuffixOperator::Element(identifier))),
+        try_operator().map(|position| (position, SuffixOperator::Try)),
     ))
 }
 
-fn call_operator<'a>() -> impl Parser<Stream<'a>, Output = Vec<Expression>> {
-    between(sign("("), sign(")"), sep_end_by(expression(), sign(",")))
+fn call_operator<'a>() -> impl Parser<Stream<'a>, Output = (Position, Vec<Expression>)> {
+    (
+        attempt(position().skip(sign("("))),
+        sep_end_by(expression(), sign(",")).skip(sign(")")),
+    )
 }
 
-fn element_operator<'a>() -> impl Parser<Stream<'a>, Output = String> {
-    sign(".").with(identifier())
+fn element_operator<'a>() -> impl Parser<Stream<'a>, Output = (Position, String)> {
+    (attempt(position().skip(sign("."))), identifier())
 }
 
-fn try_operator<'a>() -> impl Parser<Stream<'a>, Output = ()> {
-    sign("?")
+fn try_operator<'a>() -> impl Parser<Stream<'a>, Output = Position> {
+    position().skip(sign("?"))
 }
 
 fn atomic_expression<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
@@ -1965,6 +1966,16 @@ mod tests {
                     )
                     .into()
                 );
+            }
+
+            #[test]
+            fn fail_to_parse_call() {
+                let source = "f(1+)";
+
+                insta::assert_debug_snapshot!(expression()
+                    .parse(stream(source, ""))
+                    .map_err(|error| ParseError::new(source, "", error))
+                    .err());
             }
         }
 
