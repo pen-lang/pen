@@ -1890,77 +1890,81 @@ mod tests {
             );
         }
 
-        #[test]
-        fn parse_call() {
-            assert_eq!(
-                expression().parse(stream("f()", "")).unwrap().0,
-                Call::new(
-                    Variable::new("f", Position::fake()),
-                    vec![],
-                    Position::fake()
-                )
-                .into()
-            );
+        mod call {
+            use super::*;
 
-            assert_eq!(
-                expression().parse(stream("f()()", "")).unwrap().0,
-                Call::new(
+            #[test]
+            fn parse_call() {
+                assert_eq!(
+                    expression().parse(stream("f()", "")).unwrap().0,
                     Call::new(
                         Variable::new("f", Position::fake()),
                         vec![],
                         Position::fake()
-                    ),
-                    vec![],
-                    Position::fake()
-                )
-                .into()
-            );
+                    )
+                    .into()
+                );
 
-            assert_eq!(
-                expression().parse(stream("f(1)", "")).unwrap().0,
-                Call::new(
-                    Variable::new("f", Position::fake()),
-                    vec![Number::new(1.0, Position::fake()).into()],
-                    Position::fake()
-                )
-                .into()
-            );
+                assert_eq!(
+                    expression().parse(stream("f()()", "")).unwrap().0,
+                    Call::new(
+                        Call::new(
+                            Variable::new("f", Position::fake()),
+                            vec![],
+                            Position::fake()
+                        ),
+                        vec![],
+                        Position::fake()
+                    )
+                    .into()
+                );
 
-            assert_eq!(
-                expression().parse(stream("f(1,)", "")).unwrap().0,
-                Call::new(
-                    Variable::new("f", Position::fake()),
-                    vec![Number::new(1.0, Position::fake()).into()],
-                    Position::fake()
-                )
-                .into()
-            );
+                assert_eq!(
+                    expression().parse(stream("f(1)", "")).unwrap().0,
+                    Call::new(
+                        Variable::new("f", Position::fake()),
+                        vec![Number::new(1.0, Position::fake()).into()],
+                        Position::fake()
+                    )
+                    .into()
+                );
 
-            assert_eq!(
-                expression().parse(stream("f(1, 2)", "")).unwrap().0,
-                Call::new(
-                    Variable::new("f", Position::fake()),
-                    vec![
-                        Number::new(1.0, Position::fake()).into(),
-                        Number::new(2.0, Position::fake()).into()
-                    ],
-                    Position::fake()
-                )
-                .into()
-            );
+                assert_eq!(
+                    expression().parse(stream("f(1,)", "")).unwrap().0,
+                    Call::new(
+                        Variable::new("f", Position::fake()),
+                        vec![Number::new(1.0, Position::fake()).into()],
+                        Position::fake()
+                    )
+                    .into()
+                );
 
-            assert_eq!(
-                expression().parse(stream("f(1, 2,)", "")).unwrap().0,
-                Call::new(
-                    Variable::new("f", Position::fake()),
-                    vec![
-                        Number::new(1.0, Position::fake()).into(),
-                        Number::new(2.0, Position::fake()).into()
-                    ],
-                    Position::fake()
-                )
-                .into()
-            );
+                assert_eq!(
+                    expression().parse(stream("f(1, 2)", "")).unwrap().0,
+                    Call::new(
+                        Variable::new("f", Position::fake()),
+                        vec![
+                            Number::new(1.0, Position::fake()).into(),
+                            Number::new(2.0, Position::fake()).into()
+                        ],
+                        Position::fake()
+                    )
+                    .into()
+                );
+
+                assert_eq!(
+                    expression().parse(stream("f(1, 2,)", "")).unwrap().0,
+                    Call::new(
+                        Variable::new("f", Position::fake()),
+                        vec![
+                            Number::new(1.0, Position::fake()).into(),
+                            Number::new(2.0, Position::fake()).into()
+                        ],
+                        Position::fake()
+                    )
+                    .into()
+                );
+            }
         }
 
         #[test]
