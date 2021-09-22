@@ -427,46 +427,40 @@ fn suffix_operation_like<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
         |(expression, suffix_operators): (_, Vec<_>)| {
             suffix_operators
                 .into_iter()
-                .fold(
-                    expression,
-                    |expression, (position, operator)| match operator {
-                        SuffixOperator::Call(arguments) => {
-                            Call::new(expression, arguments, position).into()
-                        }
-                        SuffixOperator::Element(name) => {
-                            RecordDeconstruction::new(expression, name, position).into()
-                        }
-                        SuffixOperator::Try => {
-                            UnaryOperation::new(UnaryOperator::Try, expression, position).into()
-                        }
-                    },
-                )
+                .fold(expression, |expression, operator| match operator {
+                    SuffixOperator::Call(arguments, position) => {
+                        Call::new(expression, arguments, position).into()
+                    }
+                    SuffixOperator::Element(name, position) => {
+                        RecordDeconstruction::new(expression, name, position).into()
+                    }
+                    SuffixOperator::Try(position) => {
+                        UnaryOperation::new(UnaryOperator::Try, expression, position).into()
+                    }
+                })
         },
     )
 }
 
-fn suffix_operator<'a>() -> impl Parser<Stream<'a>, Output = (Position, SuffixOperator)> {
-    choice((
-        call_operator().map(|(position, arguments)| (position, SuffixOperator::Call(arguments))),
-        element_operator()
-            .map(|(position, identifier)| (position, SuffixOperator::Element(identifier))),
-        try_operator().map(|position| (position, SuffixOperator::Try)),
-    ))
+fn suffix_operator<'a>() -> impl Parser<Stream<'a>, Output = SuffixOperator> {
+    choice((call_operator(), element_operator(), try_operator()))
 }
 
-fn call_operator<'a>() -> impl Parser<Stream<'a>, Output = (Position, Vec<Expression>)> {
+fn call_operator<'a>() -> impl Parser<Stream<'a>, Output = SuffixOperator> {
     (
         attempt(position().skip(sign("("))),
         sep_end_by(expression(), sign(",")).skip(sign(")")),
     )
+        .map(|(position, arguments)| SuffixOperator::Call(arguments, position))
 }
 
-fn element_operator<'a>() -> impl Parser<Stream<'a>, Output = (Position, String)> {
+fn element_operator<'a>() -> impl Parser<Stream<'a>, Output = SuffixOperator> {
     (attempt(position().skip(sign("."))), identifier())
+        .map(|(position, identifier)| SuffixOperator::Element(identifier, position))
 }
 
-fn try_operator<'a>() -> impl Parser<Stream<'a>, Output = Position> {
-    position().skip(sign("?"))
+fn try_operator<'a>() -> impl Parser<Stream<'a>, Output = SuffixOperator> {
+    position().skip(sign("?")).map(SuffixOperator::Try)
 }
 
 fn atomic_expression<'a>() -> impl Parser<Stream<'a>, Output = Expression> {

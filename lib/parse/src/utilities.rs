@@ -3,9 +3,9 @@ use position::Position;
 
 #[derive(Clone, Debug)]
 pub enum SuffixOperator {
-    Call(Vec<Expression>),
-    Element(String),
-    Try,
+    Call(Vec<Expression>, Position),
+    Element(String, Position),
+    Try(Position),
 }
 
 pub fn reduce_operations(
