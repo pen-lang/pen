@@ -9,6 +9,7 @@ import foreign "c" _pen_os_open_file \(string, OpenOptions) FfiOpenResult
 import foreign "c" _pen_os_read_file \(NormalFile) FfiStringResult
 import foreign "c" _pen_os_write_file \(NormalFile, string) FfiWriteResult
 import foreign "c" _pen_os_copy_file \(string, string) FfiNoneResult
+import foreign "c" _pen_os_move_file \(string, string) FfiNoneResult
 import foreign "c" _pen_os_remove_file \(string) FfiNoneResult
 import foreign "c" _pen_os_read_directory \(string) FfiReadDirectoryResult
 import foreign "c" _pen_os_create_directory \(string) FfiNoneResult
@@ -28,6 +29,7 @@ type InnerContext {
   ReadFile \(NormalFile) FfiStringResult
   WriteFile \(NormalFile, string) FfiWriteResult
   CopyFile \(string, string) FfiNoneResult
+  MoveFile \(string, string) FfiNoneResult
   RemoveFile \(string) FfiNoneResult
   ReadDirectory \(string) FfiReadDirectoryResult
   CreateDirectory \(string) FfiNoneResult
@@ -71,6 +73,7 @@ New = \() Context {
       ReadFile: _pen_os_read_file,
       WriteFile: _pen_os_write_file,
       CopyFile: _pen_os_copy_file,
+      MoveFile: _pen_os_move_file,
       RemoveFile: _pen_os_remove_file,
       ReadDirectory: _pen_os_read_directory,
       CreateDirectory: _pen_os_create_directory,

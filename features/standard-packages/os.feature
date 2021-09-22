@@ -161,6 +161,27 @@ Feature: OS
     And a file named "foo.txt" with "foo"
     When I successfully run `pen build`
     Then I successfully run `./app`
+    And the file "foo.txt" should contain "foo"
+    And the file "bar.txt" should contain "foo"
+
+  Scenario: Move a file
+    Given a file named "Main.pen" with:
+    """pen
+    import System'Context { Context }
+    import System'File
+
+    main = \(ctx Context) number {
+      if _ = File'Move(ctx, "foo.txt", "bar.txt") as none {
+        0
+      } else {
+        1
+      }
+    }
+    """
+    And a file named "foo.txt" with "foo"
+    When I successfully run `pen build`
+    Then I successfully run `./app`
+    And the file "foo.txt" does not exist
     And the file "bar.txt" should contain "foo"
 
   Scenario: Remove a file
