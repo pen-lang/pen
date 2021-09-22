@@ -91,6 +91,16 @@ Copy = \(ctx Context, src string, dest string) none | error {
   }
 }
 
+Move = \(ctx Context, src string, dest string) none | error {
+  r = Context'Inner(ctx).MoveFile(src, dest)
+
+  if r.Error == 0 {
+    none
+  } else {
+    error(errorTranslator'Translate(r.Error))
+  }
+}
+
 Remove = \(ctx Context, path string) none | error {
   r = Context'Inner(ctx).RemoveFile(path)
 

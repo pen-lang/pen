@@ -107,6 +107,23 @@ fn copy_file(src: ffi::ByteString, dest: ffi::ByteString) -> Result<(), OsError>
 }
 
 #[no_mangle]
+extern "C" fn _pen_os_move_file(
+    src: ffi::ByteString,
+    dest: ffi::ByteString,
+) -> ffi::Arc<FfiResult<ffi::None>> {
+    ffi::Arc::new(move_file(src, dest).into())
+}
+
+fn move_file(src: ffi::ByteString, dest: ffi::ByteString) -> Result<(), OsError> {
+    fs::rename(
+        utilities::decode_path(&src)?,
+        utilities::decode_path(&dest)?,
+    )?;
+
+    Ok(())
+}
+
+#[no_mangle]
 extern "C" fn _pen_os_remove_file(path: ffi::ByteString) -> ffi::Arc<FfiResult<ffi::None>> {
     ffi::Arc::new(remove_file(path).into())
 }
