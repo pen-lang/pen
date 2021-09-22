@@ -229,3 +229,11 @@ if [x, ...xs] = ... {
   ...
 }
 ```
+
+## Comment
+
+Comments start with `#` and end with new-line characters.
+
+```pen
+# This is an important comment.
+```
