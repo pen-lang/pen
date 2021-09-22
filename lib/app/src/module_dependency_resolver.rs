@@ -44,13 +44,7 @@ pub fn resolve(
         };
 
         if !infrastructure.file_system.exists(&source_file) {
-            return Err(ApplicationError::ModuleNotFound(
-                infrastructure
-                    .file_path_displayer
-                    .display(&source_file)
-                    .clone(),
-            )
-            .into());
+            return Err(ApplicationError::ModuleNotFound(import.module_path().to_string()).into());
         }
 
         Ok((
