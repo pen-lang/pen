@@ -15,13 +15,23 @@ impl FilePathDisplayer {
 
 impl app::infra::FilePathDisplayer for FilePathDisplayer {
     fn display(&self, file_path: &app::infra::FilePath) -> String {
-        format!(
-            "{}",
-            self.file_path_converter
-                .convert_to_os_path(file_path)
-                .canonicalize()
-                .expect("valid os file path")
-                .display()
-        )
+        let os_path = self.file_path_converter.convert_to_os_path(file_path);
+
+        format!("{}", os_path.canonicalize().unwrap_or(os_path).display())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use app::infra::FilePathDisplayer;
+
+    #[test]
+    fn display_path() {
+        assert_eq!(
+            super::FilePathDisplayer::new(FilePathConverter::new("/").into())
+                .display(&app::infra::FilePath::new(vec!["foo", "bar"])),
+            "/foo/bar"
+        );
     }
 }
