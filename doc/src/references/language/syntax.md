@@ -184,7 +184,7 @@ x?
 
 ### Function
 
-It represents a function.
+It creates a function.
 
 First, functions declare their argument names and types (`x number` and `y number`) and their result types (`number`). After that, function bodies describe what the functions do as [blocks](#block).
 
