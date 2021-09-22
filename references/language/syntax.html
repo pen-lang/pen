@@ -202,7 +202,7 @@
 }
 </code></pre>
 <p>If you want to save results of intermediate expressions for later use, you can define variables putting their names and <code>=</code> operators in front of the expressions.</p>
-<pre><code>{
+<pre><code class="language-pen">{
   x = 42
 
   ...
@@ -252,7 +252,7 @@ foo{x: 0} == foo{x: 1}
 </code></pre>
 <h4 id="error-handling"><a class="header" href="#error-handling">Error handling</a></h4>
 <p><code>?</code> suffix operator immediately exits the current function with an operand if it is of <a href="built-ins.html#error">the <code>error</code> type</a>. The operand must be a union type containing <a href="built-ins.html#error">the <code>error</code> type</a>.</p>
-<pre><code>x?
+<pre><code class="language-pen">x?
 </code></pre>
 <h3 id="conditionals"><a class="header" href="#conditionals">Conditionals</a></h3>
 <h4 id="if-expression"><a class="header" href="#if-expression">If expression</a></h4>
@@ -288,6 +288,10 @@ foo{x: 0} == foo{x: 1}
 } else {
   ...
 }
+</code></pre>
+<h2 id="comment"><a class="header" href="#comment">Comment</a></h2>
+<p>Comments start with <code>#</code> and end with new-line characters.</p>
+<pre><code class="language-pen"># This is an important comment.
 </code></pre>
 
                     </main>
@@ -336,6 +340,7 @@ foo{x: 0} == foo{x: 1}
         <script src="../../book.js" type="text/javascript" charset="utf-8"></script>
 
         <!-- Custom JS scripts -->
+                <script type="text/javascript" src="../../theme/custom-highlight.js"></script>
         
         
     </body>
