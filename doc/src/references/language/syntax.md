@@ -198,7 +198,7 @@ First, functions declare their argument names and types (`x number` and `y numbe
 
 #### If expression
 
-It evaluates one of blocks depending on a value of an expression of a boolean type.
+It evaluates one of [blocks](#block) depending on a value of an expression of a boolean type.
 
 - It evaluates the first block if a given boolean value is `true`.
 - Otherwise, it evaluates the second block.
@@ -213,7 +213,7 @@ if x {
 
 #### If-type expression
 
-It evaluates one of blocks depending on the type of a given expression. The expression (`foo()`) needs to be bound to a variable (`x`) and, in each block, the variable is treated as its specified type.
+It evaluates one of [blocks](#block) depending on the type of a given expression. The expression (`foo()`) needs to be bound to a variable (`x`) and, in each block, the variable is treated as its specified type.
 
 ```pen
 if x = foo() as number {
@@ -227,7 +227,7 @@ if x = foo() as number {
 
 #### If-list expression
 
-It deconstructs a list and evaluates one of blocks depending on if the list is empty or not.
+It deconstructs a list and evaluates one of [blocks](#block) depending on if the list is empty or not.
 
 - If a given list has 1 or more element, it evaluates the first block with a function which returns its first element (`x`) and rest of elements as a list (`xs`).
 - If it has no element, it evaluates the second block.
