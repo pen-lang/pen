@@ -1892,6 +1892,7 @@ mod tests {
 
         mod call {
             use super::*;
+            use pretty_assertions::assert_eq;
 
             #[test]
             fn parse_call() {
