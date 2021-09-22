@@ -17,8 +17,8 @@ impl Display for ApplicationError {
             Self::MainFunctionTypeNotFound => {
                 write!(formatter, "main function type not found")
             }
-            Self::ModuleNotFound(path) => {
-                write!(formatter, "module {} not found", path)
+            Self::ModuleNotFound(module) => {
+                write!(formatter, "module {} not found", module)
             }
             Self::PackageNotFound(package) => {
                 write!(formatter, "package {} not found", package)
