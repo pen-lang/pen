@@ -180,14 +180,13 @@
 <pre><code class="language-pen">type foo = number | none
 </code></pre>
 <h3 id="function-definition"><a class="header" href="#function-definition">Function definition</a></h3>
-<p>It defines a new function.</p>
-<p>First, followed by a function name (<code>foo</code>), it declares its argument names and types (<code>x number</code> and <code>y number</code>) and its result type (<code>number</code>). Then, function bodies describe what the functions do as <a href="#block">blocks</a>.</p>
+<p>It defines a function with a given name. The right hand side of <code>=</code> signs must be <a href="#function">function expressions</a>.</p>
 <pre><code class="language-pen">foo = \(x number, y number) number {
   x + y
 }
 </code></pre>
 <h3 id="foreign-function-definition"><a class="header" href="#foreign-function-definition">Foreign function definition</a></h3>
-<p>It defines a new function exported for foreign languages.</p>
+<p>It defines a function exported for foreign languages.</p>
 <p>See <a href="/advanced-features/ffi.html">FFI</a> for more details.</p>
 <pre><code class="language-pen">foreign foo = \(x number, y number) number {
   x + y
@@ -254,9 +253,16 @@ foo{x: 0} == foo{x: 1}
 <p><code>?</code> suffix operator immediately exits the current function with an operand if it is of <a href="built-ins.html#error">the <code>error</code> type</a>. The operand must be a union type containing <a href="built-ins.html#error">the <code>error</code> type</a>.</p>
 <pre><code class="language-pen">x?
 </code></pre>
+<h3 id="function"><a class="header" href="#function">Function</a></h3>
+<p>It creates a function.</p>
+<p>First, functions declare their argument names and types (<code>x number</code> and <code>y number</code>) and their result types (<code>number</code>). After that, function bodies describe what the functions do as <a href="#block">blocks</a>.</p>
+<pre><code class="language-pen">\(x number, y number) number {
+  x + y
+}
+</code></pre>
 <h3 id="conditionals"><a class="header" href="#conditionals">Conditionals</a></h3>
 <h4 id="if-expression"><a class="header" href="#if-expression">If expression</a></h4>
-<p>It evaluates one of blocks depending on a value of an expression of a boolean type.</p>
+<p>It evaluates one of <a href="#block">blocks</a> depending on a value of an expression of a boolean type.</p>
 <ul>
 <li>It evaluates the first block if a given boolean value is <code>true</code>.</li>
 <li>Otherwise, it evaluates the second block.</li>
@@ -268,7 +274,7 @@ foo{x: 0} == foo{x: 1}
 }
 </code></pre>
 <h4 id="if-type-expression"><a class="header" href="#if-type-expression">If-type expression</a></h4>
-<p>It evaluates one of blocks depending on the type of a given expression. The expression (<code>foo()</code>) needs to be bound to a variable (<code>x</code>) and, in each block, the variable is treated as its specified type.</p>
+<p>It evaluates one of <a href="#block">blocks</a> depending on the type of a given expression. The expression (<code>foo()</code>) needs to be bound to a variable (<code>x</code>) and, in each block, the variable is treated as its specified type.</p>
 <pre><code class="language-pen">if x = foo() as number {
   ...
 } else if string | none {
@@ -278,7 +284,7 @@ foo{x: 0} == foo{x: 1}
 }
 </code></pre>
 <h4 id="if-list-expression"><a class="header" href="#if-list-expression">If-list expression</a></h4>
-<p>It deconstructs a list and evaluates one of blocks depending on if the list is empty or not.</p>
+<p>It deconstructs a list and evaluates one of <a href="#block">blocks</a> depending on if the list is empty or not.</p>
 <ul>
 <li>If a given list has 1 or more element, it evaluates the first block with a function which returns its first element (<code>x</code>) and rest of elements as a list (<code>xs</code>).</li>
 <li>If it has no element, it evaluates the second block.</li>
