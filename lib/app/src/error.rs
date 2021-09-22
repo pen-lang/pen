@@ -4,6 +4,7 @@ use std::{error::Error, fmt::Display};
 #[derive(Debug)]
 pub enum ApplicationError {
     MainFunctionTypeNotFound,
+    ModuleNotFound(String),
     PackageNotFound(String),
     SystemPackageNotFound,
 }
@@ -15,6 +16,9 @@ impl Display for ApplicationError {
         match self {
             Self::MainFunctionTypeNotFound => {
                 write!(formatter, "main function type not found")
+            }
+            Self::ModuleNotFound(module) => {
+                write!(formatter, "module {} not found", module)
             }
             Self::PackageNotFound(package) => {
                 write!(formatter, "package {} not found", package)
