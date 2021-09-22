@@ -9,6 +9,7 @@ title = "Pen programming language"
 create-missing = false
 
 [output.html]
+additional-js = ["theme/custom-highlight.js"]
 cname = "pen-lang.org"
 git-repository-url = "https://github.com/pen-lang/pen"
 edit-url-template = "https://github.com/pen-lang/pen/edit/main/doc/{path}"

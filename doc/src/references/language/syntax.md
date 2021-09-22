@@ -91,7 +91,7 @@ A block consists of 1 or more expressions wrapped in `{` and `}`. Values of the 
 
 If you want to save results of intermediate expressions for later use, you can define variables putting their names and `=` operators in front of the expressions.
 
-```
+```pen
 {
   x = 42
 
@@ -178,7 +178,7 @@ true | false
 
 `?` suffix operator immediately exits the current function with an operand if it is of [the `error` type][error-type]. The operand must be a union type containing [the `error` type][error-type].
 
-```
+```pen
 x?
 ```
 
@@ -228,4 +228,12 @@ if [x, ...xs] = ... {
 } else {
   ...
 }
+```
+
+## Comment
+
+Comments start with `#` and end with new-line characters.
+
+```pen
+# This is an important comment.
 ```
