@@ -4,6 +4,7 @@ use std::{error::Error, fmt::Display};
 #[derive(Debug)]
 pub enum ApplicationError {
     MainFunctionTypeNotFound,
+    ModuleNotFound(String),
     PackageNotFound(String),
     SystemPackageNotFound,
 }

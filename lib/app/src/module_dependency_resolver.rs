@@ -43,6 +43,16 @@ pub fn resolve(
             ),
         };
 
+        if !infrastructure.file_system.exists(&source_file) {
+            return Err(ApplicationError::ModuleNotFound(
+                infrastructure
+                    .file_path_displayer
+                    .display(&source_file)
+                    .clone(),
+            )
+            .into());
+        }
+
         Ok((
             import.module_path().clone(),
             output_directory.join(
