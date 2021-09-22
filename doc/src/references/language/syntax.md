@@ -55,9 +55,7 @@ type foo = number | none
 
 ### Function definition
 
-It defines a new function.
-
-First, followed by a function name (`foo`), it declares its argument names and types (`x number` and `y number`) and its result type (`number`). Then, function bodies describe what the functions do as [blocks](#block).
+It defines a function with a given name. The right side of the `=` signs must be [function expressions](#function).
 
 ```pen
 foo = \(x number, y number) number {
@@ -67,7 +65,7 @@ foo = \(x number, y number) number {
 
 ### Foreign function definition
 
-It defines a new function exported for foreign languages.
+It defines a function exported for foreign languages.
 
 See [FFI](/advanced-features/ffi.md) for more details.
 
@@ -183,6 +181,18 @@ x?
 ```
 
 [error-type]: built-ins.md#error
+
+### Function
+
+It represents a function.
+
+First, functions declare their argument names and types (`x number` and `y number`) and their result types (`number`). After that, function bodies describe what the functions do as [blocks](#block).
+
+```pen
+\(x number, y number) number {
+  x + y
+}
+```
 
 ### Conditionals
 
