@@ -32,19 +32,28 @@ pub fn resolve_source_file(
         .with_extension(file_path_configuration.source_file_extension)
 }
 
-pub fn resolve_target_files(
+pub fn resolve_object_file(
     output_directory: &FilePath,
     source_file: &FilePath,
     file_path_configuration: &FilePathConfiguration,
-) -> (FilePath, FilePath) {
-    let target_file = resolve_object_directory(output_directory).join(&FilePath::new([
-        &module_id_calculator::calculate(source_file),
-    ]));
+) -> FilePath {
+    resolve_target_file_basename(output_directory, source_file)
+        .with_extension(file_path_configuration.object_file_extension)
+}
 
-    (
-        target_file.with_extension(file_path_configuration.object_file_extension),
-        target_file.with_extension(file_path_configuration.interface_file_extension),
-    )
+pub fn resolve_interface_file(
+    output_directory: &FilePath,
+    source_file: &FilePath,
+    file_path_configuration: &FilePathConfiguration,
+) -> FilePath {
+    resolve_target_file_basename(output_directory, source_file)
+        .with_extension(file_path_configuration.interface_file_extension)
+}
+
+fn resolve_target_file_basename(output_directory: &FilePath, source_file: &FilePath) -> FilePath {
+    resolve_object_directory(output_directory).join(&FilePath::new([
+        &module_id_calculator::calculate(source_file),
+    ]))
 }
 
 pub fn resolve_package_directory(output_directory: &FilePath, url: &url::Url) -> FilePath {

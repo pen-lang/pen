@@ -49,32 +49,22 @@ pub fn compile_main(
                         Ok(MainModuleTarget::new(
                             target.source_file().clone(),
                             target.object_file().clone(),
-                            {
-                                let (_, main_function_interface_file) =
-                                    file_path_resolver::resolve_target_files(
+                            file_path_resolver::resolve_interface_file(
+                                output_directory,
+                                &file_path_resolver::resolve_source_file(
+                                    &file_path_resolver::resolve_package_directory(
                                         output_directory,
-                                        &file_path_resolver::resolve_source_file(
-                                            &file_path_resolver::resolve_package_directory(
-                                                output_directory,
-                                                dependencies
-                                                    .get(
-                                                        &application_configuration
-                                                            .system_package_name,
-                                                    )
-                                                    .ok_or(
-                                                        ApplicationError::SystemPackageNotFound,
-                                                    )?,
-                                            ),
-                                            &[application_configuration
-                                                .main_function_module_basename
-                                                .clone()],
-                                            &infrastructure.file_path_configuration,
-                                        ),
-                                        &infrastructure.file_path_configuration,
-                                    );
-
-                                main_function_interface_file
-                            },
+                                        dependencies
+                                            .get(&application_configuration.system_package_name)
+                                            .ok_or(ApplicationError::SystemPackageNotFound)?,
+                                    ),
+                                    &[application_configuration
+                                        .main_function_module_basename
+                                        .clone()],
+                                    &infrastructure.file_path_configuration,
+                                ),
+                                &infrastructure.file_path_configuration,
+                            ),
                         ))
                     })
                     .transpose()?

@@ -16,13 +16,11 @@ pub fn find(
     )?
     .iter()
     .map(|source_file| {
-        let (_, interface_file) = file_path_resolver::resolve_target_files(
+        file_path_resolver::resolve_interface_file(
             output_directory,
             source_file,
             &infrastructure.file_path_configuration,
-        );
-
-        interface_file
+        )
     })
     .collect::<Vec<_>>())
 }
