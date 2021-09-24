@@ -9,9 +9,9 @@ The programming language for scalable development
 Pen is designed for large-scale software development; it empowers a number of people to develop software together over a long time. To make such development efficient, it focuses on:
 
 - Maintainability
-  - Everyone can learn the language and participate in actual development quickly.
-  - Developers can focus on application logic rather than ever-changing implementation details.
-  - Unit tests are always fast, reliable, and independent.
+  - Simplicity: Everyone can learn the language and participate in actual development quickly.
+  - Cleanness: Developers can focus on application logic rather than ever-changing implementation details.
+  - Testability: Unit tests are always fast, reliable, and independent.
 - Portability
   - Programs written in the language can be ported to different platforms.
 

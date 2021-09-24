@@ -44,9 +44,9 @@ See [Install](https://pen-lang.org/guides/install.html).
 Pen aims to make large-scale software development efficient where a number of people develop software together over a long time. To realize that, it focuses on software **maintainability** and **portability**.
 
 - Maintainability
-  - Everyone can learn the language and participate in actual development quickly.
-  - Developers can focus on application logic rather than ever-changing implementation details.
-  - Unit tests are always fast, reliable, and independent.
+  - Simplicity: Everyone can learn the language and participate in actual development quickly.
+  - Cleanness: Developers can focus on application logic rather than ever-changing implementation details.
+  - Testability: Unit tests are always fast, reliable, and independent.
 - Portability
   - Programs written in the language can be ported to different platforms including [WASM](https://webassembly.org/).
 
@@ -55,7 +55,11 @@ Pen aims to make large-scale software development efficient where a number of pe
 ### [Minimal language design][syntax]
 
 - [Syntax][syntax] and [type system](https://pen-lang.org/references/language/types.html) are made as small as possible.
-- Even smaller than Go!
+- Yet, the language supports all the modern functionalities.
+  - Effect system
+  - Dependency injection
+  - Asynchronous operations
+  - Parallel computation
 
 ### [System injection](https://pen-lang.org/advanced-features/system-injection.html)
 
