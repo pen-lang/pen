@@ -6,6 +6,8 @@ Feature: Packages
     """
     And a file named "foo/Foo.pen" with:
     """pen
+    type Foo = number
+
     Foo = \() number {
       42
     }
