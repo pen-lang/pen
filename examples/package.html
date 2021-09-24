@@ -156,7 +156,9 @@
 <pre><code class="language-json">{ &quot;dependencies&quot;: {} }
 </code></pre>
 <p><em>And</em> a file named &quot;foo/Foo.pen&quot; with:</p>
-<pre><code class="language-pen">Foo = \() number {
+<pre><code class="language-pen">type Foo = number
+
+Foo = \() number {
   42
 }
 </code></pre>
@@ -184,7 +186,7 @@ Bar = \() number {
 </code></pre>
 <p><em>When</em> I run <code>pen build</code></p>
 <p><em>Then</em> the exit status should be 0.</p>
-<h2 id="import-a-type-alias-from-a-module"><a class="header" href="#import-a-type-alias-from-a-module">Import a type alias from a module</a></h2>
+<h2 id="import-a-type-from-a-module"><a class="header" href="#import-a-type-from-a-module">Import a type from a module</a></h2>
 <p><em>Given</em> a file named &quot;Bar.pen&quot; with:</p>
 <pre><code class="language-pen">import Foo'Foo
 
