@@ -11,7 +11,7 @@ Pen is designed for large-scale software development; it empowers a number of pe
 - Maintainability
   - Everyone can learn the language and participate in actual development quickly.
   - Developers can focus on application logic rather than ever-changing implementation details.
-  - The language keeps codes testable by injecting non-testable codes explicitly.
+  - Unit tests are always fast, reliable, and independent.
 - Portability
   - Programs written in the language can be ported to different platforms.
 
