@@ -6,7 +6,7 @@
 [![License](https://img.shields.io/badge/license-MIT%20%2B%20Apache%202.0-yellow?style=flat-square)](LICENSE.md)
 [![Twitter](https://img.shields.io/badge/twitter-%40pen__language-blue?style=flat-square)](https://twitter.com/pen_language)
 
-Pen is a statically typed functional programming language for application programming with [system injection](#system-injection). It's designed to make large-scale development efficient focusing on software **maintainability** and **portability**.
+Pen is a statically typed functional programming language for application programming. It's designed to make large-scale development efficient focusing on software **maintainability** and **portability**.
 
 ```pen
 import System'Context { Context }
