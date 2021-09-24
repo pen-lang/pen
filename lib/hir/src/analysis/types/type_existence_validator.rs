@@ -1,9 +1,6 @@
 use super::error::TypeError;
-use crate::analysis::ir::type_transformer;
-use crate::ir::*;
-use crate::types::Type;
-use std::cell::RefCell;
-use std::collections::HashSet;
+use crate::{analysis::ir::type_transformer, ir::*, types::Type};
+use std::{cell::RefCell, collections::HashSet};
 
 pub fn validate(
     module: &Module,
@@ -51,12 +48,11 @@ fn collect_types(module: &Module) -> Vec<Type> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test::ModuleFake;
-    use crate::test::TypeAliasFake;
-    use crate::test::TypeDefinitionFake;
-    use crate::types;
-    use position::test::PositionFake;
-    use position::Position;
+    use crate::{
+        test::{ModuleFake, TypeAliasFake, TypeDefinitionFake},
+        types,
+    };
+    use position::{test::PositionFake, Position};
 
     #[test]
     fn fail_to_validate_non_existent_reference_type_in_type_alias() {

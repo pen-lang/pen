@@ -1,5 +1,7 @@
-use crate::ir::*;
-use crate::types::{self, Type};
+use crate::{
+    ir::*,
+    types::{self, Type},
+};
 use std::collections::HashMap;
 
 pub fn collect(module: &Module) -> HashMap<String, Type> {
