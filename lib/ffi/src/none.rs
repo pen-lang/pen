@@ -1,7 +1,7 @@
 use crate::type_information;
 
 #[repr(C)]
-#[derive(Clone, Copy, Default, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct None {
     _private: [u8; 0],
 }

@@ -3,7 +3,7 @@ use crate::type_information;
 use std::{cmp::max, str::from_utf8_unchecked};
 
 #[repr(C)]
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct ByteString {
     buffer: ArcBuffer,
 }
@@ -68,16 +68,6 @@ impl ByteString {
             .nth(index)
             .map(|(index, _)| index)
             .unwrap_or_else(|| string.as_bytes().len())
-    }
-}
-
-unsafe impl Sync for ByteString {}
-
-impl Default for ByteString {
-    fn default() -> Self {
-        Self {
-            buffer: ArcBuffer::new(0),
-        }
     }
 }
 
