@@ -6,7 +6,7 @@
 [![License](https://img.shields.io/badge/license-MIT%20%2B%20Apache%202.0-yellow?style=flat-square)](LICENSE.md)
 [![Twitter](https://img.shields.io/badge/twitter-%40pen__language-blue?style=flat-square)](https://twitter.com/pen_language)
 
-Pen is a statically typed functional programming language for large-scale software development. It's designed to make such development efficient focusing on software **maintainability** and **portability**.
+Pen is a statically typed functional programming language for scalable development focused on software **maintainability** and **portability**.
 
 ```pen
 import System'Context { Context }
@@ -45,8 +45,8 @@ Pen aims to make large-scale software development efficient where a number of pe
 
 - Maintainability
   - Simplicity: Everyone can learn the language and participate in actual development quickly.
-  - Cleanness: Developers can focus on application logic rather than ever-changing implementation details.
   - Testability: Unit tests are always fast, reliable, and independent.
+  - Modifiability: Developers can focus on application logic rather than ever-changing implementation details.
 - Portability
   - Programs written in the language can be ported to different platforms including [WASM](https://webassembly.org/).
 
