@@ -135,7 +135,9 @@ Items are ordered by priority.
 - [ ] Web browser interface
 - [ ] Binary support
 
-#{{#include ../../LICENSE.md}}
+## License
+
+Pen is released under open source licenses. See [LICENSE](https://github.com/pen-lang/pen/blob/main/LICENSE.md) for more information.
 
 [go]: https://golang.org
 [syntax]: https://pen-lang.org/references/language/syntax.html
