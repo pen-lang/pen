@@ -44,9 +44,9 @@ See [Install](https://pen-lang.org/guides/install.html).
 Pen aims to make large-scale software development efficient where a number of people develop software together. To realize that, it focuses on software **maintainability** and **portability**.
 
 - Maintainability
-  - Simplicity: The language is easy to learn but also full featured.
-  - Testability: Unit tests are always fast, reliable, and independent.
-  - Modifiability: You can focus on application logic but not ever-changing implementaion details.
+  - Simplicity: The language is small and easy to learn but also full featured.
+  - Testability: Unit tests are always fast, reliable, and independent with each other.
+  - Modifiability: Developers can change application logic without changing implementaion details, and vice versa.
 - Portability
   - Programs written in the language can be ported to different platforms including [WASM](https://webassembly.org/).
 
@@ -68,35 +68,43 @@ Pen aims to make large-scale software development efficient where a number of pe
 - In other words, a _dynamically typed_ effect system
 - You can even define your own system APIs!
 
-### Static typing
+### Even more...
 
-- Type inference
-- Subtyping
-- [Union types](https://pen-lang.org/references/language/types.html#unions)
-- No generics
+#### Static typing
 
-### Functional programming
+Data types are checked at compile time so that developers can catch errors earlier.
 
-- Closures
-- Immutable values
-- Pure functions by default
+#### Immutable values
 
-### Others
+All values are immutable, which leads to predictable and testable codes.
 
-- Automatic memory management
-  - Ownership-based reference counting
-- [Stress-free error handling](https://pen-lang.org/references/language/syntax.html#error-handling)
-- [Cross compile](https://pen-lang.org/advanced-features/cross-compile.html)
-- [Foreign Function Interface (FFI)](https://pen-lang.org/advanced-features/ffi.html)
-- Tail call elimination
-- CPS transformation
+#### Pure functions by default
 
-#### Work in progress...
+Functions are pure; they work just like math functions unless developers inject side effects explicitly.
 
-- Deterministic testing framework
-- Asynchronous operations
-  - Based on continuations
-- Thread-safe parallel computation
+#### Errors as values
+
+Errors are merely data. Its special syntax provides a convenient way to handle errors.
+
+#### Cross compile
+
+The compiler and runtime support different CPU architectures, operating systems, web browsers and [WASI](https://wasi.dev/).
+
+#### Foreign Function Interface (FFI)
+
+Its [Rust](https://www.rust-lang.org/)/C FFI provides interoperability with other languages.
+
+#### Deterministic tests (WIP)
+
+Unit tests are deterministic to enable reliable continuous integration.
+
+#### Asynchronous operation (WIP)
+
+Functions can be called asynchronously to run multiple tasks concurrently.
+
+#### Parallel computation (WIP)
+
+The runtime and library provide tools for thread-safe parallel computation that leverage multi-core CPUs.
 
 ## Background
 
