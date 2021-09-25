@@ -26,3 +26,4 @@ Items are ordered by priority.
   - [ ] Thread safety
 - [ ] Web browser interface
 - [ ] Binary support
+- [ ] Self-hosting
