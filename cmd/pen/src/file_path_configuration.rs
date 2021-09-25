@@ -16,6 +16,7 @@ pub const FILE_PATH_CONFIGURATION: app::infra::FilePathConfiguration =
         interface_file_extension: "i",
         archive_file_extension: "a",
         build_script_file_extension: "ninja",
+        test_file_extension: "test.pen",
     };
 
 pub const OUTPUT_DIRECTORY: &str = ".pen";

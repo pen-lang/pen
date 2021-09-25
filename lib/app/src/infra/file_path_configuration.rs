@@ -5,4 +5,5 @@ pub struct FilePathConfiguration {
     pub interface_file_extension: &'static str,
     pub archive_file_extension: &'static str,
     pub build_script_file_extension: &'static str,
+    pub test_file_extension: &'static str,
 }
