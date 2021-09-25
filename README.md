@@ -55,7 +55,7 @@ Pen aims to make large-scale software development efficient where a number of pe
 ### Minimal language design
 
 - [Syntax][syntax] and [type system](https://pen-lang.org/references/language/types.html) are made as small as possible.
-- Yet, the language supports all the modern functionalities.
+- Yet, the language supports all the modern features.
   - Functional programming
   - Effect system
   - Dependency injection
