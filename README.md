@@ -93,7 +93,7 @@ The runtime and library provide tools for thread-safe parallel computation that 
 
 ## License
 
-Pen is released under open source licenses. See [LICENSE](https://github.com/pen-lang/pen/blob/main/LICENSE.md) for more information.
+Pen is released under open source licenses. See [its LICENSE file](https://github.com/pen-lang/pen/blob/main/LICENSE.md) for more information.
 
 [go]: https://golang.org
 [syntax]: https://pen-lang.org/references/language/syntax.html
