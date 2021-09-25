@@ -5,6 +5,7 @@
   - [Getting started](guides/getting-started.md)
   - [Install](guides/install.md)
   - [Coding style](guides/coding-style.md)
+  - [Background](guides/background.md)
 - [References](references/README.md)
   - [Language](references/language/README.md)
     - [Syntax](references/language/syntax.md)
@@ -44,4 +45,5 @@
   - [Cross compile](advanced-features/cross-compile.md)
   - [FFI](advanced-features/ffi.md)
   - [System injection](advanced-features/system-injection.md)
+- [Roadmap](roadmap.md)
 - [The Zen](the-zen.md)

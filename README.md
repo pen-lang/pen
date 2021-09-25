@@ -3,10 +3,10 @@
 # Pen programming language
 
 [![GitHub Action](https://img.shields.io/github/workflow/status/pen-lang/pen/test?style=flat-square)](https://github.com/pen-lang/pen/actions)
-[![License](https://img.shields.io/badge/license-MIT%20%2B%20Apache%202.0-yellow?style=flat-square)](LICENSE.md)
+[![License](https://img.shields.io/badge/license-MIT%20%2B%20Apache%202.0-yellow?style=flat-square)](https://github.com/pen-lang/pen/blob/main/LICENSE.md)
 [![Twitter](https://img.shields.io/badge/twitter-%40pen__language-blue?style=flat-square)](https://twitter.com/pen_language)
 
-Pen is a statically typed functional programming language for application programming with [system injection](#system-injection). Its design is heavily inspired by [the Go programming language][go] and many functional programming languages like [Haskell](https://www.haskell.org/) and [Koka](https://koka-lang.github.io/koka/doc/index.html).
+Pen is the programming language that makes software development **scalable**, focusing on software maintainability and portability.
 
 ```pen
 import System'Context { Context }
@@ -36,103 +36,79 @@ See [Install](https://pen-lang.org/guides/install.html).
 ## Documentation
 
 - [Getting started](https://pen-lang.org/guides/getting-started.html)
-- [Language reference](https://pen-lang.org/references/language/)
-- [Code examples](https://pen-lang.org/examples/)
+- [Language reference](https://pen-lang.org/references/language/syntax.html)
+- [Code examples](https://pen-lang.org/examples/standard-packages/os.html)
 
 ## Vision
 
-Pen aims to make large-scale software development efficient where a number of people develop software together over a long time. To realize that, it focuses on software **maintainability** and **portability**.
+Pen aims to make large-scale software development efficient where a number of people develop software together. To realize that, it focuses on software **maintainability** and **portability**.
 
 - Maintainability
-  - Everyone can learn the language and participate in actual development quickly.
-  - Developers can focus on application logic rather than ever-changing implementation details.
-  - The language keeps codes testable by injecting non-testable codes explicitly.
+  - Simplicity: The language is small and easy to learn but also full featured.
+  - Testability: Unit tests are always fast, reliable, and independent with each other.
+  - Modifiability: Developers can change application logic without doing implementation details, and vice versa.
 - Portability
   - Programs written in the language can be ported to different platforms including [WASM](https://webassembly.org/).
 
 ## Features
 
-### [Minimal language design][syntax]
+### Minimal language design
 
 - [Syntax][syntax] and [type system](https://pen-lang.org/references/language/types.html) are made as small as possible.
-- Even smaller than Go!
+- Yet, the language supports all the modern features.
+  - Functional programming
+  - Effect system
+  - Dependency injection
+  - Asynchronous operations
+  - Parallel computation
 
 ### [System injection](https://pen-lang.org/advanced-features/system-injection.html)
 
-- A mechanism to inject system functions into pure functions
-- In other words, a _dynamically typed_ effect system
-- You can even define your own system APIs!
+- System functions are always injected as arguments of main functions.
+- That isolates and protects application logic from implementation details for both maintainability and portability.
+- Developers can define their own system functions and build applications on top of them.
 
-### Static typing
+### Even more...
 
-- Type inference
-- Subtyping
-- [Union types](https://pen-lang.org/references/language/types.html#unions)
-- No generics
+#### Static typing
 
-### Functional programming
+Data types are checked at compile time so that developers can catch errors earlier.
 
-- Closures
-- Immutable values
-- Pure functions by default
+#### Immutable values
 
-### Others
+All values are immutable, which leads to predictable and testable codes.
 
-- Automatic memory management
-  - Ownership-based reference counting
-- [Stress-free error handling](https://pen-lang.org/references/language/syntax.html#error-handling)
-- [Cross compile](https://pen-lang.org/advanced-features/cross-compile.html)
-- [Foreign Function Interface (FFI)](https://pen-lang.org/advanced-features/ffi.html)
-- Tail call elimination
-- CPS transformation
+#### Pure functions by default
 
-#### Work in progress...
+Functions are pure; they work just like math functions unless developers inject side effects explicitly.
 
-- Deterministic testing framework
-- Asynchronous operations
-  - Based on continuations
-- Thread-safe parallel computation
+#### Errors as values
 
-## Background
+Errors are merely data. Its special syntax provides a convenient way to handle errors.
 
-Simplicity enables efficient collaboration of developers. [The Go programming language][go] has been notably successful as it's been one of the most simple but practical programming languages ever made. That being said, [Go 2](https://go.dev/blog/go2-here-we-come) decided to compromise some complexity for its evolution, such as its [generics](https://github.com/golang/go/issues/43651) proposal.
+#### Cross compile
 
-On the other hand, Pen aims to be **even simpler by focusing only on application programming** as its target domain while adopting the same philosophy of simplicity. It pursues its minimal language design further after removing several features from Go like pointers, mutability, method syntax, global variables, circular references, etc.
+The compiler and runtime support different CPU architectures, operating systems, web browsers and [WASI](https://wasi.dev/).
 
-Furthermore, although many programming languages have been solving problems of **programming** in history, few of them actually tackled ones of **software engineering**, where you also need to maintain and keep making changes to existing software continuously. Pen's approach to that is embracing battle-tested ideas in such field, such as [Clean Architecture](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html), into the language's principles and ecosystem. One of its most clear incarnations is [system injection](#system-injection).
+#### Foreign Function Interface (FFI)
 
-## Roadmap
+Its [Rust](https://www.rust-lang.org/)/C FFI provides interoperability with other languages.
 
-Items are ordered by priority.
+#### Deterministic tests (WIP)
 
-- [x] Basic syntax
-- [x] CPS transformation
-- [x] Capability-based effect system
-- [x] Performant GC
-  - [x] Automatic reference counting
-- [x] Foreign function interface
-- [x] Basic OS interface
-- [x] WASM backend
-- [x] Stream-based list type
-- [ ] Testing framework
-- [ ] Serialization / deserialization
-- [ ] Map type
-- [ ] Code formatter
-- [ ] Asynchronous operations
-- [ ] Parallel computation
-- [ ] Full OS interface
-  - [ ] TCP/UDP sockets
-  - [ ] Process
-- [ ] IDE/editor support
-  - [ ] Language server
-- [ ] Mutable state
-  - [ ] Thread safety
-- [ ] Web browser interface
-- [ ] Binary support
+Unit tests are deterministic to enable reliable continuous integration.
+
+#### Asynchronous operation (WIP)
+
+Functions can be called asynchronously to run multiple tasks concurrently.
+
+#### Parallel computation (WIP)
+
+The runtime and library provide tools for thread-safe parallel computation that leverage multi-core CPUs.
 
 ## License
 
-Dual-licensed under [MIT](LICENSE-MIT) and [Apache 2.0](LICENSE-APACHE).
+Pen is released under open source licenses. See [LICENSE](https://github.com/pen-lang/pen/blob/main/LICENSE.md) for more information.
 
 [go]: https://golang.org
 [syntax]: https://pen-lang.org/references/language/syntax.html
