@@ -114,35 +114,6 @@ On the other hand, Pen aims to be **even simpler by focusing only on application
 
 Furthermore, although many programming languages have been solving problems of **programming** in history, few of them actually tackled ones of **software engineering**, where you also need to maintain and keep making changes to existing software continuously. Pen's approach to that is embracing battle-tested ideas in such field, such as [Clean Architecture](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html), into the language's principles and ecosystem. One of its most clear incarnations is [system injection](#system-injection).
 
-## Roadmap
-
-Items are ordered by priority.
-
-- [x] Basic syntax
-- [x] CPS transformation
-- [x] Capability-based effect system
-- [x] Performant GC
-  - [x] Automatic reference counting
-- [x] Foreign function interface
-- [x] Basic OS interface
-- [x] WASM backend
-- [x] Stream-based list type
-- [ ] Testing framework
-- [ ] Serialization / deserialization
-- [ ] Map type
-- [ ] Code formatter
-- [ ] Asynchronous operations
-- [ ] Parallel computation
-- [ ] Full OS interface
-  - [ ] TCP/UDP sockets
-  - [ ] Process
-- [ ] IDE/editor support
-  - [ ] Language server
-- [ ] Mutable state
-  - [ ] Thread safety
-- [ ] Web browser interface
-- [ ] Binary support
-
 ## License
 
 Pen is released under open source licenses. See [LICENSE](https://github.com/pen-lang/pen/blob/main/LICENSE.md) for more information.
