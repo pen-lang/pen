@@ -79,15 +79,15 @@ Pen aims to make large-scale software development efficient where a number of pe
 
 ### Work in progress...
 
-#### Deterministic tests (WIP)
+#### Deterministic tests
 
 Unit tests are deterministic to enable reliable continuous integration.
 
-#### Asynchronous operation (WIP)
+#### Asynchronous operation
 
 Functions can be called asynchronously to run multiple tasks concurrently.
 
-#### Parallel computation (WIP)
+#### Parallel computation
 
 The runtime and library provide tools for thread-safe parallel computation that leverage multi-core CPUs.
 
