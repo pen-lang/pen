@@ -28,9 +28,8 @@ impl app::infra::PackageConfigurationWriter for JsonPackageConfigurationWriter {
             &package_directory.join(&app::infra::FilePath::new(vec![
                 self.build_configuration_filename,
             ])),
-            &serde_json::to_vec_pretty::<JsonPackageConfiguration>(
-                &JsonPackageConfiguration::new(dependencies),
-            )?,
+            (serde_json::to_string_pretty(&JsonPackageConfiguration::new(dependencies))? + "\n")
+                .as_bytes(),
         )?;
 
         Ok(())

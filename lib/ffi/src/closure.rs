@@ -20,8 +20,6 @@ impl Closure {
 
 extern "C" fn drop_nothing(_: *mut u8) {}
 
-unsafe impl Sync for Closure {}
-
 impl Drop for Closure {
     fn drop(&mut self) {
         (self.drop_function)(self as *mut Self as *mut u8);

@@ -83,6 +83,7 @@ impl NinjaBuildScriptCompiler {
             "  description = archiving package at $package_directory",
             "rule compile_ffi",
             "  command = $in -t $target $out",
+            "  description = compiling FFI module with script $in",
         ]
         .iter()
         .map(|string| string.to_string())
@@ -409,6 +410,7 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
                     ))?
                     .display(),
             ),
+            "  description = linking application at $out".into(),
             format!(
                 "build {}: link {}",
                 application_file.display(),
