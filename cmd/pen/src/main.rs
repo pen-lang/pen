@@ -11,6 +11,7 @@ mod module_compiler;
 mod package_builder;
 mod package_creator;
 mod prelude_module_compiler;
+mod test_configuration;
 
 fn main() {
     if let Err(error) = run() {

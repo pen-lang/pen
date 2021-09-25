@@ -28,7 +28,7 @@ pub fn run(
         })
         .collect::<Vec<_>>();
 
-    let interfaces = interface_files
+    let test_functions = interface_files
         .iter()
         .map(|file| -> Result<interface::Module, Box<dyn Error>> {
             Ok(interface_serializer::deserialize(
@@ -43,7 +43,8 @@ pub fn run(
                     .name()
                     .starts_with(infrastructure.test_configuration.test_function_prefix)
             })
-        });
+        })
+        .collect::<Vec<_>>();
 
     Ok(())
 }
