@@ -4,24 +4,37 @@ use std::sync::{Arc, RwLock};
 #[repr(C)]
 #[derive(Clone)]
 pub struct StateContext {
-    state: Arc<RwLock<ffi::Any>>,
+    inner: ffi::Any,
 }
 
-ffi::type_information!(state_context, crate::state_context::StateContext);
+#[repr(C)]
+#[derive(Clone)]
+pub struct StateContextInner {
+    pub state: Arc<RwLock<ffi::Any>>,
+}
+
+ffi::type_information!(state_context, crate::state_context::StateContextInner);
 
 impl StateContext {
     pub fn new() -> Self {
         Self {
-            state: RwLock::new(ffi::None::new().into_any()).into(),
+            inner: StateContextInner {
+                state: RwLock::new(ffi::None::new().into_any()).into(),
+            }
+            .into_any(),
         }
     }
 
     pub fn get(&self) -> ffi::Any {
-        self.state.read().unwrap().clone()
+        self.inner().state.read().unwrap().clone()
     }
 
     pub fn set(&self, state: ffi::Any) {
-        *self.state.write().unwrap() = state;
+        *self.inner().state.write().unwrap() = state;
+    }
+
+    fn inner(&self) -> &StateContextInner {
+        StateContextInner::as_inner(&self.inner).unwrap()
     }
 }
 

@@ -1,3 +1,10 @@
+import foreign _pen_test_state_context_get \(stateContext) any
+import foreign _pen_test_state_context_set \(stateContext, any) none
+
 type Context {
+  state stateContext
+}
+
+type stateContext {
   inner any
 }
