@@ -564,7 +564,7 @@ checksum = "150e275fde223298ff1d85f74e4fb8f0558edba03293c1964f236602479c2f63"
 
 [[package]]
 name = "pen-ffi"
-version = "0.2.5"
+version = "0.2.6"
 
 [[package]]
 name = "percent-encoding"
