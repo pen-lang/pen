@@ -44,8 +44,9 @@ See [Install](https://pen-lang.org/guides/install.html).
 Pen aims to make large-scale software development efficient where a number of people develop software together. To realize that, it focuses on software **maintainability** and **portability**.
 
 - Maintainability
-  - Simplicity: Everyone can learn the language and participate in actual development quickly.
+  - Simplicity: The language is easy to learn but also full featured.
   - Testability: Unit tests are always fast, reliable, and independent.
+  - Modifiability: You can focus on application logic but not ever-changing implementaion details.
 - Portability
   - Programs written in the language can be ported to different platforms including [WASM](https://webassembly.org/).
 
@@ -134,9 +135,7 @@ Items are ordered by priority.
 - [ ] Web browser interface
 - [ ] Binary support
 
-## License
-
-Dual-licensed under [MIT](LICENSE-MIT) and [Apache 2.0](LICENSE-APACHE).
+#{{#include ../../LICENSE.md}}
 
 [go]: https://golang.org
 [syntax]: https://pen-lang.org/references/language/syntax.html
