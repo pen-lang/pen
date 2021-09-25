@@ -64,7 +64,7 @@ Pen aims to make large-scale software development efficient where a number of pe
 
 ### [System injection](https://pen-lang.org/advanced-features/system-injection.html)
 
-- System functions are always injected through main functions.
+- System functions are always injected as arguments of main functions.
 - That isolates and protects application logic from implementation details for both maintainability and portability.
 - Developers can define their own system functions and build applications on top of them.
 
