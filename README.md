@@ -48,7 +48,7 @@ Pen aims to make large-scale software development efficient where a number of pe
   - Testability: Unit tests are always fast, reliable, and independent with each other.
   - Modifiability: Developers can change application logic without doing implementation details, and vice versa.
 - Portability
-  - Programs written in the language can be ported to different platforms including [WASM](https://webassembly.org/).
+  - Programs written in the language can be ported to different platforms including [WebAssembly](https://webassembly.org/).
 
 ## Features
 
