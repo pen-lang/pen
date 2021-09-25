@@ -64,9 +64,9 @@ Pen aims to make large-scale software development efficient where a number of pe
 
 ### [System injection](https://pen-lang.org/advanced-features/system-injection.html)
 
-- A mechanism to inject system functions into pure functions
-- In other words, a _dynamically typed_ effect system
-- You can even define your own system APIs!
+- System functions are always injected through entry points of applications.
+- That isolates and protects application logic from implementation details for both maintainability and portability.
+- Developers can define their own system functions and build applications on top of them.
 
 ### Even more...
 
