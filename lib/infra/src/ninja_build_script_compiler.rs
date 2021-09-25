@@ -410,7 +410,7 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
                     ))?
                     .display(),
             ),
-            "  description = linking applicaiton at $out".into(),
+            "  description = linking application at $out".into(),
             format!(
                 "build {}: link {}",
                 application_file.display(),
