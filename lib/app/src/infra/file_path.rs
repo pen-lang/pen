@@ -61,12 +61,12 @@ impl FilePath {
 
     fn check_extension(&self, extension: &str) -> Option<bool> {
         let component = self.components.last()?;
-        let element = component.split('.').last()?;
+        let (_, suffix) = component.split_once('.').unwrap_or_default();
 
-        Some(if element == component {
+        Some(if suffix == component {
             extension.is_empty()
         } else {
-            element == extension
+            suffix == extension
         })
     }
 
@@ -143,5 +143,6 @@ mod tests {
         assert!(!FilePath::new(&["foo", "bar"]).has_extension("bar"));
         assert!(FilePath::new(&["foo", "bar.baz"]).has_extension("baz"));
         assert!(!FilePath::new(&["foo", "bar.baz"]).has_extension("blah"));
+        assert!(FilePath::new(&["foo", "bar.baz.blah"]).has_extension("baz.blah"));
     }
 }
