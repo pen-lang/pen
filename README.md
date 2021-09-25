@@ -68,39 +68,26 @@ Pen aims to make large-scale software development efficient where a number of pe
 - That isolates and protects application logic from implementation details for both maintainability and portability.
 - Developers can define their own system functions and build applications on top of them.
 
-### Static typing
+### Others
 
-Data types are checked at compile time so that developers can catch errors earlier.
+- Static typing
+- Immutable values
+- Pure functions by default
+- Errors as values
+- Cross compile
+- [Rust](https://www.rust-lang.org/)/C Foreign Function Interface (FFI)
 
-### Immutable values
+### Work in progress...
 
-All values are immutable, which leads to predictable and testable codes.
-
-### Pure functions by default
-
-Functions are pure; they work just like math functions unless developers inject side effects explicitly.
-
-### Errors as values
-
-Errors are merely data. Its special syntax provides a convenient way to handle errors.
-
-### Cross compile
-
-The compiler and runtime support different CPU architectures, operating systems, web browsers and [WASI](https://wasi.dev/).
-
-### Foreign Function Interface (FFI)
-
-Its [Rust](https://www.rust-lang.org/)/C FFI provides interoperability with other languages.
-
-### Deterministic tests (WIP)
+#### Deterministic tests (WIP)
 
 Unit tests are deterministic to enable reliable continuous integration.
 
-### Asynchronous operation (WIP)
+#### Asynchronous operation (WIP)
 
 Functions can be called asynchronously to run multiple tasks concurrently.
 
-### Parallel computation (WIP)
+#### Parallel computation (WIP)
 
 The runtime and library provide tools for thread-safe parallel computation that leverage multi-core CPUs.
 
