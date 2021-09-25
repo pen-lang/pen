@@ -75,7 +75,7 @@ Pen aims to make large-scale software development efficient where a number of pe
 - Pure functions by default
 - Errors as values
 - Cross compile
-- [Rust](https://www.rust-lang.org/)/C Foreign Function Interface (FFI)
+- [Rust](https://www.rust-lang.org/)/C Foreign Function Interface
 
 ### Work in progress...
 
