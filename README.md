@@ -41,7 +41,7 @@ See [Install](https://pen-lang.org/guides/install.html).
 
 ## Vision
 
-Pen aims to make large-scale software development efficient where a number of people develop software together over a long time. To realize that, it focuses on software **maintainability** and **portability**.
+Pen aims to make large-scale software development efficient where a number of people develop software together. To realize that, it focuses on software **maintainability** and **portability**.
 
 - Maintainability
   - Simplicity: Everyone can learn the language and participate in actual development quickly.
