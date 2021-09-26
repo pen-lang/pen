@@ -68,12 +68,7 @@ fn compile_body(
     variables: &HashMap<String, fmm::build::TypedExpression>,
     types: &HashMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    let payload_pointer = compile_payload_pointer(definition, types)?;
-    let environment_pointer = if definition.is_thunk() {
-        fmm::build::union_address(payload_pointer, 0)?.into()
-    } else {
-        payload_pointer
-    };
+    let environment_pointer = compile_environment_pointer(definition, types)?;
 
     expressions::compile(
         module_builder,
@@ -168,6 +163,23 @@ fn compile_initial_thunk_entry(
                         variables,
                         types,
                     )?;
+
+                    let environment_pointer = compile_environment_pointer(definition, types)?;
+
+                    // TODO Remove these extra drops of free variables when we move them in function
+                    // bodies rather than cloning them.
+                    // See also https://github.com/pen-lang/pen/issues/295.
+                    for (index, free_variable) in definition.environment().iter().enumerate() {
+                        reference_count::drop_expression(
+                            &instruction_builder,
+                            &instruction_builder.load(fmm::build::record_address(
+                                environment_pointer.clone(),
+                                index,
+                            )?)?,
+                            free_variable.type_(),
+                            types,
+                        )?;
+                    }
 
                     reference_count::clone_expression(
                         &instruction_builder,
@@ -339,11 +351,24 @@ fn compile_thunk_value_pointer(
     Ok(fmm::build::union_address(compile_payload_pointer(definition, types)?, 1)?.into())
 }
 
+fn compile_environment_pointer(
+    definition: &mir::ir::Definition,
+    types: &HashMap<String, mir::types::RecordBody>,
+) -> Result<fmm::build::TypedExpression, CompileError> {
+    let payload_pointer = compile_payload_pointer(definition, types)?;
+
+    Ok(if definition.is_thunk() {
+        fmm::build::union_address(payload_pointer, 0)?.into()
+    } else {
+        payload_pointer
+    })
+}
+
 fn compile_payload_pointer(
     definition: &mir::ir::Definition,
     types: &HashMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    closures::compile_environment_pointer(fmm::build::bit_cast(
+    closures::compile_payload_pointer(fmm::build::bit_cast(
         fmm::types::Pointer::new(types::compile_sized_closure(definition, types)),
         compile_untyped_closure_pointer(),
     ))

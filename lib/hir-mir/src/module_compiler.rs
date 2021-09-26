@@ -99,11 +99,7 @@ fn compile_definition(
     let body = expression_compiler::compile(definition.lambda().body(), type_context)?;
     let result_type = type_compiler::compile(definition.lambda().result_type(), type_context)?;
 
-    Ok(if definition.lambda().arguments().is_empty() {
-        mir::ir::Definition::thunk
-    } else {
-        mir::ir::Definition::new
-    }(
+    Ok(mir::ir::Definition::new(
         definition.name(),
         definition
             .lambda()

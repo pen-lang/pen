@@ -27,8 +27,14 @@ test() {
   fi
 }
 
-for _ in $(seq $test_retry_count); do
-  if test "$@"; then
-    break
-  fi
-done
+retry_tests() {
+  for _ in $(seq $test_retry_count); do
+    if test "$@"; then
+      return 0
+    fi
+  done
+
+  return 1
+}
+
+retry_tests "$@"
