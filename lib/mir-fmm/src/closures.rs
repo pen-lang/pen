@@ -48,7 +48,7 @@ pub fn compile_load_drop_function(
     Ok(builder.load(compile_drop_function_pointer(closure_pointer)?)?)
 }
 
-pub fn compile_environment_pointer(
+pub fn compile_payload_pointer(
     closure_pointer: impl Into<fmm::build::TypedExpression>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     Ok(fmm::build::record_address(
@@ -142,7 +142,7 @@ fn compile_drop_function_with_builder(
         |builder| -> Result<_, CompileError> {
             compile_body(
                 &builder,
-                &compile_environment_pointer(fmm::build::bit_cast(
+                &compile_payload_pointer(fmm::build::bit_cast(
                     fmm::types::Pointer::new(types::compile_unsized_closure(
                         &DUMMY_FUNCTION_TYPE,
                         types,

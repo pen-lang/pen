@@ -343,7 +343,7 @@ fn compile_payload_pointer(
     definition: &mir::ir::Definition,
     types: &HashMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    closures::compile_environment_pointer(fmm::build::bit_cast(
+    closures::compile_payload_pointer(fmm::build::bit_cast(
         fmm::types::Pointer::new(types::compile_sized_closure(definition, types)),
         compile_untyped_closure_pointer(),
     ))
