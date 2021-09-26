@@ -68,7 +68,7 @@ fn compile_body(
     variables: &HashMap<String, fmm::build::TypedExpression>,
     types: &HashMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    let environment_pointer = compile_payload_pointer(definition, types)?;
+    let environment_pointer = compile_environment_pointer(definition, types)?;
 
     expressions::compile(
         module_builder,
@@ -164,7 +164,7 @@ fn compile_initial_thunk_entry(
                         types,
                     )?;
 
-                    let environment_pointer = compile_payload_pointer(definition, types)?;
+                    let environment_pointer = compile_environment_pointer(definition, types)?;
 
                     // TODO Remove these extra drops of free variables when we move them in function
                     // bodies rather than cloning them.
