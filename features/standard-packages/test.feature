@@ -12,11 +12,11 @@ Feature: Test
   Scenario: Import a Test package
     Given a file named "FooTest.pen" with:
     """pen
+    import Test'Assert
     import Test'Context { Context }
 
     TestFoo = \(ctx Context) none | error {
-      # TODO
-      #Assert'True(ctx, true)
+      Assert'True(ctx, true)?
 
       none
     }
