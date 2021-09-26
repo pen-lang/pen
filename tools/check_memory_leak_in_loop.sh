@@ -31,4 +31,6 @@ for _ in $(seq $test_retry_count); do
   if test "$@"; then
     break
   fi
+
+  exit 1
 done
