@@ -1,10 +1,5 @@
-import foreign _pen_test_state_context_get \(stateContext) any
-import foreign _pen_test_state_context_set \(stateContext, any) none
+import 'State
 
 type Context {
-  state stateContext
-}
-
-type stateContext {
-  inner any
+  state State'Context
 }
