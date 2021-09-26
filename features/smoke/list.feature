@@ -12,10 +12,10 @@ Feature: List
   Scenario: Force multiple elements of a list
     Given a file named "Main.pen" with:
     """pen
-    import System'Os
+    import System'Context { Context }
 
-    main = \(ctx Os'Context) number {
-      if [x, ...xs] = [none; ...[none; none]] {
+    main = \(ctx Context) number {
+      if [x, ...xs] = [none ...[none none]] {
         x()
       } else {
         none

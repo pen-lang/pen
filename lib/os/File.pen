@@ -1,0 +1,112 @@
+import 'Context { Context }
+import 'errorTranslator
+import 'File'OpenOptions { OpenOptions }
+import 'normalFile { NormalFile }
+
+type File {
+  inner NormalFile | specialFile
+}
+
+type stdIn {}
+type stdOut {}
+type stdErr {}
+
+type specialFile = stdIn | stdOut | stdErr
+
+StdIn = \() File {
+  File{inner: stdIn}
+}
+
+StdOut = \() File {
+  File{inner: stdOut}
+}
+
+StdErr = \() File {
+  File{inner: stdErr}
+}
+
+OpenWithOptions = \(ctx Context, path string, opt OpenOptions) File | error {
+  r = Context'Inner(ctx).OpenFile(path, opt)
+
+  if r.Error == 0 {
+    File{inner: r.File}
+  } else {
+    error(errorTranslator'Translate(r.Error))
+  }
+}
+
+Open = \(ctx Context, path string) File | error {
+  OpenWithOptions(
+    ctx,
+    path,
+    OpenOptions{...OpenOptions'Default(), Read: true}
+  )
+}
+
+Read = \(ctx Context, file File) string | error {
+  r = if f = file.inner as stdIn {
+    Context'Inner(ctx).ReadStdIn()
+  } else if stdOut {
+    error("cannot read from stdout")
+  } else if stdErr {
+    error("cannot read from stderr")
+  } else if NormalFile {
+    Context'Inner(ctx).ReadFile(f)
+  }?
+
+  if r.Error == 0 {
+    r.Value
+  } else {
+    error(errorTranslator'Translate(r.Error))
+  }
+}
+
+Write = \(ctx Context, file File, data string) number | error {
+  inner = Context'Inner(ctx)
+
+  r = if f = file.inner as stdIn {
+    error("cannot write to stdin")
+  } else if stdOut {
+    inner.WriteStdOut(data)
+  } else if stdErr {
+    inner.WriteStdErr(data)
+  } else {
+    inner.WriteFile(f, data)
+  }?
+
+  if r.Error == 0 {
+    r.Count
+  } else {
+    error(errorTranslator'Translate(r.Error))
+  }
+}
+
+Copy = \(ctx Context, src string, dest string) none | error {
+  r = Context'Inner(ctx).CopyFile(src, dest)
+
+  if r.Error == 0 {
+    none
+  } else {
+    error(errorTranslator'Translate(r.Error))
+  }
+}
+
+Move = \(ctx Context, src string, dest string) none | error {
+  r = Context'Inner(ctx).MoveFile(src, dest)
+
+  if r.Error == 0 {
+    none
+  } else {
+    error(errorTranslator'Translate(r.Error))
+  }
+}
+
+Remove = \(ctx Context, path string) none | error {
+  r = Context'Inner(ctx).RemoveFile(path)
+
+  if r.Error == 0 {
+    none
+  } else {
+    error(errorTranslator'Translate(r.Error))
+  }
+}

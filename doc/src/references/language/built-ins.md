@@ -1,12 +1,12 @@
 # Built-ins
 
-Built-in types and functions are accessible from any modules.
+Built-in types and functions are ones implicitly defined in every module.
 
 ## Types
 
 ### `error`
 
-It is a special record type used for error handling.
+It is a special record type used for error handling. See also [Error handling](/references/language/syntax.md#error-handling).
 
 ```pen
 type error {
@@ -21,7 +21,7 @@ type error {
 It creates an error with its source information.
 
 ```pen
-error \(any) error
+\(info any) error
 ```
 
 ### `source`
@@ -29,5 +29,5 @@ error \(any) error
 It extracts source information from an error.
 
 ```pen
-source \(error) any
+\(e error) any
 ```

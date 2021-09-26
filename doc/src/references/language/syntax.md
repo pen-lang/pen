@@ -1,16 +1,20 @@
 # Syntax
 
+This page describes the syntactical components of the language. You can compose programs building up those constructs. See also [Types](types.md) about syntax for specific data types.
+
 ## Module
 
-Modules are sets of types and functions. One file composes a module. Modules can import functions and types from other modules.
+Modules are sets of types and functions. See [Modules](modules.md) for more information.
 
-A module consists of [statements](#statements).
+Syntactically, a module consists of [statements](#statements).
 
 ## Statements
 
+Statements are constructs that declare functions and types in modules.
+
 ### Import statement
 
-It imports types and functions from another module in the current or another package.
+It imports types and functions from another module in the same or another package.
 
 See [Modules](modules.md) for more details.
 
@@ -22,9 +26,7 @@ import Foo'Bar
 
 It imports a function in a foreign language.
 
-You can specify calling convention of foreign languages in a format of string literals after `import foreign` optionally. Currently, only the C calling convention is supported as `"c"`.
-
-See [FFI](/guides/ffi.md) for more details.
+See [FFI](/advanced-features/ffi.md) for more details.
 
 ```pen
 import foreign "c" foo \(number, number) number
@@ -53,9 +55,7 @@ type foo = number | none
 
 ### Function definition
 
-It defines a new function.
-
-First, followed by a function name (`foo`), it declares its argument names and types (`x number` and `y number`) and its result type (`number`). Then, function bodies describe what the functions do. The function bodies are [blocks](#block).
+It defines a function with a given name. The right hand side of `=` signs must be [function expressions](#function).
 
 ```pen
 foo = \(x number, y number) number {
@@ -65,12 +65,12 @@ foo = \(x number, y number) number {
 
 ### Foreign function definition
 
-It defines a new foreign function.
+It defines a function exported for foreign languages.
 
-See [FFI](/guides/ffi.md) for more details.
+See [FFI](/advanced-features/ffi.md) for more details.
 
 ```pen
-export foreign foo = \(x number, y number) number {
+foreign foo = \(x number, y number) number {
   x + y
 }
 ```
@@ -87,9 +87,9 @@ A block consists of 1 or more expressions wrapped in `{` and `}`. Values of the 
 }
 ```
 
-If you want to save results of intermediate expressions and use them somewhere else, you can define variables putting their names and `=` operators in front of the expressions.
+If you want to save results of intermediate expressions for later use, you can define variables putting their names and `=` operators in front of the expressions.
 
-```
+```pen
 {
   x = 42
 
@@ -98,6 +98,8 @@ If you want to save results of intermediate expressions and use them somewhere e
 ```
 
 ## Expressions
+
+Expressions express what programs actually compute. Notably, expressions can be nested; many expressions contain other expressions inside.
 
 ### Function call
 
@@ -131,7 +133,7 @@ Equal (`==`) and not-equal (`!=`) operators compare two values and return a bool
 1 != 1
 ```
 
-They can be used for any types except functions and types that include them.
+The operators can compare any types except functions and types that include them.
 
 ```pen
 "foo" == "bar"
@@ -141,7 +143,7 @@ foo{x: 0} == foo{x: 1}
 
 ##### Ordering
 
-Order operators compare two numbers and return a boolean value indicating if it is correct or not.
+Order operators compare two numbers and return a boolean value indicating if the condition is correct or not.
 
 ```pen
 1 < 1
@@ -152,19 +154,19 @@ Order operators compare two numbers and return a boolean value indicating if it 
 
 #### Boolean
 
-A not operator flips a boolean value.
+A _not_ operator flips a boolean value.
 
 ```pen
 !true
 ```
 
-An _and_ (`&`) operator returns `true` if both operands are `true`, or `false` otherwise.
+An _and_ operator returns `true` if both operands are `true`, or `false` otherwise.
 
 ```pen
 true & false
 ```
 
-An _or_ (`|`) operator returns `true` if either operand is `true`, or `false` otherwise.
+An _or_ operator returns `true` if either operand is `true`, or `false` otherwise.
 
 ```pen
 true | false
@@ -172,21 +174,31 @@ true | false
 
 #### Error handling
 
-`?` suffix operator immediately exits the current function with an operand if it has [the `error` type][error-type].
+`?` suffix operator immediately exits the current function with an operand if it is of [the `error` type][error-type]. The operand must be a union type containing [the `error` type][error-type].
 
-An operand must be a union type including [the `error` type][error-type].
-
-```
+```pen
 x?
 ```
 
 [error-type]: built-ins.md#error
 
+### Function
+
+It creates a function.
+
+First, functions declare their argument names and types (`x number` and `y number`) and their result types (`number`). After that, function bodies describe what the functions do as [blocks](#block).
+
+```pen
+\(x number, y number) number {
+  x + y
+}
+```
+
 ### Conditionals
 
 #### If expression
 
-It evaluates one of blocks depending on an expression of a boolean type.
+It evaluates one of [blocks](#block) depending on a value of an expression of a boolean type.
 
 - It evaluates the first block if a given boolean value is `true`.
 - Otherwise, it evaluates the second block.
@@ -201,10 +213,10 @@ if x {
 
 #### If-type expression
 
-It evaluates one of blocks depending on the type of a given expression. The given expression (`foo()`) needs to be bound to a variable (`x`) and, in each block, the variable is treated as its specified type.
+It evaluates one of [blocks](#block) depending on the type of a given expression. The expression (`foo()`) needs to be bound to a variable (`x`) and, in each block, the variable is treated as its specified type.
 
 ```pen
-if x = foo(); number {
+if x = foo() as number {
   ...
 } else if string | none {
   ...
@@ -215,7 +227,7 @@ if x = foo(); number {
 
 #### If-list expression
 
-It deconstructs a list and evaluates one of blocks depending on if the list is empty or not.
+It deconstructs a list and evaluates one of [blocks](#block) depending on if the list is empty or not.
 
 - If a given list has 1 or more element, it evaluates the first block with a function which returns its first element (`x`) and rest of elements as a list (`xs`).
 - If it has no element, it evaluates the second block.
@@ -226,4 +238,12 @@ if [x, ...xs] = ... {
 } else {
   ...
 }
+```
+
+## Comment
+
+Comments start with `#` and end with new-line characters.
+
+```pen
+# This is an important comment.
 ```

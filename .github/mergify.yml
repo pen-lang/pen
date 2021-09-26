@@ -1,0 +1,19 @@
+pull_request_rules:
+  - name: dependabot
+    conditions:
+      - author=dependabot[bot]
+    actions:
+      merge:
+        method: squash
+        strict: smart
+  - name: auto-merge
+    conditions:
+      - label=auto-merge
+      - or:
+          - author=raviqqe
+          - "#approved-reviews-by>=1"
+    actions:
+      merge:
+        method: squash
+        strict: smart
+        commit_message: title+body

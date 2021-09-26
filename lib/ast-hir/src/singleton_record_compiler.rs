@@ -1,22 +1,20 @@
+use super::name_qualifier;
+use crate::imported_module::ImportedModule;
 use hir::{analysis::ir::variable_transformer, ir::*, types};
 use std::collections::HashMap;
 
-use super::name_qualifier;
-
-pub fn compile(
-    module: &Module,
-    module_interfaces: &HashMap<ast::ModulePath, interface::Module>,
-) -> Module {
-    let names = module_interfaces
+pub fn compile(module: &Module, imported_modules: &[ImportedModule]) -> Module {
+    let names = imported_modules
         .iter()
-        .flat_map(|(path, module)| {
+        .flat_map(|module| {
             module
+                .interface()
                 .type_definitions()
                 .iter()
                 .filter_map(|definition| {
                     if definition.elements().is_empty() && definition.is_public() {
                         Some((
-                            name_qualifier::qualify(path, definition.original_name()),
+                            name_qualifier::qualify(module.prefix(), definition.original_name()),
                             definition.name().into(),
                         ))
                     } else {
@@ -74,7 +72,7 @@ mod tests {
                         ),
                         false
                     )]),
-                &Default::default(),
+                &[],
             ),
             Module::empty()
                 .set_type_definitions(vec![type_definition])
@@ -125,7 +123,7 @@ mod tests {
                 &Module::empty()
                     .set_type_definitions(vec![type_definition.clone()])
                     .set_definitions(vec![definition.clone()]),
-                &Default::default(),
+                &[],
             ),
             Module::empty()
                 .set_type_definitions(vec![type_definition])
@@ -147,8 +145,7 @@ mod tests {
                     ),
                     false
                 )]),
-                &vec![(
-                    ast::InternalModulePath::new(vec!["Foo".into()]).into(),
+                &[ImportedModule::new(
                     interface::Module::new(
                         vec![interface::TypeDefinition::new(
                             "RealFoo",
@@ -160,10 +157,10 @@ mod tests {
                         )],
                         vec![],
                         vec![]
-                    )
-                )]
-                .into_iter()
-                .collect(),
+                    ),
+                    "Foo",
+                    Default::default()
+                )],
             ),
             Module::empty().set_definitions(vec![Definition::fake(
                 "f",
@@ -198,8 +195,7 @@ mod tests {
         assert_eq!(
             compile(
                 &Module::empty().set_definitions(vec![definition.clone()]),
-                &vec![(
-                    ast::InternalModulePath::new(vec!["Foo".into()]).into(),
+                &[ImportedModule::new(
                     interface::Module::new(
                         vec![interface::TypeDefinition::new(
                             "RealFoo",
@@ -214,10 +210,10 @@ mod tests {
                         )],
                         vec![],
                         vec![]
-                    )
-                )]
-                .into_iter()
-                .collect(),
+                    ),
+                    "Foo",
+                    Default::default()
+                )],
             ),
             Module::empty().set_definitions(vec![definition])
         );
@@ -239,8 +235,7 @@ mod tests {
         assert_eq!(
             compile(
                 &Module::empty().set_definitions(vec![definition.clone()]),
-                &vec![(
-                    ast::InternalModulePath::new(vec!["Foo".into()]).into(),
+                &[ImportedModule::new(
                     interface::Module::new(
                         vec![interface::TypeDefinition::new(
                             "RealFoo",
@@ -252,10 +247,10 @@ mod tests {
                         )],
                         vec![],
                         vec![]
-                    )
-                )]
-                .into_iter()
-                .collect(),
+                    ),
+                    "Foo",
+                    Default::default()
+                )],
             ),
             Module::empty().set_definitions(vec![definition])
         );

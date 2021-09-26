@@ -13,7 +13,7 @@ pub fn compile(module: &ast::Module) -> Result<ir::Module, CompileError> {
                     definition.name(),
                     definition.elements().to_vec(),
                     is_record_open(definition.elements()),
-                    is_name_public(definition.name()),
+                    ast::analysis::is_name_public(definition.name()),
                     false,
                     definition.position().clone(),
                 )),
@@ -29,7 +29,7 @@ pub fn compile(module: &ast::Module) -> Result<ir::Module, CompileError> {
                     alias.name(),
                     alias.name(),
                     alias.type_().clone(),
-                    is_name_public(alias.name()),
+                    ast::analysis::is_name_public(alias.name()),
                     false,
                     alias.position().clone(),
                 )),
@@ -67,7 +67,7 @@ fn compile_definition(definition: &ast::Definition) -> Result<ir::Definition, Co
         definition.name(),
         compile_lambda(definition.lambda())?,
         definition.is_foreign(),
-        is_name_public(definition.name()),
+        ast::analysis::is_name_public(definition.name()),
         definition.position().clone(),
     ))
 }
@@ -332,11 +332,7 @@ fn is_record_open(elements: &[types::RecordElement]) -> bool {
     !elements.is_empty()
         && elements
             .iter()
-            .all(|element| is_name_public(element.name()))
-}
-
-fn is_name_public(name: &str) -> bool {
-    name.chars().next().unwrap().is_ascii_uppercase()
+            .all(|element| ast::analysis::is_name_public(element.name()))
 }
 
 #[cfg(test)]

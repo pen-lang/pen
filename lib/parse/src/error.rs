@@ -19,6 +19,7 @@ impl ParseError {
             message: errors
                 .errors
                 .iter()
+                .rev()
                 .find_map(|error| match error {
                     easy::Error::Expected(_) => None,
                     easy::Error::Message(info) => Some(info.to_string()),

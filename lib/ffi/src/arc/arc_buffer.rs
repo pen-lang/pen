@@ -59,6 +59,12 @@ impl ArcBuffer {
     }
 }
 
+impl Default for ArcBuffer {
+    fn default() -> Self {
+        Self::new(0)
+    }
+}
+
 impl Clone for ArcBuffer {
     fn clone(&self) -> Self {
         Self {

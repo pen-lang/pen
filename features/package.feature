@@ -6,6 +6,8 @@ Feature: Packages
     """
     And a file named "foo/Foo.pen" with:
     """pen
+    type Foo = number
+
     Foo = \() number {
       42
     }
@@ -39,7 +41,7 @@ Feature: Packages
     When I run `pen build`
     Then the exit status should be 0
 
-  Scenario: Import a type alias from a module
+  Scenario: Import a type from a module
     Given a file named "Bar.pen" with:
     """pen
     import Foo'Foo

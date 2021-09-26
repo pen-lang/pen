@@ -32,7 +32,7 @@ use self::{
 };
 pub use error::CompileError;
 pub use error_type_configuration::ErrorTypeConfiguration;
-use hir::ir::*;
+use hir::{analysis::types::type_existence_validator, ir::*};
 pub use list_type_configuration::ListTypeConfiguration;
 pub use main_module_configuration::MainModuleConfiguration;
 pub use string_type_configuration::StringTypeConfiguration;
@@ -94,6 +94,11 @@ fn compile_module(
 ) -> Result<(mir::ir::Module, interface::Module), CompileError> {
     duplicate_function_name_validator::validate(module)?;
     duplicate_type_name_validator::validate(module)?;
+    type_existence_validator::validate(
+        module,
+        &type_context.types().keys().cloned().collect(),
+        &type_context.records().keys().cloned().collect(),
+    )?;
 
     let module = record_equal_function_transformer::transform(module, type_context)?;
     let module = type_inferrer::infer_types(&module, type_context)?;

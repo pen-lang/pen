@@ -83,7 +83,7 @@ fn collect_open_records(type_definitions: &[TypeDefinition]) -> HashSet<String> 
 }
 
 fn is_record_open(definition: &TypeDefinition) -> bool {
-    definition.is_open() || !definition.is_external()
+    !definition.is_external() || definition.is_public() && definition.is_open()
 }
 
 #[cfg(test)]
@@ -326,6 +326,45 @@ mod tests {
                         RecordUpdate::new(
                             record_type,
                             Variable::new("x", Position::fake()),
+                            vec![RecordElement::new(
+                                "x",
+                                None::new(Position::fake()),
+                                Position::fake(),
+                            )],
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    ),
+                    false,
+                )]),
+        )
+        .unwrap();
+    }
+
+    #[test]
+    #[should_panic]
+    fn fail_to_validate_record_construction_with_external_private_record() {
+        let record_type = types::Record::new("r", Position::fake());
+
+        validate_module(
+            &Module::empty()
+                .set_type_definitions(vec![TypeDefinition::fake(
+                    "r",
+                    vec![types::RecordElement::new(
+                        "x",
+                        types::None::new(Position::fake()),
+                    )],
+                    true,
+                    false,
+                    true,
+                )])
+                .set_definitions(vec![Definition::fake(
+                    "x",
+                    Lambda::new(
+                        vec![],
+                        record_type.clone(),
+                        RecordConstruction::new(
+                            record_type,
                             vec![RecordElement::new(
                                 "x",
                                 None::new(Position::fake()),

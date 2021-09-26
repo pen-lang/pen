@@ -4,6 +4,7 @@ use super::{
     string_type_configuration::StringTypeConfiguration,
 };
 use hir::{
+    analysis::types::type_collector,
     ir::*,
     types::{self, Type},
 };
@@ -26,22 +27,7 @@ impl TypeContext {
         error_type_configuration: &ErrorTypeConfiguration,
     ) -> Self {
         Self {
-            types: module
-                .type_definitions()
-                .iter()
-                .map(|definition| {
-                    (
-                        definition.name().into(),
-                        types::Record::new(definition.name(), definition.position().clone()).into(),
-                    )
-                })
-                .chain(
-                    module
-                        .type_aliases()
-                        .iter()
-                        .map(|alias| (alias.name().into(), alias.type_().clone())),
-                )
-                .collect(),
+            types: type_collector::collect(module),
             records: module
                 .type_definitions()
                 .iter()

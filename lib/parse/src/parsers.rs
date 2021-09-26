@@ -4,7 +4,7 @@ use ast::{
     *,
 };
 use combine::{
-    attempt, choice, easy, from_str, many, many1, none_of, one_of, optional,
+    attempt, choice, easy, from_str, look_ahead, many, many1, none_of, one_of, optional,
     parser::{
         char::{alpha_num, char as character, digit, letter, space, spaces, string},
         combinator::{lazy, no_partial, not_followed_by},
@@ -19,7 +19,16 @@ use once_cell::sync::Lazy;
 use position::Position;
 use std::collections::HashSet;
 
-const KEYWORDS: &[&str] = &["else", "export", "foreign", "if", "import", "type"];
+const BUILT_IN_LITERALS: &[&str] = &["false", "none", "true"];
+const BUILT_IN_TYPES: &[&str] = &["any", "boolean", "none", "number", "string"];
+static KEYWORDS: Lazy<Vec<&str>> = Lazy::new(|| {
+    ["as", "else", "export", "foreign", "if", "import", "type"]
+        .iter()
+        .chain(BUILT_IN_LITERALS)
+        .chain(BUILT_IN_TYPES)
+        .copied()
+        .collect()
+});
 const OPERATOR_CHARACTERS: &str = "+-*/=<>&|!?";
 
 static NUMBER_REGEX: Lazy<regex::Regex> =
@@ -72,8 +81,17 @@ pub fn module<'a>() -> impl Parser<Stream<'a>, Output = Module> {
 }
 
 fn import<'a>() -> impl Parser<Stream<'a>, Output = Import> {
-    attempt(keyword("import").with(module_path()))
-        .map(Import::new)
+    (
+        attempt(keyword("import").with(not_followed_by(keyword("foreign").with(value("foreign"))))),
+        module_path(),
+        optional(keyword("as").with(identifier())),
+        optional(between(
+            sign("{"),
+            sign("}"),
+            sep_end_by1(identifier(), sign(",")),
+        )),
+    )
+        .map(|(_, path, prefix, names)| Import::new(path, prefix, names.unwrap_or_default()))
         .expected("import statement")
 }
 
@@ -86,16 +104,33 @@ fn module_path<'a>() -> impl Parser<Stream<'a>, Output = ModulePath> {
 }
 
 fn internal_module_path<'a>() -> impl Parser<Stream<'a>, Output = InternalModulePath> {
-    module_path_components().map(InternalModulePath::new)
+    module_path_components(identifier()).map(InternalModulePath::new)
 }
 
 fn external_module_path<'a>() -> impl Parser<Stream<'a>, Output = ExternalModulePath> {
-    (identifier(), module_path_components())
+    (
+        identifier(),
+        module_path_components(public_module_path_component()),
+    )
         .map(|(package, components)| ExternalModulePath::new(package, components))
 }
 
-fn module_path_components<'a>() -> impl Parser<Stream<'a>, Output = Vec<String>> {
-    many1(string(IDENTIFIER_SEPARATOR).with(identifier()))
+fn module_path_components<'a>(
+    component: impl Parser<Stream<'a>, Output = String>,
+) -> impl Parser<Stream<'a>, Output = Vec<String>> {
+    many1(string(IDENTIFIER_SEPARATOR).with(component))
+}
+
+fn public_module_path_component<'a>() -> impl Parser<Stream<'a>, Output = String> {
+    look_ahead(identifier().expected("public module path"))
+        .then(|name| {
+            if ast::analysis::is_name_public(&name) {
+                value(()).left()
+            } else {
+                unexpected_any("private module path").right()
+            }
+        })
+        .with(identifier())
 }
 
 fn foreign_import<'a>() -> impl Parser<Stream<'a>, Output = ForeignImport> {
@@ -127,7 +162,7 @@ fn calling_convention<'a>() -> impl Parser<Stream<'a>, Output = CallingConventio
 
 fn definition<'a>() -> impl Parser<Stream<'a>, Output = Definition> {
     (
-        optional(foreign_export()),
+        optional(keyword("foreign")),
         position(),
         identifier(),
         sign("="),
@@ -139,27 +174,26 @@ fn definition<'a>() -> impl Parser<Stream<'a>, Output = Definition> {
         .expected("definition")
 }
 
-fn foreign_export<'a>() -> impl Parser<Stream<'a>, Output = ()> {
-    (keyword("export"), keyword("foreign")).with(value(()))
-}
-
 fn record_definition<'a>() -> impl Parser<Stream<'a>, Output = RecordDefinition> {
     (
-        // TODO Simplify commitment to this parser after allow mixing record definitions and aliases.
-        attempt((position(), keyword("type"), identifier(), sign("{"))),
+        attempt((position(), keyword("type"))),
+        identifier(),
+        sign("{"),
         many((identifier(), type_())),
         sign("}"),
     )
-        .map(|((position, _, name, _), elements, _): (_, Vec<_>, _)| {
-            RecordDefinition::new(
-                name,
-                elements
-                    .into_iter()
-                    .map(|(name, type_)| types::RecordElement::new(name, type_))
-                    .collect(),
-                position,
-            )
-        })
+        .map(
+            |((position, _), name, _, elements, _): (_, _, _, Vec<_>, _)| {
+                RecordDefinition::new(
+                    name,
+                    elements
+                        .into_iter()
+                        .map(|(name, type_)| types::RecordElement::new(name, type_))
+                        .collect(),
+                    position,
+                )
+            },
+        )
         .expected("record definition")
 }
 
@@ -286,16 +320,7 @@ fn statement<'a>() -> impl Parser<Stream<'a>, Output = Statement> {
 }
 
 fn statement_with_result<'a>() -> impl Parser<Stream<'a>, Output = Statement> {
-    (
-        attempt((
-            position(),
-            identifier(),
-            // TODO Implement a sign combinator like a binary operator by consuming all operator
-            // like characters.
-            sign("=").skip(not_followed_by(one_of(OPERATOR_CHARACTERS.chars()))),
-        )),
-        expression(),
-    )
+    (attempt((position(), identifier(), sign("="))), expression())
         .map(|((position, name, _), expression)| Statement::new(Some(name), expression, position))
 }
 
@@ -398,49 +423,44 @@ fn concrete_prefix_operator<'a>(
 }
 
 fn suffix_operation_like<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
-    (
-        atomic_expression(),
-        // TODO Move positions into suffix operators.
-        many(attempt((position(), suffix_operator()))),
-    )
-        .map(|(expression, suffix_operators): (_, Vec<_>)| {
+    (atomic_expression(), many(suffix_operator())).map(
+        |(expression, suffix_operators): (_, Vec<_>)| {
             suffix_operators
                 .into_iter()
-                .fold(
-                    expression,
-                    |expression, (position, operator)| match operator {
-                        SuffixOperator::Call(arguments) => {
-                            Call::new(expression, arguments, position).into()
-                        }
-                        SuffixOperator::Element(name) => {
-                            RecordDeconstruction::new(expression, name, position).into()
-                        }
-                        SuffixOperator::Try => {
-                            UnaryOperation::new(UnaryOperator::Try, expression, position).into()
-                        }
-                    },
-                )
-        })
+                .fold(expression, |expression, operator| match operator {
+                    SuffixOperator::Call(arguments, position) => {
+                        Call::new(expression, arguments, position).into()
+                    }
+                    SuffixOperator::Element(name, position) => {
+                        RecordDeconstruction::new(expression, name, position).into()
+                    }
+                    SuffixOperator::Try(position) => {
+                        UnaryOperation::new(UnaryOperator::Try, expression, position).into()
+                    }
+                })
+        },
+    )
 }
 
 fn suffix_operator<'a>() -> impl Parser<Stream<'a>, Output = SuffixOperator> {
-    choice((
-        call_operator().map(SuffixOperator::Call),
-        element_operator().map(SuffixOperator::Element),
-        try_operator().map(|_| SuffixOperator::Try),
-    ))
+    choice((call_operator(), element_operator(), try_operator()))
 }
 
-fn call_operator<'a>() -> impl Parser<Stream<'a>, Output = Vec<Expression>> {
-    between(sign("("), sign(")"), sep_end_by(expression(), sign(",")))
+fn call_operator<'a>() -> impl Parser<Stream<'a>, Output = SuffixOperator> {
+    (
+        attempt(position().skip(sign("("))),
+        sep_end_by(expression(), sign(",")).skip(sign(")")),
+    )
+        .map(|(position, arguments)| SuffixOperator::Call(arguments, position))
 }
 
-fn element_operator<'a>() -> impl Parser<Stream<'a>, Output = String> {
-    sign(".").with(identifier())
+fn element_operator<'a>() -> impl Parser<Stream<'a>, Output = SuffixOperator> {
+    (attempt(position().skip(sign("."))), identifier())
+        .map(|(position, identifier)| SuffixOperator::Element(identifier, position))
 }
 
-fn try_operator<'a>() -> impl Parser<Stream<'a>, Output = ()> {
-    sign("?")
+fn try_operator<'a>() -> impl Parser<Stream<'a>, Output = SuffixOperator> {
+    position().skip(sign("?")).map(SuffixOperator::Try)
 }
 
 fn atomic_expression<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
@@ -529,16 +549,9 @@ fn if_list<'a>() -> impl Parser<Stream<'a>, Output = IfList> {
 
 fn if_type<'a>() -> impl Parser<Stream<'a>, Output = IfType> {
     (
-        attempt((
-            position(),
-            keyword("if"),
-            identifier(),
-            // TODO Implement a sign combinator like a binary operator by consuming all operator
-            // like characters.
-            sign("=").skip(not_followed_by(one_of(OPERATOR_CHARACTERS.chars()))),
-        )),
+        attempt((position(), keyword("if"), identifier(), sign("="))),
         expression(),
-        sign(";"),
+        keyword("as"),
         if_type_branch(),
         many(attempt((keyword("else"), keyword("if"))).with(if_type_branch())),
         optional(keyword("else").with(block())),
@@ -655,11 +668,10 @@ fn list_literal<'a>() -> impl Parser<Stream<'a>, Output = List> {
     (
         attempt(position().skip(sign("["))),
         type_(),
-        sign(";"),
         sep_end_by(list_element(), sign(",")),
         sign("]"),
     )
-        .map(|(position, type_, _, elements, _)| List::new(type_, elements, position))
+        .map(|(position, type_, elements, _)| List::new(type_, elements, position))
         .expected("list literal")
 }
 
@@ -709,13 +721,32 @@ fn raw_identifier<'a>() -> impl Parser<Stream<'a>, Output = String> {
 }
 
 fn keyword<'a>(name: &'static str) -> impl Parser<Stream<'a>, Output = ()> {
+    if !KEYWORDS.contains(&name) {
+        unreachable!("undefined keyword");
+    }
+
     token(attempt(string(name)).skip(not_followed_by(alpha_num())))
         .with(value(()))
         .expected(name)
 }
 
 fn sign<'a>(sign: &'static str) -> impl Parser<Stream<'a>, Output = ()> {
-    token(string(sign)).with(value(())).expected(sign)
+    let parser = string(sign);
+
+    token(
+        if sign
+            .chars()
+            .any(|character| OPERATOR_CHARACTERS.contains(character))
+        {
+            parser
+                .skip(not_followed_by(one_of(OPERATOR_CHARACTERS.chars())))
+                .left()
+        } else {
+            parser.right()
+        },
+    )
+    .with(value(()))
+    .expected(sign)
 }
 
 fn token<'a, O, P: Parser<Stream<'a>, Output = O>>(p: P) -> impl Parser<Stream<'a>, Output = O> {
@@ -757,6 +788,7 @@ fn comment<'a>() -> impl Parser<Stream<'a>, Output = ()> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::error::ParseError;
     use position::test::PositionFake;
     use pretty_assertions::assert_eq;
 
@@ -781,10 +813,11 @@ mod tests {
             assert_eq!(
                 module().parse(stream("import Foo'Bar", "")).unwrap().0,
                 Module::new(
-                    vec![Import::new(ExternalModulePath::new(
-                        "Foo",
-                        vec!["Bar".into()]
-                    ))],
+                    vec![Import::new(
+                        ExternalModulePath::new("Foo", vec!["Bar".into()]),
+                        None,
+                        vec![]
+                    )],
                     vec![],
                     vec![],
                     vec![],
@@ -890,10 +923,11 @@ mod tests {
                     .unwrap()
                     .0,
                 Module::new(
-                    vec![Import::new(ExternalModulePath::new(
-                        "Foo",
-                        vec!["Bar".into()]
-                    ))],
+                    vec![Import::new(
+                        ExternalModulePath::new("Foo", vec!["Bar".into()]),
+                        None,
+                        vec![]
+                    )],
                     vec![ForeignImport::new(
                         "foo",
                         CallingConvention::Native,
@@ -937,57 +971,125 @@ mod tests {
         }
     }
 
-    #[test]
-    fn parse_import() {
-        assert_eq!(
-            import().parse(stream("import 'Foo", "")).unwrap().0,
-            Import::new(InternalModulePath::new(vec!["Foo".into()])),
-        );
-        assert_eq!(
-            import().parse(stream("import Foo'Bar", "")).unwrap().0,
-            Import::new(ExternalModulePath::new("Foo", vec!["Bar".into()])),
-        );
-    }
+    mod import {
+        use super::*;
+        use pretty_assertions::assert_eq;
 
-    #[test]
-    fn parse_module_path() {
-        assert!(module_path().parse(stream("", "")).is_err());
-        assert_eq!(
-            module_path().parse(stream("'Foo", "")).unwrap().0,
-            InternalModulePath::new(vec!["Foo".into()]).into(),
-        );
-        assert_eq!(
-            module_path().parse(stream("Foo'Bar", "")).unwrap().0,
-            ExternalModulePath::new("Foo", vec!["Bar".into()]).into(),
-        );
-    }
+        #[test]
+        fn parse_import() {
+            assert_eq!(
+                import().parse(stream("import 'Foo", "")).unwrap().0,
+                Import::new(InternalModulePath::new(vec!["Foo".into()]), None, vec![]),
+            );
+            assert_eq!(
+                import().parse(stream("import Foo'Bar", "")).unwrap().0,
+                Import::new(
+                    ExternalModulePath::new("Foo", vec!["Bar".into()]),
+                    None,
+                    vec![]
+                ),
+            );
+        }
 
-    #[test]
-    fn parse_internal_module_path() {
-        assert!(internal_module_path().parse(stream("", "")).is_err());
-        assert_eq!(
-            internal_module_path().parse(stream("'Foo", "")).unwrap().0,
-            InternalModulePath::new(vec!["Foo".into()]),
-        );
-        assert_eq!(
-            internal_module_path()
-                .parse(stream("'Foo'Bar", ""))
-                .unwrap()
-                .0,
-            InternalModulePath::new(vec!["Foo".into(), "Bar".into()]),
-        );
-    }
+        #[test]
+        fn parse_import_with_custom_prefix() {
+            assert_eq!(
+                import().parse(stream("import 'Foo as foo", "")).unwrap().0,
+                Import::new(
+                    InternalModulePath::new(vec!["Foo".into()]),
+                    Some("foo".into()),
+                    vec![]
+                ),
+            );
+        }
 
-    #[test]
-    fn parse_external_module_path() {
-        assert!(external_module_path().parse(stream("", "")).is_err());
-        assert_eq!(
-            external_module_path()
-                .parse(stream("Foo'Bar", ""))
-                .unwrap()
-                .0,
-            ExternalModulePath::new("Foo", vec!["Bar".into()]),
-        );
+        #[test]
+        fn parse_unqualified_import() {
+            assert_eq!(
+                import().parse(stream("import 'Foo { Foo }", "")).unwrap().0,
+                Import::new(
+                    InternalModulePath::new(vec!["Foo".into()]),
+                    None,
+                    vec!["Foo".into()]
+                ),
+            );
+        }
+
+        #[test]
+        fn parse_unqualified_import_with_multiple_identifiers() {
+            assert_eq!(
+                import()
+                    .parse(stream("import 'Foo { Foo, Bar }", ""))
+                    .unwrap()
+                    .0,
+                Import::new(
+                    InternalModulePath::new(vec!["Foo".into()]),
+                    None,
+                    vec!["Foo".into(), "Bar".into()]
+                ),
+            );
+        }
+
+        #[test]
+        fn parse_module_path() {
+            assert!(module_path().parse(stream("", "")).is_err());
+            assert_eq!(
+                module_path().parse(stream("'Foo", "")).unwrap().0,
+                InternalModulePath::new(vec!["Foo".into()]).into(),
+            );
+            assert_eq!(
+                module_path().parse(stream("Foo'Bar", "")).unwrap().0,
+                ExternalModulePath::new("Foo", vec!["Bar".into()]).into(),
+            );
+        }
+
+        #[test]
+        fn parse_internal_module_path() {
+            assert!(internal_module_path().parse(stream("", "")).is_err());
+            assert_eq!(
+                internal_module_path().parse(stream("'Foo", "")).unwrap().0,
+                InternalModulePath::new(vec!["Foo".into()]),
+            );
+            assert_eq!(
+                internal_module_path()
+                    .parse(stream("'Foo'Bar", ""))
+                    .unwrap()
+                    .0,
+                InternalModulePath::new(vec!["Foo".into(), "Bar".into()]),
+            );
+        }
+
+        #[test]
+        fn parse_external_module_path() {
+            assert!(external_module_path().parse(stream("", "")).is_err());
+            assert_eq!(
+                external_module_path()
+                    .parse(stream("Foo'Bar", ""))
+                    .unwrap()
+                    .0,
+                ExternalModulePath::new("Foo", vec!["Bar".into()]),
+            );
+        }
+
+        #[test]
+        fn fail_to_parse_private_external_module_file() {
+            let source = "Foo'bar";
+
+            insta::assert_debug_snapshot!(external_module_path()
+                .parse(stream(source, ""))
+                .map_err(|error| ParseError::new(source, "", error))
+                .err());
+        }
+
+        #[test]
+        fn fail_to_parse_private_external_module_directory() {
+            let source = "Foo'bar'Baz";
+
+            insta::assert_debug_snapshot!(external_module_path()
+                .parse(stream(source, ""))
+                .map_err(|error| ParseError::new(source, "", error))
+                .err());
+        }
     }
 
     #[test]
@@ -1057,7 +1159,7 @@ mod tests {
 
             assert_eq!(
                 definition()
-                    .parse(stream("export foreign x=\\(x number)number{42}", ""))
+                    .parse(stream("foreign x=\\(x number)number{42}", ""))
                     .unwrap()
                     .0,
                 Definition::new(
@@ -1692,7 +1794,7 @@ mod tests {
         fn parse_if_type() {
             assert_eq!(
                 if_type()
-                    .parse(stream("if x=y;boolean {none}else{none}", ""))
+                    .parse(stream("if x=y as boolean {none}else{none}", ""))
                     .unwrap()
                     .0,
                 IfType::new(
@@ -1714,7 +1816,7 @@ mod tests {
             assert_eq!(
                 if_type()
                     .parse(stream(
-                        "if x=y;boolean{none}else if none{none}else{none}",
+                        "if x=y as boolean{none}else if none{none}else{none}",
                         ""
                     ))
                     .unwrap()
@@ -1743,7 +1845,7 @@ mod tests {
 
             assert_eq!(
                 if_type()
-                    .parse(stream("if x=y;boolean{none}else if none{none}", ""))
+                    .parse(stream("if x=y as boolean{none}else if none{none}", ""))
                     .unwrap()
                     .0,
                 IfType::new(
@@ -1783,77 +1885,92 @@ mod tests {
             );
         }
 
-        #[test]
-        fn parse_call() {
-            assert_eq!(
-                expression().parse(stream("f()", "")).unwrap().0,
-                Call::new(
-                    Variable::new("f", Position::fake()),
-                    vec![],
-                    Position::fake()
-                )
-                .into()
-            );
+        mod call {
+            use super::*;
+            use pretty_assertions::assert_eq;
 
-            assert_eq!(
-                expression().parse(stream("f()()", "")).unwrap().0,
-                Call::new(
+            #[test]
+            fn parse_call() {
+                assert_eq!(
+                    expression().parse(stream("f()", "")).unwrap().0,
                     Call::new(
                         Variable::new("f", Position::fake()),
                         vec![],
                         Position::fake()
-                    ),
-                    vec![],
-                    Position::fake()
-                )
-                .into()
-            );
+                    )
+                    .into()
+                );
 
-            assert_eq!(
-                expression().parse(stream("f(1)", "")).unwrap().0,
-                Call::new(
-                    Variable::new("f", Position::fake()),
-                    vec![Number::new(1.0, Position::fake()).into()],
-                    Position::fake()
-                )
-                .into()
-            );
+                assert_eq!(
+                    expression().parse(stream("f()()", "")).unwrap().0,
+                    Call::new(
+                        Call::new(
+                            Variable::new("f", Position::fake()),
+                            vec![],
+                            Position::fake()
+                        ),
+                        vec![],
+                        Position::fake()
+                    )
+                    .into()
+                );
 
-            assert_eq!(
-                expression().parse(stream("f(1,)", "")).unwrap().0,
-                Call::new(
-                    Variable::new("f", Position::fake()),
-                    vec![Number::new(1.0, Position::fake()).into()],
-                    Position::fake()
-                )
-                .into()
-            );
+                assert_eq!(
+                    expression().parse(stream("f(1)", "")).unwrap().0,
+                    Call::new(
+                        Variable::new("f", Position::fake()),
+                        vec![Number::new(1.0, Position::fake()).into()],
+                        Position::fake()
+                    )
+                    .into()
+                );
 
-            assert_eq!(
-                expression().parse(stream("f(1, 2)", "")).unwrap().0,
-                Call::new(
-                    Variable::new("f", Position::fake()),
-                    vec![
-                        Number::new(1.0, Position::fake()).into(),
-                        Number::new(2.0, Position::fake()).into()
-                    ],
-                    Position::fake()
-                )
-                .into()
-            );
+                assert_eq!(
+                    expression().parse(stream("f(1,)", "")).unwrap().0,
+                    Call::new(
+                        Variable::new("f", Position::fake()),
+                        vec![Number::new(1.0, Position::fake()).into()],
+                        Position::fake()
+                    )
+                    .into()
+                );
 
-            assert_eq!(
-                expression().parse(stream("f(1, 2,)", "")).unwrap().0,
-                Call::new(
-                    Variable::new("f", Position::fake()),
-                    vec![
-                        Number::new(1.0, Position::fake()).into(),
-                        Number::new(2.0, Position::fake()).into()
-                    ],
-                    Position::fake()
-                )
-                .into()
-            );
+                assert_eq!(
+                    expression().parse(stream("f(1, 2)", "")).unwrap().0,
+                    Call::new(
+                        Variable::new("f", Position::fake()),
+                        vec![
+                            Number::new(1.0, Position::fake()).into(),
+                            Number::new(2.0, Position::fake()).into()
+                        ],
+                        Position::fake()
+                    )
+                    .into()
+                );
+
+                assert_eq!(
+                    expression().parse(stream("f(1, 2,)", "")).unwrap().0,
+                    Call::new(
+                        Variable::new("f", Position::fake()),
+                        vec![
+                            Number::new(1.0, Position::fake()).into(),
+                            Number::new(2.0, Position::fake()).into()
+                        ],
+                        Position::fake()
+                    )
+                    .into()
+                );
+            }
+
+            #[test]
+            fn fail_to_parse_call() {
+                let source = "f(1+)";
+
+                insta::assert_debug_snapshot!(expression()
+                    .parse(stream(source, ""))
+                    .map_err(|error| ParseError::new(source, "", error))
+                    .err());
+            }
         }
 
         #[test]
@@ -2385,11 +2502,11 @@ mod tests {
         fn parse_list() {
             for (source, target) in vec![
                 (
-                    "[none;]",
+                    "[none]",
                     List::new(types::None::new(Position::fake()), vec![], Position::fake()),
                 ),
                 (
-                    "[none;none]",
+                    "[none none]",
                     List::new(
                         types::None::new(Position::fake()),
                         vec![ListElement::Single(None::new(Position::fake()).into())],
@@ -2397,7 +2514,7 @@ mod tests {
                     ),
                 ),
                 (
-                    "[none;none,]",
+                    "[none none,]",
                     List::new(
                         types::None::new(Position::fake()),
                         vec![ListElement::Single(None::new(Position::fake()).into())],
@@ -2405,7 +2522,7 @@ mod tests {
                     ),
                 ),
                 (
-                    "[none;none,none]",
+                    "[none none,none]",
                     List::new(
                         types::None::new(Position::fake()),
                         vec![
@@ -2416,7 +2533,7 @@ mod tests {
                     ),
                 ),
                 (
-                    "[none;none,none,]",
+                    "[none none,none,]",
                     List::new(
                         types::None::new(Position::fake()),
                         vec![
@@ -2427,7 +2544,7 @@ mod tests {
                     ),
                 ),
                 (
-                    "[none;...foo]",
+                    "[none ...foo]",
                     List::new(
                         types::None::new(Position::fake()),
                         vec![ListElement::Multiple(
@@ -2437,7 +2554,7 @@ mod tests {
                     ),
                 ),
                 (
-                    "[none;...foo,]",
+                    "[none ...foo,]",
                     List::new(
                         types::None::new(Position::fake()),
                         vec![ListElement::Multiple(
@@ -2447,7 +2564,7 @@ mod tests {
                     ),
                 ),
                 (
-                    "[none;...foo,...bar]",
+                    "[none ...foo,...bar]",
                     List::new(
                         types::None::new(Position::fake()),
                         vec![
@@ -2458,7 +2575,7 @@ mod tests {
                     ),
                 ),
                 (
-                    "[none;...foo,...bar,]",
+                    "[none ...foo,...bar,]",
                     List::new(
                         types::None::new(Position::fake()),
                         vec![
@@ -2469,7 +2586,7 @@ mod tests {
                     ),
                 ),
                 (
-                    "[none;foo,...bar]",
+                    "[none foo,...bar]",
                     List::new(
                         types::None::new(Position::fake()),
                         vec![
@@ -2480,7 +2597,7 @@ mod tests {
                     ),
                 ),
                 (
-                    "[none;...foo,bar]",
+                    "[none ...foo,bar]",
                     List::new(
                         types::None::new(Position::fake()),
                         vec![
@@ -2515,9 +2632,10 @@ mod tests {
 
     #[test]
     fn parse_keyword() {
-        assert!(keyword("foo").parse(stream("bar", "")).is_err());
-        assert!(keyword("fo").parse(stream("foo", "")).is_err());
-        assert!(keyword("foo").parse(stream("foo", "")).is_ok());
+        assert!(keyword("type").parse(stream("bar", "")).is_err());
+        // spell-checker: disable-next-line
+        assert!(keyword("type").parse(stream("typer", "")).is_err());
+        assert!(keyword("type").parse(stream("type", "")).is_ok());
     }
 
     #[test]
@@ -2526,6 +2644,7 @@ mod tests {
         assert!(sign("+").parse(stream("-", "")).is_err());
         assert!(sign("+").parse(stream("+", "")).is_ok());
         assert!(sign("++").parse(stream("++", "")).is_ok());
+        assert!(sign("+").parse(stream("++", "")).is_err());
     }
 
     #[test]

@@ -19,7 +19,7 @@ Feature: Union
     Given a file named "Foo.pen" with:
     """pen
     f = \() [number] | none {
-      [number; 42]
+      [number 42]
     }
     """
     When I run `pen build`
@@ -29,7 +29,7 @@ Feature: Union
     Given a file named "Foo.pen" with:
     """pen
     f = \(x number | none) number {
-      if x = x; number {
+      if x = x as number {
         x
       } else if none {
         0
@@ -43,7 +43,7 @@ Feature: Union
     Given a file named "Foo.pen" with:
     """pen
     f = \(x number | none) number {
-      if x = x; none {
+      if x = x as none {
         0
       } else {
         x
@@ -57,7 +57,7 @@ Feature: Union
     Given a file named "Foo.pen" with:
     """pen
     f = \(x number | boolean | none) number | none {
-      if x = x; number | none {
+      if x = x as number | none {
         x
       } else {
         none
