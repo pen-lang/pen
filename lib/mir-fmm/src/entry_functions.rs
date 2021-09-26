@@ -169,6 +169,24 @@ fn compile_initial_thunk_entry(
                         types,
                     )?;
 
+                    let payload_pointer = compile_payload_pointer(definition, types)?;
+                    let environment_pointer = if definition.is_thunk() {
+                        fmm::build::union_address(payload_pointer, 0)?.into()
+                    } else {
+                        payload_pointer
+                    };
+                    for (index, free_variable) in definition.environment().iter().enumerate() {
+                        reference_count::drop_expression(
+                            &instruction_builder,
+                            &instruction_builder.load(fmm::build::record_address(
+                                environment_pointer.clone(),
+                                index,
+                            )?)?,
+                            free_variable.type_(),
+                            types,
+                        )?;
+                    }
+
                     reference_count::clone_expression(
                         &instruction_builder,
                         &value,
