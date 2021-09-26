@@ -68,12 +68,7 @@ fn compile_body(
     variables: &HashMap<String, fmm::build::TypedExpression>,
     types: &HashMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    let payload_pointer = compile_payload_pointer(definition, types)?;
-    let environment_pointer = if definition.is_thunk() {
-        fmm::build::union_address(payload_pointer, 0)?.into()
-    } else {
-        payload_pointer
-    };
+    let environment_pointer = compile_payload_pointer(definition, types)?;
 
     expressions::compile(
         module_builder,
@@ -169,12 +164,8 @@ fn compile_initial_thunk_entry(
                         types,
                     )?;
 
-                    let payload_pointer = compile_payload_pointer(definition, types)?;
-                    let environment_pointer = if definition.is_thunk() {
-                        fmm::build::union_address(payload_pointer, 0)?.into()
-                    } else {
-                        payload_pointer
-                    };
+                    let environment_pointer = compile_payload_pointer(definition, types)?;
+
                     for (index, free_variable) in definition.environment().iter().enumerate() {
                         reference_count::drop_expression(
                             &instruction_builder,
@@ -355,6 +346,19 @@ fn compile_thunk_value_pointer(
     types: &HashMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     Ok(fmm::build::union_address(compile_payload_pointer(definition, types)?, 1)?.into())
+}
+
+fn compile_environment_pointer(
+    definition: &mir::ir::Definition,
+    types: &HashMap<String, mir::types::RecordBody>,
+) -> Result<fmm::build::TypedExpression, CompileError> {
+    let payload_pointer = compile_payload_pointer(definition, types)?;
+
+    Ok(if definition.is_thunk() {
+        fmm::build::union_address(payload_pointer, 0)?.into()
+    } else {
+        payload_pointer
+    })
 }
 
 fn compile_payload_pointer(
