@@ -31,9 +31,7 @@ pub fn run(
     let interfaces = interface_files
         .iter()
         .map(|file| -> Result<interface::Module, Box<dyn Error>> {
-            Ok(interface_serializer::deserialize(
-                &infrastructure.file_system.read_to_vec(&file)?,
-            )?)
+            interface_serializer::deserialize(&infrastructure.file_system.read_to_vec(file)?)
         })
         .collect::<Result<Vec<_>, _>>()?;
 

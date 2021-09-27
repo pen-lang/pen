@@ -13,7 +13,7 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
         file_path_converter.convert_to_file_path(&main_package_directory)?;
 
     app::test_runner::run(
-        &infrastructure::create(file_path_converter.clone())?,
+        &infrastructure::create(file_path_converter)?,
         &main_package_directory,
         &main_package_directory.join(&app::infra::FilePath::new([
             OUTPUT_DIRECTORY,
