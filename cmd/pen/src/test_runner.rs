@@ -11,13 +11,15 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
     ));
     let main_package_directory =
         file_path_converter.convert_to_file_path(&main_package_directory)?;
-    let output_directory = main_package_directory.join(&app::infra::FilePath::new([
-        OUTPUT_DIRECTORY,
-        DEFAULT_TARGET_DIRECTORY,
-    ]));
-    let infrastructure = infrastructure::create(file_path_converter.clone())?;
 
-    app::test_runner::run(&infrastructure, &main_package_directory, &output_directory)?;
+    app::test_runner::run(
+        &infrastructure::create(file_path_converter.clone())?,
+        &main_package_directory,
+        &main_package_directory.join(&app::infra::FilePath::new([
+            OUTPUT_DIRECTORY,
+            DEFAULT_TARGET_DIRECTORY,
+        ])),
+    )?;
 
     Ok(())
 }

@@ -28,23 +28,31 @@ pub fn run(
         })
         .collect::<Vec<_>>();
 
-    let test_functions = interface_files
+    let interfaces = interface_files
         .iter()
         .map(|file| -> Result<interface::Module, Box<dyn Error>> {
             Ok(interface_serializer::deserialize(
                 &infrastructure.file_system.read_to_vec(&file)?,
             )?)
         })
-        .collect::<Result<Vec<_>, _>>()?
+        .collect::<Result<Vec<_>, _>>()?;
+
+    let test_functions = interfaces
         .iter()
         .flat_map(|interface| {
-            interface.declarations().iter().filter(|declaration| {
-                declaration
-                    .name()
-                    .starts_with(infrastructure.test_configuration.test_function_prefix)
-            })
+            interface
+                .declarations()
+                .iter()
+                .filter(|declaration| {
+                    declaration
+                        .name()
+                        .starts_with(infrastructure.test_configuration.test_function_prefix)
+                })
+                .cloned()
         })
         .collect::<Vec<_>>();
+
+    dbg!(test_functions);
 
     Ok(())
 }
