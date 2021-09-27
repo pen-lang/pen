@@ -12,6 +12,7 @@ mod package_builder;
 mod package_creator;
 mod prelude_module_compiler;
 mod test_configuration;
+mod test_runner;
 
 fn main() {
     if let Err(error) = run() {
@@ -36,6 +37,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                 .about("Builds a package")
                 .arg(build_target_triple_argument().possible_values(CROSS_COMPILE_TARGETS)),
         )
+        .subcommand(clap::SubCommand::with_name("test").about("Tests modules in a package"))
         .subcommand(
             clap::SubCommand::with_name("create")
                 .about("Creates a package")
@@ -125,6 +127,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
 
             package_builder::build(matches.value_of("target"), matches.is_present("verbose"))
         }
+        ("test", _) => test_runner::run(),
         ("create", matches) => {
             let matches = matches.unwrap();
 
