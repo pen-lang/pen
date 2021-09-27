@@ -43,12 +43,7 @@ pub fn run(
             interface
                 .declarations()
                 .iter()
-                .filter(|declaration| {
-                    declaration
-                        .name()
-                        .starts_with(infrastructure.test_configuration.test_function_prefix)
-                })
-                .cloned()
+                .map(|declaration| declaration.name())
         })
         .collect::<Vec<_>>();
 

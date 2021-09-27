@@ -11,7 +11,6 @@ mod main_module_target;
 mod module_target;
 mod package_configuration_reader;
 mod package_configuration_writer;
-mod test_configuration;
 
 pub use build_script_compiler::*;
 pub use build_script_dependency_compiler::*;
@@ -26,7 +25,6 @@ pub use main_module_target::*;
 pub use module_target::*;
 pub use package_configuration_reader::*;
 pub use package_configuration_writer::*;
-pub use test_configuration::*;
 
 pub const EXTERNAL_PACKAGE_DIRECTORY: &str = "packages";
 pub const OBJECT_DIRECTORY: &str = "objects";

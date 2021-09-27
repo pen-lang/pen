@@ -3,7 +3,6 @@ use crate::file_path_configuration::{
     FILE_PATH_CONFIGURATION, LANGUAGE_ROOT_ENVIRONMENT_VARIABLE, LANGUAGE_ROOT_SCHEME,
     LINK_SCRIPT_BASENAME,
 };
-use crate::test_configuration::TEST_CONFIGURATION;
 use std::{error::Error, sync::Arc};
 
 pub fn create(
@@ -45,6 +44,5 @@ pub fn create(
             file_system,
             BUILD_CONFIGURATION_FILENAME,
         )),
-        test_configuration: TEST_CONFIGURATION.into(),
     })
 }
