@@ -11,6 +11,6 @@ pub fn find(
     file_finder::find(
         infrastructure,
         package_directory,
-        infrastructure.file_path_configuration.source_file_extension,
+        infrastructure.file_path_configuration.test_file_extension,
     )
 }

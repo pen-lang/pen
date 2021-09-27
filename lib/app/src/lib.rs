@@ -3,6 +3,7 @@ mod common;
 mod error;
 mod external_package_configuration_reader;
 mod external_package_topological_sorter;
+mod file_finder;
 pub mod infra;
 pub mod module_compiler;
 pub mod module_dependency_resolver;
@@ -12,6 +13,7 @@ pub mod package_builder;
 pub mod package_creator;
 pub mod package_initializer;
 mod prelude_interface_file_finder;
+mod test_module_finder;
 pub mod test_runner;
 
 pub use application_configuration::{ApplicationConfiguration, MainModuleConfiguration};

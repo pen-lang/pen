@@ -1,7 +1,7 @@
 use crate::{
     common::{file_path_resolver, interface_serializer},
     infra::{FilePath, Infrastructure},
-    module_finder,
+    test_module_finder,
 };
 use std::error::Error;
 
@@ -10,14 +10,7 @@ pub fn run(
     main_package_directory: &FilePath,
     output_directory: &FilePath,
 ) -> Result<(), Box<dyn Error>> {
-    let source_files = module_finder::find(infrastructure, main_package_directory)?
-        .into_iter()
-        .filter(|file| {
-            file.has_extension(infrastructure.file_path_configuration.test_file_extension)
-        })
-        .collect::<Vec<_>>();
-
-    let interface_files = source_files
+    let interface_files = test_module_finder::find(infrastructure, main_package_directory)?
         .iter()
         .map(|file| {
             file_path_resolver::resolve_interface_file(
