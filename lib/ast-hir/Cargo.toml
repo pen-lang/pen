@@ -12,4 +12,4 @@ itertools = "0.10"
 position = { path = "../position" }
 
 [dev-dependencies]
-pretty_assertions = "0.7"
+pretty_assertions = "1.0"
