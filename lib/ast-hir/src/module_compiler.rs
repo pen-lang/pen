@@ -55,7 +55,7 @@ pub fn compile(module: &ast::Module) -> Result<ir::Module, CompileError> {
         module
             .definitions()
             .iter()
-            .map(|definition| compile_definition(definition))
+            .map(compile_definition)
             .collect::<Result<_, _>>()?,
         module.position().clone(),
     ))
@@ -185,7 +185,7 @@ fn compile_expression(expression: &ast::Expression) -> Result<ir::Expression, Co
             compile_expression(call.function())?,
             call.arguments()
                 .iter()
-                .map(|argument| compile_expression(argument))
+                .map(compile_expression)
                 .collect::<Result<_, _>>()?,
             call.position().clone(),
         )

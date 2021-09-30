@@ -31,7 +31,7 @@ fn calculate_string(type_: &Type, types: &HashMap<String, Type>) -> Result<Strin
             function
                 .arguments()
                 .iter()
-                .map(|argument| calculate_string(argument))
+                .map(calculate_string)
                 .collect::<Result<Vec<_>, _>>()?
                 .join(","),
             calculate_string(function.result())?

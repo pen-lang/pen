@@ -35,7 +35,7 @@ pub fn compile_function(
         function
             .arguments()
             .iter()
-            .map(|type_| compile(type_))
+            .map(compile)
             .collect::<Result<_, _>>()?,
         compile(function.result())?,
     ))
