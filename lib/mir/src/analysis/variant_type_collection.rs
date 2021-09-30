@@ -5,7 +5,7 @@ pub fn collect_variant_types(module: &Module) -> HashSet<Type> {
     module
         .definitions()
         .iter()
-        .flat_map(|definition| collect_from_definition(definition))
+        .flat_map(collect_from_definition)
         .collect()
 }
 

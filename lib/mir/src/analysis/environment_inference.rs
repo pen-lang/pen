@@ -11,7 +11,7 @@ pub fn infer_environment(module: &Module) -> Module {
         module
             .definitions()
             .iter()
-            .map(|definition| infer_in_global_definition(definition))
+            .map(infer_in_global_definition)
             .collect(),
     )
 }
