@@ -1,9 +1,0 @@
-import 'State
-
-type Context {
-  state State'Context
-}
-
-State = \(ctx Context) State'Context {
-  ctx.state
-}
