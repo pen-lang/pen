@@ -1,3 +1,4 @@
+use super::foreign_export::ForeignExport;
 use super::lambda::Lambda;
 use position::Position;
 
@@ -5,16 +6,21 @@ use position::Position;
 pub struct Definition {
     name: String,
     lambda: Lambda,
-    foreign: bool,
+    foreign_export: Option<ForeignExport>,
     position: Position,
 }
 
 impl Definition {
-    pub fn new(name: impl Into<String>, lambda: Lambda, foreign: bool, position: Position) -> Self {
+    pub fn new(
+        name: impl Into<String>,
+        lambda: Lambda,
+        foreign_export: Option<ForeignExport>,
+        position: Position,
+    ) -> Self {
         Self {
             name: name.into(),
             lambda,
-            foreign,
+            foreign_export,
             position,
         }
     }
@@ -27,8 +33,8 @@ impl Definition {
         &self.lambda
     }
 
-    pub fn is_foreign(&self) -> bool {
-        self.foreign
+    pub fn foreign_export(&self) -> Option<&ForeignExport> {
+        self.foreign_export.as_ref()
     }
 
     pub fn position(&self) -> &Position {
