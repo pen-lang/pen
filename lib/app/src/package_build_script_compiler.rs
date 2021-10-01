@@ -11,13 +11,49 @@ use std::error::Error;
 
 pub fn compile_main(
     infrastructure: &Infrastructure,
+    prelude_package_url: &url::Url,
+    output_directory: &FilePath,
+    target_triple: Option<&str>,
+    child_build_script_files: &[FilePath],
+) -> Result<FilePath, Box<dyn Error>> {
+    let build_script_file = file_path_resolver::resolve_special_build_script_file(
+        output_directory,
+        "main",
+        &infrastructure.file_path_configuration,
+    );
+
+    infrastructure.file_system.write(
+        &build_script_file,
+        infrastructure
+            .build_script_compiler
+            .compile_main(
+                &prelude_interface_file_finder::find(
+                    infrastructure,
+                    output_directory,
+                    prelude_package_url,
+                )?,
+                output_directory,
+                target_triple,
+                child_build_script_files,
+            )?
+            .as_bytes(),
+    )?;
+
+    Ok(build_script_file)
+}
+
+pub fn compile_modules(
+    infrastructure: &Infrastructure,
     package_directory: &FilePath,
     output_directory: &FilePath,
-    rule_build_script_file: &FilePath,
-    child_build_script_files: &[FilePath],
-    build_script_file: &FilePath,
     application_configuration: &ApplicationConfiguration,
-) -> Result<(), Box<dyn Error>> {
+) -> Result<FilePath, Box<dyn Error>> {
+    let build_script_file = file_path_resolver::resolve_special_build_script_file(
+        output_directory,
+        "modules",
+        &infrastructure.file_path_configuration,
+    );
+
     let (main_module_targets, module_targets) = module_target_collector::collect_module_targets(
         infrastructure,
         package_directory,
@@ -34,10 +70,10 @@ pub fn compile_main(
     });
 
     infrastructure.file_system.write(
-        build_script_file,
+        &build_script_file,
         infrastructure
             .build_script_compiler
-            .compile_main(
+            .compile_modules(
                 &module_targets,
                 main_module_targets
                     .get(0)
@@ -78,13 +114,11 @@ pub fn compile_main(
                     &infrastructure.file_path_configuration,
                 ),
                 package_directory,
-                rule_build_script_file,
-                child_build_script_files,
             )?
             .as_bytes(),
     )?;
 
-    Ok(())
+    Ok(build_script_file)
 }
 
 pub fn compile_application(
@@ -93,10 +127,15 @@ pub fn compile_application(
     output_directory: &FilePath,
     prelude_package_url: &url::Url,
     application_configuration: &ApplicationConfiguration,
-    build_script_file: &FilePath,
-) -> Result<(), Box<dyn Error>> {
+) -> Result<FilePath, Box<dyn Error>> {
+    let build_script_file = file_path_resolver::resolve_special_build_script_file(
+        output_directory,
+        "application",
+        &infrastructure.file_path_configuration,
+    );
+
     infrastructure.file_system.write(
-        build_script_file,
+        &build_script_file,
         infrastructure
             .build_script_compiler
             .compile_application(
@@ -157,7 +196,7 @@ pub fn compile_application(
             .as_bytes(),
     )?;
 
-    Ok(())
+    Ok(build_script_file)
 }
 
 pub fn compile_external(
@@ -227,32 +266,6 @@ pub fn compile_prelude(
                     &infrastructure.file_path_configuration,
                 ),
                 &package_directory,
-            )?
-            .as_bytes(),
-    )?;
-
-    Ok(())
-}
-
-pub fn compile_rules(
-    infrastructure: &Infrastructure,
-    prelude_package_url: &url::Url,
-    output_directory: &FilePath,
-    target_triple: Option<&str>,
-    build_script_file: &FilePath,
-) -> Result<(), Box<dyn Error>> {
-    infrastructure.file_system.write(
-        build_script_file,
-        infrastructure
-            .build_script_compiler
-            .compile_rules(
-                &prelude_interface_file_finder::find(
-                    infrastructure,
-                    output_directory,
-                    prelude_package_url,
-                )?,
-                output_directory,
-                target_triple,
             )?
             .as_bytes(),
     )?;
