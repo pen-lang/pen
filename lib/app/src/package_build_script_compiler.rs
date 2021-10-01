@@ -9,12 +9,43 @@ use crate::{
 };
 use std::error::Error;
 
+pub fn compile_main(
+    infrastructure: &Infrastructure,
+    prelude_package_url: &url::Url,
+    output_directory: &FilePath,
+    target_triple: Option<&str>,
+    child_build_script_files: &[FilePath],
+) -> Result<FilePath, Box<dyn Error>> {
+    let build_script_file = file_path_resolver::resolve_special_build_script_file(
+        output_directory,
+        "main",
+        &infrastructure.file_path_configuration,
+    );
+
+    infrastructure.file_system.write(
+        &build_script_file,
+        infrastructure
+            .build_script_compiler
+            .compile_main(
+                &prelude_interface_file_finder::find(
+                    infrastructure,
+                    output_directory,
+                    prelude_package_url,
+                )?,
+                output_directory,
+                target_triple,
+                child_build_script_files,
+            )?
+            .as_bytes(),
+    )?;
+
+    Ok(build_script_file)
+}
+
 pub fn compile_modules(
     infrastructure: &Infrastructure,
     package_directory: &FilePath,
     output_directory: &FilePath,
-    rule_build_script_file: &FilePath,
-    child_build_script_files: &[FilePath],
     application_configuration: &ApplicationConfiguration,
 ) -> Result<FilePath, Box<dyn Error>> {
     let build_script_file = file_path_resolver::resolve_special_build_script_file(
@@ -83,8 +114,6 @@ pub fn compile_modules(
                     &infrastructure.file_path_configuration,
                 ),
                 package_directory,
-                rule_build_script_file,
-                child_build_script_files,
             )?
             .as_bytes(),
     )?;
@@ -98,10 +127,15 @@ pub fn compile_application(
     output_directory: &FilePath,
     prelude_package_url: &url::Url,
     application_configuration: &ApplicationConfiguration,
-    build_script_file: &FilePath,
-) -> Result<(), Box<dyn Error>> {
+) -> Result<FilePath, Box<dyn Error>> {
+    let build_script_file = file_path_resolver::resolve_special_build_script_file(
+        output_directory,
+        "application",
+        &infrastructure.file_path_configuration,
+    );
+
     infrastructure.file_system.write(
-        build_script_file,
+        &build_script_file,
         infrastructure
             .build_script_compiler
             .compile_application(
@@ -162,7 +196,7 @@ pub fn compile_application(
             .as_bytes(),
     )?;
 
-    Ok(())
+    Ok(build_script_file)
 }
 
 pub fn compile_external(
@@ -237,37 +271,6 @@ pub fn compile_prelude(
     )?;
 
     Ok(())
-}
-
-pub fn compile_rules(
-    infrastructure: &Infrastructure,
-    prelude_package_url: &url::Url,
-    output_directory: &FilePath,
-    target_triple: Option<&str>,
-) -> Result<FilePath, Box<dyn Error>> {
-    let build_script_file = file_path_resolver::resolve_special_build_script_file(
-        output_directory,
-        "rules",
-        &infrastructure.file_path_configuration,
-    );
-
-    infrastructure.file_system.write(
-        &build_script_file,
-        infrastructure
-            .build_script_compiler
-            .compile_rules(
-                &prelude_interface_file_finder::find(
-                    infrastructure,
-                    output_directory,
-                    prelude_package_url,
-                )?,
-                output_directory,
-                target_triple,
-            )?
-            .as_bytes(),
-    )?;
-
-    Ok(build_script_file)
 }
 
 fn resolve_external_package_archive_files(

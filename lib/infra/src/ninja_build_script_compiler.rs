@@ -304,11 +304,12 @@ impl NinjaBuildScriptCompiler {
 }
 
 impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
-    fn compile_rules(
+    fn compile_main(
         &self,
         prelude_interface_files: &[FilePath],
         output_directory: &FilePath,
         target_triple: Option<&str>,
+        child_build_script_files: &[FilePath],
     ) -> Result<String, Box<dyn Error>> {
         Ok(vec![
             "ninja_required_version = 1.10".into(),
@@ -321,6 +322,12 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
         ]
         .into_iter()
         .chain(self.compile_rules(prelude_interface_files, target_triple)?)
+        .chain(child_build_script_files.iter().map(|file| {
+            format!(
+                "subninja {}",
+                self.file_path_converter.convert_to_os_path(file).display()
+            )
+        }))
         .collect::<Vec<_>>()
         .join("\n")
             + "\n")
@@ -333,41 +340,28 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
         archive_file: &FilePath,
         ffi_archive_file: &FilePath,
         package_directory: &FilePath,
-        rule_build_script_file: &FilePath,
-        child_build_script_files: &[FilePath],
     ) -> Result<String, Box<dyn Error>> {
-        Ok(vec![format!(
-            "include {}",
-            self.file_path_converter
-                .convert_to_os_path(rule_build_script_file)
-                .display()
-        )]
-        .into_iter()
-        .chain(self.compile_module_targets(module_targets, ffi_archive_file, package_directory)?)
-        .chain(if let Some(main_module_target) = main_module_target {
-            self.compile_main_module_target(main_module_target, package_directory)?
-        } else {
-            vec![]
-        })
-        .chain(
-            self.compile_archive(
-                &module_targets
-                    .iter()
-                    .map(|target| target.object_file())
-                    .chain(main_module_target.map(|target| target.object_file()))
-                    .collect::<Vec<_>>(),
-                archive_file,
-                package_directory,
-            )?,
-        )
-        .chain(child_build_script_files.iter().map(|file| {
-            format!(
-                "subninja {}",
-                self.file_path_converter.convert_to_os_path(file).display()
+        Ok(self
+            .compile_module_targets(module_targets, ffi_archive_file, package_directory)?
+            .into_iter()
+            .chain(if let Some(main_module_target) = main_module_target {
+                self.compile_main_module_target(main_module_target, package_directory)?
+            } else {
+                vec![]
+            })
+            .chain(
+                self.compile_archive(
+                    &module_targets
+                        .iter()
+                        .map(|target| target.object_file())
+                        .chain(main_module_target.map(|target| target.object_file()))
+                        .collect::<Vec<_>>(),
+                    archive_file,
+                    package_directory,
+                )?,
             )
-        }))
-        .collect::<Vec<_>>()
-        .join("\n")
+            .collect::<Vec<_>>()
+            .join("\n")
             + "\n")
     }
 
