@@ -32,10 +32,7 @@ pub fn compile(
                         .ok_or_else(|| {
                             CompileError::FunctionExpected(declaration.position().clone())
                         })?,
-                    match declaration.calling_convention() {
-                        CallingConvention::Native => mir::ir::CallingConvention::Source,
-                        CallingConvention::C => mir::ir::CallingConvention::Target,
-                    },
+                    compile_calling_convention(declaration.calling_convention()),
                 ))
             })
             .collect::<Result<_, _>>()?,
@@ -43,10 +40,11 @@ pub fn compile(
             .definitions()
             .iter()
             .flat_map(|definition| {
-                if definition.is_foreign() {
+                if let Some(configuration) = definition.foreign_definition_configuration() {
                     Some(mir::ir::ForeignDefinition::new(
                         definition.name(),
                         definition.original_name(),
+                        compile_calling_convention(configuration.calling_convention()),
                     ))
                 } else {
                     None
@@ -64,6 +62,13 @@ pub fn compile(
             .map(|definition| compile_definition(definition, type_context))
             .collect::<Result<Vec<_>, CompileError>>()?,
     ))
+}
+
+fn compile_calling_convention(calling_convention: CallingConvention) -> mir::ir::CallingConvention {
+    match calling_convention {
+        CallingConvention::Native => mir::ir::CallingConvention::Source,
+        CallingConvention::C => mir::ir::CallingConvention::Target,
+    }
 }
 
 fn compile_type_definition(
@@ -142,7 +147,7 @@ mod tests {
     }
 
     #[test]
-    fn compile_foreign_declaration() {
+    fn compile_foreign_definition() {
         assert_eq!(
             compile_module(&Module::empty().set_definitions(vec![Definition::new(
                 "foo",
@@ -153,14 +158,53 @@ mod tests {
                     None::new(Position::fake()),
                     Position::fake(),
                 ),
-                true,
+                ForeignDefinitionConfiguration::new(CallingConvention::Native).into(),
                 false,
                 Position::fake(),
             )])),
             Ok(mir::ir::Module::new(
                 vec![],
                 vec![],
-                vec![mir::ir::ForeignDefinition::new("foo", "bar")],
+                vec![mir::ir::ForeignDefinition::new(
+                    "foo",
+                    "bar",
+                    mir::ir::CallingConvention::Source
+                )],
+                vec![],
+                vec![mir::ir::Definition::new(
+                    "foo",
+                    vec![mir::ir::Argument::new("x", mir::types::Type::None)],
+                    mir::ir::Expression::None,
+                    mir::types::Type::None,
+                )],
+            ))
+        );
+    }
+
+    #[test]
+    fn compile_foreign_definition_with_c_calling_convention() {
+        assert_eq!(
+            compile_module(&Module::empty().set_definitions(vec![Definition::new(
+                "foo",
+                "bar",
+                Lambda::new(
+                    vec![Argument::new("x", types::None::new(Position::fake()))],
+                    types::None::new(Position::fake()),
+                    None::new(Position::fake()),
+                    Position::fake(),
+                ),
+                ForeignDefinitionConfiguration::new(CallingConvention::C).into(),
+                false,
+                Position::fake(),
+            )])),
+            Ok(mir::ir::Module::new(
+                vec![],
+                vec![],
+                vec![mir::ir::ForeignDefinition::new(
+                    "foo",
+                    "bar",
+                    mir::ir::CallingConvention::Target
+                )],
                 vec![],
                 vec![mir::ir::Definition::new(
                     "foo",

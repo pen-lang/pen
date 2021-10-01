@@ -32,7 +32,7 @@ fn infer_definition(
         definition.name(),
         definition.original_name(),
         infer_lambda(definition.lambda(), variables, type_context)?,
-        definition.is_foreign(),
+        definition.foreign_definition_configuration().cloned(),
         definition.is_public(),
         definition.position().clone(),
     ))
