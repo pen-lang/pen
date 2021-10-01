@@ -15,31 +15,15 @@ pub fn build(
     prelude_package_url: &url::Url,
     application_configuration: &ApplicationConfiguration,
 ) -> Result<(), Box<dyn Error>> {
-    let rule_build_script_file = file_path_resolver::resolve_special_build_script_file(
-        output_directory,
-        "rules",
-        &infrastructure.file_path_configuration,
-    );
-    let package_build_script_file = file_path_resolver::resolve_special_build_script_file(
-        output_directory,
-        "main",
-        &infrastructure.file_path_configuration,
-    );
-
-    package_build_script_compiler::compile_rules(
-        infrastructure,
-        prelude_package_url,
-        output_directory,
-        target_triple,
-        &rule_build_script_file,
-    )?;
-
-    package_build_script_compiler::compile_main(
+    let child_build_script_files = vec![package_build_script_compiler::compile_modules(
         infrastructure,
         main_package_directory,
         output_directory,
-        &rule_build_script_file,
-        &external_package_topological_sorter::sort(
+        application_configuration,
+    )?]
+    .into_iter()
+    .chain(
+        external_package_topological_sorter::sort(
             infrastructure,
             main_package_directory,
             output_directory,
@@ -52,43 +36,36 @@ pub fn build(
                 url,
                 &infrastructure.file_path_configuration,
             )
-        })
-        .into_iter()
-        .chain(
-            if is_application_package(
+        }),
+    )
+    .chain(
+        if is_application_package(
+            infrastructure,
+            main_package_directory,
+            application_configuration,
+        )? {
+            Some(package_build_script_compiler::compile_application(
                 infrastructure,
                 main_package_directory,
+                output_directory,
+                prelude_package_url,
                 application_configuration,
-            )? {
-                let application_build_script_file =
-                    file_path_resolver::resolve_special_build_script_file(
-                        output_directory,
-                        "application",
-                        &infrastructure.file_path_configuration,
-                    );
-
-                package_build_script_compiler::compile_application(
-                    infrastructure,
-                    main_package_directory,
-                    output_directory,
-                    prelude_package_url,
-                    application_configuration,
-                    &application_build_script_file,
-                )?;
-
-                Some(application_build_script_file)
-            } else {
-                None
-            },
-        )
-        .collect::<Vec<_>>(),
-        &package_build_script_file,
-        application_configuration,
-    )?;
+            )?)
+        } else {
+            None
+        },
+    )
+    .collect::<Vec<_>>();
 
     infrastructure
         .build_script_runner
-        .run(&package_build_script_file)?;
+        .run(&package_build_script_compiler::compile_main(
+            infrastructure,
+            prelude_package_url,
+            output_directory,
+            target_triple,
+            &child_build_script_files,
+        )?)?;
 
     Ok(())
 }
