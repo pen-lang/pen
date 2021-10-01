@@ -1,9 +1,9 @@
 use crate::{
-    common::{file_path_resolver, interface_serializer},
+    common::{file_path_resolver, test_interface_serializer},
     infra::{FilePath, Infrastructure},
     package_test_builder, test_module_finder, ApplicationConfiguration,
 };
-use std::error::Error;
+use std::{collections::BTreeMap, error::Error};
 
 pub fn run(
     infrastructure: &Infrastructure,
@@ -23,7 +23,7 @@ pub fn run(
     let interface_files = test_module_finder::find(infrastructure, main_package_directory)?
         .iter()
         .map(|file| {
-            file_path_resolver::resolve_interface_file(
+            file_path_resolver::resolve_test_interface_file(
                 output_directory,
                 file,
                 &infrastructure.file_path_configuration,
@@ -33,20 +33,12 @@ pub fn run(
 
     let interfaces = interface_files
         .iter()
-        .map(|file| -> Result<interface::Module, Box<dyn Error>> {
-            interface_serializer::deserialize(&infrastructure.file_system.read_to_vec(file)?)
+        .map(|file| {
+            test_interface_serializer::deserialize(&infrastructure.file_system.read_to_vec(file)?)
         })
         .collect::<Result<Vec<_>, _>>()?;
 
-    let test_functions = interfaces
-        .iter()
-        .flat_map(|interface| {
-            interface
-                .declarations()
-                .iter()
-                .map(|declaration| declaration.name())
-        })
-        .collect::<Vec<_>>();
+    let test_functions = interfaces.into_iter().flatten().collect::<BTreeMap<_, _>>();
 
     dbg!(test_functions);
 
