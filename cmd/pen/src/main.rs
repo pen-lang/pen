@@ -96,6 +96,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                 .arg(clap::Arg::with_name("source file").required(true))
                 .arg(clap::Arg::with_name("dependency file").required(true))
                 .arg(clap::Arg::with_name("object file").required(true))
+                .arg(clap::Arg::with_name("test interface file").required(true))
                 .arg(build_target_triple_argument()),
         )
         .subcommand(

@@ -1,19 +1,19 @@
-use crate::module_finder;
+use crate::test_module_finder;
 use crate::{
     common::file_path_resolver,
-    infra::{FilePath, Infrastructure, ModuleTarget},
+    infra::{FilePath, Infrastructure, TestModuleTarget},
 };
 use std::error::Error;
 
-pub fn collect_module_targets(
+pub fn collect(
     infrastructure: &Infrastructure,
     package_directory: &FilePath,
     output_directory: &FilePath,
-) -> Result<Vec<ModuleTarget>, Box<dyn Error>> {
-    Ok(module_finder::find(infrastructure, package_directory)?
+) -> Result<Vec<TestModuleTarget>, Box<dyn Error>> {
+    Ok(test_module_finder::find(infrastructure, package_directory)?
         .iter()
         .map(|source_file| {
-            ModuleTarget::new(
+            TestModuleTarget::new(
                 package_directory.clone(),
                 source_file.clone(),
                 file_path_resolver::resolve_object_file(
@@ -21,7 +21,7 @@ pub fn collect_module_targets(
                     source_file,
                     &infrastructure.file_path_configuration,
                 ),
-                file_path_resolver::resolve_interface_file(
+                file_path_resolver::resolve_test_interface_file(
                     output_directory,
                     source_file,
                     &infrastructure.file_path_configuration,

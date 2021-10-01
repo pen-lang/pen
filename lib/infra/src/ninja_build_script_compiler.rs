@@ -68,6 +68,9 @@ impl NinjaBuildScriptCompiler {
             "rule compile_prelude",
             "  command = pen compile-prelude --target $target $in $out",
             "  description = compiling module of $source_file",
+            "rule compile_test",
+            "  command = pen compile-test --target $target $in $out",
+            "  description = compiling test module of $source_file",
             "rule llc",
             &format!(
                 "  command = {} -O3 -tailcallopt --relocation-model pic \
@@ -152,6 +155,59 @@ impl NinjaBuildScriptCompiler {
                 ))
             })
             .chain(self.compile_ffi_build(package_directory, ffi_archive_file)?)
+            .collect())
+    }
+
+    fn compile_test_module_targets(
+        &self,
+        module_targets: &[app::infra::TestModuleTarget],
+    ) -> Result<Vec<String>, Box<dyn Error>> {
+        Ok(module_targets
+            .iter()
+            .flat_map(|target| {
+                let package_directory = self
+                    .file_path_converter
+                    .convert_to_os_path(target.package_directory());
+                let source_file = self
+                    .file_path_converter
+                    .convert_to_os_path(target.source_file());
+                let test_interface_file = self
+                    .file_path_converter
+                    .convert_to_os_path(target.test_interface_file());
+                let object_file = self
+                    .file_path_converter
+                    .convert_to_os_path(target.object_file());
+                let dependency_file = object_file.with_extension("dep");
+                let ninja_dependency_file = object_file.with_extension("dd");
+                let bit_code_file = object_file.with_extension(self.bit_code_file_extension);
+
+                vec![
+                    format!(
+                        "build {} {}: compile_test {} {} || {}",
+                        bit_code_file.display(),
+                        test_interface_file.display(),
+                        source_file.display(),
+                        dependency_file.display(),
+                        ninja_dependency_file.display()
+                    ),
+                    format!("  dyndep = {}", ninja_dependency_file.display()),
+                    format!("  source_file = {}", source_file.display()),
+                    format!(
+                        "build {}: llc {}",
+                        object_file.display(),
+                        bit_code_file.display(),
+                    ),
+                    format!("  source_file = {}", source_file.display()),
+                ]
+                .into_iter()
+                .chain(self.compile_dependency(
+                    &source_file,
+                    &bit_code_file,
+                    &dependency_file,
+                    &ninja_dependency_file,
+                    &package_directory,
+                ))
+            })
             .collect())
     }
 
@@ -355,6 +411,30 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
                         .iter()
                         .map(|target| target.object_file())
                         .chain(main_module_target.map(|target| target.object_file()))
+                        .collect::<Vec<_>>(),
+                    archive_file,
+                    package_directory,
+                )?,
+            )
+            .collect::<Vec<_>>()
+            .join("\n")
+            + "\n")
+    }
+
+    fn compile_test_modules(
+        &self,
+        module_targets: &[app::infra::TestModuleTarget],
+        archive_file: &FilePath,
+        package_directory: &FilePath,
+    ) -> Result<String, Box<dyn Error>> {
+        Ok(self
+            .compile_test_module_targets(module_targets)?
+            .into_iter()
+            .chain(
+                self.compile_archive(
+                    &module_targets
+                        .iter()
+                        .map(|target| target.object_file())
                         .collect::<Vec<_>>(),
                     archive_file,
                     package_directory,

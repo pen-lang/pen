@@ -1,11 +1,12 @@
 mod module_target_collector;
+mod test_module_target_collector;
 
 use crate::{
     common::file_path_resolver,
     error::ApplicationError,
     external_package_topological_sorter,
     infra::{FilePath, Infrastructure, MainModuleTarget},
-    module_finder, prelude_interface_file_finder, ApplicationConfiguration,
+    prelude_interface_file_finder, ApplicationConfiguration,
 };
 use std::error::Error;
 
@@ -110,6 +111,39 @@ pub fn compile_modules(
                     &infrastructure.file_path_configuration,
                 ),
                 &file_path_resolver::resolve_main_package_ffi_archive_file(
+                    output_directory,
+                    &infrastructure.file_path_configuration,
+                ),
+                package_directory,
+            )?
+            .as_bytes(),
+    )?;
+
+    Ok(build_script_file)
+}
+
+pub fn compile_test_modules(
+    infrastructure: &Infrastructure,
+    package_directory: &FilePath,
+    output_directory: &FilePath,
+) -> Result<FilePath, Box<dyn Error>> {
+    let build_script_file = file_path_resolver::resolve_special_build_script_file(
+        output_directory,
+        "test_modules",
+        &infrastructure.file_path_configuration,
+    );
+
+    infrastructure.file_system.write(
+        &build_script_file,
+        infrastructure
+            .build_script_compiler
+            .compile_test_modules(
+                &test_module_target_collector::collect(
+                    infrastructure,
+                    package_directory,
+                    output_directory,
+                )?,
+                &file_path_resolver::resolve_main_package_test_archive_file(
                     output_directory,
                     &infrastructure.file_path_configuration,
                 ),

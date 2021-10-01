@@ -1,4 +1,4 @@
-use super::{FilePath, MainModuleTarget, ModuleTarget};
+use super::{FilePath, MainModuleTarget, ModuleTarget, TestModuleTarget};
 use std::error::Error;
 
 pub trait BuildScriptCompiler {
@@ -16,6 +16,13 @@ pub trait BuildScriptCompiler {
         main_module_target: Option<&MainModuleTarget>,
         archive_file: &FilePath,
         ffi_archive_file: &FilePath,
+        package_directory: &FilePath,
+    ) -> Result<String, Box<dyn Error>>;
+
+    fn compile_test_modules(
+        &self,
+        module_targets: &[TestModuleTarget],
+        archive_file: &FilePath,
         package_directory: &FilePath,
     ) -> Result<String, Box<dyn Error>>;
 
