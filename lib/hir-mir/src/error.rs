@@ -25,6 +25,7 @@ pub enum CompileError {
     RecordElementMissing(Position),
     RecordExpected(Position),
     RecordNotFound(types::Record),
+    TestContextTypeUndefined(Position),
     TryOperationInList(Position),
     TypeAnalysis(TypeError),
     TypeNotFound(types::Reference),
@@ -121,6 +122,9 @@ impl Display for CompileError {
                 record.name(),
                 record.position()
             ),
+            Self::TestContextTypeUndefined(position) => {
+                write!(formatter, "test context type undefined\n{}", position)
+            }
             Self::TryOperationInList(position) => {
                 write!(
                     formatter,
