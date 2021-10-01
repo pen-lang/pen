@@ -1,5 +1,4 @@
-use super::foreign_export::ForeignExport;
-use super::lambda::Lambda;
+use super::{foreign_export::ForeignExport, lambda::Lambda};
 use position::Position;
 
 #[derive(Clone, Debug, PartialEq)]

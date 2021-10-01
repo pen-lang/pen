@@ -40,15 +40,15 @@ pub fn compile(
             .definitions()
             .iter()
             .flat_map(|definition| {
-                if let Some(configuration) = definition.foreign_definition_configuration() {
-                    Some(mir::ir::ForeignDefinition::new(
-                        definition.name(),
-                        definition.original_name(),
-                        compile_calling_convention(configuration.calling_convention()),
-                    ))
-                } else {
-                    None
-                }
+                definition
+                    .foreign_definition_configuration()
+                    .map(|configuration| {
+                        mir::ir::ForeignDefinition::new(
+                            definition.name(),
+                            definition.original_name(),
+                            compile_calling_convention(configuration.calling_convention()),
+                        )
+                    })
             })
             .collect(),
         module
