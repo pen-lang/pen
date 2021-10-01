@@ -48,6 +48,7 @@ dependencies = [
  "petgraph",
  "regex",
  "serde",
+ "serde_json",
  "url",
 ]
 

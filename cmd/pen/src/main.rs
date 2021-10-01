@@ -186,6 +186,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                 matches.value_of("source file").unwrap(),
                 matches.value_of("dependency file").unwrap(),
                 matches.value_of("object file").unwrap(),
+                matches.value_of("test interface file").unwrap(),
                 matches.value_of("target"),
             )
         }
