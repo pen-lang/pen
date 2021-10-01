@@ -165,7 +165,7 @@ f = \(x number) number {
 </code></pre>
 <p><em>When</em> I run <code>pen build</code></p>
 <p><em>Then</em> the exit status should be 0.</p>
-<h2 id="import-a-foreign-function-of-c-calling-convention"><a class="header" href="#import-a-foreign-function-of-c-calling-convention">Import a foreign function of C calling convention</a></h2>
+<h2 id="import-a-foreign-function-of-the-c-calling-convention"><a class="header" href="#import-a-foreign-function-of-the-c-calling-convention">Import a foreign function of the C calling convention</a></h2>
 <p><em>Given</em> a file named &quot;Foo.pen&quot; with:</p>
 <pre><code class="language-pen">import foreign &quot;c&quot; g \(number) number
 
@@ -178,6 +178,14 @@ f = \(x number) number {
 <h2 id="export-a-foreign-function"><a class="header" href="#export-a-foreign-function">Export a foreign function</a></h2>
 <p><em>Given</em> a file named &quot;Foo.pen&quot; with:</p>
 <pre><code class="language-pen">foreign f = \(x number) number {
+  x
+}
+</code></pre>
+<p><em>When</em> I run <code>pen build</code></p>
+<p><em>Then</em> the exit status should be 0.</p>
+<h2 id="export-a-foreign-function-of-the-c-calling-convention"><a class="header" href="#export-a-foreign-function-of-the-c-calling-convention">Export a foreign function of the C calling convention</a></h2>
+<p><em>Given</em> a file named &quot;Foo.pen&quot; with:</p>
+<pre><code class="language-pen">foreign &quot;c&quot; f = \(x number) number {
   x
 }
 </code></pre>
