@@ -1,4 +1,4 @@
-use super::lambda::Lambda;
+use super::{lambda::Lambda, ForeignDefinitionConfiguration};
 use position::Position;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -6,7 +6,7 @@ pub struct Definition {
     name: String,
     original_name: String,
     lambda: Lambda,
-    foreign: bool,
+    foreign_definition_configuration: Option<ForeignDefinitionConfiguration>,
     public: bool,
     position: Position,
 }
@@ -16,7 +16,7 @@ impl Definition {
         name: impl Into<String>,
         original_name: impl Into<String>,
         lambda: Lambda,
-        foreign: bool,
+        foreign_definition_configuration: Option<ForeignDefinitionConfiguration>,
         public: bool,
         position: Position,
     ) -> Self {
@@ -24,7 +24,7 @@ impl Definition {
             name: name.into(),
             original_name: original_name.into(),
             lambda,
-            foreign,
+            foreign_definition_configuration,
             public,
             position,
         }
@@ -42,8 +42,8 @@ impl Definition {
         &self.lambda
     }
 
-    pub fn is_foreign(&self) -> bool {
-        self.foreign
+    pub fn foreign_definition_configuration(&self) -> Option<&ForeignDefinitionConfiguration> {
+        self.foreign_definition_configuration.as_ref()
     }
 
     pub fn is_public(&self) -> bool {
