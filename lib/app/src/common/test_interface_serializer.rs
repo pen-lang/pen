@@ -1,5 +1,4 @@
-use std::collections::BTreeMap;
-use std::error::Error;
+use std::{collections::BTreeMap, error::Error};
 
 pub fn serialize(interface: &BTreeMap<String, String>) -> Result<Vec<u8>, Box<dyn Error>> {
     Ok(serde_json::to_vec(&interface)?)
