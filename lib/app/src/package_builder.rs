@@ -34,7 +34,7 @@ pub fn build(
         &rule_build_script_file,
     )?;
 
-    package_build_script_compiler::compile_main(
+    package_build_script_compiler::compile_modules(
         infrastructure,
         main_package_directory,
         output_directory,

@@ -9,7 +9,7 @@ use crate::{
 };
 use std::error::Error;
 
-pub fn compile_main(
+pub fn compile_modules(
     infrastructure: &Infrastructure,
     package_directory: &FilePath,
     output_directory: &FilePath,
