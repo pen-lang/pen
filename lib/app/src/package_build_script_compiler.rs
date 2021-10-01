@@ -15,9 +15,14 @@ pub fn compile_modules(
     output_directory: &FilePath,
     rule_build_script_file: &FilePath,
     child_build_script_files: &[FilePath],
-    build_script_file: &FilePath,
     application_configuration: &ApplicationConfiguration,
-) -> Result<(), Box<dyn Error>> {
+) -> Result<FilePath, Box<dyn Error>> {
+    let build_script_file = file_path_resolver::resolve_special_build_script_file(
+        output_directory,
+        "modules",
+        &infrastructure.file_path_configuration,
+    );
+
     let (main_module_targets, module_targets) = module_target_collector::collect_module_targets(
         infrastructure,
         package_directory,
@@ -34,7 +39,7 @@ pub fn compile_modules(
     });
 
     infrastructure.file_system.write(
-        build_script_file,
+        &build_script_file,
         infrastructure
             .build_script_compiler
             .compile_main(
@@ -84,7 +89,7 @@ pub fn compile_modules(
             .as_bytes(),
     )?;
 
-    Ok(())
+    Ok(build_script_file)
 }
 
 pub fn compile_application(
@@ -239,10 +244,15 @@ pub fn compile_rules(
     prelude_package_url: &url::Url,
     output_directory: &FilePath,
     target_triple: Option<&str>,
-    build_script_file: &FilePath,
-) -> Result<(), Box<dyn Error>> {
+) -> Result<FilePath, Box<dyn Error>> {
+    let build_script_file = file_path_resolver::resolve_special_build_script_file(
+        output_directory,
+        "rules",
+        &infrastructure.file_path_configuration,
+    );
+
     infrastructure.file_system.write(
-        build_script_file,
+        &build_script_file,
         infrastructure
             .build_script_compiler
             .compile_rules(
@@ -257,7 +267,7 @@ pub fn compile_rules(
             .as_bytes(),
     )?;
 
-    Ok(())
+    Ok(build_script_file)
 }
 
 fn resolve_external_package_archive_files(

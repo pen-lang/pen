@@ -15,26 +15,14 @@ pub fn build(
     prelude_package_url: &url::Url,
     application_configuration: &ApplicationConfiguration,
 ) -> Result<(), Box<dyn Error>> {
-    let rule_build_script_file = file_path_resolver::resolve_special_build_script_file(
-        output_directory,
-        "rules",
-        &infrastructure.file_path_configuration,
-    );
-    let package_build_script_file = file_path_resolver::resolve_special_build_script_file(
-        output_directory,
-        "main",
-        &infrastructure.file_path_configuration,
-    );
-
-    package_build_script_compiler::compile_rules(
+    let rule_build_script_file = package_build_script_compiler::compile_rules(
         infrastructure,
         prelude_package_url,
         output_directory,
         target_triple,
-        &rule_build_script_file,
     )?;
 
-    package_build_script_compiler::compile_modules(
+    let module_build_script_file = package_build_script_compiler::compile_modules(
         infrastructure,
         main_package_directory,
         output_directory,
@@ -82,13 +70,12 @@ pub fn build(
             },
         )
         .collect::<Vec<_>>(),
-        &package_build_script_file,
         application_configuration,
     )?;
 
     infrastructure
         .build_script_runner
-        .run(&package_build_script_file)?;
+        .run(&module_build_script_file)?;
 
     Ok(())
 }
