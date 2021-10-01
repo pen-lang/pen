@@ -10,7 +10,7 @@ pub trait BuildScriptCompiler {
     ) -> Result<String, Box<dyn Error>>;
 
     #[allow(clippy::too_many_arguments)]
-    fn compile_main(
+    fn compile_modules(
         &self,
         module_targets: &[ModuleTarget],
         main_module_target: Option<&MainModuleTarget>,

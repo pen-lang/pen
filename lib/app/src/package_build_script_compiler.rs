@@ -42,7 +42,7 @@ pub fn compile_modules(
         &build_script_file,
         infrastructure
             .build_script_compiler
-            .compile_main(
+            .compile_modules(
                 &module_targets,
                 main_module_targets
                     .get(0)

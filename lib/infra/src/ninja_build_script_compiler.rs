@@ -326,7 +326,7 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
             + "\n")
     }
 
-    fn compile_main(
+    fn compile_modules(
         &self,
         module_targets: &[app::infra::ModuleTarget],
         main_module_target: Option<&app::infra::MainModuleTarget>,
