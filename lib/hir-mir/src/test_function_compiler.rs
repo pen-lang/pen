@@ -12,19 +12,6 @@ pub fn compile(
     configuration: &TestModuleConfiguration,
 ) -> Result<(Module, BTreeMap<String, String>), CompileError> {
     let position = module.position();
-    let context_type_definition = module
-        .type_definitions()
-        .iter()
-        .find(|definition| definition.name() == configuration.context_type_name)
-        .ok_or_else(|| CompileError::TestContextTypeUndefined(position.clone()))?;
-    let arguments = vec![Argument::new(
-        "ctx",
-        types::Record::new(
-            context_type_definition.name(),
-            context_type_definition.position().clone(),
-        )
-        .clone(),
-    )];
 
     let definitions = module
         .definitions()
@@ -49,7 +36,7 @@ pub fn compile(
                         definition.name().to_owned() + TEST_FUNCTION_WRAPPER_SUFFIX,
                         compile_test_name(definition.name(), configuration),
                         Lambda::new(
-                            arguments.clone(),
+                            vec![],
                             types::Union::new(
                                 types::None::new(position.clone()),
                                 types::Record::new(
@@ -62,12 +49,7 @@ pub fn compile(
                             Call::new(
                                 None,
                                 Variable::new(definition.name(), position.clone()),
-                                arguments
-                                    .iter()
-                                    .map(|argument| {
-                                        Variable::new(argument.name(), position.clone()).into()
-                                    })
-                                    .collect(),
+                                vec![],
                                 position.clone(),
                             ),
                             position.clone(),
