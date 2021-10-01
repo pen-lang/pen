@@ -143,7 +143,7 @@ fn foreign_import<'a>() -> impl Parser<Stream<'a>, Output = ForeignImport> {
         .map(|(position, calling_convention, name, type_)| {
             ForeignImport::new(
                 &name,
-                calling_convention.unwrap_or(CallingConvention::Native),
+                calling_convention.unwrap_or_default(),
                 type_,
                 position,
             )
@@ -162,16 +162,22 @@ fn calling_convention<'a>() -> impl Parser<Stream<'a>, Output = CallingConventio
 
 fn definition<'a>() -> impl Parser<Stream<'a>, Output = Definition> {
     (
-        optional(keyword("foreign")),
+        optional(foreign_export()),
         position(),
         identifier(),
         sign("="),
         lambda(),
     )
         .map(|(foreign_export, position, name, _, lambda)| {
-            Definition::new(name, lambda, foreign_export.is_some(), position)
+            Definition::new(name, lambda, foreign_export, position)
         })
         .expected("definition")
+}
+
+fn foreign_export<'a>() -> impl Parser<Stream<'a>, Output = ForeignExport> {
+    keyword("foreign")
+        .with(optional(calling_convention()))
+        .map(|calling_convention| ForeignExport::new(calling_convention.unwrap_or_default()))
 }
 
 fn record_definition<'a>() -> impl Parser<Stream<'a>, Output = RecordDefinition> {
@@ -860,7 +866,7 @@ mod tests {
                             ),
                             Position::fake()
                         ),
-                        false,
+                        None,
                         Position::fake()
                     )],
                     Position::fake()
@@ -891,7 +897,7 @@ mod tests {
                                 ),
                                 Position::fake()
                             ),
-                            false,
+                            None,
                             Position::fake()
                         ),
                         Definition::new(
@@ -906,7 +912,7 @@ mod tests {
                                 ),
                                 Position::fake()
                             ),
-                            false,
+                            None,
                             Position::fake()
                         )
                     ],
@@ -1152,11 +1158,14 @@ mod tests {
                         ),
                         Position::fake()
                     ),
-                    false,
+                    None,
                     Position::fake()
                 ),
             );
+        }
 
+        #[test]
+        fn parse_foreign_definition() {
             assert_eq!(
                 definition()
                     .parse(stream("foreign x=\\(x number)number{42}", ""))
@@ -1174,7 +1183,32 @@ mod tests {
                         ),
                         Position::fake()
                     ),
-                    true,
+                    ForeignExport::new(CallingConvention::Native).into(),
+                    Position::fake()
+                ),
+            );
+        }
+
+        #[test]
+        fn parse_foreign_definition_with_c_calling_convention() {
+            assert_eq!(
+                definition()
+                    .parse(stream("foreign \"c\" x=\\(x number)number{42}", ""))
+                    .unwrap()
+                    .0,
+                Definition::new(
+                    "x",
+                    Lambda::new(
+                        vec![Argument::new("x", types::Number::new(Position::fake()))],
+                        types::Number::new(Position::fake()),
+                        Block::new(
+                            vec![],
+                            Number::new(42.0, Position::fake()),
+                            Position::fake()
+                        ),
+                        Position::fake()
+                    ),
+                    ForeignExport::new(CallingConvention::C).into(),
                     Position::fake()
                 ),
             );
@@ -1199,7 +1233,7 @@ mod tests {
                         ),
                         Position::fake()
                     ),
-                    false,
+                    None,
                     Position::fake()
                 ),
             );

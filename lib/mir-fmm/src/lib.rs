@@ -272,7 +272,11 @@ mod tests {
                     ),
                     mir::ir::CallingConvention::Target,
                 )],
-                vec![mir::ir::ForeignDefinition::new("f", "h")],
+                vec![mir::ir::ForeignDefinition::new(
+                    "f",
+                    "h",
+                    mir::ir::CallingConvention::Source,
+                )],
                 vec![],
                 vec![],
             ));
@@ -283,7 +287,11 @@ mod tests {
             compile_module(&mir::ir::Module::new(
                 vec![],
                 vec![],
-                vec![mir::ir::ForeignDefinition::new("f", "g")],
+                vec![mir::ir::ForeignDefinition::new(
+                    "f",
+                    "g",
+                    mir::ir::CallingConvention::Source,
+                )],
                 vec![mir::ir::Declaration::new(
                     "f",
                     mir::types::Function::new(
@@ -300,7 +308,31 @@ mod tests {
             compile_module(&mir::ir::Module::new(
                 vec![],
                 vec![],
-                vec![mir::ir::ForeignDefinition::new("f", "g")],
+                vec![mir::ir::ForeignDefinition::new(
+                    "f",
+                    "g",
+                    mir::ir::CallingConvention::Source,
+                )],
+                vec![],
+                vec![mir::ir::Definition::new(
+                    "f",
+                    vec![mir::ir::Argument::new("x", mir::types::Type::Number)],
+                    mir::ir::Variable::new("x"),
+                    mir::types::Type::Number,
+                )],
+            ));
+        }
+
+        #[test]
+        fn compile_for_definition_with_target_calling_convention() {
+            compile_module(&mir::ir::Module::new(
+                vec![],
+                vec![],
+                vec![mir::ir::ForeignDefinition::new(
+                    "f",
+                    "g",
+                    mir::ir::CallingConvention::Target,
+                )],
                 vec![],
                 vec![mir::ir::Definition::new(
                     "f",
