@@ -17,7 +17,7 @@ Feature: FFI
     When I run `pen build`
     Then the exit status should be 0
 
-  Scenario: Import a foreign function of C calling convention
+  Scenario: Import a foreign function of the C calling convention
     Given a file named "Foo.pen" with:
     """pen
     import foreign "c" g \(number) number
@@ -33,6 +33,16 @@ Feature: FFI
     Given a file named "Foo.pen" with:
     """pen
     foreign f = \(x number) number {
+      x
+    }
+    """
+    When I run `pen build`
+    Then the exit status should be 0
+
+  Scenario: Export a foreign function of the C calling convention
+    Given a file named "Foo.pen" with:
+    """pen
+    foreign "c" f = \(x number) number {
       x
     }
     """
