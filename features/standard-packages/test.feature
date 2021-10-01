@@ -13,10 +13,9 @@ Feature: Test
     Given a file named "FooTest.pen" with:
     """pen
     import Test'Assert
-    import Test'Context { Context }
 
-    TestFoo = \(ctx Context) none | error {
-      Assert'True(ctx, true)?
+    TestFoo = \() none | error {
+      Assert'True(true)?
 
       none
     }

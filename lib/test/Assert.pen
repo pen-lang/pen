@@ -1,6 +1,4 @@
-import 'Context { Context }
-
-True = \(ctx Context, x boolean) none | error {
+True = \(x boolean) none | error {
   if !x {
     error("assertion failed")
   } else {
