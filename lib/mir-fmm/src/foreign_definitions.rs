@@ -8,10 +8,8 @@ pub fn compile_foreign_definition(
     global_variable: &fmm::build::TypedExpression,
     types: &HashMap<String, mir::types::RecordBody>,
 ) -> Result<(), CompileError> {
-    // TODO Support a target calling convention.
-    // Blocked by https://github.com/raviqqe/fmm/issues/88
     let foreign_function_type =
-        types::compile_foreign_function(function_type, mir::ir::CallingConvention::Source, types);
+        types::compile_foreign_function(function_type, definition.calling_convention(), types);
     let arguments = foreign_function_type
         .arguments()
         .iter()

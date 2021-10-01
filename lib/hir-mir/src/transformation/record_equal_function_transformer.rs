@@ -98,7 +98,7 @@ fn compile_equal_function_definition(type_definition: &TypeDefinition) -> Defini
             ),
             position.clone(),
         ),
-        false,
+        None,
         false,
         position.clone(),
     )
@@ -217,7 +217,7 @@ mod tests {
                         ),
                         Position::fake(),
                     ),
-                    false,
+                    None,
                     false,
                     Position::fake()
                 )]))

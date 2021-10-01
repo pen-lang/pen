@@ -13,4 +13,4 @@ regex = "1"
 
 [dev-dependencies]
 insta = "1"
-pretty_assertions = "0.7"
+pretty_assertions = "1.0"

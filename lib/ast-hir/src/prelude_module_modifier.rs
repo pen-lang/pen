@@ -41,7 +41,7 @@ pub fn modify(module: &Module) -> Module {
                     definition.name(),
                     definition.original_name(),
                     definition.lambda().clone(),
-                    definition.is_foreign(),
+                    definition.foreign_definition_configuration().cloned(),
                     true,
                     definition.position().clone(),
                 )

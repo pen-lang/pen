@@ -42,10 +42,7 @@ pub fn compile(module: &ast::Module) -> Result<ir::Module, CompileError> {
                 ir::ForeignDeclaration::new(
                     import.name(),
                     import.name(),
-                    match import.calling_convention() {
-                        ast::CallingConvention::C => ir::CallingConvention::C,
-                        ast::CallingConvention::Native => ir::CallingConvention::Native,
-                    },
+                    compile_calling_convention(import.calling_convention()),
                     import.type_().clone(),
                     import.position().clone(),
                 )
@@ -55,7 +52,7 @@ pub fn compile(module: &ast::Module) -> Result<ir::Module, CompileError> {
         module
             .definitions()
             .iter()
-            .map(|definition| compile_definition(definition))
+            .map(compile_definition)
             .collect::<Result<_, _>>()?,
         module.position().clone(),
     ))
@@ -66,10 +63,21 @@ fn compile_definition(definition: &ast::Definition) -> Result<ir::Definition, Co
         definition.name(),
         definition.name(),
         compile_lambda(definition.lambda())?,
-        definition.is_foreign(),
+        definition.foreign_export().map(|export| {
+            ir::ForeignDefinitionConfiguration::new(compile_calling_convention(
+                export.calling_convention(),
+            ))
+        }),
         ast::analysis::is_name_public(definition.name()),
         definition.position().clone(),
     ))
+}
+
+fn compile_calling_convention(calling_convention: ast::CallingConvention) -> ir::CallingConvention {
+    match calling_convention {
+        ast::CallingConvention::C => ir::CallingConvention::C,
+        ast::CallingConvention::Native => ir::CallingConvention::Native,
+    }
 }
 
 fn compile_lambda(lambda: &ast::Lambda) -> Result<ir::Lambda, CompileError> {
@@ -185,7 +193,7 @@ fn compile_expression(expression: &ast::Expression) -> Result<ir::Expression, Co
             compile_expression(call.function())?,
             call.arguments()
                 .iter()
-                .map(|argument| compile_expression(argument))
+                .map(compile_expression)
                 .collect::<Result<_, _>>()?,
             call.position().clone(),
         )
@@ -379,7 +387,7 @@ mod tests {
                         ast::Block::new(vec![], ast::None::new(Position::fake()), Position::fake()),
                         Position::fake(),
                     ),
-                    false,
+                    None,
                     Position::fake(),
                 )],
                 Position::fake(),
@@ -411,7 +419,7 @@ mod tests {
                         ir::None::new(Position::fake()),
                         Position::fake(),
                     ),
-                    false,
+                    None,
                     true,
                     Position::fake()
                 )]))

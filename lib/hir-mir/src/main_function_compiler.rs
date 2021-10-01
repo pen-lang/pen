@@ -63,7 +63,7 @@ pub fn compile(
                     ),
                     position.clone(),
                 ),
-                true,
+                ForeignDefinitionConfiguration::new(CallingConvention::Native).into(),
                 false,
                 position.clone(),
             )])

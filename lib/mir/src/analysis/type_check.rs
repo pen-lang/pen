@@ -1018,7 +1018,7 @@ mod tests {
             let module = Module::new(
                 vec![],
                 vec![],
-                vec![ForeignDefinition::new("f", "g")],
+                vec![ForeignDefinition::new("f", "g", CallingConvention::Source)],
                 vec![Declaration::new(
                     "f",
                     types::Function::new(vec![Type::Number], Type::Number),
@@ -1034,7 +1034,7 @@ mod tests {
             let module = Module::new(
                 vec![],
                 vec![],
-                vec![ForeignDefinition::new("f", "g")],
+                vec![ForeignDefinition::new("f", "g", CallingConvention::Source)],
                 vec![],
                 vec![Definition::new(
                     "f",
