@@ -13,7 +13,9 @@ pub mod package_builder;
 pub mod package_creator;
 pub mod package_initializer;
 mod prelude_interface_file_finder;
+mod test_configuration;
 mod test_module_finder;
 pub mod test_runner;
 
 pub use application_configuration::{ApplicationConfiguration, MainModuleConfiguration};
+pub use test_configuration::TestModuleConfiguration;

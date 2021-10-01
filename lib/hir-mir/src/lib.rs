@@ -39,7 +39,7 @@ pub use list_type_configuration::ListTypeConfiguration;
 pub use main_module_configuration::MainModuleConfiguration;
 use std::collections::BTreeMap;
 pub use string_type_configuration::StringTypeConfiguration;
-use test_module_configuration::TestModuleConfiguration;
+pub use test_module_configuration::TestModuleConfiguration;
 
 pub fn compile_main(
     module: &Module,

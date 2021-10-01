@@ -1,5 +1,3 @@
-use compile_configuration::CROSS_COMPILE_TARGETS;
-
 mod application_configuration;
 mod compile_configuration;
 mod dependency_resolver;
@@ -11,7 +9,11 @@ mod module_compiler;
 mod package_builder;
 mod package_creator;
 mod prelude_module_compiler;
+mod test_module_compiler;
+mod test_module_configuration;
 mod test_runner;
+
+use compile_configuration::CROSS_COMPILE_TARGETS;
 
 fn main() {
     if let Err(error) = run() {
@@ -85,6 +87,15 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                 .arg(clap::Arg::with_name("source file").required(true))
                 .arg(clap::Arg::with_name("object file").required(true))
                 .arg(clap::Arg::with_name("interface file").required(true))
+                .arg(build_target_triple_argument()),
+        )
+        .subcommand(
+            clap::SubCommand::with_name("compile-test")
+                .setting(clap::AppSettings::Hidden)
+                .about("Compiles a test module")
+                .arg(clap::Arg::with_name("source file").required(true))
+                .arg(clap::Arg::with_name("dependency file").required(true))
+                .arg(clap::Arg::with_name("object file").required(true))
                 .arg(build_target_triple_argument()),
         )
         .subcommand(
@@ -164,6 +175,16 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                 matches.value_of("source file").unwrap(),
                 matches.value_of("object file").unwrap(),
                 matches.value_of("interface file").unwrap(),
+                matches.value_of("target"),
+            )
+        }
+        ("compile-test", matches) => {
+            let matches = matches.unwrap();
+
+            test_module_compiler::compile(
+                matches.value_of("source file").unwrap(),
+                matches.value_of("dependency file").unwrap(),
+                matches.value_of("object file").unwrap(),
                 matches.value_of("target"),
             )
         }

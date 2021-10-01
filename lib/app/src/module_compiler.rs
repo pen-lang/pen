@@ -6,6 +6,7 @@ use crate::{
     application_configuration::ApplicationConfiguration,
     common::{dependency_serializer, interface_serializer},
     infra::{FilePath, Infrastructure},
+    test_configuration::TestModuleConfiguration,
 };
 pub use compile_configuration::{
     CompileConfiguration, ErrorTypeConfiguration, InstructionConfiguration, ListTypeConfiguration,
@@ -98,6 +99,43 @@ pub fn compile_main(
                 &main_function_interface,
             )?,
         )?,
+        object_file,
+        target_triple,
+        &compile_configuration.instruction,
+    )?;
+
+    Ok(())
+}
+
+pub fn compile_test(
+    infrastructure: &Infrastructure,
+    source_file: &FilePath,
+    dependency_file: &FilePath,
+    object_file: &FilePath,
+    target_triple: Option<&str>,
+    compile_configuration: &CompileConfiguration,
+    test_module_configuration: &TestModuleConfiguration,
+) -> Result<(), Box<dyn Error>> {
+    let (module, test_functions) = hir_mir::compile_test(
+        &compile_to_hir(infrastructure, source_file, dependency_file, None)?,
+        &prelude_type_configuration_qualifier::qualify_list_type_configuration(
+            &compile_configuration.list_type,
+            PRELUDE_PREFIX,
+        ),
+        &prelude_type_configuration_qualifier::qualify_string_type_configuration(
+            &compile_configuration.string_type,
+            PRELUDE_PREFIX,
+        ),
+        &prelude_type_configuration_qualifier::qualify_error_type_configuration(
+            &compile_configuration.error_type,
+            PRELUDE_PREFIX,
+        ),
+        &test_module_configuration,
+    )?;
+
+    compile_mir_module(
+        infrastructure,
+        &module,
         object_file,
         target_triple,
         &compile_configuration.instruction,
