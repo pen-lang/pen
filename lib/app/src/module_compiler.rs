@@ -107,6 +107,7 @@ pub fn compile_main(
     Ok(())
 }
 
+#[allow(clippy::too_many_arguments)]
 pub fn compile_test(
     infrastructure: &Infrastructure,
     source_file: &FilePath,
