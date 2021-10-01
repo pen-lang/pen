@@ -1,8 +1,10 @@
 use super::{error::CompileError, test_module_configuration::TestModuleConfiguration};
 use crate::type_context::TypeContext;
 use hir::{ir::*, types};
-use std::collections::{hash_map::DefaultHasher, BTreeMap};
-use std::hash::{Hash, Hasher};
+use std::{
+    collections::{hash_map::DefaultHasher, BTreeMap},
+    hash::{Hash, Hasher},
+};
 
 const TEST_FUNCTION_WRAPPER_SUFFIX: &str = "__wrapper";
 
@@ -42,8 +44,7 @@ pub fn compile(
                                 types::Record::new(
                                     &type_context.error_type_configuration().error_type_name,
                                     position.clone(),
-                                )
-                                .clone(),
+                                ),
                                 position.clone(),
                             ),
                             Call::new(

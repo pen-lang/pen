@@ -116,7 +116,7 @@ pub fn compile_test(
     compile_configuration: &CompileConfiguration,
     test_module_configuration: &TestModuleConfiguration,
 ) -> Result<(), Box<dyn Error>> {
-    let (module, test_functions) = hir_mir::compile_test(
+    let (module, _test_functions) = hir_mir::compile_test(
         &compile_to_hir(infrastructure, source_file, dependency_file, None)?,
         &prelude_type_configuration_qualifier::qualify_list_type_configuration(
             &compile_configuration.list_type,
@@ -130,7 +130,7 @@ pub fn compile_test(
             &compile_configuration.error_type,
             PRELUDE_PREFIX,
         ),
-        &test_module_configuration,
+        test_module_configuration,
     )?;
 
     compile_mir_module(
