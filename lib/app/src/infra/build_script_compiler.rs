@@ -23,6 +23,7 @@ pub trait BuildScriptCompiler {
         &self,
         module_targets: &[TestModuleTarget],
         archive_file: &FilePath,
+        package_test_interface_file: &FilePath,
         package_directory: &FilePath,
     ) -> Result<String, Box<dyn Error>>;
 

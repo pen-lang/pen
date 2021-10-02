@@ -147,6 +147,10 @@ pub fn compile_test_modules(
                     output_directory,
                     &infrastructure.file_path_configuration,
                 ),
+                &file_path_resolver::resolve_package_test_interface_file(
+                    output_directory,
+                    &infrastructure.file_path_configuration,
+                ),
                 package_directory,
             )?
             .as_bytes(),

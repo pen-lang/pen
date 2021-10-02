@@ -71,6 +71,9 @@ impl NinjaBuildScriptCompiler {
             "rule compile_test",
             "  command = pen compile-test --target $target $in $out",
             "  description = compiling test module of $source_file",
+            "rule compile_package_test_interface",
+            "  command = pen compile-package-test-interface -o $out $in",
+            "  description = compiling package test interface",
             "rule llc",
             &format!(
                 "  command = {} -O3 -tailcallopt --relocation-model pic \
@@ -357,6 +360,32 @@ impl NinjaBuildScriptCompiler {
             format!("default {}", archive_file.display()),
         ])
     }
+
+    fn compile_package_test_interface(
+        &self,
+        test_interface_files: &[&FilePath],
+        package_test_interface_file: &FilePath,
+    ) -> Result<Vec<String>, Box<dyn Error>> {
+        let package_test_interface_file = self
+            .file_path_converter
+            .convert_to_os_path(package_test_interface_file);
+
+        Ok(vec![
+            format!(
+                "build {}: compile_package_test_interface {}",
+                package_test_interface_file.display(),
+                test_interface_files
+                    .iter()
+                    .map(|file| format!(
+                        "{}",
+                        self.file_path_converter.convert_to_os_path(file).display()
+                    ))
+                    .collect::<Vec<_>>()
+                    .join(" ")
+            ),
+            format!("default {}", package_test_interface_file.display()),
+        ])
+    }
 }
 
 impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
@@ -425,6 +454,7 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
         &self,
         module_targets: &[app::infra::TestModuleTarget],
         archive_file: &FilePath,
+        package_test_interface_file: &FilePath,
         package_directory: &FilePath,
     ) -> Result<String, Box<dyn Error>> {
         Ok(self
@@ -438,6 +468,15 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
                         .collect::<Vec<_>>(),
                     archive_file,
                     package_directory,
+                )?,
+            )
+            .chain(
+                self.compile_package_test_interface(
+                    &module_targets
+                        .iter()
+                        .map(|target| target.test_interface_file())
+                        .collect::<Vec<_>>(),
+                    package_test_interface_file,
                 )?,
             )
             .collect::<Vec<_>>()
