@@ -183,7 +183,7 @@ pub fn resolve_package_test_interface_file(
 ) -> FilePath {
     resolve_test_directory(output_directory).join(
         &FilePath::new(["test"])
-            .with_extension(&file_path_configuration.test_interface_file_extension),
+            .with_extension(file_path_configuration.test_interface_file_extension),
     )
 }
 
