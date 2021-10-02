@@ -1,6 +1,6 @@
 True = \(x boolean) none | error {
   if !x {
-    error("assertion failed")
+    error("condition is not true")
   } else {
     none
   }
