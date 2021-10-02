@@ -13,10 +13,13 @@ print_lib_link_flags() {
   done
 }
 
-while getopts o: option; do
+while getopts i:o: option; do
   case $option in
   o)
     output=$OPTARG
+    ;;
+  i)
+    test_interface=$OPTARG
     ;;
   esac
 done
