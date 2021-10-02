@@ -145,8 +145,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                     clap::Arg::with_name("test interface file")
                         .required(true)
                         .multiple(true),
-                )
-                .arg(build_target_triple_argument()),
+                ),
         )
         .get_matches()
         .subcommand()
