@@ -33,6 +33,14 @@ pub trait BuildScriptCompiler {
         application_file: &FilePath,
     ) -> Result<String, Box<dyn Error>>;
 
+    fn compile_test(
+        &self,
+        test_package_directory: &FilePath,
+        test_interface_file: &FilePath,
+        archive_files: &[FilePath],
+        test_file: &FilePath,
+    ) -> Result<String, Box<dyn Error>>;
+
     fn compile_external(
         &self,
         module_targets: &[ModuleTarget],

@@ -513,6 +513,51 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
             + "\n")
     }
 
+    fn compile_test(
+        &self,
+        test_package_directory: &FilePath,
+        test_interface_file: &FilePath,
+        archive_files: &[FilePath],
+        test_file: &FilePath,
+    ) -> Result<String, Box<dyn Error>> {
+        let test_package_directory = self
+            .file_path_converter
+            .convert_to_os_path(test_package_directory);
+        let test_file = self.file_path_converter.convert_to_os_path(test_file);
+
+        Ok(vec![
+            "rule link".into(),
+            format!(
+                "  command = {} -o $out -i $in",
+                package_script_finder::find(&test_package_directory, self.link_script_basename)?
+                    .ok_or(InfrastructureError::LinkScriptNotFound(
+                        test_package_directory,
+                    ))?
+                    .display(),
+            ),
+            "  description = linking tests at $out".into(),
+            format!(
+                "build {}: link {} {}",
+                test_file.display(),
+                self.file_path_converter
+                    .convert_to_os_path(test_interface_file)
+                    .display(),
+                archive_files
+                    .iter()
+                    .map(|file| self
+                        .file_path_converter
+                        .convert_to_os_path(file)
+                        .display()
+                        .to_string())
+                    .collect::<Vec<_>>()
+                    .join(" ")
+            ),
+            format!("default {}", test_file.display()),
+        ]
+        .join("\n")
+            + "\n")
+    }
+
     fn compile_prelude(
         &self,
         module_targets: &[app::infra::ModuleTarget],
