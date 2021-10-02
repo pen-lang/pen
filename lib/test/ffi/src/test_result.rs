@@ -1,3 +1,4 @@
+#[derive(Debug)]
 #[repr(C)]
 pub struct TestResult {
     is_error: ffi::Boolean,
@@ -11,5 +12,13 @@ impl TestResult {
 
     pub fn message(&self) -> String {
         String::from_utf8_lossy(self.message.as_slice()).into()
+    }
+
+    pub fn into_result(&self) -> Result<(), String> {
+        if !self.is_error() {
+            Ok(())
+        } else {
+            Err(self.message().into())
+        }
     }
 }

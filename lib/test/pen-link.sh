@@ -51,7 +51,7 @@ mod unreachable;
 use test_result::TestResult;
 
 extern "C" {
-    fn _pen_test_convert_result(stack: ffi::Any) -> TestResult;
+    fn _pen_test_convert_result(stack: ffi::Any) -> ffi::Arc<TestResult>;
 }
 
 #[link(name = "main_test")]
@@ -60,7 +60,24 @@ extern "C" {
 }
 
 fn main() {
-    $(for f in $(jq -r 'keys[]' $test_interface); do echo "unsafe { _pen_test_convert_result($f()) };"; done)
+    let mut success: bool = true;
+
+$(
+  for f in $(jq -r 'keys[]' $test_interface); do
+    echo "
+      let result: Result<_, _> = unsafe { _pen_test_convert_result($f()) }.into_result();
+      println!(\"{}\\t$f\", if result.is_ok() { \"OK\" } else { \"FAIL\" });
+      if let Err(message) = &result {
+        println!(\"\tMessage: {}\", message);
+      }
+      success = success && result.is_ok();
+    "
+  done
+)
+
+    if !success {
+      std::process::exit(1);
+    }
 }
 EOF
 
