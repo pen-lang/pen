@@ -9,8 +9,8 @@ mod module_compiler;
 mod package_builder;
 mod package_creator;
 mod prelude_module_compiler;
+mod test_configuration;
 mod test_module_compiler;
-mod test_module_configuration;
 mod test_runner;
 
 use compile_configuration::CROSS_COMPILE_TARGETS;

@@ -6,7 +6,7 @@ use crate::{
     error::ApplicationError,
     external_package_topological_sorter,
     infra::{FilePath, Infrastructure, MainModuleTarget},
-    prelude_interface_file_finder, ApplicationConfiguration,
+    prelude_interface_file_finder, ApplicationConfiguration, TestConfiguration,
 };
 use std::error::Error;
 
@@ -226,6 +226,92 @@ pub fn compile_application(
                 &main_package_directory.join(&FilePath::new([
                     &application_configuration.application_filename
                 ])),
+            )?
+            .as_bytes(),
+    )?;
+
+    Ok(build_script_file)
+}
+
+pub fn compile_test(
+    infrastructure: &Infrastructure,
+    main_package_directory: &FilePath,
+    output_directory: &FilePath,
+    prelude_package_url: &url::Url,
+    test_configuration: &TestConfiguration,
+) -> Result<FilePath, Box<dyn Error>> {
+    let build_script_file = file_path_resolver::resolve_special_build_script_file(
+        output_directory,
+        "test",
+        &infrastructure.file_path_configuration,
+    );
+
+    infrastructure.file_system.write(
+        &build_script_file,
+        infrastructure
+            .build_script_compiler
+            .compile_test(
+                &file_path_resolver::resolve_package_directory(
+                    output_directory,
+                    infrastructure
+                        .package_configuration_reader
+                        .get_dependencies(main_package_directory)?
+                        .get(&test_configuration.test_package_name)
+                        .ok_or(ApplicationError::TestPackageNotFound)?,
+                ),
+                &vec![
+                    file_path_resolver::resolve_main_package_archive_file(
+                        output_directory,
+                        &infrastructure.file_path_configuration,
+                    ),
+                    file_path_resolver::resolve_main_package_test_archive_file(
+                        output_directory,
+                        &infrastructure.file_path_configuration,
+                    ),
+                ]
+                .into_iter()
+                .chain(
+                    if infrastructure
+                        .package_configuration_reader
+                        .is_ffi_enabled(main_package_directory)?
+                    {
+                        Some(file_path_resolver::resolve_main_package_ffi_archive_file(
+                            output_directory,
+                            &infrastructure.file_path_configuration,
+                        ))
+                    } else {
+                        None
+                    },
+                )
+                .chain(
+                    external_package_topological_sorter::sort(
+                        infrastructure,
+                        main_package_directory,
+                        output_directory,
+                    )?
+                    .iter()
+                    .map(|url| {
+                        resolve_external_package_archive_files(
+                            infrastructure,
+                            url,
+                            output_directory,
+                        )
+                    })
+                    .collect::<Result<Vec<_>, _>>()?
+                    .into_iter()
+                    .flatten(),
+                )
+                .chain(resolve_external_package_archive_files(
+                    infrastructure,
+                    prelude_package_url,
+                    output_directory,
+                )?)
+                .collect::<Vec<_>>(),
+                &file_path_resolver::resolve_package_test_interface_file(
+                    output_directory,
+                    &infrastructure.file_path_configuration,
+                ),
+                &file_path_resolver::resolve_test_executable_file(output_directory),
             )?
             .as_bytes(),
     )?;

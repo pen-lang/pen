@@ -36,8 +36,8 @@ pub trait BuildScriptCompiler {
     fn compile_test(
         &self,
         test_package_directory: &FilePath,
-        test_interface_file: &FilePath,
         archive_files: &[FilePath],
+        test_interface_file: &FilePath,
         test_file: &FilePath,
     ) -> Result<String, Box<dyn Error>>;
 

@@ -3,7 +3,7 @@ use crate::{
     common::module_id_calculator,
     infra::{
         FilePath, FilePathConfiguration, ARCHIVE_DIRECTORY, BUILD_SCRIPT_DIRECTORY,
-        EXTERNAL_PACKAGE_DIRECTORY, OBJECT_DIRECTORY,
+        EXTERNAL_PACKAGE_DIRECTORY, OBJECT_DIRECTORY, TEST_DIRECTORY,
     },
 };
 
@@ -21,6 +21,10 @@ pub fn resolve_archive_directory(output_directory: &FilePath) -> FilePath {
 
 pub fn resolve_build_script_directory(output_directory: &FilePath) -> FilePath {
     output_directory.join(&FilePath::new([BUILD_SCRIPT_DIRECTORY]))
+}
+
+pub fn resolve_test_directory(output_directory: &FilePath) -> FilePath {
+    output_directory.join(&FilePath::new([TEST_DIRECTORY]))
 }
 
 pub fn resolve_source_file(
@@ -171,4 +175,18 @@ pub fn resolve_external_package_build_script_file(
         &FilePath::new([package_id_calculator::calculate(url)])
             .with_extension(file_path_configuration.build_script_file_extension),
     )
+}
+
+pub fn resolve_package_test_interface_file(
+    output_directory: &FilePath,
+    file_path_configuration: &FilePathConfiguration,
+) -> FilePath {
+    resolve_test_directory(output_directory).join(
+        &FilePath::new(["test"])
+            .with_extension(&file_path_configuration.test_interface_file_extension),
+    )
+}
+
+pub fn resolve_test_executable_file(output_directory: &FilePath) -> FilePath {
+    resolve_test_directory(output_directory).join(&FilePath::new(["test"]))
 }

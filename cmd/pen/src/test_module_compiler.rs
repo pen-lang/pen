@@ -1,5 +1,5 @@
 use super::{compile_configuration::COMPILE_CONFIGURATION, main_package_directory_finder};
-use crate::{infrastructure, test_module_configuration::TEST_MODULE_CONFIGURATION};
+use crate::{infrastructure, test_configuration::TEST_CONFIGURATION};
 use std::sync::Arc;
 
 pub fn compile(
@@ -21,7 +21,7 @@ pub fn compile(
         &file_path_converter.convert_to_file_path(test_interface_file)?,
         target_triple,
         &COMPILE_CONFIGURATION,
-        &TEST_MODULE_CONFIGURATION,
+        &TEST_CONFIGURATION.test_module_configuration,
     )?;
 
     Ok(())

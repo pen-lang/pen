@@ -1,9 +1,10 @@
-use super::application_configuration::ApplicationConfiguration;
 use crate::{
     common::file_path_resolver,
     external_package_topological_sorter,
     infra::{FilePath, Infrastructure},
     package_build_script_compiler,
+    test_configuration::TestConfiguration,
+    ApplicationConfiguration,
 };
 use std::error::Error;
 
@@ -13,6 +14,7 @@ pub fn build(
     output_directory: &FilePath,
     prelude_package_url: &url::Url,
     application_configuration: &ApplicationConfiguration,
+    test_configuration: &TestConfiguration,
 ) -> Result<(), Box<dyn Error>> {
     let child_build_script_files = vec![
         package_build_script_compiler::compile_modules(
@@ -25,6 +27,13 @@ pub fn build(
             infrastructure,
             main_package_directory,
             output_directory,
+        )?,
+        package_build_script_compiler::compile_test(
+            infrastructure,
+            main_package_directory,
+            output_directory,
+            prelude_package_url,
+            test_configuration,
         )?,
     ]
     .into_iter()

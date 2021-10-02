@@ -2,6 +2,7 @@ use crate::{
     application_configuration::APPLICATION_CONFIGURATION,
     file_path_configuration::{DEFAULT_TARGET_DIRECTORY, OUTPUT_DIRECTORY, PRELUDE_PACKAGE_URL},
     infrastructure, main_package_directory_finder,
+    test_configuration::TEST_CONFIGURATION,
 };
 use std::sync::Arc;
 
@@ -32,6 +33,7 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
         &output_directory,
         &url::Url::parse(PRELUDE_PACKAGE_URL)?,
         &APPLICATION_CONFIGURATION,
+        &TEST_CONFIGURATION,
     )?;
 
     Ok(())

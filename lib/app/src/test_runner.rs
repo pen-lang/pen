@@ -1,7 +1,7 @@
 use crate::{
     common::{file_path_resolver, test_interface_serializer},
     infra::{FilePath, Infrastructure},
-    package_test_builder, test_module_finder, ApplicationConfiguration,
+    package_test_builder, test_module_finder, ApplicationConfiguration, TestConfiguration,
 };
 use std::{collections::BTreeMap, error::Error};
 
@@ -11,6 +11,7 @@ pub fn run(
     output_directory: &FilePath,
     prelude_package_url: &url::Url,
     application_configuration: &ApplicationConfiguration,
+    test_configuration: &TestConfiguration,
 ) -> Result<(), Box<dyn Error>> {
     package_test_builder::build(
         infrastructure,
@@ -18,6 +19,7 @@ pub fn run(
         output_directory,
         prelude_package_url,
         application_configuration,
+        test_configuration,
     )?;
 
     let interface_files = test_module_finder::find(infrastructure, main_package_directory)?

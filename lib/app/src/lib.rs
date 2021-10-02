@@ -19,4 +19,4 @@ mod test_module_finder;
 pub mod test_runner;
 
 pub use application_configuration::{ApplicationConfiguration, MainModuleConfiguration};
-pub use test_configuration::TestModuleConfiguration;
+pub use test_configuration::{TestConfiguration, TestModuleConfiguration};
