@@ -1,9 +1,8 @@
 use crate::{
-    common::{file_path_resolver, test_interface_serializer},
     infra::{FilePath, Infrastructure},
-    package_test_builder, test_module_finder, ApplicationConfiguration, TestConfiguration,
+    package_test_builder, ApplicationConfiguration, TestConfiguration,
 };
-use std::{collections::BTreeMap, error::Error};
+use std::error::Error;
 
 pub fn run(
     infrastructure: &Infrastructure,
@@ -22,27 +21,7 @@ pub fn run(
         test_configuration,
     )?;
 
-    let interface_files = test_module_finder::find(infrastructure, main_package_directory)?
-        .iter()
-        .map(|file| {
-            file_path_resolver::resolve_test_interface_file(
-                output_directory,
-                file,
-                &infrastructure.file_path_configuration,
-            )
-        })
-        .collect::<Vec<_>>();
-
-    let interfaces = interface_files
-        .iter()
-        .map(|file| {
-            test_interface_serializer::deserialize(&infrastructure.file_system.read_to_vec(file)?)
-        })
-        .collect::<Result<Vec<_>, _>>()?;
-
-    let test_functions = interfaces.into_iter().flatten().collect::<BTreeMap<_, _>>();
-
-    dbg!(test_functions);
+    // TODO Run a test executable.
 
     Ok(())
 }

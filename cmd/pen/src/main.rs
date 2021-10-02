@@ -8,6 +8,7 @@ mod main_package_directory_finder;
 mod module_compiler;
 mod package_builder;
 mod package_creator;
+mod package_test_interface_compiler;
 mod prelude_module_compiler;
 mod test_configuration;
 mod test_module_compiler;
@@ -130,6 +131,23 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                 .arg(clap::Arg::with_name("dependency file").required(true))
                 .arg(clap::Arg::with_name("build script dependency file").required(true)),
         )
+        .subcommand(
+            clap::SubCommand::with_name("compile-package-test-interface")
+                .setting(clap::AppSettings::Hidden)
+                .about("Compiles a package test interface")
+                .arg(
+                    clap::Arg::with_name("package test interface file")
+                        .short("o")
+                        .required(true)
+                        .takes_value(true),
+                )
+                .arg(
+                    clap::Arg::with_name("test interface file")
+                        .required(true)
+                        .multiple(true),
+                )
+                .arg(build_target_triple_argument()),
+        )
         .get_matches()
         .subcommand()
     {
@@ -204,6 +222,17 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                     .collect::<Vec<_>>(),
                 matches.value_of("package directory").unwrap(),
                 matches.value_of("output directory").unwrap(),
+            )
+        }
+        ("compile-package-test-interface", matches) => {
+            let matches = matches.unwrap();
+
+            package_test_interface_compiler::compile(
+                &matches
+                    .values_of("test interface file")
+                    .unwrap()
+                    .collect::<Vec<_>>(),
+                matches.value_of("package test interface file").unwrap(),
             )
         }
         _ => unreachable!(),
