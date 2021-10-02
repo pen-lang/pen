@@ -43,8 +43,29 @@ fn main() {
 }
 EOF
 
+cat <<EOF >ffi/src/main.rs
+mod heap;
+mod test_result;
+mod unreachable;
+
+use test_result::TestResult;
+
+extern "C" {
+    fn _pen_test_convert_result(stack: ffi::Any) -> TestResult;
+}
+
+#[link(name = "main_test")]
+extern "C" {
+    $(for f in $(jq -r 'keys[]' $test_interface); do echo "fn $f() -> ffi::Any;"; done)
+}
+
+fn main() {
+    $(for f in $(jq -r 'keys[]' $test_interface); do echo "unsafe { _pen_test_convert_result($f()) };"; done)
+}
+EOF
+
 cd ffi
 
 cargo build --release --quiet
 
-cp target/release/os-app $output
+cp target/release/test $output
