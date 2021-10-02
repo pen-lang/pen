@@ -19,6 +19,7 @@ pub fn find(
             .unwrap()
             .starts_with('.')
         {
+            continue;
         } else if infrastructure.file_system.is_directory(&path) {
             source_files.extend(find(infrastructure, &path, file_extension)?);
         } else if path.has_extension(file_extension) {
