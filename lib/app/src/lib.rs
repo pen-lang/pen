@@ -13,7 +13,7 @@ pub mod package_builder;
 pub mod package_creator;
 pub mod package_initializer;
 mod package_test_builder;
-pub mod package_test_interface_compiler;
+pub mod package_test_information_compiler;
 mod prelude_interface_file_finder;
 mod test_configuration;
 mod test_module_finder;

@@ -113,7 +113,7 @@ pub fn compile_test(
     source_file: &FilePath,
     dependency_file: &FilePath,
     object_file: &FilePath,
-    test_interface_file: &FilePath,
+    test_information_file: &FilePath,
     target_triple: Option<&str>,
     compile_configuration: &CompileConfiguration,
     test_module_configuration: &TestModuleConfiguration,
@@ -144,7 +144,7 @@ pub fn compile_test(
     )?;
 
     infrastructure.file_system.write(
-        test_interface_file,
+        test_information_file,
         &module_test_information_serializer::serialize(&test_information)?,
     )?;
 

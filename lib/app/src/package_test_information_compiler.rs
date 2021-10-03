@@ -6,13 +6,13 @@ use std::{collections::BTreeMap, error::Error};
 
 pub fn compile(
     infrastructure: &Infrastructure,
-    module_test_interface_files: &[FilePath],
-    package_test_interface_file: &FilePath,
+    module_test_information_files: &[FilePath],
+    package_test_information_file: &FilePath,
 ) -> Result<(), Box<dyn Error>> {
     infrastructure.file_system.write(
-        package_test_interface_file,
+        package_test_information_file,
         &package_test_information_serializer::serialize(
-            &module_test_interface_files
+            &module_test_information_files
                 .iter()
                 .map(|file| {
                     module_test_information_serializer::deserialize(

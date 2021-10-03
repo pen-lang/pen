@@ -21,7 +21,7 @@ pub fn collect(
                     source_file,
                     &infrastructure.file_path_configuration,
                 ),
-                file_path_resolver::resolve_test_interface_file(
+                file_path_resolver::resolve_test_information_file(
                     output_directory,
                     source_file,
                     &infrastructure.file_path_configuration,

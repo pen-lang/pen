@@ -23,7 +23,7 @@ pub trait BuildScriptCompiler {
         &self,
         module_targets: &[TestModuleTarget],
         archive_file: &FilePath,
-        package_test_interface_file: &FilePath,
+        package_test_information_file: &FilePath,
         package_directory: &FilePath,
     ) -> Result<String, Box<dyn Error>>;
 
@@ -38,7 +38,7 @@ pub trait BuildScriptCompiler {
         &self,
         test_package_directory: &FilePath,
         archive_files: &[FilePath],
-        test_interface_file: &FilePath,
+        test_information_file: &FilePath,
         test_file: &FilePath,
     ) -> Result<String, Box<dyn Error>>;
 

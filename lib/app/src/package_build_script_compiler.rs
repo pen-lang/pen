@@ -147,7 +147,7 @@ pub fn compile_test_modules(
                     output_directory,
                     &infrastructure.file_path_configuration,
                 ),
-                &file_path_resolver::resolve_package_test_interface_file(
+                &file_path_resolver::resolve_package_test_information_file(
                     output_directory,
                     &infrastructure.file_path_configuration,
                 ),
@@ -311,7 +311,7 @@ pub fn compile_test(
                     output_directory,
                 )?)
                 .collect::<Vec<_>>(),
-                &file_path_resolver::resolve_package_test_interface_file(
+                &file_path_resolver::resolve_package_test_information_file(
                     output_directory,
                     &infrastructure.file_path_configuration,
                 ),

@@ -4,7 +4,7 @@ pub struct TestModuleTarget {
     package_directory: FilePath,
     source_file: FilePath,
     object_file: FilePath,
-    test_interface_file: FilePath,
+    test_information_file: FilePath,
 }
 
 impl TestModuleTarget {
@@ -12,13 +12,13 @@ impl TestModuleTarget {
         package_directory: FilePath,
         source_file: FilePath,
         object_file: FilePath,
-        test_interface_file: FilePath,
+        test_information_file: FilePath,
     ) -> Self {
         Self {
             package_directory,
             source_file,
             object_file,
-            test_interface_file,
+            test_information_file,
         }
     }
 
@@ -34,7 +34,7 @@ impl TestModuleTarget {
         &self.object_file
     }
 
-    pub fn test_interface_file(&self) -> &FilePath {
-        &self.test_interface_file
+    pub fn test_information_file(&self) -> &FilePath {
+        &self.test_information_file
     }
 }

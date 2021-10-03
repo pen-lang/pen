@@ -19,7 +19,7 @@ while getopts i:o: option; do
     output=$OPTARG
     ;;
   i)
-    test_interface=$OPTARG
+    test_information=$OPTARG
     ;;
   esac
 done
@@ -58,11 +58,11 @@ fn main() {
     let mut success: bool = true;
 
 $(
-  for m in $(jq -r 'keys[]' $test_interface); do
+  for m in $(jq -r 'keys[]' $test_information); do
     echo "println!(\"$m\");"
 
-    for f in $(jq -r ".[\"$m\"].functions | keys[]" $test_interface); do
-      name=$(jq -r ".[\"$m\"].functions.$f.name" $test_interface)
+    for f in $(jq -r ".[\"$m\"].functions | keys[]" $test_information); do
+      name=$(jq -r ".[\"$m\"].functions.$f.name" $test_information)
 
       echo "
         #[link(name = \"main_test\")]

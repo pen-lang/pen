@@ -8,7 +8,7 @@ mod main_package_directory_finder;
 mod module_compiler;
 mod package_builder;
 mod package_creator;
-mod package_test_interface_compiler;
+mod package_test_information_compiler;
 mod prelude_module_compiler;
 mod test_configuration;
 mod test_module_compiler;
@@ -97,7 +97,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                 .arg(clap::Arg::with_name("source file").required(true))
                 .arg(clap::Arg::with_name("dependency file").required(true))
                 .arg(clap::Arg::with_name("object file").required(true))
-                .arg(clap::Arg::with_name("test interface file").required(true))
+                .arg(clap::Arg::with_name("test information file").required(true))
                 .arg(build_target_triple_argument()),
         )
         .subcommand(
@@ -132,17 +132,17 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                 .arg(clap::Arg::with_name("build script dependency file").required(true)),
         )
         .subcommand(
-            clap::SubCommand::with_name("compile-package-test-interface")
+            clap::SubCommand::with_name("compile-package-test-information")
                 .setting(clap::AppSettings::Hidden)
-                .about("Compiles a package test interface")
+                .about("Compiles a package test information")
                 .arg(
-                    clap::Arg::with_name("package test interface file")
+                    clap::Arg::with_name("package test information file")
                         .short("o")
                         .required(true)
                         .takes_value(true),
                 )
                 .arg(
-                    clap::Arg::with_name("test interface file")
+                    clap::Arg::with_name("test information file")
                         .required(true)
                         .multiple(true),
                 ),
@@ -203,7 +203,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                 matches.value_of("source file").unwrap(),
                 matches.value_of("dependency file").unwrap(),
                 matches.value_of("object file").unwrap(),
-                matches.value_of("test interface file").unwrap(),
+                matches.value_of("test information file").unwrap(),
                 matches.value_of("target"),
             )
         }
@@ -223,15 +223,15 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                 matches.value_of("output directory").unwrap(),
             )
         }
-        ("compile-package-test-interface", matches) => {
+        ("compile-package-test-information", matches) => {
             let matches = matches.unwrap();
 
-            package_test_interface_compiler::compile(
+            package_test_information_compiler::compile(
                 &matches
-                    .values_of("test interface file")
+                    .values_of("test information file")
                     .unwrap()
                     .collect::<Vec<_>>(),
-                matches.value_of("package test interface file").unwrap(),
+                matches.value_of("package test information file").unwrap(),
             )
         }
         _ => unreachable!(),
