@@ -10,7 +10,7 @@ interface = { path = "../interface" }
 mir = { path = "../mir" }
 once_cell = "1"
 position = { path = "../position" }
-serde = { version = "1", features = ["derive", "rc"] }
+test-info = { path = "../test-info" }
 
 [dev-dependencies]
 pretty_assertions = "1.0"

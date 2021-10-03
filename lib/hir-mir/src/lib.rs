@@ -14,9 +14,7 @@ mod module_interface_compiler;
 mod record_element_validator;
 mod string_type_configuration;
 mod test_function_compiler;
-mod test_function_information;
 mod test_module_configuration;
-mod test_module_information;
 mod transformation;
 mod try_operation_validator;
 mod type_checker;
@@ -39,11 +37,8 @@ pub use error_type_configuration::ErrorTypeConfiguration;
 use hir::{analysis::types::type_existence_validator, ir::*};
 pub use list_type_configuration::ListTypeConfiguration;
 pub use main_module_configuration::MainModuleConfiguration;
-
 pub use string_type_configuration::StringTypeConfiguration;
-
 pub use test_module_configuration::TestModuleConfiguration;
-pub use test_module_information::TestModuleInformation;
 
 pub fn compile_main(
     module: &Module,
@@ -102,7 +97,7 @@ pub fn compile_test(
     string_type_configuration: &StringTypeConfiguration,
     error_type_configuration: &ErrorTypeConfiguration,
     test_module_configuration: &TestModuleConfiguration,
-) -> Result<(mir::ir::Module, TestModuleInformation), CompileError> {
+) -> Result<(mir::ir::Module, test_info::Module), CompileError> {
     let type_context = TypeContext::new(
         module,
         list_type_configuration,

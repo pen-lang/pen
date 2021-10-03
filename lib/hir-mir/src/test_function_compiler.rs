@@ -1,8 +1,5 @@
 use super::{error::CompileError, test_module_configuration::TestModuleConfiguration};
-use crate::{
-    test_function_information::TestFunctionInformation,
-    test_module_information::TestModuleInformation, type_context::TypeContext,
-};
+use crate::type_context::TypeContext;
 use hir::{ir::*, types};
 use std::{
     collections::hash_map::DefaultHasher,
@@ -15,7 +12,7 @@ pub fn compile(
     module: &Module,
     type_context: &TypeContext,
     configuration: &TestModuleConfiguration,
-) -> Result<(Module, TestModuleInformation), CompileError> {
+) -> Result<(Module, test_info::Module), CompileError> {
     let position = module.position();
 
     let definitions = module
@@ -66,14 +63,14 @@ pub fn compile(
                 .collect(),
             position.clone(),
         ),
-        TestModuleInformation::new(
+        test_info::Module::new(
             module.position().path(),
             definitions
                 .iter()
                 .map(|definition| {
                     (
                         compile_test_name(definition.name(), configuration),
-                        TestFunctionInformation::new(
+                        test_info::Function::new(
                             definition.original_name(),
                             definition.position().clone(),
                         ),

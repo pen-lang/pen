@@ -15,5 +15,6 @@ members = [
   "lib/parse",
   "lib/position",
   "lib/prelude/ffi",
+  "lib/test-info",
 ]
 exclude = ["lib/core/.pen", "lib/os", "lib/test", "tmp"]

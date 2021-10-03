@@ -49,6 +49,7 @@ dependencies = [
  "regex",
  "serde",
  "serde_json",
+ "test-info",
  "url",
 ]
 
@@ -301,7 +302,7 @@ dependencies = [
  "once_cell",
  "position",
  "pretty_assertions",
- "serde",
+ "test-info",
 ]
 
 [[package]]
@@ -851,6 +852,14 @@ checksum = "633c1a546cee861a1a6d0dc69ebeca693bf4296661ba7852b9d21d159e0506df"
 dependencies = [
  "libc",
  "winapi",
+]
+
+[[package]]
+name = "test-info"
+version = "0.1.0"
+dependencies = [
+ "position",
+ "serde",
 ]
 
 [[package]]

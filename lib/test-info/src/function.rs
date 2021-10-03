@@ -2,12 +2,12 @@ use position::Position;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
-pub struct TestFunctionInformation {
+pub struct Function {
     name: String,
     position: Position,
 }
 
-impl TestFunctionInformation {
+impl Function {
     pub fn new(name: impl Into<String>, position: Position) -> Self {
         Self {
             name: name.into(),
