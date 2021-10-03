@@ -60,8 +60,10 @@ pub fn resolve_test_information_file(
     source_file: &FilePath,
     file_path_configuration: &FilePathConfiguration,
 ) -> FilePath {
-    resolve_target_file_basename(output_directory, source_file)
-        .with_extension(file_path_configuration.test_information_file_extension)
+    resolve_test_directory(output_directory).join(
+        &FilePath::new([&module_id_calculator::calculate(source_file)])
+            .with_extension(file_path_configuration.test_information_file_extension),
+    )
 }
 
 fn resolve_target_file_basename(output_directory: &FilePath, source_file: &FilePath) -> FilePath {
@@ -182,7 +184,7 @@ pub fn resolve_package_test_information_file(
     file_path_configuration: &FilePathConfiguration,
 ) -> FilePath {
     resolve_test_directory(output_directory).join(
-        &FilePath::new(["test"])
+        &FilePath::new(["main"])
             .with_extension(file_path_configuration.test_information_file_extension),
     )
 }
