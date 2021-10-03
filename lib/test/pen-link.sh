@@ -74,9 +74,7 @@ $(
       echo "
         #[link(name = \"main_test\")]
         extern \"C\" { fn $f() -> ffi::Any; }
-      "
 
-      echo "
         let result: Result<_, _> = unsafe { _pen_test_convert_result($f()) }.into_result();
         println!(\"\t{}\t$name\", if result.is_ok() { \"OK\" } else { \"FAIL\" });
         if let Err(message) = &result {
