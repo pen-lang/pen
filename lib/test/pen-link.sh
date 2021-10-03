@@ -2,6 +2,11 @@
 
 set -e
 
+if ! which jq >/dev/null 2>&1; then
+  echo jq command not found >&2
+  exit 1
+fi
+
 convert_library_path_to_flag() {
   basename "$1" | sed 's/^lib\(.*\)\.a$/\1/'
 }
