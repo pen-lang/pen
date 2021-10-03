@@ -1,8 +1,11 @@
 use super::{error::CompileError, test_module_configuration::TestModuleConfiguration};
-use crate::type_context::TypeContext;
+use crate::{
+    test_function_information::TestFunctionInformation,
+    test_module_information::TestModuleInformation, type_context::TypeContext,
+};
 use hir::{ir::*, types};
 use std::{
-    collections::{hash_map::DefaultHasher, BTreeMap},
+    collections::hash_map::DefaultHasher,
     hash::{Hash, Hasher},
 };
 
@@ -12,7 +15,7 @@ pub fn compile(
     module: &Module,
     type_context: &TypeContext,
     configuration: &TestModuleConfiguration,
-) -> Result<(Module, BTreeMap<String, String>), CompileError> {
+) -> Result<(Module, TestModuleInformation), CompileError> {
     let position = module.position();
 
     let definitions = module
@@ -63,15 +66,21 @@ pub fn compile(
                 .collect(),
             position.clone(),
         ),
-        definitions
-            .iter()
-            .map(|definition| {
-                (
-                    compile_test_name(definition.name(), configuration),
-                    definition.original_name().into(),
-                )
-            })
-            .collect(),
+        TestModuleInformation::new(
+            module.position().path(),
+            definitions
+                .iter()
+                .map(|definition| {
+                    (
+                        compile_test_name(definition.name(), configuration),
+                        TestFunctionInformation::new(
+                            definition.original_name(),
+                            definition.position().clone(),
+                        ),
+                    )
+                })
+                .collect(),
+        ),
     ))
 }
 

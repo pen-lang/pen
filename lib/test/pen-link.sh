@@ -54,24 +54,30 @@ extern "C" {
     fn _pen_test_convert_result(stack: ffi::Any) -> ffi::Arc<TestResult>;
 }
 
-#[link(name = "main_test")]
-extern "C" {
-    $(for f in $(jq -r 'keys[]' $test_interface); do echo "fn $f() -> ffi::Any;"; done)
-}
-
 fn main() {
     let mut success: bool = true;
 
 $(
-  for f in $(jq -r 'keys[]' $test_interface); do
-    echo "
-      let result: Result<_, _> = unsafe { _pen_test_convert_result($f()) }.into_result();
-      println!(\"{}\\t$f\", if result.is_ok() { \"OK\" } else { \"FAIL\" });
-      if let Err(message) = &result {
-        println!(\"\tMessage: {}\", message);
-      }
-      success = success && result.is_ok();
-    "
+  for m in $(jq -r 'keys[]' $test_interface); do
+    echo "println!(\"$m\");"
+
+    for f in $(jq -r ".[\"$m\"].functions | keys[]" $test_interface); do
+      name=$(jq -r ".[\"$m\"].functions.$f.name" $test_interface)
+
+      echo "
+        #[link(name = \"main_test\")]
+        extern \"C\" { fn $f() -> ffi::Any; }
+      "
+
+      echo "
+        let result: Result<_, _> = unsafe { _pen_test_convert_result($f()) }.into_result();
+        println!(\"\t{}\t$name\", if result.is_ok() { \"OK\" } else { \"FAIL\" });
+        if let Err(message) = &result {
+          println!(\"\t\tMessage: {}\", message);
+        }
+        success = success && result.is_ok();
+      "
+    done
   done
 )
 

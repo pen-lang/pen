@@ -4,7 +4,7 @@ mod prelude_type_configuration_qualifier;
 
 use crate::{
     application_configuration::ApplicationConfiguration,
-    common::{dependency_serializer, interface_serializer, test_interface_serializer},
+    common::{dependency_serializer, interface_serializer, module_test_information_serializer},
     infra::{FilePath, Infrastructure},
     test_configuration::TestModuleConfiguration,
 };
@@ -118,7 +118,7 @@ pub fn compile_test(
     compile_configuration: &CompileConfiguration,
     test_module_configuration: &TestModuleConfiguration,
 ) -> Result<(), Box<dyn Error>> {
-    let (module, test_functions) = hir_mir::compile_test(
+    let (module, test_information) = hir_mir::compile_test(
         &compile_to_hir(infrastructure, source_file, dependency_file, None)?,
         &prelude_type_configuration_qualifier::qualify_list_type_configuration(
             &compile_configuration.list_type,
@@ -145,7 +145,7 @@ pub fn compile_test(
 
     infrastructure.file_system.write(
         test_interface_file,
-        &test_interface_serializer::serialize(&test_functions)?,
+        &module_test_information_serializer::serialize(&test_information)?,
     )?;
 
     Ok(())

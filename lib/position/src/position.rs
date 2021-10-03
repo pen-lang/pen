@@ -27,6 +27,10 @@ impl Position {
             line: line.into(),
         }
     }
+
+    pub fn path(&self) -> &str {
+        &self.path
+    }
 }
 
 impl Display for Position {

@@ -301,6 +301,7 @@ dependencies = [
  "once_cell",
  "position",
  "pretty_assertions",
+ "serde",
 ]
 
 [[package]]

@@ -1,9 +1,6 @@
 use super::error::InfrastructureError;
 use crate::FilePathConverter;
-use std::error::Error;
-use std::io::Write;
-use std::process::Command;
-use std::sync::Arc;
+use std::{error::Error, io::Write, process::Command, sync::Arc};
 
 pub struct CommandRunner {
     file_path_converter: Arc<FilePathConverter>,
