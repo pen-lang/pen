@@ -66,10 +66,12 @@ $(
   for m in $(jq -r '.modules | keys[]' $test_information); do
     echo "println!(\"$m\");"
 
-    functions=$(jq -r ".modules[\"$m\"].functions" $test_information)
+    functions() {
+      jq -r ".modules[\"$m\"].functions" $test_information
+    }
 
-    for f in $(echo "$functions" | jq -r 'keys[]'); do
-      name=$(echo "$functions" | jq -r ".$f.name")
+    for f in $(functions | jq -r 'keys[]'); do
+      name=$(functions | jq -r ".$f.name")
 
       echo "
         #[link(name = \"main_test\")]
