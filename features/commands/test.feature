@@ -27,6 +27,7 @@ Feature: Testing packages
     """
     When I run `pen test`
     Then the exit status should be 0
+    And the stdout should contain "OK"
 
   Scenario: Fail to test a module
     Given a file named "Foo.test.pen" with:
@@ -40,3 +41,4 @@ Feature: Testing packages
     """
     When I run `pen test`
     Then the exit status should not be 0
+    And the stdout should contain "FAIL"
