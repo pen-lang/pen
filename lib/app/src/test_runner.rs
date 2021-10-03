@@ -1,4 +1,5 @@
 use crate::{
+    common::file_path_resolver,
     infra::{FilePath, Infrastructure},
     package_test_builder, ApplicationConfiguration, TestConfiguration,
 };
@@ -21,7 +22,11 @@ pub fn run(
         test_configuration,
     )?;
 
-    // TODO Run a test executable.
+    infrastructure
+        .command_runner
+        .run(&file_path_resolver::resolve_test_executable_file(
+            output_directory,
+        ))?;
 
     Ok(())
 }

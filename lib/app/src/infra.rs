@@ -1,6 +1,7 @@
 mod build_script_compiler;
 mod build_script_dependency_compiler;
 mod build_script_runner;
+mod command_runner;
 mod external_package_initializer;
 mod file_path;
 mod file_path_configuration;
@@ -16,6 +17,7 @@ mod test_module_target;
 pub use build_script_compiler::*;
 pub use build_script_dependency_compiler::*;
 pub use build_script_runner::*;
+pub use command_runner::*;
 pub use external_package_initializer::*;
 pub use file_path::*;
 pub use file_path_configuration::*;

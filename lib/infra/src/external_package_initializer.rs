@@ -45,10 +45,12 @@ impl app::infra::ExternalPackageInitializer for ExternalPackageInitializer {
 
         match url.scheme() {
             "file" | "file+relative" => {
-                command_runner::run(Command::new("cp").arg("-r").arg(url.path()).arg(directory))?;
+                command_runner::run_command(
+                    Command::new("cp").arg("-r").arg(url.path()).arg(directory),
+                )?;
             }
             "git" => {
-                command_runner::run(
+                command_runner::run_command(
                     Command::new("git")
                         .arg("clone")
                         .arg(url.as_str())
@@ -56,23 +58,23 @@ impl app::infra::ExternalPackageInitializer for ExternalPackageInitializer {
                 )?;
             }
             _ => {
-                if url.scheme() == self.language_root_scheme {
-                    command_runner::run(
-                        Command::new("cp")
-                            .arg("-r")
-                            .arg(
-                                PathBuf::from(environment_variable_reader::read(
-                                    self.language_root_environment_variable,
-                                )?)
-                                .join(url.path().strip_prefix('/').unwrap_or_default()),
-                            )
-                            .arg(directory),
-                    )?;
-                } else {
+                if url.scheme() != self.language_root_scheme {
                     return Err(
                         InfrastructureError::PackageUrlSchemeNotSupported(url.clone()).into(),
                     );
                 }
+
+                command_runner::run_command(
+                    Command::new("cp")
+                        .arg("-r")
+                        .arg(
+                            PathBuf::from(environment_variable_reader::read(
+                                self.language_root_environment_variable,
+                            )?)
+                            .join(url.path().strip_prefix('/').unwrap_or_default()),
+                        )
+                        .arg(directory),
+                )?;
             }
         }
 
