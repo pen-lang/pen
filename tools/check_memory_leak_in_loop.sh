@@ -5,7 +5,7 @@ set -ex
 . $(dirname $0)/utilities.sh
 
 test_duration=1
-test_retry_count=3
+test_retry_count=5
 
 test() {
   valgrind=""
@@ -32,6 +32,8 @@ retry_tests() {
     if test "$@"; then
       return 0
     fi
+
+    echo Retrying...
   done
 
   return 1
