@@ -31,7 +31,7 @@ done
 
 shift $(expr $OPTIND - 1)
 
-if [ -z "$output" ]; then
+if [ -z "$output" -o -z "$test_information" ]; then
   exit 1
 fi
 
