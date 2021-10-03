@@ -22,7 +22,7 @@ impl CommandRunner {
 impl app::infra::CommandRunner for CommandRunner {
     fn run(&self, executable_file: &app::infra::FilePath) -> Result<(), Box<dyn Error>> {
         run_command(
-            &mut Command::new(self.file_path_converter.convert_to_os_path(executable_file))
+            Command::new(self.file_path_converter.convert_to_os_path(executable_file))
                 .stdout(Stdio::inherit())
                 .stderr(Stdio::inherit()),
         )?;
