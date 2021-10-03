@@ -58,11 +58,11 @@ fn main() {
     let mut success: bool = true;
 
 $(
-  for m in $(jq -r 'keys[]' $test_information); do
+  for m in $(jq -r '.modules | keys[]' $test_information); do
     echo "println!(\"$m\");"
 
-    for f in $(jq -r ".[\"$m\"].functions | keys[]" $test_information); do
-      name=$(jq -r ".[\"$m\"].functions.$f.name" $test_information)
+    for f in $(jq -r ".modules[\"$m\"].functions | keys[]" $test_information); do
+      name=$(jq -r ".modules[\"$m\"].functions.$f.name" $test_information)
 
       echo "
         #[link(name = \"main_test\")]

@@ -11,8 +11,8 @@ pub fn compile(
 ) -> Result<(), Box<dyn Error>> {
     infrastructure.file_system.write(
         package_test_information_file,
-        &package_test_information_serializer::serialize(
-            &module_test_information_files
+        &package_test_information_serializer::serialize(&test_info::Package::new(
+            module_test_information_files
                 .iter()
                 .map(|file| {
                     module_test_information_serializer::deserialize(
@@ -23,7 +23,7 @@ pub fn compile(
                 .into_iter()
                 .map(|information| (information.path().into(), information))
                 .collect::<BTreeMap<_, _>>(),
-        )?,
+        ))?,
     )?;
 
     Ok(())
