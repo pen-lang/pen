@@ -70,7 +70,7 @@ It defines a function exported for foreign languages.
 See [FFI](/advanced-features/ffi.md) for more details.
 
 ```pen
-foreign foo = \(x number, y number) number {
+foreign "c" foo = \(x number, y number) number {
   x + y
 }
 ```
