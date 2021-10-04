@@ -62,6 +62,12 @@ Pen aims to make large-scale software development efficient where a number of pe
   - Asynchronous operations
   - Parallel computation
 
+#### Fast and reliable tests
+
+- All unit tests are deterministic.
+- Therefore, tests are always fast and reliable.
+- In every test, nondeterministic codes are replaced with deterministic mocks.
+
 ### [System injection](https://pen-lang.org/advanced-features/system-injection.html)
 
 - System functions are always injected as arguments of main functions.
@@ -78,10 +84,6 @@ Pen aims to make large-scale software development efficient where a number of pe
 - [Rust](https://www.rust-lang.org/)/C foreign function interface
 
 ### Work in progress...
-
-#### Deterministic tests
-
-Unit tests are deterministic to enable reliable continuous integration.
 
 #### Asynchronous operation
 
