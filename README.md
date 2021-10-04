@@ -65,8 +65,7 @@ Pen aims to make large-scale software development efficient where a number of pe
 ### Reliable testing
 
 - All unit tests are deterministic.
-- Therefore, tests are always reliable and fast.
-- In every test, nondeterministic codes are replaced with deterministic mocks.
+- So tests are always reliable and fast.
 
 ### [System injection](https://pen-lang.org/advanced-features/system-injection.html)
 
