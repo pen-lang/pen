@@ -55,7 +55,7 @@ Pen aims to make large-scale software development efficient where a number of pe
 ### Minimal language design
 
 - [Syntax][syntax] and [type system](https://pen-lang.org/references/language/types.html) are made as small as possible.
-- Yet, the language supports all the modern features.
+- Yet, the language supports all the modern features, such as:
   - Functional programming
   - Effect system
   - Dependency injection
@@ -67,10 +67,9 @@ Pen aims to make large-scale software development efficient where a number of pe
 - All unit tests are deterministic.
 - So testing is always reliable and fast.
 
-### [System injection](https://pen-lang.org/advanced-features/system-injection.html)
+### System injection
 
-- System functions are always injected as arguments of main functions.
-- That isolates and protects application logic from implementation details for both maintainability and portability.
+- [System injection](https://pen-lang.org/advanced-features/system-injection.html) is a novel mechanism to isolate application logic from system functions.
 - Developers can define their own system functions and build applications on top of them.
 
 ### Others
