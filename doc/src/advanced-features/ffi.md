@@ -16,7 +16,7 @@ import foreign "c" foo \(number, number) number
 
 ## Exporting functions to foreign languages
 
-You can export functions to foreign languages using [foreign function definitions](/references/language/syntax.md#foreign-function-definition) which have `foreign` keywords in front of normal function definitions.
+You can export functions to foreign languages using [foreign function definitions](/references/language/syntax.md#foreign-function-definition), which have `foreign` keywords in front of normal function definitions.
 
 You might specify calling conventions of exported foreign functions optionally after `foreign` keywords as well as [imported foreign functions](#importing-functions-in-foreign-languages).
 
