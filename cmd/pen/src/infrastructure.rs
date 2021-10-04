@@ -3,10 +3,11 @@ use crate::file_path_configuration::{
     FILE_PATH_CONFIGURATION, LANGUAGE_ROOT_ENVIRONMENT_VARIABLE, LANGUAGE_ROOT_SCHEME,
     LINK_SCRIPT_BASENAME,
 };
-use std::{error::Error, sync::Arc};
+use std::{error::Error, path::Path, sync::Arc};
 
 pub fn create(
     file_path_converter: Arc<infra::FilePathConverter>,
+    main_package_directory: impl AsRef<Path>,
 ) -> Result<app::infra::Infrastructure, Box<dyn Error>> {
     let file_system = Arc::new(infra::FileSystem::new(file_path_converter.clone()));
 
@@ -28,7 +29,10 @@ pub fn create(
             LANGUAGE_ROOT_ENVIRONMENT_VARIABLE,
         )),
         file_system: file_system.clone(),
-        file_path_displayer: Arc::new(infra::FilePathDisplayer::new(file_path_converter.clone())),
+        file_path_displayer: Arc::new(infra::FilePathDisplayer::new(
+            file_path_converter.clone(),
+            main_package_directory,
+        )),
         file_path_configuration: FILE_PATH_CONFIGURATION.clone().into(),
         build_script_runner: Arc::new(infra::NinjaBuildScriptRunner::new(
             file_path_converter.clone(),
