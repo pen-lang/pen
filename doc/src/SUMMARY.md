@@ -4,6 +4,7 @@
 - [Guides](guides/README.md)
   - [Getting started](guides/getting-started.md)
   - [Install](guides/install.md)
+  - [Testing](guides/testing.md)
   - [Coding style](guides/coding-style.md)
   - [Background](guides/background.md)
 - [References](references/README.md)
