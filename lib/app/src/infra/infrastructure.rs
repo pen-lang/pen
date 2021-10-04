@@ -1,5 +1,5 @@
 use super::{
-    BuildScriptCompiler, BuildScriptDependencyCompiler, BuildScriptRunner,
+    BuildScriptCompiler, BuildScriptDependencyCompiler, BuildScriptRunner, CommandRunner,
     ExternalPackageInitializer, FilePathConfiguration, FilePathDisplayer, FileSystem,
     PackageConfigurationReader, PackageConfigurationWriter,
 };
@@ -20,4 +20,5 @@ pub struct Infrastructure {
     pub build_script_runner: Arc<dyn BuildScriptRunner>,
     pub package_configuration_reader: Arc<dyn PackageConfigurationReader>,
     pub package_configuration_writer: Arc<dyn PackageConfigurationWriter>,
+    pub command_runner: Arc<dyn CommandRunner>,
 }

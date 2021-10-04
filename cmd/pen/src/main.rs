@@ -1,5 +1,3 @@
-use compile_configuration::CROSS_COMPILE_TARGETS;
-
 mod application_configuration;
 mod compile_configuration;
 mod dependency_resolver;
@@ -10,7 +8,13 @@ mod main_package_directory_finder;
 mod module_compiler;
 mod package_builder;
 mod package_creator;
+mod package_test_information_compiler;
 mod prelude_module_compiler;
+mod test_configuration;
+mod test_module_compiler;
+mod test_runner;
+
+use compile_configuration::CROSS_COMPILE_TARGETS;
 
 fn main() {
     if let Err(error) = run() {
@@ -35,6 +39,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                 .about("Builds a package")
                 .arg(build_target_triple_argument().possible_values(CROSS_COMPILE_TARGETS)),
         )
+        .subcommand(clap::SubCommand::with_name("test").about("Tests modules in a package"))
         .subcommand(
             clap::SubCommand::with_name("create")
                 .about("Creates a package")
@@ -86,6 +91,16 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                 .arg(build_target_triple_argument()),
         )
         .subcommand(
+            clap::SubCommand::with_name("compile-test")
+                .setting(clap::AppSettings::Hidden)
+                .about("Compiles a test module")
+                .arg(clap::Arg::with_name("source file").required(true))
+                .arg(clap::Arg::with_name("dependency file").required(true))
+                .arg(clap::Arg::with_name("object file").required(true))
+                .arg(clap::Arg::with_name("test information file").required(true))
+                .arg(build_target_triple_argument()),
+        )
+        .subcommand(
             clap::SubCommand::with_name("resolve-dependency")
                 .setting(clap::AppSettings::Hidden)
                 .about("Resolves module dependency")
@@ -116,6 +131,22 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                 .arg(clap::Arg::with_name("dependency file").required(true))
                 .arg(clap::Arg::with_name("build script dependency file").required(true)),
         )
+        .subcommand(
+            clap::SubCommand::with_name("compile-package-test-information")
+                .setting(clap::AppSettings::Hidden)
+                .about("Compiles a package test information")
+                .arg(
+                    clap::Arg::with_name("package test information file")
+                        .short("o")
+                        .required(true)
+                        .takes_value(true),
+                )
+                .arg(
+                    clap::Arg::with_name("test information file")
+                        .required(true)
+                        .multiple(true),
+                ),
+        )
         .get_matches()
         .subcommand()
     {
@@ -124,6 +155,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
 
             package_builder::build(matches.value_of("target"), matches.is_present("verbose"))
         }
+        ("test", _) => test_runner::run(),
         ("create", matches) => {
             let matches = matches.unwrap();
 
@@ -164,6 +196,17 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                 matches.value_of("target"),
             )
         }
+        ("compile-test", matches) => {
+            let matches = matches.unwrap();
+
+            test_module_compiler::compile(
+                matches.value_of("source file").unwrap(),
+                matches.value_of("dependency file").unwrap(),
+                matches.value_of("object file").unwrap(),
+                matches.value_of("test information file").unwrap(),
+                matches.value_of("target"),
+            )
+        }
         ("resolve-dependency", matches) => {
             let matches = matches.unwrap();
 
@@ -178,6 +221,17 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                     .collect::<Vec<_>>(),
                 matches.value_of("package directory").unwrap(),
                 matches.value_of("output directory").unwrap(),
+            )
+        }
+        ("compile-package-test-information", matches) => {
+            let matches = matches.unwrap();
+
+            package_test_information_compiler::compile(
+                &matches
+                    .values_of("test information file")
+                    .unwrap()
+                    .collect::<Vec<_>>(),
+                matches.value_of("package test information file").unwrap(),
             )
         }
         _ => unreachable!(),

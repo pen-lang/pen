@@ -1,4 +1,5 @@
-use super::{command_runner, file_path_converter::FilePathConverter};
+use super::file_path_converter::FilePathConverter;
+use crate::command_runner;
 use std::{
     error::Error,
     process::{Command, Stdio},
@@ -20,7 +21,7 @@ impl NinjaBuildScriptRunner {
 impl app::infra::BuildScriptRunner for NinjaBuildScriptRunner {
     fn run(&self, build_script_file: &app::infra::FilePath) -> Result<(), Box<dyn Error>> {
         // spell-checker:disable
-        command_runner::run(
+        command_runner::run_command(
             Command::new("ninja")
                 .arg("-f")
                 .arg(

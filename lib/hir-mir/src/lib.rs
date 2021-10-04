@@ -13,6 +13,8 @@ mod module_compiler;
 mod module_interface_compiler;
 mod record_element_validator;
 mod string_type_configuration;
+mod test_function_compiler;
+mod test_module_configuration;
 mod transformation;
 mod try_operation_validator;
 mod type_checker;
@@ -36,6 +38,7 @@ use hir::{analysis::types::type_existence_validator, ir::*};
 pub use list_type_configuration::ListTypeConfiguration;
 pub use main_module_configuration::MainModuleConfiguration;
 pub use string_type_configuration::StringTypeConfiguration;
+pub use test_module_configuration::TestModuleConfiguration;
 
 pub fn compile_main(
     module: &Module,
@@ -86,6 +89,27 @@ pub fn compile_prelude(
             &DUMMY_ERROR_TYPE_CONFIGURATION,
         ),
     )
+}
+
+pub fn compile_test(
+    module: &Module,
+    list_type_configuration: &ListTypeConfiguration,
+    string_type_configuration: &StringTypeConfiguration,
+    error_type_configuration: &ErrorTypeConfiguration,
+    test_module_configuration: &TestModuleConfiguration,
+) -> Result<(mir::ir::Module, test_info::Module), CompileError> {
+    let type_context = TypeContext::new(
+        module,
+        list_type_configuration,
+        string_type_configuration,
+        error_type_configuration,
+    );
+
+    let (module, test_information) =
+        test_function_compiler::compile(module, &type_context, test_module_configuration)?;
+    let (module, _) = compile_module(&module, &type_context)?;
+
+    Ok((module, test_information))
 }
 
 fn compile_module(

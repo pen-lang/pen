@@ -17,6 +17,7 @@ mod ninja_build_script_dependency_compiler;
 mod ninja_build_script_runner;
 mod package_script_finder;
 
+pub use command_runner::CommandRunner;
 pub use error::*;
 pub use external_package_initializer::*;
 pub use file_path_converter::*;

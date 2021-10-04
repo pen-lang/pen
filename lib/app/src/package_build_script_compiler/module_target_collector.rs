@@ -1,7 +1,7 @@
-use super::module_finder;
 use crate::{
     common::file_path_resolver,
     infra::{FilePath, Infrastructure, ModuleTarget},
+    module_finder,
 };
 use std::error::Error;
 

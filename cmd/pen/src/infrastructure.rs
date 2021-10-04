@@ -36,7 +36,7 @@ pub fn create(
         build_script_compiler,
         package_configuration_reader: Arc::new(infra::JsonPackageConfigurationReader::new(
             file_system.clone(),
-            file_path_converter,
+            file_path_converter.clone(),
             BUILD_CONFIGURATION_FILENAME,
             FFI_BUILD_SCRIPT_BASENAME,
         )),
@@ -44,5 +44,6 @@ pub fn create(
             file_system,
             BUILD_CONFIGURATION_FILENAME,
         )),
+        command_runner: Arc::new(infra::CommandRunner::new(file_path_converter)),
     })
 }

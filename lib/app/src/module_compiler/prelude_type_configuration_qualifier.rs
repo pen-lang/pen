@@ -23,7 +23,7 @@ pub fn qualify_string_type_configuration(
     prelude_prefix: &str,
 ) -> hir_mir::StringTypeConfiguration {
     hir_mir::StringTypeConfiguration {
-        equal_function_name: [prelude_prefix, &configuration.equal_function_name].join(""),
+        equal_function_name: prelude_prefix.to_owned() + &configuration.equal_function_name,
     }
 }
 

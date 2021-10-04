@@ -7,6 +7,7 @@ pub enum ApplicationError {
     ModuleNotFound(String),
     PackageNotFound(String),
     SystemPackageNotFound,
+    TestPackageNotFound,
 }
 
 impl Error for ApplicationError {}
@@ -25,6 +26,9 @@ impl Display for ApplicationError {
             }
             Self::SystemPackageNotFound => {
                 write!(formatter, "system package not found")
+            }
+            Self::TestPackageNotFound => {
+                write!(formatter, "test package not found")
             }
         }
     }

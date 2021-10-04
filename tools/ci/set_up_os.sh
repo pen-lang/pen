@@ -2,7 +2,7 @@
 
 set -e
 
-brew install llvm@12 ninja
+brew install jq llvm@12 ninja
 
 llvm_prefix=$(brew --prefix)/opt/llvm@12
 

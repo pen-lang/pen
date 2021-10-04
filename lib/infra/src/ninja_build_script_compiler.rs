@@ -68,6 +68,12 @@ impl NinjaBuildScriptCompiler {
             "rule compile_prelude",
             "  command = pen compile-prelude --target $target $in $out",
             "  description = compiling module of $source_file",
+            "rule compile_test",
+            "  command = pen compile-test --target $target $in $out",
+            "  description = compiling test module of $source_file",
+            "rule compile_package_test_information",
+            "  command = pen compile-package-test-information -o $out $in",
+            "  description = compiling package test information",
             "rule llc",
             &format!(
                 "  command = {} -O3 -tailcallopt --relocation-model pic \
@@ -152,6 +158,59 @@ impl NinjaBuildScriptCompiler {
                 ))
             })
             .chain(self.compile_ffi_build(package_directory, ffi_archive_file)?)
+            .collect())
+    }
+
+    fn compile_test_module_targets(
+        &self,
+        module_targets: &[app::infra::TestModuleTarget],
+    ) -> Result<Vec<String>, Box<dyn Error>> {
+        Ok(module_targets
+            .iter()
+            .flat_map(|target| {
+                let package_directory = self
+                    .file_path_converter
+                    .convert_to_os_path(target.package_directory());
+                let source_file = self
+                    .file_path_converter
+                    .convert_to_os_path(target.source_file());
+                let test_information_file = self
+                    .file_path_converter
+                    .convert_to_os_path(target.test_information_file());
+                let object_file = self
+                    .file_path_converter
+                    .convert_to_os_path(target.object_file());
+                let dependency_file = object_file.with_extension("dep");
+                let ninja_dependency_file = object_file.with_extension("dd");
+                let bit_code_file = object_file.with_extension(self.bit_code_file_extension);
+
+                vec![
+                    format!(
+                        "build {} {}: compile_test {} {} || {}",
+                        bit_code_file.display(),
+                        test_information_file.display(),
+                        source_file.display(),
+                        dependency_file.display(),
+                        ninja_dependency_file.display()
+                    ),
+                    format!("  dyndep = {}", ninja_dependency_file.display()),
+                    format!("  source_file = {}", source_file.display()),
+                    format!(
+                        "build {}: llc {}",
+                        object_file.display(),
+                        bit_code_file.display(),
+                    ),
+                    format!("  source_file = {}", source_file.display()),
+                ]
+                .into_iter()
+                .chain(self.compile_dependency(
+                    &source_file,
+                    &bit_code_file,
+                    &dependency_file,
+                    &ninja_dependency_file,
+                    &package_directory,
+                ))
+            })
             .collect())
     }
 
@@ -301,6 +360,32 @@ impl NinjaBuildScriptCompiler {
             format!("default {}", archive_file.display()),
         ])
     }
+
+    fn compile_package_test_information(
+        &self,
+        test_information_files: &[&FilePath],
+        package_test_information_file: &FilePath,
+    ) -> Result<Vec<String>, Box<dyn Error>> {
+        let package_test_information_file = self
+            .file_path_converter
+            .convert_to_os_path(package_test_information_file);
+
+        Ok(vec![
+            format!(
+                "build {}: compile_package_test_information {}",
+                package_test_information_file.display(),
+                test_information_files
+                    .iter()
+                    .map(|file| format!(
+                        "{}",
+                        self.file_path_converter.convert_to_os_path(file).display()
+                    ))
+                    .collect::<Vec<_>>()
+                    .join(" ")
+            ),
+            format!("default {}", package_test_information_file.display()),
+        ])
+    }
 }
 
 impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
@@ -358,6 +443,40 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
                         .collect::<Vec<_>>(),
                     archive_file,
                     package_directory,
+                )?,
+            )
+            .collect::<Vec<_>>()
+            .join("\n")
+            + "\n")
+    }
+
+    fn compile_test_modules(
+        &self,
+        module_targets: &[app::infra::TestModuleTarget],
+        archive_file: &FilePath,
+        package_test_information_file: &FilePath,
+        package_directory: &FilePath,
+    ) -> Result<String, Box<dyn Error>> {
+        Ok(self
+            .compile_test_module_targets(module_targets)?
+            .into_iter()
+            .chain(
+                self.compile_archive(
+                    &module_targets
+                        .iter()
+                        .map(|target| target.object_file())
+                        .collect::<Vec<_>>(),
+                    archive_file,
+                    package_directory,
+                )?,
+            )
+            .chain(
+                self.compile_package_test_information(
+                    &module_targets
+                        .iter()
+                        .map(|target| target.test_information_file())
+                        .collect::<Vec<_>>(),
+                    package_test_information_file,
                 )?,
             )
             .collect::<Vec<_>>()
@@ -428,6 +547,51 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
                     .join(" ")
             ),
             format!("default {}", application_file.display()),
+        ]
+        .join("\n")
+            + "\n")
+    }
+
+    fn compile_test(
+        &self,
+        test_package_directory: &FilePath,
+        archive_files: &[FilePath],
+        test_information_file: &FilePath,
+        test_file: &FilePath,
+    ) -> Result<String, Box<dyn Error>> {
+        let test_package_directory = self
+            .file_path_converter
+            .convert_to_os_path(test_package_directory);
+        let test_file = self.file_path_converter.convert_to_os_path(test_file);
+
+        Ok(vec![
+            "rule link".into(),
+            format!(
+                "  command = {} -o $out -i $in",
+                package_script_finder::find(&test_package_directory, self.link_script_basename)?
+                    .ok_or(InfrastructureError::LinkScriptNotFound(
+                        test_package_directory,
+                    ))?
+                    .display(),
+            ),
+            "  description = linking tests at $out".into(),
+            format!(
+                "build {}: link {} {}",
+                test_file.display(),
+                self.file_path_converter
+                    .convert_to_os_path(test_information_file)
+                    .display(),
+                archive_files
+                    .iter()
+                    .map(|file| self
+                        .file_path_converter
+                        .convert_to_os_path(file)
+                        .display()
+                        .to_string())
+                    .collect::<Vec<_>>()
+                    .join(" ")
+            ),
+            format!("default {}", test_file.display()),
         ]
         .join("\n")
             + "\n")

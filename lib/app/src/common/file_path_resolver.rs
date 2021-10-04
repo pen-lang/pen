@@ -3,11 +3,12 @@ use crate::{
     common::module_id_calculator,
     infra::{
         FilePath, FilePathConfiguration, ARCHIVE_DIRECTORY, BUILD_SCRIPT_DIRECTORY,
-        EXTERNAL_PACKAGE_DIRECTORY, OBJECT_DIRECTORY,
+        EXTERNAL_PACKAGE_DIRECTORY, OBJECT_DIRECTORY, TEST_DIRECTORY,
     },
 };
 
 const MAIN_ARCHIVE_BASENAME: &str = "main";
+const TEST_ARCHIVE_SUFFIX: &str = "_test";
 const FFI_ARCHIVE_SUFFIX: &str = "_ffi";
 
 pub fn resolve_object_directory(output_directory: &FilePath) -> FilePath {
@@ -20,6 +21,10 @@ pub fn resolve_archive_directory(output_directory: &FilePath) -> FilePath {
 
 pub fn resolve_build_script_directory(output_directory: &FilePath) -> FilePath {
     output_directory.join(&FilePath::new([BUILD_SCRIPT_DIRECTORY]))
+}
+
+pub fn resolve_test_directory(output_directory: &FilePath) -> FilePath {
+    output_directory.join(&FilePath::new([TEST_DIRECTORY]))
 }
 
 pub fn resolve_source_file(
@@ -50,6 +55,17 @@ pub fn resolve_interface_file(
         .with_extension(file_path_configuration.interface_file_extension)
 }
 
+pub fn resolve_test_information_file(
+    output_directory: &FilePath,
+    source_file: &FilePath,
+    file_path_configuration: &FilePathConfiguration,
+) -> FilePath {
+    resolve_test_directory(output_directory).join(
+        &FilePath::new([&module_id_calculator::calculate(source_file)])
+            .with_extension(file_path_configuration.test_information_file_extension),
+    )
+}
+
 fn resolve_target_file_basename(output_directory: &FilePath, source_file: &FilePath) -> FilePath {
     resolve_object_directory(output_directory).join(&FilePath::new([
         &module_id_calculator::calculate(source_file),
@@ -70,6 +86,17 @@ pub fn resolve_main_package_archive_file(
     resolve_package_archive_file(
         output_directory,
         MAIN_ARCHIVE_BASENAME,
+        file_path_configuration,
+    )
+}
+
+pub fn resolve_main_package_test_archive_file(
+    output_directory: &FilePath,
+    file_path_configuration: &FilePathConfiguration,
+) -> FilePath {
+    resolve_package_archive_file(
+        output_directory,
+        &(MAIN_ARCHIVE_BASENAME.to_owned() + TEST_ARCHIVE_SUFFIX),
         file_path_configuration,
     )
 }
@@ -150,4 +177,18 @@ pub fn resolve_external_package_build_script_file(
         &FilePath::new([package_id_calculator::calculate(url)])
             .with_extension(file_path_configuration.build_script_file_extension),
     )
+}
+
+pub fn resolve_package_test_information_file(
+    output_directory: &FilePath,
+    file_path_configuration: &FilePathConfiguration,
+) -> FilePath {
+    resolve_test_directory(output_directory).join(
+        &FilePath::new(["main"])
+            .with_extension(file_path_configuration.test_information_file_extension),
+    )
+}
+
+pub fn resolve_test_executable_file(output_directory: &FilePath) -> FilePath {
+    resolve_test_directory(output_directory).join(&FilePath::new(["test"]))
 }

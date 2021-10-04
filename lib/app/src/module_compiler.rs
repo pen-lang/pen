@@ -4,8 +4,9 @@ mod prelude_type_configuration_qualifier;
 
 use crate::{
     application_configuration::ApplicationConfiguration,
-    common::{dependency_serializer, interface_serializer},
+    common::{dependency_serializer, interface_serializer, module_test_information_serializer},
     infra::{FilePath, Infrastructure},
+    test_configuration::TestModuleConfiguration,
 };
 pub use compile_configuration::{
     CompileConfiguration, ErrorTypeConfiguration, InstructionConfiguration, ListTypeConfiguration,
@@ -101,6 +102,50 @@ pub fn compile_main(
         object_file,
         target_triple,
         &compile_configuration.instruction,
+    )?;
+
+    Ok(())
+}
+
+#[allow(clippy::too_many_arguments)]
+pub fn compile_test(
+    infrastructure: &Infrastructure,
+    source_file: &FilePath,
+    dependency_file: &FilePath,
+    object_file: &FilePath,
+    test_information_file: &FilePath,
+    target_triple: Option<&str>,
+    compile_configuration: &CompileConfiguration,
+    test_module_configuration: &TestModuleConfiguration,
+) -> Result<(), Box<dyn Error>> {
+    let (module, test_information) = hir_mir::compile_test(
+        &compile_to_hir(infrastructure, source_file, dependency_file, None)?,
+        &prelude_type_configuration_qualifier::qualify_list_type_configuration(
+            &compile_configuration.list_type,
+            PRELUDE_PREFIX,
+        ),
+        &prelude_type_configuration_qualifier::qualify_string_type_configuration(
+            &compile_configuration.string_type,
+            PRELUDE_PREFIX,
+        ),
+        &prelude_type_configuration_qualifier::qualify_error_type_configuration(
+            &compile_configuration.error_type,
+            PRELUDE_PREFIX,
+        ),
+        test_module_configuration,
+    )?;
+
+    compile_mir_module(
+        infrastructure,
+        &module,
+        object_file,
+        target_triple,
+        &compile_configuration.instruction,
+    )?;
+
+    infrastructure.file_system.write(
+        test_information_file,
+        &module_test_information_serializer::serialize(&test_information)?,
     )?;
 
     Ok(())

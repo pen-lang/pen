@@ -14,8 +14,10 @@ pub const FILE_PATH_CONFIGURATION: app::infra::FilePathConfiguration =
         source_file_extension: "pen",
         object_file_extension: "o",
         interface_file_extension: "i",
+        test_information_file_extension: "test.json",
         archive_file_extension: "a",
         build_script_file_extension: "ninja",
+        test_file_extension: "test.pen",
     };
 
 pub const OUTPUT_DIRECTORY: &str = ".pen";
