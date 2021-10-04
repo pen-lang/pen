@@ -11,7 +11,8 @@ pub fn build(target_triple: Option<&str>, verbose: bool) -> Result<(), Box<dyn s
     let file_path_converter = Arc::new(infra::FilePathConverter::new(
         main_package_directory.clone(),
     ));
-    let infrastructure = infrastructure::create(file_path_converter.clone())?;
+    let infrastructure =
+        infrastructure::create(file_path_converter.clone(), &main_package_directory)?;
     let main_package_directory =
         file_path_converter.convert_to_file_path(&main_package_directory)?;
     // TODO Share an external package directory to avoid initializing them multiple times for
