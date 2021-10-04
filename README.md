@@ -62,14 +62,14 @@ Pen aims to make large-scale software development efficient where a number of pe
   - Asynchronous operations
   - Parallel computation
 
-### Reliable testing
+### Deterministic testing
 
 - All unit tests are deterministic.
 - So testing is always reliable and fast.
 
 ### System injection
 
-- [System injection](https://pen-lang.org/advanced-features/system-injection.html) is a novel mechanism to isolate application logic from system functions.
+- [System injection](https://pen-lang.org/advanced-features/system-injection.html) is a novel mechanism to isolate application logic from implementation details.
 - Developers can define their own system functions and build applications on top of them.
 
 ### Others
