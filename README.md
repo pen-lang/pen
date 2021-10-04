@@ -62,10 +62,10 @@ Pen aims to make large-scale software development efficient where a number of pe
   - Asynchronous operations
   - Parallel computation
 
-### Fast and reliable testing
+### Reliable testing
 
 - All unit tests are deterministic.
-- Therefore, tests are always fast and reliable.
+- Therefore, tests are always reliable and fast.
 - In every test, nondeterministic codes are replaced with deterministic mocks.
 
 ### [System injection](https://pen-lang.org/advanced-features/system-injection.html)
