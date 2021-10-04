@@ -62,7 +62,7 @@ Pen aims to make large-scale software development efficient where a number of pe
   - Asynchronous operations
   - Parallel computation
 
-### Fast and reliable tests
+### Fast and reliable testing
 
 - All unit tests are deterministic.
 - Therefore, tests are always fast and reliable.
