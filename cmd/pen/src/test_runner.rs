@@ -11,14 +11,13 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
     let file_path_converter = Arc::new(infra::FilePathConverter::new(
         main_package_directory.clone(),
     ));
+    let infrastructure = infrastructure::create(file_path_converter, &main_package_directory)?;
     let main_package_directory =
         file_path_converter.convert_to_file_path(&main_package_directory)?;
     let output_directory = main_package_directory.join(&app::infra::FilePath::new([
         OUTPUT_DIRECTORY,
         DEFAULT_TARGET_DIRECTORY,
     ]));
-
-    let infrastructure = infrastructure::create(file_path_converter)?;
 
     app::package_initializer::initialize(
         &infrastructure,
