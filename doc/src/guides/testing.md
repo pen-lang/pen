@@ -2,11 +2,25 @@
 
 This page describes how to write and run unit tests for programs written in the language.
 
-The language comes with its built-in test framework. Testing codes consists of the following steps:
+Testing codes consists of the following steps:
 
 1. Add the `Test` package in package configuration.
 1. Write tests as functions in test modules.
 1. Run the tests with a `pen test` command.
+
+## The `Test` package
+
+Before writing tests, you need to add the `Test` standard package in your package's [configuration file](/references/language) as following.
+
+```json
+{
+  "dependencies": {
+    ...
+    "Test": "pen:///lib/test",
+    ...
+  }
+}
+```
 
 ## Writing tests
 
