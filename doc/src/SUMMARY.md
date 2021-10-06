@@ -18,7 +18,7 @@
   - [Standard packages](references/standard-packages/README.md)
     - [Core](references/standard-packages/core.md)
     - [OS](references/standard-packages/os.md)
-    - [Test](references/standard-packages/Test.md)
+    - [Test](references/standard-packages/test.md)
 - [Examples](examples/README.md)
   - [Types](examples/types/README.md)
     - [Number](examples/types/number.md)
