@@ -66,6 +66,7 @@ Pen aims to make large-scale software development efficient where a number of pe
 
 - All unit tests are deterministic.
 - Therefore, testing is always reliable and fast.
+- You never get bothered by slow and flaky tests.
 
 ### System injection
 
