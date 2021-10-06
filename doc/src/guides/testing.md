@@ -22,7 +22,7 @@ Before writing any tests, you need to add the `Test` standard package in your pa
 }
 ```
 
-The `Test` package also includes some utilities which helps you to write tests. See [`Test` package](/references/standard-packages/test.html) for more information.
+The `Test` package also includes some utilities which helps you to write tests. See [its reference](/references/standard-packages/test.html) for more information.
 
 ## Writing tests
 
