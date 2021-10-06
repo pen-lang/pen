@@ -22,6 +22,8 @@ Before writing any tests, you need to add the `Test` standard package in your pa
 }
 ```
 
+The `Test` package also includes some utilities which helps you to write tests. See [`Test` package](/references/standard-packages/test) for more information.
+
 ## Writing tests
 
 You can write tests as functions in _test_ modules. Test modules are all the modules that have the `.test.pen` file extension. The functions need to be public to be recognized as test functions.
