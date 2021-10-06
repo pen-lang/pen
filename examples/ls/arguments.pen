@@ -1,0 +1,17 @@
+import System'Context { Context }
+
+type Arguments {
+  Directory string
+}
+
+Parse= \(xs [string]) Arguments | error {
+  if [x, ...xs] = xs {
+    if [_, ..._] = xs {
+      Arguments{Directory: x()}
+    } else {
+      error("too many arguments")
+    }
+  } else {
+    error("too few arguments")
+  }
+}

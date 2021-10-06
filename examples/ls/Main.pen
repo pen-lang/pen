@@ -1,0 +1,30 @@
+import System'Context { Context }
+import System'Directory
+import System'Environment
+import System'File
+
+import 'arguments
+import 'console
+
+main = \(ctx Context) number {
+  if x = run(ctx) as none {
+    0
+  } else {
+    console'Print(ctx, if x = source(x) as string {
+      x
+    } else {
+      "unknown error"
+    })
+
+    1
+  }
+}
+
+run = \(ctx Context) none | error {
+  args = arguments'Parse(Environment'Arguments(ctx))?
+
+  Directory'Read(ctx, args.Directory)?
+  File'Write(ctx, File'StdOut(), "Hello, world!\n")?
+
+  none
+}
