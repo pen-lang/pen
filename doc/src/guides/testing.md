@@ -26,7 +26,7 @@ The `Test` package also includes some utilities which helps you to write tests. 
 
 ## Writing tests
 
-You can write tests as functions in _test_ modules. All modules with `.test.pen` file extensions are test modules. All public functions in test modules are test functions.
+You can write tests as functions in _test_ modules. All modules with `.test.pen` file extensions are test modules. All public functions in test modules are test functions. A `pen test` command described later runs the test functions as tests.
 
 For example, to test a `Foo` function in a `Foo.pen` module, write a `Foo.test.pen` test module with the following contents.
 
@@ -41,4 +41,4 @@ CheckFoo = \() none | error {
 
 ## Running tests
 
-To run tests, you can run a `pen test` command in your terminal. Then, you should see test results of each functions in each modules.
+To run tests, you can run a `pen test` command in your package's directory. Then, you should see test results of each functions in each modules.
