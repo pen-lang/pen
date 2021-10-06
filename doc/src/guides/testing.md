@@ -10,7 +10,7 @@ Testing codes consists of the following steps:
 
 ## The `Test` package
 
-Before writing tests, you need to add the `Test` standard package in your package's [configuration file](/references/language) as following.
+Before writing any tests, you need to add the `Test` standard package in your package's [configuration file](/references/language/packages.html#package-configuration) as follows.
 
 ```json
 {
