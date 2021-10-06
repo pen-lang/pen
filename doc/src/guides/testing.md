@@ -5,7 +5,7 @@ This page describes how to write and run unit tests for programs written in the 
 Testing codes consists of the following steps:
 
 1. Add the `Test` package in package configuration.
-1. Write tests as functions in test modules.
+1. Write tests as functions in _test_ modules.
 1. Run the tests with a `pen test` command.
 
 ## The `Test` package
@@ -24,7 +24,7 @@ Before writing tests, you need to add the `Test` standard package in your packag
 
 ## Writing tests
 
-Tests are expressed as functions in test modules. Test modules are all the modules that have the `.test.pen` file extension. The functions need to be public to be recognized as test functions.
+You can write tests as functions in _test_ modules. Test modules are all the modules that have the `.test.pen` file extension. The functions need to be public to be recognized as test functions.
 
 For example, to test a `Foo` function in a `Foo.pen` module, write a `Foo.test.pen` test module with the following contents.
 
