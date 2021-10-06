@@ -41,4 +41,4 @@ CheckFoo = \() none | error {
 
 ## Running tests
 
-To run tests, you can run a `pen test` command in your package's directory. Then, you should see test results of each functions in each modules.
+To run tests, you can run a `pen test` command in your package's directory. Then, you should see test results of each functions in each modules. The `pen test` command exits with non-zero status codes if some tests fail.
