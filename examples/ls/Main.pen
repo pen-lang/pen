@@ -23,7 +23,7 @@ main = \(ctx Context) number {
 run = \(ctx Context) none | error {
   args = arguments'Parse(Environment'Arguments(ctx))?
 
-  Directory'Read(ctx, args.Directory)?
+  console'PrintLines(ctx, Directory'Read(ctx, args.Directory)?)?
 
   none
 }
