@@ -36,7 +36,7 @@ See [Install](https://pen-lang.org/guides/install.html).
 ## Documentation
 
 - [Getting started](https://pen-lang.org/guides/getting-started.html)
-- [Language reference](https://pen-lang.org/references/language/syntax.html)
+- [Language reference][syntax]
 - [Code examples](https://pen-lang.org/examples/standard-packages/os.html)
 
 ## Vision
@@ -45,28 +45,34 @@ Pen aims to make large-scale software development efficient where a number of pe
 
 - Maintainability
   - Simplicity: The language is small and easy to learn but also full featured.
-  - Testability: Unit tests are always fast, reliable, and independent with each other.
-  - Modifiability: Developers can change application logic without doing implementation details, and vice versa.
+  - Testability: Unit tests are always reliable, fast, and independent with each other.
+  - Modifiability: Developers can change application logic without changing implementation details, and vice versa.
 - Portability
   - Programs written in the language can be ported to different platforms including [WebAssembly](https://webassembly.org/).
 
 ## Features
 
-### Minimal language design
+### Simple language
 
-- [Syntax][syntax] and [type system](https://pen-lang.org/references/language/types.html) are made as small as possible.
-- Yet, the language supports all the modern features.
+- Its [syntax][syntax] and [type system](https://pen-lang.org/references/language/types.html) are small and easy to learn.
+- Yet, the language supports all the modern features, such as:
   - Functional programming
   - Effect system
   - Dependency injection
   - Asynchronous operations
   - Parallel computation
 
-### [System injection](https://pen-lang.org/advanced-features/system-injection.html)
+### Deterministic testing
 
-- System functions are always injected as arguments of main functions.
-- That isolates and protects application logic from implementation details for both maintainability and portability.
-- Developers can define their own system functions and build applications on top of them.
+- All unit tests are deterministic.
+- Therefore, testing is always reliable and fast.
+- You never get bothered by flaky or slow tests.
+
+### System injection
+
+- [System injection](https://pen-lang.org/advanced-features/system-injection.html) is a novel mechanism to isolate application logic from implementation details.
+- The language injects system functions into applications explicitly.
+- Developers can even define their own system functions.
 
 ### Others
 
@@ -78,10 +84,6 @@ Pen aims to make large-scale software development efficient where a number of pe
 - [Rust](https://www.rust-lang.org/)/C foreign function interface
 
 ### Work in progress...
-
-#### Deterministic tests
-
-Unit tests are deterministic to enable reliable continuous integration.
 
 #### Asynchronous operation
 
@@ -95,5 +97,4 @@ The runtime and library provide tools for thread-safe parallel computation that 
 
 Pen is released under open source licenses. See [its LICENSE file](https://github.com/pen-lang/pen/blob/main/LICENSE.md) for more information.
 
-[go]: https://golang.org
 [syntax]: https://pen-lang.org/references/language/syntax.html
