@@ -39,4 +39,4 @@ CheckFoo = \() none | error {
 
 ## Running tests
 
-To run those tests, you can run a `pen test` command in your terminal. Then, you should see test results of each functions in each modules.
+To run tests, you can run a `pen test` command in your terminal. Then, you should see test results of each functions in each modules.
