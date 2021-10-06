@@ -22,7 +22,7 @@ import Test'Assert
 
 #### `True`
 
-It fails and returns an error if a given condition is `false`, and returns `none` otherwise.
+It fails and returns an error if a given condition is `false`, or returns `none` otherwise.
 
 ```pen
 \(boolean) none | error
