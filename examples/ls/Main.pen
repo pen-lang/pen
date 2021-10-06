@@ -24,7 +24,6 @@ run = \(ctx Context) none | error {
   args = arguments'Parse(Environment'Arguments(ctx))?
 
   Directory'Read(ctx, args.Directory)?
-  File'Write(ctx, File'StdOut(), "Hello, world!\n")?
 
   none
 }
