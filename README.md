@@ -36,7 +36,7 @@ See [Install](https://pen-lang.org/guides/install.html).
 ## Documentation
 
 - [Getting started](https://pen-lang.org/guides/getting-started.html)
-- [Language reference](https://pen-lang.org/references/language/syntax.html)
+- [Language reference][syntax]
 - [Code examples](https://pen-lang.org/examples/standard-packages/os.html)
 
 ## Vision
@@ -97,5 +97,4 @@ The runtime and library provide tools for thread-safe parallel computation that 
 
 Pen is released under open source licenses. See [its LICENSE file](https://github.com/pen-lang/pen/blob/main/LICENSE.md) for more information.
 
-[go]: https://golang.org
 [syntax]: https://pen-lang.org/references/language/syntax.html
