@@ -1,5 +1,6 @@
 *.new
 *.tar.*
 .pen
+app
 target
 tmp

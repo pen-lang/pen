@@ -7,9 +7,9 @@ type Arguments {
 Parse= \(xs [string]) Arguments | error {
   if [x, ...xs] = xs {
     if [_, ..._] = xs {
-      Arguments{Directory: x()}
-    } else {
       error("too many arguments")
+    } else {
+      Arguments{Directory: x()}
     }
   } else {
     error("too few arguments")
