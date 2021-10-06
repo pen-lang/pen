@@ -26,7 +26,7 @@ The `Test` package also includes some utilities which helps you to write tests. 
 
 ## Writing tests
 
-You can write tests as functions in _test_ modules. Test modules are all the modules that have the `.test.pen` file extension. The functions need to be public to be recognized as test functions.
+You can write tests as functions in _test_ modules. All modules with `.test.pen` file extensions are test modules. All public functions in test modules are test functions.
 
 For example, to test a `Foo` function in a `Foo.pen` module, write a `Foo.test.pen` test module with the following contents.
 
