@@ -225,7 +225,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
             package_test_information_compiler::compile(
                 &matches
                     .values_of("test information file")
-                    .unwrap()
+                    .unwrap_or_default()
                     .collect::<Vec<_>>(),
                 matches.value_of("package test information file").unwrap(),
             )
