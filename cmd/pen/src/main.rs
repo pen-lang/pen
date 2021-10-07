@@ -141,11 +141,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                         .required(true)
                         .takes_value(true),
                 )
-                .arg(
-                    clap::Arg::with_name("test information file")
-                        .required(true)
-                        .multiple(true),
-                ),
+                .arg(clap::Arg::with_name("test information file").multiple(true)),
         )
         .get_matches()
         .subcommand()
