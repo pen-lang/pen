@@ -60,6 +60,7 @@ extern "C" {
 }
 
 fn main() {
+    #[allow(unused_mut)]
     let mut success: bool = true;
 
 $(
