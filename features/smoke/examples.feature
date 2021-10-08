@@ -6,13 +6,7 @@ Feature: Examples
     """
     When I cd to "examples/<example>"
     Then I successfully run `pen build`
-    # TODO Fix pen test on macOS.
-    And I run the following script:
-    """
-    if ! llvm-config --host-target | grep apple; Then
-      pen test
-    fi
-    """
+    And I successfully run `pen_test_on_linux.sh`
 
     Examples:
       | example |
