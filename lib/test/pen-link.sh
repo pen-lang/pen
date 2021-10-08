@@ -55,7 +55,7 @@ mod unreachable;
 
 use test_result::TestResult;
 
-extern "fastcall" {
+extern "C" {
     fn _pen_test_convert_result(stack: ffi::Any) -> ffi::Arc<TestResult>;
 }
 
