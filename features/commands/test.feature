@@ -42,3 +42,7 @@ Feature: Testing packages
     When I run `pen test`
     Then the exit status should not be 0
     And the stdout should contain "FAIL"
+
+  Scenario: Run no test
+    When I run `pen test`
+    Then the exit status should be 0

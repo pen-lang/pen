@@ -141,11 +141,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                         .required(true)
                         .takes_value(true),
                 )
-                .arg(
-                    clap::Arg::with_name("test information file")
-                        .required(true)
-                        .multiple(true),
-                ),
+                .arg(clap::Arg::with_name("test information file").multiple(true)),
         )
         .get_matches()
         .subcommand()
@@ -229,7 +225,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
             package_test_information_compiler::compile(
                 &matches
                     .values_of("test information file")
-                    .unwrap()
+                    .unwrap_or_default()
                     .collect::<Vec<_>>(),
                 matches.value_of("package test information file").unwrap(),
             )
