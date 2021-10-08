@@ -31,7 +31,7 @@ pub fn create(
         file_system: file_system.clone(),
         file_path_displayer: Arc::new(infra::FilePathDisplayer::new(
             file_path_converter.clone(),
-            main_package_directory.as_ref().clone(),
+            main_package_directory.as_ref(),
         )),
         file_path_configuration: FILE_PATH_CONFIGURATION.clone().into(),
         build_script_runner: Arc::new(infra::NinjaBuildScriptRunner::new(
