@@ -24,7 +24,7 @@ Feature: Packages
     """json
     {
       "dependencies": {
-        "Foo": "file+relative:../foo"
+        "Foo": "../foo"
       }
     }
     """
