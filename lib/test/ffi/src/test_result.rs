@@ -25,3 +25,9 @@ impl TestResult {
         }
     }
 }
+
+#[allow(dead_code)]
+#[repr(C)]
+pub struct RawTestResult {
+    error: ffi::Any,
+}

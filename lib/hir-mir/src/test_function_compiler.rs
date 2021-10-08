@@ -7,6 +7,7 @@ use std::{
 };
 
 const TEST_FUNCTION_WRAPPER_SUFFIX: &str = "__wrapper";
+const TEST_RESULT_TYPE_NAME: &str = "_testResult";
 
 pub fn compile(
     module: &Module,
@@ -23,7 +24,30 @@ pub fn compile(
 
     Ok((
         Module::new(
-            module.type_definitions().to_vec(),
+            module
+                .type_definitions()
+                .iter()
+                .cloned()
+                .chain(vec![TypeDefinition::new(
+                    TEST_RESULT_TYPE_NAME,
+                    TEST_RESULT_TYPE_NAME,
+                    vec![types::RecordElement::new(
+                        "error",
+                        types::Union::new(
+                            types::None::new(position.clone()),
+                            types::Record::new(
+                                &type_context.error_type_configuration().error_type_name,
+                                position.clone(),
+                            ),
+                            position.clone(),
+                        ),
+                    )],
+                    false,
+                    false,
+                    false,
+                    position.clone(),
+                )])
+                .collect(),
             module.type_aliases().to_vec(),
             module.foreign_declarations().to_vec(),
             module.declarations().to_vec(),
@@ -33,24 +57,26 @@ pub fn compile(
                 .cloned()
                 .chain(definitions.iter().map(|definition| {
                     let position = definition.position();
+                    let result_type = types::Record::new(TEST_RESULT_TYPE_NAME, position.clone());
 
                     Definition::new(
                         definition.name().to_owned() + TEST_FUNCTION_WRAPPER_SUFFIX,
                         compile_test_name(definition.name(), configuration),
                         Lambda::new(
                             vec![],
-                            types::Union::new(
-                                types::None::new(position.clone()),
-                                types::Record::new(
-                                    &type_context.error_type_configuration().error_type_name,
+                            result_type.clone(),
+                            RecordConstruction::new(
+                                result_type,
+                                vec![RecordElement::new(
+                                    "error",
+                                    Call::new(
+                                        None,
+                                        Variable::new(definition.name(), position.clone()),
+                                        vec![],
+                                        position.clone(),
+                                    ),
                                     position.clone(),
-                                ),
-                                position.clone(),
-                            ),
-                            Call::new(
-                                None,
-                                Variable::new(definition.name(), position.clone()),
-                                vec![],
+                                )],
                                 position.clone(),
                             ),
                             position.clone(),

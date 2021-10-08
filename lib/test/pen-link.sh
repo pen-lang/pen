@@ -53,10 +53,10 @@ mod heap;
 mod test_result;
 mod unreachable;
 
-use test_result::TestResult;
+use test_result::{RawTestResult, TestResult};
 
 extern "C" {
-    fn _pen_test_convert_result(result: ffi::Any) -> ffi::Arc<TestResult>;
+    fn _pen_test_convert_result(result: ffi::Arc<RawTestResult>) -> ffi::Arc<TestResult>;
 }
 
 fn main() {
@@ -76,7 +76,7 @@ $(
 
       echo "
         #[link(name = \"main_test\")]
-        extern \"C\" { fn $f() -> ffi::Any; }
+        extern \"C\" { fn $f() -> ffi::Arc<RawTestResult>; }
 
         let result: Result<_, _> = unsafe { _pen_test_convert_result($f()) }.into_result();
         println!(\"\t{}\t$name\", if result.is_ok() { \"OK\" } else { \"FAIL\" });

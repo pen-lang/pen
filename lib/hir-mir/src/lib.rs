@@ -98,16 +98,25 @@ pub fn compile_test(
     error_type_configuration: &ErrorTypeConfiguration,
     test_module_configuration: &TestModuleConfiguration,
 ) -> Result<(mir::ir::Module, test_info::Module), CompileError> {
-    let type_context = TypeContext::new(
+    let (module, test_information) = test_function_compiler::compile(
         module,
-        list_type_configuration,
-        string_type_configuration,
-        error_type_configuration,
-    );
-
-    let (module, test_information) =
-        test_function_compiler::compile(module, &type_context, test_module_configuration)?;
-    let (module, _) = compile_module(&module, &type_context)?;
+        &TypeContext::new(
+            module,
+            list_type_configuration,
+            string_type_configuration,
+            error_type_configuration,
+        ),
+        test_module_configuration,
+    )?;
+    let (module, _) = compile_module(
+        &module,
+        &TypeContext::new(
+            &module,
+            list_type_configuration,
+            string_type_configuration,
+            error_type_configuration,
+        ),
+    )?;
 
     Ok((module, test_information))
 }

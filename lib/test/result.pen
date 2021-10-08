@@ -1,13 +1,18 @@
-type result {
+# TODO Remove this boxing when the C calling convention is fully supported in FFI.
+type boxResult {
+	error none | error
+}
+
+type ffiResult {
   isError boolean
   message string
 }
 
-foreign "c" _pen_test_convert_result = \(e none | error) result {
-	if e = e as none {
-		result{isError: false, message: ""}
+foreign "c" _pen_test_convert_result = \(r boxResult) ffiResult {
+	if e = r.error as none {
+		ffiResult{isError: false, message: ""}
   } else {
-		result{
+		ffiResult{
 			isError: true,
 			message: if s = source(e) as string { s } else { "unknown test error" }
 		}
