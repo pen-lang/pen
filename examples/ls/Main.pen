@@ -1,16 +1,16 @@
+import Console'Print
 import System'Context { Context }
 import System'Directory
 import System'Environment
 import System'File
 
 import 'arguments
-import 'console
 
 main = \(ctx Context) number {
   if x = run(ctx) as none {
     0
   } else {
-    console'Print(ctx, if x = source(x) as string {
+    Print'Line(ctx, if x = source(x) as string {
       x
     } else {
       "unknown error"
@@ -23,7 +23,7 @@ main = \(ctx Context) number {
 run = \(ctx Context) none | error {
   args = arguments'Parse(Environment'Arguments(ctx))?
 
-  console'PrintLines(ctx, Directory'Read(ctx, args.Directory)?)?
+  Print'Lines(ctx, Directory'Read(ctx, args.Directory)?)?
 
   none
 }

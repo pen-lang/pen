@@ -1,14 +1,13 @@
+import Console'Print
 import Core'String
 import System'Context { Context }
 import System'Environment
-
-import 'console
 
 main = \(ctx Context) number {
   if x = run(ctx) as none {
     0
   } else {
-    console'Print(ctx, if x = source(x) as string {
+    Print'Line(ctx, if x = source(x) as string {
       x
     } else {
       "unknown error"
@@ -19,7 +18,7 @@ main = \(ctx Context) number {
 }
 
 run = \(ctx Context) none | error {
-  console'Print(ctx, String'Join(Environment'Arguments(ctx), " "))?
+  Print'Line(ctx, String'Join(Environment'Arguments(ctx), " "))?
 
   none
 }
