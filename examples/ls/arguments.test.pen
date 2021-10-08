@@ -1,7 +1,7 @@
 import Test'Assert
 import 'arguments
 
-Parse= \() none | error {
+Parse = \() none | error {
   args = arguments'Parse([string "foo"])?
 
   Assert'EqualStrings(args.Directory, "foo")
