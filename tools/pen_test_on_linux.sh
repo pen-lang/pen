@@ -4,7 +4,7 @@
 
 set -e
 
-if llvm-config --host-target | grep apple; then
+if [ $(uname) = Darwin ]; then
   exit
 fi
 
