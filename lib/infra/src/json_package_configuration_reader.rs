@@ -1,5 +1,6 @@
 use super::json_package_configuration::JsonPackageConfiguration;
 use crate::{package_script_finder, FilePathConverter};
+use std::path::PathBuf;
 use std::{collections::HashMap, error::Error, sync::Arc};
 
 pub struct JsonPackageConfigurationReader {
@@ -7,6 +8,7 @@ pub struct JsonPackageConfigurationReader {
     file_path_converter: Arc<FilePathConverter>,
     build_configuration_filename: &'static str,
     ffi_build_script_basename: &'static str,
+    absolute_main_package_directory_path: PathBuf,
 }
 
 impl JsonPackageConfigurationReader {
@@ -15,12 +17,14 @@ impl JsonPackageConfigurationReader {
         file_path_converter: Arc<FilePathConverter>,
         build_configuration_filename: &'static str,
         ffi_build_script_basename: &'static str,
+        absolute_main_package_directory_path: PathBuf,
     ) -> Self {
         Self {
             file_system,
             file_path_converter,
             build_configuration_filename,
             ffi_build_script_basename,
+            absolute_main_package_directory_path,
         }
     }
 }
@@ -36,7 +40,25 @@ impl app::infra::PackageConfigurationReader for JsonPackageConfigurationReader {
                     self.build_configuration_filename,
                 ])),
             )?)?
-            .get_dependencies()?,
+            .dependencies
+            .iter()
+            .map(|(name, url_string)| {
+                Ok((
+                    name.clone(),
+                    match url::Url::parse(url_string) {
+                        Err(url::ParseError::RelativeUrlWithoutBase) => url::Url::options()
+                            .base_url(Some(
+                                &url::Url::from_directory_path(
+                                    &self.absolute_main_package_directory_path,
+                                )
+                                .unwrap(),
+                            ))
+                            .parse(url_string),
+                        result => result.clone(),
+                    }?,
+                ))
+            })
+            .collect::<Result<_, url::ParseError>>()?,
         )
     }
 
@@ -51,5 +73,18 @@ impl app::infra::PackageConfigurationReader for JsonPackageConfigurationReader {
             self.ffi_build_script_basename,
         )?
         .is_some())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn parse_relative_path() {
+        assert_eq!(
+            url::Url::options()
+                .base_url(Some(&url::Url::parse("file:///foo/bar/").unwrap()))
+                .parse("../baz"),
+            url::Url::parse("file:///foo/baz")
+        );
     }
 }

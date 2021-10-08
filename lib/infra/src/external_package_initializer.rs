@@ -44,7 +44,7 @@ impl app::infra::ExternalPackageInitializer for ExternalPackageInitializer {
         }
 
         match url.scheme() {
-            "file" | "file+relative" => {
+            "file" => {
                 command_runner::run_command(
                     Command::new("cp").arg("-r").arg(url.path()).arg(directory),
                 )?;
