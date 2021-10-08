@@ -17,7 +17,7 @@ impl JsonPackageConfiguration {
     }
 
     pub fn into_dependency_urls(
-        &self,
+        self,
         base_url: &url::Url,
     ) -> Result<HashMap<String, url::Url>, url::ParseError> {
         self.dependencies
