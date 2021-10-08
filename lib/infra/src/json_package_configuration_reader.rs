@@ -59,16 +59,3 @@ impl app::infra::PackageConfigurationReader for JsonPackageConfigurationReader {
         .is_some())
     }
 }
-
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn parse_relative_path() {
-        assert_eq!(
-            url::Url::options()
-                .base_url(Some(&url::Url::parse("file:///foo/bar/").unwrap()))
-                .parse("../baz"),
-            url::Url::parse("file:///foo/baz")
-        );
-    }
-}
