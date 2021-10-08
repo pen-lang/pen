@@ -42,7 +42,7 @@ impl app::infra::PackageConfigurationReader for JsonPackageConfigurationReader {
                     self.build_configuration_filename,
                 ])),
             )?)?
-            .into_dependency_urls(&self.absolute_main_package_directory_path)?,
+            .dependencies(&self.absolute_main_package_directory_path)?,
         )
     }
 

@@ -7,7 +7,7 @@ pub struct JsonPackageConfiguration {
 }
 
 impl JsonPackageConfiguration {
-    pub fn from_dependency_urls(dependencies: HashMap<String, url::Url>) -> Self {
+    pub fn new(dependencies: HashMap<String, url::Url>) -> Self {
         Self {
             dependencies: dependencies
                 .iter()
@@ -16,8 +16,8 @@ impl JsonPackageConfiguration {
         }
     }
 
-    pub fn into_dependency_urls(
-        self,
+    pub fn dependencies(
+        &self,
         base_url: &url::Url,
     ) -> Result<HashMap<String, url::Url>, url::ParseError> {
         self.dependencies
