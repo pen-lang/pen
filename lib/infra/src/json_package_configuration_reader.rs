@@ -1,13 +1,18 @@
 use super::json_package_configuration::JsonPackageConfiguration;
 use crate::{package_script_finder, FilePathConverter};
-use std::{collections::HashMap, error::Error, path::Path, sync::Arc};
+use std::{
+    collections::HashMap,
+    error::Error,
+    path::{Path, PathBuf},
+    sync::Arc,
+};
 
 pub struct JsonPackageConfigurationReader {
     file_system: Arc<dyn app::infra::FileSystem>,
     file_path_converter: Arc<FilePathConverter>,
     build_configuration_filename: &'static str,
     ffi_build_script_basename: &'static str,
-    absolute_main_package_directory_path: url::Url,
+    main_package_directory_path: PathBuf,
 }
 
 impl JsonPackageConfigurationReader {
@@ -16,17 +21,14 @@ impl JsonPackageConfigurationReader {
         file_path_converter: Arc<FilePathConverter>,
         build_configuration_filename: &'static str,
         ffi_build_script_basename: &'static str,
-        absolute_main_package_directory_path: impl AsRef<Path>,
+        main_package_directory_path: impl AsRef<Path>,
     ) -> Self {
         Self {
             file_system,
             file_path_converter,
             build_configuration_filename,
             ffi_build_script_basename,
-            absolute_main_package_directory_path: url::Url::from_directory_path(
-                &absolute_main_package_directory_path,
-            )
-            .unwrap(),
+            main_package_directory_path: main_package_directory_path.as_ref().into(),
         }
     }
 }
@@ -36,13 +38,17 @@ impl app::infra::PackageConfigurationReader for JsonPackageConfigurationReader {
         &self,
         package_directory: &app::infra::FilePath,
     ) -> Result<HashMap<String, url::Url>, Box<dyn Error>> {
+        let main_package_file_url =
+            url::Url::from_directory_path(&self.main_package_directory_path.canonicalize()?)
+                .unwrap();
+
         Ok(
             serde_json::from_str::<JsonPackageConfiguration>(&self.file_system.read_to_string(
                 &package_directory.join(&app::infra::FilePath::new(vec![
                     self.build_configuration_filename,
                 ])),
             )?)?
-            .dependencies(&self.absolute_main_package_directory_path)?,
+            .dependencies(&main_package_file_url)?,
         )
     }
 

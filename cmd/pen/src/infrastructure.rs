@@ -43,7 +43,7 @@ pub fn create(
             file_path_converter.clone(),
             BUILD_CONFIGURATION_FILENAME,
             FFI_BUILD_SCRIPT_BASENAME,
-            main_package_directory.as_ref().canonicalize()?,
+            main_package_directory,
         )),
         package_configuration_writer: Arc::new(infra::JsonPackageConfigurationWriter::new(
             file_system,
