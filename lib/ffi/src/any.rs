@@ -128,12 +128,14 @@ mod tests {
 
         #[derive(Clone)]
         pub struct TypeA {
+            #[allow(dead_code)]
             value: std::rc::Rc<f64>,
         }
 
         #[allow(clippy::redundant_allocation)]
         #[derive(Clone)]
         pub struct TypeB {
+            #[allow(dead_code)]
             value: std::rc::Rc<std::rc::Rc<f64>>,
         }
 
@@ -175,6 +177,7 @@ mod tests {
 
         #[derive(Clone)]
         pub struct Type {
+            #[allow(dead_code)]
             value: f64,
         }
 

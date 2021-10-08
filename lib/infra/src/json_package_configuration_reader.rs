@@ -30,13 +30,21 @@ impl app::infra::PackageConfigurationReader for JsonPackageConfigurationReader {
         &self,
         package_directory: &app::infra::FilePath,
     ) -> Result<HashMap<String, url::Url>, Box<dyn Error>> {
+        let package_file_url = url::Url::from_directory_path(
+            &self
+                .file_path_converter
+                .convert_to_os_path(package_directory)
+                .canonicalize()?,
+        )
+        .unwrap();
+
         Ok(
             serde_json::from_str::<JsonPackageConfiguration>(&self.file_system.read_to_string(
                 &package_directory.join(&app::infra::FilePath::new(vec![
                     self.build_configuration_filename,
                 ])),
             )?)?
-            .get_dependencies()?,
+            .dependencies(&package_file_url)?,
         )
     }
 

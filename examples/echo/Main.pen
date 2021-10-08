@@ -1,0 +1,24 @@
+import Console'Print
+import Core'String
+import System'Context { Context }
+import System'Environment
+
+main = \(ctx Context) number {
+  if x = run(ctx) as none {
+    0
+  } else {
+    Print'Line(ctx, if x = source(x) as string {
+      x
+    } else {
+      "unknown error"
+    })
+
+    1
+  }
+}
+
+run = \(ctx Context) none | error {
+  Print'Line(ctx, String'Join(Environment'Arguments(ctx), " "))?
+
+  none
+}

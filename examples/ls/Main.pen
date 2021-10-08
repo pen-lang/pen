@@ -1,0 +1,29 @@
+import Console'Print
+import System'Context { Context }
+import System'Directory
+import System'Environment
+import System'File
+
+import 'arguments
+
+main = \(ctx Context) number {
+  if x = run(ctx) as none {
+    0
+  } else {
+    Print'Line(ctx, if x = source(x) as string {
+      x
+    } else {
+      "unknown error"
+    })
+
+    1
+  }
+}
+
+run = \(ctx Context) none | error {
+  args = arguments'Parse(Environment'Arguments(ctx))?
+
+  Print'Lines(ctx, Directory'Read(ctx, args.Directory)?)?
+
+  none
+}

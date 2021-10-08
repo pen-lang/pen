@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "Core": "pen:///lib/core",
+    "Os": "pen:///lib/os",
+    "Test": "pen:///lib/test"
+  }
+}
