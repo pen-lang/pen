@@ -42,17 +42,7 @@ impl app::infra::PackageConfigurationReader for JsonPackageConfigurationReader {
                     self.build_configuration_filename,
                 ])),
             )?)?
-            .dependencies
-            .iter()
-            .map(|(name, url_string)| {
-                Ok((
-                    name.clone(),
-                    url::Url::options()
-                        .base_url(Some(&self.absolute_main_package_directory_path))
-                        .parse(url_string)?,
-                ))
-            })
-            .collect::<Result<_, url::ParseError>>()?,
+            .into_dependency_urls(&self.absolute_main_package_directory_path)?,
         )
     }
 
