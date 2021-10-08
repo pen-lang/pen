@@ -1,14 +1,13 @@
 use super::json_package_configuration::JsonPackageConfiguration;
 use crate::{package_script_finder, FilePathConverter};
-use std::path::PathBuf;
-use std::{collections::HashMap, error::Error, sync::Arc};
+use std::{collections::HashMap, error::Error, path::Path, sync::Arc};
 
 pub struct JsonPackageConfigurationReader {
     file_system: Arc<dyn app::infra::FileSystem>,
     file_path_converter: Arc<FilePathConverter>,
     build_configuration_filename: &'static str,
     ffi_build_script_basename: &'static str,
-    absolute_main_package_directory_path: PathBuf,
+    absolute_main_package_directory_path: url::Url,
 }
 
 impl JsonPackageConfigurationReader {
@@ -17,14 +16,17 @@ impl JsonPackageConfigurationReader {
         file_path_converter: Arc<FilePathConverter>,
         build_configuration_filename: &'static str,
         ffi_build_script_basename: &'static str,
-        absolute_main_package_directory_path: PathBuf,
+        absolute_main_package_directory_path: impl AsRef<Path>,
     ) -> Self {
         Self {
             file_system,
             file_path_converter,
             build_configuration_filename,
             ffi_build_script_basename,
-            absolute_main_package_directory_path,
+            absolute_main_package_directory_path: url::Url::from_directory_path(
+                &absolute_main_package_directory_path,
+            )
+            .unwrap(),
         }
     }
 }
@@ -45,17 +47,9 @@ impl app::infra::PackageConfigurationReader for JsonPackageConfigurationReader {
             .map(|(name, url_string)| {
                 Ok((
                     name.clone(),
-                    match url::Url::parse(url_string) {
-                        Err(url::ParseError::RelativeUrlWithoutBase) => url::Url::options()
-                            .base_url(Some(
-                                &url::Url::from_directory_path(
-                                    &self.absolute_main_package_directory_path,
-                                )
-                                .unwrap(),
-                            ))
-                            .parse(url_string),
-                        result => result.clone(),
-                    }?,
+                    url::Url::options()
+                        .base_url(Some(&self.absolute_main_package_directory_path))
+                        .parse(url_string)?,
                 ))
             })
             .collect::<Result<_, url::ParseError>>()?,
