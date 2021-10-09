@@ -79,7 +79,7 @@ Pen aims to make large-scale software development efficient where a number of pe
 - Static typing
 - Immutable values
 - Pure functions by default
-- Errors as values
+- Errors as values (no runtime error)
 - Cross compile
 - [Rust](https://www.rust-lang.org/)/C foreign function interface
 
