@@ -36,7 +36,7 @@ pub fn compile(
 
                     Definition::new(
                         definition.name().to_owned() + TEST_FUNCTION_WRAPPER_SUFFIX,
-                        compile_test_name(definition.name(), configuration),
+                        compile_foreign_name(definition.name(), configuration),
                         Lambda::new(
                             vec![],
                             types::Union::new(
@@ -68,12 +68,10 @@ pub fn compile(
             definitions
                 .iter()
                 .map(|definition| {
-                    (
-                        compile_test_name(definition.name(), configuration),
-                        test_info::Function::new(
-                            definition.original_name(),
-                            definition.position().clone(),
-                        ),
+                    test_info::Function::new(
+                        definition.original_name(),
+                        compile_foreign_name(definition.name(), configuration),
+                        definition.position().clone(),
                     )
                 })
                 .collect(),
@@ -81,7 +79,7 @@ pub fn compile(
     ))
 }
 
-fn compile_test_name(name: &str, configuration: &TestModuleConfiguration) -> String {
+fn compile_foreign_name(name: &str, configuration: &TestModuleConfiguration) -> String {
     let mut hasher = DefaultHasher::new();
 
     name.hash(&mut hasher);
