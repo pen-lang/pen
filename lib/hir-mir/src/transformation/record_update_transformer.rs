@@ -26,13 +26,7 @@ pub fn transform(
                 .iter()
                 .map(|field_type| field_type.name())
                 .collect::<HashSet<_>>()
-                .difference(
-                    &update
-                        .fields()
-                        .iter()
-                        .map(|field| field.name())
-                        .collect(),
-                )
+                .difference(&update.fields().iter().map(|field| field.name()).collect())
                 .map(|&name| {
                     RecordField::new(
                         name,

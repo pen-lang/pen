@@ -431,9 +431,7 @@ fn compile_record_fields(
                     field_types
                         .iter()
                         .find(|field_type| field_type.name() == field.name())
-                        .ok_or_else(|| {
-                            CompileError::RecordFieldUnknown(field.position().clone())
-                        })?
+                        .ok_or_else(|| CompileError::RecordFieldUnknown(field.position().clone()))?
                         .type_(),
                     type_context,
                 )?,

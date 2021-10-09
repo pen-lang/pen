@@ -29,13 +29,11 @@ pub fn clone_expression(
             builder.call(
                 builder.deconstruct_record(
                     builder.load(
-                        builder
-                            .deconstruct_record(expression.clone(), VARIANT_TAG_FIELD_INDEX)?,
+                        builder.deconstruct_record(expression.clone(), VARIANT_TAG_FIELD_INDEX)?,
                     )?,
                     TYPE_INFORMATION_CLONE_FUNCTION_FIELD_INDEX,
                 )?,
-                vec![builder
-                    .deconstruct_record(expression.clone(), VARIANT_PAYLOAD_FIELD_INDEX)?],
+                vec![builder.deconstruct_record(expression.clone(), VARIANT_PAYLOAD_FIELD_INDEX)?],
             )?;
         }
         mir::types::Type::Boolean | mir::types::Type::None | mir::types::Type::Number => {}
@@ -66,13 +64,11 @@ pub fn drop_expression(
             builder.call(
                 builder.deconstruct_record(
                     builder.load(
-                        builder
-                            .deconstruct_record(expression.clone(), VARIANT_TAG_FIELD_INDEX)?,
+                        builder.deconstruct_record(expression.clone(), VARIANT_TAG_FIELD_INDEX)?,
                     )?,
                     TYPE_INFORMATION_DROP_FUNCTION_FIELD_INDEX,
                 )?,
-                vec![builder
-                    .deconstruct_record(expression.clone(), VARIANT_PAYLOAD_FIELD_INDEX)?],
+                vec![builder.deconstruct_record(expression.clone(), VARIANT_PAYLOAD_FIELD_INDEX)?],
             )?;
         }
         mir::types::Type::Boolean | mir::types::Type::None | mir::types::Type::Number => {}
