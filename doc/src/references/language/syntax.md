@@ -4,9 +4,7 @@ This page describes the syntactical components of the language. You can compose 
 
 ## Module
 
-Modules are sets of types and functions. See [Modules](modules.md) for more information.
-
-Syntactically, a module consists of [statements](#statements).
+Modules are sets of type and function definitions. Syntactically, a module consists of [statements](#statements). See [Modules](modules.md) for more information.
 
 ## Statements
 
