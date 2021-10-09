@@ -146,7 +146,7 @@
 <p><em>Given</em> a file named &quot;pen.json&quot; with:</p>
 <pre><code class="language-json">{ &quot;dependencies&quot;: {} }
 </code></pre>
-<h2 id="create-a-record-with-an-element"><a class="header" href="#create-a-record-with-an-element">Create a record with an element</a></h2>
+<h2 id="create-a-record-with-a-field"><a class="header" href="#create-a-record-with-a-field">Create a record with a field</a></h2>
 <p><em>Given</em> a file named &quot;Foo.pen&quot; with:</p>
 <pre><code class="language-pen">type r {
   x number
@@ -158,7 +158,7 @@ f = \() r {
 </code></pre>
 <p><em>When</em> I run <code>pen build</code></p>
 <p><em>Then</em> the exit status should be 0.</p>
-<h2 id="create-a-record-with-two-elements"><a class="header" href="#create-a-record-with-two-elements">Create a record with two elements</a></h2>
+<h2 id="create-a-record-with-two-fields"><a class="header" href="#create-a-record-with-two-fields">Create a record with two fields</a></h2>
 <p><em>Given</em> a file named &quot;Foo.pen&quot; with:</p>
 <pre><code class="language-pen">type r {
   x number
@@ -171,7 +171,7 @@ f = \() r {
 </code></pre>
 <p><em>When</em> I run <code>pen build</code></p>
 <p><em>Then</em> the exit status should be 0.</p>
-<h2 id="create-a-record-with-no-element"><a class="header" href="#create-a-record-with-no-element">Create a record with no element</a></h2>
+<h2 id="create-a-record-with-no-field"><a class="header" href="#create-a-record-with-no-field">Create a record with no field</a></h2>
 <p><em>Given</em> a file named &quot;Foo.pen&quot; with:</p>
 <pre><code class="language-pen">type r {}
 
@@ -194,7 +194,7 @@ f = \(x r) r {
 </code></pre>
 <p><em>When</em> I run <code>pen build</code></p>
 <p><em>Then</em> the exit status should be 0.</p>
-<h2 id="get-an-element-in-a-record"><a class="header" href="#get-an-element-in-a-record">Get an element in a record</a></h2>
+<h2 id="get-a-field-in-a-record"><a class="header" href="#get-a-field-in-a-record">Get a field in a record</a></h2>
 <p><em>Given</em> a file named &quot;Foo.pen&quot; with:</p>
 <pre><code class="language-pen">type r {
   x number
