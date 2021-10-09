@@ -19,3 +19,4 @@ pull_request_rules:
         commit_message: title+body
 queue_rules:
   - name: default
+    conditions: []
