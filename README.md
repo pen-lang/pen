@@ -37,7 +37,7 @@ See [Install](https://pen-lang.org/guides/install.html).
 
 - [Getting started](https://pen-lang.org/guides/getting-started.html)
 - [Language reference][syntax]
-- [Code examples](https://pen-lang.org/examples/standard-packages/os.html)
+- [Code examples](https://github.com/pen-lang/pen/tree/main/examples)
 
 ## Vision
 
@@ -52,9 +52,9 @@ Pen aims to make large-scale software development efficient where a number of pe
 
 ## Features
 
-### Simple language
+### Minimal language
 
-- Its [syntax][syntax] and [type system](https://pen-lang.org/references/language/types.html) are small and easy to learn.
+- Its [syntax][syntax] and [type system](https://pen-lang.org/references/language/types.html) are small, simple, and easy to learn.
 - Yet, the language supports all the modern features, such as:
   - Functional programming
   - Effect system
@@ -79,7 +79,7 @@ Pen aims to make large-scale software development efficient where a number of pe
 - Static typing
 - Immutable values
 - Pure functions by default
-- Errors as values
+- Errors as values (no runtime error)
 - Cross compile
 - [Rust](https://www.rust-lang.org/)/C foreign function interface
 

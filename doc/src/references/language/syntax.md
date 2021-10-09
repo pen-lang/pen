@@ -1,12 +1,10 @@
 # Syntax
 
-This page describes the syntactical components of the language. You can compose programs building up those constructs. See also [Types](types.md) about syntax for specific data types.
+This page describes syntactical components of the language. You can compose programs building up those constructs. See also [Types](types.md) about syntax for specific data types.
 
 ## Module
 
-Modules are sets of types and functions. See [Modules](modules.md) for more information.
-
-Syntactically, a module consists of [statements](#statements).
+Modules are sets of type and function definitions. Syntactically, a module consists of [statements](#statements). See [Modules](modules.md) about how modules themselves interact with each other.
 
 ## Statements
 
@@ -55,7 +53,7 @@ type foo = number | none
 
 ### Function definition
 
-It defines a function with a given name. The right hand side of `=` signs must be [function expressions](#function).
+It defines a function with a given name. The right-hand side of `=` signs must be [function expressions](#function).
 
 ```pen
 foo = \(x number, y number) number {
@@ -99,7 +97,7 @@ If you want to save results of intermediate expressions for later use, you can d
 
 ## Expressions
 
-Expressions express what programs actually compute. Notably, expressions can be nested; many expressions contain other expressions inside.
+Expressions express what functions actually compute. Notably, expressions can be nested; expressions often contain other expressions inside.
 
 ### Function call
 
@@ -113,7 +111,7 @@ f(x, y)
 
 #### Arithmetic
 
-Arithmetic operators add, subtract, multiply or divide a number with another one.
+Arithmetic operators add, subtract, multiply, or divide a number with another.
 
 ```pen
 1 + 1
@@ -133,7 +131,7 @@ Equal (`==`) and not-equal (`!=`) operators compare two values and return a bool
 1 != 1
 ```
 
-The operators can compare any types except functions and types that include them.
+The operators can compare any types except functions and types containing them.
 
 ```pen
 "foo" == "bar"
@@ -174,7 +172,7 @@ true | false
 
 #### Error handling
 
-`?` suffix operator immediately exits the current function with an operand if it is of [the `error` type][error-type]. The operand must be a union type containing [the `error` type][error-type].
+`?` suffix operators immediately exit the current functions with operands if they are of [the `error` type][error-type]. Both the operands and result values of functions where the operators are used must be a union type containing [the `error` type][error-type].
 
 ```pen
 x?
@@ -186,7 +184,7 @@ x?
 
 It creates a function.
 
-First, functions declare their argument names and types (`x number` and `y number`) and their result types (`number`). After that, function bodies describe what the functions do as [blocks](#block).
+First, functions declare their argument names and types (`x number` and `y number`) and their result types (`number`). After that, function bodies of [blocks](#block) describe what the functions compute.
 
 ```pen
 \(x number, y number) number {
@@ -198,7 +196,7 @@ First, functions declare their argument names and types (`x number` and `y numbe
 
 #### If expression
 
-It evaluates one of [blocks](#block) depending on a value of an expression of a boolean type.
+It evaluates one of [blocks](#block) depending on a condition of an expression of a boolean type.
 
 - It evaluates the first block if a given boolean value is `true`.
 - Otherwise, it evaluates the second block.
@@ -229,7 +227,7 @@ if x = foo() as number {
 
 It deconstructs a list and evaluates one of [blocks](#block) depending on if the list is empty or not.
 
-- If a given list has 1 or more element, it evaluates the first block with a function which returns its first element (`x`) and rest of elements as a list (`xs`).
+- If a given list has 1 or more element, it evaluates the first block with **a function that returns its first element** (`x`) and rest of elements as a list (`xs`).
 - If it has no element, it evaluates the second block.
 
 ```pen
