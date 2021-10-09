@@ -21,7 +21,7 @@ pub fn sort(
 }
 
 fn sort_external_packages(
-    dependencies: &BTreeMap<url::Url, HashMap<String, url::Url>>,
+    dependencies: &BTreeMap<url::Url, BTreeMap<String, url::Url>>,
 ) -> Result<Vec<url::Url>, Box<dyn std::error::Error>> {
     let mut graph = Graph::<url::Url, ()>::new();
     let mut indices = HashMap::<url::Url, _>::new();

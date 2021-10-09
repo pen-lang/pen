@@ -2,16 +2,13 @@ use crate::{
     common::file_path_resolver,
     infra::{FilePath, Infrastructure},
 };
-use std::{
-    collections::{BTreeMap, HashMap},
-    error::Error,
-};
+use std::{collections::BTreeMap, error::Error};
 
 pub fn read_recursively(
     infrastructure: &Infrastructure,
     package_directory: &FilePath,
     output_directory: &FilePath,
-) -> Result<BTreeMap<url::Url, HashMap<String, url::Url>>, Box<dyn Error>> {
+) -> Result<BTreeMap<url::Url, BTreeMap<String, url::Url>>, Box<dyn Error>> {
     read_dependencies(
         infrastructure,
         &infrastructure
@@ -23,9 +20,9 @@ pub fn read_recursively(
 
 fn read_dependencies(
     infrastructure: &Infrastructure,
-    dependencies: &HashMap<String, url::Url>,
+    dependencies: &BTreeMap<String, url::Url>,
     output_directory: &FilePath,
-) -> Result<BTreeMap<url::Url, HashMap<String, url::Url>>, Box<dyn Error>> {
+) -> Result<BTreeMap<url::Url, BTreeMap<String, url::Url>>, Box<dyn Error>> {
     Ok(dependencies
         .values()
         .map(|url| -> Result<_, Box<dyn Error>> {

@@ -1,13 +1,13 @@
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct JsonPackageConfiguration {
-    pub dependencies: HashMap<String, String>,
+    pub dependencies: BTreeMap<String, String>,
 }
 
 impl JsonPackageConfiguration {
-    pub fn new(dependencies: HashMap<String, url::Url>) -> Self {
+    pub fn new(dependencies: BTreeMap<String, url::Url>) -> Self {
         Self {
             dependencies: dependencies
                 .iter()
@@ -19,7 +19,7 @@ impl JsonPackageConfiguration {
     pub fn dependencies(
         &self,
         base_url: &url::Url,
-    ) -> Result<HashMap<String, url::Url>, url::ParseError> {
+    ) -> Result<BTreeMap<String, url::Url>, url::ParseError> {
         self.dependencies
             .iter()
             .map(|(name, url_string)| {
