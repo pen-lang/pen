@@ -48,7 +48,7 @@ fn collect_from_expression(expression: &Expression) -> HashSet<Type> {
             .iter()
             .flat_map(collect_from_expression)
             .collect(),
-        Expression::RecordElement(element) => collect_from_expression(element.record()),
+        Expression::RecordField(element) => collect_from_expression(element.record()),
         Expression::TryOperation(operation) => vec![operation.type_().clone()]
             .into_iter()
             .chain(collect_from_expression(operation.operand()))

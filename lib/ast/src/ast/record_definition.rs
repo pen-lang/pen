@@ -4,14 +4,14 @@ use position::Position;
 #[derive(Clone, Debug, Hash, PartialEq)]
 pub struct RecordDefinition {
     name: String,
-    elements: Vec<types::RecordElement>,
+    elements: Vec<types::RecordField>,
     position: Position,
 }
 
 impl RecordDefinition {
     pub fn new(
         name: impl Into<String>,
-        elements: Vec<types::RecordElement>,
+        elements: Vec<types::RecordField>,
         position: Position,
     ) -> Self {
         Self {
@@ -25,7 +25,7 @@ impl RecordDefinition {
         &self.name
     }
 
-    pub fn elements(&self) -> &[types::RecordElement] {
+    pub fn elements(&self) -> &[types::RecordField] {
         &self.elements
     }
 

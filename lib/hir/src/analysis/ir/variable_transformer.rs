@@ -156,7 +156,7 @@ fn transform_expression(
                 .elements()
                 .iter()
                 .map(|element| {
-                    RecordElement::new(
+                    RecordField::new(
                         element.name(),
                         transform_expression(element.expression(), transform),
                         element.position().clone(),
@@ -180,7 +180,7 @@ fn transform_expression(
                 .elements()
                 .iter()
                 .map(|element| {
-                    RecordElement::new(
+                    RecordField::new(
                         element.name(),
                         transform_expression(element.expression(), transform),
                         element.position().clone(),

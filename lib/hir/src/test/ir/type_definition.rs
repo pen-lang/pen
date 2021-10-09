@@ -4,7 +4,7 @@ use position::{test::PositionFake, Position};
 pub trait TypeDefinitionFake {
     fn fake(
         name: impl Into<String>,
-        elements: Vec<types::RecordElement>,
+        elements: Vec<types::RecordField>,
         open: bool,
         public: bool,
         external: bool,
@@ -14,7 +14,7 @@ pub trait TypeDefinitionFake {
 impl TypeDefinitionFake for TypeDefinition {
     fn fake(
         name: impl Into<String>,
-        elements: Vec<types::RecordElement>,
+        elements: Vec<types::RecordField>,
         open: bool,
         public: bool,
         external: bool,

@@ -18,7 +18,7 @@ pub fn validate(module: &Module, type_context: &TypeContext) -> Result<(), Compi
                 .ok_or_else(|| CompileError::RecordExpected(construction.position().clone()))?;
 
                 if !open_records.contains(record_type.name()) {
-                    return Err(CompileError::RecordElementPrivate(
+                    return Err(CompileError::RecordFieldPrivate(
                         construction.position().clone(),
                     ));
                 }
@@ -33,7 +33,7 @@ pub fn validate(module: &Module, type_context: &TypeContext) -> Result<(), Compi
                 .ok_or_else(|| CompileError::RecordExpected(deconstruction.position().clone()))?;
 
                 if !open_records.contains(record_type.name()) {
-                    return Err(CompileError::RecordElementPrivate(
+                    return Err(CompileError::RecordFieldPrivate(
                         deconstruction.position().clone(),
                     ));
                 }
@@ -44,7 +44,7 @@ pub fn validate(module: &Module, type_context: &TypeContext) -> Result<(), Compi
                         .ok_or_else(|| CompileError::RecordExpected(update.position().clone()))?;
 
                 if !open_records.contains(record_type.name()) {
-                    return Err(CompileError::RecordElementPrivate(
+                    return Err(CompileError::RecordFieldPrivate(
                         update.position().clone(),
                     ));
                 }
@@ -122,7 +122,7 @@ mod tests {
             &Module::empty()
                 .set_type_definitions(vec![TypeDefinition::fake(
                     "r",
-                    vec![types::RecordElement::new(
+                    vec![types::RecordField::new(
                         "x",
                         types::None::new(Position::fake()),
                     )],
@@ -137,7 +137,7 @@ mod tests {
                         record_type.clone(),
                         RecordConstruction::new(
                             record_type,
-                            vec![RecordElement::new(
+                            vec![RecordField::new(
                                 "x",
                                 None::new(Position::fake()),
                                 Position::fake(),
@@ -161,7 +161,7 @@ mod tests {
             &Module::empty()
                 .set_type_definitions(vec![TypeDefinition::fake(
                     "r",
-                    vec![types::RecordElement::new(
+                    vec![types::RecordField::new(
                         "x",
                         types::None::new(Position::fake()),
                     )],
@@ -176,7 +176,7 @@ mod tests {
                         record_type.clone(),
                         RecordConstruction::new(
                             record_type,
-                            vec![RecordElement::new(
+                            vec![RecordField::new(
                                 "x",
                                 None::new(Position::fake()),
                                 Position::fake(),
@@ -199,7 +199,7 @@ mod tests {
             &Module::empty()
                 .set_type_definitions(vec![TypeDefinition::fake(
                     "r",
-                    vec![types::RecordElement::new(
+                    vec![types::RecordField::new(
                         "x",
                         types::None::new(Position::fake()),
                     )],
@@ -235,7 +235,7 @@ mod tests {
             &Module::empty()
                 .set_type_definitions(vec![TypeDefinition::fake(
                     "r",
-                    vec![types::RecordElement::new(
+                    vec![types::RecordField::new(
                         "x",
                         types::None::new(Position::fake()),
                     )],
@@ -270,7 +270,7 @@ mod tests {
             &Module::empty()
                 .set_type_definitions(vec![TypeDefinition::fake(
                     "r",
-                    vec![types::RecordElement::new(
+                    vec![types::RecordField::new(
                         "x",
                         types::None::new(Position::fake()),
                     )],
@@ -286,7 +286,7 @@ mod tests {
                         RecordUpdate::new(
                             record_type,
                             Variable::new("x", Position::fake()),
-                            vec![RecordElement::new(
+                            vec![RecordField::new(
                                 "x",
                                 None::new(Position::fake()),
                                 Position::fake(),
@@ -310,7 +310,7 @@ mod tests {
             &Module::empty()
                 .set_type_definitions(vec![TypeDefinition::fake(
                     "r",
-                    vec![types::RecordElement::new(
+                    vec![types::RecordField::new(
                         "x",
                         types::None::new(Position::fake()),
                     )],
@@ -326,7 +326,7 @@ mod tests {
                         RecordUpdate::new(
                             record_type,
                             Variable::new("x", Position::fake()),
-                            vec![RecordElement::new(
+                            vec![RecordField::new(
                                 "x",
                                 None::new(Position::fake()),
                                 Position::fake(),
@@ -350,7 +350,7 @@ mod tests {
             &Module::empty()
                 .set_type_definitions(vec![TypeDefinition::fake(
                     "r",
-                    vec![types::RecordElement::new(
+                    vec![types::RecordField::new(
                         "x",
                         types::None::new(Position::fake()),
                     )],
@@ -365,7 +365,7 @@ mod tests {
                         record_type.clone(),
                         RecordConstruction::new(
                             record_type,
-                            vec![RecordElement::new(
+                            vec![RecordField::new(
                                 "x",
                                 None::new(Position::fake()),
                                 Position::fake(),

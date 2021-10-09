@@ -45,7 +45,7 @@ fn find_in_expression(expression: &Expression) -> HashSet<String> {
             .iter()
             .flat_map(find_in_expression)
             .collect(),
-        Expression::RecordElement(element) => find_in_expression(element.record()),
+        Expression::RecordField(element) => find_in_expression(element.record()),
         Expression::TryOperation(operation) => find_in_expression(operation.operand())
             .into_iter()
             .chain(

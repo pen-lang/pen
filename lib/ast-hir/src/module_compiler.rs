@@ -268,7 +268,7 @@ fn compile_expression(expression: &ast::Expression) -> Result<ir::Expression, Co
                 .elements()
                 .iter()
                 .map(|element| {
-                    Ok(ir::RecordElement::new(
+                    Ok(ir::RecordField::new(
                         element.name(),
                         compile_expression(element.expression())?,
                         element.position().clone(),
@@ -336,7 +336,7 @@ fn compile_if(
     })
 }
 
-fn is_record_open(elements: &[types::RecordElement]) -> bool {
+fn is_record_open(elements: &[types::RecordField]) -> bool {
     !elements.is_empty()
         && elements
             .iter()

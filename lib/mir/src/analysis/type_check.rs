@@ -198,7 +198,7 @@ fn check_expression(
 
             record.type_().clone().into()
         }
-        Expression::RecordElement(element) => {
+        Expression::RecordField(element) => {
             check_equality(
                 &check_expression(element.record(), variables)?,
                 &element.type_().clone().into(),
@@ -847,7 +847,7 @@ mod tests {
         }
 
         #[test]
-        fn check_record_element() {
+        fn check_record_field() {
             let record_type = types::Record::new("foo");
 
             assert_eq!(
@@ -860,7 +860,7 @@ mod tests {
                         "f",
                         vec![],
                         vec![Argument::new("x", Type::Number)],
-                        RecordElement::new(
+                        RecordField::new(
                             record_type.clone(),
                             0,
                             Record::new(record_type, vec![42.0.into()],)

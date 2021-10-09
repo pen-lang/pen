@@ -432,12 +432,12 @@ fn convert_expression(
                 moved_variables,
             )
         }
-        Expression::RecordElement(element) => {
+        Expression::RecordField(element) => {
             let (record, moved_variables) =
                 convert_expression(element.record(), owned_variables, moved_variables)?;
 
             (
-                RecordElement::new(element.type_().clone(), element.index(), record).into(),
+                RecordField::new(element.type_().clone(), element.index(), record).into(),
                 moved_variables,
             )
         }

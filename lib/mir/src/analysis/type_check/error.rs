@@ -8,7 +8,7 @@ use std::{error::Error, fmt::Display};
 pub enum TypeCheckError {
     DuplicateFunctionNames(String),
     DuplicateTypeNames(String),
-    ElementIndexOutOfBounds(RecordElement),
+    ElementIndexOutOfBounds(RecordField),
     ForeignDefinitionNotFound(ForeignDefinition),
     FunctionExpected(Expression),
     NoAlternativeFound(Case),

@@ -87,7 +87,7 @@ fn infer_in_expression(expression: &Expression, variables: &HashMap<String, Type
         Expression::Let(let_) => infer_in_let(let_, variables).into(),
         Expression::LetRecursive(let_) => infer_in_let_recursive(let_, variables).into(),
         Expression::Record(record) => infer_in_record(record, variables).into(),
-        Expression::RecordElement(element) => infer_in_record_element(element, variables).into(),
+        Expression::RecordField(element) => infer_in_record_field(element, variables).into(),
         Expression::TryOperation(operation) => infer_in_try_operation(operation, variables).into(),
         Expression::Variant(variant) => infer_in_variant(variant, variables).into(),
         Expression::Boolean(_)
@@ -244,11 +244,11 @@ fn infer_in_record(record: &Record, variables: &HashMap<String, Type>) -> Record
     )
 }
 
-fn infer_in_record_element(
-    element: &RecordElement,
+fn infer_in_record_field(
+    element: &RecordField,
     variables: &HashMap<String, Type>,
-) -> RecordElement {
-    RecordElement::new(
+) -> RecordField {
+    RecordField::new(
         element.type_().clone(),
         element.index(),
         infer_in_expression(element.record(), variables),

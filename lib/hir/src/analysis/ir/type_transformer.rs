@@ -75,7 +75,7 @@ fn transform_type_definition(
                 .elements()
                 .iter()
                 .map(|element| {
-                    types::RecordElement::new(element.name(), transform(element.type_()))
+                    types::RecordField::new(element.name(), transform(element.type_()))
                 })
                 .collect(),
             definition.is_open(),
@@ -221,7 +221,7 @@ fn transform_expression(expression: &Expression, transform: &impl Fn(&Type) -> T
                 .elements()
                 .iter()
                 .map(|element| {
-                    RecordElement::new(
+                    RecordField::new(
                         element.name(),
                         transform_expression(element.expression(), transform),
                         element.position().clone(),
@@ -245,7 +245,7 @@ fn transform_expression(expression: &Expression, transform: &impl Fn(&Type) -> T
                 .elements()
                 .iter()
                 .map(|element| {
-                    RecordElement::new(
+                    RecordField::new(
                         element.name(),
                         transform_expression(element.expression(), transform),
                         element.position().clone(),

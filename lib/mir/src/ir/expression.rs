@@ -2,7 +2,7 @@ use super::{
     arithmetic_operation::ArithmeticOperation, byte_string::ByteString, call::Call, case::Case,
     clone_variables::CloneVariables, comparison_operation::ComparisonOperation,
     drop_variables::DropVariables, if_::If, let_::Let, let_recursive::LetRecursive, record::Record,
-    record_element::RecordElement, try_operation::TryOperation, variable::Variable,
+    record_field::RecordField, try_operation::TryOperation, variable::Variable,
     variant::Variant,
 };
 
@@ -22,7 +22,7 @@ pub enum Expression {
     None,
     Number(f64),
     Record(Record),
-    RecordElement(RecordElement),
+    RecordField(RecordElement),
     TryOperation(TryOperation),
     Variable(Variable),
     Variant(Variant),
@@ -100,9 +100,9 @@ impl From<Record> for Expression {
     }
 }
 
-impl From<RecordElement> for Expression {
-    fn from(element: RecordElement) -> Self {
-        Self::RecordElement(element)
+impl From<RecordField> for Expression {
+    fn from(element: RecordField) -> Self {
+        Self::RecordField(element)
     }
 }
 

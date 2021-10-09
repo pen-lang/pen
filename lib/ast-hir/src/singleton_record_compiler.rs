@@ -98,7 +98,7 @@ mod tests {
         let type_definition = TypeDefinition::new(
             "bar",
             "foo",
-            vec![types::RecordElement::new(
+            vec![types::RecordField::new(
                 "x",
                 types::None::new(Position::fake()),
             )],
@@ -200,7 +200,7 @@ mod tests {
                         vec![interface::TypeDefinition::new(
                             "RealFoo",
                             "Foo",
-                            vec![types::RecordElement::new(
+                            vec![types::RecordField::new(
                                 "x",
                                 types::None::new(Position::fake()),
                             )],

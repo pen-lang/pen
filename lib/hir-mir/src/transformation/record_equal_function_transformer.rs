@@ -149,8 +149,8 @@ mod tests {
             "foo",
             "foo",
             vec![
-                types::RecordElement::new("x", types::None::new(Position::fake())),
-                types::RecordElement::new("y", types::None::new(Position::fake())),
+                types::RecordField::new("x", types::None::new(Position::fake())),
+                types::RecordField::new("y", types::None::new(Position::fake())),
             ],
             false,
             false,
@@ -230,8 +230,8 @@ mod tests {
             "foo",
             "foo",
             vec![
-                types::RecordElement::new("x", types::None::new(Position::fake())),
-                types::RecordElement::new("y", types::None::new(Position::fake())),
+                types::RecordField::new("x", types::None::new(Position::fake())),
+                types::RecordField::new("y", types::None::new(Position::fake())),
             ],
             false,
             false,

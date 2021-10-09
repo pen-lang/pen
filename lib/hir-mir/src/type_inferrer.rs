@@ -343,7 +343,7 @@ fn infer_expression(
                 .elements()
                 .iter()
                 .map(|element| {
-                    Ok(RecordElement::new(
+                    Ok(RecordField::new(
                         element.name(),
                         infer_expression(element.expression(), variables)?,
                         element.position().clone(),
@@ -375,7 +375,7 @@ fn infer_expression(
                 .elements()
                 .iter()
                 .map(|element| {
-                    Ok(RecordElement::new(
+                    Ok(RecordField::new(
                         element.name(),
                         infer_expression(element.expression(), variables)?,
                         element.position().clone(),
@@ -630,7 +630,7 @@ mod tests {
         let type_definition = TypeDefinition::new(
             "r",
             "",
-            vec![types::RecordElement::new(
+            vec![types::RecordField::new(
                 "x",
                 types::None::new(Position::fake()),
             )],

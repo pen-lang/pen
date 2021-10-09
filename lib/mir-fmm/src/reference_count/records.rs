@@ -29,7 +29,7 @@ pub fn compile_record_clone_function(
                 for (index, type_) in definition.type_().elements().iter().enumerate() {
                     expressions::clone_expression(
                         &builder,
-                        &crate::records::get_record_element(
+                        &crate::records::get_record_field(
                             &builder,
                             &record,
                             &record_type,
@@ -71,7 +71,7 @@ pub fn compile_record_drop_function(
 
             if types::is_record_boxed(&record_type, types) {
                 pointers::drop_pointer(&builder, &record, |builder| {
-                    drop_record_elements(
+                    drop_record_fields(
                         builder,
                         &record,
                         &record_type,
@@ -82,7 +82,7 @@ pub fn compile_record_drop_function(
                     Ok(())
                 })?;
             } else {
-                drop_record_elements(&builder, &record, &record_type, definition.type_(), types)?;
+                drop_record_fields(&builder, &record, &record_type, definition.type_(), types)?;
             }
 
             Ok(builder.return_(fmm::ir::VOID_VALUE.clone()))
@@ -95,7 +95,7 @@ pub fn compile_record_drop_function(
     Ok(())
 }
 
-fn drop_record_elements(
+fn drop_record_fields(
     builder: &fmm::build::InstructionBuilder,
     record: &fmm::build::TypedExpression,
     record_type: &mir::types::Record,
@@ -105,7 +105,7 @@ fn drop_record_elements(
     for (index, type_) in record_body_type.elements().iter().enumerate() {
         expressions::drop_expression(
             builder,
-            &crate::records::get_record_element(builder, record, record_type, index, types)?,
+            &crate::records::get_record_field(builder, record, record_type, index, types)?,
             type_,
             types,
         )?;

@@ -104,12 +104,12 @@ pub fn compile(
                 unboxed.into()
             }
         }
-        mir::ir::Expression::RecordElement(element) => {
+        mir::ir::Expression::RecordField(element) => {
             let record_type = element.type_().clone();
             let element_index = element.index();
 
             let record = compile(element.record(), variables)?;
-            let element = records::get_record_element(
+            let element = records::get_record_field(
                 instruction_builder,
                 &record,
                 element.type_(),

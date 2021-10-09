@@ -1,7 +1,7 @@
 use crate::{error::CompileError, types};
 use std::collections::HashMap;
 
-pub fn get_record_element(
+pub fn get_record_field(
     builder: &fmm::build::InstructionBuilder,
     record: &fmm::build::TypedExpression,
     type_: &mir::types::Record,

@@ -194,7 +194,7 @@ fn record_definition<'a>() -> impl Parser<Stream<'a>, Output = RecordDefinition>
                     name,
                     elements
                         .into_iter()
-                        .map(|(name, type_)| types::RecordElement::new(name, type_))
+                        .map(|(name, type_)| types::RecordField::new(name, type_))
                         .collect(),
                     position,
                 )
@@ -591,7 +591,7 @@ fn record<'a>() -> impl Parser<Stream<'a>, Output = Record> {
     (
         attempt((position(), qualified_identifier(), sign("{"))),
         optional(between(sign("..."), sign(","), expression())),
-        sep_end_by1(record_element(), sign(",")),
+        sep_end_by1(record_field(), sign(",")),
         sign("}"),
     )
         .then(|((position, name, _), record, elements, _)| {
@@ -618,9 +618,9 @@ fn record<'a>() -> impl Parser<Stream<'a>, Output = Record> {
         .expected("record literal")
 }
 
-fn record_element<'a>() -> impl Parser<Stream<'a>, Output = RecordElement> {
+fn record_field<'a>() -> impl Parser<Stream<'a>, Output = RecordField> {
     (attempt((position(), identifier())), sign(":"), expression())
-        .map(|((position, name), _, expression)| RecordElement::new(name, expression, position))
+        .map(|((position, name), _, expression)| RecordField::new(name, expression, position))
 }
 
 fn boolean_literal<'a>() -> impl Parser<Stream<'a>, Output = Boolean> {
@@ -1251,7 +1251,7 @@ mod tests {
                 "type Foo {foo number}",
                 RecordDefinition::new(
                     "Foo",
-                    vec![types::RecordElement::new(
+                    vec![types::RecordField::new(
                         "foo",
                         types::Number::new(Position::fake()),
                     )],
@@ -1263,8 +1263,8 @@ mod tests {
                 RecordDefinition::new(
                     "Foo",
                     vec![
-                        types::RecordElement::new("foo", types::Number::new(Position::fake())),
-                        types::RecordElement::new("bar", types::Number::new(Position::fake())),
+                        types::RecordField::new("foo", types::Number::new(Position::fake())),
+                        types::RecordField::new("bar", types::Number::new(Position::fake())),
                     ],
                     Position::fake(),
                 ),
@@ -2305,7 +2305,7 @@ mod tests {
                 Record::new(
                     types::Reference::new("Foo", Position::fake()),
                     None,
-                    vec![RecordElement::new(
+                    vec![RecordField::new(
                         "foo",
                         Number::new(42.0, Position::fake()),
                         Position::fake()
@@ -2320,7 +2320,7 @@ mod tests {
                 Record::new(
                     types::Reference::new("Foo", Position::fake()),
                     None,
-                    vec![RecordElement::new(
+                    vec![RecordField::new(
                         "foo",
                         Number::new(42.0, Position::fake()),
                         Position::fake()
@@ -2335,12 +2335,12 @@ mod tests {
                     types::Reference::new("Foo", Position::fake()),
                     None,
                     vec![
-                        RecordElement::new(
+                        RecordField::new(
                             "foo",
                             Number::new(42.0, Position::fake()),
                             Position::fake()
                         ),
-                        RecordElement::new(
+                        RecordField::new(
                             "bar",
                             Number::new(42.0, Position::fake()),
                             Position::fake()
@@ -2362,7 +2362,7 @@ mod tests {
                     vec![Record::new(
                         types::Reference::new("Foo", Position::fake()),
                         None,
-                        vec![RecordElement::new(
+                        vec![RecordField::new(
                             "foo",
                             Number::new(42.0, Position::fake()),
                             Position::fake()
@@ -2380,7 +2380,7 @@ mod tests {
                 Record::new(
                     types::Reference::new("Foo", Position::fake()),
                     None,
-                    vec![RecordElement::new(
+                    vec![RecordField::new(
                         "foo",
                         Call::new(
                             Variable::new("bar", Position::fake()),
@@ -2398,7 +2398,7 @@ mod tests {
                 Record::new(
                     types::Reference::new("Foo", Position::fake()),
                     Some(Variable::new("foo", Position::fake()).into()),
-                    vec![RecordElement::new(
+                    vec![RecordField::new(
                         "bar",
                         Number::new(42.0, Position::fake()),
                         Position::fake()
@@ -2412,7 +2412,7 @@ mod tests {
                 Record::new(
                     types::Reference::new("Foo", Position::fake()),
                     Some(Variable::new("foo", Position::fake()).into()),
-                    vec![RecordElement::new(
+                    vec![RecordField::new(
                         "bar",
                         Number::new(42.0, Position::fake()),
                         Position::fake()
@@ -2429,7 +2429,7 @@ mod tests {
                 Record::new(
                     types::Reference::new("Foo", Position::fake()),
                     Some(Variable::new("foo", Position::fake()).into()),
-                    vec![RecordElement::new(
+                    vec![RecordField::new(
                         "bar",
                         Number::new(42.0, Position::fake()),
                         Position::fake()

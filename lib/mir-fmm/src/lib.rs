@@ -773,7 +773,7 @@ mod tests {
             }
         }
 
-        mod record_elements {
+        mod record_fields {
             use super::*;
 
             #[test]
@@ -788,7 +788,7 @@ mod tests {
                     vec![mir::ir::Definition::new(
                         "f",
                         vec![mir::ir::Argument::new("x", record_type.clone())],
-                        mir::ir::RecordElement::new(record_type, 0, mir::ir::Variable::new("x")),
+                        mir::ir::RecordField::new(record_type, 0, mir::ir::Variable::new("x")),
                         mir::types::Type::Number,
                     )],
                 ));
@@ -809,7 +809,7 @@ mod tests {
                     vec![mir::ir::Definition::new(
                         "f",
                         vec![mir::ir::Argument::new("x", record_type.clone())],
-                        mir::ir::RecordElement::new(record_type, 1, mir::ir::Variable::new("x")),
+                        mir::ir::RecordField::new(record_type, 1, mir::ir::Variable::new("x")),
                         mir::types::Type::Number,
                     )],
                 ));

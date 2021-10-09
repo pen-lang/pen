@@ -130,7 +130,7 @@ mod tests {
                 &Module::empty()
                     .set_type_definitions(vec![TypeDefinition::fake(
                         "x",
-                        vec![types::RecordElement::new(
+                        vec![types::RecordField::new(
                             "x",
                             types::Reference::new("x", Position::fake())
                         )],
@@ -144,7 +144,7 @@ mod tests {
             Module::empty()
                 .set_type_definitions(vec![TypeDefinition::fake(
                     "foo.x",
-                    vec![types::RecordElement::new(
+                    vec![types::RecordField::new(
                         "x",
                         types::Reference::new("foo.x", Position::fake())
                     )],

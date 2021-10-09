@@ -1,16 +1,16 @@
-use super::RecordElement;
+use super::RecordField;
 use crate::types::Type;
 use position::Position;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct RecordConstruction {
     type_: Type,
-    elements: Vec<RecordElement>,
+    elements: Vec<RecordField>,
     position: Position,
 }
 
 impl RecordConstruction {
-    pub fn new(type_: impl Into<Type>, elements: Vec<RecordElement>, position: Position) -> Self {
+    pub fn new(type_: impl Into<Type>, elements: Vec<RecordField>, position: Position) -> Self {
         Self {
             type_: type_.into(),
             elements,
@@ -22,7 +22,7 @@ impl RecordConstruction {
         &self.type_
     }
 
-    pub fn elements(&self) -> &[RecordElement] {
+    pub fn elements(&self) -> &[RecordField] {
         &self.elements
     }
 

@@ -1,6 +1,6 @@
 use super::{environment_creator, type_context::TypeContext, type_extractor, CompileError};
 use hir::{
-    analysis::types::{record_element_resolver, type_canonicalizer, type_equality_checker},
+    analysis::types::{record_field_resolver, type_canonicalizer, type_equality_checker},
     ir::*,
     types::{self, Type},
 };
@@ -320,7 +320,7 @@ fn transform_expression(
         },
         Expression::RecordConstruction(construction) => RecordConstruction::new(
             construction.type_().clone(),
-            transform_record_elements(
+            transform_record_fields(
                 construction.elements(),
                 construction.position(),
                 construction.type_(),
@@ -340,7 +340,7 @@ fn transform_expression(
         Expression::RecordUpdate(update) => RecordUpdate::new(
             update.type_().clone(),
             transform_expression(update.record(), variables)?,
-            transform_record_elements(
+            transform_record_fields(
                 update.elements(),
                 update.position(),
                 update.type_(),
@@ -377,14 +377,14 @@ fn transform_expression(
     })
 }
 
-fn transform_record_elements(
-    elements: &[RecordElement],
+fn transform_record_fields(
+    elements: &[RecordField],
     position: &Position,
     record_type: &Type,
     variables: &HashMap<String, Type>,
     type_context: &TypeContext,
-) -> Result<Vec<RecordElement>, CompileError> {
-    let element_types = record_element_resolver::resolve(
+) -> Result<Vec<RecordField>, CompileError> {
+    let element_types = record_field_resolver::resolve(
         record_type,
         position,
         type_context.types(),
@@ -394,7 +394,7 @@ fn transform_record_elements(
     elements
         .iter()
         .map(|element| {
-            Ok(RecordElement::new(
+            Ok(RecordField::new(
                 element.name(),
                 coerce_expression(
                     &transform_expression(element.expression(), variables, type_context)?,
@@ -402,7 +402,7 @@ fn transform_record_elements(
                         .iter()
                         .find(|element_type| element_type.name() == element.name())
                         .ok_or_else(|| {
-                            CompileError::RecordElementUnknown(element.position().clone())
+                            CompileError::RecordFieldUnknown(element.position().clone())
                         })?
                         .type_(),
                     variables,
@@ -966,7 +966,7 @@ mod tests {
         );
         let type_definition = TypeDefinition::fake(
             "r",
-            vec![types::RecordElement::new("x", union_type.clone())],
+            vec![types::RecordField::new("x", union_type.clone())],
             false,
             false,
             false,
@@ -984,7 +984,7 @@ mod tests {
                             record_type.clone(),
                             RecordConstruction::new(
                                 record_type.clone(),
-                                vec![RecordElement::new(
+                                vec![RecordField::new(
                                     "x",
                                     None::new(Position::fake()),
                                     Position::fake()
@@ -1005,7 +1005,7 @@ mod tests {
                         record_type.clone(),
                         RecordConstruction::new(
                             record_type,
-                            vec![RecordElement::new(
+                            vec![RecordField::new(
                                 "x",
                                 TypeCoercion::new(
                                     types::None::new(Position::fake()),
@@ -1033,7 +1033,7 @@ mod tests {
         );
         let type_definition = TypeDefinition::fake(
             "r",
-            vec![types::RecordElement::new("x", union_type.clone())],
+            vec![types::RecordField::new("x", union_type.clone())],
             false,
             false,
             false,
@@ -1052,7 +1052,7 @@ mod tests {
                             RecordUpdate::new(
                                 record_type.clone(),
                                 Variable::new("r", Position::fake()),
-                                vec![RecordElement::new(
+                                vec![RecordField::new(
                                     "x",
                                     None::new(Position::fake()),
                                     Position::fake()
@@ -1074,7 +1074,7 @@ mod tests {
                         RecordUpdate::new(
                             record_type,
                             Variable::new("r", Position::fake()),
-                            vec![RecordElement::new(
+                            vec![RecordField::new(
                                 "x",
                                 TypeCoercion::new(
                                     types::None::new(Position::fake()),

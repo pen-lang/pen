@@ -339,7 +339,7 @@ mod tests {
                     Default::default(),
                     vec![(
                         "foo".into(),
-                        vec![types::RecordElement::new(
+                        vec![types::RecordField::new(
                             "x",
                             types::None::new(Position::fake())
                         )]
