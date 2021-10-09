@@ -52,9 +52,9 @@ Pen aims to make large-scale software development efficient where a number of pe
 
 ## Features
 
-### Simple language
+### Minimal language
 
-- Its [syntax][syntax] and [type system](https://pen-lang.org/references/language/types.html) are small and easy to learn.
+- Its [syntax][syntax] and [type system](https://pen-lang.org/references/language/types.html) are small, simple, and easy to learn.
 - Yet, the language supports all the modern features, such as:
   - Functional programming
   - Effect system
