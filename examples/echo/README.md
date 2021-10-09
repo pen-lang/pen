@@ -1,6 +1,6 @@
 # `echo` command
 
-A simple implementation of the `echo` command on Unix
+An application to echo command line arguments
 
 ## Usage
 

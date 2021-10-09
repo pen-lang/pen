@@ -4,8 +4,8 @@ Those are example applications and libraries written in Pen.
 
 # Applications
 
-- [`echo`](echo)
-- [`ls`](ls)
+- [`echo` command](echo)
+- [`ls` command](ls)
 
 # Libraries
 
