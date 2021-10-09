@@ -66,11 +66,11 @@ fn main() {
     let mut error: usize = 0;
 
 $(
-  for m in $(jq -r '.modules | keys[]' $test_information); do
-    echo "println!(\"$m\");"
+  for module in $(jq -r '.modules | keys[]' $test_information); do
+    echo "println!(\"$module\");"
 
     functions() {
-      jq -r ".modules[\"$m\"].functions" $test_information
+      jq -r ".modules[\"$module\"].functions" $test_information
     }
 
     for i in $(functions | jq -r 'keys[]'); do
