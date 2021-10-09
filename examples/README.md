@@ -1,6 +1,6 @@
 # Examples
 
-Those are example applications and libraries written in Pen.
+Those are examples of applications and libraries written in Pen.
 
 # Applications
 
