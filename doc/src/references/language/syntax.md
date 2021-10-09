@@ -4,7 +4,7 @@ This page describes syntactical components of the language. You can compose prog
 
 ## Module
 
-Modules are sets of type and function definitions. Syntactically, a module consists of [statements](#statements). See [Modules](modules.md) about who modules themselves interact with each other.
+Modules are sets of type and function definitions. Syntactically, a module consists of [statements](#statements). See [Modules](modules.md) about how modules themselves interact with each other.
 
 ## Statements
 
