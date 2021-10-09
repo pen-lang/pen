@@ -73,14 +73,15 @@ $(
       jq -r ".modules[\"$m\"].functions" $test_information
     }
 
-    for f in $(functions | jq -r 'keys[]'); do
-      name=$(functions | jq -r ".$f.name")
+    for i in $(functions | jq -r 'keys[]'); do
+      name=$(functions | jq -r ".[$i].name")
+      foreign_name=$(functions | jq -r ".[$i].foreign_name")
 
       echo "
         #[link(name = \"main_test\")]
-        extern \"C\" { fn $f() -> ffi::Any; }
+        extern \"C\" { fn $foreign_name() -> ffi::Any; }
 
-        let result: Result<_, _> = unsafe { _pen_test_convert_result($f()) }.into_result();
+        let result: Result<_, _> = unsafe { _pen_test_convert_result($foreign_name()) }.into_result();
         println!(\"\t{}\t$name\", if result.is_ok() { \"OK\" } else { \"FAIL\" });
         if let Err(message) = &result {
           println!(\"\t\tMessage: {}\", message);
