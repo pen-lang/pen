@@ -1,6 +1,6 @@
 # Syntax
 
-This page describes the syntactical components of the language. You can compose programs building up those constructs. See also [Types](types.md) about syntax for specific data types.
+This page describes syntactical components of the language. You can compose programs building up those constructs. See also [Types](types.md) about syntax for specific data types.
 
 ## Module
 
