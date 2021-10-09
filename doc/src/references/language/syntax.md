@@ -97,7 +97,7 @@ If you want to save results of intermediate expressions for later use, you can d
 
 ## Expressions
 
-Expressions express what programs actually compute. Notably, expressions can be nested; many expressions contain other expressions inside.
+Expressions express what functions actually compute. Notably, expressions can be nested; expressions often contain other expressions inside.
 
 ### Function call
 
@@ -111,7 +111,7 @@ f(x, y)
 
 #### Arithmetic
 
-Arithmetic operators add, subtract, multiply or divide a number with another one.
+Arithmetic operators add, subtract, multiply, or divide a number with another.
 
 ```pen
 1 + 1
@@ -131,7 +131,7 @@ Equal (`==`) and not-equal (`!=`) operators compare two values and return a bool
 1 != 1
 ```
 
-The operators can compare any types except functions and types that include them.
+The operators can compare any types except functions and types containing them.
 
 ```pen
 "foo" == "bar"
@@ -172,7 +172,7 @@ true | false
 
 #### Error handling
 
-`?` suffix operator immediately exits the current function with an operand if it is of [the `error` type][error-type]. The operand must be a union type containing [the `error` type][error-type].
+`?` suffix operators immediately exit the current functions with operands if they are of [the `error` type][error-type]. Both the operands and result values of functions where the operators are used must be a union type containing [the `error` type][error-type].
 
 ```pen
 x?
@@ -184,7 +184,7 @@ x?
 
 It creates a function.
 
-First, functions declare their argument names and types (`x number` and `y number`) and their result types (`number`). After that, function bodies describe what the functions do as [blocks](#block).
+First, functions declare their argument names and types (`x number` and `y number`) and their result types (`number`). After that, function bodies of [blocks](#block) describe what the functions compute.
 
 ```pen
 \(x number, y number) number {
