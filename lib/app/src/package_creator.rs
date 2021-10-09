@@ -3,7 +3,7 @@ use crate::{
     infra::{FilePath, Infrastructure},
     ApplicationConfiguration,
 };
-use std::{collections::HashMap, error::Error};
+use std::{collections::BTreeMap, error::Error};
 
 pub fn create_application(
     infrastructure: &Infrastructure,
@@ -43,7 +43,7 @@ pub fn create_library(
 
 fn create(
     infrastructure: &Infrastructure,
-    dependencies: &HashMap<String, url::Url>,
+    dependencies: &BTreeMap<String, url::Url>,
     module_basename: &str,
     module_content: &str,
     package_directory: &FilePath,
