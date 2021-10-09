@@ -37,7 +37,7 @@ See [Install](https://pen-lang.org/guides/install.html).
 
 - [Getting started](https://pen-lang.org/guides/getting-started.html)
 - [Language reference][syntax]
-- [Code examples](https://pen-lang.org/examples/standard-packages/os.html)
+- [Code examples](https://github.com/pen-lang/pen/tree/main/examples)
 
 ## Vision
 
