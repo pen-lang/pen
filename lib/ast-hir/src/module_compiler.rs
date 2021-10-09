@@ -11,8 +11,8 @@ pub fn compile(module: &ast::Module) -> Result<ir::Module, CompileError> {
                 ast::TypeDefinition::RecordDefinition(definition) => Some(ir::TypeDefinition::new(
                     definition.name(),
                     definition.name(),
-                    definition.elements().to_vec(),
-                    is_record_open(definition.elements()),
+                    definition.fields().to_vec(),
+                    is_record_open(definition.fields()),
                     ast::analysis::is_name_public(definition.name()),
                     false,
                     definition.position().clone(),
@@ -264,14 +264,14 @@ fn compile_expression(expression: &ast::Expression) -> Result<ir::Expression, Co
             ir::Number::new(number.value(), number.position().clone()).into()
         }
         ast::Expression::Record(record) => {
-            let elements = record
-                .elements()
+            let fields = record
+                .fields()
                 .iter()
-                .map(|element| {
+                .map(|field| {
                     Ok(ir::RecordField::new(
-                        element.name(),
-                        compile_expression(element.expression())?,
-                        element.position().clone(),
+                        field.name(),
+                        compile_expression(field.expression())?,
+                        field.position().clone(),
                     ))
                 })
                 .collect::<Result<_, _>>()?;
@@ -280,14 +280,14 @@ fn compile_expression(expression: &ast::Expression) -> Result<ir::Expression, Co
                 ir::RecordUpdate::new(
                     record.type_().clone(),
                     compile_expression(old_record)?,
-                    elements,
+                    fields,
                     record.position().clone(),
                 )
                 .into()
             } else {
                 ir::RecordConstruction::new(
                     record.type_().clone(),
-                    elements,
+                    fields,
                     record.position().clone(),
                 )
                 .into()
@@ -336,11 +336,11 @@ fn compile_if(
     })
 }
 
-fn is_record_open(elements: &[types::RecordField]) -> bool {
-    !elements.is_empty()
-        && elements
+fn is_record_open(fields: &[types::RecordField]) -> bool {
+    !fields.is_empty()
+        && fields
             .iter()
-            .all(|element| ast::analysis::is_name_public(element.name()))
+            .all(|field| ast::analysis::is_name_public(field.name()))
 }
 
 #[cfg(test)]

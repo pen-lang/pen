@@ -41,11 +41,11 @@ fn find_in_expression(expression: &Expression) -> HashSet<String> {
             )
             .collect(),
         Expression::Record(record) => record
-            .elements()
+            .fields()
             .iter()
             .flat_map(find_in_expression)
             .collect(),
-        Expression::RecordField(element) => find_in_expression(element.record()),
+        Expression::RecordField(field) => find_in_expression(field.record()),
         Expression::TryOperation(operation) => find_in_expression(operation.operand())
             .into_iter()
             .chain(

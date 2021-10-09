@@ -84,8 +84,8 @@ impl From<RecordConstruction> for Expression {
 }
 
 impl From<RecordDeconstruction> for Expression {
-    fn from(element: RecordDeconstruction) -> Self {
-        Self::RecordDeconstruction(element)
+    fn from(field: RecordDeconstruction) -> Self {
+        Self::RecordDeconstruction(field)
     }
 }
 

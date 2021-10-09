@@ -38,7 +38,7 @@ fn compile_imports(module: &ir::Module, module_interfaces: &[&interface::Module]
                         ir::TypeDefinition::new(
                             definition.name(),
                             definition.original_name(),
-                            definition.elements().to_vec(),
+                            definition.fields().to_vec(),
                             definition.is_open(),
                             definition.is_public(),
                             true,

@@ -4,19 +4,19 @@ use position::Position;
 #[derive(Clone, Debug, Hash, PartialEq)]
 pub struct RecordDefinition {
     name: String,
-    elements: Vec<types::RecordField>,
+    fields: Vec<types::RecordField>,
     position: Position,
 }
 
 impl RecordDefinition {
     pub fn new(
         name: impl Into<String>,
-        elements: Vec<types::RecordField>,
+        fields: Vec<types::RecordField>,
         position: Position,
     ) -> Self {
         Self {
             name: name.into(),
-            elements,
+            fields,
             position,
         }
     }
@@ -25,8 +25,8 @@ impl RecordDefinition {
         &self.name
     }
 
-    pub fn elements(&self) -> &[types::RecordField] {
-        &self.elements
+    pub fn fields(&self) -> &[types::RecordField] {
+        &self.fields
     }
 
     pub fn position(&self) -> &Position {

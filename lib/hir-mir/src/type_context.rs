@@ -31,7 +31,7 @@ impl TypeContext {
             records: module
                 .type_definitions()
                 .iter()
-                .map(|definition| (definition.name().into(), definition.elements().to_vec()))
+                .map(|definition| (definition.name().into(), definition.fields().to_vec()))
                 .collect(),
             list_type_configuration: list_type_configuration.clone(),
             string_type_configuration: string_type_configuration.clone(),

@@ -5,7 +5,7 @@ pub fn get_record_field(
     builder: &fmm::build::InstructionBuilder,
     record: &fmm::build::TypedExpression,
     type_: &mir::types::Record,
-    element_index: usize,
+    field_index: usize,
     types: &HashMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     Ok(builder.deconstruct_record(
@@ -17,6 +17,6 @@ pub fn get_record_field(
         } else {
             record.clone()
         },
-        element_index,
+        field_index,
     )?)
 }

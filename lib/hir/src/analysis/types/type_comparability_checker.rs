@@ -38,7 +38,7 @@ fn check_with_cache(
 
                 record_field_resolver::resolve(type_, type_.position(), types, record_types)?
                     .iter()
-                    .map(|element| check_with_cache(element.type_(), &record_names))
+                    .map(|field| check_with_cache(field.type_(), &record_names))
                     .collect::<Result<Vec<_>, _>>()?
                     .into_iter()
                     .all(|flag| flag)
@@ -80,7 +80,7 @@ mod tests {
     }
 
     #[test]
-    fn check_record_type_with_function_element() {
+    fn check_record_type_with_function_field() {
         assert!(!check(
             &types::Record::new("foo", Position::fake()).into(),
             &Default::default(),
@@ -102,7 +102,7 @@ mod tests {
     }
 
     #[test]
-    fn check_comparability_of_record_type_with_any_element() {
+    fn check_comparability_of_record_type_with_any_field() {
         assert!(!check(
             &types::Record::new("foo", Position::fake()).into(),
             &Default::default(),

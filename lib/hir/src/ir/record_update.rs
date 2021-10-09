@@ -7,7 +7,7 @@ use std::sync::Arc;
 pub struct RecordUpdate {
     type_: Type,
     record: Arc<Expression>,
-    elements: Vec<RecordField>,
+    fields: Vec<RecordField>,
     position: Position,
 }
 
@@ -15,13 +15,13 @@ impl RecordUpdate {
     pub fn new(
         type_: impl Into<Type>,
         record: impl Into<Expression>,
-        elements: Vec<RecordField>,
+        fields: Vec<RecordField>,
         position: Position,
     ) -> Self {
         Self {
             type_: type_.into(),
             record: Arc::new(record.into()),
-            elements,
+            fields,
             position,
         }
     }
@@ -34,8 +34,8 @@ impl RecordUpdate {
         &self.record
     }
 
-    pub fn elements(&self) -> &[RecordField] {
-        &self.elements
+    pub fn fields(&self) -> &[RecordField] {
+        &self.fields
     }
 
     pub fn position(&self) -> &Position {

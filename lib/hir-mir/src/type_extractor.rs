@@ -153,7 +153,7 @@ pub fn extract_from_expression(
             type_context.records(),
         )?
         .iter()
-        .find(|element| element.name() == deconstruction.element_name())
+        .find(|field| field.name() == deconstruction.field_name())
         .ok_or_else(|| CompileError::RecordFieldUnknown(deconstruction.position().clone()))?
         .type_()
         .clone(),

@@ -100,8 +100,8 @@ impl From<Record> for Expression {
 }
 
 impl From<RecordField> for Expression {
-    fn from(element: RecordField) -> Self {
-        Self::RecordField(element)
+    fn from(field: RecordField) -> Self {
+        Self::RecordField(field)
     }
 }
 

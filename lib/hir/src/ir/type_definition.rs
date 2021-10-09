@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 pub struct TypeDefinition {
     name: String,
     original_name: String,
-    elements: Vec<types::RecordField>,
+    fields: Vec<types::RecordField>,
     open: bool,
     public: bool,
     external: bool,
@@ -17,7 +17,7 @@ impl TypeDefinition {
     pub fn new(
         name: impl Into<String>,
         original_name: impl Into<String>,
-        elements: Vec<types::RecordField>,
+        fields: Vec<types::RecordField>,
         open: bool,
         public: bool,
         external: bool,
@@ -26,7 +26,7 @@ impl TypeDefinition {
         Self {
             name: name.into(),
             original_name: original_name.into(),
-            elements,
+            fields,
             open,
             public,
             external,
@@ -42,8 +42,8 @@ impl TypeDefinition {
         &self.original_name
     }
 
-    pub fn elements(&self) -> &[types::RecordField] {
-        &self.elements
+    pub fn fields(&self) -> &[types::RecordField] {
+        &self.fields
     }
 
     pub fn is_open(&self) -> bool {

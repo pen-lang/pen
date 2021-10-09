@@ -120,8 +120,8 @@ fn validate_expression(
             }
         },
         Expression::RecordConstruction(construction) => {
-            for element in construction.elements() {
-                validate(element.expression())?;
+            for field in construction.fields() {
+                validate(field.expression())?;
             }
         }
         Expression::RecordDeconstruction(deconstruction) => {
@@ -130,8 +130,8 @@ fn validate_expression(
         Expression::RecordUpdate(update) => {
             validate(update.record())?;
 
-            for element in update.elements() {
-                validate(element.expression())?;
+            for field in update.fields() {
+                validate(field.expression())?;
             }
         }
         Expression::Thunk(thunk) => {

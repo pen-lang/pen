@@ -8,7 +8,7 @@ use std::{error::Error, fmt::Display};
 pub enum TypeCheckError {
     DuplicateFunctionNames(String),
     DuplicateTypeNames(String),
-    ElementIndexOutOfBounds(RecordField),
+    FieldIndexOutOfBounds(RecordField),
     ForeignDefinitionNotFound(ForeignDefinition),
     FunctionExpected(Expression),
     NoAlternativeFound(Case),
@@ -17,7 +17,7 @@ pub enum TypeCheckError {
     VariableNotFound(Variable),
     VariantInVariant(Variant),
     WrongArgumentCount(Call),
-    WrongElementCount(Record),
+    WrongFieldCount(Record),
 }
 
 impl Display for TypeCheckError {

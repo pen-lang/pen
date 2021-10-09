@@ -321,7 +321,7 @@ fn transform_expression(
         Expression::RecordConstruction(construction) => RecordConstruction::new(
             construction.type_().clone(),
             transform_record_fields(
-                construction.elements(),
+                construction.fields(),
                 construction.position(),
                 construction.type_(),
                 variables,
@@ -333,7 +333,7 @@ fn transform_expression(
         Expression::RecordDeconstruction(deconstruction) => RecordDeconstruction::new(
             deconstruction.type_().cloned(),
             transform_expression(deconstruction.record(), variables)?,
-            deconstruction.element_name(),
+            deconstruction.field_name(),
             deconstruction.position().clone(),
         )
         .into(),
@@ -341,7 +341,7 @@ fn transform_expression(
             update.type_().clone(),
             transform_expression(update.record(), variables)?,
             transform_record_fields(
-                update.elements(),
+                update.fields(),
                 update.position(),
                 update.type_(),
                 variables,
@@ -378,37 +378,37 @@ fn transform_expression(
 }
 
 fn transform_record_fields(
-    elements: &[RecordField],
+    fields: &[RecordField],
     position: &Position,
     record_type: &Type,
     variables: &HashMap<String, Type>,
     type_context: &TypeContext,
 ) -> Result<Vec<RecordField>, CompileError> {
-    let element_types = record_field_resolver::resolve(
+    let field_types = record_field_resolver::resolve(
         record_type,
         position,
         type_context.types(),
         type_context.records(),
     )?;
 
-    elements
+    fields
         .iter()
-        .map(|element| {
+        .map(|field| {
             Ok(RecordField::new(
-                element.name(),
+                field.name(),
                 coerce_expression(
-                    &transform_expression(element.expression(), variables, type_context)?,
-                    element_types
+                    &transform_expression(field.expression(), variables, type_context)?,
+                    field_types
                         .iter()
-                        .find(|element_type| element_type.name() == element.name())
+                        .find(|field_type| field_type.name() == field.name())
                         .ok_or_else(|| {
-                            CompileError::RecordFieldUnknown(element.position().clone())
+                            CompileError::RecordFieldUnknown(field.position().clone())
                         })?
                         .type_(),
                     variables,
                     type_context,
                 )?,
-                element.position().clone(),
+                field.position().clone(),
             ))
         })
         .collect::<Result<_, _>>()

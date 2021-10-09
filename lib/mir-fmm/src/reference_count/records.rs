@@ -26,7 +26,7 @@ pub fn compile_record_clone_function(
             if types::is_record_boxed(&record_type, types) {
                 pointers::clone_pointer(&builder, &record)?;
             } else {
-                for (index, type_) in definition.type_().elements().iter().enumerate() {
+                for (index, type_) in definition.type_().fields().iter().enumerate() {
                     expressions::clone_expression(
                         &builder,
                         &crate::records::get_record_field(
@@ -96,7 +96,7 @@ fn drop_record_fields(
     record_body_type: &mir::types::RecordBody,
     types: &HashMap<String, mir::types::RecordBody>,
 ) -> Result<(), CompileError> {
-    for (index, type_) in record_body_type.elements().iter().enumerate() {
+    for (index, type_) in record_body_type.fields().iter().enumerate() {
         expressions::drop_expression(
             builder,
             &crate::records::get_record_field(builder, record, record_type, index, types)?,

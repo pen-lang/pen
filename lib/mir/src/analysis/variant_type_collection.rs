@@ -44,11 +44,11 @@ fn collect_from_expression(expression: &Expression) -> HashSet<Type> {
             .chain(collect_from_expression(let_.expression()))
             .collect(),
         Expression::Record(record) => record
-            .elements()
+            .fields()
             .iter()
             .flat_map(collect_from_expression)
             .collect(),
-        Expression::RecordField(element) => collect_from_expression(element.record()),
+        Expression::RecordField(field) => collect_from_expression(field.record()),
         Expression::TryOperation(operation) => vec![operation.type_().clone()]
             .into_iter()
             .chain(collect_from_expression(operation.operand()))

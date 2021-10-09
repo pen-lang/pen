@@ -85,8 +85,8 @@ fn visit_expression(expression: &Expression, visit: &mut impl FnMut(&Expression)
             }
         },
         Expression::RecordConstruction(construction) => {
-            for element in construction.elements() {
-                visit_expression(element.expression());
+            for field in construction.fields() {
+                visit_expression(field.expression());
             }
         }
         Expression::RecordDeconstruction(deconstruction) => {
@@ -95,8 +95,8 @@ fn visit_expression(expression: &Expression, visit: &mut impl FnMut(&Expression)
         Expression::RecordUpdate(update) => {
             visit_expression(update.record());
 
-            for element in update.elements() {
-                visit_expression(element.expression());
+            for field in update.fields() {
+                visit_expression(field.expression());
             }
         }
         Expression::Thunk(thunk) => {

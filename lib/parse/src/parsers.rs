@@ -189,10 +189,10 @@ fn record_definition<'a>() -> impl Parser<Stream<'a>, Output = RecordDefinition>
         sign("}"),
     )
         .map(
-            |((position, _), name, _, elements, _): (_, _, _, Vec<_>, _)| {
+            |((position, _), name, _, fields, _): (_, _, _, Vec<_>, _)| {
                 RecordDefinition::new(
                     name,
-                    elements
+                    fields
                         .into_iter()
                         .map(|(name, type_)| types::RecordField::new(name, type_))
                         .collect(),
@@ -437,7 +437,7 @@ fn suffix_operation_like<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
                     SuffixOperator::Call(arguments, position) => {
                         Call::new(expression, arguments, position).into()
                     }
-                    SuffixOperator::Element(name, position) => {
+                    SuffixOperator::Field(name, position) => {
                         RecordDeconstruction::new(expression, name, position).into()
                     }
                     SuffixOperator::Try(position) => {
@@ -449,7 +449,7 @@ fn suffix_operation_like<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
 }
 
 fn suffix_operator<'a>() -> impl Parser<Stream<'a>, Output = SuffixOperator> {
-    choice((call_operator(), element_operator(), try_operator()))
+    choice((call_operator(), field_operator(), try_operator()))
 }
 
 fn call_operator<'a>() -> impl Parser<Stream<'a>, Output = SuffixOperator> {
@@ -460,9 +460,9 @@ fn call_operator<'a>() -> impl Parser<Stream<'a>, Output = SuffixOperator> {
         .map(|(position, arguments)| SuffixOperator::Call(arguments, position))
 }
 
-fn element_operator<'a>() -> impl Parser<Stream<'a>, Output = SuffixOperator> {
+fn field_operator<'a>() -> impl Parser<Stream<'a>, Output = SuffixOperator> {
     (attempt(position().skip(sign("."))), identifier())
-        .map(|(position, identifier)| SuffixOperator::Element(identifier, position))
+        .map(|(position, identifier)| SuffixOperator::Field(identifier, position))
 }
 
 fn try_operator<'a>() -> impl Parser<Stream<'a>, Output = SuffixOperator> {
@@ -594,20 +594,20 @@ fn record<'a>() -> impl Parser<Stream<'a>, Output = Record> {
         sep_end_by1(record_field(), sign(",")),
         sign("}"),
     )
-        .then(|((position, name, _), record, elements, _)| {
-            let elements: Vec<_> = elements;
+        .then(|((position, name, _), record, fields, _)| {
+            let fields: Vec<_> = fields;
 
-            if elements
+            if fields
                 .iter()
-                .map(|element| element.name())
+                .map(|field| field.name())
                 .collect::<HashSet<_>>()
                 .len()
-                == elements.len()
+                == fields.len()
             {
                 value(Record::new(
                     types::Reference::new(name, position.clone()),
                     record,
-                    elements,
+                    fields,
                     position,
                 ))
                 .left()

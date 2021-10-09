@@ -8,7 +8,7 @@ pub fn transform(
     update: &RecordUpdate,
     type_context: &TypeContext,
 ) -> Result<Expression, CompileError> {
-    let element_types = record_field_resolver::resolve(
+    let field_types = record_field_resolver::resolve(
         update.type_(),
         update.position(),
         type_context.types(),
@@ -22,15 +22,15 @@ pub fn transform(
         update.record().clone(),
         RecordConstruction::new(
             update.type_().clone(),
-            element_types
+            field_types
                 .iter()
-                .map(|element_type| element_type.name())
+                .map(|field_type| field_type.name())
                 .collect::<HashSet<_>>()
                 .difference(
                     &update
-                        .elements()
+                        .fields()
                         .iter()
-                        .map(|element| element.name())
+                        .map(|field| field.name())
                         .collect(),
                 )
                 .map(|&name| {
@@ -45,7 +45,7 @@ pub fn transform(
                         position.clone(),
                     )
                 })
-                .chain(update.elements().iter().cloned())
+                .chain(update.fields().iter().cloned())
                 .collect(),
             position.clone(),
         ),

@@ -87,7 +87,7 @@ pub fn compile(
         mir::ir::Expression::Record(record) => {
             let unboxed = fmm::build::record(
                 record
-                    .elements()
+                    .fields()
                     .iter()
                     .map(|argument| compile(argument, variables))
                     .collect::<Result<_, _>>()?,
@@ -104,23 +104,23 @@ pub fn compile(
                 unboxed.into()
             }
         }
-        mir::ir::Expression::RecordField(element) => {
-            let record_type = element.type_().clone();
-            let element_index = element.index();
+        mir::ir::Expression::RecordField(field) => {
+            let record_type = field.type_().clone();
+            let field_index = field.index();
 
-            let record = compile(element.record(), variables)?;
-            let element = records::get_record_field(
+            let record = compile(field.record(), variables)?;
+            let field = records::get_record_field(
                 instruction_builder,
                 &record,
-                element.type_(),
-                element.index(),
+                field.type_(),
+                field.index(),
                 types,
             )?;
 
             reference_count::clone_expression(
                 instruction_builder,
-                &element,
-                &types[record_type.name()].elements()[element_index],
+                &field,
+                &types[record_type.name()].fields()[field_index],
                 types,
             )?;
             reference_count::drop_expression(
@@ -130,7 +130,7 @@ pub fn compile(
                 types,
             )?;
 
-            element
+            field
         }
         mir::ir::Expression::ByteString(string) => {
             if string.value().is_empty() {

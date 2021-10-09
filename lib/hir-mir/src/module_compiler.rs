@@ -79,9 +79,9 @@ fn compile_type_definition(
         type_definition.name(),
         mir::types::RecordBody::new(
             type_definition
-                .elements()
+                .fields()
                 .iter()
-                .map(|element| type_compiler::compile(element.type_(), type_context))
+                .map(|field| type_compiler::compile(field.type_(), type_context))
                 .collect::<Result<_, _>>()?,
         ),
     ))

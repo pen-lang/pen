@@ -12,7 +12,7 @@ pub fn compile(module: &Module, imported_modules: &[ImportedModule]) -> Module {
                 .type_definitions()
                 .iter()
                 .filter_map(|definition| {
-                    if definition.elements().is_empty() && definition.is_public() {
+                    if definition.fields().is_empty() && definition.is_public() {
                         Some((
                             name_qualifier::qualify(module.prefix(), definition.original_name()),
                             definition.name().into(),
@@ -24,7 +24,7 @@ pub fn compile(module: &Module, imported_modules: &[ImportedModule]) -> Module {
                 .collect::<Vec<_>>()
         })
         .chain(module.type_definitions().iter().filter_map(|definition| {
-            if definition.elements().is_empty() && !definition.is_external() {
+            if definition.fields().is_empty() && !definition.is_external() {
                 Some((definition.original_name().into(), definition.name().into()))
             } else {
                 None

@@ -340,13 +340,13 @@ fn infer_expression(
         Expression::RecordConstruction(construction) => RecordConstruction::new(
             construction.type_().clone(),
             construction
-                .elements()
+                .fields()
                 .iter()
-                .map(|element| {
+                .map(|field| {
                     Ok(RecordField::new(
-                        element.name(),
-                        infer_expression(element.expression(), variables)?,
-                        element.position().clone(),
+                        field.name(),
+                        infer_expression(field.expression(), variables)?,
+                        field.position().clone(),
                     ))
                 })
                 .collect::<Result<_, CompileError>>()?,
@@ -363,7 +363,7 @@ fn infer_expression(
                     type_context,
                 )?),
                 record,
-                deconstruction.element_name(),
+                deconstruction.field_name(),
                 deconstruction.position().clone(),
             )
             .into()
@@ -372,13 +372,13 @@ fn infer_expression(
             update.type_().clone(),
             infer_expression(update.record(), variables)?,
             update
-                .elements()
+                .fields()
                 .iter()
-                .map(|element| {
+                .map(|field| {
                     Ok(RecordField::new(
-                        element.name(),
-                        infer_expression(element.expression(), variables)?,
-                        element.position().clone(),
+                        field.name(),
+                        infer_expression(field.expression(), variables)?,
+                        field.position().clone(),
                     ))
                 })
                 .collect::<Result<_, CompileError>>()?,
