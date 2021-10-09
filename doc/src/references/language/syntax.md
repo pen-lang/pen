@@ -227,7 +227,7 @@ if x = foo() as number {
 
 It deconstructs a list and evaluates one of [blocks](#block) depending on if the list is empty or not.
 
-- If a given list has 1 or more element, it evaluates the first block with **a function that returns its first element (`x`)** and rest of elements as a list (`xs`).
+- If a given list has 1 or more element, it evaluates the first block with **a function that returns its first element** (`x`) and rest of elements as a list (`xs`).
 - If it has no element, it evaluates the second block.
 
 ```pen
