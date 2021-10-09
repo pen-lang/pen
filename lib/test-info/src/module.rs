@@ -1,15 +1,14 @@
 use crate::function::Function;
 use serde::{Deserialize, Serialize};
-use std::collections::BTreeMap;
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Module {
     path: String,
-    functions: BTreeMap<String, Function>,
+    functions: Vec<Function>,
 }
 
 impl Module {
-    pub fn new(path: impl Into<String>, functions: BTreeMap<String, Function>) -> Self {
+    pub fn new(path: impl Into<String>, functions: Vec<Function>) -> Self {
         Self {
             path: path.into(),
             functions,
@@ -20,7 +19,7 @@ impl Module {
         &self.path
     }
 
-    pub fn functions(&self) -> &BTreeMap<String, Function> {
+    pub fn functions(&self) -> &[Function] {
         &self.functions
     }
 }
