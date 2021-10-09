@@ -53,7 +53,7 @@ type foo = number | none
 
 ### Function definition
 
-It defines a function with a given name. The right hand side of `=` signs must be [function expressions](#function).
+It defines a function with a given name. The right-hand side of `=` signs must be [function expressions](#function).
 
 ```pen
 foo = \(x number, y number) number {
