@@ -3,9 +3,9 @@ pull_request_rules:
     conditions:
       - author=dependabot[bot]
     actions:
-      merge:
+      queue:
+        name: default
         method: squash
-        strict: smart
   - name: merge
     conditions:
       - label=merge
