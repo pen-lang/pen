@@ -6,7 +6,7 @@ pull_request_rules:
       merge:
         method: squash
         strict: smart
-  - name: auto-merge
+  - name: merge
     conditions:
       - label=merge
       - or:
