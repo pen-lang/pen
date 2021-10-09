@@ -13,7 +13,9 @@ pull_request_rules:
           - author=raviqqe
           - "#approved-reviews-by>=1"
     actions:
-      merge:
+      queue:
+        name: default
         method: squash
-        strict: smart
         commit_message: title+body
+queue_rules:
+  - name: default
