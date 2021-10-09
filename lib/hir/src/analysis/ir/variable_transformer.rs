@@ -153,13 +153,13 @@ fn transform_expression(
         Expression::RecordConstruction(construction) => RecordConstruction::new(
             construction.type_().clone(),
             construction
-                .elements()
+                .fields()
                 .iter()
-                .map(|element| {
-                    RecordElement::new(
-                        element.name(),
-                        transform_expression(element.expression(), transform),
-                        element.position().clone(),
+                .map(|field| {
+                    RecordField::new(
+                        field.name(),
+                        transform_expression(field.expression(), transform),
+                        field.position().clone(),
                     )
                 })
                 .collect(),
@@ -169,7 +169,7 @@ fn transform_expression(
         Expression::RecordDeconstruction(deconstruction) => RecordDeconstruction::new(
             deconstruction.type_().cloned(),
             transform_expression(deconstruction.record(), transform),
-            deconstruction.element_name(),
+            deconstruction.field_name(),
             deconstruction.position().clone(),
         )
         .into(),
@@ -177,13 +177,13 @@ fn transform_expression(
             update.type_().clone(),
             transform_expression(update.record(), transform),
             update
-                .elements()
+                .fields()
                 .iter()
-                .map(|element| {
-                    RecordElement::new(
-                        element.name(),
-                        transform_expression(element.expression(), transform),
-                        element.position().clone(),
+                .map(|field| {
+                    RecordField::new(
+                        field.name(),
+                        transform_expression(field.expression(), transform),
+                        field.position().clone(),
                     )
                 })
                 .collect(),

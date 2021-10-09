@@ -2,13 +2,13 @@ use super::expression::Expression;
 use position::Position;
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct RecordElement {
+pub struct RecordField {
     name: String,
     expression: Expression,
     position: Position,
 }
 
-impl RecordElement {
+impl RecordField {
     pub fn new(
         name: impl Into<String>,
         expression: impl Into<Expression>,

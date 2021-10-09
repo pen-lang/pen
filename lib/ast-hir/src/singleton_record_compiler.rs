@@ -12,7 +12,7 @@ pub fn compile(module: &Module, imported_modules: &[ImportedModule]) -> Module {
                 .type_definitions()
                 .iter()
                 .filter_map(|definition| {
-                    if definition.elements().is_empty() && definition.is_public() {
+                    if definition.fields().is_empty() && definition.is_public() {
                         Some((
                             name_qualifier::qualify(module.prefix(), definition.original_name()),
                             definition.name().into(),
@@ -24,7 +24,7 @@ pub fn compile(module: &Module, imported_modules: &[ImportedModule]) -> Module {
                 .collect::<Vec<_>>()
         })
         .chain(module.type_definitions().iter().filter_map(|definition| {
-            if definition.elements().is_empty() && !definition.is_external() {
+            if definition.fields().is_empty() && !definition.is_external() {
                 Some((definition.original_name().into(), definition.name().into()))
             } else {
                 None
@@ -98,7 +98,7 @@ mod tests {
         let type_definition = TypeDefinition::new(
             "bar",
             "foo",
-            vec![types::RecordElement::new(
+            vec![types::RecordField::new(
                 "x",
                 types::None::new(Position::fake()),
             )],
@@ -200,7 +200,7 @@ mod tests {
                         vec![interface::TypeDefinition::new(
                             "RealFoo",
                             "Foo",
-                            vec![types::RecordElement::new(
+                            vec![types::RecordField::new(
                                 "x",
                                 types::None::new(Position::fake()),
                             )],

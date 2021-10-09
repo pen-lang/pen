@@ -1,5 +1,5 @@
 use crate::{error::CompileError, type_context::TypeContext};
-use hir::{analysis::types::record_element_resolver, ir::*};
+use hir::{analysis::types::record_field_resolver, ir::*};
 use std::collections::HashSet;
 
 const RECORD_NAME: &str = "$record";
@@ -8,7 +8,7 @@ pub fn transform(
     update: &RecordUpdate,
     type_context: &TypeContext,
 ) -> Result<Expression, CompileError> {
-    let element_types = record_element_resolver::resolve(
+    let field_types = record_field_resolver::resolve(
         update.type_(),
         update.position(),
         type_context.types(),
@@ -22,19 +22,13 @@ pub fn transform(
         update.record().clone(),
         RecordConstruction::new(
             update.type_().clone(),
-            element_types
+            field_types
                 .iter()
-                .map(|element_type| element_type.name())
+                .map(|field_type| field_type.name())
                 .collect::<HashSet<_>>()
-                .difference(
-                    &update
-                        .elements()
-                        .iter()
-                        .map(|element| element.name())
-                        .collect(),
-                )
+                .difference(&update.fields().iter().map(|field| field.name()).collect())
                 .map(|&name| {
-                    RecordElement::new(
+                    RecordField::new(
                         name,
                         RecordDeconstruction::new(
                             update.type_().clone().into(),
@@ -45,7 +39,7 @@ pub fn transform(
                         position.clone(),
                     )
                 })
-                .chain(update.elements().iter().cloned())
+                .chain(update.fields().iter().cloned())
                 .collect(),
             position.clone(),
         ),
@@ -70,7 +64,7 @@ mod tests {
                 &RecordUpdate::new(
                     record_type.clone(),
                     Variable::new("r", Position::fake()),
-                    vec![RecordElement::new(
+                    vec![RecordField::new(
                         "y",
                         None::new(Position::fake()),
                         Position::fake()
@@ -82,8 +76,8 @@ mod tests {
                     vec![(
                         "r".into(),
                         vec![
-                            types::RecordElement::new("x", types::Number::new(Position::fake())),
-                            types::RecordElement::new("y", types::None::new(Position::fake()))
+                            types::RecordField::new("x", types::Number::new(Position::fake())),
+                            types::RecordField::new("y", types::None::new(Position::fake()))
                         ]
                     )]
                     .into_iter()
@@ -97,7 +91,7 @@ mod tests {
                 RecordConstruction::new(
                     record_type.clone(),
                     vec![
-                        RecordElement::new(
+                        RecordField::new(
                             "x",
                             RecordDeconstruction::new(
                                 Some(record_type.into()),
@@ -107,7 +101,7 @@ mod tests {
                             ),
                             Position::fake()
                         ),
-                        RecordElement::new("y", None::new(Position::fake()), Position::fake())
+                        RecordField::new("y", None::new(Position::fake()), Position::fake())
                     ],
                     Position::fake()
                 ),

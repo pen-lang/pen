@@ -2,15 +2,15 @@ use super::type_::Type;
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct RecordBody {
-    elements: Vec<Type>,
+    fields: Vec<Type>,
 }
 
 impl RecordBody {
-    pub const fn new(elements: Vec<Type>) -> Self {
-        RecordBody { elements }
+    pub const fn new(fields: Vec<Type>) -> Self {
+        RecordBody { fields }
     }
 
-    pub fn elements(&self) -> &[Type] {
-        &self.elements
+    pub fn fields(&self) -> &[Type] {
+        &self.fields
     }
 }

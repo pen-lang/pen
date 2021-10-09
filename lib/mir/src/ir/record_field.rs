@@ -3,13 +3,13 @@ use crate::types;
 use std::sync::Arc;
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct RecordElement {
+pub struct RecordField {
     type_: types::Record,
     index: usize,
     record: Arc<Expression>,
 }
 
-impl RecordElement {
+impl RecordField {
     pub fn new(type_: types::Record, index: usize, record: impl Into<Expression>) -> Self {
         Self {
             type_,

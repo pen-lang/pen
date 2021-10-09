@@ -1,8 +1,8 @@
 use super::{environment_creator, type_context::TypeContext, type_extractor, CompileError};
 use hir::{
     analysis::types::{
-        record_element_resolver, type_canonicalizer, type_equality_checker,
-        type_subsumption_checker, union_type_creator,
+        record_field_resolver, type_canonicalizer, type_equality_checker, type_subsumption_checker,
+        union_type_creator,
     },
     ir::*,
     types::{self, Type},
@@ -250,35 +250,35 @@ fn check_expression(
         Expression::Number(number) => types::Number::new(number.position().clone()).into(),
         Expression::Operation(operation) => check_operation(operation, variables, type_context)?,
         Expression::RecordConstruction(construction) => {
-            let element_types = record_element_resolver::resolve(
+            let field_types = record_field_resolver::resolve(
                 construction.type_(),
                 construction.position(),
                 type_context.types(),
                 type_context.records(),
             )?;
 
-            for element in construction.elements() {
+            for field in construction.fields() {
                 check_subsumption(
-                    &check_expression(element.expression(), variables)?,
-                    element_types
+                    &check_expression(field.expression(), variables)?,
+                    field_types
                         .iter()
-                        .find(|element_type| element_type.name() == element.name())
+                        .find(|field_type| field_type.name() == field.name())
                         .ok_or_else(|| {
-                            CompileError::RecordElementUnknown(expression.position().clone())
+                            CompileError::RecordFieldUnknown(expression.position().clone())
                         })?
                         .type_(),
                 )?;
             }
 
-            let element_names = construction
-                .elements()
+            let field_names = construction
+                .fields()
                 .iter()
-                .map(|element| element.name())
+                .map(|field| field.name())
                 .collect::<HashSet<_>>();
 
-            for element_type in element_types {
-                if !element_names.contains(element_type.name()) {
-                    return Err(CompileError::RecordElementMissing(
+            for field_type in field_types {
+                if !field_names.contains(field_type.name()) {
+                    return Err(CompileError::RecordFieldMissing(
                         construction.position().clone(),
                     ));
                 }
@@ -296,19 +296,17 @@ fn check_expression(
                 type_,
             )?;
 
-            let element_types = record_element_resolver::resolve(
+            let field_types = record_field_resolver::resolve(
                 type_,
                 deconstruction.position(),
                 type_context.types(),
                 type_context.records(),
             )?;
 
-            element_types
+            field_types
                 .iter()
-                .find(|element_type| element_type.name() == deconstruction.element_name())
-                .ok_or_else(|| {
-                    CompileError::RecordElementUnknown(deconstruction.position().clone())
-                })?
+                .find(|field_type| field_type.name() == deconstruction.field_name())
+                .ok_or_else(|| CompileError::RecordFieldUnknown(deconstruction.position().clone()))?
                 .type_()
                 .clone()
         }
@@ -318,21 +316,21 @@ fn check_expression(
                 update.type_(),
             )?;
 
-            let element_types = record_element_resolver::resolve(
+            let field_types = record_field_resolver::resolve(
                 update.type_(),
                 update.position(),
                 type_context.types(),
                 type_context.records(),
             )?;
 
-            for element in update.elements() {
+            for field in update.fields() {
                 check_subsumption(
-                    &check_expression(element.expression(), variables)?,
-                    element_types
+                    &check_expression(field.expression(), variables)?,
+                    field_types
                         .iter()
-                        .find(|element_type| element_type.name() == element.name())
+                        .find(|field_type| field_type.name() == field.name())
                         .ok_or_else(|| {
-                            CompileError::RecordElementUnknown(expression.position().clone())
+                            CompileError::RecordFieldUnknown(expression.position().clone())
                         })?
                         .type_(),
                 )?;
@@ -1458,7 +1456,7 @@ mod tests {
                 &Module::empty()
                     .set_type_definitions(vec![TypeDefinition::fake(
                         "r",
-                        vec![types::RecordElement::new(
+                        vec![types::RecordField::new(
                             "x",
                             types::None::new(Position::fake()),
                         )],
@@ -1473,7 +1471,7 @@ mod tests {
                             reference_type.clone(),
                             RecordConstruction::new(
                                 reference_type,
-                                vec![RecordElement::new(
+                                vec![RecordField::new(
                                     "x",
                                     None::new(Position::fake()),
                                     Position::fake(),
@@ -1488,7 +1486,7 @@ mod tests {
         }
 
         #[test]
-        fn fail_to_check_record_with_missing_element() {
+        fn fail_to_check_record_with_missing_field() {
             let reference_type = types::Reference::new("r", Position::fake());
 
             assert!(matches!(
@@ -1496,7 +1494,7 @@ mod tests {
                     &Module::empty()
                         .set_type_definitions(vec![TypeDefinition::fake(
                             "r",
-                            vec![types::RecordElement::new(
+                            vec![types::RecordField::new(
                                 "x",
                                 types::None::new(Position::fake()),
                             )],
@@ -1519,12 +1517,12 @@ mod tests {
                             false
                         )])
                 ),
-                Err(CompileError::RecordElementMissing(_))
+                Err(CompileError::RecordFieldMissing(_))
             ));
         }
 
         #[test]
-        fn fail_to_check_record_with_unknown_element() {
+        fn fail_to_check_record_with_unknown_field() {
             let reference_type = types::Reference::new("r", Position::fake());
 
             assert!(matches!(
@@ -1544,7 +1542,7 @@ mod tests {
                                 reference_type.clone(),
                                 RecordConstruction::new(
                                     reference_type,
-                                    vec![RecordElement::new(
+                                    vec![RecordField::new(
                                         "x",
                                         None::new(Position::fake()),
                                         Position::fake()
@@ -1556,7 +1554,7 @@ mod tests {
                             false
                         )])
                 ),
-                Err(CompileError::RecordElementUnknown(_))
+                Err(CompileError::RecordFieldUnknown(_))
             ));
         }
 
@@ -1568,7 +1566,7 @@ mod tests {
                 &Module::empty()
                     .set_type_definitions(vec![TypeDefinition::fake(
                         "r",
-                        vec![types::RecordElement::new(
+                        vec![types::RecordField::new(
                             "x",
                             types::None::new(Position::fake()),
                         )],
@@ -1584,7 +1582,7 @@ mod tests {
                             RecordUpdate::new(
                                 reference_type,
                                 Variable::new("x", Position::fake()),
-                                vec![RecordElement::new(
+                                vec![RecordField::new(
                                     "x",
                                     None::new(Position::fake()),
                                     Position::fake(),
@@ -1606,7 +1604,7 @@ mod tests {
                 &Module::empty()
                     .set_type_definitions(vec![TypeDefinition::fake(
                         "r",
-                        vec![types::RecordElement::new(
+                        vec![types::RecordField::new(
                             "x",
                             types::None::new(Position::fake()),
                         )],
@@ -1633,7 +1631,7 @@ mod tests {
         }
 
         #[test]
-        fn fail_to_check_record_deconstruction_due_to_unknown_element() {
+        fn fail_to_check_record_deconstruction_due_to_unknown_field() {
             let reference_type = types::Reference::new("r", Position::fake());
 
             assert_eq!(
@@ -1641,7 +1639,7 @@ mod tests {
                     &Module::empty()
                         .set_type_definitions(vec![TypeDefinition::fake(
                             "r",
-                            vec![types::RecordElement::new(
+                            vec![types::RecordField::new(
                                 "x",
                                 types::None::new(Position::fake()),
                             )],
@@ -1665,7 +1663,7 @@ mod tests {
                             false,
                         )])
                 ),
-                Err(CompileError::RecordElementUnknown(Position::fake()))
+                Err(CompileError::RecordFieldUnknown(Position::fake()))
             );
         }
 

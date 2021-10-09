@@ -13,7 +13,7 @@ use std::collections::HashMap;
 #[derive(Debug)]
 pub struct TypeContext {
     types: HashMap<String, Type>,
-    records: HashMap<String, Vec<types::RecordElement>>,
+    records: HashMap<String, Vec<types::RecordField>>,
     list_type_configuration: ListTypeConfiguration,
     string_type_configuration: StringTypeConfiguration,
     error_type_configuration: ErrorTypeConfiguration,
@@ -31,7 +31,7 @@ impl TypeContext {
             records: module
                 .type_definitions()
                 .iter()
-                .map(|definition| (definition.name().into(), definition.elements().to_vec()))
+                .map(|definition| (definition.name().into(), definition.fields().to_vec()))
                 .collect(),
             list_type_configuration: list_type_configuration.clone(),
             string_type_configuration: string_type_configuration.clone(),
@@ -42,7 +42,7 @@ impl TypeContext {
     #[cfg(test)]
     pub fn dummy(
         types: HashMap<String, Type>,
-        records: HashMap<String, Vec<types::RecordElement>>,
+        records: HashMap<String, Vec<types::RecordField>>,
     ) -> Self {
         use super::{
             error_type_configuration::ERROR_TYPE_CONFIGURATION,
@@ -63,7 +63,7 @@ impl TypeContext {
         &self.types
     }
 
-    pub fn records(&self) -> &HashMap<String, Vec<types::RecordElement>> {
+    pub fn records(&self) -> &HashMap<String, Vec<types::RecordField>> {
         &self.records
     }
 

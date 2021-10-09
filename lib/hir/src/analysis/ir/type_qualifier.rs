@@ -37,7 +37,7 @@ pub fn qualify(module: &Module, prefix: &str) -> Module {
                             .map(String::as_str)
                             .unwrap_or_else(|| definition.name()),
                         definition.original_name(),
-                        definition.elements().to_vec(),
+                        definition.fields().to_vec(),
                         definition.is_open(),
                         definition.is_public(),
                         definition.is_external(),
@@ -130,7 +130,7 @@ mod tests {
                 &Module::empty()
                     .set_type_definitions(vec![TypeDefinition::fake(
                         "x",
-                        vec![types::RecordElement::new(
+                        vec![types::RecordField::new(
                             "x",
                             types::Reference::new("x", Position::fake())
                         )],
@@ -144,7 +144,7 @@ mod tests {
             Module::empty()
                 .set_type_definitions(vec![TypeDefinition::fake(
                     "foo.x",
-                    vec![types::RecordElement::new(
+                    vec![types::RecordField::new(
                         "x",
                         types::Reference::new("foo.x", Position::fake())
                     )],

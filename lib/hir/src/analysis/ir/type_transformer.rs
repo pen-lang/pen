@@ -72,11 +72,9 @@ fn transform_type_definition(
             definition.name(),
             definition.original_name(),
             definition
-                .elements()
+                .fields()
                 .iter()
-                .map(|element| {
-                    types::RecordElement::new(element.name(), transform(element.type_()))
-                })
+                .map(|field| types::RecordField::new(field.name(), transform(field.type_())))
                 .collect(),
             definition.is_open(),
             definition.is_public(),
@@ -218,13 +216,13 @@ fn transform_expression(expression: &Expression, transform: &impl Fn(&Type) -> T
         Expression::RecordConstruction(construction) => RecordConstruction::new(
             transform(construction.type_()),
             construction
-                .elements()
+                .fields()
                 .iter()
-                .map(|element| {
-                    RecordElement::new(
-                        element.name(),
-                        transform_expression(element.expression(), transform),
-                        element.position().clone(),
+                .map(|field| {
+                    RecordField::new(
+                        field.name(),
+                        transform_expression(field.expression(), transform),
+                        field.position().clone(),
                     )
                 })
                 .collect(),
@@ -234,7 +232,7 @@ fn transform_expression(expression: &Expression, transform: &impl Fn(&Type) -> T
         Expression::RecordDeconstruction(deconstruction) => RecordDeconstruction::new(
             deconstruction.type_().map(transform),
             transform_expression(deconstruction.record(), transform),
-            deconstruction.element_name(),
+            deconstruction.field_name(),
             deconstruction.position().clone(),
         )
         .into(),
@@ -242,13 +240,13 @@ fn transform_expression(expression: &Expression, transform: &impl Fn(&Type) -> T
             transform(update.type_()),
             transform_expression(update.record(), transform),
             update
-                .elements()
+                .fields()
                 .iter()
-                .map(|element| {
-                    RecordElement::new(
-                        element.name(),
-                        transform_expression(element.expression(), transform),
-                        element.position().clone(),
+                .map(|field| {
+                    RecordField::new(
+                        field.name(),
+                        transform_expression(field.expression(), transform),
+                        field.position().clone(),
                     )
                 })
                 .collect(),

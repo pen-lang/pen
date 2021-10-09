@@ -81,7 +81,7 @@ pub fn is_record_boxed(
     record: &mir::types::Record,
     types: &HashMap<String, mir::types::RecordBody>,
 ) -> bool {
-    !types[record.name()].elements().is_empty()
+    !types[record.name()].fields().is_empty()
 }
 
 pub fn compile_unboxed_record(
@@ -90,7 +90,7 @@ pub fn compile_unboxed_record(
 ) -> fmm::types::Record {
     fmm::types::Record::new(
         types[record.name()]
-            .elements()
+            .fields()
             .iter()
             .map(|type_| compile(type_, types))
             .collect(),

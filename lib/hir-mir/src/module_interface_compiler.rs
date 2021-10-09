@@ -10,7 +10,7 @@ pub fn compile(module: &ir::Module) -> Result<interface::Module, CompileError> {
                 interface::TypeDefinition::new(
                     definition.name(),
                     definition.original_name(),
-                    definition.elements().to_vec(),
+                    definition.fields().to_vec(),
                     definition.is_open(),
                     definition.is_public() && !definition.is_external(),
                     definition.position().clone(),

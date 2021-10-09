@@ -1,4 +1,4 @@
-use super::utilities::*;
+use super::operations::*;
 use ast::{
     types::{self, Type},
     *,
@@ -189,12 +189,12 @@ fn record_definition<'a>() -> impl Parser<Stream<'a>, Output = RecordDefinition>
         sign("}"),
     )
         .map(
-            |((position, _), name, _, elements, _): (_, _, _, Vec<_>, _)| {
+            |((position, _), name, _, fields, _): (_, _, _, Vec<_>, _)| {
                 RecordDefinition::new(
                     name,
-                    elements
+                    fields
                         .into_iter()
-                        .map(|(name, type_)| types::RecordElement::new(name, type_))
+                        .map(|(name, type_)| types::RecordField::new(name, type_))
                         .collect(),
                     position,
                 )
@@ -437,7 +437,7 @@ fn suffix_operation_like<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
                     SuffixOperator::Call(arguments, position) => {
                         Call::new(expression, arguments, position).into()
                     }
-                    SuffixOperator::Element(name, position) => {
+                    SuffixOperator::RecordField(name, position) => {
                         RecordDeconstruction::new(expression, name, position).into()
                     }
                     SuffixOperator::Try(position) => {
@@ -449,7 +449,7 @@ fn suffix_operation_like<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
 }
 
 fn suffix_operator<'a>() -> impl Parser<Stream<'a>, Output = SuffixOperator> {
-    choice((call_operator(), element_operator(), try_operator()))
+    choice((call_operator(), record_field_operator(), try_operator()))
 }
 
 fn call_operator<'a>() -> impl Parser<Stream<'a>, Output = SuffixOperator> {
@@ -460,9 +460,9 @@ fn call_operator<'a>() -> impl Parser<Stream<'a>, Output = SuffixOperator> {
         .map(|(position, arguments)| SuffixOperator::Call(arguments, position))
 }
 
-fn element_operator<'a>() -> impl Parser<Stream<'a>, Output = SuffixOperator> {
+fn record_field_operator<'a>() -> impl Parser<Stream<'a>, Output = SuffixOperator> {
     (attempt(position().skip(sign("."))), identifier())
-        .map(|(position, identifier)| SuffixOperator::Element(identifier, position))
+        .map(|(position, identifier)| SuffixOperator::RecordField(identifier, position))
 }
 
 fn try_operator<'a>() -> impl Parser<Stream<'a>, Output = SuffixOperator> {
@@ -591,23 +591,23 @@ fn record<'a>() -> impl Parser<Stream<'a>, Output = Record> {
     (
         attempt((position(), qualified_identifier(), sign("{"))),
         optional(between(sign("..."), sign(","), expression())),
-        sep_end_by1(record_element(), sign(",")),
+        sep_end_by1(record_field(), sign(",")),
         sign("}"),
     )
-        .then(|((position, name, _), record, elements, _)| {
-            let elements: Vec<_> = elements;
+        .then(|((position, name, _), record, fields, _)| {
+            let fields: Vec<_> = fields;
 
-            if elements
+            if fields
                 .iter()
-                .map(|element| element.name())
+                .map(|field| field.name())
                 .collect::<HashSet<_>>()
                 .len()
-                == elements.len()
+                == fields.len()
             {
                 value(Record::new(
                     types::Reference::new(name, position.clone()),
                     record,
-                    elements,
+                    fields,
                     position,
                 ))
                 .left()
@@ -618,9 +618,9 @@ fn record<'a>() -> impl Parser<Stream<'a>, Output = Record> {
         .expected("record literal")
 }
 
-fn record_element<'a>() -> impl Parser<Stream<'a>, Output = RecordElement> {
+fn record_field<'a>() -> impl Parser<Stream<'a>, Output = RecordField> {
     (attempt((position(), identifier())), sign(":"), expression())
-        .map(|((position, name), _, expression)| RecordElement::new(name, expression, position))
+        .map(|((position, name), _, expression)| RecordField::new(name, expression, position))
 }
 
 fn boolean_literal<'a>() -> impl Parser<Stream<'a>, Output = Boolean> {
@@ -1251,7 +1251,7 @@ mod tests {
                 "type Foo {foo number}",
                 RecordDefinition::new(
                     "Foo",
-                    vec![types::RecordElement::new(
+                    vec![types::RecordField::new(
                         "foo",
                         types::Number::new(Position::fake()),
                     )],
@@ -1263,8 +1263,8 @@ mod tests {
                 RecordDefinition::new(
                     "Foo",
                     vec![
-                        types::RecordElement::new("foo", types::Number::new(Position::fake())),
-                        types::RecordElement::new("bar", types::Number::new(Position::fake())),
+                        types::RecordField::new("foo", types::Number::new(Position::fake())),
+                        types::RecordField::new("bar", types::Number::new(Position::fake())),
                     ],
                     Position::fake(),
                 ),
@@ -2305,7 +2305,7 @@ mod tests {
                 Record::new(
                     types::Reference::new("Foo", Position::fake()),
                     None,
-                    vec![RecordElement::new(
+                    vec![RecordField::new(
                         "foo",
                         Number::new(42.0, Position::fake()),
                         Position::fake()
@@ -2320,7 +2320,7 @@ mod tests {
                 Record::new(
                     types::Reference::new("Foo", Position::fake()),
                     None,
-                    vec![RecordElement::new(
+                    vec![RecordField::new(
                         "foo",
                         Number::new(42.0, Position::fake()),
                         Position::fake()
@@ -2335,12 +2335,12 @@ mod tests {
                     types::Reference::new("Foo", Position::fake()),
                     None,
                     vec![
-                        RecordElement::new(
+                        RecordField::new(
                             "foo",
                             Number::new(42.0, Position::fake()),
                             Position::fake()
                         ),
-                        RecordElement::new(
+                        RecordField::new(
                             "bar",
                             Number::new(42.0, Position::fake()),
                             Position::fake()
@@ -2362,7 +2362,7 @@ mod tests {
                     vec![Record::new(
                         types::Reference::new("Foo", Position::fake()),
                         None,
-                        vec![RecordElement::new(
+                        vec![RecordField::new(
                             "foo",
                             Number::new(42.0, Position::fake()),
                             Position::fake()
@@ -2380,7 +2380,7 @@ mod tests {
                 Record::new(
                     types::Reference::new("Foo", Position::fake()),
                     None,
-                    vec![RecordElement::new(
+                    vec![RecordField::new(
                         "foo",
                         Call::new(
                             Variable::new("bar", Position::fake()),
@@ -2398,7 +2398,7 @@ mod tests {
                 Record::new(
                     types::Reference::new("Foo", Position::fake()),
                     Some(Variable::new("foo", Position::fake()).into()),
-                    vec![RecordElement::new(
+                    vec![RecordField::new(
                         "bar",
                         Number::new(42.0, Position::fake()),
                         Position::fake()
@@ -2412,7 +2412,7 @@ mod tests {
                 Record::new(
                     types::Reference::new("Foo", Position::fake()),
                     Some(Variable::new("foo", Position::fake()).into()),
-                    vec![RecordElement::new(
+                    vec![RecordField::new(
                         "bar",
                         Number::new(42.0, Position::fake()),
                         Position::fake()
@@ -2429,7 +2429,7 @@ mod tests {
                 Record::new(
                     types::Reference::new("Foo", Position::fake()),
                     Some(Variable::new("foo", Position::fake()).into()),
-                    vec![RecordElement::new(
+                    vec![RecordField::new(
                         "bar",
                         Number::new(42.0, Position::fake()),
                         Position::fake()

@@ -20,9 +20,9 @@ pub enum CompileError {
     MainFunctionTypeUndefined(Position),
     MirTypeCheck(mir::analysis::TypeCheckError),
     MissingElseBlock(Position),
-    RecordElementPrivate(Position),
-    RecordElementUnknown(Position),
-    RecordElementMissing(Position),
+    RecordFieldPrivate(Position),
+    RecordFieldUnknown(Position),
+    RecordFieldMissing(Position),
     RecordExpected(Position),
     RecordNotFound(types::Record),
     TryOperationInList(Position),
@@ -103,14 +103,14 @@ impl Display for CompileError {
                     position
                 )
             }
-            Self::RecordElementPrivate(position) => {
-                write!(formatter, "private record element\n{}", position)
+            Self::RecordFieldPrivate(position) => {
+                write!(formatter, "private record field\n{}", position)
             }
-            Self::RecordElementUnknown(position) => {
-                write!(formatter, "unknown record element\n{}", position)
+            Self::RecordFieldUnknown(position) => {
+                write!(formatter, "unknown record field\n{}", position)
             }
-            Self::RecordElementMissing(position) => {
-                write!(formatter, "missing record element\n{}", position)
+            Self::RecordFieldMissing(position) => {
+                write!(formatter, "missing record field\n{}", position)
             }
             Self::RecordExpected(position) => {
                 write!(formatter, "record expected\n{}", position)

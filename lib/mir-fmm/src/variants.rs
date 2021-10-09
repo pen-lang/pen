@@ -1,8 +1,8 @@
 use crate::{types, CompileError};
 use std::collections::HashMap;
 
-pub const VARIANT_TAG_ELEMENT_INDEX: usize = 0;
-pub const VARIANT_PAYLOAD_ELEMENT_INDEX: usize = 1;
+pub const VARIANT_TAG_FIELD_INDEX: usize = 0;
+pub const VARIANT_PAYLOAD_FIELD_INDEX: usize = 1;
 
 pub fn compile_tag(type_: &mir::types::Type) -> fmm::build::TypedExpression {
     fmm::build::variable(types::compile_type_id(type_), types::compile_variant_tag())

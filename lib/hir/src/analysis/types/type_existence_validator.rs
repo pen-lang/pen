@@ -100,7 +100,7 @@ mod tests {
             validate(
                 &Module::empty().set_type_definitions(vec![TypeDefinition::fake(
                     "x",
-                    vec![types::RecordElement::new(
+                    vec![types::RecordField::new(
                         "x",
                         types::Record::new("foo", Position::fake())
                     )],

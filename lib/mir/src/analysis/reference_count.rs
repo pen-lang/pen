@@ -59,7 +59,7 @@ fn convert_definition(definition: &Definition) -> Result<Definition, ReferenceCo
 //
 // - The returned values of functions are moved.
 // - Every input of expressions is moved including conditions of if expressions and records of record
-//   element operations.
+//   field operations.
 // - Newly bound variables in let expressions are dropped if they are not moved in their expressions.
 fn convert_expression(
     expression: &Expression,
@@ -413,31 +413,31 @@ fn convert_expression(
             )
         }
         Expression::Record(record) => {
-            let (elements, moved_variables) = record.elements().iter().rev().fold(
+            let (fields, moved_variables) = record.fields().iter().rev().fold(
                 Ok((vec![], moved_variables.clone())),
-                |result, element| {
-                    let (elements, moved_variables) = result?;
-                    let (element, moved_variables) =
-                        convert_expression(element, owned_variables, &moved_variables)?;
+                |result, field| {
+                    let (fields, moved_variables) = result?;
+                    let (field, moved_variables) =
+                        convert_expression(field, owned_variables, &moved_variables)?;
 
                     Ok((
-                        vec![element].into_iter().chain(elements).collect(),
+                        vec![field].into_iter().chain(fields).collect(),
                         moved_variables,
                     ))
                 },
             )?;
 
             (
-                Record::new(record.type_().clone(), elements).into(),
+                Record::new(record.type_().clone(), fields).into(),
                 moved_variables,
             )
         }
-        Expression::RecordElement(element) => {
+        Expression::RecordField(field) => {
             let (record, moved_variables) =
-                convert_expression(element.record(), owned_variables, moved_variables)?;
+                convert_expression(field.record(), owned_variables, moved_variables)?;
 
             (
-                RecordElement::new(element.type_().clone(), element.index(), record).into(),
+                RecordField::new(field.type_().clone(), field.index(), record).into(),
                 moved_variables,
             )
         }

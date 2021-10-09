@@ -188,28 +188,28 @@ fn check_expression(
                 .get(record.type_().name())
                 .ok_or_else(|| TypeCheckError::TypeNotFound(record.type_().clone()))?;
 
-            if record.elements().len() != record_type.elements().len() {
-                return Err(TypeCheckError::WrongElementCount(record.clone()));
+            if record.fields().len() != record_type.fields().len() {
+                return Err(TypeCheckError::WrongFieldCount(record.clone()));
             }
 
-            for (element, element_type) in record.elements().iter().zip(record_type.elements()) {
-                check_equality(&check_expression(element, variables)?, element_type)?;
+            for (field, field_type) in record.fields().iter().zip(record_type.fields()) {
+                check_equality(&check_expression(field, variables)?, field_type)?;
             }
 
             record.type_().clone().into()
         }
-        Expression::RecordElement(element) => {
+        Expression::RecordField(field) => {
             check_equality(
-                &check_expression(element.record(), variables)?,
-                &element.type_().clone().into(),
+                &check_expression(field.record(), variables)?,
+                &field.type_().clone().into(),
             )?;
 
             types
-                .get(element.type_().name())
-                .ok_or_else(|| TypeCheckError::TypeNotFound(element.type_().clone()))?
-                .elements()
-                .get(element.index())
-                .ok_or_else(|| TypeCheckError::ElementIndexOutOfBounds(element.clone()))?
+                .get(field.type_().name())
+                .ok_or_else(|| TypeCheckError::TypeNotFound(field.type_().clone()))?
+                .fields()
+                .get(field.index())
+                .ok_or_else(|| TypeCheckError::FieldIndexOutOfBounds(field.clone()))?
                 .clone()
         }
         Expression::ByteString(_) => Type::ByteString,
@@ -758,7 +758,7 @@ mod tests {
         use super::*;
 
         #[test]
-        fn check_records_with_no_element() {
+        fn check_records_with_no_field() {
             let record_type = types::Record::new("foo");
 
             assert_eq!(
@@ -777,7 +777,7 @@ mod tests {
         }
 
         #[test]
-        fn check_records_with_elements() {
+        fn check_records_with_fields() {
             let record_type = types::Record::new("foo");
 
             assert_eq!(
@@ -799,7 +799,7 @@ mod tests {
         }
 
         #[test]
-        fn fail_to_check_records_with_wrong_number_of_elements() {
+        fn fail_to_check_records_with_wrong_number_of_fields() {
             let record_type = types::Record::new("foo");
 
             let module = create_module_with_records(
@@ -818,12 +818,12 @@ mod tests {
 
             assert!(matches!(
                 check_types(&module),
-                Err(TypeCheckError::WrongElementCount(_))
+                Err(TypeCheckError::WrongFieldCount(_))
             ));
         }
 
         #[test]
-        fn fail_to_check_records_with_wrong_element_type() {
+        fn fail_to_check_records_with_wrong_field_type() {
             let record_type = types::Record::new("foo");
 
             let module = create_module_with_records(
@@ -847,7 +847,7 @@ mod tests {
         }
 
         #[test]
-        fn check_record_element() {
+        fn check_record_field() {
             let record_type = types::Record::new("foo");
 
             assert_eq!(
@@ -860,7 +860,7 @@ mod tests {
                         "f",
                         vec![],
                         vec![Argument::new("x", Type::Number)],
-                        RecordElement::new(
+                        RecordField::new(
                             record_type.clone(),
                             0,
                             Record::new(record_type, vec![42.0.into()],)

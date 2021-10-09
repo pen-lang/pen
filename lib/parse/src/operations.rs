@@ -4,7 +4,7 @@ use position::Position;
 #[derive(Clone, Debug)]
 pub enum SuffixOperator {
     Call(Vec<Expression>, Position),
-    Element(String, Position),
+    RecordField(String, Position),
     Try(Position),
 }
 

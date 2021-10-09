@@ -1,4 +1,4 @@
-use super::{expression::Expression, RecordElement};
+use super::{expression::Expression, RecordField};
 use crate::types::Type;
 use position::Position;
 use std::sync::Arc;
@@ -7,7 +7,7 @@ use std::sync::Arc;
 pub struct Record {
     type_: Type,
     record: Arc<Option<Expression>>,
-    elements: Vec<RecordElement>,
+    fields: Vec<RecordField>,
     position: Position,
 }
 
@@ -15,13 +15,13 @@ impl Record {
     pub fn new(
         type_: impl Into<Type>,
         record: Option<Expression>,
-        elements: Vec<RecordElement>,
+        fields: Vec<RecordField>,
         position: Position,
     ) -> Self {
         Self {
             type_: type_.into(),
             record: Arc::new(record),
-            elements,
+            fields,
             position,
         }
     }
@@ -34,8 +34,8 @@ impl Record {
         self.record.as_ref().as_ref()
     }
 
-    pub fn elements(&self) -> &[RecordElement] {
-        &self.elements
+    pub fn fields(&self) -> &[RecordField] {
+        &self.fields
     }
 
     pub fn position(&self) -> &Position {

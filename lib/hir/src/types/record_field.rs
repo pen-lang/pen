@@ -2,12 +2,12 @@ use super::Type;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
-pub struct RecordElement {
+pub struct RecordField {
     name: String,
     type_: Type,
 }
 
-impl RecordElement {
+impl RecordField {
     pub fn new(name: impl Into<String>, type_: impl Into<Type>) -> Self {
         Self {
             name: name.into(),

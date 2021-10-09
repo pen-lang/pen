@@ -1,6 +1,6 @@
 use super::{type_context::TypeContext, CompileError};
 use hir::{
-    analysis::types::{record_element_resolver, type_canonicalizer, union_type_creator},
+    analysis::types::{record_field_resolver, type_canonicalizer, union_type_creator},
     ir::*,
     types::{self, Type},
 };
@@ -144,7 +144,7 @@ pub fn extract_from_expression(
                 .clone(),
         },
         Expression::RecordConstruction(construction) => construction.type_().clone(),
-        Expression::RecordDeconstruction(deconstruction) => record_element_resolver::resolve(
+        Expression::RecordDeconstruction(deconstruction) => record_field_resolver::resolve(
             deconstruction
                 .type_()
                 .ok_or_else(|| CompileError::TypeNotInferred(deconstruction.position().clone()))?,
@@ -153,8 +153,8 @@ pub fn extract_from_expression(
             type_context.records(),
         )?
         .iter()
-        .find(|element| element.name() == deconstruction.element_name())
-        .ok_or_else(|| CompileError::RecordElementUnknown(deconstruction.position().clone()))?
+        .find(|field| field.name() == deconstruction.field_name())
+        .ok_or_else(|| CompileError::RecordFieldUnknown(deconstruction.position().clone()))?
         .type_()
         .clone(),
         Expression::RecordUpdate(update) => update.type_().clone(),

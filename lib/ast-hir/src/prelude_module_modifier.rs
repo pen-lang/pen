@@ -9,7 +9,7 @@ pub fn modify(module: &Module) -> Module {
                 TypeDefinition::new(
                     definition.name(),
                     definition.original_name(),
-                    definition.elements().to_vec(),
+                    definition.fields().to_vec(),
                     definition.is_open(),
                     true,
                     definition.is_external(),

@@ -38,7 +38,7 @@ fn compile_imports(module: &ir::Module, module_interfaces: &[&interface::Module]
                         ir::TypeDefinition::new(
                             definition.name(),
                             definition.original_name(),
-                            definition.elements().to_vec(),
+                            definition.fields().to_vec(),
                             definition.is_open(),
                             definition.is_public(),
                             true,
@@ -279,7 +279,7 @@ mod tests {
                 &ir::Module::empty()
                     .set_type_definitions(vec![ir::TypeDefinition::fake(
                         "Foo",
-                        vec![types::RecordElement::new(
+                        vec![types::RecordField::new(
                             "foo",
                             types::Reference::new("Bar'Bar", Position::fake())
                         )],
@@ -328,7 +328,7 @@ mod tests {
                     ),
                     ir::TypeDefinition::fake(
                         "Foo",
-                        vec![types::RecordElement::new(
+                        vec![types::RecordField::new(
                             "foo",
                             types::Reference::new("RealBar", Position::fake())
                         )],
@@ -357,7 +357,7 @@ mod tests {
                 &ir::Module::empty()
                     .set_type_definitions(vec![ir::TypeDefinition::fake(
                         "Foo",
-                        vec![types::RecordElement::new(
+                        vec![types::RecordField::new(
                             "foo",
                             types::Reference::new("Bar'Bar", Position::fake())
                         )],
@@ -395,7 +395,7 @@ mod tests {
             ir::Module::empty()
                 .set_type_definitions(vec![ir::TypeDefinition::fake(
                     "Foo",
-                    vec![types::RecordElement::new(
+                    vec![types::RecordField::new(
                         "foo",
                         types::Reference::new("RealBar", Position::fake())
                     )],
@@ -428,7 +428,7 @@ mod tests {
     fn do_not_rename_private_type_definition() {
         let type_definition = ir::TypeDefinition::fake(
             "Foo",
-            vec![types::RecordElement::new(
+            vec![types::RecordField::new(
                 "foo",
                 types::Reference::new("Bar'Bar", Position::fake()),
             )],
@@ -491,7 +491,7 @@ mod tests {
     fn do_not_rename_private_type_alias() {
         let type_definition = ir::TypeDefinition::fake(
             "Foo",
-            vec![types::RecordElement::new(
+            vec![types::RecordField::new(
                 "foo",
                 types::Reference::new("Bar'Bar", Position::fake()),
             )],
@@ -685,7 +685,7 @@ mod tests {
                     &ir::Module::empty()
                         .set_type_definitions(vec![ir::TypeDefinition::fake(
                             "Foo",
-                            vec![types::RecordElement::new(
+                            vec![types::RecordField::new(
                                 "foo",
                                 types::Reference::new("Bar", Position::fake())
                             )],
@@ -734,7 +734,7 @@ mod tests {
                         ),
                         ir::TypeDefinition::fake(
                             "Foo",
-                            vec![types::RecordElement::new(
+                            vec![types::RecordField::new(
                                 "foo",
                                 types::Reference::new("RealBar", Position::fake())
                             )],
@@ -763,7 +763,7 @@ mod tests {
                     &ir::Module::empty()
                         .set_type_definitions(vec![ir::TypeDefinition::fake(
                             "Foo",
-                            vec![types::RecordElement::new(
+                            vec![types::RecordField::new(
                                 "foo",
                                 types::Reference::new("Bar", Position::fake())
                             )],
@@ -801,7 +801,7 @@ mod tests {
                 ir::Module::empty()
                     .set_type_definitions(vec![ir::TypeDefinition::fake(
                         "Foo",
-                        vec![types::RecordElement::new(
+                        vec![types::RecordField::new(
                             "foo",
                             types::Reference::new("RealBar", Position::fake())
                         )],

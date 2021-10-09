@@ -7,8 +7,8 @@ pub fn resolve<'a>(
     type_: &Type,
     position: &Position,
     types: &HashMap<String, Type>,
-    records: &'a HashMap<String, Vec<RecordElement>>,
-) -> Result<&'a [RecordElement], TypeError> {
+    records: &'a HashMap<String, Vec<RecordField>>,
+) -> Result<&'a [RecordField], TypeError> {
     let record = type_canonicalizer::canonicalize_record(type_, types)?
         .ok_or_else(|| TypeError::RecordExpected(position.clone()))?;
 

@@ -698,7 +698,7 @@ mod tests {
             use super::*;
 
             #[test]
-            fn compile_with_no_element() {
+            fn compile_with_no_field() {
                 let record_type = mir::types::Record::new("foo");
 
                 compile_module(&create_module_with_type_definitions(
@@ -716,7 +716,7 @@ mod tests {
             }
 
             #[test]
-            fn compile_with_1_element() {
+            fn compile_with_1_field() {
                 let record_type = mir::types::Record::new("foo");
 
                 compile_module(&create_module_with_type_definitions(
@@ -734,7 +734,7 @@ mod tests {
             }
 
             #[test]
-            fn compile_with_2_elements() {
+            fn compile_with_2_fields() {
                 let record_type = mir::types::Record::new("foo");
 
                 compile_module(&create_module_with_type_definitions(
@@ -773,11 +773,11 @@ mod tests {
             }
         }
 
-        mod record_elements {
+        mod record_fields {
             use super::*;
 
             #[test]
-            fn compile_with_1_element_record() {
+            fn compile_with_1_field_record() {
                 let record_type = mir::types::Record::new("foo");
 
                 compile_module(&create_module_with_type_definitions(
@@ -788,14 +788,14 @@ mod tests {
                     vec![mir::ir::Definition::new(
                         "f",
                         vec![mir::ir::Argument::new("x", record_type.clone())],
-                        mir::ir::RecordElement::new(record_type, 0, mir::ir::Variable::new("x")),
+                        mir::ir::RecordField::new(record_type, 0, mir::ir::Variable::new("x")),
                         mir::types::Type::Number,
                     )],
                 ));
             }
 
             #[test]
-            fn compile_with_2_element_record() {
+            fn compile_with_2_field_record() {
                 let record_type = mir::types::Record::new("foo");
 
                 compile_module(&create_module_with_type_definitions(
@@ -809,7 +809,7 @@ mod tests {
                     vec![mir::ir::Definition::new(
                         "f",
                         vec![mir::ir::Argument::new("x", record_type.clone())],
-                        mir::ir::RecordElement::new(record_type, 1, mir::ir::Variable::new("x")),
+                        mir::ir::RecordField::new(record_type, 1, mir::ir::Variable::new("x")),
                         mir::types::Type::Number,
                     )],
                 ));

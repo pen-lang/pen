@@ -5,7 +5,7 @@ Feature: Record
     { "dependencies": {} }
     """
 
-  Scenario: Create a record with an element
+  Scenario: Create a record with a field
     Given a file named "Foo.pen" with:
     """pen
     type r {
@@ -19,7 +19,7 @@ Feature: Record
     When I run `pen build`
     Then the exit status should be 0
 
-  Scenario: Create a record with two elements
+  Scenario: Create a record with two fields
     Given a file named "Foo.pen" with:
     """pen
     type r {
@@ -34,7 +34,7 @@ Feature: Record
     When I run `pen build`
     Then the exit status should be 0
 
-  Scenario: Create a record with no element
+  Scenario: Create a record with no field
     Given a file named "Foo.pen" with:
     """pen
     type r {}
@@ -61,7 +61,7 @@ Feature: Record
     When I run `pen build`
     Then the exit status should be 0
 
-  Scenario: Get an element in a record
+  Scenario: Get a field in a record
     Given a file named "Foo.pen" with:
     """pen
     type r {

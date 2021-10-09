@@ -11,7 +11,7 @@ mod main_function_compiler;
 mod main_module_configuration;
 mod module_compiler;
 mod module_interface_compiler;
-mod record_element_validator;
+mod record_field_validator;
 mod string_type_configuration;
 mod test_function_compiler;
 mod test_module_configuration;
@@ -128,7 +128,7 @@ fn compile_module(
     let module = type_inferrer::infer_types(&module, type_context)?;
     type_checker::check_types(&module, type_context)?;
     try_operation_validator::validate(&module, type_context)?;
-    record_element_validator::validate(&module, type_context)?;
+    record_field_validator::validate(&module, type_context)?;
     let module = type_coercer::coerce_types(&module, type_context)?;
     type_checker::check_types(&module, type_context)?;
 
@@ -245,7 +245,7 @@ mod tests {
             &Module::empty()
                 .set_type_definitions(vec![TypeDefinition::fake(
                     "foo",
-                    vec![types::RecordElement::new(
+                    vec![types::RecordField::new(
                         "x",
                         types::None::new(Position::fake()),
                     )],
@@ -260,7 +260,7 @@ mod tests {
                         reference_type.clone(),
                         RecordConstruction::new(
                             reference_type,
-                            vec![RecordElement::new(
+                            vec![RecordField::new(
                                 "x",
                                 None::new(Position::fake()),
                                 Position::fake(),
@@ -283,7 +283,7 @@ mod tests {
             &Module::empty()
                 .set_type_definitions(vec![TypeDefinition::fake(
                     "foo",
-                    vec![types::RecordElement::new(
+                    vec![types::RecordField::new(
                         "x",
                         types::None::new(Position::fake()),
                     )],

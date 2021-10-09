@@ -68,23 +68,23 @@ fn compile_equal_function_definition(type_definition: &TypeDefinition) -> Defini
                 Argument::new(RHS_NAME, record_type.clone()),
             ],
             types::Boolean::new(position.clone()),
-            type_definition.elements().iter().rev().fold(
+            type_definition.fields().iter().rev().fold(
                 Boolean::new(true, position.clone()).into(),
-                |expression: Expression, element| {
+                |expression: Expression, field| {
                     If::new(
                         EqualityOperation::new(
-                            Some(element.type_().clone()),
+                            Some(field.type_().clone()),
                             EqualityOperator::Equal,
                             RecordDeconstruction::new(
                                 Some(record_type.clone().into()),
                                 Variable::new(LHS_NAME, position.clone()),
-                                element.name(),
+                                field.name(),
                                 position.clone(),
                             ),
                             RecordDeconstruction::new(
                                 Some(record_type.clone().into()),
                                 Variable::new(RHS_NAME, position.clone()),
-                                element.name(),
+                                field.name(),
                                 position.clone(),
                             ),
                             position.clone(),
@@ -149,8 +149,8 @@ mod tests {
             "foo",
             "foo",
             vec![
-                types::RecordElement::new("x", types::None::new(Position::fake())),
-                types::RecordElement::new("y", types::None::new(Position::fake())),
+                types::RecordField::new("x", types::None::new(Position::fake())),
+                types::RecordField::new("y", types::None::new(Position::fake())),
             ],
             false,
             false,
@@ -230,8 +230,8 @@ mod tests {
             "foo",
             "foo",
             vec![
-                types::RecordElement::new("x", types::None::new(Position::fake())),
-                types::RecordElement::new("y", types::None::new(Position::fake())),
+                types::RecordField::new("x", types::None::new(Position::fake())),
+                types::RecordField::new("y", types::None::new(Position::fake())),
             ],
             false,
             false,
