@@ -22,7 +22,7 @@ pub enum Expression {
     None,
     Number(f64),
     Record(Record),
-    RecordField(RecordElement),
+    RecordField(RecordField),
     TryOperation(TryOperation),
     Variable(Variable),
     Variant(Variant),
