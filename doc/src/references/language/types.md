@@ -100,7 +100,7 @@ You can create new lists from existing ones by spreading elements of the old one
 
 ## Records
 
-It is a combination of types banded into a single type. Each field of a record type is composed of its name and type.
+It is a combination of types as a single type. Each field of a record type is composed of its name and type.
 
 Fields are not accessible outside modules where they are defined by default.
 
