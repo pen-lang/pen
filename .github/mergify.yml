@@ -6,14 +6,17 @@ pull_request_rules:
       merge:
         method: squash
         strict: smart
-  - name: auto-merge
+  - name: merge
     conditions:
       - label=merge
       - or:
           - author=raviqqe
           - "#approved-reviews-by>=1"
     actions:
-      merge:
+      queue:
+        name: default
         method: squash
-        strict: smart
         commit_message: title+body
+queue_rules:
+  - name: default
+    conditions: []
