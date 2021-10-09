@@ -1,4 +1,4 @@
-use super::utilities::*;
+use super::operations::*;
 use ast::{
     types::{self, Type},
     *,
@@ -437,7 +437,7 @@ fn suffix_operation_like<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
                     SuffixOperator::Call(arguments, position) => {
                         Call::new(expression, arguments, position).into()
                     }
-                    SuffixOperator::Field(name, position) => {
+                    SuffixOperator::RecordField(name, position) => {
                         RecordDeconstruction::new(expression, name, position).into()
                     }
                     SuffixOperator::Try(position) => {
@@ -449,7 +449,7 @@ fn suffix_operation_like<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
 }
 
 fn suffix_operator<'a>() -> impl Parser<Stream<'a>, Output = SuffixOperator> {
-    choice((call_operator(), field_operator(), try_operator()))
+    choice((call_operator(), record_field_operator(), try_operator()))
 }
 
 fn call_operator<'a>() -> impl Parser<Stream<'a>, Output = SuffixOperator> {
@@ -460,9 +460,9 @@ fn call_operator<'a>() -> impl Parser<Stream<'a>, Output = SuffixOperator> {
         .map(|(position, arguments)| SuffixOperator::Call(arguments, position))
 }
 
-fn field_operator<'a>() -> impl Parser<Stream<'a>, Output = SuffixOperator> {
+fn record_field_operator<'a>() -> impl Parser<Stream<'a>, Output = SuffixOperator> {
     (attempt(position().skip(sign("."))), identifier())
-        .map(|(position, identifier)| SuffixOperator::Field(identifier, position))
+        .map(|(position, identifier)| SuffixOperator::RecordField(identifier, position))
 }
 
 fn try_operator<'a>() -> impl Parser<Stream<'a>, Output = SuffixOperator> {

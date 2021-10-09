@@ -1,6 +1,6 @@
 mod error;
+mod operations;
 mod parsers;
-mod utilities;
 
 use combine::Parser;
 pub use error::ParseError;
