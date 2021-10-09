@@ -2,8 +2,7 @@ use super::{
     arithmetic_operation::ArithmeticOperation, byte_string::ByteString, call::Call, case::Case,
     clone_variables::CloneVariables, comparison_operation::ComparisonOperation,
     drop_variables::DropVariables, if_::If, let_::Let, let_recursive::LetRecursive, record::Record,
-    record_field::RecordField, try_operation::TryOperation, variable::Variable,
-    variant::Variant,
+    record_field::RecordField, try_operation::TryOperation, variable::Variable, variant::Variant,
 };
 
 #[derive(Clone, Debug, PartialEq)]

@@ -71,13 +71,7 @@ pub fn compile_record_drop_function(
 
             if types::is_record_boxed(&record_type, types) {
                 pointers::drop_pointer(&builder, &record, |builder| {
-                    drop_record_fields(
-                        builder,
-                        &record,
-                        &record_type,
-                        definition.type_(),
-                        types,
-                    )?;
+                    drop_record_fields(builder, &record, &record_type, definition.type_(), types)?;
 
                     Ok(())
                 })?;

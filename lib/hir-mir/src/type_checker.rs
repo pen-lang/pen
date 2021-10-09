@@ -1,8 +1,8 @@
 use super::{environment_creator, type_context::TypeContext, type_extractor, CompileError};
 use hir::{
     analysis::types::{
-        record_field_resolver, type_canonicalizer, type_equality_checker,
-        type_subsumption_checker, union_type_creator,
+        record_field_resolver, type_canonicalizer, type_equality_checker, type_subsumption_checker,
+        union_type_creator,
     },
     ir::*,
     types::{self, Type},
@@ -306,9 +306,7 @@ fn check_expression(
             element_types
                 .iter()
                 .find(|element_type| element_type.name() == deconstruction.element_name())
-                .ok_or_else(|| {
-                    CompileError::RecordFieldUnknown(deconstruction.position().clone())
-                })?
+                .ok_or_else(|| CompileError::RecordFieldUnknown(deconstruction.position().clone()))?
                 .type_()
                 .clone()
         }

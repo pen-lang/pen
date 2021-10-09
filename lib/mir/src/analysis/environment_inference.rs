@@ -244,10 +244,7 @@ fn infer_in_record(record: &Record, variables: &HashMap<String, Type>) -> Record
     )
 }
 
-fn infer_in_record_field(
-    element: &RecordField,
-    variables: &HashMap<String, Type>,
-) -> RecordField {
+fn infer_in_record_field(element: &RecordField, variables: &HashMap<String, Type>) -> RecordField {
     RecordField::new(
         element.type_().clone(),
         element.index(),

@@ -44,9 +44,7 @@ pub fn validate(module: &Module, type_context: &TypeContext) -> Result<(), Compi
                         .ok_or_else(|| CompileError::RecordExpected(update.position().clone()))?;
 
                 if !open_records.contains(record_type.name()) {
-                    return Err(CompileError::RecordFieldPrivate(
-                        update.position().clone(),
-                    ));
+                    return Err(CompileError::RecordFieldPrivate(update.position().clone()));
                 }
             }
             _ => {}

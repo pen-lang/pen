@@ -74,9 +74,7 @@ fn transform_type_definition(
             definition
                 .elements()
                 .iter()
-                .map(|element| {
-                    types::RecordField::new(element.name(), transform(element.type_()))
-                })
+                .map(|element| types::RecordField::new(element.name(), transform(element.type_())))
                 .collect(),
             definition.is_open(),
             definition.is_public(),

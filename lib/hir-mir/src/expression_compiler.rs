@@ -823,10 +823,7 @@ mod tests {
                         vec![(
                             "r".into(),
                             vec![
-                                types::RecordField::new(
-                                    "x",
-                                    types::Number::new(Position::fake())
-                                ),
+                                types::RecordField::new("x", types::Number::new(Position::fake())),
                                 types::RecordField::new("y", types::None::new(Position::fake()))
                             ]
                         )]
