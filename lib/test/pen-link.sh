@@ -61,7 +61,9 @@ extern "C" {
 
 fn main() {
     #[allow(unused_mut)]
-    let mut success: bool = true;
+    let mut success: usize = 0;
+    #[allow(unused_mut)]
+    let mut error: usize = 0;
 
 $(
   for m in $(jq -r '.modules | keys[]' $test_information); do
@@ -82,14 +84,22 @@ $(
         println!(\"\t{}\t$name\", if result.is_ok() { \"OK\" } else { \"FAIL\" });
         if let Err(message) = &result {
           println!(\"\t\tMessage: {}\", message);
+          error += 1;
+        } else {
+          success += 1;
         }
-        success = success && result.is_ok();
       "
     done
   done
 )
+    println!("test summary");
+    println!(
+      "\t{}\\t{} passed, {} failed",
+      if error == 0 { "OK" } else { "FAIL" },
+      success, error
+    );
 
-    if !success {
+    if error > 0 {
       std::process::exit(1);
     }
 }
