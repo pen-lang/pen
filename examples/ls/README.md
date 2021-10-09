@@ -1,6 +1,6 @@
 # `ls` command
 
-A simple implementation of the `ls` command on Unix
+An application to list contents in a directory
 
 ## Usage
 
