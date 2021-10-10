@@ -1,8 +1,0 @@
-[package]
-name = "test"
-version = "0.1.0"
-publish = false
-edition = "2018"
-
-[dependencies]
-ffi = { package = "pen-ffi", version = "0.2" }
