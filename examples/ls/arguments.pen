@@ -1,5 +1,3 @@
-import System'Context { Context }
-
 type Arguments {
   Directory string
 }
