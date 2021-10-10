@@ -260,7 +260,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
             test_linker::link(
                 &matches
                     .values_of("test archive file")
-                    .unwrap_or_default()
+                    .unwrap()
                     .collect::<Vec<_>>(),
                 matches.value_of("package test information file").unwrap(),
                 matches.value_of("test file").unwrap(),
