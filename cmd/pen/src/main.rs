@@ -147,7 +147,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         .subcommand(
             clap::SubCommand::with_name("link-test")
                 .setting(clap::AppSettings::Hidden)
-                .about("Link tests")
+                .about("Links tests")
                 .arg(
                     clap::Arg::with_name("test file")
                         .short("o")
