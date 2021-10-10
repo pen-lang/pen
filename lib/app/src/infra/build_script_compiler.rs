@@ -36,7 +36,6 @@ pub trait BuildScriptCompiler {
 
     fn compile_test(
         &self,
-        test_package_directory: &FilePath,
         archive_files: &[FilePath],
         test_information_file: &FilePath,
         test_file: &FilePath,

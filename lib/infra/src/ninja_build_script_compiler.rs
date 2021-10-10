@@ -554,26 +554,15 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
 
     fn compile_test(
         &self,
-        test_package_directory: &FilePath,
         archive_files: &[FilePath],
         test_information_file: &FilePath,
         test_file: &FilePath,
     ) -> Result<String, Box<dyn Error>> {
-        let test_package_directory = self
-            .file_path_converter
-            .convert_to_os_path(test_package_directory);
         let test_file = self.file_path_converter.convert_to_os_path(test_file);
 
         Ok(vec![
             "rule link".into(),
-            format!(
-                "  command = {} -o $out -i $in",
-                package_script_finder::find(&test_package_directory, self.link_script_basename)?
-                    .ok_or(InfrastructureError::LinkScriptNotFound(
-                        test_package_directory,
-                    ))?
-                    .display(),
-            ),
+            "  command = pen link-test -o $out -i $in".into(),
             "  description = linking tests at $out".into(),
             format!(
                 "build {}: link {} {}",
