@@ -33,6 +33,7 @@
     "renamer",
     "repr",
     "roadmap",
+    "rustc",
     "rustup",
     "subninja",
     "subtyping",

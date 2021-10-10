@@ -1,7 +1,7 @@
 use crate::{
     common::file_path_resolver,
     infra::{FilePath, Infrastructure},
-    package_test_builder, ApplicationConfiguration, TestConfiguration,
+    package_test_builder, ApplicationConfiguration,
 };
 use std::error::Error;
 
@@ -11,7 +11,6 @@ pub fn run(
     output_directory: &FilePath,
     prelude_package_url: &url::Url,
     application_configuration: &ApplicationConfiguration,
-    test_configuration: &TestConfiguration,
 ) -> Result<(), Box<dyn Error>> {
     package_test_builder::build(
         infrastructure,
@@ -19,7 +18,6 @@ pub fn run(
         output_directory,
         prelude_package_url,
         application_configuration,
-        test_configuration,
     )?;
 
     infrastructure

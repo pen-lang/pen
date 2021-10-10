@@ -16,6 +16,7 @@ mod package_test_builder;
 pub mod package_test_information_compiler;
 mod prelude_interface_file_finder;
 mod test_configuration;
+pub mod test_linker;
 mod test_module_finder;
 pub mod test_runner;
 

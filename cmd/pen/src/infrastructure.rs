@@ -48,6 +48,10 @@ pub fn create(
             file_system,
             BUILD_CONFIGURATION_FILENAME,
         )),
-        command_runner: Arc::new(infra::CommandRunner::new(file_path_converter)),
+        command_runner: Arc::new(infra::CommandRunner::new(file_path_converter.clone())),
+        test_linker: Arc::new(infra::TestLinker::new(
+            file_path_converter,
+            LANGUAGE_ROOT_ENVIRONMENT_VARIABLE,
+        )),
     })
 }

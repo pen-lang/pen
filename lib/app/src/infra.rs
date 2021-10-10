@@ -12,6 +12,7 @@ mod main_module_target;
 mod module_target;
 mod package_configuration_reader;
 mod package_configuration_writer;
+mod test_linker;
 mod test_module_target;
 
 pub use build_script_compiler::*;
@@ -28,6 +29,7 @@ pub use main_module_target::*;
 pub use module_target::*;
 pub use package_configuration_reader::*;
 pub use package_configuration_writer::*;
+pub use test_linker::*;
 pub use test_module_target::*;
 
 pub const EXTERNAL_PACKAGE_DIRECTORY: &str = "packages";

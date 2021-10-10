@@ -345,6 +345,7 @@ dependencies = [
  "serde",
  "serde_json",
  "termcolor",
+ "test-info",
  "url",
  "which",
 ]

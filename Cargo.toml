@@ -17,4 +17,4 @@ members = [
   "lib/prelude/ffi",
   "lib/test-info",
 ]
-exclude = ["examples", "lib/core/.pen", "lib/os", "lib/test", "tmp"]
+exclude = ["cmd/test", "examples", "lib/core/.pen", "lib/os", "tmp"]
