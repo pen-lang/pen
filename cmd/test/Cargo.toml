@@ -6,3 +6,6 @@ edition = "2018"
 
 [dependencies]
 ffi = { package = "pen-ffi", version = "0.2" }
+
+[build-dependencies]
+json = "0.12"

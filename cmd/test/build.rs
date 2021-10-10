@@ -1,3 +1,5 @@
+use std::fs::{self, OpenOptions};
+use std::io::Write;
 use std::{
     collections::BTreeSet,
     env,
@@ -30,7 +32,99 @@ fn run() -> Result<(), Box<dyn Error>> {
         println!("cargo:rustc-link-search={}", path);
     }
 
+    write_main_rs()?;
+
     Ok(())
+}
+
+fn write_main_rs() -> Result<(), Box<dyn Error>> {
+    let mut file = OpenOptions::new()
+        .create(true)
+        .write(true)
+        .truncate(true)
+        .open("src/main.rs")?;
+
+    write!(
+        file,
+        r#"
+        mod heap;
+        mod test_result;
+        mod unreachable;
+        use test_result::TestResult;
+        extern "C" {{
+            fn _pen_test_convert_result(result: ffi::Any) -> ffi::Arc<TestResult>;
+        }}
+
+        fn main() {{
+            #[allow(unused_mut)]
+            let mut success: usize = 0;
+            #[allow(unused_mut)]
+            let mut error: usize = 0;
+
+            {}
+
+            println!("test summary");
+            println!(
+                "\t{{}}\t{{}} passed, {{}} failed",
+                if error == 0 {{ "OK" }} else {{ "FAIL" }},
+                success, error
+            );
+
+            if error > 0 {{
+                std::process::exit(1);
+            }}
+        }}
+        "#,
+        format_tests()?,
+    )?;
+
+    Ok(())
+}
+
+fn format_tests() -> Result<String, Box<dyn Error>> {
+    let test_information = json::parse(&fs::read_to_string(&env::var(
+        "PEN_TEST_INFORMATION_FILE",
+    )?)?)?;
+
+    Ok(test_information["modules"]
+        .entries()
+        .map(|(name, module)| {
+            format!(r#"println!("{}");"#, name)
+                + &module["functions"]
+                    .members()
+                    .map(|function| {
+                        format_test_function(
+                            function["name"].as_str().unwrap(),
+                            function["foreign_name"].as_str().unwrap(),
+                        )
+                    })
+                    .collect::<Vec<_>>()
+                    .join("\n")
+        })
+        .collect::<Vec<_>>()
+        .join("\n"))
+}
+
+fn format_test_function(name: &str, foreign_name: &str) -> String {
+    format!(
+        r#"
+        #[link(name = "main_test")]
+        extern "C" {{ fn {foreign_name}() -> ffi::Any; }}
+
+        let result: Result<_, _>
+            = unsafe {{ _pen_test_convert_result({foreign_name}()) }}.into_result();
+        println!("\t{{}}\t{name}", if result.is_ok() {{ "OK" }} else {{ "FAIL" }});
+
+        if let Err(message) = &result {{
+            println!("\t\tMessage: {{}}", message);
+            error += 1;
+        }} else {{
+            success += 1;
+        }}
+        "#,
+        name = name,
+        foreign_name = foreign_name,
+    )
 }
 
 fn get_library_name(path: &str) -> String {
