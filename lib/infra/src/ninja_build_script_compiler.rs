@@ -563,7 +563,7 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
         Ok(vec![
             "rule link".into(),
             "  command = pen link-test -o $out -i $in".into(),
-            "  description = linking tests at $out".into(),
+            "  description = linking tests".into(),
             format!(
                 "build {}: link {} {}",
                 test_file.display(),
