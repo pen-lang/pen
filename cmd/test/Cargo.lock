@@ -3,12 +3,6 @@
 version = 3
 
 [[package]]
-name = "json"
-version = "0.12.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "078e285eafdfb6c4b434e0d31e8cfcb5115b651496faca5749b88fafd4f23bfd"
-
-[[package]]
 name = "pen-ffi"
 version = "0.2.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -18,6 +12,5 @@ checksum = "1295e8885b3f12de6e6462eff2450c30744ff5ef7978be255f50a5f5b5a94f72"
 name = "test"
 version = "0.1.0"
 dependencies = [
- "json",
  "pen-ffi",
 ]
