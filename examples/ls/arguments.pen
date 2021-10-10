@@ -10,6 +10,6 @@ Parse = \(xs [string]) Arguments | error {
       Arguments{Directory: x()}
     }
   } else {
-    error("too few arguments")
+    Arguments{Directory: "."}
   }
 }
