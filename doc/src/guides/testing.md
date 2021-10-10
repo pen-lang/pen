@@ -4,25 +4,8 @@ This page describes how to write and run unit tests for programs written in the 
 
 Testing codes consists of the following steps:
 
-1. Add the `Test` package in package configuration.
 1. Write tests as _test_ functions in _test_ modules.
 1. Run the tests with a `pen test` command.
-
-## The `Test` package
-
-Before writing any tests, you need to add the `Test` standard package in your package's [configuration file](/references/language/packages.html#package-configuration) as follows.
-
-```json
-{
-  "dependencies": {
-    ...
-    "Test": "pen:///lib/test",
-    ...
-  }
-}
-```
-
-The `Test` package also includes some utilities which helps you to write tests. See [its reference](/references/standard-packages/test.html) for more information.
 
 ## Writing tests
 
@@ -35,9 +18,13 @@ import Test'Assert
 import 'Foo
 
 CheckFoo = \() none | error {
-  Assert'True(Foo(42, "foo"))
+  Assert'True(Foo'Foo() == 42)
 }
 ```
+
+### The `Test` package
+
+The `Test` standard package includes some utilities which helps you to write tests. See [its reference](/references/standard-packages/test.html) for more information.
 
 ## Running tests
 

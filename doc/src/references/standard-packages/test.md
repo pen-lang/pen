@@ -22,8 +22,32 @@ import Test'Assert
 
 #### `True`
 
-It fails and returns an error if a given condition is `false`, or returns `none` otherwise.
+It returns `none` if a given condition is `true`, or returns an error otherwise.
 
 ```pen
 \(boolean) none | error
+```
+
+#### `Fail`
+
+It always returns an error.
+
+```pen
+\() error
+```
+
+#### `EqualNumbers`
+
+It returns `none` if given numbers are equal, or returns an error otherwise.
+
+```pen
+\(number, number) none | error
+```
+
+#### `EqualStrings`
+
+It returns `none` if given strings are equal, or returns an error otherwise.
+
+```pen
+\(string, string) none | error
 ```
