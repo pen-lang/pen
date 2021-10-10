@@ -13,6 +13,6 @@ strip target/release/pen
 
 tar caf $tarball \
   README.md LICENSE.md LICENSE-MIT LICENSE-APACHE \
-  doc lib rust-toolchain.toml target/release/pen
+  cmd doc lib rust-toolchain.toml target/release/pen
 
 echo $tarball
