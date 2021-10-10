@@ -19,8 +19,6 @@ main = \(ctx Context) number {
 }
 
 run = \(ctx Context) none | error {
-  Print'Line(ctx, "yes")?
-
   printLines(ctx, arguments'Parse(Environment'Arguments(ctx)).Message)
 }
 
