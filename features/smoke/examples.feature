@@ -14,3 +14,4 @@ Feature: Examples
       | echo        |
       | hello-world |
       | ls          |
+      | yes         |
