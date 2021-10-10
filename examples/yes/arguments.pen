@@ -9,9 +9,9 @@ Parse = \(xs [string]) Arguments {
 
   Arguments{
     Message: if s == "" {
-			"yes"
+      "yes"
     } else {
-			s
+    	s
     }
   }
 }
