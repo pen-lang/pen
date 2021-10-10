@@ -255,11 +255,11 @@ pub fn compile_test(
             .build_script_compiler
             .compile_test(
                 &vec![
-                    file_path_resolver::resolve_main_package_archive_file(
+                    file_path_resolver::resolve_main_package_test_archive_file(
                         output_directory,
                         &infrastructure.file_path_configuration,
                     ),
-                    file_path_resolver::resolve_main_package_test_archive_file(
+                    file_path_resolver::resolve_main_package_archive_file(
                         output_directory,
                         &infrastructure.file_path_configuration,
                     ),
