@@ -1,5 +1,5 @@
-use crate::{command_runner, FilePathConverter};
-use std::{env, error::Error, fs, path::Path, process::Command, sync::Arc};
+use crate::{command_runner, environment_variable_reader, FilePathConverter};
+use std::{error::Error, fs, path::Path, process::Command, sync::Arc};
 
 pub struct TestLinker {
     file_path_converter: Arc<FilePathConverter>,
@@ -26,7 +26,8 @@ impl app::infra::TestLinker for TestLinker {
         test_file: &app::infra::FilePath,
         test_directory: &app::infra::FilePath,
     ) -> Result<(), Box<dyn Error>> {
-        let language_root_directory = env::var(self.language_root_environment_variable)?;
+        let language_root_directory =
+            environment_variable_reader::read(self.language_root_environment_variable)?;
         let main_crate_directory = self
             .file_path_converter
             .convert_to_os_path(test_directory)
