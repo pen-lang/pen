@@ -30,7 +30,7 @@ It returns `none` if a given condition is `true`, or returns an error otherwise.
 
 #### `Fail`
 
-It always fails with an error.
+It always returns an error.
 
 ```pen
 \() error
