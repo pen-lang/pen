@@ -161,7 +161,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                         .takes_value(true),
                 )
                 .arg(
-                    clap::Arg::with_name("test archive file")
+                    clap::Arg::with_name("archive file")
                         .multiple(true)
                         .required(true)
                         .takes_value(true),
@@ -259,7 +259,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
 
             test_linker::link(
                 &matches
-                    .values_of("test archive file")
+                    .values_of("archive file")
                     .unwrap()
                     .collect::<Vec<_>>(),
                 matches.value_of("package test information file").unwrap(),
