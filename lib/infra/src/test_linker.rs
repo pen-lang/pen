@@ -33,7 +33,9 @@ impl TestLinker {
             mod heap;
             mod test_result;
             mod unreachable;
+
             use test_result::TestResult;
+
             extern "C" {{
                 fn _pen_test_convert_result(result: ffi::Any) -> ffi::Arc<TestResult>;
             }}
