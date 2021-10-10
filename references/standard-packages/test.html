@@ -155,8 +155,20 @@
 </code></pre>
 <h3 id="functions"><a class="header" href="#functions">Functions</a></h3>
 <h4 id="true"><a class="header" href="#true"><code>True</code></a></h4>
-<p>It fails and returns an error if a given condition is <code>false</code>, or returns <code>none</code> otherwise.</p>
+<p>It returns <code>none</code> if a given condition is <code>true</code>, or returns an error otherwise.</p>
 <pre><code class="language-pen">\(boolean) none | error
+</code></pre>
+<h4 id="fail"><a class="header" href="#fail"><code>Fail</code></a></h4>
+<p>It always returns an error.</p>
+<pre><code class="language-pen">\() error
+</code></pre>
+<h4 id="equalnumbers"><a class="header" href="#equalnumbers"><code>EqualNumbers</code></a></h4>
+<p>It returns <code>none</code> if given numbers are equal, or returns an error otherwise.</p>
+<pre><code class="language-pen">\(number, number) none | error
+</code></pre>
+<h4 id="equalstrings"><a class="header" href="#equalstrings"><code>EqualStrings</code></a></h4>
+<p>It returns <code>none</code> if given strings are equal, or returns an error otherwise.</p>
+<pre><code class="language-pen">\(string, string) none | error
 </code></pre>
 
                     </main>

@@ -145,21 +145,9 @@
 <p>This page describes how to write and run unit tests for programs written in the language.</p>
 <p>Testing codes consists of the following steps:</p>
 <ol>
-<li>Add the <code>Test</code> package in package configuration.</li>
 <li>Write tests as <em>test</em> functions in <em>test</em> modules.</li>
 <li>Run the tests with a <code>pen test</code> command.</li>
 </ol>
-<h2 id="the-test-package"><a class="header" href="#the-test-package">The <code>Test</code> package</a></h2>
-<p>Before writing any tests, you need to add the <code>Test</code> standard package in your package's <a href="/references/language/packages.html#package-configuration">configuration file</a> as follows.</p>
-<pre><code class="language-json">{
-  &quot;dependencies&quot;: {
-    ...
-    &quot;Test&quot;: &quot;pen:///lib/test&quot;,
-    ...
-  }
-}
-</code></pre>
-<p>The <code>Test</code> package also includes some utilities which helps you to write tests. See <a href="/references/standard-packages/test.html">its reference</a> for more information.</p>
 <h2 id="writing-tests"><a class="header" href="#writing-tests">Writing tests</a></h2>
 <p>You can write tests as <em>test</em> functions in <em>test</em> modules. All modules with <code>.test.pen</code> file extensions are test modules. And, all public functions in test modules are test functions. The test functions need to have a type of <code>\() none | error</code> and should return <code>error</code> values when they fail. A <code>pen test</code> command described later runs the test functions as tests.</p>
 <p>For example, to test a <code>Foo</code> function in a <code>Foo.pen</code> module, write a <code>Foo.test.pen</code> test module with the following contents.</p>
@@ -167,9 +155,11 @@
 import 'Foo
 
 CheckFoo = \() none | error {
-  Assert'True(Foo(42, &quot;foo&quot;))
+  Assert'True(Foo'Foo() == 42)
 }
 </code></pre>
+<h3 id="the-test-package"><a class="header" href="#the-test-package">The <code>Test</code> package</a></h3>
+<p>The <code>Test</code> standard package includes some utilities which helps you to write tests. See <a href="/references/standard-packages/test.html">its reference</a> for more information.</p>
 <h2 id="running-tests"><a class="header" href="#running-tests">Running tests</a></h2>
 <p>To run tests, you can run a <code>pen test</code> command in your package's directory. Then, you should see test results of each functions in each modules. The <code>pen test</code> command exits with non-zero status codes if some tests fail.</p>
 
