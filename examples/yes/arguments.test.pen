@@ -1,32 +1,20 @@
 import Test'Assert
 import 'arguments
 
-Parse = \() none | error {
-  args = arguments'Parse([string "foo"])?
-
-  Assert'EqualStrings(args.Directory, "foo")
-}
-
-FailToParseWithTooFewArguments = \() none | error {
+ParseNoArgument = \() none | error {
   args = arguments'Parse([string])
 
-  assertStringError(args, "too few arguments")
+  Assert'EqualStrings(args.Message, "yes")
 }
 
-FailToParseWithTooManyArguments = \() none | error {
+ParseOneArgument = \() none | error {
+  args = arguments'Parse([string "foo"])
+
+  Assert'EqualStrings(args.Message, "foo")
+}
+
+ParseTwoArgument = \() none | error {
   args = arguments'Parse([string "foo", "bar"])
 
-  assertStringError(args, "too many arguments")
-}
-
-assertStringError = \(x any, expected string) none | error {
-  if e = x as error {
-    if s = source(e) as string {
-      Assert'EqualStrings(s, expected)
-    } else {
-      Assert'Fail()
-    }
-  } else {
-    Assert'Fail()
-  }
+  Assert'EqualStrings(args.Message, "foo bar")
 }

@@ -1,8 +1,6 @@
 import Console'Print
 import System'Context { Context }
-import System'Directory
 import System'Environment
-import System'File
 
 import 'arguments
 
@@ -23,5 +21,11 @@ main = \(ctx Context) number {
 run = \(ctx Context) none | error {
   Print'Line(ctx, "yes")?
 
-  run(ctx)
+  printLines(ctx, arguments'Parse(Environment'Arguments(ctx)).Message)
+}
+
+printLines = \(ctx Context, s string) none | error {
+  Print'Line(ctx, s)?
+
+  printLines(ctx, s)
 }
