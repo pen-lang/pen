@@ -16,6 +16,7 @@ mod ninja_build_script_compiler;
 mod ninja_build_script_dependency_compiler;
 mod ninja_build_script_runner;
 mod package_script_finder;
+mod test_linker;
 
 pub use command_runner::CommandRunner;
 pub use error::*;
@@ -29,3 +30,4 @@ pub use logger::*;
 pub use ninja_build_script_compiler::*;
 pub use ninja_build_script_dependency_compiler::*;
 pub use ninja_build_script_runner::*;
+pub use test_linker::*;

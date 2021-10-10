@@ -11,6 +11,7 @@ mod package_creator;
 mod package_test_information_compiler;
 mod prelude_module_compiler;
 mod test_configuration;
+mod test_linker;
 mod test_module_compiler;
 mod test_runner;
 
@@ -143,6 +144,29 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                 )
                 .arg(clap::Arg::with_name("test information file").multiple(true)),
         )
+        .subcommand(
+            clap::SubCommand::with_name("link-test")
+                .setting(clap::AppSettings::Hidden)
+                .about("Link tests")
+                .arg(
+                    clap::Arg::with_name("test file")
+                        .short("o")
+                        .required(true)
+                        .takes_value(true),
+                )
+                .arg(
+                    clap::Arg::with_name("package test information file")
+                        .short("i")
+                        .required(true)
+                        .takes_value(true),
+                )
+                .arg(
+                    clap::Arg::with_name("test archive file")
+                        .multiple(true)
+                        .required(true)
+                        .takes_value(true),
+                ),
+        )
         .get_matches()
         .subcommand()
     {
@@ -228,6 +252,18 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                     .unwrap_or_default()
                     .collect::<Vec<_>>(),
                 matches.value_of("package test information file").unwrap(),
+            )
+        }
+        ("link-test", matches) => {
+            let matches = matches.unwrap();
+
+            test_linker::link(
+                &matches
+                    .values_of("test archive file")
+                    .unwrap_or_default()
+                    .collect::<Vec<_>>(),
+                matches.value_of("package test information file").unwrap(),
+                matches.value_of("test file").unwrap(),
             )
         }
         _ => unreachable!(),
