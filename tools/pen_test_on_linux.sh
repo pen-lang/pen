@@ -4,8 +4,4 @@
 
 set -e
 
-if [ $(uname) = Darwin ]; then
-  exit
-fi
-
 pen test
