@@ -112,6 +112,33 @@ Feature: OS
     Then I successfully run `./app`
     And the file "bar.txt" should contain "foo"
 
+  Scenario: Read a file until a limit
+    Given a file named "Main.pen" with:
+    """pen
+    import System'Context { Context }
+    import System'File
+
+    readFile = \(ctx Context) none | error {
+      f = File'Open(ctx, "foo.txt")?
+      d = File'ReadLimit(ctx, f, 5)?
+      File'Write(ctx, File'StdOut(), d)?
+
+      none
+    }
+
+    main = \(ctx Context) number {
+      if _ = readFile(ctx) as none {
+        0
+      } else {
+        1
+      }
+    }
+    """
+    And a file named "foo.txt" with "Hello, world!"
+    When I successfully run `pen build`
+    Then I successfully run `./app`
+    And the stdout from "./app" should contain exactly "Hello"
+
   Scenario: Write a file
     Given a file named "Main.pen" with:
     """pen
