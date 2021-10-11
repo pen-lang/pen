@@ -390,6 +390,31 @@ main = \(ctx Context) number {
 <p><em>When</em> I successfully run <code>pen build</code></p>
 <p><em>Then</em> I successfully run <code>./app</code></p>
 <p><em>And</em> a directory named &quot;foo&quot; should not exist.</p>
+<h2 id="get-file-metadata"><a class="header" href="#get-file-metadata">Get file metadata</a></h2>
+<p><em>Given</em> a file named &quot;Main.pen&quot; with:</p>
+<pre><code class="language-pen">import System'Context { Context }
+import System'File
+import System'File'Metadata { Metadata }
+
+main = \(ctx Context) number {
+  m = File'Metadata(ctx, &quot;foo&quot;)
+
+  if m = m as Metadata {
+    if m.Size == 3 {
+      0
+    } else {
+      1
+    }
+  } else {
+    1
+  }
+}
+</code></pre>
+<p><em>And</em> a file named &quot;foo&quot; with:</p>
+<pre><code>foo
+</code></pre>
+<p><em>When</em> I successfully run <code>pen build</code></p>
+<p><em>Then</em> I successfully run <code>./app</code>.</p>
 
                     </main>
 
