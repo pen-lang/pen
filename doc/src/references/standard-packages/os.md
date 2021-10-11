@@ -128,6 +128,14 @@ It reads all data from a file.
 \(ctx Context, file File) string | error
 ```
 
+#### `ReadLimit`
+
+It reads data from a file until a limit in bytes.
+
+```pen
+\(ctx Context, file File, limit number) string | error
+```
+
 #### `Write`
 
 It writes data to a file and returns a number of bytes written to the file.

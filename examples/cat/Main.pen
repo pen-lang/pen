@@ -1,0 +1,50 @@
+import Console'Print
+import System'Context { Context }
+import System'File { File }
+import System'Environment
+
+bufferSize = \() number { 4096 }
+
+main = \(ctx Context) number {
+  if x = run(ctx) as none {
+    0
+  } else {
+    Print'Line(ctx, if x = source(x) as string {
+      x
+    } else {
+      "unknown error"
+    })
+
+    1
+  }
+}
+
+run = \(ctx Context) none | error {
+  fs = Environment'Arguments(ctx)
+
+  if [_, ..._] = fs {
+    concatenateFiles(ctx, fs)
+  } else {
+    pipeFile(ctx, File'StdIn())
+  }
+}
+
+concatenateFiles = \(ctx Context, fs [string]) none | error {
+  if [f, ...fs] = fs {
+    pipeFile(ctx, File'Open(ctx, f())?)?
+    concatenateFiles(ctx, fs)
+  } else {
+    none
+  }
+}
+
+pipeFile = \(ctx Context, f File) none | error {
+  s = File'ReadLimit(ctx, f, bufferSize())?
+
+  if s == "" {
+    none
+  } else {
+    File'Write(ctx, File'StdOut(), s)?
+    pipeFile(ctx, f)
+  }
+}
