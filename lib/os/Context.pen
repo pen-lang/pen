@@ -4,6 +4,7 @@ import 'File'OpenOptions { OpenOptions }
 import 'File'Metadata { Metadata }
 
 import foreign "c" _pen_os_read_stdin \() FfiStringResult
+import foreign "c" _pen_os_read_limit_stdin \(number) FfiStringResult
 import foreign "c" _pen_os_write_stdout \(string) FfiWriteResult
 import foreign "c" _pen_os_write_stderr \(string) FfiWriteResult
 import foreign "c" _pen_os_open_file \(string, OpenOptions) FfiOpenResult
@@ -26,6 +27,7 @@ type Context {
 
 type InnerContext {
   ReadStdIn \() FfiStringResult
+  ReadLimitStdIn \(number) FfiStringResult
   WriteStdOut \(string) FfiWriteResult
   WriteStdErr \(string) FfiWriteResult
   OpenFile \(string, OpenOptions) FfiOpenResult
@@ -77,6 +79,7 @@ New = \() Context {
   Context{
     inner: InnerContext{
       ReadStdIn: _pen_os_read_stdin,
+      ReadLimitStdIn: _pen_os_read_limit_stdin,
       WriteStdOut: _pen_os_write_stdout,
       WriteStdErr: _pen_os_write_stderr,
       OpenFile: _pen_os_open_file,

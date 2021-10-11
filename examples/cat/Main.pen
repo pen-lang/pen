@@ -20,7 +20,11 @@ main = \(ctx Context) number {
 }
 
 run = \(ctx Context) none | error {
-  concatenateFiles(ctx, Environment'Arguments(ctx))
+  if [_, ..._] = Environment'Arguments(ctx) {
+    concatenateFiles(ctx, Environment'Arguments(ctx))
+  } else {
+    pipeFile(ctx, File'StdIn())
+  }
 }
 
 concatenateFiles = \(ctx Context, fs [string]) none | error {

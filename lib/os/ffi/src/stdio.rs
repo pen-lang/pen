@@ -8,6 +8,11 @@ extern "C" fn _pen_os_read_stdin() -> ffi::Arc<FfiResult<ffi::ByteString>> {
 }
 
 #[no_mangle]
+extern "C" fn _pen_os_read_limit_stdin(limit: ffi::Number) -> ffi::Arc<FfiResult<ffi::ByteString>> {
+    ffi::Arc::new(utilities::read_limit(&mut stdin(), f64::from(limit) as usize).into())
+}
+
+#[no_mangle]
 extern "C" fn _pen_os_write_stdout(bytes: ffi::ByteString) -> ffi::Arc<FfiResult<ffi::Number>> {
     ffi::Arc::new(utilities::write(&mut stdout(), bytes).into())
 }

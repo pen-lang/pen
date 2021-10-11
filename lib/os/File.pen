@@ -64,7 +64,7 @@ Read = \(ctx Context, file File) string | error {
 
 ReadLimit = \(ctx Context, file File, limit number) string | error {
   r = if f = file.inner as stdIn {
-    error("not implemented")
+    Context'Inner(ctx).ReadLimitStdIn(limit)
   } else if stdOut {
     error("cannot read from stdout")
   } else if stdErr {
