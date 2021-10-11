@@ -113,7 +113,7 @@ Feature: OS
     And the file "bar.txt" should contain "foo"
 
   Scenario: Read a file until a limit
-    Given a file named "Main.pen" with:
+    Given a file named "main.pen" with:
     """pen
     import System'Context { Context }
     import System'File
