@@ -11,7 +11,7 @@ Feature: OS
     """
 
   Scenario: Get arguments
-    Given a file named "Main.pen" with:
+    Given a file named "main.pen" with:
     """pen
     import Core'String
     import System'Context { Context }
@@ -31,7 +31,7 @@ Feature: OS
     And stdout from "./app foo bar" should contain exactly "foo bar"
 
   Scenario: Get an environment variable
-    Given a file named "Main.pen" with:
+    Given a file named "main.pen" with:
     """pen
     import Core'String
     import System'Context { Context }
@@ -58,7 +58,7 @@ Feature: OS
     And stdout from "./app" should contain exactly "foo"
 
   Scenario: Open a file
-    Given a file named "Main.pen" with:
+    Given a file named "main.pen" with:
     """pen
     import System'Context { Context }
     import System'File { File }
@@ -76,7 +76,7 @@ Feature: OS
     Then I successfully run `./app`
 
   Scenario: Read a file
-    Given a file named "Main.pen" with:
+    Given a file named "main.pen" with:
     """pen
     import System'Context { Context }
     import System'File
@@ -113,7 +113,7 @@ Feature: OS
     And the file "bar.txt" should contain "foo"
 
   Scenario: Write a file
-    Given a file named "Main.pen" with:
+    Given a file named "main.pen" with:
     """pen
     import System'Context { Context }
     import System'File
@@ -145,7 +145,7 @@ Feature: OS
     And the file "foo.txt" should contain "foo"
 
   Scenario: Copy a file
-    Given a file named "Main.pen" with:
+    Given a file named "main.pen" with:
     """pen
     import System'Context { Context }
     import System'File
@@ -165,7 +165,7 @@ Feature: OS
     And the file "bar.txt" should contain "foo"
 
   Scenario: Move a file
-    Given a file named "Main.pen" with:
+    Given a file named "main.pen" with:
     """pen
     import System'Context { Context }
     import System'File
@@ -185,7 +185,7 @@ Feature: OS
     And the file "bar.txt" should contain "foo"
 
   Scenario: Remove a file
-    Given a file named "Main.pen" with:
+    Given a file named "main.pen" with:
     """pen
     import System'Context { Context }
     import System'File
@@ -204,7 +204,7 @@ Feature: OS
     And the file "foo.txt" does not exist
 
   Scenario: Read a directory
-    Given a file named "Main.pen" with:
+    Given a file named "main.pen" with:
     """pen
     import Core'String
     import System'Context { Context }
@@ -231,11 +231,11 @@ Feature: OS
     """
     When I successfully run `pen build`
     Then I successfully run `./app`
-    And the stdout from "./app" should contain "Main.pen"
+    And the stdout from "./app" should contain "main.pen"
     And the stdout from "./app" should contain "pen.json"
 
   Scenario: Create a directory
-    Given a file named "Main.pen" with:
+    Given a file named "main.pen" with:
     """pen
     import System'Context { Context }
     import System'Directory
@@ -253,7 +253,7 @@ Feature: OS
     And a directory named "foo" should exist
 
   Scenario: Remove a directory
-    Given a file named "Main.pen" with:
+    Given a file named "main.pen" with:
     """pen
     import System'Context { Context }
     import System'Directory
@@ -272,7 +272,7 @@ Feature: OS
     And a directory named "foo" should not exist
 
   Scenario: Get file metadata
-    Given a file named "Main.pen" with:
+    Given a file named "main.pen" with:
     """pen
     import System'Context { Context }
     import System'File

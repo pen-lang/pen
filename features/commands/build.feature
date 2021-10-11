@@ -8,7 +8,7 @@ Feature: Building packages
       }
     }
     """
-    And a file named "Main.pen" with:
+    And a file named "main.pen" with:
     """pen
     import System'Context { Context }
 
@@ -42,7 +42,7 @@ Feature: Building packages
       }
     }
     """
-    And a file named "Main.pen" with:
+    And a file named "main.pen" with:
     """pen
     import System'Context { Context }
 

@@ -21,7 +21,7 @@ Feature: List as stream
     """
 
   Scenario: Evaluate an element lazily
-    Given a file named "Main.pen" with:
+    Given a file named "main.pen" with:
     """pen
     import System'Context { Context }
     import 'Hello
@@ -37,7 +37,7 @@ Feature: List as stream
     And the stdout from "./app" should not contain "hello"
 
   Scenario: Evaluate an element lazily but only once
-    Given a file named "Main.pen" with:
+    Given a file named "main.pen" with:
     """pen
     import System'Context { Context }
     import 'Hello
@@ -58,7 +58,7 @@ Feature: List as stream
     And the stdout from "./app" should contain exactly "hello"
 
   Scenario: Evaluate multiple elements lazily
-    Given a file named "Main.pen" with:
+    Given a file named "main.pen" with:
     """pen
     import System'Context { Context }
     import 'Hello
@@ -80,7 +80,7 @@ Feature: List as stream
     And the stdout from "./app" should not contain "hello"
 
   Scenario: Evaluate multiple elements lazily but only once
-    Given a file named "Main.pen" with:
+    Given a file named "main.pen" with:
     """pen
     import System'Context { Context }
     import 'Hello

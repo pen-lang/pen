@@ -10,7 +10,7 @@ Feature: List
     """
 
   Scenario: Force multiple elements of a list
-    Given a file named "Main.pen" with:
+    Given a file named "main.pen" with:
     """pen
     import System'Context { Context }
 

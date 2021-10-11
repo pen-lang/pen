@@ -13,7 +13,7 @@ System packages do the following three things.
 
 ### Defining main function types
 
-Every system package must have a module named `MainFunction.pen` in which a `MainFunction` function type is defined. Literally, the function type is used as a type of `main` functions in `Main.pen` modules in application packages using the system package.
+Every system package must have a module named `MainFunction.pen` in which a `MainFunction` function type is defined. Literally, the function type is used as a type of `main` functions in `main.pen` modules in application packages using the system package.
 
 For example, a system package for command line applications might have the following `MainFunction.pen` module:
 
