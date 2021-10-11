@@ -62,6 +62,24 @@ Read = \(ctx Context, file File) string | error {
   }
 }
 
+ReadLimit = \(ctx Context, file File, limit number) string | error {
+  r = if f = file.inner as stdIn {
+    Context'Inner(ctx).ReadLimitStdIn(limit)
+  } else if stdOut {
+    error("cannot read from stdout")
+  } else if stdErr {
+    error("cannot read from stderr")
+  } else if NormalFile {
+    Context'Inner(ctx).ReadLimitFile(f, limit)
+  }?
+
+  if r.Error == 0 {
+    r.Value
+  } else {
+    error(errorTranslator'Translate(r.Error))
+  }
+}
+
 Write = \(ctx Context, file File, data string) number | error {
   inner = Context'Inner(ctx)
 
