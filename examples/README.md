@@ -2,7 +2,7 @@
 
 Those are examples of applications and libraries written in Pen.
 
-# Applications
+## Applications
 
 - [Hello, world!](hello-world)
 - [`echo` command](echo)
@@ -10,6 +10,6 @@ Those are examples of applications and libraries written in Pen.
 - [`ls` command](ls)
 - [`yes` command](yes)
 
-# Libraries
+## Libraries
 
 - [`Console`](console)
