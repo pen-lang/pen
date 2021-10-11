@@ -209,6 +209,10 @@
 <p>It reads all data from a file.</p>
 <pre><code class="language-pen">\(ctx Context, file File) string | error
 </code></pre>
+<h4 id="readlimit"><a class="header" href="#readlimit"><code>ReadLimit</code></a></h4>
+<p>It reads data from a file until a limit in bytes.</p>
+<pre><code class="language-pen">\(ctx Context, file File, limit number) string | error
+</code></pre>
 <h4 id="write"><a class="header" href="#write"><code>Write</code></a></h4>
 <p>It writes data to a file and returns a number of bytes written to the file.</p>
 <pre><code class="language-pen">\(ctx Context, file File, data string) number | error

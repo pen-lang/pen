@@ -245,6 +245,31 @@ main = \(ctx Context) number {
 <p><em>When</em> I successfully run <code>pen build</code></p>
 <p><em>Then</em> I successfully run <code>./app</code></p>
 <p><em>And</em> the file &quot;bar.txt&quot; should contain &quot;foo&quot;.</p>
+<h2 id="read-a-file-until-a-limit"><a class="header" href="#read-a-file-until-a-limit">Read a file until a limit</a></h2>
+<p><em>Given</em> a file named &quot;Main.pen&quot; with:</p>
+<pre><code class="language-pen">import System'Context { Context }
+import System'File
+
+readFile = \(ctx Context) none | error {
+  f = File'Open(ctx, &quot;foo.txt&quot;)?
+  d = File'ReadLimit(ctx, f, 5)?
+  File'Write(ctx, File'StdOut(), d)?
+
+  none
+}
+
+main = \(ctx Context) number {
+  if _ = readFile(ctx) as none {
+    0
+  } else {
+    1
+  }
+}
+</code></pre>
+<p><em>And</em> a file named &quot;foo.txt&quot; with &quot;Hello, world!&quot;</p>
+<p><em>When</em> I successfully run <code>pen build</code></p>
+<p><em>Then</em> I successfully run <code>./app</code></p>
+<p><em>And</em> the stdout from &quot;./app&quot; should contain exactly &quot;Hello&quot;.</p>
 <h2 id="write-a-file"><a class="header" href="#write-a-file">Write a file</a></h2>
 <p><em>Given</em> a file named &quot;Main.pen&quot; with:</p>
 <pre><code class="language-pen">import System'Context { Context }
