@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "Console": "../console",
+    "System": "pen:///lib/os"
+  }
+}
