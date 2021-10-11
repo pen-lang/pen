@@ -10,6 +10,7 @@ Feature: Examples
 
     Examples:
       | example     |
+      | cat         |
       | console     |
       | echo        |
       | hello-world |
