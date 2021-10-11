@@ -1,0 +1,17 @@
+import Core'String
+
+type Arguments {
+  Message string
+}
+
+Parse = \(xs [string]) Arguments {
+  s = String'Join(xs, " ")
+
+  Arguments{
+    Message: if s == "" {
+      "yes"
+    } else {
+    	s
+    }
+  }
+}
