@@ -9,7 +9,9 @@ Feature: Examples
     And I successfully run `pen_test_on_linux.sh`
 
     Examples:
-      | example |
-      | console |
-      | echo    |
-      | ls      |
+      | example     |
+      | console     |
+      | echo        |
+      | hello-world |
+      | ls          |
+      | yes         |
