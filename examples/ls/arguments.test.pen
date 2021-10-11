@@ -1,16 +1,16 @@
 import Test'Assert
 import 'arguments
 
-Parse = \() none | error {
+ParseNoArgument = \() none | error {
+  args = arguments'Parse([string])?
+
+  Assert'EqualStrings(args.Directory, ".")
+}
+
+ParseArgument = \() none | error {
   args = arguments'Parse([string "foo"])?
 
   Assert'EqualStrings(args.Directory, "foo")
-}
-
-FailToParseWithTooFewArguments = \() none | error {
-  args = arguments'Parse([string])
-
-  assertStringError(args, "too few arguments")
 }
 
 FailToParseWithTooManyArguments = \() none | error {
