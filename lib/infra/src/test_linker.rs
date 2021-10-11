@@ -89,18 +89,20 @@ impl TestLinker {
     fn format_test_function(&self, name: &str, foreign_name: &str) -> String {
         format!(
             r#"
-            #[link(name = "main_test")]
-            extern "C" {{ fn {foreign_name}() -> ffi::Any; }}
+            {{
+                #[link(name = "main_test")]
+                extern "C" {{ fn {foreign_name}() -> ffi::Any; }}
 
-            let result: Result<_, _>
-                = unsafe {{ _pen_test_convert_result({foreign_name}()) }}.into_result();
-            println!("\t{{}}\t{name}", if result.is_ok() {{ "OK" }} else {{ "FAIL" }});
+                let result: Result<_, _>
+                    = unsafe {{ _pen_test_convert_result({foreign_name}()) }}.into_result();
+                println!("\t{{}}\t{name}", if result.is_ok() {{ "OK" }} else {{ "FAIL" }});
 
-            if let Err(message) = &result {{
-                println!("\t\tMessage: {{}}", message);
-                error += 1;
-            }} else {{
-                success += 1;
+                if let Err(message) = &result {{
+                    println!("\t\tMessage: {{}}", message);
+                    error += 1;
+                }} else {{
+                    success += 1;
+                }}
             }}
             "#,
             name = name,
