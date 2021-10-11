@@ -78,6 +78,18 @@ fn read_file(file: ffi::Arc<OsFile>) -> Result<ffi::ByteString, OsError> {
 }
 
 #[no_mangle]
+extern "C" fn _pen_os_read_limit_file(
+    file: ffi::Arc<OsFile>,
+    limit: ffi::Number,
+) -> ffi::Arc<FfiResult<ffi::ByteString>> {
+    ffi::Arc::new(read_limit_file(file, limit).into())
+}
+
+fn read_limit_file(file: ffi::Arc<OsFile>, limit: ffi::Number) -> Result<ffi::ByteString, OsError> {
+    utilities::read_limit(&mut file.lock()?.deref(), f64::from(limit) as usize)
+}
+
+#[no_mangle]
 extern "C" fn _pen_os_write_file(
     file: ffi::Arc<OsFile>,
     bytes: ffi::ByteString,
