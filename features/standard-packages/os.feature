@@ -270,3 +270,31 @@ Feature: OS
     When I successfully run `pen build`
     Then I successfully run `./app`
     And a directory named "foo" should not exist
+
+  Scenario: Get file metadata
+    Given a file named "Main.pen" with:
+    """pen
+    import System'Context { Context }
+    import System'File
+    import System'File'Metadata { Metadata }
+
+    main = \(ctx Context) number {
+      m = File'Metadata(ctx, "foo")
+
+      if m = m as Metadata {
+        if m.Size == 3 {
+          0
+        } else {
+          1
+        }
+      } else {
+        1
+      }
+    }
+    """
+    And a file named "foo" with:
+    """
+    foo
+    """
+    When I successfully run `pen build`
+    Then I successfully run `./app`

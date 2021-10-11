@@ -1,6 +1,7 @@
 import 'Context { Context }
 import 'errorTranslator
 import 'File'OpenOptions { OpenOptions }
+import 'File'Metadata { Metadata }
 import 'normalFile { NormalFile }
 
 type File {
@@ -124,6 +125,16 @@ Remove = \(ctx Context, path string) none | error {
 
   if r.Error == 0 {
     none
+  } else {
+    error(errorTranslator'Translate(r.Error))
+  }
+}
+
+Metadata = \(ctx Context, path string) Metadata | error {
+  r = Context'Inner(ctx).Metadata(path)
+
+  if r.Error == 0 {
+    r.Metadata
   } else {
     error(errorTranslator'Translate(r.Error))
   }

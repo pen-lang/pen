@@ -51,6 +51,12 @@ impl From<File> for OsFileInner {
     }
 }
 
+#[derive(Default)]
+#[repr(C)]
+struct FileMetadata {
+    size: ffi::Number,
+}
+
 #[no_mangle]
 extern "C" fn _pen_os_open_file(
     path: ffi::ByteString,
@@ -144,6 +150,22 @@ fn remove_file(path: ffi::ByteString) -> Result<(), OsError> {
     fs::remove_file(utilities::decode_path(&path)?)?;
 
     Ok(())
+}
+
+#[no_mangle]
+extern "C" fn _pen_os_read_metadata(
+    path: ffi::ByteString,
+) -> ffi::Arc<FfiResult<ffi::Arc<FileMetadata>>> {
+    ffi::Arc::new(read_metadata(path).into())
+}
+
+fn read_metadata(path: ffi::ByteString) -> Result<ffi::Arc<FileMetadata>, OsError> {
+    let metadata = fs::metadata(utilities::decode_path(&path)?)?;
+
+    Ok(FileMetadata {
+        size: (metadata.len() as f64).into(),
+    }
+    .into())
 }
 
 #[cfg(test)]
