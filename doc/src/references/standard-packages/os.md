@@ -28,6 +28,16 @@ It is a context of an operating system.
 type Context { ... }
 ```
 
+#### `Metadata`
+
+It is file metadata.
+
+```pen
+type Metadata {
+  Size number
+}
+```
+
 ## `Environment` module
 
 ```pen
@@ -212,4 +222,12 @@ It removes a directory.
 
 ```pen
 \(ctx Context, path string) none | error
+```
+
+#### `Metadata`
+
+It reads file metadata.
+
+```pen
+\(ctx Context, path string) Metadata | error
 ```
