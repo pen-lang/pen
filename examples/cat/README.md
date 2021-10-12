@@ -1,6 +1,6 @@
 # `cat` command
 
-An application to concatenate multiple files
+An application to concatenate files
 
 ## Usage
 
