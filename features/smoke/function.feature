@@ -10,7 +10,7 @@ Feature: Function
     """
 
   Scenario: Reference an inner closure in nested closures
-    Given a file named "Main.pen" with:
+    Given a file named "main.pen" with:
     """pen
     import System'Context { Context }
 

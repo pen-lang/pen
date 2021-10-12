@@ -10,7 +10,7 @@ Feature: Union
     """
 
   Scenario: Downcast a union to a list
-    Given a file named "Main.pen" with:
+    Given a file named "main.pen" with:
     """pen
     import System'Context { Context }
 

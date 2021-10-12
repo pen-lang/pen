@@ -11,7 +11,7 @@ Feature: Memory leak
     """
 
   Scenario: Run an infinite loop
-    Given a file named "Main.pen" with:
+    Given a file named "main.pen" with:
     """pen
     import System'Context { Context }
 
@@ -29,7 +29,7 @@ Feature: Memory leak
     Then I successfully run `check_memory_leak_in_loop.sh ./app`
 
   Scenario: Run hello world
-    Given a file named "Main.pen" with:
+    Given a file named "main.pen" with:
     """pen
     import System'Context { Context }
     import System'File
@@ -44,7 +44,7 @@ Feature: Memory leak
     Then I successfully run `check_memory_leak_in_loop.sh ./app`
 
   Scenario: Create a record
-    Given a file named "Main.pen" with:
+    Given a file named "main.pen" with:
     """pen
     import System'Context { Context }
 
@@ -68,7 +68,7 @@ Feature: Memory leak
     Then I successfully run `check_memory_leak_in_loop.sh ./app`
 
   Scenario: Deconstruct a record
-    Given a file named "Main.pen" with:
+    Given a file named "main.pen" with:
     """pen
     import System'Context { Context }
 
@@ -92,7 +92,7 @@ Feature: Memory leak
     Then I successfully run `check_memory_leak_in_loop.sh ./app`
 
   Scenario: Put a string into a value of any type
-    Given a file named "Main.pen" with:
+    Given a file named "main.pen" with:
     """pen
     import System'Context { Context }
 
@@ -116,7 +116,7 @@ Feature: Memory leak
     Then I successfully run `check_memory_leak_in_loop.sh ./app`
 
   Scenario: Shadow a variable in a block
-    Given a file named "Main.pen" with:
+    Given a file named "main.pen" with:
     """pen
     import System'Context { Context }
 
@@ -141,7 +141,7 @@ Feature: Memory leak
     Then I successfully run `check_memory_leak_in_loop.sh ./app`
 
   Scenario: Define a function in a let expression with a free variable
-    Given a file named "Main.pen" with:
+    Given a file named "main.pen" with:
     """pen
     import System'Context { Context }
 
@@ -166,7 +166,7 @@ Feature: Memory leak
     Then I successfully run `check_memory_leak_in_loop.sh ./app`
 
   Scenario: Convert a number to a string
-    Given a file named "Main.pen" with:
+    Given a file named "main.pen" with:
     """pen
     import Core'Number
     import System'Context { Context }
@@ -187,7 +187,7 @@ Feature: Memory leak
     Then I successfully run `check_memory_leak_in_loop.sh ./app`
 
   Scenario: Join strings
-    Given a file named "Main.pen" with:
+    Given a file named "main.pen" with:
     """pen
     import Core'String
     import System'Context { Context }
@@ -208,7 +208,7 @@ Feature: Memory leak
     Then I successfully run `check_memory_leak_in_loop.sh ./app`
 
   Scenario: Drop an unforced list
-    Given a file named "Main.pen" with:
+    Given a file named "main.pen" with:
     """pen
     import System'Context { Context }
 
@@ -228,7 +228,7 @@ Feature: Memory leak
     Then I successfully run `check_memory_leak_in_loop.sh ./app`
 
   Scenario: Drop a forced list
-    Given a file named "Main.pen" with:
+    Given a file named "main.pen" with:
     """pen
     import System'Context { Context }
 
@@ -252,7 +252,7 @@ Feature: Memory leak
     Then I successfully run `check_memory_leak_in_loop.sh ./app`
 
   Scenario: Drop an unforced list with no environment
-    Given a file named "Main.pen" with:
+    Given a file named "main.pen" with:
     """pen
     import System'Context { Context }
 
@@ -270,7 +270,7 @@ Feature: Memory leak
     Then I successfully run `check_memory_leak_in_loop.sh ./app`
 
   Scenario: Drop a forced list with no environment
-    Given a file named "Main.pen" with:
+    Given a file named "main.pen" with:
     """pen
     import System'Context { Context }
 

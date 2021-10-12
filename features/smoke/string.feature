@@ -10,7 +10,7 @@ Feature: String
     """
 
   Scenario: Compare strings
-    Given a file named "Main.pen" with:
+    Given a file named "main.pen" with:
     """pen
     import System'Context { Context }
 
