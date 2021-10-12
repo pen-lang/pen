@@ -156,7 +156,7 @@
 </ul>
 <h2 id="kinds-of-packages"><a class="header" href="#kinds-of-packages">Kinds of packages</a></h2>
 <p>There are two kinds of packages: applications and libraries. Application packages build applications which are often executable files on host platforms. Library packages are meant to be imported and used by other packages which can be of both applications and libraries.</p>
-<p>Packages are considered to be of applications if they have <code>Main.pen</code> files at their top directories. Otherwise, they are of libraries. Note that every application package needs to specify <a href="/advanced-features/system-injection.html#system-packages">a system package</a> with a key of <code>System</code> in its <a href="#package-configuration">package configuration file</a>.</p>
+<p>Packages are considered to be of applications if they have <code>main.pen</code> files at their top directories. Otherwise, they are of libraries. Note that every application package needs to specify <a href="/advanced-features/system-injection.html#system-packages">a system package</a> with a key of <code>System</code> in its <a href="#package-configuration">package configuration file</a>.</p>
 <h2 id="package-configuration"><a class="header" href="#package-configuration">Package configuration</a></h2>
 <p>Each package has its configuration file named <code>pen.json</code> in a <a href="https://www.json.org/json-en.html">JSON</a> format at its top directory. The JSON file has a single field named <code>dependencies</code> specifying external packages' names and URLs.</p>
 <p>Package URLs have different protocol schemes depending on where they are located.</p>

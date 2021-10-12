@@ -151,7 +151,7 @@
 Each <a href="/references/language/packages.html#kinds-of-packages">application package</a> needs to specify a system package in <a href="/references/language/packages.html#package-configuration">its package configuration</a>.</p>
 <p>System packages do the following three things.</p>
 <h3 id="defining-main-function-types"><a class="header" href="#defining-main-function-types">Defining main function types</a></h3>
-<p>Every system package must have a module named <code>MainFunction.pen</code> in which a <code>MainFunction</code> function type is defined. Literally, the function type is used as a type of <code>main</code> functions in <code>Main.pen</code> modules in application packages using the system package.</p>
+<p>Every system package must have a module named <code>MainFunction.pen</code> in which a <code>MainFunction</code> function type is defined. Literally, the function type is used as a type of <code>main</code> functions in <code>main.pen</code> modules in application packages using the system package.</p>
 <p>For example, a system package for command line applications might have the following <code>MainFunction.pen</code> module:</p>
 <pre><code class="language-pen">import 'Context { Context }
 

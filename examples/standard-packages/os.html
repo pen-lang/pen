@@ -152,7 +152,7 @@
 }
 </code></pre>
 <h2 id="get-arguments"><a class="header" href="#get-arguments">Get arguments</a></h2>
-<p><em>Given</em> a file named &quot;Main.pen&quot; with:</p>
+<p><em>Given</em> a file named &quot;main.pen&quot; with:</p>
 <pre><code class="language-pen">import Core'String
 import System'Context { Context }
 import System'Environment
@@ -170,7 +170,7 @@ main = \(ctx Context) number {
 <p><em>Then</em> I successfully run <code>./app foo bar</code></p>
 <p><em>And</em> stdout from &quot;./app foo bar&quot; should contain exactly &quot;foo bar&quot;.</p>
 <h2 id="get-an-environment-variable"><a class="header" href="#get-an-environment-variable">Get an environment variable</a></h2>
-<p><em>Given</em> a file named &quot;Main.pen&quot; with:</p>
+<p><em>Given</em> a file named &quot;main.pen&quot; with:</p>
 <pre><code class="language-pen">import Core'String
 import System'Context { Context }
 import System'File
@@ -195,7 +195,7 @@ main = \(ctx Context) number {
 <p><em>Then</em> I successfully run <code>./app</code></p>
 <p><em>And</em> stdout from &quot;./app&quot; should contain exactly &quot;foo&quot;.</p>
 <h2 id="open-a-file"><a class="header" href="#open-a-file">Open a file</a></h2>
-<p><em>Given</em> a file named &quot;Main.pen&quot; with:</p>
+<p><em>Given</em> a file named &quot;main.pen&quot; with:</p>
 <pre><code class="language-pen">import System'Context { Context }
 import System'File { File }
 
@@ -211,7 +211,7 @@ main = \(ctx Context) number {
 <p><em>When</em> I successfully run <code>pen build</code></p>
 <p><em>Then</em> I successfully run <code>./app</code>.</p>
 <h2 id="read-a-file"><a class="header" href="#read-a-file">Read a file</a></h2>
-<p><em>Given</em> a file named &quot;Main.pen&quot; with:</p>
+<p><em>Given</em> a file named &quot;main.pen&quot; with:</p>
 <pre><code class="language-pen">import System'Context { Context }
 import System'File
 import System'File'OpenOptions
@@ -246,7 +246,7 @@ main = \(ctx Context) number {
 <p><em>Then</em> I successfully run <code>./app</code></p>
 <p><em>And</em> the file &quot;bar.txt&quot; should contain &quot;foo&quot;.</p>
 <h2 id="read-a-file-until-a-limit"><a class="header" href="#read-a-file-until-a-limit">Read a file until a limit</a></h2>
-<p><em>Given</em> a file named &quot;Main.pen&quot; with:</p>
+<p><em>Given</em> a file named &quot;main.pen&quot; with:</p>
 <pre><code class="language-pen">import System'Context { Context }
 import System'File
 
@@ -271,7 +271,7 @@ main = \(ctx Context) number {
 <p><em>Then</em> I successfully run <code>./app</code></p>
 <p><em>And</em> the stdout from &quot;./app&quot; should contain exactly &quot;Hello&quot;.</p>
 <h2 id="write-a-file"><a class="header" href="#write-a-file">Write a file</a></h2>
-<p><em>Given</em> a file named &quot;Main.pen&quot; with:</p>
+<p><em>Given</em> a file named &quot;main.pen&quot; with:</p>
 <pre><code class="language-pen">import System'Context { Context }
 import System'File
 import System'File'OpenOptions
@@ -301,7 +301,7 @@ main = \(ctx Context) number {
 <p><em>Then</em> I successfully run <code>./app</code></p>
 <p><em>And</em> the file &quot;foo.txt&quot; should contain &quot;foo&quot;.</p>
 <h2 id="copy-a-file"><a class="header" href="#copy-a-file">Copy a file</a></h2>
-<p><em>Given</em> a file named &quot;Main.pen&quot; with:</p>
+<p><em>Given</em> a file named &quot;main.pen&quot; with:</p>
 <pre><code class="language-pen">import System'Context { Context }
 import System'File
 
@@ -319,7 +319,7 @@ main = \(ctx Context) number {
 <p><em>And</em> the file &quot;foo.txt&quot; should contain &quot;foo&quot;</p>
 <p><em>And</em> the file &quot;bar.txt&quot; should contain &quot;foo&quot;.</p>
 <h2 id="move-a-file"><a class="header" href="#move-a-file">Move a file</a></h2>
-<p><em>Given</em> a file named &quot;Main.pen&quot; with:</p>
+<p><em>Given</em> a file named &quot;main.pen&quot; with:</p>
 <pre><code class="language-pen">import System'Context { Context }
 import System'File
 
@@ -337,7 +337,7 @@ main = \(ctx Context) number {
 <p><em>And</em> the file &quot;foo.txt&quot; does not exist</p>
 <p><em>And</em> the file &quot;bar.txt&quot; should contain &quot;foo&quot;.</p>
 <h2 id="remove-a-file"><a class="header" href="#remove-a-file">Remove a file</a></h2>
-<p><em>Given</em> a file named &quot;Main.pen&quot; with:</p>
+<p><em>Given</em> a file named &quot;main.pen&quot; with:</p>
 <pre><code class="language-pen">import System'Context { Context }
 import System'File
 
@@ -354,7 +354,7 @@ main = \(ctx Context) number {
 <p><em>Then</em> I successfully run <code>./app</code></p>
 <p><em>And</em> the file &quot;foo.txt&quot; does not exist.</p>
 <h2 id="read-a-directory"><a class="header" href="#read-a-directory">Read a directory</a></h2>
-<p><em>Given</em> a file named &quot;Main.pen&quot; with:</p>
+<p><em>Given</em> a file named &quot;main.pen&quot; with:</p>
 <pre><code class="language-pen">import Core'String
 import System'Context { Context }
 import System'File
@@ -380,10 +380,10 @@ main = \(ctx Context) number {
 </code></pre>
 <p><em>When</em> I successfully run <code>pen build</code></p>
 <p><em>Then</em> I successfully run <code>./app</code></p>
-<p><em>And</em> the stdout from &quot;./app&quot; should contain &quot;Main.pen&quot;</p>
+<p><em>And</em> the stdout from &quot;./app&quot; should contain &quot;main.pen&quot;</p>
 <p><em>And</em> the stdout from &quot;./app&quot; should contain &quot;pen.json&quot;.</p>
 <h2 id="create-a-directory"><a class="header" href="#create-a-directory">Create a directory</a></h2>
-<p><em>Given</em> a file named &quot;Main.pen&quot; with:</p>
+<p><em>Given</em> a file named &quot;main.pen&quot; with:</p>
 <pre><code class="language-pen">import System'Context { Context }
 import System'Directory
 
@@ -399,7 +399,7 @@ main = \(ctx Context) number {
 <p><em>Then</em> I successfully run <code>./app</code></p>
 <p><em>And</em> a directory named &quot;foo&quot; should exist.</p>
 <h2 id="remove-a-directory"><a class="header" href="#remove-a-directory">Remove a directory</a></h2>
-<p><em>Given</em> a file named &quot;Main.pen&quot; with:</p>
+<p><em>Given</em> a file named &quot;main.pen&quot; with:</p>
 <pre><code class="language-pen">import System'Context { Context }
 import System'Directory
 
@@ -416,7 +416,7 @@ main = \(ctx Context) number {
 <p><em>Then</em> I successfully run <code>./app</code></p>
 <p><em>And</em> a directory named &quot;foo&quot; should not exist.</p>
 <h2 id="get-file-metadata"><a class="header" href="#get-file-metadata">Get file metadata</a></h2>
-<p><em>Given</em> a file named &quot;Main.pen&quot; with:</p>
+<p><em>Given</em> a file named &quot;main.pen&quot; with:</p>
 <pre><code class="language-pen">import System'Context { Context }
 import System'File
 import System'File'Metadata { Metadata }
