@@ -9,7 +9,7 @@ Feature: Test
     }
     """
 
-  Scenario: Import a Test package
+  Scenario: Use a True function
     Given a file named "FooTest.pen" with:
     """pen
     import Test'Assert
