@@ -43,6 +43,7 @@
   - [Standard packages](examples/standard-packages/README.md)
     - [Core](examples/standard-packages/core.md)
     - [OS](examples/standard-packages/os.md)
+    - [Test](examples/standard-packages/test.md)
   - [FFI](examples/ffi.md)
 - [Advanced features](advanced-features/README.md)
   - [Cross compile](advanced-features/cross-compile.md)
