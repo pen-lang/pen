@@ -3,18 +3,16 @@ use crate::type_information;
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub struct Boolean {
-    value: usize,
+    value: bool,
 }
 
 impl Boolean {
     pub fn new(value: bool) -> Self {
-        Self {
-            value: value.into(),
-        }
+        Self { value }
     }
 }
 
-impl From<Boolean> for usize {
+impl From<Boolean> for bool {
     fn from(number: Boolean) -> Self {
         number.value
     }
