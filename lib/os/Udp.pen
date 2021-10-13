@@ -1,13 +1,10 @@
 import 'Context { Context }
-
-type Socket {
-	inner any
-}
+import 'Udp'Socket { Socket }
 
 Bind = \(ctx Context, address string) Socket | error {
-	ctx.UdpBind(address)
+  Context'Inner(ctx).UdpBind(address)
 }
 
-Connect = \(ctx Context, socket Socket, address string) Socket | error {
-	ctx.UdpConnect(socket, address)
+Connect = \(ctx Context, socket Socket, address string) none | error {
+  Context'Inner(ctx).UdpConnect(socket, address)
 }

@@ -2,6 +2,7 @@ import 'array
 import 'normalFile { NormalFile }
 import 'File'OpenOptions { OpenOptions }
 import 'File'Metadata { Metadata }
+import 'Udp'Socket as Udp
 
 import foreign "c" _pen_os_read_stdin \() FfiStringResult
 import foreign "c" _pen_os_read_limit_stdin \(number) FfiStringResult
@@ -20,8 +21,8 @@ import foreign "c" _pen_os_remove_directory \(string) FfiNoneResult
 import foreign "c" _pen_os_get_arguments \() array'Array
 import foreign "c" _pen_os_get_environment_variable \(string) FfiStringResult
 import foreign "c" _pen_os_read_metadata \(string) FfiMetadataResult
-import foreign "c" _pen_os_udp_bind \(string) Socket
-import foreign "c" _pen_os_udp_connect \(Socket, string) Socket
+import foreign "c" _pen_os_udp_bind \(string) Udp'Socket | error
+import foreign "c" _pen_os_udp_connect \(Udp'Socket, string) none | error
 
 
 type Context {
@@ -46,6 +47,8 @@ type InnerContext {
   GetArguments \() array'Array
   GetEnvironmentVariable \(string) FfiStringResult
   Metadata \(string) FfiMetadataResult
+  UdpBind \(string) Udp'Socket | error
+  UdpConnect \(Udp'Socket, string) none | error
 }
 
 type FfiOpenResult {
