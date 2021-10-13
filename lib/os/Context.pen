@@ -20,6 +20,9 @@ import foreign "c" _pen_os_remove_directory \(string) FfiNoneResult
 import foreign "c" _pen_os_get_arguments \() array'Array
 import foreign "c" _pen_os_get_environment_variable \(string) FfiStringResult
 import foreign "c" _pen_os_read_metadata \(string) FfiMetadataResult
+import foreign "c" _pen_os_udp_bind \(string) Socket
+import foreign "c" _pen_os_udp_connect \(Socket, string) Socket
+
 
 type Context {
   inner InnerContext
@@ -95,6 +98,8 @@ New = \() Context {
       GetArguments: _pen_os_get_arguments,
       GetEnvironmentVariable: _pen_os_get_environment_variable,
       Metadata: _pen_os_read_metadata,
+      UdpBind: _pen_os_udp_bind,
+      UdpConnect: _pen_os_udp_connect,
     }
   }
 }
