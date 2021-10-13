@@ -168,7 +168,7 @@ dependencies = [
 name = "core"
 version = "0.1.0"
 dependencies = [
- "pen-ffi 0.2.6 (registry+https://github.com/rust-lang/crates.io-index)",
+ "pen-ffi 0.2.6",
 ]
 
 [[package]]
@@ -563,12 +563,12 @@ dependencies = [
 [[package]]
 name = "pen-ffi"
 version = "0.2.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1295e8885b3f12de6e6462eff2450c30744ff5ef7978be255f50a5f5b5a94f72"
 
 [[package]]
 name = "pen-ffi"
-version = "0.2.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1295e8885b3f12de6e6462eff2450c30744ff5ef7978be255f50a5f5b5a94f72"
+version = "0.2.7"
 
 [[package]]
 name = "percent-encoding"
@@ -612,7 +612,7 @@ checksum = "ac74c624d6b2d21f425f752262f42188365d7b8ff1aff74c82e45136510a4857"
 name = "prelude"
 version = "0.1.0"
 dependencies = [
- "pen-ffi 0.2.6 (registry+https://github.com/rust-lang/crates.io-index)",
+ "pen-ffi 0.2.6",
 ]
 
 [[package]]
