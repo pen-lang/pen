@@ -5,6 +5,6 @@ Bind = \(ctx Context, address string) Socket | error {
   Context'Inner(ctx).UdpBind(address)
 }
 
-Connect = \(ctx Context, socket Socket, address string) none | error {
-  Context'Inner(ctx).UdpConnect(socket, address)
+Connect = \(ctx Context, s Socket, address string) none | error {
+  Context'Inner(ctx).UdpConnect(s, address)
 }
