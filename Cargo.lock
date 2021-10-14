@@ -168,7 +168,7 @@ dependencies = [
 name = "core"
 version = "0.1.0"
 dependencies = [
- "pen-ffi 0.2.6 (registry+https://github.com/rust-lang/crates.io-index)",
+ "pen-ffi 0.2.7 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -562,13 +562,13 @@ dependencies = [
 
 [[package]]
 name = "pen-ffi"
-version = "0.2.6"
+version = "0.2.7"
 
 [[package]]
 name = "pen-ffi"
-version = "0.2.6"
+version = "0.2.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1295e8885b3f12de6e6462eff2450c30744ff5ef7978be255f50a5f5b5a94f72"
+checksum = "13e8b7b0c0d0af737287da84f1d9f1c6036e7018ae01dec6ebe6fd90740225a9"
 
 [[package]]
 name = "percent-encoding"
@@ -612,7 +612,7 @@ checksum = "ac74c624d6b2d21f425f752262f42188365d7b8ff1aff74c82e45136510a4857"
 name = "prelude"
 version = "0.1.0"
 dependencies = [
- "pen-ffi 0.2.6 (registry+https://github.com/rust-lang/crates.io-index)",
+ "pen-ffi 0.2.7 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -629,9 +629,9 @@ dependencies = [
 
 [[package]]
 name = "proc-macro2"
-version = "1.0.29"
+version = "1.0.30"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b9f5105d4fdaab20335ca9565e106a5d9b82b6219b5ba735731124ac6711d23d"
+checksum = "edc3358ebc67bc8b7fa0c007f945b0b18226f78437d61bec735a9eb96b61ee70"
 dependencies = [
  "unicode-xid",
 ]
