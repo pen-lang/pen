@@ -42,6 +42,7 @@
     "termcolor",
     "toolchains",
     "toposort",
+    "udp",
     "wasi",
     "writability"
   ]
