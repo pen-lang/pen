@@ -8,6 +8,7 @@ mod open_file_options;
 mod result;
 mod stdio;
 mod string_array;
+mod udp;
 mod unreachable;
 mod utilities;
 
