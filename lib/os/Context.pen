@@ -21,8 +21,8 @@ import foreign "c" _pen_os_remove_directory \(string) FfiNoneResult
 import foreign "c" _pen_os_get_arguments \() array'Array
 import foreign "c" _pen_os_get_environment_variable \(string) FfiStringResult
 import foreign "c" _pen_os_read_metadata \(string) FfiMetadataResult
-import foreign "c" _pen_os_udp_bind \(string) Udp'Socket | error
-import foreign "c" _pen_os_udp_connect \(Udp'Socket, string) none | error
+import foreign "c" _pen_os_udp_bind \(string) FfiUdpSocketResult
+import foreign "c" _pen_os_udp_connect \(Udp'Socket, string) FfiNoneResult
 
 
 type Context {
@@ -47,8 +47,8 @@ type InnerContext {
   GetArguments \() array'Array
   GetEnvironmentVariable \(string) FfiStringResult
   Metadata \(string) FfiMetadataResult
-  UdpBind \(string) Udp'Socket | error
-  UdpConnect \(Udp'Socket, string) none | error
+  UdpBind \(string) FfiUdpSocketResult
+  UdpConnect \(Udp'Socket, string) FfiNoneResult
 }
 
 type FfiOpenResult {
@@ -78,6 +78,11 @@ type FfiReadDirectoryResult {
 
 type FfiMetadataResult {
   Metadata Metadata
+  Error number
+}
+
+type FfiUdpSocketResult {
+  Socket Udp'Socket
   Error number
 }
 

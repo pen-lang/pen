@@ -1,10 +1,23 @@
 import 'Context { Context }
 import 'Udp'Socket { Socket }
+import 'errorTranslator
 
 Bind = \(ctx Context, address string) Socket | error {
-  Context'Inner(ctx).UdpBind(address)
+  r = Context'Inner(ctx).UdpBind(address)
+
+  if r.Error == 0 {
+    r.Socket
+  } else {
+    error(errorTranslator'Translate(r.Error))
+  }
 }
 
 Connect = \(ctx Context, s Socket, address string) none | error {
-  Context'Inner(ctx).UdpConnect(s, address)
+  r = Context'Inner(ctx).UdpConnect(s, address)
+
+  if r.Error == 0 {
+    none
+  } else {
+    error(errorTranslator'Translate(r.Error))
+  }
 }
