@@ -25,20 +25,20 @@ impl UdpSocket {
 
 #[derive(Clone, Debug)]
 pub struct UdpSocketInner {
-    file: Arc<RwLock<net::UdpSocket>>,
+    socket: Arc<RwLock<net::UdpSocket>>,
 }
 
-ffi::type_information!(ffi_file, crate::udp::UdpSocketInner);
+ffi::type_information!(ffi_udp_socket, crate::udp::UdpSocketInner);
 
 impl UdpSocketInner {
     pub fn new(socket: net::UdpSocket) -> Self {
         Self {
-            file: RwLock::new(socket).into(),
+            socket: RwLock::new(socket).into(),
         }
     }
 
     pub fn get_mut(&self) -> LockResult<RwLockWriteGuard<'_, net::UdpSocket>> {
-        self.file.write()
+        self.socket.write()
     }
 }
 
