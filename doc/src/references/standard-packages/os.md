@@ -258,7 +258,7 @@ It binds a socket with an address.
 
 #### `Connect`
 
-It connects a socket with a peer address.
+It connects a socket to a peer address.
 
 ```pen
 \(ctx Context, s Socket, address string) none | error
