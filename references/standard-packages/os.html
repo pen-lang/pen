@@ -273,6 +273,53 @@
 <p>It reads file metadata.</p>
 <pre><code class="language-pen">\(ctx Context, path string) Metadata | error
 </code></pre>
+<h2 id="udp-module"><a class="header" href="#udp-module"><code>Udp</code> module</a></h2>
+<pre><code class="language-pen">import System'Udp
+</code></pre>
+<h3 id="functions-4"><a class="header" href="#functions-4">Functions</a></h3>
+<h4 id="bind"><a class="header" href="#bind"><code>Bind</code></a></h4>
+<p>It binds a socket with an address.</p>
+<pre><code class="language-pen">\(ctx Context, address string) Socket | error
+</code></pre>
+<h4 id="connect"><a class="header" href="#connect"><code>Connect</code></a></h4>
+<p>It connects a socket to a peer address.</p>
+<pre><code class="language-pen">\(ctx Context, s Socket, address string) none | error
+</code></pre>
+<h4 id="receive"><a class="header" href="#receive"><code>Receive</code></a></h4>
+<p>It receives a datagram from a connected address.</p>
+<pre><code class="language-pen">\(ctx Context, s Socket) string | error
+</code></pre>
+<h4 id="receivefrom"><a class="header" href="#receivefrom"><code>ReceiveFrom</code></a></h4>
+<p>It receives a datagram from any address.</p>
+<pre><code class="language-pen">\(ctx Context, s Socket) Datagram | error
+</code></pre>
+<h4 id="send"><a class="header" href="#send"><code>Send</code></a></h4>
+<p>It sends a datagram to a connected address.</p>
+<pre><code class="language-pen">\(ctx Context, s Socket, data string) none | error
+</code></pre>
+<h4 id="sendto"><a class="header" href="#sendto"><code>SendTo</code></a></h4>
+<p>It receives a datagram from an address.</p>
+<pre><code class="language-pen">\(ctx Context, s Socket, data string, address string) none | error
+</code></pre>
+<h2 id="udpsocket-module"><a class="header" href="#udpsocket-module"><code>Udp'Socket</code> module</a></h2>
+<pre><code class="language-pen">import System'Udp'Socket
+</code></pre>
+<h3 id="types-3"><a class="header" href="#types-3">Types</a></h3>
+<h4 id="socket"><a class="header" href="#socket"><code>Socket</code></a></h4>
+<p>It is a UDP socket.</p>
+<pre><code class="language-pen">type Socket { ... }
+</code></pre>
+<h2 id="udpdatagram-module"><a class="header" href="#udpdatagram-module"><code>Udp'Datagram</code> module</a></h2>
+<pre><code class="language-pen">import System'Udp'Datagram
+</code></pre>
+<h3 id="types-4"><a class="header" href="#types-4">Types</a></h3>
+<h4 id="datagram"><a class="header" href="#datagram"><code>Datagram</code></a></h4>
+<p>It is a UDP datagram.</p>
+<pre><code class="language-pen">type Datagram {
+  Data string
+  Address string
+}
+</code></pre>
 
                     </main>
 
