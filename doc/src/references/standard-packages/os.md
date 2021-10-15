@@ -325,5 +325,8 @@ import System'Udp'Datagram
 It is a UDP datagram.
 
 ```pen
-type Datagram { ... }
+type Datagram {
+  Data string
+  Address string
+}
 ```
