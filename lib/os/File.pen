@@ -94,7 +94,7 @@ Write = \(ctx Context, file File, data string) number | error {
   }?
 
   if r.Error == 0 {
-    r.Count
+    r.Value
   } else {
     error(errorTranslator'Translate(r.Error))
   }

@@ -13,6 +13,7 @@
     "clippy",
     "combinator",
     "concat",
+    "datagram",
     "dealloc",
     "deserialization",
     "displayer",
@@ -42,6 +43,7 @@
     "termcolor",
     "toolchains",
     "toposort",
+    "udp",
     "wasi",
     "writability"
   ]

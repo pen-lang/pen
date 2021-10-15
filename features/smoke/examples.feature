@@ -15,4 +15,6 @@ Feature: Examples
       | echo        |
       | hello-world |
       | ls          |
+      | udp-client  |
+      | udp-server  |
       | yes         |

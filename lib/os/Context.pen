@@ -2,15 +2,17 @@ import 'array
 import 'normalFile { NormalFile }
 import 'File'OpenOptions { OpenOptions }
 import 'File'Metadata { Metadata }
+import 'Udp'Datagram as Udp
+import 'Udp'Socket as Udp
 
 import foreign "c" _pen_os_read_stdin \() FfiStringResult
 import foreign "c" _pen_os_read_limit_stdin \(number) FfiStringResult
-import foreign "c" _pen_os_write_stdout \(string) FfiWriteResult
-import foreign "c" _pen_os_write_stderr \(string) FfiWriteResult
+import foreign "c" _pen_os_write_stdout \(string) FfiNumberResult
+import foreign "c" _pen_os_write_stderr \(string) FfiNumberResult
 import foreign "c" _pen_os_open_file \(string, OpenOptions) FfiOpenResult
 import foreign "c" _pen_os_read_file \(NormalFile) FfiStringResult
 import foreign "c" _pen_os_read_limit_file \(NormalFile, number) FfiStringResult
-import foreign "c" _pen_os_write_file \(NormalFile, string) FfiWriteResult
+import foreign "c" _pen_os_write_file \(NormalFile, string) FfiNumberResult
 import foreign "c" _pen_os_copy_file \(string, string) FfiNoneResult
 import foreign "c" _pen_os_move_file \(string, string) FfiNoneResult
 import foreign "c" _pen_os_remove_file \(string) FfiNoneResult
@@ -20,6 +22,13 @@ import foreign "c" _pen_os_remove_directory \(string) FfiNoneResult
 import foreign "c" _pen_os_get_arguments \() array'Array
 import foreign "c" _pen_os_get_environment_variable \(string) FfiStringResult
 import foreign "c" _pen_os_read_metadata \(string) FfiMetadataResult
+import foreign "c" _pen_os_udp_bind \(string) FfiUdpSocketResult
+import foreign "c" _pen_os_udp_connect \(Udp'Socket, string) FfiNoneResult
+import foreign "c" _pen_os_udp_receive \(Udp'Socket) FfiStringResult
+import foreign "c" _pen_os_udp_receive_from \(Udp'Socket) FfiUdpDatagramResult
+import foreign "c" _pen_os_udp_send \(Udp'Socket, string) FfiNumberResult
+import foreign "c" _pen_os_udp_send_to \(Udp'Socket, string, string) FfiNumberResult
+
 
 type Context {
   inner InnerContext
@@ -28,12 +37,12 @@ type Context {
 type InnerContext {
   ReadStdIn \() FfiStringResult
   ReadLimitStdIn \(number) FfiStringResult
-  WriteStdOut \(string) FfiWriteResult
-  WriteStdErr \(string) FfiWriteResult
+  WriteStdOut \(string) FfiNumberResult
+  WriteStdErr \(string) FfiNumberResult
   OpenFile \(string, OpenOptions) FfiOpenResult
   ReadFile \(NormalFile) FfiStringResult
   ReadLimitFile \(NormalFile, number) FfiStringResult
-  WriteFile \(NormalFile, string) FfiWriteResult
+  WriteFile \(NormalFile, string) FfiNumberResult
   CopyFile \(string, string) FfiNoneResult
   MoveFile \(string, string) FfiNoneResult
   RemoveFile \(string) FfiNoneResult
@@ -43,6 +52,12 @@ type InnerContext {
   GetArguments \() array'Array
   GetEnvironmentVariable \(string) FfiStringResult
   Metadata \(string) FfiMetadataResult
+  UdpBind \(string) FfiUdpSocketResult
+  UdpConnect \(Udp'Socket, string) FfiNoneResult
+  UdpReceive \(Udp'Socket) FfiStringResult
+  UdpReceiveFrom \(Udp'Socket) FfiUdpDatagramResult
+  UdpSend \(Udp'Socket, string) FfiNumberResult
+  UdpSendTo \(Udp'Socket, string, string) FfiNumberResult
 }
 
 type FfiOpenResult {
@@ -55,8 +70,8 @@ type FfiStringResult {
   Error number
 }
 
-type FfiWriteResult {
-  Count number
+type FfiNumberResult {
+  Value number
   Error number
 }
 
@@ -72,6 +87,16 @@ type FfiReadDirectoryResult {
 
 type FfiMetadataResult {
   Metadata Metadata
+  Error number
+}
+
+type FfiUdpSocketResult {
+  Socket Udp'Socket
+  Error number
+}
+
+type FfiUdpDatagramResult {
+  Datagram Udp'Datagram
   Error number
 }
 
@@ -95,6 +120,12 @@ New = \() Context {
       GetArguments: _pen_os_get_arguments,
       GetEnvironmentVariable: _pen_os_get_environment_variable,
       Metadata: _pen_os_read_metadata,
+      UdpBind: _pen_os_udp_bind,
+      UdpConnect: _pen_os_udp_connect,
+      UdpReceive: _pen_os_udp_receive,
+      UdpReceiveFrom: _pen_os_udp_receive_from,
+      UdpSend: _pen_os_udp_send,
+      UdpSendTo: _pen_os_udp_send_to,
     }
   }
 }

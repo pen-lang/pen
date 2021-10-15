@@ -239,3 +239,94 @@ It reads file metadata.
 ```pen
 \(ctx Context, path string) Metadata | error
 ```
+
+## `Udp` module
+
+```pen
+import System'Udp
+```
+
+### Functions
+
+#### `Bind`
+
+It binds a socket with an address.
+
+```pen
+\(ctx Context, address string) Socket | error
+```
+
+#### `Connect`
+
+It connects a socket to a peer address.
+
+```pen
+\(ctx Context, s Socket, address string) none | error
+```
+
+#### `Receive`
+
+It receives a datagram from a connected address.
+
+```pen
+\(ctx Context, s Socket) string | error
+```
+
+#### `ReceiveFrom`
+
+It receives a datagram from any address.
+
+```pen
+\(ctx Context, s Socket) Datagram | error
+```
+
+#### `Send`
+
+It sends a datagram to a connected address.
+
+```pen
+\(ctx Context, s Socket, data string) none | error
+```
+
+#### `SendTo`
+
+It receives a datagram from an address.
+
+```pen
+\(ctx Context, s Socket, data string, address string) none | error
+```
+
+## `Udp'Socket` module
+
+```pen
+import System'Udp'Socket
+```
+
+### Types
+
+#### `Socket`
+
+It is a UDP socket.
+
+```pen
+type Socket { ... }
+```
+
+## `Udp'Datagram` module
+
+```pen
+import System'Udp'Datagram
+```
+
+### Types
+
+#### `Datagram`
+
+It is a UDP datagram.
+
+```pen
+type Datagram {
+  Data string
+  Address string
+}
+```

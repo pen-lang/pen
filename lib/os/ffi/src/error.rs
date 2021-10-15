@@ -1,5 +1,6 @@
 use std::{env::VarError, str::Utf8Error, sync::PoisonError};
 
+#[derive(Debug)]
 pub enum OsError {
     EnvironmentVariableNotPresent,
     EnvironmentVariableNotUnicode,
