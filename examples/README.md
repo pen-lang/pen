@@ -9,6 +9,8 @@ Those are examples of applications and libraries written in Pen.
 - [`cat` command](cat)
 - [`ls` command](ls)
 - [`yes` command](yes)
+- [UDP client](udp-client)
+- [UDP server](udp-server)
 
 ## Libraries
 
