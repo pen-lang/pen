@@ -1,0 +1,15 @@
+type Arguments {
+  Host string
+}
+
+Parse = \(ss [string]) Arguments | error {
+  if [s, ...ss] = ss {
+    if [_, ..._] = ss {
+      error("too many arguments")
+    } else {
+      Arguments{Host: s()}
+    }
+  } else {
+    error("too few arguments")
+  }
+}

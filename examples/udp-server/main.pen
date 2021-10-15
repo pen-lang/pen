@@ -1,0 +1,37 @@
+import Console'Print
+import System'Context { Context }
+import System'Environment
+import System'File
+import System'Udp
+import System'Udp'Datagram
+import System'Udp'Socket { Socket }
+
+import 'arguments
+
+main = \(ctx Context) number {
+  if x = run(ctx) as none {
+    0
+  } else {
+    Print'Line(ctx, if x = source(x) as string {
+      x
+    } else {
+      "unknown error"
+    })
+
+    1
+  }
+}
+
+run = \(ctx Context) none | error {
+  args = arguments'Parse(Environment'Arguments(ctx))?
+
+  serve(ctx, Udp'Bind(ctx, args.Host)?)
+}
+
+serve = \(ctx Context, s Socket) none | error {
+  d = Udp'ReceiveFrom(ctx, s)?
+  Print'Line(ctx, d.Data)?
+  Udp'SendTo(ctx, s, d.Data, d.Address)?
+
+  serve(ctx, s)
+}
