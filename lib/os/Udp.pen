@@ -1,4 +1,5 @@
 import 'Context { Context }
+import 'Udp'Datagram { Datagram }
 import 'Udp'Socket { Socket }
 import 'errorTranslator
 
@@ -17,6 +18,26 @@ Connect = \(ctx Context, s Socket, address string) none | error {
 
   if r.Error == 0 {
     none
+  } else {
+    error(errorTranslator'Translate(r.Error))
+  }
+}
+
+ReceiveFrom = \(ctx Context, s Socket) Datagram | error {
+  r = Context'Inner(ctx).UdpReceiveFrom(s)
+
+  if r.Error == 0 {
+    r.Datagram
+  } else {
+    error(errorTranslator'Translate(r.Error))
+  }
+}
+
+SendTo = \(ctx Context, s Socket, data string, address string) number | error {
+  r = Context'Inner(ctx).UdpSendTo(s, data, address)
+
+  if r.Error == 0 {
+    r.Value
   } else {
     error(errorTranslator'Translate(r.Error))
   }
