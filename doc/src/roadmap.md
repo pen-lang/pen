@@ -11,19 +11,22 @@ Items are ordered by priority.
 - [x] Basic OS interface
 - [x] WASM backend
 - [x] Stream-based list type
-- [ ] Testing framework
-- [ ] Serialization / deserialization
-- [ ] Map type
-- [ ] Code formatter
-- [ ] Asynchronous operations
-- [ ] Parallel computation
+- [x] Testing framework
 - [ ] Full OS interface
   - [ ] TCP/UDP sockets
   - [ ] Process
-- [ ] IDE/editor support
-  - [ ] Language server
+  - [ ] Time
+- [ ] Asynchronous operations
+- [ ] Parallel computation
+- [ ] Map type
+- [ ] Vector type
+- [ ] Code formatter
+- [ ] Documentation generator
+- [ ] Serialization / deserialization
 - [ ] Mutable state
   - [ ] Thread safety
+- [ ] IDE/editor support
+  - [ ] Language server
 - [ ] Web browser interface
 - [ ] Binary support
 - [ ] Self-hosting
