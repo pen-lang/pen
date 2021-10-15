@@ -24,7 +24,9 @@ import foreign "c" _pen_os_get_environment_variable \(string) FfiStringResult
 import foreign "c" _pen_os_read_metadata \(string) FfiMetadataResult
 import foreign "c" _pen_os_udp_bind \(string) FfiUdpSocketResult
 import foreign "c" _pen_os_udp_connect \(Udp'Socket, string) FfiNoneResult
+import foreign "c" _pen_os_udp_receive \(Udp'Socket) FfiStringResult
 import foreign "c" _pen_os_udp_receive_from \(Udp'Socket) FfiUdpDatagramResult
+import foreign "c" _pen_os_udp_send \(Udp'Socket, string) FfiNumberResult
 import foreign "c" _pen_os_udp_send_to \(Udp'Socket, string, string) FfiNumberResult
 
 
@@ -52,7 +54,9 @@ type InnerContext {
   Metadata \(string) FfiMetadataResult
   UdpBind \(string) FfiUdpSocketResult
   UdpConnect \(Udp'Socket, string) FfiNoneResult
+  UdpReceive \(Udp'Socket) FfiStringResult
   UdpReceiveFrom \(Udp'Socket) FfiUdpDatagramResult
+  UdpSend \(Udp'Socket, string) FfiNumberResult
   UdpSendTo \(Udp'Socket, string, string) FfiNumberResult
 }
 
@@ -118,7 +122,9 @@ New = \() Context {
       Metadata: _pen_os_read_metadata,
       UdpBind: _pen_os_udp_bind,
       UdpConnect: _pen_os_udp_connect,
+      UdpReceive: _pen_os_udp_receive,
       UdpReceiveFrom: _pen_os_udp_receive_from,
+      UdpSend: _pen_os_udp_send,
       UdpSendTo: _pen_os_udp_send_to,
     }
   }

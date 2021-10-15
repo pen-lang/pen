@@ -78,6 +78,22 @@ fn connect(socket: ffi::Arc<UdpSocket>, address: ffi::ByteString) -> Result<(), 
 }
 
 #[no_mangle]
+extern "C" fn _pen_os_udp_receive(
+    socket: ffi::Arc<UdpSocket>,
+) -> ffi::Arc<FfiResult<ffi::ByteString>> {
+    ffi::Arc::new(receive(socket).into())
+}
+
+fn receive(socket: ffi::Arc<UdpSocket>) -> Result<ffi::ByteString, OsError> {
+    let mut buffer = vec![0; MAX_UDP_PAYLOAD_SIZE];
+    let size = socket.lock()?.recv(&mut buffer)?;
+
+    buffer.truncate(size);
+
+    Ok(buffer.into())
+}
+
+#[no_mangle]
 extern "C" fn _pen_os_udp_receive_from(
     socket: ffi::Arc<UdpSocket>,
 ) -> ffi::Arc<FfiResult<ffi::Arc<UdpDatagram>>> {
@@ -95,6 +111,20 @@ fn receive_from(socket: ffi::Arc<UdpSocket>) -> Result<ffi::Arc<UdpDatagram>, Os
         address: address.to_string().into(),
     }
     .into())
+}
+
+#[no_mangle]
+extern "C" fn _pen_os_udp_send(
+    socket: ffi::Arc<UdpSocket>,
+    data: ffi::ByteString,
+) -> ffi::Arc<FfiResult<ffi::Number>> {
+    ffi::Arc::new(send(socket, data).into())
+}
+
+fn send(socket: ffi::Arc<UdpSocket>, data: ffi::ByteString) -> Result<ffi::Number, OsError> {
+    let size = socket.lock()?.send(data.as_slice())?;
+
+    Ok((size as f64).into())
 }
 
 #[no_mangle]

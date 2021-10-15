@@ -23,11 +23,31 @@ Connect = \(ctx Context, s Socket, address string) none | error {
   }
 }
 
+Receive = \(ctx Context, s Socket) string | error {
+  r = Context'Inner(ctx).UdpReceive(s)
+
+  if r.Error == 0 {
+    r.Value
+  } else {
+    error(errorTranslator'Translate(r.Error))
+  }
+}
+
 ReceiveFrom = \(ctx Context, s Socket) Datagram | error {
   r = Context'Inner(ctx).UdpReceiveFrom(s)
 
   if r.Error == 0 {
     r.Datagram
+  } else {
+    error(errorTranslator'Translate(r.Error))
+  }
+}
+
+Send = \(ctx Context, s Socket, data string) number | error {
+  r = Context'Inner(ctx).UdpSend(s, data)
+
+  if r.Error == 0 {
+    r.Value
   } else {
     error(errorTranslator'Translate(r.Error))
   }
