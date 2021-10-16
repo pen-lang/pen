@@ -2,6 +2,7 @@ import 'array
 import 'normalFile { NormalFile }
 import 'File'OpenOptions { OpenOptions }
 import 'File'Metadata { Metadata }
+import 'Tcp'AcceptedStream as Tcp
 import 'Tcp'Listener as Tcp
 import 'Tcp'Stream as Tcp
 import 'Udp'Datagram as Udp
@@ -26,7 +27,7 @@ import foreign "c" _pen_os_get_environment_variable \(string) FfiStringResult
 import foreign "c" _pen_os_read_metadata \(string) FfiMetadataResult
 import foreign "c" _pen_os_tcp_bind \(string) FfiTcpListenerResult
 import foreign "c" _pen_os_tcp_connect \(string) FfiTcpStreamResult
-import foreign "c" _pen_os_tcp_accept \(Tcp'Listener) FfiTcpStreamResult
+import foreign "c" _pen_os_tcp_accept \(Tcp'Listener) FfiTcpAcceptedStreamResult
 import foreign "c" _pen_os_tcp_receive \(Tcp'Stream) FfiStringResult
 import foreign "c" _pen_os_tcp_send \(Tcp'Stream, string) FfiNumberResult
 import foreign "c" _pen_os_udp_bind \(string) FfiUdpSocketResult
@@ -61,7 +62,7 @@ type InnerContext {
   Metadata \(string) FfiMetadataResult
   TcpBind \(string) FfiTcpListenerResult
   TcpConnect \(string) FfiTcpStreamResult
-  TcpAccept \(Tcp'Listener) FfiTcpStreamResult
+  TcpAccept \(Tcp'Listener) FfiTcpAcceptedStreamResult
   TcpReceive \(Tcp'Stream) FfiStringResult
   TcpSend \(Tcp'Stream, string) FfiNumberResult
   UdpBind \(string) FfiUdpSocketResult
@@ -109,6 +110,11 @@ type FfiTcpListenerResult {
 
 type FfiTcpStreamResult {
   Stream Tcp'Stream
+  Error number
+}
+
+type FfiTcpAcceptedStreamResult {
+  Stream Tcp'AcceptedStream
   Error number
 }
 

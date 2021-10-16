@@ -1,0 +1,6 @@
+import 'Tcp'Stream { Stream }
+
+type AcceptedStream {
+  Stream Stream
+  Address string
+}

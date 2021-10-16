@@ -80,6 +80,12 @@ impl TcpStreamInner {
     }
 }
 
+#[derive(Clone, Default)]
+pub struct TcpAcceptedStream {
+    pub stream: ffi::Arc<TcpStream>,
+    pub address: ffi::ByteString,
+}
+
 #[no_mangle]
 extern "C" fn _pen_os_tcp_bind(
     address: ffi::ByteString,
@@ -105,14 +111,18 @@ fn connect(address: ffi::ByteString) -> Result<(), OsError> {
 #[no_mangle]
 extern "C" fn _pen_os_tcp_accept(
     listener: ffi::Arc<TcpListener>,
-) -> ffi::Arc<FfiResult<ffi::Arc<TcpStream>>> {
+) -> ffi::Arc<FfiResult<ffi::Arc<TcpAcceptedStream>>> {
     ffi::Arc::new(accept(listener).into())
 }
 
-fn accept(listener: ffi::Arc<TcpListener>) -> Result<ffi::Arc<TcpStream>, OsError> {
-    let (stream, _) = listener.lock()?.accept()?;
+fn accept(listener: ffi::Arc<TcpListener>) -> Result<ffi::Arc<TcpAcceptedStream>, OsError> {
+    let (stream, address) = listener.lock()?.accept()?;
 
-    Ok(TcpStream::new(stream).into())
+    Ok(TcpAcceptedStream {
+        stream: TcpStream::new(stream).into(),
+        address: address.to_string().into(),
+    }
+    .into())
 }
 
 #[no_mangle]

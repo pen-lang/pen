@@ -1,4 +1,5 @@
 import 'Context { Context }
+import 'Tcp'AcceptedStream { AcceptedStream }
 import 'Tcp'Listener { Listener }
 import 'Tcp'Stream { Stream }
 import 'errorTranslator
@@ -23,7 +24,7 @@ Connect = \(ctx Context, address string) Stream | error {
   }
 }
 
-Accept = \(ctx Context, l Listener) Stream | error {
+Accept = \(ctx Context, l Listener) AcceptedStream | error {
   r = Context'Inner(ctx).TcpAccept(l)
 
   if r.Error == 0 {
