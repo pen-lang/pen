@@ -17,4 +17,5 @@ Feature: Examples
       | ls          |
       | udp-client  |
       | udp-server  |
+      | tcp-server  |
       | yes         |
