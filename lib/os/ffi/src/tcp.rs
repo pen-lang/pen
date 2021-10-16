@@ -98,14 +98,17 @@ fn bind(address: ffi::ByteString) -> Result<ffi::Arc<TcpListener>, OsError> {
 }
 
 #[no_mangle]
-extern "C" fn _pen_os_tcp_connect(address: ffi::ByteString) -> ffi::Arc<FfiResult<ffi::None>> {
+extern "C" fn _pen_os_tcp_connect(
+    address: ffi::ByteString,
+) -> ffi::Arc<FfiResult<ffi::Arc<TcpStream>>> {
     ffi::Arc::new(connect(address).into())
 }
 
-fn connect(address: ffi::ByteString) -> Result<(), OsError> {
-    net::TcpStream::connect(str::from_utf8(address.as_slice())?)?;
-
-    Ok(())
+fn connect(address: ffi::ByteString) -> Result<ffi::Arc<TcpStream>, OsError> {
+    Ok(TcpStream::new(net::TcpStream::connect(str::from_utf8(
+        address.as_slice(),
+    )?)?)
+    .into())
 }
 
 #[no_mangle]
