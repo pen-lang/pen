@@ -35,5 +35,5 @@ serve = \(ctx Context, l Listener) none | error {
   Print'Line(ctx, d)?
   Tcp'Send(ctx, s.Stream, d)?
 
-  serve(ctx, l)?
+  serve(ctx, l)
 }
