@@ -11,6 +11,7 @@ Those are examples of applications and libraries written in Pen.
 - [`yes` command](yes)
 - [UDP client](udp-client)
 - [UDP server](udp-server)
+- [TCP client](tcp-client)
 - [TCP server](tcp-server)
 
 ## Libraries
