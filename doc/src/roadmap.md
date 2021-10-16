@@ -12,10 +12,8 @@ Items are ordered by priority.
 - [x] WASM backend
 - [x] Stream-based list type
 - [x] Testing framework
-- [ ] Full OS interface
-  - [ ] TCP/UDP sockets
-  - [ ] Process
-  - [ ] Time
+- [ ] TCP/UDP sockets
+- [ ] System time
 - [ ] Asynchronous operations
 - [ ] Parallel computation
 - [ ] Map type
@@ -27,6 +25,7 @@ Items are ordered by priority.
   - [ ] Thread safety
 - [ ] IDE/editor support
   - [ ] Language server
+- [ ] Process management
 - [ ] Web browser interface
 - [ ] Binary support
 - [ ] Self-hosting
