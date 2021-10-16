@@ -1,8 +1,6 @@
 import Console'Print
-import Core'Number
 import System'Context { Context }
 import System'Environment
-import System'File
 import System'Tcp
 import System'Tcp'Stream { Stream }
 
@@ -25,13 +23,9 @@ main = \(ctx Context) number {
 run = \(ctx Context) none | error {
   args = arguments'Parse(Environment'Arguments(ctx))?
 
-  talk(ctx, Tcp'Connect(ctx, args.Host)?, 1)
-}
+  s = Tcp'Connect(ctx, args.Host)?
+  Tcp'Send(ctx, s, "Hello, world!")?
+  Print'Line(ctx, Tcp'Receive(ctx, s, 1024)?)?
 
-talk = \(ctx Context, s Stream, count number) none | error {
-  Tcp'Send(ctx, s, Number'String(count))?
-  d = Tcp'Receive(ctx, s, 1024)?
-  Print'Line(ctx, d)?
-
-  talk(ctx, s, count + 1)?
+  none
 }
