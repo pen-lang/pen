@@ -34,8 +34,8 @@ Accept = \(ctx Context, l Listener) AcceptedStream | error {
   }
 }
 
-Receive = \(ctx Context, s Stream) string | error {
-  r = Context'Inner(ctx).TcpReceive(s)
+Receive = \(ctx Context, s Stream, limit number) string | error {
+  r = Context'Inner(ctx).TcpReceive(s, limit)
 
   if r.Error == 0 {
     r.Value

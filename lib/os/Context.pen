@@ -28,7 +28,7 @@ import foreign "c" _pen_os_read_metadata \(string) FfiMetadataResult
 import foreign "c" _pen_os_tcp_bind \(string) FfiTcpListenerResult
 import foreign "c" _pen_os_tcp_connect \(string) FfiTcpStreamResult
 import foreign "c" _pen_os_tcp_accept \(Tcp'Listener) FfiTcpAcceptedStreamResult
-import foreign "c" _pen_os_tcp_receive \(Tcp'Stream) FfiStringResult
+import foreign "c" _pen_os_tcp_receive \(Tcp'Stream, number) FfiStringResult
 import foreign "c" _pen_os_tcp_send \(Tcp'Stream, string) FfiNumberResult
 import foreign "c" _pen_os_udp_bind \(string) FfiUdpSocketResult
 import foreign "c" _pen_os_udp_connect \(Udp'Socket, string) FfiNoneResult
@@ -63,7 +63,7 @@ type InnerContext {
   TcpBind \(string) FfiTcpListenerResult
   TcpConnect \(string) FfiTcpStreamResult
   TcpAccept \(Tcp'Listener) FfiTcpAcceptedStreamResult
-  TcpReceive \(Tcp'Stream) FfiStringResult
+  TcpReceive \(Tcp'Stream, number) FfiStringResult
   TcpSend \(Tcp'Stream, string) FfiNumberResult
   UdpBind \(string) FfiUdpSocketResult
   UdpConnect \(Udp'Socket, string) FfiNoneResult
