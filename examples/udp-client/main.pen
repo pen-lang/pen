@@ -37,5 +37,5 @@ talk = \(ctx Context, s Socket, count number) none | error {
   d = Udp'Receive(ctx, s)?
   Print'Line(ctx, d)?
 
-  talk(ctx, s, count + 1)?
+  talk(ctx, s, count + 1)
 }
