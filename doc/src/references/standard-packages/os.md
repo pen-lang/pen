@@ -261,7 +261,7 @@ It creates a listener bound to an server-side address.
 It accepts a client connection and creates its stream.
 
 ```pen
-\(ctx Context, address string) Listener | error
+\(ctx Context, l Listener) AcceptedStream | error
 ```
 
 #### `Connect`
