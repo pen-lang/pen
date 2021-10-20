@@ -1,11 +1,11 @@
 import Console'Print
-import Core'Number
 import System'Context { Context }
 import System'Environment
 import System'File
-import System'Udp
-import System'Udp'Datagram
-import System'Udp'Socket { Socket }
+import System'Tcp
+import System'Tcp'AcceptedStream
+import System'Tcp'Listener { Listener }
+import System'Tcp'Stream { Stream }
 
 import 'arguments
 
@@ -26,16 +26,14 @@ main = \(ctx Context) number {
 run = \(ctx Context) none | error {
   args = arguments'Parse(Environment'Arguments(ctx))?
 
-  s = Udp'Bind(ctx, "localhost:0")?
-  Udp'Connect(ctx, s, args.Host)?
-
-  talk(ctx, s, 1)
+  serve(ctx, Tcp'Bind(ctx, args.Host)?)
 }
 
-talk = \(ctx Context, s Socket, count number) none | error {
-  Udp'Send(ctx, s, Number'String(count))?
-  d = Udp'Receive(ctx, s)?
+serve = \(ctx Context, l Listener) none | error {
+  s = Tcp'Accept(ctx, l)?
+  d = Tcp'Receive(ctx, s.Stream, 1024)?
   Print'Line(ctx, d)?
+  Tcp'Send(ctx, s.Stream, d)?
 
-  talk(ctx, s, count + 1)
+  serve(ctx, l)
 }

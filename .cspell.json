@@ -39,6 +39,7 @@
     "subninja",
     "subtyping",
     "tailcallopt",
+    "tcp",
     "tempfile",
     "termcolor",
     "toolchains",

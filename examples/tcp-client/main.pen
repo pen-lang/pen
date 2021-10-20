@@ -1,0 +1,31 @@
+import Console'Print
+import System'Context { Context }
+import System'Environment
+import System'Tcp
+import System'Tcp'Stream { Stream }
+
+import 'arguments
+
+main = \(ctx Context) number {
+  if x = run(ctx) as none {
+    0
+  } else {
+    Print'Line(ctx, if x = source(x) as string {
+      x
+    } else {
+      "unknown error"
+    })
+
+    1
+  }
+}
+
+run = \(ctx Context) none | error {
+  args = arguments'Parse(Environment'Arguments(ctx))?
+
+  s = Tcp'Connect(ctx, args.Host)?
+  Tcp'Send(ctx, s, "Hello, world!")?
+  Print'Line(ctx, Tcp'Receive(ctx, s, 1024)?)?
+
+  none
+}

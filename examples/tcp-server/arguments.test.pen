@@ -1,0 +1,8 @@
+import Test'Assert
+import 'arguments
+
+ParseArgument = \() none | error {
+  args = arguments'Parse([string "localhost:12345"])?
+
+  Assert'EqualStrings(args.Host, "localhost:12345")
+}

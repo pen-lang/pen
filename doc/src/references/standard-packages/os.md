@@ -240,6 +240,105 @@ It reads file metadata.
 \(ctx Context, path string) Metadata | error
 ```
 
+## `Tcp` module
+
+```pen
+import System'Tcp
+```
+
+### Functions
+
+#### `Bind`
+
+It creates a listener bound to an server-side address.
+
+```pen
+\(ctx Context, address string) Listener | error
+```
+
+#### `Accept`
+
+It accepts a client connection and creates its stream.
+
+```pen
+\(ctx Context, l Listener) AcceptedStream | error
+```
+
+#### `Connect`
+
+It creates a stream connected to a peer address.
+
+```pen
+\(ctx Context, address string) Stream | error
+```
+
+#### `Receive`
+
+It receives data from a peer through a stream with a size limit in bytes.
+
+```pen
+\(ctx Context, s Stream, limit number) string | error
+```
+
+#### `Send`
+
+It sends data to a peer through a stream.
+
+```pen
+\(ctx Context, s Stream, data string) none | error
+```
+
+## `Tcp'Listener` module
+
+```pen
+import System'Tcp'Listener
+```
+
+### Types
+
+#### `Listener`
+
+It is a TCP listener to listen for client connections.
+
+```pen
+type Listener { ... }
+```
+
+## `Tcp'Stream` module
+
+```pen
+import System'Tcp'Stream
+```
+
+### Types
+
+#### `Stream`
+
+It is a TCP stream.
+
+```pen
+type Stream { ...  }
+```
+
+## `Tcp'AcceptedStream` module
+
+```pen
+import System'Tcp'AcceptedStream
+```
+
+### Types
+
+#### `AcceptedStream`
+
+It is a stream accepted on a server containing a client address.
+
+```pen
+type AcceptedStream {
+  Stream Stream
+  Address string
+}
+```
+
 ## `Udp` module
 
 ```pen

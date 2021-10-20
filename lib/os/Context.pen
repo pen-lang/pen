@@ -2,6 +2,9 @@ import 'array
 import 'normalFile { NormalFile }
 import 'File'OpenOptions { OpenOptions }
 import 'File'Metadata { Metadata }
+import 'Tcp'AcceptedStream as Tcp
+import 'Tcp'Listener as Tcp
+import 'Tcp'Stream as Tcp
 import 'Udp'Datagram as Udp
 import 'Udp'Socket as Udp
 
@@ -22,6 +25,11 @@ import foreign "c" _pen_os_remove_directory \(string) FfiNoneResult
 import foreign "c" _pen_os_get_arguments \() array'Array
 import foreign "c" _pen_os_get_environment_variable \(string) FfiStringResult
 import foreign "c" _pen_os_read_metadata \(string) FfiMetadataResult
+import foreign "c" _pen_os_tcp_bind \(string) FfiTcpListenerResult
+import foreign "c" _pen_os_tcp_connect \(string) FfiTcpStreamResult
+import foreign "c" _pen_os_tcp_accept \(Tcp'Listener) FfiTcpAcceptedStreamResult
+import foreign "c" _pen_os_tcp_receive \(Tcp'Stream, number) FfiStringResult
+import foreign "c" _pen_os_tcp_send \(Tcp'Stream, string) FfiNumberResult
 import foreign "c" _pen_os_udp_bind \(string) FfiUdpSocketResult
 import foreign "c" _pen_os_udp_connect \(Udp'Socket, string) FfiNoneResult
 import foreign "c" _pen_os_udp_receive \(Udp'Socket) FfiStringResult
@@ -52,6 +60,11 @@ type InnerContext {
   GetArguments \() array'Array
   GetEnvironmentVariable \(string) FfiStringResult
   Metadata \(string) FfiMetadataResult
+  TcpBind \(string) FfiTcpListenerResult
+  TcpConnect \(string) FfiTcpStreamResult
+  TcpAccept \(Tcp'Listener) FfiTcpAcceptedStreamResult
+  TcpReceive \(Tcp'Stream, number) FfiStringResult
+  TcpSend \(Tcp'Stream, string) FfiNumberResult
   UdpBind \(string) FfiUdpSocketResult
   UdpConnect \(Udp'Socket, string) FfiNoneResult
   UdpReceive \(Udp'Socket) FfiStringResult
@@ -90,6 +103,21 @@ type FfiMetadataResult {
   Error number
 }
 
+type FfiTcpListenerResult {
+  Listener Tcp'Listener
+  Error number
+}
+
+type FfiTcpStreamResult {
+  Stream Tcp'Stream
+  Error number
+}
+
+type FfiTcpAcceptedStreamResult {
+  Stream Tcp'AcceptedStream
+  Error number
+}
+
 type FfiUdpSocketResult {
   Socket Udp'Socket
   Error number
@@ -120,6 +148,11 @@ New = \() Context {
       GetArguments: _pen_os_get_arguments,
       GetEnvironmentVariable: _pen_os_get_environment_variable,
       Metadata: _pen_os_read_metadata,
+      TcpBind: _pen_os_tcp_bind,
+      TcpConnect: _pen_os_tcp_connect,
+      TcpAccept: _pen_os_tcp_accept,
+      TcpReceive: _pen_os_tcp_receive,
+      TcpSend: _pen_os_tcp_send,
       UdpBind: _pen_os_udp_bind,
       UdpConnect: _pen_os_udp_connect,
       UdpReceive: _pen_os_udp_receive,
