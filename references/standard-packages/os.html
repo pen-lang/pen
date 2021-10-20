@@ -273,19 +273,70 @@
 <p>It reads file metadata.</p>
 <pre><code class="language-pen">\(ctx Context, path string) Metadata | error
 </code></pre>
-<h2 id="udp-module"><a class="header" href="#udp-module"><code>Udp</code> module</a></h2>
-<pre><code class="language-pen">import System'Udp
+<h2 id="tcp-module"><a class="header" href="#tcp-module"><code>Tcp</code> module</a></h2>
+<pre><code class="language-pen">import System'Tcp
 </code></pre>
 <h3 id="functions-4"><a class="header" href="#functions-4">Functions</a></h3>
 <h4 id="bind"><a class="header" href="#bind"><code>Bind</code></a></h4>
+<p>It creates a listener bound to an server-side address.</p>
+<pre><code class="language-pen">\(ctx Context, address string) Listener | error
+</code></pre>
+<h4 id="accept"><a class="header" href="#accept"><code>Accept</code></a></h4>
+<p>It accepts a client connection and creates its stream.</p>
+<pre><code class="language-pen">\(ctx Context, l Listener) AcceptedStream | error
+</code></pre>
+<h4 id="connect"><a class="header" href="#connect"><code>Connect</code></a></h4>
+<p>It creates a stream connected to a peer address.</p>
+<pre><code class="language-pen">\(ctx Context, address string) Stream | error
+</code></pre>
+<h4 id="receive"><a class="header" href="#receive"><code>Receive</code></a></h4>
+<p>It receives data from a peer through a stream with a size limit in bytes.</p>
+<pre><code class="language-pen">\(ctx Context, s Stream, limit number) string | error
+</code></pre>
+<h4 id="send"><a class="header" href="#send"><code>Send</code></a></h4>
+<p>It sends data to a peer through a stream.</p>
+<pre><code class="language-pen">\(ctx Context, s Stream, data string) none | error
+</code></pre>
+<h2 id="tcplistener-module"><a class="header" href="#tcplistener-module"><code>Tcp'Listener</code> module</a></h2>
+<pre><code class="language-pen">import System'Tcp'Listener
+</code></pre>
+<h3 id="types-3"><a class="header" href="#types-3">Types</a></h3>
+<h4 id="listener"><a class="header" href="#listener"><code>Listener</code></a></h4>
+<p>It is a TCP listener to listen for client connections.</p>
+<pre><code class="language-pen">type Listener { ... }
+</code></pre>
+<h2 id="tcpstream-module"><a class="header" href="#tcpstream-module"><code>Tcp'Stream</code> module</a></h2>
+<pre><code class="language-pen">import System'Tcp'Stream
+</code></pre>
+<h3 id="types-4"><a class="header" href="#types-4">Types</a></h3>
+<h4 id="stream"><a class="header" href="#stream"><code>Stream</code></a></h4>
+<p>It is a TCP stream.</p>
+<pre><code class="language-pen">type Stream { ...  }
+</code></pre>
+<h2 id="tcpacceptedstream-module"><a class="header" href="#tcpacceptedstream-module"><code>Tcp'AcceptedStream</code> module</a></h2>
+<pre><code class="language-pen">import System'Tcp'AcceptedStream
+</code></pre>
+<h3 id="types-5"><a class="header" href="#types-5">Types</a></h3>
+<h4 id="acceptedstream"><a class="header" href="#acceptedstream"><code>AcceptedStream</code></a></h4>
+<p>It is a stream accepted on a server containing a client address.</p>
+<pre><code class="language-pen">type AcceptedStream {
+  Stream Stream
+  Address string
+}
+</code></pre>
+<h2 id="udp-module"><a class="header" href="#udp-module"><code>Udp</code> module</a></h2>
+<pre><code class="language-pen">import System'Udp
+</code></pre>
+<h3 id="functions-5"><a class="header" href="#functions-5">Functions</a></h3>
+<h4 id="bind-1"><a class="header" href="#bind-1"><code>Bind</code></a></h4>
 <p>It binds a socket with an address.</p>
 <pre><code class="language-pen">\(ctx Context, address string) Socket | error
 </code></pre>
-<h4 id="connect"><a class="header" href="#connect"><code>Connect</code></a></h4>
+<h4 id="connect-1"><a class="header" href="#connect-1"><code>Connect</code></a></h4>
 <p>It connects a socket to a peer address.</p>
 <pre><code class="language-pen">\(ctx Context, s Socket, address string) none | error
 </code></pre>
-<h4 id="receive"><a class="header" href="#receive"><code>Receive</code></a></h4>
+<h4 id="receive-1"><a class="header" href="#receive-1"><code>Receive</code></a></h4>
 <p>It receives a datagram from a connected address.</p>
 <pre><code class="language-pen">\(ctx Context, s Socket) string | error
 </code></pre>
@@ -293,7 +344,7 @@
 <p>It receives a datagram from any address.</p>
 <pre><code class="language-pen">\(ctx Context, s Socket) Datagram | error
 </code></pre>
-<h4 id="send"><a class="header" href="#send"><code>Send</code></a></h4>
+<h4 id="send-1"><a class="header" href="#send-1"><code>Send</code></a></h4>
 <p>It sends a datagram to a connected address.</p>
 <pre><code class="language-pen">\(ctx Context, s Socket, data string) none | error
 </code></pre>
@@ -304,7 +355,7 @@
 <h2 id="udpsocket-module"><a class="header" href="#udpsocket-module"><code>Udp'Socket</code> module</a></h2>
 <pre><code class="language-pen">import System'Udp'Socket
 </code></pre>
-<h3 id="types-3"><a class="header" href="#types-3">Types</a></h3>
+<h3 id="types-6"><a class="header" href="#types-6">Types</a></h3>
 <h4 id="socket"><a class="header" href="#socket"><code>Socket</code></a></h4>
 <p>It is a UDP socket.</p>
 <pre><code class="language-pen">type Socket { ... }
@@ -312,7 +363,7 @@
 <h2 id="udpdatagram-module"><a class="header" href="#udpdatagram-module"><code>Udp'Datagram</code> module</a></h2>
 <pre><code class="language-pen">import System'Udp'Datagram
 </code></pre>
-<h3 id="types-4"><a class="header" href="#types-4">Types</a></h3>
+<h3 id="types-7"><a class="header" href="#types-7">Types</a></h3>
 <h4 id="datagram"><a class="header" href="#datagram"><code>Datagram</code></a></h4>
 <p>It is a UDP datagram.</p>
 <pre><code class="language-pen">type Datagram {
