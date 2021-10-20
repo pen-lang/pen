@@ -317,9 +317,7 @@ import System'Tcp'Stream
 It is a TCP stream.
 
 ```pen
-type Stream {
-  ...
-}
+type Stream { ...  }
 ```
 
 ## `Tcp'AcceptedStream` module
