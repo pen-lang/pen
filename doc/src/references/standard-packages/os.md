@@ -266,7 +266,7 @@ It accepts a client connection and creates its stream.
 
 #### `Connect`
 
-It creates a stream connencted to a peer address.
+It creates a stream connected to a peer address.
 
 ```pen
 \(ctx Context, address string) Stream | error
@@ -298,7 +298,7 @@ import System'Tcp'Listener
 
 #### `Listener`
 
-It is a TCP listener to listen for client connnections.
+It is a TCP listener to listen for client connections.
 
 ```pen
 type Listener { ... }
