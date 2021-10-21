@@ -3,7 +3,7 @@ use crate::{
     error::ApplicationError,
     infra::{FilePath, Infrastructure, OBJECT_DIRECTORY},
 };
-use std::{collections::HashMap, error::Error};
+use std::{collections::BTreeMap, error::Error};
 
 #[allow(clippy::too_many_arguments)]
 pub fn resolve(
@@ -62,7 +62,7 @@ pub fn resolve(
             ),
         ))
     })
-    .collect::<Result<HashMap<_, _>, Box<dyn Error>>>()?;
+    .collect::<Result<BTreeMap<_, _>, Box<dyn Error>>>()?;
 
     infrastructure.file_system.write(
         dependency_file,

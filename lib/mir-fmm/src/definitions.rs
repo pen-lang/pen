@@ -1,12 +1,12 @@
 use super::error::CompileError;
 use crate::{closures, entry_functions, types};
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 
 pub fn compile_definition(
     module_builder: &fmm::build::ModuleBuilder,
     definition: &mir::ir::Definition,
-    global_variables: &HashMap<String, fmm::build::TypedExpression>,
-    types: &HashMap<String, mir::types::RecordBody>,
+    global_variables: &BTreeMap<String, fmm::build::TypedExpression>,
+    types: &BTreeMap<String, mir::types::RecordBody>,
 ) -> Result<(), CompileError> {
     module_builder.define_variable(
         definition.name(),

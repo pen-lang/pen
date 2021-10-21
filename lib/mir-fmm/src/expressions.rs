@@ -1,15 +1,15 @@
 use super::error::CompileError;
 use crate::{calls, closures, entry_functions, records, reference_count, types, variants};
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 
 pub fn compile(
     module_builder: &fmm::build::ModuleBuilder,
     instruction_builder: &fmm::build::InstructionBuilder,
     expression: &mir::ir::Expression,
-    variables: &HashMap<String, fmm::build::TypedExpression>,
-    types: &HashMap<String, mir::types::RecordBody>,
+    variables: &BTreeMap<String, fmm::build::TypedExpression>,
+    types: &BTreeMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    let compile = |expression, variables: &HashMap<_, _>| {
+    let compile = |expression, variables: &BTreeMap<_, _>| {
         compile(
             module_builder,
             instruction_builder,
@@ -185,8 +185,8 @@ fn compile_if(
     module_builder: &fmm::build::ModuleBuilder,
     instruction_builder: &fmm::build::InstructionBuilder,
     if_: &mir::ir::If,
-    variables: &HashMap<String, fmm::build::TypedExpression>,
-    types: &HashMap<String, mir::types::RecordBody>,
+    variables: &BTreeMap<String, fmm::build::TypedExpression>,
+    types: &BTreeMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     let compile = |instruction_builder: &fmm::build::InstructionBuilder, expression| {
         compile(
@@ -213,8 +213,8 @@ fn compile_case(
     module_builder: &fmm::build::ModuleBuilder,
     instruction_builder: &fmm::build::InstructionBuilder,
     case: &mir::ir::Case,
-    variables: &HashMap<String, fmm::build::TypedExpression>,
-    types: &HashMap<String, mir::types::RecordBody>,
+    variables: &BTreeMap<String, fmm::build::TypedExpression>,
+    types: &BTreeMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     let argument = compile(
         module_builder,
@@ -242,8 +242,8 @@ fn compile_alternatives(
     argument: fmm::build::TypedExpression,
     alternatives: &[mir::ir::Alternative],
     default_alternative: Option<&mir::ir::DefaultAlternative>,
-    variables: &HashMap<String, fmm::build::TypedExpression>,
-    types: &HashMap<String, mir::types::RecordBody>,
+    variables: &BTreeMap<String, fmm::build::TypedExpression>,
+    types: &BTreeMap<String, mir::types::RecordBody>,
 ) -> Result<Option<fmm::build::TypedExpression>, CompileError> {
     Ok(match alternatives {
         [] => default_alternative
@@ -328,8 +328,8 @@ fn compile_let(
     module_builder: &fmm::build::ModuleBuilder,
     instruction_builder: &fmm::build::InstructionBuilder,
     let_: &mir::ir::Let,
-    variables: &HashMap<String, fmm::build::TypedExpression>,
-    types: &HashMap<String, mir::types::RecordBody>,
+    variables: &BTreeMap<String, fmm::build::TypedExpression>,
+    types: &BTreeMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     let compile = |expression, variables| {
         compile(
@@ -344,8 +344,8 @@ fn compile_let(
     compile(
         let_.expression(),
         &variables
-            .clone()
-            .drain()
+            .iter()
+            .map(|(name, expression)| (name.clone(), expression.clone()))
             .chain(vec![(
                 let_.name().into(),
                 compile(let_.bound_expression(), variables)?,
@@ -358,8 +358,8 @@ fn compile_let_recursive(
     module_builder: &fmm::build::ModuleBuilder,
     instruction_builder: &fmm::build::InstructionBuilder,
     let_: &mir::ir::LetRecursive,
-    variables: &HashMap<String, fmm::build::TypedExpression>,
-    types: &HashMap<String, mir::types::RecordBody>,
+    variables: &BTreeMap<String, fmm::build::TypedExpression>,
+    types: &BTreeMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     let closure_pointer = reference_count::allocate_heap(
         instruction_builder,
@@ -420,8 +420,8 @@ fn compile_arithmetic_operation(
     module_builder: &fmm::build::ModuleBuilder,
     instruction_builder: &fmm::build::InstructionBuilder,
     operation: &mir::ir::ArithmeticOperation,
-    variables: &HashMap<String, fmm::build::TypedExpression>,
-    types: &HashMap<String, mir::types::RecordBody>,
+    variables: &BTreeMap<String, fmm::build::TypedExpression>,
+    types: &BTreeMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::ir::ArithmeticOperation, CompileError> {
     let compile = |expression| {
         compile(
@@ -456,8 +456,8 @@ fn compile_comparison_operation(
     module_builder: &fmm::build::ModuleBuilder,
     instruction_builder: &fmm::build::InstructionBuilder,
     operation: &mir::ir::ComparisonOperation,
-    variables: &HashMap<String, fmm::build::TypedExpression>,
-    types: &HashMap<String, mir::types::RecordBody>,
+    variables: &BTreeMap<String, fmm::build::TypedExpression>,
+    types: &BTreeMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::ir::ComparisonOperation, CompileError> {
     let compile = |expression| {
         compile(
@@ -494,8 +494,8 @@ fn compile_try_operation(
     module_builder: &fmm::build::ModuleBuilder,
     instruction_builder: &fmm::build::InstructionBuilder,
     operation: &mir::ir::TryOperation,
-    variables: &HashMap<String, fmm::build::TypedExpression>,
-    types: &HashMap<String, mir::types::RecordBody>,
+    variables: &BTreeMap<String, fmm::build::TypedExpression>,
+    types: &BTreeMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     let operand = compile(
         module_builder,

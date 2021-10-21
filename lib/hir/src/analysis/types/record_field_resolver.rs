@@ -1,13 +1,13 @@
 use super::{type_canonicalizer, TypeError};
 use crate::types::*;
 use position::Position;
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 
 pub fn resolve<'a>(
     type_: &Type,
     position: &Position,
-    types: &HashMap<String, Type>,
-    records: &'a HashMap<String, Vec<RecordField>>,
+    types: &BTreeMap<String, Type>,
+    records: &'a BTreeMap<String, Vec<RecordField>>,
 ) -> Result<&'a [RecordField], TypeError> {
     let record = type_canonicalizer::canonicalize_record(type_, types)?
         .ok_or_else(|| TypeError::RecordExpected(position.clone()))?;

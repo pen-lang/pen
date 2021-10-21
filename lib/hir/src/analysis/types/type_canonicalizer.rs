@@ -1,9 +1,9 @@
 use super::{type_resolver, TypeError};
 use crate::types::*;
-use std::collections::{BTreeSet, HashMap};
+use std::collections::{BTreeMap, BTreeSet};
 
 // Canonicalize a type deeply.
-pub fn canonicalize(type_: &Type, types: &HashMap<String, Type>) -> Result<Type, TypeError> {
+pub fn canonicalize(type_: &Type, types: &BTreeMap<String, Type>) -> Result<Type, TypeError> {
     Ok(match &type_ {
         Type::Function(function) => Function::new(
             function
@@ -35,26 +35,26 @@ pub fn canonicalize(type_: &Type, types: &HashMap<String, Type>) -> Result<Type,
 
 pub fn canonicalize_function(
     type_: &Type,
-    types: &HashMap<String, Type>,
+    types: &BTreeMap<String, Type>,
 ) -> Result<Option<Function>, TypeError> {
     Ok(canonicalize(type_, types)?.into_function())
 }
 
 pub fn canonicalize_list(
     type_: &Type,
-    types: &HashMap<String, Type>,
+    types: &BTreeMap<String, Type>,
 ) -> Result<Option<List>, TypeError> {
     Ok(canonicalize(type_, types)?.into_list())
 }
 
 pub fn canonicalize_record(
     type_: &Type,
-    types: &HashMap<String, Type>,
+    types: &BTreeMap<String, Type>,
 ) -> Result<Option<Record>, TypeError> {
     Ok(canonicalize(type_, types)?.into_record())
 }
 
-fn canonicalize_union(union: &Union, types: &HashMap<String, Type>) -> Result<Type, TypeError> {
+fn canonicalize_union(union: &Union, types: &BTreeMap<String, Type>) -> Result<Type, TypeError> {
     Ok(collect_types(&union.clone().into(), types)?
         .into_iter()
         .reduce(|one, other| {
@@ -69,7 +69,10 @@ fn canonicalize_union(union: &Union, types: &HashMap<String, Type>) -> Result<Ty
         .unwrap())
 }
 
-fn collect_types(type_: &Type, types: &HashMap<String, Type>) -> Result<BTreeSet<Type>, TypeError> {
+fn collect_types(
+    type_: &Type,
+    types: &BTreeMap<String, Type>,
+) -> Result<BTreeSet<Type>, TypeError> {
     Ok(match type_ {
         Type::Union(union) => collect_types(union.lhs(), types)?
             .into_iter()

@@ -16,7 +16,7 @@ use hir::{
     ir::*,
     types::{self, Type},
 };
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 
 const CLOSURE_NAME: &str = "$closure";
 const THUNK_NAME: &str = "$thunk";
@@ -416,7 +416,7 @@ fn compile_record_fields(
     fields: &[RecordField],
     field_types: &[types::RecordField],
     convert_fields_to_expression: &dyn Fn(
-        &HashMap<String, mir::ir::Expression>,
+        &BTreeMap<String, mir::ir::Expression>,
     ) -> mir::ir::Expression,
     type_context: &TypeContext,
 ) -> Result<mir::ir::Expression, CompileError> {

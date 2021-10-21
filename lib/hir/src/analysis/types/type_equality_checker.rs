@@ -1,8 +1,8 @@
 use super::{type_canonicalizer, TypeError};
 use crate::types::Type;
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 
-pub fn check(one: &Type, other: &Type, types: &HashMap<String, Type>) -> Result<bool, TypeError> {
+pub fn check(one: &Type, other: &Type, types: &BTreeMap<String, Type>) -> Result<bool, TypeError> {
     check_canonical(
         &type_canonicalizer::canonicalize(one, types)?,
         &type_canonicalizer::canonicalize(other, types)?,
@@ -13,7 +13,7 @@ pub fn check(one: &Type, other: &Type, types: &HashMap<String, Type>) -> Result<
 fn check_canonical(
     one: &Type,
     other: &Type,
-    types: &HashMap<String, Type>,
+    types: &BTreeMap<String, Type>,
 ) -> Result<bool, TypeError> {
     let check = |one, other| check_canonical(one, other, types);
 

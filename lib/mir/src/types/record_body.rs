@@ -1,6 +1,6 @@
 use super::type_::Type;
 
-#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct RecordBody {
     fields: Vec<Type>,
 }

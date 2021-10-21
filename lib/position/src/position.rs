@@ -1,9 +1,5 @@
 use serde::{Deserialize, Serialize};
-use std::{
-    cmp::Ordering,
-    fmt::Display,
-    hash::{Hash, Hasher},
-};
+use std::{cmp::Ordering, fmt::Display};
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Position {
@@ -67,10 +63,6 @@ impl PartialOrd for Position {
     fn partial_cmp(&self, _: &Self) -> Option<Ordering> {
         Some(Ordering::Equal)
     }
-}
-
-impl Hash for Position {
-    fn hash<H: Hasher>(&self, _: &mut H) {}
 }
 
 #[cfg(test)]

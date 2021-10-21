@@ -1,6 +1,6 @@
 use super::error::CompileError;
 use crate::{closures, expressions, reference_count, types};
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 
 const CLOSURE_NAME: &str = "_closure";
 
@@ -8,8 +8,8 @@ pub fn compile(
     module_builder: &fmm::build::ModuleBuilder,
     definition: &mir::ir::Definition,
     global: bool,
-    variables: &HashMap<String, fmm::build::TypedExpression>,
-    types: &HashMap<String, mir::types::RecordBody>,
+    variables: &BTreeMap<String, fmm::build::TypedExpression>,
+    types: &BTreeMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     Ok(if definition.is_thunk() {
         compile_thunk(module_builder, definition, global, variables, types)?
@@ -22,8 +22,8 @@ fn compile_non_thunk(
     module_builder: &fmm::build::ModuleBuilder,
     definition: &mir::ir::Definition,
     global: bool,
-    variables: &HashMap<String, fmm::build::TypedExpression>,
-    types: &HashMap<String, mir::types::RecordBody>,
+    variables: &BTreeMap<String, fmm::build::TypedExpression>,
+    types: &BTreeMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     module_builder.define_anonymous_function(
         compile_arguments(definition, types),
@@ -46,8 +46,8 @@ fn compile_thunk(
     module_builder: &fmm::build::ModuleBuilder,
     definition: &mir::ir::Definition,
     global: bool,
-    variables: &HashMap<String, fmm::build::TypedExpression>,
-    types: &HashMap<String, mir::types::RecordBody>,
+    variables: &BTreeMap<String, fmm::build::TypedExpression>,
+    types: &BTreeMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     compile_initial_thunk_entry(
         module_builder,
@@ -65,8 +65,8 @@ fn compile_body(
     instruction_builder: &fmm::build::InstructionBuilder,
     definition: &mir::ir::Definition,
     global: bool,
-    variables: &HashMap<String, fmm::build::TypedExpression>,
-    types: &HashMap<String, mir::types::RecordBody>,
+    variables: &BTreeMap<String, fmm::build::TypedExpression>,
+    types: &BTreeMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     let environment_pointer = compile_environment_pointer(definition, types)?;
 
@@ -124,8 +124,8 @@ fn compile_initial_thunk_entry(
     global: bool,
     normal_entry_function: fmm::build::TypedExpression,
     lock_entry_function: fmm::build::TypedExpression,
-    variables: &HashMap<String, fmm::build::TypedExpression>,
-    types: &HashMap<String, mir::types::RecordBody>,
+    variables: &BTreeMap<String, fmm::build::TypedExpression>,
+    types: &BTreeMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     let entry_function_name = module_builder.generate_name();
     let entry_function_type = types::compile_entry_function(definition.type_(), types);
@@ -246,7 +246,7 @@ fn compile_initial_thunk_entry(
 fn compile_normal_thunk_entry(
     module_builder: &fmm::build::ModuleBuilder,
     definition: &mir::ir::Definition,
-    types: &HashMap<String, mir::types::RecordBody>,
+    types: &BTreeMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     module_builder.define_anonymous_function(
         compile_arguments(definition, types),
@@ -259,7 +259,7 @@ fn compile_normal_thunk_entry(
 fn compile_locked_thunk_entry(
     module_builder: &fmm::build::ModuleBuilder,
     definition: &mir::ir::Definition,
-    types: &HashMap<String, mir::types::RecordBody>,
+    types: &BTreeMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     let entry_function_name = module_builder.generate_name();
 
@@ -301,7 +301,7 @@ fn compile_locked_thunk_entry(
 fn compile_normal_body(
     instruction_builder: &fmm::build::InstructionBuilder,
     definition: &mir::ir::Definition,
-    types: &HashMap<String, mir::types::RecordBody>,
+    types: &BTreeMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::ir::Block, CompileError> {
     let value = instruction_builder.load(compile_thunk_value_pointer(definition, types)?)?;
 
@@ -317,21 +317,21 @@ fn compile_normal_body(
 
 fn compile_entry_function_pointer(
     definition: &mir::ir::Definition,
-    types: &HashMap<String, mir::types::RecordBody>,
+    types: &BTreeMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     closures::compile_entry_function_pointer(compile_closure_pointer(definition.type_(), types)?)
 }
 
 fn compile_drop_function_pointer(
     definition: &mir::ir::Definition,
-    types: &HashMap<String, mir::types::RecordBody>,
+    types: &BTreeMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     closures::compile_drop_function_pointer(compile_closure_pointer(definition.type_(), types)?)
 }
 
 fn compile_arguments(
     definition: &mir::ir::Definition,
-    types: &HashMap<String, mir::types::RecordBody>,
+    types: &BTreeMap<String, mir::types::RecordBody>,
 ) -> Vec<fmm::ir::Argument> {
     vec![fmm::ir::Argument::new(
         CLOSURE_NAME,
@@ -346,14 +346,14 @@ fn compile_arguments(
 
 fn compile_thunk_value_pointer(
     definition: &mir::ir::Definition,
-    types: &HashMap<String, mir::types::RecordBody>,
+    types: &BTreeMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     Ok(fmm::build::union_address(compile_payload_pointer(definition, types)?, 1)?.into())
 }
 
 fn compile_environment_pointer(
     definition: &mir::ir::Definition,
-    types: &HashMap<String, mir::types::RecordBody>,
+    types: &BTreeMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     let payload_pointer = compile_payload_pointer(definition, types)?;
 
@@ -366,7 +366,7 @@ fn compile_environment_pointer(
 
 fn compile_payload_pointer(
     definition: &mir::ir::Definition,
-    types: &HashMap<String, mir::types::RecordBody>,
+    types: &BTreeMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     closures::compile_payload_pointer(fmm::build::bit_cast(
         fmm::types::Pointer::new(types::compile_sized_closure(definition, types)),
@@ -376,7 +376,7 @@ fn compile_payload_pointer(
 
 fn compile_closure_pointer(
     function_type: &mir::types::Function,
-    types: &HashMap<String, mir::types::RecordBody>,
+    types: &BTreeMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, fmm::build::BuildError> {
     Ok(fmm::build::bit_cast(
         fmm::types::Pointer::new(types::compile_unsized_closure(function_type, types)),

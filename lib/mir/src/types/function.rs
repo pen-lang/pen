@@ -1,7 +1,7 @@
 use super::type_::Type;
 use std::sync::Arc;
 
-#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Debug, Eq, Ord, PartialEq, PartialOrd)]
 pub struct Function {
     arguments: Vec<Type>,
     result: Arc<Type>,

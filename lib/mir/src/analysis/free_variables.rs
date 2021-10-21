@@ -1,11 +1,11 @@
 use crate::ir::*;
-use std::collections::HashSet;
+use std::collections::BTreeSet;
 
-pub fn find_free_variables(expression: &Expression) -> HashSet<String> {
+pub fn find_free_variables(expression: &Expression) -> BTreeSet<String> {
     find_in_expression(expression)
 }
 
-fn find_in_expression(expression: &Expression) -> HashSet<String> {
+fn find_in_expression(expression: &Expression) -> BTreeSet<String> {
     match expression {
         Expression::ArithmeticOperation(operation) => find_in_expression(operation.lhs())
             .into_iter()
@@ -59,18 +59,18 @@ fn find_in_expression(expression: &Expression) -> HashSet<String> {
         Expression::Boolean(_)
         | Expression::ByteString(_)
         | Expression::None
-        | Expression::Number(_) => HashSet::new(),
+        | Expression::Number(_) => BTreeSet::new(),
     }
 }
 
-fn find_in_case(case: &Case) -> HashSet<String> {
+fn find_in_case(case: &Case) -> BTreeSet<String> {
     find_in_expression(case.argument())
         .into_iter()
         .chain(case.alternatives().iter().flat_map(|alternative| {
             find_in_expression(alternative.expression())
                 .into_iter()
                 .filter(|variable| variable != alternative.name())
-                .collect::<HashSet<_>>()
+                .collect::<BTreeSet<_>>()
         }))
         .chain(
             case.default_alternative()
@@ -79,13 +79,13 @@ fn find_in_case(case: &Case) -> HashSet<String> {
                     find_in_expression(alternative.expression())
                         .into_iter()
                         .filter(|variable| variable != alternative.name())
-                        .collect::<HashSet<_>>()
+                        .collect::<BTreeSet<_>>()
                 }),
         )
         .collect()
 }
 
-fn find_in_definition(definition: &Definition) -> HashSet<String> {
+fn find_in_definition(definition: &Definition) -> BTreeSet<String> {
     find_in_expression(definition.body())
         .into_iter()
         .filter(|variable| {

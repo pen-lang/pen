@@ -4,11 +4,11 @@ use hir::{
     ir::*,
     types::{self, Type},
 };
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 
 pub fn extract_from_expression(
     expression: &Expression,
-    variables: &HashMap<String, Type>,
+    variables: &BTreeMap<String, Type>,
     type_context: &TypeContext,
 ) -> Result<Type, CompileError> {
     let extract_from_expression =

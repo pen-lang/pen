@@ -1,8 +1,8 @@
 use super::type_extractor;
 use hir::{ir::*, types::Type};
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 
-pub fn create_from_module(module: &Module) -> HashMap<String, Type> {
+pub fn create_from_module(module: &Module) -> BTreeMap<String, Type> {
     module
         .declarations()
         .iter()

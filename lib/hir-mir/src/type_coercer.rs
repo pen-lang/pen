@@ -5,7 +5,7 @@ use hir::{
     types::{self, Type},
 };
 use position::Position;
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 
 pub fn coerce_types(module: &Module, type_context: &TypeContext) -> Result<Module, CompileError> {
     let variables = environment_creator::create_from_module(module);
@@ -26,7 +26,7 @@ pub fn coerce_types(module: &Module, type_context: &TypeContext) -> Result<Modul
 
 fn transform_definition(
     definition: &Definition,
-    variables: &HashMap<String, Type>,
+    variables: &BTreeMap<String, Type>,
     type_context: &TypeContext,
 ) -> Result<Definition, CompileError> {
     Ok(Definition::new(
@@ -41,7 +41,7 @@ fn transform_definition(
 
 fn transform_lambda(
     lambda: &Lambda,
-    variables: &HashMap<String, Type>,
+    variables: &BTreeMap<String, Type>,
     type_context: &TypeContext,
 ) -> Result<Lambda, CompileError> {
     let variables = variables
@@ -70,7 +70,7 @@ fn transform_lambda(
 
 fn transform_expression(
     expression: &Expression,
-    variables: &HashMap<String, Type>,
+    variables: &BTreeMap<String, Type>,
     type_context: &TypeContext,
 ) -> Result<Expression, CompileError> {
     let transform_expression =
@@ -381,7 +381,7 @@ fn transform_record_fields(
     fields: &[RecordField],
     position: &Position,
     record_type: &Type,
-    variables: &HashMap<String, Type>,
+    variables: &BTreeMap<String, Type>,
     type_context: &TypeContext,
 ) -> Result<Vec<RecordField>, CompileError> {
     let field_types = record_field_resolver::resolve(
@@ -415,7 +415,7 @@ fn transform_record_fields(
 fn coerce_expression(
     expression: &Expression,
     upper_type: &Type,
-    variables: &HashMap<String, Type>,
+    variables: &BTreeMap<String, Type>,
     type_context: &TypeContext,
 ) -> Result<Expression, CompileError> {
     let lower_type = type_extractor::extract_from_expression(expression, variables, type_context)?;

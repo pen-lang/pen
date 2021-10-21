@@ -16,7 +16,7 @@ pub fn check_types(module: &Module) -> Result<(), TypeCheckError> {
         .iter()
         .map(|definition| (definition.name(), definition.type_()))
         .collect();
-    let mut variables = HashMap::<&str, Type>::new();
+    let mut variables = BTreeMap::<&str, Type>::new();
 
     for declaration in module.foreign_declarations() {
         variables.insert(declaration.name(), declaration.type_().clone().into());
@@ -47,8 +47,8 @@ pub fn check_types(module: &Module) -> Result<(), TypeCheckError> {
 
 fn check_definition(
     definition: &Definition,
-    variables: &HashMap<&str, Type>,
-    types: &HashMap<&str, &types::RecordBody>,
+    variables: &BTreeMap<&str, Type>,
+    types: &BTreeMap<&str, &types::RecordBody>,
 ) -> Result<(), TypeCheckError> {
     let mut variables = variables.clone();
 
@@ -73,9 +73,9 @@ fn check_definition(
 
 fn check_expression(
     expression: &Expression,
-    variables: &HashMap<&str, Type>,
+    variables: &BTreeMap<&str, Type>,
     result_type: &Type,
-    types: &HashMap<&str, &types::RecordBody>,
+    types: &BTreeMap<&str, &types::RecordBody>,
 ) -> Result<Type, TypeCheckError> {
     let check_expression =
         |expression, variables| check_expression(expression, variables, result_type, types);
@@ -248,11 +248,11 @@ fn check_expression(
 
 fn check_case(
     case: &Case,
-    variables: &HashMap<&str, Type>,
+    variables: &BTreeMap<&str, Type>,
     result_type: &Type,
-    types: &HashMap<&str, &types::RecordBody>,
+    types: &BTreeMap<&str, &types::RecordBody>,
 ) -> Result<Type, TypeCheckError> {
-    let check_expression = |expression: &Expression, variables: &HashMap<&str, Type>| {
+    let check_expression = |expression: &Expression, variables: &BTreeMap<&str, Type>| {
         check_expression(expression, variables, result_type, types)
     };
 
@@ -296,7 +296,7 @@ fn check_case(
 
 fn check_variable(
     variable: &Variable,
-    variables: &HashMap<&str, Type>,
+    variables: &BTreeMap<&str, Type>,
 ) -> Result<Type, TypeCheckError> {
     variables
         .get(variable.name())

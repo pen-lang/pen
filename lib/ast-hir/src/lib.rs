@@ -13,12 +13,12 @@ use hir::{
     ir,
 };
 use imported_module::ImportedModule;
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 
 pub fn compile(
     module: &ast::Module,
     prefix: &str,
-    module_interfaces: &HashMap<ast::ModulePath, interface::Module>,
+    module_interfaces: &BTreeMap<ast::ModulePath, interface::Module>,
     prelude_module_interfaces: &[interface::Module],
 ) -> Result<ir::Module, CompileError> {
     let imported_modules = module

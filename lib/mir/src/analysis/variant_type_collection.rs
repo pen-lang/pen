@@ -1,7 +1,7 @@
 use crate::{ir::*, types::Type};
 use std::collections::*;
 
-pub fn collect_variant_types(module: &Module) -> HashSet<Type> {
+pub fn collect_variant_types(module: &Module) -> BTreeSet<Type> {
     module
         .definitions()
         .iter()
@@ -9,34 +9,39 @@ pub fn collect_variant_types(module: &Module) -> HashSet<Type> {
         .collect()
 }
 
-fn collect_from_definition(definition: &Definition) -> HashSet<Type> {
+fn collect_from_definition(definition: &Definition) -> BTreeSet<Type> {
     collect_from_expression(definition.body())
 }
 
-fn collect_from_expression(expression: &Expression) -> HashSet<Type> {
+fn collect_from_expression(expression: &Expression) -> BTreeSet<Type> {
     match expression {
         Expression::ArithmeticOperation(operation) => collect_from_expression(operation.lhs())
-            .drain()
+            .iter()
+            .cloned()
             .chain(collect_from_expression(operation.rhs()))
             .collect(),
         Expression::Case(case) => collect_from_case(case),
         Expression::CloneVariables(clone) => collect_from_expression(clone.expression()),
         Expression::ComparisonOperation(operation) => collect_from_expression(operation.lhs())
-            .drain()
+            .iter()
+            .cloned()
             .chain(collect_from_expression(operation.rhs()))
             .collect(),
         Expression::DropVariables(drop) => collect_from_expression(drop.expression()),
         Expression::Call(call) => collect_from_expression(call.function())
-            .drain()
+            .iter()
+            .cloned()
             .chain(call.arguments().iter().flat_map(collect_from_expression))
             .collect(),
         Expression::If(if_) => collect_from_expression(if_.condition())
-            .drain()
+            .iter()
+            .cloned()
             .chain(collect_from_expression(if_.then()))
             .chain(collect_from_expression(if_.else_()))
             .collect(),
         Expression::Let(let_) => collect_from_expression(let_.bound_expression())
-            .drain()
+            .iter()
+            .cloned()
             .chain(collect_from_expression(let_.expression()))
             .collect(),
         Expression::LetRecursive(let_) => collect_from_definition(let_.definition())
@@ -66,7 +71,7 @@ fn collect_from_expression(expression: &Expression) -> HashSet<Type> {
     }
 }
 
-fn collect_from_case(case: &Case) -> HashSet<Type> {
+fn collect_from_case(case: &Case) -> BTreeSet<Type> {
     collect_from_expression(case.argument())
         .into_iter()
         .chain(case.alternatives().iter().flat_map(|alternative| {

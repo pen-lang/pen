@@ -2,9 +2,9 @@ use crate::{
     ir::*,
     types::{self, Type},
 };
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 
-pub fn collect(module: &Module) -> HashMap<String, Type> {
+pub fn collect(module: &Module) -> BTreeMap<String, Type> {
     module
         .type_definitions()
         .iter()

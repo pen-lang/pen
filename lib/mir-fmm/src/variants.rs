@@ -1,5 +1,5 @@
 use crate::{types, CompileError};
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 
 pub const VARIANT_TAG_FIELD_INDEX: usize = 0;
 pub const VARIANT_PAYLOAD_FIELD_INDEX: usize = 1;
@@ -23,7 +23,7 @@ pub fn compile_unboxed_payload(
     builder: &fmm::build::InstructionBuilder,
     payload: &fmm::build::TypedExpression,
     type_: &mir::types::Type,
-    types: &HashMap<String, mir::types::RecordBody>,
+    types: &BTreeMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     Ok(compile_union_bit_cast(
         builder,

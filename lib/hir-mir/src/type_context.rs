@@ -8,12 +8,12 @@ use hir::{
     ir::*,
     types::{self, Type},
 };
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 
 #[derive(Debug)]
 pub struct TypeContext {
-    types: HashMap<String, Type>,
-    records: HashMap<String, Vec<types::RecordField>>,
+    types: BTreeMap<String, Type>,
+    records: BTreeMap<String, Vec<types::RecordField>>,
     list_type_configuration: ListTypeConfiguration,
     string_type_configuration: StringTypeConfiguration,
     error_type_configuration: ErrorTypeConfiguration,
@@ -41,8 +41,8 @@ impl TypeContext {
 
     #[cfg(test)]
     pub fn dummy(
-        types: HashMap<String, Type>,
-        records: HashMap<String, Vec<types::RecordField>>,
+        types: BTreeMap<String, Type>,
+        records: BTreeMap<String, Vec<types::RecordField>>,
     ) -> Self {
         use super::{
             error_type_configuration::ERROR_TYPE_CONFIGURATION,
@@ -59,11 +59,11 @@ impl TypeContext {
         }
     }
 
-    pub fn types(&self) -> &HashMap<String, Type> {
+    pub fn types(&self) -> &BTreeMap<String, Type> {
         &self.types
     }
 
-    pub fn records(&self) -> &HashMap<String, Vec<types::RecordField>> {
+    pub fn records(&self) -> &BTreeMap<String, Vec<types::RecordField>> {
         &self.records
     }
 

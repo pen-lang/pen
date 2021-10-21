@@ -1,10 +1,10 @@
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 
 pub const FUNCTION_ARGUMENT_OFFSET: usize = 1;
 
 pub fn compile(
     type_: &mir::types::Type,
-    types: &HashMap<String, mir::types::RecordBody>,
+    types: &BTreeMap<String, mir::types::RecordBody>,
 ) -> fmm::types::Type {
     match type_ {
         mir::types::Type::Boolean => fmm::types::Primitive::Boolean.into(),
@@ -67,7 +67,7 @@ pub fn compile_type_id(type_: &mir::types::Type) -> String {
 
 pub fn compile_record(
     record: &mir::types::Record,
-    types: &HashMap<String, mir::types::RecordBody>,
+    types: &BTreeMap<String, mir::types::RecordBody>,
 ) -> fmm::types::Type {
     if is_record_boxed(record, types) {
         fmm::types::Pointer::new(fmm::types::Record::new(vec![])).into()
@@ -79,14 +79,14 @@ pub fn compile_record(
 // TODO Unbox small non-recursive records.
 pub fn is_record_boxed(
     record: &mir::types::Record,
-    types: &HashMap<String, mir::types::RecordBody>,
+    types: &BTreeMap<String, mir::types::RecordBody>,
 ) -> bool {
     !types[record.name()].fields().is_empty()
 }
 
 pub fn compile_unboxed_record(
     record: &mir::types::Record,
-    types: &HashMap<String, mir::types::RecordBody>,
+    types: &BTreeMap<String, mir::types::RecordBody>,
 ) -> fmm::types::Record {
     fmm::types::Record::new(
         types[record.name()]
@@ -99,7 +99,7 @@ pub fn compile_unboxed_record(
 
 pub fn compile_sized_closure(
     definition: &mir::ir::Definition,
-    types: &HashMap<String, mir::types::RecordBody>,
+    types: &BTreeMap<String, mir::types::RecordBody>,
 ) -> fmm::types::Record {
     compile_raw_closure(
         compile_entry_function(definition.type_(), types),
@@ -109,7 +109,7 @@ pub fn compile_sized_closure(
 
 pub fn compile_closure_payload(
     definition: &mir::ir::Definition,
-    types: &HashMap<String, mir::types::RecordBody>,
+    types: &BTreeMap<String, mir::types::RecordBody>,
 ) -> fmm::types::Type {
     if definition.is_thunk() {
         compile_thunk_payload(definition, types).into()
@@ -120,7 +120,7 @@ pub fn compile_closure_payload(
 
 pub fn compile_thunk_payload(
     definition: &mir::ir::Definition,
-    types: &HashMap<String, mir::types::RecordBody>,
+    types: &BTreeMap<String, mir::types::RecordBody>,
 ) -> fmm::types::Union {
     fmm::types::Union::new(vec![
         compile_environment(definition, types).into(),
@@ -130,7 +130,7 @@ pub fn compile_thunk_payload(
 
 pub fn compile_unsized_closure(
     function: &mir::types::Function,
-    types: &HashMap<String, mir::types::RecordBody>,
+    types: &BTreeMap<String, mir::types::RecordBody>,
 ) -> fmm::types::Record {
     compile_raw_closure(
         compile_entry_function(function, types),
@@ -151,7 +151,7 @@ pub fn compile_raw_closure(
 
 pub fn compile_environment(
     definition: &mir::ir::Definition,
-    types: &HashMap<String, mir::types::RecordBody>,
+    types: &BTreeMap<String, mir::types::RecordBody>,
 ) -> fmm::types::Record {
     fmm::types::Record::new(
         definition
@@ -168,7 +168,7 @@ pub fn compile_unsized_environment() -> fmm::types::Record {
 
 pub fn compile_entry_function(
     type_: &mir::types::Function,
-    types: &HashMap<String, mir::types::RecordBody>,
+    types: &BTreeMap<String, mir::types::RecordBody>,
 ) -> fmm::types::Function {
     fmm::types::Function::new(
         vec![compile_untyped_closure_pointer().into()]
@@ -188,7 +188,7 @@ pub fn compile_untyped_closure_pointer() -> fmm::types::Pointer {
 pub fn compile_foreign_function(
     function: &mir::types::Function,
     calling_convention: mir::ir::CallingConvention,
-    types: &HashMap<String, mir::types::RecordBody>,
+    types: &BTreeMap<String, mir::types::RecordBody>,
 ) -> fmm::types::Function {
     fmm::types::Function::new(
         function
