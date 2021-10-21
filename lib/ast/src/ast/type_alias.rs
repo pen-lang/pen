@@ -1,7 +1,7 @@
 use crate::types::Type;
 use position::Position;
 
-#[derive(Clone, Debug, Hash, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct TypeAlias {
     name: String,
     type_: Type,

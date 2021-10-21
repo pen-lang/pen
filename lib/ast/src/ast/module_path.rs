@@ -2,7 +2,7 @@ use super::{external_module_path::ExternalModulePath, internal_module_path::Inte
 use serde::{Deserialize, Serialize};
 use std::fmt::{self, Display, Formatter};
 
-#[derive(Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(Clone, Debug, Deserialize, Eq, Ord, PartialEq, PartialOrd, Serialize)]
 pub enum ModulePath {
     External(ExternalModulePath),
     Internal(InternalModulePath),

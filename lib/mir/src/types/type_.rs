@@ -1,6 +1,6 @@
 use super::{function::Function, record::Record};
 
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Eq,  Ord, PartialEq, PartialOrd)]
 pub enum Type {
     Boolean,
     ByteString,
