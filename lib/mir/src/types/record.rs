@@ -1,4 +1,4 @@
-#[derive(Clone, Debug, Eq,  Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Eq, Ord, PartialEq, PartialOrd)]
 pub struct Record {
     name: String,
 }

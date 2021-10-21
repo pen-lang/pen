@@ -2,7 +2,7 @@ use crate::types;
 use position::Position;
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Debug, Deserialize, Hash, PartialEq, Serialize)]
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct TypeDefinition {
     name: String,
     original_name: String,
