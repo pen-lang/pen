@@ -1,11 +1,11 @@
 use super::{type_canonicalizer, union_type_creator, union_type_member_calculator, TypeError};
 use crate::types::Type;
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 
 pub fn calculate(
     one: &Type,
     other: &Type,
-    types: &HashMap<String, Type>,
+    types: &BTreeMap<String, Type>,
 ) -> Result<Option<Type>, TypeError> {
     let one = type_canonicalizer::canonicalize(one, types)?;
     let other = type_canonicalizer::canonicalize(other, types)?;

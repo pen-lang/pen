@@ -4,7 +4,7 @@ use hir::{
     types::{self, Type},
 };
 
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 
 pub fn compile(type_: &Type, type_context: &TypeContext) -> Result<mir::types::Type, CompileError> {
     Ok(
@@ -43,7 +43,7 @@ pub fn compile_function(
 
 pub fn compile_concrete_list(
     list: &types::List,
-    types: &HashMap<String, Type>,
+    types: &BTreeMap<String, Type>,
 ) -> Result<mir::types::Record, CompileError> {
     Ok(mir::types::Record::new(compile_concrete_list_name(
         list, types,
@@ -52,7 +52,7 @@ pub fn compile_concrete_list(
 
 pub fn compile_concrete_list_name(
     list: &types::List,
-    types: &HashMap<String, Type>,
+    types: &BTreeMap<String, Type>,
 ) -> Result<String, CompileError> {
     Ok(format!(
         "_list_{}",

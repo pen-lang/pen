@@ -4,7 +4,7 @@ use hir::{
     ir::*,
     types::{self, Type},
 };
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 
 pub fn infer_types(module: &Module, type_context: &TypeContext) -> Result<Module, CompileError> {
     let variables = environment_creator::create_from_module(module);
@@ -25,7 +25,7 @@ pub fn infer_types(module: &Module, type_context: &TypeContext) -> Result<Module
 
 fn infer_definition(
     definition: &Definition,
-    variables: &HashMap<String, Type>,
+    variables: &BTreeMap<String, Type>,
     type_context: &TypeContext,
 ) -> Result<Definition, CompileError> {
     Ok(Definition::new(
@@ -40,7 +40,7 @@ fn infer_definition(
 
 fn infer_lambda(
     lambda: &Lambda,
-    variables: &HashMap<String, Type>,
+    variables: &BTreeMap<String, Type>,
     type_context: &TypeContext,
 ) -> Result<Lambda, CompileError> {
     Ok(Lambda::new(
@@ -66,7 +66,7 @@ fn infer_lambda(
 
 fn infer_expression(
     expression: &Expression,
-    variables: &HashMap<String, Type>,
+    variables: &BTreeMap<String, Type>,
     type_context: &TypeContext,
 ) -> Result<Expression, CompileError> {
     let infer_expression =

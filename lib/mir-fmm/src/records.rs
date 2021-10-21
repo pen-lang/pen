@@ -1,12 +1,12 @@
 use crate::{error::CompileError, types};
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 
 pub fn get_record_field(
     builder: &fmm::build::InstructionBuilder,
     record: &fmm::build::TypedExpression,
     type_: &mir::types::Record,
     field_index: usize,
-    types: &HashMap<String, mir::types::RecordBody>,
+    types: &BTreeMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     Ok(builder.deconstruct_record(
         if types::is_record_boxed(type_, types) {

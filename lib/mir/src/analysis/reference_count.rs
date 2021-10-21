@@ -2,7 +2,7 @@ mod error;
 
 use crate::{ir::*, types::Type};
 pub use error::ReferenceCountError;
-use std::collections::{HashMap, HashSet};
+use std::collections::{BTreeMap, BTreeSet};
 
 // Closure environments need to be inferred before reference counting.
 pub fn count_references(module: &Module) -> Result<Module, ReferenceCountError> {
@@ -63,9 +63,9 @@ fn convert_definition(definition: &Definition) -> Result<Definition, ReferenceCo
 // - Newly bound variables in let expressions are dropped if they are not moved in their expressions.
 fn convert_expression(
     expression: &Expression,
-    owned_variables: &HashMap<String, Type>,
-    moved_variables: &HashSet<String>,
-) -> Result<(Expression, HashSet<String>), ReferenceCountError> {
+    owned_variables: &BTreeMap<String, Type>,
+    moved_variables: &BTreeSet<String>,
+) -> Result<(Expression, BTreeSet<String>), ReferenceCountError> {
     Ok(match expression {
         Expression::ArithmeticOperation(operation) => {
             let (rhs, moved_variables) =
@@ -153,10 +153,10 @@ fn convert_expression(
                                 .iter()
                                 .cloned()
                                 .filter(|variable| variable != alternative.name())
-                                .collect::<HashSet<String>>()
+                                .collect::<BTreeSet<String>>()
                         }),
                 )
-                .collect::<HashSet<_>>();
+                .collect::<BTreeSet<_>>();
 
             let (argument, moved_variables) = convert_expression(
                 case.argument(),
@@ -183,7 +183,7 @@ fn convert_expression(
                                         .clone()
                                         .into_iter()
                                         .chain(vec![alternative.name().into()])
-                                        .collect::<HashSet<_>>()
+                                        .collect::<BTreeSet<_>>()
                                         .difference(&moved_variables)
                                         .cloned()
                                         .collect(),
@@ -207,7 +207,7 @@ fn convert_expression(
                                 alternative_moved_variables
                                     .into_iter()
                                     .chain(vec![alternative.name().into()])
-                                    .collect::<HashSet<_>>()
+                                    .collect::<BTreeSet<_>>()
                                     .difference(&default_alternative_moved_variables)
                                     .cloned()
                                     .collect(),
@@ -379,10 +379,10 @@ fn convert_expression(
                 .environment()
                 .iter()
                 .map(|argument| argument.name().into())
-                .collect::<HashSet<_>>()
+                .collect::<BTreeSet<_>>()
                 .intersection(&moved_variables)
                 .cloned()
-                .collect::<HashSet<_>>();
+                .collect::<BTreeSet<_>>();
 
             (
                 clone_variables(
@@ -409,7 +409,7 @@ fn convert_expression(
                             .iter()
                             .map(|argument| argument.name().into()),
                     )
-                    .collect::<HashSet<String>>(),
+                    .collect::<BTreeSet<String>>(),
             )
         }
         Expression::Record(record) => {
@@ -447,7 +447,7 @@ fn convert_expression(
             let then_moved_variables = then_moved_variables
                 .into_iter()
                 .filter(|name| name != operation.name())
-                .collect::<HashSet<_>>();
+                .collect::<BTreeSet<_>>();
 
             let all_moved_variables = then_moved_variables
                 .clone()
@@ -526,8 +526,8 @@ fn convert_expression(
 
 fn clone_variables(
     expression: impl Into<Expression>,
-    cloned_variables: HashSet<String>,
-    owned_variables: &HashMap<String, Type>,
+    cloned_variables: BTreeSet<String>,
+    owned_variables: &BTreeMap<String, Type>,
 ) -> Expression {
     let expression = expression.into();
 
@@ -548,8 +548,8 @@ fn clone_variables(
 
 fn drop_variables(
     expression: impl Into<Expression>,
-    dropped_variables: HashSet<String>,
-    owned_variables: &HashMap<String, Type>,
+    dropped_variables: BTreeSet<String>,
+    owned_variables: &BTreeMap<String, Type>,
 ) -> Expression {
     let expression = expression.into();
 
@@ -570,8 +570,8 @@ fn drop_variables(
 
 fn should_clone_variable(
     variable: &str,
-    owned_variables: &HashMap<String, Type>,
-    moved_variables: &HashSet<String>,
+    owned_variables: &BTreeMap<String, Type>,
+    moved_variables: &BTreeSet<String>,
 ) -> bool {
     owned_variables.contains_key(variable) && moved_variables.contains(variable)
 }

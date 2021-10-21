@@ -1,14 +1,14 @@
 use super::{type_canonicalizer, TypeError};
 use crate::types::Type;
-use std::collections::{BTreeSet, HashMap};
+use std::collections::{BTreeSet, BTreeMap};
 
-pub fn calculate(type_: &Type, types: &HashMap<String, Type>) -> Result<BTreeSet<Type>, TypeError> {
+pub fn calculate(type_: &Type, types: &BTreeMap<String, Type>) -> Result<BTreeSet<Type>, TypeError> {
     calculate_canonical(&type_canonicalizer::canonicalize(type_, types)?, types)
 }
 
 fn calculate_canonical(
     type_: &Type,
-    types: &HashMap<String, Type>,
+    types: &BTreeMap<String, Type>,
 ) -> Result<BTreeSet<Type>, TypeError> {
     Ok(match type_ {
         Type::Union(union) => calculate_canonical(union.lhs(), types)?

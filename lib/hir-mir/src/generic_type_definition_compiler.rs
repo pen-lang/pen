@@ -7,7 +7,7 @@ use hir::{
     ir::*,
     types::Type,
 };
-use std::collections::{HashMap, HashSet};
+use std::collections::{BTreeMap, BTreeSet};
 
 pub fn compile(
     module: &Module,
@@ -40,9 +40,9 @@ fn compile_type_definition(
 
 fn collect_types(
     module: &Module,
-    types: &HashMap<String, Type>,
-) -> Result<HashSet<Type>, TypeError> {
-    let mut lower_types = HashSet::new();
+    types: &BTreeMap<String, Type>,
+) -> Result<BTreeSet<Type>, TypeError> {
+    let mut lower_types = BTreeSet::new();
 
     expression_visitor::visit(module, |expression| match expression {
         Expression::IfType(if_) => {

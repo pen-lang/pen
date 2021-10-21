@@ -1,6 +1,6 @@
 use super::free_variables::find_free_variables;
 use crate::{ir::*, types::Type};
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 
 pub fn infer_environment(module: &Module) -> Module {
     Module::new(
@@ -36,7 +36,7 @@ fn infer_in_global_definition(definition: &Definition) -> Definition {
 
 fn infer_in_local_definition(
     definition: &Definition,
-    variables: &HashMap<String, Type>,
+    variables: &BTreeMap<String, Type>,
 ) -> Definition {
     Definition::with_options(
         definition.name(),
@@ -52,8 +52,8 @@ fn infer_in_local_definition(
         infer_in_expression(
             definition.body(),
             &variables
-                .clone()
-                .drain()
+                .iter()
+                .map(|(name, type_)| (name.clone(), type_.clone()))
                 .chain(vec![(
                     definition.name().into(),
                     definition.type_().clone().into(),
@@ -71,7 +71,7 @@ fn infer_in_local_definition(
     )
 }
 
-fn infer_in_expression(expression: &Expression, variables: &HashMap<String, Type>) -> Expression {
+fn infer_in_expression(expression: &Expression, variables: &BTreeMap<String, Type>) -> Expression {
     match expression {
         Expression::ArithmeticOperation(operation) => {
             infer_in_arithmetic_operation(operation, variables).into()
@@ -100,7 +100,7 @@ fn infer_in_expression(expression: &Expression, variables: &HashMap<String, Type
 
 fn infer_in_arithmetic_operation(
     operation: &ArithmeticOperation,
-    variables: &HashMap<String, Type>,
+    variables: &BTreeMap<String, Type>,
 ) -> ArithmeticOperation {
     ArithmeticOperation::new(
         operation.operator(),
@@ -109,7 +109,7 @@ fn infer_in_arithmetic_operation(
     )
 }
 
-fn infer_in_if(if_: &If, variables: &HashMap<String, Type>) -> If {
+fn infer_in_if(if_: &If, variables: &BTreeMap<String, Type>) -> If {
     If::new(
         infer_in_expression(if_.condition(), variables),
         infer_in_expression(if_.then(), variables),
@@ -117,7 +117,7 @@ fn infer_in_if(if_: &If, variables: &HashMap<String, Type>) -> If {
     )
 }
 
-fn infer_in_case(case: &Case, variables: &HashMap<String, Type>) -> Case {
+fn infer_in_case(case: &Case, variables: &BTreeMap<String, Type>) -> Case {
     Case::new(
         infer_in_expression(case.argument(), variables),
         case.alternatives()
@@ -131,7 +131,7 @@ fn infer_in_case(case: &Case, variables: &HashMap<String, Type>) -> Case {
 
 fn infer_in_alternative(
     alternative: &Alternative,
-    variables: &HashMap<String, Type>,
+    variables: &BTreeMap<String, Type>,
 ) -> Alternative {
     let mut variables = variables.clone();
 
@@ -146,7 +146,7 @@ fn infer_in_alternative(
 
 fn infer_in_default_alternative(
     alternative: &DefaultAlternative,
-    variables: &HashMap<String, Type>,
+    variables: &BTreeMap<String, Type>,
 ) -> DefaultAlternative {
     let mut variables = variables.clone();
 
@@ -160,7 +160,7 @@ fn infer_in_default_alternative(
 
 fn infer_in_clone_variables(
     clone: &CloneVariables,
-    variables: &HashMap<String, Type>,
+    variables: &BTreeMap<String, Type>,
 ) -> CloneVariables {
     CloneVariables::new(
         clone.variables().clone(),
@@ -170,7 +170,7 @@ fn infer_in_clone_variables(
 
 fn infer_in_comparison_operation(
     operation: &ComparisonOperation,
-    variables: &HashMap<String, Type>,
+    variables: &BTreeMap<String, Type>,
 ) -> ComparisonOperation {
     ComparisonOperation::new(
         operation.operator(),
@@ -181,7 +181,7 @@ fn infer_in_comparison_operation(
 
 fn infer_in_drop_variables(
     drop: &DropVariables,
-    variables: &HashMap<String, Type>,
+    variables: &BTreeMap<String, Type>,
 ) -> DropVariables {
     DropVariables::new(
         drop.variables().clone(),
@@ -189,7 +189,7 @@ fn infer_in_drop_variables(
     )
 }
 
-fn infer_in_call(call: &Call, variables: &HashMap<String, Type>) -> Call {
+fn infer_in_call(call: &Call, variables: &BTreeMap<String, Type>) -> Call {
     Call::new(
         call.type_().clone(),
         infer_in_expression(call.function(), variables),
@@ -200,7 +200,7 @@ fn infer_in_call(call: &Call, variables: &HashMap<String, Type>) -> Call {
     )
 }
 
-fn infer_in_let(let_: &Let, variables: &HashMap<String, Type>) -> Let {
+fn infer_in_let(let_: &Let, variables: &BTreeMap<String, Type>) -> Let {
     Let::new(
         let_.name(),
         let_.type_().clone(),
@@ -208,22 +208,22 @@ fn infer_in_let(let_: &Let, variables: &HashMap<String, Type>) -> Let {
         infer_in_expression(
             let_.expression(),
             &variables
-                .clone()
-                .drain()
+                .iter()
+                .map(|(name, type_)| (name.clone(), type_.clone()))
                 .chain(vec![(let_.name().into(), let_.type_().clone())])
                 .collect(),
         ),
     )
 }
 
-fn infer_in_let_recursive(let_: &LetRecursive, variables: &HashMap<String, Type>) -> LetRecursive {
+fn infer_in_let_recursive(let_: &LetRecursive, variables: &BTreeMap<String, Type>) -> LetRecursive {
     LetRecursive::new(
         infer_in_local_definition(let_.definition(), variables),
         infer_in_expression(
             let_.expression(),
             &variables
-                .clone()
-                .drain()
+                .iter()
+                .map(|(name, type_)| (name.clone(), type_.clone()))
                 .chain(vec![(
                     let_.definition().name().into(),
                     let_.definition().type_().clone().into(),
@@ -233,7 +233,7 @@ fn infer_in_let_recursive(let_: &LetRecursive, variables: &HashMap<String, Type>
     )
 }
 
-fn infer_in_record(record: &Record, variables: &HashMap<String, Type>) -> Record {
+fn infer_in_record(record: &Record, variables: &BTreeMap<String, Type>) -> Record {
     Record::new(
         record.type_().clone(),
         record
@@ -244,7 +244,7 @@ fn infer_in_record(record: &Record, variables: &HashMap<String, Type>) -> Record
     )
 }
 
-fn infer_in_record_field(field: &RecordField, variables: &HashMap<String, Type>) -> RecordField {
+fn infer_in_record_field(field: &RecordField, variables: &BTreeMap<String, Type>) -> RecordField {
     RecordField::new(
         field.type_().clone(),
         field.index(),
@@ -254,7 +254,7 @@ fn infer_in_record_field(field: &RecordField, variables: &HashMap<String, Type>)
 
 fn infer_in_try_operation(
     operation: &TryOperation,
-    variables: &HashMap<String, Type>,
+    variables: &BTreeMap<String, Type>,
 ) -> TryOperation {
     TryOperation::new(
         infer_in_expression(operation.operand(), variables),
@@ -263,15 +263,15 @@ fn infer_in_try_operation(
         infer_in_expression(
             operation.then(),
             &variables
-                .clone()
-                .drain()
+                .iter()
+                .map(|(name, type_)| (name.clone(), type_.clone()))
                 .chain(vec![(operation.name().into(), operation.type_().clone())])
                 .collect(),
         ),
     )
 }
 
-fn infer_in_variant(variant: &Variant, variables: &HashMap<String, Type>) -> Variant {
+fn infer_in_variant(variant: &Variant, variables: &BTreeMap<String, Type>) -> Variant {
     Variant::new(
         variant.type_().clone(),
         infer_in_expression(variant.payload(), variables),

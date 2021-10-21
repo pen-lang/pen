@@ -1,7 +1,7 @@
 use crate::infra::FilePath;
-use std::{collections::HashMap, error::Error};
+use std::{collections::BTreeMap, error::Error};
 
-type InterfaceFileMap = HashMap<ast::ModulePath, FilePath>;
+type InterfaceFileMap = BTreeMap<ast::ModulePath, FilePath>;
 
 pub fn serialize(
     interface_files: &InterfaceFileMap,

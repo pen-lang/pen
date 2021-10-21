@@ -1,6 +1,6 @@
 use crate::{error::CompileError, type_context::TypeContext};
 use hir::{analysis::types::record_field_resolver, ir::*};
-use std::collections::HashSet;
+use std::collections::BTreeSet;
 
 const RECORD_NAME: &str = "$record";
 
@@ -25,7 +25,7 @@ pub fn transform(
             field_types
                 .iter()
                 .map(|field_type| field_type.name())
-                .collect::<HashSet<_>>()
+                .collect::<BTreeSet<_>>()
                 .difference(&update.fields().iter().map(|field| field.name()).collect())
                 .map(|&name| {
                     RecordField::new(

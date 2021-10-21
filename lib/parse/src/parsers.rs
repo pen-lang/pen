@@ -17,7 +17,7 @@ use combine::{
 };
 use once_cell::sync::Lazy;
 use position::Position;
-use std::collections::HashSet;
+use std::collections::BTreeSet;
 
 const BUILT_IN_LITERALS: &[&str] = &["false", "none", "true"];
 const BUILT_IN_TYPES: &[&str] = &["any", "boolean", "none", "number", "string"];
@@ -600,7 +600,7 @@ fn record<'a>() -> impl Parser<Stream<'a>, Output = Record> {
             if fields
                 .iter()
                 .map(|field| field.name())
-                .collect::<HashSet<_>>()
+                .collect::<BTreeSet<_>>()
                 .len()
                 == fields.len()
             {

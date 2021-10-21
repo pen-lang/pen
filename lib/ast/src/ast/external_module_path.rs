@@ -2,7 +2,7 @@ use crate::IDENTIFIER_SEPARATOR;
 use serde::{Deserialize, Serialize};
 use std::fmt::{self, Display, Formatter};
 
-#[derive(Clone, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
+#[derive(Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct ExternalModulePath {
     package: String,
     components: Vec<String>,

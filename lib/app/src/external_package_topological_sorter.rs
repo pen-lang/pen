@@ -3,10 +3,7 @@ use crate::{
     infra::{FilePath, Infrastructure},
 };
 use petgraph::{algo::toposort, Graph};
-use std::{
-    collections::{BTreeMap, HashMap},
-    error::Error,
-};
+use std::{collections::BTreeMap, error::Error};
 
 pub fn sort(
     infrastructure: &Infrastructure,
@@ -24,7 +21,7 @@ fn sort_external_packages(
     dependencies: &BTreeMap<url::Url, BTreeMap<String, url::Url>>,
 ) -> Result<Vec<url::Url>, Box<dyn std::error::Error>> {
     let mut graph = Graph::<url::Url, ()>::new();
-    let mut indices = HashMap::<url::Url, _>::new();
+    let mut indices = BTreeMap::<url::Url, _>::new();
 
     for external_package in dependencies.keys() {
         indices.insert(

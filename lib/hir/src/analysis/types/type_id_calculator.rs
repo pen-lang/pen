@@ -1,11 +1,11 @@
 use super::{error::TypeError, type_canonicalizer};
 use crate::types::Type;
 use std::{
-    collections::{hash_map::DefaultHasher, HashMap},
+    collections::{hash_map::DefaultHasher, BTreeMap},
     hash::{Hash, Hasher},
 };
 
-pub fn calculate(type_: &Type, types: &HashMap<String, Type>) -> Result<String, TypeError> {
+pub fn calculate(type_: &Type, types: &BTreeMap<String, Type>) -> Result<String, TypeError> {
     let mut hasher = DefaultHasher::new();
 
     calculate_canonical_string(type_, types)?.hash(&mut hasher);
@@ -15,12 +15,12 @@ pub fn calculate(type_: &Type, types: &HashMap<String, Type>) -> Result<String, 
 
 fn calculate_canonical_string(
     type_: &Type,
-    types: &HashMap<String, Type>,
+    types: &BTreeMap<String, Type>,
 ) -> Result<String, TypeError> {
     calculate_string(&type_canonicalizer::canonicalize(type_, types)?, types)
 }
 
-fn calculate_string(type_: &Type, types: &HashMap<String, Type>) -> Result<String, TypeError> {
+fn calculate_string(type_: &Type, types: &BTreeMap<String, Type>) -> Result<String, TypeError> {
     let calculate_string = |type_| calculate_string(type_, types);
 
     Ok(match type_ {
