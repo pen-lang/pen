@@ -1,8 +1,11 @@
 use super::{type_canonicalizer, TypeError};
 use crate::types::Type;
-use std::collections::{BTreeSet, BTreeMap};
+use std::collections::{BTreeMap, BTreeSet};
 
-pub fn calculate(type_: &Type, types: &BTreeMap<String, Type>) -> Result<BTreeSet<Type>, TypeError> {
+pub fn calculate(
+    type_: &Type,
+    types: &BTreeMap<String, Type>,
+) -> Result<BTreeSet<Type>, TypeError> {
     calculate_canonical(&type_canonicalizer::canonicalize(type_, types)?, types)
 }
 

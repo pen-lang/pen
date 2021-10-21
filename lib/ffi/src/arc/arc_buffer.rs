@@ -114,11 +114,11 @@ mod tests {
 
     #[test]
     fn convert_from_vec() {
-        ArcBuffer::from(vec![0u8; 42].as_slice());
+        let _ = ArcBuffer::from(vec![0u8; 42].as_slice());
     }
 
     #[test]
     fn convert_from_string() {
-        ArcBuffer::from("hello".as_bytes());
+        let _ = ArcBuffer::from("hello".as_bytes());
     }
 }

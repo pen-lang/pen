@@ -1,6 +1,6 @@
 use super::{type_resolver, TypeError};
 use crate::types::*;
-use std::collections::{BTreeSet, BTreeMap};
+use std::collections::{BTreeMap, BTreeSet};
 
 // Canonicalize a type deeply.
 pub fn canonicalize(type_: &Type, types: &BTreeMap<String, Type>) -> Result<Type, TypeError> {
@@ -69,7 +69,10 @@ fn canonicalize_union(union: &Union, types: &BTreeMap<String, Type>) -> Result<T
         .unwrap())
 }
 
-fn collect_types(type_: &Type, types: &BTreeMap<String, Type>) -> Result<BTreeSet<Type>, TypeError> {
+fn collect_types(
+    type_: &Type,
+    types: &BTreeMap<String, Type>,
+) -> Result<BTreeSet<Type>, TypeError> {
     Ok(match type_ {
         Type::Union(union) => collect_types(union.lhs(), types)?
             .into_iter()

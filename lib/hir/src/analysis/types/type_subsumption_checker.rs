@@ -2,7 +2,11 @@ use super::{type_canonicalizer, type_equality_checker, TypeError};
 use crate::types::Type;
 use std::collections::BTreeMap;
 
-pub fn check(lower: &Type, upper: &Type, types: &BTreeMap<String, Type>) -> Result<bool, TypeError> {
+pub fn check(
+    lower: &Type,
+    upper: &Type,
+    types: &BTreeMap<String, Type>,
+) -> Result<bool, TypeError> {
     check_canonical(
         &type_canonicalizer::canonicalize(lower, types)?,
         &type_canonicalizer::canonicalize(upper, types)?,
