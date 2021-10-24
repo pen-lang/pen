@@ -325,3 +325,28 @@ Feature: OS
     """
     When I successfully run `pen build`
     Then I successfully run `./app`
+
+  Scenario: Get system time
+    Given a file named "main.pen" with:
+    """pen
+    import Core'Number
+    import System'Context { Context }
+    import System'File
+    import System'Time
+
+    run = \(ctx Context) none | error {
+      File'Write(ctx, File'StdOut(), Number'String(Time'Now(ctx)))?
+
+      none
+    }
+
+    main = \(ctx Context) number {
+      if m = run(ctx) as none {
+        0
+      } else {
+        1
+      }
+    }
+    """
+    When I successfully run `pen build`
+    Then I successfully run `./app`
