@@ -36,6 +36,7 @@ import foreign "c" _pen_os_udp_receive \(Udp'Socket) FfiStringResult
 import foreign "c" _pen_os_udp_receive_from \(Udp'Socket) FfiUdpDatagramResult
 import foreign "c" _pen_os_udp_send \(Udp'Socket, string) FfiNumberResult
 import foreign "c" _pen_os_udp_send_to \(Udp'Socket, string, string) FfiNumberResult
+import foreign "c" _pen_os_get_time \() number
 
 
 type Context {
@@ -71,6 +72,7 @@ type InnerContext {
   UdpReceiveFrom \(Udp'Socket) FfiUdpDatagramResult
   UdpSend \(Udp'Socket, string) FfiNumberResult
   UdpSendTo \(Udp'Socket, string, string) FfiNumberResult
+  GetTime \() number
 }
 
 type FfiOpenResult {
@@ -159,6 +161,7 @@ New = \() Context {
       UdpReceiveFrom: _pen_os_udp_receive_from,
       UdpSend: _pen_os_udp_send,
       UdpSendTo: _pen_os_udp_send_to,
+      GetTime: _pen_os_get_time,
     }
   }
 }

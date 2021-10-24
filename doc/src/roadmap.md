@@ -13,7 +13,7 @@ Items are ordered by priority.
 - [x] Stream-based list type
 - [x] Testing framework
 - [x] TCP/UDP sockets
-- [ ] System time
+- [x] System time
 - [ ] Asynchronous operations
 - [ ] Parallel computation
 - [ ] Map type

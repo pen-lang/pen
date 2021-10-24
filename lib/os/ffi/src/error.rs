@@ -40,7 +40,7 @@ impl From<std::io::Error> for OsError {
 }
 
 impl From<Utf8Error> for OsError {
-    fn from(_: std::str::Utf8Error) -> OsError {
+    fn from(_: Utf8Error) -> OsError {
         OsError::Utf8Decode
     }
 }

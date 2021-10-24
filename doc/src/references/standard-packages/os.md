@@ -429,3 +429,19 @@ type Datagram {
   Address string
 }
 ```
+
+## `Time` module
+
+```pen
+import System'Time
+```
+
+### Functions
+
+#### `Now`
+
+It fetches a current system time in milliseconds.
+
+```pen
+\(ctx Context) number
+```
