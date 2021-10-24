@@ -1,8 +1,70 @@
+import Core'String
 import System'Context { Context }
 import System'File
 
-main = \(ctx Context) number {
-  File'Write(ctx, File'StdOut(), "Hello, world!\n")
+rows = \() number { 10 }
+columns = \() number { 20 }
 
-  0
+main = \(ctx Context) number {
+  if e =  run(ctx) as none {
+    0
+  } else {
+    1
+  }
+}
+
+run = \(ctx Context) none | error {
+  step(ctx, createRows(rows(), columns()))
+}
+
+step = \(ctx Context, rows [[boolean]]) none | error {
+  File'Write(ctx, File'StdOut(), renderRows(rows))?
+  File'Write(ctx, File'StdOut(), "\x1bc")?
+
+  step(ctx, calculateNextRows(rows))
+}
+
+calculateNextRows = \(rows [[boolean]]) [[boolean]] {
+  # TODO
+  rows
+}
+
+createRows = \(rows number, columns number) [[boolean]] {
+  if rows == 0 {
+    [[boolean]]
+  } else {
+    [[boolean] createRow(columns), ...createRows(rows - 1, columns)]
+  }
+}
+
+createRow = \(columns number) [boolean] {
+  if columns == 0 {
+    [boolean]
+  } else {
+    [boolean false, ...createRow(columns - 1)]
+  }
+}
+
+renderRows = \(rs [[boolean]]) string {
+  if [r, ...rs] = rs {
+    String'Join([string renderRow(r()), renderRows(rs)], "\n")
+  } else {
+    ""
+  }
+}
+
+renderRow = \(xs [boolean]) string {
+  if [x, ...xs] = xs {
+    String'Join([string renderCell(x()), renderRow(xs)], "")
+  } else {
+    ""
+  }
+}
+
+renderCell = \(cell boolean) string {
+  if cell {
+    "o"
+  } else {
+    "."
+  }
 }
