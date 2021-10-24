@@ -9,6 +9,7 @@ mod result;
 mod stdio;
 mod string_array;
 mod tcp;
+mod time;
 mod udp;
 mod unreachable;
 mod utilities;
