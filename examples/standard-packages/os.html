@@ -440,6 +440,29 @@ main = \(ctx Context) number {
 </code></pre>
 <p><em>When</em> I successfully run <code>pen build</code></p>
 <p><em>Then</em> I successfully run <code>./app</code>.</p>
+<h2 id="get-system-time"><a class="header" href="#get-system-time">Get system time</a></h2>
+<p><em>Given</em> a file named &quot;main.pen&quot; with:</p>
+<pre><code class="language-pen">import Core'Number
+import System'Context { Context }
+import System'File
+import System'Time
+
+run = \(ctx Context) none | error {
+  File'Write(ctx, File'StdOut(), Number'String(Time'Now(ctx)))?
+
+  none
+}
+
+main = \(ctx Context) number {
+  if m = run(ctx) as none {
+    0
+  } else {
+    1
+  }
+}
+</code></pre>
+<p><em>When</em> I successfully run <code>pen build</code></p>
+<p><em>Then</em> I successfully run <code>./app</code>.</p>
 
                     </main>
 
