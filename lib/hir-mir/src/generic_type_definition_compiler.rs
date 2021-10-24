@@ -239,4 +239,45 @@ mod tests {
             )])
         );
     }
+
+    #[test]
+    fn collect_type_from_list_literal() {
+        let type_context = TypeContext::dummy(Default::default(), Default::default());
+        let list_type = types::List::new(types::None::new(Position::fake()), Position::fake());
+        let union_type = types::Union::new(
+            list_type.clone(),
+            types::None::new(Position::fake()),
+            Position::fake(),
+        );
+
+        assert_eq!(
+            compile(
+                &Module::empty().set_definitions(vec![Definition::fake(
+                    "foo",
+                    Lambda::new(
+                        vec![Argument::new("x", list_type.clone())],
+                        types::None::new(Position::fake()),
+                        List::new(
+                            union_type.clone(),
+                            vec![ListElement::Single(
+                                Variable::new("x", Position::fake()).into()
+                            )],
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    ),
+                    false,
+                )]),
+                &type_context,
+            ),
+            Ok(vec![mir::ir::TypeDefinition::new(
+                type_compiler::compile_concrete_list_name(&list_type, type_context.types())
+                    .unwrap(),
+                mir::types::RecordBody::new(vec![mir::types::Record::new(
+                    &type_context.list_type_configuration().list_type_name
+                )
+                .into()]),
+            )])
+        );
+    }
 }
