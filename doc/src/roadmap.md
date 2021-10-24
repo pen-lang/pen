@@ -12,7 +12,7 @@ Items are ordered by priority.
 - [x] WASM backend
 - [x] Stream-based list type
 - [x] Testing framework
-- [ ] TCP/UDP sockets
+- [x] TCP/UDP sockets
 - [ ] System time
 - [ ] Asynchronous operations
 - [ ] Parallel computation
