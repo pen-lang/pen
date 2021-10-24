@@ -66,14 +66,14 @@ String literals are sequences of bytes in general. Texts in the literals are enc
 
 String literals can contain the following character escapes.
 
-| Escape | Name           |
-| ------ | -------------- |
-| `\n`   | Newline        |
-| `\r`   | Carrige return |
-| `\t`   | Tab            |
-| `\"`   | Double quote   |
-| `\\`   | Backslash      |
-| `\x9f` | Byte           |
+| Escape | Name            |
+| ------ | --------------- |
+| `\n`   | Newline         |
+| `\r`   | Carriage return |
+| `\t`   | Tab             |
+| `\"`   | Double quote    |
+| `\\`   | Backslash       |
+| `\x9f` | Byte            |
 
 ## Functions
 
