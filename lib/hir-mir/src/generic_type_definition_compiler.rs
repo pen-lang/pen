@@ -2,7 +2,7 @@ use super::{type_compiler, type_context::TypeContext, CompileError};
 use hir::{
     analysis::{
         ir::expression_visitor,
-        types::{type_canonicalizer, TypeError},
+        types::{union_type_member_calculator, TypeError},
     },
     ir::*,
     types::Type,
@@ -54,6 +54,9 @@ fn collect_types(
                     .cloned(),
             );
         }
+        Expression::List(list) => {
+            lower_types.insert(list.type_().clone());
+        }
         Expression::TypeCoercion(coercion) => {
             lower_types.insert(coercion.from().clone());
         }
@@ -63,10 +66,13 @@ fn collect_types(
         _ => {}
     });
 
-    lower_types
+    Ok(lower_types
         .into_iter()
-        .map(|type_| type_canonicalizer::canonicalize(&type_, types))
-        .collect()
+        .map(|type_| union_type_member_calculator::calculate(&type_, types))
+        .collect::<Result<Vec<_>, _>>()?
+        .into_iter()
+        .flatten()
+        .collect())
 }
 
 #[cfg(test)]
@@ -221,6 +227,47 @@ mod tests {
                         TryOperation::new(
                             Some(list_type.clone().into()),
                             Variable::new("x", Position::fake()),
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    ),
+                    false,
+                )]),
+                &type_context,
+            ),
+            Ok(vec![mir::ir::TypeDefinition::new(
+                type_compiler::compile_concrete_list_name(&list_type, type_context.types())
+                    .unwrap(),
+                mir::types::RecordBody::new(vec![mir::types::Record::new(
+                    &type_context.list_type_configuration().list_type_name
+                )
+                .into()]),
+            )])
+        );
+    }
+
+    #[test]
+    fn collect_type_from_list_literal() {
+        let type_context = TypeContext::dummy(Default::default(), Default::default());
+        let list_type = types::List::new(types::None::new(Position::fake()), Position::fake());
+        let union_type = types::Union::new(
+            list_type.clone(),
+            types::None::new(Position::fake()),
+            Position::fake(),
+        );
+
+        assert_eq!(
+            compile(
+                &Module::empty().set_definitions(vec![Definition::fake(
+                    "foo",
+                    Lambda::new(
+                        vec![Argument::new("x", list_type.clone())],
+                        types::None::new(Position::fake()),
+                        List::new(
+                            union_type.clone(),
+                            vec![ListElement::Single(
+                                Variable::new("x", Position::fake()).into()
+                            )],
                             Position::fake(),
                         ),
                         Position::fake(),
