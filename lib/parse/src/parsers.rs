@@ -664,6 +664,7 @@ fn string_literal<'a>() -> impl Parser<Stream<'a>, Output = ByteString> {
                 character('\\').map(|_| "\\".as_bytes().to_vec()),
                 character('"').map(|_| "\"".as_bytes().to_vec()),
                 character('n').map(|_| "\n".as_bytes().to_vec()),
+                character('r').map(|_| "\r".as_bytes().to_vec()),
                 character('t').map(|_| "\t".as_bytes().to_vec()),
                 character('x')
                     .with(find(hex_regex))
@@ -2529,6 +2530,7 @@ mod tests {
                 (r#""foo bar""#, "foo bar"),
                 (r#""\"""#, "\""),
                 (r#""\n""#, "\n"),
+                (r#""\r""#, "\r"),
                 (r#""\t""#, "\t"),
                 (r#""\\""#, "\\"),
                 (r#""\n\n""#, "\n\n"),
