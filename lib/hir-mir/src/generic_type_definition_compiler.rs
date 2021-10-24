@@ -2,7 +2,7 @@ use super::{type_compiler, type_context::TypeContext, CompileError};
 use hir::{
     analysis::{
         ir::expression_visitor,
-        types::{type_canonicalizer, TypeError},
+        types::{union_type_member_calculator, TypeError},
     },
     ir::*,
     types::Type,
@@ -54,6 +54,9 @@ fn collect_types(
                     .cloned(),
             );
         }
+        Expression::List(list) => {
+            lower_types.insert(list.type_().clone());
+        }
         Expression::TypeCoercion(coercion) => {
             lower_types.insert(coercion.from().clone());
         }
@@ -63,10 +66,13 @@ fn collect_types(
         _ => {}
     });
 
-    lower_types
+    Ok(lower_types
         .into_iter()
-        .map(|type_| type_canonicalizer::canonicalize(&type_, types))
-        .collect()
+        .map(|type_| union_type_member_calculator::calculate(&type_, types))
+        .collect::<Result<Vec<_>, _>>()?
+        .into_iter()
+        .flatten()
+        .collect())
 }
 
 #[cfg(test)]
