@@ -56,7 +56,7 @@ string
 
 ### Literals
 
-They represent texts encoded in [UTF-8](https://en.wikipedia.org/wiki/UTF-8).
+String literals are sequences of bytes in general. Texts in the literals are encoded in [UTF-8](https://en.wikipedia.org/wiki/UTF-8).
 
 ```pen
 "foo"
