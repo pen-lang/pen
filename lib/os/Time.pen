@@ -1,0 +1,6 @@
+import 'Context { Context }
+import 'errorTranslator
+
+Now = \(ctx Context) number  {
+  Context'Inner(ctx).GetTime()
+}
