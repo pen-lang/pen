@@ -34,6 +34,8 @@ const OPERATOR_CHARACTERS: &str = "+-*/=<>&|!?";
 static NUMBER_REGEX: Lazy<regex::Regex> =
     Lazy::new(|| regex::Regex::new(r"^-?([123456789][0123456789]*|0)(\.[0123456789]+)?").unwrap());
 static STRING_REGEX: Lazy<regex::Regex> = Lazy::new(|| regex::Regex::new(r#"^[^\\"]"#).unwrap());
+static HEX_CHARACTER_REGEX: Lazy<regex::Regex> =
+    Lazy::new(|| regex::Regex::new("[0-9a-fA-F][0-9a-fA-F]").unwrap());
 
 pub struct State<'a> {
     path: String,
@@ -154,9 +156,12 @@ fn foreign_import<'a>() -> impl Parser<Stream<'a>, Output = ForeignImport> {
 fn calling_convention<'a>() -> impl Parser<Stream<'a>, Output = CallingConvention> {
     string_literal()
         .expected("calling convention")
-        .then(|string| match string.value() {
-            "c" => value(CallingConvention::C).left(),
-            _ => unexpected_any("unknown calling convention").right(),
+        .then(|string| {
+            if string.value() == "c".as_bytes() {
+                value(CallingConvention::C).left()
+            } else {
+                unexpected_any("unknown calling convention").right()
+            }
         })
 }
 
@@ -648,25 +653,29 @@ fn number_literal<'a>() -> impl Parser<Stream<'a>, Output = Number> {
 }
 
 fn string_literal<'a>() -> impl Parser<Stream<'a>, Output = ByteString> {
-    let regex: &'static regex::Regex = &STRING_REGEX;
+    let string_regex: &'static regex::Regex = &STRING_REGEX;
+    let hex_regex: &'static regex::Regex = &HEX_CHARACTER_REGEX;
 
     token((
         attempt(position().skip(character('"'))),
         many(choice((
-            from_str(find(regex)),
-            character('\\').with(
-                choice((
-                    character('\\').map(|_| "\\"),
-                    character('"').map(|_| "\""),
-                    character('n').map(|_| "\n"),
-                    character('t').map(|_| "\t"),
-                ))
-                .map(|string| string.into()),
-            ),
+            find(string_regex).map(|string: &str| string.as_bytes().to_vec()),
+            character('\\').with(choice((
+                character('\\').map(|_| "\\".as_bytes().to_vec()),
+                character('"').map(|_| "\"".as_bytes().to_vec()),
+                character('n').map(|_| "\n".as_bytes().to_vec()),
+                character('r').map(|_| "\r".as_bytes().to_vec()),
+                character('t').map(|_| "\t".as_bytes().to_vec()),
+                character('x')
+                    .with(find(hex_regex))
+                    .map(|string: &str| vec![u8::from_str_radix(string, 16).unwrap()]),
+            ))),
         ))),
         character('"'),
     ))
-    .map(|(position, strings, _): (_, Vec<String>, _)| ByteString::new(strings.join(""), position))
+    .map(|(position, strings, _): (_, Vec<Vec<u8>>, _)| {
+        ByteString::new(strings.into_iter().flatten().collect::<Vec<u8>>(), position)
+    })
     .expected("string literal")
 }
 
@@ -2516,14 +2525,16 @@ mod tests {
             assert!(string_literal().parse(stream("foo", "")).is_err());
 
             for (source, value) in &[
-                ("\"\"", ""),
-                ("\"foo\"", "foo"),
-                ("\"foo bar\"", "foo bar"),
-                ("\"\\\"\"", "\""),
-                ("\"\\n\"", "\n"),
-                ("\"\\t\"", "\t"),
-                ("\"\\\\\"", "\\"),
-                ("\"\\n\\n\"", "\n\n"),
+                (r#""""#, ""),
+                (r#""foo""#, "foo"),
+                (r#""foo bar""#, "foo bar"),
+                (r#""\"""#, "\""),
+                (r#""\n""#, "\n"),
+                (r#""\r""#, "\r"),
+                (r#""\t""#, "\t"),
+                (r#""\\""#, "\\"),
+                (r#""\n\n""#, "\n\n"),
+                (r#""\x42""#, "\x42"),
             ] {
                 assert_eq!(
                     string_literal().parse(stream(source, "")).unwrap().0,
