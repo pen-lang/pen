@@ -14,7 +14,7 @@ main = \(ctx Context) number {
 }
 
 run = \(ctx Context) none | error {
-  step(ctx, createRows(rows(), columns()))
+  step(ctx, initializeRows(rows(), columns()))
 }
 
 step = \(ctx Context, rows [[boolean]]) none | error {
@@ -29,19 +29,19 @@ calculateNextRows = \(rows [[boolean]]) [[boolean]] {
   rows
 }
 
-createRows = \(rows number, columns number) [[boolean]] {
+initializeRows = \(rows number, columns number) [[boolean]] {
   if rows == 0 {
     [[boolean]]
   } else {
-    [[boolean] createRow(columns), ...createRows(rows - 1, columns)]
+    [[boolean] initializeRow(columns), ...initializeRows(rows - 1, columns)]
   }
 }
 
-createRow = \(columns number) [boolean] {
+initializeRow = \(columns number) [boolean] {
   if columns == 0 {
     [boolean]
   } else {
-    [boolean false, ...createRow(columns - 1)]
+    [boolean false, ...initializeRow(columns - 1)]
   }
 }
 
