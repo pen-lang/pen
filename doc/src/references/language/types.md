@@ -62,6 +62,19 @@ They represent texts encoded in [UTF-8](https://en.wikipedia.org/wiki/UTF-8).
 "foo"
 ```
 
+#### Escapes
+
+String literals can contain the following character escapes.
+
+| Escape | Name           |
+| ------ | -------------- |
+| `\n`   | Newline        |
+| `\r`   | Carrige return |
+| `\t`   | Tab            |
+| `\"`   | Double quote   |
+| `\\`   | Backslash      |
+| `\x9f` | Byte           |
+
 ## Functions
 
 A function is a set of operations with arguments and a result.
