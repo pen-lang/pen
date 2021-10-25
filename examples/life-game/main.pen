@@ -51,13 +51,33 @@ calculateRows = \(rs [[boolean]]) [[boolean]] | error {
 }
 
 calculateRow = \(upper [boolean], current [boolean], lower [boolean]) [boolean] | error {
+  calculateColumns(loopRow(upper)?, loopRow(current)?, loopRow(lower)?)
+}
+
+loopRow = \(columns [boolean]) [boolean] | error {
+  if [f, ...cs] = columns {
+    if l = List'Last([any ...cs]) as boolean {
+      [boolean l, ...columns, f]
+    } else {
+      error("too few columns")
+    }
+  } else {
+    error("too few columns")
+  }
+}
+
+calculateColumns = \(upper [boolean], current [boolean], lower [boolean]) [boolean] | error {
   if [u1, u2, u3, ...us] = upper {
     if [c1, c2, c3, ...cs] = current {
       if [l1, l2, l3, ...ls] = lower {
         n = Number'Sum(
           booleansToNumbers([boolean u1, u2, u3, c1, c3, l1, l2, l3])
         )
-        bs = calculateRow(us, cs, ls)?
+        bs = calculateColumns(
+          [boolean u2, u3, ...us],
+          [boolean c2, c3, ...cs],
+          [boolean l2, l3, ...ls],
+        )?
 
         [boolean c2 & 2 <= n & n <= 3 || !c2 & n == 3, ...bs]
       } else {
