@@ -1,3 +1,4 @@
+import Core'List
 import Core'String
 import System'Context { Context }
 import System'File
@@ -21,12 +22,62 @@ step = \(ctx Context, rows [[boolean]]) none | error {
   File'Write(ctx, File'StdOut(), renderRows(rows))?
   File'Write(ctx, File'StdOut(), "\x1bc")?
 
-  step(ctx, calculateNextRows(rows))
+  step(ctx, calculateArray(rows)?)
 }
 
-calculateNextRows = \(rows [[boolean]]) [[boolean]] {
-  # TODO
-  rows
+calculateArray = \(rows [[boolean]]) [[boolean]] | error {
+  calculateRows(
+    if [f, ...rs] = rows {
+      if l = List'Last([any ...rs]) as [boolean] {
+        [[boolean] l, ...rows, f]
+      } else {
+        error("too few rows")
+      }
+    } else {
+      error("too few rows")
+    }?
+  )
+}
+
+calculateRows = \(rs [[boolean]]) [[boolean]] | error {
+  if [r1, r2, r3, ...rs] = rs {
+    r = calculateRow(r1, r2, r3)?
+    rs = calculateRows([[boolean] r2, r3, ...rs])?
+
+    [[boolean] r, ...rs]
+  } else {
+    [[boolean]]
+  }
+}
+
+calculateRow = \(upper [boolean], current [boolean], lower [boolean]) [boolean] | error {
+  if [u1, u2, u3, ...us] = upper {
+    if [c1, c2, c3, ...cs] = current {
+      if [l1, l2, l3, ...ls] = lower {
+        n = Number'Sum(
+          booleansToNumbers([boolean u1, u2, u3, c1, c3, l1, l2, l3])
+        )
+        bs = calculateRow(us, cs, ls)?
+
+        [boolean c2 & 2 <= n & n <= 4 || !c2 & n == 3, ...bs]
+      } else {
+        error("wrong row length")
+      }
+    } else {
+      error("wrong row length")
+    }
+  } else {
+    [boolean]
+  }
+}
+
+# TODO Use a list comprehension.
+booleansToNumbers = \(bs [boolean]) [number] {
+  if [b, ...bs] = bs {
+    [number if b { 1 } else { 0 }, booleansToNumbers(bs)]
+  } else {
+    [number]
+  }
 }
 
 initializeRows = \(rows number, columns number) [[boolean]] {
@@ -45,6 +96,7 @@ initializeRow = \(columns number) [boolean] {
   }
 }
 
+# TODO Use a list comprehension.
 renderRows = \(rs [[boolean]]) string {
   if [r, ...rs] = rs {
     String'Join([string renderRow(r()), renderRows(rs)], "\n")
