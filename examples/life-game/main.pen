@@ -59,7 +59,7 @@ calculateRow = \(upper [boolean], current [boolean], lower [boolean]) [boolean] 
         )
         bs = calculateRow(us, cs, ls)?
 
-        [boolean c2 & 2 <= n & n <= 4 || !c2 & n == 3, ...bs]
+        [boolean c2 & 2 <= n & n <= 3 || !c2 & n == 3, ...bs]
       } else {
         error("wrong row length")
       }
