@@ -1,4 +1,5 @@
 mod argument;
+mod debug;
 mod directory;
 mod environment_variable;
 mod error;
