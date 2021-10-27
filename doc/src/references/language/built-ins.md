@@ -34,7 +34,9 @@ It extracts source information from an error.
 
 ### `debug`
 
-It prints a debug message given as an argument if a `PEN_DEBUG` environment variable is set. Note that the implementation of this function is platform-dependant and can change among different system packages.
+It prints a debug message given as an argument if a `PEN_DEBUG` environment variable is set.
+
+Note that the implementation of this function can change among different system packages. **You may note even see any messages with system packges whose systems do not have any consoles.**
 
 ```pen
 \(message string) none
