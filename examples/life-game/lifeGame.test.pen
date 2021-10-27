@@ -30,3 +30,41 @@ Render4x4 = \() none | error {
     )
   )
 }
+
+RenderLife = \() none | error {
+  Assert'EqualStrings(
+    lifeGame'Render([[boolean]
+      [boolean false, false, false],
+      [boolean false, true, false],
+      [boolean false, false, false],
+    ],
+    ),
+    String'Join(
+      [string
+        "...",
+        ".o.",
+        "...\n",
+      ],
+      "\n",
+    )
+  )
+}
+
+RenderTwoLives = \() none | error {
+  Assert'EqualStrings(
+    lifeGame'Render([[boolean]
+      [boolean false, true, false],
+      [boolean false, false, false],
+      [boolean false, false, true],
+    ],
+    ),
+    String'Join(
+      [string
+        ".o.",
+        "...",
+        "..o\n",
+      ],
+      "\n",
+    )
+  )
+}
