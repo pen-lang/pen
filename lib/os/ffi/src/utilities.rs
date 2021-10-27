@@ -4,6 +4,8 @@ use std::{
     str,
 };
 
+pub const DEBUG_ENVIRONMENT_VARIABLE: &str = "PEN_DEBUG";
+
 pub fn read(reader: &mut impl Read) -> Result<ffi::ByteString, OsError> {
     let mut buffer = vec![];
 

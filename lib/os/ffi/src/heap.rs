@@ -1,6 +1,6 @@
+use crate::utilities::DEBUG_ENVIRONMENT_VARIABLE;
 use std::{alloc::Layout, os::raw::c_void};
 
-const DEBUG_ENVIRONMENT_VARIABLE: &str = "PEN_DEBUG";
 const DEFAULT_ALIGNMENT: usize = 8;
 
 #[no_mangle]
