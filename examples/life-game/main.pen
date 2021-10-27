@@ -89,8 +89,7 @@ stepColumns = \(upper [boolean], current [boolean], lower [boolean]) [boolean] |
             u.first, u.second, u.third,
             c.first, c.third,
             l.first, l.second, l.third,
-          ],
-        )
+          ]),
         )
         bs = stepColumns(tail(us), tail(cs), tail(ls))?
 
