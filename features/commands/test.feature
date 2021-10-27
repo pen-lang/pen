@@ -46,3 +46,15 @@ Feature: Testing packages
   Scenario: Run no test
     When I run `pen test`
     Then the exit status should be 0
+
+  Scenario: Use a debug function in a test
+    Given a file named "Foo.test.pen" with:
+    """pen
+    Foo = \() none | error {
+      debug("hello")
+    }
+    """
+    And I append "1" to the environment variable "PEN_DEBUG"
+    When I run `pen test`
+    Then the exit status should be 0
+    And the stderr should contain exactly "hello"
