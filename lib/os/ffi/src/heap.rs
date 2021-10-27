@@ -1,4 +1,4 @@
-use crate::utilities::DEBUG_ENVIRONMENT_VARIABLE;
+use crate::utilities::is_os_debug;
 use std::{alloc::Layout, os::raw::c_void};
 
 const DEFAULT_ALIGNMENT: usize = 8;
@@ -9,7 +9,7 @@ pub extern "C" fn _pen_malloc(size: usize) -> *mut c_void {
         (unsafe { std::alloc::alloc(Layout::from_size_align(size, DEFAULT_ALIGNMENT).unwrap()) })
             as *mut c_void;
 
-    if std::env::var(DEBUG_ENVIRONMENT_VARIABLE).is_ok() {
+    if is_os_debug() {
         eprintln!("malloc: {} -> {:x}", size, pointer as usize);
     }
 
@@ -27,7 +27,7 @@ pub extern "C" fn _pen_realloc(old_pointer: *mut c_void, size: usize) -> *mut c_
         )
     }) as *mut c_void;
 
-    if std::env::var(DEBUG_ENVIRONMENT_VARIABLE).is_ok() {
+    if is_os_debug() {
         eprintln!(
             "realloc: {:x}, {} -> {:x}",
             old_pointer as usize, size, new_pointer as usize
@@ -42,7 +42,7 @@ pub extern "C" fn _pen_realloc(old_pointer: *mut c_void, size: usize) -> *mut c_
 /// Pointers returned from `_pen_malloc` or `_pen_realloc` must be passed.
 #[no_mangle]
 pub unsafe extern "C" fn _pen_free(pointer: *mut u8) {
-    if std::env::var(DEBUG_ENVIRONMENT_VARIABLE).is_ok() {
+    if is_os_debug() {
         eprintln!("free: {:x}", pointer as usize);
     }
 

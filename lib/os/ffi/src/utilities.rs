@@ -1,10 +1,20 @@
 use crate::error::OsError;
 use std::{
+    env,
     io::{Read, Write},
     str,
 };
 
-pub const DEBUG_ENVIRONMENT_VARIABLE: &str = "PEN_DEBUG";
+const DEBUG_ENVIRONMENT_VARIABLE: &str = "PEN_DEBUG";
+const OS_DEBUG_ENVIRONMENT_VARIABLE: &str = "PEN_OS_DEBUG";
+
+pub fn is_debug() -> bool {
+    env::var(DEBUG_ENVIRONMENT_VARIABLE).is_ok()
+}
+
+pub fn is_os_debug() -> bool {
+    env::var(OS_DEBUG_ENVIRONMENT_VARIABLE).is_ok()
+}
 
 pub fn read(reader: &mut impl Read) -> Result<ffi::ByteString, OsError> {
     let mut buffer = vec![];
