@@ -1,0 +1,157 @@
+import Core'List
+import Core'Number
+import Core'String
+
+type cellTuple {
+  first boolean
+  second boolean
+  third boolean
+}
+
+Step = \(rows [[boolean]]) [[boolean]] | error {
+  stepRows(
+    if [f, ...rs] = rows {
+      if l = List'Last([any ...rs], none) as [boolean] {
+        [[boolean] l, ...rows, f()]
+      } else {
+        error("too few rows")
+      }
+    } else {
+      error("too few rows")
+    }?
+  )
+}
+
+stepRows = \(rs [[boolean]]) [[boolean]] | error {
+  if [r1, ...rs] = rs {
+    if [r2, ...rs] = rs {
+      if [r3, ...rs] = rs {
+        r = stepRow(r1(), r2(), r3())?
+        rs = stepRows([[boolean] r2(), r3(), ...rs])?
+
+        [[boolean] r, ...rs]
+      } else {
+        error("too few rows")
+      }
+    } else {
+      error("too few rows")
+    }
+  } else {
+    [[boolean]]
+  }
+}
+
+stepRow = \(upper [boolean], current [boolean], lower [boolean]) [boolean] | error {
+  stepColumns(loopRow(upper)?, loopRow(current)?, loopRow(lower)?)
+}
+
+loopRow = \(columns [boolean]) [boolean] | error {
+  if [f, ...cs] = columns {
+    if l = List'Last([any ...cs], none) as boolean {
+      [boolean l, ...columns, f()]
+    } else {
+      error("too few columns")
+    }
+  } else {
+    error("too few columns")
+  }
+}
+
+stepColumns = \(upper [boolean], current [boolean], lower [boolean]) [boolean] | error {
+  if u = cellTuple(upper) as cellTuple {
+    if c = cellTuple(current) as cellTuple {
+      if l = cellTuple(lower) as cellTuple {
+        n = Number'Sum(
+          booleansToNumbers([boolean
+            u.first, u.second, u.third,
+            c.first, c.third,
+            l.first, l.second, l.third,
+          ]),
+        )
+        bs = stepColumns(tail(upper), tail(current), tail(lower))?
+
+        [boolean c.second & 2 <= n & n <= 3 | !c.second & n == 3, ...bs]
+      } else {
+        error("wrong row length")
+      }
+    } else {
+      error("wrong row length")
+    }
+  } else {
+    [boolean]
+  }
+}
+
+tail = \(cs [boolean]) [boolean] {
+  if [_, ...cs] = cs {
+    cs
+  } else {
+    [boolean]
+  }
+}
+
+cellTuple = \(cs [boolean]) cellTuple | none {
+  if [c1, ...cs] = cs {
+    if [c2, ...cs] = cs {
+      if [c3, ...cs] = cs {
+        cellTuple{first: c1(), second: c2(), third: c3()}
+      } else {
+        none
+      }
+    } else {
+      none
+    }
+  } else {
+    none
+  }
+}
+
+# TODO Use a list comprehension.
+booleansToNumbers = \(bs [boolean]) [number] {
+  if [b, ...bs] = bs {
+    [number if b() { 1 } else { 0 }, ...booleansToNumbers(bs)]
+  } else {
+    [number]
+  }
+}
+
+Initialize = \(rows number, columns number) [[boolean]] {
+  if rows == 0 {
+    [[boolean]]
+  } else {
+    [[boolean] initializeRow(columns), ...Initialize(rows - 1, columns)]
+  }
+}
+
+initializeRow = \(columns number) [boolean] {
+  if columns == 0 {
+    [boolean]
+  } else {
+    [boolean false, ...initializeRow(columns - 1)]
+  }
+}
+
+# TODO Use a list comprehension.
+Render = \(rs [[boolean]]) string {
+  if [r, ...rs] = rs {
+    String'Join([string renderRow(r()), Render(rs)], "\n")
+  } else {
+    ""
+  }
+}
+
+renderRow = \(xs [boolean]) string {
+  if [x, ...xs] = xs {
+    String'Join([string renderCell(x()), renderRow(xs)], "")
+  } else {
+    ""
+  }
+}
+
+renderCell = \(cell boolean) string {
+  if cell {
+    "o"
+  } else {
+    "."
+  }
+}
