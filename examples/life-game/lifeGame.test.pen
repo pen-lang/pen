@@ -1,0 +1,32 @@
+import Core'String
+import Test'Assert
+import 'lifeGame
+
+Render3x4 = \() none | error {
+  Assert'EqualStrings(
+    lifeGame'Render(lifeGame'Initialize(3, 4)),
+    String'Join(
+      [string
+        "....",
+        "....",
+        "....\n",
+      ],
+      "\n",
+    )
+  )
+}
+
+Render4x4 = \() none | error {
+  Assert'EqualStrings(
+    lifeGame'Render(lifeGame'Initialize(4, 4)),
+    String'Join(
+      [string
+        "....",
+        "....",
+        "....",
+        "....\n",
+      ],
+      "\n",
+    )
+  )
+}
