@@ -182,6 +182,15 @@ Add = \() none | error {
 <h2 id="run-no-test"><a class="header" href="#run-no-test">Run no test</a></h2>
 <p><em>When</em> I run <code>pen test</code></p>
 <p><em>Then</em> the exit status should be 0.</p>
+<h2 id="use-a-debug-function-in-a-test"><a class="header" href="#use-a-debug-function-in-a-test">Use a debug function in a test</a></h2>
+<p><em>Given</em> a file named &quot;Foo.test.pen&quot; with:</p>
+<pre><code class="language-pen">Foo = \() none | error {
+  debug(&quot;hello&quot;)
+}
+</code></pre>
+<p><em>And</em> I append &quot;1&quot; to the environment variable &quot;PEN_DEBUG&quot;</p>
+<p><em>When</em> I run <code>pen_test_on_linux.sh</code></p>
+<p><em>Then</em> the exit status should be 0.</p>
 
                     </main>
 
