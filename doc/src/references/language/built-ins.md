@@ -31,3 +31,11 @@ It extracts source information from an error.
 ```pen
 \(e error) any
 ```
+
+### `debug`
+
+It prints a debug message given as an argument if a `PEN_DEBUG` environment variable is set. Note that the implementation of this function is platform-dependant and can change among different system packages.
+
+```pen
+\(message string) none
+```
