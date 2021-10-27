@@ -1,3 +1,4 @@
+mod debug;
 mod heap;
 mod test_result;
 mod unreachable;
