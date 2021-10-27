@@ -22,11 +22,11 @@ step = \(ctx Context, rows [[boolean]]) none | error {
   File'Write(ctx, File'StdOut(), renderRows(rows))?
   File'Write(ctx, File'StdOut(), "\x1bc")?
 
-  step(ctx, calculateArray(rows)?)
+  step(ctx, stepArray(rows)?)
 }
 
-calculateArray = \(rows [[boolean]]) [[boolean]] | error {
-  calculateRows(
+stepArray = \(rows [[boolean]]) [[boolean]] | error {
+  stepRows(
     if [f, ...rs] = rows {
       if l = List'Last([any ...rs]) as [boolean] {
         [[boolean] l, ...rows, f]
@@ -39,10 +39,10 @@ calculateArray = \(rows [[boolean]]) [[boolean]] | error {
   )
 }
 
-calculateRows = \(rs [[boolean]]) [[boolean]] | error {
+stepRows = \(rs [[boolean]]) [[boolean]] | error {
   if [r1, r2, r3, ...rs] = rs {
-    r = calculateRow(r1, r2, r3)?
-    rs = calculateRows([[boolean] r2, r3, ...rs])?
+    r = stepRow(r1, r2, r3)?
+    rs = stepRows([[boolean] r2, r3, ...rs])?
 
     [[boolean] r, ...rs]
   } else {
@@ -50,8 +50,8 @@ calculateRows = \(rs [[boolean]]) [[boolean]] | error {
   }
 }
 
-calculateRow = \(upper [boolean], current [boolean], lower [boolean]) [boolean] | error {
-  calculateColumns(loopRow(upper)?, loopRow(current)?, loopRow(lower)?)
+stepRow = \(upper [boolean], current [boolean], lower [boolean]) [boolean] | error {
+  stepColumns(loopRow(upper)?, loopRow(current)?, loopRow(lower)?)
 }
 
 loopRow = \(columns [boolean]) [boolean] | error {
@@ -66,14 +66,14 @@ loopRow = \(columns [boolean]) [boolean] | error {
   }
 }
 
-calculateColumns = \(upper [boolean], current [boolean], lower [boolean]) [boolean] | error {
+stepColumns = \(upper [boolean], current [boolean], lower [boolean]) [boolean] | error {
   if [u1, u2, u3, ...us] = upper {
     if [c1, c2, c3, ...cs] = current {
       if [l1, l2, l3, ...ls] = lower {
         n = Number'Sum(
           booleansToNumbers([boolean u1, u2, u3, c1, c3, l1, l2, l3])
         )
-        bs = calculateColumns(
+        bs = stepColumns(
           [boolean u2, u3, ...us],
           [boolean c2, c3, ...cs],
           [boolean l2, l3, ...ls],
