@@ -3,6 +3,12 @@ import Core'String
 import System'Context { Context }
 import System'File
 
+type cellTuple {
+  first boolean
+  second boolean
+  third boolean
+}
+
 rows = \() number { 10 }
 columns = \() number { 20 }
 
@@ -40,11 +46,19 @@ stepArray = \(rows [[boolean]]) [[boolean]] | error {
 }
 
 stepRows = \(rs [[boolean]]) [[boolean]] | error {
-  if [r1, r2, r3, ...rs] = rs {
-    r = stepRow(r1, r2, r3)?
-    rs = stepRows([[boolean] r2, r3, ...rs])?
+  if [r1, ...rs] = rs {
+    if [r2, ...rs] = rs {
+      if [r3, ...rs] = rs {
+        r = stepRow(r1, r2, r3)?
+        rs = stepRows([[boolean] r2, r3, ...rs])?
 
-    [[boolean] r, ...rs]
+        [[boolean] r, ...rs]
+      } else {
+        error("too few rows")
+      }
+    } else {
+      error("too few rows")
+    }
   } else {
     [[boolean]]
   }
@@ -67,19 +81,20 @@ loopRow = \(columns [boolean]) [boolean] | error {
 }
 
 stepColumns = \(upper [boolean], current [boolean], lower [boolean]) [boolean] | error {
-  if [u1, u2, u3, ...us] = upper {
-    if [c1, c2, c3, ...cs] = current {
-      if [l1, l2, l3, ...ls] = lower {
+  if u = cellTuple(upper) as cellTuple {
+    if c = cellTuple(current) as cellTuple {
+      if l = cellTuple(lower) as cellTuple {
         n = Number'Sum(
-          booleansToNumbers([boolean u1, u2, u3, c1, c3, l1, l2, l3])
+          booleansToNumbers([boolean
+            u.first, u.second, u.third,
+            c.first, c.third,
+            l.first, l.second, l.third,
+          ],
         )
-        bs = stepColumns(
-          [boolean u2, u3, ...us],
-          [boolean c2, c3, ...cs],
-          [boolean l2, l3, ...ls],
-        )?
+        )
+        bs = stepColumns(tail(us), tail(cs), tail(ls))?
 
-        [boolean c2 & 2 <= n & n <= 3 || !c2 & n == 3, ...bs]
+        [boolean c2 & 2 <= n & n <= 3 | !c2 & n == 3, ...bs]
       } else {
         error("wrong row length")
       }
@@ -88,6 +103,30 @@ stepColumns = \(upper [boolean], current [boolean], lower [boolean]) [boolean] |
     }
   } else {
     [boolean]
+  }
+}
+
+tail = \(cs [boolean]) [boolean] {
+  if [_, ...cs] = cs {
+    cs
+  } else {
+    [boolean]
+  }
+}
+
+cellTuple = \(cs [boolean]) cellTuple {
+  if [c1, ...cs] = cs {
+    if [c2, ...cs] = cs {
+      if [c3, ...cs] = cs {
+        cellTuple{first: c1(), second: c2(), third: c3()}
+      } else {
+        none
+      }
+    } else {
+      none
+    }
+  } else {
+    none
   }
 }
 
