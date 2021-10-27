@@ -14,9 +14,10 @@ Feature: Examples
       | console     |
       | echo        |
       | hello-world |
+      | life-game   |
       | ls          |
-      | udp-client  |
-      | udp-server  |
       | tcp-client  |
       | tcp-server  |
+      | udp-client  |
+      | udp-server  |
       | yes         |
