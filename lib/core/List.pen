@@ -9,3 +9,27 @@ LengthRecursive = \(xs [any], n number) number {
     n
   }
 }
+
+First = \(xs [any], fallback any) any {
+  if [x, ..._] = xs {
+    x()
+  } else {
+    fallback
+  }
+}
+
+Last = \(xs [any], fallback any) any {
+  if [x, ...xs] = xs {
+    last(xs, x)
+  } else {
+    fallback
+  }
+}
+
+last= \(xs [any], x \() any) any {
+  if [x, ...xs] = xs {
+    last(xs, x)
+  } else {
+    x()
+  }
+}
