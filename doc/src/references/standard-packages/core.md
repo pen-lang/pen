@@ -52,6 +52,22 @@ It returns a length of a list.
 \([any]) number
 ```
 
+#### `First`
+
+It returns the first element of a list. If the list is empty, it returns a given fallback value.
+
+```pen
+\([any], any) any
+```
+
+#### `Last`
+
+It returns the last element of a list. If the list is empty, it returns a given fallback value.
+
+```pen
+\([any], any) any
+```
+
 ## `String` module
 
 ```pen

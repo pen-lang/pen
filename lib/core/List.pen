@@ -1,11 +1,35 @@
 Length = \(xs [any]) number {
-  LengthRecursive(xs, 0)
+  lengthRecursive(xs, 0)
 }
 
-LengthRecursive = \(xs [any], n number) number {
+lengthRecursive = \(xs [any], n number) number {
   if [_, ...xs] = xs {
-    LengthRecursive(xs, n + 1)
+    lengthRecursive(xs, n + 1)
   } else {
     n
+  }
+}
+
+First = \(xs [any], fallback any) any {
+  if [x, ..._] = xs {
+    x()
+  } else {
+    fallback
+  }
+}
+
+Last = \(xs [any], fallback any) any {
+  if [x, ...xs] = xs {
+    last(xs, x)
+  } else {
+    fallback
+  }
+}
+
+last= \(xs [any], x \() any) any {
+  if [x, ...xs] = xs {
+    last(xs, x)
+  } else {
+    x()
   }
 }
