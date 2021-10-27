@@ -8,11 +8,11 @@ type cellTuple {
   third boolean
 }
 
-Step = \(rows [[boolean]]) [[boolean]] | error {
+Step = \(rs [[boolean]]) [[boolean]] | error {
   stepRows(
-    if [f, ...rs] = rows {
+    if [f, ..._] = rs {
       if l = List'Last([any ...rs], none) as [boolean] {
-        [[boolean] l, ...rows, f()]
+        [[boolean] l, ...rs, f()]
       } else {
         error("too few rows")
       }
