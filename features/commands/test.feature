@@ -55,6 +55,5 @@ Feature: Testing packages
     }
     """
     And I append "1" to the environment variable "PEN_DEBUG"
-    When I run `pen test`
-    Then the exit status should be 0
-    And the stderr should contain exactly "hello"
+    When I successfully run `pen test`
+    Then the stderr should contain exactly "hello"
