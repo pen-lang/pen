@@ -115,6 +115,7 @@ booleansToNumbers = \(bs [boolean]) [number] {
   }
 }
 
+# TODO Use a list comprehension.
 Initialize = \(rows number, columns number) [[boolean]] {
   if rows == 0 {
     [[boolean]]
