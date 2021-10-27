@@ -37,8 +37,7 @@ RenderLife = \() none | error {
       [boolean false, false, false],
       [boolean false, true, false],
       [boolean false, false, false],
-    ],
-    ),
+    ]),
     String'Join(
       [string
         "...",
@@ -56,8 +55,7 @@ RenderTwoLives = \() none | error {
       [boolean false, true, false],
       [boolean false, false, false],
       [boolean false, false, true],
-    ],
-    ),
+    ]),
     String'Join(
       [string
         ".o.",
