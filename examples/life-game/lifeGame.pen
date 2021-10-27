@@ -45,10 +45,10 @@ stepRow = \(upper [boolean], current [boolean], lower [boolean]) [boolean] | err
   stepColumns(loopRow(upper)?, loopRow(current)?, loopRow(lower)?)
 }
 
-loopRow = \(columns [boolean]) [boolean] | error {
-  if [f, ...cs] = columns {
+loopRow = \(cs [boolean]) [boolean] | error {
+  if [f, ..._] = cs {
     if l = List'Last([any ...cs], none) as boolean {
-      [boolean l, ...columns, f()]
+      [boolean l, ...cs, f()]
     } else {
       error("too few columns")
     }
