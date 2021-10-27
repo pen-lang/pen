@@ -1,10 +1,10 @@
 Length = \(xs [any]) number {
-  LengthRecursive(xs, 0)
+  lengthRecursive(xs, 0)
 }
 
-LengthRecursive = \(xs [any], n number) number {
+lengthRecursive = \(xs [any], n number) number {
   if [_, ...xs] = xs {
-    LengthRecursive(xs, n + 1)
+    lengthRecursive(xs, n + 1)
   } else {
     n
   }
