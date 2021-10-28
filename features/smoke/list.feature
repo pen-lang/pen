@@ -26,3 +26,21 @@ Feature: List
     """
     When I successfully run `pen build`
     Then I successfully run `check_memory_leak.sh ./app`
+
+  Scenario: Force an element in a list of any type
+    Given a file named "main.pen" with:
+    """pen
+    import System'Context { Context }
+
+    main = \(ctx Context) number {
+      if [x, ..._] = [any "foo"] {
+        x()
+
+        0
+      } else {
+        1
+      }
+    }
+    """
+    When I successfully run `pen build`
+    Then I successfully run `check_memory_leak.sh ./app`

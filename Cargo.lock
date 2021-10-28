@@ -297,6 +297,7 @@ name = "hir_mir"
 version = "0.1.0"
 dependencies = [
  "hir",
+ "insta",
  "interface",
  "mir",
  "once_cell",

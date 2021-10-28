@@ -50,10 +50,7 @@ pub fn compile(
             compile(if_.else_())?,
         )
         .into(),
-        Expression::IfList(if_) => compile(&if_list_transformer::transform(
-            if_,
-            type_context.list_type_configuration(),
-        )?)?,
+        Expression::IfList(if_) => compile(&if_list_transformer::transform(if_, type_context)?)?,
         Expression::IfType(if_) => mir::ir::Case::new(
             compile(if_.argument())?,
             if_.branches()
