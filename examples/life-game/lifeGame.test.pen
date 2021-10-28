@@ -67,7 +67,7 @@ RenderTwoLives = \() none | error {
   )
 }
 
-StepEmpty3x3 = \() none | error {
+StepEmpty = \() none | error {
   Assert'EqualStrings(
     lifeGame'Render(lifeGame'Step(lifeGame'Initialize(3, 3))?),
     lifeGame'Render(lifeGame'Initialize(3, 3)),
