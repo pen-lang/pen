@@ -27,8 +27,8 @@ run = \(ctx Context) none | error {
 }
 
 step = \(ctx Context, rows [[boolean]]) none | error {
-  File'Write(ctx, File'StdOut(), lifeGame'Render(rows))?
   File'Write(ctx, File'StdOut(), "\x1bc")?
+  File'Write(ctx, File'StdOut(), lifeGame'Render(rows))?
 
   step(ctx, lifeGame'Step(rows)?)
 }
