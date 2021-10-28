@@ -15,4 +15,3 @@ test-info = { path = "../test-info" }
 [dev-dependencies]
 insta = "1"
 pretty_assertions = "1.0"
-
