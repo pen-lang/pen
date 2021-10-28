@@ -31,13 +31,13 @@ stepRows = \(rs [[boolean]]) [[boolean]] | error {
 
         [[boolean] r, ...rs]
       } else {
-        error("too few rows")
+        [[boolean]]
       }
     } else {
       error("too few rows")
     }
   } else {
-    [[boolean]]
+    error("too few rows")
   }
 }
 
