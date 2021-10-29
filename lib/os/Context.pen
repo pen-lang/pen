@@ -37,7 +37,7 @@ import foreign "c" _pen_os_udp_receive_from \(Udp'Socket) FfiUdpDatagramResult
 import foreign "c" _pen_os_udp_send \(Udp'Socket, string) FfiNumberResult
 import foreign "c" _pen_os_udp_send_to \(Udp'Socket, string, string) FfiNumberResult
 import foreign "c" _pen_os_get_time \() number
-
+import foreign "c" _pen_os_random_number \() number
 
 type Context {
   inner InnerContext
@@ -73,6 +73,7 @@ type InnerContext {
   UdpSend \(Udp'Socket, string) FfiNumberResult
   UdpSendTo \(Udp'Socket, string, string) FfiNumberResult
   GetTime \() number
+  RandomNumber \() number
 }
 
 type FfiOpenResult {
@@ -162,6 +163,7 @@ New = \() Context {
       UdpSend: _pen_os_udp_send,
       UdpSendTo: _pen_os_udp_send_to,
       GetTime: _pen_os_get_time,
+      RandomNumber: _pen_os_random_number,
     }
   }
 }
