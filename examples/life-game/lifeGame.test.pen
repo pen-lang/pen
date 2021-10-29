@@ -4,7 +4,7 @@ import 'lifeGame
 
 Render3x4 = \() none | error {
   Assert'EqualStrings(
-    lifeGame'Render(lifeGame'Initialize(3, 4)),
+    lifeGame'Render(initializeEmpty(3, 4)),
     String'Join(
       [string
         "....",
@@ -18,7 +18,7 @@ Render3x4 = \() none | error {
 
 Render4x4 = \() none | error {
   Assert'EqualStrings(
-    lifeGame'Render(lifeGame'Initialize(4, 4)),
+    lifeGame'Render(initializeEmpty(4, 4)),
     String'Join(
       [string
         "....",
@@ -69,8 +69,8 @@ RenderTwoLives = \() none | error {
 
 StepEmpty = \() none | error {
   Assert'EqualStrings(
-    lifeGame'Render(lifeGame'Step(lifeGame'Initialize(3, 3))?),
-    lifeGame'Render(lifeGame'Initialize(3, 3)),
+    lifeGame'Render(lifeGame'Step(initializeEmpty(3, 3))?),
+    lifeGame'Render(initializeEmpty(3, 3)),
   )
 }
 
@@ -81,7 +81,7 @@ StepDyingLife = \() none | error {
       [boolean false, true, false],
       [boolean false, false, false],
     ])?),
-    lifeGame'Render(lifeGame'Initialize(3, 3)),
+    lifeGame'Render(initializeEmpty(3, 3)),
   )
 }
 
@@ -96,4 +96,12 @@ StepSteadyCube = \() none | error {
     lifeGame'Render(lifeGame'Step(xs)?),
     lifeGame'Render(xs),
   )
+}
+
+initializeEmpty = \(rows number, columns number) [[boolean]] {
+  lifeGame'Initialize(mockContext(), rows, columns)
+}
+
+mockContext = \() lifeGame'Context {
+  lifeGame'NewContext(\() number { 1 })
 }

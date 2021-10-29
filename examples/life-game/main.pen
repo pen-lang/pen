@@ -4,6 +4,7 @@ import Core'Number
 import Core'String
 import System'Context { Context }
 import System'File
+import System'Random
 import 'lifeGame
 
 rows = \() number { 10 }
@@ -23,7 +24,14 @@ main = \(ctx Context) number {
 }
 
 run = \(ctx Context) none | error {
-  step(ctx, lifeGame'Initialize(rows(), columns()))
+  step(
+    ctx,
+    lifeGame'Initialize(
+      lifeGame'NewContext(\() number { Random'Number(ctx) }),
+      rows(),
+      columns(),
+    ),
+  )
 }
 
 step = \(ctx Context, rows [[boolean]]) none | error {

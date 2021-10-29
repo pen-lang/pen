@@ -2,10 +2,18 @@ import Core'List
 import Core'Number
 import Core'String
 
+type Context {
+  random \() number
+}
+
 type cellTuple {
   first boolean
   second boolean
   third boolean
+}
+
+NewContext = \(random \() number) Context {
+  Context{random: random}
 }
 
 Step = \(rs [[boolean]]) [[boolean]] | error {
@@ -116,19 +124,19 @@ booleansToNumbers = \(bs [boolean]) [number] {
 }
 
 # TODO Use a list comprehension.
-Initialize = \(rows number, columns number) [[boolean]] {
+Initialize = \(ctx Context, rows number, columns number) [[boolean]] {
   if rows == 0 {
     [[boolean]]
   } else {
-    [[boolean] initializeRow(columns), ...Initialize(rows - 1, columns)]
+    [[boolean] initializeRow(ctx, columns), ...Initialize(ctx, rows - 1, columns)]
   }
 }
 
-initializeRow = \(columns number) [boolean] {
+initializeRow = \(ctx Context, columns number) [boolean] {
   if columns == 0 {
     [boolean]
   } else {
-    [boolean false, ...initializeRow(columns - 1)]
+    [boolean ctx.random() < 1 / 3, ...initializeRow(ctx, columns - 1)]
   }
 }
 
