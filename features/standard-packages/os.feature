@@ -350,3 +350,28 @@ Feature: OS
     """
     When I successfully run `pen build`
     Then I successfully run `./app`
+
+  Scenario: Generate a random number
+    Given a file named "main.pen" with:
+    """pen
+    import Core'Number
+    import System'Context { Context }
+    import System'File
+    import System'Random
+
+    run = \(ctx Context) none | error {
+      File'Write(ctx, File'StdOut(), Number'String(Random'Number(ctx)))?
+
+      none
+    }
+
+    main = \(ctx Context) number {
+      if m = run(ctx) as none {
+        0
+      } else {
+        1
+      }
+    }
+    """
+    When I successfully run `pen build`
+    Then I successfully run `./app`
