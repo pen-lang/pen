@@ -98,6 +98,23 @@ StepSteadyCube = \() none | error {
   )
 }
 
+StepStick = \() none | error {
+  Assert'EqualStrings(
+    lifeGame'Render(lifeGame'Step([[boolean]
+      [boolean false, false, false, false],
+      [boolean false, false, true, false],
+      [boolean false, false, true, false],
+      [boolean false, false, true, false],
+    ])?),
+    lifeGame'Render([[boolean]
+      [boolean false, false, false, false],
+      [boolean false, false, false, false],
+      [boolean false, true, true, true],
+      [boolean false, false, false, false],
+    ]),
+  )
+}
+
 initializeEmpty = \(rows number, columns number) [[boolean]] {
   lifeGame'Initialize(mockContext(), rows, columns)
 }
