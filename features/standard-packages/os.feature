@@ -351,6 +351,21 @@ Feature: OS
     When I successfully run `pen build`
     Then I successfully run `./app`
 
+  Scenario: Sleep
+    Given a file named "main.pen" with:
+    """pen
+    import System'Context { Context }
+    import System'Time
+
+    main = \(ctx Context) number {
+      Time'Sleep(ctx, 1)
+
+      0
+    }
+    """
+    When I successfully run `pen build`
+    Then I successfully run `./app`
+
   Scenario: Generate a random number
     Given a file named "main.pen" with:
     """pen
