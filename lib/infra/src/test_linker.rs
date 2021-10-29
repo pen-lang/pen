@@ -30,6 +30,7 @@ impl TestLinker {
     ) -> Result<String, Box<dyn Error>> {
         Ok(format!(
             r#"
+            mod debug;
             mod heap;
             mod test_result;
             mod unreachable;

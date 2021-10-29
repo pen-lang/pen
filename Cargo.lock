@@ -142,9 +142,9 @@ dependencies = [
 
 [[package]]
 name = "combine"
-version = "4.6.1"
+version = "4.6.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a909e4d93292cd8e9c42e189f61681eff9d67b6541f96b8a1a737f23737bd001"
+checksum = "b2b2f5d0ee456f3928812dfc8c6d9a1d592b98678f6d56db9b0cd2b7bc6c8db5"
 dependencies = [
  "bytes",
  "memchr",
@@ -214,7 +214,7 @@ checksum = "398ea4fabe40b9b0d885340a2a991a44c8a645624075ad966d21f88688e2b69e"
 [[package]]
 name = "fmm"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#34aeb61690f8b1eb5cd88dbeb9060416e4d96995"
+source = "git+https://github.com/raviqqe/fmm?branch=main#4a6450e4bc60349bee297a73c8a1a8c43fa87683"
 dependencies = [
  "once_cell",
  "petgraph",
@@ -224,7 +224,7 @@ dependencies = [
 [[package]]
 name = "fmm-c"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#34aeb61690f8b1eb5cd88dbeb9060416e4d96995"
+source = "git+https://github.com/raviqqe/fmm?branch=main#4a6450e4bc60349bee297a73c8a1a8c43fa87683"
 dependencies = [
  "fmm",
  "tempfile",
@@ -233,7 +233,7 @@ dependencies = [
 [[package]]
 name = "fmm-llvm"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#34aeb61690f8b1eb5cd88dbeb9060416e4d96995"
+source = "git+https://github.com/raviqqe/fmm?branch=main#4a6450e4bc60349bee297a73c8a1a8c43fa87683"
 dependencies = [
  "fmm",
  "inkwell",
@@ -297,6 +297,7 @@ name = "hir_mir"
 version = "0.1.0"
 dependencies = [
  "hir",
+ "insta",
  "interface",
  "mir",
  "once_cell",
@@ -353,7 +354,7 @@ dependencies = [
 [[package]]
 name = "inkwell"
 version = "0.1.0"
-source = "git+https://github.com/TheDan64/inkwell?branch=master#bec0222fbd52c04fd575aebab3d9127a291a63b4"
+source = "git+https://github.com/TheDan64/inkwell?branch=master#293c6a1d918b8a8f8f136c89dd657ab0929f3135"
 dependencies = [
  "either",
  "inkwell_internals",
@@ -366,8 +367,8 @@ dependencies = [
 
 [[package]]
 name = "inkwell_internals"
-version = "0.3.0"
-source = "git+https://github.com/TheDan64/inkwell?branch=master#bec0222fbd52c04fd575aebab3d9127a291a63b4"
+version = "0.4.0"
+source = "git+https://github.com/TheDan64/inkwell?branch=master#293c6a1d918b8a8f8f136c89dd657ab0929f3135"
 dependencies = [
  "proc-macro2",
  "quote",
