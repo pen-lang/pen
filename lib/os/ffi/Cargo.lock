@@ -36,6 +36,7 @@ name = "os-app"
 version = "0.1.0"
 dependencies = [
  "pen-ffi",
+ "rand",
  "tempfile",
 ]
 
