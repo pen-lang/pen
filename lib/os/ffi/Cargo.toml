@@ -6,4 +6,5 @@ edition = "2018"
 
 [dependencies]
 ffi = { package = "pen-ffi", version = "0.2" }
+rand = "0.8"
 tempfile = "3"
