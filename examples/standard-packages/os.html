@@ -463,6 +463,19 @@ main = \(ctx Context) number {
 </code></pre>
 <p><em>When</em> I successfully run <code>pen build</code></p>
 <p><em>Then</em> I successfully run <code>./app</code>.</p>
+<h2 id="sleep"><a class="header" href="#sleep">Sleep</a></h2>
+<p><em>Given</em> a file named &quot;main.pen&quot; with:</p>
+<pre><code class="language-pen">import System'Context { Context }
+import System'Time
+
+main = \(ctx Context) number {
+  Time'Sleep(ctx, 1)
+
+  0
+}
+</code></pre>
+<p><em>When</em> I successfully run <code>pen build</code></p>
+<p><em>Then</em> I successfully run <code>./app</code>.</p>
 <h2 id="generate-a-random-number"><a class="header" href="#generate-a-random-number">Generate a random number</a></h2>
 <p><em>Given</em> a file named &quot;main.pen&quot; with:</p>
 <pre><code class="language-pen">import Core'Number
