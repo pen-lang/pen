@@ -445,3 +445,19 @@ It fetches a current system time in milliseconds.
 ```pen
 \(ctx Context) number
 ```
+
+## `Random` module
+
+```pen
+import System'Random
+```
+
+### Functions
+
+#### `Number`
+
+It generates a random number in a range of `0 <= n < 1`.
+
+```pen
+\(ctx Context) number
+```
