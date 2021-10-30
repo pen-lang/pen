@@ -24,13 +24,26 @@ pub fn reduce_operations(
                     &pairs[1..],
                 )
             } else {
-                BinaryOperation::new(
-                    *operator,
-                    lhs,
-                    reduce_operations(rhs.clone(), &pairs[1..]),
-                    position.clone(),
+                let pairs = &pairs[1..];
+                let (head, tail) = pairs.split_at(
+                    pairs
+                        .iter()
+                        .position(&|pair: &(_, _, _)| {
+                            operator_priority(pair.0) > operator_priority(*operator)
+                        })
+                        .map(|index| index + 1)
+                        .unwrap_or_else(|| pairs.len()),
+                );
+
+                reduce_operations(
+                    BinaryOperation::new(
+                        *operator,
+                        lhs,
+                        reduce_operations(rhs.clone(), &head),
+                        position.clone(),
+                    ),
+                    tail,
                 )
-                .into()
             }
         }
     }
@@ -55,6 +68,7 @@ fn operator_priority(operator: BinaryOperator) -> usize {
 mod tests {
     use super::*;
     use position::{test::PositionFake, Position};
+    use pretty_assertions::assert_eq;
 
     #[test]
     fn reduce_no_operation() {
@@ -140,6 +154,45 @@ mod tests {
                         Position::fake()
                     ),
                     none.clone(),
+                    Position::fake()
+                ),
+                BinaryOperation::new(
+                    BinaryOperator::And,
+                    none.clone(),
+                    none.clone(),
+                    Position::fake()
+                ),
+                Position::fake()
+            )
+            .into(),
+        );
+    }
+
+    #[test]
+    fn reduce_operations_with_three_priorities() {
+        let none = None::new(Position::fake());
+
+        assert_eq!(
+            reduce_operations(
+                none.clone(),
+                &[
+                    (BinaryOperator::And, none.clone().into(), Position::fake()),
+                    (BinaryOperator::Equal, none.clone().into(), Position::fake()),
+                    (BinaryOperator::Or, none.clone().into(), Position::fake()),
+                    (BinaryOperator::And, none.clone().into(), Position::fake())
+                ]
+            ),
+            BinaryOperation::new(
+                BinaryOperator::Or,
+                BinaryOperation::new(
+                    BinaryOperator::And,
+                    none.clone(),
+                    BinaryOperation::new(
+                        BinaryOperator::Equal,
+                        none.clone(),
+                        none.clone(),
+                        Position::fake()
+                    ),
                     Position::fake()
                 ),
                 BinaryOperation::new(
