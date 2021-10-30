@@ -38,7 +38,7 @@ pub fn reduce_operations(
                     BinaryOperation::new(
                         *operator,
                         lhs,
-                        reduce_operations(rhs.clone(), &head),
+                        reduce_operations(rhs.clone(), head),
                         position.clone(),
                     ),
                     tail,
@@ -85,13 +85,7 @@ mod tests {
                 none.clone(),
                 &[(BinaryOperator::And, none.clone().into(), Position::fake())]
             ),
-            BinaryOperation::new(
-                BinaryOperator::And,
-                none.clone(),
-                none.clone(),
-                Position::fake()
-            )
-            .into(),
+            BinaryOperation::new(BinaryOperator::And, none.clone(), none, Position::fake()).into(),
         );
     }
 
@@ -116,12 +110,7 @@ mod tests {
                     none.clone(),
                     Position::fake()
                 ),
-                BinaryOperation::new(
-                    BinaryOperator::And,
-                    none.clone(),
-                    none.clone(),
-                    Position::fake()
-                ),
+                BinaryOperation::new(BinaryOperator::And, none.clone(), none, Position::fake()),
                 Position::fake()
             )
             .into(),
@@ -155,12 +144,7 @@ mod tests {
                     none.clone(),
                     Position::fake()
                 ),
-                BinaryOperation::new(
-                    BinaryOperator::And,
-                    none.clone(),
-                    none.clone(),
-                    Position::fake()
-                ),
+                BinaryOperation::new(BinaryOperator::And, none.clone(), none, Position::fake()),
                 Position::fake()
             )
             .into(),
@@ -194,12 +178,7 @@ mod tests {
                     ),
                     Position::fake()
                 ),
-                BinaryOperation::new(
-                    BinaryOperator::And,
-                    none.clone(),
-                    none.clone(),
-                    Position::fake()
-                ),
+                BinaryOperation::new(BinaryOperator::And, none.clone(), none, Position::fake()),
                 Position::fake()
             )
             .into(),
@@ -239,12 +218,7 @@ mod tests {
                     ),
                     Position::fake()
                 ),
-                BinaryOperation::new(
-                    BinaryOperator::And,
-                    none.clone(),
-                    none.clone(),
-                    Position::fake()
-                ),
+                BinaryOperation::new(BinaryOperator::And, none.clone(), none, Position::fake()),
                 Position::fake()
             )
             .into(),

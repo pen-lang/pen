@@ -264,7 +264,7 @@ mod tests {
                         vec![Argument::new("x", list_type.clone())],
                         types::None::new(Position::fake()),
                         List::new(
-                            union_type.clone(),
+                            union_type,
                             vec![ListElement::Single(
                                 Variable::new("x", Position::fake()).into()
                             )],
