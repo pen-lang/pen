@@ -34,8 +34,8 @@ Package URLs have different protocol schemes depending on where they are located
 ```json
 {
   "dependencies": {
-    "System": "pen:///lib/os",
-    "Core": "pen:///lib/core",
+    "System": "pen:///os",
+    "Core": "pen:///core",
     "MyLibrary": "git://github.com/john-doe/super-hello-world"
   }
 }
@@ -46,7 +46,7 @@ Package URLs have different protocol schemes depending on where they are located
 ```json
 {
   "dependencies": {
-    "Core": "pen:///lib/core",
+    "Core": "pen:///core",
     "MyLibrary": "git://github.com/john-doe/super-hello-world"
   }
 }

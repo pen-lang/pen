@@ -4,7 +4,7 @@ pub const BIT_CODE_FILE_EXTENSION: &str = "bc";
 pub const LANGUAGE_ROOT_SCHEME: &str = "pen";
 pub const LANGUAGE_ROOT_ENVIRONMENT_VARIABLE: &str = "PEN_ROOT";
 
-pub const DEFAULT_SYSTEM_PACKAGE_URL: &str = "pen:///lib/os";
+pub const DEFAULT_SYSTEM_PACKAGE_URL: &str = "pen:///os";
 pub const PRELUDE_PACKAGE_URL: &str = "pen:///lib/prelude";
 pub const FFI_BUILD_SCRIPT_BASENAME: &str = "pen-ffi";
 pub const LINK_SCRIPT_BASENAME: &str = "pen-link";

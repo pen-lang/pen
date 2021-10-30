@@ -7,7 +7,7 @@ This package provides an interface for operating systems. Currently, it supports
 ```json
 {
   "dependencies": {
-    "System": "pen:///lib/os"
+    "System": "pen:///os"
   }
 }
 ```

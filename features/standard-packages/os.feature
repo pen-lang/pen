@@ -4,8 +4,8 @@ Feature: OS
     """json
     {
       "dependencies": {
-        "System": "pen:///lib/os",
-        "Core": "pen:///lib/core"
+        "System": "pen:///os",
+        "Core": "pen:///core"
       }
     }
     """

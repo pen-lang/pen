@@ -4,7 +4,7 @@ Feature: Building packages
     """json
     {
       "dependencies": {
-        "System": "pen:///lib/os"
+        "System": "pen:///os"
       }
     }
     """
@@ -38,7 +38,7 @@ Feature: Building packages
     """json
     {
       "dependencies": {
-        "System": "pen:///lib/os"
+        "System": "pen:///os"
       }
     }
     """

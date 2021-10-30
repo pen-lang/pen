@@ -4,7 +4,7 @@ Feature: List
     """json
     {
       "dependencies": {
-        "System": "pen:///lib/os"
+        "System": "pen:///os"
       }
     }
     """
