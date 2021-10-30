@@ -9,18 +9,18 @@ pub enum SuffixOperator {
 }
 
 pub fn reduce_operations(
-    lhs: Expression,
+    lhs: impl Into<Expression>,
     pairs: &[(BinaryOperator, Expression, Position)],
 ) -> Expression {
     match pairs {
-        [] => lhs,
+        [] => lhs.into(),
         [(operator, rhs, position)] => {
             BinaryOperation::new(*operator, lhs, rhs.clone(), position.clone()).into()
         }
         [(operator, rhs, position), (next_operator, _, _), ..] => {
             if operator_priority(*operator) >= operator_priority(*next_operator) {
                 reduce_operations(
-                    BinaryOperation::new(*operator, lhs, rhs.clone(), position.clone()).into(),
+                    BinaryOperation::new(*operator, lhs, rhs.clone(), position.clone()),
                     &pairs[1..],
                 )
             } else {
@@ -48,5 +48,109 @@ fn operator_priority(operator: BinaryOperator) -> usize {
         | BinaryOperator::GreaterThanOrEqual => 3,
         BinaryOperator::Add | BinaryOperator::Subtract => 4,
         BinaryOperator::Multiply | BinaryOperator::Divide => 5,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use position::{test::PositionFake, Position};
+
+    #[test]
+    fn reduce_no_operation() {
+        let none = None::new(Position::fake());
+
+        assert_eq!(reduce_operations(none.clone(), &[]), none.into());
+    }
+
+    #[test]
+    fn reduce_one_operation() {
+        let none = None::new(Position::fake());
+
+        assert_eq!(
+            reduce_operations(
+                none.clone(),
+                &[(BinaryOperator::And, none.clone().into(), Position::fake())]
+            ),
+            BinaryOperation::new(
+                BinaryOperator::And,
+                none.clone(),
+                none.clone(),
+                Position::fake()
+            )
+            .into(),
+        );
+    }
+
+    #[test]
+    fn reduce_three_operations_with_low_priority_operator_in_middle() {
+        let none = None::new(Position::fake());
+
+        assert_eq!(
+            reduce_operations(
+                none.clone(),
+                &[
+                    (BinaryOperator::And, none.clone().into(), Position::fake()),
+                    (BinaryOperator::Or, none.clone().into(), Position::fake()),
+                    (BinaryOperator::And, none.clone().into(), Position::fake())
+                ]
+            ),
+            BinaryOperation::new(
+                BinaryOperator::Or,
+                BinaryOperation::new(
+                    BinaryOperator::And,
+                    none.clone(),
+                    none.clone(),
+                    Position::fake()
+                ),
+                BinaryOperation::new(
+                    BinaryOperator::And,
+                    none.clone(),
+                    none.clone(),
+                    Position::fake()
+                ),
+                Position::fake()
+            )
+            .into(),
+        );
+    }
+
+    #[test]
+    fn reduce_four_operations_with_low_priority_operator_in_middle() {
+        let none = None::new(Position::fake());
+
+        assert_eq!(
+            reduce_operations(
+                none.clone(),
+                &[
+                    (BinaryOperator::And, none.clone().into(), Position::fake()),
+                    (BinaryOperator::And, none.clone().into(), Position::fake()),
+                    (BinaryOperator::Or, none.clone().into(), Position::fake()),
+                    (BinaryOperator::And, none.clone().into(), Position::fake())
+                ]
+            ),
+            BinaryOperation::new(
+                BinaryOperator::Or,
+                BinaryOperation::new(
+                    BinaryOperator::And,
+                    BinaryOperation::new(
+                        BinaryOperator::And,
+                        none.clone(),
+                        none.clone(),
+                        Position::fake()
+                    ),
+                    none.clone(),
+                    Position::fake()
+                ),
+                BinaryOperation::new(
+                    BinaryOperator::And,
+                    none.clone(),
+                    none.clone(),
+                    Position::fake()
+                ),
+                Position::fake()
+            )
+            .into(),
+        );
     }
 }
