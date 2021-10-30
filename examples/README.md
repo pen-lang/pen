@@ -15,6 +15,7 @@ Those are examples of applications and libraries written in Pen.
 - TCP
   - [Client](tcp-client)
   - [Server](tcp-server)
+- [Conway's game of life](life-game)
 
 ## Libraries
 

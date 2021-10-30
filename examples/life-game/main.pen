@@ -1,0 +1,44 @@
+import Console'Print
+import Core'List
+import Core'Number
+import Core'String
+import System'Context { Context }
+import System'File
+import System'Random
+import System'Time
+import 'lifeGame
+
+rows = \() number { 10 }
+columns = \() number { 20 }
+
+main = \(ctx Context) number {
+  if e = run(ctx) as none {
+    0
+  } else {
+    Print'Line(
+      ctx,
+      if s = source(e) as string { s } else { "unknown error" },
+    )
+
+    1
+  }
+}
+
+run = \(ctx Context) none | error {
+  step(
+    ctx,
+    lifeGame'Initialize(
+      lifeGame'NewContext(\() number { Random'Number(ctx) }),
+      rows(),
+      columns(),
+    ),
+  )
+}
+
+step = \(ctx Context, rows [[boolean]]) none | error {
+  File'Write(ctx, File'StdOut(), "\x1bc")?
+  File'Write(ctx, File'StdOut(), lifeGame'Render(rows))?
+  Time'Sleep(ctx, 500)
+
+  step(ctx, lifeGame'Step(rows)?)
+}

@@ -1,0 +1,124 @@
+import Core'String
+import Test'Assert
+import 'lifeGame
+
+Render3x4 = \() none | error {
+  Assert'EqualStrings(
+    lifeGame'Render(initializeEmpty(3, 4)),
+    String'Join(
+      [string
+        "....",
+        "....",
+        "....\n",
+      ],
+      "\n",
+    )
+  )
+}
+
+Render4x4 = \() none | error {
+  Assert'EqualStrings(
+    lifeGame'Render(initializeEmpty(4, 4)),
+    String'Join(
+      [string
+        "....",
+        "....",
+        "....",
+        "....\n",
+      ],
+      "\n",
+    )
+  )
+}
+
+RenderLife = \() none | error {
+  Assert'EqualStrings(
+    lifeGame'Render([[boolean]
+      [boolean false, false, false],
+      [boolean false, true, false],
+      [boolean false, false, false],
+    ]),
+    String'Join(
+      [string
+        "...",
+        ".o.",
+        "...\n",
+      ],
+      "\n",
+    )
+  )
+}
+
+RenderTwoLives = \() none | error {
+  Assert'EqualStrings(
+    lifeGame'Render([[boolean]
+      [boolean false, true, false],
+      [boolean false, false, false],
+      [boolean false, false, true],
+    ]),
+    String'Join(
+      [string
+        ".o.",
+        "...",
+        "..o\n",
+      ],
+      "\n",
+    )
+  )
+}
+
+StepEmpty = \() none | error {
+  Assert'EqualStrings(
+    lifeGame'Render(lifeGame'Step(initializeEmpty(3, 3))?),
+    lifeGame'Render(initializeEmpty(3, 3)),
+  )
+}
+
+StepDyingLife = \() none | error {
+  Assert'EqualStrings(
+    lifeGame'Render(lifeGame'Step([[boolean]
+      [boolean false, false, false],
+      [boolean false, true, false],
+      [boolean false, false, false],
+    ])?),
+    lifeGame'Render(initializeEmpty(3, 3)),
+  )
+}
+
+StepSteadyCube = \() none | error {
+  xs = [[boolean]
+    [boolean false, false, false],
+    [boolean false, true, true],
+    [boolean false, true, true],
+  ]
+
+  Assert'EqualStrings(
+    lifeGame'Render(lifeGame'Step(xs)?),
+    lifeGame'Render(xs),
+  )
+}
+
+StepStick = \() none | error {
+  Assert'EqualStrings(
+    lifeGame'Render(lifeGame'Step([[boolean]
+      [boolean false, false, false, false],
+      [boolean false, false, true, false],
+      [boolean false, false, true, false],
+      [boolean false, false, true, false],
+    ])?),
+    lifeGame'Render([[boolean]
+      [boolean false, false, false, false],
+      [boolean false, false, false, false],
+      [boolean false, true, true, true],
+      [boolean false, false, false, false],
+    ]),
+  )
+}
+
+initializeEmpty = \(rows number, columns number) [[boolean]] {
+  lifeGame'Initialize(mockContext(), rows, columns)
+}
+
+mockContext = \() lifeGame'Context {
+  lifeGame'NewContext(\() number { 1 })
+}
