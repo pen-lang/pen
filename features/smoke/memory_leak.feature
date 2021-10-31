@@ -4,8 +4,8 @@ Feature: Memory leak
     """json
     {
       "dependencies": {
-        "Core": "pen:///lib/core",
-        "System": "pen:///lib/os"
+        "Core": "pen:///core",
+        "System": "pen:///os"
       }
     }
     """

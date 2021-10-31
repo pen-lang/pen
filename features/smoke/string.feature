@@ -4,7 +4,7 @@ Feature: String
     """json
     {
       "dependencies": {
-        "System": "pen:///lib/os"
+        "System": "pen:///os"
       }
     }
     """

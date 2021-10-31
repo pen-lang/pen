@@ -1,8 +1,8 @@
 {
   "dependencies": {
     "Console": "../console",
-    "Core": "pen:///lib/core",
-    "System": "pen:///lib/os",
-    "Test": "pen:///lib/test"
+    "Core": "pen:///core",
+    "System": "pen:///os",
+    "Test": "pen:///test"
   }
 }

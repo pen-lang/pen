@@ -4,7 +4,7 @@ Feature: Core
     """json
     {
       "dependencies": {
-        "Core": "pen:///lib/core"
+        "Core": "pen:///core"
       }
     }
     """

@@ -7,7 +7,7 @@ This package provides utility functions and types for testing.
 ```json
 {
   "dependencies": {
-    "Test": "pen:///lib/test"
+    "Test": "pen:///test"
   }
 }
 ```

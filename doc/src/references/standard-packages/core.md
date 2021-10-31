@@ -7,7 +7,7 @@ This package provides common utility functions and types that are agnostic about
 ```json
 {
   "dependencies": {
-    "Core": "pen:///lib/core"
+    "Core": "pen:///core"
   }
 }
 ```
