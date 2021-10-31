@@ -4,7 +4,7 @@ Feature: Testing packages
     """json
     {
       "dependencies": {
-        "Test": "pen:///lib/test"
+        "Test": "pen:///test"
       }
     }
     """
