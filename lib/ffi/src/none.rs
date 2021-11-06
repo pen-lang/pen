@@ -12,4 +12,4 @@ impl None {
     }
 }
 
-type_information!(byte_string, crate::none::None);
+type_information!(none, crate::none::None);

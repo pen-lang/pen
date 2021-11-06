@@ -30,4 +30,4 @@ impl From<f64> for Number {
     }
 }
 
-type_information!(byte_string, crate::number::Number);
+type_information!(number, crate::number::Number);
