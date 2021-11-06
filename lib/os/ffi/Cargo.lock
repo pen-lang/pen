@@ -42,9 +42,9 @@ dependencies = [
 
 [[package]]
 name = "pen-ffi"
-version = "0.2.9"
+version = "0.2.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8b2ad90faae57416370d5fe13779e5ba97528530828805faf806db1ff194b08b"
+checksum = "6f494fb646fdbe87e699c2c1040160669bc98a2cded39a144c2f1a8b604a46a6"
 
 [[package]]
 name = "ppv-lite86"
