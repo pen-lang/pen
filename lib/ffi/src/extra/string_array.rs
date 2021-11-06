@@ -1,20 +1,20 @@
-use ffi::AnyLike;
+use crate::{type_information, Any, AnyLike, ByteString};
 use std::sync::Arc;
 
 #[repr(C)]
 #[derive(Clone)]
 pub struct StringArray {
-    inner: ffi::Any,
+    inner: Any,
 }
 
 impl StringArray {
-    pub fn new(vector: Vec<ffi::ByteString>) -> Self {
+    pub fn new(vector: Vec<ByteString>) -> Self {
         Self {
             inner: StringArrayInner::new(vector).into_any(),
         }
     }
 
-    pub fn get(&self, index: usize) -> Option<ffi::ByteString> {
+    pub fn get(&self, index: usize) -> Option<ByteString> {
         StringArrayInner::from_any(self.inner.clone())
             .unwrap()
             .get(index)
@@ -33,7 +33,7 @@ impl Default for StringArray {
     }
 }
 
-impl<T: Into<ffi::ByteString>> From<Vec<T>> for StringArray {
+impl<T: Into<ByteString>> From<Vec<T>> for StringArray {
     fn from(vector: Vec<T>) -> Self {
         Self::new(vector.into_iter().map(|x| x.into()).collect())
     }
@@ -42,38 +42,25 @@ impl<T: Into<ffi::ByteString>> From<Vec<T>> for StringArray {
 #[allow(clippy::redundant_allocation)]
 #[derive(Clone)]
 struct StringArrayInner {
-    vector: Arc<Vec<ffi::ByteString>>,
+    vector: Arc<Vec<ByteString>>,
 }
 
-ffi::type_information!(array_inner, crate::string_array::StringArrayInner);
+type_information!(array_inner, crate::extra::string_array::StringArrayInner);
 
 impl StringArrayInner {
-    pub fn new(vector: Vec<ffi::ByteString>) -> Self {
+    pub fn new(vector: Vec<ByteString>) -> Self {
         Self {
             vector: Arc::new(vector),
         }
     }
 
-    pub fn get(&self, index: usize) -> Option<ffi::ByteString> {
+    pub fn get(&self, index: usize) -> Option<ByteString> {
         self.vector.get(index).cloned()
     }
 
     pub fn len(&self) -> usize {
         self.vector.len()
     }
-}
-
-#[no_mangle]
-extern "C" fn _pen_ffi_string_array_get(
-    array: ffi::Arc<StringArray>,
-    index: ffi::Number,
-) -> ffi::ByteString {
-    array.get(f64::from(index) as usize - 1).unwrap_or_default()
-}
-
-#[no_mangle]
-extern "C" fn _pen_ffi_string_array_length(array: ffi::Arc<StringArray>) -> ffi::Number {
-    (array.len() as f64).into()
 }
 
 #[cfg(test)]
@@ -102,10 +89,7 @@ mod tests {
 
         #[test]
         fn get_element() {
-            assert_eq!(
-                StringArrayInner::new(vec!["abc".into()]).get(1),
-                Some("b".into())
-            );
+            StringArray::from(vec!["foo"]).get(1);
         }
     }
 
@@ -128,8 +112,8 @@ mod tests {
         #[test]
         fn get_element() {
             assert_eq!(
-                StringArrayInner::new(vec!["abc".into()]).get(0),
-                Some("b".into())
+                StringArrayInner::new(vec!["foo".into()]).get(0),
+                Some("foo".into())
             );
         }
     }
