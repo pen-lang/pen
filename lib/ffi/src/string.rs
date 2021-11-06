@@ -41,7 +41,7 @@ impl ByteString {
     }
 
     // Indices are inclusive and start from 1.
-    pub fn slice(&self, start: Number, end: Number) -> Self {
+    pub fn char_slice(&self, start: Number, end: Number) -> Self {
         let start = f64::from(start);
         let end = f64::from(end);
 
@@ -58,11 +58,12 @@ impl ByteString {
         if string.is_empty() || start >= string.chars().count() || end <= start {
             Self::empty()
         } else {
-            string[Self::get_byte_index(string, start)..Self::get_byte_index(string, end)].into()
+            string[Self::get_char_byte_index(string, start)..Self::get_char_byte_index(string, end)]
+                .into()
         }
     }
 
-    fn get_byte_index(string: &str, index: usize) -> usize {
+    fn get_char_byte_index(string: &str, index: usize) -> usize {
         string
             .char_indices()
             .nth(index)
@@ -97,6 +98,7 @@ impl From<String> for ByteString {
     }
 }
 
+// TODO Use Vec::into_raw_parts().
 impl From<Vec<u8>> for ByteString {
     fn from(vec: Vec<u8>) -> Self {
         vec.as_slice().into()
@@ -128,7 +130,7 @@ mod tests {
     #[test]
     fn slice_with_ascii() {
         assert_eq!(
-            ByteString::from("abc").slice(2.0.into(), 2.0.into()),
+            ByteString::from("abc").char_slice(2.0.into(), 2.0.into()),
             ByteString::from("b")
         );
     }
@@ -136,7 +138,7 @@ mod tests {
     #[test]
     fn slice_with_negative_index() {
         assert_eq!(
-            ByteString::from("abc").slice((-1.0).into(), 3.0.into()),
+            ByteString::from("abc").char_slice((-1.0).into(), 3.0.into()),
             ByteString::from("abc")
         );
     }
@@ -144,7 +146,7 @@ mod tests {
     #[test]
     fn slice_into_whole() {
         assert_eq!(
-            ByteString::from("abc").slice(1.0.into(), 3.0.into()),
+            ByteString::from("abc").char_slice(1.0.into(), 3.0.into()),
             ByteString::from("abc")
         );
     }
@@ -152,7 +154,7 @@ mod tests {
     #[test]
     fn slice_into_empty() {
         assert_eq!(
-            ByteString::from("abc").slice(4.0.into(), 4.0.into()),
+            ByteString::from("abc").char_slice(4.0.into(), 4.0.into()),
             ByteString::from("")
         );
     }
@@ -160,7 +162,7 @@ mod tests {
     #[test]
     fn slice_with_emojis() {
         assert_eq!(
-            ByteString::from("😀😉😂").slice(2.0.into(), 2.0.into()),
+            ByteString::from("😀😉😂").char_slice(2.0.into(), 2.0.into()),
             ByteString::from("😉")
         );
     }
@@ -168,7 +170,7 @@ mod tests {
     #[test]
     fn slice_last_with_emojis() {
         assert_eq!(
-            ByteString::from("😀😉😂").slice(3.0.into(), 3.0.into()),
+            ByteString::from("😀😉😂").char_slice(3.0.into(), 3.0.into()),
             ByteString::from("😂")
         );
     }
