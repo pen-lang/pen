@@ -1,4 +1,4 @@
-use crate::{type_information, Any, AnyLike, ByteString};
+use crate::{type_information, Any, ByteString};
 use std::sync::Arc;
 
 #[repr(C)]
@@ -15,13 +15,13 @@ impl StringArray {
     }
 
     pub fn get(&self, index: usize) -> Option<ByteString> {
-        StringArrayInner::from_any(self.inner.clone())
+        StringArrayInner::try_from(self.inner.clone())
             .unwrap()
             .get(index)
     }
 
     pub fn len(&self) -> usize {
-        StringArrayInner::from_any(self.inner.clone())
+        StringArrayInner::try_from(self.inner.clone())
             .unwrap()
             .len()
     }
