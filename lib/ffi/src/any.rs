@@ -36,8 +36,7 @@ impl Drop for Any {
     }
 }
 
-pub trait AnyLike: Sized {
-    fn into_any(self) -> Any;
+pub trait AnyLike: Into<Any> + Sized {
     fn from_any(any: Any) -> Option<Self>;
     fn as_inner(any: &Any) -> Option<&Self>;
 }
@@ -81,11 +80,13 @@ macro_rules! type_information {
             static TYPE_INFORMATION: $crate::TypeInformation =
                 $crate::TypeInformation { clone, drop };
 
-            impl $crate::AnyLike for $type {
-                fn into_any(self) -> $crate::Any {
-                    $crate::Any::new(&TYPE_INFORMATION, unsafe { transmute_into_payload(self) })
+            impl From<$type> for $crate::Any {
+                fn from(x: $type) -> Self {
+                    Self::new(&TYPE_INFORMATION, unsafe { transmute_into_payload(x) })
                 }
+            }
 
+            impl $crate::AnyLike for $type {
                 fn from_any(any: $crate::Any) -> Option<$type> {
                     if std::ptr::eq(any.type_information(), &TYPE_INFORMATION) {
                         let x = unsafe { transmute_from_payload(*any.payload()) };
@@ -115,7 +116,7 @@ type_information!(dummy, crate::any::Dummy);
 
 impl Default for Any {
     fn default() -> Self {
-        Dummy::default().into_any()
+        Dummy::default().into()
     }
 }
 
@@ -144,18 +145,16 @@ mod tests {
 
         #[test]
         fn drop_any() {
-            TypeA {
+            Any::from(TypeA {
                 value: Box::new(42.0),
-            }
-            .into_any();
+            });
         }
 
         #[test]
         fn clone_any() {
-            let x = TypeA {
+            let x = Any::from(TypeA {
                 value: Box::new(42.0),
-            }
-            .into_any();
+            });
 
             drop(x.clone());
             drop(x)
@@ -166,7 +165,7 @@ mod tests {
             let x = TypeA {
                 value: Box::new(42.0),
             }
-            .into_any();
+            .into();
 
             let _: Option<&TypeA> = AnyLike::as_inner(&x);
         }
@@ -194,18 +193,16 @@ mod tests {
 
         #[test]
         fn drop_any() {
-            TypeA {
+            Any::from(TypeA {
                 value: Rc::new(42.0),
-            }
-            .into_any();
+            });
         }
 
         #[test]
         fn clone_any() {
-            let x = TypeA {
+            let x = Any::from(TypeA {
                 value: Rc::new(42.0),
-            }
-            .into_any();
+            });
 
             drop(x.clone());
             drop(x)
@@ -216,7 +213,7 @@ mod tests {
             let x = TypeA {
                 value: Rc::new(42.0),
             }
-            .into_any();
+            .into();
 
             let _: Option<&TypeA> = AnyLike::as_inner(&x);
         }
@@ -235,12 +232,12 @@ mod tests {
 
         #[test]
         fn drop_any() {
-            Type { value: 42.0 }.into_any();
+            Any::from(Type { value: 42.0 });
         }
 
         #[test]
         fn clone_any() {
-            let x = Type { value: 42.0 }.into_any();
+            let x = Any::from(Type { value: 42.0 });
 
             drop(x.clone());
             drop(x)

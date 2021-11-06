@@ -10,7 +10,7 @@ pub struct StringArray {
 impl StringArray {
     pub fn new(vector: Vec<ByteString>) -> Self {
         Self {
-            inner: StringArrayInner::new(vector).into_any(),
+            inner: StringArrayInner::new(vector).into(),
         }
     }
 
