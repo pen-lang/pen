@@ -7,12 +7,12 @@ authors = ["Yota Toyama <raviqqe@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-fmm = { git = "https://github.com/raviqqe/fmm", branch = "main" }
+fmm = { git = "https://github.com/raviqqe/fmm", branch = "chore/type-check-map" }
 mir = { path = "../mir" }
 once_cell = "1"
 
 [dev-dependencies]
 insta = "1"
 tempfile = "3"
-fmm-c = { git = "https://github.com/raviqqe/fmm", branch = "main" }
-fmm-llvm = { git = "https://github.com/raviqqe/fmm", branch = "main" }
+fmm-c = { git = "https://github.com/raviqqe/fmm", branch = "chore/type-check-map" }
+fmm-llvm = { git = "https://github.com/raviqqe/fmm", branch = "chore/type-check-map" }
