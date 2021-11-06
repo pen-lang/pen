@@ -21,7 +21,7 @@ struct ArcInner {
 impl ArcBlock {
     pub fn new(layout: Layout) -> Self {
         if layout.size() == 0 {
-            Self::null()
+            Self { pointer: null() }
         } else {
             let pointer = unsafe { &mut *(alloc(Self::inner_layout(layout)) as *mut ArcInner) };
 
@@ -31,10 +31,6 @@ impl ArcBlock {
                 pointer: &pointer.payload as *const () as *const u8,
             }
         }
-    }
-
-    pub fn null() -> Self {
-        Self { pointer: null() }
     }
 
     pub fn ptr(&self) -> *const u8 {
@@ -114,8 +110,10 @@ mod tests {
     }
 
     #[test]
-    fn create_null() {
-        ArcBlock::null();
+    fn create_empty() {
+        let block = ArcBlock::new(Layout::from_size_align(0, 1).unwrap());
+
+        assert!(block.is_null());
     }
 
     #[test]
