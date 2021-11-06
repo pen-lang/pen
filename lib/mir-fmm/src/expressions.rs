@@ -32,18 +32,30 @@ pub fn compile(
         mir::ir::Expression::Case(case) => {
             compile_case(module_builder, instruction_builder, case, variables, types)?
         }
-        mir::ir::Expression::CloneVariables(clone) => {
-            for (variable, type_) in clone.variables() {
-                reference_count::clone_expression(
-                    instruction_builder,
-                    &variables[variable],
-                    type_,
-                    types,
-                )?;
-            }
-
-            compile(clone.expression(), variables)?
-        }
+        mir::ir::Expression::CloneVariables(clone) => compile(
+            clone.expression(),
+            &variables
+                .iter()
+                .map(|(name, expression)| (name.clone(), expression.clone()))
+                .chain(
+                    clone
+                        .variables()
+                        .iter()
+                        .map(|(variable, type_)| {
+                            Ok((
+                                variable.into(),
+                                reference_count::clone_expression(
+                                    instruction_builder,
+                                    &variables[variable],
+                                    type_,
+                                    types,
+                                )?,
+                            ))
+                        })
+                        .collect::<Result<Vec<_>, CompileError>>()?,
+                )
+                .collect(),
+        )?,
         mir::ir::Expression::ComparisonOperation(operation) => compile_comparison_operation(
             module_builder,
             instruction_builder,
@@ -117,7 +129,7 @@ pub fn compile(
                 types,
             )?;
 
-            reference_count::clone_expression(
+            let field = reference_count::clone_expression(
                 instruction_builder,
                 &field,
                 &types[record_type.name()].fields()[field_index],

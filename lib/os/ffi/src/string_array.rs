@@ -42,7 +42,7 @@ impl<T: Into<ffi::ByteString>> From<Vec<T>> for StringArray {
 #[allow(clippy::redundant_allocation)]
 #[derive(Clone)]
 struct StringArrayInner {
-    vector: Arc<Arc<[ffi::ByteString]>>,
+    vector: Arc<Vec<ffi::ByteString>>,
 }
 
 ffi::type_information!(array_inner, crate::string_array::StringArrayInner);
@@ -50,7 +50,7 @@ ffi::type_information!(array_inner, crate::string_array::StringArrayInner);
 impl StringArrayInner {
     pub fn new(vector: Vec<ffi::ByteString>) -> Self {
         Self {
-            vector: Arc::new(Arc::from(vector)),
+            vector: Arc::new(vector),
         }
     }
 

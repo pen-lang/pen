@@ -3,7 +3,7 @@ use super::{super::error::CompileError, heap};
 pub fn clone_pointer(
     builder: &fmm::build::InstructionBuilder,
     expression: &fmm::build::TypedExpression,
-) -> Result<(), CompileError> {
+) -> Result<fmm::build::TypedExpression, CompileError> {
     if_heap_pointer(builder, expression, |builder| {
         builder.atomic_operation(
             fmm::ir::AtomicOperator::Add,
@@ -15,7 +15,7 @@ pub fn clone_pointer(
         Ok(())
     })?;
 
-    Ok(())
+    Ok(expression.clone())
 }
 
 pub fn drop_pointer(

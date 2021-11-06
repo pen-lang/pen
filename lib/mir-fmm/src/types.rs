@@ -39,17 +39,19 @@ pub fn compile_variant() -> fmm::types::Record {
 }
 
 pub fn compile_variant_tag() -> fmm::types::Pointer {
+    let payload = fmm::types::Type::from(compile_variant_payload());
+
     fmm::types::Pointer::new(fmm::types::Record::new(vec![
         // clone function
         fmm::types::Function::new(
-            vec![compile_variant_payload().into()],
-            fmm::types::VOID_TYPE.clone(),
+            vec![payload.clone()],
+            payload.clone(),
             fmm::types::CallingConvention::Target,
         )
         .into(),
         // drop function
         fmm::types::Function::new(
-            vec![compile_variant_payload().into()],
+            vec![payload],
             fmm::types::VOID_TYPE.clone(),
             fmm::types::CallingConvention::Target,
         )

@@ -5,7 +5,7 @@ set -ex
 . $(dirname $0)/utilities.sh
 
 test_duration=1
-test_retry_count=5
+test_retry_count=10
 
 test() {
   valgrind=""

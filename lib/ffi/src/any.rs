@@ -23,11 +23,9 @@ impl Any {
 
 impl Clone for Any {
     fn clone(&self) -> Self {
-        (self.type_information.clone)(self.payload);
-
         Self {
             type_information: self.type_information,
-            payload: self.payload,
+            payload: (self.type_information.clone)(self.payload),
         }
     }
 }
@@ -46,7 +44,7 @@ pub trait AnyLike: Sized {
 
 #[repr(C)]
 pub struct TypeInformation {
-    pub clone: extern "C" fn(u64),
+    pub clone: extern "C" fn(u64) -> u64,
     pub drop: extern "C" fn(u64),
 }
 
@@ -54,7 +52,7 @@ pub struct TypeInformation {
 macro_rules! type_information {
     ($name: ident, $type: ty) => {
         mod $name {
-            unsafe fn transmute_to_payload<T>(data: T) -> u64 {
+            unsafe fn transmute_into_payload<T>(data: T) -> u64 {
                 let mut payload = 0;
 
                 std::ptr::write(&mut payload as *mut u64 as *mut T, data);
@@ -67,10 +65,13 @@ macro_rules! type_information {
             }
 
             #[allow(clippy::forget_copy)]
-            extern "C" fn clone(x: u64) {
+            extern "C" fn clone(x: u64) -> u64 {
                 let x = unsafe { transmute_from_payload::<$type>(x) };
-                std::mem::forget(x.clone());
+                let payload = unsafe { transmute_into_payload(x.clone()) };
+
                 std::mem::forget(x);
+
+                payload
             }
 
             extern "C" fn drop(x: u64) {
@@ -82,7 +83,7 @@ macro_rules! type_information {
 
             impl $crate::AnyLike for $type {
                 fn into_any(self) -> $crate::Any {
-                    $crate::Any::new(&TYPE_INFORMATION, unsafe { transmute_to_payload(self) })
+                    $crate::Any::new(&TYPE_INFORMATION, unsafe { transmute_into_payload(self) })
                 }
 
                 fn from_any(any: $crate::Any) -> Option<$type> {
@@ -121,6 +122,55 @@ impl Default for Any {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    mod box_ {
+        use super::*;
+
+        #[derive(Clone)]
+        pub struct TypeA {
+            #[allow(dead_code)]
+            value: Box<f64>,
+        }
+
+        #[allow(clippy::redundant_allocation)]
+        #[derive(Clone)]
+        pub struct TypeB {
+            #[allow(dead_code)]
+            value: Box<Box<f64>>,
+        }
+
+        type_information!(foo, crate::any::tests::box_::TypeA);
+        type_information!(bar, crate::any::tests::box_::TypeB);
+
+        #[test]
+        fn drop_any() {
+            TypeA {
+                value: Box::new(42.0),
+            }
+            .into_any();
+        }
+
+        #[test]
+        fn clone_any() {
+            let x = TypeA {
+                value: Box::new(42.0),
+            }
+            .into_any();
+
+            drop(x.clone());
+            drop(x)
+        }
+
+        #[test]
+        fn as_inner() {
+            let x = TypeA {
+                value: Box::new(42.0),
+            }
+            .into_any();
+
+            let _: Option<&TypeA> = AnyLike::as_inner(&x);
+        }
+    }
 
     mod rc {
         use super::*;

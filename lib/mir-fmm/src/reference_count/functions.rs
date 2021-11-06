@@ -4,7 +4,7 @@ use crate::closures;
 pub fn clone_function(
     builder: &fmm::build::InstructionBuilder,
     closure_pointer: &fmm::build::TypedExpression,
-) -> Result<(), CompileError> {
+) -> Result<fmm::build::TypedExpression, CompileError> {
     pointers::clone_pointer(builder, closure_pointer)
 }
 

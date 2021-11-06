@@ -20,7 +20,7 @@ impl From<Number> for f64 {
 
 impl From<Number> for usize {
     fn from(number: Number) -> Self {
-        number.value as usize
+        number.value as Self
     }
 }
 

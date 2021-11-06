@@ -7,7 +7,7 @@ pub struct RecordBody {
 
 impl RecordBody {
     pub const fn new(fields: Vec<Type>) -> Self {
-        RecordBody { fields }
+        Self { fields }
     }
 
     pub fn fields(&self) -> &[Type] {
