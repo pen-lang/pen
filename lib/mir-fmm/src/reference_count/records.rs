@@ -42,9 +42,9 @@ pub fn compile_record_clone_function(
                 }
             }
 
-            Ok(builder.return_(fmm::ir::VOID_VALUE.clone()))
+            Ok(builder.return_(record))
         },
-        fmm::types::VOID_TYPE.clone(),
+        fmm_record_type.clone(),
         fmm::types::CallingConvention::Target,
         fmm::ir::Linkage::Weak,
     )?;

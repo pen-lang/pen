@@ -9,7 +9,20 @@ pub fn get_record_drop_function_name(name: &str) -> String {
     format!("mir_drop_{}", name)
 }
 
-pub fn compile_record_rc_function_type(
+pub fn compile_record_clone_function_type(
+    record: &mir::types::Record,
+    types: &BTreeMap<String, mir::types::RecordBody>,
+) -> fmm::types::Function {
+    let record = types::compile_record(record, types);
+
+    fmm::types::Function::new(
+        vec![record.clone()],
+        record,
+        fmm::types::CallingConvention::Target,
+    )
+}
+
+pub fn compile_record_drop_function_type(
     record: &mir::types::Record,
     types: &BTreeMap<String, mir::types::RecordBody>,
 ) -> fmm::types::Function {
