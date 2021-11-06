@@ -2,7 +2,7 @@
 name = "pen"
 version = "0.3.1"
 authors = ["Yota Toyama <raviqqe@gmail.com>"]
-edition = "2018"
+edition = "2021"
 
 [dependencies]
 clap = "2"
