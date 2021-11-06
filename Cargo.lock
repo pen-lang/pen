@@ -214,7 +214,7 @@ checksum = "398ea4fabe40b9b0d885340a2a991a44c8a645624075ad966d21f88688e2b69e"
 [[package]]
 name = "fmm"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=chore/type-check-map#fa5f35dd81be75269f9e647d0faeb1861ccc2d38"
+source = "git+https://github.com/raviqqe/fmm?branch=main#f932c4b155fa5da00678d7fee49d7349b34ccb21"
 dependencies = [
  "hamt",
  "once_cell",
@@ -225,7 +225,7 @@ dependencies = [
 [[package]]
 name = "fmm-c"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=chore/type-check-map#fa5f35dd81be75269f9e647d0faeb1861ccc2d38"
+source = "git+https://github.com/raviqqe/fmm?branch=main#f932c4b155fa5da00678d7fee49d7349b34ccb21"
 dependencies = [
  "fmm",
  "tempfile",
@@ -234,7 +234,7 @@ dependencies = [
 [[package]]
 name = "fmm-llvm"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=chore/type-check-map#fa5f35dd81be75269f9e647d0faeb1861ccc2d38"
+source = "git+https://github.com/raviqqe/fmm?branch=main#f932c4b155fa5da00678d7fee49d7349b34ccb21"
 dependencies = [
  "fmm",
  "hamt",
