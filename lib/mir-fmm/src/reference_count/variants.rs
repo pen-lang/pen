@@ -16,16 +16,20 @@ pub fn compile_variant_clone_function(
             types::compile_variant_payload(),
         )],
         |builder| -> Result<_, CompileError> {
-            let payload = fmm::build::variable(ARGUMENT_NAME, types::compile_variant_payload());
-
-            expressions::clone_expression(
+            Ok(builder.return_(crate::variants::compile_boxed_payload(
                 &builder,
-                &crate::variants::compile_unboxed_payload(&builder, &payload, type_, types)?,
-                type_,
-                types,
-            )?;
-
-            Ok(builder.return_(payload))
+                &expressions::clone_expression(
+                    &builder,
+                    &crate::variants::compile_unboxed_payload(
+                        &builder,
+                        &fmm::build::variable(ARGUMENT_NAME, types::compile_variant_payload()),
+                        type_,
+                        types,
+                    )?,
+                    type_,
+                    types,
+                )?,
+            )?))
         },
         types::compile_variant_payload(),
         fmm::types::CallingConvention::Target,
