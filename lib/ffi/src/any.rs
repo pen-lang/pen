@@ -146,7 +146,7 @@ mod tests {
 
         #[test]
         fn drop_any() {
-            Any::from(TypeA {
+            let _ = Any::from(TypeA {
                 value: Box::new(42.0),
             });
         }
@@ -193,7 +193,7 @@ mod tests {
 
         #[test]
         fn drop_any() {
-            Any::from(TypeA {
+            let _ = Any::from(TypeA {
                 value: Rc::new(42.0),
             });
         }
@@ -231,7 +231,7 @@ mod tests {
 
         #[test]
         fn drop_any() {
-            Any::from(Type { value: 42.0 });
+            let _ = Any::from(Type { value: 42.0 });
         }
 
         #[test]
