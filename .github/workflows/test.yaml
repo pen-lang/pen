@@ -10,7 +10,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - run: tools/ci/set_up_os.sh
-      - run: cargo build
+      - run: cargo build --locked
       - run: git diff --exit-code
   unit_test:
     runs-on: ubuntu-latest
