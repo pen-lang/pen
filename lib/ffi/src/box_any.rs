@@ -11,6 +11,7 @@ struct BoxAnyInner {
 }
 
 impl BoxAny {
+    #[deprecated]
     pub fn new(value: Any) -> Self {
         Self {
             inner: BoxAnyInner { value }.into(),
