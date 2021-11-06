@@ -46,7 +46,7 @@ pub trait AnyLike: Sized {
 
 #[repr(C)]
 pub struct TypeInformation {
-    pub clone: extern "C" fn(u64),
+    pub clone: extern "C" fn(u64) -> u64,
     pub drop: extern "C" fn(u64),
 }
 
@@ -54,7 +54,7 @@ pub struct TypeInformation {
 macro_rules! type_information {
     ($name: ident, $type: ty) => {
         mod $name {
-            unsafe fn transmute_to_payload<T>(data: T) -> u64 {
+            unsafe fn transmute_into_payload<T>(data: T) -> u64 {
                 let mut payload = 0;
 
                 std::ptr::write(&mut payload as *mut u64 as *mut T, data);
@@ -67,10 +67,13 @@ macro_rules! type_information {
             }
 
             #[allow(clippy::forget_copy)]
-            extern "C" fn clone(x: u64) {
+            extern "C" fn clone(x: u64) -> u64 {
                 let x = unsafe { transmute_from_payload::<$type>(x) };
-                std::mem::forget(x.clone());
+                let payload = unsafe { transmute_into_payload(x.clone()) };
+
                 std::mem::forget(x);
+
+                payload
             }
 
             extern "C" fn drop(x: u64) {
@@ -82,7 +85,7 @@ macro_rules! type_information {
 
             impl $crate::AnyLike for $type {
                 fn into_any(self) -> $crate::Any {
-                    $crate::Any::new(&TYPE_INFORMATION, unsafe { transmute_to_payload(self) })
+                    $crate::Any::new(&TYPE_INFORMATION, unsafe { transmute_into_payload(self) })
                 }
 
                 fn from_any(any: $crate::Any) -> Option<$type> {
