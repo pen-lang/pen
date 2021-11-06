@@ -23,26 +23,35 @@ pub fn compile_record_clone_function(
         |builder| -> Result<_, CompileError> {
             let record = fmm::build::variable(ARGUMENT_NAME, fmm_record_type.clone());
 
-            if types::is_record_boxed(&record_type, types) {
-                pointers::clone_pointer(&builder, &record)?;
-            } else {
-                for (index, type_) in definition.type_().fields().iter().enumerate() {
-                    expressions::clone_expression(
-                        &builder,
-                        &crate::records::get_record_field(
-                            &builder,
-                            &record,
-                            &record_type,
-                            index,
-                            types,
-                        )?,
-                        type_,
-                        types,
-                    )?;
-                }
-            }
-
-            Ok(builder.return_(record))
+            Ok(
+                builder.return_(if types::is_record_boxed(&record_type, types) {
+                    pointers::clone_pointer(&builder, &record)?
+                } else {
+                    fmm::build::record(
+                        definition
+                            .type_()
+                            .fields()
+                            .iter()
+                            .enumerate()
+                            .map(|(index, type_)| {
+                                expressions::clone_expression(
+                                    &builder,
+                                    &crate::records::get_record_field(
+                                        &builder,
+                                        &record,
+                                        &record_type,
+                                        index,
+                                        types,
+                                    )?,
+                                    type_,
+                                    types,
+                                )
+                            })
+                            .collect::<Result<_, _>>()?,
+                    )
+                    .into()
+                }),
+            )
         },
         fmm_record_type.clone(),
         fmm::types::CallingConvention::Target,
