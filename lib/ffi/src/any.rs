@@ -23,11 +23,9 @@ impl Any {
 
 impl Clone for Any {
     fn clone(&self) -> Self {
-        (self.type_information.clone)(self.payload);
-
         Self {
             type_information: self.type_information,
-            payload: self.payload,
+            payload: (self.type_information.clone)(self.payload),
         }
     }
 }
@@ -124,6 +122,55 @@ impl Default for Any {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    mod box_ {
+        use super::*;
+
+        #[derive(Clone)]
+        pub struct TypeA {
+            #[allow(dead_code)]
+            value: Box<f64>,
+        }
+
+        #[allow(clippy::redundant_allocation)]
+        #[derive(Clone)]
+        pub struct TypeB {
+            #[allow(dead_code)]
+            value: Box<Box<f64>>,
+        }
+
+        type_information!(foo, crate::any::tests::box_::TypeA);
+        type_information!(bar, crate::any::tests::box_::TypeB);
+
+        #[test]
+        fn drop_any() {
+            TypeA {
+                value: Box::new(42.0),
+            }
+            .into_any();
+        }
+
+        #[test]
+        fn clone_any() {
+            let x = TypeA {
+                value: Box::new(42.0),
+            }
+            .into_any();
+
+            drop(x.clone());
+            drop(x)
+        }
+
+        #[test]
+        fn as_inner() {
+            let x = TypeA {
+                value: Box::new(42.0),
+            }
+            .into_any();
+
+            let _: Option<&TypeA> = AnyLike::as_inner(&x);
+        }
+    }
 
     mod rc {
         use super::*;
