@@ -41,7 +41,6 @@ pub fn compile_variant() -> fmm::types::Record {
 pub fn compile_variant_tag() -> fmm::types::Pointer {
     let payload = fmm::types::Type::from(compile_variant_payload());
 
-    // TODO Move functions to a reference_count module.
     fmm::types::Pointer::new(fmm::types::Record::new(vec![
         // clone function
         fmm::types::Function::new(
