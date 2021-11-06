@@ -8,7 +8,7 @@ pub struct TestResult {
 impl TestResult {
     #[allow(dead_code)]
     pub fn is_error(&self) -> bool {
-        usize::from(self.is_error) != 0
+        self.is_error.into()
     }
 
     #[allow(dead_code)]
