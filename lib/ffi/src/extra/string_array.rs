@@ -93,7 +93,10 @@ mod tests {
 
         #[test]
         fn get_element() {
-            StringArray::from(vec!["foo"]).get(1);
+            assert_eq!(
+                StringArray::new(vec!["foo".into()]).get(0),
+                Some("foo".into())
+            );
         }
     }
 

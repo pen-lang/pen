@@ -103,8 +103,8 @@ mod tests {
         #[test]
         fn get_element() {
             assert_eq!(
-                StringArrayInner::new(vec!["abc".into()]).get(1),
-                Some("b".into())
+                StringArrayInner::new(vec!["foo".into()]).get(0),
+                Some("foo".into())
             );
         }
     }
@@ -128,8 +128,8 @@ mod tests {
         #[test]
         fn get_element() {
             assert_eq!(
-                StringArrayInner::new(vec!["abc".into()]).get(0),
-                Some("b".into())
+                StringArrayInner::new(vec!["foo".into()]).get(0),
+                Some("foo".into())
             );
         }
     }
