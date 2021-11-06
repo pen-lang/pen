@@ -1,5 +1,4 @@
 use crate::{error::OsError, result::FfiResult};
-use ffi::AnyLike;
 use std::io::{Read, Write};
 use std::{
     net, str,
@@ -14,13 +13,15 @@ pub struct TcpListener {
 impl TcpListener {
     pub fn new(listener: net::TcpListener) -> ffi::Arc<Self> {
         Self {
-            inner: TcpListenerInner::new(listener).into_any(),
+            inner: TcpListenerInner::new(listener).into(),
         }
         .into()
     }
 
     pub fn lock(&self) -> Result<RwLockWriteGuard<net::TcpListener>, OsError> {
-        Ok(TcpListenerInner::as_inner(&self.inner).unwrap().get_mut()?)
+        Ok(TryInto::<&TcpListenerInner>::try_into(&self.inner)
+            .unwrap()
+            .get_mut()?)
     }
 }
 
@@ -29,7 +30,7 @@ pub struct TcpListenerInner {
     listener: Arc<RwLock<net::TcpListener>>,
 }
 
-ffi::type_information!(ffi_tcp_listener, crate::tcp::TcpListenerInner);
+ffi::type_information!(tcp_listener_inner, crate::tcp::TcpListenerInner);
 
 impl TcpListenerInner {
     pub fn new(listener: net::TcpListener) -> Self {
@@ -51,13 +52,15 @@ pub struct TcpStream {
 impl TcpStream {
     pub fn new(socket: net::TcpStream) -> ffi::Arc<Self> {
         Self {
-            inner: TcpStreamInner::new(socket).into_any(),
+            inner: TcpStreamInner::new(socket).into(),
         }
         .into()
     }
 
     pub fn lock(&self) -> Result<RwLockWriteGuard<net::TcpStream>, OsError> {
-        Ok(TcpStreamInner::as_inner(&self.inner).unwrap().get_mut()?)
+        Ok(TryInto::<&TcpStreamInner>::try_into(&self.inner)
+            .unwrap()
+            .get_mut()?)
     }
 }
 
