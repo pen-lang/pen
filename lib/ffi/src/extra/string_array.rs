@@ -25,6 +25,10 @@ impl StringArray {
             .unwrap()
             .len()
     }
+
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
 }
 
 impl Default for StringArray {
