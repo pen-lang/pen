@@ -35,7 +35,7 @@ pub fn compile(
         mir::ir::Expression::CloneVariables(clone) => compile(
             clone.expression(),
             &variables
-                .into_iter()
+                .iter()
                 .map(|(name, expression)| (name.clone(), expression.clone()))
                 .chain(
                     clone

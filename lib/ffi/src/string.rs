@@ -41,7 +41,7 @@ impl ByteString {
     }
 
     // Indices are inclusive and start from 1.
-    pub fn slice(&self, start: Number, end: Number) -> ByteString {
+    pub fn slice(&self, start: Number, end: Number) -> Self {
         let start = f64::from(start);
         let end = f64::from(end);
 
@@ -72,7 +72,7 @@ impl ByteString {
 }
 
 impl PartialEq for ByteString {
-    fn eq(&self, other: &ByteString) -> bool {
+    fn eq(&self, other: &Self) -> bool {
         self.as_slice() == other.as_slice()
     }
 }
