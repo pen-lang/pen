@@ -290,3 +290,24 @@ Feature: Memory leak
     """
     When I successfully run `pen build`
     Then I successfully run `check_memory_leak_in_loop.sh ./app`
+
+  Scenario: Force an element twice
+    Given a file named "main.pen" with:
+    """pen
+    import System'Context { Context }
+
+    main = \(ctx Context) number {
+      xs = [none none]
+
+      if [x, ..._] = xs {
+        x()
+        x()
+      } else {
+        none
+      }
+
+      main(ctx)
+    }
+    """
+    When I successfully run `pen build`
+    Then I successfully run `check_memory_leak_in_loop.sh ./app`
