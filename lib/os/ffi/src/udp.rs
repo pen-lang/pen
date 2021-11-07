@@ -1,5 +1,4 @@
 use crate::{error::OsError, result::FfiResult};
-use ffi::AnyLike;
 use std::{
     net, str,
     sync::{Arc, LockResult, RwLock, RwLockWriteGuard},
@@ -15,13 +14,15 @@ pub struct UdpSocket {
 impl UdpSocket {
     pub fn new(socket: net::UdpSocket) -> ffi::Arc<Self> {
         Self {
-            inner: UdpSocketInner::new(socket).into_any(),
+            inner: UdpSocketInner::new(socket).into(),
         }
         .into()
     }
 
     pub fn lock(&self) -> Result<RwLockWriteGuard<net::UdpSocket>, OsError> {
-        Ok(UdpSocketInner::as_inner(&self.inner).unwrap().get_mut()?)
+        Ok(TryInto::<&UdpSocketInner>::try_into(&self.inner)
+            .unwrap()
+            .get_mut()?)
     }
 }
 
@@ -30,7 +31,7 @@ pub struct UdpSocketInner {
     socket: Arc<RwLock<net::UdpSocket>>,
 }
 
-ffi::type_information!(ffi_udp_socket, crate::udp::UdpSocketInner);
+ffi::type_information!(udp_socket_inner, crate::udp::UdpSocketInner);
 
 impl UdpSocketInner {
     pub fn new(socket: net::UdpSocket) -> Self {

@@ -4,6 +4,7 @@ mod boolean;
 mod box_any;
 mod closure;
 pub mod cps;
+pub mod extra;
 mod none;
 mod number;
 mod string;

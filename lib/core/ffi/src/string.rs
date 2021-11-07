@@ -9,5 +9,5 @@ extern "C" fn _pen_slice_string(
     start: ffi::Number,
     end: ffi::Number,
 ) -> ffi::ByteString {
-    string.slice(start, end)
+    string.char_slice(start, end)
 }

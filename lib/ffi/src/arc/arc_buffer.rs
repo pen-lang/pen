@@ -17,7 +17,7 @@ impl ArcBuffer {
     pub fn new(length: usize) -> Self {
         Self {
             block: if length == 0 {
-                ArcBlock::null()
+                ArcBlock::new(Layout::from_size_align(0, 1).unwrap())
             } else {
                 let mut block = ArcBlock::new(
                     Layout::new::<usize>()
@@ -98,6 +98,11 @@ mod tests {
     #[test]
     fn create_buffer() {
         ArcBuffer::new(42);
+    }
+
+    #[test]
+    fn create_empty() {
+        ArcBuffer::new(0);
     }
 
     #[test]

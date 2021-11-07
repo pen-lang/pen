@@ -1,6 +1,5 @@
 use super::{error::OsError, open_file_options::OpenFileOptions, utilities};
 use crate::result::FfiResult;
-use ffi::AnyLike;
 use std::{
     fs,
     fs::{File, OpenOptions},
@@ -17,12 +16,14 @@ pub struct OsFile {
 impl OsFile {
     pub fn new(file: File) -> ffi::Arc<Self> {
         ffi::Arc::new(Self {
-            inner: OsFileInner::new(file).into_any(),
+            inner: OsFileInner::new(file).into(),
         })
     }
 
     pub fn lock(&self) -> Result<RwLockWriteGuard<File>, OsError> {
-        Ok(OsFileInner::as_inner(&self.inner).unwrap().get_mut()?)
+        Ok(TryInto::<&OsFileInner>::try_into(&self.inner)
+            .unwrap()
+            .get_mut()?)
     }
 }
 
@@ -31,7 +32,7 @@ pub struct OsFileInner {
     file: Arc<RwLock<File>>,
 }
 
-ffi::type_information!(ffi_file, crate::file::OsFileInner);
+ffi::type_information!(os_file_inner, crate::file::OsFileInner);
 
 impl OsFileInner {
     pub fn new(file: File) -> Self {
@@ -175,11 +176,13 @@ mod tests {
 
     #[test]
     fn convert_to_any() {
-        OsFileInner::from_any(OsFileInner::new(tempfile::tempfile().unwrap()).into_any())
-            .unwrap()
-            .get_mut()
-            .unwrap()
-            .write_all(b"foo")
-            .unwrap();
+        OsFileInner::try_from(ffi::Any::from(OsFileInner::new(
+            tempfile::tempfile().unwrap(),
+        )))
+        .unwrap()
+        .get_mut()
+        .unwrap()
+        .write_all(b"foo")
+        .unwrap();
     }
 }
