@@ -83,19 +83,18 @@ fn compile_body(
                     .iter()
                     .enumerate()
                     .map(|(index, free_variable)| -> Result<_, CompileError> {
-                        let value = instruction_builder.load(fmm::build::record_address(
-                            environment_pointer.clone(),
-                            index,
-                        )?)?;
-
-                        reference_count::clone_expression(
-                            instruction_builder,
-                            &value,
-                            free_variable.type_(),
-                            types,
-                        )?;
-
-                        Ok((free_variable.name().into(), value))
+                        Ok((
+                            free_variable.name().into(),
+                            reference_count::clone_expression(
+                                instruction_builder,
+                                &instruction_builder.load(fmm::build::record_address(
+                                    environment_pointer.clone(),
+                                    index,
+                                )?)?,
+                                free_variable.type_(),
+                                types,
+                            )?,
+                        ))
                     })
                     .collect::<Result<Vec<_>, _>>()?,
             )
@@ -146,11 +145,9 @@ fn compile_initial_thunk_entry(
                     fmm::ir::AtomicOrdering::Relaxed,
                 ),
                 |instruction_builder| -> Result<_, CompileError> {
-                    let closure = compile_closure_pointer(definition.type_(), types)?;
-
-                    reference_count::clone_expression(
+                    let closure = reference_count::clone_expression(
                         &instruction_builder,
-                        &closure,
+                        &compile_closure_pointer(definition.type_(), types)?,
                         &definition.type_().clone().into(),
                         types,
                     )?;
@@ -181,15 +178,13 @@ fn compile_initial_thunk_entry(
                         )?;
                     }
 
-                    reference_count::clone_expression(
-                        &instruction_builder,
-                        &value,
-                        definition.result_type(),
-                        types,
-                    )?;
-
                     instruction_builder.store(
-                        value.clone(),
+                        reference_count::clone_expression(
+                            &instruction_builder,
+                            &value,
+                            definition.result_type(),
+                            types,
+                        )?,
                         compile_thunk_value_pointer(definition, types)?,
                     );
 
@@ -303,16 +298,14 @@ fn compile_normal_body(
     definition: &mir::ir::Definition,
     types: &BTreeMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::ir::Block, CompileError> {
-    let value = instruction_builder.load(compile_thunk_value_pointer(definition, types)?)?;
-
-    reference_count::clone_expression(
-        instruction_builder,
-        &value,
-        definition.result_type(),
-        types,
-    )?;
-
-    Ok(instruction_builder.return_(value))
+    Ok(
+        instruction_builder.return_(reference_count::clone_expression(
+            instruction_builder,
+            &instruction_builder.load(compile_thunk_value_pointer(definition, types)?)?,
+            definition.result_type(),
+            types,
+        )?),
+    )
 }
 
 fn compile_entry_function_pointer(
