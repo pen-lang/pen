@@ -306,7 +306,7 @@ fn compile_normal_body(
     )?;
 
     reference_count::drop_expression(
-        &instruction_builder,
+        instruction_builder,
         &compile_closure_pointer(definition.type_(), types)?,
         &definition.type_().clone().into(),
         types,
