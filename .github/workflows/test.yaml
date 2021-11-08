@@ -17,10 +17,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - run: tools/ci/set_up_os.sh
-      - run: cargo test
-        env:
-          RUST_MIN_STACK: 8388608
-      - run: cd lib/os/ffi && cargo test
+      - run: tools/unit_test.sh
   integration_test:
     strategy:
       fail-fast: false
