@@ -298,14 +298,21 @@ fn compile_normal_body(
     definition: &mir::ir::Definition,
     types: &BTreeMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::ir::Block, CompileError> {
-    Ok(
-        instruction_builder.return_(reference_count::clone_expression(
-            instruction_builder,
-            &instruction_builder.load(compile_thunk_value_pointer(definition, types)?)?,
-            definition.result_type(),
-            types,
-        )?),
-    )
+    let value = reference_count::clone_expression(
+        instruction_builder,
+        &instruction_builder.load(compile_thunk_value_pointer(definition, types)?)?,
+        definition.result_type(),
+        types,
+    )?;
+
+    reference_count::drop_expression(
+        &instruction_builder,
+        &compile_closure_pointer(definition.type_(), types)?,
+        &definition.type_().clone().into(),
+        types,
+    )?;
+
+    Ok(instruction_builder.return_(value))
 }
 
 fn compile_entry_function_pointer(
