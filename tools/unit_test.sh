@@ -1,8 +1,8 @@
 #!/bin/sh
 
-set -e
+set -ex
 
-for directory in . lib/os/ffi/application lib/os/ffi/application; do
+for directory in . lib/os/ffi/application lib/os/ffi/library; do
   (
     cd $directory
     cargo test
