@@ -37,7 +37,7 @@ cd $(dirname $0)
 main_archive_path=$1
 shift
 
-cat <<EOF >ffi/build.rs
+cat <<EOF >ffi/main/build.rs
 fn main() {
   println!("cargo:rustc-link-lib=static=$(convert_library_path_to_flag "$main_archive_path")");
   println!("cargo:rustc-link-search=$(dirname "$main_archive_path")");
@@ -45,7 +45,7 @@ fn main() {
 }
 EOF
 
-cd ffi
+cd ffi/main
 
 cargo build --release --quiet $target_option
 
