@@ -32,3 +32,34 @@ Feature: Testing
     """
     When I run `pen_test_on_linux.sh`
     Then the exit status should be 0
+
+  Scenario: Run a test referencing an OS package
+    Given a file named "pen.json" with:
+    """json
+    {
+      "dependencies": {
+        "System": "pen:///os",
+        "Test": "pen:///test"
+      }
+    }
+    """
+    And a file named "main.pen" with:
+    """pen
+    import System'Context { Context }
+
+    main = \(ctx Context) number {
+      0
+    }
+    """
+    And a file named "main.test.pen" with:
+    """pen
+    import System'File
+
+    Foo = \() none | error {
+      File'Write
+
+      none
+    }
+    """
+    When I successfully run `pen test`
+    Then the exit status should be 0
