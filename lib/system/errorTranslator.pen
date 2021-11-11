@@ -1,0 +1,39 @@
+Translate = \(code number) string {
+  if code == 1 {
+    "operation not permitted"
+  } else if code == 2 {
+    "no such file or directory"
+  } else if code == 3 {
+    "no such process"
+  } else if code == 4 {
+    "interrupted system call"
+  } else if code == 5 {
+    "i/o error"
+  } else if code == 12 {
+    "out of memory"
+  } else if code == 13 {
+    "permission denied"
+  } else if code == 14 {
+    "bad address"
+  } else if code == 17 {
+    "file exists"
+  } else if code == 20 {
+    "not a directory"
+  } else if code == 21 {
+    "is a directory"
+  } else if code == 24 {
+    "too many open files"
+  } else if code == 28 {
+    "no space left on device"
+  } else if code == 257 {
+    "cannot lock file"
+  } else if code == 258 {
+    "cannot decode path as utf-8"
+  } else if code == 259 {
+    "environment variable not present"
+  } else if code == 260 {
+    "environment variable not unicode"
+  } else {
+    "unknown io error"
+  }
+}
