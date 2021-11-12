@@ -1,3 +1,5 @@
 {
-  "dependencies": {}
+  "dependencies": {
+    "System": "pen:///system"
+  }
 }
