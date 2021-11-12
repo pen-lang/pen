@@ -1,5 +1,0 @@
-import 'Context { Context }
-
-Number = \(ctx Context) number {
-  Context'Inner(ctx).RandomNumber()
-}

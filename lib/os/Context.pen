@@ -1,12 +1,5 @@
-import 'array
-import 'normalFile { NormalFile }
-import 'File'OpenOptions { OpenOptions }
-import 'File'Metadata { Metadata }
-import 'Tcp'AcceptedStream as Tcp
-import 'Tcp'Listener as Tcp
-import 'Tcp'Stream as Tcp
-import 'Udp'Datagram as Udp
-import 'Udp'Socket as Udp
+import System'Context { FfiNumberResult, FfiStringResult }
+import System'NormalFile { NormalFile }
 
 import foreign "c" _pen_os_read_stdin \() FfiStringResult
 import foreign "c" _pen_os_read_limit_stdin \(number) FfiStringResult
@@ -40,102 +33,9 @@ import foreign "c" _pen_os_get_time \() number
 import foreign "c" _pen_os_sleep \(number) none
 import foreign "c" _pen_os_random_number \() number
 
-type Context {
-  inner InnerContext
-}
-
-type InnerContext {
-  ReadStdIn \() FfiStringResult
-  ReadLimitStdIn \(number) FfiStringResult
-  WriteStdOut \(string) FfiNumberResult
-  WriteStdErr \(string) FfiNumberResult
-  OpenFile \(string, OpenOptions) FfiOpenResult
-  ReadFile \(NormalFile) FfiStringResult
-  ReadLimitFile \(NormalFile, number) FfiStringResult
-  WriteFile \(NormalFile, string) FfiNumberResult
-  CopyFile \(string, string) FfiNoneResult
-  MoveFile \(string, string) FfiNoneResult
-  RemoveFile \(string) FfiNoneResult
-  ReadDirectory \(string) FfiReadDirectoryResult
-  CreateDirectory \(string) FfiNoneResult
-  RemoveDirectory \(string) FfiNoneResult
-  GetArguments \() array'Array
-  GetEnvironmentVariable \(string) FfiStringResult
-  Metadata \(string) FfiMetadataResult
-  TcpBind \(string) FfiTcpListenerResult
-  TcpConnect \(string) FfiTcpStreamResult
-  TcpAccept \(Tcp'Listener) FfiTcpAcceptedStreamResult
-  TcpReceive \(Tcp'Stream, number) FfiStringResult
-  TcpSend \(Tcp'Stream, string) FfiNumberResult
-  UdpBind \(string) FfiUdpSocketResult
-  UdpConnect \(Udp'Socket, string) FfiNoneResult
-  UdpReceive \(Udp'Socket) FfiStringResult
-  UdpReceiveFrom \(Udp'Socket) FfiUdpDatagramResult
-  UdpSend \(Udp'Socket, string) FfiNumberResult
-  UdpSendTo \(Udp'Socket, string, string) FfiNumberResult
-  GetTime \() number
-  Sleep \(number) none
-  RandomNumber \() number
-}
-
-type FfiOpenResult {
-  File NormalFile
-  Error number
-}
-
-type FfiStringResult {
-  Value string
-  Error number
-}
-
-type FfiNumberResult {
-  Value number
-  Error number
-}
-
-type FfiNoneResult {
-  None none
-  Error number
-}
-
-type FfiReadDirectoryResult {
-  Paths array'Array
-  Error number
-}
-
-type FfiMetadataResult {
-  Metadata Metadata
-  Error number
-}
-
-type FfiTcpListenerResult {
-  Listener Tcp'Listener
-  Error number
-}
-
-type FfiTcpStreamResult {
-  Stream Tcp'Stream
-  Error number
-}
-
-type FfiTcpAcceptedStreamResult {
-  Stream Tcp'AcceptedStream
-  Error number
-}
-
-type FfiUdpSocketResult {
-  Socket Udp'Socket
-  Error number
-}
-
-type FfiUdpDatagramResult {
-  Datagram Udp'Datagram
-  Error number
-}
-
 New = \() Context {
-  Context{
-    inner: InnerContext{
+  Context'New(
+    InnerContext{
       ReadStdIn: _pen_os_read_stdin,
       ReadLimitStdIn: _pen_os_read_limit_stdin,
       WriteStdOut: _pen_os_write_stdout,
@@ -168,9 +68,5 @@ New = \() Context {
       Sleep: _pen_os_sleep,
       RandomNumber: _pen_os_random_number,
     }
-  }
-}
-
-Inner = \(ctx Context) InnerContext {
-  ctx.inner
+  )
 }
