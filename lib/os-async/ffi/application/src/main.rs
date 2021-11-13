@@ -22,7 +22,8 @@ unsafe extern "C" fn _pen_os_main(
     ffi::cps::Result::new()
 }
 
-fn main() {
+#[tokio::main]
+async fn main() {
     let mut stack = ffi::cps::Stack::new(INITIAL_STACK_CAPACITY);
 
     unsafe { _pen_os_main(&mut stack, exit) };
