@@ -6,3 +6,4 @@ edition = "2021"
 
 [dependencies]
 ffi = { package = "pen-ffi", version = "0.3" }
+tokio = "1"
