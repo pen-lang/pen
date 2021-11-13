@@ -1,3 +1,5 @@
+#![feature(future_poll_fn)]
+
 mod debug;
 mod heap;
 mod unreachable;
