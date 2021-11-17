@@ -87,4 +87,13 @@ mod tests {
 
         assert_eq!(stack.pop::<f64>(), 42.0);
     }
+
+    #[test]
+    fn wake() {
+        let waker = create_waker();
+        let mut context = Context::from_waker(&waker);
+        let mut stack = AsyncStack::new(TEST_CAPACITY, &mut context);
+
+        stack.context().waker().wake_by_ref();
+    }
 }
