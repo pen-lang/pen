@@ -62,6 +62,7 @@ mod tests {
         task::{RawWaker, RawWakerVTable, Waker},
     };
 
+    const TEST_CAPACITY: usize = 1;
     const RAW_WAKER_DATA: () = ();
     const RAW_WAKER_V_TABLE: RawWakerVTable =
         RawWakerVTable::new(clone_waker, do_nothing, do_nothing, do_nothing);
@@ -80,7 +81,7 @@ mod tests {
     fn push_f64() {
         let waker = create_waker();
         let mut context = Context::from_waker(&waker);
-        let mut stack = AsyncStack::new(16, &mut context);
+        let mut stack = AsyncStack::new(TEST_CAPACITY, &mut context);
 
         stack.push(42.0f64);
 

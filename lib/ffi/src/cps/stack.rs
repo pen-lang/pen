@@ -15,10 +15,13 @@ pub struct Stack {
 
 impl Stack {
     pub fn new(capacity: usize) -> Self {
+        let layout = Layout::from_size_align(capacity, DEFAULT_ALIGNMENT)
+            .unwrap()
+            .pad_to_align();
+        let capacity = layout.size();
+
         Self {
-            base_pointer: unsafe {
-                alloc(Layout::from_size_align(capacity, DEFAULT_ALIGNMENT).unwrap())
-            },
+            base_pointer: unsafe { alloc(layout) },
             size: 0,
             capacity,
         }
@@ -70,11 +73,11 @@ impl Stack {
 mod tests {
     use super::*;
 
-    const TEST_ALIGNMENT: usize = 16;
+    const TEST_CAPACITY: usize = 1;
 
     #[test]
     fn push_u8() {
-        let mut stack = Stack::new(TEST_ALIGNMENT);
+        let mut stack = Stack::new(TEST_CAPACITY);
 
         stack.push(42u8);
 
@@ -83,7 +86,7 @@ mod tests {
 
     #[test]
     fn push_multiple_u8() {
-        let mut stack = Stack::new(TEST_ALIGNMENT);
+        let mut stack = Stack::new(TEST_CAPACITY);
 
         stack.push(42u8);
         stack.push(42u8);
@@ -94,7 +97,7 @@ mod tests {
 
     #[test]
     fn push_f32() {
-        let mut stack = Stack::new(TEST_ALIGNMENT);
+        let mut stack = Stack::new(TEST_CAPACITY);
 
         stack.push(42.0f32);
 
@@ -103,7 +106,7 @@ mod tests {
 
     #[test]
     fn push_f64() {
-        let mut stack = Stack::new(TEST_ALIGNMENT);
+        let mut stack = Stack::new(TEST_CAPACITY);
 
         stack.push(42.0f64);
 
