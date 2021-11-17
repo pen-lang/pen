@@ -15,7 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - run: tools/ci/set_up_os.sh
-      - run: cargo clippy -- -D warnings
+      - run: tools/lint.sh
   spell_check:
     runs-on: ubuntu-latest
     steps:
