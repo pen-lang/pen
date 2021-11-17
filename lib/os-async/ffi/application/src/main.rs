@@ -36,7 +36,7 @@ async fn main() {
     unreachable!()
 }
 
-fn main_wrapper<'a, 'b>(_context: &'a mut Context<'b>) -> Poll<()> {
+fn main_wrapper(_context: &mut Context<'_>) -> Poll<()> {
     let mut stack = ffi::cps::Stack::new(INITIAL_STACK_CAPACITY);
 
     unsafe { _pen_os_main(&mut stack, exit) };
