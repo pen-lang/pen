@@ -4,9 +4,9 @@ version = 3
 
 [[package]]
 name = "pen-ffi"
-version = "0.3.0"
+version = "0.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "058335d9ae6cbcb9f04601a1cb8b56630ab76980959a5a5dd16961f5478ce0dd"
+checksum = "88e4b0922b28f410568ffef5b8c1185ad9634ea4ad7f6c2ec93e366368f7a21a"
 
 [[package]]
 name = "test"

@@ -27,9 +27,9 @@ dependencies = [
 
 [[package]]
 name = "libc"
-version = "0.2.106"
+version = "0.2.107"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a60553f9a9e039a333b4e9b20573b9e9b9c0bb3a11e201ccc48ef4283456d673"
+checksum = "fbe5e23404da5b4f555ef85ebed98fb4083e55a00c317800bc2a50ede9f3d219"
 
 [[package]]
 name = "os"
@@ -42,9 +42,9 @@ dependencies = [
 
 [[package]]
 name = "pen-ffi"
-version = "0.3.0"
+version = "0.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "058335d9ae6cbcb9f04601a1cb8b56630ab76980959a5a5dd16961f5478ce0dd"
+checksum = "88e4b0922b28f410568ffef5b8c1185ad9634ea4ad7f6c2ec93e366368f7a21a"
 
 [[package]]
 name = "ppv-lite86"
