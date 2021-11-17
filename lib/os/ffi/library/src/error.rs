@@ -24,32 +24,32 @@ impl From<OsError> for f64 {
 }
 
 impl<T> From<PoisonError<T>> for OsError {
-    fn from(_: PoisonError<T>) -> OsError {
-        OsError::LockFile
+    fn from(_: PoisonError<T>) -> Self {
+        Self::LockFile
     }
 }
 
 impl From<std::io::Error> for OsError {
     fn from(error: std::io::Error) -> Self {
         if let Some(code) = error.raw_os_error() {
-            OsError::Raw(code)
+            Self::Raw(code)
         } else {
-            OsError::Unknown
+            Self::Unknown
         }
     }
 }
 
 impl From<Utf8Error> for OsError {
-    fn from(_: Utf8Error) -> OsError {
-        OsError::Utf8Decode
+    fn from(_: Utf8Error) -> Self {
+        Self::Utf8Decode
     }
 }
 
 impl From<VarError> for OsError {
-    fn from(error: VarError) -> OsError {
+    fn from(error: VarError) -> Self {
         match error {
-            VarError::NotPresent => OsError::EnvironmentVariableNotPresent,
-            VarError::NotUnicode(_) => OsError::EnvironmentVariableNotUnicode,
+            VarError::NotPresent => Self::EnvironmentVariableNotPresent,
+            VarError::NotUnicode(_) => Self::EnvironmentVariableNotUnicode,
         }
     }
 }

@@ -1,4 +1,7 @@
-use std::{thread::sleep, time::{Duration, SystemTime, UNIX_EPOCH}};
+use std::{
+    thread::sleep,
+    time::{Duration, SystemTime, UNIX_EPOCH},
+};
 
 #[no_mangle]
 extern "C" fn _pen_os_get_time() -> ffi::Number {
