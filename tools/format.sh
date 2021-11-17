@@ -2,9 +2,8 @@
 
 set -e
 
-toolchain=nightly
+. $(dirname $0)/utilities.sh
 
-rustup install $toolchain
-rustup component add --toolchain $toolchain rustfmt
+install_nightly_component rustfmt
 
-$(dirname $0)/run_all_crates.sh rustup run $toolchain cargo fmt "$@"
+$(dirname $0)/run_all_crates.sh rustup run nightly cargo fmt "$@"
