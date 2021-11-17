@@ -1,5 +1,7 @@
-use std::alloc::{alloc, realloc, Layout};
-use std::ptr;
+use std::{
+    alloc::{alloc, realloc, Layout},
+    ptr,
+};
 
 const CAPACITY_MULTIPLIER: usize = 2;
 const DEFAULT_ALIGNMENT: usize = 8;

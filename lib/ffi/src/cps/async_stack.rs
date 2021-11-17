@@ -57,8 +57,10 @@ impl<'a> DerefMut for AsyncStack<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::ptr::null;
-    use std::task::{RawWaker, RawWakerVTable, Waker};
+    use std::{
+        ptr::null,
+        task::{RawWaker, RawWakerVTable, Waker},
+    };
 
     const RAW_WAKER_DATA: () = ();
     const RAW_WAKER_V_TABLE: RawWakerVTable =
