@@ -6,8 +6,6 @@ if [ $# -eq 0 ]; then
   exit 1
 fi
 
-rustup install nightly
-
 root_directory=$(dirname $0)/..
 
 for directory in . lib/os/ffi lib/os-async/ffi; do
