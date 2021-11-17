@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - run: cargo fmt -- --check
+      - run: tools/format.sh -- --check
   lint:
     runs-on: ubuntu-latest
     steps:
