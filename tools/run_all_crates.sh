@@ -8,9 +8,15 @@ fi
 
 root_directory=$(dirname $0)/..
 
-for directory in . cmd/test lib/os/ffi lib/os-async/ffi; do
+for directory in . lib/os/ffi lib/os-async/ffi; do
   (
     cd $root_directory/$directory
     "$@"
   )
 done
+
+(
+  export PEN_ARCHIVE_FILES=/tmp/libmain.a
+  cd $root_directory/$directory
+  "$@"
+)

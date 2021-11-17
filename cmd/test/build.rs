@@ -11,15 +11,15 @@ fn main() {
 
 fn run() -> Result<(), Box<dyn Error>> {
     let archive_files_string = env::var("PEN_ARCHIVE_FILES")?;
-    let archive_files = archive_files_string.split(":").collect::<Vec<_>>();
+    let archive_files = archive_files_string.split(':').collect::<Vec<_>>();
 
     println!(
         "cargo:rustc-link-lib=static={}",
-        get_library_name(&archive_files[0]),
+        get_library_name(archive_files[0]),
     );
 
     for path in &archive_files[1..] {
-        println!("cargo:rustc-link-lib={}", get_library_name(&path),);
+        println!("cargo:rustc-link-lib={}", get_library_name(path),);
     }
 
     for path in archive_files
