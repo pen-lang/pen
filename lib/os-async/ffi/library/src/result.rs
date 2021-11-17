@@ -25,8 +25,8 @@ impl<T: Default> FfiResult<T> {
 impl From<Result<(), OsError>> for FfiResult<ffi::None> {
     fn from(result: Result<(), OsError>) -> Self {
         match result {
-            Ok(_) => FfiResult::ok(ffi::None::new()),
-            Err(error) => FfiResult::error(f64::from(error)),
+            Ok(_) => Self::ok(ffi::None::new()),
+            Err(error) => Self::error(f64::from(error)),
         }
     }
 }
@@ -34,8 +34,8 @@ impl From<Result<(), OsError>> for FfiResult<ffi::None> {
 impl<T: Default, E: Into<OsError>> From<Result<T, E>> for FfiResult<T> {
     fn from(result: Result<T, E>) -> Self {
         match result {
-            Ok(data) => FfiResult::ok(data),
-            Err(error) => FfiResult::error(f64::from(error.into())),
+            Ok(data) => Self::ok(data),
+            Err(error) => Self::error(f64::from(error.into())),
         }
     }
 }
