@@ -80,7 +80,7 @@ mod tests {
     fn push_f64() {
         let waker = create_waker();
         let mut context = Context::from_waker(&waker);
-        let mut stack = AsyncStack::new(1, &mut context);
+        let mut stack = AsyncStack::new(16, &mut context);
 
         stack.push(42.0f64);
 

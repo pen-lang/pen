@@ -70,9 +70,11 @@ impl Stack {
 mod tests {
     use super::*;
 
+    const TEST_ALIGNMENT: usize = 16;
+
     #[test]
     fn push_u8() {
-        let mut stack = Stack::new(1);
+        let mut stack = Stack::new(TEST_ALIGNMENT);
 
         stack.push(42u8);
 
@@ -81,7 +83,7 @@ mod tests {
 
     #[test]
     fn push_multiple_u8() {
-        let mut stack = Stack::new(1);
+        let mut stack = Stack::new(TEST_ALIGNMENT);
 
         stack.push(42u8);
         stack.push(42u8);
@@ -92,7 +94,7 @@ mod tests {
 
     #[test]
     fn push_f32() {
-        let mut stack = Stack::new(1);
+        let mut stack = Stack::new(TEST_ALIGNMENT);
 
         stack.push(42.0f32);
 
@@ -101,7 +103,7 @@ mod tests {
 
     #[test]
     fn push_f64() {
-        let mut stack = Stack::new(1);
+        let mut stack = Stack::new(TEST_ALIGNMENT);
 
         stack.push(42.0f64);
 
