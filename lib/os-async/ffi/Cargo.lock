@@ -34,6 +34,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "os"
+version = "0.1.0"
+dependencies = [
+ "pen-ffi",
+]
+
+[[package]]
 name = "os-app"
 version = "0.1.0"
 dependencies = [
