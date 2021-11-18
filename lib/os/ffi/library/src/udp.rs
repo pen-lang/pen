@@ -59,7 +59,9 @@ extern "C" fn _pen_os_udp_bind(
 }
 
 fn bind(address: ffi::ByteString) -> Result<ffi::Arc<UdpSocket>, OsError> {
-    Ok(UdpSocket::new(net::UdpSocket::bind(str::from_utf8(address.as_slice())?)?).into())
+    Ok(UdpSocket::new(net::UdpSocket::bind(str::from_utf8(
+        address.as_slice(),
+    )?)?))
 }
 
 #[no_mangle]

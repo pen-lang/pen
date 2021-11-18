@@ -1,6 +1,6 @@
 use crate::{error::OsError, result::FfiResult};
-use std::io::{Read, Write};
 use std::{
+    io::{Read, Write},
     net, str,
     sync::{Arc, LockResult, RwLock, RwLockWriteGuard},
 };
@@ -97,7 +97,9 @@ extern "C" fn _pen_os_tcp_bind(
 }
 
 fn bind(address: ffi::ByteString) -> Result<ffi::Arc<TcpListener>, OsError> {
-    Ok(TcpListener::new(net::TcpListener::bind(str::from_utf8(address.as_slice())?)?).into())
+    Ok(TcpListener::new(net::TcpListener::bind(str::from_utf8(
+        address.as_slice(),
+    )?)?))
 }
 
 #[no_mangle]
@@ -110,8 +112,7 @@ extern "C" fn _pen_os_tcp_connect(
 fn connect(address: ffi::ByteString) -> Result<ffi::Arc<TcpStream>, OsError> {
     Ok(TcpStream::new(net::TcpStream::connect(str::from_utf8(
         address.as_slice(),
-    )?)?)
-    .into())
+    )?)?))
 }
 
 #[no_mangle]
@@ -125,7 +126,7 @@ fn accept(listener: ffi::Arc<TcpListener>) -> Result<ffi::Arc<TcpAcceptedStream>
     let (stream, address) = listener.lock()?.accept()?;
 
     Ok(TcpAcceptedStream {
-        stream: TcpStream::new(stream).into(),
+        stream: TcpStream::new(stream),
         address: address.to_string().into(),
     }
     .into())

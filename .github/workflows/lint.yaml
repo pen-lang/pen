@@ -9,13 +9,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - run: cargo fmt -- --check
+      - run: tools/format.sh -- --check
   lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - run: tools/ci/set_up_os.sh
-      - run: cargo clippy -- -D warnings
+      - run: tools/lint.sh -- -D warnings
   spell_check:
     runs-on: ubuntu-latest
     steps:

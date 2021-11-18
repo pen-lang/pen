@@ -1,0 +1,28 @@
+type Context {
+  inner InnerContext
+}
+
+type InnerContext {
+  ReadStdIn \() FfiStringResult
+}
+
+type FfiStringResult {
+  Value string
+  Error number
+}
+
+New = \() Context {
+  Context{
+    inner: InnerContext{
+      ReadStdIn: _pen_os_read_stdin,
+    }
+  }
+}
+
+Inner = \(ctx Context) InnerContext {
+  ctx.inner
+}
+
+_pen_os_read_stdin = \() FfiStringResult {
+  FfiStringResult{Value: "", Error: 0}
+}

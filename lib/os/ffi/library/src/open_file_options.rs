@@ -13,7 +13,7 @@ pub struct OpenFileOptions {
 
 impl From<&OpenFileOptions> for OpenOptions {
     fn from(options: &OpenFileOptions) -> Self {
-        let mut open_options = OpenOptions::new();
+        let mut open_options = Self::new();
 
         // Set the create option after the create_new option because the latter is prioritized.
         open_options

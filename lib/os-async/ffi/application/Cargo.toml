@@ -1,0 +1,9 @@
+[package]
+name = "os-app"
+version = "0.1.0"
+publish = false
+edition = "2021"
+
+[dependencies]
+ffi = { package = "pen-ffi", version = "0.3" }
+tokio = { "version" = "1", features = ["macros", "rt", "rt-multi-thread"] }
