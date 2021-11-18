@@ -16,7 +16,6 @@ for directory in . lib/os/ffi lib/os-async/ffi; do
 done
 
 (
-  export PEN_ARCHIVE_FILES=/tmp/libmain.a
   cd $root_directory/$directory
-  "$@"
+  PEN_ARCHIVE_FILES=/tmp/libmain.a "$@"
 )
