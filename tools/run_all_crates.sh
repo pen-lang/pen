@@ -17,5 +17,5 @@ done
 
 (
   cd $root_directory/cmd/test
-  PEN_ARCHIVE_FILES=/tmp/libmain.a "$@"
+  PEN_ARCHIVE_FILES= "$@"
 )
