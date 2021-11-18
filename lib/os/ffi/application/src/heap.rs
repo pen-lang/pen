@@ -1,13 +1,11 @@
 use crate::utilities::is_os_debug;
 use std::{alloc::Layout, os::raw::c_void};
 
-const DEFAULT_ALIGNMENT: usize = 8;
-
 #[no_mangle]
 pub extern "C" fn _pen_malloc(size: usize) -> *mut c_void {
-    let pointer =
-        (unsafe { std::alloc::alloc(Layout::from_size_align(size, DEFAULT_ALIGNMENT).unwrap()) })
-            as *mut c_void;
+    let pointer = (unsafe {
+        std::alloc::alloc(Layout::from_size_align(size, ffi::DEFAULT_MEMORY_ALIGNMENT).unwrap())
+    }) as *mut c_void;
 
     if is_os_debug() {
         eprintln!("malloc: {} -> {:x}", size, pointer as usize);
@@ -22,7 +20,7 @@ pub extern "C" fn _pen_realloc(old_pointer: *mut c_void, size: usize) -> *mut c_
     let new_pointer = (unsafe {
         std::alloc::realloc(
             old_pointer as *mut u8,
-            Layout::from_size_align(0, DEFAULT_ALIGNMENT).unwrap(),
+            Layout::from_size_align(0, ffi::DEFAULT_MEMORY_ALIGNMENT).unwrap(),
             size,
         )
     }) as *mut c_void;
@@ -48,6 +46,6 @@ pub unsafe extern "C" fn _pen_free(pointer: *mut u8) {
 
     std::alloc::dealloc(
         pointer,
-        Layout::from_size_align(0, DEFAULT_ALIGNMENT).unwrap(),
+        Layout::from_size_align(0, ffi::DEFAULT_MEMORY_ALIGNMENT).unwrap(),
     )
 }
