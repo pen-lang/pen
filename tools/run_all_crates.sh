@@ -16,6 +16,6 @@ for directory in . lib/os/ffi lib/os-async/ffi; do
 done
 
 (
-  cd $root_directory/$directory
+  cd $root_directory/cmd/test
   PEN_ARCHIVE_FILES=/tmp/libmain.a "$@"
 )
