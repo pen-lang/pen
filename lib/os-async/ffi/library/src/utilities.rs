@@ -1,6 +1,8 @@
 use crate::error::OsError;
 use std::io::{Read, Write};
 
+// TODO Make those asynchronous.
+
 pub fn read(reader: &mut impl Read) -> Result<ffi::ByteString, OsError> {
     let mut buffer = vec![];
 
