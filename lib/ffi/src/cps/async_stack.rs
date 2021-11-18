@@ -1,7 +1,6 @@
 use super::Stack;
 use std::{
     future::Future,
-    marker::PhantomData,
     ops::{Deref, DerefMut},
     task::Context,
 };
@@ -9,23 +8,21 @@ use std::{
 #[repr(C)]
 pub struct AsyncStack<'a, 'b> {
     stack: Stack,
-    context: *mut Context<'b>,
+    context: &'a mut Context<'b>,
     suspended: bool,
-    _context: PhantomData<&'a Context<'b>>,
 }
 
 impl<'a, 'b> AsyncStack<'a, 'b> {
     pub fn new(capacity: usize, context: &'a mut Context<'b>) -> Self {
         Self {
             stack: Stack::new(capacity),
-            context: context as *mut Context<'b>,
+            context,
             suspended: false,
-            _context: Default::default(),
         }
     }
 
     pub fn context(&mut self) -> &mut Context<'b> {
-        unsafe { &mut *self.context }
+        self.context
     }
 
     pub fn suspend(&mut self, future: impl Future) {
