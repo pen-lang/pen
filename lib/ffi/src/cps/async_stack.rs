@@ -6,14 +6,14 @@ use std::{
 };
 
 #[repr(C)]
-pub struct AsyncStack<'a> {
+pub struct AsyncStack<'a, 'b> {
     stack: Stack,
-    context: &'a mut Context<'a>,
+    context: &'a mut Context<'b>,
     suspended: bool,
 }
 
-impl<'a> AsyncStack<'a> {
-    pub fn new(capacity: usize, context: &'a mut Context<'a>) -> Self {
+impl<'a, 'b> AsyncStack<'a, 'b> {
+    pub fn new(capacity: usize, context: &'a mut Context<'b>) -> Self {
         Self {
             stack: Stack::new(capacity),
             context,
@@ -21,7 +21,7 @@ impl<'a> AsyncStack<'a> {
         }
     }
 
-    pub fn context(&mut self) -> &mut Context<'a> {
+    pub fn context(&mut self) -> &mut Context<'b> {
         self.context
     }
 
@@ -40,7 +40,7 @@ impl<'a> AsyncStack<'a> {
     }
 }
 
-impl<'a> Deref for AsyncStack<'a> {
+impl<'a, 'b> Deref for AsyncStack<'a, 'b> {
     type Target = Stack;
 
     fn deref(&self) -> &Stack {
@@ -48,7 +48,7 @@ impl<'a> Deref for AsyncStack<'a> {
     }
 }
 
-impl<'a> DerefMut for AsyncStack<'a> {
+impl<'a, 'b> DerefMut for AsyncStack<'a, 'b> {
     fn deref_mut(&mut self) -> &mut Stack {
         &mut self.stack
     }
