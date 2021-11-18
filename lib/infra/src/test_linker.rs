@@ -94,7 +94,7 @@ impl TestLinker {
             extern "C" {{ fn {foreign_name}() -> ffi::Any; }}
 
             let result: Result<_, _>
-                = unsafe {{ _pen_test_convert_result({foreign_name}()) }}.into_result();
+                = unsafe {{ _pen_test_convert_result({foreign_name}()) }}.to_result();
             println!("\t{{}}\t{name}", if result.is_ok() {{ "OK" }} else {{ "FAIL" }});
 
             if let Err(message) = &result {{

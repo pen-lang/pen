@@ -17,7 +17,7 @@ impl TestResult {
     }
 
     #[allow(dead_code)]
-    pub fn into_result(self) -> Result<(), String> {
+    pub fn to_result(&self) -> Result<(), String> {
         if !self.is_error() {
             Ok(())
         } else {
