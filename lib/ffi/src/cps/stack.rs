@@ -18,12 +18,11 @@ impl Stack {
         let layout = Layout::from_size_align(capacity, DEFAULT_MEMORY_ALIGNMENT)
             .unwrap()
             .pad_to_align();
-        let capacity = layout.size();
 
         Self {
+            capacity: layout.size(),
             base_pointer: unsafe { alloc(layout) },
             size: 0,
-            capacity,
         }
     }
 
