@@ -1,10 +1,10 @@
+use crate::DEFAULT_MEMORY_ALIGNMENT;
 use std::{
     alloc::{alloc, realloc, Layout},
     ptr,
 };
 
 const CAPACITY_MULTIPLIER: usize = 2;
-const DEFAULT_ALIGNMENT: usize = 8;
 
 #[repr(C)]
 pub struct Stack {
@@ -15,7 +15,7 @@ pub struct Stack {
 
 impl Stack {
     pub fn new(capacity: usize) -> Self {
-        let layout = Layout::from_size_align(capacity, DEFAULT_ALIGNMENT)
+        let layout = Layout::from_size_align(capacity, DEFAULT_MEMORY_ALIGNMENT)
             .unwrap()
             .pad_to_align();
         let capacity = layout.size();
@@ -38,7 +38,7 @@ impl Stack {
             self.base_pointer = unsafe {
                 realloc(
                     self.base_pointer,
-                    Layout::from_size_align(self.capacity, DEFAULT_ALIGNMENT).unwrap(),
+                    Layout::from_size_align(self.capacity, DEFAULT_MEMORY_ALIGNMENT).unwrap(),
                     new_capacity,
                 )
             };
@@ -62,7 +62,7 @@ impl Stack {
 
     fn get_type_size<T>() -> usize {
         Layout::new::<T>()
-            .align_to(DEFAULT_ALIGNMENT)
+            .align_to(DEFAULT_MEMORY_ALIGNMENT)
             .unwrap()
             .pad_to_align()
             .size()
