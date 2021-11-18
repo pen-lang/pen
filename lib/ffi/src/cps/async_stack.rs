@@ -18,14 +18,14 @@ impl<'a, 'b> AsyncStack<'a, 'b> {
     pub fn new(capacity: usize, context: &'a mut Context<'b>) -> Self {
         Self {
             stack: Stack::new(capacity),
-            context: context as *mut Context<'b> as *mut Context<'b>,
+            context: context as *mut Context<'b>,
             suspended: false,
             _context: Default::default(),
         }
     }
 
     pub fn context(&mut self) -> &mut Context<'b> {
-        unsafe { &mut *(self.context as *mut Context<'b>) }
+        unsafe { &mut *self.context }
     }
 
     pub fn suspend(&mut self, future: impl Future) {
@@ -55,6 +55,11 @@ impl<'a, 'b> DerefMut for AsyncStack<'a, 'b> {
     fn deref_mut(&mut self) -> &mut Stack {
         &mut self.stack
     }
+}
+
+#[allow(dead_code)]
+extern "C" {
+    fn _test_async_stack_ffi_safety(_: *mut AsyncStack<'_, '_>);
 }
 
 #[cfg(test)]
