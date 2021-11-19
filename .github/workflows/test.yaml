@@ -6,14 +6,14 @@ on:
   pull_request:
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
       - run: tools/ci/set_up_os.sh
       - run: cargo build --locked
       - run: git diff --exit-code
   unit_test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
       - run: tools/ci/set_up_os.sh
@@ -23,7 +23,7 @@ jobs:
       fail-fast: false
       matrix:
         os:
-          - ubuntu-latest
+          - ubuntu-18.04
           - macos-latest
     runs-on: ${{ matrix.os }}
     steps:
