@@ -15,3 +15,5 @@ if [ $RUNNER_OS = Linux ]; then
   sudo apt install libc6-dbg # for valgrind
   brew install valgrind
 fi
+
+brew cleanup -s --prune all
