@@ -2,9 +2,14 @@
 
 set -e
 
-brew install jq llvm ninja
+llvm_version=13
 
-echo PATH=$(brew --prefix)/opt/llvm/bin:$PATH >>$GITHUB_ENV
+brew install jq llvm@$llvm_version ninja
+
+llvm_prefix=$(brew --prefix)/opt/llvm@1$llvm_version
+
+echo LLVM_SYS_${llvm_version}0_PREFIX=$llvm_prefix >>$GITHUB_ENV
+echo PATH=$llvm_prefix/bin:$PATH >>$GITHUB_ENV
 
 if [ $RUNNER_OS = Linux ]; then
   sudo apt install libc6-dbg # for valgrind
