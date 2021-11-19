@@ -29,7 +29,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - run: tools/ci/set_up_os.sh
-      - uses: actions/setup-ruby@v1
+      - uses: ruby/setup-ruby@v1
       - run: bundler install
       - run: cargo build --release
       - run: tools/integration_test.sh
