@@ -1,9 +1,3 @@
 [toolchain]
 channel = "stable"
 components = ["clippy", "rustfmt", "rust-analysis", "rust-src"]
-targets = [
-  "i686-unknown-linux-musl",
-  "x86_64-unknown-linux-musl",
-  "aarch64-unknown-linux-musl",
-  "wasm32-wasi",
-]
