@@ -1,6 +1,6 @@
 #!/bin/sh
 
-set -ex
+set -e
 
 llvm_version=13
 
