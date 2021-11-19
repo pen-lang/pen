@@ -18,8 +18,6 @@ install_nightly_component clippy
 
 $(dirname $0)/run_all_crates.sh \
   rustup run nightly cargo clippy $options -Z unstable-options -- \
-  -A improper_ctypes \
-  -D improper_ctypes_definitions \
   -D clippy::use_self \
   -D clippy::mod_module_files \
   "$@"
