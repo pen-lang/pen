@@ -6,7 +6,7 @@ on:
   pull_request:
 jobs:
   tag_check:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     outputs:
       version: ${{ env.version }}
       should_release: ${{ env.should_release }}
@@ -25,7 +25,7 @@ jobs:
       fail-fast: false
       matrix:
         os:
-          - ubuntu-latest
+          - ubuntu-18.04
           - macos-latest
     runs-on: ${{ matrix.os }}
     steps:
@@ -40,7 +40,7 @@ jobs:
     needs:
       - tag_check
       - build_asset
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
         with:
@@ -63,7 +63,7 @@ jobs:
       - tag_check
       - release
     if: needs.tag_check.outputs.should_release == 'true'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
         with:
