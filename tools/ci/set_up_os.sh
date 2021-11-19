@@ -4,7 +4,7 @@ set -e
 
 llvm_version=13
 
-brew install gcc jq llvm@$llvm_version ninja
+brew install jq llvm@$llvm_version ninja
 
 llvm_prefix=$(brew --prefix)/opt/llvm@$llvm_version
 
