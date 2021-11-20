@@ -3,6 +3,8 @@
 set -e
 
 for channel in stable nightly; do
+  rustup install $channel
+
   for target in \
     i686-unknown-linux-musl \
     x86_64-unknown-linux-musl \
