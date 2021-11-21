@@ -1,3 +1,5 @@
+import foreign _pen_os_read_stdin \() FfiStringResult
+
 type Context {
   inner InnerContext
 }
@@ -21,8 +23,4 @@ New = \() Context {
 
 Inner = \(ctx Context) InnerContext {
   ctx.inner
-}
-
-_pen_os_read_stdin = \() FfiStringResult {
-  FfiStringResult{Value: "", Error: 0}
 }
