@@ -20,16 +20,13 @@ extern "C" fn _pen_read_stdin(
         Box::pin(utilities::read(&mut stdin))
     };
 
-    let value = match future.as_mut().poll(stack.context()) {
-        Poll::Ready(value) => value,
+    match future.as_mut().poll(stack.context()) {
+        Poll::Ready(value) => continuation(stack, ffi::Arc::new(value.into())),
         Poll::Pending => {
             stack.suspend(future);
-
-            return ffi::cps::Result::new();
+            ffi::cps::Result::new()
         }
-    };
-
-    continuation(stack, ffi::Arc::new(value.into()))
+    }
 }
 
 /* #[no_mangle]
