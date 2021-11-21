@@ -6,7 +6,7 @@ use tokio::io::stdin;
 // TODO Make those asynchronous.
 
 #[no_mangle]
-extern "C" fn _pen_read_stdin(
+extern "C" fn _pen_os_read_stdin(
     stack: &mut ffi::cps::AsyncStack,
     continuation: extern "C" fn(
         &mut ffi::cps::AsyncStack,
