@@ -24,7 +24,7 @@ extern "C" {
 #[cfg(test)]
 unsafe extern "C" fn _pen_os_main(
     _: &mut ffi::cps::AsyncStack,
-    _: extern "C" fn(*mut ffi::cps::AsyncStack, f64) -> ffi::cps::Result,
+    _: extern "C" fn(&mut ffi::cps::AsyncStack, f64) -> ffi::cps::Result,
 ) -> ffi::cps::Result {
     ffi::cps::Result::new()
 }
