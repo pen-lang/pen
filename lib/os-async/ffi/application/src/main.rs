@@ -17,7 +17,7 @@ const INITIAL_STACK_CAPACITY: usize = 256;
 extern "C" {
     fn _pen_os_main(
         stack: &mut ffi::cps::AsyncStack,
-        continuation: extern "C" fn(*mut ffi::cps::AsyncStack, f64) -> ffi::cps::Result,
+        continuation: extern "C" fn(&mut ffi::cps::AsyncStack, f64) -> ffi::cps::Result,
     ) -> ffi::cps::Result;
 }
 
