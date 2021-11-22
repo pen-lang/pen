@@ -8,21 +8,25 @@ use std::{
 #[repr(C)]
 pub struct AsyncStack<'a, 'b> {
     stack: Stack,
-    context: &'a mut Context<'b>,
+    context: Option<&'a mut Context<'b>>,
     suspended: bool,
 }
 
 impl<'a, 'b> AsyncStack<'a, 'b> {
-    pub fn new(capacity: usize, context: &'a mut Context<'b>) -> Self {
+    pub fn new(capacity: usize) -> Self {
         Self {
             stack: Stack::new(capacity),
-            context,
+            context: None,
             suspended: false,
         }
     }
 
-    pub fn context(&mut self) -> &mut Context<'b> {
-        self.context
+    pub fn context(&mut self) -> Option<&mut Context<'b>> {
+        self.context.as_deref_mut()
+    }
+
+    pub fn set_context(&mut self, context: &'a mut Context<'b>) {
+        self.context = Some(context);
     }
 
     pub fn suspend(&mut self, future: impl Future) {
@@ -84,9 +88,7 @@ mod tests {
 
     #[test]
     fn push_f64() {
-        let waker = create_waker();
-        let mut context = Context::from_waker(&waker);
-        let mut stack = AsyncStack::new(TEST_CAPACITY, &mut context);
+        let mut stack = AsyncStack::new(TEST_CAPACITY);
 
         stack.push(42.0f64);
 
@@ -96,9 +98,10 @@ mod tests {
     #[test]
     fn wake() {
         let waker = create_waker();
+        let mut stack = AsyncStack::new(TEST_CAPACITY);
         let mut context = Context::from_waker(&waker);
-        let mut stack = AsyncStack::new(TEST_CAPACITY, &mut context);
 
-        stack.context().waker().wake_by_ref();
+        stack.set_context(&mut context);
+        stack.context().unwrap().waker().wake_by_ref();
     }
 }
