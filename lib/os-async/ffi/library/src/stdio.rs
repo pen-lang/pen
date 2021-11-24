@@ -20,7 +20,7 @@ extern "C" fn _pen_os_read_stdin(
         Box::pin(utilities::read(&mut stdin))
     };
 
-    match future.as_mut().poll(stack.context()) {
+    match future.as_mut().poll(stack.context().unwrap()) {
         Poll::Ready(value) => continuation(stack, ffi::Arc::new(value.into())),
         Poll::Pending => {
             stack.suspend(future);
