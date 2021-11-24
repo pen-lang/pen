@@ -1,18 +1,19 @@
 use super::Stack;
 use std::{
     future::Future,
+    intrinsics::transmute,
     ops::{Deref, DerefMut},
     task::Context,
 };
 
 #[repr(C)]
-pub struct AsyncStack<'a, 'b> {
+pub struct AsyncStack {
     stack: Stack,
-    context: Option<&'a mut Context<'b>>,
+    context: Option<*mut Context<'static>>,
     suspended: bool,
 }
 
-impl<'a, 'b> AsyncStack<'a, 'b> {
+impl AsyncStack {
     pub fn new(capacity: usize) -> Self {
         Self {
             stack: Stack::new(capacity),
@@ -21,12 +22,13 @@ impl<'a, 'b> AsyncStack<'a, 'b> {
         }
     }
 
-    pub fn context(&mut self) -> Option<&mut Context<'b>> {
-        self.context.as_deref_mut()
+    pub fn context(&mut self) -> Option<&mut Context<'_>> {
+        self.context
+            .map(|context| unsafe { transmute::<_, &mut Context<'_>>(context) })
     }
 
-    pub fn set_context(&mut self, context: &'a mut Context<'b>) {
-        self.context = Some(context);
+    pub fn set_context(&mut self, context: &mut Context<'_>) {
+        self.context = Some(unsafe { transmute(context) });
     }
 
     pub fn suspend(&mut self, future: impl Future) {
@@ -44,7 +46,7 @@ impl<'a, 'b> AsyncStack<'a, 'b> {
     }
 }
 
-impl<'a, 'b> Deref for AsyncStack<'a, 'b> {
+impl Deref for AsyncStack {
     type Target = Stack;
 
     fn deref(&self) -> &Stack {
@@ -52,7 +54,7 @@ impl<'a, 'b> Deref for AsyncStack<'a, 'b> {
     }
 }
 
-impl<'a, 'b> DerefMut for AsyncStack<'a, 'b> {
+impl DerefMut for AsyncStack {
     fn deref_mut(&mut self) -> &mut Stack {
         &mut self.stack
     }
@@ -60,7 +62,7 @@ impl<'a, 'b> DerefMut for AsyncStack<'a, 'b> {
 
 #[allow(dead_code)]
 extern "C" {
-    fn _test_async_stack_ffi_safety(_: *mut AsyncStack<'_, '_>);
+    fn _test_async_stack_ffi_safety(_: *mut AsyncStack);
 }
 
 #[cfg(test)]

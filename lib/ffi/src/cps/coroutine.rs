@@ -1,4 +1,4 @@
-use super::{AsyncStack, Stack};
+use super::AsyncStack;
 use crate::cps;
 use std::{
     future::Future,
@@ -17,7 +17,7 @@ type ContinuationFunction<T> = extern "C" fn(&mut AsyncStack, T) -> cps::Result;
 
 #[repr(C)]
 pub struct Coroutine<T> {
-    stack: Stack,
+    stack: AsyncStack,
     context: Option<*mut Context<'static>>,
     step_function: *const (),
     continuation_function: *const (),
@@ -39,7 +39,7 @@ impl<T> Coroutine<T> {
         ) -> cps::Result,
     ) -> Self {
         Self {
-            stack: Stack::new(capacity),
+            stack: AsyncStack::new(capacity),
             context: None,
             step_function: step_function as *const (),
             continuation_function: push_result::<T> as *const (),
@@ -48,10 +48,10 @@ impl<T> Coroutine<T> {
     }
 }
 
-impl<T> Future for Coroutine<T> {
+impl<T: Unpin> Future for Coroutine<T> {
     type Output = T;
 
-    fn poll(self: Pin<&mut Self>, context: &mut Context<'_>) -> Poll<T> {
+    fn poll(mut self: Pin<&mut Self>, context: &mut Context<'_>) -> Poll<T> {
         let step_function = unsafe { transmute::<_, StepFunction<()>>(self.step_function) };
         let continuation_function =
             unsafe { transmute::<_, ContinuationFunction<()>>(self.continuation_function) };
@@ -59,6 +59,7 @@ impl<T> Future for Coroutine<T> {
         self.stack.set_context(context);
         step_function(&mut self.stack, continuation_function);
 
+        // TODO Check if a result is ready.
         Poll::Pending
     }
 }
