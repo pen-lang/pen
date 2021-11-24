@@ -18,7 +18,6 @@ type ContinuationFunction<T> = extern "C" fn(&mut AsyncStack, T) -> cps::Result;
 #[repr(C)]
 pub struct Coroutine<T> {
     stack: AsyncStack,
-    context: Option<*mut Context<'static>>,
     step_function: *const (),
     continuation_function: *const (),
     _result: PhantomData<T>,
@@ -40,7 +39,6 @@ impl<T> Coroutine<T> {
     ) -> Self {
         Self {
             stack: AsyncStack::new(capacity),
-            context: None,
             step_function: step_function as *const (),
             continuation_function: push_result::<T> as *const (),
             _result: Default::default(),
