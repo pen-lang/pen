@@ -31,15 +31,15 @@ unsafe extern "C" fn _pen_os_main(
 
 #[tokio::main]
 async fn main() {
-    poll_fn(main_wrapper).await;
+    let future = ffi::cps::Future::new(_pen_os_main, exit);
+    let stack = ffi::cps::AsyncStack::new(INITIAL_STACK_CAPACITY);
 
-    unreachable!()
-}
+    poll_fn(|context| {
+        unsafe { _pen_os_main(&mut stack, exit) };
 
-fn main_wrapper(context: &mut Context<'_>) -> Poll<()> {
-    let mut stack = ffi::cps::AsyncStack::new(INITIAL_STACK_CAPACITY, context);
-
-    unsafe { _pen_os_main(&mut stack, exit) };
+        unreachable!()
+    })
+    .await;
 
     unreachable!()
 }
