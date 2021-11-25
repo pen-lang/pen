@@ -15,26 +15,19 @@ type StepFunction<T> = extern "C" fn(
 type ContinuationFunction<T> = extern "C" fn(&mut AsyncStack, T) -> cps::Result;
 
 #[repr(C)]
-#[derive(Clone, Copy, Debug)]
-pub struct Suspension {
-    pub step_function: *const (),
-    pub continuation_function: *const (),
-}
-
-#[repr(C)]
 #[derive(Debug)]
 pub struct AsyncStack {
     stack: Stack,
     context: Option<*mut Context<'static>>,
-    suspension: Option<Suspension>,
+    suspended: bool,
 }
 
 impl AsyncStack {
     pub fn new(capacity: usize) -> Self {
         Self {
             stack: Stack::new(capacity),
-            suspension: None,
             context: None,
+            suspended: false,
         }
     }
 
@@ -48,28 +41,28 @@ impl AsyncStack {
 
     pub fn suspend<T>(
         &mut self,
-        step_function: StepFunction<T>,
-        continuation_function: ContinuationFunction<T>,
+        step: StepFunction<T>,
+        continuation: ContinuationFunction<T>,
         future: impl Future,
     ) {
+        self.stack.push(step);
+        self.stack.push(continuation);
         self.stack.push(future);
-        self.suspension = Some(Suspension {
-            step_function: unsafe { transmute(step_function) },
-            continuation_function: unsafe { transmute(continuation_function) },
-        });
+
+        self.suspended = true;
     }
 
     pub fn resume<T, F: Future>(
         &mut self,
     ) -> Option<(StepFunction<T>, ContinuationFunction<T>, F)> {
-        if let Some(suspension) = self.suspension {
-            self.suspension = None;
+        if self.suspended {
+            self.suspended = false;
 
-            Some((
-                unsafe { transmute(suspension.step_function) },
-                unsafe { transmute(suspension.continuation_function) },
-                self.stack.pop(),
-            ))
+            let future = self.pop();
+            let continuation = self.pop();
+            let step = self.pop();
+
+            Some((step, continuation, future))
         } else {
             None
         }
@@ -92,7 +85,7 @@ impl DerefMut for AsyncStack {
 
 #[allow(dead_code)]
 extern "C" {
-    fn _test_async_stack_ffi_safety(_: *mut AsyncStack);
+    fn _test_async_stack_ffi_safety(_: &mut AsyncStack);
 }
 
 #[cfg(test)]
