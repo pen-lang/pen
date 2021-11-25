@@ -4,7 +4,6 @@ use std::{
     future::Future,
     intrinsics::transmute,
     ops::{Deref, DerefMut},
-    ptr::null,
     task::Context,
 };
 
@@ -16,22 +15,26 @@ type StepFunction<T> = extern "C" fn(
 type ContinuationFunction<T> = extern "C" fn(&mut AsyncStack, T) -> cps::Result;
 
 #[repr(C)]
+#[derive(Clone, Copy, Debug)]
+pub struct Suspension {
+    pub step_function: *const (),
+    pub continuation_function: *const (),
+}
+
+#[repr(C)]
+#[derive(Debug)]
 pub struct AsyncStack {
     stack: Stack,
-    step_function: *const (),
-    continuation_function: *const (),
     context: Option<*mut Context<'static>>,
-    suspended: bool,
+    suspension: Option<Suspension>,
 }
 
 impl AsyncStack {
     pub fn new(capacity: usize) -> Self {
         Self {
             stack: Stack::new(capacity),
-            step_function: null(),
-            continuation_function: null(),
+            suspension: None,
             context: None,
-            suspended: false,
         }
     }
 
@@ -50,19 +53,21 @@ impl AsyncStack {
         future: impl Future,
     ) {
         self.stack.push(future);
-        self.step_function = unsafe { transmute(step_function) };
-        self.continuation_function = unsafe { transmute(continuation_function) };
-        self.suspended = true;
+        self.suspension = Some(Suspension {
+            step_function: unsafe { transmute(step_function) },
+            continuation_function: unsafe { transmute(continuation_function) },
+        });
     }
 
     pub fn resume<T, F: Future>(
         &mut self,
     ) -> Option<(StepFunction<T>, ContinuationFunction<T>, F)> {
-        if self.suspended {
-            self.suspended = false;
+        if let Some(suspension) = self.suspension {
+            self.suspension = None;
+
             Some((
-                unsafe { transmute(self.step_function) },
-                unsafe { transmute(self.continuation_function) },
+                unsafe { transmute(suspension.step_function) },
+                unsafe { transmute(suspension.continuation_function) },
                 self.stack.pop(),
             ))
         } else {
@@ -94,6 +99,7 @@ extern "C" {
 mod tests {
     use super::*;
     use std::{
+        future::{ready, Ready},
         ptr::null,
         task::{RawWaker, RawWakerVTable, Waker},
     };
@@ -113,6 +119,19 @@ mod tests {
 
     fn do_nothing(_: *const ()) {}
 
+    type TestResult = usize;
+
+    extern "C" fn step(
+        _: &mut AsyncStack,
+        _: extern "C" fn(&mut AsyncStack, TestResult) -> cps::Result,
+    ) -> cps::Result {
+        cps::Result::new()
+    }
+
+    extern "C" fn continuation(_: &mut AsyncStack, _: TestResult) -> cps::Result {
+        cps::Result::new()
+    }
+
     #[test]
     fn push_f64() {
         let mut stack = AsyncStack::new(TEST_CAPACITY);
@@ -130,5 +149,26 @@ mod tests {
 
         stack.set_context(&mut context);
         stack.context().unwrap().waker().wake_by_ref();
+    }
+
+    #[test]
+    fn suspend() {
+        let waker = create_waker();
+        let mut stack = AsyncStack::new(TEST_CAPACITY);
+        let mut context = Context::from_waker(&waker);
+
+        stack.set_context(&mut context);
+        stack.suspend(step, continuation, ready(42));
+    }
+
+    #[test]
+    fn suspend_and_resume() {
+        let waker = create_waker();
+        let mut stack = AsyncStack::new(TEST_CAPACITY);
+        let mut context = Context::from_waker(&waker);
+
+        stack.set_context(&mut context);
+        stack.suspend(step, continuation, ready(42u64));
+        stack.resume::<(), Ready<u64>>();
     }
 }
