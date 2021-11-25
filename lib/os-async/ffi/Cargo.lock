@@ -63,9 +63,9 @@ dependencies = [
 
 [[package]]
 name = "pen-ffi"
-version = "0.3.5"
+version = "0.3.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "867e28801233a2ee223b4094d2049ec8fd1e4fd59c85012fbf959415e3a170b8"
+checksum = "f67a1e7db1904dc9a317eb7fe15b320f4bbefd783d0e14833f2ec7364cda49d8"
 
 [[package]]
 name = "pin-project-lite"
@@ -93,9 +93,9 @@ dependencies = [
 
 [[package]]
 name = "syn"
-version = "1.0.81"
+version = "1.0.82"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f2afee18b8beb5a596ecb4a2dce128c719b4ba399d34126b9e4396e3f9860966"
+checksum = "8daf5dd0bb60cbd4137b1b587d2fc0ae729bc07cf01cd70b36a1ed5ade3b9d59"
 dependencies = [
  "proc-macro2",
  "quote",
