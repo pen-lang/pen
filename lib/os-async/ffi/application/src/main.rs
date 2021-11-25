@@ -5,10 +5,7 @@ mod heap;
 mod unreachable;
 mod utilities;
 
-use std::{
-    future::poll_fn,
-    task::{Context, Poll},
-};
+use std::{future::poll_fn, task::Poll};
 
 const INITIAL_STACK_CAPACITY: usize = 256;
 
@@ -31,13 +28,20 @@ unsafe extern "C" fn _pen_os_main(
 
 #[tokio::main]
 async fn main() {
-    let future = ffi::cps::Future::new(_pen_os_main, exit);
-    let stack = ffi::cps::AsyncStack::new(INITIAL_STACK_CAPACITY);
+    let trampoline = (_pen_os_main, exit);
+
+    let mut stack = ffi::cps::AsyncStack::new(INITIAL_STACK_CAPACITY);
 
     poll_fn(|context| {
-        unsafe { _pen_os_main(&mut stack, exit) };
+        stack.set_context(context);
 
-        unreachable!()
+        let (step, continue_) = trampoline;
+        unsafe { step(&mut stack, continue_) };
+
+        trampoline = stack.resume();
+
+        // We never get ready until the exit function is called.
+        Poll::Pending
     })
     .await;
 
