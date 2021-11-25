@@ -1,14 +1,25 @@
 use super::Stack;
+use crate::cps;
 use std::{
     future::Future,
     intrinsics::transmute,
     ops::{Deref, DerefMut},
+    ptr::null,
     task::Context,
 };
+
+type StepFunction<T> = extern "C" fn(
+    stack: &mut AsyncStack,
+    continuation: extern "C" fn(&mut AsyncStack, T) -> cps::Result,
+) -> cps::Result;
+
+type ContinuationFunction<T> = extern "C" fn(&mut AsyncStack, T) -> cps::Result;
 
 #[repr(C)]
 pub struct AsyncStack {
     stack: Stack,
+    step_function: *const (),
+    continuation_function: *const (),
     context: Option<*mut Context<'static>>,
     suspended: bool,
 }
@@ -17,29 +28,43 @@ impl AsyncStack {
     pub fn new(capacity: usize) -> Self {
         Self {
             stack: Stack::new(capacity),
+            step_function: null(),
+            continuation_function: null(),
             context: None,
             suspended: false,
         }
     }
 
     pub fn context(&mut self) -> Option<&mut Context<'_>> {
-        self.context
-            .map(|context| unsafe { transmute::<_, &mut Context<'_>>(context) })
+        self.context.map(|context| unsafe { transmute(context) })
     }
 
     pub fn set_context(&mut self, context: &mut Context<'_>) {
         self.context = Some(unsafe { transmute(context) });
     }
 
-    pub fn suspend(&mut self, future: impl Future) {
+    pub fn suspend<T>(
+        &mut self,
+        step_function: StepFunction<T>,
+        continuation_function: ContinuationFunction<T>,
+        future: impl Future,
+    ) {
         self.stack.push(future);
+        self.step_function = unsafe { transmute(step_function) };
+        self.continuation_function = unsafe { transmute(continuation_function) };
         self.suspended = true;
     }
 
-    pub fn resume<F: Future>(&mut self) -> Option<F> {
+    pub fn resume<T, F: Future>(
+        &mut self,
+    ) -> Option<(StepFunction<T>, ContinuationFunction<T>, F)> {
         if self.suspended {
             self.suspended = false;
-            Some(self.stack.pop())
+            Some((
+                unsafe { transmute(self.step_function) },
+                unsafe { transmute(self.continuation_function) },
+                self.stack.pop(),
+            ))
         } else {
             None
         }
