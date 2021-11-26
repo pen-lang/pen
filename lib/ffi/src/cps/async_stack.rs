@@ -52,17 +52,18 @@ impl AsyncStack {
         self.suspended = true;
     }
 
-    pub fn resume<T, F: Future>(
-        &mut self,
-    ) -> Option<(StepFunction<T>, ContinuationFunction<T>, F)> {
+    pub fn resume<T>(&mut self) -> Option<(StepFunction<T>, ContinuationFunction<T>)> {
+        let continuation = self.pop();
+        let step = self.pop();
+
+        Some((step, continuation))
+    }
+
+    pub fn restore<F: Future>(&mut self) -> Option<F> {
         if self.suspended {
             self.suspended = false;
 
-            let future = self.pop();
-            let continuation = self.pop();
-            let step = self.pop();
-
-            Some((step, continuation, future))
+            Some(self.pop())
         } else {
             None
         }
@@ -162,6 +163,7 @@ mod tests {
 
         stack.set_context(&mut context);
         stack.suspend(step, continuation, ready(42u64));
-        stack.resume::<(), Ready<u64>>();
+        stack.resume::<()>();
+        stack.restore::<Ready<u64>>();
     }
 }
