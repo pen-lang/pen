@@ -7,12 +7,12 @@ use std::{
     task::Context,
 };
 
-type StepFunction<T> = extern "C" fn(
+pub type StepFunction<T> = unsafe extern "C" fn(
     stack: &mut AsyncStack,
     continuation: extern "C" fn(&mut AsyncStack, T) -> cps::Result,
 ) -> cps::Result;
 
-type ContinuationFunction<T> = extern "C" fn(&mut AsyncStack, T) -> cps::Result;
+pub type ContinuationFunction<T> = unsafe extern "C" fn(&mut AsyncStack, T) -> cps::Result;
 
 #[repr(C)]
 #[derive(Debug)]
@@ -52,11 +52,11 @@ impl AsyncStack {
         self.suspended = true;
     }
 
-    pub fn resume<T>(&mut self) -> Option<(StepFunction<T>, ContinuationFunction<T>)> {
+    pub fn resume<T>(&mut self) -> (StepFunction<T>, ContinuationFunction<T>) {
         let continuation = self.pop();
         let step = self.pop();
 
-        Some((step, continuation))
+        (step, continuation)
     }
 
     pub fn restore<F: Future>(&mut self) -> Option<F> {
