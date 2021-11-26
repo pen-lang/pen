@@ -1,5 +1,6 @@
 use super::utilities;
 use crate::result::FfiResult;
+use std::future::Future;
 use std::task::Poll;
 use tokio::io::stdin;
 
@@ -14,8 +15,7 @@ extern "C" fn _pen_os_read_stdin(
     ) -> ffi::cps::Result,
 ) -> ffi::cps::Result {
     let mut stdin = stdin();
-
-    let future = stack
+    let mut future = stack
         .restore()
         .unwrap_or_else(|| Box::pin(utilities::read(&mut stdin)));
 

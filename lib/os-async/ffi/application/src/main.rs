@@ -28,17 +28,23 @@ unsafe extern "C" fn _pen_os_main(
 
 #[tokio::main]
 async fn main() {
-    let trampoline = (_pen_os_main, exit);
+    let mut trampoline: (
+        unsafe extern "C" fn(
+            &mut ffi::cps::AsyncStack,
+            extern "C" fn(&mut ffi::cps::AsyncStack, _) -> ffi::cps::Result,
+        ) -> ffi::cps::Result,
+        unsafe extern "C" fn(&mut ffi::cps::AsyncStack, _) -> ffi::cps::Result,
+    ) = (_pen_os_main, exit);
 
     let mut stack = ffi::cps::AsyncStack::new(INITIAL_STACK_CAPACITY);
 
-    poll_fn(|context| {
+    poll_fn::<(), _>(|context| {
         stack.set_context(context);
 
         let (step, continue_) = trampoline;
-        unsafe { step(&mut stack, continue_) };
+        step(&mut stack, continue_);
 
-        trampoline = stack.resume();
+        trampoline = stack.resume().unwrap();
 
         // We never get ready until the exit function is called.
         Poll::Pending
