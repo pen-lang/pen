@@ -63,9 +63,9 @@ dependencies = [
 
 [[package]]
 name = "pen-ffi"
-version = "0.3.8"
+version = "0.3.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a83eab7b8b8ada4b9edfaa0edfc978ff7d64a85bc5b2c105077f3bafa64fd2f0"
+checksum = "d737092ddc92b20f8cbaede08a548d95e0c12243a54949309899932ca8eade95"
 
 [[package]]
 name = "pin-project-lite"
