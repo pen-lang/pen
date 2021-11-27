@@ -12,16 +12,16 @@ const INITIAL_STACK_CAPACITY: usize = 256;
 #[cfg(not(test))]
 #[link(name = "main")]
 extern "C" {
-    fn _pen_os_main(
+    unsafe fn _pen_os_main(
         stack: &mut ffi::cps::AsyncStack,
-        continuation: extern "C" fn(&mut ffi::cps::AsyncStack, f64) -> ffi::cps::Result,
+        continuation: ffi::cps::ContinuationFunction<ffi::Number>,
     ) -> ffi::cps::Result;
 }
 
 #[cfg(test)]
 unsafe extern "C" fn _pen_os_main(
     _: &mut ffi::cps::AsyncStack,
-    _: extern "C" fn(&mut ffi::cps::AsyncStack, f64) -> ffi::cps::Result,
+    _: ffi::cps::ContinuationFunction<ffi::Number>,
 ) -> ffi::cps::Result {
     ffi::cps::Result::new()
 }
@@ -29,22 +29,18 @@ unsafe extern "C" fn _pen_os_main(
 #[tokio::main]
 async fn main() {
     let mut trampoline: (
-        unsafe extern "C" fn(
-            &mut ffi::cps::AsyncStack,
-            extern "C" fn(&mut ffi::cps::AsyncStack, _) -> ffi::cps::Result,
-        ) -> ffi::cps::Result,
-        unsafe extern "C" fn(&mut ffi::cps::AsyncStack, _) -> ffi::cps::Result,
+        ffi::cps::StepFunction<ffi::Number>,
+        ffi::cps::ContinuationFunction<ffi::Number>,
     ) = (_pen_os_main, exit);
-
     let mut stack = ffi::cps::AsyncStack::new(INITIAL_STACK_CAPACITY);
 
     poll_fn::<(), _>(|context| {
         stack.set_context(context);
 
         let (step, continue_) = trampoline;
-        step(&mut stack, continue_);
+        unsafe { step(&mut stack, continue_) };
 
-        trampoline = stack.resume().unwrap();
+        trampoline = stack.resume();
 
         // We never get ready until the exit function is called.
         Poll::Pending
@@ -54,6 +50,6 @@ async fn main() {
     unreachable!()
 }
 
-extern "C" fn exit(_: &mut ffi::cps::AsyncStack, code: f64) -> ffi::cps::Result {
-    std::process::exit(code as i32)
+unsafe extern "C" fn exit(_: &mut ffi::cps::AsyncStack, code: ffi::Number) -> ffi::cps::Result {
+    std::process::exit(f64::from(code) as i32)
 }
