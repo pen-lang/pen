@@ -161,9 +161,13 @@ mod tests {
         let mut stack = AsyncStack::new(TEST_CAPACITY);
         let mut context = Context::from_waker(&waker);
 
+        type TestFuture = Ready<u64>;
+
+        let future: TestFuture = ready(42u64);
+
         stack.set_context(&mut context);
-        stack.suspend(step, continuation, ready(42u64));
+        stack.suspend(step, continuation, future);
+        stack.restore::<TestFuture>();
         stack.resume::<()>();
-        stack.restore::<Ready<u64>>();
     }
 }
