@@ -43,7 +43,7 @@ impl AsyncStack {
         &mut self,
         step: StepFunction<T>,
         continuation: ContinuationFunction<T>,
-        future: impl Future,
+        future: impl Future + Unpin,
     ) {
         self.stack.push(step);
         self.stack.push(continuation);
@@ -59,7 +59,7 @@ impl AsyncStack {
         (step, continuation)
     }
 
-    pub fn restore<F: Future>(&mut self) -> Option<F> {
+    pub fn restore<F: Future + Unpin>(&mut self) -> Option<F> {
         if self.suspended {
             self.suspended = false;
 
@@ -161,9 +161,9 @@ mod tests {
         let mut stack = AsyncStack::new(TEST_CAPACITY);
         let mut context = Context::from_waker(&waker);
 
-        type TestFuture = Ready<u64>;
+        type TestFuture = Ready<()>;
 
-        let future: TestFuture = ready(42u64);
+        let future: TestFuture = ready(());
 
         stack.set_context(&mut context);
         stack.suspend(step, continuation, future);
