@@ -9,7 +9,7 @@ use std::{
 
 pub type StepFunction<T> = unsafe extern "C" fn(
     stack: &mut AsyncStack,
-    continuation: extern "C" fn(&mut AsyncStack, T) -> cps::Result,
+    continuation: ContinuationFunction<T>,
 ) -> cps::Result;
 
 pub type ContinuationFunction<T> = unsafe extern "C" fn(&mut AsyncStack, T) -> cps::Result;
@@ -115,14 +115,14 @@ mod tests {
 
     type TestResult = usize;
 
-    extern "C" fn step(
+    unsafe extern "C" fn step(
         _: &mut AsyncStack,
-        _: extern "C" fn(&mut AsyncStack, TestResult) -> cps::Result,
+        _: ContinuationFunction<TestResult>,
     ) -> cps::Result {
         cps::Result::new()
     }
 
-    extern "C" fn continuation(_: &mut AsyncStack, _: TestResult) -> cps::Result {
+    unsafe extern "C" fn continuation(_: &mut AsyncStack, _: TestResult) -> cps::Result {
         cps::Result::new()
     }
 
