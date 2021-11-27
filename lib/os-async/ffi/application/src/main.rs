@@ -12,7 +12,7 @@ const INITIAL_STACK_CAPACITY: usize = 256;
 #[cfg(not(test))]
 #[link(name = "main")]
 extern "C" {
-    unsafe fn _pen_os_main(
+    fn _pen_os_main(
         stack: &mut ffi::cps::AsyncStack,
         continuation: ffi::cps::ContinuationFunction<ffi::Number>,
     ) -> ffi::cps::Result;
