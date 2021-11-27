@@ -32,6 +32,7 @@ impl AsyncStack {
     }
 
     pub fn context(&mut self) -> Option<&mut Context<'_>> {
+        #[allow(clippy::transmute_ptr_to_ref)]
         self.context.map(|context| unsafe { transmute(context) })
     }
 
