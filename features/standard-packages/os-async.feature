@@ -43,12 +43,11 @@ Feature: OS (asynchronous runtime)
     }
 
     run = \(ctx Context) none | error {
-      s = File'Read(ctx, File'StdIn())?
-      # TODO
-      #File'Write(ctx, File'StdOut(), s)?
+      File'Write(ctx, File'StdOut(), "Hello, world!")?
 
       none
     }
     """
-    When I successfully run `pen build --target <target>`
+    When I successfully run `pen build`
     Then I successfully run `./app`
+    And the stdout from "./app" should contain exactly "Hello, world!"
