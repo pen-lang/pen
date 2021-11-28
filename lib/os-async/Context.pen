@@ -1,4 +1,5 @@
 import foreign _pen_os_read_stdin \() FfiStringResult
+import foreign _pen_os_write_stdout \(string) FfiNumberResult
 
 type Context {
   inner InnerContext
@@ -6,6 +7,12 @@ type Context {
 
 type InnerContext {
   ReadStdIn \() FfiStringResult
+  WriteStdOut \(string) FfiNumberResult
+}
+
+type FfiNumberResult {
+  Value number
+  Error number
 }
 
 type FfiStringResult {
@@ -17,6 +24,7 @@ New = \() Context {
   Context{
     inner: InnerContext{
       ReadStdIn: _pen_os_read_stdin,
+      WriteStdOut: _pen_os_write_stdout,
     }
   }
 }

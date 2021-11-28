@@ -38,3 +38,21 @@ Read = \(ctx Context, file File) string | error {
     error(errorTranslator'Translate(r.Error))
   }
 }
+
+Write = \(ctx Context, file File, data string) number | error {
+  inner = Context'Inner(ctx)
+
+  r = if f = file.inner as stdIn {
+    error("cannot write to stdin")
+  } else if stdOut {
+    inner.WriteStdOut(data)
+  } else if stdErr {
+    error("not implemented")
+  }?
+
+  if r.Error == 0 {
+    r.Value
+  } else {
+    error(errorTranslator'Translate(r.Error))
+  }
+}
