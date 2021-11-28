@@ -46,9 +46,9 @@ impl AsyncStack {
         continuation: ContinuationFunction<T>,
         future: impl Future + Unpin,
     ) {
+        self.stack.push(future);
         self.stack.push(step);
         self.stack.push(continuation);
-        self.stack.push(future);
 
         self.suspended = true;
     }
@@ -60,14 +60,8 @@ impl AsyncStack {
         (step, continuation)
     }
 
-    pub fn restore<F: Future + Unpin>(&mut self) -> Option<F> {
-        if self.suspended {
-            self.suspended = false;
-
-            Some(self.pop())
-        } else {
-            None
-        }
+    pub fn restore<F: Future + Unpin>(&mut self) -> F {
+        self.pop()
     }
 }
 
@@ -156,8 +150,8 @@ mod tests {
         stack.suspend(step, continuation, ready(42));
     }
 
-    #[test]
-    fn suspend_and_resume() {
+    #[tokio::test]
+    async fn suspend_and_resume() {
         let waker = create_waker();
         let mut stack = AsyncStack::new(TEST_CAPACITY);
         let mut context = Context::from_waker(&waker);
@@ -168,7 +162,7 @@ mod tests {
 
         stack.set_context(&mut context);
         stack.suspend(step, continuation, future);
-        stack.restore::<TestFuture>();
         stack.resume::<()>();
+        stack.restore::<TestFuture>().await;
     }
 }
