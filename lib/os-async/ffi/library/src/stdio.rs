@@ -11,10 +11,9 @@ unsafe extern "C" fn _pen_os_read_stdin(
     stack: &mut ffi::cps::AsyncStack,
     continue_: ffi::cps::ContinuationFunction<ffi::Arc<FfiResult<ffi::ByteString>>>,
 ) -> ffi::cps::Result {
-    let mut stdin = stdin();
     let mut future = stack
         .restore()
-        .unwrap_or_else(|| Box::pin(utilities::read(&mut stdin)));
+        .unwrap_or_else(|| Box::pin(utilities::read(stdin())));
 
     match future.as_mut().poll(stack.context().unwrap()) {
         Poll::Ready(value) => continue_(stack, ffi::Arc::new(value.into())),
