@@ -19,6 +19,7 @@ pub type ContinuationFunction<T> = unsafe extern "C" fn(&mut AsyncStack, T) -> c
 pub struct AsyncStack {
     stack: Stack,
     context: Option<*mut Context<'static>>,
+    // TODO Replace with an enum representing async stack states.
     suspended: bool,
 }
 
@@ -60,8 +61,14 @@ impl AsyncStack {
         (step, continuation)
     }
 
-    pub fn restore<F: Future + Unpin>(&mut self) -> F {
-        self.pop()
+    pub fn restore<F: Future + Unpin>(&mut self) -> Option<F> {
+        if self.suspended {
+            self.suspended = false;
+
+            Some(self.pop())
+        } else {
+            None
+        }
     }
 }
 
@@ -163,6 +170,6 @@ mod tests {
         stack.set_context(&mut context);
         stack.suspend(step, continuation, future);
         stack.resume::<()>();
-        stack.restore::<TestFuture>().await;
+        stack.restore::<TestFuture>().unwrap().await;
     }
 }
