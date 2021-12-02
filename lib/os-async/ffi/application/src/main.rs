@@ -5,7 +5,9 @@ mod heap;
 mod unreachable;
 mod utilities;
 
-use std::{future::poll_fn, task::Poll};
+use once_cell::sync::Lazy;
+use std::{future::poll_fn, process, sync::Mutex, task::Poll};
+use tokio::runtime::Runtime;
 
 const INITIAL_STACK_CAPACITY: usize = 256;
 
@@ -26,30 +28,42 @@ unsafe extern "C" fn _pen_os_main(
     ffi::cps::Result::new()
 }
 
-#[tokio::main]
-async fn main() {
-    let mut trampoline: (
-        ffi::cps::StepFunction<ffi::Number>,
-        ffi::cps::ContinuationFunction<ffi::Number>,
-    ) = (_pen_os_main, exit);
-    let mut stack = ffi::cps::AsyncStack::new(INITIAL_STACK_CAPACITY);
+static EXIT_CODE: Lazy<Mutex<Option<i32>>> = Lazy::new(|| Mutex::new(None));
 
-    poll_fn::<(), _>(|context| {
-        stack.set_context(context);
+fn main() {
+    process::exit({
+        // TODO When we remove this let statement, tasks are not awaited
+        // on shutdown of the runtime somehow.
+        let code = Runtime::new().unwrap().block_on(async {
+            let mut trampoline: (
+                ffi::cps::StepFunction<ffi::Number>,
+                ffi::cps::ContinuationFunction<ffi::Number>,
+            ) = (_pen_os_main, exit);
+            let mut stack = ffi::cps::AsyncStack::new(INITIAL_STACK_CAPACITY);
 
-        let (step, continue_) = trampoline;
-        unsafe { step(&mut stack, continue_) };
+            poll_fn(move |context| {
+                stack.set_context(context);
 
-        trampoline = stack.resume();
+                let (step, continue_) = trampoline;
+                unsafe { step(&mut stack, continue_) };
 
-        // We never get ready until the exit function is called.
-        Poll::Pending
-    })
-    .await;
+                trampoline = stack.resume();
 
-    unreachable!()
+                if let Some(code) = *EXIT_CODE.lock().unwrap() {
+                    code.into()
+                } else {
+                    Poll::Pending
+                }
+            })
+            .await
+        });
+
+        code
+    });
 }
 
 unsafe extern "C" fn exit(_: &mut ffi::cps::AsyncStack, code: ffi::Number) -> ffi::cps::Result {
-    std::process::exit(f64::from(code) as i32)
+    *EXIT_CODE.lock().unwrap() = (f64::from(code) as i32).into();
+
+    ffi::cps::Result::new()
 }
