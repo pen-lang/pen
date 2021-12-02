@@ -34,6 +34,7 @@ fn main() {
     process::exit({
         // TODO When we remove this let statement, tasks are not awaited
         // on shutdown of the runtime somehow.
+        #[allow(clippy::let_and_return)]
         let code = Runtime::new().unwrap().block_on(async {
             let mut trampoline: (
                 ffi::cps::StepFunction<ffi::Number>,
