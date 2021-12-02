@@ -48,11 +48,10 @@ fn main() {
                 let (step, continue_) = trampoline;
                 unsafe { step(&mut stack, continue_) };
 
-                trampoline = stack.resume();
-
                 if let Some(code) = *EXIT_CODE.lock().unwrap() {
                     code.into()
                 } else {
+                    trampoline = stack.resume();
                     Poll::Pending
                 }
             })
