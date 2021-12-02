@@ -19,6 +19,7 @@ Feature: OS (asynchronous runtime)
       0
     }
     """
+    And I successfully run `rustup target add <target>`
     When I run `pen build --target <target>`
     Then the exit status should be 0
 
