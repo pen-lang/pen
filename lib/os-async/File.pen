@@ -1,0 +1,58 @@
+import 'Context { Context }
+import 'errorTranslator
+
+type File {
+  inner specialFile
+}
+
+type stdIn {}
+type stdOut {}
+type stdErr {}
+
+type specialFile = stdIn | stdOut | stdErr
+
+StdIn = \() File {
+  File{inner: stdIn}
+}
+
+StdOut = \() File {
+  File{inner: stdOut}
+}
+
+StdErr = \() File {
+  File{inner: stdErr}
+}
+
+Read = \(ctx Context, file File) string | error {
+  r = if f = file.inner as stdIn {
+    Context'Inner(ctx).ReadStdIn()
+  } else if stdOut {
+    error("cannot read from stdout")
+  } else if stdErr {
+    error("cannot read from stderr")
+  }?
+
+  if r.Error == 0 {
+    r.Value
+  } else {
+    error(errorTranslator'Translate(r.Error))
+  }
+}
+
+Write = \(ctx Context, file File, data string) number | error {
+  inner = Context'Inner(ctx)
+
+  r = if f = file.inner as stdIn {
+    error("cannot write to stdin")
+  } else if stdOut {
+    inner.WriteStdOut(data)
+  } else if stdErr {
+    error("not implemented")
+  }?
+
+  if r.Error == 0 {
+    r.Value
+  } else {
+    error(errorTranslator'Translate(r.Error))
+  }
+}

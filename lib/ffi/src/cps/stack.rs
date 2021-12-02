@@ -7,6 +7,7 @@ use std::{
 const CAPACITY_MULTIPLIER: usize = 2;
 
 #[repr(C)]
+#[derive(Debug)]
 pub struct Stack {
     base_pointer: *mut u8,
     size: usize,

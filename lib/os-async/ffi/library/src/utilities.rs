@@ -1,25 +1,19 @@
 use crate::error::OsError;
-use std::io::{Read, Write};
+use tokio::io::{AsyncReadExt, AsyncWriteExt};
 
-// TODO Make those asynchronous.
-
-pub fn read(reader: &mut impl Read) -> Result<ffi::ByteString, OsError> {
+pub async fn read(mut reader: impl AsyncReadExt + Unpin) -> Result<ffi::ByteString, OsError> {
     let mut buffer = vec![];
 
-    reader.read_to_end(&mut buffer)?;
+    reader.read_to_end(&mut buffer).await?;
 
     Ok(buffer.into())
 }
 
-pub fn read_limit(reader: &mut impl Read, limit: usize) -> Result<ffi::ByteString, OsError> {
-    let mut buffer = vec![0; limit];
-    let size = reader.read(&mut buffer)?;
-
-    buffer.truncate(size);
-
-    Ok(buffer.into())
-}
-
-pub fn write(writer: &mut impl Write, bytes: ffi::ByteString) -> Result<ffi::Number, OsError> {
-    Ok(ffi::Number::new(writer.write(bytes.as_slice())? as f64))
+pub async fn write(
+    mut writer: impl AsyncWriteExt + Unpin,
+    bytes: ffi::ByteString,
+) -> Result<ffi::Number, OsError> {
+    Ok(ffi::Number::new(
+        writer.write(bytes.as_slice()).await? as f64,
+    ))
 }
