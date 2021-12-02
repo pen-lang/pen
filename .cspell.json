@@ -38,6 +38,7 @@
     "rustup",
     "subninja",
     "subtyping",
+    "suspendable",
     "tailcallopt",
     "tcp",
     "tempfile",
