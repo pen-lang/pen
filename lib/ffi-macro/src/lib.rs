@@ -1,8 +1,8 @@
 use proc_macro::TokenStream;
 use quote::quote;
 use syn::{
-    parse_macro_input, parse_quote, AttributeArgs, FnArg, ItemFn, Lit, Meta, NestedMeta,
-    ReturnType, Stmt,
+    parse_macro_input, parse_quote, parse_str, AttributeArgs, FnArg, ItemFn, Lit, Meta, NestedMeta,
+    Path, ReturnType, Stmt,
 };
 
 #[proc_macro_attribute]
@@ -23,23 +23,31 @@ pub fn bindgen(attributes: TokenStream, item: TokenStream) -> TokenStream {
         return quote! { compile_error!("generic function not allowed") }.into();
     }
 
-    let crate_name = attributes
-        .iter()
-        .find_map(|attribute| match attribute {
-            NestedMeta::Meta(Meta::NameValue(name_value)) => {
-                if name_value.path.is_ident("serde") {
-                    if let Lit::Str(string) = &name_value.lit {
-                        Some(string.value())
+    let crate_path: Path = match parse_str(
+        &attributes
+            .iter()
+            .find_map(|attribute| match attribute {
+                NestedMeta::Meta(Meta::NameValue(name_value)) => {
+                    if name_value.path.is_ident("serde") {
+                        if let Lit::Str(string) = &name_value.lit {
+                            Some(string.value())
+                        } else {
+                            None
+                        }
                     } else {
                         None
                     }
-                } else {
-                    None
                 }
-            }
-            _ => None,
-        })
-        .unwrap_or("ffi".into());
+                _ => None,
+            })
+            .unwrap_or("ffi".into()),
+    ) {
+        Ok(path) => path,
+        Err(error) => {
+            let message = error.to_string();
+            return quote! { compile_error!(#message) }.into();
+        }
+    };
 
     let function_name = function.sig.ident;
     let arguments = &function.sig.inputs;
@@ -76,16 +84,16 @@ pub fn bindgen(attributes: TokenStream, item: TokenStream) -> TokenStream {
             let mut future: OutputFuture = Box::pin(create_future(#(#argument_names),*));
 
             unsafe extern "C" fn resume(
-                stack: &mut #crate_name::cps::AsyncStack,
-                continue_: #crate_name::cps::ContinuationFunction<#output_type>,
-            ) -> #crate_name::cps::Result {
+                stack: &mut #crate_path::cps::AsyncStack,
+                continue_: #crate_path::cps::ContinuationFunction<#output_type>,
+            ) -> #crate_path::cps::Result {
                 let mut future: OutputFuture = stack.restore().unwrap();
 
                 match future.as_mut().poll(stack.context().unwrap()) {
                     Poll::Ready(value) => continue_(stack, value),
                     Poll::Pending => {
                         stack.suspend(resume, continue_, future);
-                        #crate_name::cps::Result::new()
+                        #crate_path::cps::Result::new()
                     }
                 }
             }
@@ -94,7 +102,7 @@ pub fn bindgen(attributes: TokenStream, item: TokenStream) -> TokenStream {
                 Poll::Ready(value) => continue_(stack, value),
                 Poll::Pending => {
                     stack.suspend(resume, continue_, future);
-                    #crate_name::cps::Result::new()
+                    #crate_path::cps::Result::new()
                 }
             }
         }
