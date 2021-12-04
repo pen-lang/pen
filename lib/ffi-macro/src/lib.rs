@@ -40,7 +40,7 @@ pub fn bindgen(attributes: TokenStream, item: TokenStream) -> TokenStream {
                 }
                 _ => None,
             })
-            .unwrap_or("ffi".into()),
+            .unwrap_or_else(|| "ffi".into()),
     ) {
         Ok(path) => path,
         Err(error) => {
