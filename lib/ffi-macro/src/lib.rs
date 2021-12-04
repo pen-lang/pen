@@ -2,7 +2,7 @@ use proc_macro::TokenStream;
 use quote::quote;
 use syn::{
     parse_macro_input, parse_quote, parse_str, AttributeArgs, FnArg, ItemFn, Lit, Meta, NestedMeta,
-    Path, ReturnType, Stmt,
+    Path, ReturnType, Stmt, Type,
 };
 
 #[proc_macro_attribute]
@@ -17,10 +17,10 @@ pub fn bindgen(attributes: TokenStream, item: TokenStream) -> TokenStream {
         .any(|input| matches!(input, FnArg::Receiver(_)))
     {
         return quote! { compile_error!("receiver not allowed") }.into();
-    } else if function.sig.asyncness.is_none() {
-        return quote! { compile_error!("non-async function not implemented yet") }.into();
     } else if !function.sig.generics.params.is_empty() {
         return quote! { compile_error!("generic function not allowed") }.into();
+    } else if function.sig.asyncness.is_none() {
+        return generate_sync_function(&function);
     }
 
     let crate_path: Path = match parse_str(
@@ -49,6 +49,7 @@ pub fn bindgen(attributes: TokenStream, item: TokenStream) -> TokenStream {
         }
     };
 
+    let output_type = parse_output_type(&function);
     let function_name = function.sig.ident;
     let arguments = &function.sig.inputs;
     let argument_names = function
@@ -61,10 +62,6 @@ pub fn bindgen(attributes: TokenStream, item: TokenStream) -> TokenStream {
         })
         .collect::<Vec<_>>();
     let statements: Vec<Stmt> = function.block.stmts;
-    let output_type = match function.sig.output {
-        ReturnType::Default => parse_quote!(ffi::None),
-        ReturnType::Type(_, type_) => type_,
-    };
 
     quote! {
         #[no_mangle]
@@ -108,4 +105,26 @@ pub fn bindgen(attributes: TokenStream, item: TokenStream) -> TokenStream {
         }
     }
     .into()
+}
+
+fn generate_sync_function(function: &ItemFn) -> TokenStream {
+    let function_name = &function.sig.ident;
+    let arguments = &function.sig.inputs;
+    let statements: &[Stmt] = &function.block.stmts;
+    let output_type = parse_output_type(&function);
+
+    quote! {
+        #[no_mangle]
+        extern "C" fn #function_name(#arguments) -> #output_type {
+            #(#statements);*
+        }
+    }
+    .into()
+}
+
+fn parse_output_type(function: &ItemFn) -> Box<Type> {
+    match &function.sig.output {
+        ReturnType::Default => parse_quote!(ffi::None),
+        ReturnType::Type(_, type_) => type_.clone(),
+    }
 }
