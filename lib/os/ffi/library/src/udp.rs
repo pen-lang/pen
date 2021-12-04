@@ -157,12 +157,12 @@ mod tests {
 
     #[test]
     fn bind_socket() {
-        bind("127.0.0.1:8080".into()).unwrap();
+        bind("127.0.0.1:8000".into()).unwrap();
     }
 
     #[test]
     fn connect_socket() {
-        let socket = bind("127.0.0.1:8080".into()).unwrap();
-        connect(socket, "127.0.0.1:8081".into()).unwrap();
+        let socket = bind("127.0.0.1:8010".into()).unwrap();
+        connect(socket, "127.0.0.1:8011".into()).unwrap();
     }
 }
