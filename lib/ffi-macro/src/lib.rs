@@ -45,7 +45,7 @@ pub fn bindgen(_attributes: TokenStream, item: TokenStream) -> TokenStream {
 
             type OutputFuture = Pin<Box<dyn Future<Output = #output_type>>>;
 
-            async fn create_future(#arguments) -> #output_type  {
+            async fn create_future(#arguments) -> #output_type {
                 #(#statements);*
             }
 
