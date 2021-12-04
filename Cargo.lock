@@ -572,6 +572,7 @@ dependencies = [
 name = "pen-ffi"
 version = "0.3.13"
 dependencies = [
+ "pen-ffi-macro",
  "tokio",
 ]
 
