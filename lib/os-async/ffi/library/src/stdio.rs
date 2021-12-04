@@ -25,6 +25,13 @@ unsafe extern "C" fn _pen_os_read_stdin(
     }
 }
 
+#[no_mangle]
+extern "C" fn _pen_os_read_limit_stdin(
+    _limit: ffi::Number,
+) -> ffi::Arc<FfiResult<ffi::ByteString>> {
+    todo!()
+}
+
 type WriteStdoutFuture = PinnedFuture<Result<ffi::Number, OsError>>;
 
 #[no_mangle]
@@ -57,4 +64,9 @@ unsafe extern "C" fn _pen_os_write_stdout_poll(
             ffi::cps::Result::new()
         }
     }
+}
+
+#[no_mangle]
+extern "C" fn _pen_os_write_stderr(_bytes: ffi::ByteString) -> ffi::Arc<FfiResult<ffi::Number>> {
+    todo!()
 }
