@@ -100,7 +100,8 @@ pub fn bindgen(attributes: TokenStream, item: TokenStream) -> TokenStream {
                 stack: &mut #crate_path::cps::AsyncStack,
                 continue_: #crate_path::cps::ContinuationFunction<#output_type>,
             ) -> #crate_path::cps::Result {
-                poll(stack, continue_, stack.restore().unwrap())
+                let future = stack.restore().unwrap();
+                poll(stack, continue_, future)
             }
 
             poll(stack, continue_, future)
