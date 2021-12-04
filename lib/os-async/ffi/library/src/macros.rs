@@ -7,6 +7,8 @@ macro_rules! export_fn {
             continue_: ffi::cps::ContinuationFunction<$output_type>,
             $($argument_name: $argument_type),*
         ) -> ffi::cps::Result {
+            use std::{future::Future, pin::Pin, task::Poll};
+
             type OutputFuture = Pin<Box<dyn Future<Output = $output_type>>>;
 
             async fn create_future($($argument_name: $argument_type),*) -> $output_type  {

@@ -1,6 +1,5 @@
 use super::utilities;
 use crate::{export_fn, result::FfiResult};
-use std::{future::Future, pin::Pin, task::Poll};
 use tokio::io::{stderr, stdin, stdout};
 
 export_fn! {
