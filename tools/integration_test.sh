@@ -2,17 +2,13 @@
 
 set -e
 
-for channel in stable nightly; do
-  rustup install $channel
-
-  for target in \
-    i686-unknown-linux-musl \
-    x86_64-unknown-linux-musl \
-    aarch64-unknown-linux-musl \
-    wasm32-wasi; do
-    rustup target add --toolchain $channel $target
-  done
-done
+for target in \
+  i686-unknown-linux-musl \
+  x86_64-unknown-linux-musl \
+  aarch64-unknown-linux-musl \
+  wasm32-wasi; do
+  rustup target add --toolchain $channel $target
+ne
 
 cd $(dirname $0)/..
 
