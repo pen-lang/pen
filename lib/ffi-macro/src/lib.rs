@@ -1,6 +1,6 @@
 use proc_macro::TokenStream;
 use quote::quote;
-use syn::{parse_macro_input, FnArg, ItemFn, Stmt};
+use syn::{parse_macro_input, FnArg, ItemFn, ReturnType, Stmt};
 
 #[proc_macro_attribute]
 pub fn bindgen(_attributes: TokenStream, item: TokenStream) -> TokenStream {
@@ -29,7 +29,10 @@ pub fn bindgen(_attributes: TokenStream, item: TokenStream) -> TokenStream {
         })
         .collect::<Vec<_>>();
     let statements: Vec<Stmt> = function.block.stmts;
-    let output_type = function.sig.output;
+    let output_type = match function.sig.output {
+        ReturnType::Default => todo!(),
+        ReturnType::Type(_, type_) => type_,
+    };
 
     quote! {
         #[no_mangle]
