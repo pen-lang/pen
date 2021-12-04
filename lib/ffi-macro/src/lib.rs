@@ -80,12 +80,11 @@ pub fn bindgen(attributes: TokenStream, item: TokenStream) -> TokenStream {
 
             let mut future: OutputFuture = Box::pin(create_future(#(#argument_names),*));
 
-            unsafe extern "C" fn resume(
+            unsafe extern "C" fn poll(
                 stack: &mut #crate_path::cps::AsyncStack,
                 continue_: #crate_path::cps::ContinuationFunction<#output_type>,
+                future: OutputFuture,
             ) -> #crate_path::cps::Result {
-                let mut future: OutputFuture = stack.restore().unwrap();
-
                 match future.as_mut().poll(stack.context().unwrap()) {
                     Poll::Ready(value) => continue_(stack, value),
                     Poll::Pending => {
@@ -95,13 +94,14 @@ pub fn bindgen(attributes: TokenStream, item: TokenStream) -> TokenStream {
                 }
             }
 
-            match future.as_mut().poll(stack.context().unwrap()) {
-                Poll::Ready(value) => continue_(stack, value),
-                Poll::Pending => {
-                    stack.suspend(resume, continue_, future);
-                    #crate_path::cps::Result::new()
-                }
+            unsafe extern "C" fn resume(
+                stack: &mut #crate_path::cps::AsyncStack,
+                continue_: #crate_path::cps::ContinuationFunction<#output_type>,
+            ) -> #crate_path::cps::Result {
+                poll(stack, continue_, stack.restore().unwrap())
             }
+
+            poll(stack, continue_, future)
         }
     }
     .into()
