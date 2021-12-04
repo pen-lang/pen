@@ -1,8 +1,8 @@
 use proc_macro::TokenStream;
 use quote::quote;
 use syn::{
-    parse_macro_input, parse_quote, Attribute, AttributeArgs, FnArg, ItemFn, Meta, NestedMeta,
-    ReturnType, Stmt,
+    parse_macro_input, parse_quote, AttributeArgs, FnArg, ItemFn, Meta, NestedMeta, ReturnType,
+    Stmt,
 };
 
 #[proc_macro_attribute]
@@ -23,16 +23,19 @@ pub fn bindgen(attributes: TokenStream, item: TokenStream) -> TokenStream {
         return quote! { compile_error!("generic function not allowed") }.into();
     }
 
-    let crate_name = attributes.iter().find_map(|attribute| match attribute {
-        NestedMeta::Meta(Meta::NameValue(name_value)) => {
-            if name_value.path.is_ident("serde") {
-                Some(&name_value.lit)
-            } else {
-                None
+    let crate_name = attributes
+        .iter()
+        .find_map(|attribute| match attribute {
+            NestedMeta::Meta(Meta::NameValue(name_value)) => {
+                if name_value.path.is_ident("serde") {
+                    Some(name_value.lit.clone())
+                } else {
+                    None
+                }
             }
-        }
-        _ => None,
-    });
+            _ => None,
+        })
+        .unwrap_or(parse_quote!(ffi));
 
     let function_name = function.sig.ident;
     let arguments = &function.sig.inputs;
@@ -69,16 +72,16 @@ pub fn bindgen(attributes: TokenStream, item: TokenStream) -> TokenStream {
             let mut future: OutputFuture = Box::pin(create_future(#(#argument_names),*));
 
             unsafe extern "C" fn resume(
-                stack: &mut ffi::cps::AsyncStack,
-                continue_: ffi::cps::ContinuationFunction<#output_type>,
-            ) -> ffi::cps::Result {
+                stack: &mut #crate_name::cps::AsyncStack,
+                continue_: #crate_name::cps::ContinuationFunction<#output_type>,
+            ) -> #crate_name::cps::Result {
                 let mut future: OutputFuture = stack.restore().unwrap();
 
                 match future.as_mut().poll(stack.context().unwrap()) {
                     Poll::Ready(value) => continue_(stack, value),
                     Poll::Pending => {
                         stack.suspend(resume, continue_, future);
-                        ffi::cps::Result::new()
+                        #crate_name::cps::Result::new()
                     }
                 }
             }
@@ -87,7 +90,7 @@ pub fn bindgen(attributes: TokenStream, item: TokenStream) -> TokenStream {
                 Poll::Ready(value) => continue_(stack, value),
                 Poll::Pending => {
                     stack.suspend(resume, continue_, future);
-                    ffi::cps::Result::new()
+                    #crate_name::cps::Result::new()
                 }
             }
         }
