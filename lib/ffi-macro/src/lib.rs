@@ -1,9 +1,13 @@
 use proc_macro::TokenStream;
 use quote::quote;
-use syn::{parse_macro_input, parse_quote, FnArg, ItemFn, ReturnType, Stmt};
+use syn::{
+    parse_macro_input, parse_quote, Attribute, AttributeArgs, FnArg, ItemFn, Meta, NestedMeta,
+    ReturnType, Stmt,
+};
 
 #[proc_macro_attribute]
-pub fn bindgen(_attributes: TokenStream, item: TokenStream) -> TokenStream {
+pub fn bindgen(attributes: TokenStream, item: TokenStream) -> TokenStream {
+    let attributes = parse_macro_input!(attributes as AttributeArgs);
     let function = parse_macro_input!(item as ItemFn);
 
     if function
@@ -18,6 +22,17 @@ pub fn bindgen(_attributes: TokenStream, item: TokenStream) -> TokenStream {
     } else if !function.sig.generics.params.is_empty() {
         return quote! { compile_error!("generic function not allowed") }.into();
     }
+
+    let crate_name = attributes.iter().find_map(|attribute| match attribute {
+        NestedMeta::Meta(Meta::NameValue(name_value)) => {
+            if name_value.path.is_ident("serde") {
+                Some(&name_value.lit)
+            } else {
+                None
+            }
+        }
+        _ => None,
+    });
 
     let function_name = function.sig.ident;
     let arguments = &function.sig.inputs;
