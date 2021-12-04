@@ -10,6 +10,30 @@ Feature: OS
     }
     """
 
+  Scenario: Build an application
+    Given a file named "main.pen" with:
+    """pen
+    import System'Context { Context }
+    import System'File
+
+    main = \(ctx Context) number {
+      if _ = run(ctx) as none {
+        0
+      } else {
+        1
+      }
+    }
+
+    run = \(ctx Context) none | error {
+      File'Write(ctx, File'StdOut(), "Hello, world!")?
+
+      none
+    }
+    """
+    When I successfully run `pen build`
+    Then I successfully run `./app`
+    And the stdout from "./app" should contain exactly "Hello, world!"
+
   Scenario: Get arguments
     Given a file named "main.pen" with:
     """pen
