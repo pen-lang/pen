@@ -32,14 +32,12 @@ pub fn bindgen(_attributes: TokenStream, item: TokenStream) -> TokenStream {
     let output_type = function.sig.output;
 
     quote! {
-        use crate::pen_ffi as _ffi;
-
         #[no_mangle]
         unsafe extern "C" fn #function_name(
-            stack: &mut _ffi::cps::AsyncStack,
-            continue_: _ffi::cps::ContinuationFunction<#output_type>,
+            stack: &mut ffi::cps::AsyncStack,
+            continue_: ffi::cps::ContinuationFunction<#output_type>,
             #arguments
-        ) -> _ffi::cps::Result {
+        ) -> ffi::cps::Result {
             use std::{future::Future, pin::Pin, task::Poll};
 
             type OutputFuture = Pin<Box<dyn Future<Output = #output_type>>>;
@@ -51,16 +49,16 @@ pub fn bindgen(_attributes: TokenStream, item: TokenStream) -> TokenStream {
             let mut future: OutputFuture = Box::pin(create_future(#(#argument_names),*));
 
             unsafe extern "C" fn resume(
-                stack: &mut _ffi::cps::AsyncStack,
-                continue_: _ffi::cps::ContinuationFunction<#output_type>,
-            ) -> _ffi::cps::Result {
+                stack: &mut ffi::cps::AsyncStack,
+                continue_: ffi::cps::ContinuationFunction<#output_type>,
+            ) -> ffi::cps::Result {
                 let mut future: OutputFuture = stack.restore().unwrap();
 
                 match future.as_mut().poll(stack.context().unwrap()) {
                     Poll::Ready(value) => continue_(stack, value),
                     Poll::Pending => {
                         stack.suspend(resume, continue_, future);
-                        _ffi::cps::Result::new()
+                        ffi::cps::Result::new()
                     }
                 }
             }
@@ -69,7 +67,7 @@ pub fn bindgen(_attributes: TokenStream, item: TokenStream) -> TokenStream {
                 Poll::Ready(value) => continue_(stack, value),
                 Poll::Pending => {
                     stack.suspend(resume, continue_, future);
-                    _ffi::cps::Result::new()
+                    ffi::cps::Result::new()
                 }
             }
         }
