@@ -17,6 +17,8 @@ pub fn bindgen(attributes: TokenStream, item: TokenStream) -> TokenStream {
         .any(|input| matches!(input, FnArg::Receiver(_)))
     {
         return quote! { compile_error!("receiver not allowed") }.into();
+    } else if !function.sig.abi.is_none() {
+        return quote! { compile_error!("custom function ABI not allowed") }.into();
     } else if !function.sig.generics.params.is_empty() {
         return quote! { compile_error!("generic function not allowed") }.into();
     } else if function.sig.asyncness.is_none() {
