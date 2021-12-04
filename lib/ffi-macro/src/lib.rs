@@ -1,8 +1,8 @@
 use proc_macro::TokenStream;
 use quote::quote;
 use syn::{
-    parse_macro_input, parse_quote, AttributeArgs, FnArg, ItemFn, Meta, NestedMeta, ReturnType,
-    Stmt,
+    parse_macro_input, parse_quote, AttributeArgs, FnArg, ItemFn, Lit, Meta, NestedMeta,
+    ReturnType, Stmt,
 };
 
 #[proc_macro_attribute]
@@ -28,14 +28,18 @@ pub fn bindgen(attributes: TokenStream, item: TokenStream) -> TokenStream {
         .find_map(|attribute| match attribute {
             NestedMeta::Meta(Meta::NameValue(name_value)) => {
                 if name_value.path.is_ident("serde") {
-                    Some(name_value.lit.clone())
+                    if let Lit::Str(string) = &name_value.lit {
+                        Some(string.value())
+                    } else {
+                        None
+                    }
                 } else {
                     None
                 }
             }
             _ => None,
         })
-        .unwrap_or(parse_quote!(ffi));
+        .unwrap_or("ffi".into());
 
     let function_name = function.sig.ident;
     let arguments = &function.sig.inputs;
