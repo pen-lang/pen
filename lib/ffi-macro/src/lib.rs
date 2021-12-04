@@ -85,7 +85,7 @@ pub fn bindgen(attributes: TokenStream, item: TokenStream) -> TokenStream {
             unsafe extern "C" fn poll(
                 stack: &mut #crate_path::cps::AsyncStack,
                 continue_: #crate_path::cps::ContinuationFunction<#output_type>,
-                future: OutputFuture,
+                mut future: OutputFuture,
             ) -> #crate_path::cps::Result {
                 match future.as_mut().poll(stack.context().unwrap()) {
                     Poll::Ready(value) => continue_(stack, value),
@@ -100,7 +100,7 @@ pub fn bindgen(attributes: TokenStream, item: TokenStream) -> TokenStream {
                 stack: &mut #crate_path::cps::AsyncStack,
                 continue_: #crate_path::cps::ContinuationFunction<#output_type>,
             ) -> #crate_path::cps::Result {
-                let mut future = stack.restore().unwrap();
+                let future = stack.restore().unwrap();
                 poll(stack, continue_, future)
             }
 
