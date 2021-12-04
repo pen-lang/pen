@@ -1,8 +1,6 @@
 use super::utilities;
-use crate::error::OsError;
-use crate::result::FfiResult;
-use std::task::Poll;
-use std::{future::Future, pin::Pin};
+use crate::{error::OsError, result::FfiResult};
+use std::{future::Future, pin::Pin, task::Poll};
 use tokio::io::{stdin, stdout};
 
 type PinnedFuture<T> = Pin<Box<dyn Future<Output = T>>>;
