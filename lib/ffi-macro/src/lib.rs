@@ -15,6 +15,8 @@ pub fn bindgen(_attributes: TokenStream, item: TokenStream) -> TokenStream {
         return quote! { compile_error!("receiver not allowed") }.into();
     } else if function.sig.asyncness.is_none() {
         return quote! { compile_error!("non-async function not implemented yet") }.into();
+    } else if !function.sig.generics.params.is_empty() {
+        return quote! { compile_error!("generic function not allowed") }.into();
     }
 
     let function_name = function.sig.ident;
