@@ -7,8 +7,8 @@ for target in \
   x86_64-unknown-linux-musl \
   aarch64-unknown-linux-musl \
   wasm32-wasi; do
-  rustup target add --toolchain $channel $target
-ne
+  rustup target add $target
+done
 
 cd $(dirname $0)/..
 
