@@ -1,12 +1,10 @@
-use super::{error::OsError, open_file_options::OpenFileOptions, utilities};
-use crate::result::FfiResult;
+use super::{error::OsError, open_file_options::OpenFileOptions};
+use crate::{export_fn, result::FfiResult, utilities};
 use std::{
-    fs,
-    fs::{File, OpenOptions},
-    ops::Deref,
-    path::Path,
+    fs::File,
     sync::{Arc, LockResult, RwLock, RwLockWriteGuard},
 };
+use tokio::fs;
 
 #[derive(Clone, Default)]
 pub struct OsFile {
@@ -108,9 +106,19 @@ extern "C" fn _pen_os_remove_file(path: ffi::ByteString) -> ffi::Arc<FfiResult<f
     todo!()
 }
 
-#[no_mangle]
-extern "C" fn _pen_os_read_metadata(
-    path: ffi::ByteString,
-) -> ffi::Arc<FfiResult<ffi::Arc<FileMetadata>>> {
-    todo!()
+export_fn! {
+    async fn _pen_os_read_metadata(
+        path: ffi::ByteString
+    ) -> ffi::Arc<FfiResult<ffi::Arc<FileMetadata>>> {
+        ffi::Arc::new(read_metadata(path).await.into())
+    }
+}
+
+async fn read_metadata(path: ffi::ByteString) -> Result<ffi::Arc<FileMetadata>, OsError> {
+    let metadata = fs::metadata(utilities::decode_path(&path)?).await?;
+
+    Ok(FileMetadata {
+        size: (metadata.len() as f64).into(),
+    }
+    .into())
 }

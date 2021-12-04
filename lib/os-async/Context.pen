@@ -36,7 +36,7 @@ import foreign _pen_os_udp_receive \(Udp'Socket) FfiStringResult
 import foreign _pen_os_udp_receive_from \(Udp'Socket) FfiUdpDatagramResult
 import foreign _pen_os_udp_send \(Udp'Socket, string) FfiNumberResult
 import foreign _pen_os_udp_send_to \(Udp'Socket, string, string) FfiNumberResult
-import foreign _pen_os_get_time \() number
+import foreign "c" _pen_os_get_time \() number
 import foreign _pen_os_sleep \(number) none
 import foreign "c" _pen_os_random_number \() number
 

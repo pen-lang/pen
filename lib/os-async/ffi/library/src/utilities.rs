@@ -1,4 +1,5 @@
 use crate::error::OsError;
+use std::str;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 
 pub async fn read(mut reader: impl AsyncReadExt + Unpin) -> Result<ffi::ByteString, OsError> {
@@ -16,4 +17,8 @@ pub async fn write(
     Ok(ffi::Number::new(
         writer.write(bytes.as_slice()).await? as f64,
     ))
+}
+
+pub fn decode_path(path: &ffi::ByteString) -> Result<&str, OsError> {
+    Ok(str::from_utf8(path.as_slice())?)
 }

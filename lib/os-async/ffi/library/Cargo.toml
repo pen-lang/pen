@@ -12,6 +12,7 @@ ffi = { package = "pen-ffi", version = "0.3" }
 rand = "0.8"
 # Those feature flags must be exactly the same as the ones in the application crate for its binary files to be considered from the same crate.
 tokio = { version = "1", features = [
+  "fs",
   "io-std",
   "io-util",
   "macros",
