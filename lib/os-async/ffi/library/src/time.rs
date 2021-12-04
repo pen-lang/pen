@@ -1,8 +1,8 @@
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use tokio::time::sleep;
 
-#[no_mangle]
-extern "C" fn _pen_os_get_time() -> ffi::Number {
+#[ffi::bindgen]
+fn _pen_os_get_time() -> ffi::Number {
     (SystemTime::now()
         .duration_since(UNIX_EPOCH)
         .unwrap_or_else(|error| error.duration())
