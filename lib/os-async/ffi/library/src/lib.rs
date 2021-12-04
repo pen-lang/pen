@@ -3,6 +3,7 @@ mod directory;
 mod environment_variable;
 mod error;
 mod file;
+mod macros;
 mod open_file_options;
 mod random;
 mod result;
