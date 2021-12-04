@@ -1,5 +1,5 @@
 use super::{error::OsError, open_file_options::OpenFileOptions};
-use crate::{export_fn, result::FfiResult, utilities};
+use crate::{result::FfiResult, utilities};
 use std::{
     fs::File,
     sync::{Arc, LockResult, RwLock, RwLockWriteGuard},
@@ -106,12 +106,11 @@ extern "C" fn _pen_os_remove_file(path: ffi::ByteString) -> ffi::Arc<FfiResult<f
     todo!()
 }
 
-export_fn! {
-    async fn _pen_os_read_metadata(
-        path: ffi::ByteString
-    ) -> ffi::Arc<FfiResult<ffi::Arc<FileMetadata>>> {
-        ffi::Arc::new(read_metadata(path).await.into())
-    }
+#[ffi::bindgen]
+async fn _pen_os_read_metadata(
+    path: ffi::ByteString,
+) -> ffi::Arc<FfiResult<ffi::Arc<FileMetadata>>> {
+    ffi::Arc::new(read_metadata(path).await.into())
 }
 
 async fn read_metadata(path: ffi::ByteString) -> Result<ffi::Arc<FileMetadata>, OsError> {
