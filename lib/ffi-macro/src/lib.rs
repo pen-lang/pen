@@ -1,6 +1,6 @@
 use proc_macro::TokenStream;
 use quote::quote;
-use syn::{parse_macro_input, parse_quote, FnArg, ItemFn, ReturnType, Stmt, Type};
+use syn::{parse_macro_input, parse_quote, FnArg, ItemFn, ReturnType, Stmt};
 
 #[proc_macro_attribute]
 pub fn bindgen(_attributes: TokenStream, item: TokenStream) -> TokenStream {
