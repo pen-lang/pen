@@ -276,9 +276,9 @@ dependencies = [
 
 [[package]]
 name = "pen-ffi-macro"
-version = "0.1.0"
+version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "063f3647dbb33a2c7b3a3b4df33fdf96bb35717477bf7bda7095164df04b416c"
+checksum = "b75ba4c70be87af4f0f12d307cba24b4d1164ec1eeda84b057ac771eca7615ad"
 dependencies = [
  "quote",
  "syn",
