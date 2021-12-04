@@ -146,9 +146,9 @@ dependencies = [
 
 [[package]]
 name = "libc"
-version = "0.2.108"
+version = "0.2.109"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8521a1b57e76b1ec69af7599e75e38e7b7fad6610f037db8c79b127201b5d119"
+checksum = "f98a04dce437184842841303488f70d0188c5f51437d2a834dc097eafa909a01"
 
 [[package]]
 name = "lock_api"
@@ -267,9 +267,22 @@ dependencies = [
 
 [[package]]
 name = "pen-ffi"
-version = "0.3.13"
+version = "0.3.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f832a6a3b4a6e8d957637e24fcb3f17c080eaf7e044b1cc292f6b8f6bec40747"
+checksum = "d0480984f480265513768f5fae8bbb7ff2735f1b6b0b8db106bb3d216d2763b3"
+dependencies = [
+ "pen-ffi-macro",
+]
+
+[[package]]
+name = "pen-ffi-macro"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "063f3647dbb33a2c7b3a3b4df33fdf96bb35717477bf7bda7095164df04b416c"
+dependencies = [
+ "quote",
+ "syn",
+]
 
 [[package]]
 name = "pin-project-lite"
