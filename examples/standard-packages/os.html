@@ -151,6 +151,28 @@
   }
 }
 </code></pre>
+<h2 id="build-an-application"><a class="header" href="#build-an-application">Build an application</a></h2>
+<p><em>Given</em> a file named &quot;main.pen&quot; with:</p>
+<pre><code class="language-pen">import System'Context { Context }
+import System'File
+
+main = \(ctx Context) number {
+  if _ = run(ctx) as none {
+    0
+  } else {
+    1
+  }
+}
+
+run = \(ctx Context) none | error {
+  File'Write(ctx, File'StdOut(), &quot;Hello, world!&quot;)?
+
+  none
+}
+</code></pre>
+<p><em>When</em> I successfully run <code>pen build</code></p>
+<p><em>Then</em> I successfully run <code>./app</code></p>
+<p><em>And</em> the stdout from &quot;./app&quot; should contain exactly &quot;Hello, world!&quot;.</p>
 <h2 id="get-arguments"><a class="header" href="#get-arguments">Get arguments</a></h2>
 <p><em>Given</em> a file named &quot;main.pen&quot; with:</p>
 <pre><code class="language-pen">import Core'String
