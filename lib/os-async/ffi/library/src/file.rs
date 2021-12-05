@@ -1,10 +1,9 @@
 use super::{error::OsError, open_file_options::OpenFileOptions};
 use crate::{result::FfiResult, utilities};
-use std::{
-    fs::File,
-    sync::{Arc, LockResult, RwLock, RwLockWriteGuard},
-};
-use tokio::fs;
+use std::ops::DerefMut;
+use std::path::Path;
+use std::sync::{Arc, LockResult, RwLock, RwLockWriteGuard};
+use tokio::fs::{self, File};
 
 #[derive(Clone, Default)]
 pub struct OsFile {
@@ -56,29 +55,45 @@ struct FileMetadata {
     size: ffi::Number,
 }
 
-#[no_mangle]
-extern "C" fn _pen_os_open_file(
+#[ffi::bindgen]
+async fn _pen_os_open_file(
     path: ffi::ByteString,
     options: ffi::Arc<OpenFileOptions>,
 ) -> ffi::Arc<FfiResult<ffi::Arc<OsFile>>> {
-    todo!()
+    ffi::Arc::new(open_file(path, options).await.into())
 }
 
-#[no_mangle]
-extern "C" fn _pen_os_read_file(file: ffi::Arc<OsFile>) -> ffi::Arc<FfiResult<ffi::ByteString>> {
-    todo!()
+async fn open_file(
+    path: ffi::ByteString,
+    options: ffi::Arc<OpenFileOptions>,
+) -> Result<ffi::Arc<OsFile>, OsError> {
+    Ok(OsFile::new(
+        options
+            .to_tokio()
+            .open(&Path::new(&utilities::decode_path(&path)?))
+            .await?,
+    ))
 }
 
-#[no_mangle]
-extern "C" fn _pen_os_read_limit_file(
+#[ffi::bindgen]
+async fn _pen_os_read_file(file: ffi::Arc<OsFile>) -> ffi::Arc<FfiResult<ffi::ByteString>> {
+    ffi::Arc::new(read_file(file).await.into())
+}
+
+async fn read_file(file: ffi::Arc<OsFile>) -> Result<ffi::ByteString, OsError> {
+    utilities::read(file.lock()?.deref_mut()).await
+}
+
+#[ffi::bindgen]
+async fn _pen_os_read_limit_file(
     file: ffi::Arc<OsFile>,
     limit: ffi::Number,
 ) -> ffi::Arc<FfiResult<ffi::ByteString>> {
     todo!()
 }
 
-#[no_mangle]
-extern "C" fn _pen_os_write_file(
+#[ffi::bindgen]
+async fn _pen_os_write_file(
     file: ffi::Arc<OsFile>,
     bytes: ffi::ByteString,
 ) -> ffi::Arc<FfiResult<ffi::Number>> {

@@ -2,7 +2,7 @@ use crate::error::OsError;
 use std::str;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 
-pub async fn read(mut reader: impl AsyncReadExt + Unpin) -> Result<ffi::ByteString, OsError> {
+pub async fn read(reader: &mut (impl AsyncReadExt + Unpin)) -> Result<ffi::ByteString, OsError> {
     let mut buffer = vec![];
 
     reader.read_to_end(&mut buffer).await?;

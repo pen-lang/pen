@@ -4,7 +4,7 @@ use tokio::io::{stderr, stdin, stdout};
 
 #[ffi::bindgen]
 async fn _pen_os_read_stdin() -> ffi::Arc<FfiResult<ffi::ByteString>> {
-    ffi::Arc::new(utilities::read(stdin()).await.into())
+    ffi::Arc::new(utilities::read(&mut stdin()).await.into())
 }
 
 #[no_mangle]
