@@ -13,9 +13,9 @@ dependencies = [
 
 [[package]]
 name = "pen-ffi-macro"
-version = "0.1.9"
+version = "0.1.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bab101285b9d9f94d03ce44b1ca7fc21d8d76aaa9f5f01674922bc2be05aa4e7"
+checksum = "bc990e974c791b3c8ec169666b78f173db7954b75fcb2c64af61919c5e7345fc"
 dependencies = [
  "quote",
  "syn",
@@ -23,9 +23,9 @@ dependencies = [
 
 [[package]]
 name = "proc-macro2"
-version = "1.0.32"
+version = "1.0.33"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ba508cc11742c0dc5c1659771673afbab7a0efab23aa17e854cbab0837ed0b43"
+checksum = "fb37d2df5df740e582f28f8560cf425f52bb267d872fe58358eadb554909f07a"
 dependencies = [
  "unicode-xid",
 ]
