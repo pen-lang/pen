@@ -85,25 +85,51 @@ extern "C" fn _pen_os_write_file(
     todo!()
 }
 
-#[no_mangle]
-extern "C" fn _pen_os_copy_file(
+#[ffi::bindgen]
+async fn _pen_os_copy_file(
     src: ffi::ByteString,
     dest: ffi::ByteString,
 ) -> ffi::Arc<FfiResult<ffi::None>> {
-    todo!()
+    ffi::Arc::new(copy_file(src, dest).await.into())
 }
 
-#[no_mangle]
-extern "C" fn _pen_os_move_file(
+async fn copy_file(src: ffi::ByteString, dest: ffi::ByteString) -> Result<(), OsError> {
+    fs::copy(
+        utilities::decode_path(&src)?,
+        utilities::decode_path(&dest)?,
+    )
+    .await?;
+
+    Ok(())
+}
+
+#[ffi::bindgen]
+async fn _pen_os_move_file(
     src: ffi::ByteString,
     dest: ffi::ByteString,
 ) -> ffi::Arc<FfiResult<ffi::None>> {
-    todo!()
+    ffi::Arc::new(move_file(src, dest).await.into())
 }
 
-#[no_mangle]
-extern "C" fn _pen_os_remove_file(path: ffi::ByteString) -> ffi::Arc<FfiResult<ffi::None>> {
-    todo!()
+async fn move_file(src: ffi::ByteString, dest: ffi::ByteString) -> Result<(), OsError> {
+    fs::rename(
+        utilities::decode_path(&src)?,
+        utilities::decode_path(&dest)?,
+    )
+    .await?;
+
+    Ok(())
+}
+
+#[ffi::bindgen]
+async fn _pen_os_remove_file(path: ffi::ByteString) -> ffi::Arc<FfiResult<ffi::None>> {
+    ffi::Arc::new(remove_file(path).await.into())
+}
+
+async fn remove_file(path: ffi::ByteString) -> Result<(), OsError> {
+    fs::remove_file(utilities::decode_path(&path)?).await?;
+
+    Ok(())
 }
 
 #[ffi::bindgen]
