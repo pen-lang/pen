@@ -10,21 +10,6 @@ pub fn bindgen(attributes: TokenStream, item: TokenStream) -> TokenStream {
     let attributes = parse_macro_input!(attributes as AttributeArgs);
     let function = parse_macro_input!(item as ItemFn);
 
-    if function
-        .sig
-        .inputs
-        .iter()
-        .any(|input| matches!(input, FnArg::Receiver(_)))
-    {
-        return quote! { compile_error!("receiver not allowed") }.into();
-    } else if function.sig.abi.is_some() {
-        return quote! { compile_error!("custom function ABI not allowed") }.into();
-    } else if !function.sig.generics.params.is_empty() {
-        return quote! { compile_error!("generic function not allowed") }.into();
-    } else if function.sig.asyncness.is_none() {
-        return generate_sync_function(&function);
-    }
-
     let crate_path: Path = match parse_str(
         &attributes
             .iter()
@@ -51,8 +36,22 @@ pub fn bindgen(attributes: TokenStream, item: TokenStream) -> TokenStream {
         }
     };
 
-    let output_type = parse_output_type(&function);
-    let function_name = function.sig.ident;
+    if function
+        .sig
+        .inputs
+        .iter()
+        .any(|input| matches!(input, FnArg::Receiver(_)))
+    {
+        return quote! { compile_error!("receiver not allowed") }.into();
+    } else if function.sig.abi.is_some() {
+        return quote! { compile_error!("custom function ABI not allowed") }.into();
+    } else if !function.sig.generics.params.is_empty() {
+        return quote! { compile_error!("generic function not allowed") }.into();
+    } else if function.sig.asyncness.is_none() {
+        return generate_sync_function(&function, &crate_path);
+    }
+
+    let function_name = &function.sig.ident;
     let arguments = &function.sig.inputs;
     let argument_names = function
         .sig
@@ -63,7 +62,8 @@ pub fn bindgen(attributes: TokenStream, item: TokenStream) -> TokenStream {
             FnArg::Typed(arg) => Some(&arg.pat),
         })
         .collect::<Vec<_>>();
-    let statements: Vec<Stmt> = function.block.stmts;
+    let output_type = parse_output_type(&function);
+    let statements = parse_statements(&function, &crate_path);
 
     quote! {
         #[no_mangle]
@@ -110,10 +110,10 @@ pub fn bindgen(attributes: TokenStream, item: TokenStream) -> TokenStream {
     .into()
 }
 
-fn generate_sync_function(function: &ItemFn) -> TokenStream {
+fn generate_sync_function(function: &ItemFn, crate_path: &Path) -> TokenStream {
     let function_name = &function.sig.ident;
     let arguments = &function.sig.inputs;
-    let statements: &[Stmt] = &function.block.stmts;
+    let statements = parse_statements(function, crate_path);
     let output_type = parse_output_type(function);
 
     quote! {
@@ -130,4 +130,14 @@ fn parse_output_type(function: &ItemFn) -> Box<Type> {
         ReturnType::Default => parse_quote!(ffi::None),
         ReturnType::Type(_, type_) => type_.clone(),
     }
+}
+
+fn parse_statements<'a>(function: &ItemFn, crate_path: &Path) -> impl Iterator<Item = Stmt> {
+    function.block.stmts.clone().into_iter().chain(
+        if matches!(function.sig.output, ReturnType::Default) {
+            Some(parse_quote!( #crate_path::None::new() ))
+        } else {
+            None
+        },
+    )
 }
