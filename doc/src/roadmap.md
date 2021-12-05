@@ -14,8 +14,10 @@ Items are ordered by priority.
 - [x] Testing framework
 - [x] TCP/UDP sockets
 - [x] System time
-- [ ] Asynchronous operations
+- [x] Asynchronous operations
 - [ ] Parallel computation
+- [ ] Multiple system packages
+- [ ] List comprehension
 - [ ] Map type
 - [ ] Vector type
 - [ ] Code formatter
