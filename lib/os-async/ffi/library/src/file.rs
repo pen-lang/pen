@@ -89,7 +89,14 @@ async fn _pen_os_read_limit_file(
     file: ffi::Arc<OsFile>,
     limit: ffi::Number,
 ) -> ffi::Arc<FfiResult<ffi::ByteString>> {
-    todo!()
+    ffi::Arc::new(read_limit_file(file, limit).await.into())
+}
+
+async fn read_limit_file(
+    file: ffi::Arc<OsFile>,
+    limit: ffi::Number,
+) -> Result<ffi::ByteString, OsError> {
+    utilities::read_limit(file.lock()?.deref_mut(), f64::from(limit) as usize).await
 }
 
 #[ffi::bindgen]

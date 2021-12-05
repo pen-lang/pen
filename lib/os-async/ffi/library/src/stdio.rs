@@ -7,11 +7,13 @@ async fn _pen_os_read_stdin() -> ffi::Arc<FfiResult<ffi::ByteString>> {
     ffi::Arc::new(utilities::read(&mut stdin()).await.into())
 }
 
-#[no_mangle]
-extern "C" fn _pen_os_read_limit_stdin(
-    _limit: ffi::Number,
-) -> ffi::Arc<FfiResult<ffi::ByteString>> {
-    todo!()
+#[ffi::bindgen]
+async fn _pen_os_read_limit_stdin(limit: ffi::Number) -> ffi::Arc<FfiResult<ffi::ByteString>> {
+    ffi::Arc::new(
+        utilities::read_limit(&mut stdin(), f64::from(limit) as usize)
+            .await
+            .into(),
+    )
 }
 
 #[ffi::bindgen]

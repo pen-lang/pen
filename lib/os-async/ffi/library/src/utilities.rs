@@ -10,6 +10,18 @@ pub async fn read(reader: &mut (impl AsyncReadExt + Unpin)) -> Result<ffi::ByteS
     Ok(buffer.into())
 }
 
+pub async fn read_limit(
+    reader: &mut (impl AsyncReadExt + Unpin),
+    limit: usize,
+) -> Result<ffi::ByteString, OsError> {
+    let mut buffer = vec![0; limit];
+    let size = reader.read(&mut buffer).await?;
+
+    buffer.truncate(size);
+
+    Ok(buffer.into())
+}
+
 pub async fn write(
     writer: &mut (impl AsyncWriteExt + Unpin),
     bytes: ffi::ByteString,
