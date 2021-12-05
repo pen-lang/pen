@@ -572,7 +572,7 @@ dependencies = [
 name = "pen-ffi"
 version = "0.3.14"
 dependencies = [
- "pen-ffi-macro 0.1.8",
+ "pen-ffi-macro 0.1.11",
  "tokio",
 ]
 
@@ -582,22 +582,23 @@ version = "0.3.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d0480984f480265513768f5fae8bbb7ff2735f1b6b0b8db106bb3d216d2763b3"
 dependencies = [
- "pen-ffi-macro 0.1.8 (registry+https://github.com/rust-lang/crates.io-index)",
+ "pen-ffi-macro 0.1.11 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
 name = "pen-ffi-macro"
-version = "0.1.8"
+version = "0.1.11"
 dependencies = [
+ "pen-ffi 0.3.14",
  "quote",
  "syn",
 ]
 
 [[package]]
 name = "pen-ffi-macro"
-version = "0.1.8"
+version = "0.1.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "35860961dba9674bd784896e625d4e877db71341200b4179181662ca0b77ec53"
+checksum = "7d81f7590b6a626e26268321ecd47510848c8467a896bedf447b8a17947a08d1"
 dependencies = [
  "quote",
  "syn",
@@ -668,9 +669,9 @@ dependencies = [
 
 [[package]]
 name = "proc-macro2"
-version = "1.0.32"
+version = "1.0.33"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ba508cc11742c0dc5c1659771673afbab7a0efab23aa17e854cbab0837ed0b43"
+checksum = "fb37d2df5df740e582f28f8560cf425f52bb267d872fe58358eadb554909f07a"
 dependencies = [
  "unicode-xid",
 ]

@@ -11,19 +11,19 @@ pub struct OpenFileOptions {
     pub write: bool,
 }
 
-impl OpenFileOptions {
-    pub fn to_tokio(self) -> OpenOptions {
-        let mut options = OpenOptions::new();
+impl From<OpenFileOptions> for OpenOptions {
+    fn from(options: OpenFileOptions) -> Self {
+        let mut open_options = Self::new();
 
         // Set the create option after the create_new option because the latter is prioritized.
-        options
-            .append(self.append)
-            .create_new(self.create_new)
-            .create(self.create)
-            .read(self.read)
-            .truncate(self.truncate)
-            .write(self.write);
+        open_options
+            .append(options.append)
+            .create_new(options.create_new)
+            .create(options.create)
+            .read(options.read)
+            .truncate(options.truncate)
+            .write(options.write);
 
-        options
+        open_options
     }
 }
