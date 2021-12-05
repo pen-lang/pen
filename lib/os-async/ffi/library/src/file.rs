@@ -5,7 +5,7 @@ use std::{
     path::Path,
     sync::{Arc, LockResult, RwLock, RwLockWriteGuard},
 };
-use tokio::fs::{self, File};
+use tokio::fs::{self, File, OpenOptions};
 
 #[derive(Clone, Default)]
 pub struct OsFile {
@@ -70,8 +70,7 @@ async fn open_file(
     options: ffi::Arc<OpenFileOptions>,
 ) -> Result<ffi::Arc<OsFile>, OsError> {
     Ok(OsFile::new(
-        options
-            .to_tokio()
+        OpenOptions::from(*options)
             .open(&Path::new(&utilities::decode_path(&path)?))
             .await?,
     ))
