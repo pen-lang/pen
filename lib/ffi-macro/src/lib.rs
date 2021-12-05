@@ -5,6 +5,8 @@ use syn::{
     Path, ReturnType, Stmt, Type,
 };
 
+const DEFAULT_CRATE_NAME: &str = "ffi";
+
 #[proc_macro_attribute]
 pub fn bindgen(attributes: TokenStream, item: TokenStream) -> TokenStream {
     let attributes = parse_macro_input!(attributes as AttributeArgs);
@@ -15,7 +17,7 @@ pub fn bindgen(attributes: TokenStream, item: TokenStream) -> TokenStream {
             .iter()
             .find_map(|attribute| match attribute {
                 NestedMeta::Meta(Meta::NameValue(name_value)) => {
-                    if name_value.path.is_ident("serde") {
+                    if name_value.path.is_ident("crate") {
                         if let Lit::Str(string) = &name_value.lit {
                             Some(string.value())
                         } else {
@@ -27,7 +29,7 @@ pub fn bindgen(attributes: TokenStream, item: TokenStream) -> TokenStream {
                 }
                 _ => None,
             })
-            .unwrap_or_else(|| "ffi".into()),
+            .unwrap_or_else(|| DEFAULT_CRATE_NAME.into()),
     ) {
         Ok(path) => path,
         Err(error) => {
@@ -62,16 +64,16 @@ pub fn bindgen(attributes: TokenStream, item: TokenStream) -> TokenStream {
             FnArg::Typed(arg) => Some(&arg.pat),
         })
         .collect::<Vec<_>>();
-    let output_type = parse_output_type(&function);
+    let output_type = parse_output_type(&function, &crate_path);
     let statements = parse_statements(&function, &crate_path);
 
     quote! {
         #[no_mangle]
         unsafe extern "C" fn #function_name(
-            stack: &mut ffi::cps::AsyncStack,
-            continue_: ffi::cps::ContinuationFunction<#output_type>,
+            stack: &mut #crate_path::cps::AsyncStack,
+            continue_: #crate_path::cps::ContinuationFunction<#output_type>,
             #arguments
-        ) -> ffi::cps::Result {
+        ) -> #crate_path::cps::Result {
             use std::{future::Future, pin::Pin, task::Poll};
 
             type OutputFuture = Pin<Box<dyn Future<Output = #output_type>>>;
@@ -113,8 +115,8 @@ pub fn bindgen(attributes: TokenStream, item: TokenStream) -> TokenStream {
 fn generate_sync_function(function: &ItemFn, crate_path: &Path) -> TokenStream {
     let function_name = &function.sig.ident;
     let arguments = &function.sig.inputs;
+    let output_type = parse_output_type(function, crate_path);
     let statements = parse_statements(function, crate_path);
-    let output_type = parse_output_type(function);
 
     quote! {
         #[no_mangle]
@@ -125,17 +127,17 @@ fn generate_sync_function(function: &ItemFn, crate_path: &Path) -> TokenStream {
     .into()
 }
 
-fn parse_output_type(function: &ItemFn) -> Box<Type> {
+fn parse_output_type(function: &ItemFn, crate_path: &Path) -> Box<Type> {
     match &function.sig.output {
-        ReturnType::Default => parse_quote!(ffi::None),
+        ReturnType::Default => parse_quote!(#crate_path::None),
         ReturnType::Type(_, type_) => type_.clone(),
     }
 }
 
-fn parse_statements<'a>(function: &ItemFn, crate_path: &Path) -> impl Iterator<Item = Stmt> {
+fn parse_statements(function: &ItemFn, crate_path: &Path) -> impl Iterator<Item = Stmt> {
     function.block.stmts.clone().into_iter().chain(
         if matches!(function.sig.output, ReturnType::Default) {
-            Some(parse_quote!( #crate_path::None::new() ))
+            Some(Stmt::Expr(parse_quote!(#crate_path::None::new())))
         } else {
             None
         },

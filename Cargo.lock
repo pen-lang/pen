@@ -589,6 +589,7 @@ dependencies = [
 name = "pen-ffi-macro"
 version = "0.1.9"
 dependencies = [
+ "pen-ffi 0.3.14",
  "quote",
  "syn",
 ]
