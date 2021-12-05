@@ -52,7 +52,7 @@ fn generate_function(attributes: &AttributeArgs, function: &ItemFn) -> Result<To
     } else if !function.sig.generics.params.is_empty() {
         return Err("generic function not supported".into());
     } else if function.sig.asyncness.is_none() {
-        return Ok(generate_sync_function(&function, &crate_path));
+        return Ok(generate_sync_function(function, &crate_path));
     }
 
     let function_name = &function.sig.ident;
@@ -66,8 +66,8 @@ fn generate_function(attributes: &AttributeArgs, function: &ItemFn) -> Result<To
             FnArg::Typed(arg) => Some(&arg.pat),
         })
         .collect::<Vec<_>>();
-    let output_type = parse_output_type(&function, &crate_path);
-    let statements = parse_statements(&function, &crate_path);
+    let output_type = parse_output_type(function, &crate_path);
+    let statements = parse_statements(function, &crate_path);
 
     Ok(quote! {
         #[no_mangle]
