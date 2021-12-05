@@ -12,7 +12,14 @@ pub fn bindgen(attributes: TokenStream, item: TokenStream) -> TokenStream {
     let attributes = parse_macro_input!(attributes as AttributeArgs);
     let function = parse_macro_input!(item as ItemFn);
 
-    let crate_path: Path = match parse_str(
+    match generate_function(&attributes, &function) {
+        Ok(tokens) => tokens,
+        Err(message) => quote! { compile_error!(#message) }.into(),
+    }
+}
+
+fn generate_function(attributes: &AttributeArgs, function: &ItemFn) -> Result<TokenStream, String> {
+    let crate_path: Path = parse_str(
         &attributes
             .iter()
             .find_map(|attribute| match attribute {
@@ -30,13 +37,8 @@ pub fn bindgen(attributes: TokenStream, item: TokenStream) -> TokenStream {
                 _ => None,
             })
             .unwrap_or_else(|| DEFAULT_CRATE_NAME.into()),
-    ) {
-        Ok(path) => path,
-        Err(error) => {
-            let message = error.to_string();
-            return quote! { compile_error!(#message) }.into();
-        }
-    };
+    )
+    .map_err(|error| error.to_string())?;
 
     if function
         .sig
@@ -44,13 +46,13 @@ pub fn bindgen(attributes: TokenStream, item: TokenStream) -> TokenStream {
         .iter()
         .any(|input| matches!(input, FnArg::Receiver(_)))
     {
-        return quote! { compile_error!("receiver not allowed") }.into();
+        return Err("receiver not supported".into());
     } else if function.sig.abi.is_some() {
-        return quote! { compile_error!("custom function ABI not allowed") }.into();
+        return Err("custom function ABI not supported".into());
     } else if !function.sig.generics.params.is_empty() {
-        return quote! { compile_error!("generic function not allowed") }.into();
+        return Err("generic function not supported".into());
     } else if function.sig.asyncness.is_none() {
-        return generate_sync_function(&function, &crate_path);
+        return Ok(generate_sync_function(&function, &crate_path));
     }
 
     let function_name = &function.sig.ident;
@@ -67,7 +69,7 @@ pub fn bindgen(attributes: TokenStream, item: TokenStream) -> TokenStream {
     let output_type = parse_output_type(&function, &crate_path);
     let statements = parse_statements(&function, &crate_path);
 
-    quote! {
+    Ok(quote! {
         #[no_mangle]
         unsafe extern "C" fn #function_name(
             stack: &mut #crate_path::cps::AsyncStack,
@@ -109,7 +111,7 @@ pub fn bindgen(attributes: TokenStream, item: TokenStream) -> TokenStream {
             poll(stack, continue_, future)
         }
     }
-    .into()
+    .into())
 }
 
 fn generate_sync_function(function: &ItemFn, crate_path: &Path) -> TokenStream {
