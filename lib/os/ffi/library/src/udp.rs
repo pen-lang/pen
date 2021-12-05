@@ -52,9 +52,7 @@ pub struct UdpDatagram {
 }
 
 #[ffi::bindgen]
- fn _pen_os_udp_bind(
-    address: ffi::ByteString,
-) -> ffi::Arc<FfiResult<ffi::Arc<UdpSocket>>> {
+fn _pen_os_udp_bind(address: ffi::ByteString) -> ffi::Arc<FfiResult<ffi::Arc<UdpSocket>>> {
     ffi::Arc::new(bind(address).into())
 }
 
@@ -65,7 +63,7 @@ fn bind(address: ffi::ByteString) -> Result<ffi::Arc<UdpSocket>, OsError> {
 }
 
 #[ffi::bindgen]
- fn _pen_os_udp_connect(
+fn _pen_os_udp_connect(
     socket: ffi::Arc<UdpSocket>,
     address: ffi::ByteString,
 ) -> ffi::Arc<FfiResult<ffi::None>> {
@@ -81,9 +79,7 @@ fn connect(socket: ffi::Arc<UdpSocket>, address: ffi::ByteString) -> Result<(), 
 }
 
 #[ffi::bindgen]
- fn _pen_os_udp_receive(
-    socket: ffi::Arc<UdpSocket>,
-) -> ffi::Arc<FfiResult<ffi::ByteString>> {
+fn _pen_os_udp_receive(socket: ffi::Arc<UdpSocket>) -> ffi::Arc<FfiResult<ffi::ByteString>> {
     ffi::Arc::new(receive(socket).into())
 }
 
@@ -97,7 +93,7 @@ fn receive(socket: ffi::Arc<UdpSocket>) -> Result<ffi::ByteString, OsError> {
 }
 
 #[ffi::bindgen]
- fn _pen_os_udp_receive_from(
+fn _pen_os_udp_receive_from(
     socket: ffi::Arc<UdpSocket>,
 ) -> ffi::Arc<FfiResult<ffi::Arc<UdpDatagram>>> {
     ffi::Arc::new(receive_from(socket).into())
@@ -117,7 +113,7 @@ fn receive_from(socket: ffi::Arc<UdpSocket>) -> Result<ffi::Arc<UdpDatagram>, Os
 }
 
 #[ffi::bindgen]
- fn _pen_os_udp_send(
+fn _pen_os_udp_send(
     socket: ffi::Arc<UdpSocket>,
     data: ffi::ByteString,
 ) -> ffi::Arc<FfiResult<ffi::Number>> {
@@ -131,7 +127,7 @@ fn send(socket: ffi::Arc<UdpSocket>, data: ffi::ByteString) -> Result<ffi::Numbe
 }
 
 #[ffi::bindgen]
- fn _pen_os_udp_send_to(
+fn _pen_os_udp_send_to(
     socket: ffi::Arc<UdpSocket>,
     data: ffi::ByteString,
     address: ffi::ByteString,

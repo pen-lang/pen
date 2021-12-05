@@ -4,7 +4,7 @@ use std::{
 };
 
 #[ffi::bindgen]
- fn _pen_os_get_time() -> ffi::Number {
+fn _pen_os_get_time() -> ffi::Number {
     (SystemTime::now()
         .duration_since(UNIX_EPOCH)
         .unwrap_or_else(|error| error.duration())
@@ -13,7 +13,7 @@ use std::{
 }
 
 #[ffi::bindgen]
- fn _pen_os_sleep(milliseconds: ffi::Number) -> ffi::None {
+fn _pen_os_sleep(milliseconds: ffi::Number) -> ffi::None {
     sleep(Duration::from_millis(f64::from(milliseconds) as u64));
 
     ffi::None::new()

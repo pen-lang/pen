@@ -90,9 +90,7 @@ pub struct TcpAcceptedStream {
 }
 
 #[ffi::bindgen]
- fn _pen_os_tcp_bind(
-    address: ffi::ByteString,
-) -> ffi::Arc<FfiResult<ffi::Arc<TcpListener>>> {
+fn _pen_os_tcp_bind(address: ffi::ByteString) -> ffi::Arc<FfiResult<ffi::Arc<TcpListener>>> {
     ffi::Arc::new(bind(address).into())
 }
 
@@ -103,9 +101,7 @@ fn bind(address: ffi::ByteString) -> Result<ffi::Arc<TcpListener>, OsError> {
 }
 
 #[ffi::bindgen]
- fn _pen_os_tcp_connect(
-    address: ffi::ByteString,
-) -> ffi::Arc<FfiResult<ffi::Arc<TcpStream>>> {
+fn _pen_os_tcp_connect(address: ffi::ByteString) -> ffi::Arc<FfiResult<ffi::Arc<TcpStream>>> {
     ffi::Arc::new(connect(address).into())
 }
 
@@ -116,7 +112,7 @@ fn connect(address: ffi::ByteString) -> Result<ffi::Arc<TcpStream>, OsError> {
 }
 
 #[ffi::bindgen]
- fn _pen_os_tcp_accept(
+fn _pen_os_tcp_accept(
     listener: ffi::Arc<TcpListener>,
 ) -> ffi::Arc<FfiResult<ffi::Arc<TcpAcceptedStream>>> {
     ffi::Arc::new(accept(listener).into())
@@ -133,7 +129,7 @@ fn accept(listener: ffi::Arc<TcpListener>) -> Result<ffi::Arc<TcpAcceptedStream>
 }
 
 #[ffi::bindgen]
- fn _pen_os_tcp_receive(
+fn _pen_os_tcp_receive(
     socket: ffi::Arc<TcpStream>,
     limit: ffi::Number,
 ) -> ffi::Arc<FfiResult<ffi::ByteString>> {
@@ -150,7 +146,7 @@ fn receive(socket: ffi::Arc<TcpStream>, limit: ffi::Number) -> Result<ffi::ByteS
 }
 
 #[ffi::bindgen]
- fn _pen_os_tcp_send(
+fn _pen_os_tcp_send(
     socket: ffi::Arc<TcpStream>,
     data: ffi::ByteString,
 ) -> ffi::Arc<FfiResult<ffi::Number>> {
