@@ -97,7 +97,14 @@ async fn _pen_os_write_file(
     file: ffi::Arc<OsFile>,
     bytes: ffi::ByteString,
 ) -> ffi::Arc<FfiResult<ffi::Number>> {
-    todo!()
+    ffi::Arc::new(write_file(file, bytes).await.into())
+}
+
+async fn write_file(
+    file: ffi::Arc<OsFile>,
+    bytes: ffi::ByteString,
+) -> Result<ffi::Number, OsError> {
+    utilities::write(file.lock()?.deref_mut(), bytes).await
 }
 
 #[ffi::bindgen]
