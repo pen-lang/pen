@@ -1,12 +1,11 @@
-#![feature(future_poll_fn)]
-
 mod debug;
 mod heap;
 mod unreachable;
 mod utilities;
 
+use futures::future::poll_fn;
 use once_cell::sync::Lazy;
-use std::{future::poll_fn, process, sync::Mutex, task::Poll};
+use std::{process, sync::Mutex, task::Poll};
 use tokio::runtime::Runtime;
 
 const INITIAL_STACK_CAPACITY: usize = 256;

@@ -18,4 +18,5 @@ pub use closure::*;
 pub use constants::*;
 pub use none::*;
 pub use number::*;
+pub use pen_ffi_macro::*;
 pub use string::*;

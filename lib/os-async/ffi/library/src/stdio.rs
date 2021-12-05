@@ -1,60 +1,27 @@
 use super::utilities;
-use crate::error::OsError;
 use crate::result::FfiResult;
-use std::task::Poll;
-use std::{future::Future, pin::Pin};
-use tokio::io::{stdin, stdout};
+use tokio::io::{stderr, stdin, stdout};
 
-type PinnedFuture<T> = Pin<Box<dyn Future<Output = T>>>;
-
-#[no_mangle]
-unsafe extern "C" fn _pen_os_read_stdin(
-    stack: &mut ffi::cps::AsyncStack,
-    continue_: ffi::cps::ContinuationFunction<ffi::Arc<FfiResult<ffi::ByteString>>>,
-) -> ffi::cps::Result {
-    let mut future = stack
-        .restore()
-        .unwrap_or_else(|| Box::pin(utilities::read(stdin())));
-
-    match future.as_mut().poll(stack.context().unwrap()) {
-        Poll::Ready(value) => continue_(stack, ffi::Arc::new(value.into())),
-        Poll::Pending => {
-            stack.suspend(_pen_os_read_stdin, continue_, future);
-            ffi::cps::Result::new()
-        }
-    }
+#[ffi::bindgen]
+async fn _pen_os_read_stdin() -> ffi::Arc<FfiResult<ffi::ByteString>> {
+    ffi::Arc::new(utilities::read(&mut stdin()).await.into())
 }
 
-type WriteStdoutFuture = PinnedFuture<Result<ffi::Number, OsError>>;
-
-#[no_mangle]
-unsafe extern "C" fn _pen_os_write_stdout(
-    stack: &mut ffi::cps::AsyncStack,
-    continue_: ffi::cps::ContinuationFunction<ffi::Arc<FfiResult<ffi::Number>>>,
-    bytes: ffi::ByteString,
-) -> ffi::cps::Result {
-    let mut future: WriteStdoutFuture = Box::pin(utilities::write(stdout(), bytes));
-
-    match future.as_mut().poll(stack.context().unwrap()) {
-        Poll::Ready(value) => continue_(stack, ffi::Arc::new(value.into())),
-        Poll::Pending => {
-            stack.suspend(_pen_os_write_stdout_poll, continue_, future);
-            ffi::cps::Result::new()
-        }
-    }
+#[ffi::bindgen]
+async fn _pen_os_read_limit_stdin(limit: ffi::Number) -> ffi::Arc<FfiResult<ffi::ByteString>> {
+    ffi::Arc::new(
+        utilities::read_limit(&mut stdin(), f64::from(limit) as usize)
+            .await
+            .into(),
+    )
 }
 
-unsafe extern "C" fn _pen_os_write_stdout_poll(
-    stack: &mut ffi::cps::AsyncStack,
-    continue_: ffi::cps::ContinuationFunction<ffi::Arc<FfiResult<ffi::Number>>>,
-) -> ffi::cps::Result {
-    let mut future: WriteStdoutFuture = stack.restore().unwrap();
+#[ffi::bindgen]
+async fn _pen_os_write_stdout(bytes: ffi::ByteString) -> ffi::Arc<FfiResult<ffi::Number>> {
+    ffi::Arc::new(utilities::write(&mut stdout(), bytes).await.into())
+}
 
-    match future.as_mut().poll(stack.context().unwrap()) {
-        Poll::Ready(value) => continue_(stack, ffi::Arc::new(value.into())),
-        Poll::Pending => {
-            stack.suspend(_pen_os_write_stdout_poll, continue_, future);
-            ffi::cps::Result::new()
-        }
-    }
+#[ffi::bindgen]
+async fn _pen_os_write_stderr(bytes: ffi::ByteString) -> ffi::Arc<FfiResult<ffi::Number>> {
+    ffi::Arc::new(utilities::write(&mut stderr(), bytes).await.into())
 }
