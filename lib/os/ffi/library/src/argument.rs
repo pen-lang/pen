@@ -1,5 +1,5 @@
-#[no_mangle]
-extern "C" fn _pen_os_get_arguments() -> ffi::Arc<ffi::extra::StringArray> {
+#[ffi::bindgen]
+fn _pen_os_get_arguments() -> ffi::Arc<ffi::extra::StringArray> {
     ffi::Arc::new(
         std::env::args()
             .skip(1)

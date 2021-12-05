@@ -58,8 +58,8 @@ struct FileMetadata {
     size: ffi::Number,
 }
 
-#[no_mangle]
-extern "C" fn _pen_os_open_file(
+#[ffi::bindgen]
+fn _pen_os_open_file(
     path: ffi::ByteString,
     options: ffi::Arc<OpenFileOptions>,
 ) -> ffi::Arc<FfiResult<ffi::Arc<OsFile>>> {
@@ -71,12 +71,12 @@ fn open_file(
     options: ffi::Arc<OpenFileOptions>,
 ) -> Result<ffi::Arc<OsFile>, OsError> {
     Ok(OsFile::new(
-        OpenOptions::from(options.deref()).open(&Path::new(&utilities::decode_path(&path)?))?,
+        OpenOptions::from(*options).open(&Path::new(&utilities::decode_path(&path)?))?,
     ))
 }
 
-#[no_mangle]
-extern "C" fn _pen_os_read_file(file: ffi::Arc<OsFile>) -> ffi::Arc<FfiResult<ffi::ByteString>> {
+#[ffi::bindgen]
+fn _pen_os_read_file(file: ffi::Arc<OsFile>) -> ffi::Arc<FfiResult<ffi::ByteString>> {
     ffi::Arc::new(read_file(file).into())
 }
 
@@ -84,8 +84,8 @@ fn read_file(file: ffi::Arc<OsFile>) -> Result<ffi::ByteString, OsError> {
     utilities::read(&mut file.lock()?.deref())
 }
 
-#[no_mangle]
-extern "C" fn _pen_os_read_limit_file(
+#[ffi::bindgen]
+fn _pen_os_read_limit_file(
     file: ffi::Arc<OsFile>,
     limit: ffi::Number,
 ) -> ffi::Arc<FfiResult<ffi::ByteString>> {
@@ -96,8 +96,8 @@ fn read_limit_file(file: ffi::Arc<OsFile>, limit: ffi::Number) -> Result<ffi::By
     utilities::read_limit(&mut file.lock()?.deref(), f64::from(limit) as usize)
 }
 
-#[no_mangle]
-extern "C" fn _pen_os_write_file(
+#[ffi::bindgen]
+fn _pen_os_write_file(
     file: ffi::Arc<OsFile>,
     bytes: ffi::ByteString,
 ) -> ffi::Arc<FfiResult<ffi::Number>> {
@@ -108,8 +108,8 @@ fn write_file(file: ffi::Arc<OsFile>, bytes: ffi::ByteString) -> Result<ffi::Num
     utilities::write(&mut file.lock()?.deref(), bytes)
 }
 
-#[no_mangle]
-extern "C" fn _pen_os_copy_file(
+#[ffi::bindgen]
+fn _pen_os_copy_file(
     src: ffi::ByteString,
     dest: ffi::ByteString,
 ) -> ffi::Arc<FfiResult<ffi::None>> {
@@ -125,8 +125,8 @@ fn copy_file(src: ffi::ByteString, dest: ffi::ByteString) -> Result<(), OsError>
     Ok(())
 }
 
-#[no_mangle]
-extern "C" fn _pen_os_move_file(
+#[ffi::bindgen]
+fn _pen_os_move_file(
     src: ffi::ByteString,
     dest: ffi::ByteString,
 ) -> ffi::Arc<FfiResult<ffi::None>> {
@@ -142,8 +142,8 @@ fn move_file(src: ffi::ByteString, dest: ffi::ByteString) -> Result<(), OsError>
     Ok(())
 }
 
-#[no_mangle]
-extern "C" fn _pen_os_remove_file(path: ffi::ByteString) -> ffi::Arc<FfiResult<ffi::None>> {
+#[ffi::bindgen]
+fn _pen_os_remove_file(path: ffi::ByteString) -> ffi::Arc<FfiResult<ffi::None>> {
     ffi::Arc::new(remove_file(path).into())
 }
 
@@ -153,10 +153,8 @@ fn remove_file(path: ffi::ByteString) -> Result<(), OsError> {
     Ok(())
 }
 
-#[no_mangle]
-extern "C" fn _pen_os_read_metadata(
-    path: ffi::ByteString,
-) -> ffi::Arc<FfiResult<ffi::Arc<FileMetadata>>> {
+#[ffi::bindgen]
+fn _pen_os_read_metadata(path: ffi::ByteString) -> ffi::Arc<FfiResult<ffi::Arc<FileMetadata>>> {
     ffi::Arc::new(read_metadata(path).into())
 }
 

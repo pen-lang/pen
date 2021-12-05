@@ -3,8 +3,8 @@ use std::{
     time::{Duration, SystemTime, UNIX_EPOCH},
 };
 
-#[no_mangle]
-extern "C" fn _pen_os_get_time() -> ffi::Number {
+#[ffi::bindgen]
+fn _pen_os_get_time() -> ffi::Number {
     (SystemTime::now()
         .duration_since(UNIX_EPOCH)
         .unwrap_or_else(|error| error.duration())
@@ -12,9 +12,7 @@ extern "C" fn _pen_os_get_time() -> ffi::Number {
         .into()
 }
 
-#[no_mangle]
-extern "C" fn _pen_os_sleep(milliseconds: ffi::Number) -> ffi::None {
+#[ffi::bindgen]
+fn _pen_os_sleep(milliseconds: ffi::Number) {
     sleep(Duration::from_millis(f64::from(milliseconds) as u64));
-
-    ffi::None::new()
 }

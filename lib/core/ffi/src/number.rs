@@ -1,21 +1,21 @@
-#[no_mangle]
-extern "C" fn _pen_core_convert_number_to_string(number: ffi::Number) -> ffi::ByteString {
+#[ffi::bindgen]
+fn _pen_core_convert_number_to_string(number: ffi::Number) -> ffi::ByteString {
     format!("{}", f64::from(number)).into()
 }
 
-#[no_mangle]
-extern "C" fn _pen_core_remainder(x: ffi::Number, y: ffi::Number) -> ffi::Number {
+#[ffi::bindgen]
+fn _pen_core_remainder(x: ffi::Number, y: ffi::Number) -> ffi::Number {
     f64::from(x).rem_euclid(y.into()).into()
 }
 
-#[no_mangle]
-extern "C" fn _pen_core_power(x: ffi::Number, y: ffi::Number) -> ffi::Number {
+#[ffi::bindgen]
+fn _pen_core_power(x: ffi::Number, y: ffi::Number) -> ffi::Number {
     // spell-checker: disable-next-line
     f64::from(x).powf(y.into()).into()
 }
 
-#[no_mangle]
-extern "C" fn _pen_core_square_root(x: ffi::Number) -> ffi::Number {
+#[ffi::bindgen]
+fn _pen_core_square_root(x: ffi::Number) -> ffi::Number {
     f64::from(x).sqrt().into()
 }
 

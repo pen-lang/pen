@@ -5,32 +5,26 @@ use syn::{
     Path, ReturnType, Stmt, Type,
 };
 
+const DEFAULT_CRATE_NAME: &str = "ffi";
+
 #[proc_macro_attribute]
 pub fn bindgen(attributes: TokenStream, item: TokenStream) -> TokenStream {
     let attributes = parse_macro_input!(attributes as AttributeArgs);
     let function = parse_macro_input!(item as ItemFn);
 
-    if function
-        .sig
-        .inputs
-        .iter()
-        .any(|input| matches!(input, FnArg::Receiver(_)))
-    {
-        return quote! { compile_error!("receiver not allowed") }.into();
-    } else if function.sig.abi.is_some() {
-        return quote! { compile_error!("custom function ABI not allowed") }.into();
-    } else if !function.sig.generics.params.is_empty() {
-        return quote! { compile_error!("generic function not allowed") }.into();
-    } else if function.sig.asyncness.is_none() {
-        return generate_sync_function(&function);
+    match generate_function(&attributes, &function) {
+        Ok(tokens) => tokens,
+        Err(message) => quote! { compile_error!(#message) }.into(),
     }
+}
 
-    let crate_path: Path = match parse_str(
+fn generate_function(attributes: &AttributeArgs, function: &ItemFn) -> Result<TokenStream, String> {
+    let crate_path: Path = parse_str(
         &attributes
             .iter()
             .find_map(|attribute| match attribute {
                 NestedMeta::Meta(Meta::NameValue(name_value)) => {
-                    if name_value.path.is_ident("serde") {
+                    if name_value.path.is_ident("crate") {
                         if let Lit::Str(string) = &name_value.lit {
                             Some(string.value())
                         } else {
@@ -42,17 +36,26 @@ pub fn bindgen(attributes: TokenStream, item: TokenStream) -> TokenStream {
                 }
                 _ => None,
             })
-            .unwrap_or_else(|| "ffi".into()),
-    ) {
-        Ok(path) => path,
-        Err(error) => {
-            let message = error.to_string();
-            return quote! { compile_error!(#message) }.into();
-        }
-    };
+            .unwrap_or_else(|| DEFAULT_CRATE_NAME.into()),
+    )
+    .map_err(|error| error.to_string())?;
 
-    let output_type = parse_output_type(&function);
-    let function_name = function.sig.ident;
+    if function
+        .sig
+        .inputs
+        .iter()
+        .any(|input| matches!(input, FnArg::Receiver(_)))
+    {
+        return Err("receiver not supported".into());
+    } else if function.sig.abi.is_some() {
+        return Err("custom function ABI not supported".into());
+    } else if !function.sig.generics.params.is_empty() {
+        return Err("generic function not supported".into());
+    } else if function.sig.asyncness.is_none() {
+        return Ok(generate_sync_function(function, &crate_path));
+    }
+
+    let function_name = &function.sig.ident;
     let arguments = &function.sig.inputs;
     let argument_names = function
         .sig
@@ -63,15 +66,16 @@ pub fn bindgen(attributes: TokenStream, item: TokenStream) -> TokenStream {
             FnArg::Typed(arg) => Some(&arg.pat),
         })
         .collect::<Vec<_>>();
-    let statements: Vec<Stmt> = function.block.stmts;
+    let output_type = parse_output_type(function, &crate_path);
+    let statements = parse_statements(function, &crate_path);
 
-    quote! {
+    Ok(quote! {
         #[no_mangle]
         unsafe extern "C" fn #function_name(
-            stack: &mut ffi::cps::AsyncStack,
-            continue_: ffi::cps::ContinuationFunction<#output_type>,
+            stack: &mut #crate_path::cps::AsyncStack,
+            continue_: #crate_path::cps::ContinuationFunction<#output_type>,
             #arguments
-        ) -> ffi::cps::Result {
+        ) -> #crate_path::cps::Result {
             use std::{future::Future, pin::Pin, task::Poll};
 
             type OutputFuture = Pin<Box<dyn Future<Output = #output_type>>>;
@@ -107,14 +111,14 @@ pub fn bindgen(attributes: TokenStream, item: TokenStream) -> TokenStream {
             poll(stack, continue_, future)
         }
     }
-    .into()
+    .into())
 }
 
-fn generate_sync_function(function: &ItemFn) -> TokenStream {
+fn generate_sync_function(function: &ItemFn, crate_path: &Path) -> TokenStream {
     let function_name = &function.sig.ident;
     let arguments = &function.sig.inputs;
-    let statements: &[Stmt] = &function.block.stmts;
-    let output_type = parse_output_type(function);
+    let output_type = parse_output_type(function, crate_path);
+    let statements = parse_statements(function, crate_path);
 
     quote! {
         #[no_mangle]
@@ -125,9 +129,19 @@ fn generate_sync_function(function: &ItemFn) -> TokenStream {
     .into()
 }
 
-fn parse_output_type(function: &ItemFn) -> Box<Type> {
+fn parse_output_type(function: &ItemFn, crate_path: &Path) -> Box<Type> {
     match &function.sig.output {
-        ReturnType::Default => parse_quote!(ffi::None),
+        ReturnType::Default => parse_quote!(#crate_path::None),
         ReturnType::Type(_, type_) => type_.clone(),
     }
+}
+
+fn parse_statements(function: &ItemFn, crate_path: &Path) -> impl Iterator<Item = Stmt> {
+    function.block.stmts.clone().into_iter().chain(
+        if matches!(function.sig.output, ReturnType::Default) {
+            Some(Stmt::Expr(parse_quote!(#crate_path::None::new())))
+        } else {
+            None
+        },
+    )
 }
