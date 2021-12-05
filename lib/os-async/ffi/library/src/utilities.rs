@@ -11,7 +11,7 @@ pub async fn read(reader: &mut (impl AsyncReadExt + Unpin)) -> Result<ffi::ByteS
 }
 
 pub async fn write(
-    mut writer: impl AsyncWriteExt + Unpin,
+    writer: &mut (impl AsyncWriteExt + Unpin),
     bytes: ffi::ByteString,
 ) -> Result<ffi::Number, OsError> {
     Ok(ffi::Number::new(

@@ -16,10 +16,10 @@ extern "C" fn _pen_os_read_limit_stdin(
 
 #[ffi::bindgen]
 async fn _pen_os_write_stdout(bytes: ffi::ByteString) -> ffi::Arc<FfiResult<ffi::Number>> {
-    ffi::Arc::new(utilities::write(stdout(), bytes).await.into())
+    ffi::Arc::new(utilities::write(&mut stdout(), bytes).await.into())
 }
 
 #[ffi::bindgen]
 async fn _pen_os_write_stderr(bytes: ffi::ByteString) -> ffi::Arc<FfiResult<ffi::Number>> {
-    ffi::Arc::new(utilities::write(stderr(), bytes).await.into())
+    ffi::Arc::new(utilities::write(&mut stderr(), bytes).await.into())
 }
