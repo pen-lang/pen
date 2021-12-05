@@ -12,7 +12,7 @@ pub struct OpenFileOptions {
 }
 
 impl OpenFileOptions {
-    pub fn to_tokio(&self) -> OpenOptions {
+    pub fn to_tokio(self) -> OpenOptions {
         let mut options = OpenOptions::new();
 
         // Set the create option after the create_new option because the latter is prioritized.

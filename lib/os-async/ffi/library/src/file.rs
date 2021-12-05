@@ -1,8 +1,10 @@
 use super::{error::OsError, open_file_options::OpenFileOptions};
 use crate::{result::FfiResult, utilities};
-use std::ops::DerefMut;
-use std::path::Path;
-use std::sync::{Arc, LockResult, RwLock, RwLockWriteGuard};
+use std::{
+    ops::DerefMut,
+    path::Path,
+    sync::{Arc, LockResult, RwLock, RwLockWriteGuard},
+};
 use tokio::fs::{self, File};
 
 #[derive(Clone, Default)]

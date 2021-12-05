@@ -17,7 +17,7 @@ pub fn bindgen(attributes: TokenStream, item: TokenStream) -> TokenStream {
         .any(|input| matches!(input, FnArg::Receiver(_)))
     {
         return quote! { compile_error!("receiver not allowed") }.into();
-    } else if !function.sig.abi.is_none() {
+    } else if function.sig.abi.is_some() {
         return quote! { compile_error!("custom function ABI not allowed") }.into();
     } else if !function.sig.generics.params.is_empty() {
         return quote! { compile_error!("generic function not allowed") }.into();
@@ -114,7 +114,7 @@ fn generate_sync_function(function: &ItemFn) -> TokenStream {
     let function_name = &function.sig.ident;
     let arguments = &function.sig.inputs;
     let statements: &[Stmt] = &function.block.stmts;
-    let output_type = parse_output_type(&function);
+    let output_type = parse_output_type(function);
 
     quote! {
         #[no_mangle]
