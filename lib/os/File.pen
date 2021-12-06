@@ -28,7 +28,7 @@ StdErr = \() File {
 OpenWithOptions = \(ctx Context, path string, opt OpenOptions) File | error {
   r = Context'Inner(ctx).OpenFile(path, opt)
 
-  if r.Error == 0 {
+  if r.Error == "" {
     File{inner: r.File}
   } else {
     error(r.Error)
@@ -54,7 +54,7 @@ Read = \(ctx Context, file File) string | error {
     Context'Inner(ctx).ReadFile(f)
   }?
 
-  if r.Error == 0 {
+  if r.Error == "" {
     r.Value
   } else {
     error(r.Error)
@@ -72,7 +72,7 @@ ReadLimit = \(ctx Context, file File, limit number) string | error {
     Context'Inner(ctx).ReadLimitFile(f, limit)
   }?
 
-  if r.Error == 0 {
+  if r.Error == "" {
     r.Value
   } else {
     error(r.Error)
@@ -92,7 +92,7 @@ Write = \(ctx Context, file File, data string) number | error {
     inner.WriteFile(f, data)
   }?
 
-  if r.Error == 0 {
+  if r.Error == "" {
     r.Value
   } else {
     error(r.Error)
@@ -102,7 +102,7 @@ Write = \(ctx Context, file File, data string) number | error {
 Copy = \(ctx Context, src string, dest string) none | error {
   r = Context'Inner(ctx).CopyFile(src, dest)
 
-  if r.Error == 0 {
+  if r.Error == "" {
     none
   } else {
     error(r.Error)
@@ -112,7 +112,7 @@ Copy = \(ctx Context, src string, dest string) none | error {
 Move = \(ctx Context, src string, dest string) none | error {
   r = Context'Inner(ctx).MoveFile(src, dest)
 
-  if r.Error == 0 {
+  if r.Error == "" {
     none
   } else {
     error(r.Error)
@@ -122,7 +122,7 @@ Move = \(ctx Context, src string, dest string) none | error {
 Remove = \(ctx Context, path string) none | error {
   r = Context'Inner(ctx).RemoveFile(path)
 
-  if r.Error == 0 {
+  if r.Error == "" {
     none
   } else {
     error(r.Error)
@@ -132,7 +132,7 @@ Remove = \(ctx Context, path string) none | error {
 Metadata = \(ctx Context, path string) Metadata | error {
   r = Context'Inner(ctx).Metadata(path)
 
-  if r.Error == 0 {
+  if r.Error == "" {
     r.Metadata
   } else {
     error(r.Error)

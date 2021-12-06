@@ -5,7 +5,7 @@ import 'Udp'Socket { Socket }
 Bind = \(ctx Context, address string) Socket | error {
   r = Context'Inner(ctx).UdpBind(address)
 
-  if r.Error == 0 {
+  if r.Error == "" {
     r.Socket
   } else {
     error(r.Error)
@@ -15,7 +15,7 @@ Bind = \(ctx Context, address string) Socket | error {
 Connect = \(ctx Context, s Socket, address string) none | error {
   r = Context'Inner(ctx).UdpConnect(s, address)
 
-  if r.Error == 0 {
+  if r.Error == "" {
     none
   } else {
     error(r.Error)
@@ -25,7 +25,7 @@ Connect = \(ctx Context, s Socket, address string) none | error {
 Receive = \(ctx Context, s Socket) string | error {
   r = Context'Inner(ctx).UdpReceive(s)
 
-  if r.Error == 0 {
+  if r.Error == "" {
     r.Value
   } else {
     error(r.Error)
@@ -35,7 +35,7 @@ Receive = \(ctx Context, s Socket) string | error {
 ReceiveFrom = \(ctx Context, s Socket) Datagram | error {
   r = Context'Inner(ctx).UdpReceiveFrom(s)
 
-  if r.Error == 0 {
+  if r.Error == "" {
     r.Datagram
   } else {
     error(r.Error)
@@ -45,7 +45,7 @@ ReceiveFrom = \(ctx Context, s Socket) Datagram | error {
 Send = \(ctx Context, s Socket, data string) number | error {
   r = Context'Inner(ctx).UdpSend(s, data)
 
-  if r.Error == 0 {
+  if r.Error == "" {
     r.Value
   } else {
     error(r.Error)
@@ -55,7 +55,7 @@ Send = \(ctx Context, s Socket, data string) number | error {
 SendTo = \(ctx Context, s Socket, data string, address string) number | error {
   r = Context'Inner(ctx).UdpSendTo(s, data, address)
 
-  if r.Error == 0 {
+  if r.Error == "" {
     r.Value
   } else {
     error(r.Error)

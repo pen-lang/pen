@@ -6,7 +6,7 @@ import 'Tcp'Stream { Stream }
 Bind = \(ctx Context, address string) Listener | error {
   r = Context'Inner(ctx).TcpBind(address)
 
-  if r.Error == 0 {
+  if r.Error == "" {
     r.Listener
   } else {
     error(r.Error)
@@ -16,7 +16,7 @@ Bind = \(ctx Context, address string) Listener | error {
 Connect = \(ctx Context, address string) Stream | error {
   r = Context'Inner(ctx).TcpConnect(address)
 
-  if r.Error == 0 {
+  if r.Error == "" {
     r.Stream
   } else {
     error(r.Error)
@@ -26,7 +26,7 @@ Connect = \(ctx Context, address string) Stream | error {
 Accept = \(ctx Context, l Listener) AcceptedStream | error {
   r = Context'Inner(ctx).TcpAccept(l)
 
-  if r.Error == 0 {
+  if r.Error == "" {
     r.Stream
   } else {
     error(r.Error)
@@ -36,7 +36,7 @@ Accept = \(ctx Context, l Listener) AcceptedStream | error {
 Receive = \(ctx Context, s Stream, limit number) string | error {
   r = Context'Inner(ctx).TcpReceive(s, limit)
 
-  if r.Error == 0 {
+  if r.Error == "" {
     r.Value
   } else {
     error(r.Error)
@@ -46,7 +46,7 @@ Receive = \(ctx Context, s Stream, limit number) string | error {
 Send = \(ctx Context, s Stream, data string) number | error {
   r = Context'Inner(ctx).TcpSend(s, data)
 
-  if r.Error == 0 {
+  if r.Error == "" {
     r.Value
   } else {
     error(r.Error)

@@ -8,7 +8,7 @@ Arguments = \(ctx Context) [string] {
 Variable = \(ctx Context, name string) string | error {
   r = Context'Inner(ctx).GetEnvironmentVariable(name)
 
-  if r.Error == 0 {
+  if r.Error == "" {
     r.Value
   } else {
     error(r.Error)
