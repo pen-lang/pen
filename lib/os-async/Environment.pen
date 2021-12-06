@@ -1,6 +1,5 @@
 import 'array
 import 'Context { Context }
-import 'errorTranslator
 
 Arguments = \(ctx Context) [string] {
   array'ConvertToStrings(Context'Inner(ctx).GetArguments())
@@ -9,9 +8,9 @@ Arguments = \(ctx Context) [string] {
 Variable = \(ctx Context, name string) string | error {
   r = Context'Inner(ctx).GetEnvironmentVariable(name)
 
-  if r.Error == 0 {
+  if r.Error == "" {
     r.Value
   } else {
-    error(errorTranslator'Translate(r.Error))
+    error(r.Error)
   }
 }

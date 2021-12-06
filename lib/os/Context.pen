@@ -80,57 +80,57 @@ type InnerContext {
 
 type FfiOpenResult {
   File NormalFile
-  Error number
+  Error string
 }
 
 type FfiStringResult {
   Value string
-  Error number
+  Error string
 }
 
 type FfiNumberResult {
   Value number
-  Error number
+  Error string
 }
 
 type FfiNoneResult {
   None none
-  Error number
+  Error string
 }
 
 type FfiReadDirectoryResult {
   Paths array'Array
-  Error number
+  Error string
 }
 
 type FfiMetadataResult {
   Metadata Metadata
-  Error number
+  Error string
 }
 
 type FfiTcpListenerResult {
   Listener Tcp'Listener
-  Error number
+  Error string
 }
 
 type FfiTcpStreamResult {
   Stream Tcp'Stream
-  Error number
+  Error string
 }
 
 type FfiTcpAcceptedStreamResult {
   Stream Tcp'AcceptedStream
-  Error number
+  Error string
 }
 
 type FfiUdpSocketResult {
   Socket Udp'Socket
-  Error number
+  Error string
 }
 
 type FfiUdpDatagramResult {
   Datagram Udp'Datagram
-  Error number
+  Error string
 }
 
 New = \() Context {
