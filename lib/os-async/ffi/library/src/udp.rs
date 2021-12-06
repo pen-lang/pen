@@ -1,6 +1,8 @@
 use crate::{error::OsError, result::FfiResult};
-use std::str;
-use std::sync::{Arc, LockResult, RwLock, RwLockWriteGuard};
+use std::{
+    str,
+    sync::{Arc, LockResult, RwLock, RwLockWriteGuard},
+};
 use tokio::net;
 
 const MAX_UDP_PAYLOAD_SIZE: usize = 512;

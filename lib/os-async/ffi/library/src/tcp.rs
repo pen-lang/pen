@@ -1,8 +1,12 @@
 use crate::{error::OsError, result::FfiResult};
-use std::str;
-use std::sync::{Arc, LockResult, RwLock, RwLockWriteGuard};
-use tokio::io::{AsyncReadExt, AsyncWriteExt};
-use tokio::net;
+use std::{
+    str,
+    sync::{Arc, LockResult, RwLock, RwLockWriteGuard},
+};
+use tokio::{
+    io::{AsyncReadExt, AsyncWriteExt},
+    net,
+};
 
 #[derive(Clone, Default)]
 pub struct TcpListener {
