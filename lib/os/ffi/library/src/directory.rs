@@ -18,7 +18,7 @@ fn read_directory(path: ffi::ByteString) -> Result<ffi::Arc<ffi::extra::StringAr
                     entry
                         .file_name()
                         .into_string()
-                        .map_err(|_| OsError::Utf8Decode)?,
+                        .map_err(|_| OsError::Other("cannot decode path".into()))?,
                 ))
             })
             .collect::<Result<Vec<_>, OsError>>()?
