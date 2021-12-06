@@ -82,14 +82,11 @@ Pen aims to make large-scale software development efficient where a number of pe
 - Immutable values
 - Pure functions by default
 - Errors as values (no runtime error)
+- Asynchronous operations
 - Cross compile
 - [Rust](https://www.rust-lang.org/)/C foreign function interface
 
 ### Work in progress...
-
-#### Asynchronous operation
-
-Functions can be called asynchronously to run multiple tasks concurrently.
 
 #### Parallel computation
 
