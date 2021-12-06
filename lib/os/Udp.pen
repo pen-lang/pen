@@ -1,7 +1,6 @@
 import 'Context { Context }
 import 'Udp'Datagram { Datagram }
 import 'Udp'Socket { Socket }
-import 'errorTranslator
 
 Bind = \(ctx Context, address string) Socket | error {
   r = Context'Inner(ctx).UdpBind(address)
@@ -9,7 +8,7 @@ Bind = \(ctx Context, address string) Socket | error {
   if r.Error == 0 {
     r.Socket
   } else {
-    error(errorTranslator'Translate(r.Error))
+    error(r.Error)
   }
 }
 
@@ -19,7 +18,7 @@ Connect = \(ctx Context, s Socket, address string) none | error {
   if r.Error == 0 {
     none
   } else {
-    error(errorTranslator'Translate(r.Error))
+    error(r.Error)
   }
 }
 
@@ -29,7 +28,7 @@ Receive = \(ctx Context, s Socket) string | error {
   if r.Error == 0 {
     r.Value
   } else {
-    error(errorTranslator'Translate(r.Error))
+    error(r.Error)
   }
 }
 
@@ -39,7 +38,7 @@ ReceiveFrom = \(ctx Context, s Socket) Datagram | error {
   if r.Error == 0 {
     r.Datagram
   } else {
-    error(errorTranslator'Translate(r.Error))
+    error(r.Error)
   }
 }
 
@@ -49,7 +48,7 @@ Send = \(ctx Context, s Socket, data string) number | error {
   if r.Error == 0 {
     r.Value
   } else {
-    error(errorTranslator'Translate(r.Error))
+    error(r.Error)
   }
 }
 
@@ -59,6 +58,6 @@ SendTo = \(ctx Context, s Socket, data string, address string) number | error {
   if r.Error == 0 {
     r.Value
   } else {
-    error(errorTranslator'Translate(r.Error))
+    error(r.Error)
   }
 }

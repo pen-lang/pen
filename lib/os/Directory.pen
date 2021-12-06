@@ -1,6 +1,5 @@
 import 'array
 import 'Context { Context }
-import 'errorTranslator
 
 Read = \(ctx Context, path string) [string] | error {
   r = Context'Inner(ctx).ReadDirectory(path)
@@ -8,7 +7,7 @@ Read = \(ctx Context, path string) [string] | error {
   if r.Error == 0 {
     array'ConvertToStrings(r.Paths)
   } else {
-    error(errorTranslator'Translate(r.Error))
+    error(r.Error)
   }
 }
 
@@ -18,7 +17,7 @@ Create = \(ctx Context, path string) none | error {
   if r.Error == 0 {
     none
   } else {
-    error(errorTranslator'Translate(r.Error))
+    error(r.Error)
   }
 }
 
@@ -28,6 +27,6 @@ Remove = \(ctx Context, path string) none | error {
   if r.Error == 0 {
     none
   } else {
-    error(errorTranslator'Translate(r.Error))
+    error(r.Error)
   }
 }
