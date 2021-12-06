@@ -26,7 +26,7 @@ async fn read_directory(
                     entry
                         .file_name()
                         .into_string()
-                        .map_err(|_| OsError::Utf8Decode)?,
+                        .map_err(|_| OsError::Other("cannot decode path".into()))?,
                 ))
             })
             .collect::<Result<Vec<_>, OsError>>()?
