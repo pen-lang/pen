@@ -11,7 +11,7 @@ pub fn log_error(error: &dyn std::error::Error) -> Result<(), Box<dyn std::error
     writeln!(
         &mut stderr,
         ": {}",
-        format!("{}", error).replace("\n", "\n  ").trim()
+        format!("{}", error).replace('\n', "\n  ").trim()
     )?;
 
     if let Some(error) = error.source() {
