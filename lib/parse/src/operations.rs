@@ -31,7 +31,7 @@ pub fn reduce_operations(
                         .position(&|pair: &(_, _, _)| {
                             operator_priority(pair.0) < operator_priority(*operator)
                         })
-                        .unwrap_or_else(|| pairs.len()),
+                        .unwrap_or(pairs.len()),
                 );
 
                 reduce_operations(

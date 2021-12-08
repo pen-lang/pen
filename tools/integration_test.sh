@@ -12,4 +12,8 @@ done
 
 cd $(dirname $0)/..
 
-PEN_ROOT=$PWD PATH=$PWD/target/release:$PWD/tools:$PATH cucumber --publish-quiet "$@"
+export PATH=$PWD/target/release:$PWD/tools:$PATH
+export RUSTC_WRAPPER=sccache
+export PEN_ROOT=$PWD
+
+cucumber --publish-quiet "$@"
