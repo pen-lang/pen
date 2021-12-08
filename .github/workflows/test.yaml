@@ -44,4 +44,5 @@ jobs:
         with:
           name: build-${{ matrix.os }}
           path: target/release
+      - run: chmod +x target/release/pen
       - run: tools/integration_test.sh
