@@ -50,7 +50,7 @@ fn collect_types(
                 if_.branches()
                     .iter()
                     .map(|branch| branch.type_())
-                    .chain(if_.else_().map(|branch| branch.type_()).flatten())
+                    .chain(if_.else_().and_then(|branch| branch.type_()))
                     .cloned(),
             );
         }
