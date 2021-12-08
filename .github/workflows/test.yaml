@@ -4,14 +4,26 @@ on:
     branches:
       - main
   pull_request:
+concurrency:
+  group: test-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   build:
-    runs-on: ubuntu-18.04
+    strategy:
+      matrix:
+        os:
+          - ubuntu-18.04
+          - macos-latest
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
       - run: tools/ci/set_up_os.sh
-      - run: cargo build --locked
+      - run: cargo build --release --locked
       - run: git diff --exit-code
+      - uses: actions/upload-artifact@v2
+        with:
+          name: build-${{ matrix.os }}
+          path: target/release/pen
   unit_test:
     runs-on: ubuntu-18.04
     steps:
@@ -19,8 +31,8 @@ jobs:
       - run: tools/ci/set_up_os.sh
       - run: tools/unit_test.sh
   integration_test:
+    needs: build
     strategy:
-      fail-fast: false
       matrix:
         os:
           - ubuntu-18.04
@@ -31,5 +43,9 @@ jobs:
       - run: tools/ci/set_up_os.sh
       - uses: ruby/setup-ruby@v1
       - run: bundler install
-      - run: cargo build --release
+      - uses: actions/download-artifact@v2
+        with:
+          name: build-${{ matrix.os }}
+          path: target/release
+      - run: chmod +x target/release/pen
       - run: tools/integration_test.sh
