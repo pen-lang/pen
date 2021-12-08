@@ -8,7 +8,7 @@ fi
 
 root_directory=$(dirname $0)/..
 
-for directory in . lib/os/ffi lib/os-async/ffi; do
+for directory in . lib/os/ffi lib/os-sync/ffi; do
   (
     cd $root_directory/$directory
     "$@"
