@@ -8,8 +8,6 @@
 
 Pen is the programming language that makes software development **scalable**, focusing on software maintainability and portability.
 
-TEST
-
 ```pen
 import System'Context { Context }
 import System'File
