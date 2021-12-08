@@ -22,7 +22,6 @@ jobs:
   build_asset:
     needs: tag_check
     strategy:
-      fail-fast: false
       matrix:
         os:
           - ubuntu-18.04
