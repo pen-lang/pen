@@ -84,7 +84,7 @@ macro_rules! type_information {
             impl TryFrom<$crate::Any> for $type {
                 type Error = ();
 
-                fn try_from(any: $crate::Any) -> Result<Self, ()> {
+                fn try_from(any: $crate::Any) -> Result<$type, ()> {
                     if std::ptr::eq(any.type_information(), &TYPE_INFORMATION) {
                         let x = unsafe { transmute_from_payload(*any.payload()) };
                         std::mem::forget(any);
@@ -98,7 +98,7 @@ macro_rules! type_information {
             impl<'a> TryFrom<&'a $crate::Any> for &'a $type {
                 type Error = ();
 
-                fn try_from(any: &$crate::Any) -> Result<&Self, ()> {
+                fn try_from(any: &$crate::Any) -> Result<&$type, ()> {
                     if std::ptr::eq(any.type_information(), &TYPE_INFORMATION) {
                         Ok(unsafe { std::mem::transmute(any.payload()) })
                     } else {
