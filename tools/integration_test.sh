@@ -10,8 +10,6 @@ for target in \
   rustup target add $target
 done
 
-cargo install sccache
-
 cd $(dirname $0)/..
 
 export PATH=$PWD/target/release:$PWD/tools:$PATH
