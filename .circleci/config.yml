@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: cimg/base
+      - image: cimg/base:2021.11
         auth:
           username: $DOCKER_USER
           password: $DOCKER_ACCESS_TOKEN
