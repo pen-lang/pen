@@ -49,9 +49,9 @@ dependencies = [
 
 [[package]]
 name = "pen-ffi"
-version = "0.3.15"
+version = "0.3.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "382c8d12ea4addc60169465d8ee0d86e2c43f8b1b16fb9550274d6c5f0a6b01b"
+checksum = "0771df6fe10bd0da53cf27b53c811015acd8ed89eb605cd23c4f0a4e0e61bc4d"
 dependencies = [
  "pen-ffi-macro",
 ]
