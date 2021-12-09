@@ -1,11 +1,8 @@
 use crate::{error::OsError, result::FfiResult};
 use std::{
-    str,
+    io::{Read, Write},
+    net, str,
     sync::{Arc, LockResult, RwLock, RwLockWriteGuard},
-};
-use tokio::{
-    io::{AsyncReadExt, AsyncWriteExt},
-    net,
 };
 
 #[derive(Clone, Default)]
@@ -93,36 +90,36 @@ pub struct TcpAcceptedStream {
 }
 
 #[ffi::bindgen]
-async fn _pen_os_tcp_bind(address: ffi::ByteString) -> ffi::Arc<FfiResult<ffi::Arc<TcpListener>>> {
-    ffi::Arc::new(bind(address).await.into())
+fn _pen_os_tcp_bind(address: ffi::ByteString) -> ffi::Arc<FfiResult<ffi::Arc<TcpListener>>> {
+    ffi::Arc::new(bind(address).into())
 }
 
-async fn bind(address: ffi::ByteString) -> Result<ffi::Arc<TcpListener>, OsError> {
-    Ok(TcpListener::new(
-        net::TcpListener::bind(str::from_utf8(address.as_slice())?).await?,
-    ))
-}
-
-#[ffi::bindgen]
-async fn _pen_os_tcp_connect(address: ffi::ByteString) -> ffi::Arc<FfiResult<ffi::Arc<TcpStream>>> {
-    ffi::Arc::new(connect(address).await.into())
-}
-
-async fn connect(address: ffi::ByteString) -> Result<ffi::Arc<TcpStream>, OsError> {
-    Ok(TcpStream::new(
-        net::TcpStream::connect(str::from_utf8(address.as_slice())?).await?,
-    ))
+fn bind(address: ffi::ByteString) -> Result<ffi::Arc<TcpListener>, OsError> {
+    Ok(TcpListener::new(net::TcpListener::bind(str::from_utf8(
+        address.as_slice(),
+    )?)?))
 }
 
 #[ffi::bindgen]
-async fn _pen_os_tcp_accept(
+fn _pen_os_tcp_connect(address: ffi::ByteString) -> ffi::Arc<FfiResult<ffi::Arc<TcpStream>>> {
+    ffi::Arc::new(connect(address).into())
+}
+
+fn connect(address: ffi::ByteString) -> Result<ffi::Arc<TcpStream>, OsError> {
+    Ok(TcpStream::new(net::TcpStream::connect(str::from_utf8(
+        address.as_slice(),
+    )?)?))
+}
+
+#[ffi::bindgen]
+fn _pen_os_tcp_accept(
     listener: ffi::Arc<TcpListener>,
 ) -> ffi::Arc<FfiResult<ffi::Arc<TcpAcceptedStream>>> {
-    ffi::Arc::new(accept(listener).await.into())
+    ffi::Arc::new(accept(listener).into())
 }
 
-async fn accept(listener: ffi::Arc<TcpListener>) -> Result<ffi::Arc<TcpAcceptedStream>, OsError> {
-    let (stream, address) = listener.lock()?.accept().await?;
+fn accept(listener: ffi::Arc<TcpListener>) -> Result<ffi::Arc<TcpAcceptedStream>, OsError> {
+    let (stream, address) = listener.lock()?.accept()?;
 
     Ok(TcpAcceptedStream {
         stream: TcpStream::new(stream),
@@ -132,19 +129,16 @@ async fn accept(listener: ffi::Arc<TcpListener>) -> Result<ffi::Arc<TcpAcceptedS
 }
 
 #[ffi::bindgen]
-async fn _pen_os_tcp_receive(
+fn _pen_os_tcp_receive(
     socket: ffi::Arc<TcpStream>,
     limit: ffi::Number,
 ) -> ffi::Arc<FfiResult<ffi::ByteString>> {
-    ffi::Arc::new(receive(socket, limit).await.into())
+    ffi::Arc::new(receive(socket, limit).into())
 }
 
-async fn receive(
-    socket: ffi::Arc<TcpStream>,
-    limit: ffi::Number,
-) -> Result<ffi::ByteString, OsError> {
+fn receive(socket: ffi::Arc<TcpStream>, limit: ffi::Number) -> Result<ffi::ByteString, OsError> {
     let mut buffer = vec![0; f64::from(limit) as usize];
-    let size = socket.lock()?.read(&mut buffer).await?;
+    let size = socket.lock()?.read(&mut buffer)?;
 
     buffer.truncate(size);
 
@@ -152,13 +146,23 @@ async fn receive(
 }
 
 #[ffi::bindgen]
-async fn _pen_os_tcp_send(
+fn _pen_os_tcp_send(
     socket: ffi::Arc<TcpStream>,
     data: ffi::ByteString,
 ) -> ffi::Arc<FfiResult<ffi::Number>> {
-    ffi::Arc::new(send(socket, data).await.into())
+    ffi::Arc::new(send(socket, data).into())
 }
 
-async fn send(socket: ffi::Arc<TcpStream>, data: ffi::ByteString) -> Result<ffi::Number, OsError> {
-    Ok((socket.lock()?.write(data.as_slice()).await? as f64).into())
+fn send(socket: ffi::Arc<TcpStream>, data: ffi::ByteString) -> Result<ffi::Number, OsError> {
+    Ok((socket.lock()?.write(data.as_slice())? as f64).into())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn bind_socket() {
+        bind("127.0.0.1:8082".into()).unwrap();
+    }
 }

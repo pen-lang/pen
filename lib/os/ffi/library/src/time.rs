@@ -1,7 +1,5 @@
-use std::{
-    thread::sleep,
-    time::{Duration, SystemTime, UNIX_EPOCH},
-};
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
+use tokio::time::sleep;
 
 #[ffi::bindgen]
 fn _pen_os_get_time() -> ffi::Number {
@@ -13,6 +11,6 @@ fn _pen_os_get_time() -> ffi::Number {
 }
 
 #[ffi::bindgen]
-fn _pen_os_sleep(milliseconds: ffi::Number) {
-    sleep(Duration::from_millis(f64::from(milliseconds) as u64));
+async fn _pen_os_sleep(milliseconds: ffi::Number) {
+    sleep(Duration::from_millis(f64::from(milliseconds) as u64)).await;
 }

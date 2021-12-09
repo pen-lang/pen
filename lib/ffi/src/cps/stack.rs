@@ -1,6 +1,6 @@
 use crate::DEFAULT_MEMORY_ALIGNMENT;
 use std::{
-    alloc::{alloc, realloc, Layout},
+    alloc::{alloc, dealloc, realloc, Layout},
     ptr,
 };
 
@@ -16,9 +16,7 @@ pub struct Stack {
 
 impl Stack {
     pub fn new(capacity: usize) -> Self {
-        let layout = Layout::from_size_align(capacity, DEFAULT_MEMORY_ALIGNMENT)
-            .unwrap()
-            .pad_to_align();
+        let layout = Self::get_layout(capacity).pad_to_align();
 
         Self {
             capacity: layout.size(),
@@ -38,7 +36,7 @@ impl Stack {
             self.base_pointer = unsafe {
                 realloc(
                     self.base_pointer,
-                    Layout::from_size_align(self.capacity, DEFAULT_MEMORY_ALIGNMENT).unwrap(),
+                    Self::get_layout(self.capacity),
                     new_capacity,
                 )
             };
@@ -66,6 +64,16 @@ impl Stack {
             .unwrap()
             .pad_to_align()
             .size()
+    }
+
+    fn get_layout(size: usize) -> Layout {
+        Layout::from_size_align(size, DEFAULT_MEMORY_ALIGNMENT).unwrap()
+    }
+}
+
+impl Drop for Stack {
+    fn drop(&mut self) {
+        unsafe { dealloc(self.base_pointer, Self::get_layout(self.capacity)) }
     }
 }
 

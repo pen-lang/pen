@@ -10,4 +10,6 @@ crate-type = ["staticlib"]
 [dependencies]
 ffi = { package = "pen-ffi", version = "0.3" }
 rand = "0.8"
-tempfile = "3"
+# Feature flags of tokio must match the ones in the application crate for its
+# object files to be considered from the same crate.
+tokio = { version = "1", features = ["full"] }

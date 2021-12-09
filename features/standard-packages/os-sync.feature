@@ -1,10 +1,10 @@
-Feature: OS (asynchronous runtime)
+Feature: OS (synchronous version)
   Background:
     Given a file named "pen.json" with:
     """json
     {
       "dependencies": {
-        "System": "pen:///os-async",
+        "System": "pen:///os-sync",
         "Core": "pen:///core"
       }
     }

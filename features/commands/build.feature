@@ -38,7 +38,7 @@ Feature: Building packages
     """json
     {
       "dependencies": {
-        "System": "pen:///os"
+        "System": "pen:///os-sync"
       }
     }
     """

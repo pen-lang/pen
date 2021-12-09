@@ -1,12 +1,11 @@
-use super::{error::OsError, open_file_options::OpenFileOptions, utilities};
-use crate::result::FfiResult;
+use super::{error::OsError, open_file_options::OpenFileOptions};
+use crate::{result::FfiResult, utilities};
 use std::{
-    fs,
-    fs::{File, OpenOptions},
-    ops::Deref,
+    ops::DerefMut,
     path::Path,
     sync::{Arc, LockResult, RwLock, RwLockWriteGuard},
 };
+use tokio::fs::{self, File, OpenOptions};
 
 #[derive(Clone, Default)]
 pub struct OsFile {
@@ -59,128 +58,122 @@ struct FileMetadata {
 }
 
 #[ffi::bindgen]
-fn _pen_os_open_file(
+async fn _pen_os_open_file(
     path: ffi::ByteString,
     options: ffi::Arc<OpenFileOptions>,
 ) -> ffi::Arc<FfiResult<ffi::Arc<OsFile>>> {
-    ffi::Arc::new(open_file(path, options).into())
+    ffi::Arc::new(open_file(path, options).await.into())
 }
 
-fn open_file(
+async fn open_file(
     path: ffi::ByteString,
     options: ffi::Arc<OpenFileOptions>,
 ) -> Result<ffi::Arc<OsFile>, OsError> {
     Ok(OsFile::new(
-        OpenOptions::from(*options).open(&Path::new(&utilities::decode_path(&path)?))?,
+        OpenOptions::from(*options)
+            .open(&Path::new(&utilities::decode_path(&path)?))
+            .await?,
     ))
 }
 
 #[ffi::bindgen]
-fn _pen_os_read_file(file: ffi::Arc<OsFile>) -> ffi::Arc<FfiResult<ffi::ByteString>> {
-    ffi::Arc::new(read_file(file).into())
+async fn _pen_os_read_file(file: ffi::Arc<OsFile>) -> ffi::Arc<FfiResult<ffi::ByteString>> {
+    ffi::Arc::new(read_file(file).await.into())
 }
 
-fn read_file(file: ffi::Arc<OsFile>) -> Result<ffi::ByteString, OsError> {
-    utilities::read(&mut file.lock()?.deref())
+async fn read_file(file: ffi::Arc<OsFile>) -> Result<ffi::ByteString, OsError> {
+    utilities::read(file.lock()?.deref_mut()).await
 }
 
 #[ffi::bindgen]
-fn _pen_os_read_limit_file(
+async fn _pen_os_read_limit_file(
     file: ffi::Arc<OsFile>,
     limit: ffi::Number,
 ) -> ffi::Arc<FfiResult<ffi::ByteString>> {
-    ffi::Arc::new(read_limit_file(file, limit).into())
+    ffi::Arc::new(read_limit_file(file, limit).await.into())
 }
 
-fn read_limit_file(file: ffi::Arc<OsFile>, limit: ffi::Number) -> Result<ffi::ByteString, OsError> {
-    utilities::read_limit(&mut file.lock()?.deref(), f64::from(limit) as usize)
+async fn read_limit_file(
+    file: ffi::Arc<OsFile>,
+    limit: ffi::Number,
+) -> Result<ffi::ByteString, OsError> {
+    utilities::read_limit(file.lock()?.deref_mut(), f64::from(limit) as usize).await
 }
 
 #[ffi::bindgen]
-fn _pen_os_write_file(
+async fn _pen_os_write_file(
     file: ffi::Arc<OsFile>,
     bytes: ffi::ByteString,
 ) -> ffi::Arc<FfiResult<ffi::Number>> {
-    ffi::Arc::new(write_file(file, bytes).into())
+    ffi::Arc::new(write_file(file, bytes).await.into())
 }
 
-fn write_file(file: ffi::Arc<OsFile>, bytes: ffi::ByteString) -> Result<ffi::Number, OsError> {
-    utilities::write(&mut file.lock()?.deref(), bytes)
+async fn write_file(
+    file: ffi::Arc<OsFile>,
+    bytes: ffi::ByteString,
+) -> Result<ffi::Number, OsError> {
+    utilities::write(file.lock()?.deref_mut(), bytes).await
 }
 
 #[ffi::bindgen]
-fn _pen_os_copy_file(
+async fn _pen_os_copy_file(
     src: ffi::ByteString,
     dest: ffi::ByteString,
 ) -> ffi::Arc<FfiResult<ffi::None>> {
-    ffi::Arc::new(copy_file(src, dest).into())
+    ffi::Arc::new(copy_file(src, dest).await.into())
 }
 
-fn copy_file(src: ffi::ByteString, dest: ffi::ByteString) -> Result<(), OsError> {
+async fn copy_file(src: ffi::ByteString, dest: ffi::ByteString) -> Result<(), OsError> {
     fs::copy(
         utilities::decode_path(&src)?,
         utilities::decode_path(&dest)?,
-    )?;
+    )
+    .await?;
 
     Ok(())
 }
 
 #[ffi::bindgen]
-fn _pen_os_move_file(
+async fn _pen_os_move_file(
     src: ffi::ByteString,
     dest: ffi::ByteString,
 ) -> ffi::Arc<FfiResult<ffi::None>> {
-    ffi::Arc::new(move_file(src, dest).into())
+    ffi::Arc::new(move_file(src, dest).await.into())
 }
 
-fn move_file(src: ffi::ByteString, dest: ffi::ByteString) -> Result<(), OsError> {
+async fn move_file(src: ffi::ByteString, dest: ffi::ByteString) -> Result<(), OsError> {
     fs::rename(
         utilities::decode_path(&src)?,
         utilities::decode_path(&dest)?,
-    )?;
+    )
+    .await?;
 
     Ok(())
 }
 
 #[ffi::bindgen]
-fn _pen_os_remove_file(path: ffi::ByteString) -> ffi::Arc<FfiResult<ffi::None>> {
-    ffi::Arc::new(remove_file(path).into())
+async fn _pen_os_remove_file(path: ffi::ByteString) -> ffi::Arc<FfiResult<ffi::None>> {
+    ffi::Arc::new(remove_file(path).await.into())
 }
 
-fn remove_file(path: ffi::ByteString) -> Result<(), OsError> {
-    fs::remove_file(utilities::decode_path(&path)?)?;
+async fn remove_file(path: ffi::ByteString) -> Result<(), OsError> {
+    fs::remove_file(utilities::decode_path(&path)?).await?;
 
     Ok(())
 }
 
 #[ffi::bindgen]
-fn _pen_os_read_metadata(path: ffi::ByteString) -> ffi::Arc<FfiResult<ffi::Arc<FileMetadata>>> {
-    ffi::Arc::new(read_metadata(path).into())
+async fn _pen_os_read_metadata(
+    path: ffi::ByteString,
+) -> ffi::Arc<FfiResult<ffi::Arc<FileMetadata>>> {
+    ffi::Arc::new(read_metadata(path).await.into())
 }
 
-fn read_metadata(path: ffi::ByteString) -> Result<ffi::Arc<FileMetadata>, OsError> {
-    let metadata = fs::metadata(utilities::decode_path(&path)?)?;
+async fn read_metadata(path: ffi::ByteString) -> Result<ffi::Arc<FileMetadata>, OsError> {
+    let metadata = fs::metadata(utilities::decode_path(&path)?).await?;
 
     Ok(FileMetadata {
         size: (metadata.len() as f64).into(),
     }
     .into())
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use std::io::Write;
-
-    #[test]
-    fn convert_to_any() {
-        OsFileInner::try_from(ffi::Any::from(OsFileInner::new(
-            tempfile::tempfile().unwrap(),
-        )))
-        .unwrap()
-        .get_mut()
-        .unwrap()
-        .write_all(b"foo")
-        .unwrap();
-    }
 }

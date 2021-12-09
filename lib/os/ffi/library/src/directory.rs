@@ -1,17 +1,25 @@
 use crate::{error::OsError, result::FfiResult, utilities};
-use std::fs;
+use tokio::fs;
 
 #[ffi::bindgen]
-fn _pen_os_read_directory(
+async fn _pen_os_read_directory(
     path: ffi::ByteString,
 ) -> ffi::Arc<FfiResult<ffi::Arc<ffi::extra::StringArray>>> {
-    ffi::Arc::new(read_directory(path).into())
+    ffi::Arc::new(read_directory(path).await.into())
 }
 
-fn read_directory(path: ffi::ByteString) -> Result<ffi::Arc<ffi::extra::StringArray>, OsError> {
+async fn read_directory(
+    path: ffi::ByteString,
+) -> Result<ffi::Arc<ffi::extra::StringArray>, OsError> {
+    let mut read_dir = fs::read_dir(utilities::decode_path(&path)?).await?;
+    let mut entries = vec![];
+
+    while let Some(entry) = read_dir.next_entry().await? {
+        entries.push(entry);
+    }
+
     Ok(ffi::Arc::new(
-        fs::read_dir(utilities::decode_path(&path)?)?
-            .collect::<Result<Vec<_>, _>>()?
+        entries
             .into_iter()
             .map(|entry| {
                 Ok(ffi::ByteString::from(
@@ -27,19 +35,19 @@ fn read_directory(path: ffi::ByteString) -> Result<ffi::Arc<ffi::extra::StringAr
 }
 
 #[ffi::bindgen]
-fn _pen_os_create_directory(path: ffi::ByteString) -> ffi::Arc<FfiResult<ffi::None>> {
-    ffi::Arc::new(create_directory(path).into())
+async fn _pen_os_create_directory(path: ffi::ByteString) -> ffi::Arc<FfiResult<ffi::None>> {
+    ffi::Arc::new(create_directory(path).await.into())
 }
 
-fn create_directory(path: ffi::ByteString) -> Result<(), OsError> {
-    Ok(fs::create_dir(utilities::decode_path(&path)?)?)
+async fn create_directory(path: ffi::ByteString) -> Result<(), OsError> {
+    Ok(fs::create_dir(utilities::decode_path(&path)?).await?)
 }
 
 #[ffi::bindgen]
-fn _pen_os_remove_directory(path: ffi::ByteString) -> ffi::Arc<FfiResult<ffi::None>> {
-    ffi::Arc::new(remove_directory(path).into())
+async fn _pen_os_remove_directory(path: ffi::ByteString) -> ffi::Arc<FfiResult<ffi::None>> {
+    ffi::Arc::new(remove_directory(path).await.into())
 }
 
-fn remove_directory(path: ffi::ByteString) -> Result<(), OsError> {
-    Ok(fs::remove_dir(utilities::decode_path(&path)?)?)
+async fn remove_directory(path: ffi::ByteString) -> Result<(), OsError> {
+    Ok(fs::remove_dir(utilities::decode_path(&path)?).await?)
 }

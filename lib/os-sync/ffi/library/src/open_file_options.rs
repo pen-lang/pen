@@ -1,4 +1,4 @@
-use tokio::fs::OpenOptions;
+use std::fs::OpenOptions;
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug)]
