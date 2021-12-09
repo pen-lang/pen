@@ -2,8 +2,16 @@
 
 set -e
 
-brew install jq llvm@13 ninja sccache
+llvm_version=13
 
-if [ $(uname) = Linux ]; then
+brew install jq llvm@$llvm_version ninja sccache
+
+llvm_prefix=$(brew --prefix)/opt/llvm@$llvm_version
+
+echo LLVM_SYS_${llvm_version}0_PREFIX=$llvm_prefix >>$GITHUB_ENV
+echo PATH=$llvm_prefix/bin:$PATH >>$GITHUB_ENV
+
+if [ $RUNNER_OS = Linux ]; then
+  sudo apt install libc6-dbg # for valgrind
   brew install valgrind
 fi
