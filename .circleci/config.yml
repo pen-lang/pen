@@ -10,6 +10,7 @@ jobs:
     steps:
       - checkout
       - run: curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh | bash
+      - run: /home/linuxbrew/.linuxbrew/bin/brew shellenv >> /home/circleci/.profile
       - run: tools/ci/set_up_os.sh
       - run: cargo install --release --locked
       - run: tools/integration_test.sh $(circleci tests glob "test/**/*.rb" | circleci tests split)
