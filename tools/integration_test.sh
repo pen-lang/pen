@@ -18,4 +18,5 @@ export PATH=$PWD/target/release:$PWD/tools:$PATH
 export RUSTC_WRAPPER=sccache
 export PEN_ROOT=$PWD
 
+cargo build --release --locked
 cucumber --publish-quiet "$@"

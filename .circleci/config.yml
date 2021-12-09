@@ -12,8 +12,7 @@ jobs:
       - run: curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh | bash
       - run: |
           eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
-          tools/ci/set_up_os.sh
-      - run: cargo install --release --locked
+          brew install jq llvm@13 ninja ruby rust sccache valgrind
       - run: |
           eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
           llvm_prefix=$(brew --prefix)/opt/llvm@13
