@@ -14,4 +14,11 @@ jobs:
           eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
           tools/ci/set_up_os.sh
       - run: cargo install --release --locked
-      - run: tools/integration_test.sh $(circleci tests glob "test/**/*.rb" | circleci tests split)
+      - run: |
+          eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
+          llvm_prefix=$(brew --prefix)/opt/llvm@13
+
+          export LLVM_SYS_130_PREFIX=$llvm_prefix
+          export PATH=$llvm_prefix/bin:$PATH
+
+          tools/integration_test.sh $(circleci tests glob "test/**/*.rb" | circleci tests split)
