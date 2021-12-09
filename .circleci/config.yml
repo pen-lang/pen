@@ -1,11 +1,7 @@
 version: 2.1
 jobs:
   build:
-    docker:
-      - image: cimg/base:2021.11
-        auth:
-          username: $DOCKER_USER
-          password: $DOCKER_ACCESS_TOKEN
+    machine: true
     parallelism: 4
     steps:
       - checkout
