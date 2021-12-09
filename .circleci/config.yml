@@ -9,7 +9,7 @@ jobs:
     parallelism: 4
     steps:
       - checkout
-      - run: curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh | bash
+      - run: wget -O - https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh | bash
       - run: tools/ci/set_up_os.sh
       - run: cargo install --release --locked
       - run: tools/integration_test.sh $(circleci tests glob "test/**/*.rb" | circleci tests split)
