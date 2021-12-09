@@ -2,14 +2,14 @@ version: 2
 jobs:
   build:
     docker:
-      - image: ubuntu:18.04
+      - image: cimg/base
         auth:
           username: $DOCKER_USER
           password: $DOCKER_ACCESS_TOKEN
     parallelism: 4
     steps:
       - checkout
-      - run: wget -O - https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh | bash
+      - run: curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh | bash
       - run: tools/ci/set_up_os.sh
       - run: cargo install --release --locked
       - run: tools/integration_test.sh $(circleci tests glob "test/**/*.rb" | circleci tests split)
