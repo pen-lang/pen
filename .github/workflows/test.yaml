@@ -32,9 +32,12 @@ jobs:
       - run: tools/unit_test.sh
   feature_list:
     runs-on: ubuntu-latest
+    outputs:
+      features: ${{ steps.features.outputs.features }}
     steps:
       - uses: actions/checkout@v2
-      - run: echo ::set-output features=$(find features -name *.feature | jq -Rn '[inputs]')
+      - id: features
+        run: echo ::set-output features=$(find features -name *.feature | jq -Rn '[inputs]')
   integration_test:
     needs:
       - build
