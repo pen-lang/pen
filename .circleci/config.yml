@@ -2,22 +2,20 @@ version: 2.1
 jobs:
   build:
     docker:
-      - image: cimg/base:2021.11
+      - image: cimg/rust:2021.12
         auth:
           username: $DOCKER_USER
           password: $DOCKER_ACCESS_TOKEN
+    shell: /bin/bash --login -eo pipefail
     parallelism: 4
     steps:
       - checkout
       - run: curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh | bash
       - run: |
-          eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
-          brew install jq llvm@13 ninja ruby rust sccache valgrind
-      - run: |
-          eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
           llvm_prefix=$(brew --prefix)/opt/llvm@13
 
-          export LLVM_SYS_130_PREFIX=$llvm_prefix
-          export PATH=$llvm_prefix/bin:$PATH
-
-          tools/integration_test.sh $(circleci tests glob "test/**/*.rb" | circleci tests split)
+          /home/linuxbrew/.linuxbrew/bin/brew shellenv > ~/.profile
+          echo export LLVM_SYS_130_PREFIX=$llvm_prefix > ~/.profile
+          echo export PATH=$llvm_prefix/bin:\$PATH > ~/.profile
+      - run: brew install jq llvm@13 ninja ruby sccache valgrind
+      - run: tools/integration_test.sh $(circleci tests glob 'features/**/*.feature' | circleci tests split)
