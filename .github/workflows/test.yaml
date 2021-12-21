@@ -37,7 +37,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - id: features
-        run: echo ::set-output features=$(find features -name *.feature | jq -Rn '[inputs]')
+        run: echo ::set-output name=features::$(find features -name *.feature | jq -Rn '[inputs]')
   integration_test:
     needs:
       - build
