@@ -14,6 +14,7 @@ pub struct StringTypeConfiguration {
 }
 
 impl StringTypeConfiguration {
+    #[must_use]
     pub fn qualify(&self, names: &BTreeMap<String, String>) -> Self {
         Self {
             equal_function_name: self.qualify_name(&self.equal_function_name, names),

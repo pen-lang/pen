@@ -31,6 +31,7 @@ impl ByteString {
         self.len() == 0
     }
 
+    #[must_use]
     pub fn join(&self, other: &Self) -> Self {
         let mut buffer = ArcBuffer::new(self.len() + other.len());
 
@@ -41,6 +42,7 @@ impl ByteString {
     }
 
     // Indices are inclusive and start from 1.
+    #[must_use]
     pub fn char_slice(&self, start: Number, end: Number) -> Self {
         let start = f64::from(start);
         let end = f64::from(end);

@@ -27,6 +27,7 @@ impl FilePath {
         self.components.iter().map(Deref::deref)
     }
 
+    #[must_use]
     pub fn with_extension(&self, extension: &str) -> Self {
         if let Some(last) = self.components.last() {
             Self::new(
@@ -51,6 +52,7 @@ impl FilePath {
         }
     }
 
+    #[must_use]
     pub fn join(&self, file_path: &Self) -> Self {
         Self::new(self.components().chain(file_path.components()))
     }
@@ -71,6 +73,7 @@ impl FilePath {
     }
 
     // TODO Check a directory path.
+    #[must_use]
     pub fn relative_to(&self, path: &Self) -> Self {
         Self::new(self.components().skip(path.components().count()))
     }
