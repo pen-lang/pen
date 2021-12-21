@@ -33,7 +33,7 @@ jobs:
   feature_list:
     runs-on: ubuntu-latest
     steps:
-      - run: echo ::set-output features=$(ls features/**/*.feature | jq -Rn '[inputs]')
+      - run: echo ::set-output features=$(find features -name *.feature | jq -Rn '[inputs]')
   integration_test:
     needs:
       - build
