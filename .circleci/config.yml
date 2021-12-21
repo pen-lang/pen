@@ -11,10 +11,10 @@ jobs:
     steps:
       - checkout
       - run: curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh | bash
+      - run: /home/linuxbrew/.linuxbrew/bin/brew shellenv > ~/.profile
       - run: |
           llvm_prefix=$(brew --prefix)/opt/llvm@13
 
-          /home/linuxbrew/.linuxbrew/bin/brew shellenv > ~/.profile
           echo export LLVM_SYS_130_PREFIX=$llvm_prefix > ~/.profile
           echo export PATH=$llvm_prefix/bin:\$PATH > ~/.profile
       - run: brew install jq llvm@13 ninja ruby sccache valgrind
