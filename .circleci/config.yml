@@ -2,7 +2,7 @@ version: 2.1
 jobs:
   build:
     docker:
-      - image: cimg/rust:2021.12
+      - image: cimg/rust:1.57.0
         auth:
           username: $DOCKER_USER
           password: $DOCKER_ACCESS_TOKEN
