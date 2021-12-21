@@ -10,6 +10,8 @@ for target in \
   rustup target add $target
 done
 
+bundler install
+
 cd $(dirname $0)/..
 
 export PATH=$PWD/target/release:$PWD/tools:$PATH
