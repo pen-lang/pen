@@ -33,6 +33,7 @@ jobs:
   feature_list:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
       - run: echo ::set-output features=$(find features -name *.feature | jq -Rn '[inputs]')
   integration_test:
     needs:
