@@ -3,10 +3,20 @@ use position::{test::PositionFake, Position};
 
 pub trait ModuleFake {
     fn empty() -> Self;
+
+    #[must_use]
     fn set_type_definitions(&self, type_definitions: Vec<TypeDefinition>) -> Self;
+
+    #[must_use]
     fn set_type_aliases(&self, type_aliases: Vec<TypeAlias>) -> Self;
+
+    #[must_use]
     fn set_foreign_declarations(&self, declarations: Vec<ForeignDeclaration>) -> Self;
+
+    #[must_use]
     fn set_declarations(&self, declarations: Vec<Declaration>) -> Self;
+
+    #[must_use]
     fn set_definitions(&self, definitions: Vec<Definition>) -> Self;
 }
 
