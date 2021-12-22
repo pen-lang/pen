@@ -62,4 +62,4 @@ jobs:
   integration_test:
     needs: feature_tests
     steps:
-      - echo
+      - run: echo
