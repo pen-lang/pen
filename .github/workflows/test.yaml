@@ -54,5 +54,6 @@ jobs:
   integration_test:
     runs-on: ubuntu-latest
     needs: feature_tests
+    if: true
     steps:
-      - run: echo
+      - run: ${{ success() }}
