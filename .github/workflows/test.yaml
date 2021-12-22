@@ -26,6 +26,8 @@ jobs:
           path: target/release/pen
   unit_test:
     runs-on: ubuntu-latest
+    env:
+      CC: clang
     steps:
       - uses: actions/checkout@v2
       - run: tools/ci/set_up_os.sh
