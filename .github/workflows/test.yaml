@@ -56,7 +56,4 @@ jobs:
     needs: feature_tests
     if: true
     steps:
-      - if: ${{ success() }}
-        run: 'true'
-      - if: ${{ failure() }}
-        run: 'false'
+      - run: test ${{ needs.feature_tests.result }} = success
