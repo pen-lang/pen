@@ -17,7 +17,7 @@ jobs:
 
           echo export LLVM_SYS_130_PREFIX=$llvm_prefix >> ~/.profile
           echo export PATH=$llvm_prefix/bin:\$PATH >> ~/.profile
-      - run: brew install jq llvm@13 ninja ruby sccache valgrind
+      - run: brew install jq libffi llvm@13 ninja ruby sccache valgrind
       - run: |
           sudo apt update --fix-missing
           sudo apt install libffi-dev
