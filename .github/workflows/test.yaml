@@ -56,4 +56,7 @@ jobs:
     needs: feature_tests
     if: true
     steps:
-      - run: ${{ success() }}
+      - if: ${{ success() }}
+        run: 'true'
+      - if: ${{ failure() }}
+        run: 'false'
