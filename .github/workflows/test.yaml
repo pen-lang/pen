@@ -60,6 +60,7 @@ jobs:
       - run: chmod +x target/release/pen
       - run: tools/integration_test.sh ${{ matrix.feature }}
   integration_test:
+    runs-on: ubuntu-latest
     needs: feature_tests
     steps:
       - run: echo
