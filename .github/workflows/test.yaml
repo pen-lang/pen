@@ -12,7 +12,7 @@ jobs:
     strategy:
       matrix:
         os:
-          - ubuntu-latest
+          - ubuntu-18.04
           - macos-latest
     runs-on: ${{ matrix.os }}
     steps:
@@ -25,7 +25,7 @@ jobs:
           name: build-${{ matrix.os }}
           path: target/release/pen
   unit_test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
       - run: tools/ci/set_up_os.sh
@@ -35,7 +35,7 @@ jobs:
     strategy:
       matrix:
         os:
-          - ubuntu-latest
+          - ubuntu-18.04
           - macos-latest
         index: [0, 1]
         total: [2]
