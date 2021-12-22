@@ -38,8 +38,7 @@ jobs:
           - ubuntu-18.04
           - macos-latest
         index: [0, 1, 2, 3]
-    env:
-      TOTAL: 4
+        total: [4]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
@@ -50,7 +49,7 @@ jobs:
           name: build-${{ matrix.os }}
           path: target/release
       - run: chmod +x target/release/pen
-      - run: tools/integration_test.sh $(find features -name *.feature | sort | sed -n ${{ matrix.index }}~${TOTAL}p)
+      - run: tools/integration_test.sh $(find features -name *.feature | sort | sed -n ${{ matrix.index }}~${{ matrix.total }}p)
   integration_test:
     runs-on: ubuntu-latest
     needs: feature_tests
