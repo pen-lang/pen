@@ -61,4 +61,5 @@ jobs:
       - run: tools/integration_test.sh ${{ matrix.feature }}
   integration_test:
     needs: feature_tests
-    steps: []
+    steps:
+      - echo
