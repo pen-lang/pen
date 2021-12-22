@@ -20,5 +20,5 @@ jobs:
       - run: brew install jq llvm@13 ninja ruby sccache valgrind
       - run: |
           sudo apt update --fix-missing
-          sudo apt install libffi-dev pkg-config
+          sudo apt install build-essentials libffi-dev
       - run: tools/integration_test.sh $(circleci tests glob 'features/**/*.feature' | circleci tests split)
