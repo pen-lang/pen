@@ -7,7 +7,7 @@ jobs:
           username: $DOCKER_USER
           password: $DOCKER_ACCESS_TOKEN
     shell: /bin/bash --login -eo pipefail
-    parallelism: 4
+    parallelism: 2
     steps:
       - checkout
       - run: curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh | bash
