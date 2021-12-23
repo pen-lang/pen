@@ -11,6 +11,7 @@ jobs:
     machine:
       image: ubuntu-2004:202111-01
     steps:
+      - run: tools/ci/circle_ci.sh
       - checkout
       - run: tools/build.sh
       - save_cache:
@@ -22,15 +23,11 @@ jobs:
       image: ubuntu-2004:202111-01
     parallelism: 4
     steps:
+      - run: tools/ci/circle_ci.sh
       - checkout
       - restore_cache:
           keys:
             - build-{{ .Revision }}
-      - run: sudo apt update --fix-missing
-      - run: sudo apt install ninja-build
-      - run: sudo snap install --candidate --classic sccache
-      - run: curl -fsS https://apt.llvm.org/llvm.sh | sudo bash -s -- 13
-      - run: curl -fsS https://sh.rustup.rs | sh -s -- -y
       - run:
           command: tools/integration_test.sh --format junit,fileattribute=true --out /tmp/cucumber $(circleci tests glob 'features/**/*.feature' | circleci tests split --split-by timings)
           no_output_timeout: 30m
