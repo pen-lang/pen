@@ -48,10 +48,9 @@ jobs:
       - run: tools/ci/circle_ci.sh
       - run: tools/build.sh
       - persist_to_workspace:
-          root: "~"
+          root: .
           paths:
-            - Library/Caches
-            - project/target
+            - target
   macos_test:
     macos:
       xcode: 12.5.1
@@ -59,7 +58,7 @@ jobs:
     steps:
       - checkout
       - attach_workspace:
-          at: "~"
+          at: .
       - run: tools/ci/circle_ci.sh
       - run:
           command: tools/integration_test.sh --format junit,fileattribute=true --out /tmp/cucumber $(circleci tests glob 'features/**/*.feature' | circleci tests split --split-by timings)
