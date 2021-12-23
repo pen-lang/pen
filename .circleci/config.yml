@@ -11,7 +11,8 @@ jobs:
       - run: sudo snap install --candidate --classic sccache
       - run: curl -fsS https://apt.llvm.org/llvm.sh | sudo bash -s -- 13
       - run: curl -fsS https://sh.rustup.rs | sh -s -- -y
-      - run: tools/integration_test.sh --format junit --out /tmp/cucumber $(circleci tests glob 'features/**/*.feature' | circleci tests split --split-by timings)
-        no_output_timeout: 30m
+      - run:
+          command: tools/integration_test.sh --format junit --out /tmp/cucumber $(circleci tests glob 'features/**/*.feature' | circleci tests split --split-by timings)
+          no_output_timeout: 30m
       - store_test_results:
           path: /tmp/cucumber
