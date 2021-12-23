@@ -1,24 +1,15 @@
 version: 2.1
 jobs:
   build:
-    docker:
-      - image: cimg/rust:1.57.0
-        auth:
-          username: $DOCKER_USER
-          password: $DOCKER_ACCESS_TOKEN
-    shell: /bin/bash --login -eo pipefail
+    macos:
+      xcode: 12.15.1
     parallelism: 2
     steps:
       - checkout
-      - run: |
-          sudo apt update --fix-missing
-          sudo apt install build-essential libffi-dev
-      - run: curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh | bash
-      - run: /home/linuxbrew/.linuxbrew/bin/brew shellenv >> ~/.profile
       - run: |
           llvm_prefix=$(brew --prefix)/opt/llvm@13
 
           echo export LLVM_SYS_130_PREFIX=$llvm_prefix >> ~/.profile
           echo export PATH=$llvm_prefix/bin:\$PATH >> ~/.profile
-      - run: brew install jq llvm@13 ninja ruby sccache valgrind
+      - run: brew install jq llvm@13 ninja ruby sccache
       - run: tools/integration_test.sh $(circleci tests glob 'features/**/*.feature' | circleci tests split)
