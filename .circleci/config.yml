@@ -3,7 +3,9 @@ workflows:
   integration_test:
     jobs:
       - build
-      - test
+      - test:
+          requires:
+            - build
 jobs:
   build:
     machine:
