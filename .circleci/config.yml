@@ -46,6 +46,10 @@ jobs:
     steps:
       - checkout
       - run: tools/ci/circle_ci.sh
+      - save_cache:
+          key: homebrew-{{ checksum "tools/ci/circle_ci.sh" }}
+          paths:
+            - /usr/local
       - run: tools/build.sh
       - persist_to_workspace:
           root: .
@@ -57,6 +61,8 @@ jobs:
     parallelism: 4
     steps:
       - checkout
+      - restore_cache:
+          key: homebrew-{{ checksum "tools/ci/circle_ci.sh" }}
       - run: tools/ci/circle_ci.sh
       - attach_workspace:
           at: .
