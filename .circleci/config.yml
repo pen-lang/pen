@@ -11,8 +11,8 @@ jobs:
     machine:
       image: ubuntu-2004:202111-01
     steps:
-      - run: tools/ci/circle_ci.sh
       - checkout
+      - run: tools/ci/circle_ci.sh
       - run: tools/build.sh
       - save_cache:
           key: build-{{ .Revision }}
@@ -23,8 +23,8 @@ jobs:
       image: ubuntu-2004:202111-01
     parallelism: 4
     steps:
-      - run: tools/ci/circle_ci.sh
       - checkout
+      - run: tools/ci/circle_ci.sh
       - restore_cache:
           keys:
             - build-{{ .Revision }}
