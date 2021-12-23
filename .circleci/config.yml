@@ -6,7 +6,7 @@ jobs:
     parallelism: 2
     steps:
       - checkout
-      - run: sudo snap install sccache
+      - run: sudo snap install --candidate --classic sccache
       - run: curl -fsS https://apt.llvm.org/llvm.sh | bash -- 13
       - run: curl -fsS https://sh.rustup.rs | sh
       - run: tools/integration_test.sh $(circleci tests glob 'features/**/*.feature' | circleci tests split)
