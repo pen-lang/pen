@@ -18,5 +18,4 @@ export PATH=$PWD/target/release:$PWD/tools:$PATH
 export RUSTC_WRAPPER=sccache
 export PEN_ROOT=$PWD
 
-$(dirname $0)/build.sh
 cucumber --publish-quiet "$@"
