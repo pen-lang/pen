@@ -10,6 +10,7 @@ jobs:
   build:
     machine:
       image: ubuntu-2004:202111-01
+    resource_class: medium
     steps:
       - checkout
       - run: tools/ci/circle_ci.sh
@@ -21,6 +22,7 @@ jobs:
   test:
     machine:
       image: ubuntu-2004:202111-01
+    resource_class: medium
     parallelism: 4
     steps:
       - checkout
