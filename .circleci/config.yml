@@ -22,7 +22,6 @@ jobs:
   test:
     machine:
       image: ubuntu-2004:202111-01
-    resource_class: medium
     parallelism: 4
     steps:
       - checkout
