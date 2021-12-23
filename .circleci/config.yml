@@ -6,6 +6,7 @@ jobs:
     parallelism: 2
     steps:
       - checkout
+      - run: sudo apt install ninja-build
       - run: sudo snap install --candidate --classic sccache
       - run: curl -fsS https://apt.llvm.org/llvm.sh | sudo bash -s -- 13
       - run: curl -fsS https://sh.rustup.rs | sh -s -- -y
