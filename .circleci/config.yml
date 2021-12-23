@@ -12,7 +12,7 @@ jobs:
       - checkout
       - run: |
           sudo apt update --fix-missing
-          sudo apt install build-essentials libffi-dev
+          sudo apt install build-essential libffi-dev
       - run: curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh | bash
       - run: /home/linuxbrew/.linuxbrew/bin/brew shellenv >> ~/.profile
       - run: |
