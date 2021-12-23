@@ -15,8 +15,8 @@ jobs:
       - checkout
       - run: tools/ci/circle_ci.sh
       - run: tools/build.sh
-      - save_cache:
-          key: build-{{ .Revision }}
+      - persist_to_workspace:
+          root: .
           paths:
             - target
   test:
@@ -26,9 +26,8 @@ jobs:
     steps:
       - checkout
       - run: tools/ci/circle_ci.sh
-      - restore_cache:
-          keys:
-            - build-{{ .Revision }}
+      - attach_workspace:
+          at: .
       - run:
           command: tools/integration_test.sh --format junit,fileattribute=true --out /tmp/cucumber $(circleci tests glob 'features/**/*.feature' | circleci tests split --split-by timings)
           no_output_timeout: 1h
