@@ -49,7 +49,7 @@ jobs:
           name: build-${{ matrix.os }}
           path: target/release
       - run: chmod +x target/release/pen
-      - run: tools/integration_test.sh $(find features -name *.feature | sort | sed -n ${{ matrix.index }}~${{ matrix.total }}p)
+      - run: tools/integration_test.sh $(find features -name *.feature | sort | awk 'NR % ${{ matrix.total }} == ${{ matrix.index }}')
   integration_test:
     runs-on: ubuntu-latest
     needs: feature_tests
