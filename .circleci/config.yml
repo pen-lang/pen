@@ -10,6 +10,9 @@ jobs:
     parallelism: 2
     steps:
       - checkout
+      - run: |
+          sudo apt update --fix-missing
+          sudo apt install build-essentials libffi-dev
       - run: curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh | bash
       - run: /home/linuxbrew/.linuxbrew/bin/brew shellenv >> ~/.profile
       - run: |
@@ -18,7 +21,4 @@ jobs:
           echo export LLVM_SYS_130_PREFIX=$llvm_prefix >> ~/.profile
           echo export PATH=$llvm_prefix/bin:\$PATH >> ~/.profile
       - run: brew install jq llvm@13 ninja ruby sccache valgrind
-      - run: |
-          sudo apt update --fix-missing
-          sudo apt install build-essentials libffi-dev
       - run: tools/integration_test.sh $(circleci tests glob 'features/**/*.feature' | circleci tests split)
