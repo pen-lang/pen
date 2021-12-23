@@ -46,26 +46,21 @@ jobs:
     steps:
       - checkout
       - run: tools/ci/circle_ci.sh
-      - save_cache:
-          key: homebrew-{{ .Revision }}
-          paths:
-            - ~/Library/Caches
       - run: tools/build.sh
       - persist_to_workspace:
-          root: .
+          root: ~
           paths:
-            - target
+            - Library/Caches
+            - project/target
   macos_test:
     macos:
       xcode: 12.5.1
     parallelism: 4
     steps:
       - checkout
-      - restore_cache:
-          key: homebrew-{{ .Revision }}
       - run: tools/ci/circle_ci.sh
       - attach_workspace:
-          at: .
+          at: ~
       - run:
           command: tools/integration_test.sh --format junit,fileattribute=true --out /tmp/cucumber $(circleci tests glob 'features/**/*.feature' | circleci tests split --split-by timings)
           no_output_timeout: 1h
