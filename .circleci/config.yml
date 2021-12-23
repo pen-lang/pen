@@ -6,12 +6,7 @@ jobs:
     parallelism: 2
     steps:
       - checkout
-      - run: curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh | bash
-      - run: /home/linuxbrew/.linuxbrew/bin/brew shellenv >> $BASH_ENV
-      - run: |
-          llvm_prefix=$(brew --prefix)/opt/llvm@13
-
-          echo export LLVM_SYS_130_PREFIX=$llvm_prefix >> $BASH_ENV
-          echo export PATH=$llvm_prefix/bin:\$PATH >> $BASH_ENV
-      - run: brew install jq llvm@13 ninja ruby sccache valgrind
+      - run: sudo snap install sccache
+      - run: curl -fsS https://apt.llvm.org/llvm.sh | bash -- 13
+      - run: curl -fsS https://sh.rustup.rs | sh
       - run: tools/integration_test.sh $(circleci tests glob 'features/**/*.feature' | circleci tests split)
