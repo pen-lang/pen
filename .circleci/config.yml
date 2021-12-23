@@ -28,7 +28,7 @@ jobs:
   linux_test:
     machine:
       image: ubuntu-2004:202111-01
-    parallelism: 8
+    parallelism: 4
     steps:
       - checkout
       - run: tools/ci/circle_ci.sh
@@ -54,7 +54,7 @@ jobs:
   macos_test:
     macos:
       xcode: 12.5.1
-    parallelism: 2
+    parallelism: 4
     steps:
       - checkout
       - run: tools/ci/circle_ci.sh
