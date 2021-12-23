@@ -17,7 +17,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
-      - run: tools/ci/set_up_os.sh
+      - run: tools/ci/github/setup.sh
       - run: tools/build.sh
       - run: git diff --exit-code
       - uses: actions/upload-artifact@v2
@@ -28,7 +28,7 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
-      - run: tools/ci/set_up_os.sh
+      - run: tools/ci/github/setup.sh
       - run: tools/unit_test.sh
   feature_tests:
     needs: build
@@ -42,7 +42,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
-      - run: tools/ci/set_up_os.sh
+      - run: tools/ci/github/setup.sh
       - uses: ruby/setup-ruby@v1
       - uses: actions/download-artifact@v2
         with:

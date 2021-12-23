@@ -19,7 +19,7 @@ jobs:
     resource_class: medium
     steps:
       - checkout
-      - run: tools/ci/circle_ci.sh
+      - run: tools/ci/circleci/setup.sh
       - run: tools/build.sh
       - persist_to_workspace:
           root: .
@@ -33,7 +33,7 @@ jobs:
       - checkout
       - attach_workspace:
           at: .
-      - run: tools/ci/circle_ci.sh
+      - run: tools/ci/circleci/setup.sh
       - run:
           command: tools/integration_test.sh --format junit,fileattribute=true --out /tmp/cucumber $(circleci tests glob 'features/**/*.feature' | circleci tests split --split-by timings)
           no_output_timeout: 1h
@@ -47,7 +47,7 @@ jobs:
       HOMEBREW_NO_AUTO_UPDATE: 1
     steps:
       - checkout
-      - run: tools/ci/circle_ci.sh
+      - run: tools/ci/circleci/setup.sh
       - run: tools/build.sh
       - persist_to_workspace:
           root: .
@@ -63,7 +63,7 @@ jobs:
       - checkout
       - attach_workspace:
           at: .
-      - run: tools/ci/circle_ci.sh
+      - run: tools/ci/circleci/setup.sh
       - run:
           command: tools/integration_test.sh --format junit,fileattribute=true --out /tmp/cucumber $(circleci tests glob 'features/**/*.feature' | circleci tests split --split-by timings)
           no_output_timeout: 1h
