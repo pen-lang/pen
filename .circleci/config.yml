@@ -49,7 +49,7 @@ jobs:
       - save_cache:
           key: homebrew-{{ checksum "tools/ci/circle_ci.sh" }}
           paths:
-            - /usr/local
+            - ~/Library/Caches
       - run: tools/build.sh
       - persist_to_workspace:
           root: .
