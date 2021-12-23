@@ -1,11 +1,29 @@
 version: 2.1
+workflows:
+  integration_test:
+    jobs:
+      - build
+      - test
 jobs:
   build:
     machine:
-      image: ubuntu-2004:202010-01
+      image: ubuntu-2004:202111-01
+    steps:
+      - checkout
+      - run: tools/build.sh
+      - save_cache:
+          key: build-{{ .Revision }}
+          paths:
+            - target
+  test:
+    machine:
+      image: ubuntu-2004:202111-01
     parallelism: 4
     steps:
       - checkout
+      - restore_cache:
+          keys:
+            - build-{{ .Revision }}
       - run: sudo apt update --fix-missing
       - run: sudo apt install ninja-build
       - run: sudo snap install --candidate --classic sccache
