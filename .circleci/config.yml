@@ -44,7 +44,7 @@ jobs:
       xcode: 13.2.1
     resource_class: medium
     environment:
-      HOMEBREW_NO_AUTO_UPDATE: true
+      HOMEBREW_NO_AUTO_UPDATE: 1
     steps:
       - checkout
       - run: tools/ci/circle_ci.sh
@@ -58,7 +58,7 @@ jobs:
       xcode: 12.5.1
     parallelism: 4
     environment:
-      HOMEBREW_NO_AUTO_UPDATE: true
+      HOMEBREW_NO_AUTO_UPDATE: 1
     steps:
       - checkout
       - attach_workspace:
