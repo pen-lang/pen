@@ -37,8 +37,8 @@ jobs:
         os:
           - ubuntu-18.04
           - macos-latest
-        index: [0, 1]
-        total: [2]
+        index: [0, 1, 2]
+        total: [3]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
