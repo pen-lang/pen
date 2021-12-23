@@ -47,7 +47,7 @@ jobs:
       - checkout
       - run: tools/ci/circle_ci.sh
       - save_cache:
-          key: homebrew-{{ checksum "tools/ci/circle_ci.sh" }}
+          key: homebrew-{{ .Revision }}
           paths:
             - ~/Library/Caches
       - run: tools/build.sh
@@ -62,7 +62,7 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          key: homebrew-{{ checksum "tools/ci/circle_ci.sh" }}
+          key: homebrew-{{ .Revision }}
       - run: tools/ci/circle_ci.sh
       - attach_workspace:
           at: .
