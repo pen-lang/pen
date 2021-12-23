@@ -22,7 +22,7 @@ jobs:
   linux_test:
     machine:
       image: ubuntu-2004:202111-01
-    parallelism: 4
+    parallelism: 8
     steps:
       - checkout
       - run: tools/ci/circle_ci.sh
