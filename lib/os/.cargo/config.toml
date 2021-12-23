@@ -1,8 +1,2 @@
 [build]
 rustflags = ["-A", "improper_ctypes", "-D", "improper_ctypes_definitions"]
-
-[target.x86_64-unknown-linux-gnu]
-linker = "rust-lld"
-
-[target.x86_64-apple-darwin]
-linker = "rust-lld"
