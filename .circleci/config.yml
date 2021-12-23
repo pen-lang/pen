@@ -1,11 +1,8 @@
 version: 2.1
 jobs:
   build:
-    docker:
-      - image: cimg/rust:1.57.0
-        auth:
-          username: $DOCKER_USER
-          password: $DOCKER_ACCESS_TOKEN
+    machine:
+      image: ubuntu-2004:202010-01
     shell: /bin/bash --login -eo pipefail
     parallelism: 2
     steps:
