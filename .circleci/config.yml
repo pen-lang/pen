@@ -1,0 +1,71 @@
+version: 2.1
+workflows:
+  linux_integration_test:
+    jobs:
+      - linux_build
+      - linux_test:
+          requires:
+            - linux_build
+  macos_integration_test:
+    jobs:
+      - macos_build
+      - macos_test:
+          requires:
+            - macos_build
+jobs:
+  linux_build:
+    machine:
+      image: ubuntu-2004:202111-01
+    resource_class: medium
+    steps:
+      - checkout
+      - run: tools/ci/circleci/setup.sh
+      - run: tools/build.sh
+      - persist_to_workspace:
+          root: .
+          paths:
+            - target
+  linux_test:
+    machine:
+      image: ubuntu-2004:202111-01
+    parallelism: 4
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - run: tools/ci/circleci/setup.sh
+      - run:
+          command: tools/ci/circleci/integration_test.sh
+          no_output_timeout: 1h
+      - store_test_results:
+          path: /tmp/cucumber
+  macos_build:
+    macos:
+      xcode: 13.2.1
+    resource_class: medium
+    environment:
+      HOMEBREW_NO_AUTO_UPDATE: 1
+    steps:
+      - checkout
+      - run: tools/ci/circleci/setup.sh
+      - run: tools/build.sh
+      - persist_to_workspace:
+          root: .
+          paths:
+            - target
+  macos_test:
+    macos:
+      xcode: 13.2.1
+    parallelism: 4
+    environment:
+      HOMEBREW_NO_AUTO_UPDATE: 1
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - run: tools/ci/circleci/setup.sh
+      - run:
+          command: tools/ci/circleci/integration_test.sh
+          no_output_timeout: 1h
+      - store_test_results:
+          path: /tmp/cucumber

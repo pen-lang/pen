@@ -4,9 +4,9 @@ use std::{error::Error, path::PathBuf};
 const LLVM_VERSION: usize = 13;
 
 pub fn find(command: &str) -> Result<PathBuf, Box<dyn Error>> {
-    if let Ok(path) = command_finder::find(command) {
+    if let Ok(path) = command_finder::find(&format!("{}-{}", command, LLVM_VERSION)) {
         return Ok(path);
     }
 
-    command_finder::find(&format!("{}-{}", command, LLVM_VERSION))
+    command_finder::find(command)
 }

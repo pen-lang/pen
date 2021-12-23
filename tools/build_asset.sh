@@ -8,7 +8,7 @@ tarball=pen-$version-$target.tar.xz
 
 cd $(dirname $0)/..
 
-cargo build --release
+$(dirname $0)/build.sh
 strip target/release/pen
 
 tar caf $tarball \
