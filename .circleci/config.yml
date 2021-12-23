@@ -1,13 +1,13 @@
 version: 2.1
 workflows:
-  integration_test:
+  linux_integration_test:
     jobs:
-      - build
-      - test:
+      - linux_build
+      - linux_test:
           requires:
-            - build
+            - linux_build
 jobs:
-  build:
+  linux_build:
     machine:
       image: ubuntu-2004:202111-01
     resource_class: medium
@@ -19,7 +19,7 @@ jobs:
           root: .
           paths:
             - target
-  test:
+  linux_test:
     machine:
       image: ubuntu-2004:202111-01
     parallelism: 4
