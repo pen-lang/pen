@@ -36,6 +36,7 @@ jobs:
       - uses: actions/checkout@v2
       - run: tools/ci/github/setup.sh
       - run: tools/coverage.sh
+      - uses: codecov/codecov-action@v2
   feature_tests:
     needs: build
     strategy:
