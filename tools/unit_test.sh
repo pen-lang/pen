@@ -2,6 +2,8 @@
 
 set -ex
 
-export RUST_MIN_STACK=8388608
+. $(dirname $0)/utilities.sh
+
+prepare_unit_test
 
 $(dirname $0)/run_all_crates.sh cargo test "$@"

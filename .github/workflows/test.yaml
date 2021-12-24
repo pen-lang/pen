@@ -30,6 +30,15 @@ jobs:
       - uses: actions/checkout@v2
       - run: tools/ci/github/setup.sh
       - run: tools/unit_test.sh
+  coverage:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+      - run: tools/ci/github/setup.sh
+      - run: tools/coverage.sh
+      - uses: codecov/codecov-action@v2
+        with:
+          files: coverage.json
   feature_tests:
     needs: build
     strategy:
