@@ -1,5 +1,6 @@
 *.new
-*.prof*
+*.prof
+*.prof.raw
 *.tar.*
 .pen
 target

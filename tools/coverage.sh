@@ -3,10 +3,13 @@
 set -e
 
 export RUSTFLAGS='-Z instrument-coverage'
-export LLVM_PROFILE_FILE='json5format-%m.profraw'
+export LLVM_PROFILE_FILE=%m.prof.raw
+
+alias cargo='rustup run nightly cargo'
 
 rustup install nightly
+rustup component add --toolchain nightly llvm-tools-preview
+cargo install cargo-binutils
 
-rustup run nightly cargo test
-rustup run nightly cargo profdata -- merge \
-  -sparse json5format-*.profraw -o json5format.profdata
+cargo test
+cargo profdata -- merge -sparse $(find -name '*.prof.raw') -o test.prof
