@@ -27,6 +27,14 @@ fn compile_type_definition(
     type_context: &TypeContext,
 ) -> Result<Option<mir::ir::TypeDefinition>, CompileError> {
     Ok(match type_ {
+        Type::Function(function_type) => Some(mir::ir::TypeDefinition::new(
+            type_compiler::compile_concrete_function_name(function_type, type_context.types())?,
+            mir::types::RecordBody::new(vec![type_compiler::compile_function(
+                function_type,
+                type_context,
+            )?
+            .into()]),
+        )),
         Type::List(list_type) => Some(mir::ir::TypeDefinition::new(
             type_compiler::compile_concrete_list_name(list_type, type_context.types())?,
             mir::types::RecordBody::new(vec![mir::types::Record::new(
@@ -83,6 +91,49 @@ mod tests {
         types,
     };
     use position::{test::PositionFake, Position};
+
+    #[test]
+    fn compile_function_type_definition() {
+        let function_type =
+            types::Function::new(vec![], types::None::new(Position::fake()), Position::fake());
+        let union_type = types::Union::new(
+            function_type.clone(),
+            types::None::new(Position::fake()),
+            Position::fake(),
+        );
+        let type_context = TypeContext::dummy(Default::default(), Default::default());
+
+        assert_eq!(
+            compile(
+                &Module::empty().set_definitions(vec![Definition::fake(
+                    "foo",
+                    Lambda::new(
+                        vec![Argument::new("x", function_type.clone())],
+                        types::None::new(Position::fake()),
+                        TypeCoercion::new(
+                            function_type.clone(),
+                            union_type,
+                            Variable::new("x", Position::fake()),
+                            Position::fake()
+                        ),
+                        Position::fake(),
+                    ),
+                    false,
+                )]),
+                &type_context,
+            ),
+            Ok(vec![mir::ir::TypeDefinition::new(
+                type_compiler::compile_concrete_function_name(&function_type, type_context.types())
+                    .unwrap(),
+                mir::types::RecordBody::new(vec![type_compiler::compile_function(
+                    &function_type,
+                    &type_context
+                )
+                .unwrap()
+                .into()]),
+            )])
+        );
+    }
 
     #[test]
     fn compile_list_type_definition() {
