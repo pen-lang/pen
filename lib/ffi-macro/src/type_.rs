@@ -1,7 +1,8 @@
 use crate::utilities::parse_crate_path;
+use convert_case::{Case, Casing};
 use proc_macro::TokenStream;
 use quote::quote;
-use syn::{parse_macro_input, AttributeArgs, ItemStruct};
+use syn::{parse_macro_input, AttributeArgs, Ident, ItemStruct};
 
 pub fn generate_binding(attributes: TokenStream, item: TokenStream) -> TokenStream {
     let attributes = parse_macro_input!(attributes as AttributeArgs);
@@ -15,12 +16,18 @@ pub fn generate_binding(attributes: TokenStream, item: TokenStream) -> TokenStre
 
 fn generate_type(attributes: &AttributeArgs, type_: &ItemStruct) -> Result<TokenStream, String> {
     let crate_path = parse_crate_path(attributes)?;
+    let module_name = Ident::new(
+        &(type_.ident.to_string().to_case(Case::Snake) + "_module"),
+        type_.ident.span(),
+    );
     let type_name = &type_.ident;
 
     Ok(quote! {
         #type_
 
-        mod #type_name {
+        mod #module_name {
+            use super::#type_name;
+
             unsafe fn transmute_into_payload<T>(data: T) -> u64 {
                 let mut payload = 0;
 
