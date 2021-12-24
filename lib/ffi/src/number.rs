@@ -1,5 +1,4 @@
-use crate::type_information;
-
+#[pen_ffi_macro::any_conv(crate = "crate")]
 #[repr(transparent)]
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct Number {
@@ -29,5 +28,3 @@ impl From<f64> for Number {
         Self { value }
     }
 }
-
-type_information!(number, crate::number::Number);

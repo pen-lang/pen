@@ -1,7 +1,7 @@
 use super::{arc::ArcBuffer, number::Number};
-use crate::type_information;
 use std::{cmp::max, str::from_utf8_unchecked};
 
+#[pen_ffi_macro::any_conv(crate = "crate")]
 #[repr(C)]
 #[derive(Clone, Debug, Default)]
 pub struct ByteString {
@@ -106,8 +106,6 @@ impl From<Vec<u8>> for ByteString {
         vec.as_slice().into()
     }
 }
-
-type_information!(byte_string, crate::string::ByteString);
 
 #[cfg(test)]
 mod tests {

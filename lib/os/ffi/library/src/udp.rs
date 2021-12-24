@@ -27,12 +27,11 @@ impl UdpSocket {
     }
 }
 
+#[ffi::any_conv]
 #[derive(Clone, Debug)]
 pub struct UdpSocketInner {
     socket: Arc<RwLock<net::UdpSocket>>,
 }
-
-ffi::type_information!(udp_socket_inner, crate::udp::UdpSocketInner);
 
 impl UdpSocketInner {
     pub fn new(socket: net::UdpSocket) -> Self {
