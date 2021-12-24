@@ -1,11 +1,9 @@
+use crate::utilities::parse_crate_path;
 use proc_macro::TokenStream;
 use quote::quote;
 use syn::{
-    parse_macro_input, parse_quote, parse_str, AttributeArgs, FnArg, ItemFn, Lit, Meta, NestedMeta,
-    Path, ReturnType, Stmt, Type,
+    parse_macro_input, parse_quote, AttributeArgs, FnArg, ItemFn, Path, ReturnType, Stmt, Type,
 };
-
-const DEFAULT_CRATE_NAME: &str = "ffi";
 
 pub fn generate_binding(attributes: TokenStream, item: TokenStream) -> TokenStream {
     let attributes = parse_macro_input!(attributes as AttributeArgs);
@@ -18,26 +16,7 @@ pub fn generate_binding(attributes: TokenStream, item: TokenStream) -> TokenStre
 }
 
 fn generate_function(attributes: &AttributeArgs, function: &ItemFn) -> Result<TokenStream, String> {
-    let crate_path: Path = parse_str(
-        &attributes
-            .iter()
-            .find_map(|attribute| match attribute {
-                NestedMeta::Meta(Meta::NameValue(name_value)) => {
-                    if name_value.path.is_ident("crate") {
-                        if let Lit::Str(string) = &name_value.lit {
-                            Some(string.value())
-                        } else {
-                            None
-                        }
-                    } else {
-                        None
-                    }
-                }
-                _ => None,
-            })
-            .unwrap_or_else(|| DEFAULT_CRATE_NAME.into()),
-    )
-    .map_err(|error| error.to_string())?;
+    let crate_path = parse_crate_path(attributes)?;
 
     if function
         .sig
