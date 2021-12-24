@@ -12,4 +12,5 @@ rustup component add --toolchain nightly llvm-tools-preview
 cargo install cargo-binutils
 
 cargo test
-cargo profdata -- merge -sparse $(find -name '*.prof.raw') -o test.prof
+cargo profdata -- merge -sparse $(find -name '*.prof.raw') -o coverage.prof
+cargo cov -- show -instr-profile=coverage.prof >coverage.txt

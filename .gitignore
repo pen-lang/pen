@@ -3,5 +3,6 @@
 *.prof.raw
 *.tar.*
 .pen
+coverage.txt
 target
 tmp
