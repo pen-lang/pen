@@ -2,6 +2,10 @@
 
 set -e
 
+. $(dirname $0)/utilities.sh
+
+prepare_unit_test
+
 rustup install nightly
 rustup component add --toolchain nightly llvm-tools-preview
 
