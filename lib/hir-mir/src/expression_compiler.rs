@@ -224,14 +224,25 @@ pub fn compile(
                         argument,
                     )
                     .into(),
-                    Type::Function(_) => todo!(),
+                    Type::Function(function_type) => {
+                        let concrete_type = type_compiler::compile_concrete_function(
+                            function_type,
+                            type_context.types(),
+                        )?;
+
+                        mir::ir::Variant::new(
+                            concrete_type.clone(),
+                            mir::ir::Record::new(concrete_type, vec![argument]),
+                        )
+                        .into()
+                    }
                     Type::List(list_type) => {
-                        let concrete_list_type =
+                        let concrete_type =
                             type_compiler::compile_concrete_list(list_type, type_context.types())?;
 
                         mir::ir::Variant::new(
-                            concrete_list_type.clone(),
-                            mir::ir::Record::new(concrete_list_type, vec![argument]),
+                            concrete_type.clone(),
+                            mir::ir::Record::new(concrete_type, vec![argument]),
                         )
                         .into()
                     }
