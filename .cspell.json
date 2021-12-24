@@ -15,6 +15,7 @@
     "clippy",
     "combinator",
     "concat",
+    "conv",
     "datagram",
     "dealloc",
     "deserialization",

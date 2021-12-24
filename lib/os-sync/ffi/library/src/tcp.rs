@@ -25,12 +25,11 @@ impl TcpListener {
     }
 }
 
+#[ffi::any_conv]
 #[derive(Clone, Debug)]
 pub struct TcpListenerInner {
     listener: Arc<RwLock<net::TcpListener>>,
 }
-
-ffi::type_information!(tcp_listener_inner, crate::tcp::TcpListenerInner);
 
 impl TcpListenerInner {
     pub fn new(listener: net::TcpListener) -> Self {
@@ -64,12 +63,11 @@ impl TcpStream {
     }
 }
 
+#[ffi::any_conv]
 #[derive(Clone, Debug)]
 pub struct TcpStreamInner {
     socket: Arc<RwLock<net::TcpStream>>,
 }
-
-ffi::type_information!(ffi_tcp_socket, crate::tcp::TcpStreamInner);
 
 impl TcpStreamInner {
     pub fn new(socket: net::TcpStream) -> Self {

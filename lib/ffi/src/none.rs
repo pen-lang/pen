@@ -1,5 +1,4 @@
-use crate::type_information;
-
+#[pen_ffi_macro::any_conv(crate = "crate")]
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct None {
@@ -11,5 +10,3 @@ impl None {
         Self { _private: [] }
     }
 }
-
-type_information!(none, crate::none::None);

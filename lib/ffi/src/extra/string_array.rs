@@ -1,4 +1,4 @@
-use crate::{type_information, Any, ByteString};
+use crate::{Any, ByteString};
 use std::sync::Arc;
 
 #[repr(C)]
@@ -43,13 +43,12 @@ impl<T: Into<ByteString>> From<Vec<T>> for StringArray {
     }
 }
 
+#[pen_ffi_macro::any_conv(crate = "crate")]
 #[allow(clippy::redundant_allocation)]
 #[derive(Clone)]
 struct StringArrayInner {
     vector: Arc<Vec<ByteString>>,
 }
-
-type_information!(array_inner, crate::extra::string_array::StringArrayInner);
 
 impl StringArrayInner {
     pub fn new(vector: Vec<ByteString>) -> Self {

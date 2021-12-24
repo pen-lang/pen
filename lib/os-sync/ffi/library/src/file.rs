@@ -27,12 +27,11 @@ impl OsFile {
     }
 }
 
+#[ffi::any_conv]
 #[derive(Clone, Debug)]
 pub struct OsFileInner {
     file: Arc<RwLock<File>>,
 }
-
-ffi::type_information!(os_file_inner, crate::file::OsFileInner);
 
 impl OsFileInner {
     pub fn new(file: File) -> Self {
