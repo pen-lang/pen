@@ -15,7 +15,19 @@ Feature: Union
     When I run `pen build`
     Then the exit status should be 0
 
-  Scenario: Upcast a number list into a union
+  Scenario: Upcast a function into a union
+    Given a file named "Foo.pen" with:
+    """pen
+    f = \() (\() number) | none {
+      \() number {
+        42
+      }
+    }
+    """
+    When I run `pen build`
+    Then the exit status should be 0
+
+  Scenario: Upcast a list into a union
     Given a file named "Foo.pen" with:
     """pen
     f = \() [number] | none {
