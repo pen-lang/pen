@@ -1227,7 +1227,7 @@ mod tests {
                                 .into(),
                             ),
                             EqualityOperator::Equal,
-                            Number::new(0.0, Position::fake()),
+                            None::new(Position::fake()),
                             None::new(Position::fake()),
                             Position::fake(),
                         ),
