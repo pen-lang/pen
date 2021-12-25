@@ -38,7 +38,8 @@ jobs:
       - run: tools/coverage.sh
       - uses: codecov/codecov-action@v2
         with:
-          files: coverage.json
+          files: lcov.info
+          fail_ci_if_error: true
   feature_tests:
     needs: build
     strategy:
