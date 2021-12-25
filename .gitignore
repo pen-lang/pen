@@ -1,5 +1,8 @@
 *.new
+*.prof
+*.prof.raw
 *.tar.*
 .pen
+coverage.json
 target
 tmp
