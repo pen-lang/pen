@@ -41,6 +41,25 @@ pub fn compile_function(
     ))
 }
 
+pub fn compile_concrete_function(
+    function: &types::Function,
+    types: &BTreeMap<String, Type>,
+) -> Result<mir::types::Record, CompileError> {
+    Ok(mir::types::Record::new(compile_concrete_function_name(
+        function, types,
+    )?))
+}
+
+pub fn compile_concrete_function_name(
+    function: &types::Function,
+    types: &BTreeMap<String, Type>,
+) -> Result<String, CompileError> {
+    Ok(format!(
+        "_function_{}",
+        type_id_calculator::calculate(&function.clone().into(), types)?,
+    ))
+}
+
 pub fn compile_concrete_list(
     list: &types::List,
     types: &BTreeMap<String, Type>,

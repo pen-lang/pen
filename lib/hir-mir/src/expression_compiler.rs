@@ -224,14 +224,25 @@ pub fn compile(
                         argument,
                     )
                     .into(),
-                    Type::Function(_) => todo!(),
+                    Type::Function(function_type) => {
+                        let concrete_type = type_compiler::compile_concrete_function(
+                            function_type,
+                            type_context.types(),
+                        )?;
+
+                        mir::ir::Variant::new(
+                            concrete_type.clone(),
+                            mir::ir::Record::new(concrete_type, vec![argument]),
+                        )
+                        .into()
+                    }
                     Type::List(list_type) => {
-                        let concrete_list_type =
+                        let concrete_type =
                             type_compiler::compile_concrete_list(list_type, type_context.types())?;
 
                         mir::ir::Variant::new(
-                            concrete_list_type.clone(),
-                            mir::ir::Record::new(concrete_list_type, vec![argument]),
+                            concrete_type.clone(),
+                            mir::ir::Record::new(concrete_type, vec![argument]),
                         )
                         .into()
                     }
@@ -257,33 +268,23 @@ fn compile_alternatives(
         .into_iter()
         .map(|member_type| {
             let compiled_member_type = type_compiler::compile(&member_type, type_context)?;
-            Ok(if let Type::List(list_type) = &member_type {
-                let concrete_list_type =
-                    type_compiler::compile_concrete_list(list_type, type_context.types())?;
 
-                mir::ir::Alternative::new(concrete_list_type.clone(), name, {
-                    if type_.is_union() {
-                        mir::ir::Let::new(
-                            name,
-                            mir::types::Type::Variant,
-                            mir::ir::Variant::new(concrete_list_type, mir::ir::Variable::new(name)),
-                            expression.clone(),
-                        )
-                    } else {
-                        mir::ir::Let::new(
-                            name,
-                            compiled_member_type,
-                            mir::ir::RecordField::new(
-                                concrete_list_type,
-                                0,
-                                mir::ir::Variable::new(name),
-                            ),
-                            expression.clone(),
-                        )
-                    }
-                })
-            } else {
-                mir::ir::Alternative::new(compiled_member_type.clone(), name, {
+            Ok(match &member_type {
+                Type::Function(function_type) => compile_generic_type_alternative(
+                    name,
+                    &expression,
+                    &type_,
+                    &compiled_member_type,
+                    &type_compiler::compile_concrete_function(function_type, type_context.types())?,
+                ),
+                Type::List(list_type) => compile_generic_type_alternative(
+                    name,
+                    &expression,
+                    &type_,
+                    &compiled_member_type,
+                    &type_compiler::compile_concrete_list(list_type, type_context.types())?,
+                ),
+                _ => mir::ir::Alternative::new(compiled_member_type.clone(), name, {
                     if type_.is_union() {
                         mir::ir::Let::new(
                             name,
@@ -298,10 +299,40 @@ fn compile_alternatives(
                     } else {
                         expression.clone()
                     }
-                })
+                }),
             })
         })
         .collect::<Result<_, _>>()
+}
+
+fn compile_generic_type_alternative(
+    name: &str,
+    expression: &mir::ir::Expression,
+    type_: &hir::types::Type,
+    member_type: &mir::types::Type,
+    concrete_member_type: &mir::types::Record,
+) -> mir::ir::Alternative {
+    mir::ir::Alternative::new(concrete_member_type.clone(), name, {
+        if type_.is_union() {
+            mir::ir::Let::new(
+                name,
+                mir::types::Type::Variant,
+                mir::ir::Variant::new(concrete_member_type.clone(), mir::ir::Variable::new(name)),
+                expression.clone(),
+            )
+        } else {
+            mir::ir::Let::new(
+                name,
+                member_type.clone(),
+                mir::ir::RecordField::new(
+                    concrete_member_type.clone(),
+                    0,
+                    mir::ir::Variable::new(name),
+                ),
+                expression.clone(),
+            )
+        }
+    })
 }
 
 fn compile_operation(
@@ -637,6 +668,52 @@ mod tests {
                             )
                         ),
                     ],
+                    None
+                )
+                .into())
+            );
+        }
+
+        #[test]
+        fn compile_function_branch() {
+            let type_context = TypeContext::dummy(Default::default(), Default::default());
+            let function_type =
+                types::Function::new(vec![], types::None::new(Position::fake()), Position::fake());
+            let concrete_function_type =
+                type_compiler::compile_concrete_function(&function_type, type_context.types())
+                    .unwrap();
+
+            assert_eq!(
+                compile(
+                    &IfType::new(
+                        "y",
+                        Variable::new("x", Position::fake()),
+                        vec![IfTypeBranch::new(
+                            function_type.clone(),
+                            Variable::new("y", Position::fake()),
+                        )],
+                        None,
+                        Position::fake(),
+                    )
+                    .into(),
+                    &type_context,
+                ),
+                Ok(mir::ir::Case::new(
+                    mir::ir::Variable::new("x"),
+                    vec![mir::ir::Alternative::new(
+                        concrete_function_type.clone(),
+                        "y",
+                        mir::ir::Let::new(
+                            "y",
+                            type_compiler::compile_function(&function_type, &type_context).unwrap(),
+                            mir::ir::RecordField::new(
+                                concrete_function_type,
+                                0,
+                                mir::ir::Variable::new("y")
+                            ),
+                            mir::ir::Variable::new("y")
+                        ),
+                    )],
                     None
                 )
                 .into())
