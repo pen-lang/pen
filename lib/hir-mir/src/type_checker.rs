@@ -405,6 +405,19 @@ fn check_operation(
             check_subsumption(&check_expression(operation.lhs())?, operand_type)?;
             check_subsumption(&check_expression(operation.rhs())?, operand_type)?;
 
+            let lhs_type =
+                type_extractor::extract_from_expression(operation.lhs(), variables, type_context)?;
+            let rhs_type =
+                type_extractor::extract_from_expression(operation.rhs(), variables, type_context)?;
+
+            if !type_subsumption_checker::check(&lhs_type, &rhs_type, type_context.types())?
+                && !type_subsumption_checker::check(&rhs_type, &lhs_type, type_context.types())?
+            {
+                return Err(CompileError::TypesNotComparable(
+                    operation.position().clone(),
+                ));
+            }
+
             types::Boolean::new(operation.position().clone()).into()
         }
         Operation::Not(operation) => {
@@ -1214,7 +1227,7 @@ mod tests {
                                 .into(),
                             ),
                             EqualityOperator::Equal,
-                            Number::new(0.0, Position::fake()),
+                            None::new(Position::fake()),
                             None::new(Position::fake()),
                             Position::fake(),
                         ),
@@ -1223,6 +1236,36 @@ mod tests {
                     false,
                 )]))
             .unwrap();
+        }
+
+        #[test]
+        fn fail_to_check_equality_operation() {
+            assert_eq!(
+                check_module(&Module::empty().set_definitions(vec![Definition::fake(
+                    "x",
+                    Lambda::new(
+                        vec![],
+                        types::Boolean::new(Position::fake()),
+                        EqualityOperation::new(
+                            Some(
+                                types::Union::new(
+                                    types::Number::new(Position::fake()),
+                                    types::None::new(Position::fake()),
+                                    Position::fake(),
+                                )
+                                .into(),
+                            ),
+                            EqualityOperator::Equal,
+                            Number::new(42.0, Position::fake()),
+                            None::new(Position::fake()),
+                            Position::fake()
+                        ),
+                        Position::fake(),
+                    ),
+                    false,
+                )])),
+                Err(CompileError::TypesNotComparable(Position::fake()))
+            );
         }
 
         #[test]

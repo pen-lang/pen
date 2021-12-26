@@ -29,6 +29,7 @@ pub enum CompileError {
     TypeAnalysis(TypeError),
     TypeNotFound(types::Reference),
     TypeNotInferred(Position),
+    TypesNotComparable(Position),
     TypesNotMatched(Position, Position),
     UnionOrAnyTypeExpected(Position),
     UnionTypeExpected(Position),
@@ -137,6 +138,9 @@ impl Display for CompileError {
             ),
             Self::TypeNotInferred(position) => {
                 write!(formatter, "type not inferred\n{}", position)
+            }
+            Self::TypesNotComparable(position) => {
+                write!(formatter, "types not comparable\n{}", position)
             }
             Self::TypesNotMatched(lhs_position, rhs_position) => write!(
                 formatter,
