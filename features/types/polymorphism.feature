@@ -8,8 +8,8 @@ Feature: Polymorphism
   Scenario: Use an equal operator
     Given a file named "Foo.pen" with:
     """pen
-    f = \() boolean {
-      42 == none
+    f = \(x number | none) boolean {
+      x == none
     }
     """
     When I run `pen build`
@@ -18,8 +18,8 @@ Feature: Polymorphism
   Scenario: Use a not-equal operator
     Given a file named "Foo.pen" with:
     """pen
-    f = \() boolean {
-      42 != none
+    f = \(x number | none) boolean {
+      x != none
     }
     """
     When I run `pen build`
