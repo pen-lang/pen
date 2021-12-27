@@ -22,12 +22,14 @@ use std::collections::BTreeSet;
 const BUILT_IN_LITERALS: &[&str] = &["false", "none", "true"];
 const BUILT_IN_TYPES: &[&str] = &["any", "boolean", "none", "number", "string"];
 static KEYWORDS: Lazy<Vec<&str>> = Lazy::new(|| {
-    ["as", "else", "export", "foreign", "if", "import", "type"]
-        .iter()
-        .chain(BUILT_IN_LITERALS)
-        .chain(BUILT_IN_TYPES)
-        .copied()
-        .collect()
+    [
+        "as", "async", "else", "export", "foreign", "if", "import", "type",
+    ]
+    .iter()
+    .chain(BUILT_IN_LITERALS)
+    .chain(BUILT_IN_TYPES)
+    .copied()
+    .collect()
 });
 const OPERATOR_CHARACTERS: &str = "+-*/=<>&|!?";
 
@@ -406,7 +408,7 @@ fn prefix_operation_like<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
 
 fn prefix_operation<'a>() -> impl Parser<Stream<'a>, Output = UnaryOperation> {
     (
-        attempt((position(), prefix_operator())),
+        attempt((position(), choice((prefix_operator(), async_operator())))),
         prefix_operation_like(),
     )
         .map(|((position, operator), expression)| {
@@ -416,6 +418,10 @@ fn prefix_operation<'a>() -> impl Parser<Stream<'a>, Output = UnaryOperation> {
 
 fn prefix_operator<'a>() -> impl Parser<Stream<'a>, Output = UnaryOperator> {
     choice((concrete_prefix_operator("!", UnaryOperator::Not),)).expected("unary operator")
+}
+
+fn async_operator<'a>() -> impl Parser<Stream<'a>, Output = UnaryOperator> {
+    keyword("async").map(|_| UnaryOperator::Async)
 }
 
 fn concrete_prefix_operator<'a>(
@@ -2095,6 +2101,20 @@ mod tests {
                     *expected
                 );
             }
+        }
+
+        #[test]
+        fn parse_async_operation() {
+            assert!(string_literal().parse(stream("", "")).is_err());
+            assert_eq!(
+                expression().parse(stream("async 42", "")).unwrap().0,
+                UnaryOperation::new(
+                    UnaryOperator::Async,
+                    Number::new(42.0, Position::fake()),
+                    Position::fake()
+                )
+                .into()
+            );
         }
 
         #[test]

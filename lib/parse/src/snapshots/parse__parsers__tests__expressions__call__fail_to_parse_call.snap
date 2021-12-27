@@ -1,5 +1,6 @@
 ---
 source: lib/parse/src/parsers.rs
+assertion_line: 2018
 expression: "expression().parse(stream(source,\n                          \"\")).map_err(|error|\n                                           ParseError::new(source, \"\",\n                                                           error)).err()"
 
 ---
@@ -7,6 +8,7 @@ Some(
     ParseError {
         message: "unexpected )",
         expected: [
+            "async",
             "unary operator",
             "if",
             "\\(",
