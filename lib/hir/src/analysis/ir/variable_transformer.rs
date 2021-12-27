@@ -223,6 +223,11 @@ fn transform_operation(
             operation.position().clone(),
         )
         .into(),
+        Operation::Async(operation) => AsyncOperation::new(
+            transform_expression(operation.expression(), transform),
+            operation.position().clone(),
+        )
+        .into(),
         Operation::Boolean(operation) => BooleanOperation::new(
             operation.operator(),
             transform_expression(operation.lhs(), transform),

@@ -389,6 +389,7 @@ fn check_operation(
 
             number_type
         }
+        Operation::Async(operation) => check_expression(operation.expression())?,
         Operation::Boolean(operation) => {
             let boolean_type = types::Boolean::new(operation.position().clone()).into();
 

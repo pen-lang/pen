@@ -259,6 +259,11 @@ fn infer_expression(
                 operation.position().clone(),
             )
             .into(),
+            Operation::Async(operation) => AsyncOperation::new(
+                infer_expression(operation.expression(), variables)?,
+                operation.position().clone(),
+            )
+            .into(),
             Operation::Boolean(operation) => BooleanOperation::new(
                 operation.operator(),
                 infer_expression(operation.lhs(), variables)?,

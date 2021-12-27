@@ -300,6 +300,9 @@ fn compile_expression(expression: &ast::Expression) -> Result<ir::Expression, Co
             let operand = compile_expression(operation.expression())?;
 
             match operation.operator() {
+                ast::UnaryOperator::Async => {
+                    ir::AsyncOperation::new(operand, operation.position().clone()).into()
+                }
                 ast::UnaryOperator::Not => {
                     ir::NotOperation::new(operand, operation.position().clone()).into()
                 }

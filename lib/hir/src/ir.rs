@@ -1,5 +1,6 @@
 mod argument;
 mod arithmetic_operation;
+mod async_operation;
 mod boolean;
 mod boolean_operation;
 mod call;
@@ -39,6 +40,7 @@ mod variable;
 
 pub use argument::*;
 pub use arithmetic_operation::*;
+pub use async_operation::*;
 pub use boolean::*;
 pub use boolean_operation::*;
 pub use call::*;

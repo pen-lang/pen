@@ -353,6 +353,7 @@ fn compile_operation(
             compile(operation.rhs())?,
         )
         .into(),
+        Operation::Async(_) => todo!(),
         Operation::Boolean(operation) => {
             compile(&boolean_operation_transformer::transform(operation))?
         }
