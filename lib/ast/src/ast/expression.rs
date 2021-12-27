@@ -3,10 +3,12 @@ use super::{
     none::None, number::Number, record::Record, string::ByteString, variable::Variable,
     BinaryOperation, Lambda, RecordDeconstruction, UnaryOperation,
 };
+use crate::AsyncOperation;
 use position::Position;
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum Expression {
+    AsyncOperation(AsyncOperation),
     BinaryOperation(BinaryOperation),
     Boolean(Boolean),
     Call(Call),
@@ -27,6 +29,7 @@ pub enum Expression {
 impl Expression {
     pub fn position(&self) -> &Position {
         match self {
+            Self::AsyncOperation(operation) => operation.position(),
             Self::BinaryOperation(operation) => operation.position(),
             Self::Boolean(boolean) => boolean.position(),
             Self::Call(call) => call.position(),
@@ -46,9 +49,9 @@ impl Expression {
     }
 }
 
-impl From<Call> for Expression {
-    fn from(call: Call) -> Self {
-        Self::Call(call)
+impl From<AsyncOperation> for Expression {
+    fn from(operation: AsyncOperation) -> Self {
+        Self::AsyncOperation(operation)
     }
 }
 
@@ -61,6 +64,12 @@ impl From<BinaryOperation> for Expression {
 impl From<Boolean> for Expression {
     fn from(boolean: Boolean) -> Self {
         Self::Boolean(boolean)
+    }
+}
+
+impl From<Call> for Expression {
+    fn from(call: Call) -> Self {
+        Self::Call(call)
     }
 }
 

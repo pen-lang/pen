@@ -408,7 +408,7 @@ fn prefix_operation_like<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
 
 fn prefix_operation<'a>() -> impl Parser<Stream<'a>, Output = UnaryOperation> {
     (
-        attempt((position(), choice((prefix_operator(), async_operator())))),
+        attempt((position(), choice((prefix_operator(),)))),
         prefix_operation_like(),
     )
         .map(|((position, operator), expression)| {
@@ -420,8 +420,9 @@ fn prefix_operator<'a>() -> impl Parser<Stream<'a>, Output = UnaryOperator> {
     choice((concrete_prefix_operator("!", UnaryOperator::Not),)).expected("unary operator")
 }
 
-fn async_operator<'a>() -> impl Parser<Stream<'a>, Output = UnaryOperator> {
-    keyword("async").map(|_| UnaryOperator::Async)
+fn async_operation<'a>() -> impl Parser<Stream<'a>, Output = AsyncOperation> {
+    (attempt(position().skip(keyword("async"))), lambda())
+        .map(|(position, lambda)| AsyncOperation::new(lambda, position))
 }
 
 fn concrete_prefix_operator<'a>(
@@ -483,6 +484,7 @@ fn try_operator<'a>() -> impl Parser<Stream<'a>, Output = SuffixOperator> {
 fn atomic_expression<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
     lazy(|| {
         no_partial(choice((
+            async_operation().map(Expression::from),
             if_type().map(Expression::from),
             if_list().map(Expression::from),
             if_().map(Expression::from),
@@ -2106,10 +2108,21 @@ mod tests {
         #[test]
         fn parse_async_operation() {
             assert_eq!(
-                expression().parse(stream("async 42", "")).unwrap().0,
-                UnaryOperation::new(
-                    UnaryOperator::Async,
-                    Number::new(42.0, Position::fake()),
+                expression()
+                    .parse(stream("async \\() number { 42 }", ""))
+                    .unwrap()
+                    .0,
+                AsyncOperation::new(
+                    Lambda::new(
+                        vec![],
+                        types::Number::new(Position::fake()),
+                        Block::new(
+                            vec![],
+                            Number::new(42.0, Position::fake()),
+                            Position::fake()
+                        ),
+                        Position::fake()
+                    ),
                     Position::fake()
                 )
                 .into()

@@ -1,4 +1,5 @@
 mod argument;
+mod async_operation;
 mod binary_operation;
 mod binary_operator;
 mod block;
@@ -37,6 +38,7 @@ mod unary_operator;
 mod variable;
 
 pub use argument::*;
+pub use async_operation::*;
 pub use binary_operation::*;
 pub use binary_operator::*;
 pub use block::*;

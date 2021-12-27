@@ -112,6 +112,11 @@ fn compile_block(block: &ast::Block) -> Result<ir::Expression, CompileError> {
 
 fn compile_expression(expression: &ast::Expression) -> Result<ir::Expression, CompileError> {
     Ok(match expression {
+        ast::Expression::AsyncOperation(operation) => ir::AsyncOperation::new(
+            compile_lambda(operation.function())?,
+            operation.position().clone(),
+        )
+        .into(),
         ast::Expression::BinaryOperation(operation) => {
             let lhs = compile_expression(operation.lhs())?;
             let rhs = compile_expression(operation.rhs())?;
@@ -300,9 +305,6 @@ fn compile_expression(expression: &ast::Expression) -> Result<ir::Expression, Co
             let operand = compile_expression(operation.expression())?;
 
             match operation.operator() {
-                ast::UnaryOperator::Async => {
-                    ir::AsyncOperation::new(operand, operation.position().clone()).into()
-                }
                 ast::UnaryOperator::Not => {
                     ir::NotOperation::new(operand, operation.position().clone()).into()
                 }
