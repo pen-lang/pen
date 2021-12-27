@@ -2105,7 +2105,6 @@ mod tests {
 
         #[test]
         fn parse_async_operation() {
-            assert!(string_literal().parse(stream("", "")).is_err());
             assert_eq!(
                 expression().parse(stream("async 42", "")).unwrap().0,
                 UnaryOperation::new(
