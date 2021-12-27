@@ -12,7 +12,7 @@ repository = "https://github.com/pen-lang/pen"
 proc-macro = true
 
 [dependencies]
-convert_case = "0.4"
+convert_case = "0.5"
 quote = "1"
 syn = { version = "1", features = ["full"] }
 
