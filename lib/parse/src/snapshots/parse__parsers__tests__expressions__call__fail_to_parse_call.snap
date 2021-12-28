@@ -9,7 +9,7 @@ Some(
         message: "unexpected )",
         expected: [
             "unary operator",
-            "async",
+            "go",
             "if",
             "\\(",
             "[",

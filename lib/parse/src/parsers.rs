@@ -23,7 +23,7 @@ const BUILT_IN_LITERALS: &[&str] = &["false", "none", "true"];
 const BUILT_IN_TYPES: &[&str] = &["any", "boolean", "none", "number", "string"];
 static KEYWORDS: Lazy<Vec<&str>> = Lazy::new(|| {
     [
-        "as", "async", "else", "export", "foreign", "if", "import", "type",
+        "as", "else", "export", "foreign", "go", "if", "import", "type",
     ]
     .iter()
     .chain(BUILT_IN_LITERALS)
@@ -421,7 +421,7 @@ fn prefix_operator<'a>() -> impl Parser<Stream<'a>, Output = UnaryOperator> {
 }
 
 fn async_operation<'a>() -> impl Parser<Stream<'a>, Output = AsyncOperation> {
-    (attempt(position().skip(keyword("async"))), lambda())
+    (attempt(position().skip(keyword("go"))), lambda())
         .map(|(position, lambda)| AsyncOperation::new(lambda, position))
 }
 
@@ -2108,8 +2108,8 @@ mod tests {
         #[test]
         fn parse_async_operation() {
             assert_eq!(
-                expression()
-                    .parse(stream("async \\() number { 42 }", ""))
+                async_operation()
+                    .parse(stream("go \\() number { 42 }", ""))
                     .unwrap()
                     .0,
                 AsyncOperation::new(
