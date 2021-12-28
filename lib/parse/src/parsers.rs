@@ -2125,7 +2125,6 @@ mod tests {
                     ),
                     Position::fake()
                 )
-                .into()
             );
         }
 

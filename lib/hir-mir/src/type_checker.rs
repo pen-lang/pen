@@ -1540,7 +1540,7 @@ mod tests {
                         SpawnOperation::new(
                             Lambda::new(
                                 vec![Argument::new("x", none_type.clone())],
-                                none_type.clone(),
+                                none_type,
                                 None::new(Position::fake()),
                                 Position::fake(),
                             ),
