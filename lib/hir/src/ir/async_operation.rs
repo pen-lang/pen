@@ -1,24 +1,23 @@
-use super::expression::Expression;
+use super::lambda::Lambda;
 use position::Position;
 use std::sync::Arc;
 
-// TODO Cache inferred types.
 #[derive(Clone, Debug, PartialEq)]
 pub struct AsyncOperation {
-    expression: Arc<Expression>,
+    function: Arc<Lambda>,
     position: Position,
 }
 
 impl AsyncOperation {
-    pub fn new(expression: impl Into<Expression>, position: Position) -> Self {
+    pub fn new(function: Lambda, position: Position) -> Self {
         Self {
-            expression: expression.into().into(),
+            function: function.into(),
             position,
         }
     }
 
-    pub fn expression(&self) -> &Expression {
-        &self.expression
+    pub fn function(&self) -> &Lambda {
+        &self.function
     }
 
     pub fn position(&self) -> &Position {

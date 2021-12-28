@@ -81,7 +81,7 @@ fn validate_expression(
                 validate(operation.rhs())?;
             }
             Operation::Async(operation) => {
-                validate(operation.expression())?;
+                validate_lambda(operation.function(), type_context)?;
             }
             Operation::Boolean(operation) => {
                 validate(operation.lhs())?;

@@ -279,7 +279,7 @@ fn transform_expression(
             )
             .into(),
             Operation::Async(operation) => AsyncOperation::new(
-                transform_expression(operation.expression(), variables)?,
+                transform_lambda(operation.function(), variables, type_context)?,
                 operation.position().clone(),
             )
             .into(),

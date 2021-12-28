@@ -260,7 +260,7 @@ fn infer_expression(
             )
             .into(),
             Operation::Async(operation) => AsyncOperation::new(
-                infer_expression(operation.expression(), variables)?,
+                infer_lambda(operation.function(), variables, type_context)?,
                 operation.position().clone(),
             )
             .into(),

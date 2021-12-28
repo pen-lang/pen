@@ -284,7 +284,7 @@ fn transform_operation(operation: &Operation, transform: &impl Fn(&Type) -> Type
         )
         .into(),
         Operation::Async(operation) => AsyncOperation::new(
-            transform_expression(operation.expression(), transform),
+            transform_lambda(operation.function(), transform),
             operation.position().clone(),
         )
         .into(),

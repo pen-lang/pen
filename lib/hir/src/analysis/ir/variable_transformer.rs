@@ -224,7 +224,7 @@ fn transform_operation(
         )
         .into(),
         Operation::Async(operation) => AsyncOperation::new(
-            transform_expression(operation.expression(), transform),
+            transform_lambda(operation.function(), transform),
             operation.position().clone(),
         )
         .into(),
