@@ -1,14 +1,14 @@
 use super::{
     arithmetic_operation::ArithmeticOperation, boolean_operation::BooleanOperation,
     equality_operation::EqualityOperation, not_operation::NotOperation,
-    order_operation::OrderOperation, try_operation::TryOperation, AsyncOperation,
+    order_operation::OrderOperation, try_operation::TryOperation, SpawnOperation,
 };
 use position::Position;
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum Operation {
     Arithmetic(ArithmeticOperation),
-    Async(AsyncOperation),
+    Async(SpawnOperation),
     Boolean(BooleanOperation),
     Equality(EqualityOperation),
     Not(NotOperation),
@@ -36,8 +36,8 @@ impl From<ArithmeticOperation> for Operation {
     }
 }
 
-impl From<AsyncOperation> for Operation {
-    fn from(operation: AsyncOperation) -> Self {
+impl From<SpawnOperation> for Operation {
+    fn from(operation: SpawnOperation) -> Self {
         Self::Async(operation)
     }
 }

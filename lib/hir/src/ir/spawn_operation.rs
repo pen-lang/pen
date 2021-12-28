@@ -3,12 +3,12 @@ use position::Position;
 use std::sync::Arc;
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct AsyncOperation {
+pub struct SpawnOperation {
     function: Arc<Lambda>,
     position: Position,
 }
 
-impl AsyncOperation {
+impl SpawnOperation {
     pub fn new(function: Lambda, position: Position) -> Self {
         Self {
             function: function.into(),

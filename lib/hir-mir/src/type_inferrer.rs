@@ -259,7 +259,7 @@ fn infer_expression(
                 operation.position().clone(),
             )
             .into(),
-            Operation::Async(operation) => AsyncOperation::new(
+            Operation::Async(operation) => SpawnOperation::new(
                 infer_lambda(operation.function(), variables, type_context)?,
                 operation.position().clone(),
             )

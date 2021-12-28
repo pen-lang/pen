@@ -271,10 +271,10 @@ mod tests {
     }
 
     #[test]
-    fn extract_from_async_operation() {
+    fn extract_from_spawn_operation() {
         assert_eq!(
             extract_from_expression(
-                &AsyncOperation::new(
+                &SpawnOperation::new(
                     Lambda::new(
                         vec![],
                         types::None::new(Position::fake()),

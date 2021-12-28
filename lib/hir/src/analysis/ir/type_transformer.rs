@@ -283,7 +283,7 @@ fn transform_operation(operation: &Operation, transform: &impl Fn(&Type) -> Type
             operation.position().clone(),
         )
         .into(),
-        Operation::Async(operation) => AsyncOperation::new(
+        Operation::Async(operation) => SpawnOperation::new(
             transform_lambda(operation.function(), transform),
             operation.position().clone(),
         )

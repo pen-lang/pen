@@ -420,9 +420,9 @@ fn prefix_operator<'a>() -> impl Parser<Stream<'a>, Output = UnaryOperator> {
     choice((concrete_prefix_operator("!", UnaryOperator::Not),)).expected("unary operator")
 }
 
-fn async_operation<'a>() -> impl Parser<Stream<'a>, Output = AsyncOperation> {
+fn spawn_operation<'a>() -> impl Parser<Stream<'a>, Output = SpawnOperation> {
     (attempt(position().skip(keyword("go"))), lambda())
-        .map(|(position, lambda)| AsyncOperation::new(lambda, position))
+        .map(|(position, lambda)| SpawnOperation::new(lambda, position))
 }
 
 fn concrete_prefix_operator<'a>(
@@ -484,7 +484,7 @@ fn try_operator<'a>() -> impl Parser<Stream<'a>, Output = SuffixOperator> {
 fn atomic_expression<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
     lazy(|| {
         no_partial(choice((
-            async_operation().map(Expression::from),
+            spawn_operation().map(Expression::from),
             if_type().map(Expression::from),
             if_list().map(Expression::from),
             if_().map(Expression::from),
@@ -2106,13 +2106,13 @@ mod tests {
         }
 
         #[test]
-        fn parse_async_operation() {
+        fn parse_spawn_operation() {
             assert_eq!(
-                async_operation()
+                spawn_operation()
                     .parse(stream("go \\() number { 42 }", ""))
                     .unwrap()
                     .0,
-                AsyncOperation::new(
+                SpawnOperation::new(
                     Lambda::new(
                         vec![],
                         types::Number::new(Position::fake()),

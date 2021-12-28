@@ -391,7 +391,7 @@ fn check_operation(
         }
         Operation::Async(operation) => {
             if !operation.function().arguments().is_empty() {
-                return Err(CompileError::AsyncOperationArguments(
+                return Err(CompileError::SpawnOperationArguments(
                     operation.position().clone(),
                 ));
             }
@@ -1497,7 +1497,7 @@ mod tests {
         }
 
         #[test]
-        fn check_async_operation() {
+        fn check_spawn_operation() {
             check_module(&Module::empty().set_definitions(vec![Definition::fake(
                 "f",
                 Lambda::new(
@@ -1507,7 +1507,7 @@ mod tests {
                         types::None::new(Position::fake()),
                         Position::fake(),
                     ),
-                    AsyncOperation::new(
+                    SpawnOperation::new(
                         Lambda::new(
                             vec![],
                             types::None::new(Position::fake()),
@@ -1524,7 +1524,7 @@ mod tests {
         }
 
         #[test]
-        fn fail_to_check_async_operation() {
+        fn fail_to_check_spawn_operation() {
             let none_type = types::None::new(Position::fake());
 
             assert_eq!(
@@ -1537,7 +1537,7 @@ mod tests {
                             none_type.clone(),
                             Position::fake(),
                         ),
-                        AsyncOperation::new(
+                        SpawnOperation::new(
                             Lambda::new(
                                 vec![Argument::new("x", none_type.clone())],
                                 none_type.clone(),
@@ -1550,7 +1550,7 @@ mod tests {
                     ),
                     false,
                 )])),
-                Err(CompileError::AsyncOperationArguments(Position::fake()))
+                Err(CompileError::SpawnOperationArguments(Position::fake()))
             );
         }
     }

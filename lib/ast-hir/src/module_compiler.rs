@@ -112,7 +112,7 @@ fn compile_block(block: &ast::Block) -> Result<ir::Expression, CompileError> {
 
 fn compile_expression(expression: &ast::Expression) -> Result<ir::Expression, CompileError> {
     Ok(match expression {
-        ast::Expression::AsyncOperation(operation) => ir::AsyncOperation::new(
+        ast::Expression::SpawnOperation(operation) => ir::SpawnOperation::new(
             compile_lambda(operation.function())?,
             operation.position().clone(),
         )

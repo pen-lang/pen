@@ -9,7 +9,7 @@ use std::{
 pub enum CompileError {
     AnyEqualOperation(Position),
     AnyTypeBranch(Position),
-    AsyncOperationArguments(Position),
+    SpawnOperationArguments(Position),
     DuplicateFunctionNames(Position, Position),
     DuplicateTypeNames(Position, Position),
     FunctionEqualOperation(Position),
@@ -56,10 +56,10 @@ impl Display for CompileError {
                     position
                 )
             }
-            Self::AsyncOperationArguments(position) => {
+            Self::SpawnOperationArguments(position) => {
                 write!(
                     formatter,
-                    "lambda expression in async operation cannot have any argument\n{}",
+                    "lambda expression in spawn operation cannot have any argument\n{}",
                     position
                 )
             }
