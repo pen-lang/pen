@@ -8,7 +8,7 @@ use position::Position;
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum Expression {
-    SpawnOperation(AsyncOperation),
+    SpawnOperation(SpawnOperation),
     BinaryOperation(BinaryOperation),
     Boolean(Boolean),
     Call(Call),
