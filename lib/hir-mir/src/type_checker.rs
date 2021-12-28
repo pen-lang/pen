@@ -390,6 +390,12 @@ fn check_operation(
             number_type
         }
         Operation::Async(operation) => {
+            if !operation.function().arguments().is_empty() {
+                return Err(CompileError::AsyncOperationArguments(
+                    operation.position().clone(),
+                ));
+            }
+
             check_lambda(operation.function(), variables, type_context)?.into()
         }
         Operation::Boolean(operation) => {
@@ -1487,6 +1493,64 @@ mod tests {
                     Position::fake(),
                     Position::fake()
                 ))
+            );
+        }
+
+        #[test]
+        fn check_async_operation() {
+            check_module(&Module::empty().set_definitions(vec![Definition::fake(
+                "f",
+                Lambda::new(
+                    vec![],
+                    types::Function::new(
+                        vec![],
+                        types::None::new(Position::fake()),
+                        Position::fake(),
+                    ),
+                    AsyncOperation::new(
+                        Lambda::new(
+                            vec![],
+                            types::None::new(Position::fake()),
+                            None::new(Position::fake()),
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    ),
+                    Position::fake(),
+                ),
+                false,
+            )]))
+            .unwrap();
+        }
+
+        #[test]
+        fn fail_to_check_async_operation() {
+            let none_type = types::None::new(Position::fake());
+
+            assert_eq!(
+                check_module(&Module::empty().set_definitions(vec![Definition::fake(
+                    "f",
+                    Lambda::new(
+                        vec![],
+                        types::Function::new(
+                            vec![none_type.clone().into()],
+                            none_type.clone(),
+                            Position::fake(),
+                        ),
+                        AsyncOperation::new(
+                            Lambda::new(
+                                vec![Argument::new("x", none_type.clone())],
+                                none_type.clone(),
+                                None::new(Position::fake()),
+                                Position::fake(),
+                            ),
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    ),
+                    false,
+                )])),
+                Err(CompileError::AsyncOperationArguments(Position::fake()))
             );
         }
     }
