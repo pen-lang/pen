@@ -134,7 +134,12 @@ pub fn extract_from_expression(
         Expression::Number(number) => types::Number::new(number.position().clone()).into(),
         Expression::Operation(operation) => match operation {
             Operation::Arithmetic(_) => types::Number::new(expression.position().clone()).into(),
-            Operation::Async(_) => todo!(),
+            Operation::Async(operation) => types::Function::new(
+                vec![],
+                operation.function().result_type().clone(),
+                operation.position().clone(),
+            )
+            .into(),
             Operation::Boolean(_)
             | Operation::Equality(_)
             | Operation::Not(_)
@@ -262,6 +267,30 @@ mod tests {
                 &TypeContext::dummy(Default::default(), Default::default()),
             ),
             Err(CompileError::TypeNotInferred(Position::fake())),
+        );
+    }
+
+    #[test]
+    fn extract_from_async_operation() {
+        assert_eq!(
+            extract_from_expression(
+                &AsyncOperation::new(
+                    Lambda::new(
+                        vec![],
+                        types::None::new(Position::fake()),
+                        None::new(Position::fake()),
+                        Position::fake()
+                    ),
+                    Position::fake()
+                )
+                .into(),
+                &Default::default(),
+                &TypeContext::dummy(Default::default(), Default::default()),
+            ),
+            Ok(
+                types::Function::new(vec![], types::None::new(Position::fake()), Position::fake())
+                    .into()
+            )
         );
     }
 }
