@@ -171,7 +171,7 @@ checksum = "fb4a24b1aaf0fd0ce8b45161144d6f42cd91677fd5940fd431183eb023b3a2b8"
 name = "core"
 version = "0.1.0"
 dependencies = [
- "pen-ffi 0.3.16 (registry+https://github.com/rust-lang/crates.io-index)",
+ "pen-ffi 0.3.16",
 ]
 
 [[package]]
@@ -211,7 +211,7 @@ checksum = "398ea4fabe40b9b0d885340a2a991a44c8a645624075ad966d21f88688e2b69e"
 [[package]]
 name = "fmm"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#cd24dc1327335fce1616deca53c1c9fdc63aea99"
+source = "git+https://github.com/raviqqe/fmm?branch=main#08a0e07d8f341e4f3cffcf17239010d5719a48d1"
 dependencies = [
  "hamt",
  "once_cell",
@@ -222,7 +222,7 @@ dependencies = [
 [[package]]
 name = "fmm-c"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#cd24dc1327335fce1616deca53c1c9fdc63aea99"
+source = "git+https://github.com/raviqqe/fmm?branch=main#08a0e07d8f341e4f3cffcf17239010d5719a48d1"
 dependencies = [
  "fmm",
  "tempfile",
@@ -231,7 +231,7 @@ dependencies = [
 [[package]]
 name = "fmm-llvm"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#cd24dc1327335fce1616deca53c1c9fdc63aea99"
+source = "git+https://github.com/raviqqe/fmm?branch=main#08a0e07d8f341e4f3cffcf17239010d5719a48d1"
 dependencies = [
  "fmm",
  "hamt",
@@ -577,14 +577,6 @@ dependencies = [
 [[package]]
 name = "pen-ffi"
 version = "0.3.16"
-dependencies = [
- "pen-ffi-macro 0.1.12",
- "tokio",
-]
-
-[[package]]
-name = "pen-ffi"
-version = "0.3.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0771df6fe10bd0da53cf27b53c811015acd8ed89eb605cd23c4f0a4e0e61bc4d"
 dependencies = [
@@ -592,11 +584,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "pen-ffi"
+version = "0.3.17"
+dependencies = [
+ "pen-ffi-macro 0.1.12",
+ "tokio",
+]
+
+[[package]]
 name = "pen-ffi-macro"
 version = "0.1.12"
 dependencies = [
  "convert_case 0.5.0",
- "pen-ffi 0.3.16",
+ "pen-ffi 0.3.17",
  "quote",
  "syn",
 ]
@@ -660,7 +660,7 @@ checksum = "ed0cfbc8191465bed66e1718596ee0b0b35d5ee1f41c5df2189d0fe8bde535ba"
 name = "prelude"
 version = "0.1.0"
 dependencies = [
- "pen-ffi 0.3.16 (registry+https://github.com/rust-lang/crates.io-index)",
+ "pen-ffi 0.3.16",
 ]
 
 [[package]]
