@@ -1,15 +1,15 @@
-use std::{os::raw::c_void, ptr::drop_in_place};
+use std::ptr::drop_in_place;
 
 #[repr(C)]
 #[derive(Clone)]
 pub struct Closure<T = ()> {
-    entry_function: *const c_void,
+    entry_function: *const u8,
     drop_function: extern "C" fn(&mut Self),
     payload: T,
 }
 
 impl<T> Closure<T> {
-    pub fn new(entry_function: *const c_void, payload: T) -> Self {
+    pub fn new(entry_function: *const u8, payload: T) -> Self {
         Self {
             entry_function,
             drop_function,
@@ -17,7 +17,7 @@ impl<T> Closure<T> {
         }
     }
 
-    pub fn entry_function(&self) -> *const c_void {
+    pub fn entry_function(&self) -> *const u8 {
         self.entry_function
     }
 
