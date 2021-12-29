@@ -140,7 +140,7 @@ pub fn compile_unsized_closure(
     )
 }
 
-pub fn compile_raw_closure(
+fn compile_raw_closure(
     entry_function: fmm::types::Function,
     environment: impl Into<fmm::types::Type>,
 ) -> fmm::types::Record {
