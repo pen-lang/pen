@@ -1,6 +1,6 @@
 mod debug;
-mod spawn;
 mod heap;
+mod spawn;
 mod unreachable;
 mod utilities;
 
