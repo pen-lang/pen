@@ -1,4 +1,5 @@
 mod debug;
+mod spawn;
 mod heap;
 mod unreachable;
 mod utilities;
