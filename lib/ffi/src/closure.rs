@@ -1,27 +1,37 @@
-use std::os::raw::c_void;
+use std::{os::raw::c_void, ptr::drop_in_place};
 
 #[repr(C)]
 #[derive(Clone)]
-pub struct Closure {
-    entry_pointer: *const c_void,
-    drop_function: extern "C" fn(*mut u8),
-    arity: usize,
+pub struct Closure<T = ()> {
+    entry_function: *const c_void,
+    drop_function: extern "C" fn(&mut Self),
+    payload: T,
 }
 
-impl Closure {
-    pub fn new(entry_pointer: *const c_void, arity: usize) -> Self {
+impl<T> Closure<T> {
+    pub fn new(entry_function: *const c_void, payload: T) -> Self {
         Self {
-            entry_pointer,
-            drop_function: drop_nothing,
-            arity,
+            entry_function,
+            drop_function,
+            payload,
         }
+    }
+
+    pub fn entry_function(&self) -> *const c_void {
+        self.entry_function
+    }
+
+    pub fn payload(&mut self) -> &mut T {
+        &mut self.payload
     }
 }
 
-extern "C" fn drop_nothing(_: *mut u8) {}
+extern "C" fn drop_function<T>(closure: &mut Closure<T>) {
+    unsafe { drop_in_place(closure.payload()) }
+}
 
-impl Drop for Closure {
+impl<T> Drop for Closure<T> {
     fn drop(&mut self) {
-        (self.drop_function)(self as *mut Self as *mut u8);
+        (self.drop_function)(self);
     }
 }
