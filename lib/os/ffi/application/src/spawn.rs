@@ -50,9 +50,7 @@ extern "C" fn store_result(stack: &mut Stack, value: ffi::Any) -> ffi::cps::Resu
 }
 
 #[no_mangle]
-pub extern "C" fn _pen_spawn(
-    closure: ffi::Arc<ffi::Closure>,
-) -> ffi::Arc<ffi::Closure<SpawnFuture>> {
+extern "C" fn _pen_spawn(closure: ffi::Arc<ffi::Closure>) -> ffi::Arc<ffi::Closure<SpawnFuture>> {
     let handle = spawn(async move {
         let mut trampoline: Option<(StepFunction, ContinuationFunction)> = None;
         let mut stack = Stack::new(INITIAL_STACK_SIZE, None);
