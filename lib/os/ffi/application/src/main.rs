@@ -39,6 +39,7 @@ fn main() {
                 stack.set_context(context);
 
                 let (step, continue_) = trampoline;
+                // TODO Pass a closure environment (or a null pointer) for the first call.
                 unsafe { step(&mut stack, continue_) };
 
                 if let Some(code) = *stack.storage() {
