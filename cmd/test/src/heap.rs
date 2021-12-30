@@ -1,4 +1,4 @@
-use std::lloc::Layout;
+use std::alloc::Layout;
 
 #[no_mangle]
 pub extern "C" fn _pen_malloc(size: usize) -> *mut u8 {
