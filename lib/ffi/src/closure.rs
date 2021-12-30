@@ -42,3 +42,18 @@ impl<T> Drop for Closure<T> {
         })(self);
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::{ptr::null, sync::Arc, thread::spawn};
+
+    #[test]
+    fn send() {
+        let closure = Arc::new(Closure::new(null(), ()));
+
+        spawn(move || {
+            closure.entry_function();
+        });
+    }
+}
