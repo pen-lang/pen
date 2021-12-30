@@ -1,8 +1,5 @@
 use futures::future::poll_fn;
-use std::future::Future;
-use std::intrinsics::transmute;
-use std::ptr;
-use std::{pin::Pin, task::Poll};
+use std::{future::Future, intrinsics::transmute, pin::Pin, ptr, task::Poll};
 use tokio::{spawn, task::JoinHandle};
 
 type SpawnFuture = Pin<Box<JoinHandle<ffi::Any>>>;
