@@ -1,5 +1,5 @@
 use crate::utilities::is_os_debug;
-use std::{alloc::Layout, os::raw::c_void};
+use std::alloc::Layout;
 
 #[no_mangle]
 pub extern "C" fn _pen_malloc(size: usize) -> *mut u8 {
