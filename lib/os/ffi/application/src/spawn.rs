@@ -72,7 +72,7 @@ pub extern "C" fn _pen_spawn(
                     entry_function(
                         &mut stack,
                         store_result,
-                        &mut *(todo!("closure.payload()") as *mut () as *mut u8),
+                        &mut *(closure.payload() as *mut u8),
                     )
                 };
             }
