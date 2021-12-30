@@ -62,6 +62,10 @@ impl<T: Default> Default for Arc<T> {
     }
 }
 
+unsafe impl<T: Send + Sync> Send for Arc<T> {}
+
+unsafe impl<T: Send + Sync> Sync for Arc<T> {}
+
 #[cfg(test)]
 mod tests {
     use super::*;
