@@ -25,13 +25,13 @@ impl<T> Closure<T> {
         self.entry_function.load(Ordering::SeqCst)
     }
 
-    pub fn payload(&mut self) -> &mut T {
-        &mut self.payload
+    pub fn payload(&self) -> *const T {
+        &self.payload
     }
 }
 
 extern "C" fn drop_function<T>(closure: &mut Closure<T>) {
-    unsafe { drop_in_place(closure.payload()) }
+    unsafe { drop_in_place(&mut (closure.payload() as *mut T)) }
 }
 
 impl<T> Drop for Closure<T> {
