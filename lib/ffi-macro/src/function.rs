@@ -98,12 +98,12 @@ fn generate_sync_function(function: &ItemFn, crate_path: &Path) -> TokenStream {
     let output_type = parse_output_type(function, crate_path);
     let statements = parse_statements(function, crate_path);
 
-    quote! {
+    (quote! {
         #[no_mangle]
         extern "C" fn #function_name(#arguments) -> #output_type {
             #(#statements);*
         }
-    }
+    })
     .into()
 }
 

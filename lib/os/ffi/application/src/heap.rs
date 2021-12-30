@@ -1,11 +1,11 @@
 use crate::utilities::is_os_debug;
-use std::{alloc::Layout, os::raw::c_void};
+use std::alloc::Layout;
 
 #[no_mangle]
-pub extern "C" fn _pen_malloc(size: usize) -> *mut c_void {
+pub extern "C" fn _pen_malloc(size: usize) -> *mut u8 {
     let pointer = (unsafe {
         std::alloc::alloc(Layout::from_size_align(size, ffi::DEFAULT_MEMORY_ALIGNMENT).unwrap())
-    }) as *mut c_void;
+    }) as *mut u8;
 
     if is_os_debug() {
         eprintln!("malloc: {} -> {:x}", size, pointer as usize);
@@ -15,7 +15,7 @@ pub extern "C" fn _pen_malloc(size: usize) -> *mut c_void {
 }
 
 #[no_mangle]
-pub extern "C" fn _pen_realloc(old_pointer: *mut c_void, size: usize) -> *mut c_void {
+pub extern "C" fn _pen_realloc(old_pointer: *mut u8, size: usize) -> *mut u8 {
     // Layouts are expected to be ignored by the global allocator.
     let new_pointer = (unsafe {
         std::alloc::realloc(
@@ -23,7 +23,7 @@ pub extern "C" fn _pen_realloc(old_pointer: *mut c_void, size: usize) -> *mut c_
             Layout::from_size_align(0, ffi::DEFAULT_MEMORY_ALIGNMENT).unwrap(),
             size,
         )
-    }) as *mut c_void;
+    }) as *mut u8;
 
     if is_os_debug() {
         eprintln!(
