@@ -4,24 +4,24 @@ version = 3
 
 [[package]]
 name = "convert_case"
-version = "0.4.0"
+version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6245d59a3e82a7fc217c5828a6692dbc6dfb63a0c8c90495621f7b9d79704a0e"
+checksum = "fb4a24b1aaf0fd0ce8b45161144d6f42cd91677fd5940fd431183eb023b3a2b8"
 
 [[package]]
 name = "pen-ffi"
-version = "0.3.17"
+version = "0.3.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0bf091d88f38b930b23b11744d3b6138f9f5ac990f037667dcdca540db98568e"
+checksum = "be7f47c74a8ad1a6a34a80dd5b271088ce6232b6b80f15221222a76b7ea55776"
 dependencies = [
  "pen-ffi-macro",
 ]
 
 [[package]]
 name = "pen-ffi-macro"
-version = "0.1.12"
+version = "0.1.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4b1f06c5d4e0ad21b49a2d48e0ee39669d9eb8e217da859d618ffbea0236fff5"
+checksum = "3f0a6d26ee9bdd0a5325abc23abe66db69db7cae1dcbec3a2b6e0245153adc6f"
 dependencies = [
  "convert_case",
  "quote",
