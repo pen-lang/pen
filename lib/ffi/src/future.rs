@@ -1,9 +1,6 @@
-use crate::cps;
-use crate::{Arc, Closure};
+use crate::{cps, Arc, Closure};
 use futures::future::poll_fn;
-use std::future::Future;
-use std::intrinsics::transmute;
-use std::task::Poll;
+use std::{future::Future, intrinsics::transmute, task::Poll};
 
 type Stack<O> = crate::cps::AsyncStack<Option<O>>;
 type InitialStepFunction<O> = unsafe extern "C" fn(
