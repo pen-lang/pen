@@ -16,7 +16,7 @@ type ContinuationFunction<O> = crate::cps::ContinuationFunction<O, Option<O>>;
 
 const INITIAL_STACK_SIZE: usize = 64;
 
-pub fn convert_closure_to_future<T, O: Clone>(closure: Arc<Closure<T>>) -> impl Future<Output = O> {
+pub fn convert_to_future<T, O: Clone>(closure: Arc<Closure<T>>) -> impl Future<Output = O> {
     async move {
         let mut trampoline: Option<(StepFunction<O>, ContinuationFunction<O>)> = None;
         let mut stack = Stack::new(INITIAL_STACK_SIZE, None);
@@ -73,8 +73,7 @@ mod tests {
         let value = 42.0;
 
         assert_eq!(
-            convert_closure_to_future::<_, Number>(Arc::new(Closure::new(foo as *const u8, value)))
-                .await,
+            convert_to_future::<_, Number>(Arc::new(Closure::new(foo as *const u8, value))).await,
             value.into()
         );
     }
