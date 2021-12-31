@@ -109,16 +109,8 @@ Feature: OS
     readFile = \(ctx Context) none | error {
       f = File'Open(ctx, "foo.txt")?
       d = File'Read(ctx, f)?
-      f = File'OpenWithOptions(
-        ctx,
-        "bar.txt",
-        OpenOptions{
-          ...OpenOptions'Default(),
-          Create: true,
-          Write: true,
-        },
-      )?
-      File'Write(ctx, f, d)?
+
+      File'Write(ctx, File'StdOut(), d)?
 
       none
     }
@@ -134,7 +126,7 @@ Feature: OS
     And a file named "foo.txt" with "foo"
     When I successfully run `pen build`
     Then I successfully run `./app`
-    And the file "bar.txt" should contain "foo"
+    And the stdout from "./app" should contain exactly "foo"
 
   Scenario: Read a file until a limit
     Given a file named "main.pen" with:
