@@ -31,7 +31,7 @@ fn main() {
         // TODO When we remove this let statement, tasks are not awaited
         // on shutdown of the runtime somehow.
         #[allow(clippy::let_and_return)]
-        let code = Runtime::new().unwrap().block_on(async {
+        let code = Runtime::new().unwrap().block_on(async move {
             let mut trampoline: (StepFunction, ContinuationFunction) = (_pen_os_main, exit);
             let mut stack = Stack::new(INITIAL_STACK_CAPACITY, None);
 
