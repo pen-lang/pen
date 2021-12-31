@@ -100,6 +100,8 @@ impl<S> AsyncStack<S> {
     }
 }
 
+unsafe impl<S: Send> Send for AsyncStack<S> {}
+
 impl<S> Deref for AsyncStack<S> {
     type Target = Stack;
 

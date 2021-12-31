@@ -55,18 +55,18 @@ dependencies = [
 
 [[package]]
 name = "pen-ffi"
-version = "0.3.19"
+version = "0.3.23"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "be7f47c74a8ad1a6a34a80dd5b271088ce6232b6b80f15221222a76b7ea55776"
+checksum = "308e9e6f50551bbfff312ce40cf65c71eb2c6fe88ce41f7511ed615ad8b3fb61"
 dependencies = [
  "pen-ffi-macro",
 ]
 
 [[package]]
 name = "pen-ffi-macro"
-version = "0.1.14"
+version = "0.1.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3f0a6d26ee9bdd0a5325abc23abe66db69db7cae1dcbec3a2b6e0245153adc6f"
+checksum = "0287f09c326ac3473412e52d3a2c3d10eb3ff21da968e5ef3a5bd15edf102ca0"
 dependencies = [
  "convert_case",
  "quote",
@@ -75,9 +75,9 @@ dependencies = [
 
 [[package]]
 name = "ppv-lite86"
-version = "0.2.15"
+version = "0.2.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ed0cfbc8191465bed66e1718596ee0b0b35d5ee1f41c5df2189d0fe8bde535ba"
+checksum = "eb9f9e6e233e5c4a35559a617bf40a4ec447db2e84c20b55a6f83167b7e57872"
 
 [[package]]
 name = "proc-macro2"
