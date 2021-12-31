@@ -234,6 +234,7 @@ dependencies = [
 name = "os-app"
 version = "0.1.0"
 dependencies = [
+ "futures",
  "once_cell",
  "pen-ffi",
  "tokio",
