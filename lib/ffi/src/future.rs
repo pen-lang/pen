@@ -1,6 +1,6 @@
 use crate::{cps, Arc, Closure};
 use futures::future::poll_fn;
-use std::{future::Future, intrinsics::transmute, task::Poll};
+use std::{intrinsics::transmute, task::Poll};
 
 type Stack<O> = crate::cps::AsyncStack<Option<O>>;
 type InitialStepFunction<O> = unsafe extern "C" fn(
@@ -13,37 +13,35 @@ type ContinuationFunction<O> = crate::cps::ContinuationFunction<O, Option<O>>;
 
 const INITIAL_STACK_SIZE: usize = 64;
 
-pub fn convert_to_future<T, O: Clone>(closure: Arc<Closure<T>>) -> impl Future<Output = O> {
-    async move {
-        let mut trampoline: Option<(StepFunction<O>, ContinuationFunction<O>)> = None;
-        let mut stack = Stack::new(INITIAL_STACK_SIZE, None);
+pub async fn async_closure<T, O: Clone>(closure: Arc<Closure<T>>) -> O {
+    let mut trampoline: Option<(StepFunction<O>, ContinuationFunction<O>)> = None;
+    let mut stack = Stack::new(INITIAL_STACK_SIZE, None);
 
-        poll_fn(move |context| {
-            stack.set_context(context);
+    poll_fn(move |context| {
+        stack.set_context(context);
 
-            if let Some((step, continue_)) = trampoline {
-                unsafe { step(&mut stack, continue_) };
-            } else {
-                unsafe {
-                    let entry_function =
-                        transmute::<_, InitialStepFunction<O>>(closure.entry_function());
-                    entry_function(
-                        &mut stack,
-                        store_result,
-                        &mut *(closure.payload() as *mut u8),
-                    )
-                };
-            }
+        if let Some((step, continue_)) = trampoline {
+            unsafe { step(&mut stack, continue_) };
+        } else {
+            unsafe {
+                let entry_function =
+                    transmute::<_, InitialStepFunction<O>>(closure.entry_function());
+                entry_function(
+                    &mut stack,
+                    store_result,
+                    &mut *(closure.payload() as *mut u8),
+                )
+            };
+        }
 
-            if let Some(value) = stack.storage() {
-                value.clone().into()
-            } else {
-                trampoline = Some(stack.resume());
-                Poll::Pending
-            }
-        })
-        .await
-    }
+        if let Some(value) = stack.storage() {
+            value.clone().into()
+        } else {
+            trampoline = Some(stack.resume());
+            Poll::Pending
+        }
+    })
+    .await
 }
 
 extern "C" fn store_result<O>(stack: &mut Stack<O>, value: O) -> cps::Result {
@@ -70,7 +68,7 @@ mod tests {
         let value = 42.0;
 
         assert_eq!(
-            convert_to_future::<_, Number>(Arc::new(Closure::new(foo as *const u8, value))).await,
+            async_closure::<_, Number>(Arc::new(Closure::new(foo as *const u8, value))).await,
             value.into()
         );
     }
