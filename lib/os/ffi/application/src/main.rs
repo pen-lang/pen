@@ -26,14 +26,14 @@ fn main() {
     process::exit({
         // TODO When we remove this let statement, tasks are not awaited
         // on shutdown of the runtime somehow.
-        #[allow(clippy::let_and_return)]
-        let code = Runtime::new()
-            .unwrap()
-            .block_on(ffi::async_closure(ffi::Arc::new(ffi::Closure::new(
-                _pen_os_main as *const u8,
-                (),
-            ))));
+        let code: ffi::Number =
+            Runtime::new()
+                .unwrap()
+                .block_on(ffi::async_closure(ffi::Arc::new(ffi::Closure::new(
+                    _pen_os_main as *const u8,
+                    (),
+                ))));
 
-        code
+        f64::from(code) as i32
     });
 }
