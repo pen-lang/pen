@@ -13,7 +13,7 @@ type Stack = ffi::cps::AsyncStack<Option<ExitCode>>;
 type StepFunction = ffi::cps::StepFunction<ExitCode, Option<ExitCode>>;
 type ContinuationFunction = ffi::cps::ContinuationFunction<ExitCode, Option<ExitCode>>;
 
-const INITIAL_STACK_CAPACITY: usize = 256;
+const INITIAL_STACK_CAPACITY: usize = 64;
 
 #[cfg(not(test))]
 #[link(name = "main")]
