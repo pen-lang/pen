@@ -23,17 +23,12 @@ unsafe extern "C" fn _pen_os_main(_: &mut Stack, _: ContinuationFunction) -> ffi
 }
 
 fn main() {
-    process::exit({
-        // TODO When we remove this let statement, tasks are not awaited
-        // on shutdown of the runtime somehow.
-        let code: ffi::Number =
-            Runtime::new()
-                .unwrap()
-                .block_on(ffi::async_closure(ffi::Arc::new(ffi::Closure::new(
-                    _pen_os_main as *const u8,
-                    (),
-                ))));
+    let code: ffi::Number = Runtime::new()
+        .unwrap()
+        .block_on(ffi::async_closure(ffi::Arc::new(ffi::Closure::new(
+            _pen_os_main as *const u8,
+            (),
+        ))));
 
-        f64::from(code) as i32
-    });
+    process::exit(f64::from(code) as i32);
 }
