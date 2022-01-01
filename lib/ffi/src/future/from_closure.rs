@@ -13,7 +13,7 @@ type ContinuationFunction<O> = cps::ContinuationFunction<O, Option<O>>;
 
 const INITIAL_STACK_SIZE: usize = 64;
 
-pub async fn closure<T, O: Clone>(closure: Arc<Closure<T>>) -> O {
+pub async fn from_closure<T, O: Clone>(closure: Arc<Closure<T>>) -> O {
     let mut trampoline: Option<(StepFunction<O>, ContinuationFunction<O>)> = None;
     let mut stack = Stack::new(INITIAL_STACK_SIZE, None);
 

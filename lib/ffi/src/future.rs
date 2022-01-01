@@ -1,5 +1,5 @@
-mod closure;
+mod from_closure;
 mod to_closure;
 
-pub use closure::*;
+pub use from_closure::*;
 pub use to_closure::*;
