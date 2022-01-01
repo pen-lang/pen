@@ -33,9 +33,9 @@ extern "C" fn resume<O, F: Future<Output = O>>(
 extern "C" fn get_result<O, F: Future<Output = O>>(
     stack: &mut Stack<O>,
     continue_: ContinuationFunction<O>,
-    future: *mut Pin<Box<F>>,
+    environment: *mut Pin<Box<F>>,
 ) -> cps::Result {
-    poll(stack, continue_, unsafe { ptr::read(future) })
+    poll(stack, continue_, unsafe { ptr::read(environment) })
 }
 
 pub fn to_closure<O, F: Future<Output = O>>(future: F) -> Arc<Closure<Pin<Box<F>>>> {

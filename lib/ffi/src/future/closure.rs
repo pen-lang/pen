@@ -2,14 +2,14 @@ use crate::{cps, Arc, Closure};
 use futures::future::poll_fn;
 use std::{intrinsics::transmute, task::Poll};
 
-type Stack<'a, O> = crate::cps::AsyncStack<'a, Option<O>>;
+type Stack<'a, O> = cps::AsyncStack<'a, Option<O>>;
 type InitialStepFunction<O> = unsafe extern "C" fn(
     stack: &mut Stack<O>,
     continuation: ContinuationFunction<O>,
     environment: &mut u8,
-) -> crate::cps::Result;
+) -> cps::Result;
 type StepFunction<O> = cps::StepFunction<O, Option<O>>;
-type ContinuationFunction<O> = crate::cps::ContinuationFunction<O, Option<O>>;
+type ContinuationFunction<O> = cps::ContinuationFunction<O, Option<O>>;
 
 const INITIAL_STACK_SIZE: usize = 64;
 
