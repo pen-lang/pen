@@ -4,7 +4,7 @@ mod spawn;
 mod unreachable;
 mod utilities;
 
-use std::process;
+use std::process::exit;
 use tokio::runtime::Runtime;
 
 type ExitCode = ffi::Number;
@@ -31,5 +31,5 @@ fn main() {
             (),
         ))));
 
-    process::exit(f64::from(code) as i32);
+    exit(f64::from(code) as i32);
 }
