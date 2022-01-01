@@ -1,19 +1,10 @@
-use futures::future::poll_fn;
-use std::{future::Future, intrinsics::transmute, pin::Pin, ptr, task::Poll};
+use std::{future::Future, pin::Pin, ptr, task::Poll};
 use tokio::{spawn, task::JoinHandle};
 
 type SpawnFuture = Pin<Box<JoinHandle<ffi::Any>>>;
 type Storage = Option<ffi::Any>;
 type Stack = ffi::cps::AsyncStack<Storage>;
-type InitialStepFunction = unsafe extern "C" fn(
-    stack: &mut Stack,
-    continuation: ContinuationFunction,
-    environment: &mut u8,
-) -> ffi::cps::Result;
-type StepFunction = ffi::cps::StepFunction<ffi::Any, Storage>;
 type ContinuationFunction = ffi::cps::ContinuationFunction<ffi::Any, Storage>;
-
-const INITIAL_STACK_SIZE: usize = 64;
 
 extern "C" fn poll(
     stack: &mut Stack,
@@ -43,44 +34,11 @@ extern "C" fn get_spawn_result(
     poll(stack, continue_, unsafe { ptr::read(future) })
 }
 
-extern "C" fn store_result(stack: &mut Stack, value: ffi::Any) -> ffi::cps::Result {
-    *stack.storage_mut() = Some(value);
-
-    ffi::cps::Result::new()
-}
-
 #[no_mangle]
 extern "C" fn _pen_spawn(closure: ffi::Arc<ffi::Closure>) -> ffi::Arc<ffi::Closure<SpawnFuture>> {
-    let handle = spawn(async move {
-        let mut trampoline: Option<(StepFunction, ContinuationFunction)> = None;
-        let mut stack = Stack::new(INITIAL_STACK_SIZE, None);
-
-        poll_fn(move |context| {
-            stack.set_context(context);
-
-            if let Some((step, continue_)) = trampoline {
-                unsafe { step(&mut stack, continue_) };
-            } else {
-                unsafe {
-                    let entry_function =
-                        transmute::<_, InitialStepFunction>(closure.entry_function());
-                    entry_function(
-                        &mut stack,
-                        store_result,
-                        &mut *(closure.payload() as *mut u8),
-                    )
-                };
-            }
-
-            if let Some(value) = stack.storage() {
-                value.clone().into()
-            } else {
-                trampoline = Some(stack.resume());
-                Poll::Pending
-            }
-        })
-        .await
-    });
-
-    ffi::Closure::new(get_spawn_result as *const u8, Box::pin(handle)).into()
+    ffi::Closure::new(
+        get_spawn_result as *const u8,
+        Box::pin(spawn(ffi::async_closure(closure))),
+    )
+    .into()
 }

@@ -26,11 +26,9 @@ impl Stack {
     }
 
     pub fn push<T>(&mut self, value: T) {
-        let pointer = self.get_pointer() as *mut T;
+        let type_size = Self::get_type_size::<T>();
 
-        self.size += Self::get_type_size::<T>();
-
-        while self.size > self.capacity {
+        while self.size + type_size > self.capacity {
             let new_capacity = CAPACITY_MULTIPLIER * self.capacity;
 
             self.base_pointer = unsafe {
@@ -43,9 +41,8 @@ impl Stack {
             self.capacity = new_capacity;
         }
 
-        unsafe {
-            ptr::write(pointer, value);
-        }
+        unsafe { ptr::write(self.get_pointer() as *mut T, value) }
+        self.size += type_size;
     }
 
     pub fn pop<T>(&mut self) -> T {
