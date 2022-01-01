@@ -1,8 +1,5 @@
 use crate::{cps, Arc, Closure};
-use std::future::Future;
-use std::pin::Pin;
-use std::ptr;
-use std::task::Poll;
+use std::{future::Future, pin::Pin, ptr, task::Poll};
 
 type Stack<'a, O> = cps::AsyncStack<'a, Option<O>>;
 type ContinuationFunction<O> = cps::ContinuationFunction<O, Option<O>>;
