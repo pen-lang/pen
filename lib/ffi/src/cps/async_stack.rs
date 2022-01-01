@@ -43,7 +43,7 @@ impl<'a, S> AsyncStack<'a, S> {
     }
 
     pub fn context(&mut self) -> Option<&mut Context<'a>> {
-        self.context.map(|context| unsafe { &mut *(context) })
+        self.context.map(|context| unsafe { &mut *context })
     }
 
     pub fn set_context(&mut self, context: &mut Context<'_>) {
