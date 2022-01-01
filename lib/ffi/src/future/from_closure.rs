@@ -68,7 +68,7 @@ mod tests {
         let value = 42.0;
 
         assert_eq!(
-            closure::<_, Number>(Arc::new(Closure::new(foo as *const u8, value))).await,
+            from_closure::<_, Number>(Arc::new(Closure::new(foo as *const u8, value))).await,
             value.into()
         );
     }
