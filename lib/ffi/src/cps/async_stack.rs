@@ -56,6 +56,7 @@ impl<'a, S> AsyncStack<'a, S> {
         continuation: ContinuationFunction<T, S>,
         future: impl Future + Unpin,
     ) {
+        // TODO Use result types.
         if self.next_action != AsyncStackAction::Suspend {
             panic!("continuation not suspendable");
         }
@@ -68,6 +69,7 @@ impl<'a, S> AsyncStack<'a, S> {
     }
 
     pub fn resume<T>(&mut self) -> (StepFunction<T, S>, ContinuationFunction<T, S>) {
+        // TODO Use result types.
         if self.next_action != AsyncStackAction::Resume {
             panic!("continuation not resumable");
         }
@@ -81,6 +83,7 @@ impl<'a, S> AsyncStack<'a, S> {
     }
 
     pub fn restore<F: Future + Unpin>(&mut self) -> Option<F> {
+        // TODO Use result types.
         if self.next_action != AsyncStackAction::Restore {
             panic!("continuation not restorable");
         }
