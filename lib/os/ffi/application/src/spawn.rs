@@ -3,7 +3,7 @@ use tokio::{spawn, task::JoinHandle};
 
 type SpawnFuture = Pin<Box<JoinHandle<ffi::Any>>>;
 type Storage = Option<ffi::Any>;
-type Stack = ffi::cps::AsyncStack<Storage>;
+type Stack<'a> = ffi::cps::AsyncStack<'a, Storage>;
 type ContinuationFunction = ffi::cps::ContinuationFunction<ffi::Any, Storage>;
 
 extern "C" fn poll(
