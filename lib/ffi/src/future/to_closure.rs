@@ -3,19 +3,15 @@ use std::{future::Future, pin::Pin, ptr, task::Poll};
 
 type Stack<'a, O> = cps::AsyncStack<'a, Option<O>>;
 type ContinuationFunction<O> = cps::ContinuationFunction<O, Option<O>>;
-type EntryFunction<O, F> =
-    extern "C" fn(&mut Stack<O>, ContinuationFunction<O>, *mut Pin<Box<F>>) -> cps::Result;
 
-impl<O, F: Future<Output = O>> From<F> for Arc<Closure<EntryFunction<O, F>, Pin<Box<F>>>> {
+impl<O, F: Future<Output = O>> From<F> for Arc<Closure<Pin<Box<F>>>> {
     fn from(future: F) -> Self {
         to_closure(future)
     }
 }
 
-pub fn to_closure<O, F: Future<Output = O>>(
-    future: F,
-) -> Arc<Closure<EntryFunction<O, F>, Pin<Box<F>>>> {
-    Arc::new(Closure::new(get_result::<O, F>, Box::pin(future)))
+pub fn to_closure<O, F: Future<Output = O>>(future: F) -> Arc<Closure<Pin<Box<F>>>> {
+    Closure::new(get_result::<O, F> as *const u8, Box::pin(future)).into()
 }
 
 extern "C" fn get_result<O, F: Future<Output = O>>(
