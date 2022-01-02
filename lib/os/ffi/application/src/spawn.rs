@@ -5,5 +5,5 @@ use tokio::{spawn, task::JoinHandle};
 extern "C" fn _pen_spawn(
     closure: ffi::Arc<ffi::Closure>,
 ) -> ffi::Arc<ffi::Closure<Pin<Box<JoinHandle<ffi::Any>>>>> {
-    ffi::future::to_closure(spawn(ffi::future::from_closure(closure))).into()
+    ffi::future::to_closure(spawn(ffi::future::from_closure(closure)))
 }
