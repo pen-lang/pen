@@ -6,6 +6,7 @@ mod closure;
 mod constants;
 pub mod cps;
 pub mod extra;
+pub mod future;
 mod none;
 mod number;
 mod string;
