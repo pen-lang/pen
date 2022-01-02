@@ -11,11 +11,11 @@ type InitialStepFunction<O> = unsafe extern "C" fn(
 type StepFunction<O> = cps::StepFunction<O, Option<O>>;
 type ContinuationFunction<O> = cps::ContinuationFunction<O, Option<O>>;
 
-const INITIAL_STACK_SIZE: usize = 64;
+const INITIAL_STACK_CAPACITY: usize = 64;
 
 pub async fn from_closure<T, O: Clone>(closure: Arc<Closure<T>>) -> O {
     let mut trampoline: Option<(StepFunction<O>, ContinuationFunction<O>)> = None;
-    let mut stack = Stack::new(INITIAL_STACK_SIZE, None);
+    let mut stack = Stack::new(INITIAL_STACK_CAPACITY, None);
 
     poll_fn(move |context| {
         stack.set_context(context);
