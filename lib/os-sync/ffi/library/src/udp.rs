@@ -26,7 +26,7 @@ impl UdpSocket {
     }
 }
 
-#[ffi::any_conv]
+#[ffi::any]
 #[derive(Clone, Debug)]
 pub struct UdpSocketInner {
     socket: Arc<RwLock<net::UdpSocket>>,

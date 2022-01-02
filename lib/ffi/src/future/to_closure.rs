@@ -1,7 +1,7 @@
 use crate::{cps, Arc, Closure};
 use std::{future::Future, pin::Pin, ptr, task::Poll};
 
-type Stack<'a, O> = cps::AsyncStack<'a, Option<O>>;
+type Stack<O> = cps::AsyncStack<Option<O>>;
 type ContinuationFunction<O> = cps::ContinuationFunction<O, Option<O>>;
 
 impl<O, F: Future<Output = O>> From<F> for Arc<Closure<Pin<Box<F>>>> {

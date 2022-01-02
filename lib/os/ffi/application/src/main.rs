@@ -8,7 +8,7 @@ use std::process::exit;
 use tokio::runtime::Runtime;
 
 type ExitCode = ffi::Number;
-type Stack<'a> = ffi::cps::AsyncStack<'a, Option<ExitCode>>;
+type Stack = ffi::cps::AsyncStack<Option<ExitCode>>;
 type ContinuationFunction = ffi::cps::ContinuationFunction<ExitCode, Option<ExitCode>>;
 
 #[cfg(not(test))]
