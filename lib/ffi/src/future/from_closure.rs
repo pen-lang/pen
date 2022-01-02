@@ -15,13 +15,15 @@ type ContinuationFunction<O> = cps::ContinuationFunction<O, Option<O>>;
 
 const INITIAL_STACK_SIZE: usize = 64;
 
-impl<T: 'static, O: Clone + 'static> Into<Pin<Box<dyn Future<Output = O>>>> for Arc<Closure<T>> {
+impl<T: 'static, O: Clone + 'static, G: Send + 'static> Into<Pin<Box<dyn Future<Output = O>>>>
+    for Arc<Closure<G, T>>
+{
     fn into(self) -> Pin<Box<dyn Future<Output = O>>> {
         Box::pin(from_closure(self))
     }
 }
 
-pub async fn from_closure<T, O: Clone>(closure: Arc<Closure<T>>) -> O {
+pub async fn from_closure<T, O: Clone, G: Send>(closure: Arc<Closure<G, T>>) -> O {
     let mut trampoline: Option<(StepFunction<O>, ContinuationFunction<O>)> = None;
     let mut stack = Stack::new(INITIAL_STACK_SIZE, None);
 
@@ -76,7 +78,7 @@ mod tests {
         let value = 42.0;
 
         assert_eq!(
-            from_closure::<_, Number>(Arc::new(Closure::new(foo as *const u8, value))).await,
+            from_closure::<_, Number, _>(Arc::new(Closure::new(foo, value))).await,
             value.into()
         );
     }

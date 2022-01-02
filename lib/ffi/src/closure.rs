@@ -1,28 +1,31 @@
 use std::{
     intrinsics::transmute,
+    marker::PhantomData,
     ptr::drop_in_place,
     sync::atomic::{AtomicPtr, Ordering},
 };
 
 #[repr(C)]
-pub struct Closure<T = ()> {
+pub struct Closure<F: Send, T = ()> {
     entry_function: AtomicPtr<u8>,
     drop_function: AtomicPtr<u8>,
     payload: T,
+    _entry_function: PhantomData<F>,
 }
 
-impl<T> Closure<T> {
-    pub fn new(entry_function: *const u8, payload: T) -> Self {
+impl<F: Send, T> Closure<F, T> {
+    pub fn new(entry_function: F, payload: T) -> Self {
         Self {
-            entry_function: AtomicPtr::new(entry_function as *mut u8),
+            entry_function: AtomicPtr::new(unsafe { transmute(entry_function) }),
             drop_function: unsafe { transmute::<extern "C" fn(&mut Self), _>(drop_function) },
             payload,
+            _entry_function: Default::default(),
         }
     }
 
-    pub fn entry_function(&self) -> *const u8 {
+    pub fn entry_function(&self) -> F {
         // TODO Optimize an atomic ordering.
-        self.entry_function.load(Ordering::SeqCst)
+        unsafe { transmute(self.entry_function.load(Ordering::SeqCst)) }
     }
 
     pub fn payload(&self) -> *const T {
@@ -30,11 +33,11 @@ impl<T> Closure<T> {
     }
 }
 
-extern "C" fn drop_function<T>(closure: &mut Closure<T>) {
+extern "C" fn drop_function<F: Send, T>(closure: &mut Closure<F, T>) {
     unsafe { drop_in_place(&mut (closure.payload() as *mut T)) }
 }
 
-impl<T> Drop for Closure<T> {
+impl<F: Send, T> Drop for Closure<F, T> {
     fn drop(&mut self) {
         // TODO Optimize an atomic ordering.
         (unsafe {
@@ -47,11 +50,13 @@ impl<T> Drop for Closure<T> {
 mod tests {
     use super::*;
     use crate::Arc;
-    use std::{ptr::null, thread::spawn};
+    use std::thread::spawn;
+
+    fn foo() {}
 
     #[test]
     fn send() {
-        let closure = Arc::new(Closure::new(null(), ()));
+        let closure = Arc::new(Closure::new(foo, ()));
 
         spawn(move || {
             closure.entry_function();
