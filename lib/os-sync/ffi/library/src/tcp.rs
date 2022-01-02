@@ -25,7 +25,7 @@ impl TcpListener {
     }
 }
 
-#[ffi::any_conv]
+#[ffi::any]
 #[derive(Clone, Debug)]
 pub struct TcpListenerInner {
     listener: Arc<RwLock<net::TcpListener>>,
@@ -63,7 +63,7 @@ impl TcpStream {
     }
 }
 
-#[ffi::any_conv]
+#[ffi::any]
 #[derive(Clone, Debug)]
 pub struct TcpStreamInner {
     socket: Arc<RwLock<net::TcpStream>>,
