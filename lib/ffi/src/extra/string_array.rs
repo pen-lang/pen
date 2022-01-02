@@ -43,7 +43,7 @@ impl<T: Into<ByteString>> From<Vec<T>> for StringArray {
     }
 }
 
-#[pen_ffi_macro::any_conv(crate = "crate")]
+#[pen_ffi_macro::any(crate = "crate")]
 #[allow(clippy::redundant_allocation)]
 #[derive(Clone)]
 struct StringArrayInner {

@@ -10,6 +10,6 @@ pub fn bindgen(attributes: TokenStream, item: TokenStream) -> TokenStream {
 }
 
 #[proc_macro_attribute]
-pub fn any_conv(attributes: TokenStream, item: TokenStream) -> TokenStream {
+pub fn any(attributes: TokenStream, item: TokenStream) -> TokenStream {
     type_::generate_binding(attributes, item)
 }
