@@ -1,5 +1,7 @@
 use crate::{cps, Arc, Closure};
 use futures::future::poll_fn;
+use std::future::Future;
+use std::pin::Pin;
 use std::{intrinsics::transmute, task::Poll};
 
 type Stack<'a, O> = cps::AsyncStack<'a, Option<O>>;
@@ -12,6 +14,12 @@ type StepFunction<O> = cps::StepFunction<O, Option<O>>;
 type ContinuationFunction<O> = cps::ContinuationFunction<O, Option<O>>;
 
 const INITIAL_STACK_SIZE: usize = 64;
+
+impl<T: 'static, O: Clone + 'static> Into<Pin<Box<dyn Future<Output = O>>>> for Arc<Closure<T>> {
+    fn into(self) -> Pin<Box<dyn Future<Output = O>>> {
+        Box::pin(from_closure(self))
+    }
+}
 
 pub async fn from_closure<T, O: Clone>(closure: Arc<Closure<T>>) -> O {
     let mut trampoline: Option<(StepFunction<O>, ContinuationFunction<O>)> = None;
