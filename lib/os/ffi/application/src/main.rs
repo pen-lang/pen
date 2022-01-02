@@ -4,7 +4,7 @@ mod spawn;
 mod unreachable;
 mod utilities;
 
-use std::process;
+use std::process::exit;
 use tokio::runtime::Runtime;
 
 type ExitCode = ffi::Number;
@@ -24,12 +24,13 @@ unsafe extern "C" fn _pen_os_main(_: &mut Stack, _: ContinuationFunction) -> ffi
 
 fn main() {
     // HACK Is it OK to call the _pen_os_main function with an extra argument of a closure environment?
-    let code: ffi::Number = Runtime::new()
-        .unwrap()
-        .block_on(ffi::async_closure(ffi::Arc::new(ffi::Closure::new(
-            _pen_os_main as *const u8,
-            (),
-        ))));
+    let code: ffi::Number =
+        Runtime::new()
+            .unwrap()
+            .block_on(ffi::future::from_closure(ffi::Arc::new(ffi::Closure::new(
+                _pen_os_main as *const u8,
+                (),
+            ))));
 
-    process::exit(f64::from(code) as i32);
+    exit(f64::from(code) as i32);
 }
