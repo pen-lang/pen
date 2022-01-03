@@ -1,21 +1,23 @@
-use crate::{cps, Arc, Closure};
+use crate::{
+    cps::{self, AsyncStack, ContinuationFunction, StepFunction},
+    Arc, Closure,
+};
 use futures::future::poll_fn;
 use std::{intrinsics::transmute, task::Poll};
 
-type Stack<O> = cps::AsyncStack<Option<O>>;
-type InitialStepFunction<O> = unsafe extern "C" fn(
-    stack: &mut Stack<O>,
-    continuation: ContinuationFunction<O>,
+type InitialStepFunction<T> = unsafe extern "C" fn(
+    stack: &mut AsyncStack<T>,
+    continuation: ContinuationFunction<T, T>,
     environment: &mut u8,
 ) -> cps::Result;
-type StepFunction<O> = cps::StepFunction<O, Option<O>>;
-type ContinuationFunction<O> = cps::ContinuationFunction<O, Option<O>>;
+// TODO Use ! type.
+type Never = ();
 
 const INITIAL_STACK_CAPACITY: usize = 64;
 
-pub async fn from_closure<T, O: Clone>(closure: Arc<Closure<T>>) -> O {
-    let mut trampoline: Option<(StepFunction<O>, ContinuationFunction<O>)> = None;
-    let mut stack = Stack::new(INITIAL_STACK_CAPACITY, None);
+pub async fn from_closure<T, S>(closure: Arc<Closure<T>>) -> S {
+    let mut trampoline: Option<(StepFunction<Never, S>, ContinuationFunction<Never, S>)> = None;
+    let mut stack = AsyncStack::new(INITIAL_STACK_CAPACITY);
 
     poll_fn(move |context| {
         stack.set_context(context);
@@ -25,17 +27,13 @@ pub async fn from_closure<T, O: Clone>(closure: Arc<Closure<T>>) -> O {
         } else {
             unsafe {
                 let entry_function =
-                    transmute::<_, InitialStepFunction<O>>(closure.entry_function());
-                entry_function(
-                    &mut stack,
-                    store_result,
-                    &mut *(closure.payload() as *mut u8),
-                )
+                    transmute::<_, InitialStepFunction<S>>(closure.entry_function());
+                entry_function(&mut stack, resolve, &mut *(closure.payload() as *mut u8))
             };
         }
 
-        if let Some(value) = stack.storage() {
-            value.clone().into()
+        if let Some(value) = stack.resolved_value() {
+            value.into()
         } else {
             trampoline = Some(stack.resume());
             Poll::Pending
@@ -44,8 +42,8 @@ pub async fn from_closure<T, O: Clone>(closure: Arc<Closure<T>>) -> O {
     .await
 }
 
-extern "C" fn store_result<O>(stack: &mut Stack<O>, value: O) -> cps::Result {
-    *stack.storage_mut() = Some(value);
+extern "C" fn resolve<T>(stack: &mut AsyncStack<T>, value: T) -> cps::Result {
+    stack.resolve(value);
 
     cps::Result::new()
 }
@@ -56,7 +54,7 @@ mod tests {
     use crate::Number;
 
     extern "C" fn foo(
-        stack: &mut Stack<Number>,
+        stack: &mut AsyncStack,
         continue_: ContinuationFunction<Number>,
         environment: &mut f64,
     ) -> cps::Result {
