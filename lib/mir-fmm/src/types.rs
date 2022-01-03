@@ -78,7 +78,9 @@ pub fn compile_record(
     }
 }
 
-// TODO Unbox small non-recursive records.
+// We can potentially optimize record type representation by unboxing small
+// records. But we don't currently because that requires implementation of the
+// same unboxing logic in FFI.
 pub fn is_record_boxed(
     record: &mir::types::Record,
     types: &BTreeMap<String, mir::types::RecordBody>,

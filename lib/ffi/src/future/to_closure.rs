@@ -26,7 +26,7 @@ extern "C" fn resume<O, F: Future<Output = O>>(
     stack: &mut AsyncStack,
     continue_: ContinuationFunction<O>,
 ) -> cps::Result {
-    let future = stack.restore::<Pin<Box<F>>>();
+    let future = stack.restore::<Pin<Box<F>>>().unwrap();
 
     poll(stack, continue_, future)
 }
@@ -39,7 +39,7 @@ extern "C" fn poll<O, F: Future<Output = O>>(
     match future.as_mut().poll(stack.context().unwrap()) {
         Poll::Ready(value) => unsafe { continue_(stack, value) },
         Poll::Pending => {
-            stack.suspend(resume::<O, F>, continue_, future);
+            stack.suspend(resume::<O, F>, continue_, future).unwrap();
             cps::Result::new()
         }
     }

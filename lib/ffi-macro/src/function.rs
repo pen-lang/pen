@@ -72,7 +72,7 @@ fn generate_function(attributes: &AttributeArgs, function: &ItemFn) -> Result<To
                 match future.as_mut().poll(stack.context().unwrap()) {
                     Poll::Ready(value) => continue_(stack, value),
                     Poll::Pending => {
-                        stack.suspend(resume, continue_, future);
+                        stack.suspend(resume, continue_, future).unwrap();
                         #crate_path::cps::Result::new()
                     }
                 }
@@ -82,7 +82,7 @@ fn generate_function(attributes: &AttributeArgs, function: &ItemFn) -> Result<To
                 stack: &mut #crate_path::cps::AsyncStack<()>,
                 continue_: #crate_path::cps::ContinuationFunction<#output_type, ()>,
             ) -> #crate_path::cps::Result {
-                let future = stack.restore();
+                let future = stack.restore().unwrap();
                 poll(stack, continue_, future)
             }
 

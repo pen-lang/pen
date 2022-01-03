@@ -1,4 +1,4 @@
-use super::Stack;
+use super::{async_stack_action::AsyncStackAction, CpsError, Stack};
 use crate::cps;
 use std::{
     future::Future,
@@ -15,14 +15,13 @@ pub type StepFunction<T, S = ()> = unsafe extern "C" fn(
 pub type ContinuationFunction<T, S = ()> =
     unsafe extern "C" fn(&mut AsyncStack<S>, T) -> cps::Result;
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-enum AsyncStackAction {
-    Suspend,
-    Resume,
-    Restore,
-}
+pub type Trampoline<T, S> = (StepFunction<T, S>, ContinuationFunction<T, S>);
 
-// TODO Fix context lifetime.
+// Something like AsyncStackManager that creates async stacks with proper
+// lifetime every time when it's given contexts can be implemented potentially.
+// The reason we set those contexts unsafely with the `run_with_context` method
+// in the current implementation is to keep struct type compatibility between
+// Stack and AsyncStack at the ABI level.
 #[repr(C)]
 #[derive(Debug)]
 pub struct AsyncStack<S = ()> {
@@ -49,8 +48,18 @@ impl<S> AsyncStack<S> {
             .map(|context| unsafe { &mut *transmute::<_, *mut Context<'_>>(context) })
     }
 
-    pub fn set_context(&mut self, context: &mut Context<'_>) {
+    pub fn run_with_context<T>(
+        &mut self,
+        context: &mut Context<'_>,
+        callback: impl FnOnce(&mut Self) -> T,
+    ) -> T {
         self.context = Some(unsafe { transmute(context) });
+
+        let value = callback(self);
+
+        self.context = None;
+
+        value
     }
 
     pub fn suspend<T>(
@@ -58,42 +67,31 @@ impl<S> AsyncStack<S> {
         step: StepFunction<T, S>,
         continuation: ContinuationFunction<T, S>,
         future: impl Future + Unpin,
-    ) {
-        // TODO Use result types.
-        if self.next_action != AsyncStackAction::Suspend {
-            panic!("continuation not suspendable");
-        }
+    ) -> Result<(), CpsError> {
+        self.transition_action(AsyncStackAction::Suspend, AsyncStackAction::Resume)?;
 
         self.next_action = AsyncStackAction::Resume;
 
         self.stack.push(future);
         self.stack.push(step);
         self.stack.push(continuation);
+
+        Ok(())
     }
 
-    pub fn resume<T>(&mut self) -> (StepFunction<T, S>, ContinuationFunction<T, S>) {
-        // TODO Use result types.
-        if self.next_action != AsyncStackAction::Resume {
-            panic!("continuation not resumable");
-        }
-
-        self.next_action = AsyncStackAction::Restore;
+    pub fn resume<T>(&mut self) -> Result<Trampoline<T, S>, CpsError> {
+        self.transition_action(AsyncStackAction::Resume, AsyncStackAction::Restore)?;
 
         let continuation = self.pop();
         let step = self.pop();
 
-        (step, continuation)
+        Ok((step, continuation))
     }
 
-    pub fn restore<F: Future + Unpin>(&mut self) -> F {
-        // TODO Use result types.
-        if self.next_action != AsyncStackAction::Restore {
-            panic!("continuation not restorable");
-        }
+    pub fn restore<F: Future + Unpin>(&mut self) -> Result<F, CpsError> {
+        self.transition_action(AsyncStackAction::Restore, AsyncStackAction::Suspend)?;
 
-        self.next_action = AsyncStackAction::Suspend;
-
-        self.pop()
+        Ok(self.pop())
     }
 
     pub fn resolved_value(&mut self) -> Option<S> {
@@ -102,6 +100,20 @@ impl<S> AsyncStack<S> {
 
     pub fn resolve(&mut self, value: S) {
         self.resolved_value = Some(value);
+    }
+
+    fn transition_action(
+        &mut self,
+        current: AsyncStackAction,
+        next: AsyncStackAction,
+    ) -> Result<(), CpsError> {
+        if self.next_action != current {
+            return Err(CpsError::UnexpectedAsyncStackAction(self.next_action));
+        }
+
+        self.next_action = next;
+
+        Ok(())
     }
 }
 
@@ -178,49 +190,43 @@ mod tests {
         let mut stack = AsyncStack::<()>::new(TEST_CAPACITY);
         let mut context = Context::from_waker(&waker);
 
-        stack.set_context(&mut context);
-        stack.context().unwrap().waker().wake_by_ref();
+        stack.run_with_context(&mut context, |stack| {
+            stack.context().unwrap().waker().wake_by_ref()
+        });
     }
 
     #[test]
     fn suspend() {
-        let waker = create_waker();
         let mut stack = AsyncStack::new(TEST_CAPACITY);
-        let mut context = Context::from_waker(&waker);
 
-        stack.set_context(&mut context);
-        stack.suspend(step, continuation, ready(42));
+        stack.suspend(step, continuation, ready(42)).unwrap();
     }
 
     #[tokio::test]
     async fn suspend_and_resume() {
-        let waker = create_waker();
         let mut stack = AsyncStack::new(TEST_CAPACITY);
-        let mut context = Context::from_waker(&waker);
 
-        type TestFuture = Ready<()>;
+        type TestFuture = Ready<usize>;
 
-        let future: TestFuture = ready(());
+        let future: TestFuture = ready(42);
 
-        stack.set_context(&mut context);
-        stack.suspend(step, continuation, future);
-        stack.resume::<()>();
-        stack.restore::<TestFuture>().await;
+        stack.suspend(step, continuation, future).unwrap();
+        stack.resume::<()>().unwrap();
+        assert_eq!(stack.restore::<TestFuture>().unwrap().await, 42);
     }
 
     #[tokio::test]
-    #[should_panic]
-    async fn panic_on_restore_before_resume() {
-        let waker = create_waker();
+    async fn fail_to_restore_before_resume() {
         let mut stack = AsyncStack::new(TEST_CAPACITY);
-        let mut context = Context::from_waker(&waker);
 
         type TestFuture = Ready<()>;
 
         let future: TestFuture = ready(());
 
-        stack.set_context(&mut context);
-        stack.suspend(step, continuation, future);
-        stack.restore::<TestFuture>().await;
+        stack.suspend(step, continuation, future).unwrap();
+        assert_eq!(
+            stack.restore::<TestFuture>().unwrap_err(),
+            CpsError::UnexpectedAsyncStackAction(AsyncStackAction::Resume)
+        );
     }
 }
