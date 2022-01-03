@@ -103,25 +103,7 @@ pub fn compile(
             },
         )
         .into(),
-        Expression::Lambda(lambda) => mir::ir::LetRecursive::new(
-            mir::ir::Definition::new(
-                CLOSURE_NAME,
-                lambda
-                    .arguments()
-                    .iter()
-                    .map(|argument| -> Result<_, CompileError> {
-                        Ok(mir::ir::Argument::new(
-                            argument.name(),
-                            type_compiler::compile(argument.type_(), type_context)?,
-                        ))
-                    })
-                    .collect::<Result<_, _>>()?,
-                compile(lambda.body())?,
-                type_compiler::compile(lambda.result_type(), type_context)?,
-            ),
-            mir::ir::Variable::new(CLOSURE_NAME),
-        )
-        .into(),
+        Expression::Lambda(lambda) => compile_lambda(lambda, type_context)?,
         Expression::Let(let_) => mir::ir::Let::new(
             let_.name().unwrap_or_default(),
             type_compiler::compile(
@@ -253,6 +235,31 @@ pub fn compile(
         }
         Expression::Variable(variable) => mir::ir::Variable::new(variable.name()).into(),
     })
+}
+
+fn compile_lambda(
+    lambda: &hir::ir::Lambda,
+    type_context: &TypeContext,
+) -> Result<mir::ir::Expression, CompileError> {
+    Ok(mir::ir::LetRecursive::new(
+        mir::ir::Definition::new(
+            CLOSURE_NAME,
+            lambda
+                .arguments()
+                .iter()
+                .map(|argument| -> Result<_, CompileError> {
+                    Ok(mir::ir::Argument::new(
+                        argument.name(),
+                        type_compiler::compile(argument.type_(), type_context)?,
+                    ))
+                })
+                .collect::<Result<_, _>>()?,
+            compile(lambda.body(), type_context)?,
+            type_compiler::compile(lambda.result_type(), type_context)?,
+        ),
+        mir::ir::Variable::new(CLOSURE_NAME),
+    )
+    .into())
 }
 
 fn compile_alternatives(
