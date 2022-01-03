@@ -10,6 +10,7 @@ type InitialStepFunction<T> = unsafe extern "C" fn(
     continuation: ContinuationFunction<T, T>,
     environment: &mut u8,
 ) -> cps::Result;
+// TODO Use ! type.
 type Never = ();
 
 const INITIAL_STACK_CAPACITY: usize = 64;
