@@ -408,7 +408,7 @@ fn prefix_operation_like<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
 
 fn prefix_operation<'a>() -> impl Parser<Stream<'a>, Output = UnaryOperation> {
     (
-        attempt((position(), choice((prefix_operator(),)))),
+        attempt((position(), prefix_operator())),
         prefix_operation_like(),
     )
         .map(|((position, operator), expression)| {
