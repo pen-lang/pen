@@ -33,7 +33,7 @@ pub async fn from_closure<T, S>(closure: Arc<Closure<T>>) -> S {
         if let Some(value) = stack.resolved_value() {
             value.into()
         } else {
-            trampoline = Some(stack.resume());
+            trampoline = Some(stack.resume().unwrap());
             Poll::Pending
         }
     })
