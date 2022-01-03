@@ -2,20 +2,20 @@ use crate::{cps, Arc, Closure};
 use futures::future::poll_fn;
 use std::{intrinsics::transmute, task::Poll};
 
-type Stack<O> = cps::AsyncStack<Option<O>>;
+type Stack<O> = cps::AsyncStack<O>;
 type InitialStepFunction<O> = unsafe extern "C" fn(
     stack: &mut Stack<O>,
     continuation: ContinuationFunction<O>,
     environment: &mut u8,
 ) -> cps::Result;
-type StepFunction<O> = cps::StepFunction<O, Option<O>>;
-type ContinuationFunction<O> = cps::ContinuationFunction<O, Option<O>>;
+type StepFunction<O> = cps::StepFunction<O, O>;
+type ContinuationFunction<O> = cps::ContinuationFunction<O, O>;
 
 const INITIAL_STACK_CAPACITY: usize = 64;
 
-pub async fn from_closure<T, O: Clone>(closure: Arc<Closure<T>>) -> O {
+pub async fn from_closure<T, O>(closure: Arc<Closure<T>>) -> O {
     let mut trampoline: Option<(StepFunction<O>, ContinuationFunction<O>)> = None;
-    let mut stack = Stack::new(INITIAL_STACK_CAPACITY, None);
+    let mut stack = Stack::new(INITIAL_STACK_CAPACITY);
 
     poll_fn(move |context| {
         stack.set_context(context);
@@ -34,8 +34,8 @@ pub async fn from_closure<T, O: Clone>(closure: Arc<Closure<T>>) -> O {
             };
         }
 
-        if let Some(value) = stack.storage() {
-            value.clone().into()
+        if let Some(value) = stack.resolved_value() {
+            value.into()
         } else {
             trampoline = Some(stack.resume());
             Poll::Pending
@@ -45,7 +45,7 @@ pub async fn from_closure<T, O: Clone>(closure: Arc<Closure<T>>) -> O {
 }
 
 extern "C" fn store_result<O>(stack: &mut Stack<O>, value: O) -> cps::Result {
-    *stack.storage_mut() = Some(value);
+    stack.resolve(value);
 
     cps::Result::new()
 }
