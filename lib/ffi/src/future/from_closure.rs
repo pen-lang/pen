@@ -1,21 +1,22 @@
-use crate::{cps, Arc, Closure};
+use crate::{
+    cps::{self, AsyncStack, ContinuationFunction, StepFunction},
+    Arc, Closure,
+};
 use futures::future::poll_fn;
 use std::{intrinsics::transmute, task::Poll};
 
-type Stack<T> = cps::AsyncStack<T>;
 type InitialStepFunction<T> = unsafe extern "C" fn(
-    stack: &mut Stack<T>,
-    continuation: ContinuationFunction<T>,
+    stack: &mut AsyncStack<T>,
+    continuation: ContinuationFunction<T, T>,
     environment: &mut u8,
 ) -> cps::Result;
-type StepFunction<T> = cps::StepFunction<T, T>;
-type ContinuationFunction<T> = cps::ContinuationFunction<T, T>;
+type Never = ();
 
 const INITIAL_STACK_CAPACITY: usize = 64;
 
 pub async fn from_closure<T, S>(closure: Arc<Closure<T>>) -> S {
-    let mut trampoline: Option<(StepFunction<S>, ContinuationFunction<S>)> = None;
-    let mut stack = Stack::new(INITIAL_STACK_CAPACITY);
+    let mut trampoline: Option<(StepFunction<Never, S>, ContinuationFunction<Never, S>)> = None;
+    let mut stack = AsyncStack::new(INITIAL_STACK_CAPACITY);
 
     poll_fn(move |context| {
         stack.set_context(context);
@@ -40,7 +41,7 @@ pub async fn from_closure<T, S>(closure: Arc<Closure<T>>) -> S {
     .await
 }
 
-extern "C" fn resolve<T>(stack: &mut Stack<T>, value: T) -> cps::Result {
+extern "C" fn resolve<T>(stack: &mut AsyncStack<T>, value: T) -> cps::Result {
     stack.resolve(value);
 
     cps::Result::new()
@@ -52,7 +53,7 @@ mod tests {
     use crate::Number;
 
     extern "C" fn foo(
-        stack: &mut Stack<Number>,
+        stack: &mut AsyncStack,
         continue_: ContinuationFunction<Number>,
         environment: &mut f64,
     ) -> cps::Result {

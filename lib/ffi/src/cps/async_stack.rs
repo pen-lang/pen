@@ -7,7 +7,7 @@ use std::{
     task::Context,
 };
 
-pub type StepFunction<T, S> = unsafe extern "C" fn(
+pub type StepFunction<T, S = ()> = unsafe extern "C" fn(
     stack: &mut AsyncStack<S>,
     continuation: ContinuationFunction<T, S>,
 ) -> cps::Result;
