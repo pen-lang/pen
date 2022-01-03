@@ -211,7 +211,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn panic_on_restore_before_resume() {
+    async fn fail_to_restore_before_resume() {
         let waker = create_waker();
         let mut stack = AsyncStack::new(TEST_CAPACITY);
         let mut context = Context::from_waker(&waker);
