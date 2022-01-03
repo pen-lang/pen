@@ -15,9 +15,11 @@ pub type StepFunction<T, S = ()> = unsafe extern "C" fn(
 pub type ContinuationFunction<T, S = ()> =
     unsafe extern "C" fn(&mut AsyncStack<S>, T) -> cps::Result;
 
+pub type Trampoline<T, S> = (StepFunction<T, S>, ContinuationFunction<T, S>);
+
 // Something like AsyncStackManager that creates async stacks with proper
 // lifetime every time when it's given contexts can be implemented potentially.
-// The reason we set those contexts unsafely with the `set_context` method
+// The reason we set those contexts unsafely with the `run_with_context` method
 // in the current implementation is to keep struct type compatibility between
 // Stack and AsyncStack at the ABI level.
 #[repr(C)]
@@ -46,8 +48,18 @@ impl<S> AsyncStack<S> {
             .map(|context| unsafe { &mut *transmute::<_, *mut Context<'_>>(context) })
     }
 
-    pub fn set_context(&mut self, context: &mut Context<'_>) {
+    pub fn run_with_context<T>(
+        &mut self,
+        context: &mut Context<'_>,
+        callback: impl FnOnce(&mut Self) -> T,
+    ) -> T {
         self.context = Some(unsafe { transmute(context) });
+
+        let value = callback(self);
+
+        self.context = None;
+
+        value
     }
 
     pub fn suspend<T>(
@@ -67,9 +79,7 @@ impl<S> AsyncStack<S> {
         Ok(())
     }
 
-    pub fn resume<T>(
-        &mut self,
-    ) -> Result<(StepFunction<T, S>, ContinuationFunction<T, S>), CpsError> {
+    pub fn resume<T>(&mut self) -> Result<Trampoline<T, S>, CpsError> {
         self.transition_action(AsyncStackAction::Resume, AsyncStackAction::Restore)?;
 
         let continuation = self.pop();
@@ -180,31 +190,26 @@ mod tests {
         let mut stack = AsyncStack::<()>::new(TEST_CAPACITY);
         let mut context = Context::from_waker(&waker);
 
-        stack.set_context(&mut context);
-        stack.context().unwrap().waker().wake_by_ref();
+        stack.run_with_context(&mut context, |stack| {
+            stack.context().unwrap().waker().wake_by_ref()
+        });
     }
 
     #[test]
     fn suspend() {
-        let waker = create_waker();
         let mut stack = AsyncStack::new(TEST_CAPACITY);
-        let mut context = Context::from_waker(&waker);
 
-        stack.set_context(&mut context);
         stack.suspend(step, continuation, ready(42)).unwrap();
     }
 
     #[tokio::test]
     async fn suspend_and_resume() {
-        let waker = create_waker();
         let mut stack = AsyncStack::new(TEST_CAPACITY);
-        let mut context = Context::from_waker(&waker);
 
         type TestFuture = Ready<usize>;
 
         let future: TestFuture = ready(42);
 
-        stack.set_context(&mut context);
         stack.suspend(step, continuation, future).unwrap();
         stack.resume::<()>().unwrap();
         assert_eq!(stack.restore::<TestFuture>().unwrap().await, 42);
@@ -212,15 +217,12 @@ mod tests {
 
     #[tokio::test]
     async fn fail_to_restore_before_resume() {
-        let waker = create_waker();
         let mut stack = AsyncStack::new(TEST_CAPACITY);
-        let mut context = Context::from_waker(&waker);
 
         type TestFuture = Ready<()>;
 
         let future: TestFuture = ready(());
 
-        stack.set_context(&mut context);
         stack.suspend(step, continuation, future).unwrap();
         assert_eq!(
             stack.restore::<TestFuture>().unwrap_err(),

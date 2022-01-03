@@ -18,17 +18,17 @@ pub async fn from_closure<T, S>(closure: Arc<Closure<T>>) -> S {
     let mut stack = AsyncStack::new(INITIAL_STACK_CAPACITY);
 
     poll_fn(move |context| {
-        stack.set_context(context);
-
-        if let Some((step, continue_)) = trampoline {
-            unsafe { step(&mut stack, continue_) };
-        } else {
-            unsafe {
-                let entry_function =
-                    transmute::<_, InitialStepFunction<S>>(closure.entry_function());
-                entry_function(&mut stack, resolve, &mut *(closure.payload() as *mut u8))
-            };
-        }
+        stack.run_with_context(context, |stack| {
+            if let Some((step, continue_)) = trampoline {
+                unsafe { step(stack, continue_) };
+            } else {
+                unsafe {
+                    let entry_function =
+                        transmute::<_, InitialStepFunction<S>>(closure.entry_function());
+                    entry_function(stack, resolve, &mut *(closure.payload() as *mut u8))
+                };
+            }
+        });
 
         if let Some(value) = stack.resolved_value() {
             value.into()
