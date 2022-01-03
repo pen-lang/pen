@@ -10,13 +10,11 @@ type InitialStepFunction<T> = unsafe extern "C" fn(
     continuation: ContinuationFunction<T, T>,
     environment: &mut u8,
 ) -> cps::Result;
-// TODO Use ! type.
-type Never = ();
 
 const INITIAL_STACK_CAPACITY: usize = 64;
 
 pub async fn from_closure<T, S>(closure: Arc<Closure<T>>) -> S {
-    let mut trampoline: Option<(StepFunction<Never, S>, ContinuationFunction<Never, S>)> = None;
+    let mut trampoline: Option<(StepFunction<(), S>, ContinuationFunction<(), S>)> = None;
     let mut stack = AsyncStack::new(INITIAL_STACK_CAPACITY);
 
     poll_fn(move |context| {
