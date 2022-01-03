@@ -82,7 +82,7 @@ fn generate_function(attributes: &AttributeArgs, function: &ItemFn) -> Result<To
                 stack: &mut #crate_path::cps::AsyncStack<()>,
                 continue_: #crate_path::cps::ContinuationFunction<#output_type, ()>,
             ) -> #crate_path::cps::Result {
-                let future = stack.restore().unwrap();
+                let future = stack.restore();
                 poll(stack, continue_, future)
             }
 
