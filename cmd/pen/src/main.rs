@@ -123,7 +123,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                     clap::Arg::new("prelude interface file")
                         .short('i')
                         .long("prelude-interface-file")
-                        .multiple_values(true)
+                        .multiple_occurrences(true)
                         .number_of_values(1)
                         .takes_value(true),
                 )
@@ -142,7 +142,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                         .required(true)
                         .takes_value(true),
                 )
-                .arg(clap::Arg::new("test information file").multiple_values(true)),
+                .arg(clap::Arg::new("test information file").multiple_occurrences(true)),
         )
         .subcommand(
             clap::App::new("link-test")
@@ -162,7 +162,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                 )
                 .arg(
                     clap::Arg::new("archive file")
-                        .multiple_values(true)
+                        .multiple_occurrences(true)
                         .required(true)
                         .takes_value(true),
                 ),
