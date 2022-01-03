@@ -12,7 +12,8 @@ pub type StepFunction<T, S> = unsafe extern "C" fn(
     continuation: ContinuationFunction<T, S>,
 ) -> cps::Result;
 
-pub type ContinuationFunction<T, S> = unsafe extern "C" fn(&mut AsyncStack<S>, T) -> cps::Result;
+pub type ContinuationFunction<T, S = ()> =
+    unsafe extern "C" fn(&mut AsyncStack<S>, T) -> cps::Result;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 enum AsyncStackAction {
@@ -24,7 +25,7 @@ enum AsyncStackAction {
 // TODO Fix context lifetime.
 #[repr(C)]
 #[derive(Debug)]
-pub struct AsyncStack<S> {
+pub struct AsyncStack<S = ()> {
     stack: Stack,
     context: Option<*mut Context<'static>>,
     // This field is currently used only for validation in FFI but not by codes
@@ -122,7 +123,7 @@ impl<S> DerefMut for AsyncStack<S> {
 
 #[allow(dead_code)]
 extern "C" {
-    fn _test_async_stack_ffi_safety(_: &mut AsyncStack<()>);
+    fn _test_async_stack_ffi_safety(_: &mut AsyncStack);
 }
 
 #[cfg(test)]
@@ -152,13 +153,13 @@ mod tests {
     type TestResult = usize;
 
     unsafe extern "C" fn step(
-        _: &mut AsyncStack<()>,
+        _: &mut AsyncStack,
         _: ContinuationFunction<TestResult, ()>,
     ) -> cps::Result {
         cps::Result::new()
     }
 
-    unsafe extern "C" fn continuation(_: &mut AsyncStack<()>, _: TestResult) -> cps::Result {
+    unsafe extern "C" fn continuation(_: &mut AsyncStack, _: TestResult) -> cps::Result {
         cps::Result::new()
     }
 
