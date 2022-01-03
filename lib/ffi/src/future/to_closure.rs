@@ -1,10 +1,12 @@
-use crate::{cps, Arc, Closure};
+use crate::{
+    cps::{self, AsyncStack},
+    Arc, Closure,
+};
 use std::{future::Future, pin::Pin, ptr, task::Poll};
 
-type Stack<O> = cps::AsyncStack<Option<O>>;
-type ContinuationFunction<O> = cps::ContinuationFunction<O, Option<O>>;
+type ContinuationFunction<T> = cps::ContinuationFunction<T, T>;
 
-impl<O, F: Future<Output = O>> From<F> for Arc<Closure<Pin<Box<F>>>> {
+impl<T, F: Future<Output = T>> From<F> for Arc<Closure<Pin<Box<F>>>> {
     fn from(future: F) -> Self {
         to_closure(future)
     }
@@ -15,7 +17,7 @@ pub fn to_closure<O, F: Future<Output = O>>(future: F) -> Arc<Closure<Pin<Box<F>
 }
 
 extern "C" fn get_result<O, F: Future<Output = O>>(
-    stack: &mut Stack<O>,
+    stack: &mut AsyncStack<O>,
     continue_: ContinuationFunction<O>,
     environment: *mut Pin<Box<F>>,
 ) -> cps::Result {
@@ -23,7 +25,7 @@ extern "C" fn get_result<O, F: Future<Output = O>>(
 }
 
 extern "C" fn resume<O, F: Future<Output = O>>(
-    stack: &mut Stack<O>,
+    stack: &mut AsyncStack<O>,
     continue_: ContinuationFunction<O>,
 ) -> cps::Result {
     let future = stack.restore::<Pin<Box<F>>>().unwrap();
@@ -32,7 +34,7 @@ extern "C" fn resume<O, F: Future<Output = O>>(
 }
 
 extern "C" fn poll<O, F: Future<Output = O>>(
-    stack: &mut Stack<O>,
+    stack: &mut AsyncStack<O>,
     continue_: ContinuationFunction<O>,
     mut future: Pin<Box<F>>,
 ) -> cps::Result {
