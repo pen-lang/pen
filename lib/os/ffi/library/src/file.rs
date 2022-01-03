@@ -26,7 +26,7 @@ impl OsFile {
     }
 }
 
-#[ffi::any_conv]
+#[ffi::any]
 #[derive(Clone, Debug)]
 pub struct OsFileInner {
     file: Arc<RwLock<File>>,

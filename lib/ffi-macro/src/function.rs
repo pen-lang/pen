@@ -72,7 +72,7 @@ fn generate_function(attributes: &AttributeArgs, function: &ItemFn) -> Result<To
                 match future.as_mut().poll(stack.context().unwrap()) {
                     Poll::Ready(value) => continue_(stack, value),
                     Poll::Pending => {
-                        stack.suspend(resume, continue_, future);
+                        stack.suspend(resume, continue_, future).unwrap();
                         #crate_path::cps::Result::new()
                     }
                 }
@@ -98,12 +98,12 @@ fn generate_sync_function(function: &ItemFn, crate_path: &Path) -> TokenStream {
     let output_type = parse_output_type(function, crate_path);
     let statements = parse_statements(function, crate_path);
 
-    (quote! {
+    quote! {
         #[no_mangle]
         extern "C" fn #function_name(#arguments) -> #output_type {
             #(#statements);*
         }
-    })
+    }
     .into()
 }
 

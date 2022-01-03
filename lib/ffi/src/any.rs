@@ -42,7 +42,7 @@ pub struct TypeInformation {
     pub drop: extern "C" fn(u64),
 }
 
-#[pen_ffi_macro::any_conv(crate = "crate")]
+#[pen_ffi_macro::any(crate = "crate")]
 #[derive(Clone, Default)]
 struct Dummy {}
 
@@ -59,14 +59,14 @@ mod tests {
     mod box_ {
         use super::*;
 
-        #[pen_ffi_macro::any_conv(crate = "crate")]
+        #[pen_ffi_macro::any(crate = "crate")]
         #[derive(Clone)]
         pub struct TypeA {
             #[allow(dead_code)]
             value: Box<f64>,
         }
 
-        #[pen_ffi_macro::any_conv(crate = "crate")]
+        #[pen_ffi_macro::any(crate = "crate")]
         #[allow(clippy::redundant_allocation)]
         #[derive(Clone)]
         pub struct TypeB {
@@ -105,14 +105,14 @@ mod tests {
         use super::*;
         use std::rc::Rc;
 
-        #[pen_ffi_macro::any_conv(crate = "crate")]
+        #[pen_ffi_macro::any(crate = "crate")]
         #[derive(Clone)]
         pub struct TypeA {
             #[allow(dead_code)]
             value: std::rc::Rc<f64>,
         }
 
-        #[pen_ffi_macro::any_conv(crate = "crate")]
+        #[pen_ffi_macro::any(crate = "crate")]
         #[allow(clippy::redundant_allocation)]
         #[derive(Clone)]
         pub struct TypeB {
@@ -150,7 +150,7 @@ mod tests {
     mod f64 {
         use super::*;
 
-        #[pen_ffi_macro::any_conv(crate = "crate")]
+        #[pen_ffi_macro::any(crate = "crate")]
         #[derive(Clone)]
         pub struct Type {
             #[allow(dead_code)]
