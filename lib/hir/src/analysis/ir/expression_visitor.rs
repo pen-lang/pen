@@ -65,7 +65,7 @@ fn visit_expression(expression: &Expression, visit: &mut impl FnMut(&Expression)
                 visit_expression(operation.lhs());
                 visit_expression(operation.rhs());
             }
-            Operation::Async(operation) => visit_lambda(operation.function(), visit),
+            Operation::Spawn(operation) => visit_lambda(operation.function(), visit),
             Operation::Boolean(operation) => {
                 visit_expression(operation.lhs());
                 visit_expression(operation.rhs());

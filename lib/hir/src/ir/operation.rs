@@ -8,11 +8,11 @@ use position::Position;
 #[derive(Clone, Debug, PartialEq)]
 pub enum Operation {
     Arithmetic(ArithmeticOperation),
-    Async(SpawnOperation),
     Boolean(BooleanOperation),
     Equality(EqualityOperation),
     Not(NotOperation),
     Order(OrderOperation),
+    Spawn(SpawnOperation),
     Try(TryOperation),
 }
 
@@ -20,11 +20,11 @@ impl Operation {
     pub fn position(&self) -> &Position {
         match self {
             Self::Arithmetic(operation) => operation.position(),
-            Self::Async(operation) => operation.position(),
             Self::Boolean(operation) => operation.position(),
             Self::Equality(operation) => operation.position(),
             Self::Not(operation) => operation.position(),
             Self::Order(operation) => operation.position(),
+            Self::Spawn(operation) => operation.position(),
             Self::Try(operation) => operation.position(),
         }
     }
@@ -38,7 +38,7 @@ impl From<ArithmeticOperation> for Operation {
 
 impl From<SpawnOperation> for Operation {
     fn from(operation: SpawnOperation) -> Self {
-        Self::Async(operation)
+        Self::Spawn(operation)
     }
 }
 

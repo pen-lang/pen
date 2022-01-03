@@ -8,7 +8,6 @@ use position::Position;
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum Expression {
-    SpawnOperation(SpawnOperation),
     BinaryOperation(BinaryOperation),
     Boolean(Boolean),
     Call(Call),
@@ -21,6 +20,7 @@ pub enum Expression {
     Number(Number),
     Record(Record),
     RecordDeconstruction(RecordDeconstruction),
+    SpawnOperation(SpawnOperation),
     String(ByteString),
     UnaryOperation(UnaryOperation),
     Variable(Variable),
@@ -29,7 +29,6 @@ pub enum Expression {
 impl Expression {
     pub fn position(&self) -> &Position {
         match self {
-            Self::SpawnOperation(operation) => operation.position(),
             Self::BinaryOperation(operation) => operation.position(),
             Self::Boolean(boolean) => boolean.position(),
             Self::Call(call) => call.position(),
@@ -42,16 +41,11 @@ impl Expression {
             Self::Number(number) => number.position(),
             Self::Record(record) => record.position(),
             Self::RecordDeconstruction(operation) => operation.position(),
+            Self::SpawnOperation(operation) => operation.position(),
             Self::String(string) => string.position(),
             Self::UnaryOperation(operation) => operation.position(),
             Self::Variable(variable) => variable.position(),
         }
-    }
-}
-
-impl From<SpawnOperation> for Expression {
-    fn from(operation: SpawnOperation) -> Self {
-        Self::SpawnOperation(operation)
     }
 }
 
@@ -130,6 +124,12 @@ impl From<Record> for Expression {
 impl From<RecordDeconstruction> for Expression {
     fn from(operation: RecordDeconstruction) -> Self {
         Self::RecordDeconstruction(operation)
+    }
+}
+
+impl From<SpawnOperation> for Expression {
+    fn from(operation: SpawnOperation) -> Self {
+        Self::SpawnOperation(operation)
     }
 }
 

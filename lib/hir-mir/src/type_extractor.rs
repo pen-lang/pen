@@ -134,7 +134,7 @@ pub fn extract_from_expression(
         Expression::Number(number) => types::Number::new(number.position().clone()).into(),
         Expression::Operation(operation) => match operation {
             Operation::Arithmetic(_) => types::Number::new(expression.position().clone()).into(),
-            Operation::Async(operation) => types::Function::new(
+            Operation::Spawn(operation) => types::Function::new(
                 vec![],
                 operation.function().result_type().clone(),
                 operation.position().clone(),

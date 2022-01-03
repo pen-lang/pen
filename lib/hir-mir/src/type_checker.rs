@@ -389,7 +389,7 @@ fn check_operation(
 
             number_type
         }
-        Operation::Async(operation) => {
+        Operation::Spawn(operation) => {
             if !operation.function().arguments().is_empty() {
                 return Err(CompileError::SpawnOperationArguments(
                     operation.position().clone(),

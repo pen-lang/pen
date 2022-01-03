@@ -223,7 +223,7 @@ fn transform_operation(
             operation.position().clone(),
         )
         .into(),
-        Operation::Async(operation) => SpawnOperation::new(
+        Operation::Spawn(operation) => SpawnOperation::new(
             transform_lambda(operation.function(), transform),
             operation.position().clone(),
         )

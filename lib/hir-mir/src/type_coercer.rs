@@ -278,7 +278,7 @@ fn transform_expression(
                 operation.position().clone(),
             )
             .into(),
-            Operation::Async(operation) => SpawnOperation::new(
+            Operation::Spawn(operation) => SpawnOperation::new(
                 transform_lambda(operation.function(), variables, type_context)?,
                 operation.position().clone(),
             )
