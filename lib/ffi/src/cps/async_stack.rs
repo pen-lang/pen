@@ -85,7 +85,7 @@ impl<S> AsyncStack<S> {
         (step, continuation)
     }
 
-    pub fn restore<F: Future + Unpin>(&mut self) -> Option<F> {
+    pub fn restore<F: Future + Unpin>(&mut self) -> F {
         // TODO Use result types.
         if self.next_action != AsyncStackAction::Restore {
             panic!("continuation not restorable");
@@ -93,7 +93,7 @@ impl<S> AsyncStack<S> {
 
         self.next_action = AsyncStackAction::Suspend;
 
-        Some(self.pop())
+        self.pop()
     }
 
     pub fn resolved_value(&mut self) -> Option<S> {
@@ -205,7 +205,7 @@ mod tests {
         stack.set_context(&mut context);
         stack.suspend(step, continuation, future);
         stack.resume::<()>();
-        stack.restore::<TestFuture>().unwrap().await;
+        stack.restore::<TestFuture>().await;
     }
 
     #[tokio::test]
@@ -221,6 +221,6 @@ mod tests {
 
         stack.set_context(&mut context);
         stack.suspend(step, continuation, future);
-        stack.restore::<TestFuture>().unwrap().await;
+        stack.restore::<TestFuture>().await;
     }
 }

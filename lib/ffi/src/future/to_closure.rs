@@ -26,7 +26,7 @@ extern "C" fn resume<O, F: Future<Output = O>>(
     stack: &mut AsyncStack,
     continue_: ContinuationFunction<O>,
 ) -> cps::Result {
-    let future = stack.restore::<Pin<Box<F>>>().unwrap();
+    let future = stack.restore::<Pin<Box<F>>>();
 
     poll(stack, continue_, future)
 }
