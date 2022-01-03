@@ -165,7 +165,7 @@ checksum = "fb4a24b1aaf0fd0ce8b45161144d6f42cd91677fd5940fd431183eb023b3a2b8"
 name = "core"
 version = "0.1.0"
 dependencies = [
- "pen-ffi 0.3.31",
+ "pen-ffi 0.3.32 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -659,21 +659,21 @@ dependencies = [
 
 [[package]]
 name = "pen-ffi"
-version = "0.3.31"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "720f53d69880a97cf78f4b1585644b6d0f39bbb9687981632ae6de2b7200e763"
-dependencies = [
- "futures",
- "pen-ffi-macro 0.1.18 (registry+https://github.com/rust-lang/crates.io-index)",
-]
-
-[[package]]
-name = "pen-ffi"
 version = "0.3.32"
 dependencies = [
  "futures",
  "pen-ffi-macro 0.1.18",
  "tokio",
+]
+
+[[package]]
+name = "pen-ffi"
+version = "0.3.32"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ec9660e320f9dbf9b51683466eff2baa243ec50e790e6cf6fef7545bb9dd6230"
+dependencies = [
+ "futures",
+ "pen-ffi-macro 0.1.18 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -751,7 +751,7 @@ checksum = "eb9f9e6e233e5c4a35559a617bf40a4ec447db2e84c20b55a6f83167b7e57872"
 name = "prelude"
 version = "0.1.0"
 dependencies = [
- "pen-ffi 0.3.31",
+ "pen-ffi 0.3.32 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
