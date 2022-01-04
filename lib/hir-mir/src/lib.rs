@@ -12,6 +12,7 @@ mod main_module_configuration;
 mod module_compiler;
 mod module_interface_compiler;
 mod record_field_validator;
+mod spawn_function_declaration_compiler;
 mod string_type_configuration;
 mod test_function_compiler;
 mod test_module_configuration;

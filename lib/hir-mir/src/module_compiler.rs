@@ -2,8 +2,8 @@ use super::{
     expression_compiler, generic_type_definition_compiler, type_compiler,
     type_context::TypeContext, CompileError,
 };
-use crate::concurrency_configuration::{
-    ConcurrencyConfiguration, MODULE_LOCAL_SPAWN_FUNCTION_NAME,
+use crate::{
+    concurrency_configuration::ConcurrencyConfiguration, spawn_function_declaration_compiler,
 };
 use hir::ir::*;
 
@@ -39,11 +39,8 @@ pub fn compile(
                     compile_calling_convention(declaration.calling_convention()),
                 ))
             })
-            .chain([Ok(mir::ir::ForeignDeclaration::new(
-                MODULE_LOCAL_SPAWN_FUNCTION_NAME,
-                &concurrency_configuration.spawn_function_name,
-                type_compiler::compile_spawn_function(),
-                mir::ir::CallingConvention::Target,
+            .chain([Ok(spawn_function_declaration_compiler::compile(
+                concurrency_configuration,
             ))])
             .collect::<Result<_, _>>()?,
         module
@@ -183,7 +180,9 @@ mod tests {
             )])),
             Ok(mir::ir::Module::new(
                 vec![],
-                vec![],
+                vec![spawn_function_declaration_compiler::compile(
+                    &CONCURRENCY_CONFIGURATION
+                )],
                 vec![mir::ir::ForeignDefinition::new(
                     "foo",
                     "bar",
@@ -218,7 +217,9 @@ mod tests {
             )])),
             Ok(mir::ir::Module::new(
                 vec![],
-                vec![],
+                vec![spawn_function_declaration_compiler::compile(
+                    &CONCURRENCY_CONFIGURATION
+                )],
                 vec![mir::ir::ForeignDefinition::new(
                     "foo",
                     "bar",
