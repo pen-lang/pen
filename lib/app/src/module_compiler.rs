@@ -9,8 +9,8 @@ use crate::{
     test_configuration::TestModuleConfiguration,
 };
 pub use compile_configuration::{
-    CompileConfiguration, ErrorTypeConfiguration, InstructionConfiguration, ListTypeConfiguration,
-    StringTypeConfiguration,
+    CompileConfiguration, ConcurrencyConfiguration, ErrorTypeConfiguration,
+    InstructionConfiguration, ListTypeConfiguration, StringTypeConfiguration,
 };
 use std::error::Error;
 
@@ -39,6 +39,7 @@ pub fn compile(
             &compile_configuration.error_type,
             PRELUDE_PREFIX,
         ),
+        &compile_configuration.concurrency,
     )?;
 
     compile_mir_module(
@@ -94,6 +95,7 @@ pub fn compile_main(
                 &compile_configuration.error_type,
                 PRELUDE_PREFIX,
             ),
+            &compile_configuration.concurrency,
             &main_module_configuration_qualifier::qualify(
                 &application_configuration.main_module,
                 &main_function_interface,
@@ -132,6 +134,7 @@ pub fn compile_test(
             &compile_configuration.error_type,
             PRELUDE_PREFIX,
         ),
+        &compile_configuration.concurrency,
         test_module_configuration,
     )?;
 

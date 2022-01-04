@@ -14,6 +14,7 @@ use std::collections::BTreeMap;
 pub struct TypeContext {
     types: BTreeMap<String, Type>,
     records: BTreeMap<String, Vec<types::RecordField>>,
+    // TODO Consider moving those to CompileConfiguration together with ConcurrencyConfiguration.
     list_type_configuration: ListTypeConfiguration,
     string_type_configuration: StringTypeConfiguration,
     error_type_configuration: ErrorTypeConfiguration,
