@@ -375,6 +375,9 @@ fn compile_operation(
         )
         .into(),
         Operation::Spawn(operation) => {
+            let body = operation.function().body();
+            let any_type = types::Any::new(body.position().clone());
+
             // TODO Downcast outputs.
             mir::ir::Call::new(
                 type_compiler::compile_spawn_function(),
@@ -383,9 +386,16 @@ fn compile_operation(
                     mir::ir::Definition::thunk(
                         THUNK_NAME,
                         vec![],
-                        // TODO Upcast inputs.
-                        compile(operation.function().body())?,
-                        type_compiler::compile(operation.function().result_type(), type_context)?,
+                        compile(
+                            &TypeCoercion::new(
+                                operation.function().result_type().clone(),
+                                any_type.clone(),
+                                body.clone(),
+                                operation.function().body().position().clone(),
+                            )
+                            .into(),
+                        )?,
+                        type_compiler::compile(&any_type.into(), type_context)?,
                     ),
                     mir::ir::Variable::new(THUNK_NAME),
                 )
