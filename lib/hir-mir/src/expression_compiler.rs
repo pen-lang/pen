@@ -375,11 +375,9 @@ fn compile_operation(
         )
         .into(),
         Operation::Spawn(operation) => {
-            let thunk_type = mir::types::Function::new(vec![], mir::types::Type::Variant);
-
             // TODO Downcast outputs.
             mir::ir::Call::new(
-                mir::types::Function::new(vec![thunk_type.clone().into()], thunk_type),
+                type_compiler::compile_spawn_function(),
                 mir::ir::Variable::new(MODULE_LOCAL_SPAWN_FUNCTION_NAME),
                 vec![mir::ir::LetRecursive::new(
                     mir::ir::Definition::thunk(
