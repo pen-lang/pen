@@ -228,18 +228,16 @@ fn compile_case(
     variables: &BTreeMap<String, fmm::build::TypedExpression>,
     types: &BTreeMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    let argument = compile(
-        module_builder,
-        instruction_builder,
-        case.argument(),
-        variables,
-        types,
-    )?;
-
     Ok(compile_alternatives(
         module_builder,
         instruction_builder,
-        argument,
+        compile(
+            module_builder,
+            instruction_builder,
+            case.argument(),
+            variables,
+            types,
+        )?,
         case.alternatives(),
         case.default_alternative(),
         variables,
