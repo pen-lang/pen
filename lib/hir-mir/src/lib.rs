@@ -1,4 +1,5 @@
 mod concurrency_configuration;
+mod downcast_compiler;
 mod duplicate_function_name_validator;
 mod duplicate_type_name_validator;
 mod environment_creator;
