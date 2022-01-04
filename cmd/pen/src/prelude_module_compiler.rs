@@ -18,6 +18,7 @@ pub fn compile(
         &file_path_converter.convert_to_file_path(interface_file)?,
         target_triple,
         &COMPILE_CONFIGURATION.instruction,
+        &COMPILE_CONFIGURATION.concurrency,
     )?;
 
     Ok(())

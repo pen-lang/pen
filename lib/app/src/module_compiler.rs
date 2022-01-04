@@ -203,14 +203,18 @@ pub fn compile_prelude(
     interface_file: &FilePath,
     target_triple: Option<&str>,
     instruction_configuration: &InstructionConfiguration,
+    concurrency_configuration: &ConcurrencyConfiguration,
 ) -> Result<(), Box<dyn Error>> {
-    let (module, module_interface) = hir_mir::compile_prelude(&ast_hir::compile_prelude(
-        &parse::parse(
-            &infrastructure.file_system.read_to_string(source_file)?,
-            &infrastructure.file_path_displayer.display(source_file),
+    let (module, module_interface) = hir_mir::compile_prelude(
+        &ast_hir::compile_prelude(
+            &parse::parse(
+                &infrastructure.file_system.read_to_string(source_file)?,
+                &infrastructure.file_path_displayer.display(source_file),
+            )?,
+            PRELUDE_PREFIX,
         )?,
-        PRELUDE_PREFIX,
-    )?)?;
+        concurrency_configuration,
+    )?;
 
     compile_mir_module(
         infrastructure,

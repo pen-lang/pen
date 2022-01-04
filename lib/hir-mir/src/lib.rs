@@ -26,7 +26,6 @@ mod type_inferrer;
 
 use self::{transformation::record_equal_function_transformer, type_context::TypeContext};
 pub use concurrency_configuration::ConcurrencyConfiguration;
-use concurrency_configuration::DUMMY_CONCURRENCY_CONFIGURATION;
 pub use error::CompileError;
 pub use error_type_configuration::ErrorTypeConfiguration;
 use error_type_configuration::DUMMY_ERROR_TYPE_CONFIGURATION;
@@ -78,8 +77,11 @@ pub fn compile(
     )
 }
 
+// TODO Remove an argument of concurrency_configuration when CompileCotnext is
+// implemented.
 pub fn compile_prelude(
     module: &Module,
+    concurrency_configuration: &ConcurrencyConfiguration,
 ) -> Result<(mir::ir::Module, interface::Module), CompileError> {
     compile_module(
         module,
@@ -89,7 +91,7 @@ pub fn compile_prelude(
             &DUMMY_STRING_TYPE_CONFIGURATION,
             &DUMMY_ERROR_TYPE_CONFIGURATION,
         ),
-        &DUMMY_CONCURRENCY_CONFIGURATION,
+        concurrency_configuration,
     )
 }
 
