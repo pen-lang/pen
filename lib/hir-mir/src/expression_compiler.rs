@@ -1256,5 +1256,63 @@ mod tests {
                 .into())
             );
         }
+
+        #[test]
+        fn compile_spawn_operation_with_any_type() {
+            assert_eq!(
+                compile_expression(
+                    &SpawnOperation::new(
+                        Lambda::new(
+                            vec![],
+                            types::Any::new(Position::fake()),
+                            Variable::new("x", Position::fake()),
+                            Position::fake()
+                        ),
+                        Position::fake(),
+                    )
+                    .into(),
+                ),
+                Ok(mir::ir::Let::new(
+                    "$any_thunk",
+                    mir::types::Function::new(vec![], mir::types::Type::Variant),
+                    mir::ir::Call::new(
+                        type_compiler::compile_spawn_function(),
+                        mir::ir::Variable::new(MODULE_LOCAL_SPAWN_FUNCTION_NAME),
+                        vec![mir::ir::LetRecursive::new(
+                            mir::ir::Definition::thunk(
+                                "$any_thunk",
+                                vec![],
+                                mir::ir::Variable::new("x"),
+                                mir::types::Type::Variant
+                            ),
+                            mir::ir::Variable::new("$any_thunk"),
+                        )
+                        .into()]
+                    ),
+                    mir::ir::LetRecursive::new(
+                        mir::ir::Definition::new(
+                            "$thunk",
+                            vec![],
+                            mir::ir::Case::new(
+                                mir::ir::Call::new(
+                                    mir::types::Function::new(vec![], mir::types::Type::Variant),
+                                    mir::ir::Variable::new("$any_thunk"),
+                                    vec![]
+                                ),
+                                vec![mir::ir::Alternative::new(
+                                    mir::types::Type::Variant,
+                                    "$value",
+                                    mir::ir::Variable::new("$value")
+                                )],
+                                None,
+                            ),
+                            mir::types::Type::Variant
+                        ),
+                        mir::ir::Variable::new("$thunk"),
+                    ),
+                )
+                .into())
+            );
+        }
     }
 }
