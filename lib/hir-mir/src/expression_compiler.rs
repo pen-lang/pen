@@ -504,7 +504,7 @@ fn compile_spawn_operation(
                         type_context,
                         concurrency_configuration,
                     )?,
-                    type_compiler::compile(&any_type.clone().into(), type_context)?,
+                    type_compiler::compile(&any_type.into(), type_context)?,
                 ),
                 mir::ir::Variable::new(ANY_THUNK_NAME),
             )
