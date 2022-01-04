@@ -511,7 +511,7 @@ fn compile_spawn_operation(
             .into()],
         ),
         mir::ir::LetRecursive::new(
-            mir::ir::Definition::thunk(
+            mir::ir::Definition::new(
                 THUNK_NAME,
                 vec![],
                 compile(
@@ -1186,6 +1186,72 @@ mod tests {
                         )
                     ],
                     None
+                )
+                .into())
+            );
+        }
+    }
+
+    mod spawn_operation {
+        use super::*;
+        use pretty_assertions::assert_eq;
+
+        #[test]
+        fn compile_spawn_operation() {
+            assert_eq!(
+                compile_expression(
+                    &SpawnOperation::new(
+                        Lambda::new(
+                            vec![],
+                            types::Number::new(Position::fake()),
+                            Number::new(42.0, Position::fake()),
+                            Position::fake()
+                        ),
+                        Position::fake(),
+                    )
+                    .into(),
+                ),
+                Ok(mir::ir::Let::new(
+                    "$any_thunk",
+                    mir::types::Function::new(vec![], mir::types::Type::Variant),
+                    mir::ir::Call::new(
+                        type_compiler::compile_spawn_function(),
+                        mir::ir::Variable::new(MODULE_LOCAL_SPAWN_FUNCTION_NAME),
+                        vec![mir::ir::LetRecursive::new(
+                            mir::ir::Definition::thunk(
+                                "$any_thunk",
+                                vec![],
+                                mir::ir::Variant::new(
+                                    mir::types::Type::Number,
+                                    mir::ir::Expression::Number(42.0)
+                                ),
+                                mir::types::Type::Variant
+                            ),
+                            mir::ir::Variable::new("$any_thunk"),
+                        )
+                        .into()]
+                    ),
+                    mir::ir::LetRecursive::new(
+                        mir::ir::Definition::new(
+                            "$thunk",
+                            vec![],
+                            mir::ir::Case::new(
+                                mir::ir::Call::new(
+                                    mir::types::Function::new(vec![], mir::types::Type::Variant),
+                                    mir::ir::Variable::new("$any_thunk"),
+                                    vec![]
+                                ),
+                                vec![mir::ir::Alternative::new(
+                                    mir::types::Type::Number,
+                                    "$value",
+                                    mir::ir::Variable::new("$value")
+                                )],
+                                None,
+                            ),
+                            mir::types::Type::Number
+                        ),
+                        mir::ir::Variable::new("$thunk"),
+                    ),
                 )
                 .into())
             );
