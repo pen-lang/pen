@@ -1,7 +1,7 @@
 #[cfg(test)]
 use once_cell::sync::Lazy;
 
-pub const MODULE_LOCAL_SPAWN_FUNCTION_NAME: &str = "_local_pen_spawn";
+pub const MODULE_LOCAL_SPAWN_FUNCTION_NAME: &str = "__module_local_spawn";
 
 #[cfg(test)]
 pub static CONCURRENCY_CONFIGURATION: Lazy<ConcurrencyConfiguration> =
