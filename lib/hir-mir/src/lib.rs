@@ -1,5 +1,4 @@
 mod concurrency_configuration;
-mod dummy_type_configurations;
 mod duplicate_function_name_validator;
 mod duplicate_type_name_validator;
 mod environment_creator;
@@ -25,22 +24,18 @@ mod type_context;
 mod type_extractor;
 mod type_inferrer;
 
-use self::{
-    dummy_type_configurations::{
-        DUMMY_ERROR_TYPE_CONFIGURATION, DUMMY_LIST_TYPE_CONFIGURATION,
-        DUMMY_STRING_TYPE_CONFIGURATION,
-    },
-    transformation::record_equal_function_transformer,
-    type_context::TypeContext,
-};
+use self::{transformation::record_equal_function_transformer, type_context::TypeContext};
 pub use concurrency_configuration::ConcurrencyConfiguration;
 use concurrency_configuration::DUMMY_CONCURRENCY_CONFIGURATION;
 pub use error::CompileError;
 pub use error_type_configuration::ErrorTypeConfiguration;
+use error_type_configuration::DUMMY_ERROR_TYPE_CONFIGURATION;
 use hir::{analysis::types::type_existence_validator, ir::*};
 pub use list_type_configuration::ListTypeConfiguration;
+use list_type_configuration::DUMMY_LIST_TYPE_CONFIGURATION;
 pub use main_module_configuration::MainModuleConfiguration;
 pub use string_type_configuration::StringTypeConfiguration;
+use string_type_configuration::DUMMY_STRING_TYPE_CONFIGURATION;
 pub use test_module_configuration::TestModuleConfiguration;
 
 pub fn compile_main(

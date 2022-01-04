@@ -99,13 +99,13 @@ fn transform_list(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::dummy_type_configurations::DUMMY_LIST_TYPE_CONFIGURATION;
+    use crate::list_type_configuration::LIST_TYPE_CONFIGURATION;
     use position::{test::PositionFake, Position};
     use pretty_assertions::assert_eq;
 
     fn get_list_type() -> types::Reference {
         types::Reference::new(
-            DUMMY_LIST_TYPE_CONFIGURATION.list_type_name.clone(),
+            LIST_TYPE_CONFIGURATION.list_type_name.clone(),
             Position::fake(),
         )
     }
@@ -144,12 +144,12 @@ mod tests {
         assert_eq!(
             transform(
                 &List::new(types::None::new(Position::fake()), vec![], Position::fake()),
-                &DUMMY_LIST_TYPE_CONFIGURATION,
+                &LIST_TYPE_CONFIGURATION,
             ),
             Call::new(
                 Some(types::Function::new(vec![], list_type, Position::fake()).into()),
                 Variable::new(
-                    &DUMMY_LIST_TYPE_CONFIGURATION.empty_list_function_name,
+                    &LIST_TYPE_CONFIGURATION.empty_list_function_name,
                     Position::fake()
                 ),
                 vec![],
@@ -170,12 +170,12 @@ mod tests {
                     vec![ListElement::Single(None::new(Position::fake()).into())],
                     Position::fake()
                 ),
-                &DUMMY_LIST_TYPE_CONFIGURATION,
+                &LIST_TYPE_CONFIGURATION,
             ),
             Call::new(
                 Some(get_prepend_function_type().into()),
                 Variable::new(
-                    &DUMMY_LIST_TYPE_CONFIGURATION.prepend_function_name,
+                    &LIST_TYPE_CONFIGURATION.prepend_function_name,
                     Position::fake()
                 ),
                 vec![
@@ -193,7 +193,7 @@ mod tests {
                     Call::new(
                         Some(types::Function::new(vec![], list_type, Position::fake()).into()),
                         Variable::new(
-                            &DUMMY_LIST_TYPE_CONFIGURATION.empty_list_function_name,
+                            &LIST_TYPE_CONFIGURATION.empty_list_function_name,
                             Position::fake()
                         ),
                         vec![],
@@ -222,12 +222,12 @@ mod tests {
                     ],
                     Position::fake()
                 ),
-                &DUMMY_LIST_TYPE_CONFIGURATION,
+                &LIST_TYPE_CONFIGURATION,
             ),
             Call::new(
                 Some(prepend_function_type.clone().into()),
                 Variable::new(
-                    &DUMMY_LIST_TYPE_CONFIGURATION.prepend_function_name,
+                    &LIST_TYPE_CONFIGURATION.prepend_function_name,
                     Position::fake()
                 ),
                 vec![
@@ -245,7 +245,7 @@ mod tests {
                     Call::new(
                         Some(prepend_function_type.into(),),
                         Variable::new(
-                            &DUMMY_LIST_TYPE_CONFIGURATION.prepend_function_name,
+                            &LIST_TYPE_CONFIGURATION.prepend_function_name,
                             Position::fake()
                         ),
                         vec![
@@ -266,7 +266,7 @@ mod tests {
                                         .into()
                                 ),
                                 Variable::new(
-                                    &DUMMY_LIST_TYPE_CONFIGURATION.empty_list_function_name,
+                                    &LIST_TYPE_CONFIGURATION.empty_list_function_name,
                                     Position::fake()
                                 ),
                                 vec![],
@@ -297,12 +297,12 @@ mod tests {
                     )],
                     Position::fake()
                 ),
-                &DUMMY_LIST_TYPE_CONFIGURATION,
+                &LIST_TYPE_CONFIGURATION,
             ),
             Call::new(
                 Some(get_concatenate_function_type().into()),
                 Variable::new(
-                    &DUMMY_LIST_TYPE_CONFIGURATION.concatenate_function_name,
+                    &LIST_TYPE_CONFIGURATION.concatenate_function_name,
                     Position::fake()
                 ),
                 vec![
@@ -315,7 +315,7 @@ mod tests {
                     Call::new(
                         Some(types::Function::new(vec![], list_type, Position::fake()).into()),
                         Variable::new(
-                            &DUMMY_LIST_TYPE_CONFIGURATION.empty_list_function_name,
+                            &LIST_TYPE_CONFIGURATION.empty_list_function_name,
                             Position::fake()
                         ),
                         vec![],
