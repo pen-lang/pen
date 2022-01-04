@@ -474,8 +474,8 @@ fn compile_spawn_operation(
     type_context: &TypeContext,
     concurrency_configuration: &ConcurrencyConfiguration,
 ) -> Result<mir::ir::Expression, CompileError> {
-    const THUNK_NAME: &str = "$future";
-    const DOWNCASTED_THUNK_NAME: &str = "$downcasted_future";
+    const ANY_THUNK_NAME: &str = "$any_thunk";
+    const THUNK_NAME: &str = "$thunk";
 
     let position = operation.position();
     let body = operation.function().body();
@@ -484,14 +484,14 @@ fn compile_spawn_operation(
     let thunk_type = types::Function::new(vec![], any_type.clone(), position.clone()).into();
 
     Ok(mir::ir::Let::new(
-        THUNK_NAME,
+        ANY_THUNK_NAME,
         type_compiler::compile(&thunk_type, type_context)?,
         mir::ir::Call::new(
             type_compiler::compile_spawn_function(),
             mir::ir::Variable::new(MODULE_LOCAL_SPAWN_FUNCTION_NAME),
             vec![mir::ir::LetRecursive::new(
                 mir::ir::Definition::thunk(
-                    THUNK_NAME,
+                    ANY_THUNK_NAME,
                     vec![],
                     compile(
                         &TypeCoercion::new(
@@ -506,19 +506,19 @@ fn compile_spawn_operation(
                     )?,
                     type_compiler::compile(&any_type.clone().into(), type_context)?,
                 ),
-                mir::ir::Variable::new(THUNK_NAME),
+                mir::ir::Variable::new(ANY_THUNK_NAME),
             )
             .into()],
         ),
         mir::ir::LetRecursive::new(
             mir::ir::Definition::thunk(
-                DOWNCASTED_THUNK_NAME,
+                THUNK_NAME,
                 vec![],
                 compile(
                     &downcast_compiler::compile(
                         &Call::new(
                             Some(thunk_type.clone()),
-                            Variable::new(THUNK_NAME, position.clone()),
+                            Variable::new(ANY_THUNK_NAME, position.clone()),
                             vec![],
                             position.clone(),
                         )
@@ -530,7 +530,7 @@ fn compile_spawn_operation(
                 )?,
                 type_compiler::compile(result_type, type_context)?,
             ),
-            mir::ir::Variable::new(DOWNCASTED_THUNK_NAME),
+            mir::ir::Variable::new(THUNK_NAME),
         ),
     )
     .into())
