@@ -2,16 +2,21 @@ use crate::{
     cps::{self, AsyncStack, ContinuationFunction},
     Arc, Closure,
 };
-use std::{future::Future, pin::Pin, task::Poll};
+use std::{future::Future, intrinsics::transmute, pin::Pin, task::Poll};
 
-impl<T, F: Future<Output = T>> From<F> for Arc<Closure<Option<Pin<Box<F>>>>> {
+impl<T, F: Future<Output = T>> From<F> for Arc<Closure> {
     fn from(future: F) -> Self {
         to_closure(future)
     }
 }
 
-pub fn to_closure<O, F: Future<Output = O>>(future: F) -> Arc<Closure<Option<Pin<Box<F>>>>> {
-    Closure::new(get_result::<O, F> as *const u8, Box::pin(future).into()).into()
+pub fn to_closure<O, F: Future<Output = O>>(future: F) -> Arc<Closure> {
+    let closure = Arc::new(Closure::new(
+        get_result::<O, F> as *const u8,
+        Some(Box::pin(future)),
+    ));
+
+    unsafe { transmute(closure) }
 }
 
 extern "C" fn get_result<O, F: Future<Output = O>>(
