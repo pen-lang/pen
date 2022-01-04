@@ -536,6 +536,14 @@ mod tests {
     use crate::concurrency_configuration::CONCURRENCY_CONFIGURATION;
     use position::{test::PositionFake, Position};
 
+    fn compile_expression(expression: &Expression) -> Result<mir::ir::Expression, CompileError> {
+        compile(
+            expression,
+            &TypeContext::dummy(Default::default(), Default::default()),
+            &CONCURRENCY_CONFIGURATION,
+        )
+    }
+
     mod if_type {
         use super::*;
         use pretty_assertions::assert_eq;
@@ -543,7 +551,7 @@ mod tests {
         #[test]
         fn compile_with_union() {
             assert_eq!(
-                compile(
+                compile_expression(
                     &IfType::new(
                         "y",
                         Variable::new("x", Position::fake()),
@@ -561,8 +569,6 @@ mod tests {
                         Position::fake(),
                     )
                     .into(),
-                    &TypeContext::dummy(Default::default(), Default::default()),
-                    &CONCURRENCY_CONFIGURATION,
                 ),
                 Ok(mir::ir::Case::new(
                     mir::ir::Variable::new("x"),
@@ -587,7 +593,7 @@ mod tests {
         #[test]
         fn compile_with_union_and_else() {
             assert_eq!(
-                compile(
+                compile_expression(
                     &IfType::new(
                         "y",
                         Variable::new("x", Position::fake()),
@@ -603,8 +609,6 @@ mod tests {
                         Position::fake(),
                     )
                     .into(),
-                    &TypeContext::dummy(Default::default(), Default::default()),
-                    &CONCURRENCY_CONFIGURATION,
                 ),
                 Ok(mir::ir::Case::new(
                     mir::ir::Variable::new("x"),
@@ -629,7 +633,7 @@ mod tests {
         #[test]
         fn compile_with_any() {
             assert_eq!(
-                compile(
+                compile_expression(
                     &IfType::new(
                         "y",
                         Variable::new("x", Position::fake()),
@@ -645,8 +649,6 @@ mod tests {
                         Position::fake(),
                     )
                     .into(),
-                    &TypeContext::dummy(Default::default(), Default::default()),
-                    &CONCURRENCY_CONFIGURATION,
                 ),
                 Ok(mir::ir::Case::new(
                     mir::ir::Variable::new("x"),
@@ -667,7 +669,7 @@ mod tests {
         #[test]
         fn compile_with_union_branch() {
             assert_eq!(
-                compile(
+                compile_expression(
                     &IfType::new(
                         "y",
                         Variable::new("x", Position::fake()),
@@ -683,8 +685,6 @@ mod tests {
                         Position::fake(),
                     )
                     .into(),
-                    &TypeContext::dummy(Default::default(), Default::default()),
-                    &CONCURRENCY_CONFIGURATION,
                 ),
                 Ok(mir::ir::Case::new(
                     mir::ir::Variable::new("x"),
