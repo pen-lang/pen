@@ -8,7 +8,7 @@ use super::{
     CompileError,
 };
 use crate::{
-    concurrency_configuration::ConcurrencyConfiguration,
+    concurrency_configuration::{ConcurrencyConfiguration, MODULE_LOCAL_SPAWN_FUNCTION_NAME},
     transformation::{list_literal_transformer, record_update_transformer},
 };
 use hir::{
@@ -378,10 +378,9 @@ fn compile_operation(
             let thunk_type = mir::types::Function::new(vec![], mir::types::Type::Variant);
 
             // TODO Downcast outputs.
-            // TODO Declare a spawn function in modules.
             mir::ir::Call::new(
                 mir::types::Function::new(vec![thunk_type.clone().into()], thunk_type),
-                mir::ir::Variable::new(&concurrency_configuration.spawn_function_name),
+                mir::ir::Variable::new(MODULE_LOCAL_SPAWN_FUNCTION_NAME),
                 vec![mir::ir::LetRecursive::new(
                     mir::ir::Definition::thunk(
                         THUNK_NAME,

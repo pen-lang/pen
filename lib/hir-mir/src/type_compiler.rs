@@ -78,3 +78,9 @@ pub fn compile_concrete_list_name(
         type_id_calculator::calculate(list.element(), types)?
     ))
 }
+
+pub fn compile_spawn_function() -> mir::types::Function {
+    let thunk_type = mir::types::Function::new(vec![], mir::types::Type::Variant);
+
+    mir::types::Function::new(vec![thunk_type.clone().into()], thunk_type)
+}

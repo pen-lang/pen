@@ -2,7 +2,9 @@ use super::{
     expression_compiler, generic_type_definition_compiler, type_compiler,
     type_context::TypeContext, CompileError,
 };
-use crate::concurrency_configuration::ConcurrencyConfiguration;
+use crate::concurrency_configuration::{
+    ConcurrencyConfiguration, MODULE_LOCAL_SPAWN_FUNCTION_NAME,
+};
 use hir::ir::*;
 
 pub fn compile(
@@ -37,6 +39,12 @@ pub fn compile(
                     compile_calling_convention(declaration.calling_convention()),
                 ))
             })
+            .chain([Ok(mir::ir::ForeignDeclaration::new(
+                MODULE_LOCAL_SPAWN_FUNCTION_NAME,
+                &concurrency_configuration.spawn_function_name,
+                type_compiler::compile_spawn_function(),
+                mir::ir::CallingConvention::Target,
+            ))])
             .collect::<Result<_, _>>()?,
         module
             .definitions()
