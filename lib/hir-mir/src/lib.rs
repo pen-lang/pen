@@ -78,7 +78,7 @@ pub fn compile(
     )
 }
 
-// TODO Remove an argument of concurrency_configuration when CompileCotnext is
+// TODO Remove an argument of concurrency_configuration when CompileContext is
 // implemented.
 pub fn compile_prelude(
     module: &Module,
