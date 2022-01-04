@@ -3,7 +3,6 @@ use hir::{
     analysis::types::{type_canonicalizer, type_id_calculator},
     types::{self, Type},
 };
-
 use std::collections::BTreeMap;
 
 pub fn compile(type_: &Type, type_context: &TypeContext) -> Result<mir::types::Type, CompileError> {

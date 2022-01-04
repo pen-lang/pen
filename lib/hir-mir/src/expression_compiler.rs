@@ -9,6 +9,7 @@ use super::{
 };
 use crate::{
     concurrency_configuration::{ConcurrencyConfiguration, MODULE_LOCAL_SPAWN_FUNCTION_NAME},
+    downcast_compiler,
     transformation::{list_literal_transformer, record_update_transformer},
 };
 use hir::{
@@ -20,9 +21,6 @@ use hir::{
     types::{self, Type},
 };
 use std::collections::BTreeMap;
-
-const CLOSURE_NAME: &str = "$closure";
-const THUNK_NAME: &str = "$thunk";
 
 pub fn compile(
     expression: &Expression,
@@ -184,21 +182,25 @@ pub fn compile(
             compile(&record_update_transformer::transform(update, type_context)?)?
         }
         Expression::String(string) => mir::ir::ByteString::new(string.value()).into(),
-        Expression::Thunk(thunk) => mir::ir::LetRecursive::new(
-            mir::ir::Definition::thunk(
-                THUNK_NAME,
-                vec![],
-                compile(thunk.expression())?,
-                type_compiler::compile(
-                    thunk
-                        .type_()
-                        .ok_or_else(|| CompileError::TypeNotInferred(thunk.position().clone()))?,
-                    type_context,
-                )?,
-            ),
-            mir::ir::Variable::new(THUNK_NAME),
-        )
-        .into(),
+        Expression::Thunk(thunk) => {
+            const THUNK_NAME: &str = "$thunk";
+
+            mir::ir::LetRecursive::new(
+                mir::ir::Definition::thunk(
+                    THUNK_NAME,
+                    vec![],
+                    compile(thunk.expression())?,
+                    type_compiler::compile(
+                        thunk.type_().ok_or_else(|| {
+                            CompileError::TypeNotInferred(thunk.position().clone())
+                        })?,
+                        type_context,
+                    )?,
+                ),
+                mir::ir::Variable::new(THUNK_NAME),
+            )
+            .into()
+        }
         Expression::TypeCoercion(coercion) => {
             let from = type_canonicalizer::canonicalize(coercion.from(), type_context.types())?;
             let to = type_canonicalizer::canonicalize(coercion.to(), type_context.types())?;
@@ -253,6 +255,8 @@ fn compile_lambda(
     type_context: &TypeContext,
     concurrency_configuration: &ConcurrencyConfiguration,
 ) -> Result<mir::ir::Expression, CompileError> {
+    const CLOSURE_NAME: &str = "$closure";
+
     Ok(mir::ir::LetRecursive::new(
         mir::ir::Definition::new(
             CLOSURE_NAME,
@@ -375,33 +379,7 @@ fn compile_operation(
         )
         .into(),
         Operation::Spawn(operation) => {
-            let body = operation.function().body();
-            let any_type = types::Any::new(body.position().clone());
-
-            // TODO Downcast outputs.
-            mir::ir::Call::new(
-                type_compiler::compile_spawn_function(),
-                mir::ir::Variable::new(MODULE_LOCAL_SPAWN_FUNCTION_NAME),
-                vec![mir::ir::LetRecursive::new(
-                    mir::ir::Definition::thunk(
-                        THUNK_NAME,
-                        vec![],
-                        compile(
-                            &TypeCoercion::new(
-                                operation.function().result_type().clone(),
-                                any_type.clone(),
-                                body.clone(),
-                                operation.function().body().position().clone(),
-                            )
-                            .into(),
-                        )?,
-                        type_compiler::compile(&any_type.into(), type_context)?,
-                    ),
-                    mir::ir::Variable::new(THUNK_NAME),
-                )
-                .into()],
-            )
-            .into()
+            compile_spawn_operation(operation, type_context, concurrency_configuration)?
         }
         Operation::Boolean(operation) => {
             compile(&boolean_operation_transformer::transform(operation))?
@@ -489,6 +467,73 @@ fn compile_operation(
             .into()
         }
     })
+}
+
+fn compile_spawn_operation(
+    operation: &SpawnOperation,
+    type_context: &TypeContext,
+    concurrency_configuration: &ConcurrencyConfiguration,
+) -> Result<mir::ir::Expression, CompileError> {
+    const THUNK_NAME: &str = "$future";
+    const DOWNCASTED_THUNK_NAME: &str = "$downcasted_future";
+
+    let position = operation.position();
+    let body = operation.function().body();
+    let result_type = operation.function().result_type();
+    let any_type = types::Any::new(position.clone());
+    let thunk_type = types::Function::new(vec![], any_type.clone(), position.clone()).into();
+
+    Ok(mir::ir::Let::new(
+        THUNK_NAME,
+        type_compiler::compile(&thunk_type, type_context)?,
+        mir::ir::Call::new(
+            type_compiler::compile_spawn_function(),
+            mir::ir::Variable::new(MODULE_LOCAL_SPAWN_FUNCTION_NAME),
+            vec![mir::ir::LetRecursive::new(
+                mir::ir::Definition::thunk(
+                    THUNK_NAME,
+                    vec![],
+                    compile(
+                        &TypeCoercion::new(
+                            result_type.clone(),
+                            any_type.clone(),
+                            body.clone(),
+                            body.position().clone(),
+                        )
+                        .into(),
+                        type_context,
+                        concurrency_configuration,
+                    )?,
+                    type_compiler::compile(&any_type.clone().into(), type_context)?,
+                ),
+                mir::ir::Variable::new(THUNK_NAME),
+            )
+            .into()],
+        ),
+        mir::ir::LetRecursive::new(
+            mir::ir::Definition::thunk(
+                DOWNCASTED_THUNK_NAME,
+                vec![],
+                compile(
+                    &downcast_compiler::compile(
+                        &Call::new(
+                            Some(thunk_type.clone()),
+                            Variable::new(THUNK_NAME, position.clone()),
+                            vec![],
+                            position.clone(),
+                        )
+                        .into(),
+                        result_type,
+                    ),
+                    type_context,
+                    concurrency_configuration,
+                )?,
+                type_compiler::compile(result_type, type_context)?,
+            ),
+            mir::ir::Variable::new(DOWNCASTED_THUNK_NAME),
+        ),
+    )
+    .into())
 }
 
 fn compile_record_fields(
