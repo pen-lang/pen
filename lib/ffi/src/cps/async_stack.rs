@@ -7,13 +7,12 @@ use std::{
     task::Context,
 };
 
-pub type StepFunction<T, S = ()> = unsafe extern "C" fn(
+pub type StepFunction<T, S = ()> = extern "C" fn(
     stack: &mut AsyncStack<S>,
     continuation: ContinuationFunction<T, S>,
 ) -> cps::Result;
 
-pub type ContinuationFunction<T, S = ()> =
-    unsafe extern "C" fn(&mut AsyncStack<S>, T) -> cps::Result;
+pub type ContinuationFunction<T, S = ()> = extern "C" fn(&mut AsyncStack<S>, T) -> cps::Result;
 
 pub type Trampoline<T, S> = (StepFunction<T, S>, ContinuationFunction<T, S>);
 
@@ -164,14 +163,11 @@ mod tests {
 
     type TestResult = usize;
 
-    unsafe extern "C" fn step(
-        _: &mut AsyncStack,
-        _: ContinuationFunction<TestResult, ()>,
-    ) -> cps::Result {
+    extern "C" fn step(_: &mut AsyncStack, _: ContinuationFunction<TestResult, ()>) -> cps::Result {
         cps::Result::new()
     }
 
-    unsafe extern "C" fn continuation(_: &mut AsyncStack, _: TestResult) -> cps::Result {
+    extern "C" fn continuation(_: &mut AsyncStack, _: TestResult) -> cps::Result {
         cps::Result::new()
     }
 
