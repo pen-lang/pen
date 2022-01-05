@@ -104,3 +104,17 @@ Feature: OS
     Then I successfully run `./app`
     And the stdout from "./app" should contain "main.pen"
     And the stdout from "./app" should contain "pen.json"
+
+  Scenario: Use go syntax
+    Given a file named "Foo.pen" with:
+    """pen
+    import System'Context { Context }
+
+    main = \(ctx Context) number {
+      f = go \() number { 0 }
+
+      f()
+    }
+    """
+    When I successfully run `pen build`
+    Then I successfully run `check_memory_leak.sh ./app`
