@@ -10,7 +10,7 @@ Feature: Concurrency
     """
 
   Scenario: Use go syntax
-    Given a file named "Foo.pen" with:
+    Given a file named "main.pen" with:
     """pen
     import System'Context { Context }
 
