@@ -480,7 +480,7 @@ fn compile_spawn_operation(
     let position = operation.position();
     let body = operation.function().body();
     let result_type = operation.function().result_type();
-    let any_type = types::Any::new(position.clone());
+    let any_type = Type::from(types::Any::new(position.clone()));
     let thunk_type = types::Function::new(vec![], any_type.clone(), position.clone()).into();
 
     Ok(mir::ir::Let::new(
@@ -504,7 +504,7 @@ fn compile_spawn_operation(
                         type_context,
                         concurrency_configuration,
                     )?,
-                    type_compiler::compile(&any_type.into(), type_context)?,
+                    type_compiler::compile(&any_type, type_context)?,
                 ),
                 mir::ir::Variable::new(ANY_THUNK_NAME),
             )
@@ -516,6 +516,8 @@ fn compile_spawn_operation(
                 vec![],
                 compile(
                     &downcast_compiler::compile(
+                        &any_type,
+                        result_type,
                         &Call::new(
                             Some(thunk_type.clone()),
                             Variable::new(ANY_THUNK_NAME, position.clone()),
@@ -523,8 +525,8 @@ fn compile_spawn_operation(
                             position.clone(),
                         )
                         .into(),
-                        result_type,
-                    ),
+                        type_context,
+                    )?,
                     type_context,
                     concurrency_configuration,
                 )?,
@@ -1293,18 +1295,10 @@ mod tests {
                         mir::ir::Definition::new(
                             "$thunk",
                             vec![],
-                            mir::ir::Case::new(
-                                mir::ir::Call::new(
-                                    mir::types::Function::new(vec![], mir::types::Type::Variant),
-                                    mir::ir::Variable::new("$any_thunk"),
-                                    vec![]
-                                ),
-                                vec![mir::ir::Alternative::new(
-                                    mir::types::Type::Variant,
-                                    "$value",
-                                    mir::ir::Variable::new("$value")
-                                )],
-                                None,
+                            mir::ir::Call::new(
+                                mir::types::Function::new(vec![], mir::types::Type::Variant),
+                                mir::ir::Variable::new("$any_thunk"),
+                                vec![]
                             ),
                             mir::types::Type::Variant
                         ),
