@@ -25,10 +25,8 @@ impl<T> Closure<T> {
         self.entry_function.load(Ordering::SeqCst)
     }
 
-    // This payload pointer is not *const T because closures should be "locked"
-    // already by entry functions in some way.
-    pub fn payload(&self) -> *mut T {
-        &mut self.payload
+    pub fn payload(&self) -> *const T {
+        &self.payload
     }
 }
 
