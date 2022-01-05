@@ -118,9 +118,9 @@ checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 
 [[package]]
 name = "clap"
-version = "3.0.2"
+version = "3.0.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cf99067eed62f7ede7267fed6ced21f61b60667651d4e1fe637859af0cafa065"
+checksum = "d01c9347757e131122b19cd19a05c85805b68c2352a97b623efdc3c295290299"
 dependencies = [
  "atty",
  "bitflags",
@@ -145,13 +145,13 @@ dependencies = [
 
 [[package]]
 name = "console"
-version = "0.14.1"
+version = "0.15.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3993e6445baa160675931ec041a5e03ca84b9c6e32a056150d3aa2bdda0a1f45"
+checksum = "a28b32d32ca44b70c3e4acd7db1babf555fa026e385fb95f18028f88848b3c31"
 dependencies = [
  "encode_unicode",
- "lazy_static",
  "libc",
+ "once_cell",
  "terminal_size",
  "winapi",
 ]
@@ -206,7 +206,7 @@ checksum = "279fb028e20b3c4c320317955b77c5e0c9701f05a1d309905d6fc702cdc5053e"
 [[package]]
 name = "fmm"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#08a0e07d8f341e4f3cffcf17239010d5719a48d1"
+source = "git+https://github.com/raviqqe/fmm?branch=main#fe09d8d5be02e1ea05a2c8e273348e2fa1827ef7"
 dependencies = [
  "hamt",
  "once_cell",
@@ -217,7 +217,7 @@ dependencies = [
 [[package]]
 name = "fmm-c"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#08a0e07d8f341e4f3cffcf17239010d5719a48d1"
+source = "git+https://github.com/raviqqe/fmm?branch=main#fe09d8d5be02e1ea05a2c8e273348e2fa1827ef7"
 dependencies = [
  "fmm",
  "tempfile",
@@ -226,7 +226,7 @@ dependencies = [
 [[package]]
 name = "fmm-llvm"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#08a0e07d8f341e4f3cffcf17239010d5719a48d1"
+source = "git+https://github.com/raviqqe/fmm?branch=main#fe09d8d5be02e1ea05a2c8e273348e2fa1827ef7"
 dependencies = [
  "fmm",
  "hamt",
@@ -442,7 +442,7 @@ dependencies = [
 [[package]]
 name = "inkwell"
 version = "0.1.0"
-source = "git+https://github.com/TheDan64/inkwell?branch=master#4ddaa3b4e3c3593c3382769b1d81267e3a5681f9"
+source = "git+https://github.com/TheDan64/inkwell?branch=master#d44ec8beed9053a8831756b9de8b9997fd7a01fe"
 dependencies = [
  "either",
  "inkwell_internals",
@@ -455,7 +455,7 @@ dependencies = [
 [[package]]
 name = "inkwell_internals"
 version = "0.5.0"
-source = "git+https://github.com/TheDan64/inkwell?branch=master#4ddaa3b4e3c3593c3382769b1d81267e3a5681f9"
+source = "git+https://github.com/TheDan64/inkwell?branch=master#d44ec8beed9053a8831756b9de8b9997fd7a01fe"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -464,9 +464,9 @@ dependencies = [
 
 [[package]]
 name = "insta"
-version = "1.9.0"
+version = "1.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "86c4e56d571b4cc829f0ce71506bd865a90369eeab5f3d3657ba96230beb8012"
+checksum = "b3cb858fc306825b542b1311d5fd536e4483680528f303a17a1d6803b0f6ce17"
 dependencies = [
  "console",
  "lazy_static",
