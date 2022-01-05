@@ -5,10 +5,10 @@ use crate::{
 use futures::future::poll_fn;
 use std::{intrinsics::transmute, task::Poll};
 
-type InitialStepFunction<T> = unsafe extern "C" fn(
+type InitialStepFunction<T, S> = unsafe extern "C" fn(
     stack: &mut AsyncStack<T>,
     continuation: ContinuationFunction<T, T>,
-    environment: &mut u8,
+    closure: Arc<Closure<S>>,
 ) -> cps::Result;
 
 const INITIAL_STACK_CAPACITY: usize = 64;
@@ -24,8 +24,8 @@ pub async fn from_closure<T, S>(closure: Arc<Closure<T>>) -> S {
             } else {
                 unsafe {
                     let entry_function =
-                        transmute::<_, InitialStepFunction<S>>(closure.entry_function());
-                    entry_function(stack, resolve, &mut *(closure.payload() as *mut u8))
+                        transmute::<_, InitialStepFunction<S, T>>(closure.entry_function());
+                    entry_function(stack, resolve, closure.clone())
                 };
             }
         });
@@ -54,9 +54,9 @@ mod tests {
     extern "C" fn foo(
         stack: &mut AsyncStack,
         continue_: ContinuationFunction<Number>,
-        environment: &mut f64,
+        closure: Arc<Closure<f64>>,
     ) -> cps::Result {
-        unsafe { continue_(stack, (*environment).into()) }
+        unsafe { continue_(stack, (*closure.payload()).into()) }
     }
 
     #[tokio::test]

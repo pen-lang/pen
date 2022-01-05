@@ -3,6 +3,7 @@ use super::{
     none::None, number::Number, record::Record, string::ByteString, variable::Variable,
     BinaryOperation, Lambda, RecordDeconstruction, UnaryOperation,
 };
+use crate::SpawnOperation;
 use position::Position;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -19,6 +20,7 @@ pub enum Expression {
     Number(Number),
     Record(Record),
     RecordDeconstruction(RecordDeconstruction),
+    SpawnOperation(SpawnOperation),
     String(ByteString),
     UnaryOperation(UnaryOperation),
     Variable(Variable),
@@ -39,16 +41,11 @@ impl Expression {
             Self::Number(number) => number.position(),
             Self::Record(record) => record.position(),
             Self::RecordDeconstruction(operation) => operation.position(),
+            Self::SpawnOperation(operation) => operation.position(),
             Self::String(string) => string.position(),
             Self::UnaryOperation(operation) => operation.position(),
             Self::Variable(variable) => variable.position(),
         }
-    }
-}
-
-impl From<Call> for Expression {
-    fn from(call: Call) -> Self {
-        Self::Call(call)
     }
 }
 
@@ -61,6 +58,12 @@ impl From<BinaryOperation> for Expression {
 impl From<Boolean> for Expression {
     fn from(boolean: Boolean) -> Self {
         Self::Boolean(boolean)
+    }
+}
+
+impl From<Call> for Expression {
+    fn from(call: Call) -> Self {
+        Self::Call(call)
     }
 }
 
@@ -121,6 +124,12 @@ impl From<Record> for Expression {
 impl From<RecordDeconstruction> for Expression {
     fn from(operation: RecordDeconstruction) -> Self {
         Self::RecordDeconstruction(operation)
+    }
+}
+
+impl From<SpawnOperation> for Expression {
+    fn from(operation: SpawnOperation) -> Self {
+        Self::SpawnOperation(operation)
     }
 }
 

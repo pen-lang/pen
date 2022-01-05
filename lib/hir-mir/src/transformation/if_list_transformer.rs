@@ -1,5 +1,5 @@
 use super::super::error::CompileError;
-use crate::type_context::TypeContext;
+use crate::{downcast_compiler, type_context::TypeContext};
 use hir::{
     analysis::types::type_equality_checker,
     ir::*,
@@ -74,21 +74,18 @@ pub fn transform(if_: &IfList, type_context: &TypeContext) -> Result<Expression,
                                 Lambda::new(
                                     vec![],
                                     element_type.clone(),
-                                    IfType::new(
-                                        if_.first_name(),
-                                        Call::new(
+                                    downcast_compiler::compile(
+                                        &any_type,
+                                        element_type,
+                                        &Call::new(
                                             Some(any_thunk_type.into()),
                                             Variable::new(if_.first_name(), position.clone()),
                                             vec![],
                                             position.clone(),
-                                        ),
-                                        vec![IfTypeBranch::new(
-                                            element_type.clone(),
-                                            Variable::new(if_.first_name(), position.clone()),
-                                        )],
-                                        None,
-                                        position.clone(),
-                                    ),
+                                        )
+                                        .into(),
+                                        type_context,
+                                    )?,
                                     position.clone(),
                                 ),
                                 position.clone(),

@@ -2,11 +2,15 @@ use super::{
     expression_compiler, generic_type_definition_compiler, type_compiler,
     type_context::TypeContext, CompileError,
 };
+use crate::{
+    concurrency_configuration::ConcurrencyConfiguration, spawn_function_declaration_compiler,
+};
 use hir::ir::*;
 
 pub fn compile(
     module: &Module,
     type_context: &TypeContext,
+    concurrency_configuration: &ConcurrencyConfiguration,
 ) -> Result<mir::ir::Module, CompileError> {
     Ok(mir::ir::Module::new(
         module
@@ -35,6 +39,9 @@ pub fn compile(
                     compile_calling_convention(declaration.calling_convention()),
                 ))
             })
+            .chain([Ok(spawn_function_declaration_compiler::compile(
+                concurrency_configuration,
+            ))])
             .collect::<Result<_, _>>()?,
         module
             .definitions()
@@ -59,7 +66,9 @@ pub fn compile(
         module
             .definitions()
             .iter()
-            .map(|definition| compile_definition(definition, type_context))
+            .map(|definition| {
+                compile_definition(definition, type_context, concurrency_configuration)
+            })
             .collect::<Result<Vec<_>, CompileError>>()?,
     ))
 }
@@ -100,8 +109,13 @@ fn compile_declaration(
 fn compile_definition(
     definition: &Definition,
     type_context: &TypeContext,
+    concurrency_configuration: &ConcurrencyConfiguration,
 ) -> Result<mir::ir::Definition, CompileError> {
-    let body = expression_compiler::compile(definition.lambda().body(), type_context)?;
+    let body = expression_compiler::compile(
+        definition.lambda().body(),
+        type_context,
+        concurrency_configuration,
+    )?;
     let result_type = type_compiler::compile(definition.lambda().result_type(), type_context)?;
 
     Ok(mir::ir::Definition::new(
@@ -126,6 +140,7 @@ fn compile_definition(
 mod tests {
     use super::*;
     use crate::{
+        concurrency_configuration::CONCURRENCY_CONFIGURATION,
         error_type_configuration::ERROR_TYPE_CONFIGURATION,
         list_type_configuration::LIST_TYPE_CONFIGURATION,
         string_type_configuration::STRING_TYPE_CONFIGURATION,
@@ -143,6 +158,7 @@ mod tests {
                 &STRING_TYPE_CONFIGURATION,
                 &ERROR_TYPE_CONFIGURATION,
             ),
+            &CONCURRENCY_CONFIGURATION,
         )
     }
 
@@ -164,7 +180,9 @@ mod tests {
             )])),
             Ok(mir::ir::Module::new(
                 vec![],
-                vec![],
+                vec![spawn_function_declaration_compiler::compile(
+                    &CONCURRENCY_CONFIGURATION
+                )],
                 vec![mir::ir::ForeignDefinition::new(
                     "foo",
                     "bar",
@@ -199,7 +217,9 @@ mod tests {
             )])),
             Ok(mir::ir::Module::new(
                 vec![],
-                vec![],
+                vec![spawn_function_declaration_compiler::compile(
+                    &CONCURRENCY_CONFIGURATION
+                )],
                 vec![mir::ir::ForeignDefinition::new(
                     "foo",
                     "bar",

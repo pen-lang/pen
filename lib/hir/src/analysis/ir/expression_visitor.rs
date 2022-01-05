@@ -7,7 +7,7 @@ pub fn visit(module: &Module, mut visit: impl FnMut(&Expression)) {
 }
 
 fn visit_definition(definition: &Definition, visit: &mut impl FnMut(&Expression)) {
-    visit_expression(definition.lambda().body(), visit)
+    visit_lambda(definition.lambda(), visit)
 }
 
 fn visit_expression(expression: &Expression, visit: &mut impl FnMut(&Expression)) {
@@ -47,7 +47,7 @@ fn visit_expression(expression: &Expression, visit: &mut impl FnMut(&Expression)
         Expression::TypeCoercion(coercion) => {
             visit_expression(coercion.argument());
         }
-        Expression::Lambda(lambda) => visit_expression(lambda.body()),
+        Expression::Lambda(lambda) => visit_lambda(lambda, visit),
         Expression::Let(let_) => {
             visit_expression(let_.bound_expression());
             visit_expression(let_.expression());
@@ -65,6 +65,7 @@ fn visit_expression(expression: &Expression, visit: &mut impl FnMut(&Expression)
                 visit_expression(operation.lhs());
                 visit_expression(operation.rhs());
             }
+            Operation::Spawn(operation) => visit_lambda(operation.function(), visit),
             Operation::Boolean(operation) => {
                 visit_expression(operation.lhs());
                 visit_expression(operation.rhs());
@@ -80,9 +81,7 @@ fn visit_expression(expression: &Expression, visit: &mut impl FnMut(&Expression)
                 visit_expression(operation.lhs());
                 visit_expression(operation.rhs());
             }
-            Operation::Try(operation) => {
-                visit_expression(operation.expression());
-            }
+            Operation::Try(operation) => visit_expression(operation.expression()),
         },
         Expression::RecordConstruction(construction) => {
             for field in construction.fields() {
@@ -90,7 +89,7 @@ fn visit_expression(expression: &Expression, visit: &mut impl FnMut(&Expression)
             }
         }
         Expression::RecordDeconstruction(deconstruction) => {
-            visit_expression(deconstruction.record());
+            visit_expression(deconstruction.record())
         }
         Expression::RecordUpdate(update) => {
             visit_expression(update.record());
@@ -99,13 +98,15 @@ fn visit_expression(expression: &Expression, visit: &mut impl FnMut(&Expression)
                 visit_expression(field.expression());
             }
         }
-        Expression::Thunk(thunk) => {
-            visit_expression(thunk.expression());
-        }
+        Expression::Thunk(thunk) => visit_expression(thunk.expression()),
         Expression::Boolean(_)
         | Expression::None(_)
         | Expression::Number(_)
         | Expression::String(_)
-        | Expression::Variable(_) => Default::default(),
+        | Expression::Variable(_) => {}
     }
+}
+
+fn visit_lambda(lambda: &Lambda, visit: &mut impl FnMut(&Expression)) {
+    visit_expression(lambda.body(), visit)
 }

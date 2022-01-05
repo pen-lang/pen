@@ -80,6 +80,9 @@ fn validate_expression(
                 validate(operation.lhs())?;
                 validate(operation.rhs())?;
             }
+            Operation::Spawn(operation) => {
+                validate_lambda(operation.function(), type_context)?;
+            }
             Operation::Boolean(operation) => {
                 validate(operation.lhs())?;
                 validate(operation.rhs())?;

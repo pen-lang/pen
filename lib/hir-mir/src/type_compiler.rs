@@ -3,7 +3,6 @@ use hir::{
     analysis::types::{type_canonicalizer, type_id_calculator},
     types::{self, Type},
 };
-
 use std::collections::BTreeMap;
 
 pub fn compile(type_: &Type, type_context: &TypeContext) -> Result<mir::types::Type, CompileError> {
@@ -77,4 +76,10 @@ pub fn compile_concrete_list_name(
         "_list_{}",
         type_id_calculator::calculate(list.element(), types)?
     ))
+}
+
+pub fn compile_spawn_function() -> mir::types::Function {
+    let thunk_type = mir::types::Function::new(vec![], mir::types::Type::Variant);
+
+    mir::types::Function::new(vec![thunk_type.clone().into()], thunk_type)
 }

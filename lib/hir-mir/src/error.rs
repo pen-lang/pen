@@ -9,6 +9,7 @@ use std::{
 pub enum CompileError {
     AnyEqualOperation(Position),
     AnyTypeBranch(Position),
+    SpawnOperationArguments(Position),
     DuplicateFunctionNames(Position, Position),
     DuplicateTypeNames(Position, Position),
     FunctionEqualOperation(Position),
@@ -52,6 +53,13 @@ impl Display for CompileError {
                 write!(
                     formatter,
                     "any type cannot be used for downcast\n{}",
+                    position
+                )
+            }
+            Self::SpawnOperationArguments(position) => {
+                write!(
+                    formatter,
+                    "lambda expression in spawn operation cannot have any argument\n{}",
                     position
                 )
             }

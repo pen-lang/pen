@@ -259,6 +259,11 @@ fn infer_expression(
                 operation.position().clone(),
             )
             .into(),
+            Operation::Spawn(operation) => SpawnOperation::new(
+                infer_lambda(operation.function(), variables, type_context)?,
+                operation.position().clone(),
+            )
+            .into(),
             Operation::Boolean(operation) => BooleanOperation::new(
                 operation.operator(),
                 infer_expression(operation.lhs(), variables)?,

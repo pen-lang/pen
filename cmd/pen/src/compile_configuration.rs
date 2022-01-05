@@ -34,6 +34,9 @@ pub static COMPILE_CONFIGURATION: Lazy<Arc<app::module_compiler::CompileConfigur
             error_type: app::module_compiler::ErrorTypeConfiguration {
                 error_type_name: "error".into(),
             },
+            concurrency: app::module_compiler::ConcurrencyConfiguration {
+                spawn_function_name: "_pen_spawn".into(),
+            },
         }
         .into()
     });
