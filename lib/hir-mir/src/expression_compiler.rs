@@ -117,9 +117,7 @@ pub fn compile(
         .into(),
         Expression::List(list) => compile(&list_literal_transformer::transform(
             list,
-            &compile_context
-                .compile_configuration()
-                .list_type_configuration,
+            &compile_context.compile_configuration().list_type,
         ))?,
         Expression::None(_) => mir::ir::Expression::None,
         Expression::Number(number) => mir::ir::Expression::Number(number.value()),
@@ -400,7 +398,7 @@ fn compile_operation(
                         mir::ir::Variable::new(
                             &compile_context
                                 .compile_configuration()
-                                .string_type_configuration
+                                .string_type
                                 .equal_function_name,
                         ),
                         vec![compile(operation.lhs())?, compile(operation.rhs())?],
@@ -440,7 +438,7 @@ fn compile_operation(
                 &types::Reference::new(
                     &compile_context
                         .compile_configuration()
-                        .error_type_configuration
+                        .error_type
                         .error_type_name,
                     operation.position().clone(),
                 )
@@ -850,7 +848,7 @@ mod tests {
                             mir::types::Record::new(
                                 &compile_context
                                     .compile_configuration()
-                                    .list_type_configuration
+                                    .list_type
                                     .list_type_name
                             ),
                             mir::ir::RecordField::new(

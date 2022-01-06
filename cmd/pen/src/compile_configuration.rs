@@ -18,7 +18,7 @@ pub static COMPILE_CONFIGURATION: Lazy<Arc<app::module_compiler::CompileConfigur
                 unreachable_function_name: Some("_pen_unreachable".into()),
             },
             hir: app::module_compiler::HirConfiguration {
-                list_type_configuration: app::module_compiler::ListTypeConfiguration {
+                list_type: app::module_compiler::ListTypeConfiguration {
                     empty_list_function_name: "_emptyList".into(),
                     concatenate_function_name: "_concatenateLists".into(),
                     equal_function_name: "_equalLists".into(),
@@ -29,13 +29,13 @@ pub static COMPILE_CONFIGURATION: Lazy<Arc<app::module_compiler::CompileConfigur
                     list_type_name: "_AnyList".into(),
                     first_rest_type_name: "_FirstRest".into(),
                 },
-                string_type_configuration: app::module_compiler::StringTypeConfiguration {
+                string_type: app::module_compiler::StringTypeConfiguration {
                     equal_function_name: "_equalStrings".into(),
                 },
-                error_type_configuration: app::module_compiler::ErrorTypeConfiguration {
+                error_type: app::module_compiler::ErrorTypeConfiguration {
                     error_type_name: "error".into(),
                 },
-                concurrency_configuration: app::module_compiler::ConcurrencyConfiguration {
+                concurrency: app::module_compiler::ConcurrencyConfiguration {
                     spawn_function_name: "_pen_spawn".into(),
                 },
             },

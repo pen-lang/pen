@@ -78,10 +78,10 @@ pub fn compile_prelude(
         &CompileContext::new(
             module,
             CompileConfiguration {
-                list_type_configuration: DUMMY_LIST_TYPE_CONFIGURATION.clone(),
-                string_type_configuration: DUMMY_STRING_TYPE_CONFIGURATION.clone(),
-                error_type_configuration: DUMMY_ERROR_TYPE_CONFIGURATION.clone(),
-                concurrency_configuration: concurrency_configuration.clone(),
+                list_type: DUMMY_LIST_TYPE_CONFIGURATION.clone(),
+                string_type: DUMMY_STRING_TYPE_CONFIGURATION.clone(),
+                error_type: DUMMY_ERROR_TYPE_CONFIGURATION.clone(),
+                concurrency: concurrency_configuration.clone(),
             },
         ),
     )

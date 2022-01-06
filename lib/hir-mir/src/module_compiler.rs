@@ -37,9 +37,7 @@ pub fn compile(
                 ))
             })
             .chain([Ok(spawn_function_declaration_compiler::compile(
-                &compile_context
-                    .compile_configuration()
-                    .concurrency_configuration,
+                &compile_context.compile_configuration().concurrency,
             ))])
             .collect::<Result<_, _>>()?,
         module

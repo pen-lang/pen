@@ -40,7 +40,7 @@ fn compile_type_definition(
             mir::types::RecordBody::new(vec![mir::types::Record::new(
                 &compile_context
                     .compile_configuration()
-                    .list_type_configuration
+                    .list_type
                     .list_type_name,
             )
             .into()]),
@@ -176,7 +176,7 @@ mod tests {
                 mir::types::RecordBody::new(vec![mir::types::Record::new(
                     &compile_context
                         .compile_configuration()
-                        .list_type_configuration
+                        .list_type
                         .list_type_name
                 )
                 .into()]),
@@ -220,7 +220,7 @@ mod tests {
                 mir::types::RecordBody::new(vec![mir::types::Record::new(
                     &compile_context
                         .compile_configuration()
-                        .list_type_configuration
+                        .list_type
                         .list_type_name
                 )
                 .into()]),
@@ -262,7 +262,7 @@ mod tests {
                 mir::types::RecordBody::new(vec![mir::types::Record::new(
                     &compile_context
                         .compile_configuration()
-                        .list_type_configuration
+                        .list_type
                         .list_type_name
                 )
                 .into()]),
@@ -279,7 +279,7 @@ mod tests {
             types::Record::new(
                 &compile_context
                     .compile_configuration()
-                    .error_type_configuration
+                    .error_type
                     .error_type_name,
                 Position::fake(),
             ),
@@ -310,7 +310,7 @@ mod tests {
                 mir::types::RecordBody::new(vec![mir::types::Record::new(
                     &compile_context
                         .compile_configuration()
-                        .list_type_configuration
+                        .list_type
                         .list_type_name
                 )
                 .into()]),
@@ -354,7 +354,7 @@ mod tests {
                 mir::types::RecordBody::new(vec![mir::types::Record::new(
                     &compile_context
                         .compile_configuration()
-                        .list_type_configuration
+                        .list_type
                         .list_type_name
                 )
                 .into()]),

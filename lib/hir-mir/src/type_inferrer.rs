@@ -320,7 +320,7 @@ fn infer_expression(
                 let error_type = types::Reference::new(
                     &compile_context
                         .compile_configuration()
-                        .error_type_configuration
+                        .error_type
                         .error_type_name,
                     position.clone(),
                 )

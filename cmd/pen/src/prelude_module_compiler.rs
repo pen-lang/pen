@@ -19,7 +19,7 @@ pub fn compile(
         target_triple,
         &COMPILE_CONFIGURATION.fmm,
         // TODO Remove this argument.
-        &COMPILE_CONFIGURATION.hir.concurrency_configuration,
+        &COMPILE_CONFIGURATION.hir.concurrency,
     )?;
 
     Ok(())

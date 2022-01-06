@@ -44,7 +44,7 @@ pub fn compile(
                                 types::Record::new(
                                     &compile_context
                                         .compile_configuration()
-                                        .error_type_configuration
+                                        .error_type
                                         .error_type_name,
                                     position.clone(),
                                 ),

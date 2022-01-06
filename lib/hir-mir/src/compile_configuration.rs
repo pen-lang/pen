@@ -16,16 +16,16 @@ use once_cell::sync::Lazy;
 
 #[derive(Clone, Debug)]
 pub struct CompileConfiguration {
-    pub list_type_configuration: ListTypeConfiguration,
-    pub string_type_configuration: StringTypeConfiguration,
-    pub error_type_configuration: ErrorTypeConfiguration,
-    pub concurrency_configuration: ConcurrencyConfiguration,
+    pub list_type: ListTypeConfiguration,
+    pub string_type: StringTypeConfiguration,
+    pub error_type: ErrorTypeConfiguration,
+    pub concurrency: ConcurrencyConfiguration,
 }
 
 #[cfg(test)]
 pub static COMPILE_CONFIGURATION: Lazy<CompileConfiguration> = Lazy::new(|| CompileConfiguration {
-    list_type_configuration: LIST_TYPE_CONFIGURATION.clone(),
-    string_type_configuration: STRING_TYPE_CONFIGURATION.clone(),
-    error_type_configuration: ERROR_TYPE_CONFIGURATION.clone(),
-    concurrency_configuration: CONCURRENCY_CONFIGURATION.clone(),
+    list_type: LIST_TYPE_CONFIGURATION.clone(),
+    string_type: STRING_TYPE_CONFIGURATION.clone(),
+    error_type: ERROR_TYPE_CONFIGURATION.clone(),
+    concurrency: CONCURRENCY_CONFIGURATION.clone(),
 });

@@ -104,7 +104,7 @@ fn validate_expression(
                         &types::Reference::new(
                             &compile_context
                                 .compile_configuration()
-                                .error_type_configuration
+                                .error_type
                                 .error_type_name,
                             result_type.position().clone(),
                         )
