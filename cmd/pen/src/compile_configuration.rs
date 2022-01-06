@@ -11,7 +11,7 @@ pub const CROSS_COMPILE_TARGETS: &[&str] = &[
 pub static COMPILE_CONFIGURATION: Lazy<Arc<app::module_compiler::CompileConfiguration>> =
     Lazy::new(|| {
         app::module_compiler::CompileConfiguration {
-            instruction: app::module_compiler::InstructionConfiguration {
+            fmm: app::module_compiler::FmmConfiguration {
                 allocate_function_name: "_pen_malloc".into(),
                 reallocate_function_name: "_pen_realloc".into(),
                 free_function_name: "_pen_free".into(),

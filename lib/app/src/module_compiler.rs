@@ -9,8 +9,8 @@ use crate::{
     test_configuration::TestModuleConfiguration,
 };
 pub use compile_configuration::{
-    CompileConfiguration, ConcurrencyConfiguration, ErrorTypeConfiguration, HirConfiguration,
-    InstructionConfiguration, ListTypeConfiguration, StringTypeConfiguration,
+    CompileConfiguration, ConcurrencyConfiguration, ErrorTypeConfiguration, FmmConfiguration,
+    HirConfiguration, ListTypeConfiguration, StringTypeConfiguration,
 };
 use std::error::Error;
 
@@ -35,7 +35,7 @@ pub fn compile(
         &module,
         object_file,
         target_triple,
-        &compile_configuration.instruction,
+        &compile_configuration.fmm,
     )?;
     infrastructure.file_system.write(
         interface_file,
@@ -82,7 +82,7 @@ pub fn compile_main(
         )?,
         object_file,
         target_triple,
-        &compile_configuration.instruction,
+        &compile_configuration.fmm,
     )?;
 
     Ok(())
@@ -110,7 +110,7 @@ pub fn compile_test(
         &module,
         object_file,
         target_triple,
-        &compile_configuration.instruction,
+        &compile_configuration.fmm,
     )?;
 
     infrastructure.file_system.write(
@@ -169,7 +169,7 @@ pub fn compile_prelude(
     object_file: &FilePath,
     interface_file: &FilePath,
     target_triple: Option<&str>,
-    instruction_configuration: &InstructionConfiguration,
+    instruction_configuration: &FmmConfiguration,
     concurrency_configuration: &ConcurrencyConfiguration,
 ) -> Result<(), Box<dyn Error>> {
     let (module, module_interface) = hir_mir::compile_prelude(
@@ -203,7 +203,7 @@ fn compile_mir_module(
     module: &mir::ir::Module,
     object_file: &FilePath,
     target_triple: Option<&str>,
-    instruction_configuration: &InstructionConfiguration,
+    instruction_configuration: &FmmConfiguration,
 ) -> Result<(), Box<dyn Error>> {
     infrastructure.file_system.write(
         object_file,
