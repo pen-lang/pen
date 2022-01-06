@@ -56,7 +56,7 @@ pub fn compile_main(
     );
     let module =
         main_function_compiler::compile(module, type_context.types(), main_module_configuration)?;
-    let (module, _) = compile_module(&module, &type_context, concurrency_configuration)?;
+    let (module, _) = compile_module(&module, &type_context)?;
 
     Ok(module)
 }
@@ -77,7 +77,6 @@ pub fn compile(
             error_type_configuration,
             concurrency_configuration,
         ),
-        concurrency_configuration,
     )
 }
 
@@ -91,12 +90,12 @@ pub fn compile_prelude(
         module,
         &TypeContext::new(
             module,
+            // TODO Make those optional.
             &DUMMY_LIST_TYPE_CONFIGURATION,
             &DUMMY_STRING_TYPE_CONFIGURATION,
             &DUMMY_ERROR_TYPE_CONFIGURATION,
             concurrency_configuration,
         ),
-        concurrency_configuration,
     )
 }
 
@@ -118,7 +117,7 @@ pub fn compile_test(
 
     let (module, test_information) =
         test_function_compiler::compile(module, &type_context, test_module_configuration)?;
-    let (module, _) = compile_module(&module, &type_context, concurrency_configuration)?;
+    let (module, _) = compile_module(&module, &type_context)?;
 
     Ok((module, test_information))
 }
@@ -126,7 +125,6 @@ pub fn compile_test(
 fn compile_module(
     module: &Module,
     type_context: &TypeContext,
-    concurrency_configuration: &ConcurrencyConfiguration,
 ) -> Result<(mir::ir::Module, interface::Module), CompileError> {
     duplicate_function_name_validator::validate(module)?;
     duplicate_type_name_validator::validate(module)?;
@@ -146,8 +144,7 @@ fn compile_module(
 
     Ok((
         {
-            let module =
-                module_compiler::compile(&module, type_context, concurrency_configuration)?;
+            let module = module_compiler::compile(&module, type_context)?;
             mir::analysis::check_types(&module)?;
             module
         },

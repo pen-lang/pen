@@ -8,7 +8,7 @@ use super::{
     CompileError,
 };
 use crate::{
-    concurrency_configuration::{ConcurrencyConfiguration, MODULE_LOCAL_SPAWN_FUNCTION_NAME},
+    concurrency_configuration::MODULE_LOCAL_SPAWN_FUNCTION_NAME,
     downcast_compiler,
     transformation::{list_literal_transformer, record_update_transformer},
 };
@@ -25,9 +25,8 @@ use std::collections::BTreeMap;
 pub fn compile(
     expression: &Expression,
     type_context: &TypeContext,
-    concurrency_configuration: &ConcurrencyConfiguration,
 ) -> Result<mir::ir::Expression, CompileError> {
-    let compile = |expression| compile(expression, type_context, concurrency_configuration);
+    let compile = |expression| compile(expression, type_context);
 
     Ok(match expression {
         Expression::Boolean(boolean) => mir::ir::Expression::Boolean(boolean.value()),
@@ -63,7 +62,6 @@ pub fn compile(
                         branch.type_(),
                         branch.expression(),
                         type_context,
-                        concurrency_configuration,
                     )
                 })
                 .collect::<Result<Vec<_>, CompileError>>()?
@@ -80,7 +78,6 @@ pub fn compile(
                             branch.type_().unwrap(),
                             branch.expression(),
                             type_context,
-                            concurrency_configuration,
                         )?
                     } else {
                         vec![]
@@ -107,9 +104,7 @@ pub fn compile(
             },
         )
         .into(),
-        Expression::Lambda(lambda) => {
-            compile_lambda(lambda, type_context, concurrency_configuration)?
-        }
+        Expression::Lambda(lambda) => compile_lambda(lambda, type_context)?,
         Expression::Let(let_) => mir::ir::Let::new(
             let_.name().unwrap_or_default(),
             type_compiler::compile(
@@ -127,9 +122,7 @@ pub fn compile(
         ))?,
         Expression::None(_) => mir::ir::Expression::None,
         Expression::Number(number) => mir::ir::Expression::Number(number.value()),
-        Expression::Operation(operation) => {
-            compile_operation(operation, type_context, concurrency_configuration)?
-        }
+        Expression::Operation(operation) => compile_operation(operation, type_context)?,
         Expression::RecordConstruction(construction) => {
             let field_types = record_field_resolver::resolve(
                 construction.type_(),
@@ -155,7 +148,6 @@ pub fn compile(
                     .into()
                 },
                 type_context,
-                concurrency_configuration,
             )?
         }
         Expression::RecordDeconstruction(deconstruction) => {
@@ -253,7 +245,6 @@ pub fn compile(
 fn compile_lambda(
     lambda: &hir::ir::Lambda,
     type_context: &TypeContext,
-    concurrency_configuration: &ConcurrencyConfiguration,
 ) -> Result<mir::ir::Expression, CompileError> {
     const CLOSURE_NAME: &str = "$closure";
 
@@ -270,7 +261,7 @@ fn compile_lambda(
                     ))
                 })
                 .collect::<Result<_, _>>()?,
-            compile(lambda.body(), type_context, concurrency_configuration)?,
+            compile(lambda.body(), type_context)?,
             type_compiler::compile(lambda.result_type(), type_context)?,
         ),
         mir::ir::Variable::new(CLOSURE_NAME),
@@ -283,10 +274,9 @@ fn compile_alternatives(
     type_: &Type,
     expression: &Expression,
     type_context: &TypeContext,
-    concurrency_configuration: &ConcurrencyConfiguration,
 ) -> Result<Vec<mir::ir::Alternative>, CompileError> {
     let type_ = type_canonicalizer::canonicalize(type_, type_context.types())?;
-    let expression = compile(expression, type_context, concurrency_configuration)?;
+    let expression = compile(expression, type_context)?;
 
     union_type_member_calculator::calculate(&type_, type_context.types())?
         .into_iter()
@@ -362,9 +352,8 @@ fn compile_generic_type_alternative(
 fn compile_operation(
     operation: &Operation,
     type_context: &TypeContext,
-    concurrency_configuration: &ConcurrencyConfiguration,
 ) -> Result<mir::ir::Expression, CompileError> {
-    let compile = |expression| compile(expression, type_context, concurrency_configuration);
+    let compile = |expression| compile(expression, type_context);
 
     Ok(match operation {
         Operation::Arithmetic(operation) => mir::ir::ArithmeticOperation::new(
@@ -378,9 +367,7 @@ fn compile_operation(
             compile(operation.rhs())?,
         )
         .into(),
-        Operation::Spawn(operation) => {
-            compile_spawn_operation(operation, type_context, concurrency_configuration)?
-        }
+        Operation::Spawn(operation) => compile_spawn_operation(operation, type_context)?,
         Operation::Boolean(operation) => {
             compile(&boolean_operation_transformer::transform(operation))?
         }
@@ -460,7 +447,6 @@ fn compile_operation(
                     success_type,
                     &Variable::new("$success", operation.position().clone()).into(),
                     type_context,
-                    concurrency_configuration,
                 )?,
                 None,
             )
@@ -472,7 +458,6 @@ fn compile_operation(
 fn compile_spawn_operation(
     operation: &SpawnOperation,
     type_context: &TypeContext,
-    concurrency_configuration: &ConcurrencyConfiguration,
 ) -> Result<mir::ir::Expression, CompileError> {
     const ANY_THUNK_NAME: &str = "$any_thunk";
     const THUNK_NAME: &str = "$thunk";
@@ -502,7 +487,6 @@ fn compile_spawn_operation(
                         )
                         .into(),
                         type_context,
-                        concurrency_configuration,
                     )?,
                     type_compiler::compile(&any_type, type_context)?,
                 ),
@@ -528,7 +512,6 @@ fn compile_spawn_operation(
                         type_context,
                     )?,
                     type_context,
-                    concurrency_configuration,
                 )?,
                 type_compiler::compile(result_type, type_context)?,
             ),
@@ -545,7 +528,6 @@ fn compile_record_fields(
         &BTreeMap<String, mir::ir::Expression>,
     ) -> mir::ir::Expression,
     type_context: &TypeContext,
-    concurrency_configuration: &ConcurrencyConfiguration,
 ) -> Result<mir::ir::Expression, CompileError> {
     Ok(match fields {
         [] => convert_fields_to_expression(&Default::default()),
@@ -562,7 +544,7 @@ fn compile_record_fields(
                         .type_(),
                     type_context,
                 )?,
-                compile(field.expression(), type_context, concurrency_configuration)?,
+                compile(field.expression(), type_context)?,
                 compile_record_fields(
                     &fields[1..],
                     field_types,
@@ -579,7 +561,6 @@ fn compile_record_fields(
                         )
                     },
                     type_context,
-                    concurrency_configuration,
                 )?,
             )
             .into()
@@ -590,14 +571,12 @@ fn compile_record_fields(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::concurrency_configuration::CONCURRENCY_CONFIGURATION;
     use position::{test::PositionFake, Position};
 
     fn compile_expression(expression: &Expression) -> Result<mir::ir::Expression, CompileError> {
         compile(
             expression,
             &TypeContext::dummy(Default::default(), Default::default()),
-            &CONCURRENCY_CONFIGURATION,
         )
     }
 
@@ -802,7 +781,6 @@ mod tests {
                     )
                     .into(),
                     &type_context,
-                    &CONCURRENCY_CONFIGURATION,
                 ),
                 Ok(mir::ir::Case::new(
                     mir::ir::Variable::new("x"),
@@ -847,7 +825,6 @@ mod tests {
                     )
                     .into(),
                     &type_context,
-                    &CONCURRENCY_CONFIGURATION,
                 ),
                 Ok(mir::ir::Case::new(
                     mir::ir::Variable::new("x"),
@@ -898,7 +875,6 @@ mod tests {
                     )
                     .into(),
                     &type_context,
-                    &CONCURRENCY_CONFIGURATION,
                 ),
                 Ok(mir::ir::Case::new(
                     mir::ir::Variable::new("x"),
@@ -967,7 +943,6 @@ mod tests {
                         .into_iter()
                         .collect()
                     ),
-                    &CONCURRENCY_CONFIGURATION,
                 ),
                 Ok(mir::ir::Let::new(
                     "$x",
@@ -1011,7 +986,6 @@ mod tests {
                         .into_iter()
                         .collect()
                     ),
-                    &CONCURRENCY_CONFIGURATION,
                 ),
                 Ok(mir::ir::Let::new(
                     "$x",
@@ -1048,7 +1022,6 @@ mod tests {
                         Default::default(),
                         vec![("r".into(), vec![])].into_iter().collect()
                     ),
-                    &CONCURRENCY_CONFIGURATION,
                 ),
                 Ok(mir::ir::Record::new(mir::types::Record::new("r"), vec![]).into())
             );
@@ -1070,7 +1043,6 @@ mod tests {
                             .collect(),
                         vec![("r".into(), vec![])].into_iter().collect()
                     ),
-                    &CONCURRENCY_CONFIGURATION,
                 ),
                 Ok(mir::ir::Record::new(mir::types::Record::new("r"), vec![]).into())
             );
@@ -1102,7 +1074,6 @@ mod tests {
                         .collect(),
                         Default::default()
                     ),
-                    &CONCURRENCY_CONFIGURATION,
                 ),
                 Ok(mir::ir::Case::new(
                     mir::ir::TryOperation::new(
@@ -1150,7 +1121,6 @@ mod tests {
                         .collect(),
                         Default::default()
                     ),
-                    &CONCURRENCY_CONFIGURATION,
                 ),
                 Ok(mir::ir::Case::new(
                     mir::ir::TryOperation::new(
