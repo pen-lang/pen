@@ -4,7 +4,7 @@ use super::{
         not_equal_operation_transformer,
     },
     type_compiler,
-    type_context::TypeContext,
+    compile_context::CompileContext,
     CompileError,
 };
 use crate::{
@@ -24,9 +24,9 @@ use std::collections::BTreeMap;
 
 pub fn compile(
     expression: &Expression,
-    type_context: &TypeContext,
+    compile_context: &CompileContext,
 ) -> Result<mir::ir::Expression, CompileError> {
-    let compile = |expression| compile(expression, type_context);
+    let compile = |expression| compile(expression, compile_context);
 
     Ok(match expression {
         Expression::Boolean(boolean) => mir::ir::Expression::Boolean(boolean.value()),
@@ -34,7 +34,7 @@ pub fn compile(
             type_compiler::compile(
                 call.function_type()
                     .ok_or_else(|| CompileError::TypeNotInferred(call.position().clone()))?,
-                type_context,
+                compile_context,
             )?
             .into_function()
             .ok_or_else(|| CompileError::FunctionExpected(call.position().clone()))?,
@@ -51,7 +51,7 @@ pub fn compile(
             compile(if_.else_())?,
         )
         .into(),
-        Expression::IfList(if_) => compile(&if_list_transformer::transform(if_, type_context)?)?,
+        Expression::IfList(if_) => compile(&if_list_transformer::transform(if_, compile_context)?)?,
         Expression::IfType(if_) => mir::ir::Case::new(
             compile(if_.argument())?,
             if_.branches()
@@ -61,7 +61,7 @@ pub fn compile(
                         if_.name(),
                         branch.type_(),
                         branch.expression(),
-                        type_context,
+                        compile_context,
                     )
                 })
                 .collect::<Result<Vec<_>, CompileError>>()?
@@ -71,13 +71,13 @@ pub fn compile(
                     if !type_equality_checker::check(
                         branch.type_().unwrap(),
                         &types::Any::new(if_.position().clone()).into(),
-                        type_context.types(),
+                        compile_context.types(),
                     )? {
                         compile_alternatives(
                             if_.name(),
                             branch.type_().unwrap(),
                             branch.expression(),
-                            type_context,
+                            compile_context,
                         )?
                     } else {
                         vec![]
@@ -90,7 +90,7 @@ pub fn compile(
                 if type_equality_checker::check(
                     branch.type_().unwrap(),
                     &types::Any::new(if_.position().clone()).into(),
-                    type_context.types(),
+                    compile_context.types(),
                 )? {
                     Some(mir::ir::DefaultAlternative::new(
                         if_.name(),
@@ -104,13 +104,13 @@ pub fn compile(
             },
         )
         .into(),
-        Expression::Lambda(lambda) => compile_lambda(lambda, type_context)?,
+        Expression::Lambda(lambda) => compile_lambda(lambda, compile_context)?,
         Expression::Let(let_) => mir::ir::Let::new(
             let_.name().unwrap_or_default(),
             type_compiler::compile(
                 let_.type_()
                     .ok_or_else(|| CompileError::TypeNotInferred(let_.position().clone()))?,
-                type_context,
+                compile_context,
             )?,
             compile(let_.bound_expression())?,
             compile(let_.expression())?,
@@ -118,19 +118,19 @@ pub fn compile(
         .into(),
         Expression::List(list) => compile(&list_literal_transformer::transform(
             list,
-            type_context.list_type_configuration(),
+            compile_context.list_type_configuration(),
         ))?,
         Expression::None(_) => mir::ir::Expression::None,
         Expression::Number(number) => mir::ir::Expression::Number(number.value()),
-        Expression::Operation(operation) => compile_operation(operation, type_context)?,
+        Expression::Operation(operation) => compile_operation(operation, compile_context)?,
         Expression::RecordConstruction(construction) => {
             let field_types = record_field_resolver::resolve(
                 construction.type_(),
                 construction.position(),
-                type_context.types(),
-                type_context.records(),
+                compile_context.types(),
+                compile_context.records(),
             )?;
-            let record_type = type_compiler::compile(construction.type_(), type_context)?
+            let record_type = type_compiler::compile(construction.type_(), compile_context)?
                 .into_record()
                 .unwrap();
 
@@ -147,21 +147,21 @@ pub fn compile(
                     )
                     .into()
                 },
-                type_context,
+                compile_context,
             )?
         }
         Expression::RecordDeconstruction(deconstruction) => {
             let type_ = deconstruction.type_().unwrap();
 
             mir::ir::RecordField::new(
-                type_compiler::compile(type_, type_context)?
+                type_compiler::compile(type_, compile_context)?
                     .into_record()
                     .unwrap(),
                 record_field_resolver::resolve(
                     type_,
                     deconstruction.position(),
-                    type_context.types(),
-                    type_context.records(),
+                    compile_context.types(),
+                    compile_context.records(),
                 )?
                 .iter()
                 .position(|field_type| field_type.name() == deconstruction.field_name())
@@ -171,7 +171,7 @@ pub fn compile(
             .into()
         }
         Expression::RecordUpdate(update) => {
-            compile(&record_update_transformer::transform(update, type_context)?)?
+            compile(&record_update_transformer::transform(update, compile_context)?)?
         }
         Expression::String(string) => mir::ir::ByteString::new(string.value()).into(),
         Expression::Thunk(thunk) => {
@@ -186,7 +186,7 @@ pub fn compile(
                         thunk.type_().ok_or_else(|| {
                             CompileError::TypeNotInferred(thunk.position().clone())
                         })?,
-                        type_context,
+                        compile_context,
                     )?,
                 ),
                 mir::ir::Variable::new(THUNK_NAME),
@@ -194,8 +194,8 @@ pub fn compile(
             .into()
         }
         Expression::TypeCoercion(coercion) => {
-            let from = type_canonicalizer::canonicalize(coercion.from(), type_context.types())?;
-            let to = type_canonicalizer::canonicalize(coercion.to(), type_context.types())?;
+            let from = type_canonicalizer::canonicalize(coercion.from(), compile_context.types())?;
+            let to = type_canonicalizer::canonicalize(coercion.to(), compile_context.types())?;
             let argument = compile(coercion.argument())?;
 
             if from.is_list() && to.is_list() {
@@ -207,14 +207,14 @@ pub fn compile(
                     | Type::Number(_)
                     | Type::Record(_)
                     | Type::String(_) => mir::ir::Variant::new(
-                        type_compiler::compile(coercion.from(), type_context)?,
+                        type_compiler::compile(coercion.from(), compile_context)?,
                         argument,
                     )
                     .into(),
                     Type::Function(function_type) => {
                         let concrete_type = type_compiler::compile_concrete_function(
                             function_type,
-                            type_context.types(),
+                            compile_context.types(),
                         )?;
 
                         mir::ir::Variant::new(
@@ -225,7 +225,7 @@ pub fn compile(
                     }
                     Type::List(list_type) => {
                         let concrete_type =
-                            type_compiler::compile_concrete_list(list_type, type_context.types())?;
+                            type_compiler::compile_concrete_list(list_type, compile_context.types())?;
 
                         mir::ir::Variant::new(
                             concrete_type.clone(),
@@ -244,7 +244,7 @@ pub fn compile(
 
 fn compile_lambda(
     lambda: &hir::ir::Lambda,
-    type_context: &TypeContext,
+    compile_context: &CompileContext,
 ) -> Result<mir::ir::Expression, CompileError> {
     const CLOSURE_NAME: &str = "$closure";
 
@@ -257,12 +257,12 @@ fn compile_lambda(
                 .map(|argument| -> Result<_, CompileError> {
                     Ok(mir::ir::Argument::new(
                         argument.name(),
-                        type_compiler::compile(argument.type_(), type_context)?,
+                        type_compiler::compile(argument.type_(), compile_context)?,
                     ))
                 })
                 .collect::<Result<_, _>>()?,
-            compile(lambda.body(), type_context)?,
-            type_compiler::compile(lambda.result_type(), type_context)?,
+            compile(lambda.body(), compile_context)?,
+            type_compiler::compile(lambda.result_type(), compile_context)?,
         ),
         mir::ir::Variable::new(CLOSURE_NAME),
     )
@@ -273,15 +273,15 @@ fn compile_alternatives(
     name: &str,
     type_: &Type,
     expression: &Expression,
-    type_context: &TypeContext,
+    compile_context: &CompileContext,
 ) -> Result<Vec<mir::ir::Alternative>, CompileError> {
-    let type_ = type_canonicalizer::canonicalize(type_, type_context.types())?;
-    let expression = compile(expression, type_context)?;
+    let type_ = type_canonicalizer::canonicalize(type_, compile_context.types())?;
+    let expression = compile(expression, compile_context)?;
 
-    union_type_member_calculator::calculate(&type_, type_context.types())?
+    union_type_member_calculator::calculate(&type_, compile_context.types())?
         .into_iter()
         .map(|member_type| {
-            let compiled_member_type = type_compiler::compile(&member_type, type_context)?;
+            let compiled_member_type = type_compiler::compile(&member_type, compile_context)?;
 
             Ok(match &member_type {
                 Type::Function(function_type) => compile_generic_type_alternative(
@@ -289,14 +289,14 @@ fn compile_alternatives(
                     &expression,
                     &type_,
                     &compiled_member_type,
-                    &type_compiler::compile_concrete_function(function_type, type_context.types())?,
+                    &type_compiler::compile_concrete_function(function_type, compile_context.types())?,
                 ),
                 Type::List(list_type) => compile_generic_type_alternative(
                     name,
                     &expression,
                     &type_,
                     &compiled_member_type,
-                    &type_compiler::compile_concrete_list(list_type, type_context.types())?,
+                    &type_compiler::compile_concrete_list(list_type, compile_context.types())?,
                 ),
                 _ => mir::ir::Alternative::new(compiled_member_type.clone(), name, {
                     if type_.is_union() {
@@ -351,9 +351,9 @@ fn compile_generic_type_alternative(
 
 fn compile_operation(
     operation: &Operation,
-    type_context: &TypeContext,
+    compile_context: &CompileContext,
 ) -> Result<mir::ir::Expression, CompileError> {
-    let compile = |expression| compile(expression, type_context);
+    let compile = |expression| compile(expression, compile_context);
 
     Ok(match operation {
         Operation::Arithmetic(operation) => mir::ir::ArithmeticOperation::new(
@@ -367,7 +367,7 @@ fn compile_operation(
             compile(operation.rhs())?,
         )
         .into(),
-        Operation::Spawn(operation) => compile_spawn_operation(operation, type_context)?,
+        Operation::Spawn(operation) => compile_spawn_operation(operation, compile_context)?,
         Operation::Boolean(operation) => {
             compile(&boolean_operation_transformer::transform(operation))?
         }
@@ -377,7 +377,7 @@ fn compile_operation(
                     operation.type_().ok_or_else(|| {
                         CompileError::TypeNotInferred(operation.position().clone())
                     })?,
-                    type_context.types(),
+                    compile_context.types(),
                 )? {
                     Type::Number(_) => mir::ir::ComparisonOperation::new(
                         mir::ir::ComparisonOperator::Equal,
@@ -391,14 +391,14 @@ fn compile_operation(
                             mir::types::Type::Boolean,
                         ),
                         mir::ir::Variable::new(
-                            &type_context.string_type_configuration().equal_function_name,
+                            &compile_context.string_type_configuration().equal_function_name,
                         ),
                         vec![compile(operation.lhs())?, compile(operation.rhs())?],
                     )
                     .into(),
                     _ => compile(&equal_operation_transformer::transform(
                         operation,
-                        type_context,
+                        compile_context,
                     )?)?,
                 }
             }
@@ -428,11 +428,11 @@ fn compile_operation(
                 .ok_or_else(|| CompileError::TypeNotInferred(operation.position().clone()))?;
             let error_type = type_compiler::compile(
                 &types::Reference::new(
-                    &type_context.error_type_configuration().error_type_name,
+                    &compile_context.error_type_configuration().error_type_name,
                     operation.position().clone(),
                 )
                 .into(),
-                type_context,
+                compile_context,
             )?;
 
             mir::ir::Case::new(
@@ -446,7 +446,7 @@ fn compile_operation(
                     "$success",
                     success_type,
                     &Variable::new("$success", operation.position().clone()).into(),
-                    type_context,
+                    compile_context,
                 )?,
                 None,
             )
@@ -457,7 +457,7 @@ fn compile_operation(
 
 fn compile_spawn_operation(
     operation: &SpawnOperation,
-    type_context: &TypeContext,
+    compile_context: &CompileContext,
 ) -> Result<mir::ir::Expression, CompileError> {
     const ANY_THUNK_NAME: &str = "$any_thunk";
     const THUNK_NAME: &str = "$thunk";
@@ -470,7 +470,7 @@ fn compile_spawn_operation(
 
     Ok(mir::ir::Let::new(
         ANY_THUNK_NAME,
-        type_compiler::compile(&thunk_type, type_context)?,
+        type_compiler::compile(&thunk_type, compile_context)?,
         mir::ir::Call::new(
             type_compiler::compile_spawn_function(),
             mir::ir::Variable::new(MODULE_LOCAL_SPAWN_FUNCTION_NAME),
@@ -486,9 +486,9 @@ fn compile_spawn_operation(
                             body.position().clone(),
                         )
                         .into(),
-                        type_context,
+                        compile_context,
                     )?,
-                    type_compiler::compile(&any_type, type_context)?,
+                    type_compiler::compile(&any_type, compile_context)?,
                 ),
                 mir::ir::Variable::new(ANY_THUNK_NAME),
             )
@@ -509,11 +509,11 @@ fn compile_spawn_operation(
                             position.clone(),
                         )
                         .into(),
-                        type_context,
+                        compile_context,
                     )?,
-                    type_context,
+                    compile_context,
                 )?,
-                type_compiler::compile(result_type, type_context)?,
+                type_compiler::compile(result_type, compile_context)?,
             ),
             mir::ir::Variable::new(THUNK_NAME),
         ),
@@ -527,7 +527,7 @@ fn compile_record_fields(
     convert_fields_to_expression: &dyn Fn(
         &BTreeMap<String, mir::ir::Expression>,
     ) -> mir::ir::Expression,
-    type_context: &TypeContext,
+    compile_context: &CompileContext,
 ) -> Result<mir::ir::Expression, CompileError> {
     Ok(match fields {
         [] => convert_fields_to_expression(&Default::default()),
@@ -542,9 +542,9 @@ fn compile_record_fields(
                         .find(|field_type| field_type.name() == field.name())
                         .ok_or_else(|| CompileError::RecordFieldUnknown(field.position().clone()))?
                         .type_(),
-                    type_context,
+                    compile_context,
                 )?,
-                compile(field.expression(), type_context)?,
+                compile(field.expression(), compile_context)?,
                 compile_record_fields(
                     &fields[1..],
                     field_types,
@@ -560,7 +560,7 @@ fn compile_record_fields(
                                 .collect(),
                         )
                     },
-                    type_context,
+                    compile_context,
                 )?,
             )
             .into()
@@ -576,7 +576,7 @@ mod tests {
     fn compile_expression(expression: &Expression) -> Result<mir::ir::Expression, CompileError> {
         compile(
             expression,
-            &TypeContext::dummy(Default::default(), Default::default()),
+            &CompileContext::dummy(Default::default(), Default::default()),
         )
     }
 
@@ -760,11 +760,11 @@ mod tests {
 
         #[test]
         fn compile_function_branch() {
-            let type_context = TypeContext::dummy(Default::default(), Default::default());
+            let compile_context = CompileContext::dummy(Default::default(), Default::default());
             let function_type =
                 types::Function::new(vec![], types::None::new(Position::fake()), Position::fake());
             let concrete_function_type =
-                type_compiler::compile_concrete_function(&function_type, type_context.types())
+                type_compiler::compile_concrete_function(&function_type, compile_context.types())
                     .unwrap();
 
             assert_eq!(
@@ -780,7 +780,7 @@ mod tests {
                         Position::fake(),
                     )
                     .into(),
-                    &type_context,
+                    &compile_context,
                 ),
                 Ok(mir::ir::Case::new(
                     mir::ir::Variable::new("x"),
@@ -789,7 +789,7 @@ mod tests {
                         "y",
                         mir::ir::Let::new(
                             "y",
-                            type_compiler::compile_function(&function_type, &type_context).unwrap(),
+                            type_compiler::compile_function(&function_type, &compile_context).unwrap(),
                             mir::ir::RecordField::new(
                                 concrete_function_type,
                                 0,
@@ -806,10 +806,10 @@ mod tests {
 
         #[test]
         fn compile_list_branch() {
-            let type_context = TypeContext::dummy(Default::default(), Default::default());
+            let compile_context = CompileContext::dummy(Default::default(), Default::default());
             let list_type = types::List::new(types::None::new(Position::fake()), Position::fake());
             let concrete_list_type =
-                type_compiler::compile_concrete_list(&list_type, type_context.types()).unwrap();
+                type_compiler::compile_concrete_list(&list_type, compile_context.types()).unwrap();
 
             assert_eq!(
                 compile(
@@ -824,7 +824,7 @@ mod tests {
                         Position::fake(),
                     )
                     .into(),
-                    &type_context,
+                    &compile_context,
                 ),
                 Ok(mir::ir::Case::new(
                     mir::ir::Variable::new("x"),
@@ -834,7 +834,7 @@ mod tests {
                         mir::ir::Let::new(
                             "y",
                             mir::types::Record::new(
-                                &type_context.list_type_configuration().list_type_name
+                                &compile_context.list_type_configuration().list_type_name
                             ),
                             mir::ir::RecordField::new(
                                 concrete_list_type,
@@ -852,10 +852,10 @@ mod tests {
 
         #[test]
         fn compile_union_branch_including_list() {
-            let type_context = TypeContext::dummy(Default::default(), Default::default());
+            let compile_context = CompileContext::dummy(Default::default(), Default::default());
             let list_type = types::List::new(types::None::new(Position::fake()), Position::fake());
             let concrete_list_type =
-                type_compiler::compile_concrete_list(&list_type, type_context.types()).unwrap();
+                type_compiler::compile_concrete_list(&list_type, compile_context.types()).unwrap();
 
             assert_eq!(
                 compile(
@@ -874,7 +874,7 @@ mod tests {
                         Position::fake(),
                     )
                     .into(),
-                    &type_context,
+                    &compile_context,
                 ),
                 Ok(mir::ir::Case::new(
                     mir::ir::Variable::new("x"),
@@ -931,7 +931,7 @@ mod tests {
                         Position::fake()
                     )
                     .into(),
-                    &TypeContext::dummy(
+                    &CompileContext::dummy(
                         Default::default(),
                         vec![(
                             "r".into(),
@@ -974,7 +974,7 @@ mod tests {
                         Position::fake()
                     )
                     .into(),
-                    &TypeContext::dummy(
+                    &CompileContext::dummy(
                         Default::default(),
                         vec![(
                             "r".into(),
@@ -1018,7 +1018,7 @@ mod tests {
                         Position::fake()
                     )
                     .into(),
-                    &TypeContext::dummy(
+                    &CompileContext::dummy(
                         Default::default(),
                         vec![("r".into(), vec![])].into_iter().collect()
                     ),
@@ -1037,7 +1037,7 @@ mod tests {
                         Position::fake()
                     )
                     .into(),
-                    &TypeContext::dummy(
+                    &CompileContext::dummy(
                         vec![("r".into(), types::Record::new("r", Position::fake()).into())]
                             .into_iter()
                             .collect(),
@@ -1065,7 +1065,7 @@ mod tests {
                         Position::fake(),
                     )
                     .into(),
-                    &TypeContext::dummy(
+                    &CompileContext::dummy(
                         vec![(
                             "error".into(),
                             types::Record::new("error", Position::fake()).into()
@@ -1112,7 +1112,7 @@ mod tests {
                         Position::fake(),
                     )
                     .into(),
-                    &TypeContext::dummy(
+                    &CompileContext::dummy(
                         vec![(
                             "error".into(),
                             types::Record::new("error", Position::fake()).into()

@@ -22,11 +22,11 @@ mod try_operation_validator;
 mod type_checker;
 mod type_coercer;
 mod type_compiler;
-mod type_context;
+mod compile_context;
 mod type_extractor;
 mod type_inferrer;
 
-use self::{transformation::record_equal_function_transformer, type_context::TypeContext};
+use self::{transformation::record_equal_function_transformer, compile_context::CompileContext};
 pub use concurrency_configuration::ConcurrencyConfiguration;
 pub use error::CompileError;
 pub use error_type_configuration::ErrorTypeConfiguration;
@@ -47,7 +47,7 @@ pub fn compile_main(
     concurrency_configuration: &ConcurrencyConfiguration,
     main_module_configuration: &MainModuleConfiguration,
 ) -> Result<mir::ir::Module, CompileError> {
-    let type_context = TypeContext::new(
+    let compile_context = CompileContext::new(
         module,
         list_type_configuration,
         string_type_configuration,
@@ -55,8 +55,8 @@ pub fn compile_main(
         concurrency_configuration,
     );
     let module =
-        main_function_compiler::compile(module, type_context.types(), main_module_configuration)?;
-    let (module, _) = compile_module(&module, &type_context)?;
+        main_function_compiler::compile(module, compile_context.types(), main_module_configuration)?;
+    let (module, _) = compile_module(&module, &compile_context)?;
 
     Ok(module)
 }
@@ -70,7 +70,7 @@ pub fn compile(
 ) -> Result<(mir::ir::Module, interface::Module), CompileError> {
     compile_module(
         module,
-        &TypeContext::new(
+        &CompileContext::new(
             module,
             list_type_configuration,
             string_type_configuration,
@@ -88,7 +88,7 @@ pub fn compile_prelude(
 ) -> Result<(mir::ir::Module, interface::Module), CompileError> {
     compile_module(
         module,
-        &TypeContext::new(
+        &CompileContext::new(
             module,
             // TODO Make those optional.
             &DUMMY_LIST_TYPE_CONFIGURATION,
@@ -107,7 +107,7 @@ pub fn compile_test(
     concurrency_configuration: &ConcurrencyConfiguration,
     test_module_configuration: &TestModuleConfiguration,
 ) -> Result<(mir::ir::Module, test_info::Module), CompileError> {
-    let type_context = TypeContext::new(
+    let compile_context = CompileContext::new(
         module,
         list_type_configuration,
         string_type_configuration,
@@ -116,35 +116,35 @@ pub fn compile_test(
     );
 
     let (module, test_information) =
-        test_function_compiler::compile(module, &type_context, test_module_configuration)?;
-    let (module, _) = compile_module(&module, &type_context)?;
+        test_function_compiler::compile(module, &compile_context, test_module_configuration)?;
+    let (module, _) = compile_module(&module, &compile_context)?;
 
     Ok((module, test_information))
 }
 
 fn compile_module(
     module: &Module,
-    type_context: &TypeContext,
+    compile_context: &CompileContext,
 ) -> Result<(mir::ir::Module, interface::Module), CompileError> {
     duplicate_function_name_validator::validate(module)?;
     duplicate_type_name_validator::validate(module)?;
     type_existence_validator::validate(
         module,
-        &type_context.types().keys().cloned().collect(),
-        &type_context.records().keys().cloned().collect(),
+        &compile_context.types().keys().cloned().collect(),
+        &compile_context.records().keys().cloned().collect(),
     )?;
 
-    let module = record_equal_function_transformer::transform(module, type_context)?;
-    let module = type_inferrer::infer_types(&module, type_context)?;
-    type_checker::check_types(&module, type_context)?;
-    try_operation_validator::validate(&module, type_context)?;
-    record_field_validator::validate(&module, type_context)?;
-    let module = type_coercer::coerce_types(&module, type_context)?;
-    type_checker::check_types(&module, type_context)?;
+    let module = record_equal_function_transformer::transform(module, compile_context)?;
+    let module = type_inferrer::infer_types(&module, compile_context)?;
+    type_checker::check_types(&module, compile_context)?;
+    try_operation_validator::validate(&module, compile_context)?;
+    record_field_validator::validate(&module, compile_context)?;
+    let module = type_coercer::coerce_types(&module, compile_context)?;
+    type_checker::check_types(&module, compile_context)?;
 
     Ok((
         {
-            let module = module_compiler::compile(&module, type_context)?;
+            let module = module_compiler::compile(&module, compile_context)?;
             mir::analysis::check_types(&module)?;
             module
         },

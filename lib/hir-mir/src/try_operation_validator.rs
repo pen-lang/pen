@@ -1,28 +1,28 @@
-use super::{type_context::TypeContext, CompileError};
+use super::{compile_context::CompileContext, CompileError};
 use hir::{
     analysis::types::type_subsumption_checker,
     ir::*,
     types::{self, Type},
 };
 
-pub fn validate(module: &Module, type_context: &TypeContext) -> Result<(), CompileError> {
+pub fn validate(module: &Module, compile_context: &CompileContext) -> Result<(), CompileError> {
     for definition in module.definitions() {
-        validate_lambda(definition.lambda(), type_context)?;
+        validate_lambda(definition.lambda(), compile_context)?;
     }
 
     Ok(())
 }
 
-fn validate_lambda(lambda: &Lambda, type_context: &TypeContext) -> Result<(), CompileError> {
-    validate_expression(lambda.body(), Some(lambda.result_type()), type_context)
+fn validate_lambda(lambda: &Lambda, compile_context: &CompileContext) -> Result<(), CompileError> {
+    validate_expression(lambda.body(), Some(lambda.result_type()), compile_context)
 }
 
 fn validate_expression(
     expression: &Expression,
     result_type: Option<&Type>,
-    type_context: &TypeContext,
+    compile_context: &CompileContext,
 ) -> Result<(), CompileError> {
-    let validate = |expression| validate_expression(expression, result_type, type_context);
+    let validate = |expression| validate_expression(expression, result_type, compile_context);
 
     match expression {
         Expression::Call(call) => {
@@ -57,7 +57,7 @@ fn validate_expression(
             validate(coercion.argument())?;
         }
         Expression::Lambda(lambda) => {
-            validate_lambda(lambda, type_context)?;
+            validate_lambda(lambda, compile_context)?;
         }
         Expression::Let(let_) => {
             validate(let_.bound_expression())?;
@@ -71,7 +71,7 @@ fn validate_expression(
                         ListElement::Single(expression) => expression,
                     },
                     None,
-                    type_context,
+                    compile_context,
                 )?;
             }
         }
@@ -81,7 +81,7 @@ fn validate_expression(
                 validate(operation.rhs())?;
             }
             Operation::Spawn(operation) => {
-                validate_lambda(operation.function(), type_context)?;
+                validate_lambda(operation.function(), compile_context)?;
             }
             Operation::Boolean(operation) => {
                 validate(operation.lhs())?;
@@ -102,12 +102,12 @@ fn validate_expression(
                 if let Some(result_type) = result_type {
                     if !type_subsumption_checker::check(
                         &types::Reference::new(
-                            &type_context.error_type_configuration().error_type_name,
+                            &compile_context.error_type_configuration().error_type_name,
                             result_type.position().clone(),
                         )
                         .into(),
                         result_type,
-                        type_context.types(),
+                        compile_context.types(),
                     )? {
                         return Err(CompileError::InvalidTryOperation(
                             operation.position().clone(),
@@ -145,7 +145,7 @@ fn validate_expression(
                         .type_()
                         .ok_or_else(|| CompileError::TypeNotInferred(thunk.position().clone()))?,
                 ),
-                type_context,
+                compile_context,
             )?;
         }
         Expression::Boolean(_)
@@ -172,7 +172,7 @@ mod tests {
     fn validate_module(module: &Module) -> Result<(), CompileError> {
         validate(
             module,
-            &TypeContext::new(
+            &CompileContext::new(
                 module,
                 &LIST_TYPE_CONFIGURATION,
                 &STRING_TYPE_CONFIGURATION,

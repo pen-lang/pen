@@ -12,7 +12,7 @@ use hir::{
 use std::collections::BTreeMap;
 
 #[derive(Debug)]
-pub struct TypeContext {
+pub struct CompileContext {
     types: BTreeMap<String, Type>,
     records: BTreeMap<String, Vec<types::RecordField>>,
     // TODO Consider moving those to CompileConfiguration together with ConcurrencyConfiguration.
@@ -22,7 +22,7 @@ pub struct TypeContext {
     concurrency_configuration: ConcurrencyConfiguration,
 }
 
-impl TypeContext {
+impl CompileContext {
     pub fn new(
         module: &Module,
         list_type_configuration: &ListTypeConfiguration,

@@ -1,4 +1,4 @@
-use super::{environment_creator, type_context::TypeContext, type_extractor, CompileError};
+use super::{environment_creator, compile_context::CompileContext, type_extractor, CompileError};
 use hir::{
     analysis::types::{type_canonicalizer, type_difference_calculator, union_type_creator},
     ir::*,
@@ -6,7 +6,7 @@ use hir::{
 };
 use std::collections::BTreeMap;
 
-pub fn infer_types(module: &Module, type_context: &TypeContext) -> Result<Module, CompileError> {
+pub fn infer_types(module: &Module, compile_context: &CompileContext) -> Result<Module, CompileError> {
     let variables = environment_creator::create_from_module(module);
 
     Ok(Module::new(
@@ -17,7 +17,7 @@ pub fn infer_types(module: &Module, type_context: &TypeContext) -> Result<Module
         module
             .definitions()
             .iter()
-            .map(|definition| infer_definition(definition, &variables, type_context))
+            .map(|definition| infer_definition(definition, &variables, compile_context))
             .collect::<Result<_, _>>()?,
         module.position().clone(),
     ))
@@ -26,12 +26,12 @@ pub fn infer_types(module: &Module, type_context: &TypeContext) -> Result<Module
 fn infer_definition(
     definition: &Definition,
     variables: &BTreeMap<String, Type>,
-    type_context: &TypeContext,
+    compile_context: &CompileContext,
 ) -> Result<Definition, CompileError> {
     Ok(Definition::new(
         definition.name(),
         definition.original_name(),
-        infer_lambda(definition.lambda(), variables, type_context)?,
+        infer_lambda(definition.lambda(), variables, compile_context)?,
         definition.foreign_definition_configuration().cloned(),
         definition.is_public(),
         definition.position().clone(),
@@ -41,7 +41,7 @@ fn infer_definition(
 fn infer_lambda(
     lambda: &Lambda,
     variables: &BTreeMap<String, Type>,
-    type_context: &TypeContext,
+    compile_context: &CompileContext,
 ) -> Result<Lambda, CompileError> {
     Ok(Lambda::new(
         lambda.arguments().to_vec(),
@@ -58,7 +58,7 @@ fn infer_lambda(
                         .map(|argument| (argument.name().into(), argument.type_().clone())),
                 )
                 .collect(),
-            type_context,
+            compile_context,
         )?,
         lambda.position().clone(),
     ))
@@ -67,10 +67,10 @@ fn infer_lambda(
 fn infer_expression(
     expression: &Expression,
     variables: &BTreeMap<String, Type>,
-    type_context: &TypeContext,
+    compile_context: &CompileContext,
 ) -> Result<Expression, CompileError> {
     let infer_expression =
-        |expression, variables: &_| infer_expression(expression, variables, type_context);
+        |expression, variables: &_| infer_expression(expression, variables, compile_context);
 
     Ok(match expression {
         Expression::Call(call) => {
@@ -80,7 +80,7 @@ fn infer_expression(
                 Some(type_extractor::extract_from_expression(
                     &function,
                     variables,
-                    type_context,
+                    compile_context,
                 )?),
                 function.clone(),
                 call.arguments()
@@ -106,8 +106,8 @@ fn infer_expression(
         Expression::IfList(if_) => {
             let list = infer_expression(if_.argument(), variables)?;
             let list_type = type_canonicalizer::canonicalize_list(
-                &type_extractor::extract_from_expression(&list, variables, type_context)?,
-                type_context.types(),
+                &type_extractor::extract_from_expression(&list, variables, compile_context)?,
+                compile_context.types(),
             )?
             .ok_or_else(|| CompileError::ListExpected(if_.argument().position().clone()))?;
 
@@ -170,7 +170,7 @@ fn infer_expression(
                         &type_extractor::extract_from_expression(
                             &argument,
                             variables,
-                            type_context,
+                            compile_context,
                         )?,
                         &union_type_creator::create(
                             &if_.branches()
@@ -180,7 +180,7 @@ fn infer_expression(
                             if_.position(),
                         )
                         .unwrap(),
-                        type_context.types(),
+                        compile_context.types(),
                     )?
                     .ok_or_else(|| CompileError::UnreachableCode(branch.position().clone()))?;
 
@@ -208,13 +208,13 @@ fn infer_expression(
             )
             .into()
         }
-        Expression::Lambda(lambda) => infer_lambda(lambda, variables, type_context)?.into(),
+        Expression::Lambda(lambda) => infer_lambda(lambda, variables, compile_context)?.into(),
         Expression::Let(let_) => {
             let bound_expression = infer_expression(let_.bound_expression(), variables)?;
             let bound_type = type_extractor::extract_from_expression(
                 &bound_expression,
                 variables,
-                type_context,
+                compile_context,
             )?;
 
             Let::new(
@@ -260,7 +260,7 @@ fn infer_expression(
             )
             .into(),
             Operation::Spawn(operation) => SpawnOperation::new(
-                infer_lambda(operation.function(), variables, type_context)?,
+                infer_lambda(operation.function(), variables, compile_context)?,
                 operation.position().clone(),
             )
             .into(),
@@ -278,8 +278,8 @@ fn infer_expression(
                 EqualityOperation::new(
                     Some(
                         types::Union::new(
-                            type_extractor::extract_from_expression(&lhs, variables, type_context)?,
-                            type_extractor::extract_from_expression(&rhs, variables, type_context)?,
+                            type_extractor::extract_from_expression(&lhs, variables, compile_context)?,
+                            type_extractor::extract_from_expression(&rhs, variables, compile_context)?,
                             operation.position().clone(),
                         )
                         .into(),
@@ -307,7 +307,7 @@ fn infer_expression(
                 let position = operation.position();
                 let expression = infer_expression(operation.expression(), variables)?;
                 let error_type = types::Reference::new(
-                    &type_context.error_type_configuration().error_type_name,
+                    &compile_context.error_type_configuration().error_type_name,
                     position.clone(),
                 )
                 .into();
@@ -318,10 +318,10 @@ fn infer_expression(
                             &type_extractor::extract_from_expression(
                                 &expression,
                                 variables,
-                                type_context,
+                                compile_context,
                             )?,
                             &error_type,
-                            type_context.types(),
+                            compile_context.types(),
                         )? {
                             if type_.is_any() {
                                 return Err(CompileError::UnionTypeExpected(
@@ -365,7 +365,7 @@ fn infer_expression(
                 Some(type_extractor::extract_from_expression(
                     &record,
                     variables,
-                    type_context,
+                    compile_context,
                 )?),
                 record,
                 deconstruction.field_name(),
@@ -394,7 +394,7 @@ fn infer_expression(
             Some(type_extractor::extract_from_expression(
                 thunk.expression(),
                 variables,
-                type_context,
+                compile_context,
             )?),
             infer_expression(thunk.expression(), variables)?,
             thunk.position().clone(),
@@ -431,7 +431,7 @@ mod tests {
     fn infer_module(module: &Module) -> Result<Module, CompileError> {
         infer_types(
             module,
-            &TypeContext::new(
+            &CompileContext::new(
                 module,
                 &LIST_TYPE_CONFIGURATION,
                 &STRING_TYPE_CONFIGURATION,

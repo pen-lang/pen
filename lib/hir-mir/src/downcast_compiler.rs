@@ -1,4 +1,4 @@
-use crate::{type_context::TypeContext, CompileError};
+use crate::{compile_context::CompileContext, CompileError};
 use hir::{
     analysis::types::{type_canonicalizer, type_equality_checker, type_subsumption_checker},
     ir::*,
@@ -11,16 +11,16 @@ pub fn compile(
     from: &Type,
     to: &Type,
     expression: &Expression,
-    type_context: &TypeContext,
+    compile_context: &CompileContext,
 ) -> Result<Expression, CompileError> {
     let position = expression.position();
-    let from = type_canonicalizer::canonicalize(from, type_context.types())?;
+    let from = type_canonicalizer::canonicalize(from, compile_context.types())?;
 
     if !from.is_union() && !from.is_any() {
         return Err(CompileError::UnionOrAnyTypeExpected(
             expression.position().clone(),
         ));
-    } else if !type_subsumption_checker::check(to, &from, type_context.types())? {
+    } else if !type_subsumption_checker::check(to, &from, compile_context.types())? {
         return Err(CompileError::TypesNotMatched(
             to.position().clone(),
             from.position().clone(),
@@ -28,7 +28,7 @@ pub fn compile(
     }
 
     Ok(
-        if type_equality_checker::check(&from, to, type_context.types())? {
+        if type_equality_checker::check(&from, to, compile_context.types())? {
             expression.clone()
         } else {
             IfType::new(
@@ -62,7 +62,7 @@ mod tests {
             from,
             to,
             expression,
-            &TypeContext::dummy(Default::default(), Default::default()),
+            &CompileContext::dummy(Default::default(), Default::default()),
         )
     }
 
