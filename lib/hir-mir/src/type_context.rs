@@ -1,4 +1,5 @@
 use super::{
+    concurrency_configuration::ConcurrencyConfiguration,
     error_type_configuration::ErrorTypeConfiguration,
     list_type_configuration::ListTypeConfiguration,
     string_type_configuration::StringTypeConfiguration,
@@ -18,6 +19,7 @@ pub struct TypeContext {
     list_type_configuration: ListTypeConfiguration,
     string_type_configuration: StringTypeConfiguration,
     error_type_configuration: ErrorTypeConfiguration,
+    concurrency_configuration: ConcurrencyConfiguration,
 }
 
 impl TypeContext {
@@ -26,6 +28,7 @@ impl TypeContext {
         list_type_configuration: &ListTypeConfiguration,
         string_type_configuration: &StringTypeConfiguration,
         error_type_configuration: &ErrorTypeConfiguration,
+        concurrency_configuration: &ConcurrencyConfiguration,
     ) -> Self {
         Self {
             types: type_collector::collect(module),
@@ -37,6 +40,7 @@ impl TypeContext {
             list_type_configuration: list_type_configuration.clone(),
             string_type_configuration: string_type_configuration.clone(),
             error_type_configuration: error_type_configuration.clone(),
+            concurrency_configuration: concurrency_configuration.clone(),
         }
     }
 
@@ -46,6 +50,7 @@ impl TypeContext {
         records: BTreeMap<String, Vec<types::RecordField>>,
     ) -> Self {
         use super::{
+            concurrency_configuration::CONCURRENCY_CONFIGURATION,
             error_type_configuration::ERROR_TYPE_CONFIGURATION,
             list_type_configuration::LIST_TYPE_CONFIGURATION,
             string_type_configuration::STRING_TYPE_CONFIGURATION,
@@ -57,6 +62,7 @@ impl TypeContext {
             list_type_configuration: LIST_TYPE_CONFIGURATION.clone(),
             string_type_configuration: STRING_TYPE_CONFIGURATION.clone(),
             error_type_configuration: ERROR_TYPE_CONFIGURATION.clone(),
+            concurrency_configuration: CONCURRENCY_CONFIGURATION.clone(),
         }
     }
 
@@ -78,5 +84,9 @@ impl TypeContext {
 
     pub fn error_type_configuration(&self) -> &ErrorTypeConfiguration {
         &self.error_type_configuration
+    }
+
+    pub fn concurrency_configuration(&self) -> &ConcurrencyConfiguration {
+        &self.concurrency_configuration
     }
 }

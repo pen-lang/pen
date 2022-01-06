@@ -52,6 +52,7 @@ pub fn compile_main(
         list_type_configuration,
         string_type_configuration,
         error_type_configuration,
+        concurrency_configuration,
     );
     let module =
         main_function_compiler::compile(module, type_context.types(), main_module_configuration)?;
@@ -74,6 +75,7 @@ pub fn compile(
             list_type_configuration,
             string_type_configuration,
             error_type_configuration,
+            concurrency_configuration,
         ),
         concurrency_configuration,
     )
@@ -92,6 +94,7 @@ pub fn compile_prelude(
             &DUMMY_LIST_TYPE_CONFIGURATION,
             &DUMMY_STRING_TYPE_CONFIGURATION,
             &DUMMY_ERROR_TYPE_CONFIGURATION,
+            concurrency_configuration,
         ),
         concurrency_configuration,
     )
@@ -110,6 +113,7 @@ pub fn compile_test(
         list_type_configuration,
         string_type_configuration,
         error_type_configuration,
+        concurrency_configuration,
     );
 
     let (module, test_information) =
