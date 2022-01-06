@@ -1,4 +1,4 @@
-use crate::CompileConfiguration;
+use crate::{CompileConfiguration, CompileError};
 use hir::{
     analysis::types::type_collector,
     ir::*,
@@ -10,11 +10,11 @@ use std::collections::BTreeMap;
 pub struct CompileContext {
     types: BTreeMap<String, Type>,
     records: BTreeMap<String, Vec<types::RecordField>>,
-    compile_configuration: CompileConfiguration,
+    compile_configuration: Option<CompileConfiguration>,
 }
 
 impl CompileContext {
-    pub fn new(module: &Module, compile_configuration: CompileConfiguration) -> Self {
+    pub fn new(module: &Module, compile_configuration: Option<CompileConfiguration>) -> Self {
         Self {
             types: type_collector::collect(module),
             records: module
@@ -36,7 +36,7 @@ impl CompileContext {
         Self {
             types,
             records,
-            compile_configuration: COMPILE_CONFIGURATION.clone(),
+            compile_configuration: COMPILE_CONFIGURATION.clone().into(),
         }
     }
 
@@ -48,7 +48,9 @@ impl CompileContext {
         &self.records
     }
 
-    pub fn compile_configuration(&self) -> &CompileConfiguration {
-        &self.compile_configuration
+    pub fn compile_configuration(&self) -> Result<&CompileConfiguration, CompileError> {
+        self.compile_configuration
+            .as_ref()
+            .ok_or(CompileError::CompileConfigurationNotProvided)
     }
 }

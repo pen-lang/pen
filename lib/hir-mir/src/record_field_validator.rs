@@ -99,7 +99,7 @@ mod tests {
     fn validate_module(module: &Module) -> Result<(), CompileError> {
         validate(
             module,
-            &CompileContext::new(module, COMPILE_CONFIGURATION.clone()),
+            &CompileContext::new(module, COMPILE_CONFIGURATION.clone().into()),
         )
     }
 

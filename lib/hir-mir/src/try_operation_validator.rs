@@ -103,7 +103,7 @@ fn validate_expression(
                     if !type_subsumption_checker::check(
                         &types::Reference::new(
                             &compile_context
-                                .compile_configuration()
+                                .compile_configuration()?
                                 .error_type
                                 .error_type_name,
                             result_type.position().clone(),
@@ -174,7 +174,7 @@ mod tests {
     fn validate_module(module: &Module) -> Result<(), CompileError> {
         validate(
             module,
-            &CompileContext::new(module, COMPILE_CONFIGURATION.clone()),
+            &CompileContext::new(module, COMPILE_CONFIGURATION.clone().into()),
         )
     }
 

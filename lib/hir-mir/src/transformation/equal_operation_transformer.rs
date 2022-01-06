@@ -66,7 +66,7 @@ fn transform_equal_operation(
             let element_type = list_type.element();
             let any_list_type = types::Reference::new(
                 &compile_context
-                    .compile_configuration()
+                    .compile_configuration()?
                     .list_type
                     .list_type_name,
                 position.clone(),
@@ -95,7 +95,7 @@ fn transform_equal_operation(
                 ),
                 Variable::new(
                     &compile_context
-                        .compile_configuration()
+                        .compile_configuration()?
                         .list_type
                         .equal_function_name,
                     position.clone(),

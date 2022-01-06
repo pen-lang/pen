@@ -319,7 +319,7 @@ fn infer_expression(
                 let expression = infer_expression(operation.expression(), variables)?;
                 let error_type = types::Reference::new(
                     &compile_context
-                        .compile_configuration()
+                        .compile_configuration()?
                         .error_type
                         .error_type_name,
                     position.clone(),
@@ -440,7 +440,7 @@ mod tests {
     fn infer_module(module: &Module) -> Result<Module, CompileError> {
         infer_types(
             module,
-            &CompileContext::new(module, COMPILE_CONFIGURATION.clone()),
+            &CompileContext::new(module, COMPILE_CONFIGURATION.clone().into()),
         )
     }
 

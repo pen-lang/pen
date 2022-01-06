@@ -15,7 +15,7 @@ pub fn compile(
             Type::Function(function) => compile_function(&function, compile_context)?.into(),
             Type::List(_) => mir::types::Record::new(
                 &compile_context
-                    .compile_configuration()
+                    .compile_configuration()?
                     .list_type
                     .list_type_name,
             )

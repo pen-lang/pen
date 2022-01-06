@@ -117,7 +117,7 @@ pub fn compile(
         .into(),
         Expression::List(list) => compile(&list_literal_transformer::transform(
             list,
-            &compile_context.compile_configuration().list_type,
+            &compile_context.compile_configuration()?.list_type,
         ))?,
         Expression::None(_) => mir::ir::Expression::None,
         Expression::Number(number) => mir::ir::Expression::Number(number.value()),
@@ -397,7 +397,7 @@ fn compile_operation(
                         ),
                         mir::ir::Variable::new(
                             &compile_context
-                                .compile_configuration()
+                                .compile_configuration()?
                                 .string_type
                                 .equal_function_name,
                         ),
@@ -437,7 +437,7 @@ fn compile_operation(
             let error_type = type_compiler::compile(
                 &types::Reference::new(
                     &compile_context
-                        .compile_configuration()
+                        .compile_configuration()?
                         .error_type
                         .error_type_name,
                     operation.position().clone(),
@@ -848,6 +848,7 @@ mod tests {
                             mir::types::Record::new(
                                 &compile_context
                                     .compile_configuration()
+                                    .unwrap()
                                     .list_type
                                     .list_type_name
                             ),

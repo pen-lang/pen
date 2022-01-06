@@ -37,7 +37,7 @@ pub fn compile(
                 ))
             })
             .chain([Ok(spawn_function_declaration_compiler::compile(
-                &compile_context.compile_configuration().concurrency,
+                &compile_context.compile_configuration()?.concurrency,
             ))])
             .collect::<Result<_, _>>()?,
         module
@@ -140,7 +140,7 @@ mod tests {
     fn compile_module(module: &Module) -> Result<mir::ir::Module, CompileError> {
         compile(
             module,
-            &CompileContext::new(module, COMPILE_CONFIGURATION.clone()),
+            &CompileContext::new(module, COMPILE_CONFIGURATION.clone().into()),
         )
     }
 

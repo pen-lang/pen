@@ -455,7 +455,7 @@ mod tests {
     fn coerce_module(module: &Module) -> Result<Module, CompileError> {
         coerce_types(
             module,
-            &CompileContext::new(module, COMPILE_CONFIGURATION.clone()),
+            &CompileContext::new(module, COMPILE_CONFIGURATION.clone().into()),
         )
     }
 

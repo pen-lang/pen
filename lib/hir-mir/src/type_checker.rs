@@ -458,7 +458,7 @@ fn check_operation(
                 .ok_or_else(|| CompileError::TypeNotInferred(position.clone()))?;
             let error_type = types::Reference::new(
                 &compile_context
-                    .compile_configuration()
+                    .compile_configuration()?
                     .error_type
                     .error_type_name,
                 position.clone(),
@@ -504,7 +504,7 @@ mod tests {
     fn check_module(module: &Module) -> Result<(), CompileError> {
         check_types(
             module,
-            &CompileContext::new(module, COMPILE_CONFIGURATION.clone()),
+            &CompileContext::new(module, COMPILE_CONFIGURATION.clone().into()),
         )
     }
 

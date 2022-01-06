@@ -133,7 +133,7 @@ mod tests {
     fn transform_module(module: &Module) -> Result<Module, CompileError> {
         transform(
             module,
-            &CompileContext::new(module, COMPILE_CONFIGURATION.clone()),
+            &CompileContext::new(module, COMPILE_CONFIGURATION.clone().into()),
         )
     }
 

@@ -32,13 +32,10 @@ pub use compile_configuration::CompileConfiguration;
 pub use concurrency_configuration::ConcurrencyConfiguration;
 pub use error::CompileError;
 pub use error_type_configuration::ErrorTypeConfiguration;
-use error_type_configuration::DUMMY_ERROR_TYPE_CONFIGURATION;
 use hir::{analysis::types::type_existence_validator, ir::*};
 pub use list_type_configuration::ListTypeConfiguration;
-use list_type_configuration::DUMMY_LIST_TYPE_CONFIGURATION;
 pub use main_module_configuration::MainModuleConfiguration;
 pub use string_type_configuration::StringTypeConfiguration;
-use string_type_configuration::DUMMY_STRING_TYPE_CONFIGURATION;
 pub use test_module_configuration::TestModuleConfiguration;
 
 pub fn compile_main(
@@ -46,7 +43,7 @@ pub fn compile_main(
     compile_configuration: &CompileConfiguration,
     main_module_configuration: &MainModuleConfiguration,
 ) -> Result<mir::ir::Module, CompileError> {
-    let compile_context = CompileContext::new(module, compile_configuration.clone());
+    let compile_context = CompileContext::new(module, compile_configuration.clone().into());
     let module = main_function_compiler::compile(
         module,
         compile_context.types(),
@@ -63,28 +60,14 @@ pub fn compile(
 ) -> Result<(mir::ir::Module, interface::Module), CompileError> {
     compile_module(
         module,
-        &CompileContext::new(module, compile_configuration.clone()),
+        &CompileContext::new(module, compile_configuration.clone().into()),
     )
 }
 
-// TODO Remove an argument of concurrency_configuration when CompileContext is
-// implemented.
 pub fn compile_prelude(
     module: &Module,
-    concurrency_configuration: &ConcurrencyConfiguration,
 ) -> Result<(mir::ir::Module, interface::Module), CompileError> {
-    compile_module(
-        module,
-        &CompileContext::new(
-            module,
-            CompileConfiguration {
-                list_type: DUMMY_LIST_TYPE_CONFIGURATION.clone(),
-                string_type: DUMMY_STRING_TYPE_CONFIGURATION.clone(),
-                error_type: DUMMY_ERROR_TYPE_CONFIGURATION.clone(),
-                concurrency: concurrency_configuration.clone(),
-            },
-        ),
-    )
+    compile_module(module, &CompileContext::new(module, None))
 }
 
 pub fn compile_test(
@@ -92,7 +75,7 @@ pub fn compile_test(
     compile_configuration: &CompileConfiguration,
     test_module_configuration: &TestModuleConfiguration,
 ) -> Result<(mir::ir::Module, test_info::Module), CompileError> {
-    let compile_context = CompileContext::new(module, compile_configuration.clone());
+    let compile_context = CompileContext::new(module, compile_configuration.clone().into());
 
     let (module, test_information) =
         test_function_compiler::compile(module, &compile_context, test_module_configuration)?;
