@@ -117,7 +117,9 @@ pub fn compile(
         .into(),
         Expression::List(list) => compile(&list_literal_transformer::transform(
             list,
-            compile_context.list_type_configuration(),
+            &compile_context
+                .compile_configuration()
+                .list_type_configuration,
         ))?,
         Expression::None(_) => mir::ir::Expression::None,
         Expression::Number(number) => mir::ir::Expression::Number(number.value()),
@@ -397,7 +399,8 @@ fn compile_operation(
                         ),
                         mir::ir::Variable::new(
                             &compile_context
-                                .string_type_configuration()
+                                .compile_configuration()
+                                .string_type_configuration
                                 .equal_function_name,
                         ),
                         vec![compile(operation.lhs())?, compile(operation.rhs())?],
@@ -435,7 +438,10 @@ fn compile_operation(
                 .ok_or_else(|| CompileError::TypeNotInferred(operation.position().clone()))?;
             let error_type = type_compiler::compile(
                 &types::Reference::new(
-                    &compile_context.error_type_configuration().error_type_name,
+                    &compile_context
+                        .compile_configuration()
+                        .error_type_configuration
+                        .error_type_name,
                     operation.position().clone(),
                 )
                 .into(),
@@ -842,7 +848,10 @@ mod tests {
                         mir::ir::Let::new(
                             "y",
                             mir::types::Record::new(
-                                &compile_context.list_type_configuration().list_type_name
+                                &compile_context
+                                    .compile_configuration()
+                                    .list_type_configuration
+                                    .list_type_name
                             ),
                             mir::ir::RecordField::new(
                                 concrete_list_type,

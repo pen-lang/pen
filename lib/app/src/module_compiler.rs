@@ -9,7 +9,7 @@ use crate::{
     test_configuration::TestModuleConfiguration,
 };
 pub use compile_configuration::{
-    CompileConfiguration, ConcurrencyConfiguration, ErrorTypeConfiguration,
+    CompileConfiguration, ConcurrencyConfiguration, ErrorTypeConfiguration, HirConfiguration,
     InstructionConfiguration, ListTypeConfiguration, StringTypeConfiguration,
 };
 use std::error::Error;
@@ -27,19 +27,7 @@ pub fn compile(
 ) -> Result<(), Box<dyn Error>> {
     let (module, module_interface) = hir_mir::compile(
         &compile_to_hir(infrastructure, source_file, dependency_file, None)?,
-        &prelude_type_configuration_qualifier::qualify_list_type_configuration(
-            &compile_configuration.list_type,
-            PRELUDE_PREFIX,
-        ),
-        &prelude_type_configuration_qualifier::qualify_string_type_configuration(
-            &compile_configuration.string_type,
-            PRELUDE_PREFIX,
-        ),
-        &prelude_type_configuration_qualifier::qualify_error_type_configuration(
-            &compile_configuration.error_type,
-            PRELUDE_PREFIX,
-        ),
-        &compile_configuration.concurrency,
+        &prelude_type_configuration_qualifier::qualify(&compile_configuration.hir, PRELUDE_PREFIX),
     )?;
 
     compile_mir_module(
@@ -83,19 +71,10 @@ pub fn compile_main(
                 dependency_file,
                 Some(&main_function_interface),
             )?,
-            &prelude_type_configuration_qualifier::qualify_list_type_configuration(
-                &compile_configuration.list_type,
+            &prelude_type_configuration_qualifier::qualify(
+                &compile_configuration.hir,
                 PRELUDE_PREFIX,
             ),
-            &prelude_type_configuration_qualifier::qualify_string_type_configuration(
-                &compile_configuration.string_type,
-                PRELUDE_PREFIX,
-            ),
-            &prelude_type_configuration_qualifier::qualify_error_type_configuration(
-                &compile_configuration.error_type,
-                PRELUDE_PREFIX,
-            ),
-            &compile_configuration.concurrency,
             &main_module_configuration_qualifier::qualify(
                 &application_configuration.main_module,
                 &main_function_interface,
@@ -122,19 +101,7 @@ pub fn compile_test(
 ) -> Result<(), Box<dyn Error>> {
     let (module, test_information) = hir_mir::compile_test(
         &compile_to_hir(infrastructure, source_file, dependency_file, None)?,
-        &prelude_type_configuration_qualifier::qualify_list_type_configuration(
-            &compile_configuration.list_type,
-            PRELUDE_PREFIX,
-        ),
-        &prelude_type_configuration_qualifier::qualify_string_type_configuration(
-            &compile_configuration.string_type,
-            PRELUDE_PREFIX,
-        ),
-        &prelude_type_configuration_qualifier::qualify_error_type_configuration(
-            &compile_configuration.error_type,
-            PRELUDE_PREFIX,
-        ),
-        &compile_configuration.concurrency,
+        &prelude_type_configuration_qualifier::qualify(&compile_configuration.hir, PRELUDE_PREFIX),
         test_module_configuration,
     )?;
 

@@ -37,7 +37,9 @@ pub fn compile(
                 ))
             })
             .chain([Ok(spawn_function_declaration_compiler::compile(
-                compile_context.concurrency_configuration(),
+                &compile_context
+                    .compile_configuration()
+                    .concurrency_configuration,
             ))])
             .collect::<Result<_, _>>()?,
         module
@@ -130,10 +132,8 @@ fn compile_definition(
 mod tests {
     use super::*;
     use crate::{
+        compile_configuration::COMPILE_CONFIGURATION,
         concurrency_configuration::CONCURRENCY_CONFIGURATION,
-        error_type_configuration::ERROR_TYPE_CONFIGURATION,
-        list_type_configuration::LIST_TYPE_CONFIGURATION,
-        string_type_configuration::STRING_TYPE_CONFIGURATION,
     };
     use hir::{test::ModuleFake, types};
     use position::{test::PositionFake, Position};
@@ -142,13 +142,7 @@ mod tests {
     fn compile_module(module: &Module) -> Result<mir::ir::Module, CompileError> {
         compile(
             module,
-            &CompileContext::new(
-                module,
-                &LIST_TYPE_CONFIGURATION,
-                &STRING_TYPE_CONFIGURATION,
-                &ERROR_TYPE_CONFIGURATION,
-                &CONCURRENCY_CONFIGURATION,
-            ),
+            &CompileContext::new(module, COMPILE_CONFIGURATION.clone()),
         )
     }
 

@@ -102,7 +102,10 @@ fn validate_expression(
                 if let Some(result_type) = result_type {
                     if !type_subsumption_checker::check(
                         &types::Reference::new(
-                            &compile_context.error_type_configuration().error_type_name,
+                            &compile_context
+                                .compile_configuration()
+                                .error_type_configuration
+                                .error_type_name,
                             result_type.position().clone(),
                         )
                         .into(),
@@ -160,11 +163,10 @@ fn validate_expression(
 
 #[cfg(test)]
 mod tests {
-    use super::{super::list_type_configuration::LIST_TYPE_CONFIGURATION, *};
+    use super::*;
     use crate::{
-        concurrency_configuration::CONCURRENCY_CONFIGURATION,
+        compile_configuration::COMPILE_CONFIGURATION,
         error_type_configuration::ERROR_TYPE_CONFIGURATION,
-        string_type_configuration::STRING_TYPE_CONFIGURATION,
     };
     use hir::test::{DefinitionFake, ModuleFake, TypeDefinitionFake};
     use position::{test::PositionFake, Position};
@@ -172,13 +174,7 @@ mod tests {
     fn validate_module(module: &Module) -> Result<(), CompileError> {
         validate(
             module,
-            &CompileContext::new(
-                module,
-                &LIST_TYPE_CONFIGURATION,
-                &STRING_TYPE_CONFIGURATION,
-                &ERROR_TYPE_CONFIGURATION,
-                &CONCURRENCY_CONFIGURATION,
-            ),
+            &CompileContext::new(module, COMPILE_CONFIGURATION.clone()),
         )
     }
 

@@ -17,25 +17,27 @@ pub static COMPILE_CONFIGURATION: Lazy<Arc<app::module_compiler::CompileConfigur
                 free_function_name: "_pen_free".into(),
                 unreachable_function_name: Some("_pen_unreachable".into()),
             },
-            list_type: app::module_compiler::ListTypeConfiguration {
-                empty_list_function_name: "_emptyList".into(),
-                concatenate_function_name: "_concatenateLists".into(),
-                equal_function_name: "_equalLists".into(),
-                prepend_function_name: "_prependToList".into(),
-                deconstruct_function_name: "_firstRest".into(),
-                first_function_name: "_first".into(),
-                rest_function_name: "_rest".into(),
-                list_type_name: "_AnyList".into(),
-                first_rest_type_name: "_FirstRest".into(),
-            },
-            string_type: app::module_compiler::StringTypeConfiguration {
-                equal_function_name: "_equalStrings".into(),
-            },
-            error_type: app::module_compiler::ErrorTypeConfiguration {
-                error_type_name: "error".into(),
-            },
-            concurrency: app::module_compiler::ConcurrencyConfiguration {
-                spawn_function_name: "_pen_spawn".into(),
+            hir: app::module_compiler::HirConfiguration {
+                list_type_configuration: app::module_compiler::ListTypeConfiguration {
+                    empty_list_function_name: "_emptyList".into(),
+                    concatenate_function_name: "_concatenateLists".into(),
+                    equal_function_name: "_equalLists".into(),
+                    prepend_function_name: "_prependToList".into(),
+                    deconstruct_function_name: "_firstRest".into(),
+                    first_function_name: "_first".into(),
+                    rest_function_name: "_rest".into(),
+                    list_type_name: "_AnyList".into(),
+                    first_rest_type_name: "_FirstRest".into(),
+                },
+                string_type_configuration: app::module_compiler::StringTypeConfiguration {
+                    equal_function_name: "_equalStrings".into(),
+                },
+                error_type_configuration: app::module_compiler::ErrorTypeConfiguration {
+                    error_type_name: "error".into(),
+                },
+                concurrency_configuration: app::module_compiler::ConcurrencyConfiguration {
+                    spawn_function_name: "_pen_spawn".into(),
+                },
             },
         }
         .into()

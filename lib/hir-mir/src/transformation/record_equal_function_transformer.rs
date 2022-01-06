@@ -125,12 +125,7 @@ fn compile_equal_function_declaration(type_definition: &TypeDefinition) -> Decla
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{
-        concurrency_configuration::CONCURRENCY_CONFIGURATION,
-        error_type_configuration::ERROR_TYPE_CONFIGURATION,
-        list_type_configuration::LIST_TYPE_CONFIGURATION,
-        string_type_configuration::STRING_TYPE_CONFIGURATION,
-    };
+    use crate::compile_configuration::COMPILE_CONFIGURATION;
     use hir::test::ModuleFake;
     use position::{test::PositionFake, Position};
     use pretty_assertions::assert_eq;
@@ -138,13 +133,7 @@ mod tests {
     fn transform_module(module: &Module) -> Result<Module, CompileError> {
         transform(
             module,
-            &CompileContext::new(
-                module,
-                &LIST_TYPE_CONFIGURATION,
-                &STRING_TYPE_CONFIGURATION,
-                &ERROR_TYPE_CONFIGURATION,
-                &CONCURRENCY_CONFIGURATION,
-            ),
+            &CompileContext::new(module, COMPILE_CONFIGURATION.clone()),
         )
     }
 

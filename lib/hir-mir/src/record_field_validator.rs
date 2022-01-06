@@ -88,15 +88,8 @@ fn is_record_open(definition: &TypeDefinition) -> bool {
 
 #[cfg(test)]
 mod tests {
-    use super::{
-        super::{
-            concurrency_configuration::CONCURRENCY_CONFIGURATION,
-            error_type_configuration::ERROR_TYPE_CONFIGURATION,
-            list_type_configuration::LIST_TYPE_CONFIGURATION,
-            string_type_configuration::STRING_TYPE_CONFIGURATION,
-        },
-        *,
-    };
+    use super::*;
+    use crate::compile_configuration::COMPILE_CONFIGURATION;
     use hir::{
         test::{DefinitionFake, ModuleFake, TypeDefinitionFake},
         types,
@@ -106,13 +99,7 @@ mod tests {
     fn validate_module(module: &Module) -> Result<(), CompileError> {
         validate(
             module,
-            &CompileContext::new(
-                module,
-                &LIST_TYPE_CONFIGURATION,
-                &STRING_TYPE_CONFIGURATION,
-                &ERROR_TYPE_CONFIGURATION,
-                &CONCURRENCY_CONFIGURATION,
-            ),
+            &CompileContext::new(module, COMPILE_CONFIGURATION.clone()),
         )
     }
 

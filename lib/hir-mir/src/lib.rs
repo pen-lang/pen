@@ -43,19 +43,10 @@ pub use test_module_configuration::TestModuleConfiguration;
 
 pub fn compile_main(
     module: &Module,
-    list_type_configuration: &ListTypeConfiguration,
-    string_type_configuration: &StringTypeConfiguration,
-    error_type_configuration: &ErrorTypeConfiguration,
-    concurrency_configuration: &ConcurrencyConfiguration,
+    compile_configuration: &CompileConfiguration,
     main_module_configuration: &MainModuleConfiguration,
 ) -> Result<mir::ir::Module, CompileError> {
-    let compile_context = CompileContext::new(
-        module,
-        list_type_configuration,
-        string_type_configuration,
-        error_type_configuration,
-        concurrency_configuration,
-    );
+    let compile_context = CompileContext::new(module, compile_configuration.clone());
     let module = main_function_compiler::compile(
         module,
         compile_context.types(),
@@ -68,20 +59,11 @@ pub fn compile_main(
 
 pub fn compile(
     module: &Module,
-    list_type_configuration: &ListTypeConfiguration,
-    string_type_configuration: &StringTypeConfiguration,
-    error_type_configuration: &ErrorTypeConfiguration,
-    concurrency_configuration: &ConcurrencyConfiguration,
+    compile_configuration: &CompileConfiguration,
 ) -> Result<(mir::ir::Module, interface::Module), CompileError> {
     compile_module(
         module,
-        &CompileContext::new(
-            module,
-            list_type_configuration,
-            string_type_configuration,
-            error_type_configuration,
-            concurrency_configuration,
-        ),
+        &CompileContext::new(module, compile_configuration.clone()),
     )
 }
 
@@ -95,30 +77,22 @@ pub fn compile_prelude(
         module,
         &CompileContext::new(
             module,
-            // TODO Make those optional.
-            &DUMMY_LIST_TYPE_CONFIGURATION,
-            &DUMMY_STRING_TYPE_CONFIGURATION,
-            &DUMMY_ERROR_TYPE_CONFIGURATION,
-            concurrency_configuration,
+            CompileConfiguration {
+                list_type_configuration: DUMMY_LIST_TYPE_CONFIGURATION.clone(),
+                string_type_configuration: DUMMY_STRING_TYPE_CONFIGURATION.clone(),
+                error_type_configuration: DUMMY_ERROR_TYPE_CONFIGURATION.clone(),
+                concurrency_configuration: concurrency_configuration.clone(),
+            },
         ),
     )
 }
 
 pub fn compile_test(
     module: &Module,
-    list_type_configuration: &ListTypeConfiguration,
-    string_type_configuration: &StringTypeConfiguration,
-    error_type_configuration: &ErrorTypeConfiguration,
-    concurrency_configuration: &ConcurrencyConfiguration,
+    compile_configuration: &CompileConfiguration,
     test_module_configuration: &TestModuleConfiguration,
 ) -> Result<(mir::ir::Module, test_info::Module), CompileError> {
-    let compile_context = CompileContext::new(
-        module,
-        list_type_configuration,
-        string_type_configuration,
-        error_type_configuration,
-        concurrency_configuration,
-    );
+    let compile_context = CompileContext::new(module, compile_configuration.clone());
 
     let (module, test_information) =
         test_function_compiler::compile(module, &compile_context, test_module_configuration)?;
@@ -159,14 +133,9 @@ fn compile_module(
 
 #[cfg(test)]
 mod tests {
-    use super::{
-        error_type_configuration::ERROR_TYPE_CONFIGURATION,
-        list_type_configuration::LIST_TYPE_CONFIGURATION, *,
-    };
-    use crate::{
-        concurrency_configuration::CONCURRENCY_CONFIGURATION,
-        string_type_configuration::STRING_TYPE_CONFIGURATION,
-    };
+    use super::*;
+    use crate::compile_configuration::COMPILE_CONFIGURATION;
+    use crate::error_type_configuration::ERROR_TYPE_CONFIGURATION;
     use hir::{
         test::{DefinitionFake, ModuleFake, TypeDefinitionFake},
         types,
@@ -176,13 +145,7 @@ mod tests {
     fn compile_module(
         module: &Module,
     ) -> Result<(mir::ir::Module, interface::Module), CompileError> {
-        compile(
-            module,
-            &LIST_TYPE_CONFIGURATION,
-            &STRING_TYPE_CONFIGURATION,
-            &ERROR_TYPE_CONFIGURATION,
-            &CONCURRENCY_CONFIGURATION,
-        )
+        compile(module, &COMPILE_CONFIGURATION)
     }
 
     #[test]

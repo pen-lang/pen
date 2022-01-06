@@ -457,7 +457,10 @@ fn check_operation(
                 .type_()
                 .ok_or_else(|| CompileError::TypeNotInferred(position.clone()))?;
             let error_type = types::Reference::new(
-                &compile_context.error_type_configuration().error_type_name,
+                &compile_context
+                    .compile_configuration()
+                    .error_type_configuration
+                    .error_type_name,
                 position.clone(),
             )
             .into();
@@ -493,25 +496,15 @@ fn check_subsumption(
 
 #[cfg(test)]
 mod tests {
-    use super::{super::list_type_configuration::LIST_TYPE_CONFIGURATION, *};
-    use crate::{
-        concurrency_configuration::CONCURRENCY_CONFIGURATION,
-        error_type_configuration::ERROR_TYPE_CONFIGURATION,
-        string_type_configuration::STRING_TYPE_CONFIGURATION,
-    };
+    use super::*;
+    use crate::compile_configuration::COMPILE_CONFIGURATION;
     use hir::test::{DefinitionFake, ForeignDeclarationFake, ModuleFake, TypeDefinitionFake};
     use position::{test::PositionFake, Position};
 
     fn check_module(module: &Module) -> Result<(), CompileError> {
         check_types(
             module,
-            &CompileContext::new(
-                module,
-                &LIST_TYPE_CONFIGURATION,
-                &STRING_TYPE_CONFIGURATION,
-                &ERROR_TYPE_CONFIGURATION,
-                &CONCURRENCY_CONFIGURATION,
-            ),
+            &CompileContext::new(module, COMPILE_CONFIGURATION.clone()),
         )
     }
 

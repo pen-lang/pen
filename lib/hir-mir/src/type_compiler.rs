@@ -14,7 +14,7 @@ pub fn compile(
             Type::Boolean(_) => mir::types::Type::Boolean,
             Type::Function(function) => compile_function(&function, compile_context)?.into(),
             Type::List(_) => {
-                mir::types::Record::new(&compile_context.list_type_configuration().list_type_name)
+                mir::types::Record::new(&compile_context.compile_configuration().list_type_configuration.list_type_name)
                     .into()
             }
             Type::None(_) => mir::types::Type::None,

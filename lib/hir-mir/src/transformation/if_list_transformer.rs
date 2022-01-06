@@ -12,7 +12,9 @@ pub fn transform(
     if_: &IfList,
     compile_context: &CompileContext,
 ) -> Result<Expression, CompileError> {
-    let configuration = compile_context.list_type_configuration();
+    let configuration = &compile_context
+        .compile_configuration()
+        .list_type_configuration;
     let position = if_.position();
 
     let element_type = if_
