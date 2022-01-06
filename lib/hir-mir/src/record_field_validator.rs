@@ -88,6 +88,7 @@ fn is_record_open(definition: &TypeDefinition) -> bool {
 mod tests {
     use super::{
         super::{
+            concurrency_configuration::CONCURRENCY_CONFIGURATION,
             error_type_configuration::ERROR_TYPE_CONFIGURATION,
             list_type_configuration::LIST_TYPE_CONFIGURATION,
             string_type_configuration::STRING_TYPE_CONFIGURATION,
@@ -108,6 +109,7 @@ mod tests {
                 &LIST_TYPE_CONFIGURATION,
                 &STRING_TYPE_CONFIGURATION,
                 &ERROR_TYPE_CONFIGURATION,
+                &CONCURRENCY_CONFIGURATION,
             ),
         )
     }

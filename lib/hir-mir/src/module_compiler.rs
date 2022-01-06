@@ -157,6 +157,7 @@ mod tests {
                 &LIST_TYPE_CONFIGURATION,
                 &STRING_TYPE_CONFIGURATION,
                 &ERROR_TYPE_CONFIGURATION,
+                &CONCURRENCY_CONFIGURATION,
             ),
             &CONCURRENCY_CONFIGURATION,
         )
