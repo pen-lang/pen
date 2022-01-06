@@ -38,10 +38,7 @@ fn compile_type_definition(
         Type::List(list_type) => Some(mir::ir::TypeDefinition::new(
             type_compiler::compile_concrete_list_name(list_type, compile_context.types())?,
             mir::types::RecordBody::new(vec![mir::types::Record::new(
-                &compile_context
-                    .compile_configuration()?
-                    .list_type
-                    .list_type_name,
+                &compile_context.configuration()?.list_type.list_type_name,
             )
             .into()]),
         )),
@@ -175,7 +172,7 @@ mod tests {
                     .unwrap(),
                 mir::types::RecordBody::new(vec![mir::types::Record::new(
                     &compile_context
-                        .compile_configuration()
+                        .configuration()
                         .unwrap()
                         .list_type
                         .list_type_name
@@ -220,7 +217,7 @@ mod tests {
                     .unwrap(),
                 mir::types::RecordBody::new(vec![mir::types::Record::new(
                     &compile_context
-                        .compile_configuration()
+                        .configuration()
                         .unwrap()
                         .list_type
                         .list_type_name
@@ -263,7 +260,7 @@ mod tests {
                     .unwrap(),
                 mir::types::RecordBody::new(vec![mir::types::Record::new(
                     &compile_context
-                        .compile_configuration()
+                        .configuration()
                         .unwrap()
                         .list_type
                         .list_type_name
@@ -281,7 +278,7 @@ mod tests {
             list_type.clone(),
             types::Record::new(
                 &compile_context
-                    .compile_configuration()
+                    .configuration()
                     .unwrap()
                     .error_type
                     .error_type_name,
@@ -313,7 +310,7 @@ mod tests {
                     .unwrap(),
                 mir::types::RecordBody::new(vec![mir::types::Record::new(
                     &compile_context
-                        .compile_configuration()
+                        .configuration()
                         .unwrap()
                         .list_type
                         .list_type_name
@@ -358,7 +355,7 @@ mod tests {
                     .unwrap(),
                 mir::types::RecordBody::new(vec![mir::types::Record::new(
                     &compile_context
-                        .compile_configuration()
+                        .configuration()
                         .unwrap()
                         .list_type
                         .list_type_name

@@ -318,10 +318,7 @@ fn infer_expression(
                 let position = operation.position();
                 let expression = infer_expression(operation.expression(), variables)?;
                 let error_type = types::Reference::new(
-                    &compile_context
-                        .compile_configuration()?
-                        .error_type
-                        .error_type_name,
+                    &compile_context.configuration()?.error_type.error_type_name,
                     position.clone(),
                 )
                 .into();

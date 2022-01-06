@@ -36,16 +36,11 @@ pub fn compile(
                     compile_calling_convention(declaration.calling_convention()),
                 ))
             })
-            .chain(
-                compile_context
-                    .compile_configuration()
-                    .ok()
-                    .map(|configuration| {
-                        Ok(spawn_function_declaration_compiler::compile(
-                            &configuration.concurrency,
-                        ))
-                    }),
-            )
+            .chain(compile_context.configuration().ok().map(|configuration| {
+                Ok(spawn_function_declaration_compiler::compile(
+                    &configuration.concurrency,
+                ))
+            }))
             .collect::<Result<_, _>>()?,
         module
             .definitions()

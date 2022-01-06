@@ -457,10 +457,7 @@ fn check_operation(
                 .type_()
                 .ok_or_else(|| CompileError::TypeNotInferred(position.clone()))?;
             let error_type = types::Reference::new(
-                &compile_context
-                    .compile_configuration()?
-                    .error_type
-                    .error_type_name,
+                &compile_context.configuration()?.error_type.error_type_name,
                 position.clone(),
             )
             .into();

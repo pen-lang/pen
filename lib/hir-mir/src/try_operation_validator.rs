@@ -102,10 +102,7 @@ fn validate_expression(
                 if let Some(result_type) = result_type {
                     if !type_subsumption_checker::check(
                         &types::Reference::new(
-                            &compile_context
-                                .compile_configuration()?
-                                .error_type
-                                .error_type_name,
+                            &compile_context.configuration()?.error_type.error_type_name,
                             result_type.position().clone(),
                         )
                         .into(),
