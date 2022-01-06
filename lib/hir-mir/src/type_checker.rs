@@ -1,4 +1,4 @@
-use super::{environment_creator, compile_context::CompileContext, type_extractor, CompileError};
+use super::{compile_context::CompileContext, environment_creator, type_extractor, CompileError};
 use hir::{
     analysis::types::{
         record_field_resolver, type_canonicalizer, type_equality_checker, type_subsumption_checker,
@@ -151,7 +151,8 @@ fn check_expression(
                         .collect(),
                 )?;
 
-                if type_canonicalizer::canonicalize(branch.type_(), compile_context.types())?.is_any()
+                if type_canonicalizer::canonicalize(branch.type_(), compile_context.types())?
+                    .is_any()
                 {
                     return Err(CompileError::AnyTypeBranch(
                         branch.type_().position().clone(),
@@ -414,10 +415,16 @@ fn check_operation(
             check_subsumption(&check_expression(operation.lhs())?, operand_type)?;
             check_subsumption(&check_expression(operation.rhs())?, operand_type)?;
 
-            let lhs_type =
-                type_extractor::extract_from_expression(operation.lhs(), variables, compile_context)?;
-            let rhs_type =
-                type_extractor::extract_from_expression(operation.rhs(), variables, compile_context)?;
+            let lhs_type = type_extractor::extract_from_expression(
+                operation.lhs(),
+                variables,
+                compile_context,
+            )?;
+            let rhs_type = type_extractor::extract_from_expression(
+                operation.rhs(),
+                variables,
+                compile_context,
+            )?;
 
             if !type_subsumption_checker::check(&lhs_type, &rhs_type, compile_context.types())?
                 && !type_subsumption_checker::check(&rhs_type, &lhs_type, compile_context.types())?

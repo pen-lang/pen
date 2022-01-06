@@ -1,6 +1,6 @@
 use super::{
-    expression_compiler, generic_type_definition_compiler, type_compiler,
-    compile_context::CompileContext, CompileError,
+    compile_context::CompileContext, expression_compiler, generic_type_definition_compiler,
+    type_compiler, CompileError,
 };
 use crate::spawn_function_declaration_compiler;
 use hir::ir::*;

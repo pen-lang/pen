@@ -1,4 +1,4 @@
-use super::{environment_creator, compile_context::CompileContext, type_extractor, CompileError};
+use super::{compile_context::CompileContext, environment_creator, type_extractor, CompileError};
 use hir::{
     analysis::types::{type_canonicalizer, type_difference_calculator, union_type_creator},
     ir::*,
@@ -6,7 +6,10 @@ use hir::{
 };
 use std::collections::BTreeMap;
 
-pub fn infer_types(module: &Module, compile_context: &CompileContext) -> Result<Module, CompileError> {
+pub fn infer_types(
+    module: &Module,
+    compile_context: &CompileContext,
+) -> Result<Module, CompileError> {
     let variables = environment_creator::create_from_module(module);
 
     Ok(Module::new(
@@ -278,8 +281,16 @@ fn infer_expression(
                 EqualityOperation::new(
                     Some(
                         types::Union::new(
-                            type_extractor::extract_from_expression(&lhs, variables, compile_context)?,
-                            type_extractor::extract_from_expression(&rhs, variables, compile_context)?,
+                            type_extractor::extract_from_expression(
+                                &lhs,
+                                variables,
+                                compile_context,
+                            )?,
+                            type_extractor::extract_from_expression(
+                                &rhs,
+                                variables,
+                                compile_context,
+                            )?,
                             operation.position().clone(),
                         )
                         .into(),

@@ -1,4 +1,4 @@
-use super::{environment_creator, compile_context::CompileContext, type_extractor, CompileError};
+use super::{compile_context::CompileContext, environment_creator, type_extractor, CompileError};
 use hir::{
     analysis::types::{record_field_resolver, type_canonicalizer, type_equality_checker},
     ir::*,
@@ -7,7 +7,10 @@ use hir::{
 use position::Position;
 use std::collections::BTreeMap;
 
-pub fn coerce_types(module: &Module, compile_context: &CompileContext) -> Result<Module, CompileError> {
+pub fn coerce_types(
+    module: &Module,
+    compile_context: &CompileContext,
+) -> Result<Module, CompileError> {
     let variables = environment_creator::create_from_module(module);
 
     Ok(Module::new(
@@ -423,7 +426,8 @@ fn coerce_expression(
     variables: &BTreeMap<String, Type>,
     compile_context: &CompileContext,
 ) -> Result<Expression, CompileError> {
-    let lower_type = type_extractor::extract_from_expression(expression, variables, compile_context)?;
+    let lower_type =
+        type_extractor::extract_from_expression(expression, variables, compile_context)?;
 
     Ok(
         if type_equality_checker::check(&lower_type, upper_type, compile_context.types())? {

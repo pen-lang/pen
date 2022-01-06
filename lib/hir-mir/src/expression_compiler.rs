@@ -1,11 +1,10 @@
 use super::{
+    compile_context::CompileContext,
     transformation::{
         boolean_operation_transformer, equal_operation_transformer, if_list_transformer,
         not_equal_operation_transformer,
     },
-    type_compiler,
-    compile_context::CompileContext,
-    CompileError,
+    type_compiler, CompileError,
 };
 use crate::{
     concurrency_configuration::MODULE_LOCAL_SPAWN_FUNCTION_NAME,
@@ -170,9 +169,10 @@ pub fn compile(
             )
             .into()
         }
-        Expression::RecordUpdate(update) => {
-            compile(&record_update_transformer::transform(update, compile_context)?)?
-        }
+        Expression::RecordUpdate(update) => compile(&record_update_transformer::transform(
+            update,
+            compile_context,
+        )?)?,
         Expression::String(string) => mir::ir::ByteString::new(string.value()).into(),
         Expression::Thunk(thunk) => {
             const THUNK_NAME: &str = "$thunk";
@@ -224,8 +224,10 @@ pub fn compile(
                         .into()
                     }
                     Type::List(list_type) => {
-                        let concrete_type =
-                            type_compiler::compile_concrete_list(list_type, compile_context.types())?;
+                        let concrete_type = type_compiler::compile_concrete_list(
+                            list_type,
+                            compile_context.types(),
+                        )?;
 
                         mir::ir::Variant::new(
                             concrete_type.clone(),
@@ -289,7 +291,10 @@ fn compile_alternatives(
                     &expression,
                     &type_,
                     &compiled_member_type,
-                    &type_compiler::compile_concrete_function(function_type, compile_context.types())?,
+                    &type_compiler::compile_concrete_function(
+                        function_type,
+                        compile_context.types(),
+                    )?,
                 ),
                 Type::List(list_type) => compile_generic_type_alternative(
                     name,
@@ -391,7 +396,9 @@ fn compile_operation(
                             mir::types::Type::Boolean,
                         ),
                         mir::ir::Variable::new(
-                            &compile_context.string_type_configuration().equal_function_name,
+                            &compile_context
+                                .string_type_configuration()
+                                .equal_function_name,
                         ),
                         vec![compile(operation.lhs())?, compile(operation.rhs())?],
                     )
@@ -789,7 +796,8 @@ mod tests {
                         "y",
                         mir::ir::Let::new(
                             "y",
-                            type_compiler::compile_function(&function_type, &compile_context).unwrap(),
+                            type_compiler::compile_function(&function_type, &compile_context)
+                                .unwrap(),
                             mir::ir::RecordField::new(
                                 concrete_function_type,
                                 0,

@@ -1,3 +1,4 @@
+mod compile_context;
 mod concurrency_configuration;
 mod downcast_compiler;
 mod duplicate_function_name_validator;
@@ -22,11 +23,10 @@ mod try_operation_validator;
 mod type_checker;
 mod type_coercer;
 mod type_compiler;
-mod compile_context;
 mod type_extractor;
 mod type_inferrer;
 
-use self::{transformation::record_equal_function_transformer, compile_context::CompileContext};
+use self::{compile_context::CompileContext, transformation::record_equal_function_transformer};
 pub use concurrency_configuration::ConcurrencyConfiguration;
 pub use error::CompileError;
 pub use error_type_configuration::ErrorTypeConfiguration;
@@ -54,8 +54,11 @@ pub fn compile_main(
         error_type_configuration,
         concurrency_configuration,
     );
-    let module =
-        main_function_compiler::compile(module, compile_context.types(), main_module_configuration)?;
+    let module = main_function_compiler::compile(
+        module,
+        compile_context.types(),
+        main_module_configuration,
+    )?;
     let (module, _) = compile_module(&module, &compile_context)?;
 
     Ok(module)

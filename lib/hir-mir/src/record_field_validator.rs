@@ -39,9 +39,11 @@ pub fn validate(module: &Module, compile_context: &CompileContext) -> Result<(),
                 }
             }
             Expression::RecordUpdate(update) => {
-                let record_type =
-                    type_canonicalizer::canonicalize_record(update.type_(), compile_context.types())?
-                        .ok_or_else(|| CompileError::RecordExpected(update.position().clone()))?;
+                let record_type = type_canonicalizer::canonicalize_record(
+                    update.type_(),
+                    compile_context.types(),
+                )?
+                .ok_or_else(|| CompileError::RecordExpected(update.position().clone()))?;
 
                 if !open_records.contains(record_type.name()) {
                     return Err(CompileError::RecordFieldPrivate(update.position().clone()));

@@ -1,4 +1,4 @@
-use super::{type_compiler, compile_context::CompileContext, CompileError};
+use super::{compile_context::CompileContext, type_compiler, CompileError};
 use hir::{
     analysis::{
         ir::expression_visitor,
@@ -123,8 +123,11 @@ mod tests {
                 &compile_context,
             ),
             Ok(vec![mir::ir::TypeDefinition::new(
-                type_compiler::compile_concrete_function_name(&function_type, compile_context.types())
-                    .unwrap(),
+                type_compiler::compile_concrete_function_name(
+                    &function_type,
+                    compile_context.types()
+                )
+                .unwrap(),
                 mir::types::RecordBody::new(vec![type_compiler::compile_function(
                     &function_type,
                     &compile_context

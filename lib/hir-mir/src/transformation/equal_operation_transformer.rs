@@ -1,5 +1,5 @@
 use super::super::error::CompileError;
-use crate::{transformation::record_type_information_compiler, compile_context::CompileContext};
+use crate::{compile_context::CompileContext, transformation::record_type_information_compiler};
 use hir::{
     analysis::types::{
         type_canonicalizer, type_comparability_checker, type_equality_checker, type_resolver,
@@ -91,7 +91,9 @@ fn transform_equal_operation(
                     .into(),
                 ),
                 Variable::new(
-                    &compile_context.list_type_configuration().equal_function_name,
+                    &compile_context
+                        .list_type_configuration()
+                        .equal_function_name,
                     position.clone(),
                 ),
                 vec![

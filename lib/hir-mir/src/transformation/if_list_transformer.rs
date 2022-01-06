@@ -1,5 +1,5 @@
 use super::super::error::CompileError;
-use crate::{downcast_compiler, compile_context::CompileContext};
+use crate::{compile_context::CompileContext, downcast_compiler};
 use hir::{
     analysis::types::type_equality_checker,
     ir::*,
@@ -8,7 +8,10 @@ use hir::{
 
 const FIRST_REST_NAME: &str = "$firstRest";
 
-pub fn transform(if_: &IfList, compile_context: &CompileContext) -> Result<Expression, CompileError> {
+pub fn transform(
+    if_: &IfList,
+    compile_context: &CompileContext,
+) -> Result<Expression, CompileError> {
     let configuration = compile_context.list_type_configuration();
     let position = if_.position();
 

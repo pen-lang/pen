@@ -1,4 +1,4 @@
-use crate::{error::CompileError, compile_context::CompileContext};
+use crate::{compile_context::CompileContext, error::CompileError};
 use hir::{analysis::types::record_field_resolver, ir::*};
 use std::collections::BTreeSet;
 

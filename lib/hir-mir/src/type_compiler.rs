@@ -5,7 +5,10 @@ use hir::{
 };
 use std::collections::BTreeMap;
 
-pub fn compile(type_: &Type, compile_context: &CompileContext) -> Result<mir::types::Type, CompileError> {
+pub fn compile(
+    type_: &Type,
+    compile_context: &CompileContext,
+) -> Result<mir::types::Type, CompileError> {
     Ok(
         match type_canonicalizer::canonicalize(type_, compile_context.types())? {
             Type::Boolean(_) => mir::types::Type::Boolean,

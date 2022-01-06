@@ -1,12 +1,15 @@
 use crate::{
-    transformation::record_type_information_compiler, compile_context::CompileContext, CompileError,
+    compile_context::CompileContext, transformation::record_type_information_compiler, CompileError,
 };
 use hir::{analysis::types::type_comparability_checker, ir::*, types};
 
 const LHS_NAME: &str = "$lhs";
 const RHS_NAME: &str = "$rhs";
 
-pub fn transform(module: &Module, compile_context: &CompileContext) -> Result<Module, CompileError> {
+pub fn transform(
+    module: &Module,
+    compile_context: &CompileContext,
+) -> Result<Module, CompileError> {
     let mut equal_function_definitions = vec![];
     let mut equal_function_declarations = vec![];
 
