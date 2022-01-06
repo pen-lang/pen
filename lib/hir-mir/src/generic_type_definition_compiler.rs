@@ -38,7 +38,10 @@ fn compile_type_definition(
         Type::List(list_type) => Some(mir::ir::TypeDefinition::new(
             type_compiler::compile_concrete_list_name(list_type, compile_context.types())?,
             mir::types::RecordBody::new(vec![mir::types::Record::new(
-                &compile_context.compile_configuration().list_type_configuration.list_type_name,
+                &compile_context
+                    .compile_configuration()
+                    .list_type_configuration
+                    .list_type_name,
             )
             .into()]),
         )),
@@ -171,7 +174,10 @@ mod tests {
                 type_compiler::compile_concrete_list_name(&list_type, compile_context.types())
                     .unwrap(),
                 mir::types::RecordBody::new(vec![mir::types::Record::new(
-                    &compile_context.compile_configuration().list_type_configuration.list_type_name
+                    &compile_context
+                        .compile_configuration()
+                        .list_type_configuration
+                        .list_type_name
                 )
                 .into()]),
             )])
@@ -212,7 +218,10 @@ mod tests {
                 type_compiler::compile_concrete_list_name(&list_type, compile_context.types())
                     .unwrap(),
                 mir::types::RecordBody::new(vec![mir::types::Record::new(
-                    &compile_context.compile_configuration().list_type_configuration.list_type_name
+                    &compile_context
+                        .compile_configuration()
+                        .list_type_configuration
+                        .list_type_name
                 )
                 .into()]),
             )])
@@ -251,7 +260,10 @@ mod tests {
                 type_compiler::compile_concrete_list_name(&list_type, compile_context.types())
                     .unwrap(),
                 mir::types::RecordBody::new(vec![mir::types::Record::new(
-                    &compile_context.compile_configuration().list_type_configuration.list_type_name
+                    &compile_context
+                        .compile_configuration()
+                        .list_type_configuration
+                        .list_type_name
                 )
                 .into()]),
             )])
@@ -265,7 +277,10 @@ mod tests {
         let union_type = types::Union::new(
             list_type.clone(),
             types::Record::new(
-                &compile_context.compile_configuration().error_type_configuration.error_type_name,
+                &compile_context
+                    .compile_configuration()
+                    .error_type_configuration
+                    .error_type_name,
                 Position::fake(),
             ),
             Position::fake(),
@@ -293,7 +308,10 @@ mod tests {
                 type_compiler::compile_concrete_list_name(&list_type, compile_context.types())
                     .unwrap(),
                 mir::types::RecordBody::new(vec![mir::types::Record::new(
-                    &compile_context.compile_configuration().list_type_configuration.list_type_name
+                    &compile_context
+                        .compile_configuration()
+                        .list_type_configuration
+                        .list_type_name
                 )
                 .into()]),
             )])
@@ -334,7 +352,10 @@ mod tests {
                 type_compiler::compile_concrete_list_name(&list_type, compile_context.types())
                     .unwrap(),
                 mir::types::RecordBody::new(vec![mir::types::Record::new(
-                    &compile_context.compile_configuration().list_type_configuration.list_type_name
+                    &compile_context
+                        .compile_configuration()
+                        .list_type_configuration
+                        .list_type_name
                 )
                 .into()]),
             )])

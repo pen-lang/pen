@@ -42,7 +42,10 @@ pub fn compile(
                             types::Union::new(
                                 types::None::new(position.clone()),
                                 types::Record::new(
-                                    &compile_context.compile_configuration().error_type_configuration.error_type_name,
+                                    &compile_context
+                                        .compile_configuration()
+                                        .error_type_configuration
+                                        .error_type_name,
                                     position.clone(),
                                 ),
                                 position.clone(),

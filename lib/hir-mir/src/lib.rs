@@ -134,8 +134,10 @@ fn compile_module(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::compile_configuration::COMPILE_CONFIGURATION;
-    use crate::error_type_configuration::ERROR_TYPE_CONFIGURATION;
+    use crate::{
+        compile_configuration::COMPILE_CONFIGURATION,
+        error_type_configuration::ERROR_TYPE_CONFIGURATION,
+    };
     use hir::{
         test::{DefinitionFake, ModuleFake, TypeDefinitionFake},
         types,
