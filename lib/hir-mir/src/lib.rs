@@ -1,3 +1,4 @@
+mod compile_configuration;
 mod compile_context;
 mod concurrency_configuration;
 mod downcast_compiler;
@@ -27,6 +28,7 @@ mod type_extractor;
 mod type_inferrer;
 
 use self::{compile_context::CompileContext, transformation::record_equal_function_transformer};
+pub use compile_configuration::CompileConfiguration;
 pub use concurrency_configuration::ConcurrencyConfiguration;
 pub use error::CompileError;
 pub use error_type_configuration::ErrorTypeConfiguration;
