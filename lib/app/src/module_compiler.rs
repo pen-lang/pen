@@ -9,8 +9,8 @@ use crate::{
     test_configuration::TestModuleConfiguration,
 };
 pub use compile_configuration::{
-    CompileConfiguration, ConcurrencyConfiguration, ErrorTypeConfiguration,
-    InstructionConfiguration, ListTypeConfiguration, StringTypeConfiguration,
+    CompileConfiguration, ConcurrencyConfiguration, ErrorTypeConfiguration, FmmConfiguration,
+    HirConfiguration, ListTypeConfiguration, StringTypeConfiguration,
 };
 use std::error::Error;
 
@@ -27,19 +27,7 @@ pub fn compile(
 ) -> Result<(), Box<dyn Error>> {
     let (module, module_interface) = hir_mir::compile(
         &compile_to_hir(infrastructure, source_file, dependency_file, None)?,
-        &prelude_type_configuration_qualifier::qualify_list_type_configuration(
-            &compile_configuration.list_type,
-            PRELUDE_PREFIX,
-        ),
-        &prelude_type_configuration_qualifier::qualify_string_type_configuration(
-            &compile_configuration.string_type,
-            PRELUDE_PREFIX,
-        ),
-        &prelude_type_configuration_qualifier::qualify_error_type_configuration(
-            &compile_configuration.error_type,
-            PRELUDE_PREFIX,
-        ),
-        &compile_configuration.concurrency,
+        &prelude_type_configuration_qualifier::qualify(&compile_configuration.hir, PRELUDE_PREFIX),
     )?;
 
     compile_mir_module(
@@ -47,7 +35,7 @@ pub fn compile(
         &module,
         object_file,
         target_triple,
-        &compile_configuration.instruction,
+        &compile_configuration.fmm,
     )?;
     infrastructure.file_system.write(
         interface_file,
@@ -83,19 +71,10 @@ pub fn compile_main(
                 dependency_file,
                 Some(&main_function_interface),
             )?,
-            &prelude_type_configuration_qualifier::qualify_list_type_configuration(
-                &compile_configuration.list_type,
+            &prelude_type_configuration_qualifier::qualify(
+                &compile_configuration.hir,
                 PRELUDE_PREFIX,
             ),
-            &prelude_type_configuration_qualifier::qualify_string_type_configuration(
-                &compile_configuration.string_type,
-                PRELUDE_PREFIX,
-            ),
-            &prelude_type_configuration_qualifier::qualify_error_type_configuration(
-                &compile_configuration.error_type,
-                PRELUDE_PREFIX,
-            ),
-            &compile_configuration.concurrency,
             &main_module_configuration_qualifier::qualify(
                 &application_configuration.main_module,
                 &main_function_interface,
@@ -103,7 +82,7 @@ pub fn compile_main(
         )?,
         object_file,
         target_triple,
-        &compile_configuration.instruction,
+        &compile_configuration.fmm,
     )?;
 
     Ok(())
@@ -122,19 +101,7 @@ pub fn compile_test(
 ) -> Result<(), Box<dyn Error>> {
     let (module, test_information) = hir_mir::compile_test(
         &compile_to_hir(infrastructure, source_file, dependency_file, None)?,
-        &prelude_type_configuration_qualifier::qualify_list_type_configuration(
-            &compile_configuration.list_type,
-            PRELUDE_PREFIX,
-        ),
-        &prelude_type_configuration_qualifier::qualify_string_type_configuration(
-            &compile_configuration.string_type,
-            PRELUDE_PREFIX,
-        ),
-        &prelude_type_configuration_qualifier::qualify_error_type_configuration(
-            &compile_configuration.error_type,
-            PRELUDE_PREFIX,
-        ),
-        &compile_configuration.concurrency,
+        &prelude_type_configuration_qualifier::qualify(&compile_configuration.hir, PRELUDE_PREFIX),
         test_module_configuration,
     )?;
 
@@ -143,7 +110,7 @@ pub fn compile_test(
         &module,
         object_file,
         target_triple,
-        &compile_configuration.instruction,
+        &compile_configuration.fmm,
     )?;
 
     infrastructure.file_system.write(
@@ -202,26 +169,22 @@ pub fn compile_prelude(
     object_file: &FilePath,
     interface_file: &FilePath,
     target_triple: Option<&str>,
-    instruction_configuration: &InstructionConfiguration,
-    concurrency_configuration: &ConcurrencyConfiguration,
+    fmm_configuration: &FmmConfiguration,
 ) -> Result<(), Box<dyn Error>> {
-    let (module, module_interface) = hir_mir::compile_prelude(
-        &ast_hir::compile_prelude(
-            &parse::parse(
-                &infrastructure.file_system.read_to_string(source_file)?,
-                &infrastructure.file_path_displayer.display(source_file),
-            )?,
-            PRELUDE_PREFIX,
+    let (module, module_interface) = hir_mir::compile_prelude(&ast_hir::compile_prelude(
+        &parse::parse(
+            &infrastructure.file_system.read_to_string(source_file)?,
+            &infrastructure.file_path_displayer.display(source_file),
         )?,
-        concurrency_configuration,
-    )?;
+        PRELUDE_PREFIX,
+    )?)?;
 
     compile_mir_module(
         infrastructure,
         &module,
         object_file,
         target_triple,
-        instruction_configuration,
+        fmm_configuration,
     )?;
     infrastructure.file_system.write(
         interface_file,
@@ -236,7 +199,7 @@ fn compile_mir_module(
     module: &mir::ir::Module,
     object_file: &FilePath,
     target_triple: Option<&str>,
-    instruction_configuration: &InstructionConfiguration,
+    instruction_configuration: &FmmConfiguration,
 ) -> Result<(), Box<dyn Error>> {
     infrastructure.file_system.write(
         object_file,

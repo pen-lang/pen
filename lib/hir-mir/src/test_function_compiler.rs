@@ -1,5 +1,5 @@
 use super::{error::CompileError, test_module_configuration::TestModuleConfiguration};
-use crate::type_context::TypeContext;
+use crate::compile_context::CompileContext;
 use hir::{ir::*, types};
 use std::{
     collections::hash_map::DefaultHasher,
@@ -10,7 +10,7 @@ const TEST_FUNCTION_WRAPPER_SUFFIX: &str = "__wrapper";
 
 pub fn compile(
     module: &Module,
-    type_context: &TypeContext,
+    compile_context: &CompileContext,
     configuration: &TestModuleConfiguration,
 ) -> Result<(Module, test_info::Module), CompileError> {
     let position = module.position();
@@ -31,35 +31,43 @@ pub fn compile(
                 .definitions()
                 .iter()
                 .cloned()
-                .chain(definitions.iter().map(|definition| {
-                    let position = definition.position();
+                .chain(
+                    definitions
+                        .iter()
+                        .map(|definition| {
+                            let position = definition.position();
 
-                    Definition::new(
-                        definition.name().to_owned() + TEST_FUNCTION_WRAPPER_SUFFIX,
-                        compile_foreign_name(definition.name(), configuration),
-                        Lambda::new(
-                            vec![],
-                            types::Union::new(
-                                types::None::new(position.clone()),
-                                types::Record::new(
-                                    &type_context.error_type_configuration().error_type_name,
+                            Ok(Definition::new(
+                                definition.name().to_owned() + TEST_FUNCTION_WRAPPER_SUFFIX,
+                                compile_foreign_name(definition.name(), configuration),
+                                Lambda::new(
+                                    vec![],
+                                    types::Union::new(
+                                        types::None::new(position.clone()),
+                                        types::Record::new(
+                                            &compile_context
+                                                .configuration()?
+                                                .error_type
+                                                .error_type_name,
+                                            position.clone(),
+                                        ),
+                                        position.clone(),
+                                    ),
+                                    Call::new(
+                                        None,
+                                        Variable::new(definition.name(), position.clone()),
+                                        vec![],
+                                        position.clone(),
+                                    ),
                                     position.clone(),
                                 ),
+                                ForeignDefinitionConfiguration::new(CallingConvention::C).into(),
+                                false,
                                 position.clone(),
-                            ),
-                            Call::new(
-                                None,
-                                Variable::new(definition.name(), position.clone()),
-                                vec![],
-                                position.clone(),
-                            ),
-                            position.clone(),
-                        ),
-                        ForeignDefinitionConfiguration::new(CallingConvention::C).into(),
-                        false,
-                        position.clone(),
-                    )
-                }))
+                            ))
+                        })
+                        .collect::<Result<Vec<_>, CompileError>>()?,
+                )
                 .collect(),
             position.clone(),
         ),

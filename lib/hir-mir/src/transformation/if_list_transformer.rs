@@ -1,5 +1,5 @@
 use super::super::error::CompileError;
-use crate::{downcast_compiler, type_context::TypeContext};
+use crate::{compile_context::CompileContext, downcast_compiler};
 use hir::{
     analysis::types::type_equality_checker,
     ir::*,
@@ -8,8 +8,11 @@ use hir::{
 
 const FIRST_REST_NAME: &str = "$firstRest";
 
-pub fn transform(if_: &IfList, type_context: &TypeContext) -> Result<Expression, CompileError> {
-    let configuration = type_context.list_type_configuration();
+pub fn transform(
+    if_: &IfList,
+    compile_context: &CompileContext,
+) -> Result<Expression, CompileError> {
+    let configuration = &compile_context.configuration()?.list_type;
     let position = if_.position();
 
     let element_type = if_
@@ -63,7 +66,7 @@ pub fn transform(if_: &IfList, type_context: &TypeContext) -> Result<Expression,
                         if type_equality_checker::check(
                             element_type,
                             &any_type,
-                            type_context.types(),
+                            compile_context.types(),
                         )? {
                             Expression::from(first)
                         } else {
@@ -84,7 +87,7 @@ pub fn transform(if_: &IfList, type_context: &TypeContext) -> Result<Expression,
                                             position.clone(),
                                         )
                                         .into(),
-                                        type_context,
+                                        compile_context,
                                     )?,
                                     position.clone(),
                                 ),
@@ -140,7 +143,7 @@ mod tests {
                 None::new(Position::fake()),
                 Position::fake(),
             ),
-            &TypeContext::dummy(Default::default(), Default::default()),
+            &CompileContext::dummy(Default::default(), Default::default()),
         ));
     }
 
@@ -156,7 +159,7 @@ mod tests {
                 None::new(Position::fake()),
                 Position::fake(),
             ),
-            &TypeContext::dummy(Default::default(), Default::default()),
+            &CompileContext::dummy(Default::default(), Default::default()),
         ));
     }
 }

@@ -49,7 +49,7 @@ fn generate_function(attributes: &AttributeArgs, function: &ItemFn) -> Result<To
 
     Ok(quote! {
         #[no_mangle]
-        unsafe extern "C" fn #function_name(
+        extern "C" fn #function_name(
             stack: &mut #crate_path::cps::AsyncStack<()>,
             continue_: #crate_path::cps::ContinuationFunction<#output_type, ()>,
             #arguments
@@ -64,7 +64,7 @@ fn generate_function(attributes: &AttributeArgs, function: &ItemFn) -> Result<To
 
             let mut future: OutputFuture = Box::pin(create_future(#(#argument_names),*));
 
-            unsafe extern "C" fn poll(
+            extern "C" fn poll(
                 stack: &mut #crate_path::cps::AsyncStack<()>,
                 continue_: #crate_path::cps::ContinuationFunction<#output_type, ()>,
                 mut future: OutputFuture,
@@ -78,7 +78,7 @@ fn generate_function(attributes: &AttributeArgs, function: &ItemFn) -> Result<To
                 }
             }
 
-            unsafe extern "C" fn resume(
+            extern "C" fn resume(
                 stack: &mut #crate_path::cps::AsyncStack<()>,
                 continue_: #crate_path::cps::ContinuationFunction<#output_type, ()>,
             ) -> #crate_path::cps::Result {

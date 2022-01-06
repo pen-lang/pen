@@ -1,4 +1,4 @@
-use super::{environment_creator, type_context::TypeContext, type_extractor, CompileError};
+use super::{compile_context::CompileContext, environment_creator, type_extractor, CompileError};
 use hir::{
     analysis::types::{
         record_field_resolver, type_canonicalizer, type_equality_checker, type_subsumption_checker,
@@ -9,11 +9,11 @@ use hir::{
 };
 use std::collections::{BTreeMap, BTreeSet};
 
-pub fn check_types(module: &Module, type_context: &TypeContext) -> Result<(), CompileError> {
+pub fn check_types(module: &Module, compile_context: &CompileContext) -> Result<(), CompileError> {
     let variables = environment_creator::create_from_module(module);
 
     for definition in module.definitions() {
-        check_lambda(definition.lambda(), &variables, type_context)?;
+        check_lambda(definition.lambda(), &variables, compile_context)?;
     }
 
     Ok(())
@@ -22,7 +22,7 @@ pub fn check_types(module: &Module, type_context: &TypeContext) -> Result<(), Co
 fn check_lambda(
     lambda: &Lambda,
     variables: &BTreeMap<String, Type>,
-    type_context: &TypeContext,
+    compile_context: &CompileContext,
 ) -> Result<types::Function, CompileError> {
     check_subsumption(
         &check_expression(
@@ -37,10 +37,10 @@ fn check_lambda(
                         .map(|argument| (argument.name().into(), argument.type_().clone())),
                 )
                 .collect(),
-            type_context,
+            compile_context,
         )?,
         lambda.result_type(),
-        type_context.types(),
+        compile_context.types(),
     )?;
 
     Ok(type_extractor::extract_from_lambda(lambda))
@@ -49,12 +49,12 @@ fn check_lambda(
 fn check_expression(
     expression: &Expression,
     variables: &BTreeMap<String, Type>,
-    type_context: &TypeContext,
+    compile_context: &CompileContext,
 ) -> Result<Type, CompileError> {
     let check_expression =
-        |expression, variables: &_| check_expression(expression, variables, type_context);
+        |expression, variables: &_| check_expression(expression, variables, compile_context);
     let check_subsumption =
-        |lower: &_, upper| check_subsumption(lower, upper, type_context.types());
+        |lower: &_, upper| check_subsumption(lower, upper, compile_context.types());
 
     Ok(match expression {
         Expression::Boolean(boolean) => types::Boolean::new(boolean.position().clone()).into(),
@@ -63,7 +63,7 @@ fn check_expression(
                 .function_type()
                 .ok_or_else(|| CompileError::TypeNotInferred(call.position().clone()))?;
             let function_type =
-                type_canonicalizer::canonicalize_function(type_, type_context.types())?
+                type_canonicalizer::canonicalize_function(type_, compile_context.types())?
                     .ok_or_else(|| {
                         CompileError::FunctionExpected(call.function().position().clone())
                     })?;
@@ -89,7 +89,7 @@ fn check_expression(
             check_expression(if_.then(), variables)?;
             check_expression(if_.else_(), variables)?;
 
-            type_extractor::extract_from_expression(expression, variables, type_context)?
+            type_extractor::extract_from_expression(expression, variables, compile_context)?
         }
         Expression::IfList(if_) => {
             let list_type = types::List::new(
@@ -127,12 +127,12 @@ fn check_expression(
             )?;
             check_expression(if_.else_(), variables)?;
 
-            type_extractor::extract_from_expression(expression, variables, type_context)?
+            type_extractor::extract_from_expression(expression, variables, compile_context)?
         }
         Expression::IfType(if_) => {
             let argument_type = type_canonicalizer::canonicalize(
                 &check_expression(if_.argument(), variables)?,
-                type_context.types(),
+                compile_context.types(),
             )?;
 
             if !argument_type.is_union() && !argument_type.is_any() {
@@ -151,7 +151,8 @@ fn check_expression(
                         .collect(),
                 )?;
 
-                if type_canonicalizer::canonicalize(branch.type_(), type_context.types())?.is_any()
+                if type_canonicalizer::canonicalize(branch.type_(), compile_context.types())?
+                    .is_any()
                 {
                     return Err(CompileError::AnyTypeBranch(
                         branch.type_().position().clone(),
@@ -186,14 +187,14 @@ fn check_expression(
                     if_.position(),
                 )
                 .unwrap(),
-                type_context.types(),
+                compile_context.types(),
             )? {
                 return Err(CompileError::MissingElseBlock(if_.position().clone()));
             }
 
-            type_extractor::extract_from_expression(expression, variables, type_context)?
+            type_extractor::extract_from_expression(expression, variables, compile_context)?
         }
-        Expression::Lambda(lambda) => check_lambda(lambda, variables, type_context)?.into(),
+        Expression::Lambda(lambda) => check_lambda(lambda, variables, compile_context)?.into(),
         Expression::Let(let_) => {
             check_subsumption(
                 &check_expression(let_.bound_expression(), variables)?,
@@ -229,7 +230,7 @@ fn check_expression(
                         check_subsumption(
                             type_canonicalizer::canonicalize_list(
                                 &check_expression(expression, variables)?,
-                                type_context.types(),
+                                compile_context.types(),
                             )?
                             .ok_or_else(|| {
                                 CompileError::ListExpected(expression.position().clone())
@@ -248,13 +249,13 @@ fn check_expression(
         }
         Expression::None(none) => types::None::new(none.position().clone()).into(),
         Expression::Number(number) => types::Number::new(number.position().clone()).into(),
-        Expression::Operation(operation) => check_operation(operation, variables, type_context)?,
+        Expression::Operation(operation) => check_operation(operation, variables, compile_context)?,
         Expression::RecordConstruction(construction) => {
             let field_types = record_field_resolver::resolve(
                 construction.type_(),
                 construction.position(),
-                type_context.types(),
-                type_context.records(),
+                compile_context.types(),
+                compile_context.records(),
             )?;
 
             for field in construction.fields() {
@@ -299,8 +300,8 @@ fn check_expression(
             let field_types = record_field_resolver::resolve(
                 type_,
                 deconstruction.position(),
-                type_context.types(),
-                type_context.records(),
+                compile_context.types(),
+                compile_context.records(),
             )?;
 
             field_types
@@ -319,8 +320,8 @@ fn check_expression(
             let field_types = record_field_resolver::resolve(
                 update.type_(),
                 update.position(),
-                type_context.types(),
-                type_context.records(),
+                compile_context.types(),
+                compile_context.records(),
             )?;
 
             for field in update.fields() {
@@ -346,7 +347,7 @@ fn check_expression(
 
             check_subsumption(&check_expression(thunk.expression(), variables)?, type_)?;
 
-            type_extractor::extract_from_expression(expression, variables, type_context)?
+            type_extractor::extract_from_expression(expression, variables, compile_context)?
         }
         Expression::TypeCoercion(coercion) => {
             check_subsumption(
@@ -354,9 +355,9 @@ fn check_expression(
                 coercion.from(),
             )?;
 
-            if type_canonicalizer::canonicalize_list(coercion.from(), type_context.types())?
+            if type_canonicalizer::canonicalize_list(coercion.from(), compile_context.types())?
                 .is_none()
-                || type_canonicalizer::canonicalize_list(coercion.to(), type_context.types())?
+                || type_canonicalizer::canonicalize_list(coercion.to(), compile_context.types())?
                     .is_none()
             {
                 check_subsumption(coercion.from(), coercion.to())?;
@@ -374,11 +375,11 @@ fn check_expression(
 fn check_operation(
     operation: &Operation,
     variables: &BTreeMap<String, Type>,
-    type_context: &TypeContext,
+    compile_context: &CompileContext,
 ) -> Result<Type, CompileError> {
-    let check_expression = |expression| check_expression(expression, variables, type_context);
+    let check_expression = |expression| check_expression(expression, variables, compile_context);
     let check_subsumption =
-        |lower: &_, upper| check_subsumption(lower, upper, type_context.types());
+        |lower: &_, upper| check_subsumption(lower, upper, compile_context.types());
 
     Ok(match operation {
         Operation::Arithmetic(operation) => {
@@ -396,7 +397,7 @@ fn check_operation(
                 ));
             }
 
-            check_lambda(operation.function(), variables, type_context)?.into()
+            check_lambda(operation.function(), variables, compile_context)?.into()
         }
         Operation::Boolean(operation) => {
             let boolean_type = types::Boolean::new(operation.position().clone()).into();
@@ -414,13 +415,19 @@ fn check_operation(
             check_subsumption(&check_expression(operation.lhs())?, operand_type)?;
             check_subsumption(&check_expression(operation.rhs())?, operand_type)?;
 
-            let lhs_type =
-                type_extractor::extract_from_expression(operation.lhs(), variables, type_context)?;
-            let rhs_type =
-                type_extractor::extract_from_expression(operation.rhs(), variables, type_context)?;
+            let lhs_type = type_extractor::extract_from_expression(
+                operation.lhs(),
+                variables,
+                compile_context,
+            )?;
+            let rhs_type = type_extractor::extract_from_expression(
+                operation.rhs(),
+                variables,
+                compile_context,
+            )?;
 
-            if !type_subsumption_checker::check(&lhs_type, &rhs_type, type_context.types())?
-                && !type_subsumption_checker::check(&rhs_type, &lhs_type, type_context.types())?
+            if !type_subsumption_checker::check(&lhs_type, &rhs_type, compile_context.types())?
+                && !type_subsumption_checker::check(&rhs_type, &lhs_type, compile_context.types())?
             {
                 return Err(CompileError::TypesNotComparable(
                     operation.position().clone(),
@@ -450,7 +457,7 @@ fn check_operation(
                 .type_()
                 .ok_or_else(|| CompileError::TypeNotInferred(position.clone()))?;
             let error_type = types::Reference::new(
-                &type_context.error_type_configuration().error_type_name,
+                &compile_context.configuration()?.error_type.error_type_name,
                 position.clone(),
             )
             .into();
@@ -486,23 +493,15 @@ fn check_subsumption(
 
 #[cfg(test)]
 mod tests {
-    use super::{super::list_type_configuration::LIST_TYPE_CONFIGURATION, *};
-    use crate::{
-        error_type_configuration::ERROR_TYPE_CONFIGURATION,
-        string_type_configuration::STRING_TYPE_CONFIGURATION,
-    };
+    use super::*;
+    use crate::compile_configuration::COMPILE_CONFIGURATION;
     use hir::test::{DefinitionFake, ForeignDeclarationFake, ModuleFake, TypeDefinitionFake};
     use position::{test::PositionFake, Position};
 
     fn check_module(module: &Module) -> Result<(), CompileError> {
         check_types(
             module,
-            &TypeContext::new(
-                module,
-                &LIST_TYPE_CONFIGURATION,
-                &STRING_TYPE_CONFIGURATION,
-                &ERROR_TYPE_CONFIGURATION,
-            ),
+            &CompileContext::new(module, COMPILE_CONFIGURATION.clone().into()),
         )
     }
 

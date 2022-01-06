@@ -5,7 +5,7 @@ use crate::{
 use futures::future::poll_fn;
 use std::{intrinsics::transmute, task::Poll};
 
-type InitialStepFunction<T, S> = unsafe extern "C" fn(
+type InitialStepFunction<T, S> = extern "C" fn(
     stack: &mut AsyncStack<T>,
     continuation: ContinuationFunction<T, T>,
     closure: Arc<Closure<S>>,
@@ -20,7 +20,7 @@ pub async fn from_closure<T, S>(closure: Arc<Closure<T>>) -> S {
     poll_fn(move |context| {
         stack.run_with_context(context, |stack| {
             if let Some((step, continue_)) = trampoline {
-                unsafe { step(stack, continue_) };
+                step(stack, continue_);
             } else {
                 unsafe {
                     let entry_function =

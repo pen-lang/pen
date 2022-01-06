@@ -1,4 +1,4 @@
-use crate::{error::CompileError, type_context::TypeContext};
+use crate::{compile_context::CompileContext, error::CompileError};
 use hir::{analysis::types::record_field_resolver, ir::*};
 use std::collections::BTreeSet;
 
@@ -6,13 +6,13 @@ const RECORD_NAME: &str = "$record";
 
 pub fn transform(
     update: &RecordUpdate,
-    type_context: &TypeContext,
+    compile_context: &CompileContext,
 ) -> Result<Expression, CompileError> {
     let field_types = record_field_resolver::resolve(
         update.type_(),
         update.position(),
-        type_context.types(),
-        type_context.records(),
+        compile_context.types(),
+        compile_context.records(),
     )?;
     let position = update.position();
 
@@ -71,7 +71,7 @@ mod tests {
                     )],
                     Position::fake()
                 ),
-                &TypeContext::dummy(
+                &CompileContext::dummy(
                     Default::default(),
                     vec![(
                         "r".into(),

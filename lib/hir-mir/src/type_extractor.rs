@@ -1,4 +1,4 @@
-use super::{type_context::TypeContext, CompileError};
+use super::{compile_context::CompileContext, CompileError};
 use hir::{
     analysis::types::{record_field_resolver, type_canonicalizer, union_type_creator},
     ir::*,
@@ -9,17 +9,17 @@ use std::collections::BTreeMap;
 pub fn extract_from_expression(
     expression: &Expression,
     variables: &BTreeMap<String, Type>,
-    type_context: &TypeContext,
+    compile_context: &CompileContext,
 ) -> Result<Type, CompileError> {
     let extract_from_expression =
-        |expression, variables: &_| extract_from_expression(expression, variables, type_context);
+        |expression, variables: &_| extract_from_expression(expression, variables, compile_context);
 
     Ok(match expression {
         Expression::Boolean(boolean) => types::Boolean::new(boolean.position().clone()).into(),
         Expression::Call(call) => type_canonicalizer::canonicalize_function(
             call.function_type()
                 .ok_or_else(|| CompileError::TypeNotInferred(call.position().clone()))?,
-            type_context.types(),
+            compile_context.types(),
         )?
         .ok_or_else(|| CompileError::FunctionExpected(call.function().position().clone()))?
         .result()
@@ -33,7 +33,7 @@ pub fn extract_from_expression(
         Expression::IfList(if_) => {
             let list_type = type_canonicalizer::canonicalize_list(
                 &extract_from_expression(if_.argument(), variables)?,
-                type_context.types(),
+                compile_context.types(),
             )?
             .ok_or_else(|| CompileError::ListExpected(if_.argument().position().clone()))?;
 
@@ -155,8 +155,8 @@ pub fn extract_from_expression(
                 .type_()
                 .ok_or_else(|| CompileError::TypeNotInferred(deconstruction.position().clone()))?,
             deconstruction.position(),
-            type_context.types(),
-            type_context.records(),
+            compile_context.types(),
+            compile_context.records(),
         )?
         .iter()
         .find(|field| field.name() == deconstruction.field_name())
@@ -213,7 +213,7 @@ mod tests {
                 )
                 .into(),
                 &Default::default(),
-                &TypeContext::dummy(Default::default(), Default::default()),
+                &CompileContext::dummy(Default::default(), Default::default()),
             )
             .unwrap(),
             types::None::new(Position::fake()).into(),
@@ -231,7 +231,7 @@ mod tests {
                 )
                 .into(),
                 &Default::default(),
-                &TypeContext::dummy(Default::default(), Default::default()),
+                &CompileContext::dummy(Default::default(), Default::default()),
             )
             .unwrap(),
             types::None::new(Position::fake()).into(),
@@ -249,7 +249,7 @@ mod tests {
                 )
                 .into(),
                 &Default::default(),
-                &TypeContext::dummy(Default::default(), Default::default()),
+                &CompileContext::dummy(Default::default(), Default::default()),
             ),
             Ok(
                 types::Function::new(vec![], types::None::new(Position::fake()), Position::fake())
@@ -264,7 +264,7 @@ mod tests {
             extract_from_expression(
                 &Thunk::new(None, Variable::new("x", Position::fake()), Position::fake()).into(),
                 &Default::default(),
-                &TypeContext::dummy(Default::default(), Default::default()),
+                &CompileContext::dummy(Default::default(), Default::default()),
             ),
             Err(CompileError::TypeNotInferred(Position::fake())),
         );
@@ -285,7 +285,7 @@ mod tests {
                 )
                 .into(),
                 &Default::default(),
-                &TypeContext::dummy(Default::default(), Default::default()),
+                &CompileContext::dummy(Default::default(), Default::default()),
             ),
             Ok(
                 types::Function::new(vec![], types::None::new(Position::fake()), Position::fake())

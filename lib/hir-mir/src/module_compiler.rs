@@ -1,27 +1,24 @@
 use super::{
-    expression_compiler, generic_type_definition_compiler, type_compiler,
-    type_context::TypeContext, CompileError,
+    compile_context::CompileContext, expression_compiler, generic_type_definition_compiler,
+    type_compiler, CompileError,
 };
-use crate::{
-    concurrency_configuration::ConcurrencyConfiguration, spawn_function_declaration_compiler,
-};
+use crate::spawn_function_declaration_compiler;
 use hir::ir::*;
 
 pub fn compile(
     module: &Module,
-    type_context: &TypeContext,
-    concurrency_configuration: &ConcurrencyConfiguration,
+    compile_context: &CompileContext,
 ) -> Result<mir::ir::Module, CompileError> {
     Ok(mir::ir::Module::new(
         module
             .type_definitions()
             .iter()
-            .map(|type_definition| compile_type_definition(type_definition, type_context))
+            .map(|type_definition| compile_type_definition(type_definition, compile_context))
             .collect::<Result<Vec<_>, _>>()?
             .into_iter()
             .chain(generic_type_definition_compiler::compile(
                 module,
-                type_context,
+                compile_context,
             )?)
             .collect(),
         module
@@ -31,7 +28,7 @@ pub fn compile(
                 Ok(mir::ir::ForeignDeclaration::new(
                     declaration.name(),
                     declaration.foreign_name(),
-                    type_compiler::compile(declaration.type_(), type_context)?
+                    type_compiler::compile(declaration.type_(), compile_context)?
                         .into_function()
                         .ok_or_else(|| {
                             CompileError::FunctionExpected(declaration.position().clone())
@@ -39,9 +36,11 @@ pub fn compile(
                     compile_calling_convention(declaration.calling_convention()),
                 ))
             })
-            .chain([Ok(spawn_function_declaration_compiler::compile(
-                concurrency_configuration,
-            ))])
+            .chain(compile_context.configuration().ok().map(|configuration| {
+                Ok(spawn_function_declaration_compiler::compile(
+                    &configuration.concurrency,
+                ))
+            }))
             .collect::<Result<_, _>>()?,
         module
             .definitions()
@@ -61,14 +60,12 @@ pub fn compile(
         module
             .declarations()
             .iter()
-            .map(|declaration| compile_declaration(declaration, type_context))
+            .map(|declaration| compile_declaration(declaration, compile_context))
             .collect::<Result<_, _>>()?,
         module
             .definitions()
             .iter()
-            .map(|definition| {
-                compile_definition(definition, type_context, concurrency_configuration)
-            })
+            .map(|definition| compile_definition(definition, compile_context))
             .collect::<Result<Vec<_>, CompileError>>()?,
     ))
 }
@@ -82,7 +79,7 @@ fn compile_calling_convention(calling_convention: CallingConvention) -> mir::ir:
 
 fn compile_type_definition(
     type_definition: &TypeDefinition,
-    type_context: &TypeContext,
+    compile_context: &CompileContext,
 ) -> Result<mir::ir::TypeDefinition, CompileError> {
     Ok(mir::ir::TypeDefinition::new(
         type_definition.name(),
@@ -90,7 +87,7 @@ fn compile_type_definition(
             type_definition
                 .fields()
                 .iter()
-                .map(|field| type_compiler::compile(field.type_(), type_context))
+                .map(|field| type_compiler::compile(field.type_(), compile_context))
                 .collect::<Result<_, _>>()?,
         ),
     ))
@@ -98,25 +95,20 @@ fn compile_type_definition(
 
 fn compile_declaration(
     declaration: &Declaration,
-    type_context: &TypeContext,
+    compile_context: &CompileContext,
 ) -> Result<mir::ir::Declaration, CompileError> {
     Ok(mir::ir::Declaration::new(
         declaration.name(),
-        type_compiler::compile_function(declaration.type_(), type_context)?,
+        type_compiler::compile_function(declaration.type_(), compile_context)?,
     ))
 }
 
 fn compile_definition(
     definition: &Definition,
-    type_context: &TypeContext,
-    concurrency_configuration: &ConcurrencyConfiguration,
+    compile_context: &CompileContext,
 ) -> Result<mir::ir::Definition, CompileError> {
-    let body = expression_compiler::compile(
-        definition.lambda().body(),
-        type_context,
-        concurrency_configuration,
-    )?;
-    let result_type = type_compiler::compile(definition.lambda().result_type(), type_context)?;
+    let body = expression_compiler::compile(definition.lambda().body(), compile_context)?;
+    let result_type = type_compiler::compile(definition.lambda().result_type(), compile_context)?;
 
     Ok(mir::ir::Definition::new(
         definition.name(),
@@ -127,7 +119,7 @@ fn compile_definition(
             .map(|argument| -> Result<_, CompileError> {
                 Ok(mir::ir::Argument::new(
                     argument.name(),
-                    type_compiler::compile(argument.type_(), type_context)?,
+                    type_compiler::compile(argument.type_(), compile_context)?,
                 ))
             })
             .collect::<Result<_, _>>()?,
@@ -140,10 +132,8 @@ fn compile_definition(
 mod tests {
     use super::*;
     use crate::{
+        compile_configuration::COMPILE_CONFIGURATION,
         concurrency_configuration::CONCURRENCY_CONFIGURATION,
-        error_type_configuration::ERROR_TYPE_CONFIGURATION,
-        list_type_configuration::LIST_TYPE_CONFIGURATION,
-        string_type_configuration::STRING_TYPE_CONFIGURATION,
     };
     use hir::{test::ModuleFake, types};
     use position::{test::PositionFake, Position};
@@ -152,13 +142,7 @@ mod tests {
     fn compile_module(module: &Module) -> Result<mir::ir::Module, CompileError> {
         compile(
             module,
-            &TypeContext::new(
-                module,
-                &LIST_TYPE_CONFIGURATION,
-                &STRING_TYPE_CONFIGURATION,
-                &ERROR_TYPE_CONFIGURATION,
-            ),
-            &CONCURRENCY_CONFIGURATION,
+            &CompileContext::new(module, COMPILE_CONFIGURATION.clone().into()),
         )
     }
 

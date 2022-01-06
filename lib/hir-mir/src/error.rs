@@ -9,7 +9,7 @@ use std::{
 pub enum CompileError {
     AnyEqualOperation(Position),
     AnyTypeBranch(Position),
-    SpawnOperationArguments(Position),
+    CompileConfigurationNotProvided,
     DuplicateFunctionNames(Position, Position),
     DuplicateTypeNames(Position, Position),
     FunctionEqualOperation(Position),
@@ -26,6 +26,7 @@ pub enum CompileError {
     RecordFieldMissing(Position),
     RecordExpected(Position),
     RecordNotFound(types::Record),
+    SpawnOperationArguments(Position),
     TryOperationInList(Position),
     TypeAnalysis(TypeError),
     TypeNotFound(types::Reference),
@@ -56,12 +57,8 @@ impl Display for CompileError {
                     position
                 )
             }
-            Self::SpawnOperationArguments(position) => {
-                write!(
-                    formatter,
-                    "lambda expression in spawn operation cannot have any argument\n{}",
-                    position
-                )
+            Self::CompileConfigurationNotProvided => {
+                write!(formatter, "compile configuration not provided")
             }
             Self::DuplicateFunctionNames(one, other) => {
                 write!(formatter, "duplicate function names\n{}\n{}", one, other)
@@ -130,6 +127,13 @@ impl Display for CompileError {
                 record.name(),
                 record.position()
             ),
+            Self::SpawnOperationArguments(position) => {
+                write!(
+                    formatter,
+                    "lambda expression in spawn operation cannot have any argument\n{}",
+                    position
+                )
+            }
             Self::TryOperationInList(position) => {
                 write!(
                     formatter,

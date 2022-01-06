@@ -1,11 +1,11 @@
-use super::{type_context::TypeContext, CompileError};
+use super::{compile_context::CompileContext, CompileError};
 use hir::{
     analysis::{ir::expression_visitor, types::type_canonicalizer},
     ir::*,
 };
 use std::collections::BTreeSet;
 
-pub fn validate(module: &Module, type_context: &TypeContext) -> Result<(), CompileError> {
+pub fn validate(module: &Module, compile_context: &CompileContext) -> Result<(), CompileError> {
     let open_records = collect_open_records(module.type_definitions());
 
     for expression in collect_expressions(module) {
@@ -13,7 +13,7 @@ pub fn validate(module: &Module, type_context: &TypeContext) -> Result<(), Compi
             Expression::RecordConstruction(construction) => {
                 let record_type = type_canonicalizer::canonicalize_record(
                     construction.type_(),
-                    type_context.types(),
+                    compile_context.types(),
                 )?
                 .ok_or_else(|| CompileError::RecordExpected(construction.position().clone()))?;
 
@@ -28,7 +28,7 @@ pub fn validate(module: &Module, type_context: &TypeContext) -> Result<(), Compi
                     deconstruction.type_().ok_or_else(|| {
                         CompileError::TypeNotInferred(deconstruction.position().clone())
                     })?,
-                    type_context.types(),
+                    compile_context.types(),
                 )?
                 .ok_or_else(|| CompileError::RecordExpected(deconstruction.position().clone()))?;
 
@@ -39,9 +39,11 @@ pub fn validate(module: &Module, type_context: &TypeContext) -> Result<(), Compi
                 }
             }
             Expression::RecordUpdate(update) => {
-                let record_type =
-                    type_canonicalizer::canonicalize_record(update.type_(), type_context.types())?
-                        .ok_or_else(|| CompileError::RecordExpected(update.position().clone()))?;
+                let record_type = type_canonicalizer::canonicalize_record(
+                    update.type_(),
+                    compile_context.types(),
+                )?
+                .ok_or_else(|| CompileError::RecordExpected(update.position().clone()))?;
 
                 if !open_records.contains(record_type.name()) {
                     return Err(CompileError::RecordFieldPrivate(update.position().clone()));
@@ -86,14 +88,8 @@ fn is_record_open(definition: &TypeDefinition) -> bool {
 
 #[cfg(test)]
 mod tests {
-    use super::{
-        super::{
-            error_type_configuration::ERROR_TYPE_CONFIGURATION,
-            list_type_configuration::LIST_TYPE_CONFIGURATION,
-            string_type_configuration::STRING_TYPE_CONFIGURATION,
-        },
-        *,
-    };
+    use super::*;
+    use crate::compile_configuration::COMPILE_CONFIGURATION;
     use hir::{
         test::{DefinitionFake, ModuleFake, TypeDefinitionFake},
         types,
@@ -103,12 +99,7 @@ mod tests {
     fn validate_module(module: &Module) -> Result<(), CompileError> {
         validate(
             module,
-            &TypeContext::new(
-                module,
-                &LIST_TYPE_CONFIGURATION,
-                &STRING_TYPE_CONFIGURATION,
-                &ERROR_TYPE_CONFIGURATION,
-            ),
+            &CompileContext::new(module, COMPILE_CONFIGURATION.clone().into()),
         )
     }
 

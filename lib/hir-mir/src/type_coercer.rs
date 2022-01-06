@@ -1,4 +1,4 @@
-use super::{environment_creator, type_context::TypeContext, type_extractor, CompileError};
+use super::{compile_context::CompileContext, environment_creator, type_extractor, CompileError};
 use hir::{
     analysis::types::{record_field_resolver, type_canonicalizer, type_equality_checker},
     ir::*,
@@ -7,7 +7,10 @@ use hir::{
 use position::Position;
 use std::collections::BTreeMap;
 
-pub fn coerce_types(module: &Module, type_context: &TypeContext) -> Result<Module, CompileError> {
+pub fn coerce_types(
+    module: &Module,
+    compile_context: &CompileContext,
+) -> Result<Module, CompileError> {
     let variables = environment_creator::create_from_module(module);
 
     Ok(Module::new(
@@ -18,7 +21,7 @@ pub fn coerce_types(module: &Module, type_context: &TypeContext) -> Result<Modul
         module
             .definitions()
             .iter()
-            .map(|definition| transform_definition(definition, &variables, type_context))
+            .map(|definition| transform_definition(definition, &variables, compile_context))
             .collect::<Result<_, _>>()?,
         module.position().clone(),
     ))
@@ -27,12 +30,12 @@ pub fn coerce_types(module: &Module, type_context: &TypeContext) -> Result<Modul
 fn transform_definition(
     definition: &Definition,
     variables: &BTreeMap<String, Type>,
-    type_context: &TypeContext,
+    compile_context: &CompileContext,
 ) -> Result<Definition, CompileError> {
     Ok(Definition::new(
         definition.name(),
         definition.original_name(),
-        transform_lambda(definition.lambda(), variables, type_context)?,
+        transform_lambda(definition.lambda(), variables, compile_context)?,
         definition.foreign_definition_configuration().cloned(),
         definition.is_public(),
         definition.position().clone(),
@@ -42,7 +45,7 @@ fn transform_definition(
 fn transform_lambda(
     lambda: &Lambda,
     variables: &BTreeMap<String, Type>,
-    type_context: &TypeContext,
+    compile_context: &CompileContext,
 ) -> Result<Lambda, CompileError> {
     let variables = variables
         .clone()
@@ -59,10 +62,10 @@ fn transform_lambda(
         lambda.arguments().to_vec(),
         lambda.result_type().clone(),
         coerce_expression(
-            &transform_expression(lambda.body(), &variables, type_context)?,
+            &transform_expression(lambda.body(), &variables, compile_context)?,
             lambda.result_type(),
             &variables,
-            type_context,
+            compile_context,
         )?,
         lambda.position().clone(),
     ))
@@ -71,20 +74,20 @@ fn transform_lambda(
 fn transform_expression(
     expression: &Expression,
     variables: &BTreeMap<String, Type>,
-    type_context: &TypeContext,
+    compile_context: &CompileContext,
 ) -> Result<Expression, CompileError> {
     let transform_expression =
-        |expression, variables: &_| transform_expression(expression, variables, type_context);
+        |expression, variables: &_| transform_expression(expression, variables, compile_context);
     let transform_and_coerce_expression = |expression, type_: &_, variables: &_| {
         coerce_expression(
             &transform_expression(expression, variables)?,
             type_,
             variables,
-            type_context,
+            compile_context,
         )
     };
     let extract_type = |expression, variables| {
-        type_extractor::extract_from_expression(expression, variables, type_context)
+        type_extractor::extract_from_expression(expression, variables, compile_context)
     };
 
     Ok(match expression {
@@ -92,7 +95,7 @@ fn transform_expression(
             let function_type = type_canonicalizer::canonicalize_function(
                 call.function_type()
                     .ok_or_else(|| CompileError::TypeNotInferred(call.position().clone()))?,
-                type_context.types(),
+                compile_context.types(),
             )?
             .ok_or_else(|| CompileError::FunctionExpected(call.position().clone()))?;
 
@@ -216,7 +219,7 @@ fn transform_expression(
             )
             .into()
         }
-        Expression::Lambda(lambda) => transform_lambda(lambda, variables, type_context)?.into(),
+        Expression::Lambda(lambda) => transform_lambda(lambda, variables, compile_context)?.into(),
         Expression::Let(let_) => Let::new(
             let_.name().map(String::from),
             let_.type_().cloned(),
@@ -279,7 +282,7 @@ fn transform_expression(
             )
             .into(),
             Operation::Spawn(operation) => SpawnOperation::new(
-                transform_lambda(operation.function(), variables, type_context)?,
+                transform_lambda(operation.function(), variables, compile_context)?,
                 operation.position().clone(),
             )
             .into(),
@@ -330,7 +333,7 @@ fn transform_expression(
                 construction.position(),
                 construction.type_(),
                 variables,
-                type_context,
+                compile_context,
             )?,
             construction.position().clone(),
         )
@@ -350,7 +353,7 @@ fn transform_expression(
                 update.position(),
                 update.type_(),
                 variables,
-                type_context,
+                compile_context,
             )?,
             update.position().clone(),
         )
@@ -387,13 +390,13 @@ fn transform_record_fields(
     position: &Position,
     record_type: &Type,
     variables: &BTreeMap<String, Type>,
-    type_context: &TypeContext,
+    compile_context: &CompileContext,
 ) -> Result<Vec<RecordField>, CompileError> {
     let field_types = record_field_resolver::resolve(
         record_type,
         position,
-        type_context.types(),
-        type_context.records(),
+        compile_context.types(),
+        compile_context.records(),
     )?;
 
     fields
@@ -402,14 +405,14 @@ fn transform_record_fields(
             Ok(RecordField::new(
                 field.name(),
                 coerce_expression(
-                    &transform_expression(field.expression(), variables, type_context)?,
+                    &transform_expression(field.expression(), variables, compile_context)?,
                     field_types
                         .iter()
                         .find(|field_type| field_type.name() == field.name())
                         .ok_or_else(|| CompileError::RecordFieldUnknown(field.position().clone()))?
                         .type_(),
                     variables,
-                    type_context,
+                    compile_context,
                 )?,
                 field.position().clone(),
             ))
@@ -421,12 +424,13 @@ fn coerce_expression(
     expression: &Expression,
     upper_type: &Type,
     variables: &BTreeMap<String, Type>,
-    type_context: &TypeContext,
+    compile_context: &CompileContext,
 ) -> Result<Expression, CompileError> {
-    let lower_type = type_extractor::extract_from_expression(expression, variables, type_context)?;
+    let lower_type =
+        type_extractor::extract_from_expression(expression, variables, compile_context)?;
 
     Ok(
-        if type_equality_checker::check(&lower_type, upper_type, type_context.types())? {
+        if type_equality_checker::check(&lower_type, upper_type, compile_context.types())? {
             expression.clone()
         } else {
             TypeCoercion::new(
@@ -443,11 +447,7 @@ fn coerce_expression(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{
-        error_type_configuration::ERROR_TYPE_CONFIGURATION,
-        list_type_configuration::LIST_TYPE_CONFIGURATION,
-        string_type_configuration::STRING_TYPE_CONFIGURATION,
-    };
+    use crate::compile_configuration::COMPILE_CONFIGURATION;
     use hir::test::{DefinitionFake, ModuleFake, TypeDefinitionFake};
     use position::{test::PositionFake, Position};
     use pretty_assertions::assert_eq;
@@ -455,12 +455,7 @@ mod tests {
     fn coerce_module(module: &Module) -> Result<Module, CompileError> {
         coerce_types(
             module,
-            &TypeContext::new(
-                module,
-                &LIST_TYPE_CONFIGURATION,
-                &STRING_TYPE_CONFIGURATION,
-                &ERROR_TYPE_CONFIGURATION,
-            ),
+            &CompileContext::new(module, COMPILE_CONFIGURATION.clone().into()),
         )
     }
 

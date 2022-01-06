@@ -1,5 +1,5 @@
 use super::super::error::CompileError;
-use crate::{transformation::record_type_information_compiler, type_context::TypeContext};
+use crate::{compile_context::CompileContext, transformation::record_type_information_compiler};
 use hir::{
     analysis::types::{
         type_canonicalizer, type_comparability_checker, type_equality_checker, type_resolver,
@@ -15,7 +15,7 @@ const RHS_NAME: &str = "$rhs";
 
 pub fn transform(
     operation: &EqualityOperation,
-    type_context: &TypeContext,
+    compile_context: &CompileContext,
 ) -> Result<Expression, CompileError> {
     Ok(if operation.operator() == EqualityOperator::Equal {
         transform_equal_operation(
@@ -23,12 +23,12 @@ pub fn transform(
                 operation
                     .type_()
                     .ok_or_else(|| CompileError::TypeNotInferred(operation.position().clone()))?,
-                type_context.types(),
+                compile_context.types(),
             )?,
             operation.lhs(),
             operation.rhs(),
             operation.position(),
-            type_context,
+            compile_context,
         )?
     } else {
         operation.clone().into()
@@ -40,7 +40,7 @@ fn transform_equal_operation(
     lhs: &Expression,
     rhs: &Expression,
     position: &Position,
-    type_context: &TypeContext,
+    compile_context: &CompileContext,
 ) -> Result<Expression, CompileError> {
     Ok(match type_ {
         Type::Any(_) => return Err(CompileError::AnyEqualOperation(position.clone())),
@@ -65,7 +65,7 @@ fn transform_equal_operation(
         Type::List(list_type) => {
             let element_type = list_type.element();
             let any_list_type = types::Reference::new(
-                &type_context.list_type_configuration().list_type_name,
+                &compile_context.configuration()?.list_type.list_type_name,
                 position.clone(),
             );
 
@@ -91,7 +91,10 @@ fn transform_equal_operation(
                     .into(),
                 ),
                 Variable::new(
-                    &type_context.list_type_configuration().equal_function_name,
+                    &compile_context
+                        .configuration()?
+                        .list_type
+                        .equal_function_name,
                     position.clone(),
                 ),
                 vec![
@@ -116,7 +119,7 @@ fn transform_equal_operation(
                                             &Variable::new(LHS_NAME, position.clone()).into(),
                                             &Variable::new(RHS_NAME, position.clone()).into(),
                                             position,
-                                            type_context,
+                                            compile_context,
                                         )?,
                                     )],
                                     None,
@@ -148,8 +151,8 @@ fn transform_equal_operation(
         Type::Record(record_type) => {
             if !type_comparability_checker::check(
                 type_,
-                type_context.types(),
-                type_context.records(),
+                compile_context.types(),
+                compile_context.records(),
             )? {
                 return Err(CompileError::InvalidRecordEqualOperation(position.clone()));
             }
@@ -182,7 +185,7 @@ fn transform_equal_operation(
         .into(),
         Type::Union(_) => {
             let member_types =
-                union_type_member_calculator::calculate(type_, type_context.types())?;
+                union_type_member_calculator::calculate(type_, compile_context.types())?;
 
             IfType::new(
                 LHS_NAME,
@@ -203,7 +206,7 @@ fn transform_equal_operation(
                                             if type_equality_checker::check(
                                                 lhs_type,
                                                 rhs_type,
-                                                type_context.types(),
+                                                compile_context.types(),
                                             )? {
                                                 transform_equal_operation(
                                                     rhs_type,
@@ -212,7 +215,7 @@ fn transform_equal_operation(
                                                     &Variable::new(RHS_NAME, position.clone())
                                                         .into(),
                                                     position,
-                                                    type_context,
+                                                    compile_context,
                                                 )?
                                             } else {
                                                 Boolean::new(false, position.clone()).into()
@@ -232,11 +235,11 @@ fn transform_equal_operation(
             .into()
         }
         Type::Reference(reference) => transform_equal_operation(
-            &type_resolver::resolve(reference, type_context.types())?,
+            &type_resolver::resolve(reference, compile_context.types())?,
             lhs,
             rhs,
             position,
-            type_context,
+            compile_context,
         )?,
     })
 }
@@ -264,7 +267,7 @@ mod tests {
                     Variable::new("y", Position::fake()),
                     Position::fake()
                 ),
-                &TypeContext::dummy(Default::default(), Default::default())
+                &CompileContext::dummy(Default::default(), Default::default())
             ),
             Ok(IfType::new(
                 LHS_NAME,
@@ -335,7 +338,7 @@ mod tests {
                     Variable::new("y", Position::fake()),
                     Position::fake()
                 ),
-                &TypeContext::dummy(
+                &CompileContext::dummy(
                     Default::default(),
                     vec![(
                         "foo".into(),
@@ -382,7 +385,7 @@ mod tests {
                     Variable::new("y", Position::fake()),
                     Position::fake()
                 ),
-                &TypeContext::dummy(Default::default(), Default::default())
+                &CompileContext::dummy(Default::default(), Default::default())
             ),
             Err(CompileError::AnyEqualOperation(Position::fake()))
         );
@@ -406,7 +409,7 @@ mod tests {
                     Variable::new("y", Position::fake()),
                     Position::fake()
                 ),
-                &TypeContext::dummy(Default::default(), Default::default())
+                &CompileContext::dummy(Default::default(), Default::default())
             ),
             Err(CompileError::FunctionEqualOperation(Position::fake()))
         );
