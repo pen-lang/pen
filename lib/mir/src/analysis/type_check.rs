@@ -233,7 +233,7 @@ fn check_expression(
         Expression::Variable(variable) => check_variable(variable, variables)?,
         Expression::Variant(variant) => {
             if matches!(variant.type_(), Type::Variant) {
-                return Err(TypeCheckError::VariantInVariant(variant.clone()));
+                return Err(TypeCheckError::VariantInVariant(variant.clone().into()));
             }
 
             check_equality(
@@ -264,6 +264,10 @@ fn check_case(
     let mut expression_type = None;
 
     for alternative in case.alternatives() {
+        if matches!(alternative.type_(), Type::Variant) {
+            return Err(TypeCheckError::VariantInVariant(case.clone().into()));
+        }
+
         let mut variables = variables.clone();
 
         variables.insert(alternative.name(), alternative.type_().clone());
@@ -750,6 +754,26 @@ mod tests {
                     )
                 ])),
                 Err(TypeCheckError::TypesNotMatched(_, _))
+            ));
+        }
+
+        #[test]
+        fn fail_to_check_case_with_variant_alternative() {
+            assert!(matches!(
+                check_types(&create_module_from_definitions(vec![
+                    Definition::with_environment(
+                        "f",
+                        vec![],
+                        vec![Argument::new("x", Type::Variant)],
+                        Case::new(
+                            Variable::new("x"),
+                            vec![Alternative::new(Type::Variant, "y", Variable::new("y"))],
+                            None
+                        ),
+                        Type::Variant,
+                    )
+                ])),
+                Err(TypeCheckError::VariantInVariant(_))
             ));
         }
     }
