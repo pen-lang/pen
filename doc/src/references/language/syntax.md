@@ -238,6 +238,18 @@ if [x, ...xs] = ... {
 }
 ```
 
+### Concurrency
+
+#### `go` expression
+
+It executes a function in parallel.
+
+```pen
+go \() number {
+  ...
+}
+```
+
 ## Comment
 
 Comments start with `#` and end with new-line characters.
