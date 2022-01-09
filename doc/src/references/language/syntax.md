@@ -238,6 +238,18 @@ if [x, ...xs] = ... {
 }
 ```
 
+### Concurrency
+
+#### `go` expression
+
+It executes a function in parallel. Its returned value is a future represented as a function that returns a result of the executed function.
+
+```pen
+future = go \() number {
+  ...
+}
+```
+
 ## Comment
 
 Comments start with `#` and end with new-line characters.
