@@ -242,10 +242,10 @@ if [x, ...xs] = ... {
 
 #### `go` expression
 
-It executes a function in parallel.
+It executes a function in parallel. A returned value is a future as a function that returns a result of the executed function.
 
 ```pen
-go \() number {
+future = go \() number {
   ...
 }
 ```
