@@ -6,7 +6,7 @@ expression: "expression().parse(stream(source,\n                          \"\"))
 ---
 Some(
     ParseError {
-        message: "unexpected )",
+        message: "unexpected `)`",
         expected: [
             "unary operator",
             "go",
@@ -16,7 +16,7 @@ Some(
             "false",
             "true",
             "none",
-            "\"",
+            "`\"`",
             "if-type expression",
             "if-list expression",
             "if expression",
