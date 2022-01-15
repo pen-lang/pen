@@ -12,6 +12,8 @@ done
 
 bundler install
 
+cargo install turtle-build
+
 cd $(dirname $0)/..
 
 export PATH=$PWD/target/release:$PWD/tools:$PATH

@@ -22,7 +22,7 @@ impl app::infra::BuildScriptRunner for NinjaBuildScriptRunner {
     fn run(&self, build_script_file: &app::infra::FilePath) -> Result<(), Box<dyn Error>> {
         // spell-checker:disable
         command_runner::run_command(
-            Command::new("ninja")
+            Command::new("turtle")
                 .arg("-f")
                 .arg(
                     self.file_path_converter

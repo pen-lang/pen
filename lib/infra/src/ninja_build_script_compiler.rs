@@ -67,13 +67,11 @@ impl NinjaBuildScriptCompiler {
             "  description = compiling module of $source_file",
             "rule compile_prelude",
             "  command = pen compile-prelude --target $target $in $out",
-            "  description = compiling module of $source_file",
             "rule compile_test",
             "  command = pen compile-test --target $target $in $out",
-            "  description = compiling test module of $source_file",
+            "  description = compiling module of $source_file",
             "rule compile_package_test_information",
             "  command = pen compile-package-test-information -o $out $in",
-            "  description = compiling package test information",
             "rule llc",
             &format!(
                 "  command = {} -O3 -tailcallopt --relocation-model pic \
@@ -89,7 +87,6 @@ impl NinjaBuildScriptCompiler {
                     ""
                 }
             ),
-            "  description = generating object file for $source_file",
             "rule resolve_dependency",
             &resolve_dependency_command,
             "  description = resolving dependency of $in",
@@ -98,7 +95,7 @@ impl NinjaBuildScriptCompiler {
             "  description = archiving package at $package_directory",
             "rule compile_ffi",
             "  command = $in -t $target $out",
-            "  description = compiling FFI module with script $in",
+            "  description = compiling FFI module at $package_directory",
         ]
         .iter()
         .map(|string| string.to_string())
@@ -269,9 +266,6 @@ impl NinjaBuildScriptCompiler {
         .collect())
     }
 
-    // TODO Remove this hack to circumvent ninja's bug where dynamic dependency files
-    // cannot be specified as inputs together with outputs of the same build rules.
-    // https://github.com/ninja-build/ninja/issues/1988
     fn compile_dependency(
         &self,
         source_file: &std::path::Path,
@@ -284,14 +278,6 @@ impl NinjaBuildScriptCompiler {
             format!(
                 "build {} {}: resolve_dependency {}",
                 dependency_file.display(),
-                ninja_dependency_file.with_extension("dd.dummy").display(),
-                source_file.display(),
-            ),
-            format!("  package_directory = {}", package_directory.display()),
-            format!("  object_file = {}", bit_code_file.display()),
-            format!(
-                "build {} {}: resolve_dependency {}",
-                dependency_file.with_extension("dep.dummy").display(),
                 ninja_dependency_file.display(),
                 source_file.display(),
             ),
@@ -305,13 +291,14 @@ impl NinjaBuildScriptCompiler {
         package_directory: &FilePath,
         archive_file: &FilePath,
     ) -> Result<Vec<String>, Box<dyn Error>> {
+        let package_directory = self
+            .file_path_converter
+            .convert_to_os_path(package_directory);
+
         Ok(
-            if let Some(script) = package_script_finder::find(
-                &self
-                    .file_path_converter
-                    .convert_to_os_path(package_directory),
-                self.ffi_build_script_basename,
-            )? {
+            if let Some(script) =
+                package_script_finder::find(&package_directory, self.ffi_build_script_basename)?
+            {
                 let archive_file = self.file_path_converter.convert_to_os_path(archive_file);
 
                 vec![
@@ -320,6 +307,7 @@ impl NinjaBuildScriptCompiler {
                         archive_file.display(),
                         script.display()
                     ),
+                    format!("  package_directory = {}", package_directory.display()),
                     format!("default {}", archive_file.display()),
                 ]
             } else {
