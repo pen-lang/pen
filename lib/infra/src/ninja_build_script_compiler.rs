@@ -269,9 +269,6 @@ impl NinjaBuildScriptCompiler {
         .collect())
     }
 
-    // TODO Remove this hack to circumvent ninja's bug where dynamic dependency files
-    // cannot be specified as inputs together with outputs of the same build rules.
-    // https://github.com/ninja-build/ninja/issues/1988
     fn compile_dependency(
         &self,
         source_file: &std::path::Path,
@@ -284,14 +281,6 @@ impl NinjaBuildScriptCompiler {
             format!(
                 "build {} {}: resolve_dependency {}",
                 dependency_file.display(),
-                ninja_dependency_file.with_extension("dd.dummy").display(),
-                source_file.display(),
-            ),
-            format!("  package_directory = {}", package_directory.display()),
-            format!("  object_file = {}", bit_code_file.display()),
-            format!(
-                "build {} {}: resolve_dependency {}",
-                dependency_file.with_extension("dep.dummy").display(),
                 ninja_dependency_file.display(),
                 source_file.display(),
             ),
