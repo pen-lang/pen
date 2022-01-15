@@ -41,6 +41,7 @@
     "roadmap",
     "rustc",
     "rustup",
+    "sccache",
     "subninja",
     "subtyping",
     "suspendable",
