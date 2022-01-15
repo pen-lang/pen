@@ -1,5 +1,5 @@
 use super::super::error::CompileError;
-use crate::{compile_context::CompileContext, transformation::record_type_information_compiler};
+use crate::{context::CompileContext, transformation::record_type_information_compiler};
 use hir::{
     analysis::types::{
         type_canonicalizer, type_comparability_checker, type_equality_checker, type_resolver,
@@ -15,7 +15,7 @@ const RHS_NAME: &str = "$rhs";
 
 pub fn transform(
     operation: &EqualityOperation,
-    compile_context: &CompileContext,
+    context: &CompileContext,
 ) -> Result<Expression, CompileError> {
     Ok(if operation.operator() == EqualityOperator::Equal {
         transform_equal_operation(
@@ -23,12 +23,12 @@ pub fn transform(
                 operation
                     .type_()
                     .ok_or_else(|| CompileError::TypeNotInferred(operation.position().clone()))?,
-                compile_context.types(),
+                context.types(),
             )?,
             operation.lhs(),
             operation.rhs(),
             operation.position(),
-            compile_context,
+            context,
         )?
     } else {
         operation.clone().into()
@@ -40,7 +40,7 @@ fn transform_equal_operation(
     lhs: &Expression,
     rhs: &Expression,
     position: &Position,
-    compile_context: &CompileContext,
+    context: &CompileContext,
 ) -> Result<Expression, CompileError> {
     Ok(match type_ {
         Type::Any(_) => return Err(CompileError::AnyEqualOperation(position.clone())),
@@ -65,7 +65,7 @@ fn transform_equal_operation(
         Type::List(list_type) => {
             let element_type = list_type.element();
             let any_list_type = types::Reference::new(
-                &compile_context.configuration()?.list_type.list_type_name,
+                &context.configuration()?.list_type.list_type_name,
                 position.clone(),
             );
 
@@ -91,10 +91,7 @@ fn transform_equal_operation(
                     .into(),
                 ),
                 Variable::new(
-                    &compile_context
-                        .configuration()?
-                        .list_type
-                        .equal_function_name,
+                    &context.configuration()?.list_type.equal_function_name,
                     position.clone(),
                 ),
                 vec![
@@ -119,7 +116,7 @@ fn transform_equal_operation(
                                             &Variable::new(LHS_NAME, position.clone()).into(),
                                             &Variable::new(RHS_NAME, position.clone()).into(),
                                             position,
-                                            compile_context,
+                                            context,
                                         )?,
                                     )],
                                     None,
@@ -149,11 +146,7 @@ fn transform_equal_operation(
         )
         .into(),
         Type::Record(record_type) => {
-            if !type_comparability_checker::check(
-                type_,
-                compile_context.types(),
-                compile_context.records(),
-            )? {
+            if !type_comparability_checker::check(type_, context.types(), context.records())? {
                 return Err(CompileError::InvalidRecordEqualOperation(position.clone()));
             }
 
@@ -184,8 +177,7 @@ fn transform_equal_operation(
         )
         .into(),
         Type::Union(_) => {
-            let member_types =
-                union_type_member_calculator::calculate(type_, compile_context.types())?;
+            let member_types = union_type_member_calculator::calculate(type_, context.types())?;
 
             IfType::new(
                 LHS_NAME,
@@ -206,7 +198,7 @@ fn transform_equal_operation(
                                             if type_equality_checker::check(
                                                 lhs_type,
                                                 rhs_type,
-                                                compile_context.types(),
+                                                context.types(),
                                             )? {
                                                 transform_equal_operation(
                                                     rhs_type,
@@ -215,7 +207,7 @@ fn transform_equal_operation(
                                                     &Variable::new(RHS_NAME, position.clone())
                                                         .into(),
                                                     position,
-                                                    compile_context,
+                                                    context,
                                                 )?
                                             } else {
                                                 Boolean::new(false, position.clone()).into()
@@ -235,11 +227,11 @@ fn transform_equal_operation(
             .into()
         }
         Type::Reference(reference) => transform_equal_operation(
-            &type_resolver::resolve(reference, compile_context.types())?,
+            &type_resolver::resolve(reference, context.types())?,
             lhs,
             rhs,
             position,
-            compile_context,
+            context,
         )?,
     })
 }

@@ -1,6 +1,6 @@
 mod compile_configuration;
-mod compile_context;
 mod concurrency_configuration;
+mod context;
 mod downcast_compiler;
 mod duplicate_function_name_validator;
 mod duplicate_type_name_validator;
@@ -27,7 +27,7 @@ mod type_compiler;
 mod type_extractor;
 mod type_inferrer;
 
-use self::{compile_context::CompileContext, transformation::record_equal_function_transformer};
+use self::{context::CompileContext, transformation::record_equal_function_transformer};
 pub use compile_configuration::CompileConfiguration;
 pub use concurrency_configuration::ConcurrencyConfiguration;
 pub use error::CompileError;
@@ -43,13 +43,10 @@ pub fn compile_main(
     compile_configuration: &CompileConfiguration,
     main_module_configuration: &MainModuleConfiguration,
 ) -> Result<mir::ir::Module, CompileError> {
-    let compile_context = CompileContext::new(module, compile_configuration.clone().into());
-    let module = main_function_compiler::compile(
-        module,
-        compile_context.types(),
-        main_module_configuration,
-    )?;
-    let (module, _) = compile_module(&module, &compile_context)?;
+    let context = CompileContext::new(module, compile_configuration.clone().into());
+    let module =
+        main_function_compiler::compile(module, context.types(), main_module_configuration)?;
+    let (module, _) = compile_module(&module, &context)?;
 
     Ok(module)
 }
@@ -75,38 +72,38 @@ pub fn compile_test(
     compile_configuration: &CompileConfiguration,
     test_module_configuration: &TestModuleConfiguration,
 ) -> Result<(mir::ir::Module, test_info::Module), CompileError> {
-    let compile_context = CompileContext::new(module, compile_configuration.clone().into());
+    let context = CompileContext::new(module, compile_configuration.clone().into());
 
     let (module, test_information) =
-        test_function_compiler::compile(module, &compile_context, test_module_configuration)?;
-    let (module, _) = compile_module(&module, &compile_context)?;
+        test_function_compiler::compile(module, &context, test_module_configuration)?;
+    let (module, _) = compile_module(&module, &context)?;
 
     Ok((module, test_information))
 }
 
 fn compile_module(
     module: &Module,
-    compile_context: &CompileContext,
+    context: &CompileContext,
 ) -> Result<(mir::ir::Module, interface::Module), CompileError> {
     duplicate_function_name_validator::validate(module)?;
     duplicate_type_name_validator::validate(module)?;
     type_existence_validator::validate(
         module,
-        &compile_context.types().keys().cloned().collect(),
-        &compile_context.records().keys().cloned().collect(),
+        &context.types().keys().cloned().collect(),
+        &context.records().keys().cloned().collect(),
     )?;
 
-    let module = record_equal_function_transformer::transform(module, compile_context)?;
-    let module = type_inferrer::infer_types(&module, compile_context)?;
-    type_checker::check_types(&module, compile_context)?;
-    try_operation_validator::validate(&module, compile_context)?;
-    record_field_validator::validate(&module, compile_context)?;
-    let module = type_coercer::coerce_types(&module, compile_context)?;
-    type_checker::check_types(&module, compile_context)?;
+    let module = record_equal_function_transformer::transform(module, context)?;
+    let module = type_inferrer::infer_types(&module, context)?;
+    type_checker::check_types(&module, context)?;
+    try_operation_validator::validate(&module, context)?;
+    record_field_validator::validate(&module, context)?;
+    let module = type_coercer::coerce_types(&module, context)?;
+    type_checker::check_types(&module, context)?;
 
     Ok((
         {
-            let module = module_compiler::compile(&module, compile_context)?;
+            let module = module_compiler::compile(&module, context)?;
             mir::analysis::check_types(&module)?;
             module
         },

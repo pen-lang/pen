@@ -1,12 +1,13 @@
 use std::{error::Error, fmt::Display};
 
-#[allow(clippy::enum_variant_names)]
 #[derive(Debug)]
 pub enum ApplicationError {
+    Build,
     MainFunctionTypeNotFound,
     ModuleNotFound(String),
     PackageNotFound(String),
     SystemPackageNotFound,
+    Test,
 }
 
 impl Error for ApplicationError {}
@@ -14,6 +15,7 @@ impl Error for ApplicationError {}
 impl Display for ApplicationError {
     fn fmt(&self, formatter: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
         match self {
+            Self::Build => write!(formatter, "build failed"),
             Self::MainFunctionTypeNotFound => {
                 write!(formatter, "main function type not found")
             }
@@ -26,6 +28,7 @@ impl Display for ApplicationError {
             Self::SystemPackageNotFound => {
                 write!(formatter, "system package not found")
             }
+            Self::Test => write!(formatter, "test failed"),
         }
     }
 }

@@ -1,5 +1,6 @@
 use crate::{
     common::file_path_resolver,
+    error::ApplicationError,
     infra::{FilePath, Infrastructure},
     package_test_builder, ApplicationConfiguration,
 };
@@ -24,7 +25,8 @@ pub fn run(
         .command_runner
         .run(&file_path_resolver::resolve_test_executable_file(
             output_directory,
-        ))?;
+        ))
+        .map_err(|_| ApplicationError::Test)?;
 
     Ok(())
 }

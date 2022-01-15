@@ -1,4 +1,4 @@
-use super::{compile_context::CompileContext, environment_creator, type_extractor, CompileError};
+use super::{context::CompileContext, environment_creator, type_extractor, CompileError};
 use hir::{
     analysis::types::{type_canonicalizer, type_difference_calculator, union_type_creator},
     ir::*,
@@ -6,10 +6,7 @@ use hir::{
 };
 use std::collections::BTreeMap;
 
-pub fn infer_types(
-    module: &Module,
-    compile_context: &CompileContext,
-) -> Result<Module, CompileError> {
+pub fn infer_types(module: &Module, context: &CompileContext) -> Result<Module, CompileError> {
     let variables = environment_creator::create_from_module(module);
 
     Ok(Module::new(
@@ -20,7 +17,7 @@ pub fn infer_types(
         module
             .definitions()
             .iter()
-            .map(|definition| infer_definition(definition, &variables, compile_context))
+            .map(|definition| infer_definition(definition, &variables, context))
             .collect::<Result<_, _>>()?,
         module.position().clone(),
     ))
@@ -29,12 +26,12 @@ pub fn infer_types(
 fn infer_definition(
     definition: &Definition,
     variables: &BTreeMap<String, Type>,
-    compile_context: &CompileContext,
+    context: &CompileContext,
 ) -> Result<Definition, CompileError> {
     Ok(Definition::new(
         definition.name(),
         definition.original_name(),
-        infer_lambda(definition.lambda(), variables, compile_context)?,
+        infer_lambda(definition.lambda(), variables, context)?,
         definition.foreign_definition_configuration().cloned(),
         definition.is_public(),
         definition.position().clone(),
@@ -44,7 +41,7 @@ fn infer_definition(
 fn infer_lambda(
     lambda: &Lambda,
     variables: &BTreeMap<String, Type>,
-    compile_context: &CompileContext,
+    context: &CompileContext,
 ) -> Result<Lambda, CompileError> {
     Ok(Lambda::new(
         lambda.arguments().to_vec(),
@@ -61,7 +58,7 @@ fn infer_lambda(
                         .map(|argument| (argument.name().into(), argument.type_().clone())),
                 )
                 .collect(),
-            compile_context,
+            context,
         )?,
         lambda.position().clone(),
     ))
@@ -70,10 +67,10 @@ fn infer_lambda(
 fn infer_expression(
     expression: &Expression,
     variables: &BTreeMap<String, Type>,
-    compile_context: &CompileContext,
+    context: &CompileContext,
 ) -> Result<Expression, CompileError> {
     let infer_expression =
-        |expression, variables: &_| infer_expression(expression, variables, compile_context);
+        |expression, variables: &_| infer_expression(expression, variables, context);
 
     Ok(match expression {
         Expression::Call(call) => {
@@ -81,9 +78,7 @@ fn infer_expression(
 
             Call::new(
                 Some(type_extractor::extract_from_expression(
-                    &function,
-                    variables,
-                    compile_context,
+                    &function, variables, context,
                 )?),
                 function.clone(),
                 call.arguments()
@@ -109,8 +104,8 @@ fn infer_expression(
         Expression::IfList(if_) => {
             let list = infer_expression(if_.argument(), variables)?;
             let list_type = type_canonicalizer::canonicalize_list(
-                &type_extractor::extract_from_expression(&list, variables, compile_context)?,
-                compile_context.types(),
+                &type_extractor::extract_from_expression(&list, variables, context)?,
+                context.types(),
             )?
             .ok_or_else(|| CompileError::ListExpected(if_.argument().position().clone()))?;
 
@@ -170,11 +165,7 @@ fn infer_expression(
                 .else_()
                 .map(|branch| -> Result<_, CompileError> {
                     let type_ = type_difference_calculator::calculate(
-                        &type_extractor::extract_from_expression(
-                            &argument,
-                            variables,
-                            compile_context,
-                        )?,
+                        &type_extractor::extract_from_expression(&argument, variables, context)?,
                         &union_type_creator::create(
                             &if_.branches()
                                 .iter()
@@ -183,7 +174,7 @@ fn infer_expression(
                             if_.position(),
                         )
                         .unwrap(),
-                        compile_context.types(),
+                        context.types(),
                     )?
                     .ok_or_else(|| CompileError::UnreachableCode(branch.position().clone()))?;
 
@@ -211,14 +202,11 @@ fn infer_expression(
             )
             .into()
         }
-        Expression::Lambda(lambda) => infer_lambda(lambda, variables, compile_context)?.into(),
+        Expression::Lambda(lambda) => infer_lambda(lambda, variables, context)?.into(),
         Expression::Let(let_) => {
             let bound_expression = infer_expression(let_.bound_expression(), variables)?;
-            let bound_type = type_extractor::extract_from_expression(
-                &bound_expression,
-                variables,
-                compile_context,
-            )?;
+            let bound_type =
+                type_extractor::extract_from_expression(&bound_expression, variables, context)?;
 
             Let::new(
                 let_.name().map(String::from),
@@ -263,7 +251,7 @@ fn infer_expression(
             )
             .into(),
             Operation::Spawn(operation) => SpawnOperation::new(
-                infer_lambda(operation.function(), variables, compile_context)?,
+                infer_lambda(operation.function(), variables, context)?,
                 operation.position().clone(),
             )
             .into(),
@@ -281,16 +269,8 @@ fn infer_expression(
                 EqualityOperation::new(
                     Some(
                         types::Union::new(
-                            type_extractor::extract_from_expression(
-                                &lhs,
-                                variables,
-                                compile_context,
-                            )?,
-                            type_extractor::extract_from_expression(
-                                &rhs,
-                                variables,
-                                compile_context,
-                            )?,
+                            type_extractor::extract_from_expression(&lhs, variables, context)?,
+                            type_extractor::extract_from_expression(&rhs, variables, context)?,
                             operation.position().clone(),
                         )
                         .into(),
@@ -318,7 +298,7 @@ fn infer_expression(
                 let position = operation.position();
                 let expression = infer_expression(operation.expression(), variables)?;
                 let error_type = types::Reference::new(
-                    &compile_context.configuration()?.error_type.error_type_name,
+                    &context.configuration()?.error_type.error_type_name,
                     position.clone(),
                 )
                 .into();
@@ -329,10 +309,10 @@ fn infer_expression(
                             &type_extractor::extract_from_expression(
                                 &expression,
                                 variables,
-                                compile_context,
+                                context,
                             )?,
                             &error_type,
-                            compile_context.types(),
+                            context.types(),
                         )? {
                             if type_.is_any() {
                                 return Err(CompileError::UnionTypeExpected(
@@ -374,9 +354,7 @@ fn infer_expression(
 
             RecordDeconstruction::new(
                 Some(type_extractor::extract_from_expression(
-                    &record,
-                    variables,
-                    compile_context,
+                    &record, variables, context,
                 )?),
                 record,
                 deconstruction.field_name(),
@@ -405,7 +383,7 @@ fn infer_expression(
             Some(type_extractor::extract_from_expression(
                 thunk.expression(),
                 variables,
-                compile_context,
+                context,
             )?),
             infer_expression(thunk.expression(), variables)?,
             thunk.position().clone(),

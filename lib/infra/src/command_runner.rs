@@ -2,7 +2,7 @@ use super::error::InfrastructureError;
 use crate::FilePathConverter;
 use std::{
     error::Error,
-    io::Write,
+    io::{stderr, stdout, Write},
     process::{Command, Stdio},
     sync::Arc,
 };
@@ -38,8 +38,8 @@ pub fn run_command(command: &mut Command) -> Result<String, Box<dyn Error>> {
         return Ok(String::from_utf8(output.stdout)?);
     }
 
-    std::io::stderr().write_all(&output.stdout)?;
-    std::io::stderr().write_all(&output.stderr)?;
+    stdout().write_all(&output.stdout)?;
+    stderr().write_all(&output.stderr)?;
 
     Err(InfrastructureError::CommandExit {
         status_code: output.status.code(),

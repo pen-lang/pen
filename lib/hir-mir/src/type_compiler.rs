@@ -1,21 +1,17 @@
-use super::{compile_context::CompileContext, CompileError};
+use super::{context::CompileContext, CompileError};
 use hir::{
     analysis::types::{type_canonicalizer, type_id_calculator},
     types::{self, Type},
 };
 use std::collections::BTreeMap;
 
-pub fn compile(
-    type_: &Type,
-    compile_context: &CompileContext,
-) -> Result<mir::types::Type, CompileError> {
+pub fn compile(type_: &Type, context: &CompileContext) -> Result<mir::types::Type, CompileError> {
     Ok(
-        match type_canonicalizer::canonicalize(type_, compile_context.types())? {
+        match type_canonicalizer::canonicalize(type_, context.types())? {
             Type::Boolean(_) => mir::types::Type::Boolean,
-            Type::Function(function) => compile_function(&function, compile_context)?.into(),
+            Type::Function(function) => compile_function(&function, context)?.into(),
             Type::List(_) => {
-                mir::types::Record::new(&compile_context.configuration()?.list_type.list_type_name)
-                    .into()
+                mir::types::Record::new(&context.configuration()?.list_type.list_type_name).into()
             }
             Type::None(_) => mir::types::Type::None,
             Type::Number(_) => mir::types::Type::Number,
@@ -29,9 +25,9 @@ pub fn compile(
 
 pub fn compile_function(
     function: &types::Function,
-    compile_context: &CompileContext,
+    context: &CompileContext,
 ) -> Result<mir::types::Function, CompileError> {
-    let compile = |type_| compile(type_, compile_context);
+    let compile = |type_| compile(type_, context);
 
     Ok(mir::types::Function::new(
         function

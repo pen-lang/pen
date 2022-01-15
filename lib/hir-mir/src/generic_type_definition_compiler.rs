@@ -1,4 +1,4 @@
-use super::{compile_context::CompileContext, type_compiler, CompileError};
+use super::{context::CompileContext, type_compiler, CompileError};
 use hir::{
     analysis::{
         ir::expression_visitor,
@@ -11,11 +11,11 @@ use std::collections::{BTreeMap, BTreeSet};
 
 pub fn compile(
     module: &Module,
-    compile_context: &CompileContext,
+    context: &CompileContext,
 ) -> Result<Vec<mir::ir::TypeDefinition>, CompileError> {
-    Ok(collect_types(module, compile_context.types())?
+    Ok(collect_types(module, context.types())?
         .into_iter()
-        .map(|type_| compile_type_definition(&type_, compile_context))
+        .map(|type_| compile_type_definition(&type_, context))
         .collect::<Result<Vec<_>, _>>()?
         .into_iter()
         .flatten()
@@ -24,21 +24,21 @@ pub fn compile(
 
 fn compile_type_definition(
     type_: &Type,
-    compile_context: &CompileContext,
+    context: &CompileContext,
 ) -> Result<Option<mir::ir::TypeDefinition>, CompileError> {
     Ok(match type_ {
         Type::Function(function_type) => Some(mir::ir::TypeDefinition::new(
-            type_compiler::compile_concrete_function_name(function_type, compile_context.types())?,
+            type_compiler::compile_concrete_function_name(function_type, context.types())?,
             mir::types::RecordBody::new(vec![type_compiler::compile_function(
                 function_type,
-                compile_context,
+                context,
             )?
             .into()]),
         )),
         Type::List(list_type) => Some(mir::ir::TypeDefinition::new(
-            type_compiler::compile_concrete_list_name(list_type, compile_context.types())?,
+            type_compiler::compile_concrete_list_name(list_type, context.types())?,
             mir::types::RecordBody::new(vec![mir::types::Record::new(
-                &compile_context.configuration()?.list_type.list_type_name,
+                &context.configuration()?.list_type.list_type_name,
             )
             .into()]),
         )),
@@ -101,7 +101,7 @@ mod tests {
             types::None::new(Position::fake()),
             Position::fake(),
         );
-        let compile_context = CompileContext::dummy(Default::default(), Default::default());
+        let context = CompileContext::dummy(Default::default(), Default::default());
 
         assert_eq!(
             compile(
@@ -120,17 +120,14 @@ mod tests {
                     ),
                     false,
                 )]),
-                &compile_context,
+                &context,
             ),
             Ok(vec![mir::ir::TypeDefinition::new(
-                type_compiler::compile_concrete_function_name(
-                    &function_type,
-                    compile_context.types()
-                )
-                .unwrap(),
+                type_compiler::compile_concrete_function_name(&function_type, context.types())
+                    .unwrap(),
                 mir::types::RecordBody::new(vec![type_compiler::compile_function(
                     &function_type,
-                    &compile_context
+                    &context
                 )
                 .unwrap()
                 .into()]),
@@ -146,7 +143,7 @@ mod tests {
             types::None::new(Position::fake()),
             Position::fake(),
         );
-        let compile_context = CompileContext::dummy(Default::default(), Default::default());
+        let context = CompileContext::dummy(Default::default(), Default::default());
 
         assert_eq!(
             compile(
@@ -165,17 +162,12 @@ mod tests {
                     ),
                     false,
                 )]),
-                &compile_context,
+                &context,
             ),
             Ok(vec![mir::ir::TypeDefinition::new(
-                type_compiler::compile_concrete_list_name(&list_type, compile_context.types())
-                    .unwrap(),
+                type_compiler::compile_concrete_list_name(&list_type, context.types()).unwrap(),
                 mir::types::RecordBody::new(vec![mir::types::Record::new(
-                    &compile_context
-                        .configuration()
-                        .unwrap()
-                        .list_type
-                        .list_type_name
+                    &context.configuration().unwrap().list_type.list_type_name
                 )
                 .into()]),
             )])
@@ -190,7 +182,7 @@ mod tests {
             types::None::new(Position::fake()),
             Position::fake(),
         );
-        let compile_context = CompileContext::dummy(Default::default(), Default::default());
+        let context = CompileContext::dummy(Default::default(), Default::default());
         let definition = Definition::fake(
             "foo",
             Lambda::new(
@@ -210,17 +202,12 @@ mod tests {
         assert_eq!(
             compile(
                 &Module::empty().set_definitions(vec![definition.clone(), definition]),
-                &compile_context,
+                &context,
             ),
             Ok(vec![mir::ir::TypeDefinition::new(
-                type_compiler::compile_concrete_list_name(&list_type, compile_context.types())
-                    .unwrap(),
+                type_compiler::compile_concrete_list_name(&list_type, context.types()).unwrap(),
                 mir::types::RecordBody::new(vec![mir::types::Record::new(
-                    &compile_context
-                        .configuration()
-                        .unwrap()
-                        .list_type
-                        .list_type_name
+                    &context.configuration().unwrap().list_type.list_type_name
                 )
                 .into()]),
             )])
@@ -230,7 +217,7 @@ mod tests {
     #[test]
     fn collect_type_from_if_type() {
         let list_type = types::List::new(types::None::new(Position::fake()), Position::fake());
-        let compile_context = CompileContext::dummy(Default::default(), Default::default());
+        let context = CompileContext::dummy(Default::default(), Default::default());
 
         assert_eq!(
             compile(
@@ -253,17 +240,12 @@ mod tests {
                     ),
                     false,
                 )]),
-                &compile_context,
+                &context,
             ),
             Ok(vec![mir::ir::TypeDefinition::new(
-                type_compiler::compile_concrete_list_name(&list_type, compile_context.types())
-                    .unwrap(),
+                type_compiler::compile_concrete_list_name(&list_type, context.types()).unwrap(),
                 mir::types::RecordBody::new(vec![mir::types::Record::new(
-                    &compile_context
-                        .configuration()
-                        .unwrap()
-                        .list_type
-                        .list_type_name
+                    &context.configuration().unwrap().list_type.list_type_name
                 )
                 .into()]),
             )])
@@ -272,16 +254,12 @@ mod tests {
 
     #[test]
     fn collect_type_from_try_operation() {
-        let compile_context = CompileContext::dummy(Default::default(), Default::default());
+        let context = CompileContext::dummy(Default::default(), Default::default());
         let list_type = types::List::new(types::None::new(Position::fake()), Position::fake());
         let union_type = types::Union::new(
             list_type.clone(),
             types::Record::new(
-                &compile_context
-                    .configuration()
-                    .unwrap()
-                    .error_type
-                    .error_type_name,
+                &context.configuration().unwrap().error_type.error_type_name,
                 Position::fake(),
             ),
             Position::fake(),
@@ -303,17 +281,12 @@ mod tests {
                     ),
                     false,
                 )]),
-                &compile_context,
+                &context,
             ),
             Ok(vec![mir::ir::TypeDefinition::new(
-                type_compiler::compile_concrete_list_name(&list_type, compile_context.types())
-                    .unwrap(),
+                type_compiler::compile_concrete_list_name(&list_type, context.types()).unwrap(),
                 mir::types::RecordBody::new(vec![mir::types::Record::new(
-                    &compile_context
-                        .configuration()
-                        .unwrap()
-                        .list_type
-                        .list_type_name
+                    &context.configuration().unwrap().list_type.list_type_name
                 )
                 .into()]),
             )])
@@ -322,7 +295,7 @@ mod tests {
 
     #[test]
     fn collect_type_from_list_literal() {
-        let compile_context = CompileContext::dummy(Default::default(), Default::default());
+        let context = CompileContext::dummy(Default::default(), Default::default());
         let list_type = types::List::new(types::None::new(Position::fake()), Position::fake());
         let union_type = types::Union::new(
             list_type.clone(),
@@ -348,17 +321,12 @@ mod tests {
                     ),
                     false,
                 )]),
-                &compile_context,
+                &context,
             ),
             Ok(vec![mir::ir::TypeDefinition::new(
-                type_compiler::compile_concrete_list_name(&list_type, compile_context.types())
-                    .unwrap(),
+                type_compiler::compile_concrete_list_name(&list_type, context.types()).unwrap(),
                 mir::types::RecordBody::new(vec![mir::types::Record::new(
-                    &compile_context
-                        .configuration()
-                        .unwrap()
-                        .list_type
-                        .list_type_name
+                    &context.configuration().unwrap().list_type.list_type_name
                 )
                 .into()]),
             )])

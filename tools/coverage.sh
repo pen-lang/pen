@@ -6,8 +6,10 @@ set -e
 
 prepare_unit_test
 
-rustup install nightly
-rustup component add --toolchain nightly llvm-tools-preview
+toolchain=nightly-2021-12-20
+
+rustup install $toolchain
+rustup component add --toolchain $toolchain llvm-tools-preview
 
 cargo install cargo-llvm-cov
-cargo llvm-cov --workspace --lcov --output-path lcov.info
+cargo +$toolchain llvm-cov --workspace --lcov --output-path lcov.info

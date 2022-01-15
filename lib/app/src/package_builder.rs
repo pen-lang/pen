@@ -1,6 +1,7 @@
 use super::application_configuration::ApplicationConfiguration;
 use crate::{
     common::file_path_resolver,
+    error::ApplicationError,
     external_package_topological_sorter,
     infra::{FilePath, Infrastructure},
     package_build_script_compiler,
@@ -65,7 +66,8 @@ pub fn build(
             output_directory,
             target_triple,
             &child_build_script_files,
-        )?)?;
+        )?)
+        .map_err(|_| ApplicationError::Build)?;
 
     Ok(())
 }

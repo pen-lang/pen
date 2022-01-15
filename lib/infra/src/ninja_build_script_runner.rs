@@ -23,6 +23,7 @@ impl app::infra::BuildScriptRunner for NinjaBuildScriptRunner {
         // spell-checker:disable
         command_runner::run_command(
             Command::new("turtle")
+                .arg("--quiet")
                 .arg("-f")
                 .arg(
                     self.file_path_converter
