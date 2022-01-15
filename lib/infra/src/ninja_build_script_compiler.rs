@@ -67,13 +67,11 @@ impl NinjaBuildScriptCompiler {
             "  description = compiling module of $source_file",
             "rule compile_prelude",
             "  command = pen compile-prelude --target $target $in $out",
-            "  description = compiling module of $source_file",
             "rule compile_test",
             "  command = pen compile-test --target $target $in $out",
-            "  description = compiling test module of $source_file",
+            "  description = compiling module of $source_file",
             "rule compile_package_test_information",
             "  command = pen compile-package-test-information -o $out $in",
-            "  description = compiling package test information",
             "rule llc",
             &format!(
                 "  command = {} -O3 -tailcallopt --relocation-model pic \
@@ -89,7 +87,6 @@ impl NinjaBuildScriptCompiler {
                     ""
                 }
             ),
-            "  description = generating object file for $source_file",
             "rule resolve_dependency",
             &resolve_dependency_command,
             "  description = resolving dependency of $in",
@@ -98,7 +95,7 @@ impl NinjaBuildScriptCompiler {
             "  description = archiving package at $package_directory",
             "rule compile_ffi",
             "  command = $in -t $target $out",
-            "  description = compiling FFI module with script $in",
+            "  description = compiling FFI module at $package_directory",
         ]
         .iter()
         .map(|string| string.to_string())
@@ -308,6 +305,12 @@ impl NinjaBuildScriptCompiler {
                         "build {}: compile_ffi {}",
                         archive_file.display(),
                         script.display()
+                    ),
+                    format!(
+                        "  package_directory = {}",
+                        self.file_path_converter
+                            .convert_to_os_path(package_directory)
+                            .display()
                     ),
                     format!("default {}", archive_file.display()),
                 ]
