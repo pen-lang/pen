@@ -30,6 +30,7 @@
     "intrinsics",
     "itertools",
     "koka",
+    "lcov",
     "malloc",
     "modifiability",
     "mtriple",
