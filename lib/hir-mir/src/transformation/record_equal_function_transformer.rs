@@ -1,23 +1,20 @@
 use crate::{
-    compile_context::CompileContext, transformation::record_type_information_compiler, CompileError,
+    context::CompileContext, transformation::record_type_information_compiler, CompileError,
 };
 use hir::{analysis::types::type_comparability_checker, ir::*, types};
 
 const LHS_NAME: &str = "$lhs";
 const RHS_NAME: &str = "$rhs";
 
-pub fn transform(
-    module: &Module,
-    compile_context: &CompileContext,
-) -> Result<Module, CompileError> {
+pub fn transform(module: &Module, context: &CompileContext) -> Result<Module, CompileError> {
     let mut equal_function_definitions = vec![];
     let mut equal_function_declarations = vec![];
 
     for type_definition in module.type_definitions() {
         if !type_comparability_checker::check(
             &types::Record::new(type_definition.name(), type_definition.position().clone()).into(),
-            compile_context.types(),
-            compile_context.records(),
+            context.types(),
+            context.records(),
         )? {
             continue;
         }
@@ -26,8 +23,8 @@ pub fn transform(
             && type_comparability_checker::check(
                 &types::Record::new(type_definition.name(), type_definition.position().clone())
                     .into(),
-                compile_context.types(),
-                compile_context.records(),
+                context.types(),
+                context.records(),
             )?
         {
             equal_function_declarations.push(compile_equal_function_declaration(type_definition));

@@ -1,5 +1,5 @@
 use super::{error::CompileError, test_module_configuration::TestModuleConfiguration};
-use crate::compile_context::CompileContext;
+use crate::context::CompileContext;
 use hir::{ir::*, types};
 use std::{
     collections::hash_map::DefaultHasher,
@@ -10,7 +10,7 @@ const TEST_FUNCTION_WRAPPER_SUFFIX: &str = "__wrapper";
 
 pub fn compile(
     module: &Module,
-    compile_context: &CompileContext,
+    context: &CompileContext,
     configuration: &TestModuleConfiguration,
 ) -> Result<(Module, test_info::Module), CompileError> {
     let position = module.position();
@@ -45,10 +45,7 @@ pub fn compile(
                                     types::Union::new(
                                         types::None::new(position.clone()),
                                         types::Record::new(
-                                            &compile_context
-                                                .configuration()?
-                                                .error_type
-                                                .error_type_name,
+                                            &context.configuration()?.error_type.error_type_name,
                                             position.clone(),
                                         ),
                                         position.clone(),

@@ -1,25 +1,19 @@
 use super::{
-    compile_context::CompileContext, expression_compiler, generic_type_definition_compiler,
-    type_compiler, CompileError,
+    context::CompileContext, expression_compiler, generic_type_definition_compiler, type_compiler,
+    CompileError,
 };
 use crate::spawn_function_declaration_compiler;
 use hir::ir::*;
 
-pub fn compile(
-    module: &Module,
-    compile_context: &CompileContext,
-) -> Result<mir::ir::Module, CompileError> {
+pub fn compile(module: &Module, context: &CompileContext) -> Result<mir::ir::Module, CompileError> {
     Ok(mir::ir::Module::new(
         module
             .type_definitions()
             .iter()
-            .map(|type_definition| compile_type_definition(type_definition, compile_context))
+            .map(|type_definition| compile_type_definition(type_definition, context))
             .collect::<Result<Vec<_>, _>>()?
             .into_iter()
-            .chain(generic_type_definition_compiler::compile(
-                module,
-                compile_context,
-            )?)
+            .chain(generic_type_definition_compiler::compile(module, context)?)
             .collect(),
         module
             .foreign_declarations()
@@ -28,7 +22,7 @@ pub fn compile(
                 Ok(mir::ir::ForeignDeclaration::new(
                     declaration.name(),
                     declaration.foreign_name(),
-                    type_compiler::compile(declaration.type_(), compile_context)?
+                    type_compiler::compile(declaration.type_(), context)?
                         .into_function()
                         .ok_or_else(|| {
                             CompileError::FunctionExpected(declaration.position().clone())
@@ -36,7 +30,7 @@ pub fn compile(
                     compile_calling_convention(declaration.calling_convention()),
                 ))
             })
-            .chain(compile_context.configuration().ok().map(|configuration| {
+            .chain(context.configuration().ok().map(|configuration| {
                 Ok(spawn_function_declaration_compiler::compile(
                     &configuration.concurrency,
                 ))
@@ -60,12 +54,12 @@ pub fn compile(
         module
             .declarations()
             .iter()
-            .map(|declaration| compile_declaration(declaration, compile_context))
+            .map(|declaration| compile_declaration(declaration, context))
             .collect::<Result<_, _>>()?,
         module
             .definitions()
             .iter()
-            .map(|definition| compile_definition(definition, compile_context))
+            .map(|definition| compile_definition(definition, context))
             .collect::<Result<Vec<_>, CompileError>>()?,
     ))
 }
@@ -79,7 +73,7 @@ fn compile_calling_convention(calling_convention: CallingConvention) -> mir::ir:
 
 fn compile_type_definition(
     type_definition: &TypeDefinition,
-    compile_context: &CompileContext,
+    context: &CompileContext,
 ) -> Result<mir::ir::TypeDefinition, CompileError> {
     Ok(mir::ir::TypeDefinition::new(
         type_definition.name(),
@@ -87,7 +81,7 @@ fn compile_type_definition(
             type_definition
                 .fields()
                 .iter()
-                .map(|field| type_compiler::compile(field.type_(), compile_context))
+                .map(|field| type_compiler::compile(field.type_(), context))
                 .collect::<Result<_, _>>()?,
         ),
     ))
@@ -95,20 +89,20 @@ fn compile_type_definition(
 
 fn compile_declaration(
     declaration: &Declaration,
-    compile_context: &CompileContext,
+    context: &CompileContext,
 ) -> Result<mir::ir::Declaration, CompileError> {
     Ok(mir::ir::Declaration::new(
         declaration.name(),
-        type_compiler::compile_function(declaration.type_(), compile_context)?,
+        type_compiler::compile_function(declaration.type_(), context)?,
     ))
 }
 
 fn compile_definition(
     definition: &Definition,
-    compile_context: &CompileContext,
+    context: &CompileContext,
 ) -> Result<mir::ir::Definition, CompileError> {
-    let body = expression_compiler::compile(definition.lambda().body(), compile_context)?;
-    let result_type = type_compiler::compile(definition.lambda().result_type(), compile_context)?;
+    let body = expression_compiler::compile(definition.lambda().body(), context)?;
+    let result_type = type_compiler::compile(definition.lambda().result_type(), context)?;
 
     Ok(mir::ir::Definition::new(
         definition.name(),
@@ -119,7 +113,7 @@ fn compile_definition(
             .map(|argument| -> Result<_, CompileError> {
                 Ok(mir::ir::Argument::new(
                     argument.name(),
-                    type_compiler::compile(argument.type_(), compile_context)?,
+                    type_compiler::compile(argument.type_(), context)?,
                 ))
             })
             .collect::<Result<_, _>>()?,

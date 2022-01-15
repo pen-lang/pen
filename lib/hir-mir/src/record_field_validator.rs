@@ -1,21 +1,21 @@
-use super::{compile_context::CompileContext, CompileError};
+use super::{context::CompileContext, CompileError};
 use hir::{
     analysis::{ir::expression_visitor, types::type_canonicalizer},
     ir::*,
 };
 use std::collections::BTreeSet;
 
-pub fn validate(module: &Module, compile_context: &CompileContext) -> Result<(), CompileError> {
+pub fn validate(module: &Module, context: &CompileContext) -> Result<(), CompileError> {
     let open_records = collect_open_records(module.type_definitions());
 
     for expression in collect_expressions(module) {
         match expression {
             Expression::RecordConstruction(construction) => {
-                let record_type = type_canonicalizer::canonicalize_record(
-                    construction.type_(),
-                    compile_context.types(),
-                )?
-                .ok_or_else(|| CompileError::RecordExpected(construction.position().clone()))?;
+                let record_type =
+                    type_canonicalizer::canonicalize_record(construction.type_(), context.types())?
+                        .ok_or_else(|| {
+                            CompileError::RecordExpected(construction.position().clone())
+                        })?;
 
                 if !open_records.contains(record_type.name()) {
                     return Err(CompileError::RecordFieldPrivate(
@@ -28,7 +28,7 @@ pub fn validate(module: &Module, compile_context: &CompileContext) -> Result<(),
                     deconstruction.type_().ok_or_else(|| {
                         CompileError::TypeNotInferred(deconstruction.position().clone())
                     })?,
-                    compile_context.types(),
+                    context.types(),
                 )?
                 .ok_or_else(|| CompileError::RecordExpected(deconstruction.position().clone()))?;
 
@@ -39,11 +39,9 @@ pub fn validate(module: &Module, compile_context: &CompileContext) -> Result<(),
                 }
             }
             Expression::RecordUpdate(update) => {
-                let record_type = type_canonicalizer::canonicalize_record(
-                    update.type_(),
-                    compile_context.types(),
-                )?
-                .ok_or_else(|| CompileError::RecordExpected(update.position().clone()))?;
+                let record_type =
+                    type_canonicalizer::canonicalize_record(update.type_(), context.types())?
+                        .ok_or_else(|| CompileError::RecordExpected(update.position().clone()))?;
 
                 if !open_records.contains(record_type.name()) {
                     return Err(CompileError::RecordFieldPrivate(update.position().clone()));

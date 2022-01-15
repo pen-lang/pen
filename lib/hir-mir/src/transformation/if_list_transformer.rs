@@ -1,5 +1,5 @@
 use super::super::error::CompileError;
-use crate::{compile_context::CompileContext, downcast_compiler};
+use crate::{context::CompileContext, downcast_compiler};
 use hir::{
     analysis::types::type_equality_checker,
     ir::*,
@@ -8,11 +8,8 @@ use hir::{
 
 const FIRST_REST_NAME: &str = "$firstRest";
 
-pub fn transform(
-    if_: &IfList,
-    compile_context: &CompileContext,
-) -> Result<Expression, CompileError> {
-    let configuration = &compile_context.configuration()?.list_type;
+pub fn transform(if_: &IfList, context: &CompileContext) -> Result<Expression, CompileError> {
+    let configuration = &context.configuration()?.list_type;
     let position = if_.position();
 
     let element_type = if_
@@ -63,11 +60,7 @@ pub fn transform(
                             position.clone(),
                         );
 
-                        if type_equality_checker::check(
-                            element_type,
-                            &any_type,
-                            compile_context.types(),
-                        )? {
+                        if type_equality_checker::check(element_type, &any_type, context.types())? {
                             Expression::from(first)
                         } else {
                             Let::new(
@@ -87,7 +80,7 @@ pub fn transform(
                                             position.clone(),
                                         )
                                         .into(),
-                                        compile_context,
+                                        context,
                                     )?,
                                     position.clone(),
                                 ),
