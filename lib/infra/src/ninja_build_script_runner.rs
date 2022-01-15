@@ -24,6 +24,7 @@ impl app::infra::BuildScriptRunner for NinjaBuildScriptRunner {
         command_runner::run_command(
             Command::new("turtle")
                 .arg("-f")
+                .arg("--quiet")
                 .arg(
                     self.file_path_converter
                         .convert_to_os_path(build_script_file),
