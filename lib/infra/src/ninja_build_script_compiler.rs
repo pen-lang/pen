@@ -291,13 +291,14 @@ impl NinjaBuildScriptCompiler {
         package_directory: &FilePath,
         archive_file: &FilePath,
     ) -> Result<Vec<String>, Box<dyn Error>> {
+        let package_directory = self
+            .file_path_converter
+            .convert_to_os_path(package_directory);
+
         Ok(
-            if let Some(script) = package_script_finder::find(
-                &self
-                    .file_path_converter
-                    .convert_to_os_path(package_directory),
-                self.ffi_build_script_basename,
-            )? {
+            if let Some(script) =
+                package_script_finder::find(&package_directory, self.ffi_build_script_basename)?
+            {
                 let archive_file = self.file_path_converter.convert_to_os_path(archive_file);
 
                 vec![
@@ -306,12 +307,7 @@ impl NinjaBuildScriptCompiler {
                         archive_file.display(),
                         script.display()
                     ),
-                    format!(
-                        "  package_directory = {}",
-                        self.file_path_converter
-                            .convert_to_os_path(package_directory)
-                            .display()
-                    ),
+                    format!("  package_directory = {}", package_directory.display()),
                     format!("default {}", archive_file.display()),
                 ]
             } else {
