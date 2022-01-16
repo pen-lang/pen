@@ -81,7 +81,11 @@ impl FilePath {
 
 impl Display for FilePath {
     fn fmt(&self, formatter: &mut Formatter) -> fmt::Result {
-        write!(formatter, "{}", "/".to_owned() + &self.components.join("/"))
+        if self.components.is_empty() {
+            write!(formatter, ".")
+        } else {
+            write!(formatter, "{}", &self.components.join("/"))
+        }
     }
 }
 
