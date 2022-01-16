@@ -1,5 +1,9 @@
 pub const BUILD_CONFIGURATION_FILENAME: &str = "pen.json";
+pub const OUTPUT_DIRECTORY: &str = ".pen";
+pub const DEFAULT_TARGET_DIRECTORY: &str = "default";
+pub const DEPENDENCY_FILE_EXTENSION: &str = "d";
 pub const BIT_CODE_FILE_EXTENSION: &str = "bc";
+pub const NINJA_DYNAMIC_DEPENDENCY_FILE_EXTENSION: &str = "ninja";
 
 pub const LANGUAGE_ROOT_SCHEME: &str = "pen";
 pub const LANGUAGE_ROOT_ENVIRONMENT_VARIABLE: &str = "PEN_ROOT";
@@ -19,6 +23,3 @@ pub const FILE_PATH_CONFIGURATION: app::infra::FilePathConfiguration =
         build_script_file_extension: "ninja",
         test_file_extension: "test.pen",
     };
-
-pub const OUTPUT_DIRECTORY: &str = ".pen";
-pub const DEFAULT_TARGET_DIRECTORY: &str = "default";
