@@ -92,10 +92,10 @@ impl NinjaBuildScriptCompiler {
             "  description = resolving dependency of $source_file",
             "rule ar",
             &format!("  command = {} crs $out $in", ar.display()),
-            "  description = archiving package at $package_directory",
+            "  description = archiving package of $package_directory",
             "rule compile_ffi",
             "  command = $in -t $target $out",
-            "  description = compiling FFI module at $package_directory",
+            "  description = compiling FFI module in $package_directory",
         ]
         .iter()
         .map(|string| string.to_string())
