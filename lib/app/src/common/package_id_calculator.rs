@@ -1,12 +1,12 @@
-use std::{
-    collections::hash_map::DefaultHasher,
-    hash::{Hash, Hasher},
-};
+use once_cell::sync::Lazy;
+use regex::Regex;
+
+const REPLACEMENT_STRING: &str = "_";
+
+static REPLACEMENT_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"[:/\\]+").unwrap());
 
 pub fn calculate(url: &url::Url) -> String {
-    let mut hasher = DefaultHasher::new();
-
-    url.hash(&mut hasher);
-
-    format!("{:x}", hasher.finish())
+    REPLACEMENT_REGEX
+        .replace(&format!("{}", url), REPLACEMENT_STRING)
+        .into()
 }
