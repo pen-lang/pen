@@ -9,5 +9,9 @@ pub fn calculate(source_file: &FilePath) -> String {
 
     source_file.hash(&mut hasher);
 
-    format!("{:x}", hasher.finish())
+    format!(
+        "{}_{:x}",
+        source_file.with_extension("").components().last().unwrap(),
+        hasher.finish()
+    )
 }
