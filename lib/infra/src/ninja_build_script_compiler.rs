@@ -141,16 +141,12 @@ impl NinjaBuildScriptCompiler {
                         ninja_dependency_file.display()
                     ),
                     format!("  dyndep = {}", ninja_dependency_file.display()),
-                    format!(
-                        "  source_file = {}",
-                        self.file_path_displayer.display(target.source_file())
-                    ),
+                    format!("  source_file = {}", target.source_file()),
                     format!(
                         "build {}: llc {}",
                         object_file.display(),
                         bit_code_file.display(),
                     ),
-                    format!("  source_file = {}", source_file.display()),
                 ]
                 .into_iter()
                 .chain(self.compile_dependency(
@@ -199,16 +195,12 @@ impl NinjaBuildScriptCompiler {
                         ninja_dependency_file.display()
                     ),
                     format!("  dyndep = {}", ninja_dependency_file.display()),
-                    format!(
-                        "  source_file = {}",
-                        self.file_path_displayer.display(target.source_file())
-                    ),
+                    format!("  source_file = {}", target.source_file()),
                     format!(
                         "build {}: llc {}",
                         object_file.display(),
                         bit_code_file.display(),
                     ),
-                    format!("  source_file = {}", source_file.display()),
                 ]
                 .into_iter()
                 .chain(self.compile_dependency(
@@ -255,16 +247,12 @@ impl NinjaBuildScriptCompiler {
                 main_function_interface_file.display()
             ),
             format!("  dyndep = {}", ninja_dependency_file.display()),
-            format!(
-                "  source_file = {}",
-                self.file_path_displayer.display(target.source_file())
-            ),
+            format!("  source_file = {}", target.source_file()),
             format!(
                 "build {}: llc {}",
                 object_file.display(),
                 bit_code_file.display(),
             ),
-            format!("  source_file = {}", source_file.display()),
         ]
         .into_iter()
         .chain(
@@ -300,10 +288,7 @@ impl NinjaBuildScriptCompiler {
             ),
             format!("  package_directory = {}", package_directory.display()),
             format!("  object_file = {}", bit_code_file.display()),
-            format!(
-                "  source_file = {}",
-                self.file_path_displayer.display(original_source_file)
-            ),
+            format!("  source_file = {}", original_source_file),
         ]
     }
 
@@ -328,10 +313,7 @@ impl NinjaBuildScriptCompiler {
                         archive_file.display(),
                         script.display()
                     ),
-                    format!(
-                        "  package_directory = {}",
-                        self.file_path_displayer.display(original_package_directory)
-                    ),
+                    format!("  package_directory = {}", original_package_directory),
                     format!("default {}", archive_file.display()),
                 ]
             } else {
@@ -363,10 +345,7 @@ impl NinjaBuildScriptCompiler {
                     .collect::<Vec<_>>()
                     .join(" ")
             ),
-            format!(
-                "  package_directory = {}",
-                self.file_path_displayer.display(package_directory)
-            ),
+            format!("  package_directory = {}", package_directory),
             format!("default {}", archive_file.display()),
         ])
     }
@@ -624,13 +603,11 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
                         interface_file.display(),
                         source_file.display(),
                     ),
-                    format!("  source_file = {}", source_file.display()),
                     format!(
                         "build {}: llc {}",
                         object_file.display(),
                         bit_code_file.display(),
                     ),
-                    format!("  source_file = {}", source_file.display()),
                 ]
             })
             .chain(
