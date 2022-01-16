@@ -8,6 +8,8 @@ use std::{error::Error, sync::Arc};
 pub struct NinjaBuildScriptCompiler {
     file_path_converter: Arc<FilePathConverter>,
     bit_code_file_extension: &'static str,
+    dependency_file_extension: &'static str,
+    ninja_dynamic_dependency_file_extension: &'static str,
     ffi_build_script_basename: &'static str,
     link_script_basename: &'static str,
 }
@@ -16,12 +18,16 @@ impl NinjaBuildScriptCompiler {
     pub fn new(
         file_path_converter: Arc<FilePathConverter>,
         bit_code_file_extension: &'static str,
+        dependency_file_extension: &'static str,
+        ninja_dynamic_dependency_file_extension: &'static str,
         ffi_build_script_basename: &'static str,
         link_script_basename: &'static str,
     ) -> Self {
         Self {
             file_path_converter,
             bit_code_file_extension,
+            dependency_file_extension,
+            ninja_dynamic_dependency_file_extension,
             ffi_build_script_basename,
             link_script_basename,
         }
@@ -123,8 +129,9 @@ impl NinjaBuildScriptCompiler {
                 let object_file = self
                     .file_path_converter
                     .convert_to_os_path(target.object_file());
-                let dependency_file = object_file.with_extension("dep");
-                let ninja_dependency_file = object_file.with_extension("dd");
+                let dependency_file = object_file.with_extension(self.dependency_file_extension);
+                let ninja_dependency_file =
+                    object_file.with_extension(self.ninja_dynamic_dependency_file_extension);
                 let bit_code_file = object_file.with_extension(self.bit_code_file_extension);
 
                 vec![
@@ -177,8 +184,9 @@ impl NinjaBuildScriptCompiler {
                 let object_file = self
                     .file_path_converter
                     .convert_to_os_path(target.object_file());
-                let dependency_file = object_file.with_extension("dep");
-                let ninja_dependency_file = object_file.with_extension("dd");
+                let dependency_file = object_file.with_extension(self.dependency_file_extension);
+                let ninja_dependency_file =
+                    object_file.with_extension(self.ninja_dynamic_dependency_file_extension);
                 let bit_code_file = object_file.with_extension(self.bit_code_file_extension);
 
                 vec![
@@ -222,8 +230,9 @@ impl NinjaBuildScriptCompiler {
         let object_file = self
             .file_path_converter
             .convert_to_os_path(target.object_file());
-        let dependency_file = object_file.with_extension("dep");
-        let ninja_dependency_file = object_file.with_extension("dd");
+        let dependency_file = object_file.with_extension(self.dependency_file_extension);
+        let ninja_dependency_file =
+            object_file.with_extension(self.ninja_dynamic_dependency_file_extension);
         let bit_code_file = object_file.with_extension(self.bit_code_file_extension);
         let main_function_interface_file = self
             .file_path_converter
