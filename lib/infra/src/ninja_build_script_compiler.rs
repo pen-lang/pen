@@ -1,14 +1,12 @@
 use super::file_path_converter::FilePathConverter;
 use crate::{
-    default_target_finder, llvm_command_finder, package_script_finder, FilePathDisplayer,
-    InfrastructureError,
+    default_target_finder, llvm_command_finder, package_script_finder, InfrastructureError,
 };
-use app::infra::{FilePath, FilePathDisplayer as _};
+use app::infra::FilePath;
 use std::{error::Error, sync::Arc};
 
 pub struct NinjaBuildScriptCompiler {
     file_path_converter: Arc<FilePathConverter>,
-    file_path_displayer: Arc<FilePathDisplayer>,
     bit_code_file_extension: &'static str,
     ffi_build_script_basename: &'static str,
     link_script_basename: &'static str,
@@ -17,14 +15,12 @@ pub struct NinjaBuildScriptCompiler {
 impl NinjaBuildScriptCompiler {
     pub fn new(
         file_path_converter: Arc<FilePathConverter>,
-        file_path_displayer: Arc<FilePathDisplayer>,
         bit_code_file_extension: &'static str,
         ffi_build_script_basename: &'static str,
         link_script_basename: &'static str,
     ) -> Self {
         Self {
             file_path_converter,
-            file_path_displayer,
             bit_code_file_extension,
             ffi_build_script_basename,
             link_script_basename,
