@@ -10,9 +10,14 @@ pub fn create(
     main_package_directory: impl AsRef<Path>,
 ) -> Result<app::infra::Infrastructure, Box<dyn Error>> {
     let file_system = Arc::new(infra::FileSystem::new(file_path_converter.clone()));
+    let file_path_displayer = Arc::new(infra::FilePathDisplayer::new(
+        file_path_converter.clone(),
+        main_package_directory,
+    ));
 
     let build_script_compiler = Arc::new(infra::NinjaBuildScriptCompiler::new(
         file_path_converter.clone(),
+        file_path_displayer.clone(),
         BIT_CODE_FILE_EXTENSION,
         FFI_BUILD_SCRIPT_BASENAME,
         LINK_SCRIPT_BASENAME,
@@ -29,10 +34,7 @@ pub fn create(
             LANGUAGE_ROOT_ENVIRONMENT_VARIABLE,
         )),
         file_system: file_system.clone(),
-        file_path_displayer: Arc::new(infra::FilePathDisplayer::new(
-            file_path_converter.clone(),
-            main_package_directory,
-        )),
+        file_path_displayer,
         file_path_configuration: FILE_PATH_CONFIGURATION.clone().into(),
         build_script_runner: Arc::new(infra::NinjaBuildScriptRunner::new(
             file_path_converter.clone(),

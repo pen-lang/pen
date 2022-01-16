@@ -1,12 +1,14 @@
 use super::file_path_converter::FilePathConverter;
 use crate::{
-    default_target_finder, llvm_command_finder, package_script_finder, InfrastructureError,
+    default_target_finder, llvm_command_finder, package_script_finder, FilePathDisplayer,
+    InfrastructureError,
 };
-use app::infra::FilePath;
+use app::infra::{FilePath, FilePathDisplayer as _};
 use std::{error::Error, sync::Arc};
 
 pub struct NinjaBuildScriptCompiler {
     file_path_converter: Arc<FilePathConverter>,
+    file_path_displayer: Arc<FilePathDisplayer>,
     bit_code_file_extension: &'static str,
     ffi_build_script_basename: &'static str,
     link_script_basename: &'static str,
@@ -15,12 +17,14 @@ pub struct NinjaBuildScriptCompiler {
 impl NinjaBuildScriptCompiler {
     pub fn new(
         file_path_converter: Arc<FilePathConverter>,
+        file_path_displayer: Arc<FilePathDisplayer>,
         bit_code_file_extension: &'static str,
         ffi_build_script_basename: &'static str,
         link_script_basename: &'static str,
     ) -> Self {
         Self {
             file_path_converter,
+            file_path_displayer,
             bit_code_file_extension,
             ffi_build_script_basename,
             link_script_basename,
@@ -89,7 +93,7 @@ impl NinjaBuildScriptCompiler {
             ),
             "rule resolve_dependency",
             &resolve_dependency_command,
-            "  description = resolving dependency of $in",
+            "  description = resolving dependency of $source_file",
             "rule ar",
             &format!("  command = {} crs $out $in", ar.display()),
             "  description = archiving package at $package_directory",
@@ -137,7 +141,10 @@ impl NinjaBuildScriptCompiler {
                         ninja_dependency_file.display()
                     ),
                     format!("  dyndep = {}", ninja_dependency_file.display()),
-                    format!("  source_file = {}", source_file.display()),
+                    format!(
+                        "  source_file = {}",
+                        self.file_path_displayer.display(target.source_file())
+                    ),
                     format!(
                         "build {}: llc {}",
                         object_file.display(),
@@ -152,6 +159,7 @@ impl NinjaBuildScriptCompiler {
                     &dependency_file,
                     &ninja_dependency_file,
                     &package_directory,
+                    target.source_file(),
                 ))
             })
             .chain(self.compile_ffi_build(package_directory, ffi_archive_file)?)
@@ -191,7 +199,10 @@ impl NinjaBuildScriptCompiler {
                         ninja_dependency_file.display()
                     ),
                     format!("  dyndep = {}", ninja_dependency_file.display()),
-                    format!("  source_file = {}", source_file.display()),
+                    format!(
+                        "  source_file = {}",
+                        self.file_path_displayer.display(target.source_file())
+                    ),
                     format!(
                         "build {}: llc {}",
                         object_file.display(),
@@ -206,6 +217,7 @@ impl NinjaBuildScriptCompiler {
                     &dependency_file,
                     &ninja_dependency_file,
                     &package_directory,
+                    target.source_file(),
                 ))
             })
             .collect())
@@ -213,21 +225,21 @@ impl NinjaBuildScriptCompiler {
 
     fn compile_main_module_target(
         &self,
-        main_module_target: &app::infra::MainModuleTarget,
+        target: &app::infra::MainModuleTarget,
         package_directory: &FilePath,
     ) -> Result<Vec<String>, Box<dyn Error>> {
         let source_file = self
             .file_path_converter
-            .convert_to_os_path(main_module_target.source_file());
+            .convert_to_os_path(target.source_file());
         let object_file = self
             .file_path_converter
-            .convert_to_os_path(main_module_target.object_file());
+            .convert_to_os_path(target.object_file());
         let dependency_file = object_file.with_extension("dep");
         let ninja_dependency_file = object_file.with_extension("dd");
         let bit_code_file = object_file.with_extension(self.bit_code_file_extension);
         let main_function_interface_file = self
             .file_path_converter
-            .convert_to_os_path(main_module_target.main_function_interface_file());
+            .convert_to_os_path(target.main_function_interface_file());
 
         Ok(vec![
             format!(
@@ -243,7 +255,10 @@ impl NinjaBuildScriptCompiler {
                 main_function_interface_file.display()
             ),
             format!("  dyndep = {}", ninja_dependency_file.display()),
-            format!("  source_file = {}", source_file.display()),
+            format!(
+                "  source_file = {}",
+                self.file_path_displayer.display(target.source_file())
+            ),
             format!(
                 "build {}: llc {}",
                 object_file.display(),
@@ -261,6 +276,7 @@ impl NinjaBuildScriptCompiler {
                 &self
                     .file_path_converter
                     .convert_to_os_path(package_directory),
+                target.source_file(),
             ),
         )
         .collect())
@@ -273,6 +289,7 @@ impl NinjaBuildScriptCompiler {
         dependency_file: &std::path::Path,
         ninja_dependency_file: &std::path::Path,
         package_directory: &std::path::Path,
+        original_source_file: &FilePath,
     ) -> Vec<String> {
         vec![
             format!(
@@ -283,17 +300,21 @@ impl NinjaBuildScriptCompiler {
             ),
             format!("  package_directory = {}", package_directory.display()),
             format!("  object_file = {}", bit_code_file.display()),
+            format!(
+                "  source_file = {}",
+                self.file_path_displayer.display(original_source_file)
+            ),
         ]
     }
 
     fn compile_ffi_build(
         &self,
-        package_directory: &FilePath,
+        original_package_directory: &FilePath,
         archive_file: &FilePath,
     ) -> Result<Vec<String>, Box<dyn Error>> {
         let package_directory = self
             .file_path_converter
-            .convert_to_os_path(package_directory);
+            .convert_to_os_path(original_package_directory);
 
         Ok(
             if let Some(script) =
@@ -307,7 +328,10 @@ impl NinjaBuildScriptCompiler {
                         archive_file.display(),
                         script.display()
                     ),
-                    format!("  package_directory = {}", package_directory.display()),
+                    format!(
+                        "  package_directory = {}",
+                        self.file_path_displayer.display(original_package_directory)
+                    ),
                     format!("default {}", archive_file.display()),
                 ]
             } else {
@@ -341,9 +365,7 @@ impl NinjaBuildScriptCompiler {
             ),
             format!(
                 "  package_directory = {}",
-                self.file_path_converter
-                    .convert_to_os_path(package_directory)
-                    .display()
+                self.file_path_displayer.display(package_directory)
             ),
             format!("default {}", archive_file.display()),
         ])
@@ -520,7 +542,7 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
                     ))?
                     .display(),
             ),
-            "  description = linking application at $out".into(),
+            "  description = linking application".into(),
             format!(
                 "build {}: link {}",
                 application_file.display(),
@@ -551,7 +573,7 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
         Ok(vec![
             "rule link".into(),
             "  command = pen link-test -o $out -i $in".into(),
-            "  description = linking tests at $out".into(),
+            "  description = linking tests".into(),
             format!(
                 "build {}: link {} {}",
                 test_file.display(),
