@@ -264,6 +264,7 @@ fn compile_expression(expression: &ast::Expression) -> Result<ir::Expression, Co
             list.position().clone(),
         )
         .into(),
+        ast::Expression::ListComprehension(_) => todo!(),
         ast::Expression::None(none) => ir::None::new(none.position().clone()).into(),
         ast::Expression::Number(number) => {
             ir::Number::new(number.value(), number.position().clone()).into()
