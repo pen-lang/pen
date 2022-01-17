@@ -470,6 +470,7 @@ fn atomic_expression<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
             if_().map(Expression::from),
             lambda().map(Expression::from),
             record().map(Expression::from),
+            list_comprehension().map(Expression::from),
             list_literal().map(Expression::from),
             boolean_literal().map(Expression::from),
             none_literal().map(Expression::from),
@@ -683,6 +684,22 @@ fn list_element<'a>() -> impl Parser<Stream<'a>, Output = ListElement> {
         expression().map(ListElement::Single),
         sign("...").with(expression()).map(ListElement::Multiple),
     ))
+}
+
+fn list_comprehension<'a>() -> impl Parser<Stream<'a>, Output = ListComprehension> {
+    (
+        attempt((position(), sign("["), type_(), expression(), keyword("for"))),
+        identifier(),
+        keyword("in"),
+        expression(),
+        sign("]"),
+    )
+        .map(
+            |((position, _, type_, element, _), element_name, _, list, _)| {
+                ListComprehension::new(type_, element, element_name, list, position)
+            },
+        )
+        .expected("list literal")
 }
 
 fn variable<'a>() -> impl Parser<Stream<'a>, Output = Variable> {
@@ -2666,6 +2683,25 @@ mod tests {
             ] {
                 assert_eq!(
                     expression().parse(stream(source, "")).unwrap().0,
+                    target.into()
+                );
+            }
+        }
+
+        #[test]
+        fn parse_list_comprehension() {
+            for (source, target) in vec![(
+                "[none x for x in xs]",
+                ListComprehension::new(
+                    types::None::new(Position::fake()),
+                    Variable::new("x", Position::fake()),
+                    "x",
+                    Variable::new("xs", Position::fake()),
+                    Position::fake(),
+                ),
+            )] {
+                assert_eq!(
+                    list_comprehension().parse(stream(source, "")).unwrap().0,
                     target.into()
                 );
             }
