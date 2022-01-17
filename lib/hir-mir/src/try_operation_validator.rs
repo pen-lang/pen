@@ -75,7 +75,10 @@ fn validate_expression(
                 )?;
             }
         }
-        Expression::ListComprehension(_) => todo!(),
+        Expression::ListComprehension(comprehension) => {
+            validate_expression(comprehension.element(), None, context)?;
+            validate_expression(comprehension.list(), None, context)?;
+        }
         Expression::Operation(operation) => match operation {
             Operation::Arithmetic(operation) => {
                 validate(operation.lhs())?;
@@ -359,6 +362,88 @@ mod tests {
                                     )
                                     .into()
                                 )],
+                                Position::fake()
+                            ),
+                            Position::fake(),
+                        ),
+                        false,
+                    )])
+            ),
+            Err(CompileError::TryOperationInList(Position::fake()))
+        );
+    }
+
+    #[test]
+    fn fail_to_validate_element_of_list_comprehension() {
+        assert_eq!(
+            validate_module(
+                &Module::empty()
+                    .set_type_definitions(vec![TypeDefinition::fake(
+                        "error",
+                        vec![],
+                        false,
+                        false,
+                        false
+                    )])
+                    .set_definitions(vec![Definition::fake(
+                        "x",
+                        Lambda::new(
+                            vec![],
+                            types::Function::new(
+                                vec![],
+                                types::None::new(Position::fake()),
+                                Position::fake()
+                            ),
+                            ListComprehension::new(
+                                types::None::new(Position::fake()),
+                                TryOperation::new(
+                                    None,
+                                    Variable::new("x", Position::fake()),
+                                    Position::fake(),
+                                ),
+                                "x",
+                                Variable::new("xs", Position::fake()),
+                                Position::fake()
+                            ),
+                            Position::fake(),
+                        ),
+                        false,
+                    )])
+            ),
+            Err(CompileError::TryOperationInList(Position::fake()))
+        );
+    }
+
+    #[test]
+    fn fail_to_validate_list_of_list_comprehension() {
+        assert_eq!(
+            validate_module(
+                &Module::empty()
+                    .set_type_definitions(vec![TypeDefinition::fake(
+                        "error",
+                        vec![],
+                        false,
+                        false,
+                        false
+                    )])
+                    .set_definitions(vec![Definition::fake(
+                        "x",
+                        Lambda::new(
+                            vec![],
+                            types::Function::new(
+                                vec![],
+                                types::None::new(Position::fake()),
+                                Position::fake()
+                            ),
+                            ListComprehension::new(
+                                types::None::new(Position::fake()),
+                                None::new(Position::fake()),
+                                "x",
+                                TryOperation::new(
+                                    None,
+                                    Variable::new("xs", Position::fake()),
+                                    Position::fake(),
+                                ),
                                 Position::fake()
                             ),
                             Position::fake(),
