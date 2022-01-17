@@ -37,6 +37,7 @@
     "optind",
     "petgraph",
     "realloc",
+    "recursivity",
     "renamer",
     "repr",
     "roadmap",
