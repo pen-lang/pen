@@ -1,10 +1,12 @@
 mod error;
 mod operations;
 mod parsers;
+mod stream;
 
 use combine::Parser;
 pub use error::ParseError;
-use parsers::{module, stream};
+use parsers::module;
+use stream::stream;
 
 pub fn parse(source: &str, path: &str) -> Result<ast::Module, ParseError> {
     module()

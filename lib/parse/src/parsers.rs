@@ -1,19 +1,19 @@
+use crate::stream::Stream;
+
 use super::operations::*;
 use ast::{
     types::{self, Type},
     *,
 };
 use combine::{
-    attempt, choice, easy, from_str, look_ahead, many, many1, none_of, one_of, optional,
+    attempt, choice, from_str, look_ahead, many, many1, none_of, one_of, optional,
     parser::{
         char::{alpha_num, char as character, digit, letter, space, spaces, string},
         combinator::{lazy, no_partial, not_followed_by},
         regex::find,
         sequence::between,
     },
-    sep_end_by, sep_end_by1,
-    stream::{self, position::SourcePosition, state},
-    unexpected_any, value, Parser, Positioned,
+    sep_end_by, sep_end_by1, unexpected_any, value, Parser, Positioned,
 };
 use once_cell::sync::Lazy;
 use position::Position;
@@ -38,25 +38,6 @@ static NUMBER_REGEX: Lazy<regex::Regex> =
 static STRING_REGEX: Lazy<regex::Regex> = Lazy::new(|| regex::Regex::new(r#"^[^\\"]"#).unwrap());
 static HEX_CHARACTER_REGEX: Lazy<regex::Regex> =
     Lazy::new(|| regex::Regex::new("[0-9a-fA-F][0-9a-fA-F]").unwrap());
-
-pub struct State<'a> {
-    path: String,
-    lines: Vec<&'a str>,
-}
-
-pub type Stream<'a> =
-    easy::Stream<state::Stream<stream::position::Stream<&'a str, SourcePosition>, State<'a>>>;
-
-pub fn stream<'a>(source: &'a str, path: &str) -> Stream<'a> {
-    state::Stream {
-        stream: stream::position::Stream::new(source),
-        state: State {
-            path: path.into(),
-            lines: source.split('\n').collect(),
-        },
-    }
-    .into()
-}
 
 pub fn module<'a>() -> impl Parser<Stream<'a>, Output = Module> {
     (
@@ -812,6 +793,7 @@ fn comment<'a>() -> impl Parser<Stream<'a>, Output = ()> {
 mod tests {
     use super::*;
     use crate::error::ParseError;
+    use crate::stream::stream;
     use position::test::PositionFake;
     use pretty_assertions::assert_eq;
 
