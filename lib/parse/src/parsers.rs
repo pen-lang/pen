@@ -2702,7 +2702,7 @@ mod tests {
             )] {
                 assert_eq!(
                     list_comprehension().parse(stream(source, "")).unwrap().0,
-                    target.into()
+                    target
                 );
             }
         }
