@@ -1,6 +1,5 @@
-use crate::stream::Stream;
-
 use super::operations::*;
+use crate::stream::Stream;
 use ast::{
     types::{self, Type},
     *,
@@ -23,7 +22,7 @@ const BUILT_IN_LITERALS: &[&str] = &["false", "none", "true"];
 const BUILT_IN_TYPES: &[&str] = &["any", "boolean", "none", "number", "string"];
 static KEYWORDS: Lazy<Vec<&str>> = Lazy::new(|| {
     [
-        "as", "else", "export", "foreign", "go", "if", "import", "type",
+        "as", "else", "export", "for", "foreign", "go", "if", "in", "import", "type",
     ]
     .iter()
     .chain(BUILT_IN_LITERALS)
