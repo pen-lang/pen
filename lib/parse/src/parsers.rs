@@ -2690,16 +2690,33 @@ mod tests {
 
         #[test]
         fn parse_list_comprehension() {
-            for (source, target) in vec![(
-                "[none x for x in xs]",
-                ListComprehension::new(
-                    types::None::new(Position::fake()),
-                    Variable::new("x", Position::fake()),
-                    "x",
-                    Variable::new("xs", Position::fake()),
-                    Position::fake(),
+            for (source, target) in vec![
+                (
+                    "[none x for x in xs]",
+                    ListComprehension::new(
+                        types::None::new(Position::fake()),
+                        Variable::new("x", Position::fake()),
+                        "x",
+                        Variable::new("xs", Position::fake()),
+                        Position::fake(),
+                    ),
                 ),
-            )] {
+                (
+                    "[number x + 42 for x in xs]",
+                    ListComprehension::new(
+                        types::Number::new(Position::fake()),
+                        BinaryOperation::new(
+                            BinaryOperator::Add,
+                            Variable::new("x", Position::fake()),
+                            Number::new(42.0, Position::fake()),
+                            Position::fake(),
+                        ),
+                        "x",
+                        Variable::new("xs", Position::fake()),
+                        Position::fake(),
+                    ),
+                ),
+            ] {
                 assert_eq!(
                     list_comprehension().parse(stream(source, "")).unwrap().0,
                     target
