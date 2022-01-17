@@ -243,7 +243,34 @@ fn check_expression(
 
             types::List::new(list.type_().clone(), list.position().clone()).into()
         }
-        Expression::ListComprehension(_) => todo!(),
+        Expression::ListComprehension(comprehension) => {
+            let list_type = type_canonicalizer::canonicalize_list(
+                &check_expression(comprehension.list(), variables)?,
+                context.types(),
+            )?
+            .ok_or_else(|| CompileError::ListExpected(comprehension.list().position().clone()))?;
+
+            check_subsumption(
+                &check_expression(
+                    comprehension.element(),
+                    &variables
+                        .clone()
+                        .into_iter()
+                        .chain([(
+                            comprehension.element_name().into(),
+                            list_type.element().clone(),
+                        )])
+                        .collect(),
+                )?,
+                comprehension.type_(),
+            )?;
+
+            types::List::new(
+                comprehension.type_().clone(),
+                comprehension.position().clone(),
+            )
+            .into()
+        }
         Expression::None(none) => types::None::new(none.position().clone()).into(),
         Expression::Number(number) => types::Number::new(number.position().clone()).into(),
         Expression::Operation(operation) => check_operation(operation, variables, context)?,
@@ -1945,6 +1972,27 @@ mod tests {
                         vec![ListElement::Multiple(
                             Variable::new("x", Position::fake()).into(),
                         )],
+                        Position::fake(),
+                    ),
+                    Position::fake(),
+                ),
+                false,
+            )]))
+            .unwrap();
+        }
+
+        #[test]
+        fn check_list_comprehension() {
+            check_module(&Module::empty().set_definitions(vec![Definition::fake(
+                "f",
+                Lambda::new(
+                    vec![],
+                    types::List::new(types::None::new(Position::fake()), Position::fake()),
+                    ListComprehension::new(
+                        types::None::new(Position::fake()),
+                        Variable::new("x", Position::fake()),
+                        "x",
+                        List::new(types::None::new(Position::fake()), vec![], Position::fake()),
                         Position::fake(),
                     ),
                     Position::fake(),
