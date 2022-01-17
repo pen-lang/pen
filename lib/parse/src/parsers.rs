@@ -792,8 +792,7 @@ fn comment<'a>() -> impl Parser<Stream<'a>, Output = ()> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::error::ParseError;
-    use crate::stream::stream;
+    use crate::{error::ParseError, stream::stream};
     use position::test::PositionFake;
     use pretty_assertions::assert_eq;
 
