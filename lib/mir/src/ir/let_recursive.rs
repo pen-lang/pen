@@ -14,7 +14,7 @@ use std::sync::Arc;
 //     used in function calls inside the functions themselves.
 //     - This is safe because only global function definitions can be
 //       recursive.
-// - This resursivity is necessary to compile "anonymous" loops in HIR effectively.
+// - This resursion is necessary to compile "anonymous" loops in HIR effectively.
 //   - e.g. list comprehension
 #[derive(Clone, Debug, PartialEq)]
 pub struct LetRecursive {
