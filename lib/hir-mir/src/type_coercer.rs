@@ -270,6 +270,7 @@ fn transform_expression(
             list.position().clone(),
         )
         .into(),
+        Expression::ListComprehension(_) => todo!(),
         Expression::Operation(operation) => match operation {
             Operation::Arithmetic(operation) => ArithmeticOperation::new(
                 operation.operator(),

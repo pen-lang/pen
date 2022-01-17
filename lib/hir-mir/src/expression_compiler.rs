@@ -114,6 +114,7 @@ pub fn compile(
             list,
             &context.configuration()?.list_type,
         ))?,
+        Expression::ListComprehension(_) => todo!(),
         Expression::None(_) => mir::ir::Expression::None,
         Expression::Number(number) => mir::ir::Expression::Number(number.value()),
         Expression::Operation(operation) => compile_operation(operation, context)?,

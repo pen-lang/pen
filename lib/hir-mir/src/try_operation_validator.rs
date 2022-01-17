@@ -75,6 +75,7 @@ fn validate_expression(
                 )?;
             }
         }
+        Expression::ListComprehension(_) => todo!(),
         Expression::Operation(operation) => match operation {
             Operation::Arithmetic(operation) => {
                 validate(operation.lhs())?;

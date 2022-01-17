@@ -212,6 +212,14 @@ fn transform_expression(expression: &Expression, transform: &impl Fn(&Type) -> T
             list.position().clone(),
         )
         .into(),
+        Expression::ListComprehension(comprehension) => ListComprehension::new(
+            transform(comprehension.type_()),
+            transform_expression(comprehension.element(), transform),
+            comprehension.element_name(),
+            transform_expression(comprehension.list(), transform),
+            comprehension.position().clone(),
+        )
+        .into(),
         Expression::Operation(operation) => transform_operation(operation, transform).into(),
         Expression::RecordConstruction(construction) => RecordConstruction::new(
             transform(construction.type_()),

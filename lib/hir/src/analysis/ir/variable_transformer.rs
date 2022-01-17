@@ -149,6 +149,20 @@ fn transform_expression(
             list.position().clone(),
         )
         .into(),
+        Expression::ListComprehension(comprehension) => ListComprehension::new(
+            comprehension.type_().clone(),
+            transform_expression(comprehension.element(), &|variable| {
+                if comprehension.element_name() == variable.name() {
+                    variable.clone().into()
+                } else {
+                    transform(variable)
+                }
+            }),
+            comprehension.element_name(),
+            transform_expression(comprehension.list(), transform),
+            comprehension.position().clone(),
+        )
+        .into(),
         Expression::Operation(operation) => transform_operation(operation, transform).into(),
         Expression::RecordConstruction(construction) => RecordConstruction::new(
             construction.type_().clone(),
@@ -371,6 +385,35 @@ mod tests {
                     None,
                     None::new(Position::fake()),
                     Variable::new("x", Position::fake()),
+                    Position::fake(),
+                ),
+                Position::fake(),
+            ),
+            false,
+        )]);
+
+        assert_eq!(
+            transform(&module, &|variable| if variable.name() == "x" {
+                Variable::new("y", variable.position().clone()).into()
+            } else {
+                variable.clone().into()
+            }),
+            module
+        );
+    }
+
+    #[test]
+    fn do_not_transform_shadowed_variable_in_list_comprehension() {
+        let module = Module::empty().set_definitions(vec![Definition::fake(
+            "x",
+            Lambda::new(
+                vec![],
+                types::None::new(Position::fake()),
+                ListComprehension::new(
+                    types::None::new(Position::fake()),
+                    Variable::new("x", Position::fake()),
+                    "x",
+                    Variable::new("xs", Position::fake()),
                     Position::fake(),
                 ),
                 Position::fake(),
