@@ -244,11 +244,10 @@ fn check_expression(
             types::List::new(list.type_().clone(), list.position().clone()).into()
         }
         Expression::ListComprehension(comprehension) => {
-            let list_type = type_canonicalizer::canonicalize_list(
-                &check_expression(comprehension.list(), variables)?,
-                context.types(),
-            )?
-            .ok_or_else(|| CompileError::ListExpected(comprehension.list().position().clone()))?;
+            let position = comprehension.position();
+            let input_type = comprehension
+                .input_type()
+                .ok_or_else(|| CompileError::TypeNotInferred(position.clone()))?;
 
             check_subsumption(
                 &check_expression(
@@ -258,18 +257,15 @@ fn check_expression(
                         .into_iter()
                         .chain([(
                             comprehension.element_name().into(),
-                            list_type.element().clone(),
+                            types::Function::new(vec![], input_type.clone(), position.clone())
+                                .into(),
                         )])
                         .collect(),
                 )?,
                 comprehension.output_type(),
             )?;
 
-            types::List::new(
-                comprehension.output_type().clone(),
-                comprehension.position().clone(),
-            )
-            .into()
+            types::List::new(comprehension.output_type().clone(), position.clone()).into()
         }
         Expression::None(none) => types::None::new(none.position().clone()).into(),
         Expression::Number(number) => types::Number::new(number.position().clone()).into(),
@@ -1993,7 +1989,16 @@ mod tests {
                     ListComprehension::new(
                         Some(element_type.clone().into()),
                         element_type.clone(),
-                        Variable::new("x", Position::fake()),
+                        Call::new(
+                            Some(types::Function::new(
+                                vec![],
+                                element_type.clone(),
+                                Position::fake(),
+                            ).into()),
+                            Variable::new("x", Position::fake()),
+                            vec![],
+                            Position::fake(),
+                        ),
                         "x",
                         List::new(element_type, vec![], Position::fake()),
                         Position::fake(),

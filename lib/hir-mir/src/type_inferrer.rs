@@ -260,7 +260,12 @@ fn infer_expression(
                         .into_iter()
                         .chain([(
                             comprehension.element_name().into(),
-                            list_type.element().clone(),
+                            types::Function::new(
+                                vec![],
+                                list_type.element().clone(),
+                                comprehension.position().clone(),
+                            )
+                            .into(),
                         )])
                         .collect(),
                 )?,
@@ -655,7 +660,12 @@ mod tests {
                         Let::new(
                             Some("y".into()),
                             None,
-                            Variable::new("x", Position::fake()),
+                            Call::new(
+                                None,
+                                Variable::new("x", Position::fake()),
+                                vec![],
+                                Position::fake()
+                            ),
                             Variable::new("y", Position::fake()),
                             Position::fake(),
                         ),
@@ -678,7 +688,19 @@ mod tests {
                         Let::new(
                             Some("y".into()),
                             Some(element_type.clone().into()),
-                            Variable::new("x", Position::fake()),
+                            Call::new(
+                                Some(
+                                    types::Function::new(
+                                        vec![],
+                                        element_type.clone(),
+                                        Position::fake()
+                                    )
+                                    .into()
+                                ),
+                                Variable::new("x", Position::fake()),
+                                vec![],
+                                Position::fake()
+                            ),
                             Variable::new("y", Position::fake()),
                             Position::fake(),
                         ),

@@ -271,11 +271,10 @@ fn transform_expression(
         )
         .into(),
         Expression::ListComprehension(comprehension) => {
-            let list_type = type_canonicalizer::canonicalize_list(
-                &type_extractor::extract_from_expression(comprehension.list(), variables, context)?,
-                context.types(),
-            )?
-            .ok_or_else(|| CompileError::ListExpected(comprehension.list().position().clone()))?;
+            let position = comprehension.position();
+            let input_type = comprehension
+                .input_type()
+                .ok_or_else(|| CompileError::TypeNotInferred(position.clone()))?;
 
             ListComprehension::new(
                 comprehension.input_type().cloned(),
@@ -288,13 +287,14 @@ fn transform_expression(
                         .into_iter()
                         .chain([(
                             comprehension.element_name().into(),
-                            list_type.element().clone(),
+                            types::Function::new(vec![], input_type.clone(), position.clone())
+                                .into(),
                         )])
                         .collect(),
                 )?,
                 comprehension.element_name(),
                 transform_expression(comprehension.list(), variables)?,
-                comprehension.position().clone(),
+                position.clone(),
             )
             .into()
         }
@@ -992,7 +992,7 @@ mod tests {
                     vec![],
                     list_type.clone(),
                     ListComprehension::new(
-                        None,
+                        Some(types::None::new(Position::fake()).into()),
                         union_type.clone(),
                         None::new(Position::fake()),
                         "x",
@@ -1009,7 +1009,7 @@ mod tests {
                     vec![],
                     list_type,
                     ListComprehension::new(
-                        None,
+                        Some(types::None::new(Position::fake()).into()),
                         union_type.clone(),
                         TypeCoercion::new(
                             types::None::new(Position::fake()),
@@ -1045,9 +1045,18 @@ mod tests {
                     vec![],
                     list_type.clone(),
                     ListComprehension::new(
-                        None,
+                        Some(types::None::new(Position::fake()).into()),
                         union_type.clone(),
-                        Variable::new("x", Position::fake()),
+                        Call::new(
+                            Some(types::Function::new(
+                                vec![],
+                                types::None::new(Position::fake()),
+                                Position::fake(),
+                            ).into()),
+                            Variable::new("x", Position::fake()),
+                            vec![],
+                            Position::fake(),
+                        ),
                         "x",
                         empty_list.clone(),
                         Position::fake(),
@@ -1062,12 +1071,24 @@ mod tests {
                     vec![],
                     list_type,
                     ListComprehension::new(
-                        None,
+                        Some(types::None::new(Position::fake()).into()),
                         union_type.clone(),
                         TypeCoercion::new(
                             types::None::new(Position::fake()),
                             union_type,
-                            Variable::new("x", Position::fake()),
+                            Call::new(
+                                Some(
+                                    types::Function::new(
+                                        vec![],
+                                        types::None::new(Position::fake()),
+                                        Position::fake(),
+                                    )
+                                    .into()
+                                ),
+                                Variable::new("x", Position::fake()),
+                                vec![],
+                                Position::fake(),
+                            ),
                             Position::fake(),
                         ),
                         "x",
