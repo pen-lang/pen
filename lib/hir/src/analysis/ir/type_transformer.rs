@@ -213,7 +213,8 @@ fn transform_expression(expression: &Expression, transform: &impl Fn(&Type) -> T
         )
         .into(),
         Expression::ListComprehension(comprehension) => ListComprehension::new(
-            transform(comprehension.type_()),
+            comprehension.input_type().map(transform),
+            transform(comprehension.output_type()),
             transform_expression(comprehension.element(), transform),
             comprehension.element_name(),
             transform_expression(comprehension.list(), transform),

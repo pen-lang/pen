@@ -278,10 +278,11 @@ fn transform_expression(
             .ok_or_else(|| CompileError::ListExpected(comprehension.list().position().clone()))?;
 
             ListComprehension::new(
-                comprehension.type_().clone(),
+                comprehension.input_type().cloned(),
+                comprehension.output_type().clone(),
                 transform_and_coerce_expression(
                     comprehension.element(),
-                    comprehension.type_(),
+                    comprehension.output_type(),
                     &variables
                         .clone()
                         .into_iter()
@@ -991,6 +992,7 @@ mod tests {
                     vec![],
                     list_type.clone(),
                     ListComprehension::new(
+                        None,
                         union_type.clone(),
                         None::new(Position::fake()),
                         "x",
@@ -1007,6 +1009,7 @@ mod tests {
                     vec![],
                     list_type,
                     ListComprehension::new(
+                        None,
                         union_type.clone(),
                         TypeCoercion::new(
                             types::None::new(Position::fake()),
@@ -1042,6 +1045,7 @@ mod tests {
                     vec![],
                     list_type.clone(),
                     ListComprehension::new(
+                        None,
                         union_type.clone(),
                         Variable::new("x", Position::fake()),
                         "x",
@@ -1058,6 +1062,7 @@ mod tests {
                     vec![],
                     list_type,
                     ListComprehension::new(
+                        None,
                         union_type.clone(),
                         TypeCoercion::new(
                             types::None::new(Position::fake()),

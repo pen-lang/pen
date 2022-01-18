@@ -5,7 +5,8 @@ use std::sync::Arc;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct ListComprehension {
-    type_: Type,
+    input_type: Option<Type>,
+    output_type: Type,
     element: Arc<Expression>,
     element_name: String,
     list: Arc<Expression>,
@@ -14,14 +15,16 @@ pub struct ListComprehension {
 
 impl ListComprehension {
     pub fn new(
-        type_: impl Into<Type>,
+        input_type: Option<Type>,
+        output_type: impl Into<Type>,
         element: impl Into<Expression>,
         element_name: impl Into<String>,
         list: impl Into<Expression>,
         position: Position,
     ) -> Self {
         Self {
-            type_: type_.into(),
+            input_type,
+            output_type: output_type.into(),
             element: element.into().into(),
             element_name: element_name.into(),
             list: list.into().into(),
@@ -29,8 +32,12 @@ impl ListComprehension {
         }
     }
 
-    pub fn type_(&self) -> &Type {
-        &self.type_
+    pub fn input_type(&self) -> Option<&Type> {
+        self.input_type.as_ref()
+    }
+
+    pub fn output_type(&self) -> &Type {
+        &self.output_type
     }
 
     pub fn element(&self) -> &Expression {

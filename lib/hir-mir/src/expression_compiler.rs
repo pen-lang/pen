@@ -120,7 +120,7 @@ pub fn compile(
 
             let position = comprehension.position();
             let input_element_type: Type = todo!("input_element_type");
-            let output_element_type = comprehension.type_();
+            let output_element_type = comprehension.output_type();
             let list_type = type_compiler::compile_list(context)?;
 
             mir::ir::LetRecursive::new(

@@ -110,7 +110,7 @@ pub fn extract_from_expression(
             types::List::new(list.type_().clone(), list.position().clone()).into()
         }
         Expression::ListComprehension(comprehension) => types::List::new(
-            comprehension.type_().clone(),
+            comprehension.output_type().clone(),
             comprehension.position().clone(),
         )
         .into(),

@@ -265,6 +265,7 @@ fn compile_expression(expression: &ast::Expression) -> Result<ir::Expression, Co
         )
         .into(),
         ast::Expression::ListComprehension(comprehension) => ir::ListComprehension::new(
+            None,
             comprehension.type_().clone(),
             compile_expression(comprehension.element())?,
             comprehension.element_name(),

@@ -262,11 +262,11 @@ fn check_expression(
                         )])
                         .collect(),
                 )?,
-                comprehension.type_(),
+                comprehension.output_type(),
             )?;
 
             types::List::new(
-                comprehension.type_().clone(),
+                comprehension.output_type().clone(),
                 comprehension.position().clone(),
             )
             .into()
@@ -1983,16 +1983,19 @@ mod tests {
 
         #[test]
         fn check_list_comprehension() {
+            let element_type = types::None::new(Position::fake());
+
             check_module(&Module::empty().set_definitions(vec![Definition::fake(
                 "f",
                 Lambda::new(
                     vec![],
-                    types::List::new(types::None::new(Position::fake()), Position::fake()),
+                    types::List::new(element_type.clone(), Position::fake()),
                     ListComprehension::new(
-                        types::None::new(Position::fake()),
+                        Some(element_type.clone().into()),
+                        element_type.clone(),
                         Variable::new("x", Position::fake()),
                         "x",
-                        List::new(types::None::new(Position::fake()), vec![], Position::fake()),
+                        List::new(element_type.clone(), vec![], Position::fake()),
                         Position::fake(),
                     ),
                     Position::fake(),

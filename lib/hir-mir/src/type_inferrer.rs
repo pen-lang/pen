@@ -251,7 +251,8 @@ fn infer_expression(
             .ok_or_else(|| CompileError::ListExpected(comprehension.list().position().clone()))?;
 
             ListComprehension::new(
-                comprehension.type_().clone(),
+                Some(list_type.element().clone()),
+                comprehension.output_type().clone(),
                 infer_expression(
                     comprehension.element(),
                     &variables
@@ -649,6 +650,7 @@ mod tests {
                     vec![],
                     list_type.clone(),
                     ListComprehension::new(
+                        None,
                         element_type.clone(),
                         Let::new(
                             Some("y".into()),
@@ -671,6 +673,7 @@ mod tests {
                     vec![],
                     list_type.clone(),
                     ListComprehension::new(
+                        Some(element_type.clone().into()),
                         element_type.clone(),
                         Let::new(
                             Some("y".into()),
