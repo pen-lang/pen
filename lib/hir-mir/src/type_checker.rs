@@ -1995,7 +1995,7 @@ mod tests {
                         element_type.clone(),
                         Variable::new("x", Position::fake()),
                         "x",
-                        List::new(element_type.clone(), vec![], Position::fake()),
+                        List::new(element_type, vec![], Position::fake()),
                         Position::fake(),
                     ),
                     Position::fake(),

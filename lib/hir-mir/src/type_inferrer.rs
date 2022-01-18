@@ -671,7 +671,7 @@ mod tests {
                 "f",
                 Lambda::new(
                     vec![],
-                    list_type.clone(),
+                    list_type,
                     ListComprehension::new(
                         Some(element_type.clone().into()),
                         element_type.clone(),
@@ -683,7 +683,7 @@ mod tests {
                             Position::fake(),
                         ),
                         "x",
-                        List::new(element_type.clone(), vec![], Position::fake()),
+                        List::new(element_type, vec![], Position::fake()),
                         Position::fake(),
                     ),
                     Position::fake(),
