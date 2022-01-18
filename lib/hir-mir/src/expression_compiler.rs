@@ -119,7 +119,9 @@ pub fn compile(
             const LIST_NAME: &str = "$list";
 
             let position = comprehension.position();
-            let input_element_type: Type = todo!("input_element_type");
+            let input_element_type = comprehension
+                .input_type()
+                .ok_or_else(|| CompileError::TypeNotInferred(position.clone()))?;
             let output_element_type = comprehension.output_type();
             let list_type = type_compiler::compile_list(context)?;
 
@@ -142,7 +144,7 @@ pub fn compile(
                                             Some(
                                                 types::Function::new(
                                                     vec![types::List::new(
-                                                        input_element_type,
+                                                        input_element_type.clone(),
                                                         position.clone(),
                                                     )
                                                     .into()],
