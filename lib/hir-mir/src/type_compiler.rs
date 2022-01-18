@@ -10,9 +10,7 @@ pub fn compile(type_: &Type, context: &CompileContext) -> Result<mir::types::Typ
         match type_canonicalizer::canonicalize(type_, context.types())? {
             Type::Boolean(_) => mir::types::Type::Boolean,
             Type::Function(function) => compile_function(&function, context)?.into(),
-            Type::List(_) => {
-                mir::types::Record::new(&context.configuration()?.list_type.list_type_name).into()
-            }
+            Type::List(_) => compile_list(context)?.into(),
             Type::None(_) => mir::types::Type::None,
             Type::Number(_) => mir::types::Type::Number,
             Type::Record(record) => mir::types::Record::new(record.name()).into(),
@@ -55,6 +53,12 @@ pub fn compile_concrete_function_name(
     Ok(format!(
         "_function_{}",
         type_id_calculator::calculate(&function.clone().into(), types)?,
+    ))
+}
+
+pub fn compile_list(context: &CompileContext) -> Result<mir::types::Record, CompileError> {
+    Ok(mir::types::Record::new(
+        &context.configuration()?.list_type.list_type_name,
     ))
 }
 
