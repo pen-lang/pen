@@ -78,3 +78,13 @@ Feature: List
     """
     When I run `pen build`
     Then the exit status should be 0
+
+  Scenario: Use list comprehension
+    Given a file named "Foo.pen" with:
+    """pen
+    f = \(xs [number]) [number] {
+      [number x + 42 for x in xs]
+    }
+    """
+    When I run `pen build`
+    Then the exit status should be 0
