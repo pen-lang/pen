@@ -143,8 +143,11 @@ initializeRow = \(ctx Context, columns number) [boolean] {
 Render = \(rs [[boolean]]) string {
   String'Join(
     [string
-      String'Join([string if x() { "o" } else { "." } for x in r()] , "")
-      for r in rs
+      ...[string
+        String'Join([string if x() { "o" } else { "." } for x in r()] , "")
+        for r in rs
+      ],
+      "",
     ],
     "\n",
   )
