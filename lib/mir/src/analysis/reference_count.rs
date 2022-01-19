@@ -22,7 +22,7 @@ pub fn count_references(module: &Module) -> Result<Module, ReferenceCountError> 
 fn convert_definition(definition: &Definition) -> Result<Definition, ReferenceCountError> {
     // Backend is expected to clone a function itself and its free variables at the very beginning
     // of the function.
-    let owned_variables = vec![(definition.name().into(), definition.type_().clone().into())]
+    let owned_variables = [(definition.name().into(), definition.type_().clone().into())]
         .into_iter()
         .chain(
             definition
@@ -86,7 +86,7 @@ fn convert_expression(
                         &owned_variables
                             .clone()
                             .into_iter()
-                            .chain(vec![(alternative.name().into(), Type::Variant)])
+                            .chain([(alternative.name().into(), Type::Variant)])
                             .collect(),
                         &moved_variables
                             .clone()
@@ -112,10 +112,7 @@ fn convert_expression(
                         &owned_variables
                             .clone()
                             .into_iter()
-                            .chain(vec![(
-                                alternative.name().into(),
-                                alternative.type_().clone(),
-                            )])
+                            .chain([(alternative.name().into(), alternative.type_().clone())])
                             .collect(),
                         &moved_variables
                             .clone()
@@ -182,7 +179,7 @@ fn convert_expression(
                                     alternative_moved_variables
                                         .clone()
                                         .into_iter()
-                                        .chain(vec![alternative.name().into()])
+                                        .chain([alternative.name().into()])
                                         .collect::<BTreeSet<_>>()
                                         .difference(&moved_variables)
                                         .cloned()
@@ -190,7 +187,7 @@ fn convert_expression(
                                     &owned_variables
                                         .clone()
                                         .into_iter()
-                                        .chain(vec![(
+                                        .chain([(
                                             alternative.name().into(),
                                             alternative.type_().clone(),
                                         )])
@@ -206,7 +203,7 @@ fn convert_expression(
                                 alternative.expression().clone(),
                                 alternative_moved_variables
                                     .into_iter()
-                                    .chain(vec![alternative.name().into()])
+                                    .chain([alternative.name().into()])
                                     .collect::<BTreeSet<_>>()
                                     .difference(&default_alternative_moved_variables)
                                     .cloned()
@@ -214,7 +211,7 @@ fn convert_expression(
                                 &owned_variables
                                     .clone()
                                     .into_iter()
-                                    .chain(vec![(alternative.name().into(), Type::Variant)])
+                                    .chain([(alternative.name().into(), Type::Variant)])
                                     .collect(),
                             ),
                         )
@@ -244,7 +241,7 @@ fn convert_expression(
                         convert_expression(argument, owned_variables, &moved_variables)?;
 
                     Ok((
-                        vec![argument].into_iter().chain(arguments).collect(),
+                        [argument].into_iter().chain(arguments).collect(),
                         moved_variables,
                     ))
                 },
@@ -301,7 +298,7 @@ fn convert_expression(
             let let_owned_variables = owned_variables
                 .clone()
                 .into_iter()
-                .chain(vec![(let_.name().into(), let_.type_().clone())])
+                .chain([(let_.name().into(), let_.type_().clone())])
                 .collect();
             let (expression, expression_moved_variables) = convert_expression(
                 let_.expression(),
@@ -337,7 +334,7 @@ fn convert_expression(
                     } else {
                         drop_variables(
                             expression,
-                            vec![let_.name().into()].into_iter().collect(),
+                            [let_.name().into()].into_iter().collect(),
                             &let_owned_variables,
                         )
                     },
@@ -350,7 +347,7 @@ fn convert_expression(
             let let_owned_variables = owned_variables
                 .clone()
                 .into_iter()
-                .chain(vec![(
+                .chain([(
                     let_.definition().name().into(),
                     let_.definition().type_().clone().into(),
                 )])
@@ -393,7 +390,7 @@ fn convert_expression(
                         } else {
                             drop_variables(
                                 expression,
-                                vec![let_.definition().name().into()].into_iter().collect(),
+                                [let_.definition().name().into()].into_iter().collect(),
                                 &let_owned_variables,
                             )
                         },
@@ -420,10 +417,7 @@ fn convert_expression(
                     let (field, moved_variables) =
                         convert_expression(field, owned_variables, &moved_variables)?;
 
-                    Ok((
-                        vec![field].into_iter().chain(fields).collect(),
-                        moved_variables,
-                    ))
+                    Ok(([field].into_iter().chain(fields).collect(), moved_variables))
                 },
             )?;
 
@@ -487,7 +481,7 @@ fn convert_expression(
                 (
                     clone_variables(
                         variable.clone(),
-                        vec![variable.name().into()].into_iter().collect(),
+                        [variable.name().into()].into_iter().collect(),
                         owned_variables,
                     ),
                     moved_variables.clone(),
@@ -498,7 +492,7 @@ fn convert_expression(
                     moved_variables
                         .clone()
                         .into_iter()
-                        .chain(vec![variable.name().into()])
+                        .chain([variable.name().into()])
                         .collect(),
                 )
             }
@@ -590,7 +584,7 @@ mod tests {
                     vec![Variable::new("x").into(), Variable::new("x").into()]
                 )
                 .into(),
-                &vec![("x".into(), Type::Number)].into_iter().collect(),
+                &[("x".into(), Type::Number)].into_iter().collect(),
                 &Default::default()
             )
             .unwrap(),
@@ -599,7 +593,7 @@ mod tests {
                     types::Record::new("a"),
                     vec![
                         CloneVariables::new(
-                            vec![("x".into(), Type::Number)].into_iter().collect(),
+                            [("x".into(), Type::Number)].into_iter().collect(),
                             Variable::new("x")
                         )
                         .into(),
@@ -607,7 +601,7 @@ mod tests {
                     ]
                 )
                 .into(),
-                vec!["x".into()].into_iter().collect()
+                ["x".into()].into_iter().collect()
             ),
         );
     }
@@ -626,7 +620,7 @@ mod tests {
                         vec![Variable::new("x").into()]
                     )
                     .into(),
-                    &vec![
+                    &[
                         (
                             "f".into(),
                             types::Function::new(vec![Type::Number], Type::Number).into()
@@ -635,14 +629,14 @@ mod tests {
                     ]
                     .into_iter()
                     .collect(),
-                    &vec!["f".into(), "x".into()].into_iter().collect(),
+                    &["f".into(), "x".into()].into_iter().collect(),
                 )
                 .unwrap(),
                 (
                     Call::new(
                         types::Function::new(vec![Type::Number], Type::Number),
                         CloneVariables::new(
-                            vec![(
+                            [(
                                 "f".into(),
                                 types::Function::new(vec![Type::Number], Type::Number).into()
                             )]
@@ -651,13 +645,13 @@ mod tests {
                             Variable::new("f")
                         ),
                         vec![CloneVariables::new(
-                            vec![("x".into(), Type::Number)].into_iter().collect(),
+                            [("x".into(), Type::Number)].into_iter().collect(),
                             Variable::new("x")
                         )
                         .into()]
                     )
                     .into(),
-                    vec!["f".into(), "x".into()].into_iter().collect()
+                    ["f".into(), "x".into()].into_iter().collect()
                 ),
             );
         }
@@ -679,7 +673,7 @@ mod tests {
                         vec![Variable::new("x").into()]
                     )
                     .into(),
-                    &vec![
+                    &[
                         (
                             "f".into(),
                             types::Function::new(
@@ -705,7 +699,7 @@ mod tests {
                             ),
                             Variable::new("f"),
                             vec![CloneVariables::new(
-                                vec![("x".into(), Type::Number)].into_iter().collect(),
+                                [("x".into(), Type::Number)].into_iter().collect(),
                                 Variable::new("x")
                             )
                             .into()]
@@ -713,7 +707,7 @@ mod tests {
                         vec![Variable::new("x").into()]
                     )
                     .into(),
-                    vec!["f".into(), "x".into()].into_iter().collect()
+                    ["f".into(), "x".into()].into_iter().collect()
                 ),
             );
         }
@@ -728,7 +722,7 @@ mod tests {
                         vec![Variable::new("x").into(), Variable::new("y").into()]
                     )
                     .into(),
-                    &vec![
+                    &[
                         (
                             "f".into(),
                             types::Function::new(vec![Type::Number, Type::Boolean], Type::Number)
@@ -739,16 +733,14 @@ mod tests {
                     ]
                     .into_iter()
                     .collect(),
-                    &vec!["f".into(), "x".into(), "y".into()]
-                        .into_iter()
-                        .collect(),
+                    &["f".into(), "x".into(), "y".into()].into_iter().collect(),
                 )
                 .unwrap(),
                 (
                     Call::new(
                         types::Function::new(vec![Type::Number, Type::Boolean], Type::Number),
                         CloneVariables::new(
-                            vec![(
+                            [(
                                 "f".into(),
                                 types::Function::new(
                                     vec![Type::Number, Type::Boolean],
@@ -762,21 +754,19 @@ mod tests {
                         ),
                         vec![
                             CloneVariables::new(
-                                vec![("x".into(), Type::Number)].into_iter().collect(),
+                                [("x".into(), Type::Number)].into_iter().collect(),
                                 Variable::new("x")
                             )
                             .into(),
                             CloneVariables::new(
-                                vec![("y".into(), Type::Boolean)].into_iter().collect(),
+                                [("y".into(), Type::Boolean)].into_iter().collect(),
                                 Variable::new("y")
                             )
                             .into()
                         ]
                     )
                     .into(),
-                    vec!["x".into(), "y".into(), "f".into(),]
-                        .into_iter()
-                        .collect()
+                    ["x".into(), "y".into(), "f".into(),].into_iter().collect()
                 ),
             );
         }
@@ -827,7 +817,7 @@ mod tests {
                     ArithmeticOperation::new(
                         ArithmeticOperator::Add,
                         CloneVariables::new(
-                            vec![("x".into(), Type::Number)].into_iter().collect(),
+                            [("x".into(), Type::Number)].into_iter().collect(),
                             Variable::new("x")
                         ),
                         Variable::new("x")
@@ -851,10 +841,7 @@ mod tests {
                     "x",
                     Type::Number,
                     42.0,
-                    DropVariables::new(
-                        vec![("x".into(), Type::Number)].into_iter().collect(),
-                        42.0
-                    )
+                    DropVariables::new([("x".into(), Type::Number)].into_iter().collect(), 42.0)
                 )
                 .into(),
             );
@@ -865,13 +852,13 @@ mod tests {
             assert_eq!(
                 convert_expression(
                     &Let::new("x", Type::Number, Variable::new("y"), Variable::new("x")).into(),
-                    &vec![("y".into(), Type::Number)].into_iter().collect(),
+                    &[("y".into(), Type::Number)].into_iter().collect(),
                     &Default::default()
                 )
                 .unwrap(),
                 (
                     Let::new("x", Type::Number, Variable::new("y"), Variable::new("x")).into(),
-                    vec!["y".into()].into_iter().collect()
+                    ["y".into()].into_iter().collect()
                 ),
             );
         }
@@ -881,7 +868,7 @@ mod tests {
             assert_eq!(
                 convert_expression(
                     &Let::new("x", Type::Number, Variable::new("y"), Variable::new("y")).into(),
-                    &vec![("y".into(), Type::Number)].into_iter().collect(),
+                    &[("y".into(), Type::Number)].into_iter().collect(),
                     &Default::default()
                 )
                 .unwrap(),
@@ -890,16 +877,16 @@ mod tests {
                         "x",
                         Type::Number,
                         CloneVariables::new(
-                            vec![("y".into(), Type::Number)].into_iter().collect(),
+                            [("y".into(), Type::Number)].into_iter().collect(),
                             Variable::new("y")
                         ),
                         DropVariables::new(
-                            vec![("x".into(), Type::Number)].into_iter().collect(),
+                            [("x".into(), Type::Number)].into_iter().collect(),
                             Variable::new("y")
                         )
                     )
                     .into(),
-                    vec!["y".into()].into_iter().collect()
+                    ["y".into()].into_iter().collect()
                 ),
             );
         }
@@ -915,7 +902,7 @@ mod tests {
                         Variable::new("x")
                     )
                     .into(),
-                    &vec![("x".into(), Type::Number)].into_iter().collect(),
+                    &[("x".into(), Type::Number)].into_iter().collect(),
                     &Default::default()
                 )
                 .unwrap(),
@@ -927,18 +914,18 @@ mod tests {
                             "x",
                             Type::Number,
                             CloneVariables::new(
-                                vec![("x".into(), Type::Number)].into_iter().collect(),
+                                [("x".into(), Type::Number)].into_iter().collect(),
                                 Variable::new("x")
                             ),
                             Variable::new("x")
                         ),
                         DropVariables::new(
-                            vec![("y".into(), Type::Number)].into_iter().collect(),
+                            [("y".into(), Type::Number)].into_iter().collect(),
                             Variable::new("x")
                         )
                     )
                     .into(),
-                    vec!["x".into()].into_iter().collect()
+                    ["x".into()].into_iter().collect()
                 )
             );
         }
@@ -972,7 +959,7 @@ mod tests {
                         "f",
                         vec![Argument::new("x", Type::Number)],
                         DropVariables::new(
-                            vec![
+                            [
                                 (
                                     "f".into(),
                                     types::Function::new(vec![Type::Number], Type::Number).into()
@@ -1734,25 +1721,25 @@ mod tests {
                         Variant::new(types::Type::Number, Variable::new("y")),
                     )
                     .into(),
-                    &vec![("x".into(), Type::Variant)].into_iter().collect(),
-                    &vec!["x".into()].into_iter().collect(),
+                    &[("x".into(), Type::Variant)].into_iter().collect(),
+                    &["x".into()].into_iter().collect(),
                 )
                 .unwrap(),
                 (
                     TryOperation::new(
                         CloneVariables::new(
-                            vec![("x".into(), Type::Variant)].into_iter().collect(),
+                            [("x".into(), Type::Variant)].into_iter().collect(),
                             Variable::new("x")
                         ),
                         "y",
                         types::Type::Number,
                         DropVariables::new(
-                            vec![("x".into(), Type::Variant)].into_iter().collect(),
+                            [("x".into(), Type::Variant)].into_iter().collect(),
                             Variant::new(types::Type::Number, Variable::new("y"),)
                         ),
                     )
                     .into(),
-                    vec!["x".into()].into_iter().collect()
+                    ["x".into()].into_iter().collect()
                 )
             );
         }
