@@ -140,27 +140,12 @@ initializeRow = \(ctx Context, columns number) [boolean] {
   }
 }
 
-# TODO Use a list comprehension.
 Render = \(rs [[boolean]]) string {
-  if [r, ...rs] = rs {
-    String'Join([string renderRow(r()), Render(rs)], "\n")
-  } else {
-    ""
-  }
-}
-
-renderRow = \(xs [boolean]) string {
-  if [x, ...xs] = xs {
-    String'Join([string renderCell(x()), renderRow(xs)], "")
-  } else {
-    ""
-  }
-}
-
-renderCell = \(cell boolean) string {
-  if cell {
-    "o"
-  } else {
-    "."
-  }
+  String'Join(
+    [string
+      String'Join([string if x() { "o" } else { "." } for x in r()] , "")
+      for r in rs
+    ],
+    "\n",
+  )
 }
