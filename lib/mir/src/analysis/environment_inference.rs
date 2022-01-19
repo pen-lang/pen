@@ -52,8 +52,8 @@ fn infer_in_local_definition(
         infer_in_expression(
             definition.body(),
             &variables
-                .iter()
-                .map(|(name, type_)| (name.clone(), type_.clone()))
+                .clone()
+                .into_iter()
                 .chain(vec![(
                     definition.name().into(),
                     definition.type_().clone().into(),
@@ -208,8 +208,8 @@ fn infer_in_let(let_: &Let, variables: &BTreeMap<String, Type>) -> Let {
         infer_in_expression(
             let_.expression(),
             &variables
-                .iter()
-                .map(|(name, type_)| (name.clone(), type_.clone()))
+                .clone()
+                .into_iter()
                 .chain(vec![(let_.name().into(), let_.type_().clone())])
                 .collect(),
         ),
@@ -222,8 +222,8 @@ fn infer_in_let_recursive(let_: &LetRecursive, variables: &BTreeMap<String, Type
         infer_in_expression(
             let_.expression(),
             &variables
-                .iter()
-                .map(|(name, type_)| (name.clone(), type_.clone()))
+                .clone()
+                .into_iter()
                 .chain(vec![(
                     let_.definition().name().into(),
                     let_.definition().type_().clone().into(),
@@ -263,8 +263,8 @@ fn infer_in_try_operation(
         infer_in_expression(
             operation.then(),
             &variables
-                .iter()
-                .map(|(name, type_)| (name.clone(), type_.clone()))
+                .clone()
+                .into_iter()
                 .chain(vec![(operation.name().into(), operation.type_().clone())])
                 .collect(),
         ),
