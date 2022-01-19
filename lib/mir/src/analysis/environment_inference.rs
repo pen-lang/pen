@@ -1,6 +1,6 @@
 use super::free_variables::find_free_variables;
 use crate::{ir::*, types::Type};
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashSet};
 
 pub fn infer_environment(module: &Module) -> Module {
     Module::new(
@@ -38,13 +38,20 @@ fn infer_in_local_definition(
     definition: &Definition,
     variables: &BTreeMap<String, Type>,
 ) -> Definition {
+    let argument_names = definition
+        .arguments()
+        .iter()
+        .map(|argument| argument.name())
+        .collect::<HashSet<_>>();
+
     Definition::with_options(
         definition.name(),
         find_free_variables(definition.body())
-            .iter()
+            .into_iter()
+            .filter(|name| !argument_names.contains(name.as_str()))
             .filter_map(|name| {
                 variables
-                    .get(name)
+                    .get(&name)
                     .map(|type_| Argument::new(name, type_.clone()))
             })
             .collect(),
@@ -436,6 +443,28 @@ mod tests {
                 42.0,
             )
             .into()
+        );
+    }
+
+    #[test]
+    fn infer_environment_with_shadowed_variable() {
+        assert_eq!(
+            infer_in_local_definition(
+                &Definition::new(
+                    "f",
+                    vec![Argument::new("x", Type::Number)],
+                    Variable::new("x"),
+                    Type::Number
+                ),
+                &vec![("x".into(), Type::Number)].drain(..).collect()
+            ),
+            Definition::with_environment(
+                "f",
+                vec![],
+                vec![Argument::new("x", Type::Number)],
+                Variable::new("x"),
+                Type::Number
+            )
         );
     }
 }
