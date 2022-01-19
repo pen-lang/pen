@@ -70,11 +70,15 @@ stepColumns = \(upper [boolean], current [boolean], lower [boolean]) [boolean] |
     if c = cellTuple(current) as cellTuple {
       if l = cellTuple(lower) as cellTuple {
         n = Number'Sum(
-          booleansToNumbers([boolean
-            u.first, u.second, u.third,
-            c.first, c.third,
-            l.first, l.second, l.third,
-          ]),
+          [number
+            if b() { 1 } else { 0 }
+            for b in
+            [boolean
+              u.first, u.second, u.third,
+              c.first, c.third,
+              l.first, l.second, l.third,
+            ]
+          ],
         )
         bs = stepColumns(tail(upper), tail(current), tail(lower))?
 
@@ -111,15 +115,6 @@ cellTuple = \(cs [boolean]) cellTuple | none {
     }
   } else {
     none
-  }
-}
-
-# TODO Use a list comprehension.
-booleansToNumbers = \(bs [boolean]) [number] {
-  if [b, ...bs] = bs {
-    [number if b() { 1 } else { 0 }, ...booleansToNumbers(bs)]
-  } else {
-    [number]
   }
 }
 
