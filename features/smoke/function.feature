@@ -36,3 +36,21 @@ Feature: Function
     """
     When I successfully run `pen build`
     Then I successfully run `check_memory_leak.sh ./app`
+
+  Scenario: Shadow a variable of a list in an outer scope
+    Given a file named "main.pen" with:
+    """pen
+    f = \() [none] {
+      x = [none]
+
+      [none \(x none) none { x }(none)]
+    }
+
+    main = \(ctx Context) number {
+      f()
+
+      0
+    }
+    """
+    When I successfully run `pen build`
+    Then I successfully run `check_memory_leak.sh ./app`

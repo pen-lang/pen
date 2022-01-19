@@ -139,7 +139,7 @@ Render = \(rs [[boolean]]) string {
   String'Join(
     [string
       ...[string
-        String'Join([string if x() { "o" } else { "." } for x in r()] , "")
+        String'Join([string if x() { "o" } else { "." } for x in r()], "")
         for r in rs
       ],
       "",
