@@ -101,7 +101,10 @@ fn move_expression(
                 )?;
 
                 if variables != &alternative_variables {
-                    return Err(ReferenceCountError::InvalidAlternative(alternative.clone()));
+                    return Err(ReferenceCountError::UnmatchedVariables(
+                        variables.clone().into_iter().collect(),
+                        alternative_variables.into_iter().collect(),
+                    ));
                 }
             }
         }
@@ -132,7 +135,10 @@ fn move_expression(
             move_expression(if_.else_(), variables)?;
 
             if variables != &then_variables {
-                return Err(ReferenceCountError::InvalidIf(if_.clone()));
+                return Err(ReferenceCountError::UnmatchedVariables(
+                    variables.clone().into_iter().collect(),
+                    then_variables.into_iter().collect(),
+                ));
             }
         }
         Expression::Let(let_) => {
