@@ -83,7 +83,7 @@ Feature: List
     Given a file named "Foo.pen" with:
     """pen
     f = \(xs [number]) [number] {
-      [number x + 42 for x in xs]
+      [number x() + 42 for x in xs]
     }
     """
     When I run `pen build`
