@@ -345,7 +345,7 @@ mod tests {
 
     #[test]
     #[should_panic]
-    fn fail_to_validate_let_with_undropped_bound_variable() {
+    fn fail_to_validate_let_with_leaked_bound_variable() {
         validate(&Module::new(
             vec![],
             vec![],
@@ -430,7 +430,7 @@ mod tests {
 
     #[test]
     #[should_panic]
-    fn fail_to_validate_let_recursive_with_undropped_function() {
+    fn fail_to_validate_let_recursive_with_leaked_function() {
         validate(&Module::new(
             vec![],
             vec![],
