@@ -1,5 +1,5 @@
 use super::ReferenceCountError;
-use crate::ir::{Definition, Expression, Module};
+use crate::ir::*;
 use std::collections::{BTreeMap, BTreeSet, HashMap};
 
 pub fn validate(module: &Module) -> Result<(), ReferenceCountError> {
@@ -76,7 +76,33 @@ fn move_expression(
                 move_expression(argument, variables)?;
             }
         }
-        Expression::Case(_) => todo!(),
+        Expression::Case(case) => {
+            move_expression(case.argument(), variables)?;
+
+            let old_variables = variables.clone();
+
+            if let Some(alternative) = case.default_alternative() {
+                validate_let_like(alternative.name(), alternative.expression(), variables)?;
+            } else {
+                let alternative = &case.alternatives()[0];
+
+                validate_let_like(alternative.name(), alternative.expression(), variables)?;
+            }
+
+            for alternative in case.alternatives() {
+                let mut alternative_variables = old_variables.clone();
+
+                validate_let_like(
+                    alternative.name(),
+                    alternative.expression(),
+                    &mut alternative_variables,
+                )?;
+
+                if variables != &alternative_variables {
+                    return Err(ReferenceCountError::InvalidAlternative(alternative.clone()));
+                }
+            }
+        }
         Expression::CloneVariables(clone) => {
             for name in clone.variables().keys() {
                 clone_variable(name, variables);
@@ -95,19 +121,21 @@ fn move_expression(
 
             move_expression(drop.expression(), variables)?;
         }
-        Expression::If(_) => todo!(),
+        Expression::If(if_) => {
+            move_expression(if_.condition(), variables)?;
+
+            let mut then_variables = variables.clone();
+            move_expression(if_.then(), &mut then_variables)?;
+
+            move_expression(if_.else_(), variables)?;
+
+            if variables != &then_variables {
+                return Err(ReferenceCountError::InvalidIf(if_.clone()));
+            }
+        }
         Expression::Let(let_) => {
             move_expression(let_.bound_expression(), variables)?;
-
-            let old_count = variables.insert(let_.name().into(), 1);
-
-            move_expression(let_.expression(), variables)?;
-
-            if variables[let_.name()] != 0 {
-                return Err(ReferenceCountError::InvalidLet(let_.clone()));
-            } else if let Some(old) = old_count {
-                variables.insert(let_.name().into(), old);
-            }
+            validate_let_like(let_.name(), let_.expression(), variables)?;
         }
         Expression::LetRecursive(let_) => {
             validate_local_definition(let_.definition())?;
@@ -149,6 +177,27 @@ fn move_expression(
     Ok(())
 }
 
+fn validate_let_like(
+    name: &str,
+    expression: &Expression,
+    variables: &mut HashMap<String, isize>,
+) -> Result<(), ReferenceCountError> {
+    let old_count = variables.insert(name.into(), 1);
+
+    move_expression(expression, variables)?;
+
+    if variables[name] != 0 {
+        return Err(ReferenceCountError::InvalidLocalVariable(
+            name.into(),
+            variables[name],
+        ));
+    } else if let Some(old) = old_count {
+        variables.insert(name.into(), old);
+    }
+
+    Ok(())
+}
+
 fn clone_variable(name: impl AsRef<str>, variables: &mut HashMap<String, isize>) {
     variables.insert(name.as_ref().into(), variables[name.as_ref()] + 1);
 }
@@ -160,13 +209,7 @@ fn drop_variable(name: impl AsRef<str>, variables: &mut HashMap<String, isize>) 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{
-        ir::{
-            Argument, ArithmeticOperation, ArithmeticOperator, CloneVariables, DropVariables, Let,
-            LetRecursive, Variable,
-        },
-        types::{self, Type},
-    };
+    use crate::types::{self, Type};
 
     #[test]
     fn validate_empty_module() {
@@ -422,6 +465,227 @@ mod tests {
                     Variable::new("g"),
                 ),
                 Type::None,
+            )],
+        ))
+        .unwrap();
+    }
+
+    #[test]
+    fn validate_if() {
+        validate(&Module::new(
+            vec![],
+            vec![],
+            vec![],
+            vec![],
+            vec![Definition::new(
+                "f",
+                vec![Argument::new("x", Type::None)],
+                If::new(
+                    Expression::Boolean(true),
+                    Variable::new("x"),
+                    Variable::new("x"),
+                ),
+                Type::None,
+            )],
+        ))
+        .unwrap();
+    }
+
+    #[test]
+    #[should_panic]
+    fn fail_to_validate_if() {
+        validate(&Module::new(
+            vec![],
+            vec![],
+            vec![],
+            vec![],
+            vec![Definition::new(
+                "f",
+                vec![Argument::new("x", Type::None)],
+                If::new(
+                    Expression::Boolean(true),
+                    Variable::new("x"),
+                    Expression::None,
+                ),
+                Type::None,
+            )],
+        ))
+        .unwrap();
+    }
+
+    #[test]
+    fn validate_case_with_default_alternative() {
+        validate(&Module::new(
+            vec![],
+            vec![],
+            vec![],
+            vec![],
+            vec![Definition::new(
+                "f",
+                vec![Argument::new("x", Type::Variant)],
+                Case::new(
+                    Variable::new("x"),
+                    vec![],
+                    Some(DefaultAlternative::new("y", Variable::new("y"))),
+                ),
+                Type::Variant,
+            )],
+        ))
+        .unwrap();
+    }
+
+    #[test]
+    #[should_panic]
+    fn fail_to_validate_case_with_default_alternative() {
+        validate(&Module::new(
+            vec![],
+            vec![],
+            vec![],
+            vec![],
+            vec![Definition::new(
+                "f",
+                vec![Argument::new("x", Type::Variant)],
+                Case::new(
+                    Variable::new("x"),
+                    vec![],
+                    Some(DefaultAlternative::new("y", Expression::None)),
+                ),
+                Type::Variant,
+            )],
+        ))
+        .unwrap();
+    }
+
+    #[test]
+    fn validate_case_with_alternative() {
+        validate(&Module::new(
+            vec![],
+            vec![],
+            vec![],
+            vec![],
+            vec![Definition::new(
+                "f",
+                vec![Argument::new("x", Type::Variant)],
+                Case::new(
+                    Variable::new("x"),
+                    vec![Alternative::new(Type::None, "y", Variable::new("y"))],
+                    None,
+                ),
+                Type::Variant,
+            )],
+        ))
+        .unwrap();
+    }
+
+    #[test]
+    #[should_panic]
+    fn fail_to_validate_case_with_alternative() {
+        validate(&Module::new(
+            vec![],
+            vec![],
+            vec![],
+            vec![],
+            vec![Definition::new(
+                "f",
+                vec![Argument::new("x", Type::Variant)],
+                Case::new(
+                    Variable::new("x"),
+                    vec![Alternative::new(Type::None, "y", Expression::None)],
+                    None,
+                ),
+                Type::Variant,
+            )],
+        ))
+        .unwrap();
+    }
+
+    #[test]
+    fn validate_case_with_alternative_and_default_alternative() {
+        validate(&Module::new(
+            vec![],
+            vec![],
+            vec![],
+            vec![],
+            vec![Definition::new(
+                "f",
+                vec![Argument::new("x", Type::Variant)],
+                Case::new(
+                    Variable::new("x"),
+                    vec![Alternative::new(Type::None, "y", Variable::new("y"))],
+                    Some(DefaultAlternative::new("y", Variable::new("y"))),
+                ),
+                Type::Variant,
+            )],
+        ))
+        .unwrap();
+    }
+
+    #[test]
+    #[should_panic]
+    fn fail_to_validate_case_with_alternative_and_default_alternative() {
+        validate(&Module::new(
+            vec![],
+            vec![],
+            vec![],
+            vec![],
+            vec![Definition::new(
+                "f",
+                vec![Argument::new("x", Type::Variant)],
+                Case::new(
+                    Variable::new("x"),
+                    vec![Alternative::new(Type::None, "y", Expression::None)],
+                    Some(DefaultAlternative::new("y", Variable::new("y"))),
+                ),
+                Type::Variant,
+            )],
+        ))
+        .unwrap();
+    }
+
+    #[test]
+    fn validate_case_with_two_alternatives_and_default_alternative() {
+        validate(&Module::new(
+            vec![],
+            vec![],
+            vec![],
+            vec![],
+            vec![Definition::new(
+                "f",
+                vec![Argument::new("x", Type::Variant)],
+                Case::new(
+                    Variable::new("x"),
+                    vec![
+                        Alternative::new(Type::None, "y", Variable::new("y")),
+                        Alternative::new(Type::None, "y", Variable::new("y")),
+                    ],
+                    Some(DefaultAlternative::new("y", Variable::new("y"))),
+                ),
+                Type::Variant,
+            )],
+        ))
+        .unwrap();
+    }
+
+    #[test]
+    #[should_panic]
+    fn fail_to_validate_case_with_two_alternatives_and_default_alternative() {
+        validate(&Module::new(
+            vec![],
+            vec![],
+            vec![],
+            vec![],
+            vec![Definition::new(
+                "f",
+                vec![Argument::new("x", Type::Variant)],
+                Case::new(
+                    Variable::new("x"),
+                    vec![
+                        Alternative::new(Type::None, "y", Variable::new("y")),
+                        Alternative::new(Type::None, "y", Expression::None),
+                    ],
+                    Some(DefaultAlternative::new("y", Variable::new("y"))),
+                ),
+                Type::Variant,
             )],
         ))
         .unwrap();

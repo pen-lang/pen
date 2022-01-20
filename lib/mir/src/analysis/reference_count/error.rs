@@ -4,7 +4,9 @@ use std::{collections::BTreeMap, error::Error, fmt::Display};
 #[derive(Clone, Debug, PartialEq)]
 pub enum ReferenceCountError {
     ExpressionNotSupported(Expression),
-    InvalidLet(Let),
+    InvalidAlternative(Alternative),
+    InvalidIf(If),
+    InvalidLocalVariable(String, isize),
     InvalidLetRecursive(LetRecursive),
     InvalidExpression(BTreeMap<String, isize>),
 }
