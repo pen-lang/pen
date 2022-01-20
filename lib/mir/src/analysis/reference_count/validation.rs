@@ -1,6 +1,6 @@
 use super::ReferenceCountError;
 use crate::ir::{Definition, Expression, Module};
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::{BTreeSet, HashMap};
 
 pub fn validate(module: &Module) -> Result<(), ReferenceCountError> {
     for definition in module.definitions() {
@@ -41,7 +41,7 @@ fn collect_definition_local_variables(definition: &Definition) -> BTreeSet<Strin
 }
 
 fn validate_definition_body_variables(
-    variables: &BTreeMap<String, isize>,
+    variables: &HashMap<String, isize>,
 ) -> Result<(), ReferenceCountError> {
     let invalid_variables = variables
         .iter()
@@ -67,8 +67,8 @@ fn validate_definition_body_variables(
 
 fn move_expression(
     expression: &Expression,
-    variables: &BTreeMap<String, isize>,
-) -> BTreeMap<String, isize> {
+    variables: &HashMap<String, isize>,
+) -> HashMap<String, isize> {
     match expression {
         Expression::ArithmeticOperation(_) => todo!(),
         Expression::Boolean(_) => todo!(),
