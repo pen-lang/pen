@@ -213,11 +213,19 @@ fn validate_let_like(
 }
 
 fn clone_variable(name: impl AsRef<str>, variables: &mut HashMap<String, isize>) {
-    variables.insert(name.as_ref().into(), variables[name.as_ref()] + 1);
+    let name = name.as_ref();
+
+    if let Some(count) = variables.get(name).cloned() {
+        variables.insert(name.into(), count + 1);
+    }
 }
 
 fn drop_variable(name: impl AsRef<str>, variables: &mut HashMap<String, isize>) {
-    variables.insert(name.as_ref().into(), variables[name.as_ref()] - 1);
+    let name = name.as_ref();
+
+    if let Some(count) = variables.get(name).cloned() {
+        variables.insert(name.into(), count - 1);
+    }
 }
 
 #[cfg(test)]
@@ -802,6 +810,32 @@ mod tests {
             Err(ReferenceCountError::InvalidLocalVariables(
                 [("x".into(), 1), ("y".into(), 0)].into_iter().collect()
             ))
+        );
+    }
+
+    #[test]
+    fn validate_global_variable() {
+        assert_eq!(
+            validate(&Module::new(
+                vec![],
+                vec![],
+                vec![],
+                vec![],
+                vec![
+                    Definition::new("f", vec![], Expression::None, Type::None,),
+                    Definition::new(
+                        "g",
+                        vec![],
+                        Call::new(
+                            types::Function::new(vec![], Type::None),
+                            Variable::new("f"),
+                            vec![],
+                        ),
+                        Type::None,
+                    )
+                ],
+            )),
+            Ok(())
         );
     }
 }
