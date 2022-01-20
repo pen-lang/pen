@@ -69,3 +69,17 @@ Feature: List
     """
     When I successfully run `pen build`
     Then I successfully run `check_memory_leak.sh ./app`
+
+  Scenario: Compile list comprehension with wrong typing
+    Given a file named "main.pen" with:
+    """pen
+    import System'Context
+
+    main = \(ctx Context) number {
+      [none y() for y in [none 1]]
+
+      0
+    }
+    """
+    When I run `pen build`
+    Then the stderr should contain "types not matched"
