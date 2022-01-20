@@ -11,24 +11,24 @@ pub fn validate(module: &Module) -> Result<(), ReferenceCountError> {
 }
 
 fn validate_global_definition(definition: &Definition) -> Result<(), ReferenceCountError> {
-    validate_definition_body_variables(&move_expression(
+    validate_definition_body(
         definition.body(),
-        &collect_definition_local_variables(definition)
+        collect_definition_local_variables(definition)
             .into_iter()
             .map(|name| (name, 1))
             .collect(),
-    ))
+    )
 }
 
 fn validate_local_definition(definition: &Definition) -> Result<(), ReferenceCountError> {
-    validate_definition_body_variables(&move_expression(
+    validate_definition_body(
         definition.body(),
-        &[definition.name().into()]
+        [definition.name().into()]
             .into_iter()
             .chain(collect_definition_local_variables(definition))
             .map(|name| (name, 1))
             .collect(),
-    ))
+    )
 }
 
 fn collect_definition_local_variables(definition: &Definition) -> BTreeSet<String> {
@@ -40,9 +40,12 @@ fn collect_definition_local_variables(definition: &Definition) -> BTreeSet<Strin
         .collect()
 }
 
-fn validate_definition_body_variables(
-    variables: &HashMap<String, isize>,
+fn validate_definition_body(
+    body: &Expression,
+    mut variables: HashMap<String, isize>,
 ) -> Result<(), ReferenceCountError> {
+    move_expression(body, &mut variables);
+
     let invalid_variables = variables
         .iter()
         .filter_map(
@@ -65,10 +68,7 @@ fn validate_definition_body_variables(
     Ok(())
 }
 
-fn move_expression(
-    expression: &Expression,
-    variables: &HashMap<String, isize>,
-) -> HashMap<String, isize> {
+fn move_expression(expression: &Expression, variables: &mut HashMap<String, isize>) {
     match expression {
         Expression::ArithmeticOperation(_) => todo!(),
         Expression::Boolean(_) => todo!(),
@@ -88,5 +88,5 @@ fn move_expression(
         Expression::TryOperation(_) => todo!(),
         Expression::Variable(_) => todo!(),
         Expression::Variant(_) => todo!(),
-    }
+    };
 }
