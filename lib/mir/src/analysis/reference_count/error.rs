@@ -7,8 +7,8 @@ pub enum ReferenceCountError {
     InvalidAlternative(Alternative),
     InvalidIf(If),
     InvalidLocalVariable(String, isize),
+    InvalidLocalVariables(BTreeMap<String, isize>),
     InvalidLetRecursive(LetRecursive),
-    InvalidExpression(BTreeMap<String, isize>),
 }
 
 impl Display for ReferenceCountError {

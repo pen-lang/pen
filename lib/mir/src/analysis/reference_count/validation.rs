@@ -52,7 +52,9 @@ fn validate_definition_body(
         .collect::<BTreeMap<_, _>>();
 
     if !invalid_variables.is_empty() {
-        return Err(ReferenceCountError::InvalidExpression(invalid_variables));
+        return Err(ReferenceCountError::InvalidLocalVariables(
+            invalid_variables,
+        ));
     }
 
     Ok(())
@@ -165,7 +167,19 @@ fn move_expression(
         Expression::RecordField(field) => {
             move_expression(field.record(), variables)?;
         }
-        Expression::TryOperation(_) => todo!(),
+        Expression::TryOperation(operation) => {
+            move_expression(operation.operand(), variables)?;
+
+            let mut variables = variables.clone();
+
+            validate_let_like(operation.name(), operation.then(), &mut variables)?;
+
+            if !variables.values().all(|&count| count == 0) {
+                return Err(ReferenceCountError::InvalidLocalVariables(
+                    variables.into_iter().collect(),
+                ));
+            }
+        }
         Expression::Variable(variable) => {
             drop_variable(variable.name(), variables);
         }
@@ -689,5 +703,105 @@ mod tests {
             )],
         ))
         .unwrap();
+    }
+
+    #[test]
+    fn validate_try_operation() {
+        validate(&Module::new(
+            vec![],
+            vec![],
+            vec![],
+            vec![],
+            vec![Definition::new(
+                "f",
+                vec![Argument::new("x", Type::Variant)],
+                TryOperation::new(
+                    Variable::new("x"),
+                    "y",
+                    Type::None,
+                    Variant::new(Type::None, Variable::new("y")),
+                ),
+                Type::Variant,
+            )],
+        ))
+        .unwrap();
+    }
+
+    #[test]
+    #[should_panic]
+    fn fail_to_validate_try_operation() {
+        validate(&Module::new(
+            vec![],
+            vec![],
+            vec![],
+            vec![],
+            vec![Definition::new(
+                "f",
+                vec![Argument::new("x", Type::Variant)],
+                TryOperation::new(
+                    Variable::new("x"),
+                    "y",
+                    Type::None,
+                    Variant::new(Type::None, Expression::None),
+                ),
+                Type::Variant,
+            )],
+        ))
+        .unwrap();
+    }
+
+    #[test]
+    fn fail_to_validate_try_operation_with_double_drops() {
+        assert_eq!(
+            validate(&Module::new(
+                vec![],
+                vec![],
+                vec![],
+                vec![],
+                vec![Definition::new(
+                    "f",
+                    vec![Argument::new("x", Type::Variant)],
+                    TryOperation::new(
+                        Variable::new("x"),
+                        "y",
+                        Type::None,
+                        DropVariables::new(
+                            [("y".into(), Type::None)].into_iter().collect(),
+                            Variable::new("x"),
+                        ),
+                    ),
+                    Type::Variant,
+                )],
+            )),
+            Err(ReferenceCountError::InvalidLocalVariables(
+                [("x".into(), -1), ("y".into(), 0)].into_iter().collect()
+            ))
+        );
+    }
+
+    #[test]
+    fn fail_to_validate_try_operation_with_unused_outer_variable() {
+        assert_eq!(
+            validate(&Module::new(
+                vec![],
+                vec![],
+                vec![],
+                vec![],
+                vec![Definition::new(
+                    "f",
+                    vec![Argument::new("x", Type::Variant)],
+                    TryOperation::new(
+                        Expression::None,
+                        "y",
+                        Type::None,
+                        Variant::new(Type::None, Variable::new("y")),
+                    ),
+                    Type::Variant,
+                )],
+            )),
+            Err(ReferenceCountError::InvalidLocalVariables(
+                [("x".into(), 1), ("y".into(), 0)].into_iter().collect()
+            ))
+        );
     }
 }
