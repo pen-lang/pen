@@ -1,9 +1,10 @@
 use crate::ir::*;
-use std::{error::Error, fmt::Display};
+use std::{collections::BTreeSet, error::Error, fmt::Display};
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum ReferenceCountError {
     ExpressionNotSupported(Expression),
+    InvalidReferenceCount(BTreeSet<String>),
 }
 
 impl Display for ReferenceCountError {

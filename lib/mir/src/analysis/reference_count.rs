@@ -1,12 +1,14 @@
 mod error;
+mod validation;
 
 use crate::{ir::*, types::Type};
 pub use error::ReferenceCountError;
 use std::collections::{BTreeMap, BTreeSet};
+use validation::validate;
 
 // Closure environments need to be inferred before reference counting.
 pub fn count_references(module: &Module) -> Result<Module, ReferenceCountError> {
-    Ok(Module::new(
+    let module = Module::new(
         module.type_definitions().to_vec(),
         module.foreign_declarations().to_vec(),
         module.foreign_definitions().to_vec(),
@@ -16,7 +18,11 @@ pub fn count_references(module: &Module) -> Result<Module, ReferenceCountError> 
             .iter()
             .map(convert_definition)
             .collect::<Result<_, _>>()?,
-    ))
+    );
+
+    validate(&module)?;
+
+    Ok(module)
 }
 
 fn convert_definition(definition: &Definition) -> Result<Definition, ReferenceCountError> {
