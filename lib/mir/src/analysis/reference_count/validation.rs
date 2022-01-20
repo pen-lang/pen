@@ -146,16 +146,7 @@ fn move_expression(
                 drop_variable(free_variable.name(), variables);
             }
 
-            let name = let_.definition().name();
-            let old_count = variables.insert(name.into(), 1);
-
-            move_expression(let_.expression(), variables)?;
-
-            if variables[name] != 0 {
-                return Err(ReferenceCountError::InvalidLetRecursive(let_.clone()));
-            } else if let Some(old) = old_count {
-                variables.insert(name.into(), old);
-            }
+            validate_let_like(let_.definition().name(), let_.expression(), variables)?;
         }
         Expression::None => {}
         Expression::Number(_) => {}
