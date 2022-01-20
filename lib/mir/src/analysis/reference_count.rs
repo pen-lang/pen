@@ -16,7 +16,7 @@ pub fn count_references(module: &Module) -> Result<Module, ReferenceCountError> 
         module
             .definitions()
             .iter()
-            .map(convert_definition)
+            .map(|definition| convert_definition(definition, true))
             .collect::<Result<_, _>>()?,
     );
 
@@ -25,19 +25,26 @@ pub fn count_references(module: &Module) -> Result<Module, ReferenceCountError> 
     Ok(module)
 }
 
-fn convert_definition(definition: &Definition) -> Result<Definition, ReferenceCountError> {
+fn convert_definition(
+    definition: &Definition,
+    global: bool,
+) -> Result<Definition, ReferenceCountError> {
     // Backend is expected to clone a function itself and its free variables at the very beginning
     // of the function.
-    let owned_variables = vec![(definition.name().into(), definition.type_().clone().into())]
-        .into_iter()
-        .chain(
-            definition
-                .environment()
-                .iter()
-                .chain(definition.arguments())
-                .map(|argument| (argument.name().into(), argument.type_().clone())),
-        )
-        .collect();
+    let owned_variables = if global {
+        None
+    } else {
+        Some((definition.name().into(), definition.type_().clone().into()))
+    }
+    .into_iter()
+    .chain(
+        definition
+            .environment()
+            .iter()
+            .chain(definition.arguments())
+            .map(|argument| (argument.name().into(), argument.type_().clone())),
+    )
+    .collect();
 
     let (expression, moved_variables) =
         convert_expression(definition.body(), &owned_variables, &Default::default())?;
@@ -393,7 +400,7 @@ fn convert_expression(
             (
                 clone_variables(
                     LetRecursive::new(
-                        convert_definition(let_.definition())?,
+                        convert_definition(let_.definition(), false)?,
                         if expression_moved_variables.contains(let_.definition().name()) {
                             expression
                         } else {
@@ -1362,12 +1369,15 @@ mod tests {
         #[test]
         fn convert_with_dropped_argument() {
             assert_eq!(
-                convert_definition(&Definition::new(
-                    "f",
-                    vec![Argument::new("x", Type::Number)],
-                    42.0,
-                    Type::Number
-                ))
+                convert_definition(
+                    &Definition::new(
+                        "f",
+                        vec![Argument::new("x", Type::Number)],
+                        42.0,
+                        Type::Number
+                    ),
+                    false
+                )
                 .unwrap(),
                 Definition::new(
                     "f",
@@ -1392,13 +1402,16 @@ mod tests {
         #[test]
         fn convert_with_dropped_free_variable() {
             assert_eq!(
-                convert_definition(&Definition::with_environment(
-                    "f",
-                    vec![Argument::new("y", Type::Number)],
-                    vec![Argument::new("x", Type::Number)],
-                    42.0,
-                    Type::Number
-                ))
+                convert_definition(
+                    &Definition::with_environment(
+                        "f",
+                        vec![Argument::new("y", Type::Number)],
+                        vec![Argument::new("x", Type::Number)],
+                        42.0,
+                        Type::Number
+                    ),
+                    false
+                )
                 .unwrap(),
                 Definition::with_environment(
                     "f",
