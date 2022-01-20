@@ -44,7 +44,7 @@ fn validate_definition_body(
     body: &Expression,
     mut variables: HashMap<String, isize>,
 ) -> Result<(), ReferenceCountError> {
-    move_expression(body, &mut variables);
+    move_expression(body, &mut variables)?;
 
     let invalid_variables = variables
         .into_iter()
@@ -52,43 +52,105 @@ fn validate_definition_body(
         .collect::<BTreeMap<_, _>>();
 
     if !invalid_variables.is_empty() {
-        return Err(ReferenceCountError::InvalidReferenceCount(
-            invalid_variables,
-        ));
+        return Err(ReferenceCountError::InvalidExpression(invalid_variables));
     }
 
     Ok(())
 }
 
-fn move_expression(expression: &Expression, variables: &mut HashMap<String, isize>) {
+fn move_expression(
+    expression: &Expression,
+    variables: &mut HashMap<String, isize>,
+) -> Result<(), ReferenceCountError> {
     match expression {
-        Expression::ArithmeticOperation(_) => todo!(),
+        Expression::ArithmeticOperation(operation) => {
+            move_expression(operation.lhs(), variables)?;
+            move_expression(operation.rhs(), variables)?;
+        }
         Expression::Boolean(_) => {}
         Expression::ByteString(_) => {}
-        Expression::Call(_) => todo!(),
+        Expression::Call(call) => {
+            move_expression(call.function(), variables)?;
+
+            for argument in call.arguments() {
+                move_expression(argument, variables)?;
+            }
+        }
         Expression::Case(_) => todo!(),
-        Expression::CloneVariables(_) => todo!(),
-        Expression::ComparisonOperation(_) => todo!(),
+        Expression::CloneVariables(clone) => {
+            for name in clone.variables().keys() {
+                clone_variable(name, variables);
+            }
+
+            move_expression(clone.expression(), variables)?;
+        }
+        Expression::ComparisonOperation(operation) => {
+            move_expression(operation.lhs(), variables)?;
+            move_expression(operation.rhs(), variables)?;
+        }
         Expression::DropVariables(drop) => {
             for name in drop.variables().keys() {
                 drop_variable(name, variables);
             }
 
-            move_expression(drop.expression(), variables);
+            move_expression(drop.expression(), variables)?;
         }
         Expression::If(_) => todo!(),
-        Expression::Let(_) => todo!(),
-        Expression::LetRecursive(_) => todo!(),
+        Expression::Let(let_) => {
+            move_expression(let_.bound_expression(), variables)?;
+
+            let old_count = variables.insert(let_.name().into(), 1);
+
+            move_expression(let_.expression(), variables)?;
+
+            if variables[let_.name()] != 0 {
+                return Err(ReferenceCountError::InvalidLet(let_.clone()));
+            } else if let Some(old) = old_count {
+                variables.insert(let_.name().into(), old);
+            }
+        }
+        Expression::LetRecursive(let_) => {
+            validate_local_definition(let_.definition())?;
+
+            for free_variable in let_.definition().environment() {
+                drop_variable(free_variable.name(), variables);
+            }
+
+            let name = let_.definition().name();
+            let old_count = variables.insert(name.into(), 1);
+
+            move_expression(let_.expression(), variables)?;
+
+            if variables[name] != 0 {
+                return Err(ReferenceCountError::InvalidLetRecursive(let_.clone()));
+            } else if let Some(old) = old_count {
+                variables.insert(name.into(), old);
+            }
+        }
         Expression::None => {}
         Expression::Number(_) => {}
-        Expression::Record(_) => todo!(),
-        Expression::RecordField(_) => todo!(),
+        Expression::Record(record) => {
+            for field in record.fields() {
+                move_expression(field, variables)?;
+            }
+        }
+        Expression::RecordField(field) => {
+            move_expression(field.record(), variables)?;
+        }
         Expression::TryOperation(_) => todo!(),
         Expression::Variable(variable) => {
             drop_variable(variable.name(), variables);
         }
-        Expression::Variant(_) => todo!(),
+        Expression::Variant(variant) => {
+            move_expression(variant.payload(), variables)?;
+        }
     }
+
+    Ok(())
+}
+
+fn clone_variable(name: impl AsRef<str>, variables: &mut HashMap<String, isize>) {
+    variables.insert(name.as_ref().into(), variables[name.as_ref()] + 1);
 }
 
 fn drop_variable(name: impl AsRef<str>, variables: &mut HashMap<String, isize>) {
@@ -99,8 +161,11 @@ fn drop_variable(name: impl AsRef<str>, variables: &mut HashMap<String, isize>) 
 mod tests {
     use super::*;
     use crate::{
-        ir::{Argument, DropVariables, Variable},
-        types::Type,
+        ir::{
+            Argument, ArithmeticOperation, ArithmeticOperator, CloneVariables, DropVariables, Let,
+            LetRecursive, Variable,
+        },
+        types::{self, Type},
     };
 
     #[test]
@@ -116,6 +181,30 @@ mod tests {
             vec![],
             vec![],
             vec![Definition::new("f", vec![], Expression::None, Type::None)],
+        ))
+        .unwrap();
+    }
+
+    #[test]
+    fn validate_variable_clone() {
+        validate(&Module::new(
+            vec![],
+            vec![],
+            vec![],
+            vec![],
+            vec![Definition::new(
+                "f",
+                vec![Argument::new("x", Type::Number)],
+                CloneVariables::new(
+                    [("x".into(), Type::Number)].into_iter().collect(),
+                    ArithmeticOperation::new(
+                        ArithmeticOperator::Add,
+                        Variable::new("x"),
+                        Variable::new("x"),
+                    ),
+                ),
+                Type::None,
+            )],
         ))
         .unwrap();
     }
@@ -169,6 +258,169 @@ mod tests {
                 "f",
                 vec![Argument::new("x", Type::None)],
                 Variable::new("x"),
+                Type::None,
+            )],
+        ))
+        .unwrap();
+    }
+
+    #[test]
+    fn validate_let() {
+        validate(&Module::new(
+            vec![],
+            vec![],
+            vec![],
+            vec![],
+            vec![Definition::new(
+                "f",
+                vec![Argument::new("x", Type::None)],
+                Let::new("y", Type::None, Variable::new("x"), Variable::new("y")),
+                Type::None,
+            )],
+        ))
+        .unwrap();
+    }
+
+    #[test]
+    #[should_panic]
+    fn fail_to_validate_let_with_undropped_bound_variable() {
+        validate(&Module::new(
+            vec![],
+            vec![],
+            vec![],
+            vec![],
+            vec![Definition::new(
+                "f",
+                vec![Argument::new("x", Type::None)],
+                Let::new("y", Type::None, Variable::new("x"), Expression::None),
+                Type::None,
+            )],
+        ))
+        .unwrap();
+    }
+
+    #[test]
+    fn validate_let_with_shadowed_variable() {
+        validate(&Module::new(
+            vec![],
+            vec![],
+            vec![],
+            vec![],
+            vec![Definition::new(
+                "f",
+                vec![Argument::new("x", Type::None)],
+                Let::new("x", Type::None, Variable::new("x"), Variable::new("x")),
+                Type::None,
+            )],
+        ))
+        .unwrap();
+    }
+
+    #[test]
+    #[should_panic]
+    fn fail_to_validate_let_with_shadowed_variable() {
+        validate(&Module::new(
+            vec![],
+            vec![],
+            vec![],
+            vec![],
+            vec![Definition::new(
+                "f",
+                vec![Argument::new("x", Type::None)],
+                Let::new("x", Type::None, Variable::new("x"), Expression::None),
+                Type::None,
+            )],
+        ))
+        .unwrap();
+    }
+
+    #[test]
+    fn validate_let_recursive() {
+        validate(&Module::new(
+            vec![],
+            vec![],
+            vec![],
+            vec![],
+            vec![Definition::new(
+                "f",
+                vec![Argument::new("x", Type::None)],
+                LetRecursive::new(
+                    Definition::with_options(
+                        "g",
+                        vec![Argument::new("x", Type::None)],
+                        vec![],
+                        DropVariables::new(
+                            [("g".into(), types::Function::new(vec![], Type::None).into())]
+                                .into_iter()
+                                .collect(),
+                            Variable::new("x"),
+                        ),
+                        Type::None,
+                        false,
+                    ),
+                    Variable::new("g"),
+                ),
+                Type::None,
+            )],
+        ))
+        .unwrap();
+    }
+
+    #[test]
+    #[should_panic]
+    fn fail_to_validate_let_recursive_with_undropped_function() {
+        validate(&Module::new(
+            vec![],
+            vec![],
+            vec![],
+            vec![],
+            vec![Definition::new(
+                "f",
+                vec![Argument::new("x", Type::None)],
+                LetRecursive::new(
+                    Definition::with_options(
+                        "g",
+                        vec![Argument::new("x", Type::None)],
+                        vec![],
+                        DropVariables::new(
+                            [("g".into(), types::Function::new(vec![], Type::None).into())]
+                                .into_iter()
+                                .collect(),
+                            Variable::new("x"),
+                        ),
+                        Type::None,
+                        false,
+                    ),
+                    Expression::None,
+                ),
+                Type::None,
+            )],
+        ))
+        .unwrap();
+    }
+
+    #[test]
+    #[should_panic]
+    fn fail_to_validate_definition_in_let_recursive() {
+        validate(&Module::new(
+            vec![],
+            vec![],
+            vec![],
+            vec![],
+            vec![Definition::new(
+                "f",
+                vec![Argument::new("x", Type::None)],
+                LetRecursive::new(
+                    Definition::with_options(
+                        "g",
+                        vec![Argument::new("x", Type::None)],
+                        vec![],
+                        Variable::new("x"),
+                        Type::None,
+                        false,
+                    ),
+                    Variable::new("g"),
+                ),
                 Type::None,
             )],
         ))
