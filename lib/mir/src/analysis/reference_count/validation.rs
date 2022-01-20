@@ -805,6 +805,32 @@ mod tests {
     }
 
     #[test]
+    fn fail_to_validate_try_operation_with_shadowed_variable() {
+        assert_eq!(
+            validate(&Module::new(
+                vec![],
+                vec![],
+                vec![],
+                vec![],
+                vec![Definition::new(
+                    "f",
+                    vec![Argument::new("x", Type::Variant)],
+                    TryOperation::new(
+                        Expression::None,
+                        "x",
+                        Type::None,
+                        Variant::new(Type::None, Variable::new("x")),
+                    ),
+                    Type::Variant,
+                )],
+            )),
+            Err(ReferenceCountError::InvalidLocalVariables(
+                [("x".into(), 1)].into_iter().collect()
+            ))
+        );
+    }
+
+    #[test]
     fn validate_global_variable() {
         assert_eq!(
             validate(&Module::new(
