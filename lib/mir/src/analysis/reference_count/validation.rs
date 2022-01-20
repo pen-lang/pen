@@ -100,12 +100,7 @@ fn move_expression(
                     &mut alternative_variables,
                 )?;
 
-                if variables != &alternative_variables {
-                    return Err(ReferenceCountError::UnmatchedVariables(
-                        variables.clone().into_iter().collect(),
-                        alternative_variables.into_iter().collect(),
-                    ));
-                }
+                validate_conditional_variables(variables, &alternative_variables)?
             }
         }
         Expression::CloneVariables(clone) => {
@@ -134,12 +129,7 @@ fn move_expression(
 
             move_expression(if_.else_(), variables)?;
 
-            if variables != &then_variables {
-                return Err(ReferenceCountError::UnmatchedVariables(
-                    variables.clone().into_iter().collect(),
-                    then_variables.into_iter().collect(),
-                ));
-            }
+            validate_conditional_variables(variables, &then_variables)?
         }
         Expression::Let(let_) => {
             move_expression(let_.bound_expression(), variables)?;
@@ -207,6 +197,31 @@ fn validate_let_like(
     }
 
     Ok(())
+}
+
+fn validate_conditional_variables(
+    then_variables: &HashMap<String, isize>,
+    else_variables: &HashMap<String, isize>,
+) -> Result<(), ReferenceCountError> {
+    let then_variables = filter_valid_variables(then_variables);
+    let else_variables = filter_valid_variables(else_variables);
+
+    if then_variables != else_variables {
+        return Err(ReferenceCountError::UnmatchedVariables(
+            then_variables,
+            else_variables,
+        ));
+    }
+
+    Ok(())
+}
+
+fn filter_valid_variables(variables: &HashMap<String, isize>) -> BTreeMap<String, isize> {
+    variables
+        .iter()
+        .filter(|(_, &count)| count != 0)
+        .map(|(name, &count)| (name.clone(), count))
+        .collect()
 }
 
 fn clone_variable(name: impl AsRef<str>, variables: &mut HashMap<String, isize>) {
@@ -540,7 +555,7 @@ mod tests {
             )),
             Err(ReferenceCountError::UnmatchedVariables(
                 [("x".into(), 1)].into_iter().collect(),
-                [("x".into(), 0)].into_iter().collect()
+                Default::default(),
             ))
         );
     }
@@ -725,6 +740,30 @@ mod tests {
             )),
             Err(ReferenceCountError::InvalidLocalVariable("y".into(), 1))
         );
+    }
+
+    #[test]
+    fn validate_case_with_different_bound_variables() {
+        validate(&Module::new(
+            vec![],
+            vec![],
+            vec![],
+            vec![],
+            vec![Definition::new(
+                "f",
+                vec![Argument::new("x", Type::Variant)],
+                Case::new(
+                    Variable::new("x"),
+                    vec![
+                        Alternative::new(Type::None, "y", Variable::new("y")),
+                        Alternative::new(Type::None, "z", Variable::new("z")),
+                    ],
+                    None,
+                ),
+                Type::Variant,
+            )],
+        ))
+        .unwrap();
     }
 
     #[test]
