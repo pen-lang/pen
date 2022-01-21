@@ -33,7 +33,7 @@ fn check_with_cache(
                 let record_names = record_names
                     .clone()
                     .into_iter()
-                    .chain(vec![record.name().into()])
+                    .chain([record.name().into()])
                     .collect();
 
                 record_field_resolver::resolve(type_, type_.position(), types, record_types)?

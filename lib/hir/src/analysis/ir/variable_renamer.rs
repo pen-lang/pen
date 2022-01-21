@@ -36,7 +36,7 @@ mod tests {
                     ),
                     false
                 )],),
-                &vec![("x".into(), "foo.x".into())].into_iter().collect()
+                &[("x".into(), "foo.x".into())].into_iter().collect()
             ),
             Module::empty().set_definitions(vec![Definition::fake(
                 "x",
@@ -67,7 +67,7 @@ mod tests {
         assert_eq!(
             rename(
                 &module,
-                &vec![("x".into(), "foo.x".into())].into_iter().collect()
+                &[("x".into(), "foo.x".into())].into_iter().collect()
             ),
             module
         );
@@ -93,7 +93,7 @@ mod tests {
                     ),
                     false
                 )],),
-                &vec![("x".into(), "foo.x".into())].into_iter().collect()
+                &[("x".into(), "foo.x".into())].into_iter().collect()
             ),
             Module::empty().set_definitions(vec![Definition::fake(
                 "x",
@@ -136,7 +136,7 @@ mod tests {
         assert_eq!(
             rename(
                 &module,
-                &vec![("x".into(), "foo.x".into())].into_iter().collect()
+                &[("x".into(), "foo.x".into())].into_iter().collect()
             ),
             module
         );
