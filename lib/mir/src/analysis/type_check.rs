@@ -6,7 +6,7 @@ use crate::{
     types::{self, Type},
 };
 pub use error::TypeCheckError;
-use std::collections::*;
+use fnv::FnvHashMap;
 
 pub fn check_types(module: &Module) -> Result<(), TypeCheckError> {
     names::check_names(module)?;
@@ -16,7 +16,7 @@ pub fn check_types(module: &Module) -> Result<(), TypeCheckError> {
         .iter()
         .map(|definition| (definition.name(), definition.type_()))
         .collect();
-    let mut variables = BTreeMap::<&str, Type>::new();
+    let mut variables = FnvHashMap::<&str, Type>::default();
 
     for declaration in module.foreign_declarations() {
         variables.insert(declaration.name(), declaration.type_().clone().into());
@@ -47,8 +47,8 @@ pub fn check_types(module: &Module) -> Result<(), TypeCheckError> {
 
 fn check_definition(
     definition: &Definition,
-    variables: &BTreeMap<&str, Type>,
-    types: &BTreeMap<&str, &types::RecordBody>,
+    variables: &FnvHashMap<&str, Type>,
+    types: &FnvHashMap<&str, &types::RecordBody>,
 ) -> Result<(), TypeCheckError> {
     let mut variables = variables.clone();
 
@@ -73,9 +73,9 @@ fn check_definition(
 
 fn check_expression(
     expression: &Expression,
-    variables: &BTreeMap<&str, Type>,
+    variables: &FnvHashMap<&str, Type>,
     result_type: &Type,
-    types: &BTreeMap<&str, &types::RecordBody>,
+    types: &FnvHashMap<&str, &types::RecordBody>,
 ) -> Result<Type, TypeCheckError> {
     let check_expression =
         |expression, variables| check_expression(expression, variables, result_type, types);
@@ -248,11 +248,11 @@ fn check_expression(
 
 fn check_case(
     case: &Case,
-    variables: &BTreeMap<&str, Type>,
+    variables: &FnvHashMap<&str, Type>,
     result_type: &Type,
-    types: &BTreeMap<&str, &types::RecordBody>,
+    types: &FnvHashMap<&str, &types::RecordBody>,
 ) -> Result<Type, TypeCheckError> {
-    let check_expression = |expression: &Expression, variables: &BTreeMap<&str, Type>| {
+    let check_expression = |expression: &Expression, variables: &FnvHashMap<&str, Type>| {
         check_expression(expression, variables, result_type, types)
     };
 
@@ -300,7 +300,7 @@ fn check_case(
 
 fn check_variable(
     variable: &Variable,
-    variables: &BTreeMap<&str, Type>,
+    variables: &FnvHashMap<&str, Type>,
 ) -> Result<Type, TypeCheckError> {
     variables
         .get(variable.name())

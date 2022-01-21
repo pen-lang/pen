@@ -1,12 +1,13 @@
 use crate::ir::*;
-use std::{collections::BTreeMap, error::Error, fmt::Display};
+use fnv::FnvHashMap;
+use std::{error::Error, fmt::Display};
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum ReferenceCountError {
     ExpressionNotSupported(Expression),
     InvalidLocalVariable(String, isize),
-    InvalidLocalVariables(BTreeMap<String, isize>),
-    UnmatchedVariables(BTreeMap<String, isize>, BTreeMap<String, isize>),
+    InvalidLocalVariables(FnvHashMap<String, isize>),
+    UnmatchedVariables(FnvHashMap<String, isize>, FnvHashMap<String, isize>),
 }
 
 impl Display for ReferenceCountError {

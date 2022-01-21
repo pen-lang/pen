@@ -1,11 +1,11 @@
 use crate::ir::*;
-use std::collections::BTreeSet;
+use fnv::FnvHashSet;
 
-pub fn find_free_variables(expression: &Expression) -> BTreeSet<String> {
+pub fn find_free_variables(expression: &Expression) -> FnvHashSet<String> {
     find_in_expression(expression)
 }
 
-fn find_in_expression(expression: &Expression) -> BTreeSet<String> {
+fn find_in_expression(expression: &Expression) -> FnvHashSet<String> {
     match expression {
         Expression::ArithmeticOperation(operation) => find_in_expression(operation.lhs())
             .into_iter()
@@ -59,18 +59,18 @@ fn find_in_expression(expression: &Expression) -> BTreeSet<String> {
         Expression::Boolean(_)
         | Expression::ByteString(_)
         | Expression::None
-        | Expression::Number(_) => BTreeSet::new(),
+        | Expression::Number(_) => FnvHashSet::default(),
     }
 }
 
-fn find_in_case(case: &Case) -> BTreeSet<String> {
+fn find_in_case(case: &Case) -> FnvHashSet<String> {
     find_in_expression(case.argument())
         .into_iter()
         .chain(case.alternatives().iter().flat_map(|alternative| {
             find_in_expression(alternative.expression())
                 .into_iter()
                 .filter(|variable| variable != alternative.name())
-                .collect::<BTreeSet<_>>()
+                .collect::<FnvHashSet<_>>()
         }))
         .chain(
             case.default_alternative()
@@ -79,13 +79,13 @@ fn find_in_case(case: &Case) -> BTreeSet<String> {
                     find_in_expression(alternative.expression())
                         .into_iter()
                         .filter(|variable| variable != alternative.name())
-                        .collect::<BTreeSet<_>>()
+                        .collect::<FnvHashSet<_>>()
                 }),
         )
         .collect()
 }
 
-fn find_in_definition(definition: &Definition) -> BTreeSet<String> {
+fn find_in_definition(definition: &Definition) -> FnvHashSet<String> {
     find_in_expression(definition.body())
         .into_iter()
         .filter(|variable| {

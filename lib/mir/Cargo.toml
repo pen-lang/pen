@@ -9,3 +9,4 @@ edition = "2021"
 [dependencies]
 pretty_assertions = "1.0"
 once_cell = "1"
+fnv = "1"

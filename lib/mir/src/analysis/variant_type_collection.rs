@@ -1,7 +1,7 @@
 use crate::{ir::*, types::Type};
-use std::collections::*;
+use fnv::FnvHashSet;
 
-pub fn collect_variant_types(module: &Module) -> BTreeSet<Type> {
+pub fn collect_variant_types(module: &Module) -> FnvHashSet<Type> {
     module
         .definitions()
         .iter()
@@ -9,11 +9,11 @@ pub fn collect_variant_types(module: &Module) -> BTreeSet<Type> {
         .collect()
 }
 
-fn collect_from_definition(definition: &Definition) -> BTreeSet<Type> {
+fn collect_from_definition(definition: &Definition) -> FnvHashSet<Type> {
     collect_from_expression(definition.body())
 }
 
-fn collect_from_expression(expression: &Expression) -> BTreeSet<Type> {
+fn collect_from_expression(expression: &Expression) -> FnvHashSet<Type> {
     match expression {
         Expression::ArithmeticOperation(operation) => collect_from_expression(operation.lhs())
             .iter()
@@ -71,7 +71,7 @@ fn collect_from_expression(expression: &Expression) -> BTreeSet<Type> {
     }
 }
 
-fn collect_from_case(case: &Case) -> BTreeSet<Type> {
+fn collect_from_case(case: &Case) -> FnvHashSet<Type> {
     collect_from_expression(case.argument())
         .into_iter()
         .chain(case.alternatives().iter().flat_map(|alternative| {

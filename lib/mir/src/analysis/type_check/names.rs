@@ -1,6 +1,6 @@
 use super::TypeCheckError;
 use crate::ir::*;
-use std::collections::BTreeSet;
+use fnv::FnvHashSet;
 
 pub fn check_names(module: &Module) -> Result<(), TypeCheckError> {
     check_types(module.type_definitions())?;
@@ -10,7 +10,7 @@ pub fn check_names(module: &Module) -> Result<(), TypeCheckError> {
 }
 
 fn check_types(definitions: &[TypeDefinition]) -> Result<(), TypeCheckError> {
-    let mut names = BTreeSet::new();
+    let mut names = FnvHashSet::default();
 
     for definition in definitions {
         if names.contains(definition.name()) {
@@ -24,7 +24,7 @@ fn check_types(definitions: &[TypeDefinition]) -> Result<(), TypeCheckError> {
 }
 
 fn check_functions(module: &Module) -> Result<(), TypeCheckError> {
-    let mut names = BTreeSet::new();
+    let mut names = FnvHashSet::default();
 
     for name in module
         .foreign_declarations()
