@@ -48,7 +48,7 @@ mod tests {
                     Position::fake()
                 )
             ])),
-            vec![("foo".into(), type_.into())].into_iter().collect()
+            [("foo".into(), type_.into())].into_iter().collect()
         );
     }
 }

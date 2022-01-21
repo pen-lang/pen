@@ -43,7 +43,7 @@ pub fn compile(
             .definitions()
             .iter()
             .cloned()
-            .chain(vec![Definition::new(
+            .chain([Definition::new(
                 main_module_configuration
                     .object_main_function_name
                     .to_owned()

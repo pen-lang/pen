@@ -18,6 +18,6 @@ fn calculate_canonical(
             .union(&calculate_canonical(union.rhs(), types)?)
             .cloned()
             .collect(),
-        _ => vec![type_.clone()].into_iter().collect(),
+        _ => [type_.clone()].into_iter().collect(),
     })
 }

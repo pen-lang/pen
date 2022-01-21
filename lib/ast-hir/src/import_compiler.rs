@@ -651,7 +651,7 @@ mod tests {
                             )]
                         ),
                         "Bar",
-                        vec!["Bar".into()].into_iter().collect()
+                        ["Bar".into()].into_iter().collect()
                     )],
                     &[]
                 ),
@@ -717,7 +717,7 @@ mod tests {
                             vec![]
                         ),
                         "Bar",
-                        vec!["Bar".into()].into_iter().collect()
+                        ["Bar".into()].into_iter().collect()
                     )],
                     &[]
                 ),
@@ -794,7 +794,7 @@ mod tests {
                             vec![]
                         ),
                         "Bar",
-                        vec!["Bar".into()].into_iter().collect()
+                        ["Bar".into()].into_iter().collect()
                     )],
                     &[]
                 ),

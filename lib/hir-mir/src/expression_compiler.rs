@@ -610,7 +610,7 @@ fn compile_record_fields(
                             &fields
                                 .clone()
                                 .into_iter()
-                                .chain(vec![(
+                                .chain([(
                                     field.name().into(),
                                     mir::ir::Variable::new(field_name.clone()).into(),
                                 )])
@@ -1076,7 +1076,7 @@ mod tests {
                     .into(),
                     &CompileContext::dummy(
                         Default::default(),
-                        vec![("r".into(), vec![])].into_iter().collect()
+                        [("r".into(), vec![])].into_iter().collect()
                     ),
                 ),
                 Ok(mir::ir::Record::new(mir::types::Record::new("r"), vec![]).into())
@@ -1097,7 +1097,7 @@ mod tests {
                         vec![("r".into(), types::Record::new("r", Position::fake()).into())]
                             .into_iter()
                             .collect(),
-                        vec![("r".into(), vec![])].into_iter().collect()
+                        [("r".into(), vec![])].into_iter().collect()
                     ),
                 ),
                 Ok(mir::ir::Record::new(mir::types::Record::new("r"), vec![]).into())

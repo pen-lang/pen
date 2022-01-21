@@ -215,7 +215,7 @@ fn infer_in_let(let_: &Let, variables: &FnvHashMap<String, Type>) -> Let {
             &variables
                 .clone()
                 .into_iter()
-                .chain(vec![(let_.name().into(), let_.type_().clone())])
+                .chain([(let_.name().into(), let_.type_().clone())])
                 .collect(),
         ),
     )
@@ -232,7 +232,7 @@ fn infer_in_let_recursive(
             &variables
                 .clone()
                 .into_iter()
-                .chain(vec![(
+                .chain([(
                     let_.definition().name().into(),
                     let_.definition().type_().clone().into(),
                 )])
@@ -273,7 +273,7 @@ fn infer_in_try_operation(
             &variables
                 .clone()
                 .into_iter()
-                .chain(vec![(operation.name().into(), operation.type_().clone())])
+                .chain([(operation.name().into(), operation.type_().clone())])
                 .collect(),
         ),
     )

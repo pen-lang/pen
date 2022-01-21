@@ -109,7 +109,7 @@ fn check_expression(
                 &variables
                     .clone()
                     .into_iter()
-                    .chain(vec![
+                    .chain([
                         (
                             if_.first_name().into(),
                             types::Function::new(
@@ -145,7 +145,7 @@ fn check_expression(
                     &variables
                         .clone()
                         .into_iter()
-                        .chain(vec![(if_.name().into(), branch.type_().clone())])
+                        .chain([(if_.name().into(), branch.type_().clone())])
                         .collect(),
                 )?;
 
@@ -162,7 +162,7 @@ fn check_expression(
                     &variables
                         .clone()
                         .into_iter()
-                        .chain(vec![(
+                        .chain([(
                             if_.name().into(),
                             branch
                                 .type_()

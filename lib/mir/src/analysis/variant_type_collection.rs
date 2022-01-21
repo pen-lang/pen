@@ -107,7 +107,7 @@ mod tests {
                     Type::None,
                 )],
             )),
-            vec![Type::Number].into_iter().collect()
+            [Type::Number].into_iter().collect()
         );
     }
 
@@ -131,7 +131,7 @@ mod tests {
                     Type::None,
                 )],
             )),
-            vec![Type::Number].into_iter().collect()
+            [Type::Number].into_iter().collect()
         );
     }
 
@@ -155,7 +155,7 @@ mod tests {
                     Type::None,
                 )],
             )),
-            vec![Type::Boolean, Type::Number].into_iter().collect()
+            [Type::Boolean, Type::Number].into_iter().collect()
         );
     }
 }
