@@ -59,6 +59,7 @@ name = "ast_hir"
 version = "0.1.0"
 dependencies = [
  "ast",
+ "fnv",
  "hir",
  "interface",
  "itertools",

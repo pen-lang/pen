@@ -6,7 +6,7 @@ use hir::{
     types::{self, Type},
 };
 use itertools::Itertools;
-use std::collections::BTreeMap;
+use fnv::{FnvHashMap, FnvHashSet};
 
 pub fn compile(
     module: &ir::Module,
@@ -177,7 +177,7 @@ fn rename_types(
                         .map(|alias| (alias.original_name().into(), alias.name().into())),
                 )
         }))
-        .collect::<BTreeMap<String, String>>();
+        .collect::<FnvHashMap<String, String>>();
 
     type_transformer::transform(module, |type_| match type_ {
         Type::Record(record) => types::Record::new(

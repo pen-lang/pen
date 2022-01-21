@@ -8,17 +8,17 @@ mod prelude_module_modifier;
 mod singleton_record_compiler;
 
 use error::CompileError;
+use fnv::FnvHashMap;
 use hir::{
     analysis::ir::{definition_qualifier, type_qualifier},
     ir,
 };
 use imported_module::ImportedModule;
-use std::collections::BTreeMap;
 
 pub fn compile(
     module: &ast::Module,
     prefix: &str,
-    module_interfaces: &BTreeMap<ast::ModulePath, interface::Module>,
+    module_interfaces: &FnvHashMap<ast::ModulePath, interface::Module>,
     prelude_module_interfaces: &[interface::Module],
 ) -> Result<ir::Module, CompileError> {
     let imported_modules = module
