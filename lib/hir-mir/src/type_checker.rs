@@ -243,6 +243,35 @@ fn check_expression(
 
             types::List::new(list.type_().clone(), list.position().clone()).into()
         }
+        Expression::ListComprehension(comprehension) => {
+            let position = comprehension.position();
+            let input_type = comprehension
+                .input_type()
+                .ok_or_else(|| CompileError::TypeNotInferred(position.clone()))?;
+
+            check_subsumption(
+                &check_expression(
+                    comprehension.element(),
+                    &variables
+                        .clone()
+                        .into_iter()
+                        .chain([(
+                            comprehension.element_name().into(),
+                            types::Function::new(vec![], input_type.clone(), position.clone())
+                                .into(),
+                        )])
+                        .collect(),
+                )?,
+                comprehension.output_type(),
+            )?;
+
+            check_subsumption(
+                &check_expression(comprehension.list(), variables)?,
+                &types::List::new(input_type.clone(), position.clone()).into(),
+            )?;
+
+            types::List::new(comprehension.output_type().clone(), position.clone()).into()
+        }
         Expression::None(none) => types::None::new(none.position().clone()).into(),
         Expression::Number(number) => types::Number::new(number.position().clone()).into(),
         Expression::Operation(operation) => check_operation(operation, variables, context)?,
@@ -1951,6 +1980,86 @@ mod tests {
                 false,
             )]))
             .unwrap();
+        }
+
+        #[test]
+        fn check_list_comprehension() {
+            let element_type = types::None::new(Position::fake());
+
+            check_module(&Module::empty().set_definitions(vec![Definition::fake(
+                "f",
+                Lambda::new(
+                    vec![],
+                    types::List::new(element_type.clone(), Position::fake()),
+                    ListComprehension::new(
+                        Some(element_type.clone().into()),
+                        element_type.clone(),
+                        Call::new(
+                            Some(types::Function::new(
+                                vec![],
+                                element_type.clone(),
+                                Position::fake(),
+                            ).into()),
+                            Variable::new("x", Position::fake()),
+                            vec![],
+                            Position::fake(),
+                        ),
+                        "x",
+                        List::new(element_type, vec![], Position::fake()),
+                        Position::fake(),
+                    ),
+                    Position::fake(),
+                ),
+                false,
+            )]))
+            .unwrap();
+        }
+
+        #[test]
+        fn fail_to_check_list_in_list_comprehension() {
+            let element_type = types::None::new(Position::fake());
+
+            assert_eq!(
+                check_module(&Module::empty().set_definitions(vec![Definition::fake(
+                    "f",
+                    Lambda::new(
+                        vec![],
+                        types::List::new(element_type.clone(), Position::fake()),
+                        ListComprehension::new(
+                            Some(element_type.clone().into()),
+                            element_type.clone(),
+                            Call::new(
+                                Some(
+                                    types::Function::new(
+                                        vec![],
+                                        element_type.clone(),
+                                        Position::fake(),
+                                    )
+                                    .into(),
+                                ),
+                                Variable::new("x", Position::fake()),
+                                vec![],
+                                Position::fake(),
+                            ),
+                            "x",
+                            List::new(
+                                element_type,
+                                vec![ListElement::Single(
+                                    Number::new(42.0, Position::fake()).into(),
+                                )],
+                                Position::fake(),
+                            ),
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    ),
+                    false,
+                )])),
+                Err(CompileError::TypesNotMatched(
+                    Position::fake(),
+                    Position::fake()
+                ))
+            );
         }
     }
 

@@ -109,6 +109,11 @@ pub fn extract_from_expression(
         Expression::List(list) => {
             types::List::new(list.type_().clone(), list.position().clone()).into()
         }
+        Expression::ListComprehension(comprehension) => types::List::new(
+            comprehension.output_type().clone(),
+            comprehension.position().clone(),
+        )
+        .into(),
         Expression::Let(let_) => extract_from_expression(
             let_.expression(),
             &variables

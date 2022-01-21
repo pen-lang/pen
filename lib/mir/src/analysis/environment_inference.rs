@@ -38,13 +38,24 @@ fn infer_in_local_definition(
     definition: &Definition,
     variables: &BTreeMap<String, Type>,
 ) -> Definition {
+    let local_variables = [(definition.name().into(), definition.type_().clone().into())]
+        .into_iter()
+        .chain(
+            definition
+                .arguments()
+                .iter()
+                .map(|argument| (argument.name().into(), argument.type_().clone())),
+        )
+        .collect::<BTreeMap<_, _>>();
+
     Definition::with_options(
         definition.name(),
         find_free_variables(definition.body())
-            .iter()
+            .into_iter()
+            .filter(|name| !local_variables.contains_key(name.as_str()))
             .filter_map(|name| {
                 variables
-                    .get(name)
+                    .get(&name)
                     .map(|type_| Argument::new(name, type_.clone()))
             })
             .collect(),
@@ -52,18 +63,9 @@ fn infer_in_local_definition(
         infer_in_expression(
             definition.body(),
             &variables
-                .iter()
-                .map(|(name, type_)| (name.clone(), type_.clone()))
-                .chain(vec![(
-                    definition.name().into(),
-                    definition.type_().clone().into(),
-                )])
-                .chain(
-                    definition
-                        .arguments()
-                        .iter()
-                        .map(|argument| (argument.name().into(), argument.type_().clone())),
-                )
+                .clone()
+                .into_iter()
+                .chain(local_variables)
                 .collect(),
         ),
         definition.result_type().clone(),
@@ -208,8 +210,8 @@ fn infer_in_let(let_: &Let, variables: &BTreeMap<String, Type>) -> Let {
         infer_in_expression(
             let_.expression(),
             &variables
-                .iter()
-                .map(|(name, type_)| (name.clone(), type_.clone()))
+                .clone()
+                .into_iter()
                 .chain(vec![(let_.name().into(), let_.type_().clone())])
                 .collect(),
         ),
@@ -222,8 +224,8 @@ fn infer_in_let_recursive(let_: &LetRecursive, variables: &BTreeMap<String, Type
         infer_in_expression(
             let_.expression(),
             &variables
-                .iter()
-                .map(|(name, type_)| (name.clone(), type_.clone()))
+                .clone()
+                .into_iter()
                 .chain(vec![(
                     let_.definition().name().into(),
                     let_.definition().type_().clone().into(),
@@ -263,8 +265,8 @@ fn infer_in_try_operation(
         infer_in_expression(
             operation.then(),
             &variables
-                .iter()
-                .map(|(name, type_)| (name.clone(), type_.clone()))
+                .clone()
+                .into_iter()
                 .chain(vec![(operation.name().into(), operation.type_().clone())])
                 .collect(),
         ),
@@ -390,6 +392,65 @@ mod tests {
     }
 
     #[test]
+    fn infer_environment_for_recursive_definition_shadowing_outer_variable() {
+        assert_eq!(
+            infer_in_let_recursive(
+                &LetRecursive::new(
+                    Definition::new(
+                        "f",
+                        vec![Argument::new("x", Type::Number)],
+                        Call::new(
+                            types::Function::new(vec![Type::Number], Type::Number),
+                            LetRecursive::new(
+                                Definition::new(
+                                    "f",
+                                    vec![Argument::new("x", Type::Number)],
+                                    Call::new(
+                                        types::Function::new(vec![Type::Number], Type::Number),
+                                        Variable::new("f"),
+                                        vec![Variable::new("x").into()]
+                                    ),
+                                    Type::Number
+                                ),
+                                Variable::new("f")
+                            ),
+                            vec![Variable::new("x").into()]
+                        ),
+                        Type::Number
+                    ),
+                    Expression::Number(42.0)
+                ),
+                &Default::default(),
+            )
+            .definition(),
+            &Definition::with_environment(
+                "f",
+                vec![],
+                vec![Argument::new("x", Type::Number)],
+                Call::new(
+                    types::Function::new(vec![Type::Number], Type::Number),
+                    LetRecursive::new(
+                        Definition::with_environment(
+                            "f",
+                            vec![],
+                            vec![Argument::new("x", Type::Number)],
+                            Call::new(
+                                types::Function::new(vec![Type::Number], Type::Number),
+                                Variable::new("f"),
+                                vec![Variable::new("x").into()]
+                            ),
+                            Type::Number
+                        ),
+                        Variable::new("f")
+                    ),
+                    vec![Variable::new("x").into()]
+                ),
+                Type::Number
+            )
+        );
+    }
+
+    #[test]
     fn infer_environment_for_nested_function_definitions() {
         assert_eq!(
             infer_in_let_recursive(
@@ -436,6 +497,28 @@ mod tests {
                 42.0,
             )
             .into()
+        );
+    }
+
+    #[test]
+    fn infer_environment_with_shadowed_variable() {
+        assert_eq!(
+            infer_in_local_definition(
+                &Definition::new(
+                    "f",
+                    vec![Argument::new("x", Type::Number)],
+                    Variable::new("x"),
+                    Type::Number
+                ),
+                &vec![("x".into(), Type::Number)].drain(..).collect()
+            ),
+            Definition::with_environment(
+                "f",
+                vec![],
+                vec![Argument::new("x", Type::Number)],
+                Variable::new("x"),
+                Type::Number
+            )
         );
     }
 }

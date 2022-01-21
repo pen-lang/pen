@@ -60,6 +60,10 @@ fn visit_expression(expression: &Expression, visit: &mut impl FnMut(&Expression)
                 });
             }
         }
+        Expression::ListComprehension(comprehension) => {
+            visit_expression(comprehension.element());
+            visit_expression(comprehension.list());
+        }
         Expression::Operation(operation) => match operation {
             Operation::Arithmetic(operation) => {
                 visit_expression(operation.lhs());

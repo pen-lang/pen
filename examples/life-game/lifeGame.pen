@@ -70,11 +70,15 @@ stepColumns = \(upper [boolean], current [boolean], lower [boolean]) [boolean] |
     if c = cellTuple(current) as cellTuple {
       if l = cellTuple(lower) as cellTuple {
         n = Number'Sum(
-          booleansToNumbers([boolean
-            u.first, u.second, u.third,
-            c.first, c.third,
-            l.first, l.second, l.third,
-          ]),
+          [number
+            if b() { 1 } else { 0 }
+            for b in
+            [boolean
+              u.first, u.second, u.third,
+              c.first, c.third,
+              l.first, l.second, l.third,
+            ]
+          ],
         )
         bs = stepColumns(tail(upper), tail(current), tail(lower))?
 
@@ -115,15 +119,6 @@ cellTuple = \(cs [boolean]) cellTuple | none {
 }
 
 # TODO Use a list comprehension.
-booleansToNumbers = \(bs [boolean]) [number] {
-  if [b, ...bs] = bs {
-    [number if b() { 1 } else { 0 }, ...booleansToNumbers(bs)]
-  } else {
-    [number]
-  }
-}
-
-# TODO Use a list comprehension.
 Initialize = \(ctx Context, rows number, columns number) [[boolean]] {
   if rows == 0 {
     [[boolean]]
@@ -140,27 +135,15 @@ initializeRow = \(ctx Context, columns number) [boolean] {
   }
 }
 
-# TODO Use a list comprehension.
 Render = \(rs [[boolean]]) string {
-  if [r, ...rs] = rs {
-    String'Join([string renderRow(r()), Render(rs)], "\n")
-  } else {
-    ""
-  }
-}
-
-renderRow = \(xs [boolean]) string {
-  if [x, ...xs] = xs {
-    String'Join([string renderCell(x()), renderRow(xs)], "")
-  } else {
-    ""
-  }
-}
-
-renderCell = \(cell boolean) string {
-  if cell {
-    "o"
-  } else {
-    "."
-  }
+  String'Join(
+    [string
+      ...[string
+        String'Join([string if x() { "o" } else { "." } for x in r()], "")
+        for r in rs
+      ],
+      "",
+    ],
+    "\n",
+  )
 }

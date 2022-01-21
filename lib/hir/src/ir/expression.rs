@@ -2,7 +2,7 @@ use super::{
     boolean::Boolean, call::Call, if_::If, if_list::IfList, if_type::IfType, list::List,
     none::None, number::Number, operation::Operation, record_construction::RecordConstruction,
     record_deconstruction::RecordDeconstruction, record_update::RecordUpdate, string::ByteString,
-    type_coercion::TypeCoercion, variable::Variable, Lambda, Let, Thunk,
+    type_coercion::TypeCoercion, variable::Variable, Lambda, Let, ListComprehension, Thunk,
 };
 use position::Position;
 
@@ -16,6 +16,7 @@ pub enum Expression {
     Lambda(Lambda),
     Let(Let),
     List(List),
+    ListComprehension(ListComprehension),
     None(None),
     Number(Number),
     Operation(Operation),
@@ -39,6 +40,7 @@ impl Expression {
             Self::Lambda(lambda) => lambda.position(),
             Self::Let(let_) => let_.position(),
             Self::List(list) => list.position(),
+            Self::ListComprehension(comprehension) => comprehension.position(),
             Self::None(none) => none.position(),
             Self::Number(number) => number.position(),
             Self::Operation(operation) => operation.position(),
@@ -116,6 +118,12 @@ impl From<Let> for Expression {
 impl From<List> for Expression {
     fn from(list: List) -> Self {
         Self::List(list)
+    }
+}
+
+impl From<ListComprehension> for Expression {
+    fn from(comprehension: ListComprehension) -> Self {
+        Self::ListComprehension(comprehension)
     }
 }
 

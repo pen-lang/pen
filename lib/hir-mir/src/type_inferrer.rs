@@ -242,6 +242,39 @@ fn infer_expression(
             list.position().clone(),
         )
         .into(),
+        Expression::ListComprehension(comprehension) => {
+            let list = infer_expression(comprehension.list(), variables)?;
+            let list_type = type_canonicalizer::canonicalize_list(
+                &type_extractor::extract_from_expression(&list, variables, context)?,
+                context.types(),
+            )?
+            .ok_or_else(|| CompileError::ListExpected(comprehension.list().position().clone()))?;
+
+            ListComprehension::new(
+                Some(list_type.element().clone()),
+                comprehension.output_type().clone(),
+                infer_expression(
+                    comprehension.element(),
+                    &variables
+                        .clone()
+                        .into_iter()
+                        .chain([(
+                            comprehension.element_name().into(),
+                            types::Function::new(
+                                vec![],
+                                list_type.element().clone(),
+                                comprehension.position().clone(),
+                            )
+                            .into(),
+                        )])
+                        .collect(),
+                )?,
+                comprehension.element_name(),
+                list,
+                comprehension.position().clone(),
+            )
+            .into()
+        }
         Expression::Operation(operation) => match operation {
             Operation::Arithmetic(operation) => ArithmeticOperation::new(
                 operation.operator(),
@@ -607,6 +640,78 @@ mod tests {
                     ),
                     false,
                 )]))
+        );
+    }
+
+    #[test]
+    fn infer_list_comprehension() {
+        let element_type = types::None::new(Position::fake());
+        let list_type = types::List::new(element_type.clone(), Position::fake());
+
+        assert_eq!(
+            infer_module(&Module::empty().set_definitions(vec![Definition::fake(
+                "f",
+                Lambda::new(
+                    vec![],
+                    list_type.clone(),
+                    ListComprehension::new(
+                        None,
+                        element_type.clone(),
+                        Let::new(
+                            Some("y".into()),
+                            None,
+                            Call::new(
+                                None,
+                                Variable::new("x", Position::fake()),
+                                vec![],
+                                Position::fake()
+                            ),
+                            Variable::new("y", Position::fake()),
+                            Position::fake(),
+                        ),
+                        "x",
+                        List::new(element_type.clone(), vec![], Position::fake()),
+                        Position::fake(),
+                    ),
+                    Position::fake(),
+                ),
+                false,
+            )])),
+            Ok(Module::empty().set_definitions(vec![Definition::fake(
+                "f",
+                Lambda::new(
+                    vec![],
+                    list_type,
+                    ListComprehension::new(
+                        Some(element_type.clone().into()),
+                        element_type.clone(),
+                        Let::new(
+                            Some("y".into()),
+                            Some(element_type.clone().into()),
+                            Call::new(
+                                Some(
+                                    types::Function::new(
+                                        vec![],
+                                        element_type.clone(),
+                                        Position::fake()
+                                    )
+                                    .into()
+                                ),
+                                Variable::new("x", Position::fake()),
+                                vec![],
+                                Position::fake()
+                            ),
+                            Variable::new("y", Position::fake()),
+                            Position::fake(),
+                        ),
+                        "x",
+                        List::new(element_type, vec![], Position::fake()),
+                        Position::fake(),
+                    ),
+                    Position::fake(),
+                ),
+                false,
+            )],))
         );
     }
 

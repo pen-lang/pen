@@ -53,6 +53,9 @@ fn collect_types(
     let mut lower_types = BTreeSet::new();
 
     expression_visitor::visit(module, |expression| match expression {
+        Expression::IfList(if_) => {
+            lower_types.insert(if_.type_().unwrap().clone());
+        }
         Expression::IfType(if_) => {
             lower_types.extend(
                 if_.branches()
@@ -64,6 +67,10 @@ fn collect_types(
         }
         Expression::List(list) => {
             lower_types.insert(list.type_().clone());
+        }
+        Expression::ListComprehension(comprehension) => {
+            lower_types.insert(comprehension.input_type().unwrap().clone());
+            lower_types.insert(comprehension.output_type().clone());
         }
         Expression::TypeCoercion(coercion) => {
             lower_types.insert(coercion.from().clone());
@@ -315,6 +322,125 @@ mod tests {
                             vec![ListElement::Single(
                                 Variable::new("x", Position::fake()).into()
                             )],
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    ),
+                    false,
+                )]),
+                &context,
+            ),
+            Ok(vec![mir::ir::TypeDefinition::new(
+                type_compiler::compile_concrete_list_name(&list_type, context.types()).unwrap(),
+                mir::types::RecordBody::new(vec![mir::types::Record::new(
+                    &context.configuration().unwrap().list_type.list_type_name
+                )
+                .into()]),
+            )])
+        );
+    }
+
+    #[test]
+    fn collect_input_type_from_list_comprehension() {
+        let context = CompileContext::dummy(Default::default(), Default::default());
+        let list_type = types::List::new(types::None::new(Position::fake()), Position::fake());
+        let union_type = types::Union::new(
+            list_type.clone(),
+            types::None::new(Position::fake()),
+            Position::fake(),
+        );
+
+        assert_eq!(
+            compile(
+                &Module::empty().set_definitions(vec![Definition::fake(
+                    "foo",
+                    Lambda::new(
+                        vec![],
+                        types::None::new(Position::fake()),
+                        ListComprehension::new(
+                            Some(union_type.clone().into()),
+                            types::None::new(Position::fake()),
+                            None::new(Position::fake()),
+                            "_",
+                            List::new(union_type, vec![], Position::fake()),
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    ),
+                    false,
+                )]),
+                &context,
+            ),
+            Ok(vec![mir::ir::TypeDefinition::new(
+                type_compiler::compile_concrete_list_name(&list_type, context.types()).unwrap(),
+                mir::types::RecordBody::new(vec![mir::types::Record::new(
+                    &context.configuration().unwrap().list_type.list_type_name
+                )
+                .into()]),
+            )])
+        );
+    }
+
+    #[test]
+    fn collect_output_type_from_list_comprehension() {
+        let context = CompileContext::dummy(Default::default(), Default::default());
+        let list_type = types::List::new(types::None::new(Position::fake()), Position::fake());
+        let union_type = types::Union::new(
+            list_type.clone(),
+            types::None::new(Position::fake()),
+            Position::fake(),
+        );
+
+        assert_eq!(
+            compile(
+                &Module::empty().set_definitions(vec![Definition::fake(
+                    "foo",
+                    Lambda::new(
+                        vec![],
+                        types::None::new(Position::fake()),
+                        ListComprehension::new(
+                            Some(types::None::new(Position::fake()).into()),
+                            union_type,
+                            None::new(Position::fake()),
+                            "_",
+                            List::new(types::None::new(Position::fake()), vec![], Position::fake()),
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    ),
+                    false,
+                )]),
+                &context,
+            ),
+            Ok(vec![mir::ir::TypeDefinition::new(
+                type_compiler::compile_concrete_list_name(&list_type, context.types()).unwrap(),
+                mir::types::RecordBody::new(vec![mir::types::Record::new(
+                    &context.configuration().unwrap().list_type.list_type_name
+                )
+                .into()]),
+            )])
+        );
+    }
+
+    #[test]
+    fn collect_type_from_if_list() {
+        let context = CompileContext::dummy(Default::default(), Default::default());
+        let list_type = types::List::new(types::None::new(Position::fake()), Position::fake());
+
+        assert_eq!(
+            compile(
+                &Module::empty().set_definitions(vec![Definition::fake(
+                    "foo",
+                    Lambda::new(
+                        vec![],
+                        types::None::new(Position::fake()),
+                        IfList::new(
+                            Some(list_type.clone().into()),
+                            List::new(types::None::new(Position::fake()), vec![], Position::fake()),
+                            "x",
+                            "xs",
+                            None::new(Position::fake()),
+                            None::new(Position::fake()),
                             Position::fake(),
                         ),
                         Position::fake(),
