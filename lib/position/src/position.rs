@@ -1,5 +1,9 @@
 use serde::{Deserialize, Serialize};
-use std::{cmp::Ordering, fmt::Display};
+use std::{
+    cmp::Ordering,
+    fmt::Display,
+    hash::{Hash, Hasher},
+};
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Position {
@@ -51,6 +55,10 @@ impl PartialEq for Position {
     fn eq(&self, _: &Self) -> bool {
         true
     }
+}
+
+impl Hash for Position {
+    fn hash<H: Hasher>(&self, _: &mut H) {}
 }
 
 impl Ord for Position {

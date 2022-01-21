@@ -1,14 +1,14 @@
 use super::{context::CompileContext, CompileError};
+use fnv::{FnvHashMap, FnvHashSet};
 use hir::{
     analysis::types::{record_field_resolver, type_canonicalizer, union_type_creator},
     ir::*,
     types::{self, Type},
 };
-use std::collections::BTreeMap;
 
 pub fn extract_from_expression(
     expression: &Expression,
-    variables: &BTreeMap<String, Type>,
+    variables: &FnvHashMap<String, Type>,
     context: &CompileContext,
 ) -> Result<Type, CompileError> {
     let extract_from_expression =

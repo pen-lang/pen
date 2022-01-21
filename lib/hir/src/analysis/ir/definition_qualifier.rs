@@ -1,6 +1,6 @@
 use super::variable_renamer;
 use crate::ir::*;
-use std::collections::BTreeMap;
+use fnv::{FnvHashMap, FnvHashSet};
 
 pub fn qualify(module: &Module, prefix: &str) -> Module {
     let names = module
@@ -18,7 +18,7 @@ pub fn qualify(module: &Module, prefix: &str) -> Module {
                 prefix.to_owned() + definition.name(),
             )
         }))
-        .collect::<BTreeMap<_, _>>();
+        .collect::<FnvHashMap<_, _>>();
 
     variable_renamer::rename(
         &Module::new(

@@ -1,4 +1,5 @@
 use super::{context::CompileContext, type_compiler, CompileError};
+use fnv::{FnvHashMap, FnvHashSet};
 use hir::{
     analysis::{
         ir::expression_visitor,
@@ -7,7 +8,6 @@ use hir::{
     ir::*,
     types::Type,
 };
-use std::collections::{BTreeMap, BTreeSet};
 
 pub fn compile(
     module: &Module,
@@ -48,9 +48,9 @@ fn compile_type_definition(
 
 fn collect_types(
     module: &Module,
-    types: &BTreeMap<String, Type>,
-) -> Result<BTreeSet<Type>, TypeError> {
-    let mut lower_types = BTreeSet::new();
+    types: &FnvHashMap<String, Type>,
+) -> Result<FnvHashSet<Type>, TypeError> {
+    let mut lower_types = FnvHashSet::default();
 
     expression_visitor::visit(module, |expression| match expression {
         Expression::IfList(if_) => {

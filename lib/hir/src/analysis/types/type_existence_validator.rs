@@ -1,11 +1,12 @@
 use super::error::TypeError;
 use crate::{analysis::ir::type_transformer, ir::*, types::Type};
-use std::{cell::RefCell, collections::BTreeSet};
+use fnv::FnvHashSet;
+use std::cell::RefCell;
 
 pub fn validate(
     module: &Module,
-    types: &BTreeSet<String>,
-    records: &BTreeSet<String>,
+    types: &FnvHashSet<String>,
+    records: &FnvHashSet<String>,
 ) -> Result<(), TypeError> {
     for type_ in &collect_types(module) {
         match type_ {

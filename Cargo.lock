@@ -381,6 +381,7 @@ dependencies = [
 name = "hir"
 version = "0.1.0"
 dependencies = [
+ "fnv",
  "position",
  "pretty_assertions",
  "serde",
@@ -390,6 +391,7 @@ dependencies = [
 name = "hir_mir"
 version = "0.1.0"
 dependencies = [
+ "fnv",
  "hir",
  "insta",
  "interface",

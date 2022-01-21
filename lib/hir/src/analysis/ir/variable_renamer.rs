@@ -1,8 +1,8 @@
 use super::variable_transformer;
 use crate::ir::*;
-use std::collections::BTreeMap;
+use fnv::{FnvHashMap, FnvHashSet};
 
-pub fn rename(module: &Module, names: &BTreeMap<String, String>) -> Module {
+pub fn rename(module: &Module, names: &FnvHashMap<String, String>) -> Module {
     variable_transformer::transform(module, &|variable| {
         if let Some(name) = names.get(variable.name()) {
             Variable::new(name, variable.position().clone()).into()

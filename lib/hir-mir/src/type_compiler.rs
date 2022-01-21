@@ -1,9 +1,9 @@
 use super::{context::CompileContext, CompileError};
+use fnv::{FnvHashMap, FnvHashSet};
 use hir::{
     analysis::types::{type_canonicalizer, type_id_calculator},
     types::{self, Type},
 };
-use std::collections::BTreeMap;
 
 pub fn compile(type_: &Type, context: &CompileContext) -> Result<mir::types::Type, CompileError> {
     Ok(
@@ -39,7 +39,7 @@ pub fn compile_function(
 
 pub fn compile_concrete_function(
     function: &types::Function,
-    types: &BTreeMap<String, Type>,
+    types: &FnvHashMap<String, Type>,
 ) -> Result<mir::types::Record, CompileError> {
     Ok(mir::types::Record::new(compile_concrete_function_name(
         function, types,
@@ -48,7 +48,7 @@ pub fn compile_concrete_function(
 
 pub fn compile_concrete_function_name(
     function: &types::Function,
-    types: &BTreeMap<String, Type>,
+    types: &FnvHashMap<String, Type>,
 ) -> Result<String, CompileError> {
     Ok(format!(
         "_function_{}",
@@ -64,7 +64,7 @@ pub fn compile_list(context: &CompileContext) -> Result<mir::types::Record, Comp
 
 pub fn compile_concrete_list(
     list: &types::List,
-    types: &BTreeMap<String, Type>,
+    types: &FnvHashMap<String, Type>,
 ) -> Result<mir::types::Record, CompileError> {
     Ok(mir::types::Record::new(compile_concrete_list_name(
         list, types,
@@ -73,7 +73,7 @@ pub fn compile_concrete_list(
 
 pub fn compile_concrete_list_name(
     list: &types::List,
-    types: &BTreeMap<String, Type>,
+    types: &FnvHashMap<String, Type>,
 ) -> Result<String, CompileError> {
     Ok(format!(
         "_list_{}",

@@ -1,15 +1,15 @@
 use crate::{CompileConfiguration, CompileError};
+use fnv::{FnvHashMap, FnvHashSet};
 use hir::{
     analysis::types::type_collector,
     ir::*,
     types::{self, Type},
 };
-use std::collections::BTreeMap;
 
 #[derive(Debug)]
 pub struct CompileContext {
-    types: BTreeMap<String, Type>,
-    records: BTreeMap<String, Vec<types::RecordField>>,
+    types: FnvHashMap<String, Type>,
+    records: FnvHashMap<String, Vec<types::RecordField>>,
     configuration: Option<CompileConfiguration>,
 }
 
@@ -28,8 +28,8 @@ impl CompileContext {
 
     #[cfg(test)]
     pub fn dummy(
-        types: BTreeMap<String, Type>,
-        records: BTreeMap<String, Vec<types::RecordField>>,
+        types: FnvHashMap<String, Type>,
+        records: FnvHashMap<String, Vec<types::RecordField>>,
     ) -> Self {
         use super::compile_configuration::COMPILE_CONFIGURATION;
 
@@ -40,11 +40,11 @@ impl CompileContext {
         }
     }
 
-    pub fn types(&self) -> &BTreeMap<String, Type> {
+    pub fn types(&self) -> &FnvHashMap<String, Type> {
         &self.types
     }
 
-    pub fn records(&self) -> &BTreeMap<String, Vec<types::RecordField>> {
+    pub fn records(&self) -> &FnvHashMap<String, Vec<types::RecordField>> {
         &self.records
     }
 

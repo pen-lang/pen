@@ -1,10 +1,10 @@
 use super::CompileError;
+use fnv::{FnvHashMap, FnvHashSet};
 use hir::ir::*;
 use position::Position;
-use std::collections::BTreeMap;
 
 pub fn validate(module: &Module) -> Result<(), CompileError> {
-    let mut definitions = BTreeMap::<&str, &Position>::new();
+    let mut definitions = FnvHashMap::<&str, &Position>::default();
 
     for definition in module.definitions() {
         if let Some(&position) = definitions.get(definition.name()) {

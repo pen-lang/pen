@@ -1,9 +1,9 @@
 use super::{context::CompileContext, CompileError};
+use fnv::{FnvHashMap, FnvHashSet};
 use hir::{
     analysis::{ir::expression_visitor, types::type_canonicalizer},
     ir::*,
 };
-use std::collections::BTreeSet;
 
 pub fn validate(module: &Module, context: &CompileContext) -> Result<(), CompileError> {
     let open_records = collect_open_records(module.type_definitions());
@@ -67,7 +67,7 @@ fn collect_expressions(module: &Module) -> Vec<Expression> {
     expressions
 }
 
-fn collect_open_records(type_definitions: &[TypeDefinition]) -> BTreeSet<String> {
+fn collect_open_records(type_definitions: &[TypeDefinition]) -> FnvHashSet<String> {
     type_definitions
         .iter()
         .filter_map(|definition| {
