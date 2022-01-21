@@ -362,7 +362,7 @@ mod tests {
                             types::None::new(Position::fake()),
                             None::new(Position::fake()),
                             "_",
-                            List::new(union_type.clone(), vec![], Position::fake()),
+                            List::new(union_type, vec![], Position::fake()),
                             Position::fake(),
                         ),
                         Position::fake(),
