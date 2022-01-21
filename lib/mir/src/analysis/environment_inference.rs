@@ -397,6 +397,65 @@ mod tests {
     }
 
     #[test]
+    fn infer_environment_for_recursive_definition_shadowing_outer_variable() {
+        assert_eq!(
+            infer_in_let_recursive(
+                &LetRecursive::new(
+                    Definition::new(
+                        "f",
+                        vec![Argument::new("x", Type::Number)],
+                        Call::new(
+                            types::Function::new(vec![Type::Number], Type::Number),
+                            LetRecursive::new(
+                                Definition::new(
+                                    "f",
+                                    vec![Argument::new("x", Type::Number)],
+                                    Call::new(
+                                        types::Function::new(vec![Type::Number], Type::Number),
+                                        Variable::new("f"),
+                                        vec![Variable::new("x").into()]
+                                    ),
+                                    Type::Number
+                                ),
+                                Variable::new("f")
+                            ),
+                            vec![Variable::new("x").into()]
+                        ),
+                        Type::Number
+                    ),
+                    Expression::Number(42.0)
+                ),
+                &Default::default(),
+            )
+            .definition(),
+            &Definition::with_environment(
+                "f",
+                vec![],
+                vec![Argument::new("x", Type::Number)],
+                Call::new(
+                    types::Function::new(vec![Type::Number], Type::Number),
+                    LetRecursive::new(
+                        Definition::with_environment(
+                            "f",
+                            vec![],
+                            vec![Argument::new("x", Type::Number)],
+                            Call::new(
+                                types::Function::new(vec![Type::Number], Type::Number),
+                                Variable::new("f"),
+                                vec![Variable::new("x").into()]
+                            ),
+                            Type::Number
+                        ),
+                        Variable::new("f")
+                    ),
+                    vec![Variable::new("x").into()]
+                ),
+                Type::Number
+            )
+        );
+    }
+
+    #[test]
     fn infer_environment_for_nested_function_definitions() {
         assert_eq!(
             infer_in_let_recursive(
