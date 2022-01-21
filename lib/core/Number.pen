@@ -30,3 +30,15 @@ Power = \(x number, y number) number {
 SquareRoot = \(x number) number {
   _pen_core_square_root(x)
 }
+
+Sequence = \(n number) [number] {
+  Range(1, n)
+}
+
+Range = \(min number, max number) [number] {
+  if min > max {
+    [number]
+  } else {
+    [number min, ...Range(min + 1, max)]
+  }
+}
