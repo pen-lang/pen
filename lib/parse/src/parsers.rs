@@ -512,7 +512,7 @@ fn if_<'a>() -> impl Parser<Stream<'a>, Output = If> {
         .map(
             |(position, first_branch, branches, _, else_block): (_, _, Vec<_>, _, _)| {
                 If::new(
-                    vec![first_branch].into_iter().chain(branches).collect(),
+                    [first_branch].into_iter().chain(branches).collect(),
                     else_block,
                     position,
                 )
@@ -568,7 +568,7 @@ fn if_type<'a>() -> impl Parser<Stream<'a>, Output = IfType> {
                 IfType::new(
                     identifier,
                     argument,
-                    vec![first_branch].into_iter().chain(branches).collect(),
+                    [first_branch].into_iter().chain(branches).collect(),
                     else_,
                     position,
                 )

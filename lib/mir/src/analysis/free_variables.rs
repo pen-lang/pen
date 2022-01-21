@@ -54,7 +54,7 @@ fn find_in_expression(expression: &Expression) -> BTreeSet<String> {
                     .filter(|variable| variable != operation.name()),
             )
             .collect(),
-        Expression::Variable(variable) => vec![variable.name().into()].into_iter().collect(),
+        Expression::Variable(variable) => [variable.name().into()].into_iter().collect(),
         Expression::Variant(variant) => find_in_expression(variant.payload()),
         Expression::Boolean(_)
         | Expression::ByteString(_)
