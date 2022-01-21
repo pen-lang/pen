@@ -117,10 +117,7 @@ fn convert_expression(
                         &owned_variables
                             .clone()
                             .into_iter()
-                            .chain([(
-                                alternative.name().into(),
-                                alternative.type_().clone(),
-                            )])
+                            .chain([(alternative.name().into(), alternative.type_().clone())])
                             .collect(),
                         &moved_variables
                             .clone()
@@ -425,10 +422,7 @@ fn convert_expression(
                     let (field, moved_variables) =
                         convert_expression(field, owned_variables, &moved_variables)?;
 
-                    Ok((
-                        [field].into_iter().chain(fields).collect(),
-                        moved_variables,
-                    ))
+                    Ok(([field].into_iter().chain(fields).collect(), moved_variables))
                 },
             )?;
 
@@ -856,10 +850,7 @@ mod tests {
                     "x",
                     Type::Number,
                     42.0,
-                    DropVariables::new(
-                        [("x".into(), Type::Number)].into_iter().collect(),
-                        42.0
-                    )
+                    DropVariables::new([("x".into(), Type::Number)].into_iter().collect(), 42.0)
                 )
                 .into(),
             );
