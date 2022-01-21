@@ -1,5 +1,5 @@
 use super::{context::CompileContext, CompileError};
-use fnv::{FnvHashMap, FnvHashSet};
+use fnv::FnvHashMap;
 use hir::{
     analysis::types::{record_field_resolver, type_canonicalizer, union_type_creator},
     ir::*,

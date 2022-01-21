@@ -2,7 +2,7 @@ use crate::{
     ir::*,
     types::{self, Type},
 };
-use fnv::{FnvHashMap, FnvHashSet};
+use fnv::FnvHashMap;
 
 pub fn collect(module: &Module) -> FnvHashMap<String, Type> {
     module

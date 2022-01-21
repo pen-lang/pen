@@ -1,5 +1,5 @@
 use crate::{CompileConfiguration, CompileError};
-use fnv::{FnvHashMap, FnvHashSet};
+use fnv::FnvHashMap;
 use hir::{
     analysis::types::type_collector,
     ir::*,

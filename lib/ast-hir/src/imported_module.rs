@@ -1,4 +1,4 @@
-use fnv::{FnvHashMap, FnvHashSet};
+use fnv::FnvHashSet;
 
 pub struct ImportedModule {
     interface: interface::Module,

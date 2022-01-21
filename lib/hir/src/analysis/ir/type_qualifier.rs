@@ -3,7 +3,7 @@ use crate::{
     ir::*,
     types::{self, Type},
 };
-use fnv::{FnvHashMap, FnvHashSet};
+use fnv::FnvHashMap;
 
 pub fn qualify(module: &Module, prefix: &str) -> Module {
     let names = module

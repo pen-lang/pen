@@ -1,5 +1,5 @@
 use crate::{error::CompileError, types};
-use fnv::{FnvHashMap, FnvHashSet};
+use fnv::FnvHashMap;
 
 pub fn get_record_field(
     builder: &fmm::build::InstructionBuilder,

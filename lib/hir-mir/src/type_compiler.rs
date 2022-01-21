@@ -1,5 +1,5 @@
 use super::{context::CompileContext, CompileError};
-use fnv::{FnvHashMap, FnvHashSet};
+use fnv::FnvHashMap;
 use hir::{
     analysis::types::{type_canonicalizer, type_id_calculator},
     types::{self, Type},

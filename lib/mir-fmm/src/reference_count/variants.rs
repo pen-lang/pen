@@ -1,6 +1,6 @@
 use super::{super::error::CompileError, expressions};
 use crate::types;
-use fnv::{FnvHashMap, FnvHashSet};
+use fnv::FnvHashMap;
 
 const ARGUMENT_NAME: &str = "_payload";
 

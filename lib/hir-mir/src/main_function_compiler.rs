@@ -1,5 +1,5 @@
 use super::{error::CompileError, main_module_configuration::MainModuleConfiguration};
-use fnv::{FnvHashMap, FnvHashSet};
+use fnv::FnvHashMap;
 use hir::{analysis::types::type_canonicalizer, ir::*, types::Type};
 
 const MAIN_FUNCTION_WRAPPER_SUFFIX: &str = "__wrapper";

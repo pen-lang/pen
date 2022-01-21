@@ -16,7 +16,7 @@ mod variants;
 use declarations::compile_declaration;
 use definitions::compile_definition;
 pub use error::CompileError;
-use fnv::{FnvHashMap, FnvHashSet};
+use fnv::FnvHashMap;
 use foreign_declarations::compile_foreign_declaration;
 use foreign_definitions::compile_foreign_definition;
 use type_information::compile_type_information_global_variable;

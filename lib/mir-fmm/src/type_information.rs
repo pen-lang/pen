@@ -1,5 +1,5 @@
 use crate::{error::CompileError, reference_count, types};
-use fnv::{FnvHashMap, FnvHashSet};
+use fnv::FnvHashMap;
 
 pub const TYPE_INFORMATION_CLONE_FUNCTION_FIELD_INDEX: usize = 0;
 pub const TYPE_INFORMATION_DROP_FUNCTION_FIELD_INDEX: usize = 1;

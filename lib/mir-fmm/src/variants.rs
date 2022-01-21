@@ -1,5 +1,5 @@
 use crate::{types, CompileError};
-use fnv::{FnvHashMap, FnvHashSet};
+use fnv::FnvHashMap;
 
 pub const VARIANT_TAG_FIELD_INDEX: usize = 0;
 pub const VARIANT_PAYLOAD_FIELD_INDEX: usize = 1;

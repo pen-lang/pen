@@ -1,6 +1,6 @@
 use super::error::CompileError;
 use crate::{closures, expressions, reference_count, types};
-use fnv::{FnvHashMap, FnvHashSet};
+use fnv::FnvHashMap;
 
 const CLOSURE_NAME: &str = "_closure";
 

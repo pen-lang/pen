@@ -1,12 +1,12 @@
 use super::name_qualifier;
 use crate::imported_module::ImportedModule;
+use fnv::FnvHashMap;
 use hir::{
     analysis::ir::{type_transformer, variable_renamer},
     ir,
     types::{self, Type},
 };
 use itertools::Itertools;
-use fnv::{FnvHashMap, FnvHashSet};
 
 pub fn compile(
     module: &ir::Module,

@@ -1,5 +1,5 @@
 use super::{reference_count, types, CompileError};
-use fnv::{FnvHashMap, FnvHashSet};
+use fnv::FnvHashMap;
 use once_cell::sync::Lazy;
 
 const DROP_FUNCTION_ARGUMENT_NAME: &str = "_closure";

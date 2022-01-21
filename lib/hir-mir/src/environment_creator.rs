@@ -1,5 +1,5 @@
 use super::type_extractor;
-use fnv::{FnvHashMap, FnvHashSet};
+use fnv::FnvHashMap;
 use hir::{ir::*, types::Type};
 
 pub fn create_from_module(module: &Module) -> FnvHashMap<String, Type> {

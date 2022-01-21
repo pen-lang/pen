@@ -5,7 +5,7 @@ use crate::{
     },
     variants::{VARIANT_PAYLOAD_FIELD_INDEX, VARIANT_TAG_FIELD_INDEX},
 };
-use fnv::{FnvHashMap, FnvHashSet};
+use fnv::FnvHashMap;
 
 pub fn clone_expression(
     builder: &fmm::build::InstructionBuilder,

@@ -2,7 +2,7 @@ use crate::{
     closures,
     types::{self, FUNCTION_ARGUMENT_OFFSET},
 };
-use fnv::{FnvHashMap, FnvHashSet};
+use fnv::FnvHashMap;
 
 pub fn compile_foreign_declaration(
     module_builder: &fmm::build::ModuleBuilder,

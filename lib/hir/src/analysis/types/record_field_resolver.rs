@@ -1,6 +1,6 @@
 use super::{type_canonicalizer, TypeError};
 use crate::types::*;
-use fnv::{FnvHashMap, FnvHashSet};
+use fnv::FnvHashMap;
 use position::Position;
 
 pub fn resolve<'a>(

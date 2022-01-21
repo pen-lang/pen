@@ -1,6 +1,6 @@
 use super::error::CompileError;
 use crate::{closures, entry_functions, types};
-use fnv::{FnvHashMap, FnvHashSet};
+use fnv::FnvHashMap;
 
 pub fn compile_definition(
     module_builder: &fmm::build::ModuleBuilder,

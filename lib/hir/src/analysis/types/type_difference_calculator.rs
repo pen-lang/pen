@@ -1,6 +1,6 @@
 use super::{type_canonicalizer, union_type_creator, union_type_member_calculator, TypeError};
 use crate::types::Type;
-use fnv::{FnvHashMap, FnvHashSet};
+use fnv::FnvHashMap;
 
 pub fn calculate(
     one: &Type,

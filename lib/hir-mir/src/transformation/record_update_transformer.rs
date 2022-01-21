@@ -1,5 +1,5 @@
 use crate::{context::CompileContext, error::CompileError};
-use fnv::{FnvHashMap, FnvHashSet};
+use fnv::FnvHashSet;
 use hir::{analysis::types::record_field_resolver, ir::*};
 
 const RECORD_NAME: &str = "$record";

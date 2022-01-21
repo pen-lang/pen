@@ -1,6 +1,6 @@
 use super::TypeError;
 use crate::types::*;
-use fnv::{FnvHashMap, FnvHashSet};
+use fnv::FnvHashMap;
 
 pub fn resolve(reference: &Reference, types: &FnvHashMap<String, Type>) -> Result<Type, TypeError> {
     resolve_type(&reference.clone().into(), types)

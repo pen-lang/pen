@@ -1,6 +1,6 @@
 use super::{type_canonicalizer, type_equality_checker, TypeError};
 use crate::types::Type;
-use fnv::{FnvHashMap, FnvHashSet};
+use fnv::FnvHashMap;
 
 pub fn check(
     lower: &Type,

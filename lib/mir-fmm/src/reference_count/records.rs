@@ -2,7 +2,7 @@ use super::{
     super::{error::CompileError, types},
     expressions, pointers, record_utilities,
 };
-use fnv::{FnvHashMap, FnvHashSet};
+use fnv::FnvHashMap;
 
 const ARGUMENT_NAME: &str = "_record";
 

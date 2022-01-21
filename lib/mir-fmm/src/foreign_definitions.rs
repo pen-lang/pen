@@ -1,5 +1,5 @@
 use crate::{calls, types, CompileError};
-use fnv::{FnvHashMap, FnvHashSet};
+use fnv::FnvHashMap;
 
 pub fn compile_foreign_definition(
     module_builder: &fmm::build::ModuleBuilder,

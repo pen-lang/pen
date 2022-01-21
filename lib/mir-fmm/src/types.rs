@@ -1,4 +1,4 @@
-use fnv::{FnvHashMap, FnvHashSet};
+use fnv::FnvHashMap;
 
 pub const FUNCTION_ARGUMENT_OFFSET: usize = 1;
 

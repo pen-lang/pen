@@ -1,6 +1,6 @@
 use super::variable_transformer;
 use crate::ir::*;
-use fnv::{FnvHashMap, FnvHashSet};
+use fnv::FnvHashMap;
 
 pub fn rename(module: &Module, names: &FnvHashMap<String, String>) -> Module {
     variable_transformer::transform(module, &|variable| {

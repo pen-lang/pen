@@ -1,5 +1,5 @@
 use super::CompileError;
-use fnv::{FnvHashMap, FnvHashSet};
+use fnv::FnvHashMap;
 use hir::ir::*;
 use position::Position;
 

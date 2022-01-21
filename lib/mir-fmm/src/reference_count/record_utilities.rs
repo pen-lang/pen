@@ -1,5 +1,5 @@
 use super::super::types;
-use fnv::{FnvHashMap, FnvHashSet};
+use fnv::FnvHashMap;
 
 pub fn get_record_clone_function_name(name: &str) -> String {
     format!("mir_clone_{}", name)

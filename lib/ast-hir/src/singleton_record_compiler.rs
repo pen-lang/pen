@@ -1,7 +1,7 @@
 use super::name_qualifier;
 use crate::imported_module::ImportedModule;
+use fnv::FnvHashMap;
 use hir::{analysis::ir::variable_transformer, ir::*, types};
-use fnv::{FnvHashMap, FnvHashSet};
 
 pub fn compile(module: &Module, imported_modules: &[ImportedModule]) -> Module {
     let names = imported_modules

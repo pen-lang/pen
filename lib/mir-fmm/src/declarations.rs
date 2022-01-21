@@ -1,5 +1,5 @@
 use super::types;
-use fnv::{FnvHashMap, FnvHashSet};
+use fnv::FnvHashMap;
 
 pub fn compile_declaration(
     module_builder: &fmm::build::ModuleBuilder,
