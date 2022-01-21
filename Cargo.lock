@@ -584,6 +584,7 @@ dependencies = [
  "fmm",
  "fmm-c",
  "fmm-llvm",
+ "fnv",
  "insta",
  "mir",
  "once_cell",

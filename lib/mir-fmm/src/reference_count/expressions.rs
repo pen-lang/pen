@@ -5,13 +5,13 @@ use crate::{
     },
     variants::{VARIANT_PAYLOAD_FIELD_INDEX, VARIANT_TAG_FIELD_INDEX},
 };
-use std::collections::BTreeMap;
+use fnv::{FnvHashMap, FnvHashSet};
 
 pub fn clone_expression(
     builder: &fmm::build::InstructionBuilder,
     expression: &fmm::build::TypedExpression,
     type_: &mir::types::Type,
-    types: &BTreeMap<String, mir::types::RecordBody>,
+    types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     Ok(match type_ {
         mir::types::Type::ByteString => pointers::clone_pointer(builder, expression)?,
@@ -49,7 +49,7 @@ pub fn drop_expression(
     builder: &fmm::build::InstructionBuilder,
     expression: &fmm::build::TypedExpression,
     type_: &mir::types::Type,
-    types: &BTreeMap<String, mir::types::RecordBody>,
+    types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> Result<(), CompileError> {
     match type_ {
         mir::types::Type::ByteString => pointers::drop_pointer(builder, expression, |_| Ok(()))?,

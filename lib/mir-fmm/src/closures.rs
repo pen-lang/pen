@@ -1,6 +1,6 @@
 use super::{reference_count, types, CompileError};
+use fnv::{FnvHashMap, FnvHashSet};
 use once_cell::sync::Lazy;
-use std::collections::BTreeMap;
 
 const DROP_FUNCTION_ARGUMENT_NAME: &str = "_closure";
 const DROP_FUNCTION_ARGUMENT_TYPE: fmm::types::Primitive = fmm::types::Primitive::PointerInteger;
@@ -74,7 +74,7 @@ pub fn compile_closure_content(
 pub fn compile_drop_function(
     module_builder: &fmm::build::ModuleBuilder,
     definition: &mir::ir::Definition,
-    types: &BTreeMap<String, mir::types::RecordBody>,
+    types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     compile_drop_function_with_builder(
         module_builder,
@@ -102,7 +102,7 @@ pub fn compile_drop_function(
 pub fn compile_normal_thunk_drop_function(
     module_builder: &fmm::build::ModuleBuilder,
     definition: &mir::ir::Definition,
-    types: &BTreeMap<String, mir::types::RecordBody>,
+    types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     compile_drop_function_with_builder(
         module_builder,
@@ -128,7 +128,7 @@ pub fn compile_normal_thunk_drop_function(
 
 fn compile_drop_function_with_builder(
     module_builder: &fmm::build::ModuleBuilder,
-    types: &BTreeMap<String, mir::types::RecordBody>,
+    types: &FnvHashMap<String, mir::types::RecordBody>,
     compile_body: impl Fn(
         &fmm::build::InstructionBuilder,
         &fmm::build::TypedExpression,
