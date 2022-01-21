@@ -85,7 +85,7 @@ fn collect_types(
         | Type::List(_)
         | Type::None(_)
         | Type::Number(_)
-        | Type::String(_) => vec![canonicalize(type_, types)?].into_iter().collect(),
+        | Type::String(_) => [canonicalize(type_, types)?].into_iter().collect(),
         Type::Reference(reference) => {
             collect_types(&type_resolver::resolve(reference, types)?, types)?
         }

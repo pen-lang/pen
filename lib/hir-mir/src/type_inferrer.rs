@@ -114,7 +114,7 @@ fn infer_expression(
                 &variables
                     .clone()
                     .into_iter()
-                    .chain(vec![
+                    .chain([
                         (
                             if_.first_name().into(),
                             types::Function::new(
@@ -154,7 +154,7 @@ fn infer_expression(
                             &variables
                                 .clone()
                                 .into_iter()
-                                .chain(vec![(if_.name().into(), branch.type_().clone())])
+                                .chain([(if_.name().into(), branch.type_().clone())])
                                 .collect(),
                         )?,
                     ))
@@ -185,7 +185,7 @@ fn infer_expression(
                             &variables
                                 .clone()
                                 .into_iter()
-                                .chain(vec![(if_.name().into(), type_)])
+                                .chain([(if_.name().into(), type_)])
                                 .collect(),
                         )?,
                         branch.position().clone(),

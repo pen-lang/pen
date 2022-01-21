@@ -157,7 +157,7 @@ fn check_expression(
             let variables = variables
                 .clone()
                 .into_iter()
-                .chain(vec![(
+                .chain([(
                     let_.definition().name(),
                     let_.definition().type_().clone().into(),
                 )])
@@ -177,7 +177,7 @@ fn check_expression(
                 &variables
                     .clone()
                     .into_iter()
-                    .chain(vec![(let_.name(), let_.type_().clone())])
+                    .chain([(let_.name(), let_.type_().clone())])
                     .collect(),
             )?
         }
@@ -217,7 +217,7 @@ fn check_expression(
             let then_variables = variables
                 .clone()
                 .into_iter()
-                .chain(vec![(operation.name(), operation.type_().clone())])
+                .chain([(operation.name(), operation.type_().clone())])
                 .collect();
             check_equality(
                 &check_expression(operation.then(), &then_variables)?,

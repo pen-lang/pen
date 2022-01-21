@@ -265,7 +265,7 @@ fn compile_alternatives(
                     &variables
                         .clone()
                         .into_iter()
-                        .chain(vec![(alternative.name().into(), argument)])
+                        .chain([(alternative.name().into(), argument)])
                         .collect(),
                     types,
                 )
@@ -281,7 +281,7 @@ fn compile_alternatives(
                     &variables
                         .clone()
                         .into_iter()
-                        .chain(vec![(
+                        .chain([(
                             alternative.name().into(),
                             variants::compile_unboxed_payload(
                                 &instruction_builder,
@@ -356,7 +356,7 @@ fn compile_let(
         &variables
             .iter()
             .map(|(name, expression)| (name.clone(), expression.clone()))
-            .chain(vec![(
+            .chain([(
                 let_.name().into(),
                 compile(let_.bound_expression(), variables)?,
             )])
@@ -410,7 +410,7 @@ fn compile_let_recursive(
         &variables
             .clone()
             .into_iter()
-            .chain(vec![(
+            .chain([(
                 let_.definition().name().into(),
                 fmm::build::bit_cast(
                     fmm::types::Pointer::new(types::compile_unsized_closure(
@@ -525,7 +525,7 @@ fn compile_try_operation(
                 &variables
                     .clone()
                     .into_iter()
-                    .chain(vec![(
+                    .chain([(
                         operation.name().into(),
                         variants::compile_unboxed_payload(
                             &instruction_builder,
