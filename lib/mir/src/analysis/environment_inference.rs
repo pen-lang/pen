@@ -1,6 +1,6 @@
 use super::free_variables::find_free_variables;
 use crate::{ir::*, types::Type};
-use std::collections::{BTreeMap, HashSet};
+use std::collections::BTreeMap;
 
 pub fn infer_environment(module: &Module) -> Module {
     Module::new(
@@ -38,17 +38,21 @@ fn infer_in_local_definition(
     definition: &Definition,
     variables: &BTreeMap<String, Type>,
 ) -> Definition {
-    let argument_names = definition
-        .arguments()
-        .iter()
-        .map(|argument| argument.name())
-        .collect::<HashSet<_>>();
+    let local_variables = [(definition.name().into(), definition.type_().clone().into())]
+        .into_iter()
+        .chain(
+            definition
+                .arguments()
+                .iter()
+                .map(|argument| (argument.name().into(), argument.type_().clone())),
+        )
+        .collect::<BTreeMap<_, _>>();
 
     Definition::with_options(
         definition.name(),
         find_free_variables(definition.body())
             .into_iter()
-            .filter(|name| !argument_names.contains(name.as_str()))
+            .filter(|name| !local_variables.contains_key(name.as_str()))
             .filter_map(|name| {
                 variables
                     .get(&name)
@@ -61,16 +65,7 @@ fn infer_in_local_definition(
             &variables
                 .clone()
                 .into_iter()
-                .chain(vec![(
-                    definition.name().into(),
-                    definition.type_().clone().into(),
-                )])
-                .chain(
-                    definition
-                        .arguments()
-                        .iter()
-                        .map(|argument| (argument.name().into(), argument.type_().clone())),
-                )
+                .chain(local_variables)
                 .collect(),
         ),
         definition.result_type().clone(),
