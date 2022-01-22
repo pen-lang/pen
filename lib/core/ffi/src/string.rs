@@ -12,7 +12,7 @@ struct FirstRest {
 }
 
 extern "C" {
-    fn _pen_core_first_rest(xs: ffi::Arc<List>) -> FirstRest;
+    fn _pen_core_first_rest(xs: ffi::Arc<List>) -> ffi::Arc<FirstRest>;
     fn _pen_core_to_string(xs: ffi::Any) -> ffi::ByteString;
 }
 
@@ -30,9 +30,9 @@ fn _pen_join_strings(mut one: ffi::Arc<List>, separator: ffi::ByteString) -> ffi
             string.extend(separator.as_slice());
         }
 
-        first = true;
-        string.extend(unsafe { _pen_core_to_string(first_rest.first) }.as_slice());
-        one = first_rest.rest;
+        first = false;
+        string.extend(unsafe { _pen_core_to_string(first_rest.first.clone()) }.as_slice());
+        one = first_rest.rest.clone();
     }
 }
 
