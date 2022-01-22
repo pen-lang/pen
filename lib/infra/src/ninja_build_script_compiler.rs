@@ -340,12 +340,12 @@ impl NinjaBuildScriptCompiler {
                 )?)
                 .collect()
             } else {
-                self.compile_archive(object_files, archive_file, package_directory)?
+                self.compile_archive_without_ffi(object_files, archive_file, package_directory)?
             },
         )
     }
 
-    fn compile_archive(
+    fn compile_archive_without_ffi(
         &self,
         object_files: &[&FilePath],
         archive_file: &FilePath,
@@ -390,31 +390,13 @@ impl NinjaBuildScriptCompiler {
         ])
     }
 
-    fn compile_package_test_information(
-        &self,
-        test_information_files: &[&FilePath],
-        package_test_information_file: &FilePath,
-    ) -> Result<Vec<String>, Box<dyn Error>> {
-        let package_test_information_file = self
-            .file_path_converter
-            .convert_to_os_path(package_test_information_file);
-
-        Ok(vec![format!(
-            "build {}: compile_package_test_information {}",
-            package_test_information_file.display(),
-            self.join_paths(test_information_files)
-        )])
-    }
-
     fn join_paths(&self, paths: &[&FilePath]) -> String {
         paths
             .iter()
-            .map(|object_file| {
+            .map(|path| {
                 format!(
                     "{}",
-                    self.file_path_converter
-                        .convert_to_os_path(object_file)
-                        .display()
+                    self.file_path_converter.convert_to_os_path(path).display()
                 )
             })
             .collect::<Vec<_>>()
@@ -494,7 +476,7 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
             .compile_test_module_targets(module_targets)?
             .into_iter()
             .chain(
-                self.compile_archive(
+                self.compile_archive_without_ffi(
                     &module_targets
                         .iter()
                         .map(|target| target.object_file())
@@ -503,15 +485,18 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
                     package_directory,
                 )?,
             )
-            .chain(
-                self.compile_package_test_information(
+            .chain([format!(
+                "build {}: compile_package_test_information {}",
+                self.file_path_converter
+                    .convert_to_os_path(package_test_information_file)
+                    .display(),
+                self.join_paths(
                     &module_targets
                         .iter()
                         .map(|target| target.test_information_file())
-                        .collect::<Vec<_>>(),
-                    package_test_information_file,
-                )?,
-            )
+                        .collect::<Vec<_>>()
+                )
+            )])
             .collect::<Vec<_>>()
             .join("\n")
             + "\n")
