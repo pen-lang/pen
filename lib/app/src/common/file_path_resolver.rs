@@ -9,7 +9,6 @@ use crate::{
 
 const MAIN_ARCHIVE_BASENAME: &str = "main";
 const TEST_ARCHIVE_SUFFIX: &str = "_test";
-const FFI_ARCHIVE_SUFFIX: &str = "_ffi";
 
 pub fn resolve_object_directory(output_directory: &FilePath) -> FilePath {
     output_directory.join(&FilePath::new([OBJECT_DIRECTORY]))
@@ -101,17 +100,6 @@ pub fn resolve_main_package_test_archive_file(
     )
 }
 
-pub fn resolve_main_package_ffi_archive_file(
-    output_directory: &FilePath,
-    file_path_configuration: &FilePathConfiguration,
-) -> FilePath {
-    resolve_package_ffi_archive_file(
-        output_directory,
-        MAIN_ARCHIVE_BASENAME,
-        file_path_configuration,
-    )
-}
-
 pub fn resolve_external_package_archive_file(
     output_directory: &FilePath,
     url: &url::Url,
@@ -120,30 +108,6 @@ pub fn resolve_external_package_archive_file(
     resolve_package_archive_file(
         output_directory,
         &package_id_calculator::calculate(url),
-        file_path_configuration,
-    )
-}
-
-pub fn resolve_external_package_ffi_archive_file(
-    output_directory: &FilePath,
-    url: &url::Url,
-    file_path_configuration: &FilePathConfiguration,
-) -> FilePath {
-    resolve_package_ffi_archive_file(
-        output_directory,
-        &package_id_calculator::calculate(url),
-        file_path_configuration,
-    )
-}
-
-fn resolve_package_ffi_archive_file(
-    output_directory: &FilePath,
-    basename: &str,
-    file_path_configuration: &FilePathConfiguration,
-) -> FilePath {
-    resolve_package_archive_file(
-        output_directory,
-        &(basename.to_owned() + FFI_ARCHIVE_SUFFIX),
         file_path_configuration,
     )
 }

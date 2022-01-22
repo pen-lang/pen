@@ -110,10 +110,6 @@ pub fn compile_modules(
                     output_directory,
                     &infrastructure.file_path_configuration,
                 ),
-                &file_path_resolver::resolve_main_package_ffi_archive_file(
-                    output_directory,
-                    &infrastructure.file_path_configuration,
-                ),
                 package_directory,
             )?
             .as_bytes(),
@@ -308,11 +304,6 @@ pub fn compile_external(
                     package_url,
                     &infrastructure.file_path_configuration,
                 ),
-                &file_path_resolver::resolve_external_package_ffi_archive_file(
-                    output_directory,
-                    package_url,
-                    &infrastructure.file_path_configuration,
-                ),
                 &package_directory,
             )?
             .as_bytes(),
@@ -341,11 +332,6 @@ pub fn compile_prelude(
                     output_directory,
                 )?,
                 &file_path_resolver::resolve_external_package_archive_file(
-                    output_directory,
-                    package_url,
-                    &infrastructure.file_path_configuration,
-                ),
-                &file_path_resolver::resolve_external_package_ffi_archive_file(
                     output_directory,
                     package_url,
                     &infrastructure.file_path_configuration,

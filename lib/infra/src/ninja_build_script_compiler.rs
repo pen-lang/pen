@@ -5,6 +5,7 @@ use crate::{
 use app::infra::FilePath;
 use std::{error::Error, sync::Arc};
 
+const FFI_ARCHIVE_DIRECTORY: &str = "ffi";
 const AR_DESCRIPTION: &str = "  description = archiving package of $package_directory";
 
 pub struct NinjaBuildScriptCompiler {
@@ -317,7 +318,7 @@ impl NinjaBuildScriptCompiler {
             )? {
                 let ffi_archive_file = archive_file
                     .parent()
-                    .join(&FilePath::new(["ffi"]))
+                    .join(&FilePath::new([FFI_ARCHIVE_DIRECTORY]))
                     .join(&archive_file.file_name());
 
                 [
@@ -456,7 +457,6 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
         module_targets: &[app::infra::ModuleTarget],
         main_module_target: Option<&app::infra::MainModuleTarget>,
         archive_file: &FilePath,
-        ffi_archive_file: &FilePath,
         package_directory: &FilePath,
     ) -> Result<String, Box<dyn Error>> {
         Ok(self
@@ -521,7 +521,6 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
         &self,
         module_targets: &[app::infra::ModuleTarget],
         archive_file: &FilePath,
-        ffi_archive_file: &FilePath,
         package_directory: &FilePath,
     ) -> Result<String, Box<dyn Error>> {
         Ok(self
@@ -623,7 +622,6 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
         &self,
         module_targets: &[app::infra::ModuleTarget],
         archive_file: &FilePath,
-        ffi_archive_file: &FilePath,
         package_directory: &FilePath,
     ) -> Result<String, Box<dyn Error>> {
         Ok(module_targets

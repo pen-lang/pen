@@ -15,7 +15,6 @@ pub trait BuildScriptCompiler {
         module_targets: &[ModuleTarget],
         main_module_target: Option<&MainModuleTarget>,
         archive_file: &FilePath,
-        ffi_archive_file: &FilePath,
         package_directory: &FilePath,
     ) -> Result<String, Box<dyn Error>>;
 
@@ -45,7 +44,6 @@ pub trait BuildScriptCompiler {
         &self,
         module_targets: &[ModuleTarget],
         archive_file: &FilePath,
-        ffi_archive_file: &FilePath,
         package_directory: &FilePath,
     ) -> Result<String, Box<dyn Error>>;
 
@@ -53,7 +51,6 @@ pub trait BuildScriptCompiler {
         &self,
         module_targets: &[ModuleTarget],
         archive_file: &FilePath,
-        ffi_archive_file: &FilePath,
         package_directory: &FilePath,
     ) -> Result<String, Box<dyn Error>>;
 }
