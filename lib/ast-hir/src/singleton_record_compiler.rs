@@ -1,7 +1,7 @@
 use super::name_qualifier;
 use crate::imported_module::ImportedModule;
+use fnv::FnvHashMap;
 use hir::{analysis::ir::variable_transformer, ir::*, types};
-use std::collections::BTreeMap;
 
 pub fn compile(module: &Module, imported_modules: &[ImportedModule]) -> Module {
     let names = imported_modules
@@ -30,7 +30,7 @@ pub fn compile(module: &Module, imported_modules: &[ImportedModule]) -> Module {
                 None
             }
         }))
-        .collect::<BTreeMap<String, String>>();
+        .collect::<FnvHashMap<String, String>>();
 
     variable_transformer::transform(module, &|variable| {
         if let Some(record_name) = names.get(variable.name()) {

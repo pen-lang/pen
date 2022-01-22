@@ -1,12 +1,12 @@
 use crate::{calls, types, CompileError};
-use std::collections::BTreeMap;
+use fnv::FnvHashMap;
 
 pub fn compile_foreign_definition(
     module_builder: &fmm::build::ModuleBuilder,
     definition: &mir::ir::ForeignDefinition,
     function_type: &mir::types::Function,
     global_variable: &fmm::build::TypedExpression,
-    types: &BTreeMap<String, mir::types::RecordBody>,
+    types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> Result<(), CompileError> {
     let foreign_function_type =
         types::compile_foreign_function(function_type, definition.calling_convention(), types);

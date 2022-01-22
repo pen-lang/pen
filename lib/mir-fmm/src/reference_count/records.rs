@@ -2,14 +2,14 @@ use super::{
     super::{error::CompileError, types},
     expressions, pointers, record_utilities,
 };
-use std::collections::BTreeMap;
+use fnv::FnvHashMap;
 
 const ARGUMENT_NAME: &str = "_record";
 
 pub fn compile_record_clone_function(
     module_builder: &fmm::build::ModuleBuilder,
     definition: &mir::ir::TypeDefinition,
-    types: &BTreeMap<String, mir::types::RecordBody>,
+    types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> Result<(), CompileError> {
     let record_type = mir::types::Record::new(definition.name());
     let fmm_record_type = types::compile_record(&record_type, types);
@@ -64,7 +64,7 @@ pub fn compile_record_clone_function(
 pub fn compile_record_drop_function(
     module_builder: &fmm::build::ModuleBuilder,
     definition: &mir::ir::TypeDefinition,
-    types: &BTreeMap<String, mir::types::RecordBody>,
+    types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> Result<(), CompileError> {
     let record_type = mir::types::Record::new(definition.name());
     let fmm_record_type = types::compile_record(&record_type, types);
@@ -103,7 +103,7 @@ fn drop_record_fields(
     record: &fmm::build::TypedExpression,
     record_type: &mir::types::Record,
     record_body_type: &mir::types::RecordBody,
-    types: &BTreeMap<String, mir::types::RecordBody>,
+    types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> Result<(), CompileError> {
     for (index, type_) in record_body_type.fields().iter().enumerate() {
         expressions::drop_expression(

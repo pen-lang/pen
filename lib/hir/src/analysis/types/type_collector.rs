@@ -2,9 +2,9 @@ use crate::{
     ir::*,
     types::{self, Type},
 };
-use std::collections::BTreeMap;
+use fnv::FnvHashMap;
 
-pub fn collect(module: &Module) -> BTreeMap<String, Type> {
+pub fn collect(module: &Module) -> FnvHashMap<String, Type> {
     module
         .type_definitions()
         .iter()

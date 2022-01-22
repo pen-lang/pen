@@ -1,6 +1,6 @@
 use super::ReferenceCountError;
 use crate::ir::*;
-use std::collections::{BTreeMap, BTreeSet, HashMap};
+use fnv::{FnvHashMap, FnvHashSet};
 
 pub fn validate(module: &Module) -> Result<(), ReferenceCountError> {
     for definition in module.definitions() {
@@ -31,7 +31,7 @@ fn validate_local_definition(definition: &Definition) -> Result<(), ReferenceCou
     )
 }
 
-fn collect_definition_local_variables(definition: &Definition) -> BTreeSet<String> {
+fn collect_definition_local_variables(definition: &Definition) -> FnvHashSet<String> {
     definition
         .environment()
         .iter()
@@ -42,14 +42,14 @@ fn collect_definition_local_variables(definition: &Definition) -> BTreeSet<Strin
 
 fn validate_definition_body(
     body: &Expression,
-    mut variables: HashMap<String, isize>,
+    mut variables: FnvHashMap<String, isize>,
 ) -> Result<(), ReferenceCountError> {
     move_expression(body, &mut variables)?;
 
     let invalid_variables = variables
         .into_iter()
         .filter(|(_, count)| count != &0)
-        .collect::<BTreeMap<_, _>>();
+        .collect::<FnvHashMap<_, _>>();
 
     if !invalid_variables.is_empty() {
         return Err(ReferenceCountError::InvalidLocalVariables(
@@ -62,7 +62,7 @@ fn validate_definition_body(
 
 fn move_expression(
     expression: &Expression,
-    variables: &mut HashMap<String, isize>,
+    variables: &mut FnvHashMap<String, isize>,
 ) -> Result<(), ReferenceCountError> {
     match expression {
         Expression::ArithmeticOperation(operation) => {
@@ -181,7 +181,7 @@ fn move_expression(
 fn validate_let_like(
     name: &str,
     expression: &Expression,
-    variables: &mut HashMap<String, isize>,
+    variables: &mut FnvHashMap<String, isize>,
 ) -> Result<(), ReferenceCountError> {
     let old_count = variables.insert(name.into(), 1);
 
@@ -200,8 +200,8 @@ fn validate_let_like(
 }
 
 fn validate_conditional_variables(
-    then_variables: &HashMap<String, isize>,
-    else_variables: &HashMap<String, isize>,
+    then_variables: &FnvHashMap<String, isize>,
+    else_variables: &FnvHashMap<String, isize>,
 ) -> Result<(), ReferenceCountError> {
     let then_variables = filter_valid_variables(then_variables);
     let else_variables = filter_valid_variables(else_variables);
@@ -216,7 +216,7 @@ fn validate_conditional_variables(
     Ok(())
 }
 
-fn filter_valid_variables(variables: &HashMap<String, isize>) -> BTreeMap<String, isize> {
+fn filter_valid_variables(variables: &FnvHashMap<String, isize>) -> FnvHashMap<String, isize> {
     variables
         .iter()
         .filter(|(_, &count)| count != 0)
@@ -224,7 +224,7 @@ fn filter_valid_variables(variables: &HashMap<String, isize>) -> BTreeMap<String
         .collect()
 }
 
-fn clone_variable(name: impl AsRef<str>, variables: &mut HashMap<String, isize>) {
+fn clone_variable(name: impl AsRef<str>, variables: &mut FnvHashMap<String, isize>) {
     let name = name.as_ref();
 
     if let Some(count) = variables.get(name).cloned() {
@@ -232,7 +232,7 @@ fn clone_variable(name: impl AsRef<str>, variables: &mut HashMap<String, isize>)
     }
 }
 
-fn drop_variable(name: impl AsRef<str>, variables: &mut HashMap<String, isize>) {
+fn drop_variable(name: impl AsRef<str>, variables: &mut FnvHashMap<String, isize>) {
     let name = name.as_ref();
 
     if let Some(count) = variables.get(name).cloned() {

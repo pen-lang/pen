@@ -1,20 +1,20 @@
 use super::{record_field_resolver, type_resolver, TypeError};
 use crate::types::{RecordField, Type};
-use std::collections::{BTreeMap, BTreeSet};
+use fnv::{FnvHashMap, FnvHashSet};
 
 pub fn check(
     type_: &Type,
-    types: &BTreeMap<String, Type>,
-    record_types: &BTreeMap<String, Vec<RecordField>>,
+    types: &FnvHashMap<String, Type>,
+    record_types: &FnvHashMap<String, Vec<RecordField>>,
 ) -> Result<bool, TypeError> {
     check_with_cache(type_, &Default::default(), types, record_types)
 }
 
 fn check_with_cache(
     type_: &Type,
-    record_names: &BTreeSet<String>,
-    types: &BTreeMap<String, Type>,
-    record_types: &BTreeMap<String, Vec<RecordField>>,
+    record_names: &FnvHashSet<String>,
+    types: &FnvHashMap<String, Type>,
+    record_types: &FnvHashMap<String, Vec<RecordField>>,
 ) -> Result<bool, TypeError> {
     let check_with_cache =
         |type_, record_names| check_with_cache(type_, record_names, types, record_types);

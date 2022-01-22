@@ -1,12 +1,12 @@
 use super::{error::CompileError, main_module_configuration::MainModuleConfiguration};
+use fnv::FnvHashMap;
 use hir::{analysis::types::type_canonicalizer, ir::*, types::Type};
-use std::collections::BTreeMap;
 
 const MAIN_FUNCTION_WRAPPER_SUFFIX: &str = "__wrapper";
 
 pub fn compile(
     module: &Module,
-    types: &BTreeMap<String, Type>,
+    types: &FnvHashMap<String, Type>,
     main_module_configuration: &MainModuleConfiguration,
 ) -> Result<Module, CompileError> {
     let definition = module

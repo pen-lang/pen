@@ -1,4 +1,5 @@
 use super::{context::CompileContext, environment_creator, type_extractor, CompileError};
+use fnv::{FnvHashMap, FnvHashSet};
 use hir::{
     analysis::types::{
         record_field_resolver, type_canonicalizer, type_equality_checker, type_subsumption_checker,
@@ -7,7 +8,6 @@ use hir::{
     ir::*,
     types::{self, Type},
 };
-use std::collections::{BTreeMap, BTreeSet};
 
 pub fn check_types(module: &Module, context: &CompileContext) -> Result<(), CompileError> {
     let variables = environment_creator::create_from_module(module);
@@ -21,7 +21,7 @@ pub fn check_types(module: &Module, context: &CompileContext) -> Result<(), Comp
 
 fn check_lambda(
     lambda: &Lambda,
-    variables: &BTreeMap<String, Type>,
+    variables: &FnvHashMap<String, Type>,
     context: &CompileContext,
 ) -> Result<types::Function, CompileError> {
     check_subsumption(
@@ -48,7 +48,7 @@ fn check_lambda(
 
 fn check_expression(
     expression: &Expression,
-    variables: &BTreeMap<String, Type>,
+    variables: &FnvHashMap<String, Type>,
     context: &CompileContext,
 ) -> Result<Type, CompileError> {
     let check_expression =
@@ -300,7 +300,7 @@ fn check_expression(
                 .fields()
                 .iter()
                 .map(|field| field.name())
-                .collect::<BTreeSet<_>>();
+                .collect::<FnvHashSet<_>>();
 
             for field_type in field_types {
                 if !field_names.contains(field_type.name()) {
@@ -397,7 +397,7 @@ fn check_expression(
 
 fn check_operation(
     operation: &Operation,
-    variables: &BTreeMap<String, Type>,
+    variables: &FnvHashMap<String, Type>,
     context: &CompileContext,
 ) -> Result<Type, CompileError> {
     let check_expression = |expression| check_expression(expression, variables, context);
@@ -495,7 +495,7 @@ fn check_operation(
 fn check_subsumption(
     lower: &Type,
     upper: &Type,
-    types: &BTreeMap<String, Type>,
+    types: &FnvHashMap<String, Type>,
 ) -> Result<(), CompileError> {
     if type_subsumption_checker::check(lower, upper, types)? {
         Ok(())

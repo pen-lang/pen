@@ -5,6 +5,7 @@ authors = ["Yota Toyama <raviqqe@gmail.com>"]
 edition = "2021"
 
 [dependencies]
+fnv = "1"
 hir = { path = "../hir" }
 interface = { path = "../interface" }
 mir = { path = "../mir" }

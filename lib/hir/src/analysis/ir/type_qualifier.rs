@@ -3,7 +3,7 @@ use crate::{
     ir::*,
     types::{self, Type},
 };
-use std::collections::BTreeMap;
+use fnv::FnvHashMap;
 
 pub fn qualify(module: &Module, prefix: &str) -> Module {
     let names = module
@@ -23,7 +23,7 @@ pub fn qualify(module: &Module, prefix: &str) -> Module {
                 .filter(|alias| !alias.is_external())
                 .map(|alias| (alias.name().into(), prefix.to_owned() + alias.name())),
         )
-        .collect::<BTreeMap<String, String>>();
+        .collect::<FnvHashMap<String, String>>();
 
     type_transformer::transform(
         &Module::new(

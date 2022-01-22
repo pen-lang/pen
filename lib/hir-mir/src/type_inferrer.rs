@@ -1,10 +1,10 @@
 use super::{context::CompileContext, environment_creator, type_extractor, CompileError};
+use fnv::FnvHashMap;
 use hir::{
     analysis::types::{type_canonicalizer, type_difference_calculator, union_type_creator},
     ir::*,
     types::{self, Type},
 };
-use std::collections::BTreeMap;
 
 pub fn infer_types(module: &Module, context: &CompileContext) -> Result<Module, CompileError> {
     let variables = environment_creator::create_from_module(module);
@@ -25,7 +25,7 @@ pub fn infer_types(module: &Module, context: &CompileContext) -> Result<Module, 
 
 fn infer_definition(
     definition: &Definition,
-    variables: &BTreeMap<String, Type>,
+    variables: &FnvHashMap<String, Type>,
     context: &CompileContext,
 ) -> Result<Definition, CompileError> {
     Ok(Definition::new(
@@ -40,7 +40,7 @@ fn infer_definition(
 
 fn infer_lambda(
     lambda: &Lambda,
-    variables: &BTreeMap<String, Type>,
+    variables: &FnvHashMap<String, Type>,
     context: &CompileContext,
 ) -> Result<Lambda, CompileError> {
     Ok(Lambda::new(
@@ -66,7 +66,7 @@ fn infer_lambda(
 
 fn infer_expression(
     expression: &Expression,
-    variables: &BTreeMap<String, Type>,
+    variables: &FnvHashMap<String, Type>,
     context: &CompileContext,
 ) -> Result<Expression, CompileError> {
     let infer_expression =

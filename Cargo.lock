@@ -59,6 +59,7 @@ name = "ast_hir"
 version = "0.1.0"
 dependencies = [
  "ast",
+ "fnv",
  "hir",
  "interface",
  "itertools",
@@ -381,6 +382,7 @@ dependencies = [
 name = "hir"
 version = "0.1.0"
 dependencies = [
+ "fnv",
  "position",
  "pretty_assertions",
  "serde",
@@ -390,6 +392,7 @@ dependencies = [
 name = "hir_mir"
 version = "0.1.0"
 dependencies = [
+ "fnv",
  "hir",
  "insta",
  "interface",
@@ -572,6 +575,7 @@ checksum = "308cc39be01b73d0d18f82a0e7b2a3df85245f84af96fdddc5d202d27e47b86a"
 name = "mir"
 version = "0.1.0"
 dependencies = [
+ "fnv",
  "once_cell",
  "pretty_assertions",
 ]
@@ -583,6 +587,7 @@ dependencies = [
  "fmm",
  "fmm-c",
  "fmm-llvm",
+ "fnv",
  "insta",
  "mir",
  "once_cell",
@@ -654,6 +659,7 @@ version = "0.1.0"
 dependencies = [
  "ast",
  "combine",
+ "fnv",
  "insta",
  "once_cell",
  "position",

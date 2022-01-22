@@ -1,16 +1,16 @@
-use std::collections::BTreeSet;
+use fnv::FnvHashSet;
 
 pub struct ImportedModule {
     interface: interface::Module,
     prefix: String,
-    unqualified_names: BTreeSet<String>,
+    unqualified_names: FnvHashSet<String>,
 }
 
 impl ImportedModule {
     pub fn new(
         interface: interface::Module,
         prefix: impl Into<String>,
-        unqualified_names: BTreeSet<String>,
+        unqualified_names: FnvHashSet<String>,
     ) -> Self {
         Self {
             interface,
@@ -27,7 +27,7 @@ impl ImportedModule {
         &self.prefix
     }
 
-    pub fn unqualified_names(&self) -> &BTreeSet<String> {
+    pub fn unqualified_names(&self) -> &FnvHashSet<String> {
         &self.unqualified_names
     }
 }

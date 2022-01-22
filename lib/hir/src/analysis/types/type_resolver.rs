@@ -1,12 +1,12 @@
 use super::TypeError;
 use crate::types::*;
-use std::collections::BTreeMap;
+use fnv::FnvHashMap;
 
-pub fn resolve(reference: &Reference, types: &BTreeMap<String, Type>) -> Result<Type, TypeError> {
+pub fn resolve(reference: &Reference, types: &FnvHashMap<String, Type>) -> Result<Type, TypeError> {
     resolve_type(&reference.clone().into(), types)
 }
 
-fn resolve_type(type_: &Type, types: &BTreeMap<String, Type>) -> Result<Type, TypeError> {
+fn resolve_type(type_: &Type, types: &FnvHashMap<String, Type>) -> Result<Type, TypeError> {
     Ok(match type_ {
         Type::Reference(reference) => resolve_type(
             types

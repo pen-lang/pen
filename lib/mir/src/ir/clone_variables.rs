@@ -1,22 +1,23 @@
 use super::expression::Expression;
 use crate::types::Type;
-use std::{collections::BTreeMap, sync::Arc};
+use fnv::FnvHashMap;
+use std::sync::Arc;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct CloneVariables {
-    variables: BTreeMap<String, Type>,
+    variables: FnvHashMap<String, Type>,
     expression: Arc<Expression>,
 }
 
 impl CloneVariables {
-    pub fn new(variables: BTreeMap<String, Type>, expression: impl Into<Expression>) -> Self {
+    pub fn new(variables: FnvHashMap<String, Type>, expression: impl Into<Expression>) -> Self {
         Self {
             variables,
             expression: expression.into().into(),
         }
     }
 
-    pub fn variables(&self) -> &BTreeMap<String, Type> {
+    pub fn variables(&self) -> &FnvHashMap<String, Type> {
         &self.variables
     }
 

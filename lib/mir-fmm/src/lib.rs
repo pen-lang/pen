@@ -16,9 +16,9 @@ mod variants;
 use declarations::compile_declaration;
 use definitions::compile_definition;
 pub use error::CompileError;
+use fnv::FnvHashMap;
 use foreign_declarations::compile_foreign_declaration;
 use foreign_definitions::compile_foreign_definition;
-use std::collections::BTreeMap;
 use type_information::compile_type_information_global_variable;
 
 pub fn compile(module: &mir::ir::Module) -> Result<fmm::ir::Module, CompileError> {
@@ -75,7 +75,7 @@ pub fn compile(module: &mir::ir::Module) -> Result<fmm::ir::Module, CompileError
                 .iter()
                 .map(|definition| (definition.name(), definition.type_())),
         )
-        .collect::<BTreeMap<_, _>>();
+        .collect::<FnvHashMap<_, _>>();
 
     for definition in module.foreign_definitions() {
         compile_foreign_definition(
@@ -92,8 +92,8 @@ pub fn compile(module: &mir::ir::Module) -> Result<fmm::ir::Module, CompileError
 
 fn compile_global_variables(
     module: &mir::ir::Module,
-    types: &BTreeMap<String, mir::types::RecordBody>,
-) -> Result<BTreeMap<String, fmm::build::TypedExpression>, CompileError> {
+    types: &FnvHashMap<String, mir::types::RecordBody>,
+) -> Result<FnvHashMap<String, fmm::build::TypedExpression>, CompileError> {
     module
         .foreign_declarations()
         .iter()

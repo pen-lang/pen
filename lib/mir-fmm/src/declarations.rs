@@ -1,10 +1,10 @@
 use super::types;
-use std::collections::BTreeMap;
+use fnv::FnvHashMap;
 
 pub fn compile_declaration(
     module_builder: &fmm::build::ModuleBuilder,
     declaration: &mir::ir::Declaration,
-    types: &BTreeMap<String, mir::types::RecordBody>,
+    types: &FnvHashMap<String, mir::types::RecordBody>,
 ) {
     module_builder.declare_variable(
         declaration.name(),

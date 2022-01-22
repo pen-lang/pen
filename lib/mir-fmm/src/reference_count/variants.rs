@@ -1,13 +1,13 @@
 use super::{super::error::CompileError, expressions};
 use crate::types;
-use std::collections::BTreeMap;
+use fnv::FnvHashMap;
 
 const ARGUMENT_NAME: &str = "_payload";
 
 pub fn compile_variant_clone_function(
     module_builder: &fmm::build::ModuleBuilder,
     type_: &mir::types::Type,
-    types: &BTreeMap<String, mir::types::RecordBody>,
+    types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     module_builder.define_function(
         format!("variant_clone_{}", types::compile_type_id(type_)),
@@ -40,7 +40,7 @@ pub fn compile_variant_clone_function(
 pub fn compile_variant_drop_function(
     module_builder: &fmm::build::ModuleBuilder,
     type_: &mir::types::Type,
-    types: &BTreeMap<String, mir::types::RecordBody>,
+    types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     module_builder.define_function(
         format!("variant_drop_{}", types::compile_type_id(type_)),

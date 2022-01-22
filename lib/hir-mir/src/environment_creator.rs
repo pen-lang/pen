@@ -1,8 +1,8 @@
 use super::type_extractor;
+use fnv::FnvHashMap;
 use hir::{ir::*, types::Type};
-use std::collections::BTreeMap;
 
-pub fn create_from_module(module: &Module) -> BTreeMap<String, Type> {
+pub fn create_from_module(module: &Module) -> FnvHashMap<String, Type> {
     module
         .declarations()
         .iter()

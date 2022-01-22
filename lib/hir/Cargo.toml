@@ -5,6 +5,7 @@ authors = ["Yota Toyama <raviqqe@gmail.com>"]
 edition = "2021"
 
 [dependencies]
+fnv = "1"
 position = { path = "../position" }
 serde = { version = "1", features = ["derive", "rc"] }
 
