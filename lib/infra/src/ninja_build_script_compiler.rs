@@ -560,7 +560,7 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
             format!(
                 "  command = {} -t $target -o $out $in",
                 package_script_finder::find(&system_package_directory, self.link_script_basename)?
-                    .ok_or_else(|| InfrastructureError::LinkScriptNotFound(
+                    .ok_or(InfrastructureError::LinkScriptNotFound(
                         system_package_directory,
                     ))?
                     .display(),
