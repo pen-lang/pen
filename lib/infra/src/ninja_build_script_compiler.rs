@@ -102,6 +102,8 @@ impl NinjaBuildScriptCompiler {
             "rule compile_ffi",
             "  command = $in -t $target $out",
             "  description = compiling FFI module in $package_directory",
+            "rule link_archives",
+            "  command = libtool -static -o $out $in",
         ]
         .iter()
         .map(|string| string.to_string())
@@ -331,14 +333,23 @@ impl NinjaBuildScriptCompiler {
         &self,
         object_files: &[&FilePath],
         archive_file: &FilePath,
+        ffi_archive_file: Option<&FilePath>,
         package_directory: &FilePath,
     ) -> Result<Vec<String>, Box<dyn Error>> {
         let archive_file = self.file_path_converter.convert_to_os_path(archive_file);
+        let package_directory = self
+            .file_path_converter
+            .convert_to_os_path(package_directory);
+
+        let mut intermediate_archive_file = archive_file.clone();
+        intermediate_archive_file
+            .set_file_name(&*(archive_file.file_name().unwrap().to_string_lossy() + "_modules"));
+        intermediate_archive_file.set_extension("a");
 
         Ok(vec![
             format!(
                 "build {}: ar {}",
-                archive_file.display(),
+                intermediate_archive_file.display(),
                 object_files
                     .iter()
                     .map(|object_file| format!(
@@ -350,7 +361,26 @@ impl NinjaBuildScriptCompiler {
                     .collect::<Vec<_>>()
                     .join(" ")
             ),
-            format!("  package_directory = {}", package_directory),
+            format!("  package_directory = {}", package_directory.display()),
+            format!(
+                "build {}: link_archives {} {}",
+                archive_file.display(),
+                intermediate_archive_file.display(),
+                if package_script_finder::find(&package_directory, self.ffi_build_script_basename)
+                    .is_ok()
+                {
+                    ffi_archive_file
+                        .map(|path| {
+                            self.file_path_converter
+                                .convert_to_os_path(path)
+                                .display()
+                                .to_string()
+                        })
+                        .unwrap_or_default()
+                } else {
+                    "".into()
+                }
+            ),
             format!("default {}", archive_file.display()),
         ])
     }
@@ -436,6 +466,7 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
                         .chain(main_module_target.map(|target| target.object_file()))
                         .collect::<Vec<_>>(),
                     archive_file,
+                    ffi_archive_file.into(),
                     package_directory,
                 )?,
             )
@@ -461,6 +492,7 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
                         .map(|target| target.object_file())
                         .collect::<Vec<_>>(),
                     archive_file,
+                    None,
                     package_directory,
                 )?,
             )
@@ -495,6 +527,7 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
                         .map(|target| target.object_file())
                         .collect::<Vec<_>>(),
                     archive_file,
+                    ffi_archive_file.into(),
                     package_directory,
                 )?,
             )
@@ -521,7 +554,7 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
             format!(
                 "  command = {} -t $target -o $out $in",
                 package_script_finder::find(&system_package_directory, self.link_script_basename)?
-                    .ok_or(InfrastructureError::LinkScriptNotFound(
+                    .ok_or_else(|| InfrastructureError::LinkScriptNotFound(
                         system_package_directory,
                     ))?
                     .display(),
@@ -622,6 +655,7 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
                         .map(|target| target.object_file())
                         .collect::<Vec<_>>(),
                     archive_file,
+                    ffi_archive_file.into(),
                     package_directory,
                 )?,
             )
