@@ -26,7 +26,7 @@ Last = \(xs [any], fallback any) any {
   }
 }
 
-last= \(xs [any], x \() any) any {
+last = \(xs [any], x \() any) any {
   if [x, ...xs] = xs {
     last(xs, x)
   } else {

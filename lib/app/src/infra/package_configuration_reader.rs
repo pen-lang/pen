@@ -6,6 +6,4 @@ pub trait PackageConfigurationReader {
         &self,
         package_directory: &FilePath,
     ) -> Result<BTreeMap<String, url::Url>, Box<dyn Error>>;
-
-    fn is_ffi_enabled(&self, package_directory: &FilePath) -> Result<bool, Box<dyn Error>>;
 }

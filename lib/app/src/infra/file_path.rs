@@ -10,7 +10,7 @@ pub struct FilePath {
 }
 
 impl FilePath {
-    pub fn new<I: IntoIterator<Item = impl AsRef<str>>>(components: I) -> Self {
+    pub fn new(components: impl IntoIterator<Item = impl AsRef<str>>) -> Self {
         Self {
             components: components
                 .into_iter()
@@ -25,6 +25,18 @@ impl FilePath {
 
     pub fn components(&self) -> impl Iterator<Item = &str> {
         self.components.iter().map(Deref::deref)
+    }
+
+    pub fn file_name(&self) -> Self {
+        Self {
+            components: self.components[(self.components.len() - 1)..].to_vec(),
+        }
+    }
+
+    pub fn parent(&self) -> Self {
+        Self {
+            components: self.components[0..(self.components.len() - 1)].to_vec(),
+        }
     }
 
     #[must_use]

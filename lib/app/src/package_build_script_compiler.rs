@@ -110,10 +110,6 @@ pub fn compile_modules(
                     output_directory,
                     &infrastructure.file_path_configuration,
                 ),
-                &file_path_resolver::resolve_main_package_ffi_archive_file(
-                    output_directory,
-                    &infrastructure.file_path_configuration,
-                ),
                 package_directory,
             )?
             .as_bytes(),
@@ -191,19 +187,6 @@ pub fn compile_application(
                 )]
                 .into_iter()
                 .chain(
-                    if infrastructure
-                        .package_configuration_reader
-                        .is_ffi_enabled(main_package_directory)?
-                    {
-                        Some(file_path_resolver::resolve_main_package_ffi_archive_file(
-                            output_directory,
-                            &infrastructure.file_path_configuration,
-                        ))
-                    } else {
-                        None
-                    },
-                )
-                .chain(
                     external_package_topological_sorter::sort(
                         infrastructure,
                         main_package_directory,
@@ -211,21 +194,19 @@ pub fn compile_application(
                     )?
                     .iter()
                     .map(|url| {
-                        resolve_external_package_archive_files(
-                            infrastructure,
-                            url,
+                        file_path_resolver::resolve_external_package_archive_file(
                             output_directory,
+                            url,
+                            &infrastructure.file_path_configuration,
                         )
                     })
-                    .collect::<Result<Vec<_>, _>>()?
-                    .into_iter()
-                    .flatten(),
+                    .collect::<Vec<_>>(),
                 )
-                .chain(resolve_external_package_archive_files(
-                    infrastructure,
-                    prelude_package_url,
+                .chain([file_path_resolver::resolve_external_package_archive_file(
                     output_directory,
-                )?)
+                    prelude_package_url,
+                    &infrastructure.file_path_configuration,
+                )])
                 .collect::<Vec<_>>(),
                 &main_package_directory.join(&FilePath::new([
                     &application_configuration.application_filename
@@ -266,19 +247,6 @@ pub fn compile_test(
                 ]
                 .into_iter()
                 .chain(
-                    if infrastructure
-                        .package_configuration_reader
-                        .is_ffi_enabled(main_package_directory)?
-                    {
-                        Some(file_path_resolver::resolve_main_package_ffi_archive_file(
-                            output_directory,
-                            &infrastructure.file_path_configuration,
-                        ))
-                    } else {
-                        None
-                    },
-                )
-                .chain(
                     external_package_topological_sorter::sort(
                         infrastructure,
                         main_package_directory,
@@ -286,21 +254,19 @@ pub fn compile_test(
                     )?
                     .iter()
                     .map(|url| {
-                        resolve_external_package_archive_files(
-                            infrastructure,
-                            url,
+                        file_path_resolver::resolve_external_package_archive_file(
                             output_directory,
+                            url,
+                            &infrastructure.file_path_configuration,
                         )
                     })
-                    .collect::<Result<Vec<_>, _>>()?
-                    .into_iter()
-                    .flatten(),
+                    .collect::<Vec<_>>(),
                 )
-                .chain(resolve_external_package_archive_files(
-                    infrastructure,
-                    prelude_package_url,
+                .chain([file_path_resolver::resolve_external_package_archive_file(
                     output_directory,
-                )?)
+                    prelude_package_url,
+                    &infrastructure.file_path_configuration,
+                )])
                 .collect::<Vec<_>>(),
                 &file_path_resolver::resolve_package_test_information_file(
                     output_directory,
@@ -327,18 +293,13 @@ pub fn compile_external(
         build_script_file,
         infrastructure
             .build_script_compiler
-            .compile_external(
+            .compile_external_package(
                 &module_target_collector::collect_module_targets(
                     infrastructure,
                     &package_directory,
                     output_directory,
                 )?,
                 &file_path_resolver::resolve_external_package_archive_file(
-                    output_directory,
-                    package_url,
-                    &infrastructure.file_path_configuration,
-                ),
-                &file_path_resolver::resolve_external_package_ffi_archive_file(
                     output_directory,
                     package_url,
                     &infrastructure.file_path_configuration,
@@ -364,7 +325,7 @@ pub fn compile_prelude(
         build_script_file,
         infrastructure
             .build_script_compiler
-            .compile_prelude(
+            .compile_prelude_package(
                 &module_target_collector::collect_module_targets(
                     infrastructure,
                     &package_directory,
@@ -375,46 +336,10 @@ pub fn compile_prelude(
                     package_url,
                     &infrastructure.file_path_configuration,
                 ),
-                &file_path_resolver::resolve_external_package_ffi_archive_file(
-                    output_directory,
-                    package_url,
-                    &infrastructure.file_path_configuration,
-                ),
                 &package_directory,
             )?
             .as_bytes(),
     )?;
 
     Ok(())
-}
-
-fn resolve_external_package_archive_files(
-    infrastructure: &Infrastructure,
-    package_url: &url::Url,
-    output_directory: &FilePath,
-) -> Result<Vec<FilePath>, Box<dyn Error>> {
-    Ok(
-        vec![file_path_resolver::resolve_external_package_archive_file(
-            output_directory,
-            package_url,
-            &infrastructure.file_path_configuration,
-        )]
-        .into_iter()
-        .chain(
-            if infrastructure.package_configuration_reader.is_ffi_enabled(
-                &file_path_resolver::resolve_package_directory(output_directory, package_url),
-            )? {
-                Some(
-                    file_path_resolver::resolve_external_package_ffi_archive_file(
-                        output_directory,
-                        package_url,
-                        &infrastructure.file_path_configuration,
-                    ),
-                )
-            } else {
-                None
-            },
-        )
-        .collect(),
-    )
 }

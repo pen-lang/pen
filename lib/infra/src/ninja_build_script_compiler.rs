@@ -5,6 +5,9 @@ use crate::{
 use app::infra::FilePath;
 use std::{error::Error, sync::Arc};
 
+const FFI_ARCHIVE_DIRECTORY: &str = "ffi";
+const AR_DESCRIPTION: &str = "  description = archiving package of $package_directory";
+
 pub struct NinjaBuildScriptCompiler {
     file_path_converter: Arc<FilePathConverter>,
     bit_code_file_extension: &'static str,
@@ -96,12 +99,18 @@ impl NinjaBuildScriptCompiler {
             "rule resolve_dependency",
             &resolve_dependency_command,
             "  description = resolving dependency of $source_file",
-            "rule ar",
-            &format!("  command = {} crs $out $in", ar.display()),
-            "  description = archiving package of $package_directory",
             "rule compile_ffi",
             "  command = $in -t $target $out",
             "  description = compiling FFI module in $package_directory",
+            "rule ar",
+            &format!("  command = {} crs $out $in", ar.display()),
+            AR_DESCRIPTION,
+            "rule ar_ffi",
+            &format!(
+                "  command = cp $ffi_archive_file $out && {} crs $out $object_files",
+                ar.display()
+            ),
+            AR_DESCRIPTION,
         ]
         .iter()
         .map(|string| string.to_string())
@@ -111,8 +120,6 @@ impl NinjaBuildScriptCompiler {
     fn compile_module_targets(
         &self,
         module_targets: &[app::infra::ModuleTarget],
-        ffi_archive_file: &FilePath,
-        package_directory: &FilePath,
     ) -> Result<Vec<String>, Box<dyn Error>> {
         Ok(module_targets
             .iter()
@@ -161,7 +168,6 @@ impl NinjaBuildScriptCompiler {
                     target.source_file(),
                 ))
             })
-            .chain(self.compile_ffi_build(package_directory, ffi_archive_file)?)
             .collect())
     }
 
@@ -297,88 +303,104 @@ impl NinjaBuildScriptCompiler {
         ]
     }
 
-    fn compile_ffi_build(
-        &self,
-        original_package_directory: &FilePath,
-        archive_file: &FilePath,
-    ) -> Result<Vec<String>, Box<dyn Error>> {
-        let package_directory = self
-            .file_path_converter
-            .convert_to_os_path(original_package_directory);
-
-        Ok(
-            if let Some(script) =
-                package_script_finder::find(&package_directory, self.ffi_build_script_basename)?
-            {
-                let archive_file = self.file_path_converter.convert_to_os_path(archive_file);
-
-                vec![
-                    format!(
-                        "build {}: compile_ffi {}",
-                        archive_file.display(),
-                        script.display()
-                    ),
-                    format!("  package_directory = {}", original_package_directory),
-                    format!("default {}", archive_file.display()),
-                ]
-            } else {
-                vec![]
-            },
-        )
-    }
-
     fn compile_archive(
         &self,
         object_files: &[&FilePath],
         archive_file: &FilePath,
         package_directory: &FilePath,
     ) -> Result<Vec<String>, Box<dyn Error>> {
-        let archive_file = self.file_path_converter.convert_to_os_path(archive_file);
+        Ok(
+            if let Some(script) = package_script_finder::find(
+                &self
+                    .file_path_converter
+                    .convert_to_os_path(package_directory),
+                self.ffi_build_script_basename,
+            )? {
+                let ffi_archive_file = archive_file
+                    .parent()
+                    .join(&FilePath::new([FFI_ARCHIVE_DIRECTORY]))
+                    .join(&archive_file.file_name());
 
+                [
+                    format!(
+                        "build {}: compile_ffi {}",
+                        self.file_path_converter
+                            .convert_to_os_path(&ffi_archive_file)
+                            .display(),
+                        script.display()
+                    ),
+                    format!("  package_directory = {}", package_directory),
+                ]
+                .into_iter()
+                .chain(self.compile_archive_with_ffi(
+                    object_files,
+                    archive_file,
+                    &ffi_archive_file,
+                    package_directory,
+                )?)
+                .collect()
+            } else {
+                self.compile_archive_without_ffi(object_files, archive_file, package_directory)?
+            },
+        )
+    }
+
+    fn compile_archive_without_ffi(
+        &self,
+        object_files: &[&FilePath],
+        archive_file: &FilePath,
+        package_directory: &FilePath,
+    ) -> Result<Vec<String>, Box<dyn Error>> {
         Ok(vec![
             format!(
                 "build {}: ar {}",
-                archive_file.display(),
-                object_files
-                    .iter()
-                    .map(|object_file| format!(
-                        "{}",
-                        self.file_path_converter
-                            .convert_to_os_path(object_file)
-                            .display()
-                    ))
-                    .collect::<Vec<_>>()
-                    .join(" ")
+                self.file_path_converter
+                    .convert_to_os_path(archive_file)
+                    .display(),
+                self.join_paths(object_files)
             ),
             format!("  package_directory = {}", package_directory),
-            format!("default {}", archive_file.display()),
         ])
     }
 
-    fn compile_package_test_information(
+    fn compile_archive_with_ffi(
         &self,
-        test_information_files: &[&FilePath],
-        package_test_information_file: &FilePath,
+        object_files: &[&FilePath],
+        archive_file: &FilePath,
+        ffi_archive_file: &FilePath,
+        package_directory: &FilePath,
     ) -> Result<Vec<String>, Box<dyn Error>> {
-        let package_test_information_file = self
+        let ffi_archive_file = self
             .file_path_converter
-            .convert_to_os_path(package_test_information_file);
+            .convert_to_os_path(ffi_archive_file);
+        let object_files = self.join_paths(object_files);
 
         Ok(vec![
             format!(
-                "build {}: compile_package_test_information {}",
-                package_test_information_file.display(),
-                test_information_files
-                    .iter()
-                    .map(|file| format!(
-                        "{}",
-                        self.file_path_converter.convert_to_os_path(file).display()
-                    ))
-                    .collect::<Vec<_>>()
-                    .join(" ")
+                "build {}: ar_ffi {} {}",
+                self.file_path_converter
+                    .convert_to_os_path(archive_file)
+                    .display(),
+                ffi_archive_file.display(),
+                &object_files,
             ),
-            format!("default {}", package_test_information_file.display()),
+            format!("  ffi_archive_file = {}", ffi_archive_file.display()),
+            format!("  object_files = {}", &object_files),
+            format!("  package_directory = {}", package_directory),
         ])
+    }
+
+    fn join_paths(&self, paths: &[&FilePath]) -> String {
+        paths
+            .iter()
+            .map(|path| {
+                format!(
+                    "{}",
+                    self.file_path_converter.convert_to_os_path(path).display()
+                )
+            })
+            .collect::<Vec<_>>()
+            .join(" ")
     }
 }
 
@@ -417,11 +439,10 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
         module_targets: &[app::infra::ModuleTarget],
         main_module_target: Option<&app::infra::MainModuleTarget>,
         archive_file: &FilePath,
-        ffi_archive_file: &FilePath,
         package_directory: &FilePath,
     ) -> Result<String, Box<dyn Error>> {
         Ok(self
-            .compile_module_targets(module_targets, ffi_archive_file, package_directory)?
+            .compile_module_targets(module_targets)?
             .into_iter()
             .chain(if let Some(main_module_target) = main_module_target {
                 self.compile_main_module_target(main_module_target, package_directory)?
@@ -455,7 +476,7 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
             .compile_test_module_targets(module_targets)?
             .into_iter()
             .chain(
-                self.compile_archive(
+                self.compile_archive_without_ffi(
                     &module_targets
                         .iter()
                         .map(|target| target.object_file())
@@ -464,29 +485,31 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
                     package_directory,
                 )?,
             )
-            .chain(
-                self.compile_package_test_information(
+            .chain([format!(
+                "build {}: compile_package_test_information {}",
+                self.file_path_converter
+                    .convert_to_os_path(package_test_information_file)
+                    .display(),
+                self.join_paths(
                     &module_targets
                         .iter()
                         .map(|target| target.test_information_file())
-                        .collect::<Vec<_>>(),
-                    package_test_information_file,
-                )?,
-            )
+                        .collect::<Vec<_>>()
+                )
+            )])
             .collect::<Vec<_>>()
             .join("\n")
             + "\n")
     }
 
-    fn compile_external(
+    fn compile_external_package(
         &self,
         module_targets: &[app::infra::ModuleTarget],
         archive_file: &FilePath,
-        ffi_archive_file: &FilePath,
         package_directory: &FilePath,
     ) -> Result<String, Box<dyn Error>> {
         Ok(self
-            .compile_module_targets(module_targets, ffi_archive_file, package_directory)?
+            .compile_module_targets(module_targets)?
             .into_iter()
             .chain(
                 self.compile_archive(
@@ -580,11 +603,10 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
             + "\n")
     }
 
-    fn compile_prelude(
+    fn compile_prelude_package(
         &self,
         module_targets: &[app::infra::ModuleTarget],
         archive_file: &FilePath,
-        ffi_archive_file: &FilePath,
         package_directory: &FilePath,
     ) -> Result<String, Box<dyn Error>> {
         Ok(module_targets
@@ -625,7 +647,6 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
                     package_directory,
                 )?,
             )
-            .chain(self.compile_ffi_build(package_directory, ffi_archive_file)?)
             .collect::<Vec<_>>()
             .join("\n")
             + "\n")

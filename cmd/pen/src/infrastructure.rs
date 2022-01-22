@@ -44,7 +44,6 @@ pub fn create(
             file_system.clone(),
             file_path_converter.clone(),
             BUILD_CONFIGURATION_FILENAME,
-            FFI_BUILD_SCRIPT_BASENAME,
         )),
         package_configuration_writer: Arc::new(infra::JsonPackageConfigurationWriter::new(
             file_system,
