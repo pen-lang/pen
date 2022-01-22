@@ -103,7 +103,7 @@ impl NinjaBuildScriptCompiler {
             "  command = $in -t $target $out",
             "  description = compiling FFI module in $package_directory",
             "rule link_archives",
-            "  command = libtool -static -o $out $in",
+            "  command = ar crsT -o $out $in",
         ]
         .iter()
         .map(|string| string.to_string())
@@ -341,10 +341,16 @@ impl NinjaBuildScriptCompiler {
             .file_path_converter
             .convert_to_os_path(package_directory);
 
-        let mut intermediate_archive_file = archive_file.clone();
-        intermediate_archive_file
-            .set_file_name(&*(archive_file.file_name().unwrap().to_string_lossy() + "_modules"));
-        intermediate_archive_file.set_extension("a");
+        let intermediate_archive_file = archive_file
+            .with_file_name(format!(
+                "{}_modules",
+                archive_file
+                    .with_extension("")
+                    .file_name()
+                    .unwrap()
+                    .to_string_lossy()
+            ))
+            .with_extension("a");
 
         Ok(vec![
             format!(
@@ -366,8 +372,8 @@ impl NinjaBuildScriptCompiler {
                 "build {}: link_archives {} {}",
                 archive_file.display(),
                 intermediate_archive_file.display(),
-                if package_script_finder::find(&package_directory, self.ffi_build_script_basename)
-                    .is_ok()
+                if package_script_finder::find(&package_directory, self.ffi_build_script_basename)?
+                    .is_some()
                 {
                     ffi_archive_file
                         .map(|path| {
