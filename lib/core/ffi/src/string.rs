@@ -1,23 +1,17 @@
-// TODO Move to a `pen-ffi` crate
-#[repr(C)]
-struct List {
-    node: ffi::Arc<ffi::Closure>,
-}
-
 #[repr(C)]
 struct FirstRest {
     ok: bool,
     first: ffi::Any,
-    rest: ffi::Arc<List>,
+    rest: ffi::Arc<ffi::List>,
 }
 
 extern "C" {
-    fn _pen_core_first_rest(xs: ffi::Arc<List>) -> ffi::Arc<FirstRest>;
+    fn _pen_core_first_rest(xs: ffi::Arc<ffi::List>) -> ffi::Arc<FirstRest>;
     fn _pen_core_to_string(xs: ffi::Any) -> ffi::ByteString;
 }
 
 #[ffi::bindgen]
-fn _pen_join_strings(mut list: ffi::Arc<List>, separator: ffi::ByteString) -> ffi::ByteString {
+fn _pen_join_strings(mut list: ffi::Arc<ffi::List>, separator: ffi::ByteString) -> ffi::ByteString {
     let mut first = true;
     let mut string = vec![];
 
