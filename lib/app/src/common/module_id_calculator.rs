@@ -11,7 +11,7 @@ pub fn calculate(source_file: &FilePath) -> String {
 
     format!(
         "{}_{:x}",
-        source_file.with_extension("").components().last().unwrap(),
+        source_file.file_name().with_extension(""),
         hasher.finish()
     )
 }

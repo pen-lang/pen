@@ -10,7 +10,7 @@ pub struct FilePath {
 }
 
 impl FilePath {
-    pub fn new<I: IntoIterator<Item = impl AsRef<str>>>(components: I) -> Self {
+    pub fn new(components: impl IntoIterator<Item = impl AsRef<str>>) -> Self {
         Self {
             components: components
                 .into_iter()
