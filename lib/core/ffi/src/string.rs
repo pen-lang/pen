@@ -17,12 +17,12 @@ extern "C" {
 }
 
 #[ffi::bindgen]
-fn _pen_join_strings(mut one: ffi::Arc<List>, separator: ffi::ByteString) -> ffi::ByteString {
+fn _pen_join_strings(mut list: ffi::Arc<List>, separator: ffi::ByteString) -> ffi::ByteString {
     let mut first = true;
     let mut string = vec![];
 
     loop {
-        let first_rest = unsafe { _pen_core_first_rest(one.clone()) };
+        let first_rest = unsafe { _pen_core_first_rest(list.clone()) };
 
         if !first_rest.ok {
             return string.into();
@@ -32,7 +32,7 @@ fn _pen_join_strings(mut one: ffi::Arc<List>, separator: ffi::ByteString) -> ffi
 
         first = false;
         string.extend(unsafe { _pen_core_to_string(first_rest.first.clone()) }.as_slice());
-        one = first_rest.rest.clone();
+        list = first_rest.rest.clone();
     }
 }
 
