@@ -1,12 +1,13 @@
+use once_cell::sync::Lazy;
 use std::env;
 
-const DEBUG_ENVIRONMENT_VARIABLE: &str = "PEN_DEBUG";
-const OS_DEBUG_ENVIRONMENT_VARIABLE: &str = "PEN_OS_DEBUG";
+static DEBUG: Lazy<bool> = Lazy::new(|| env::var("PEN_DEBUG").is_ok());
+static OS_DEBUG: Lazy<bool> = Lazy::new(|| env::var("PEN_OS_DEBUG").is_ok());
 
 pub fn is_debug() -> bool {
-    env::var(DEBUG_ENVIRONMENT_VARIABLE).is_ok()
+    *DEBUG
 }
 
 pub fn is_os_debug() -> bool {
-    env::var(OS_DEBUG_ENVIRONMENT_VARIABLE).is_ok()
+    *OS_DEBUG
 }
