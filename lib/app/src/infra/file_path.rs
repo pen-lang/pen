@@ -27,6 +27,18 @@ impl FilePath {
         self.components.iter().map(Deref::deref)
     }
 
+    pub fn file_name(&self) -> Self {
+        Self {
+            components: self.components[(self.components.len() - 1)..].to_vec(),
+        }
+    }
+
+    pub fn parent(&self) -> Self {
+        Self {
+            components: self.components[0..(self.components.len() - 1)].to_vec(),
+        }
+    }
+
     #[must_use]
     pub fn with_extension(&self, extension: &str) -> Self {
         if let Some(last) = self.components.last() {
