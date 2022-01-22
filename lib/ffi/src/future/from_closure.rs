@@ -25,8 +25,8 @@ pub async fn from_closure<T, S>(closure: Arc<Closure<T>>) -> S {
                 unsafe {
                     let entry_function =
                         transmute::<_, InitialStepFunction<S, T>>(closure.entry_function());
-                    entry_function(stack, resolve, closure.clone())
-                };
+                    entry_function(stack, resolve, closure.clone());
+                }
             }
         });
 
