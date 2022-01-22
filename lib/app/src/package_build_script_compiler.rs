@@ -198,15 +198,19 @@ pub fn compile_application(
                     )?
                     .iter()
                     .map(|url| {
-                        resolve_external_package_archive_file(infrastructure, url, output_directory)
+                        file_path_resolver::resolve_external_package_archive_file(
+                            output_directory,
+                            url,
+                            &infrastructure.file_path_configuration,
+                        )
                     })
-                    .collect::<Result<Vec<_>, _>>()?,
+                    .collect::<Vec<_>>(),
                 )
-                .chain([resolve_external_package_archive_file(
-                    infrastructure,
-                    prelude_package_url,
+                .chain([file_path_resolver::resolve_external_package_archive_file(
                     output_directory,
-                )?])
+                    prelude_package_url,
+                    &infrastructure.file_path_configuration,
+                )])
                 .collect::<Vec<_>>(),
                 &main_package_directory.join(&FilePath::new([
                     &application_configuration.application_filename
@@ -267,15 +271,19 @@ pub fn compile_test(
                     )?
                     .iter()
                     .map(|url| {
-                        resolve_external_package_archive_file(infrastructure, url, output_directory)
+                        file_path_resolver::resolve_external_package_archive_file(
+                            output_directory,
+                            url,
+                            &infrastructure.file_path_configuration,
+                        )
                     })
-                    .collect::<Result<Vec<_>, _>>()?,
+                    .collect::<Vec<_>>(),
                 )
-                .chain([resolve_external_package_archive_file(
-                    infrastructure,
-                    prelude_package_url,
+                .chain([file_path_resolver::resolve_external_package_archive_file(
                     output_directory,
-                )?])
+                    prelude_package_url,
+                    &infrastructure.file_path_configuration,
+                )])
                 .collect::<Vec<_>>(),
                 &file_path_resolver::resolve_package_test_information_file(
                     output_directory,
@@ -361,16 +369,4 @@ pub fn compile_prelude(
     )?;
 
     Ok(())
-}
-
-fn resolve_external_package_archive_file(
-    infrastructure: &Infrastructure,
-    package_url: &url::Url,
-    output_directory: &FilePath,
-) -> Result<FilePath, Box<dyn Error>> {
-    Ok(file_path_resolver::resolve_external_package_archive_file(
-        output_directory,
-        package_url,
-        &infrastructure.file_path_configuration,
-    ))
 }
