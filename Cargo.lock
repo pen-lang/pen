@@ -659,6 +659,7 @@ version = "0.1.0"
 dependencies = [
  "ast",
  "combine",
+ "fnv",
  "insta",
  "once_cell",
  "position",
