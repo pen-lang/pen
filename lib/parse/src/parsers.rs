@@ -14,9 +14,9 @@ use combine::{
     },
     sep_end_by, sep_end_by1, unexpected_any, value, Parser, Positioned,
 };
+use fnv::FnvHashSet;
 use once_cell::sync::Lazy;
 use position::Position;
-use fnv::FnvHashSet;
 
 const BUILT_IN_LITERALS: &[&str] = &["false", "none", "true"];
 const BUILT_IN_TYPES: &[&str] = &["any", "boolean", "none", "number", "string"];
