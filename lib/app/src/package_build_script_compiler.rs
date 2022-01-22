@@ -251,19 +251,6 @@ pub fn compile_test(
                 ]
                 .into_iter()
                 .chain(
-                    if infrastructure
-                        .package_configuration_reader
-                        .is_ffi_enabled(main_package_directory)?
-                    {
-                        Some(file_path_resolver::resolve_main_package_ffi_archive_file(
-                            output_directory,
-                            &infrastructure.file_path_configuration,
-                        ))
-                    } else {
-                        None
-                    },
-                )
-                .chain(
                     external_package_topological_sorter::sort(
                         infrastructure,
                         main_package_directory,
