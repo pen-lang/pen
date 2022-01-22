@@ -303,7 +303,7 @@ impl NinjaBuildScriptCompiler {
         ]
     }
 
-    fn compile_package_archive(
+    fn compile_archive(
         &self,
         object_files: &[&FilePath],
         archive_file: &FilePath,
@@ -450,7 +450,7 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
                 vec![]
             })
             .chain(
-                self.compile_package_archive(
+                self.compile_archive(
                     &module_targets
                         .iter()
                         .map(|target| target.object_file())
@@ -512,7 +512,7 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
             .compile_module_targets(module_targets)?
             .into_iter()
             .chain(
-                self.compile_package_archive(
+                self.compile_archive(
                     &module_targets
                         .iter()
                         .map(|target| target.object_file())
@@ -638,7 +638,7 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
                 ]
             })
             .chain(
-                self.compile_package_archive(
+                self.compile_archive(
                     &module_targets
                         .iter()
                         .map(|target| target.object_file())
