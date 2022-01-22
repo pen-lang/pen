@@ -327,7 +327,7 @@ pub fn compile_external(
         build_script_file,
         infrastructure
             .build_script_compiler
-            .compile_external(
+            .compile_external_package(
                 &module_target_collector::collect_module_targets(
                     infrastructure,
                     &package_directory,
@@ -364,7 +364,7 @@ pub fn compile_prelude(
         build_script_file,
         infrastructure
             .build_script_compiler
-            .compile_prelude(
+            .compile_prelude_package(
                 &module_target_collector::collect_module_targets(
                     infrastructure,
                     &package_directory,

@@ -161,7 +161,7 @@ impl NinjaBuildScriptCompiler {
                     target.source_file(),
                 ))
             })
-            .chain(self.compile_ffi_build(package_directory, ffi_archive_file)?)
+            .chain(self.compile_ffi(package_directory, ffi_archive_file)?)
             .collect())
     }
 
@@ -297,7 +297,7 @@ impl NinjaBuildScriptCompiler {
         ]
     }
 
-    fn compile_ffi_build(
+    fn compile_ffi(
         &self,
         original_package_directory: &FilePath,
         archive_file: &FilePath,
@@ -478,7 +478,7 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
             + "\n")
     }
 
-    fn compile_external(
+    fn compile_external_package(
         &self,
         module_targets: &[app::infra::ModuleTarget],
         archive_file: &FilePath,
@@ -580,7 +580,7 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
             + "\n")
     }
 
-    fn compile_prelude(
+    fn compile_prelude_package(
         &self,
         module_targets: &[app::infra::ModuleTarget],
         archive_file: &FilePath,
@@ -625,7 +625,7 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
                     package_directory,
                 )?,
             )
-            .chain(self.compile_ffi_build(package_directory, ffi_archive_file)?)
+            .chain(self.compile_ffi(package_directory, ffi_archive_file)?)
             .collect::<Vec<_>>()
             .join("\n")
             + "\n")

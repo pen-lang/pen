@@ -41,7 +41,7 @@ pub trait BuildScriptCompiler {
         test_file: &FilePath,
     ) -> Result<String, Box<dyn Error>>;
 
-    fn compile_external(
+    fn compile_external_package(
         &self,
         module_targets: &[ModuleTarget],
         archive_file: &FilePath,
@@ -49,7 +49,7 @@ pub trait BuildScriptCompiler {
         package_directory: &FilePath,
     ) -> Result<String, Box<dyn Error>>;
 
-    fn compile_prelude(
+    fn compile_prelude_package(
         &self,
         module_targets: &[ModuleTarget],
         archive_file: &FilePath,
