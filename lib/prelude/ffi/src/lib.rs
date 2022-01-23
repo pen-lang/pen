@@ -1,3 +1,5 @@
+#![no_std]
+
 #[ffi::bindgen]
 fn _pen_equal_strings(one: ffi::ByteString, other: ffi::ByteString) -> ffi::Boolean {
     (one.as_slice() == other.as_slice()).into()
