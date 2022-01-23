@@ -9,6 +9,14 @@ updates:
     schedule:
       interval: daily
   - package-ecosystem: cargo
+    directory: /lib/core/ffi
+    schedule:
+      interval: daily
+  - package-ecosystem: cargo
+    directory: /lib/prelude/ffi
+    schedule:
+      interval: daily
+  - package-ecosystem: cargo
     directory: /lib/os/ffi
     schedule:
       interval: daily
