@@ -1,0 +1,30 @@
+import foreign "c" _pen_core_bitwise_and \(number, number) number
+import foreign "c" _pen_core_bitwise_or \(number, number) number
+import foreign "c" _pen_core_bitwise_xor \(number, number) number
+import foreign "c" _pen_core_bitwise_not \(number) number
+import foreign "c" _pen_core_bitwise_left_shift \(number, number) number
+import foreign "c" _pen_core_bitwise_right_shift \(number, number) number
+
+And = \(x number, y number) number {
+  _pen_core_bitwise_and(x, y)
+}
+
+Or = \(x number, y number) number {
+  _pen_core_bitwise_or(x, y)
+}
+
+Xor = \(x number, y number) number {
+  _pen_core_bitwise_xor(x, y)
+}
+
+Not = \(x number) number {
+  _pen_core_bitwise_not(x)
+}
+
+LeftShift = \(x number, n number) number {
+  _pen_core_bitwise_left_shift(x, y)
+}
+
+RightShift = \(x number, n number) number {
+  _pen_core_bitwise_right_shift(x, y)
+}
