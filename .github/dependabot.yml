@@ -9,11 +9,11 @@ updates:
     schedule:
       interval: daily
   - package-ecosystem: cargo
-    directory: /lib/os
+    directory: /lib/os/ffi
     schedule:
       interval: daily
   - package-ecosystem: cargo
-    directory: /lib/os-sync
+    directory: /lib/os-sync/ffi
     schedule:
       interval: daily
   - package-ecosystem: gomod
