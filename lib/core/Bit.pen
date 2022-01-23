@@ -22,9 +22,9 @@ Not = \(x number) number {
 }
 
 LeftShift = \(x number, n number) number {
-  _pen_core_bitwise_left_shift(x, y)
+  _pen_core_bitwise_left_shift(x, n)
 }
 
 RightShift = \(x number, n number) number {
-  _pen_core_bitwise_right_shift(x, y)
+  _pen_core_bitwise_right_shift(x, n)
 }
