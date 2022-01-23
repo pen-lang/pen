@@ -1,15 +1,12 @@
 use super::async_stack_action::AsyncStackAction;
-use std::{
-    error::Error,
-    fmt::{self, Display, Formatter},
-};
+use core::fmt::{self, Display, Formatter};
 
 #[derive(Debug, PartialEq)]
 pub enum CpsError {
     UnexpectedAsyncStackAction(AsyncStackAction),
 }
 
-impl Error for CpsError {}
+// TODO Implement std::error::Error when it is not `no_std`.
 
 impl Display for CpsError {
     fn fmt(&self, formatter: &mut Formatter) -> Result<(), fmt::Error> {

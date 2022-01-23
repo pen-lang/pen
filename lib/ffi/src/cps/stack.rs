@@ -1,8 +1,6 @@
 use crate::DEFAULT_MEMORY_ALIGNMENT;
-use std::{
-    alloc::{alloc, dealloc, realloc, Layout},
-    ptr,
-};
+use alloc::alloc::{alloc, dealloc, realloc};
+use core::{alloc::Layout, ptr};
 
 const CAPACITY_MULTIPLIER: usize = 2;
 
