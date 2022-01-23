@@ -4,6 +4,7 @@ import foreign "c" _pen_core_bitwise_xor \(number, number) number
 import foreign "c" _pen_core_bitwise_not \(number) number
 import foreign "c" _pen_core_bitwise_left_shift \(number, number) number
 import foreign "c" _pen_core_bitwise_right_shift \(number, number) number
+import foreign "c" _pen_core_bitwise_integer_64 \(number) number
 
 And = \(x number, y number) number {
   _pen_core_bitwise_and(x, y)
@@ -27,4 +28,8 @@ LeftShift = \(x number, n number) number {
 
 RightShift = \(x number, n number) number {
   _pen_core_bitwise_right_shift(x, n)
+}
+
+Integer64 = \(x number) number {
+  _pen_core_bitwise_integer_64(x)
 }
