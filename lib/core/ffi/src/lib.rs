@@ -1,3 +1,3 @@
-mod bitwise;
+mod bit;
 mod number;
 mod string;
