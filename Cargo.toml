@@ -4,7 +4,6 @@ members = [
   "lib/app",
   "lib/ast",
   "lib/ast-hir",
-  "lib/core/ffi",
   "lib/ffi",
   "lib/ffi-macro",
   "lib/hir",
@@ -15,10 +14,17 @@ members = [
   "lib/mir-fmm",
   "lib/parse",
   "lib/position",
-  "lib/prelude/ffi",
   "lib/test-info",
 ]
-exclude = ["cmd/test", "examples", "lib/os", "lib/os-sync", "tmp"]
+exclude = [
+  "cmd/test",
+  "examples",
+  "lib/core",
+  "lib/prelude",
+  "lib/os",
+  "lib/os-sync",
+  "tmp",
+]
 
 [profile.release]
 lto = true

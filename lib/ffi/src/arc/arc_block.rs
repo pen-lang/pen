@@ -1,5 +1,6 @@
-use std::{
-    alloc::{alloc, dealloc, Layout},
+use alloc::alloc::{alloc, dealloc};
+use core::{
+    alloc::Layout,
     ptr::{drop_in_place, null},
     sync::atomic::{fence, AtomicUsize, Ordering},
 };

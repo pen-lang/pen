@@ -26,18 +26,19 @@ fn generate_type(attributes: &AttributeArgs, type_: &ItemStruct) -> Result<Token
         #type_
 
         mod #module_name {
+            use core::{mem, ptr};
             use super::#type_name;
 
             unsafe fn transmute_into_payload<T>(data: T) -> u64 {
                 let mut payload = 0;
 
-                std::ptr::write(&mut payload as *mut u64 as *mut T, data);
+                ptr::write(&mut payload as *mut u64 as *mut T, data);
 
                 payload
             }
 
             unsafe fn transmute_from_payload<T>(payload: u64) -> T {
-                std::ptr::read(&payload as *const u64 as *const T)
+                ptr::read(&payload as *const u64 as *const T)
             }
 
             #[allow(clippy::forget_copy)]
@@ -45,7 +46,7 @@ fn generate_type(attributes: &AttributeArgs, type_: &ItemStruct) -> Result<Token
                 let x = unsafe { transmute_from_payload::<#type_name>(x) };
                 let payload = unsafe { transmute_into_payload(x.clone()) };
 
-                std::mem::forget(x);
+                mem::forget(x);
 
                 payload
             }
@@ -67,9 +68,9 @@ fn generate_type(attributes: &AttributeArgs, type_: &ItemStruct) -> Result<Token
                 type Error = ();
 
                 fn try_from(any: #crate_path::Any) -> Result<Self, ()> {
-                    if std::ptr::eq(any.type_information(), &TYPE_INFORMATION) {
+                    if ptr::eq(any.type_information(), &TYPE_INFORMATION) {
                         let x = unsafe { transmute_from_payload(*any.payload()) };
-                        std::mem::forget(any);
+                        mem::forget(any);
                         Ok(x)
                     } else {
                         Err(())
@@ -81,8 +82,8 @@ fn generate_type(attributes: &AttributeArgs, type_: &ItemStruct) -> Result<Token
                 type Error = ();
 
                 fn try_from(any: &#crate_path::Any) -> Result<Self, ()> {
-                    if std::ptr::eq(any.type_information(), &TYPE_INFORMATION) {
-                        Ok(unsafe { std::mem::transmute(any.payload()) })
+                    if ptr::eq(any.type_information(), &TYPE_INFORMATION) {
+                        Ok(unsafe { mem::transmute(any.payload()) })
                     } else {
                         Err(())
                     }

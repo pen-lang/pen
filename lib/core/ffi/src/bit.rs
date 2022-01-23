@@ -1,4 +1,4 @@
-use std::intrinsics::transmute;
+use core::mem::transmute;
 
 #[ffi::bindgen]
 fn _pen_core_bit_and(x: ffi::Number, y: ffi::Number) -> ffi::Number {

@@ -1,3 +1,7 @@
+#![no_std]
+
+extern crate alloc;
+
 #[ffi::bindgen]
 fn _pen_equal_strings(one: ffi::ByteString, other: ffi::ByteString) -> ffi::Boolean {
     (one.as_slice() == other.as_slice()).into()
@@ -6,6 +10,7 @@ fn _pen_equal_strings(one: ffi::ByteString, other: ffi::ByteString) -> ffi::Bool
 #[cfg(test)]
 mod tests {
     use super::*;
+    use alloc::vec;
 
     #[test]
     fn equal_empty_strings() {

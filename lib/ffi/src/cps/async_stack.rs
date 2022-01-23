@@ -1,6 +1,6 @@
 use super::{async_stack_action::AsyncStackAction, CpsError, Stack};
 use crate::cps;
-use std::{
+use core::{
     future::Future,
     intrinsics::transmute,
     ops::{Deref, DerefMut},
@@ -140,7 +140,7 @@ extern "C" {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::{
+    use core::{
         future::{ready, Ready},
         ptr::null,
         task::{RawWaker, RawWakerVTable, Waker},

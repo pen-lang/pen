@@ -58,6 +58,7 @@ mod tests {
 
     mod box_ {
         use super::*;
+        use alloc::boxed::Box;
 
         #[pen_ffi_macro::any(crate = "crate")]
         #[derive(Clone)]
@@ -103,13 +104,13 @@ mod tests {
 
     mod rc {
         use super::*;
-        use std::rc::Rc;
+        use alloc::rc::Rc;
 
         #[pen_ffi_macro::any(crate = "crate")]
         #[derive(Clone)]
         pub struct TypeA {
             #[allow(dead_code)]
-            value: std::rc::Rc<f64>,
+            value: Rc<f64>,
         }
 
         #[pen_ffi_macro::any(crate = "crate")]
@@ -117,7 +118,7 @@ mod tests {
         #[derive(Clone)]
         pub struct TypeB {
             #[allow(dead_code)]
-            value: std::rc::Rc<std::rc::Rc<f64>>,
+            value: Rc<Rc<f64>>,
         }
 
         #[test]
