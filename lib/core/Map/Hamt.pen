@@ -1,0 +1,15 @@
+import 'Map'EmptyEntry { EmptyEntry }
+
+# TODO
+
+type Hamt {
+  entry1 any
+}
+
+New = \() Hamt {
+  Hamt{entry1: none}
+}
+
+Get = \() any {
+  EmptyEntry
+}

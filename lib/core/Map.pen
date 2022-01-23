@@ -1,0 +1,29 @@
+import 'Map'EmptyEntry { EmptyEntry }
+import 'Map'Hamt { Hamt }
+
+type Map {
+  size number
+  hamt Hamt
+}
+
+New = \() Map {
+  Map{
+    size: 0,
+    hamt: Hamt'New(),
+  }
+}
+
+Size = \(map Map) number {
+  map.size
+}
+
+Get = \(map Map, key string, default any) any {
+  v = Hamt'Get(map.hamt, key)
+
+  if v == EmptyEntry {
+    default
+  } else {
+    # TODO
+    default
+  }
+}
