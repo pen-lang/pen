@@ -1,5 +1,5 @@
 use super::{any::Any, arc::Arc};
-use std::ops::Deref;
+use core::ops::Deref;
 
 #[repr(C)]
 pub struct BoxAny {
