@@ -3,7 +3,7 @@ mod arc_buffer;
 
 use arc_block::*;
 pub use arc_buffer::*;
-use std::{alloc::Layout, marker::PhantomData, ops::Deref, ptr::write};
+use core::{alloc::Layout, marker::PhantomData, ops::Deref, ptr::write};
 
 #[derive(Debug)]
 #[repr(C)]
@@ -69,7 +69,8 @@ unsafe impl<T: Send + Sync> Sync for Arc<T> {}
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::mem::{drop, forget};
+    use alloc::boxed::Box;
+    use core::mem::{drop, forget};
 
     #[test]
     fn create() {

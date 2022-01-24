@@ -1,4 +1,4 @@
-use std::{
+use core::{
     intrinsics::transmute,
     ptr::drop_in_place,
     sync::atomic::{AtomicPtr, Ordering},
@@ -47,7 +47,9 @@ impl<T> Drop for Closure<T> {
 mod tests {
     use super::*;
     use crate::Arc;
-    use std::{ptr::null, thread::spawn};
+    use core::ptr::null;
+
+    fn spawn<T: Send + 'static>(_: impl (FnOnce() -> T) + Send + 'static) {}
 
     #[test]
     fn send() {
