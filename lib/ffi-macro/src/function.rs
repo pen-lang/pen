@@ -54,7 +54,7 @@ fn generate_function(attributes: &AttributeArgs, function: &ItemFn) -> Result<To
             continue_: #crate_path::cps::ContinuationFunction<#output_type, ()>,
             #arguments
         ) -> #crate_path::cps::Result {
-            use std::{future::Future, pin::Pin, task::Poll};
+            use core::{future::Future, pin::Pin, task::Poll};
 
             type OutputFuture = Pin<Box<dyn Future<Output = #output_type>>>;
 

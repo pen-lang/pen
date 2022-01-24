@@ -5,7 +5,7 @@ Feature: Memory leak
     {
       "dependencies": {
         "Core": "pen:///core",
-        "System": "pen:///os"
+        "System": "pen:///os-sync"
       }
     }
     """
@@ -245,11 +245,11 @@ Feature: Memory leak
         none
       }
 
-      main(ctx)
+      0
     }
     """
     When I successfully run `pen build`
-    Then I successfully run `check_memory_leak_in_loop.sh ./app`
+    Then I successfully run `check_memory_leak.sh ./app`
 
   Scenario: Drop an unforced list with no environment
     Given a file named "main.pen" with:
@@ -263,11 +263,11 @@ Feature: Memory leak
     main = \(ctx Context) number {
       [foo foo{x: 42}]
 
-      main(ctx)
+      0
     }
     """
     When I successfully run `pen build`
-    Then I successfully run `check_memory_leak_in_loop.sh ./app`
+    Then I successfully run `check_memory_leak.sh ./app`
 
   Scenario: Drop a forced list with no environment
     Given a file named "main.pen" with:

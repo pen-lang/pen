@@ -1,5 +1,5 @@
 use super::error::CompileError;
-use hir::{ir, types};
+use hir::ir;
 use position::Position;
 
 pub fn compile(module: &ast::Module) -> Result<ir::Module, CompileError> {
@@ -12,7 +12,10 @@ pub fn compile(module: &ast::Module) -> Result<ir::Module, CompileError> {
                     definition.name(),
                     definition.name(),
                     definition.fields().to_vec(),
-                    is_record_open(definition.fields()),
+                    definition
+                        .fields()
+                        .iter()
+                        .all(|field| ast::analysis::is_name_public(field.name())),
                     ast::analysis::is_name_public(definition.name()),
                     false,
                     definition.position().clone(),
@@ -350,16 +353,10 @@ fn compile_if(
     })
 }
 
-fn is_record_open(fields: &[types::RecordField]) -> bool {
-    !fields.is_empty()
-        && fields
-            .iter()
-            .all(|field| ast::analysis::is_name_public(field.name()))
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
+    use ast::types;
     use hir::test::ModuleFake;
     use position::{test::PositionFake, Position};
     use pretty_assertions::assert_eq;
@@ -411,7 +408,7 @@ mod tests {
                     "Foo1",
                     "Foo1",
                     vec![],
-                    false,
+                    true,
                     true,
                     false,
                     Position::fake()
