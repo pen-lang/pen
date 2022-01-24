@@ -23,6 +23,7 @@
     "dyndep",
     "foo",
     "getopts",
+    "hamt",
     "hasher",
     "idempotently",
     "indoc",
