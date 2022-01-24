@@ -584,11 +584,16 @@ fn if_type_branch<'a>() -> impl Parser<Stream<'a>, Output = IfTypeBranch> {
 fn record<'a>() -> impl Parser<Stream<'a>, Output = Record> {
     (
         attempt((position(), qualified_identifier(), sign("{"))),
-        optional(between(sign("..."), sign(","), expression())),
-        sep_end_by1(record_field(), sign(",")),
+        choice((
+            (
+                between(sign("..."), sign(","), expression()).map(Some),
+                sep_end_by1(record_field(), sign(",")),
+            ),
+            (value(None), sep_end_by(record_field(), sign(","))),
+        )),
         sign("}"),
     )
-        .then(|((position, name, _), record, fields, _)| {
+        .then(|((position, name, _), (record, fields), _)| {
             let fields: Vec<_> = fields;
 
             if fields
@@ -2335,7 +2340,15 @@ mod tests {
         fn parse_record() {
             assert!(record().parse(stream("Foo", "")).is_err());
 
-            assert!(record().parse(stream("Foo{}", "")).is_err());
+            assert_eq!(
+                record().parse(stream("Foo{}", "")).unwrap().0,
+                Record::new(
+                    types::Reference::new("Foo", Position::fake()),
+                    None,
+                    vec![],
+                    Position::fake()
+                )
+            );
 
             assert_eq!(
                 expression().parse(stream("Foo{foo:42}", "")).unwrap().0,
@@ -2429,6 +2442,8 @@ mod tests {
                     Position::fake()
                 )
             );
+
+            assert!(record().parse(stream("Foo{...foo,}", "")).is_err());
 
             assert_eq!(
                 record().parse(stream("Foo{...foo,bar:42}", "")).unwrap().0,
