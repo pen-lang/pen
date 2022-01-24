@@ -356,6 +356,7 @@ fn compile_if(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use ast::types;
     use hir::test::ModuleFake;
     use position::{test::PositionFake, Position};
     use pretty_assertions::assert_eq;
@@ -407,7 +408,7 @@ mod tests {
                     "Foo1",
                     "Foo1",
                     vec![],
-                    false,
+                    true,
                     true,
                     false,
                     Position::fake()
