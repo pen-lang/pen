@@ -5,7 +5,7 @@ Feature: Memory leak
     {
       "dependencies": {
         "Core": "pen:///core",
-        "System": "pen:///os"
+        "System": "pen:///os-sync"
       }
     }
     """
