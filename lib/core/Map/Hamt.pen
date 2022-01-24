@@ -2,12 +2,83 @@ import 'Map'EmptyEntry { EmptyEntry }
 
 # TODO
 
+type KeyValue {
+  key string
+  value any
+}
+
+type Entry = KeyValue | Hamt | none
+
 type Hamt {
-  entry1 any
+  entry1 Entry
+  entry2 Entry
+  entry3 Entry
+  entry4 Entry
+  entry5 Entry
+  entry6 Entry
+  entry7 Entry
+  entry8 Entry
+  entry9 Entry
+  entry10 Entry
+  entry11 Entry
+  entry12 Entry
+  entry13 Entry
+  entry14 Entry
+  entry15 Entry
+  entry16 Entry
+  entry17 Entry
+  entry18 Entry
+  entry19 Entry
+  entry20 Entry
+  entry21 Entry
+  entry22 Entry
+  entry23 Entry
+  entry24 Entry
+  entry25 Entry
+  entry26 Entry
+  entry27 Entry
+  entry28 Entry
+  entry29 Entry
+  entry30 Entry
+  entry31 Entry
+  entry32 Entry
 }
 
 New = \() Hamt {
-  Hamt{entry1: none}
+  Hamt{
+    entry1: none,
+    entry2: none,
+    entry3: none,
+    entry4: none,
+    entry5: none,
+    entry6: none,
+    entry7: none,
+    entry8: none,
+    entry9: none,
+    entry10: none,
+    entry11: none,
+    entry12: none,
+    entry13: none,
+    entry14: none,
+    entry15: none,
+    entry16: none,
+    entry17: none,
+    entry18: none,
+    entry19: none,
+    entry20: none,
+    entry21: none,
+    entry22: none,
+    entry23: none,
+    entry24: none,
+    entry25: none,
+    entry26: none,
+    entry27: none,
+    entry28: none,
+    entry29: none,
+    entry30: none,
+    entry31: none,
+    entry32: none,
+  }
 }
 
 Get = \(hamt Hamt, key string) any {
