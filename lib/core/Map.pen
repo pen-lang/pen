@@ -2,14 +2,14 @@ import 'Map'EmptyEntry { EmptyEntry }
 import 'Map'Hamt { Hamt }
 
 type Map {
-  size number
   hamt Hamt
+  size number
 }
 
 New = \() Map {
   Map{
-    size: 0,
     hamt: Hamt'New(),
+    size: 0,
   }
 }
 
@@ -20,10 +20,9 @@ Size = \(map Map) number {
 Get = \(map Map, key string, default any) any {
   v = Hamt'Get(map.hamt, key)
 
-  if v == EmptyEntry {
+  if _ = v as EmptyEntry {
     default
   } else {
-    # TODO
-    default
+    v
   }
 }

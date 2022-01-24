@@ -10,6 +10,6 @@ New = \() Hamt {
   Hamt{entry1: none}
 }
 
-Get = \() any {
-  EmptyEntry
+Get = \(hamt Hamt, key string) any {
+  EmptyEntry{}
 }
