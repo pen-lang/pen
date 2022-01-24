@@ -2,7 +2,8 @@ use crate::{
     cps::{self, AsyncStack, ContinuationFunction},
     Arc, Closure,
 };
-use std::{future::Future, intrinsics::transmute, pin::Pin, task::Poll};
+use alloc::boxed::Box;
+use core::{future::Future, intrinsics::transmute, pin::Pin, task::Poll};
 
 impl<T, F: Future<Output = T>> From<F> for Arc<Closure> {
     fn from(future: F) -> Self {

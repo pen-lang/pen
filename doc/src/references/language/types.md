@@ -153,14 +153,6 @@ You can access field values by appending their names with `.` prefixes to expres
 john.name
 ```
 
-## Singleton records
-
-Singleton records are special record types which have no field and, therefore, only one kind of values.
-
-```pen
-type foo {}
-```
-
 ### Literals
 
 Their values are accessible as variables of their names.

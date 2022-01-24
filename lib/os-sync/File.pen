@@ -14,15 +14,15 @@ type stdErr {}
 type specialFile = stdIn | stdOut | stdErr
 
 StdIn = \() File {
-  File{inner: stdIn}
+  File{inner: stdIn{}}
 }
 
 StdOut = \() File {
-  File{inner: stdOut}
+  File{inner: stdOut{}}
 }
 
 StdErr = \() File {
-  File{inner: stdErr}
+  File{inner: stdErr{}}
 }
 
 OpenWithOptions = \(ctx Context, path string, opt OpenOptions) File | error {

@@ -5,7 +5,6 @@ mod module_compiler;
 mod module_prefix_collector;
 mod name_qualifier;
 mod prelude_module_modifier;
-mod singleton_record_compiler;
 
 use error::CompileError;
 use fnv::FnvHashMap;
@@ -40,8 +39,6 @@ pub fn compile(
 
     let module = definition_qualifier::qualify(&module, prefix);
     let module = type_qualifier::qualify(&module, prefix);
-
-    let module = singleton_record_compiler::compile(&module, &imported_modules);
 
     Ok(module)
 }

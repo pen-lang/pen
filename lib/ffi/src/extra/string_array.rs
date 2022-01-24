@@ -1,5 +1,5 @@
 use crate::{Any, ByteString};
-use std::sync::Arc;
+use alloc::{sync::Arc, vec, vec::Vec};
 
 #[repr(C)]
 #[derive(Clone)]
@@ -69,7 +69,7 @@ impl StringArrayInner {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::mem::{drop, forget, size_of};
+    use core::mem::{drop, forget, size_of};
 
     mod string_array {
         use super::*;
