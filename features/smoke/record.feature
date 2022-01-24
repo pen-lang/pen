@@ -24,7 +24,7 @@ Feature: Record
     """pen
     import 'bar
 
-    x = \() bar'Bar { bar'Bar }
+    x = \() bar'Bar { bar'Bar{} }
     """
     And a file named "bar.pen" with:
     """pen
@@ -36,9 +36,9 @@ Feature: Record
   Scenario: Import a record type with no field without a module prefix
     Given a file named "foo.pen" with:
     """pen
-    import 'bar { bar }
+    import 'bar { Bar }
 
-    type foo = bar
+    type foo = Bar
     """
     And a file named "bar.pen" with:
     """pen
@@ -52,7 +52,7 @@ Feature: Record
     """pen
     import 'bar { Bar }
 
-    x = \() Bar { Bar }
+    x = \() Bar { Bar{} }
     """
     And a file named "bar.pen" with:
     """pen
