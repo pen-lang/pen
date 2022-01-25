@@ -5,7 +5,7 @@ Feature: Memory leak
     {
       "dependencies": {
         "Core": "pen:///core",
-        "System": "pen:///os"
+        "System": "pen:///os-sync"
       }
     }
     """
@@ -15,12 +15,12 @@ Feature: Memory leak
     """pen
     import System'Context { Context }
 
-    f = \() none {
-      f()
+    f = \(_ none) none {
+      f(none)
     }
 
     main = \(ctx Context) number {
-      f()
+      f(none)
 
       0
     }
@@ -37,11 +37,11 @@ Feature: Memory leak
     main = \(ctx Context) number {
       File'Write(ctx, File'StdOut(), "Hello, world!\n")
 
-      main(ctx)
+      0
     }
     """
     When I successfully run `pen build`
-    Then I successfully run `check_memory_leak_in_loop.sh ./app`
+    Then I successfully run `check_memory_leak.sh ./app`
 
   Scenario: Create a record
     Given a file named "main.pen" with:
@@ -52,20 +52,14 @@ Feature: Memory leak
       x number
     }
 
-    f = \() none {
-      _ = foo{x: 42}
-
-      f()
-    }
-
     main = \(ctx Context) number {
-      f()
+      _ = foo{x: 42}
 
       0
     }
     """
     When I successfully run `pen build`
-    Then I successfully run `check_memory_leak_in_loop.sh ./app`
+    Then I successfully run `check_memory_leak.sh ./app`
 
   Scenario: Deconstruct a record
     Given a file named "main.pen" with:
@@ -76,20 +70,14 @@ Feature: Memory leak
       x number
     }
 
-    f = \() none {
-      _ = foo{x: 42}.x
-
-      f()
-    }
-
     main = \(ctx Context) number {
-      f()
+      _ = foo{x: 42}.x
 
       0
     }
     """
     When I successfully run `pen build`
-    Then I successfully run `check_memory_leak_in_loop.sh ./app`
+    Then I successfully run `check_memory_leak.sh ./app`
 
   Scenario: Put a string into a value of any type
     Given a file named "main.pen" with:
@@ -100,20 +88,14 @@ Feature: Memory leak
       x
     }
 
-    g = \() none {
-      f("")
-
-      g()
-    }
-
     main = \(ctx Context) number {
-      g()
+      f("")
 
       0
     }
     """
     When I successfully run `pen build`
-    Then I successfully run `check_memory_leak_in_loop.sh ./app`
+    Then I successfully run `check_memory_leak.sh ./app`
 
   Scenario: Shadow a variable in a block
     Given a file named "main.pen" with:
@@ -124,21 +106,15 @@ Feature: Memory leak
       x number
     }
 
-    f = \() none {
+    main = \(ctx Context) number {
       x = foo{x: 42}
       x = x.x
-
-      f()
-    }
-
-    main = \(ctx Context) number {
-      f()
 
       0
     }
     """
     When I successfully run `pen build`
-    Then I successfully run `check_memory_leak_in_loop.sh ./app`
+    Then I successfully run `check_memory_leak.sh ./app`
 
   Scenario: Define a function in a let expression with a free variable
     Given a file named "main.pen" with:
@@ -149,21 +125,15 @@ Feature: Memory leak
       x number
     }
 
-    f = \() none {
+    main = \(ctx Context) number {
       x = foo{x: 42}
       _ = \() number { x.x }
-
-      f()
-    }
-
-    main = \(ctx Context) number {
-      f()
 
       0
     }
     """
     When I successfully run `pen build`
-    Then I successfully run `check_memory_leak_in_loop.sh ./app`
+    Then I successfully run `check_memory_leak.sh ./app`
 
   Scenario: Convert a number to a string
     Given a file named "main.pen" with:
@@ -171,20 +141,14 @@ Feature: Memory leak
     import Core'Number
     import System'Context { Context }
 
-    f = \() none {
-      Number'String(42)
-
-      f()
-    }
-
     main = \(ctx Context) number {
-      f()
+      Number'String(42)
 
       0
     }
     """
     When I successfully run `pen build`
-    Then I successfully run `check_memory_leak_in_loop.sh ./app`
+    Then I successfully run `check_memory_leak.sh ./app`
 
   Scenario: Join strings
     Given a file named "main.pen" with:
@@ -192,20 +156,14 @@ Feature: Memory leak
     import Core'String
     import System'Context { Context }
 
-    f = \() none {
-      String'Join([string "hello", "world"], " ")
-
-      f()
-    }
-
     main = \(ctx Context) number {
-      f()
+      String'Join([string "hello", "world"], " ")
 
       0
     }
     """
     When I successfully run `pen build`
-    Then I successfully run `check_memory_leak_in_loop.sh ./app`
+    Then I successfully run `check_memory_leak.sh ./app`
 
   Scenario: Drop an unforced list
     Given a file named "main.pen" with:
@@ -218,14 +176,13 @@ Feature: Memory leak
 
     main = \(ctx Context) number {
       x = foo{x: 42}
+      _ = [foo x]
 
-      [foo x]
-
-      main(ctx)
+      0
     }
     """
     When I successfully run `pen build`
-    Then I successfully run `check_memory_leak_in_loop.sh ./app`
+    Then I successfully run `check_memory_leak.sh ./app`
 
   Scenario: Drop a forced list
     Given a file named "main.pen" with:
@@ -245,11 +202,11 @@ Feature: Memory leak
         none
       }
 
-      main(ctx)
+      0
     }
     """
     When I successfully run `pen build`
-    Then I successfully run `check_memory_leak_in_loop.sh ./app`
+    Then I successfully run `check_memory_leak.sh ./app`
 
   Scenario: Drop an unforced list with no environment
     Given a file named "main.pen" with:
@@ -263,11 +220,11 @@ Feature: Memory leak
     main = \(ctx Context) number {
       [foo foo{x: 42}]
 
-      main(ctx)
+      0
     }
     """
     When I successfully run `pen build`
-    Then I successfully run `check_memory_leak_in_loop.sh ./app`
+    Then I successfully run `check_memory_leak.sh ./app`
 
   Scenario: Drop a forced list with no environment
     Given a file named "main.pen" with:
@@ -285,11 +242,11 @@ Feature: Memory leak
         none
       }
 
-      main(ctx)
+      0
     }
     """
     When I successfully run `pen build`
-    Then I successfully run `check_memory_leak_in_loop.sh ./app`
+    Then I successfully run `check_memory_leak.sh ./app`
 
   Scenario: Force an element twice
     Given a file named "main.pen" with:
@@ -306,8 +263,8 @@ Feature: Memory leak
         none
       }
 
-      main(ctx)
+      0
     }
     """
     When I successfully run `pen build`
-    Then I successfully run `check_memory_leak_in_loop.sh ./app`
+    Then I successfully run `check_memory_leak.sh ./app`

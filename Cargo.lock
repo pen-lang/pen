@@ -164,13 +164,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fb4a24b1aaf0fd0ce8b45161144d6f42cd91677fd5940fd431183eb023b3a2b8"
 
 [[package]]
-name = "core"
-version = "0.1.0"
-dependencies = [
- "pen-ffi 0.3.36 (registry+https://github.com/rust-lang/crates.io-index)",
-]
-
-[[package]]
 name = "ctor"
 version = "0.1.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -216,7 +209,7 @@ checksum = "279fb028e20b3c4c320317955b77c5e0c9701f05a1d309905d6fc702cdc5053e"
 [[package]]
 name = "fmm"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#55c8439d44fe50b70431afda1d9873e687cfa626"
+source = "git+https://github.com/raviqqe/fmm?branch=main#6c22f29ce3e7d149c4eb7324e65cb7b28d064d37"
 dependencies = [
  "fnv",
  "hamt",
@@ -228,7 +221,7 @@ dependencies = [
 [[package]]
 name = "fmm-c"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#55c8439d44fe50b70431afda1d9873e687cfa626"
+source = "git+https://github.com/raviqqe/fmm?branch=main#6c22f29ce3e7d149c4eb7324e65cb7b28d064d37"
 dependencies = [
  "fmm",
  "fnv",
@@ -238,7 +231,7 @@ dependencies = [
 [[package]]
 name = "fmm-llvm"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#55c8439d44fe50b70431afda1d9873e687cfa626"
+source = "git+https://github.com/raviqqe/fmm?branch=main#6c22f29ce3e7d149c4eb7324e65cb7b28d064d37"
 dependencies = [
  "fmm",
  "hamt",
@@ -451,7 +444,7 @@ dependencies = [
 [[package]]
 name = "inkwell"
 version = "0.1.0"
-source = "git+https://github.com/TheDan64/inkwell?branch=master#28f04fd1f332932fa9fe414c0cbf09ea8a8393cd"
+source = "git+https://github.com/TheDan64/inkwell?branch=master#a24642d23255d07fe8ef3938d01a981899ee5d2c"
 dependencies = [
  "either",
  "inkwell_internals",
@@ -464,7 +457,7 @@ dependencies = [
 [[package]]
 name = "inkwell_internals"
 version = "0.5.0"
-source = "git+https://github.com/TheDan64/inkwell?branch=master#28f04fd1f332932fa9fe414c0cbf09ea8a8393cd"
+source = "git+https://github.com/TheDan64/inkwell?branch=master#a24642d23255d07fe8ef3938d01a981899ee5d2c"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -473,17 +466,16 @@ dependencies = [
 
 [[package]]
 name = "insta"
-version = "1.10.0"
+version = "1.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b3cb858fc306825b542b1311d5fd536e4483680528f303a17a1d6803b0f6ce17"
+checksum = "da408b722765c64aad796c666b756aa1dda2a6c1b44f98797f2d8ea8f197746f"
 dependencies = [
  "console",
- "lazy_static",
+ "once_cell",
  "serde",
  "serde_json",
  "serde_yaml",
  "similar",
- "uuid",
 ]
 
 [[package]]
@@ -681,40 +673,19 @@ dependencies = [
 
 [[package]]
 name = "pen-ffi"
-version = "0.3.36"
+version = "0.3.37"
 dependencies = [
  "futures",
- "pen-ffi-macro 0.1.20",
+ "pen-ffi-macro",
  "tokio",
 ]
 
 [[package]]
-name = "pen-ffi"
-version = "0.3.36"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8eafb18fc08df16adc14f94294bfafad41d7a1b097bc13ae59eee549868bedca"
-dependencies = [
- "futures",
- "pen-ffi-macro 0.1.20 (registry+https://github.com/rust-lang/crates.io-index)",
-]
-
-[[package]]
 name = "pen-ffi-macro"
-version = "0.1.20"
+version = "0.1.21"
 dependencies = [
  "convert_case",
- "pen-ffi 0.3.36",
- "quote",
- "syn",
-]
-
-[[package]]
-name = "pen-ffi-macro"
-version = "0.1.20"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "baa89fc5ce0dcad13d3553f6168af8f4212b4fdcb32d83e6dee11ec88663c7ba"
-dependencies = [
- "convert_case",
+ "pen-ffi",
  "quote",
  "syn",
 ]
@@ -761,13 +732,6 @@ name = "position"
 version = "0.1.0"
 dependencies = [
  "serde",
-]
-
-[[package]]
-name = "prelude"
-version = "0.1.0"
-dependencies = [
- "pen-ffi 0.3.36 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -1073,16 +1037,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "uuid"
-version = "0.8.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bc5cf98d8186244414c848017f0e2676b3fcb46807f6668a97dfe67359a3c4b7"
-
-[[package]]
 name = "which"
-version = "4.2.2"
+version = "4.2.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ea187a8ef279bc014ec368c27a920da2024d2a711109bfbe3440585d5cf27ad9"
+checksum = "2a5a7e487e921cf220206864a94a89b6c6905bfc19f1057fa26a4cb360e5c1d2"
 dependencies = [
  "either",
  "lazy_static",

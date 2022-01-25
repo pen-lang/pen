@@ -1,3 +1,5 @@
+use alloc::vec;
+
 #[repr(C)]
 struct FirstRest {
     ok: bool,

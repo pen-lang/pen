@@ -1,5 +1,5 @@
 use super::arc_block::ArcBlock;
-use std::alloc::Layout;
+use core::{alloc::Layout, slice};
 
 #[derive(Debug)]
 #[repr(C)]
@@ -37,11 +37,11 @@ impl ArcBuffer {
     pub fn as_slice(&self) -> &[u8] {
         unsafe {
             if self.block.is_null() {
-                std::slice::from_raw_parts(core::ptr::NonNull::dangling().as_ptr(), 0)
+                slice::from_raw_parts(core::ptr::NonNull::dangling().as_ptr(), 0)
             } else {
                 let inner = &*(self.block.ptr() as *const ArcBufferInner);
 
-                std::slice::from_raw_parts(&inner.first_byte, inner.length)
+                slice::from_raw_parts(&inner.first_byte, inner.length)
             }
         }
     }
@@ -49,11 +49,11 @@ impl ArcBuffer {
     pub fn as_slice_mut(&mut self) -> &mut [u8] {
         unsafe {
             if self.block.is_null() {
-                std::slice::from_raw_parts_mut(core::ptr::NonNull::dangling().as_ptr(), 0)
+                slice::from_raw_parts_mut(core::ptr::NonNull::dangling().as_ptr(), 0)
             } else {
                 let inner = &mut *(self.block.ptr() as *mut ArcBufferInner);
 
-                std::slice::from_raw_parts_mut(&mut inner.first_byte, inner.length)
+                slice::from_raw_parts_mut(&mut inner.first_byte, inner.length)
             }
         }
     }
@@ -92,6 +92,7 @@ impl From<&[u8]> for ArcBuffer {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use alloc::vec;
 
     fn drop<T>(_: T) {}
 
