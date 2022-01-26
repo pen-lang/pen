@@ -661,7 +661,7 @@ dependencies = [
 
 [[package]]
 name = "pen"
-version = "0.3.11"
+version = "0.3.12"
 dependencies = [
  "app",
  "clap",
