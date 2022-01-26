@@ -1,5 +1,5 @@
-import 'Map'EmptyEntry { EmptyEntry }
-import 'Map'Hamt { Hamt }
+import 'Map'emptyEntry { EmptyEntry }
+import 'Map'hamt { Hamt }
 
 type Map {
   hamt Hamt
@@ -8,7 +8,7 @@ type Map {
 
 New = \() Map {
   Map{
-    hamt: Hamt'New(),
+    hamt: hamt'New(),
     size: 0,
   }
 }
@@ -18,7 +18,7 @@ Size = \(map Map) number {
 }
 
 Get = \(map Map, key string, default any) any {
-  v = Hamt'Get(map.hamt, key)
+  v = hamt'Get(map.hamt, key)
 
   if _ = v as EmptyEntry {
     default
