@@ -1,6 +1,6 @@
 #[pen_ffi_macro::any(crate = "crate")]
 #[repr(C)]
-#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq)]
 pub struct Boolean {
     value: bool,
 }
