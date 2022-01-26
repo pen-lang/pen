@@ -1,4 +1,5 @@
 use super::operations::*;
+use crate::intermediate_error::IntermediateParseError;
 use crate::stream::Stream;
 use ast::{
     types::{self, Type},
@@ -736,15 +737,15 @@ fn raw_identifier<'a>() -> impl Parser<Stream<'a>, Output = String> {
             many(choice((alpha_num(), combine::parser::char::char('_')))),
         )
             .map(|(head, tail): (char, String)| [head.into(), tail].concat())
-            .then(|identifier| {
+            .and_then(|identifier| {
                 if KEYWORDS.contains(&identifier.as_str()) {
-                    unexpected_any("keyword").left()
+                    Err(IntermediateParseError::default())
                 } else {
-                    value(identifier).right()
+                    Ok(identifier)
                 }
             }),
     )
-    .silent()
+    .or(unexpected_any("keyword"))
 }
 
 fn keyword<'a>(name: &'static str) -> impl Parser<Stream<'a>, Output = ()> {

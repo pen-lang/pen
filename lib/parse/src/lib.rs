@@ -1,4 +1,5 @@
 mod error;
+mod intermediate_error;
 mod operations;
 mod parsers;
 mod stream;
