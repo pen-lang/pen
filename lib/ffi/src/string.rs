@@ -1,6 +1,10 @@
 use super::{arc::ArcBuffer, number::Number};
 use alloc::{string::String, vec::Vec};
-use core::{cmp::max, str::from_utf8_unchecked};
+use core::{
+    cmp::max,
+    hash::{Hash, Hasher},
+    str::from_utf8_unchecked,
+};
 
 #[pen_ffi_macro::any(crate = "crate")]
 #[repr(C)]
@@ -78,6 +82,14 @@ impl ByteString {
 impl PartialEq for ByteString {
     fn eq(&self, other: &Self) -> bool {
         self.as_slice() == other.as_slice()
+    }
+}
+
+impl Eq for ByteString {}
+
+impl Hash for ByteString {
+    fn hash<H: Hasher>(&self, hasher: &mut H) {
+        self.as_slice().hash(hasher)
     }
 }
 
