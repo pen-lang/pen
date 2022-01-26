@@ -119,9 +119,9 @@ checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 
 [[package]]
 name = "clap"
-version = "3.0.10"
+version = "3.0.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7a30c3bf9ff12dfe5dae53f0a96e0febcd18420d1c0e7fad77796d9d5c4b5375"
+checksum = "2afefa54b5c7dd40918dc1e09f213a171ab5937aadccab45e804780b238f9f43"
 dependencies = [
  "atty",
  "bitflags",
@@ -209,7 +209,7 @@ checksum = "279fb028e20b3c4c320317955b77c5e0c9701f05a1d309905d6fc702cdc5053e"
 [[package]]
 name = "fmm"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#6c22f29ce3e7d149c4eb7324e65cb7b28d064d37"
+source = "git+https://github.com/raviqqe/fmm?branch=main#418622cc8a2fcd9c5e12e16108cf838f06c8e2ee"
 dependencies = [
  "fnv",
  "hamt",
@@ -221,7 +221,7 @@ dependencies = [
 [[package]]
 name = "fmm-c"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#6c22f29ce3e7d149c4eb7324e65cb7b28d064d37"
+source = "git+https://github.com/raviqqe/fmm?branch=main#418622cc8a2fcd9c5e12e16108cf838f06c8e2ee"
 dependencies = [
  "fmm",
  "fnv",
@@ -231,7 +231,7 @@ dependencies = [
 [[package]]
 name = "fmm-llvm"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#6c22f29ce3e7d149c4eb7324e65cb7b28d064d37"
+source = "git+https://github.com/raviqqe/fmm?branch=main#418622cc8a2fcd9c5e12e16108cf838f06c8e2ee"
 dependencies = [
  "fmm",
  "hamt",
