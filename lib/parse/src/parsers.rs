@@ -730,19 +730,21 @@ fn identifier<'a>() -> impl Parser<Stream<'a>, Output = String> {
 }
 
 fn raw_identifier<'a>() -> impl Parser<Stream<'a>, Output = String> {
-    (
-        choice((letter(), combine::parser::char::char('_'))),
-        many(choice((alpha_num(), combine::parser::char::char('_')))),
+    attempt(
+        (
+            choice((letter(), combine::parser::char::char('_'))),
+            many(choice((alpha_num(), combine::parser::char::char('_')))),
+        )
+            .map(|(head, tail): (char, String)| [head.into(), tail].concat())
+            .then(|identifier| {
+                if KEYWORDS.contains(&identifier.as_str()) {
+                    unexpected_any("keyword").left()
+                } else {
+                    value(identifier).right()
+                }
+            }),
     )
-        .map(|(head, tail): (char, String)| [head.into(), tail].concat())
-        .then(|identifier| {
-            if KEYWORDS.contains(&identifier.as_str()) {
-                unexpected_any("keyword").left()
-            } else {
-                value(identifier).right()
-            }
-        })
-        .silent()
+    .silent()
 }
 
 fn keyword<'a>(name: &'static str) -> impl Parser<Stream<'a>, Output = ()> {
