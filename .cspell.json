@@ -44,6 +44,7 @@
     "rustc",
     "rustup",
     "sccache",
+    "siphasher",
     "subninja",
     "subtyping",
     "suspendable",
