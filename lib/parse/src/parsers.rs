@@ -32,8 +32,12 @@ static KEYWORDS: Lazy<Vec<&str>> = Lazy::new(|| {
 });
 const OPERATOR_CHARACTERS: &str = "+-*/=<>&|!?";
 
-static NUMBER_REGEX: Lazy<regex::Regex> =
-    Lazy::new(|| regex::Regex::new(r"^-?([123456789][0123456789]*|0)(\.[0123456789]+)?").unwrap());
+static BINARY_REGEX: Lazy<regex::Regex> =
+    Lazy::new(|| regex::Regex::new(r"^0b(1[01]*|0)").unwrap());
+static HEXADECIMAL_REGEX: Lazy<regex::Regex> =
+    Lazy::new(|| regex::Regex::new(r"^0x([1-9a-f][0-9a-f]*|0)").unwrap());
+static DECIMAL_REGEX: Lazy<regex::Regex> =
+    Lazy::new(|| regex::Regex::new(r"^-?([1-9][0-9]*|0)(\.[0-9]+)?").unwrap());
 static STRING_REGEX: Lazy<regex::Regex> = Lazy::new(|| regex::Regex::new(r#"^[^\\"]"#).unwrap());
 static HEX_CHARACTER_REGEX: Lazy<regex::Regex> =
     Lazy::new(|| regex::Regex::new("[0-9a-fA-F][0-9a-fA-F]").unwrap());
@@ -637,13 +641,34 @@ fn none_literal<'a>() -> impl Parser<Stream<'a>, Output = None> {
 }
 
 fn number_literal<'a>() -> impl Parser<Stream<'a>, Output = Number> {
-    let regex: &'static regex::Regex = &NUMBER_REGEX;
+    token(
+        attempt((
+            position(),
+            choice((binary_literal(), hexadecimal_literal(), decimal_literal())),
+        ))
+        .skip(not_followed_by(digit())),
+    )
+    .map(|(position, number)| Number::new(number, position))
+    .silent()
+    .expected("number literal")
+}
 
-    token(attempt((position(), from_str(find(regex)))))
-        .skip(not_followed_by(digit()))
-        .map(|(position, number)| Number::new(number, position))
-        .silent()
-        .expected("number literal")
+fn binary_literal<'a>() -> impl Parser<Stream<'a>, Output = f64> {
+    let regex: &'static regex::Regex = &BINARY_REGEX;
+
+    find(regex).map(|number: &str| i64::from_str_radix(&number[2..], 2).unwrap() as f64)
+}
+
+fn hexadecimal_literal<'a>() -> impl Parser<Stream<'a>, Output = f64> {
+    let regex: &'static regex::Regex = &HEXADECIMAL_REGEX;
+
+    find(regex).map(|number: &str| i64::from_str_radix(&number[2..], 16).unwrap() as f64)
+}
+
+fn decimal_literal<'a>() -> impl Parser<Stream<'a>, Output = f64> {
+    let regex: &'static regex::Regex = &DECIMAL_REGEX;
+
+    from_str(find(regex))
 }
 
 fn string_literal<'a>() -> impl Parser<Stream<'a>, Output = ByteString> {
