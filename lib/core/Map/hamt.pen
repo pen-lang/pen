@@ -169,5 +169,69 @@ getEntry = \(hamt Hamt, index number) Entry {
 }
 
 setEntry = \(hamt Hamt, index number, entry Entry) Hamt {
-  hamt
+  if index == 1 {
+    Hamt{...hamt, entry1: entry}
+  } else if index == 2 {
+    Hamt{...hamt, entry2: entry}
+  } else if index == 3 {
+    Hamt{...hamt, entry3: entry}
+  } else if index == 4 {
+    Hamt{...hamt, entry4: entry}
+  } else if index == 5 {
+    Hamt{...hamt, entry5: entry}
+  } else if index == 6 {
+    Hamt{...hamt, entry6: entry}
+  } else if index == 7 {
+    Hamt{...hamt, entry7: entry}
+  } else if index == 8 {
+    Hamt{...hamt, entry8: entry}
+  } else if index == 9 {
+    Hamt{...hamt, entry9: entry}
+  } else if index == 10 {
+    Hamt{...hamt, entry10: entry}
+  } else if index == 11 {
+    Hamt{...hamt, entry11: entry}
+  } else if index == 12 {
+    Hamt{...hamt, entry12: entry}
+  } else if index == 13 {
+    Hamt{...hamt, entry13: entry}
+  } else if index == 14 {
+    Hamt{...hamt, entry14: entry}
+  } else if index == 15 {
+    Hamt{...hamt, entry15: entry}
+  } else if index == 16 {
+    Hamt{...hamt, entry16: entry}
+  } else if index == 17 {
+    Hamt{...hamt, entry17: entry}
+  } else if index == 18 {
+    Hamt{...hamt, entry18: entry}
+  } else if index == 19 {
+    Hamt{...hamt, entry19: entry}
+  } else if index == 20 {
+    Hamt{...hamt, entry20: entry}
+  } else if index == 21 {
+    Hamt{...hamt, entry21: entry}
+  } else if index == 22 {
+    Hamt{...hamt, entry22: entry}
+  } else if index == 23 {
+    Hamt{...hamt, entry23: entry}
+  } else if index == 24 {
+    Hamt{...hamt, entry24: entry}
+  } else if index == 25 {
+    Hamt{...hamt, entry25: entry}
+  } else if index == 26 {
+    Hamt{...hamt, entry26: entry}
+  } else if index == 27 {
+    Hamt{...hamt, entry27: entry}
+  } else if index == 28 {
+    Hamt{...hamt, entry28: entry}
+  } else if index == 29 {
+    Hamt{...hamt, entry29: entry}
+  } else if index == 30 {
+    Hamt{...hamt, entry30: entry}
+  } else if index == 31 {
+    Hamt{...hamt, entry31: entry}
+  } else {
+    Hamt{...hamt, entry32: entry}
+  }
 }
