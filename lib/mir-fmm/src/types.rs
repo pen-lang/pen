@@ -3,6 +3,21 @@ use once_cell::sync::Lazy;
 
 pub const FUNCTION_ARGUMENT_OFFSET: usize = 1;
 
+static STRING_TYPE: Lazy<fmm::types::Pointer> = Lazy::new(|| {
+    fmm::types::Pointer::new(fmm::types::Record::new(vec![
+        fmm::types::Primitive::PointerInteger.into(),
+        // The first byte of a string
+        fmm::types::Primitive::Integer8.into(),
+    ]))
+});
+
+static VARIANT_TYPE: Lazy<fmm::types::Record> = Lazy::new(|| {
+    fmm::types::Record::new(vec![
+        compile_variant_tag().into(),
+        compile_variant_payload().into(),
+    ])
+});
+
 static VARIANT_TAG_TYPE: Lazy<fmm::types::Pointer> = Lazy::new(|| {
     let payload = fmm::types::Type::from(compile_variant_payload());
 
@@ -22,6 +37,15 @@ static VARIANT_TAG_TYPE: Lazy<fmm::types::Pointer> = Lazy::new(|| {
         )
         .into(),
     ]))
+});
+
+static CLOSURE_DROP_FUNCTION_TYPE: Lazy<fmm::types::Function> = Lazy::new(|| {
+    // The argument is a closure pointer.
+    fmm::types::Function::new(
+        vec![fmm::types::Primitive::PointerInteger.into()],
+        fmm::types::VOID_TYPE.clone(),
+        fmm::types::CallingConvention::Target,
+    )
 });
 
 pub fn compile(
@@ -46,18 +70,11 @@ pub fn compile_none() -> fmm::types::Type {
 }
 
 pub fn compile_string() -> fmm::types::Pointer {
-    fmm::types::Pointer::new(fmm::types::Record::new(vec![
-        fmm::types::Primitive::PointerInteger.into(),
-        // The first byte of a string
-        fmm::types::Primitive::Integer8.into(),
-    ]))
+    STRING_TYPE.clone()
 }
 
 pub fn compile_variant() -> fmm::types::Record {
-    fmm::types::Record::new(vec![
-        compile_variant_tag().into(),
-        compile_variant_payload().into(),
-    ])
+    VARIANT_TYPE.clone()
 }
 
 pub fn compile_variant_tag() -> fmm::types::Pointer {
@@ -220,10 +237,5 @@ fn compile_calling_convention(
 }
 
 pub fn compile_closure_drop_function() -> fmm::types::Function {
-    // The argument is a closure pointer.
-    fmm::types::Function::new(
-        vec![fmm::types::Primitive::PointerInteger.into()],
-        fmm::types::VOID_TYPE.clone(),
-        fmm::types::CallingConvention::Target,
-    )
+    CLOSURE_DROP_FUNCTION_TYPE.clone()
 }
