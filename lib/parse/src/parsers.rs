@@ -2556,6 +2556,10 @@ mod tests {
                 ("-1", -1.0),
                 ("0.1", 0.1),
                 ("0.01", 0.01),
+                ("0b1", 1.0),
+                ("0b10", 2.0),
+                ("0x1", 1.0),
+                ("0xa", 10.0),
             ] {
                 assert_eq!(
                     number_literal().parse(stream(source, "")).unwrap().0,
