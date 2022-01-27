@@ -119,9 +119,9 @@ checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 
 [[package]]
 name = "clap"
-version = "3.0.12"
+version = "3.0.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2afefa54b5c7dd40918dc1e09f213a171ab5937aadccab45e804780b238f9f43"
+checksum = "08799f92c961c7a1cf0cc398a9073da99e21ce388b46372c37f3191f2f3eed3e"
 dependencies = [
  "atty",
  "bitflags",
@@ -209,7 +209,7 @@ checksum = "279fb028e20b3c4c320317955b77c5e0c9701f05a1d309905d6fc702cdc5053e"
 [[package]]
 name = "fmm"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#418622cc8a2fcd9c5e12e16108cf838f06c8e2ee"
+source = "git+https://github.com/raviqqe/fmm?branch=main#30bb4647c82fb3071a52bdde5188064c14cdd8a6"
 dependencies = [
  "fnv",
  "hamt",
@@ -221,7 +221,7 @@ dependencies = [
 [[package]]
 name = "fmm-c"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#418622cc8a2fcd9c5e12e16108cf838f06c8e2ee"
+source = "git+https://github.com/raviqqe/fmm?branch=main#30bb4647c82fb3071a52bdde5188064c14cdd8a6"
 dependencies = [
  "fmm",
  "fnv",
@@ -231,7 +231,7 @@ dependencies = [
 [[package]]
 name = "fmm-llvm"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#418622cc8a2fcd9c5e12e16108cf838f06c8e2ee"
+source = "git+https://github.com/raviqqe/fmm?branch=main#30bb4647c82fb3071a52bdde5188064c14cdd8a6"
 dependencies = [
  "fmm",
  "hamt",
@@ -354,7 +354,7 @@ checksum = "9b919933a397b79c37e33b77bb2aa3dc8eb6e165ad809e58ff75bc7db2e34574"
 [[package]]
 name = "hamt"
 version = "0.3.1"
-source = "git+https://github.com/raviqqe/hamt-rs?branch=main#b30dd6cca326abd015035cdb37c9eb04a6f3adbb"
+source = "git+https://github.com/raviqqe/hamt-rs?branch=main#52d227cf48b5d9e0970e38ae74d252150b681b34"
 
 [[package]]
 name = "hashbrown"
@@ -519,9 +519,9 @@ checksum = "e2abad23fbc42b3700f2f279844dc832adb2b2eb069b2df918f455c4e18cc646"
 
 [[package]]
 name = "libc"
-version = "0.2.113"
+version = "0.2.114"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "eef78b64d87775463c549fbd80e19249ef436ea3bf1de2a1eb7e717ec7fab1e9"
+checksum = "b0005d08a8f7b65fb8073cb697aa0b12b631ed251ce73d862ce50eeb52ce3b50"
 
 [[package]]
 name = "linked-hash-map"
