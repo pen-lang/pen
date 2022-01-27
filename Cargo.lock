@@ -209,7 +209,7 @@ checksum = "279fb028e20b3c4c320317955b77c5e0c9701f05a1d309905d6fc702cdc5053e"
 [[package]]
 name = "fmm"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#30bb4647c82fb3071a52bdde5188064c14cdd8a6"
+source = "git+https://github.com/raviqqe/fmm?branch=main#81638178305dc7b1709a2bd8b68a2a6be42ddff0"
 dependencies = [
  "fnv",
  "hamt",
@@ -221,7 +221,7 @@ dependencies = [
 [[package]]
 name = "fmm-c"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#30bb4647c82fb3071a52bdde5188064c14cdd8a6"
+source = "git+https://github.com/raviqqe/fmm?branch=main#81638178305dc7b1709a2bd8b68a2a6be42ddff0"
 dependencies = [
  "fmm",
  "fnv",
@@ -231,7 +231,7 @@ dependencies = [
 [[package]]
 name = "fmm-llvm"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#30bb4647c82fb3071a52bdde5188064c14cdd8a6"
+source = "git+https://github.com/raviqqe/fmm?branch=main#81638178305dc7b1709a2bd8b68a2a6be42ddff0"
 dependencies = [
  "fmm",
  "hamt",
@@ -519,9 +519,9 @@ checksum = "e2abad23fbc42b3700f2f279844dc832adb2b2eb069b2df918f455c4e18cc646"
 
 [[package]]
 name = "libc"
-version = "0.2.114"
+version = "0.2.115"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b0005d08a8f7b65fb8073cb697aa0b12b631ed251ce73d862ce50eeb52ce3b50"
+checksum = "0a8d982fa7a96a000f6ec4cfe966de9703eccde29750df2bb8949da91b0e818d"
 
 [[package]]
 name = "linked-hash-map"
