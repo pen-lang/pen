@@ -26,3 +26,12 @@ Get = \(map Map, key string, default any) any {
     v
   }
 }
+
+Insert = \(map Map, key string, value any) Map {
+  u = hamt'Insert(map.hamt, key, value, 1, 1)
+
+  Map{
+    hamt: u.Hamt,
+    size: map.size + if u.Updated { 1 } else { 0 }
+  }
+}
