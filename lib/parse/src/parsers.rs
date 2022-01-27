@@ -737,6 +737,8 @@ fn raw_identifier<'a>() -> impl Parser<Stream<'a>, Output = String> {
         .map(|(head, tail): (char, String)| [head.into(), tail].concat())
         .then(|identifier| {
             if KEYWORDS.contains(&identifier.as_str()) {
+                // TODO Fix those misuse of `unexpected_any` combinators.
+                // These lead to wrong positions in error messages.
                 unexpected_any("keyword").left()
             } else {
                 value(identifier).right()
