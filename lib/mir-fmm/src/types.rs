@@ -1,6 +1,28 @@
 use fnv::FnvHashMap;
+use once_cell::sync::Lazy;
 
 pub const FUNCTION_ARGUMENT_OFFSET: usize = 1;
+
+static VARIANT_TAG_TYPE: Lazy<fmm::types::Pointer> = Lazy::new(|| {
+    let payload = fmm::types::Type::from(compile_variant_payload());
+
+    fmm::types::Pointer::new(fmm::types::Record::new(vec![
+        // clone function
+        fmm::types::Function::new(
+            vec![payload.clone()],
+            payload.clone(),
+            fmm::types::CallingConvention::Target,
+        )
+        .into(),
+        // drop function
+        fmm::types::Function::new(
+            vec![payload],
+            fmm::types::VOID_TYPE.clone(),
+            fmm::types::CallingConvention::Target,
+        )
+        .into(),
+    ]))
+});
 
 pub fn compile(
     type_: &mir::types::Type,
@@ -39,24 +61,7 @@ pub fn compile_variant() -> fmm::types::Record {
 }
 
 pub fn compile_variant_tag() -> fmm::types::Pointer {
-    let payload = fmm::types::Type::from(compile_variant_payload());
-
-    fmm::types::Pointer::new(fmm::types::Record::new(vec![
-        // clone function
-        fmm::types::Function::new(
-            vec![payload.clone()],
-            payload.clone(),
-            fmm::types::CallingConvention::Target,
-        )
-        .into(),
-        // drop function
-        fmm::types::Function::new(
-            vec![payload],
-            fmm::types::VOID_TYPE.clone(),
-            fmm::types::CallingConvention::Target,
-        )
-        .into(),
-    ]))
+    VARIANT_TAG_TYPE.clone()
 }
 
 pub fn compile_variant_payload() -> fmm::types::Primitive {
