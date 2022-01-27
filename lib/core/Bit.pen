@@ -4,7 +4,8 @@ import foreign "c" _pen_core_bit_xor \(number, number) number
 import foreign "c" _pen_core_bit_not \(number) number
 import foreign "c" _pen_core_bit_left_shift \(number, number) number
 import foreign "c" _pen_core_bit_right_shift \(number, number) number
-import foreign "c" _pen_core_bit_integer_64 \(number) number
+import foreign "c" _pen_core_bit_to_integer_64 \(number) number
+import foreign "c" _pen_core_bit_from_integer_64 \(number) number
 
 And = \(x number, y number) number {
   _pen_core_bit_and(x, y)
@@ -30,6 +31,10 @@ RightShift = \(x number, n number) number {
   _pen_core_bit_right_shift(x, n)
 }
 
-Integer64 = \(x number) number {
-  _pen_core_bit_integer_64(x)
+ToInteger64 = \(x number) number {
+  _pen_core_bit_to_integer_64(x)
+}
+
+FromInteger64 = \(x number) number {
+  _pen_core_bit_from_integer_64(x)
 }

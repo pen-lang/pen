@@ -31,6 +31,26 @@ fn _pen_core_bit_right_shift(x: ffi::Number, count: ffi::Number) -> ffi::Number 
 }
 
 #[ffi::bindgen]
-fn _pen_core_bit_integer_64(x: ffi::Number) -> ffi::Number {
+fn _pen_core_bit_to_integer_64(x: ffi::Number) -> ffi::Number {
     unsafe { transmute(f64::from(x) as u64) }
+}
+
+#[ffi::bindgen]
+fn _pen_core_bit_from_integer_64(x: ffi::Number) -> ffi::Number {
+    (unsafe { transmute::<_, u64>(x) } as f64).into()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn convert_float_and_integer_64() {
+        let x = 42.0;
+
+        assert_eq!(
+            _pen_core_bit_from_integer_64(_pen_core_bit_to_integer_64(x.into())),
+            x.into()
+        );
+    }
 }
