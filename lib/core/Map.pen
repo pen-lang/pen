@@ -18,7 +18,7 @@ Size = \(map Map) number {
 }
 
 Get = \(map Map, key string, default any) any {
-  v = hamt'Get(map.hamt, key)
+  v = hamt'Get(map.hamt, key, 1, 1)
 
   if _ = v as EmptyEntry {
     default

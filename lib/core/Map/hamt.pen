@@ -86,13 +86,19 @@ New = \() Hamt {
   }
 }
 
-Get = \(hamt Hamt, key string) any {
-  getWithHash(hamt, key, hash'HashKey(key))
+Get = \(hamt Hamt, key string, layer number, level number) any {
+  getWithHash(hamt, key, hash'HashKey(key), layer, level)
 }
 
-getWithHash = \(hamt Hamt, key string, hash number) any {
-  # TODO
-  EmptyEntry{}
+getWithHash = \(hamt Hamt, key string, hash number, layer number, level number) any {
+  if e = getEntry(hamt, Bit'FromInteger64(Bit'And(hash, Bit'ToInteger64(0b11111)))) as keyValue {
+    e.value
+  } else if Hamt {
+    # TODO
+    EmptyEntry{}
+  } else if none {
+    EmptyEntry{}
+  }
 }
 
 Insert = \(hamt Hamt, key string, value any, layer number, level number) Update {
