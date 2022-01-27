@@ -1,6 +1,6 @@
 import 'Map'emptyEntry { EmptyEntry }
 
-type KeyValue {
+type keyValue {
   key string
   value any
 }
@@ -10,7 +10,7 @@ type Update {
   Updated boolean
 }
 
-type Entry = KeyValue | Hamt | none
+type Entry = keyValue | Hamt | none
 
 type Hamt {
   entry1 Entry
