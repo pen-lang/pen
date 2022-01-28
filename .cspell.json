@@ -46,6 +46,7 @@
     "rustup",
     "sccache",
     "siphasher",
+    "srcdep",
     "subninja",
     "subtyping",
     "suspendable",

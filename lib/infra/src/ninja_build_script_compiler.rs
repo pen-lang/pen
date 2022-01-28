@@ -152,6 +152,7 @@ impl NinjaBuildScriptCompiler {
                     ),
                     format!("  dyndep = {}", ninja_dependency_file.display()),
                     format!("  source_file = {}", target.source_file()),
+                    format!("  srcdep = {}", target.source_file()),
                     format!(
                         "build {}: llc {}",
                         object_file.display(),
@@ -206,6 +207,7 @@ impl NinjaBuildScriptCompiler {
                     ),
                     format!("  dyndep = {}", ninja_dependency_file.display()),
                     format!("  source_file = {}", target.source_file()),
+                    format!("  srcdep = {}", target.source_file()),
                     format!(
                         "build {}: llc {}",
                         object_file.display(),
@@ -259,6 +261,7 @@ impl NinjaBuildScriptCompiler {
             ),
             format!("  dyndep = {}", ninja_dependency_file.display()),
             format!("  source_file = {}", target.source_file()),
+            format!("  srcdep = {}", target.source_file()),
             format!(
                 "build {}: llc {}",
                 object_file.display(),
@@ -300,6 +303,7 @@ impl NinjaBuildScriptCompiler {
             format!("  package_directory = {}", package_directory.display()),
             format!("  object_file = {}", bit_code_file.display()),
             format!("  source_file = {}", original_source_file),
+            format!("  srcdep = {}", original_source_file),
         ]
     }
 
