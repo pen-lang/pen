@@ -1,6 +1,7 @@
 import 'Bit
-import 'Map'hash
 import 'Map'emptyEntry { EmptyEntry }
+
+import foreign "c" _pen_core_hamt_hash_key \(string, number) number
 
 type keyValue {
   key string
@@ -49,6 +50,8 @@ type Hamt {
   entry32 Entry
 }
 
+maxLevel = \() number { 60 / 5 }
+
 New = \() Hamt {
   Hamt{
     entry1: none,
@@ -86,16 +89,23 @@ New = \() Hamt {
   }
 }
 
-Get = \(hamt Hamt, key string, layer number, level number) any {
-  getWithHash(hamt, key, hash'HashKey(key), layer, level)
+Get = \(hamt Hamt, key string) any {
+  getInLayer(hamt, key, 1, 1)
+}
+
+getInLayer = \(hamt Hamt, key string, layer number, level number) any {
+  getWithHash(hamt, key, _pen_core_hamt_hash_key(key, layer), layer, level)
 }
 
 getWithHash = \(hamt Hamt, key string, hash number, layer number, level number) any {
   if e = getEntry(hamt, Bit'FromInteger64(Bit'And(hash, Bit'ToInteger64(0b11111)))) as keyValue {
     e.value
   } else if Hamt {
-    # TODO
-    EmptyEntry{}
+    if level > maxLevel() {
+      getInLayer(e, key, layer + 1, 1)
+    } else {
+      getWithHash(e, key, hash, layer, level + 1)
+    }
   } else if none {
     EmptyEntry{}
   }

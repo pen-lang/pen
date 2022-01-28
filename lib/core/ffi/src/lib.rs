@@ -3,6 +3,6 @@
 extern crate alloc;
 
 mod bit;
-mod hash;
+mod hamt;
 mod number;
 mod string;

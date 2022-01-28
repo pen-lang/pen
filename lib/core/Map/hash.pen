@@ -1,5 +1,0 @@
-import foreign "c" _pen_core_map_hash_key \(string) number
-
-HashKey = \(key string) number {
-  _pen_core_map_hash_key(key)
-}
