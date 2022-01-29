@@ -242,7 +242,7 @@ if [x, ...xs] = ... {
 
 #### List comprehension
 
-It iterates over elements in a given list and generate a list with new elements of a given expression.
+It iterates over elements in a given list and generates a new list with elements of a given expression.
 
 ```pen
 [number f(x) for x in xs]
