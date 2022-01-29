@@ -125,6 +125,7 @@ setWithHash = \(hamt Hamt, key string, hash number, value any, layer number, lev
   i = index(hash)
 
   if e = getEntry(hamt, i) as keyValue {
+    # TODO Handle duplicate entries.
     Update{Hamt: setEntry(hamt, i, keyValue{key: key, value: value}), Updated: false}
   } else if Hamt {
     if level > maxLevel() {
@@ -133,7 +134,7 @@ setWithHash = \(hamt Hamt, key string, hash number, value any, layer number, lev
       setWithHash(e, key, shiftHash(hash), value, layer, level + 1)
     }
   } else if none {
-    Update{Hamt: hamt, Updated: true}
+    Update{Hamt: setEntry(hamt, i, keyValue{key: key, value: value}), Updated: true}
   }
 }
 
