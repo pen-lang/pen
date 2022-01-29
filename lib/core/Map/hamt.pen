@@ -123,19 +123,19 @@ setInLayer = \(hamt Hamt, key string, value any, layer number, level number) Upd
 
 setWithHash = \(hamt Hamt, key string, hash number, value any, layer number, level number) Update {
   i = index(hash)
-  setEntry = \(e Entry, new boolean) Update {
+  update = \(e Entry, new boolean) Update {
     Update{Hamt: setEntry(hamt, i, e), New: new}
   }
 
   if e = getEntry(hamt, i) as keyValue {
     if e.key == key {
-      setEntry(keyValue{key: key, value: value}, false)
+      update(keyValue{key: key, value: value}, false)
     } else {
       l = level + 1
       u = setInLayer(New(), e.key, e.value, layer, l)
       u = setInLayer(u.Hamt, key, value, layer, l)
 
-      setEntry(u.Hamt, true)
+      update(u.Hamt, true)
     }
   } else if Hamt {
     u = if level > maxLevel() {
@@ -144,9 +144,9 @@ setWithHash = \(hamt Hamt, key string, hash number, value any, layer number, lev
       setWithHash(e, key, shiftHash(hash), value, layer, level + 1)
     }
 
-    setEntry(u.Hamt, u.New)
+    update(u.Hamt, u.New)
   } else if none {
-    setEntry(keyValue{key: key, value: value}, true)
+    update(keyValue{key: key, value: value}, true)
   }
 }
 
