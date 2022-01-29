@@ -16,6 +16,7 @@ Items are ordered by priority.
 - [x] System time
 - [x] Asynchronous operations
 - [x] Parallel computation
+- [x] Binary operations
 - [x] List comprehension
 - [ ] Multiple system packages
 - [ ] Map type
@@ -29,5 +30,4 @@ Items are ordered by priority.
   - [ ] Language server
 - [ ] Process management
 - [ ] Web browser interface
-- [ ] Binary support
-- [ ] Self-hosting
+- [ ] Self-hosting!?
