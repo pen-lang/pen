@@ -10,7 +10,7 @@ type keyValue {
 
 type Update {
   Hamt Hamt
-  Updated boolean
+  New boolean
 }
 
 type Entry = keyValue | Hamt | none
@@ -126,7 +126,7 @@ setWithHash = \(hamt Hamt, key string, hash number, value any, layer number, lev
 
   if e = getEntry(hamt, i) as keyValue {
     # TODO Handle duplicate entries.
-    Update{Hamt: setEntry(hamt, i, keyValue{key: key, value: value}), Updated: false}
+    Update{Hamt: setEntry(hamt, i, keyValue{key: key, value: value}), New: false}
   } else if Hamt {
     if level > maxLevel() {
       setInLayer(e, key, value, layer + 1, 1)
@@ -134,7 +134,7 @@ setWithHash = \(hamt Hamt, key string, hash number, value any, layer number, lev
       setWithHash(e, key, shiftHash(hash), value, layer, level + 1)
     }
   } else if none {
-    Update{Hamt: setEntry(hamt, i, keyValue{key: key, value: value}), Updated: true}
+    Update{Hamt: setEntry(hamt, i, keyValue{key: key, value: value}), New: true}
   }
 }
 
