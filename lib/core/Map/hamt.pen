@@ -137,11 +137,11 @@ setWithHash = \(hamt Hamt, key string, hash number, value any, layer number, lev
   }
 }
 
-index = \(hash number) number { 
+index = \(hash number) number {
   Bit'FromInteger64(Bit'And(hash, Bit'ToInteger64(0b11111)))
 }
 
-shiftHash = \(hash number) number { 
+shiftHash = \(hash number) number {
   Bit'RightShift(hash, 5)
 }
 
