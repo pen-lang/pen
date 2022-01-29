@@ -93,6 +93,8 @@ Get = \(hamt Hamt, key string) any {
   getInLayer(hamt, key, 1, 1)
 }
 
+# A layer is composed of a tree of HAMT and used to re-hash keys.
+# A level is composed of a node of HAMT and used to segment hash values into entry indexes.
 getInLayer = \(hamt Hamt, key string, layer number, level number) any {
   getWithHash(hamt, key, _pen_core_hamt_hash_key(key, layer), layer, level)
 }
