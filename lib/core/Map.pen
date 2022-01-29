@@ -28,7 +28,7 @@ Get = \(map Map, key string, default any) any {
 }
 
 Set = \(map Map, key string, value any) Map {
-  u = hamt'Set(map.hamt, key, value, 1, 1)
+  u = hamt'Set(map.hamt, key, value)
 
   Map{
     hamt: u.Hamt,

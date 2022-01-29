@@ -100,22 +100,49 @@ getInLayer = \(hamt Hamt, key string, layer number, level number) any {
 }
 
 getWithHash = \(hamt Hamt, key string, hash number, layer number, level number) any {
-  if e = getEntry(hamt, Bit'FromInteger64(Bit'And(hash, Bit'ToInteger64(0b11111)))) as keyValue {
+  if e = getEntry(hamt, index(hash)) as keyValue {
     e.value
   } else if Hamt {
     if level > maxLevel() {
       getInLayer(e, key, layer + 1, 1)
     } else {
-      getWithHash(e, key, hash, layer, level + 1)
+      getWithHash(e, key, shiftHash(hash), layer, level + 1)
     }
   } else if none {
     EmptyEntry{}
   }
 }
 
-Set = \(hamt Hamt, key string, value any, layer number, level number) Update {
-  # TODO
-  Update{Hamt: hamt, Updated: false}
+Set = \(hamt Hamt, key string, value any) Update {
+  setInLayer(hamt, key, value, 1, 1)
+}
+
+setInLayer = \(hamt Hamt, key string, value any, layer number, level number) Update {
+  setWithHash(hamt, key, _pen_core_hamt_hash_key(key, layer), value, layer, level)
+}
+
+setWithHash = \(hamt Hamt, key string, hash number, value any, layer number, level number) Update {
+  i = index(hash)
+
+  if e = getEntry(hamt, i) as keyValue {
+    Update{Hamt: setEntry(hamt, i, keyValue{key: key, value: value}), Updated: false}
+  } else if Hamt {
+    if level > maxLevel() {
+      setInLayer(e, key, value, layer + 1, 1)
+    } else {
+      setWithHash(e, key, shiftHash(hash), value, layer, level + 1)
+    }
+  } else if none {
+    Update{Hamt: hamt, Updated: true}
+  }
+}
+
+index = \(hash number) number { 
+  Bit'FromInteger64(Bit'And(hash, Bit'ToInteger64(0b11111)))
+}
+
+shiftHash = \(hash number) number { 
+  Bit'RightShift(hash, 5)
 }
 
 getEntry = \(hamt Hamt, index number) Entry {
