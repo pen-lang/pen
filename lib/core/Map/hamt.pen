@@ -113,7 +113,7 @@ getWithHash = \(hamt Hamt, key string, hash number, layer number, level number) 
   }
 }
 
-Insert = \(hamt Hamt, key string, value any, layer number, level number) Update {
+Set = \(hamt Hamt, key string, value any, layer number, level number) Update {
   # TODO
   Update{Hamt: hamt, Updated: false}
 }
