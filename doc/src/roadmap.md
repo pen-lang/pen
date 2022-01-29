@@ -20,9 +20,9 @@ Items are ordered by priority.
 - [x] List comprehension
 - [ ] Multiple system packages
 - [ ] Map type
-- [ ] Vector type
 - [ ] Code formatter
 - [ ] Documentation generator
+- [ ] Vector type
 - [ ] Serialization / deserialization
 - [ ] Mutable state
   - [ ] Thread safety
