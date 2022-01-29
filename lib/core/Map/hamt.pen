@@ -139,7 +139,7 @@ setWithHash = \(hamt Hamt, key string, hash number, value any, layer number, lev
 }
 
 index = \(hash number) number {
-  Bit'FromInteger64(Bit'And(hash, Bit'ToInteger64(0b11111)))
+  Bit'FromInteger64(Bit'And(hash, Bit'ToInteger64(0b11111))) + 1
 }
 
 shiftHash = \(hash number) number {
