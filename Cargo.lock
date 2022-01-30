@@ -119,9 +119,9 @@ checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 
 [[package]]
 name = "clap"
-version = "3.0.10"
+version = "3.0.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7a30c3bf9ff12dfe5dae53f0a96e0febcd18420d1c0e7fad77796d9d5c4b5375"
+checksum = "08799f92c961c7a1cf0cc398a9073da99e21ce388b46372c37f3191f2f3eed3e"
 dependencies = [
  "atty",
  "bitflags",
@@ -209,7 +209,7 @@ checksum = "279fb028e20b3c4c320317955b77c5e0c9701f05a1d309905d6fc702cdc5053e"
 [[package]]
 name = "fmm"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#6c22f29ce3e7d149c4eb7324e65cb7b28d064d37"
+source = "git+https://github.com/raviqqe/fmm?branch=main#9fbe21879a975ea0826f3aa25ee37564e0cca957"
 dependencies = [
  "fnv",
  "hamt",
@@ -221,7 +221,7 @@ dependencies = [
 [[package]]
 name = "fmm-c"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#6c22f29ce3e7d149c4eb7324e65cb7b28d064d37"
+source = "git+https://github.com/raviqqe/fmm?branch=main#9fbe21879a975ea0826f3aa25ee37564e0cca957"
 dependencies = [
  "fmm",
  "fnv",
@@ -231,7 +231,7 @@ dependencies = [
 [[package]]
 name = "fmm-llvm"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#6c22f29ce3e7d149c4eb7324e65cb7b28d064d37"
+source = "git+https://github.com/raviqqe/fmm?branch=main#9fbe21879a975ea0826f3aa25ee37564e0cca957"
 dependencies = [
  "fmm",
  "hamt",
@@ -354,7 +354,7 @@ checksum = "9b919933a397b79c37e33b77bb2aa3dc8eb6e165ad809e58ff75bc7db2e34574"
 [[package]]
 name = "hamt"
 version = "0.3.1"
-source = "git+https://github.com/raviqqe/hamt-rs?branch=main#b30dd6cca326abd015035cdb37c9eb04a6f3adbb"
+source = "git+https://github.com/raviqqe/hamt-rs?branch=main#52d227cf48b5d9e0970e38ae74d252150b681b34"
 
 [[package]]
 name = "hashbrown"
@@ -466,9 +466,9 @@ dependencies = [
 
 [[package]]
 name = "insta"
-version = "1.11.0"
+version = "1.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "da408b722765c64aad796c666b756aa1dda2a6c1b44f98797f2d8ea8f197746f"
+checksum = "f4c0c443f6dceb3a1cb7607c87501aa91e4b9c976044f725c2a74ca2152c91a4"
 dependencies = [
  "console",
  "once_cell",
@@ -519,9 +519,9 @@ checksum = "e2abad23fbc42b3700f2f279844dc832adb2b2eb069b2df918f455c4e18cc646"
 
 [[package]]
 name = "libc"
-version = "0.2.113"
+version = "0.2.115"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "eef78b64d87775463c549fbd80e19249ef436ea3bf1de2a1eb7e717ec7fab1e9"
+checksum = "0a8d982fa7a96a000f6ec4cfe966de9703eccde29750df2bb8949da91b0e818d"
 
 [[package]]
 name = "linked-hash-map"
@@ -661,7 +661,7 @@ dependencies = [
 
 [[package]]
 name = "pen"
-version = "0.3.11"
+version = "0.3.12"
 dependencies = [
  "app",
  "clap",
@@ -673,7 +673,7 @@ dependencies = [
 
 [[package]]
 name = "pen-ffi"
-version = "0.3.37"
+version = "0.3.39"
 dependencies = [
  "futures",
  "pen-ffi-macro",
@@ -831,18 +831,18 @@ dependencies = [
 
 [[package]]
 name = "serde"
-version = "1.0.135"
+version = "1.0.136"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2cf9235533494ea2ddcdb794665461814781c53f19d87b76e571a1c35acbad2b"
+checksum = "ce31e24b01e1e524df96f1c2fdd054405f8d7376249a5110886fb4b658484789"
 dependencies = [
  "serde_derive",
 ]
 
 [[package]]
 name = "serde_derive"
-version = "1.0.135"
+version = "1.0.136"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8dcde03d87d4c973c04be249e7d8f0b35db1c848c487bd43032808e59dd8328d"
+checksum = "08597e7152fcd306f41838ed3e37be9eaeed2b61c42e2117266a554fab4662f9"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -971,9 +971,9 @@ checksum = "cda74da7e1a664f795bb1f8a87ec406fb89a02522cf6e50620d016add6dbbf5c"
 
 [[package]]
 name = "tokio"
-version = "1.15.0"
+version = "1.16.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fbbf1c778ec206785635ce8ad57fe52b3009ae9e0c9f574a728f3049d3e55838"
+checksum = "0c27a64b625de6d309e8c57716ba93021dccf1b3b5c97edd6d3dd2d2135afc0a"
 dependencies = [
  "num_cpus",
  "pin-project-lite",

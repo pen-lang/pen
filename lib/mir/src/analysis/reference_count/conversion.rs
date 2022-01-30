@@ -21,8 +21,8 @@ fn convert_definition(
     definition: &Definition,
     global: bool,
 ) -> Result<Definition, ReferenceCountError> {
-    // Backend is expected to clone a function itself and its free variables at the very beginning
-    // of the function.
+    // Backend is expected to clone a function itself and its free variables at the
+    // very beginning of the function.
     let owned_variables = if global {
         None
     } else {
@@ -59,13 +59,14 @@ fn convert_definition(
     ))
 }
 
-// Here, we convert expressions tracking moved variables and cloning variables moved already.
-// The basic rules are listed below.
+// Here, we convert expressions tracking moved variables and cloning variables
+// moved already. The basic rules are listed below.
 //
 // - The returned values of functions are moved.
-// - Every input of expressions is moved including conditions of if expressions and records of record
-//   field operations.
-// - Newly bound variables in let expressions are dropped if they are not moved in their expressions.
+// - Every input of expressions is moved including conditions of if expressions
+//   and records of record field operations.
+// - Newly bound variables in let expressions are dropped if they are not moved
+//   in their expressions.
 fn convert_expression(
     expression: &Expression,
     owned_variables: &FnvHashMap<String, Type>,

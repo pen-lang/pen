@@ -5,11 +5,11 @@ pub fn log_error(error: &dyn std::error::Error) -> Result<(), Box<dyn std::error
     let mut stderr = StandardStream::stderr(ColorChoice::Auto);
 
     stderr.set_color(ColorSpec::new().set_fg(Some(Color::Red)))?;
-    write!(&mut stderr, "error")?;
+    write!(stderr, "error")?;
     stderr.set_color(ColorSpec::new().set_fg(None))?;
 
     writeln!(
-        &mut stderr,
+        stderr,
         ": {}",
         format!("{}", error).replace('\n', "\n  ").trim()
     )?;
@@ -25,10 +25,10 @@ pub fn log_info(log: &str) -> Result<(), Box<dyn std::error::Error>> {
     let mut stderr = StandardStream::stderr(ColorChoice::Auto);
 
     stderr.set_color(ColorSpec::new().set_fg(Some(Color::Green)))?;
-    write!(&mut stderr, "info")?;
+    write!(stderr, "info")?;
     stderr.set_color(ColorSpec::new().set_fg(None))?;
 
-    writeln!(&mut stderr, ": {}", log)?;
+    writeln!(stderr, ": {}", log)?;
 
     Ok(())
 }

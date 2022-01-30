@@ -15,8 +15,8 @@ pub fn build(target_triple: Option<&str>, verbose: bool) -> Result<(), Box<dyn s
         infrastructure::create(file_path_converter.clone(), &main_package_directory)?;
     let main_package_directory =
         file_path_converter.convert_to_file_path(&main_package_directory)?;
-    // TODO Share an external package directory to avoid initializing them multiple times for
-    // different targets.
+    // TODO Share an external package directory to avoid initializing them multiple
+    // times for different targets.
     let output_directory = main_package_directory.join(&app::infra::FilePath::new([
         OUTPUT_DIRECTORY,
         target_triple.unwrap_or(DEFAULT_TARGET_DIRECTORY),
