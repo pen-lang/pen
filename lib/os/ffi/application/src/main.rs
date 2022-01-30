@@ -23,7 +23,8 @@ unsafe extern "C" fn _pen_os_main(_: &mut Stack, _: ContinuationFunction) -> ffi
 }
 
 fn main() {
-    // HACK Is it OK to call the _pen_os_main function with an extra argument of a closure environment?
+    // HACK Is it OK to call the _pen_os_main function with an extra argument of a
+    // closure environment?
     let code: ffi::Number =
         Runtime::new()
             .unwrap()
