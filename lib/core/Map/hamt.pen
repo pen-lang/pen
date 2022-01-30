@@ -122,174 +122,35 @@ setInLayer = \(hamt Hamt, key string, value any, layer number, level number) Upd
 }
 
 setWithHash = \(hamt Hamt, key string, hash number, value any, layer number, level number) Update {
-  i = index(hash)
-  update = \(e Entry, new boolean) Update {
-    Update{Hamt: setEntry(hamt, i, e), New: new}
-  }
+  i = 0
 
   if e = getEntry(hamt, i) as keyValue {
     if e.key == key {
-      update(keyValue{key: key, value: value}, false)
+      Update{Hamt: hamt, New: true}
     } else {
       l = level + 1
       u = setInLayer(New(), e.key, e.value, layer, l)
-      u = setInLayer(u.Hamt, key, value, layer, l)
+      uu = setInLayer(u.Hamt, key, value, layer, l)
 
-      update(u.Hamt, true)
+      Update{Hamt: hamt, New: true}
     }
-  } else if Hamt {
-    u = if level > maxLevel() {
-      setInLayer(e, key, value, layer + 1, 1)
-    } else {
-      setWithHash(e, key, shiftHash(hash), value, layer, level + 1)
-    }
-
-    update(u.Hamt, u.New)
-  } else if none {
-    update(keyValue{key: key, value: value}, true)
+  } else {
+    Update{Hamt: hamt, New: true}
   }
 }
 
 index = \(hash number) number {
-  Bit'FromInteger64(Bit'And(hash, Bit'ToInteger64(0b11111))) + 1
+  0
 }
 
 shiftHash = \(hash number) number {
-  Bit'RightShift(hash, 5)
+  0
 }
 
 getEntry = \(hamt Hamt, index number) Entry {
-  if index == 1 {
-    hamt.entry1
-  } else if index == 2 {
-    hamt.entry2
-  } else if index == 3 {
-    hamt.entry3
-  } else if index == 4 {
-    hamt.entry4
-  } else if index == 5 {
-    hamt.entry5
-  } else if index == 6 {
-    hamt.entry6
-  } else if index == 7 {
-    hamt.entry7
-  } else if index == 8 {
-    hamt.entry8
-  } else if index == 9 {
-    hamt.entry9
-  } else if index == 10 {
-    hamt.entry10
-  } else if index == 11 {
-    hamt.entry11
-  } else if index == 12 {
-    hamt.entry12
-  } else if index == 13 {
-    hamt.entry13
-  } else if index == 14 {
-    hamt.entry14
-  } else if index == 15 {
-    hamt.entry15
-  } else if index == 16 {
-    hamt.entry16
-  } else if index == 17 {
-    hamt.entry17
-  } else if index == 18 {
-    hamt.entry18
-  } else if index == 19 {
-    hamt.entry19
-  } else if index == 20 {
-    hamt.entry20
-  } else if index == 21 {
-    hamt.entry21
-  } else if index == 22 {
-    hamt.entry22
-  } else if index == 23 {
-    hamt.entry23
-  } else if index == 24 {
-    hamt.entry24
-  } else if index == 25 {
-    hamt.entry25
-  } else if index == 26 {
-    hamt.entry26
-  } else if index == 27 {
-    hamt.entry27
-  } else if index == 28 {
-    hamt.entry28
-  } else if index == 29 {
-    hamt.entry29
-  } else if index == 30 {
-    hamt.entry30
-  } else if index == 31 {
-    hamt.entry31
-  } else {
     hamt.entry32
-  }
 }
 
 setEntry = \(hamt Hamt, index number, entry Entry) Hamt {
-  if index == 1 {
-    Hamt{...hamt, entry1: entry}
-  } else if index == 2 {
-    Hamt{...hamt, entry2: entry}
-  } else if index == 3 {
-    Hamt{...hamt, entry3: entry}
-  } else if index == 4 {
-    Hamt{...hamt, entry4: entry}
-  } else if index == 5 {
-    Hamt{...hamt, entry5: entry}
-  } else if index == 6 {
-    Hamt{...hamt, entry6: entry}
-  } else if index == 7 {
-    Hamt{...hamt, entry7: entry}
-  } else if index == 8 {
-    Hamt{...hamt, entry8: entry}
-  } else if index == 9 {
-    Hamt{...hamt, entry9: entry}
-  } else if index == 10 {
-    Hamt{...hamt, entry10: entry}
-  } else if index == 11 {
-    Hamt{...hamt, entry11: entry}
-  } else if index == 12 {
-    Hamt{...hamt, entry12: entry}
-  } else if index == 13 {
-    Hamt{...hamt, entry13: entry}
-  } else if index == 14 {
-    Hamt{...hamt, entry14: entry}
-  } else if index == 15 {
-    Hamt{...hamt, entry15: entry}
-  } else if index == 16 {
-    Hamt{...hamt, entry16: entry}
-  } else if index == 17 {
-    Hamt{...hamt, entry17: entry}
-  } else if index == 18 {
-    Hamt{...hamt, entry18: entry}
-  } else if index == 19 {
-    Hamt{...hamt, entry19: entry}
-  } else if index == 20 {
-    Hamt{...hamt, entry20: entry}
-  } else if index == 21 {
-    Hamt{...hamt, entry21: entry}
-  } else if index == 22 {
-    Hamt{...hamt, entry22: entry}
-  } else if index == 23 {
-    Hamt{...hamt, entry23: entry}
-  } else if index == 24 {
-    Hamt{...hamt, entry24: entry}
-  } else if index == 25 {
-    Hamt{...hamt, entry25: entry}
-  } else if index == 26 {
-    Hamt{...hamt, entry26: entry}
-  } else if index == 27 {
-    Hamt{...hamt, entry27: entry}
-  } else if index == 28 {
-    Hamt{...hamt, entry28: entry}
-  } else if index == 29 {
-    Hamt{...hamt, entry29: entry}
-  } else if index == 30 {
-    Hamt{...hamt, entry30: entry}
-  } else if index == 31 {
-    Hamt{...hamt, entry31: entry}
-  } else {
     Hamt{...hamt, entry32: entry}
-  }
 }
