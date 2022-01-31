@@ -1,3 +1,5 @@
 {
-  "dependencies": {}
+  "dependencies": {
+    "Test": "pen:///test"
+  }
 }

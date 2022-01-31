@@ -1,0 +1,25 @@
+import 'Map
+
+type StringMap {
+  map Map'Map
+}
+
+New = \() StringMap {
+  StringMap{map: Map'New()}
+}
+
+Get = \(map StringMap, key string) string | none {
+  if v = Map'Get(map.map, key, none) as string {
+    v
+  } else {
+    none
+  }
+}
+
+Set = \(map StringMap, key string, value string) StringMap {
+  StringMap{map: Map'Set(map.map, key, value)}
+}
+
+Size = \(map StringMap) number {
+  Map'Size(map.map)
+}
