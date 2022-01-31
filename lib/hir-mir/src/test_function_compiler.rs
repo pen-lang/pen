@@ -6,7 +6,13 @@ use std::{
     hash::{Hash, Hasher},
 };
 
+const ERROR_SOURCE_FUNCTION_NAME: &str = "source";
 const TEST_FUNCTION_WRAPPER_SUFFIX: &str = "__wrapper";
+
+const RESULT_VARIABLE_NAME: &str = "$result";
+const MESSAGE_VARIABLE_NAME: &str = "$message";
+
+const NON_STRING_TEST_ERROR_MESSAGE: &str = "<non-string test error>";
 
 pub fn compile(
     module: &Module,
@@ -42,18 +48,55 @@ pub fn compile(
                                 compile_foreign_name(definition.name(), configuration),
                                 Lambda::new(
                                     vec![],
-                                    types::Union::new(
-                                        types::None::new(position.clone()),
-                                        types::Record::new(
-                                            &context.configuration()?.error_type.error_type_name,
+                                    types::ByteString::new(position.clone()),
+                                    IfType::new(
+                                        "$result",
+                                        Call::new(
+                                            None,
+                                            Variable::new(definition.name(), position.clone()),
+                                            vec![],
                                             position.clone(),
                                         ),
-                                        position.clone(),
-                                    ),
-                                    Call::new(
-                                        None,
-                                        Variable::new(definition.name(), position.clone()),
-                                        vec![],
+                                        vec![IfTypeBranch::new(
+                                            types::None::new(position.clone()),
+                                            ByteString::new(vec![], position.clone()),
+                                        )],
+                                        Some(ElseBranch::new(
+                                            None,
+                                            IfType::new(
+                                                MESSAGE_VARIABLE_NAME,
+                                                Call::new(
+                                                    None,
+                                                    Variable::new(
+                                                        ERROR_SOURCE_FUNCTION_NAME,
+                                                        position.clone(),
+                                                    ),
+                                                    vec![Variable::new(
+                                                        RESULT_VARIABLE_NAME,
+                                                        position.clone(),
+                                                    )
+                                                    .into()],
+                                                    position.clone(),
+                                                ),
+                                                vec![IfTypeBranch::new(
+                                                    types::ByteString::new(position.clone()),
+                                                    Variable::new(
+                                                        MESSAGE_VARIABLE_NAME,
+                                                        position.clone(),
+                                                    ),
+                                                )],
+                                                Some(ElseBranch::new(
+                                                    None,
+                                                    ByteString::new(
+                                                        NON_STRING_TEST_ERROR_MESSAGE,
+                                                        position.clone(),
+                                                    ),
+                                                    position.clone(),
+                                                )),
+                                                position.clone(),
+                                            ),
+                                            position.clone(),
+                                        )),
                                         position.clone(),
                                     ),
                                     position.clone(),
