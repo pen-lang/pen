@@ -30,7 +30,7 @@ Feature: Testing
       Assert'True(Foo'Add(40, 2) == 42)
     }
     """
-    When I run `pen_test_on_linux.sh`
+    When I successfully run `pen_test_on_linux.sh`
     Then the exit status should be 0
 
   Scenario: Run a test referencing an OS package
@@ -77,5 +77,5 @@ Feature: Testing
       if Foo'Add(41, 1) == 42 { none } else { error("oh no") }
     }
     """
-    When I run `pen_test_on_linux.sh`
+    When I successfully run `pen_test_on_linux.sh`
     Then the exit status should be 0
