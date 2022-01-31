@@ -50,7 +50,7 @@ impl TestLinker {
 
                 {}
 
-                println!("test summary");
+                println!("summary");
                 println!(
                     "\t{{}}\t{{}} passed, {{}} failed",
                     if error == 0 {{ "OK" }} else {{ "FAIL" }},
