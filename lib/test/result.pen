@@ -4,12 +4,12 @@ type result {
 }
 
 foreign "c" _pen_test_convert_result = \(e none | error) result {
-	if e = e as none {
-		result{isError: false, message: ""}
+  if e = e as none {
+    result{isError: false, message: ""}
   } else {
-		result{
-			isError: true,
-			message: if s = source(e) as string { s } else { "unknown test error" }
-		}
-	}
+    result{
+      isError: true,
+      message: if s = source(e) as string { s } else { "unknown test error" }
+    }
+  }
 }
