@@ -39,3 +39,7 @@ Set = \(map Map, key string, value any) Map {
 Keys = \(map Map) [string] {
   hamt'Keys(map.hamt)
 }
+
+Values = \(map Map) [any] {
+  hamt'Values(map.hamt)
+}

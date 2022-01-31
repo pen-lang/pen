@@ -58,6 +58,13 @@ TestMapKeys = \() none | error {
   Assert'EqualNumbers(List'Length([any ...stringMap'Keys(m)]), n)
 }
 
+TestMapValues = \() none | error {
+  n = 1000
+  m = setMany(stringMap'New(), n)
+
+  Assert'EqualNumbers(List'Length([any ...stringMap'Values(m)]), n)
+}
+
 assertGetMany = \(m stringMap'StringMap, n number) none | error {
   if n == 0 {
     none

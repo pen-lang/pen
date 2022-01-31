@@ -27,3 +27,19 @@ Size = \(map StringMap) number {
 Keys = \(map StringMap) [string] {
   Map'Keys(map.map)
 }
+
+Values = \(map StringMap) [string] {
+  asStrings(Map'Values(map.map))
+}
+
+asStrings = \(xs [any]) [string] {
+  if [x, ...xs] = xs {
+    if x = x() as string {
+      [string x, ...asStrings(xs)]  
+    } else {
+      asStrings(xs)
+    }
+  } else {
+    [string]
+  }
+}
