@@ -1,7 +1,7 @@
 import 'Map
+import 'Map'stringMap
 import 'Number
 import Test'Assert
-import 'stringMap
 
 TestMapNew = \() none | error {
   m = stringMap'New()
