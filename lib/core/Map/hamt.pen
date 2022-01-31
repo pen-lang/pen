@@ -163,7 +163,9 @@ Keys = \(m Hamt) [string] {
 }
 
 keys = \(m Hamt, i number) [string] {
-  if i <= maxIndex() {
+  if i > maxIndex() {
+    [string]
+  } else {
     if e = getEntry(m, i) as keyValue {
       [string e.key, ...keys(m, i + 1)]
     } else if Hamt {
@@ -171,8 +173,6 @@ keys = \(m Hamt, i number) [string] {
     } else if none {
       keys(m, i + 1)
     }
-  } else {
-    [string]
   }
 }
 
