@@ -33,7 +33,7 @@ Feature: Testing
     When I successfully run `pen_test_on_linux.sh`
     Then the exit status should be 0
 
-  Scenario: Run a test referencing an OS package
+  Scenario: Run a test referencing an Os package
     Given a file named "pen.json" with:
     """json
     {
