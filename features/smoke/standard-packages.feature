@@ -11,6 +11,6 @@ Feature: Standard packages
     Examples:
       | package |
       | core    |
-      | test    |
       | os      |
       | os-sync |
+      | test    |
