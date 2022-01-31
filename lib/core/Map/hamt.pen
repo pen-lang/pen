@@ -52,6 +52,8 @@ type Hamt {
 
 maxLevel = \() number { 60 / 5 }
 
+maxIndex = \() number { 32 }
+
 New = \() Hamt {
   Hamt{
     entry1: none,
@@ -154,6 +156,24 @@ index = \(key string, layer number, level number) number {
       Bit'ToInteger64(0b11111),
     )
   ) + 1
+}
+
+Keys = \(m Hamt) [string] {
+  keys(m, 1)
+}
+
+keys = \(m Hamt, i number) [string] {
+  if i <= maxIndex() {
+    if e = getEntry(m, i) as keyValue {
+      [string e.key, ...keys(m, i + 1)]
+    } else if Hamt {
+      [string ...Keys(e), ...keys(m, i + 1)]
+    } else if none {
+      keys(m, i + 1)
+    }
+  } else {
+    [string]
+  }
 }
 
 getEntry = \(hamt Hamt, index number) Entry {
