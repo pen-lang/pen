@@ -6,12 +6,9 @@ use std::{
     hash::{Hash, Hasher},
 };
 
-const ERROR_SOURCE_FUNCTION_NAME: &str = "source";
 const TEST_FUNCTION_WRAPPER_SUFFIX: &str = "__wrapper";
-
 const RESULT_VARIABLE_NAME: &str = "$result";
 const MESSAGE_VARIABLE_NAME: &str = "$message";
-
 const NON_STRING_TEST_ERROR_MESSAGE: &str = "<non-string test error>";
 
 pub fn compile(
@@ -68,7 +65,10 @@ pub fn compile(
                                                 Call::new(
                                                     None,
                                                     Variable::new(
-                                                        ERROR_SOURCE_FUNCTION_NAME,
+                                                        &context
+                                                            .configuration()?
+                                                            .error_type
+                                                            .source_function_name,
                                                         position.clone(),
                                                     ),
                                                     vec![Variable::new(

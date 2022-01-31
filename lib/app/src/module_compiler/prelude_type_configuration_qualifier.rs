@@ -45,5 +45,6 @@ fn qualify_error_type_configuration(
 ) -> hir_mir::ErrorTypeConfiguration {
     hir_mir::ErrorTypeConfiguration {
         error_type_name: prelude_prefix.to_owned() + &configuration.error_type_name,
+        source_function_name: prelude_prefix.to_owned() + &configuration.source_function_name,
     }
 }
