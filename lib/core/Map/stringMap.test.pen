@@ -1,0 +1,70 @@
+import 'Map
+import 'Map'stringMap
+import 'Number
+import Test'Assert
+
+TestMapNew = \() none | error {
+  m = stringMap'New()
+
+  Assert'EqualNumbers(stringMap'Size(m), 0)
+}
+
+TestMapSet = \() none | error {
+  m = stringMap'Set(stringMap'New(), "", "")
+
+  Assert'EqualNumbers(stringMap'Size(m), 1)
+}
+
+TestMapSetTwice = \() none | error {
+  m = stringMap'Set(stringMap'New(), "foo", "")
+  m = stringMap'Set(m, "bar", "")
+
+  Assert'EqualNumbers(stringMap'Size(m), 2)
+}
+
+TestMapSetSameTwice = \() none | error {
+  m = stringMap'Set(stringMap'New(), "foo", "")
+  m = stringMap'Set(m, "foo", "")
+
+  Assert'EqualNumbers(stringMap'Size(m), 1)
+}
+
+TestMapGet = \() none | error {
+  key = "foo"
+  value = "bar"
+
+  m = stringMap'Set(stringMap'New(), key, value)
+
+  Assert'True(stringMap'Get(m, key) == value)
+}
+
+TestMapGetFail = \() none | error {
+  Assert'True(stringMap'Get(stringMap'New(), "foo") == none)
+}
+
+TestMapSetManyTimes = \() none | error {
+  n = 1000
+  m = setMany(stringMap'New(), n)
+
+  Assert'EqualNumbers(stringMap'Size(m), n)
+  assertMany(m, n)
+}
+
+assertMany = \(m stringMap'StringMap, n number) none | error {
+  if n == 0 {
+    none
+  } else {
+    s = Number'String(n)
+    Assert'True(stringMap'Get(m, s) == s)?
+    assertMany(m, n - 1)
+  }
+}
+
+setMany = \(m stringMap'StringMap, n number) stringMap'StringMap {
+  if n == 0 {
+    m
+  } else {
+    s = Number'String(n)
+    setMany(stringMap'Set(m, s, s), n - 1)
+  }
+}
