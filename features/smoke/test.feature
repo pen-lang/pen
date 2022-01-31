@@ -30,10 +30,10 @@ Feature: Testing
       Assert'True(Foo'Add(40, 2) == 42)
     }
     """
-    When I run `pen_test_on_linux.sh`
+    When I successfully run `pen_test_on_linux.sh`
     Then the exit status should be 0
 
-  Scenario: Run a test referencing an OS package
+  Scenario: Run a test referencing an Os package
     Given a file named "pen.json" with:
     """json
     {
@@ -62,4 +62,20 @@ Feature: Testing
     }
     """
     When I successfully run `pen test`
+    Then the exit status should be 0
+
+  Scenario: Run tests without a Test package
+    Given a file named "pen.json" with:
+    """json
+    { "dependencies": {} }
+    """
+    And a file named "Foo.test.pen" with:
+    """pen
+    import 'Foo
+
+    Add = \() none | error {
+      if Foo'Add(41, 1) == 42 { none } else { error("oh no") }
+    }
+    """
+    When I successfully run `pen_test_on_linux.sh`
     Then the exit status should be 0
