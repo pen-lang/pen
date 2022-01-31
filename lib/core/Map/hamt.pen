@@ -176,18 +176,6 @@ keys = \(m Hamt, i number) [string] {
   }
 }
 
-Values = \(m Hamt) [any] {
-  values(m, Keys(m))
-}
-
-values = \(m Hamt, keys [string]) [any] {
-  if [k, ...keys] = keys {
-    [any Get(m, k()), ...values(m, keys)]
-  } else {
-    [any]
-  }
-}
-
 getEntry = \(hamt Hamt, index number) Entry {
   if index == 1 {
     hamt.entry1

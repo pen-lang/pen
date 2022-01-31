@@ -40,6 +40,14 @@ Keys = \(map Map) [string] {
   hamt'Keys(map.hamt)
 }
 
-Values = \(map Map) [any] {
-  hamt'Values(map.hamt)
+Values = \(m Map) [any] {
+  values(m, Keys(m))
+}
+
+values = \(m Map, keys [string]) [any] {
+  if [k, ...keys] = keys {
+    [any Get(m, k(), none), ...values(m, keys)]
+  } else {
+    [any]
+  }
 }
