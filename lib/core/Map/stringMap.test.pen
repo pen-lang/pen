@@ -75,6 +75,16 @@ assertGetMany = \(m stringMap'StringMap, n number) none | error {
   }
 }
 
+TestMapMerge = \() none | error {
+  m = stringMap'Merge(
+    stringMap'Set(stringMap'New(), "foo", "foo"),
+    stringMap'Set(stringMap'New(), "bar", "bar"),
+  )
+
+  Assert'True(stringMap'Get(m, "foo") == "foo")
+  Assert'True(stringMap'Get(m, "bar") == "bar")
+}
+
 setMany = \(m stringMap'StringMap, n number) stringMap'StringMap {
   if n == 0 {
     m

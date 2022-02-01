@@ -10,4 +10,4 @@ position = { path = "../position" }
 serde = { version = "1", features = ["derive", "rc"] }
 
 [dev-dependencies]
-pretty_assertions = "1.0"
+pretty_assertions = "1.1"
