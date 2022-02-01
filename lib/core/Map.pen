@@ -36,6 +36,18 @@ Set = \(map Map, key string, value any) Map {
   }
 }
 
+Merge = \(x Map, y Map) Map {
+  merge(x, y, Keys(y))
+}
+
+merge = \(x Map, y Map, keys [string]) Map {
+  if [k, ...keys] = keys {
+    merge(Set(x, k(), Get(y, k(), none)), y, keys)
+  } else {
+    x
+  }
+}
+
 Keys = \(map Map) [string] {
   hamt'Keys(map.hamt)
 }

@@ -24,6 +24,10 @@ Size = \(map StringMap) number {
   Map'Size(map.map)
 }
 
+Merge = \(x StringMap, y StringMap) StringMap {
+  StringMap{map: Map'Merge(x.map, y.map)}
+}
+
 Keys = \(map StringMap) [string] {
   Map'Keys(map.map)
 }
@@ -35,7 +39,7 @@ Values = \(map StringMap) [string] {
 asStrings = \(xs [any]) [string] {
   if [x, ...xs] = xs {
     if x = x() as string {
-      [string x, ...asStrings(xs)]  
+      [string x, ...asStrings(xs)]
     } else {
       asStrings(xs)
     }
