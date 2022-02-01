@@ -1,3 +1,4 @@
+import 'List
 import 'Map
 import 'Map'stringMap
 import 'Number
@@ -47,16 +48,30 @@ TestMapSetManyTimes = \() none | error {
   m = setMany(stringMap'New(), n)
 
   Assert'EqualNumbers(stringMap'Size(m), n)
-  assertMany(m, n)
+  assertGetMany(m, n)
 }
 
-assertMany = \(m stringMap'StringMap, n number) none | error {
+TestMapKeys = \() none | error {
+  n = 1000
+  m = setMany(stringMap'New(), n)
+
+  Assert'EqualNumbers(List'Length([any ...stringMap'Keys(m)]), n)
+}
+
+TestMapValues = \() none | error {
+  n = 1000
+  m = setMany(stringMap'New(), n)
+
+  Assert'EqualNumbers(List'Length([any ...stringMap'Values(m)]), n)
+}
+
+assertGetMany = \(m stringMap'StringMap, n number) none | error {
   if n == 0 {
     none
   } else {
     s = Number'String(n)
     Assert'True(stringMap'Get(m, s) == s)?
-    assertMany(m, n - 1)
+    assertGetMany(m, n - 1)
   }
 }
 

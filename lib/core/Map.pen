@@ -35,3 +35,19 @@ Set = \(map Map, key string, value any) Map {
     size: map.size + if u.New { 1 } else { 0 }
   }
 }
+
+Keys = \(map Map) [string] {
+  hamt'Keys(map.hamt)
+}
+
+Values = \(m Map) [any] {
+  values(m, Keys(m))
+}
+
+values = \(m Map, keys [string]) [any] {
+  if [k, ...keys] = keys {
+    [any Get(m, k(), none), ...values(m, keys)]
+  } else {
+    [any]
+  }
+}
