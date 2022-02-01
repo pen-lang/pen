@@ -7,6 +7,6 @@ authors = ["Yota Toyama <raviqqe@gmail.com>"]
 edition = "2021"
 
 [dependencies]
-pretty_assertions = "1.0"
+pretty_assertions = "1.1"
 once_cell = "1"
 fnv = "1"
