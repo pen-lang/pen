@@ -53,13 +53,5 @@ Keys = \(map Map) [string] {
 }
 
 Values = \(m Map) [any] {
-  values(m, Keys(m))
-}
-
-values = \(m Map, keys [string]) [any] {
-  if [k, ...keys] = keys {
-    [any Get(m, k(), none), ...values(m, keys)]
-  } else {
-    [any]
-  }
+  [any Get(m, k(), none) for k in Keys(m)]
 }
