@@ -52,14 +52,14 @@ TestMapSetManyTimes = \() none | error {
 }
 
 TestMapKeys = \() none | error {
-  n = 1000
+  n = 4
   m = setMany(stringMap'New(), n)
 
   Assert'EqualNumbers(List'Length([any ...stringMap'Keys(m)]), n)
 }
 
 TestMapValues = \() none | error {
-  n = 1000
+  n = 4
   m = setMany(stringMap'New(), n)
 
   Assert'EqualNumbers(List'Length([any ...stringMap'Values(m)]), n)
