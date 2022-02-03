@@ -32,6 +32,28 @@ fn transform_list(
             position.clone(),
         )
         .into(),
+        [ListElement::Multiple(expression)] => Call::new(
+            Some(
+                types::Function::new(
+                    vec![
+                        types::Function::new(vec![], any_list_type.clone(), position.clone())
+                            .into(),
+                    ],
+                    any_list_type.clone(),
+                    position.clone(),
+                )
+                .into(),
+            ),
+            Variable::new(&configuration.lazy_function_name, position.clone()),
+            vec![Thunk::new(
+                Some(any_list_type.into()),
+                expression.clone(),
+                position.clone(),
+            )
+            .into()],
+            position.clone(),
+        )
+        .into(),
         [ListElement::Multiple(expression), ..] => Call::new(
             Some(
                 types::Function::new(

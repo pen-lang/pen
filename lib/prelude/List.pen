@@ -46,6 +46,14 @@ _prependToNode = \(x \() any, n \() _Node | none) _Node {
   }
 }
 
+_lazy = \(x \() _AnyList) _AnyList {
+  _AnyList{
+    node: \() _Node | none {
+      x().node()
+    }
+  }
+}
+
 _concatenateLists = \(x \() _AnyList, y _AnyList) _AnyList {
   _AnyList{
     node: \() _Node | none {

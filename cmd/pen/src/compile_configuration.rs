@@ -24,6 +24,7 @@ pub static COMPILE_CONFIGURATION: Lazy<Arc<app::module_compiler::CompileConfigur
                     equal_function_name: "_equalLists".into(),
                     prepend_function_name: "_prependToList".into(),
                     deconstruct_function_name: "_firstRest".into(),
+                    lazy_function_name: "_lazy".into(),
                     first_function_name: "_first".into(),
                     rest_function_name: "_rest".into(),
                     list_type_name: "_AnyList".into(),
