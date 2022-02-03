@@ -23,6 +23,7 @@ fn qualify_list_type_configuration(
         prepend_function_name: [prelude_prefix, &configuration.prepend_function_name].join(""),
         deconstruct_function_name: [prelude_prefix, &configuration.deconstruct_function_name]
             .join(""),
+        lazy_function_name: [prelude_prefix, &configuration.lazy_function_name].join(""),
         first_function_name: [prelude_prefix, &configuration.first_function_name].join(""),
         rest_function_name: [prelude_prefix, &configuration.rest_function_name].join(""),
         list_type_name: [prelude_prefix, &configuration.list_type_name].join(""),
