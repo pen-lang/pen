@@ -27,8 +27,8 @@ pub static COMPILE_CONFIGURATION: Lazy<Arc<app::module_compiler::CompileConfigur
                     lazy_function_name: "_lazy".into(),
                     first_function_name: "_first".into(),
                     rest_function_name: "_rest".into(),
-                    list_type_name: "_AnyList".into(),
-                    first_rest_type_name: "_FirstRest".into(),
+                    list_type_name: "_anyList".into(),
+                    first_rest_type_name: "_firstRest".into(),
                 },
                 string_type: app::module_compiler::StringTypeConfiguration {
                     equal_function_name: "_equalStrings".into(),
