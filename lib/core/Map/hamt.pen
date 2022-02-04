@@ -2,6 +2,7 @@ import 'Bit
 import 'Map'emptyEntry { EmptyEntry }
 
 # The first argument is a hash value.
+# The second argument is a layer index.
 import foreign "c" _pen_core_hamt_hash_key \(number, number) number
 
 type keyValue {
