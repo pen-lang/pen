@@ -1,5 +1,5 @@
 import 'Bit
-import 'Map'emptyEntry { EmptyEntry }
+import 'Map'noValue { NoValue }
 
 # The first argument is a hash value.
 # The second argument is a layer index.
@@ -114,7 +114,7 @@ get = \(hamt Hamt, key any, layer number, level number, cfg Configuration) any {
       get(e, key, layer, level + 1, cfg)
     }
   } else if none {
-    EmptyEntry{}
+    NoValue{}
   }
 }
 

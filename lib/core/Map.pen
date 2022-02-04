@@ -1,4 +1,4 @@
-import 'Map'emptyEntry { EmptyEntry }
+import 'Map'noValue { NoValue }
 import 'Map'hamt { Hamt }
 
 type Map {
@@ -20,7 +20,7 @@ Size = \(map Map) number {
 }
 
 Get = \(map Map, key any, default any) any {
-  if v = hamt'Get(map.hamt, key, map.configuration) as EmptyEntry {
+  if v = hamt'Get(map.hamt, key, map.configuration) as NoValue {
     default
   } else {
     v

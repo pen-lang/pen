@@ -1,6 +1,6 @@
 import 'List
 import 'Map
-import 'Map'emptyEntry { EmptyEntry }
+import 'Map'noValue { NoValue }
 
 import foreign "c" _pen_core_hamt_hash_string \(string) number
 
