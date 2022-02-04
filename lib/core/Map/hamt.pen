@@ -1,11 +1,17 @@
 import 'Bit
 import 'Map'emptyEntry { EmptyEntry }
 
-import foreign "c" _pen_core_hamt_hash_key \(string, number) number
+# The first argument is a hash value.
+import foreign "c" _pen_core_hamt_hash_key \(number, number) number
 
 type keyValue {
-  key string
+  key any
   value any
+}
+
+type Configuration {
+  EqualKeys \(any, any) boolean
+  HashKey \(any) number
 }
 
 type Update {
@@ -91,32 +97,32 @@ New = \() Hamt {
   }
 }
 
-Get = \(hamt Hamt, key string) any {
-  get(hamt, key, 1, 1)
+Get = \(hamt Hamt, key any, cfg Configuration) any {
+  get(hamt, key, 1, 1, cfg)
 }
 
 # A layer is composed of a tree of HAMT and used to re-hash keys.
 # A level is composed of a node of HAMT and used to segment hash values into entry indexes.
-get = \(hamt Hamt, key string, layer number, level number) any {
-  if e = getEntry(hamt, index(key, layer, level)) as keyValue {
+get = \(hamt Hamt, key any, layer number, level number, cfg Configuration) any {
+  if e = getEntry(hamt, index(key, layer, level, cfg)) as keyValue {
     e.value
   } else if Hamt {
     if level > maxLevel() {
-      get(e, key, layer + 1, 1)
+      get(e, key, layer + 1, 1, cfg)
     } else {
-      get(e, key, layer, level + 1)
+      get(e, key, layer, level + 1, cfg)
     }
   } else if none {
     EmptyEntry{}
   }
 }
 
-Set = \(hamt Hamt, key string, value any) Update {
-  set(hamt, key, value, 1, 1)
+Set = \(hamt Hamt, key any, value any, cfg Configuration) Update {
+  set(hamt, key, value, 1, 1, cfg)
 }
 
-set = \(hamt Hamt, key string, value any, layer number, level number) Update {
-  i = index(key, layer, level)
+set = \(hamt Hamt, key any, value any, layer number, level number, cfg Configuration) Update {
+  i = index(key, layer, level, cfg)
   update = \(e Entry, new boolean) Update {
     Update{Hamt: setEntry(hamt, i, e), New: new}
   }
@@ -124,20 +130,20 @@ set = \(hamt Hamt, key string, value any, layer number, level number) Update {
   if e = getEntry(hamt, i) as keyValue {
     # TODO Remove a debug function call below of workaround for a bug in LLVM 13.0.0.
     debug("pen: hack to preserve proper stack values")
-    if e.key == key {
+    if cfg.EqualKeys(e.key, key) {
       update(keyValue{key: key, value: value}, false)
     } else {
       l = level + 1
-      u = set(New(), e.key, e.value, layer, l)
-      u = set(u.Hamt, key, value, layer, l)
+      u = set(New(), e.key, e.value, layer, l, cfg)
+      u = set(u.Hamt, key, value, layer, l, cfg)
 
       update(u.Hamt, true)
     }
   } else if Hamt {
     u = if level > maxLevel() {
-      set(e, key, value, layer + 1, 1)
+      set(e, key, value, layer + 1, 1, cfg)
     } else {
-      set(e, key, value, layer, level + 1)
+      set(e, key, value, layer, level + 1, cfg)
     }
 
     update(u.Hamt, u.New)
@@ -146,11 +152,11 @@ set = \(hamt Hamt, key string, value any, layer number, level number) Update {
   }
 }
 
-index = \(key string, layer number, level number) number {
+index = \(key any, layer number, level number, cfg Configuration) number {
   Bit'FromInteger64(
     Bit'And(
       Bit'RightShift(
-        _pen_core_hamt_hash_key(key, layer),
+        _pen_core_hamt_hash_key(cfg.HashKey(key), layer),
         5 * (level - 1),
       ),
       Bit'ToInteger64(0b11111),
@@ -158,18 +164,18 @@ index = \(key string, layer number, level number) number {
   ) + 1
 }
 
-Keys = \(m Hamt) [string] {
+Keys = \(m Hamt) [any] {
   keys(m, 1)
 }
 
-keys = \(m Hamt, i number) [string] {
+keys = \(m Hamt, i number) [any] {
   if i > maxIndex() {
-    [string]
+    [any]
   } else {
     if e = getEntry(m, i) as keyValue {
-      [string e.key, ...keys(m, i + 1)]
+      [any e.key, ...keys(m, i + 1)]
     } else if Hamt {
-      [string ...Keys(e), ...keys(m, i + 1)]
+      [any ...Keys(e), ...keys(m, i + 1)]
     } else if none {
       keys(m, i + 1)
     }

@@ -1,11 +1,34 @@
 import 'Map
 
+import foreign "c" _pen_core_hamt_hash_string \(string) number
+
 type StringMap {
   map Map'Map
 }
 
 New = \() StringMap {
-  StringMap{map: Map'New()}
+  StringMap{
+    map: Map'New(
+      \(x any, y any) boolean {
+        if x = x as string {
+          if y = y as string {
+            x == y
+          } else {
+            false
+          }
+        } else {
+          false
+        }
+      },
+      \(x any) number {
+        if x = x as string {
+          _pen_core_hamt_hash_string(x)
+        } else {
+          0
+        }
+      }
+    )
+  }
 }
 
 Get = \(map StringMap, key string) string | none {
@@ -29,7 +52,7 @@ Merge = \(x StringMap, y StringMap) StringMap {
 }
 
 Keys = \(map StringMap) [string] {
-  Map'Keys(map.map)
+  asStrings(Map'Keys(map.map))
 }
 
 Values = \(map StringMap) [string] {
