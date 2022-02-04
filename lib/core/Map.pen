@@ -20,9 +20,7 @@ Size = \(map Map) number {
 }
 
 Get = \(map Map, key any, default any) any {
-  v = hamt'Get(map.hamt, key, map.configuration)
-
-  if _ = v as EmptyEntry {
+  if v = hamt'Get(map.hamt, key, map.configuration) as EmptyEntry {
     default
   } else {
     v
