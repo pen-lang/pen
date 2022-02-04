@@ -106,7 +106,11 @@ Get = \(hamt Hamt, key any, cfg Configuration) any {
 # A level is composed of a node of HAMT and used to segment hash values into entry indexes.
 get = \(hamt Hamt, key any, layer number, level number, cfg Configuration) any {
   if e = getEntry(hamt, index(key, layer, level, cfg)) as keyValue {
-    e.value
+    if cfg.EqualKeys(e.key, key) {
+      e.value
+    } else {
+      NoValue{}
+    }
   } else if Hamt {
     if level > maxLevel() {
       get(e, key, layer + 1, 1, cfg)
