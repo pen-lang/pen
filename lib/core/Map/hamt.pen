@@ -139,7 +139,7 @@ set = \(hamt Hamt, key any, value any, layer number, level number, cfg Configura
       update(keyValue{key: key, value: value}, false)
     } else {
       l = level + 1
-      u = set(Size(), e.key, e.value, layer, l, cfg)
+      u = set(New(), e.key, e.value, layer, l, cfg)
       u = set(u.Hamt, key, value, layer, l, cfg)
 
       update(u.Hamt, true)

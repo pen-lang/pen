@@ -32,7 +32,7 @@ Set = \(map Map, key any, value any) Map {
 
   Map{
     hamt: u.Hamt,
-    size: map.size + if u.New { 1 } else { 0 },
+    size: map.size + if u.Size { 1 } else { 0 },
     configuration: map.configuration
   }
 }
@@ -42,7 +42,7 @@ Delete = \(map Map, key any) Map {
 
   Map{
     hamt: u.Hamt,
-    size: map.size - if u.New { 1 } else { 0 },
+    size: map.size - if u.Size { 1 } else { 0 },
     configuration: map.configuration
   }
 }
