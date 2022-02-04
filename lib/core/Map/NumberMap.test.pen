@@ -9,9 +9,9 @@ get = \(m NumberMap'Map, k number) number | none {
   }
 }
 
-TestMapSet = \() none | error {
-  k = 42
-  v = 2045
-
-  Assert'True(get(NumberMap'Set(NumberMap'New(), k, v), k) == v)
-}
+#TestMapSet = \() none | error {
+#  k = 42
+#  v = 2045
+#
+#  Assert'True(get(NumberMap'Set(NumberMap'New(), k, v), k) == v)
+#}
