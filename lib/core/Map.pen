@@ -37,6 +37,16 @@ Set = \(map Map, key any, value any) Map {
   }
 }
 
+Delete = \(map Map, key any) Map {
+  u = hamt'Delete(map.hamt, key, map.configuration)
+
+  Map{
+    hamt: u.Hamt,
+    size: map.size - if u.New { 1 } else { 0 },
+    configuration: map.configuration
+  }
+}
+
 Merge = \(x Map, y Map) Map {
   merge(x, y, Keys(y))
 }

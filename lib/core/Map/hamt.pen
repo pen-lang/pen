@@ -157,6 +157,36 @@ set = \(hamt Hamt, key any, value any, layer number, level number, cfg Configura
   }
 }
 
+Delete = \(hamt Hamt, key any, cfg Configuration) Update {
+  delete(hamt, key, 1, 1, cfg)
+}
+
+# TODO Normalize tree structures.
+delete = \(hamt Hamt, key any, layer number, level number, cfg Configuration) Update {
+  i = index(key, layer, level, cfg)
+  update = \(e Entry, new boolean) Update {
+    Update{Hamt: setEntry(hamt, i, e), New: new}
+  }
+
+  if e = getEntry(hamt, i) as keyValue {
+    if cfg.EqualKeys(e.key, key) {
+      update(none, true)
+    } else {
+      Update{Hamt: hamt, New: false}
+    }
+  } else if Hamt {
+    u = if level > maxLevel() {
+      delete(e, key, layer + 1, 1, cfg)
+    } else {
+      delete(e, key, layer, level + 1, cfg)
+    }
+
+    update(u.Hamt, u.New)
+  } else if none {
+    Update{Hamt: hamt, New: false}
+  }
+}
+
 index = \(key any, layer number, level number, cfg Configuration) number {
   Bit'FromInteger64(
     Bit'And(
