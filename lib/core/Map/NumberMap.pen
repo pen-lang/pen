@@ -50,6 +50,14 @@ Set = \(map Map, key number, value any) Map {
   }
 }
 
+Delete = \(map Map, key number) Map {
+  if Number'IsNan(key) {
+    map
+  } else {
+    Map{map: Map'Delete(map.map, key)}
+  }
+}
+
 Size = \(map Map) number {
   Map'Size(map.map)
 }

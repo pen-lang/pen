@@ -41,6 +41,10 @@ Set = \(map Map, key string, value any) Map {
   Map{map: Map'Set(map.map, key, value)}
 }
 
+Delete = \(map Map, key string) Map {
+  Map{map: Map'Delete(map.map, key)}
+}
+
 Size = \(map Map) number {
   Map'Size(map.map)
 }

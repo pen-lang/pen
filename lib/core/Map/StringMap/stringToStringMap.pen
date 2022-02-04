@@ -21,6 +21,10 @@ Set = \(map Map, key string, value string) Map {
   Map{map: StringMap'Set(map.map, key, value)}
 }
 
+Delete = \(map Map, key string) Map {
+  Map{map: StringMap'Delete(map.map, key)}
+}
+
 Size = \(map Map) number {
   StringMap'Size(map.map)
 }

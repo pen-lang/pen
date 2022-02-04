@@ -46,8 +46,17 @@ TestMapSetManyTimes = \() none | error {
   n = 1000
   m = setMany(map'New(), n)
 
-  Assert'EqualNumbers(map'Size(m), n)
-  assertGetMany(m, n)
+  Assert'EqualNumbers(map'Size(m), n)?
+  assertGetMany(m, Number'Sequence(n))
+}
+
+TestMapDeleteManyTimes = \() none | error {
+  n = 1000
+  m = setMany(map'New(), n)
+  m = deleteMany(m, n / 2)
+
+  Assert'EqualNumbers(map'Size(m), n / 2)?
+  assertGetMany(m, Number'Range(n / 2 + 1, n))
 }
 
 TestMapKeys = \() none | error {
@@ -64,13 +73,13 @@ TestMapValues = \() none | error {
   Assert'EqualNumbers(List'Length([any ...map'Values(m)]), n)
 }
 
-assertGetMany = \(m map'Map, n number) none | error {
-  if n == 0 {
-    none
-  } else {
-    s = Number'String(n)
+assertGetMany = \(m map'Map, ns [number]) none | error {
+  if [n, ...ns] = ns {
+    s = Number'String(n())
     Assert'True(map'Get(m, s) == s)?
-    assertGetMany(m, n - 1)
+    assertGetMany(m, ns)
+  } else {
+    none
   }
 }
 
@@ -90,5 +99,13 @@ setMany = \(m map'Map, n number) map'Map {
   } else {
     s = Number'String(n)
     setMany(map'Set(m, s, s), n - 1)
+  }
+}
+
+deleteMany = \(m map'Map, n number) map'Map {
+  if n == 0 {
+    m
+  } else {
+    deleteMany(map'Delete(m, Number'String(n)), n - 1)
   }
 }
