@@ -406,3 +406,19 @@ Feature: OS
     """
     When I successfully run `pen build`
     Then I successfully run `./app`
+
+  Scenario: Exit a process
+    Given a file named "main.pen" with:
+    """pen
+    import System'Context { Context }
+    import System'Process
+
+    main = \(ctx Context) number {
+      Process'Exit(42)
+
+      0
+    }
+    """
+    When I successfully run `pen build`
+    Then I run `./app`
+    And the exit status should be 42
