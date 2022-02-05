@@ -1,0 +1,5 @@
+import foreign "c" _pen_os_exit \(number) none
+
+Exit = \(code number) none {
+  _pen_os_exit(code)
+}
