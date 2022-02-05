@@ -21,6 +21,11 @@ fn _pen_core_square_root(x: ffi::Number) -> ffi::Number {
     f64::from(x).sqrt().into()
 }
 
+#[ffi::bindgen]
+fn _pen_core_is_nan(x: ffi::Number) -> ffi::Boolean {
+    f64::from(x).is_nan().into()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

@@ -33,3 +33,27 @@ last = \(xs [any], x \() any) any {
     x()
   }
 }
+
+ToNumbers = \(xs [any]) [number] {
+  if [x, ...xs] = xs {
+    if x = x() as number {
+      [number x, ...ToNumbers(xs)]
+    } else {
+      ToNumbers(xs)
+    }
+  } else {
+    [number]
+  }
+}
+
+ToStrings = \(xs [any]) [string] {
+  if [x, ...xs] = xs {
+    if x = x() as string {
+      [string x, ...ToStrings(xs)]
+    } else {
+      ToStrings(xs)
+    }
+  } else {
+    [string]
+  }
+}
