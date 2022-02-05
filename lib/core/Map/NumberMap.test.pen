@@ -9,6 +9,7 @@ get = \(m NumberMap'Map, k number) number | none {
   }
 }
 
+# TODO Enable this test when LLVM's tail call bug is fixed.
 #TestMapSet = \() none | error {
 #  k = 42
 #  v = 2045
