@@ -1,55 +1,63 @@
-type _AnyList {
-  node \() _Node | none
+type _anyList {
+  node \() _node | none
 }
 
-type _Node {
+type _node {
   first \() any
-  rest \() _Node | none
+  rest \() _node | none
 }
 
-type _FirstRest {
+type _firstRest {
   first \() any
-  rest _AnyList
+  rest _anyList
 }
 
-_first = \(fr _FirstRest) \() any {
+_first = \(fr _firstRest) \() any {
   fr.first
 }
 
-_rest = \(fr _FirstRest) _AnyList {
+_rest = \(fr _firstRest) _anyList {
   fr.rest
 }
 
-_firstRest = \(l _AnyList) _FirstRest | none {
-  if n = l.node() as _Node {
-    _FirstRest{
+_firstRest = \(l _anyList) _firstRest | none {
+  if n = l.node() as _node {
+    _firstRest{
       first: n.first,
-      rest: _AnyList{node: n.rest},
+      rest: _anyList{node: n.rest},
     }
   } else {
     none
   }
 }
 
-_emptyList = \() _AnyList {
-  _AnyList{node: \() _Node | none { none }}
+_emptyList = \() _anyList {
+  _anyList{node: \() _node | none { none }}
 }
 
-_prependToList = \(x \() any, l _AnyList) _AnyList {
-  _AnyList{node: \() _Node | none { _prependToNode(x, l.node) }}
+_prependToList = \(x \() any, l _anyList) _anyList {
+  _anyList{node: \() _node | none { _prependToNode(x, l.node) }}
 }
 
-_prependToNode = \(x \() any, n \() _Node | none) _Node {
-  _Node{
+_prependToNode = \(x \() any, n \() _node | none) _node {
+  _node{
     first: x,
     rest: n,
   }
 }
 
-_concatenateLists = \(x \() _AnyList, y _AnyList) _AnyList {
-  _AnyList{
-    node: \() _Node | none {
-      if x = x().node() as _Node {
+_lazy = \(x \() _anyList) _anyList {
+  _anyList{
+    node: \() _node | none {
+      x().node()
+    }
+  }
+}
+
+_concatenateLists = \(x \() _anyList, y _anyList) _anyList {
+  _anyList{
+    node: \() _node | none {
+      if x = x().node() as _node {
         _prependToNode(x.first, _concatenateNodes(x.rest, y.node))
       } else {
         y.node()
@@ -58,9 +66,9 @@ _concatenateLists = \(x \() _AnyList, y _AnyList) _AnyList {
   }
 }
 
-_concatenateNodes = \(x \() _Node | none, y \() _Node | none) \() _Node | none {
-  \() _Node | none {
-    if x = x() as _Node {
+_concatenateNodes = \(x \() _node | none, y \() _node | none) \() _node | none {
+  \() _node | none {
+    if x = x() as _node {
       _prependToNode(x.first, _concatenateNodes(x.rest, y))
     } else {
       y()
@@ -68,19 +76,19 @@ _concatenateNodes = \(x \() _Node | none, y \() _Node | none) \() _Node | none {
   }
 }
 
-_equalLists = \(f \(any, any) boolean, x _AnyList, y _AnyList) boolean {
+_equalLists = \(f \(any, any) boolean, x _anyList, y _anyList) boolean {
   _equalNodes(f, x.node(), y.node())
 }
 
-_equalNodes = \(f \(any, any) boolean, x _Node | none, y _Node | none) boolean {
-  if x = x as _Node {
-    if y = y as _Node {
+_equalNodes = \(f \(any, any) boolean, x _node | none, y _node | none) boolean {
+  if x = x as _node {
+    if y = y as _node {
       f(x.first(), y.first()) & _equalNodes(f, x.rest(), y.rest())
     } else {
       false
     }
   } else {
-    if y = y as _Node {
+    if y = y as _node {
       false
     } else {
       true

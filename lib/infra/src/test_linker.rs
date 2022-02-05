@@ -33,14 +33,7 @@ impl TestLinker {
             mod debug;
             mod heap;
             mod spawn;
-            mod test_result;
             mod unreachable;
-
-            use test_result::TestResult;
-
-            extern "C" {{
-                fn _pen_test_convert_result(result: ffi::Any) -> ffi::Arc<TestResult>;
-            }}
 
             fn main() {{
                 #[allow(unused_mut)]
@@ -92,17 +85,16 @@ impl TestLinker {
         format!(
             r#"
             #[link(name = "main_test")]
-            extern "C" {{ fn {foreign_name}() -> ffi::Any; }}
+            extern "C" {{ fn {foreign_name}() -> ffi::ByteString; }}
 
-            let result: Result<_, _>
-                = unsafe {{ _pen_test_convert_result({foreign_name}()) }}.to_result();
-            println!("\t{{}}\t{name}", if result.is_ok() {{ "OK" }} else {{ "FAIL" }});
+            let message = unsafe {{ {foreign_name}() }};
+            println!("\t{{}}\t{name}", if message.is_empty() {{ "OK" }} else {{ "FAIL" }});
 
-            if let Err(message) = &result {{
-                println!("\t\tMessage: {{}}", message);
-                error += 1;
-            }} else {{
+            if message.is_empty() {{
                 success += 1;
+            }} else {{
+                println!("\t\tMessage: {{}}", String::from_utf8_lossy(message.as_slice()));
+                error += 1;
             }}
             "#,
             name = name,

@@ -32,6 +32,28 @@ fn transform_list(
             position.clone(),
         )
         .into(),
+        [ListElement::Multiple(expression)] => Call::new(
+            Some(
+                types::Function::new(
+                    vec![
+                        types::Function::new(vec![], any_list_type.clone(), position.clone())
+                            .into(),
+                    ],
+                    any_list_type.clone(),
+                    position.clone(),
+                )
+                .into(),
+            ),
+            Variable::new(&configuration.lazy_function_name, position.clone()),
+            vec![Thunk::new(
+                Some(any_list_type.into()),
+                expression.clone(),
+                position.clone(),
+            )
+            .into()],
+            position.clone(),
+        )
+        .into(),
         [ListElement::Multiple(expression), ..] => Call::new(
             Some(
                 types::Function::new(
@@ -132,6 +154,16 @@ mod tests {
                 types::Function::new(vec![], list_type.clone(), Position::fake()).into(),
                 list_type.clone().into(),
             ],
+            list_type,
+            Position::fake(),
+        )
+    }
+
+    fn get_lazy_function_type() -> types::Function {
+        let list_type = get_list_type();
+
+        types::Function::new(
+            vec![types::Function::new(vec![], list_type.clone(), Position::fake()).into()],
             list_type,
             Position::fake(),
         )
@@ -300,6 +332,40 @@ mod tests {
                 &LIST_TYPE_CONFIGURATION,
             ),
             Call::new(
+                Some(get_lazy_function_type().into()),
+                Variable::new(
+                    &LIST_TYPE_CONFIGURATION.lazy_function_name,
+                    Position::fake()
+                ),
+                vec![Thunk::new(
+                    Some(list_type.clone().into()),
+                    Variable::new("xs", Position::fake()),
+                    Position::fake(),
+                )
+                .into()],
+                Position::fake(),
+            )
+            .into(),
+        );
+    }
+
+    #[test]
+    fn transform_two_multiple_elements() {
+        let list_type = get_list_type();
+
+        assert_eq!(
+            transform(
+                &List::new(
+                    types::None::new(Position::fake()),
+                    vec![
+                        ListElement::Multiple(Variable::new("xs", Position::fake()).into()),
+                        ListElement::Multiple(Variable::new("ys", Position::fake()).into())
+                    ],
+                    Position::fake()
+                ),
+                &LIST_TYPE_CONFIGURATION,
+            ),
+            Call::new(
                 Some(get_concatenate_function_type().into()),
                 Variable::new(
                     &LIST_TYPE_CONFIGURATION.concatenate_function_name,
@@ -313,13 +379,18 @@ mod tests {
                     )
                     .into(),
                     Call::new(
-                        Some(types::Function::new(vec![], list_type, Position::fake()).into()),
+                        Some(get_lazy_function_type().into()),
                         Variable::new(
-                            &LIST_TYPE_CONFIGURATION.empty_list_function_name,
+                            &LIST_TYPE_CONFIGURATION.lazy_function_name,
                             Position::fake()
                         ),
-                        vec![],
-                        Position::fake()
+                        vec![Thunk::new(
+                            Some(list_type.clone().into()),
+                            Variable::new("ys", Position::fake()),
+                            Position::fake(),
+                        )
+                        .into()],
+                        Position::fake(),
                     )
                     .into(),
                 ],
