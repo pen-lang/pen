@@ -2,6 +2,7 @@ import foreign "c" _pen_core_convert_number_to_string \(number) string
 import foreign "c" _pen_core_power \(number, number) number
 import foreign "c" _pen_core_remainder \(number, number) number
 import foreign "c" _pen_core_square_root \(number) number
+import foreign "c" _pen_core_is_nan \(number) boolean
 
 String = \(x number) string {
   _pen_core_convert_number_to_string(x)
@@ -41,4 +42,8 @@ Range = \(min number, max number) [number] {
   } else {
     [number min, ...Range(min + 1, max)]
   }
+}
+
+IsNan = \(x number) boolean {
+  _pen_core_is_nan(x)
 }

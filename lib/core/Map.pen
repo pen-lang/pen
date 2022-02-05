@@ -1,15 +1,17 @@
-import 'Map'emptyEntry { EmptyEntry }
+import 'Map'noValue { NoValue }
 import 'Map'hamt { Hamt }
 
 type Map {
   hamt Hamt
   size number
+  configuration hamt'Configuration
 }
 
-New = \() Map {
+New = \(equalKeys \(any, any) boolean, hashKey \(any) number) Map {
   Map{
     hamt: hamt'New(),
     size: 0,
+    configuration: hamt'Configuration{EqualKeys: equalKeys, HashKey: hashKey},
   }
 }
 
@@ -17,22 +19,31 @@ Size = \(map Map) number {
   map.size
 }
 
-Get = \(map Map, key string, default any) any {
-  v = hamt'Get(map.hamt, key)
-
-  if _ = v as EmptyEntry {
+Get = \(map Map, key any, default any) any {
+  if v = hamt'Get(map.hamt, key, map.configuration) as NoValue {
     default
   } else {
     v
   }
 }
 
-Set = \(map Map, key string, value any) Map {
-  u = hamt'Set(map.hamt, key, value)
+Set = \(map Map, key any, value any) Map {
+  u = hamt'Set(map.hamt, key, value, map.configuration)
 
   Map{
     hamt: u.Hamt,
-    size: map.size + if u.New { 1 } else { 0 }
+    size: map.size + if u.Size { 1 } else { 0 },
+    configuration: map.configuration
+  }
+}
+
+Delete = \(map Map, key any) Map {
+  u = hamt'Delete(map.hamt, key, map.configuration)
+
+  Map{
+    hamt: u.Hamt,
+    size: map.size - if u.Size { 1 } else { 0 },
+    configuration: map.configuration
   }
 }
 
@@ -40,7 +51,7 @@ Merge = \(x Map, y Map) Map {
   merge(x, y, Keys(y))
 }
 
-merge = \(x Map, y Map, keys [string]) Map {
+merge = \(x Map, y Map, keys [any]) Map {
   if [k, ...keys] = keys {
     merge(Set(x, k(), Get(y, k(), none)), y, keys)
   } else {
@@ -48,7 +59,7 @@ merge = \(x Map, y Map, keys [string]) Map {
   }
 }
 
-Keys = \(map Map) [string] {
+Keys = \(map Map) [any] {
   hamt'Keys(map.hamt)
 }
 
