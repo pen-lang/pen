@@ -26,24 +26,17 @@ unsafe extern "C" fn _pen_os_main(_: &mut Stack, _: ContinuationFunction) -> ffi
 }
 
 fn main() {
-    // TODO Remove these extra let expression and drop of runtime.
-    // Without those codes, memory leak tests fail with an old version of a Rust
-    // compiler.
-    let runtime = Runtime::new().unwrap();
-    let code: ffi::Number = runtime.block_on(async {
-        let code = ffi::future::from_closure(ffi::Arc::new(ffi::Closure::new(
-            _pen_os_main as *const u8,
-            (),
-        )))
-        .await;
+    // TODO Allocate a closure in an async block below instead.
+    // Without this extra variable definition, memory leak tests fail somehow.
+    let closure = ffi::Arc::new(ffi::Closure::new(_pen_os_main as *const u8, ()));
+    let code: ffi::Number = Runtime::new().unwrap().block_on(async {
+        let code = ffi::future::from_closure(closure).await;
 
         stdout().flush().await.unwrap();
         stderr().flush().await.unwrap();
 
         code
     });
-
-    drop(runtime);
 
     exit(f64::from(code) as i32);
 }
