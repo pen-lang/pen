@@ -57,6 +57,7 @@
     "toolchains",
     "toposort",
     "udp",
+    "valgrind",
     "wasi",
     "writability"
   ]
