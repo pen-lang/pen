@@ -6,8 +6,7 @@ mod utilities;
 
 use std::process::exit;
 use tokio::{
-    io::AsyncWriteExt,
-    io::{stderr, stdout},
+    io::{stderr, stdout, AsyncWriteExt},
     runtime::Runtime,
 };
 
