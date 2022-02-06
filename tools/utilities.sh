@@ -1,7 +1,10 @@
 test_valgrind_log() {
-  grep 'definitely lost: 0 bytes in 0 blocks' $1 &&
-    grep 'indirectly lost: 0 bytes in 0 blocks' $1 &&
-    grep '0 errors from 0 contexts' $1
+  if !(grep 'definitely lost: 0 bytes in 0 blocks' $1 &&
+      grep 'indirectly lost: 0 bytes in 0 blocks' $1 &&
+      grep '0 errors from 0 contexts' $1); then
+    cat $1
+    exit 1
+  fi
 }
 
 install_nightly_component() {
