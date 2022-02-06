@@ -26,9 +26,10 @@ unsafe extern "C" fn _pen_os_main(_: &mut Stack, _: ContinuationFunction) -> ffi
 }
 
 fn main() {
-    // HACK Is it OK to call the _pen_os_main function with an extra argument of a
-    // closure environment?
-    let code: ffi::Number = Runtime::new().unwrap().block_on(async {
+    // TODO Remove these extra let expression and drop of runtime.
+    // Without those codes, memory leak tests fail with an old version of a Rust compiler.
+    let runtime = Runtime::new().unwrap();
+    let code: ffi::Number = runtime.block_on(async {
         let code = ffi::future::from_closure(ffi::Arc::new(ffi::Closure::new(
             _pen_os_main as *const u8,
             (),
@@ -40,6 +41,8 @@ fn main() {
 
         code
     });
+
+    drop(runtime);
 
     exit(f64::from(code) as i32);
 }
