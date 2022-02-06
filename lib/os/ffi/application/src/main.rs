@@ -27,7 +27,8 @@ unsafe extern "C" fn _pen_os_main(_: &mut Stack, _: ContinuationFunction) -> ffi
 
 fn main() {
     // TODO Remove these extra let expression and drop of runtime.
-    // Without those codes, memory leak tests fail with an old version of a Rust compiler.
+    // Without those codes, memory leak tests fail with an old version of a Rust
+    // compiler.
     let runtime = Runtime::new().unwrap();
     let code: ffi::Number = runtime.block_on(async {
         let code = ffi::future::from_closure(ffi::Arc::new(ffi::Closure::new(
