@@ -20,6 +20,4 @@ export PATH=$PWD/target/release:$PWD/tools:$PATH
 export RUSTC_WRAPPER=sccache
 export PEN_ROOT=$PWD
 
-# TODO Do not retry. The option is set currently for:
-# - https://github.com/pen-lang/pen/issues/578
-cucumber --publish-quiet --retry 5 "$@"
+cucumber --publish-quiet "$@"
