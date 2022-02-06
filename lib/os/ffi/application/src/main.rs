@@ -5,7 +5,11 @@ mod unreachable;
 mod utilities;
 
 use std::process::exit;
-use tokio::runtime::Runtime;
+use tokio::{
+    io::AsyncWriteExt,
+    io::{stderr, stdout},
+    runtime::Runtime,
+};
 
 type ExitCode = ffi::Number;
 type Stack = ffi::cps::AsyncStack<Option<ExitCode>>;
@@ -25,13 +29,18 @@ unsafe extern "C" fn _pen_os_main(_: &mut Stack, _: ContinuationFunction) -> ffi
 fn main() {
     // HACK Is it OK to call the _pen_os_main function with an extra argument of a
     // closure environment?
-    let code: ffi::Number =
-        Runtime::new()
-            .unwrap()
-            .block_on(ffi::future::from_closure(ffi::Arc::new(ffi::Closure::new(
-                _pen_os_main as *const u8,
-                (),
-            ))));
+    let code: ffi::Number = Runtime::new().unwrap().block_on(async {
+        let code = ffi::future::from_closure(ffi::Arc::new(ffi::Closure::new(
+            _pen_os_main as *const u8,
+            (),
+        )))
+        .await;
+
+        stdout().flush().await.unwrap();
+        stderr().flush().await.unwrap();
+
+        code
+    });
 
     exit(f64::from(code) as i32);
 }
