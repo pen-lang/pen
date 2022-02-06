@@ -10,4 +10,8 @@ if ! which valgrind; then
 fi
 
 valgrind --log-file=valgrind.log "$@"
-test_valgrind_log valgrind.log
+
+if ! test_valgrind_log valgrind.log; then
+  cat valgrind.log
+  exit 1
+fi
