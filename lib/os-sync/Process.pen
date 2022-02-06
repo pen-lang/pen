@@ -1,5 +1,5 @@
-import foreign "c" _pen_os_exit \(number) none
+import 'Context { Context }
 
-Exit = \(code number) none {
-  _pen_os_exit(code)
+Exit = \(ctx Context, code number) none {
+  Context'Inner(ctx).Exit(code)
 }
