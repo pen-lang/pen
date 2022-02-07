@@ -27,7 +27,7 @@ impl JsonPackageConfiguration {
                 .into_iter()
                 .map(|(name, url)| {
                     Ok((
-                        name.clone(),
+                        name,
                         url::Url::options().base_url(Some(base_url)).parse(&url)?,
                     ))
                 })
