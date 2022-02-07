@@ -19,18 +19,16 @@ impl JsonPackageConfiguration {
     }
 
     pub fn into_configuration(
-        &self,
+        self,
         base_url: &url::Url,
     ) -> Result<app::PackageConfiguration, url::ParseError> {
         Ok(app::PackageConfiguration::new(
             self.dependencies
-                .iter()
-                .map(|(name, url_string)| {
+                .into_iter()
+                .map(|(name, url)| {
                     Ok((
                         name.clone(),
-                        url::Url::options()
-                            .base_url(Some(base_url))
-                            .parse(url_string)?,
+                        url::Url::options().base_url(Some(base_url)).parse(&url)?,
                     ))
                 })
                 .collect::<Result<_, url::ParseError>>()?,
