@@ -4,6 +4,7 @@ mod environment_variable;
 mod error;
 mod file;
 mod open_file_options;
+mod process;
 mod random;
 mod result;
 mod stdio;
