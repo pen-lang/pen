@@ -5,6 +5,27 @@ use crate::{
 };
 use std::{collections::BTreeMap, error::Error};
 
+pub fn read_main(
+    infrastructure: &Infrastructure,
+    package_directory: &FilePath,
+    output_directory: &FilePath,
+) -> Result<BTreeMap<url::Url, PackageConfiguration>, Box<dyn Error>> {
+    Ok(infrastructure
+        .package_configuration_reader
+        .read(package_directory)?
+        .dependencies()
+        .values()
+        .map(|url| -> Result<_, Box<dyn Error>> {
+            Ok((
+                url.clone(),
+                infrastructure.package_configuration_reader.read(
+                    &file_path_resolver::resolve_package_directory(output_directory, url),
+                )?,
+            ))
+        })
+        .collect::<Result<_, _>>()?)
+}
+
 pub fn read_all(
     infrastructure: &Infrastructure,
     package_directory: &FilePath,
