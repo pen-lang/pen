@@ -10,6 +10,7 @@ use crate::{
 };
 use std::error::Error;
 
+// Compile a "main" build script.
 pub fn compile_main(
     infrastructure: &Infrastructure,
     prelude_package_url: &url::Url,
