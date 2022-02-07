@@ -1,6 +1,7 @@
 use crate::{
     common::file_path_resolver,
     infra::{FilePath, Infrastructure},
+    package_configuration::PackageConfiguration,
 };
 use std::{collections::BTreeMap, error::Error};
 
@@ -13,27 +14,25 @@ pub fn read_recursively(
         infrastructure,
         &infrastructure
             .package_configuration_reader
-            .get_dependencies(package_directory)?,
+            .read(package_directory)?,
         output_directory,
     )
 }
 
 fn read_dependencies(
     infrastructure: &Infrastructure,
-    dependencies: &BTreeMap<String, url::Url>,
+    configuration: &PackageConfiguration,
     output_directory: &FilePath,
 ) -> Result<BTreeMap<url::Url, BTreeMap<String, url::Url>>, Box<dyn Error>> {
-    Ok(dependencies
+    Ok(configuration
+        .dependencies()
         .values()
         .map(|url| -> Result<_, Box<dyn Error>> {
-            let configuration = infrastructure
-                .package_configuration_reader
-                .get_dependencies(&file_path_resolver::resolve_package_directory(
-                    output_directory,
-                    url,
-                ))?;
+            let configuration = infrastructure.package_configuration_reader.read(
+                &file_path_resolver::resolve_package_directory(output_directory, url),
+            )?;
 
-            Ok(vec![(url.clone(), configuration.clone())]
+            Ok([(url.clone(), configuration.dependencies().clone())]
                 .into_iter()
                 .chain(read_dependencies(
                     infrastructure,

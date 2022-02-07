@@ -34,7 +34,8 @@ pub fn resolve(
                     output_directory,
                     infrastructure
                         .package_configuration_reader
-                        .get_dependencies(package_directory)?
+                        .read(package_directory)?
+                        .dependencies()
                         .get(path.package())
                         .ok_or_else(|| ApplicationError::PackageNotFound(path.package().into()))?,
                 ),

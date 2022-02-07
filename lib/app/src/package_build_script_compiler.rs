@@ -79,9 +79,9 @@ pub fn compile_modules(
                 main_module_targets
                     .get(0)
                     .map(|target| -> Result<_, Box<dyn Error>> {
-                        let dependencies = infrastructure
+                        let configuration = infrastructure
                             .package_configuration_reader
-                            .get_dependencies(package_directory)?;
+                            .read(package_directory)?;
 
                         Ok(MainModuleTarget::new(
                             target.source_file().clone(),
@@ -91,7 +91,8 @@ pub fn compile_modules(
                                 &file_path_resolver::resolve_source_file(
                                     &file_path_resolver::resolve_package_directory(
                                         output_directory,
-                                        dependencies
+                                        configuration
+                                            .dependencies()
                                             .get(&application_configuration.system_package_name)
                                             .ok_or(ApplicationError::SystemPackageNotFound)?,
                                     ),
@@ -177,7 +178,8 @@ pub fn compile_application(
                     output_directory,
                     infrastructure
                         .package_configuration_reader
-                        .get_dependencies(main_package_directory)?
+                        .read(main_package_directory)?
+                        .dependencies()
                         .get(&application_configuration.system_package_name)
                         .ok_or(ApplicationError::SystemPackageNotFound)?,
                 ),

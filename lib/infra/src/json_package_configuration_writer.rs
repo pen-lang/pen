@@ -1,5 +1,5 @@
 use super::json_package_configuration::JsonPackageConfiguration;
-use std::{collections::BTreeMap, error::Error, sync::Arc};
+use std::{error::Error, sync::Arc};
 
 pub struct JsonPackageConfigurationWriter {
     file_system: Arc<dyn app::infra::FileSystem>,
@@ -21,15 +21,17 @@ impl JsonPackageConfigurationWriter {
 impl app::infra::PackageConfigurationWriter for JsonPackageConfigurationWriter {
     fn write(
         &self,
-        dependencies: &BTreeMap<String, url::Url>,
+        configuration: &app::PackageConfiguration,
         package_directory: &app::infra::FilePath,
     ) -> Result<(), Box<dyn Error>> {
         self.file_system.write(
             &package_directory.join(&app::infra::FilePath::new(vec![
                 self.build_configuration_filename,
             ])),
-            (serde_json::to_string_pretty(&JsonPackageConfiguration::new(dependencies.clone()))?
-                + "\n")
+            (serde_json::to_string_pretty(&JsonPackageConfiguration::new(
+                configuration.dependencies().clone(),
+                configuration.is_system(),
+            ))? + "\n")
                 .as_bytes(),
         )?;
 

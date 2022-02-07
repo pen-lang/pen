@@ -12,7 +12,8 @@ pub fn initialize_recursively(
 ) -> Result<(), Box<dyn Error>> {
     for url in infrastructure
         .package_configuration_reader
-        .get_dependencies(package_directory)?
+        .read(package_directory)?
+        .dependencies()
         .values()
     {
         initialize(infrastructure, url, output_directory)?;

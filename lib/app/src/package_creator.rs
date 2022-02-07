@@ -1,6 +1,7 @@
 use crate::{
     common::file_path_resolver,
     infra::{FilePath, Infrastructure},
+    package_configuration::PackageConfiguration,
     ApplicationConfiguration,
 };
 use std::{collections::BTreeMap, error::Error};
@@ -48,9 +49,10 @@ fn create(
     module_content: &str,
     package_directory: &FilePath,
 ) -> Result<(), Box<dyn Error>> {
-    infrastructure
-        .package_configuration_writer
-        .write(dependencies, package_directory)?;
+    infrastructure.package_configuration_writer.write(
+        &PackageConfiguration::new(dependencies.clone(), false),
+        package_directory,
+    )?;
 
     infrastructure.file_system.write(
         &file_path_resolver::resolve_source_file(

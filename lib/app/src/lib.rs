@@ -10,6 +10,7 @@ pub mod module_dependency_resolver;
 mod module_finder;
 mod package_build_script_compiler;
 pub mod package_builder;
+mod package_configuration;
 pub mod package_creator;
 pub mod package_initializer;
 mod package_test_builder;
@@ -21,4 +22,5 @@ mod test_module_finder;
 pub mod test_runner;
 
 pub use application_configuration::{ApplicationConfiguration, MainModuleConfiguration};
+pub use package_configuration::PackageConfiguration;
 pub use test_configuration::{TestConfiguration, TestModuleConfiguration};
