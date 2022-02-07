@@ -422,7 +422,7 @@ Feature: OS (synchronous version)
     import System'Process
 
     main = \(ctx Context) number {
-      Process'Exit(42)
+      Process'Exit(ctx, 42)
 
       0
     }
