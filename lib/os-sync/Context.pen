@@ -39,6 +39,7 @@ import foreign "c" _pen_os_udp_send_to \(Udp'Socket, string, string) FfiNumberRe
 import foreign "c" _pen_os_get_time \() number
 import foreign "c" _pen_os_sleep \(number) none
 import foreign "c" _pen_os_random_number \() number
+import foreign "c" _pen_os_exit \(number) none
 
 type Context {
   inner InnerContext
@@ -76,6 +77,7 @@ type InnerContext {
   GetTime \() number
   Sleep \(number) none
   RandomNumber \() number
+  Exit \(number) none
 }
 
 type FfiOpenResult {
@@ -167,6 +169,7 @@ New = \() Context {
       GetTime: _pen_os_get_time,
       Sleep: _pen_os_sleep,
       RandomNumber: _pen_os_random_number,
+      Exit: _pen_os_exit
     }
   }
 }
