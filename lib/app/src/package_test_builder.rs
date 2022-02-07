@@ -1,7 +1,7 @@
 use crate::{
     common::file_path_resolver,
     error::ApplicationError,
-    external_package_topological_sorter,
+    external_package_configuration_reader, external_package_topological_sorter,
     infra::{FilePath, Infrastructure},
     package_build_script_compiler, ApplicationConfiguration,
 };
@@ -36,9 +36,11 @@ pub fn build(
     .into_iter()
     .chain(
         external_package_topological_sorter::sort(
-            infrastructure,
-            main_package_directory,
-            output_directory,
+            &external_package_configuration_reader::read_all(
+                infrastructure,
+                main_package_directory,
+                output_directory,
+            )?,
         )?
         .iter()
         .chain([prelude_package_url])

@@ -5,11 +5,11 @@ use crate::{
 };
 use std::{collections::BTreeMap, error::Error};
 
-pub fn read_recursively(
+pub fn read_all(
     infrastructure: &Infrastructure,
     package_directory: &FilePath,
     output_directory: &FilePath,
-) -> Result<BTreeMap<url::Url, BTreeMap<String, url::Url>>, Box<dyn Error>> {
+) -> Result<BTreeMap<url::Url, PackageConfiguration>, Box<dyn Error>> {
     read_dependencies(
         infrastructure,
         &infrastructure
@@ -23,7 +23,7 @@ fn read_dependencies(
     infrastructure: &Infrastructure,
     configuration: &PackageConfiguration,
     output_directory: &FilePath,
-) -> Result<BTreeMap<url::Url, BTreeMap<String, url::Url>>, Box<dyn Error>> {
+) -> Result<BTreeMap<url::Url, PackageConfiguration>, Box<dyn Error>> {
     Ok(configuration
         .dependencies()
         .values()
@@ -31,14 +31,11 @@ fn read_dependencies(
             let configuration = infrastructure.package_configuration_reader.read(
                 &file_path_resolver::resolve_package_directory(output_directory, url),
             )?;
+            let dependencies = read_dependencies(infrastructure, &configuration, output_directory)?;
 
-            Ok([(url.clone(), configuration.dependencies().clone())]
+            Ok([(url.clone(), configuration)]
                 .into_iter()
-                .chain(read_dependencies(
-                    infrastructure,
-                    &configuration,
-                    output_directory,
-                )?)
+                .chain(dependencies)
                 .collect::<Vec<_>>())
         })
         .collect::<Result<Vec<_>, _>>()?

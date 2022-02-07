@@ -15,7 +15,7 @@ pub fn create_application(
 ) -> Result<(), Box<dyn Error>> {
     create(
         infrastructure,
-        &vec![(
+        &[(
             application_configuration.system_package_name.clone(),
             system_package_url.clone(),
         )]
