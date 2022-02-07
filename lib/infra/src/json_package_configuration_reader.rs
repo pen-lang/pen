@@ -41,7 +41,7 @@ impl app::infra::PackageConfigurationReader for JsonPackageConfigurationReader {
                     self.build_configuration_filename,
                 ])),
             )?)?
-            .into_configuartion(&package_file_url)?,
+            .into_configuration(&package_file_url)?,
         )
     }
 }

@@ -18,7 +18,7 @@ impl JsonPackageConfiguration {
         }
     }
 
-    pub fn into_configuartion(
+    pub fn into_configuration(
         &self,
         base_url: &url::Url,
     ) -> Result<app::PackageConfiguration, url::ParseError> {
