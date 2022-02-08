@@ -3,13 +3,13 @@ mod test_module_target_collector;
 
 use crate::{
     common::file_path_resolver,
-    error::ApplicationError,
-    external_package_topological_sorter,
+    external_package_configuration_reader, external_package_topological_sorter,
     infra::{FilePath, Infrastructure, MainModuleTarget},
-    prelude_interface_file_finder, ApplicationConfiguration,
+    prelude_interface_file_finder, system_package_finder, ApplicationConfiguration,
 };
 use std::error::Error;
 
+// Compile a "main" build script that triggers build of a main package.
 pub fn compile_main(
     infrastructure: &Infrastructure,
     prelude_package_url: &url::Url,
@@ -79,10 +79,6 @@ pub fn compile_modules(
                 main_module_targets
                     .get(0)
                     .map(|target| -> Result<_, Box<dyn Error>> {
-                        let dependencies = infrastructure
-                            .package_configuration_reader
-                            .get_dependencies(package_directory)?;
-
                         Ok(MainModuleTarget::new(
                             target.source_file().clone(),
                             target.object_file().clone(),
@@ -91,9 +87,11 @@ pub fn compile_modules(
                                 &file_path_resolver::resolve_source_file(
                                     &file_path_resolver::resolve_package_directory(
                                         output_directory,
-                                        dependencies
-                                            .get(&application_configuration.system_package_name)
-                                            .ok_or(ApplicationError::SystemPackageNotFound)?,
+                                        &system_package_finder::find(
+                                            infrastructure,
+                                            package_directory,
+                                            output_directory,
+                                        )?,
                                     ),
                                     &[application_configuration
                                         .main_function_module_basename
@@ -162,6 +160,11 @@ pub fn compile_application(
     prelude_package_url: &url::Url,
     application_configuration: &ApplicationConfiguration,
 ) -> Result<FilePath, Box<dyn Error>> {
+    let external_package_configurations = external_package_configuration_reader::read_all(
+        infrastructure,
+        main_package_directory,
+        output_directory,
+    )?;
     let build_script_file = file_path_resolver::resolve_special_build_script_file(
         output_directory,
         "application",
@@ -175,32 +178,28 @@ pub fn compile_application(
             .compile_application(
                 &file_path_resolver::resolve_package_directory(
                     output_directory,
-                    infrastructure
-                        .package_configuration_reader
-                        .get_dependencies(main_package_directory)?
-                        .get(&application_configuration.system_package_name)
-                        .ok_or(ApplicationError::SystemPackageNotFound)?,
+                    &system_package_finder::find(
+                        infrastructure,
+                        main_package_directory,
+                        output_directory,
+                    )?,
                 ),
-                &vec![file_path_resolver::resolve_main_package_archive_file(
+                &[file_path_resolver::resolve_main_package_archive_file(
                     output_directory,
                     &infrastructure.file_path_configuration,
                 )]
                 .into_iter()
                 .chain(
-                    external_package_topological_sorter::sort(
-                        infrastructure,
-                        main_package_directory,
-                        output_directory,
-                    )?
-                    .iter()
-                    .map(|url| {
-                        file_path_resolver::resolve_external_package_archive_file(
-                            output_directory,
-                            url,
-                            &infrastructure.file_path_configuration,
-                        )
-                    })
-                    .collect::<Vec<_>>(),
+                    external_package_topological_sorter::sort(&external_package_configurations)?
+                        .iter()
+                        .map(|url| {
+                            file_path_resolver::resolve_external_package_archive_file(
+                                output_directory,
+                                url,
+                                &infrastructure.file_path_configuration,
+                            )
+                        })
+                        .collect::<Vec<_>>(),
                 )
                 .chain([file_path_resolver::resolve_external_package_archive_file(
                     output_directory,
@@ -248,9 +247,11 @@ pub fn compile_test(
                 .into_iter()
                 .chain(
                     external_package_topological_sorter::sort(
-                        infrastructure,
-                        main_package_directory,
-                        output_directory,
+                        &external_package_configuration_reader::read_all(
+                            infrastructure,
+                            main_package_directory,
+                            output_directory,
+                        )?,
                     )?
                     .iter()
                     .map(|url| {

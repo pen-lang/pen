@@ -1,6 +1,7 @@
 use crate::{
     application_configuration::APPLICATION_CONFIGURATION,
-    file_path_configuration::DEFAULT_SYSTEM_PACKAGE_URL, infrastructure,
+    file_path_configuration::{DEFAULT_SYSTEM_PACKAGE_NAME, DEFAULT_SYSTEM_PACKAGE_URL},
+    infrastructure,
 };
 use std::{path::PathBuf, sync::Arc};
 
@@ -31,8 +32,8 @@ pub fn create(package_directory: &str, library: bool) -> Result<(), Box<dyn std:
             &infrastructure,
             indoc::indoc!(
                 "
-                import System'Context { Context }
-                import System'File
+                import Os'Context { Context }
+                import Os'File
 
                 main = \\(ctx Context) number {
                   File'Write(ctx, File'StdOut(), \"Hello, world!\\n\")
@@ -41,6 +42,7 @@ pub fn create(package_directory: &str, library: bool) -> Result<(), Box<dyn std:
                 }
                 "
             ),
+            DEFAULT_SYSTEM_PACKAGE_NAME,
             &url::Url::parse(DEFAULT_SYSTEM_PACKAGE_URL)?,
             &APPLICATION_CONFIGURATION,
             &package_directory,

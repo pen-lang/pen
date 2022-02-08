@@ -1,41 +1,27 @@
-use crate::{
-    external_package_configuration_reader,
-    infra::{FilePath, Infrastructure},
-};
+use crate::PackageConfiguration;
 use petgraph::{algo::toposort, Graph};
 use std::{collections::BTreeMap, error::Error};
 
 pub fn sort(
-    infrastructure: &Infrastructure,
-    package_directory: &FilePath,
-    output_directory: &FilePath,
+    external_package_configurations: &BTreeMap<url::Url, PackageConfiguration>,
 ) -> Result<Vec<url::Url>, Box<dyn Error>> {
-    sort_external_packages(&external_package_configuration_reader::read_recursively(
-        infrastructure,
-        package_directory,
-        output_directory,
-    )?)
-}
-
-fn sort_external_packages(
-    dependencies: &BTreeMap<url::Url, BTreeMap<String, url::Url>>,
-) -> Result<Vec<url::Url>, Box<dyn std::error::Error>> {
     let mut graph = Graph::<url::Url, ()>::new();
     let mut indices = BTreeMap::<url::Url, _>::new();
 
-    for external_package in dependencies.keys() {
+    for external_package in external_package_configurations.keys() {
         indices.insert(
             external_package.clone(),
             graph.add_node(external_package.clone()),
         );
     }
 
-    for (url, dependencies) in dependencies {
-        for dependency_url in dependencies.values() {
+    for (url, configuration) in external_package_configurations {
+        for dependency_url in configuration.dependencies().values() {
             graph.add_edge(indices[url], indices[dependency_url], ());
         }
     }
 
+    // TODO Return an error on cycle.
     Ok(toposort(&graph, None)
         .unwrap()
         .into_iter()
@@ -50,23 +36,32 @@ mod tests {
     #[test]
     fn sort_packages() {
         assert_eq!(
-            sort_external_packages(
+            sort(
                 &vec![
-                    (url::Url::parse("file:///foo").unwrap(), Default::default()),
+                    (
+                        url::Url::parse("file:///foo").unwrap(),
+                        PackageConfiguration::new(Default::default(), false)
+                    ),
                     (
                         url::Url::parse("file:///bar").unwrap(),
-                        vec![
-                            ("Foo".into(), url::Url::parse("file:///foo").unwrap()),
-                            ("Baz".into(), url::Url::parse("file:///baz").unwrap())
-                        ]
-                        .into_iter()
-                        .collect()
+                        PackageConfiguration::new(
+                            [
+                                ("Foo".into(), url::Url::parse("file:///foo").unwrap()),
+                                ("Baz".into(), url::Url::parse("file:///baz").unwrap())
+                            ]
+                            .into_iter()
+                            .collect(),
+                            false
+                        )
                     ),
                     (
                         url::Url::parse("file:///baz").unwrap(),
-                        vec![("Foo".into(), url::Url::parse("file:///foo").unwrap()),]
-                            .into_iter()
-                            .collect()
+                        PackageConfiguration::new(
+                            [("Foo".into(), url::Url::parse("file:///foo").unwrap()),]
+                                .into_iter()
+                                .collect(),
+                            false
+                        )
                     )
                 ]
                 .into_iter()

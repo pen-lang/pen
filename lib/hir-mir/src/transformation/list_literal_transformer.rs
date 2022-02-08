@@ -338,7 +338,7 @@ mod tests {
                     Position::fake()
                 ),
                 vec![Thunk::new(
-                    Some(list_type.clone().into()),
+                    Some(list_type.into()),
                     Variable::new("xs", Position::fake()),
                     Position::fake(),
                 )
@@ -385,7 +385,7 @@ mod tests {
                             Position::fake()
                         ),
                         vec![Thunk::new(
-                            Some(list_type.clone().into()),
+                            Some(list_type.into()),
                             Variable::new("ys", Position::fake()),
                             Position::fake(),
                         )
