@@ -10,7 +10,7 @@ pub fn read_main(
     package_directory: &FilePath,
     output_directory: &FilePath,
 ) -> Result<BTreeMap<url::Url, PackageConfiguration>, Box<dyn Error>> {
-    Ok(infrastructure
+    infrastructure
         .package_configuration_reader
         .read(package_directory)?
         .dependencies()
@@ -23,7 +23,7 @@ pub fn read_main(
                 )?,
             ))
         })
-        .collect::<Result<_, _>>()?)
+        .collect::<Result<_, _>>()
 }
 
 pub fn read_all(
