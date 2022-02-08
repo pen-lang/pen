@@ -3,10 +3,9 @@ mod test_module_target_collector;
 
 use crate::{
     common::file_path_resolver,
-    error::ApplicationError,
     external_package_configuration_reader, external_package_topological_sorter,
     infra::{FilePath, Infrastructure, MainModuleTarget},
-    prelude_interface_file_finder, ApplicationConfiguration,
+    prelude_interface_file_finder, system_package_finder, ApplicationConfiguration,
 };
 use std::error::Error;
 
@@ -80,10 +79,6 @@ pub fn compile_modules(
                 main_module_targets
                     .get(0)
                     .map(|target| -> Result<_, Box<dyn Error>> {
-                        let configuration = infrastructure
-                            .package_configuration_reader
-                            .read(package_directory)?;
-
                         Ok(MainModuleTarget::new(
                             target.source_file().clone(),
                             target.object_file().clone(),
@@ -92,10 +87,11 @@ pub fn compile_modules(
                                 &file_path_resolver::resolve_source_file(
                                     &file_path_resolver::resolve_package_directory(
                                         output_directory,
-                                        configuration
-                                            .dependencies()
-                                            .get(&application_configuration.system_package_name)
-                                            .ok_or(ApplicationError::SystemPackageNotFound)?,
+                                        &system_package_finder::find(
+                                            infrastructure,
+                                            package_directory,
+                                            output_directory,
+                                        )?,
                                     ),
                                     &[application_configuration
                                         .main_function_module_basename
@@ -182,12 +178,11 @@ pub fn compile_application(
             .compile_application(
                 &file_path_resolver::resolve_package_directory(
                     output_directory,
-                    infrastructure
-                        .package_configuration_reader
-                        .read(main_package_directory)?
-                        .dependencies()
-                        .get(&application_configuration.system_package_name)
-                        .ok_or(ApplicationError::SystemPackageNotFound)?,
+                    &system_package_finder::find(
+                        infrastructure,
+                        main_package_directory,
+                        output_directory,
+                    )?,
                 ),
                 &[file_path_resolver::resolve_main_package_archive_file(
                     output_directory,
