@@ -9,18 +9,16 @@ use std::{collections::BTreeMap, error::Error};
 pub fn create_application(
     infrastructure: &Infrastructure,
     module_content: &str,
+    system_package_name: &str,
     system_package_url: &url::Url,
     application_configuration: &ApplicationConfiguration,
     package_directory: &FilePath,
 ) -> Result<(), Box<dyn Error>> {
     create(
         infrastructure,
-        &[(
-            application_configuration.system_package_name.clone(),
-            system_package_url.clone(),
-        )]
-        .into_iter()
-        .collect(),
+        &[(system_package_name.into(), system_package_url.clone())]
+            .into_iter()
+            .collect(),
         &application_configuration.main_module_basename,
         module_content,
         package_directory,
