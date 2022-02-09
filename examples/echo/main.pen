@@ -2,13 +2,14 @@ import Console'Print
 import Core'String
 import Os'Context { Context }
 import Os'Environment
+import Os'Process
 
 main = \(ctx Context) none {
   if x = run(ctx) as none {
     none
   } else {
     Print'Line(ctx, if x = source(x) as string { x } else { "unknown error" })
-    Process'Exit(1)
+    Process'Exit(ctx, 1)
   }
 }
 
