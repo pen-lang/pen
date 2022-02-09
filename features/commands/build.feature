@@ -12,8 +12,8 @@ Feature: Building packages
     """pen
     import Os'Context { Context }
 
-    main = \(ctx Context) number {
-      0
+    main = \(ctx Context) none {
+      none
     }
     """
     When I successfully run `pen build`
@@ -46,8 +46,8 @@ Feature: Building packages
     """pen
     import Os'Context { Context }
 
-    main = \(ctx Context) number {
-      0
+    main = \(ctx Context) none {
+      none
     }
     """
     And I successfully run `rustup target add <target>`

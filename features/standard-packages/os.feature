@@ -16,7 +16,7 @@ Feature: OS
     import Os'Context { Context }
     import Os'File
 
-    main = \(ctx Context) number {
+    main = \(ctx Context) none {
       if _ = run(ctx) as none {
         0
       } else {
@@ -42,7 +42,7 @@ Feature: OS
     import Os'Environment
     import Os'File
 
-    main = \(ctx Context) number {
+    main = \(ctx Context) none {
       if _ = File'Write(ctx, File'StdOut(), String'Join(Environment'Arguments(ctx), " ")) as number {
         0
       } else {
@@ -68,7 +68,7 @@ Feature: OS
       none
     }
 
-    main = \(ctx Context) number {
+    main = \(ctx Context) none {
       if _ = printEnvironmentVariable(ctx) as none {
         0
       } else {
@@ -87,7 +87,7 @@ Feature: OS
     import Os'Context { Context }
     import Os'File { File }
 
-    main = \(ctx Context) number {
+    main = \(ctx Context) none {
       if f = File'Open(ctx, "./foo.txt") as File {
         0
       } else {
@@ -115,7 +115,7 @@ Feature: OS
       none
     }
 
-    main = \(ctx Context) number {
+    main = \(ctx Context) none {
       if _ = readFile(ctx) as none {
         0
       } else {
@@ -142,7 +142,7 @@ Feature: OS
       none
     }
 
-    main = \(ctx Context) number {
+    main = \(ctx Context) none {
       if _ = readFile(ctx) as none {
         0
       } else {
@@ -174,7 +174,7 @@ Feature: OS
       none
     }
 
-    main = \(ctx Context) number {
+    main = \(ctx Context) none {
       if _ = writeFile(ctx) as none {
         0
       } else {
@@ -193,7 +193,7 @@ Feature: OS
     import Os'Context { Context }
     import Os'File
 
-    main = \(ctx Context) number {
+    main = \(ctx Context) none {
       if _ = File'Copy(ctx, "foo.txt", "bar.txt") as none {
         0
       } else {
@@ -213,7 +213,7 @@ Feature: OS
     import Os'Context { Context }
     import Os'File
 
-    main = \(ctx Context) number {
+    main = \(ctx Context) none {
       if _ = File'Move(ctx, "foo.txt", "bar.txt") as none {
         0
       } else {
@@ -233,7 +233,7 @@ Feature: OS
     import Os'Context { Context }
     import Os'File
 
-    main = \(ctx Context) number {
+    main = \(ctx Context) none {
       if _ = File'Remove(ctx, "foo.txt") as none {
         0
       } else {
@@ -264,7 +264,7 @@ Feature: OS
       none
     }
 
-    main = \(ctx Context) number {
+    main = \(ctx Context) none {
       if _ = readDirectory(ctx) as none {
         0
       } else {
@@ -283,7 +283,7 @@ Feature: OS
     import Os'Context { Context }
     import Os'Directory
 
-    main = \(ctx Context) number {
+    main = \(ctx Context) none {
       if _ = Directory'Create(ctx, "foo") as none {
         0
       } else {
@@ -301,7 +301,7 @@ Feature: OS
     import Os'Context { Context }
     import Os'Directory
 
-    main = \(ctx Context) number {
+    main = \(ctx Context) none {
       if _ = Directory'Remove(ctx, "foo") as none {
         0
       } else {
@@ -321,7 +321,7 @@ Feature: OS
     import Os'File
     import Os'File'Metadata { Metadata }
 
-    main = \(ctx Context) number {
+    main = \(ctx Context) none {
       m = File'Metadata(ctx, "foo")
 
       if m = m as Metadata {
@@ -356,7 +356,7 @@ Feature: OS
       none
     }
 
-    main = \(ctx Context) number {
+    main = \(ctx Context) none {
       if m = run(ctx) as none {
         0
       } else {
@@ -373,7 +373,7 @@ Feature: OS
     import Os'Context { Context }
     import Os'Time
 
-    main = \(ctx Context) number {
+    main = \(ctx Context) none {
       Time'Sleep(ctx, 1)
 
       0
@@ -396,7 +396,7 @@ Feature: OS
       none
     }
 
-    main = \(ctx Context) number {
+    main = \(ctx Context) none {
       if m = run(ctx) as none {
         0
       } else {
@@ -413,7 +413,7 @@ Feature: OS
     import Os'Context { Context }
     import Os'Process
 
-    main = \(ctx Context) number {
+    main = \(ctx Context) none {
       Process'Exit(ctx, 42)
 
       0

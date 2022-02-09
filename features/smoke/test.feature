@@ -47,8 +47,8 @@ Feature: Testing
     """pen
     import Os'Context { Context }
 
-    main = \(ctx Context) number {
-      0
+    main = \(ctx Context) none {
+      none
     }
     """
     And a file named "main.test.pen" with:

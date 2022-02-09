@@ -14,7 +14,7 @@ Feature: Union
     """pen
     import Os'Context { Context }
 
-    main = \(ctx Context) number {
+    main = \(ctx Context) none {
       x = if true {
         [none]
       } else {
@@ -26,8 +26,6 @@ Feature: Union
       } else {
         none
       }
-
-      0
     }
     """
     When I successfully run `pen build`

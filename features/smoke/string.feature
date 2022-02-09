@@ -13,12 +13,13 @@ Feature: String
     Given a file named "main.pen" with:
     """pen
     import Os'Context { Context }
+    import Os'Process
 
-    main = \(ctx Context) number {
+    main = \(ctx Context) none {
       if "foo" == "foo" {
-        0
+        none
       } else {
-        1
+        Process'Exit(1)
       }
     }
     """

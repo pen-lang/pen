@@ -19,10 +19,10 @@ Feature: Memory leak
       f(none)
     }
 
-    main = \(ctx Context) number {
+    main = \(ctx Context) none {
       f(none)
 
-      0
+      none
     }
     """
     When I successfully run `pen build`
@@ -34,10 +34,10 @@ Feature: Memory leak
     import Os'Context { Context }
     import Os'File
 
-    main = \(ctx Context) number {
+    main = \(ctx Context) none {
       File'Write(ctx, File'StdOut(), "Hello, world!\n")
 
-      0
+      none
     }
     """
     When I successfully run `pen build`
@@ -52,10 +52,10 @@ Feature: Memory leak
       x number
     }
 
-    main = \(ctx Context) number {
+    main = \(ctx Context) none {
       _ = foo{x: 42}
 
-      0
+      none
     }
     """
     When I successfully run `pen build`
@@ -70,10 +70,10 @@ Feature: Memory leak
       x number
     }
 
-    main = \(ctx Context) number {
+    main = \(ctx Context) none {
       _ = foo{x: 42}.x
 
-      0
+      none
     }
     """
     When I successfully run `pen build`
@@ -88,10 +88,10 @@ Feature: Memory leak
       x
     }
 
-    main = \(ctx Context) number {
+    main = \(ctx Context) none {
       f("")
 
-      0
+      none
     }
     """
     When I successfully run `pen build`
@@ -106,11 +106,11 @@ Feature: Memory leak
       x number
     }
 
-    main = \(ctx Context) number {
+    main = \(ctx Context) none {
       x = foo{x: 42}
       x = x.x
 
-      0
+      none
     }
     """
     When I successfully run `pen build`
@@ -125,11 +125,11 @@ Feature: Memory leak
       x number
     }
 
-    main = \(ctx Context) number {
+    main = \(ctx Context) none {
       x = foo{x: 42}
       _ = \() number { x.x }
 
-      0
+      none
     }
     """
     When I successfully run `pen build`
@@ -141,10 +141,10 @@ Feature: Memory leak
     import Core'Number
     import Os'Context { Context }
 
-    main = \(ctx Context) number {
+    main = \(ctx Context) none {
       Number'String(42)
 
-      0
+      none
     }
     """
     When I successfully run `pen build`
@@ -156,10 +156,10 @@ Feature: Memory leak
     import Core'String
     import Os'Context { Context }
 
-    main = \(ctx Context) number {
+    main = \(ctx Context) none {
       String'Join([string "hello", "world"], " ")
 
-      0
+      none
     }
     """
     When I successfully run `pen build`
@@ -174,11 +174,11 @@ Feature: Memory leak
       x number
     }
 
-    main = \(ctx Context) number {
+    main = \(ctx Context) none {
       x = foo{x: 42}
       _ = [foo x]
 
-      0
+      none
     }
     """
     When I successfully run `pen build`
@@ -193,7 +193,7 @@ Feature: Memory leak
       x number
     }
 
-    main = \(ctx Context) number {
+    main = \(ctx Context) none {
       x = foo{x: 42}
 
       if [x, ...xs] = [foo x] {
@@ -202,7 +202,7 @@ Feature: Memory leak
         none
       }
 
-      0
+      none
     }
     """
     When I successfully run `pen build`
@@ -217,10 +217,10 @@ Feature: Memory leak
       x number
     }
 
-    main = \(ctx Context) number {
+    main = \(ctx Context) none {
       [foo foo{x: 42}]
 
-      0
+      none
     }
     """
     When I successfully run `pen build`
@@ -235,14 +235,14 @@ Feature: Memory leak
       x number
     }
 
-    main = \(ctx Context) number {
+    main = \(ctx Context) none {
       if [x, ...xs] = [foo foo{x: 42}] {
         x()
       } else {
         none
       }
 
-      0
+      none
     }
     """
     When I successfully run `pen build`
@@ -253,7 +253,7 @@ Feature: Memory leak
     """pen
     import Os'Context { Context }
 
-    main = \(ctx Context) number {
+    main = \(ctx Context) none {
       xs = [none none]
 
       if [x, ..._] = xs {
@@ -263,7 +263,7 @@ Feature: Memory leak
         none
       }
 
-      0
+      none
     }
     """
     When I successfully run `pen build`

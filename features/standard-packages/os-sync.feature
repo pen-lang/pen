@@ -15,12 +15,13 @@ Feature: OS (synchronous version)
     """pen
     import Os'Context { Context }
     import Os'File
+    import Os'Process
 
-    main = \(ctx Context) number {
+    main = \(ctx Context) none {
       if _ = run(ctx) as none {
-        0
+        none
       } else {
-        1
+        Process'Exit(ctx, 1)
       }
     }
 
@@ -41,12 +42,13 @@ Feature: OS (synchronous version)
     import Os'Context { Context }
     import Os'Environment
     import Os'File
+    import Os'Process
 
-    main = \(ctx Context) number {
+    main = \(ctx Context) none {
       if _ = File'Write(ctx, File'StdOut(), String'Join(Environment'Arguments(ctx), " ")) as number {
-        0
+        none
       } else {
-        1
+        Process'Exit(ctx, 1)
       }
     }
     """
@@ -61,6 +63,7 @@ Feature: OS (synchronous version)
     import Os'Context { Context }
     import Os'File
     import Os'Environment
+    import Os'Process
 
     printEnvironmentVariable = \(ctx Context) none | error {
       File'Write(ctx, File'StdOut(), Environment'Variable(ctx, "FOO")?)?
@@ -68,11 +71,11 @@ Feature: OS (synchronous version)
       none
     }
 
-    main = \(ctx Context) number {
+    main = \(ctx Context) none {
       if _ = printEnvironmentVariable(ctx) as none {
-        0
+        none
       } else {
-        1
+        Process'Exit(ctx, 1)
       }
     }
     """
@@ -86,12 +89,13 @@ Feature: OS (synchronous version)
     """pen
     import Os'Context { Context }
     import Os'File { File }
+    import Os'Process
 
-    main = \(ctx Context) number {
+    main = \(ctx Context) none {
       if f = File'Open(ctx, "./foo.txt") as File {
-        0
+        none
       } else {
-        1
+        Process'Exit(ctx, 1)
       }
     }
     """
@@ -105,42 +109,36 @@ Feature: OS (synchronous version)
     import Os'Context { Context }
     import Os'File
     import Os'File'OpenOptions
+    import Os'Process
 
     readFile = \(ctx Context) none | error {
       f = File'Open(ctx, "foo.txt")?
       d = File'Read(ctx, f)?
-      f = File'OpenWithOptions(
-        ctx,
-        "bar.txt",
-        OpenOptions{
-          ...OpenOptions'Default(),
-          Create: true,
-          Write: true,
-        },
-      )?
-      File'Write(ctx, f, d)?
+
+      File'Write(ctx, File'StdOut(), d)?
 
       none
     }
 
-    main = \(ctx Context) number {
+    main = \(ctx Context) none {
       if _ = readFile(ctx) as none {
-        0
+        none
       } else {
-        1
+        Process'Exit(ctx, 1)
       }
     }
     """
     And a file named "foo.txt" with "foo"
     When I successfully run `pen build`
     Then I successfully run `./app`
-    And the file "bar.txt" should contain "foo"
+    And the stdout from "./app" should contain exactly "foo"
 
   Scenario: Read a file until a limit
     Given a file named "main.pen" with:
     """pen
     import Os'Context { Context }
     import Os'File
+    import Os'Process
 
     readFile = \(ctx Context) none | error {
       f = File'Open(ctx, "foo.txt")?
@@ -150,11 +148,11 @@ Feature: OS (synchronous version)
       none
     }
 
-    main = \(ctx Context) number {
+    main = \(ctx Context) none {
       if _ = readFile(ctx) as none {
-        0
+        none
       } else {
-        1
+        Process'Exit(ctx, 1)
       }
     }
     """
@@ -169,6 +167,7 @@ Feature: OS (synchronous version)
     import Os'Context { Context }
     import Os'File
     import Os'File'OpenOptions
+    import Os'Process
 
     writeFile = \(ctx Context) none | error {
       f = File'OpenWithOptions(
@@ -182,11 +181,11 @@ Feature: OS (synchronous version)
       none
     }
 
-    main = \(ctx Context) number {
+    main = \(ctx Context) none {
       if _ = writeFile(ctx) as none {
-        0
+        none
       } else {
-        1
+        Process'Exit(ctx, 1)
       }
     }
     """
@@ -200,12 +199,13 @@ Feature: OS (synchronous version)
     """pen
     import Os'Context { Context }
     import Os'File
+    import Os'Process
 
-    main = \(ctx Context) number {
+    main = \(ctx Context) none {
       if _ = File'Copy(ctx, "foo.txt", "bar.txt") as none {
-        0
+        none
       } else {
-        1
+        Process'Exit(ctx, 1)
       }
     }
     """
@@ -220,12 +220,13 @@ Feature: OS (synchronous version)
     """pen
     import Os'Context { Context }
     import Os'File
+    import Os'Process
 
-    main = \(ctx Context) number {
+    main = \(ctx Context) none {
       if _ = File'Move(ctx, "foo.txt", "bar.txt") as none {
-        0
+        none
       } else {
-        1
+        Process'Exit(ctx, 1)
       }
     }
     """
@@ -240,12 +241,13 @@ Feature: OS (synchronous version)
     """pen
     import Os'Context { Context }
     import Os'File
+    import Os'Process
 
-    main = \(ctx Context) number {
+    main = \(ctx Context) none {
       if _ = File'Remove(ctx, "foo.txt") as none {
-        0
+        none
       } else {
-        1
+        Process'Exit(ctx, 1)
       }
     }
     """
@@ -261,6 +263,7 @@ Feature: OS (synchronous version)
     import Os'Context { Context }
     import Os'File
     import Os'Directory
+    import Os'Process
 
     readDirectory = \(ctx Context) none | error {
       File'Write(
@@ -272,11 +275,11 @@ Feature: OS (synchronous version)
       none
     }
 
-    main = \(ctx Context) number {
+    main = \(ctx Context) none {
       if _ = readDirectory(ctx) as none {
-        0
+        none
       } else {
-        1
+        Process'Exit(ctx, 1)
       }
     }
     """
@@ -290,12 +293,13 @@ Feature: OS (synchronous version)
     """pen
     import Os'Context { Context }
     import Os'Directory
+    import Os'Process
 
-    main = \(ctx Context) number {
+    main = \(ctx Context) none {
       if _ = Directory'Create(ctx, "foo") as none {
-        0
+        none
       } else {
-        1
+        Process'Exit(ctx, 1)
       }
     }
     """
@@ -308,12 +312,13 @@ Feature: OS (synchronous version)
     """pen
     import Os'Context { Context }
     import Os'Directory
+    import Os'Process
 
-    main = \(ctx Context) number {
+    main = \(ctx Context) none {
       if _ = Directory'Remove(ctx, "foo") as none {
-        0
+        none
       } else {
-        1
+        Process'Exit(ctx, 1)
       }
     }
     """
@@ -328,11 +333,12 @@ Feature: OS (synchronous version)
     import Os'Context { Context }
     import Os'File
     import Os'File'Metadata { Metadata }
+    import Os'Process
 
-    main = \(ctx Context) number {
+    main = \(ctx Context) none {
       m = File'Metadata(ctx, "foo")
 
-      if m = m as Metadata {
+      c = if m = m as Metadata {
         if m.Size == 3 {
           0
         } else {
@@ -341,6 +347,8 @@ Feature: OS (synchronous version)
       } else {
         1
       }
+
+      Process'Exit(ctx, c)
     }
     """
     And a file named "foo" with:
@@ -356,6 +364,7 @@ Feature: OS (synchronous version)
     import Core'Number
     import Os'Context { Context }
     import Os'File
+    import Os'Process
     import Os'Time
 
     run = \(ctx Context) none | error {
@@ -364,11 +373,11 @@ Feature: OS (synchronous version)
       none
     }
 
-    main = \(ctx Context) number {
+    main = \(ctx Context) none {
       if m = run(ctx) as none {
-        0
+        none
       } else {
-        1
+        Process'Exit(ctx, 1)
       }
     }
     """
@@ -381,10 +390,8 @@ Feature: OS (synchronous version)
     import Os'Context { Context }
     import Os'Time
 
-    main = \(ctx Context) number {
+    main = \(ctx Context) none {
       Time'Sleep(ctx, 1)
-
-      0
     }
     """
     When I successfully run `pen build`
@@ -396,6 +403,7 @@ Feature: OS (synchronous version)
     import Core'Number
     import Os'Context { Context }
     import Os'File
+    import Os'Process
     import Os'Random
 
     run = \(ctx Context) none | error {
@@ -404,11 +412,11 @@ Feature: OS (synchronous version)
       none
     }
 
-    main = \(ctx Context) number {
+    main = \(ctx Context) none {
       if m = run(ctx) as none {
-        0
+        none
       } else {
-        1
+        Process'Exit(ctx, 1)
       }
     }
     """
@@ -421,10 +429,8 @@ Feature: OS (synchronous version)
     import Os'Context { Context }
     import Os'Process
 
-    main = \(ctx Context) number {
+    main = \(ctx Context) none {
       Process'Exit(ctx, 42)
-
-      0
     }
     """
     When I successfully run `pen build`
