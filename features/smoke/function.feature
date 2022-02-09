@@ -4,7 +4,7 @@ Feature: Function
     """json
     {
       "dependencies": {
-        "System": "pen:///os"
+        "Os": "pen:///os"
       }
     }
     """
@@ -12,7 +12,7 @@ Feature: Function
   Scenario: Reference an inner closure in nested closures
     Given a file named "main.pen" with:
     """pen
-    import System'Context { Context }
+    import Os'Context { Context }
 
     f = \(x number) \() number {
       \() number {

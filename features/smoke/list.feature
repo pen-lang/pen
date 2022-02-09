@@ -4,7 +4,7 @@ Feature: List
     """json
     {
       "dependencies": {
-        "System": "pen:///os"
+        "Os": "pen:///os"
       }
     }
     """
@@ -12,7 +12,7 @@ Feature: List
   Scenario: Force multiple elements of a list
     Given a file named "main.pen" with:
     """pen
-    import System'Context { Context }
+    import Os'Context { Context }
 
     main = \(ctx Context) number {
       if [x, ...xs] = [none ...[none none]] {
@@ -30,7 +30,7 @@ Feature: List
   Scenario: Force an element in a list of any type
     Given a file named "main.pen" with:
     """pen
-    import System'Context { Context }
+    import Os'Context { Context }
 
     main = \(ctx Context) number {
       if [x, ..._] = [any "foo"] {
@@ -48,7 +48,7 @@ Feature: List
   Scenario: Compile nested list comprehension
     Given a file named "main.pen" with:
     """pen
-    import System'Context { Context }
+    import Os'Context { Context }
 
     f = \(xss [[boolean]]) [[number]] {
       [[number]
@@ -73,7 +73,7 @@ Feature: List
   Scenario: Compile list comprehension with wrong typing
     Given a file named "main.pen" with:
     """pen
-    import System'Context
+    import Os'Context
 
     main = \(ctx Context) number {
       [none y() for y in [none 1]]

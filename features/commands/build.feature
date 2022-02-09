@@ -4,13 +4,13 @@ Feature: Building packages
     """json
     {
       "dependencies": {
-        "System": "pen:///os"
+        "Os": "pen:///os"
       }
     }
     """
     And a file named "main.pen" with:
     """pen
-    import System'Context { Context }
+    import Os'Context { Context }
 
     main = \(ctx Context) number {
       0
@@ -38,13 +38,13 @@ Feature: Building packages
     """json
     {
       "dependencies": {
-        "System": "pen:///os-sync"
+        "Os": "pen:///os-sync"
       }
     }
     """
     And a file named "main.pen" with:
     """pen
-    import System'Context { Context }
+    import Os'Context { Context }
 
     main = \(ctx Context) number {
       0

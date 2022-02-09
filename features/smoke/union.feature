@@ -4,7 +4,7 @@ Feature: Union
     """json
     {
       "dependencies": {
-        "System": "pen:///os"
+        "Os": "pen:///os"
       }
     }
     """
@@ -12,7 +12,7 @@ Feature: Union
   Scenario: Downcast a union to a list
     Given a file named "main.pen" with:
     """pen
-    import System'Context { Context }
+    import Os'Context { Context }
 
     main = \(ctx Context) number {
       x = if true {

@@ -4,7 +4,7 @@ Feature: OS
     """json
     {
       "dependencies": {
-        "System": "pen:///os",
+        "Os": "pen:///os",
         "Core": "pen:///core"
       }
     }
@@ -13,8 +13,8 @@ Feature: OS
   Scenario: Build an application
     Given a file named "main.pen" with:
     """pen
-    import System'Context { Context }
-    import System'File
+    import Os'Context { Context }
+    import Os'File
 
     main = \(ctx Context) number {
       if _ = run(ctx) as none {
@@ -38,9 +38,9 @@ Feature: OS
     Given a file named "main.pen" with:
     """pen
     import Core'String
-    import System'Context { Context }
-    import System'Environment
-    import System'File
+    import Os'Context { Context }
+    import Os'Environment
+    import Os'File
 
     main = \(ctx Context) number {
       if _ = File'Write(ctx, File'StdOut(), String'Join(Environment'Arguments(ctx), " ")) as number {
@@ -58,9 +58,9 @@ Feature: OS
     Given a file named "main.pen" with:
     """pen
     import Core'String
-    import System'Context { Context }
-    import System'File
-    import System'Environment
+    import Os'Context { Context }
+    import Os'File
+    import Os'Environment
 
     printEnvironmentVariable = \(ctx Context) none | error {
       File'Write(ctx, File'StdOut(), Environment'Variable(ctx, "FOO")?)?
@@ -84,8 +84,8 @@ Feature: OS
   Scenario: Open a file
     Given a file named "main.pen" with:
     """pen
-    import System'Context { Context }
-    import System'File { File }
+    import Os'Context { Context }
+    import Os'File { File }
 
     main = \(ctx Context) number {
       if f = File'Open(ctx, "./foo.txt") as File {
@@ -102,9 +102,9 @@ Feature: OS
   Scenario: Read a file
     Given a file named "main.pen" with:
     """pen
-    import System'Context { Context }
-    import System'File
-    import System'File'OpenOptions
+    import Os'Context { Context }
+    import Os'File
+    import Os'File'OpenOptions
 
     readFile = \(ctx Context) none | error {
       f = File'Open(ctx, "foo.txt")?
@@ -131,8 +131,8 @@ Feature: OS
   Scenario: Read a file until a limit
     Given a file named "main.pen" with:
     """pen
-    import System'Context { Context }
-    import System'File
+    import Os'Context { Context }
+    import Os'File
 
     readFile = \(ctx Context) none | error {
       f = File'Open(ctx, "foo.txt")?
@@ -158,9 +158,9 @@ Feature: OS
   Scenario: Write a file
     Given a file named "main.pen" with:
     """pen
-    import System'Context { Context }
-    import System'File
-    import System'File'OpenOptions
+    import Os'Context { Context }
+    import Os'File
+    import Os'File'OpenOptions
 
     writeFile = \(ctx Context) none | error {
       f = File'OpenWithOptions(
@@ -190,8 +190,8 @@ Feature: OS
   Scenario: Copy a file
     Given a file named "main.pen" with:
     """pen
-    import System'Context { Context }
-    import System'File
+    import Os'Context { Context }
+    import Os'File
 
     main = \(ctx Context) number {
       if _ = File'Copy(ctx, "foo.txt", "bar.txt") as none {
@@ -210,8 +210,8 @@ Feature: OS
   Scenario: Move a file
     Given a file named "main.pen" with:
     """pen
-    import System'Context { Context }
-    import System'File
+    import Os'Context { Context }
+    import Os'File
 
     main = \(ctx Context) number {
       if _ = File'Move(ctx, "foo.txt", "bar.txt") as none {
@@ -230,8 +230,8 @@ Feature: OS
   Scenario: Remove a file
     Given a file named "main.pen" with:
     """pen
-    import System'Context { Context }
-    import System'File
+    import Os'Context { Context }
+    import Os'File
 
     main = \(ctx Context) number {
       if _ = File'Remove(ctx, "foo.txt") as none {
@@ -250,9 +250,9 @@ Feature: OS
     Given a file named "main.pen" with:
     """pen
     import Core'String
-    import System'Context { Context }
-    import System'File
-    import System'Directory
+    import Os'Context { Context }
+    import Os'File
+    import Os'Directory
 
     readDirectory = \(ctx Context) none | error {
       File'Write(
@@ -280,8 +280,8 @@ Feature: OS
   Scenario: Create a directory
     Given a file named "main.pen" with:
     """pen
-    import System'Context { Context }
-    import System'Directory
+    import Os'Context { Context }
+    import Os'Directory
 
     main = \(ctx Context) number {
       if _ = Directory'Create(ctx, "foo") as none {
@@ -298,8 +298,8 @@ Feature: OS
   Scenario: Remove a directory
     Given a file named "main.pen" with:
     """pen
-    import System'Context { Context }
-    import System'Directory
+    import Os'Context { Context }
+    import Os'Directory
 
     main = \(ctx Context) number {
       if _ = Directory'Remove(ctx, "foo") as none {
@@ -317,9 +317,9 @@ Feature: OS
   Scenario: Get file metadata
     Given a file named "main.pen" with:
     """pen
-    import System'Context { Context }
-    import System'File
-    import System'File'Metadata { Metadata }
+    import Os'Context { Context }
+    import Os'File
+    import Os'File'Metadata { Metadata }
 
     main = \(ctx Context) number {
       m = File'Metadata(ctx, "foo")
@@ -342,13 +342,13 @@ Feature: OS
     When I successfully run `pen build`
     Then I successfully run `./app`
 
-  Scenario: Get system time
+  Scenario: Get os time
     Given a file named "main.pen" with:
     """pen
     import Core'Number
-    import System'Context { Context }
-    import System'File
-    import System'Time
+    import Os'Context { Context }
+    import Os'File
+    import Os'Time
 
     run = \(ctx Context) none | error {
       File'Write(ctx, File'StdOut(), Number'String(Time'Now(ctx)))?
@@ -370,8 +370,8 @@ Feature: OS
   Scenario: Sleep
     Given a file named "main.pen" with:
     """pen
-    import System'Context { Context }
-    import System'Time
+    import Os'Context { Context }
+    import Os'Time
 
     main = \(ctx Context) number {
       Time'Sleep(ctx, 1)
@@ -386,9 +386,9 @@ Feature: OS
     Given a file named "main.pen" with:
     """pen
     import Core'Number
-    import System'Context { Context }
-    import System'File
-    import System'Random
+    import Os'Context { Context }
+    import Os'File
+    import Os'Random
 
     run = \(ctx Context) none | error {
       File'Write(ctx, File'StdOut(), Number'String(Random'Number(ctx)))?
@@ -410,8 +410,8 @@ Feature: OS
   Scenario: Exit a process
     Given a file named "main.pen" with:
     """pen
-    import System'Context { Context }
-    import System'Process
+    import Os'Context { Context }
+    import Os'Process
 
     main = \(ctx Context) number {
       Process'Exit(ctx, 42)
