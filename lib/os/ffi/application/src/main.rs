@@ -5,10 +5,7 @@ mod unreachable;
 mod utilities;
 
 use std::process::exit;
-use tokio::{
-    io::{stderr, stdout, AsyncWriteExt},
-    runtime::Runtime,
-};
+use tokio::runtime::Runtime;
 
 type ExitCode = ffi::Number;
 type Stack = ffi::cps::AsyncStack<Option<ExitCode>>;
