@@ -4,11 +4,8 @@ mod spawn;
 mod unreachable;
 mod utilities;
 
-use std::process::exit;
-use tokio::{
-    io::{stderr, stdout, AsyncWriteExt},
-    runtime::Runtime,
-};
+use std::{process::exit, time::Duration};
+use tokio::{runtime::Runtime, time::sleep};
 
 type ExitCode = ffi::Number;
 type Stack = ffi::cps::AsyncStack<Option<ExitCode>>;
@@ -32,8 +29,8 @@ fn main() {
     let code: ffi::Number = Runtime::new().unwrap().block_on(async {
         let code = ffi::future::from_closure(closure).await;
 
-        stdout().flush().await.unwrap();
-        stderr().flush().await.unwrap();
+        // HACK Wait for all I/O buffers to be flushed (hopefully.)
+        sleep(Duration::from_millis(1)).await;
 
         code
     });
