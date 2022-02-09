@@ -9,8 +9,8 @@
 Pen is the programming language that makes software development **scalable**, focusing on software maintainability and portability.
 
 ```pen
-import System'Context { Context }
-import System'File
+import Os'Context { Context }
+import Os'File
 
 sayHello = \(ctx Context) none | error {
   File'Write(ctx, File'StdOut(), "Hello, world!\n")?

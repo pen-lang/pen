@@ -15,7 +15,7 @@ The following entities compose packages.
 
 There are two kinds of packages: applications and libraries. Application packages build applications which are often executable files on host platforms. Library packages are meant to be imported and used by other packages which can be of both applications and libraries.
 
-Packages are considered to be of applications if they have `main.pen` files at their top directories. Otherwise, they are of libraries. Note that every application package needs to specify [a system package](/advanced-features/system-injection.md#system-packages) with a key of `System` in its [package configuration file](#package-configuration).
+Packages are considered to be of applications if they have `main.pen` files at their top directories. Otherwise, they are of libraries. Note that every application package needs to specify [a system package](/advanced-features/system-injection.md#system-packages) with a key of `Os` in its [package configuration file](#package-configuration).
 
 ## Package configuration
 
@@ -34,7 +34,7 @@ Package URLs have different protocol schemes depending on where they are located
 ```json
 {
   "dependencies": {
-    "System": "pen:///os",
+    "Os": "pen:///os",
     "Core": "pen:///core",
     "MyLibrary": "git://github.com/john-doe/super-hello-world"
   }

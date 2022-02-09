@@ -7,7 +7,7 @@ This package provides an interface for operating systems. Currently, it supports
 ```json
 {
   "dependencies": {
-    "System": "pen:///os"
+    "Os": "pen:///os"
   }
 }
 ```
@@ -15,7 +15,7 @@ This package provides an interface for operating systems. Currently, it supports
 ## `Context` module
 
 ```pen
-import System'Context
+import Os'Context
 ```
 
 ### Types
@@ -41,7 +41,7 @@ type Metadata {
 ## `Environment` module
 
 ```pen
-import System'Environment
+import Os'Environment
 ```
 
 ### Functions
@@ -65,7 +65,7 @@ It gets an environment variable of a given name. It returns an error if the vari
 ## `File` module
 
 ```pen
-import System'File
+import Os'File
 ```
 
 ### Types
@@ -163,7 +163,7 @@ It removes a file at a path.
 ## `File'OpenOptions` module
 
 ```pen
-import System'File'OpenOptions
+import Os'File'OpenOptions
 ```
 
 ### Types
@@ -203,7 +203,7 @@ It gets default options where all flags are set `false`.
 ## `Directory` module
 
 ```pen
-import System'Directory
+import Os'Directory
 ```
 
 ### Functions
@@ -243,7 +243,7 @@ It reads file metadata.
 ## `Tcp` module
 
 ```pen
-import System'Tcp
+import Os'Tcp
 ```
 
 ### Functions
@@ -291,7 +291,7 @@ It sends data to a peer through a stream.
 ## `Tcp'Listener` module
 
 ```pen
-import System'Tcp'Listener
+import Os'Tcp'Listener
 ```
 
 ### Types
@@ -307,7 +307,7 @@ type Listener { ... }
 ## `Tcp'Stream` module
 
 ```pen
-import System'Tcp'Stream
+import Os'Tcp'Stream
 ```
 
 ### Types
@@ -323,7 +323,7 @@ type Stream { ...  }
 ## `Tcp'AcceptedStream` module
 
 ```pen
-import System'Tcp'AcceptedStream
+import Os'Tcp'AcceptedStream
 ```
 
 ### Types
@@ -342,7 +342,7 @@ type AcceptedStream {
 ## `Udp` module
 
 ```pen
-import System'Udp
+import Os'Udp
 ```
 
 ### Functions
@@ -398,7 +398,7 @@ It receives a datagram from an address.
 ## `Udp'Socket` module
 
 ```pen
-import System'Udp'Socket
+import Os'Udp'Socket
 ```
 
 ### Types
@@ -414,7 +414,7 @@ type Socket { ... }
 ## `Udp'Datagram` module
 
 ```pen
-import System'Udp'Datagram
+import Os'Udp'Datagram
 ```
 
 ### Types
@@ -433,7 +433,7 @@ type Datagram {
 ## `Time` module
 
 ```pen
-import System'Time
+import Os'Time
 ```
 
 ### Functions
@@ -449,7 +449,7 @@ It fetches a current system time in milliseconds.
 ## `Random` module
 
 ```pen
-import System'Random
+import Os'Random
 ```
 
 ### Functions
