@@ -5,6 +5,7 @@ pub enum ApplicationError {
     Build,
     ContextTypeNotFound,
     ModuleNotFound(String),
+    NewContextFunctionNotFound,
     PackageNotFound(String),
     SystemPackageNotFound,
     TooManySystemPackages,
@@ -22,6 +23,9 @@ impl Display for ApplicationError {
             }
             Self::ModuleNotFound(module) => {
                 write!(formatter, "module {} not found", module)
+            }
+            Self::NewContextFunctionNotFound => {
+                write!(formatter, "new context function not found")
             }
             Self::PackageNotFound(package) => {
                 write!(formatter, "package {} not found", package)

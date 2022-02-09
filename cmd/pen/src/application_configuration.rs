@@ -10,6 +10,7 @@ pub static APPLICATION_CONFIGURATION: Lazy<Arc<app::ApplicationConfiguration>> =
             source_main_function_name: "main".into(),
             object_main_function_name: "_pen_main".into(),
             context_type_name: "Context".into(),
+            new_context_function_name: "UnsafeNew".into(),
         },
     }
     .into()

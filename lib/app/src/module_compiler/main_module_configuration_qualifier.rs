@@ -19,5 +19,14 @@ pub fn qualify(
             .ok_or(ApplicationError::ContextTypeNotFound)?
             .name()
             .into(),
+        new_context_function_name: context_interface
+            .declarations()
+            .iter()
+            .find(|definition| {
+                definition.original_name() == configuration.new_context_function_name
+            })
+            .ok_or(ApplicationError::NewContextFunctionNotFound)?
+            .name()
+            .into(),
     })
 }
