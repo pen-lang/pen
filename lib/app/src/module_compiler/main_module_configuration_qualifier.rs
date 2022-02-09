@@ -14,7 +14,7 @@ pub fn qualify(
             .find(|alias| {
                 alias.original_name() == configuration.context_type_name && alias.is_public()
             })
-            .ok_or(ApplicationError::MainFunctionTypeNotFound)?
+            .ok_or(ApplicationError::ContextTypeNotFound)?
             .name()
             .into(),
     })
