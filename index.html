@@ -147,8 +147,8 @@
 <a href="https://github.com/pen-lang/pen/blob/main/LICENSE.md"><img src="https://img.shields.io/badge/license-MIT%20%2B%20Apache%202.0-yellow?style=flat-square" alt="License" /></a>
 <a href="https://twitter.com/pen_language"><img src="https://img.shields.io/badge/twitter-%40pen__language-blue?style=flat-square" alt="Twitter" /></a></p>
 <p>Pen is the programming language that makes software development <strong>scalable</strong>, focusing on software maintainability and portability.</p>
-<pre><code class="language-pen">import System'Context { Context }
-import System'File
+<pre><code class="language-pen">import Os'Context { Context }
+import Os'File
 
 sayHello = \(ctx Context) none | error {
   File'Write(ctx, File'StdOut(), &quot;Hello, world!\n&quot;)?

@@ -146,12 +146,12 @@
 <h2 id="install"><a class="header" href="#install">Install</a></h2>
 <pre><code class="language-json">{
   &quot;dependencies&quot;: {
-    &quot;System&quot;: &quot;pen:///os&quot;
+    &quot;Os&quot;: &quot;pen:///os&quot;
   }
 }
 </code></pre>
 <h2 id="context-module"><a class="header" href="#context-module"><code>Context</code> module</a></h2>
-<pre><code class="language-pen">import System'Context
+<pre><code class="language-pen">import Os'Context
 </code></pre>
 <h3 id="types"><a class="header" href="#types">Types</a></h3>
 <h4 id="context"><a class="header" href="#context"><code>Context</code></a></h4>
@@ -165,7 +165,7 @@
 }
 </code></pre>
 <h2 id="environment-module"><a class="header" href="#environment-module"><code>Environment</code> module</a></h2>
-<pre><code class="language-pen">import System'Environment
+<pre><code class="language-pen">import Os'Environment
 </code></pre>
 <h3 id="functions"><a class="header" href="#functions">Functions</a></h3>
 <h4 id="arguments"><a class="header" href="#arguments"><code>Arguments</code></a></h4>
@@ -177,7 +177,7 @@
 <pre><code class="language-pen">\(ctx Context, name string) string | error
 </code></pre>
 <h2 id="file-module"><a class="header" href="#file-module"><code>File</code> module</a></h2>
-<pre><code class="language-pen">import System'File
+<pre><code class="language-pen">import Os'File
 </code></pre>
 <h3 id="types-1"><a class="header" href="#types-1">Types</a></h3>
 <h4 id="file"><a class="header" href="#file"><code>File</code></a></h4>
@@ -226,7 +226,7 @@
 <pre><code class="language-pen">\(ctx Context, path string) none | error
 </code></pre>
 <h2 id="fileopenoptions-module"><a class="header" href="#fileopenoptions-module"><code>File'OpenOptions</code> module</a></h2>
-<pre><code class="language-pen">import System'File'OpenOptions
+<pre><code class="language-pen">import Os'File'OpenOptions
 </code></pre>
 <h3 id="types-2"><a class="header" href="#types-2">Types</a></h3>
 <h4 id="openoptions"><a class="header" href="#openoptions"><code>OpenOptions</code></a></h4>
@@ -254,7 +254,7 @@
 <pre><code class="language-pen">\() OpenOptions
 </code></pre>
 <h2 id="directory-module"><a class="header" href="#directory-module"><code>Directory</code> module</a></h2>
-<pre><code class="language-pen">import System'Directory
+<pre><code class="language-pen">import Os'Directory
 </code></pre>
 <h3 id="functions-3"><a class="header" href="#functions-3">Functions</a></h3>
 <h4 id="read-1"><a class="header" href="#read-1"><code>Read</code></a></h4>
@@ -274,7 +274,7 @@
 <pre><code class="language-pen">\(ctx Context, path string) Metadata | error
 </code></pre>
 <h2 id="tcp-module"><a class="header" href="#tcp-module"><code>Tcp</code> module</a></h2>
-<pre><code class="language-pen">import System'Tcp
+<pre><code class="language-pen">import Os'Tcp
 </code></pre>
 <h3 id="functions-4"><a class="header" href="#functions-4">Functions</a></h3>
 <h4 id="bind"><a class="header" href="#bind"><code>Bind</code></a></h4>
@@ -298,7 +298,7 @@
 <pre><code class="language-pen">\(ctx Context, s Stream, data string) none | error
 </code></pre>
 <h2 id="tcplistener-module"><a class="header" href="#tcplistener-module"><code>Tcp'Listener</code> module</a></h2>
-<pre><code class="language-pen">import System'Tcp'Listener
+<pre><code class="language-pen">import Os'Tcp'Listener
 </code></pre>
 <h3 id="types-3"><a class="header" href="#types-3">Types</a></h3>
 <h4 id="listener"><a class="header" href="#listener"><code>Listener</code></a></h4>
@@ -306,7 +306,7 @@
 <pre><code class="language-pen">type Listener { ... }
 </code></pre>
 <h2 id="tcpstream-module"><a class="header" href="#tcpstream-module"><code>Tcp'Stream</code> module</a></h2>
-<pre><code class="language-pen">import System'Tcp'Stream
+<pre><code class="language-pen">import Os'Tcp'Stream
 </code></pre>
 <h3 id="types-4"><a class="header" href="#types-4">Types</a></h3>
 <h4 id="stream"><a class="header" href="#stream"><code>Stream</code></a></h4>
@@ -314,7 +314,7 @@
 <pre><code class="language-pen">type Stream { ...  }
 </code></pre>
 <h2 id="tcpacceptedstream-module"><a class="header" href="#tcpacceptedstream-module"><code>Tcp'AcceptedStream</code> module</a></h2>
-<pre><code class="language-pen">import System'Tcp'AcceptedStream
+<pre><code class="language-pen">import Os'Tcp'AcceptedStream
 </code></pre>
 <h3 id="types-5"><a class="header" href="#types-5">Types</a></h3>
 <h4 id="acceptedstream"><a class="header" href="#acceptedstream"><code>AcceptedStream</code></a></h4>
@@ -325,7 +325,7 @@
 }
 </code></pre>
 <h2 id="udp-module"><a class="header" href="#udp-module"><code>Udp</code> module</a></h2>
-<pre><code class="language-pen">import System'Udp
+<pre><code class="language-pen">import Os'Udp
 </code></pre>
 <h3 id="functions-5"><a class="header" href="#functions-5">Functions</a></h3>
 <h4 id="bind-1"><a class="header" href="#bind-1"><code>Bind</code></a></h4>
@@ -353,7 +353,7 @@
 <pre><code class="language-pen">\(ctx Context, s Socket, data string, address string) none | error
 </code></pre>
 <h2 id="udpsocket-module"><a class="header" href="#udpsocket-module"><code>Udp'Socket</code> module</a></h2>
-<pre><code class="language-pen">import System'Udp'Socket
+<pre><code class="language-pen">import Os'Udp'Socket
 </code></pre>
 <h3 id="types-6"><a class="header" href="#types-6">Types</a></h3>
 <h4 id="socket"><a class="header" href="#socket"><code>Socket</code></a></h4>
@@ -361,7 +361,7 @@
 <pre><code class="language-pen">type Socket { ... }
 </code></pre>
 <h2 id="udpdatagram-module"><a class="header" href="#udpdatagram-module"><code>Udp'Datagram</code> module</a></h2>
-<pre><code class="language-pen">import System'Udp'Datagram
+<pre><code class="language-pen">import Os'Udp'Datagram
 </code></pre>
 <h3 id="types-7"><a class="header" href="#types-7">Types</a></h3>
 <h4 id="datagram"><a class="header" href="#datagram"><code>Datagram</code></a></h4>
@@ -372,7 +372,7 @@
 }
 </code></pre>
 <h2 id="time-module"><a class="header" href="#time-module"><code>Time</code> module</a></h2>
-<pre><code class="language-pen">import System'Time
+<pre><code class="language-pen">import Os'Time
 </code></pre>
 <h3 id="functions-6"><a class="header" href="#functions-6">Functions</a></h3>
 <h4 id="now"><a class="header" href="#now"><code>Now</code></a></h4>
@@ -380,7 +380,7 @@
 <pre><code class="language-pen">\(ctx Context) number
 </code></pre>
 <h2 id="random-module"><a class="header" href="#random-module"><code>Random</code> module</a></h2>
-<pre><code class="language-pen">import System'Random
+<pre><code class="language-pen">import Os'Random
 </code></pre>
 <h3 id="functions-7"><a class="header" href="#functions-7">Functions</a></h3>
 <h4 id="number"><a class="header" href="#number"><code>Number</code></a></h4>
