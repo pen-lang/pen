@@ -1,31 +1,31 @@
 # Packages
 
-Packages are sets of [modules](/references/language/modules.md). Packages are built as either applications or libraries. Like modules, packages can use other packages specified in [their configurations](#package-configuration).
+Packages are sets of [modules](/references/language/modules.md). Like modules, packages can import other packages specifying them in [their configurations](#package-configuration).
 
 ## What composes a package?
 
 The following entities compose packages.
 
-- Standard packages that come with [installation](/guides/install.md) of the language
-- Repositories of version control systems (VCS)
+- Standard packages bundled in [installation](/guides/install.md) of the language
+- Remote repositories managed by version control systems (VCS)
   - Currently, only [Git](https://git-scm.com/) is supported as a VCS.
 - Directories with [package configuration files](#package-configuration) on file systems
 
 ## Kinds of packages
 
-There are two kinds of packages: applications and libraries. Application packages build applications which are often executable files on host platforms. Library packages are meant to be imported and used by other packages which can be of both applications and libraries.
+There are 3 kinds of packages: application, library, and system. Application packages build applications usually of executable files. Library packages are imported and used by other packages of any kinds. System packages are similar to library packages but provide system interfaces to application packages.
 
-Packages are considered to be of applications if they have `main.pen` files at their top directories. Otherwise, they are of libraries. Note that every application package needs to specify [a system package](/advanced-features/system-injection.md#system-packages) with a key of `System` in its [package configuration file](#package-configuration).
+Packages are considered as application packages if they have `main.pen` files at their top directories. Packages are considered as system packages if their [package configuration files](#package-configuration) have a `"system"` field set to `true`. Otherwise, they are library packages. Note that every application package needs to have at least [one system package](/advanced-features/system-injection.md#system-packages) in its [package configuration file](#package-configuration).
 
 ## Package configuration
 
-Each package has its configuration file named `pen.json` in a [JSON](https://www.json.org/json-en.html) format at its top directory. The JSON file has a single field named `dependencies` specifying external packages' names and URLs.
+Each package has its configuration file named `pen.json` in a [JSON](https://www.json.org/json-en.html) format at its top directory. The JSON file has a single field named `dependencies` specifying names and URLs of packages to import.
 
 Package URLs have different protocol schemes depending on where they are located.
 
 - Standard packages: `pen`
 - Git repositories: `git`
-- Directories on file systems: `file`
+- Directories on file systems: none
 
 ### Examples
 
@@ -34,7 +34,7 @@ Package URLs have different protocol schemes depending on where they are located
 ```json
 {
   "dependencies": {
-    "System": "pen:///os",
+    "Os": "pen:///os",
     "Core": "pen:///core",
     "MyLibrary": "git://github.com/john-doe/super-hello-world"
   }

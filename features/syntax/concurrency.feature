@@ -4,7 +4,7 @@ Feature: Concurrency
     """json
     {
       "dependencies": {
-        "System": "pen:///os"
+        "Os": "pen:///os"
       }
     }
     """
@@ -12,7 +12,7 @@ Feature: Concurrency
   Scenario: Use go syntax
     Given a file named "main.pen" with:
     """pen
-    import System'Context { Context }
+    import Os'Context { Context }
 
     main = \(ctx Context) number {
       f = go \() number { 0 }

@@ -2,7 +2,7 @@
   "dependencies": {
     "Console": "../console",
     "Core": "pen:///core",
-    "System": "pen:///os",
+    "Os": "pen:///os",
     "Test": "pen:///test"
   }
 }

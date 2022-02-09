@@ -1,10 +1,10 @@
 import Console'Print
-import System'Context { Context }
-import System'Environment
-import System'File
-import System'Udp
-import System'Udp'Datagram
-import System'Udp'Socket { Socket }
+import Os'Context { Context }
+import Os'Environment
+import Os'File
+import Os'Udp
+import Os'Udp'Datagram
+import Os'Udp'Socket { Socket }
 
 import 'arguments
 

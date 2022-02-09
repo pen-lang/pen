@@ -1,7 +1,7 @@
 import Console'Print
-import System'Context { Context }
-import System'Directory
-import System'Environment
+import Os'Context { Context }
+import Os'Directory
+import Os'Environment
 
 import 'arguments
 

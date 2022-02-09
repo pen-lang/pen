@@ -4,7 +4,7 @@ Feature: OS
     """json
     {
       "dependencies": {
-        "System": "pen:///os",
+        "Os": "pen:///os",
         "Core": "pen:///core"
       }
     }
@@ -13,9 +13,9 @@ Feature: OS
   Scenario: Read and write files
     Given a file named "main.pen" with:
     """pen
-    import System'Context { Context }
-    import System'File
-    import System'File'OpenOptions
+    import Os'Context { Context }
+    import Os'File
+    import Os'File'OpenOptions
 
     readFile = \(ctx Context) none | error {
       f = File'Open(ctx, "foo.txt")?
@@ -50,8 +50,8 @@ Feature: OS
   Scenario: Read a file until a limit
     Given a file named "main.pen" with:
     """pen
-    import System'Context { Context }
-    import System'File
+    import Os'Context { Context }
+    import Os'File
 
     readFile = \(ctx Context) none | error {
       f = File'Open(ctx, "foo.txt")?
@@ -78,9 +78,9 @@ Feature: OS
     Given a file named "main.pen" with:
     """pen
     import Core'String
-    import System'Context { Context }
-    import System'File
-    import System'Directory
+    import Os'Context { Context }
+    import Os'File
+    import Os'Directory
 
     readDirectory = \(ctx Context) none | error {
       File'Write(
@@ -108,7 +108,7 @@ Feature: OS
   Scenario: Use go syntax
     Given a file named "main.pen" with:
     """pen
-    import System'Context { Context }
+    import Os'Context { Context }
 
     main = \(ctx Context) number {
       f = go \() number { 0 }

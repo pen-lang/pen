@@ -4,14 +4,14 @@ Feature: List as stream
     """json
     {
       "dependencies": {
-        "System": "pen:///os"
+        "Os": "pen:///os"
       }
     }
     """
     And a file named "Hello.pen" with:
     """pen
-    import System'Context { Context }
-    import System'File
+    import Os'Context { Context }
+    import Os'File
 
     Hello = \(ctx Context) none {
       File'Write(ctx, File'StdOut(), "hello")
@@ -23,7 +23,7 @@ Feature: List as stream
   Scenario: Evaluate an element lazily
     Given a file named "main.pen" with:
     """pen
-    import System'Context { Context }
+    import Os'Context { Context }
     import 'Hello
 
     main = \(ctx Context) number {
@@ -39,7 +39,7 @@ Feature: List as stream
   Scenario: Evaluate an element lazily but only once
     Given a file named "main.pen" with:
     """pen
-    import System'Context { Context }
+    import Os'Context { Context }
     import 'Hello
 
     main = \(ctx Context) number {
@@ -60,7 +60,7 @@ Feature: List as stream
   Scenario: Evaluate multiple elements lazily
     Given a file named "main.pen" with:
     """pen
-    import System'Context { Context }
+    import Os'Context { Context }
     import 'Hello
 
     foo = \(ctx Context) [none] {
@@ -82,7 +82,7 @@ Feature: List as stream
   Scenario: Evaluate multiple elements lazily but only once
     Given a file named "main.pen" with:
     """pen
-    import System'Context { Context }
+    import Os'Context { Context }
     import 'Hello
 
     foo = \(ctx Context) [none] {

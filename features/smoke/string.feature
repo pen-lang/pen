@@ -4,7 +4,7 @@ Feature: String
     """json
     {
       "dependencies": {
-        "System": "pen:///os"
+        "Os": "pen:///os"
       }
     }
     """
@@ -12,7 +12,7 @@ Feature: String
   Scenario: Compare strings
     Given a file named "main.pen" with:
     """pen
-    import System'Context { Context }
+    import Os'Context { Context }
 
     main = \(ctx Context) number {
       if "foo" == "foo" {

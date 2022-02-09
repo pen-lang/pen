@@ -38,14 +38,14 @@ Feature: Testing
     """json
     {
       "dependencies": {
-        "System": "pen:///os",
+        "Os": "pen:///os",
         "Test": "pen:///test"
       }
     }
     """
     And a file named "main.pen" with:
     """pen
-    import System'Context { Context }
+    import Os'Context { Context }
 
     main = \(ctx Context) number {
       0
@@ -53,7 +53,7 @@ Feature: Testing
     """
     And a file named "main.test.pen" with:
     """pen
-    import System'File
+    import Os'File
 
     Foo = \() none | error {
       File'Write

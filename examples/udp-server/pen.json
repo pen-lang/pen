@@ -1,7 +1,7 @@
 {
   "dependencies": {
     "Console": "../console",
-    "System": "pen:///os",
+    "Os": "pen:///os",
     "Test": "pen:///test"
   }
 }
