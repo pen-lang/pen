@@ -30,7 +30,7 @@ fn main() {
         let code = ffi::future::from_closure(closure).await;
 
         // HACK Wait for all I/O buffers to be flushed (hopefully.)
-        sleep(Duration::from_millis(1)).await;
+        sleep(Duration::from_millis(50)).await;
 
         code
     });
