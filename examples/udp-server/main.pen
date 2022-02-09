@@ -5,20 +5,16 @@ import Os'File
 import Os'Udp
 import Os'Udp'Datagram
 import Os'Udp'Socket { Socket }
+import Os'Process
 
 import 'arguments
 
-main = \(ctx Context) number {
-  if x = run(ctx) as none {
-    0
+main = \(ctx Context) none {
+  if e = run(ctx) as none {
+    none
   } else {
-    Print'Line(ctx, if x = source(x) as string {
-      x
-    } else {
-      "unknown error"
-    })
-
-    1
+    Print'Line(ctx, if s = source(e) as string { s } else { "unknown error" })
+    Process'Exit(ctx, 1)
   }
 }
 

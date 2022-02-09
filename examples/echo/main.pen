@@ -5,10 +5,10 @@ import Os'Environment
 import Os'Process
 
 main = \(ctx Context) none {
-  if x = run(ctx) as none {
+  if e = run(ctx) as none {
     none
   } else {
-    Print'Line(ctx, if x = source(x) as string { x } else { "unknown error" })
+    Print'Line(ctx, if s = source(e) as string { s } else { "unknown error" })
     Process'Exit(ctx, 1)
   }
 }
