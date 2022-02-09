@@ -1,10 +1,16 @@
 use super::{error::CompileError, main_module_configuration::MainModuleConfiguration};
-use hir::{ir::*, types};
+use fnv::FnvHashMap;
+use hir::{
+    analysis::types::type_resolver,
+    ir::*,
+    types::{self, Type},
+};
 
 const MAIN_FUNCTION_WRAPPER_SUFFIX: &str = "__wrapper";
 
 pub fn compile(
     module: &Module,
+    types: &FnvHashMap<String, Type>,
     main_module_configuration: &MainModuleConfiguration,
 ) -> Result<Module, CompileError> {
     let definition = module
@@ -14,15 +20,15 @@ pub fn compile(
             definition.original_name() == main_module_configuration.source_main_function_name
         })
         .ok_or_else(|| CompileError::MainFunctionNotFound(module.position().clone()))?;
-
     let position = definition.position();
 
-    let context_type = module
-        .type_aliases()
-        .iter()
-        .find(|alias| alias.name() == main_module_configuration.context_type_name)
-        .ok_or_else(|| CompileError::ContextTypeUndefined(module.position().clone()))?
-        .type_();
+    let context_type = type_resolver::resolve(
+        &types::Reference::new(
+            &main_module_configuration.context_type_name,
+            position.clone(),
+        ),
+        types,
+    )?;
     let function_type = types::Function::new(
         vec![context_type.clone()],
         types::None::new(position.clone()),
