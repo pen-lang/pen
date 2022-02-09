@@ -4,8 +4,8 @@ mod spawn;
 mod unreachable;
 mod utilities;
 
-use std::{process::exit, time::Duration};
-use tokio::{runtime::Runtime, time::sleep};
+use std::time::Duration;
+use tokio::time::sleep;
 
 type ExitCode = ffi::Number;
 type Stack = ffi::cps::AsyncStack<Option<ExitCode>>;
@@ -22,18 +22,12 @@ unsafe extern "C" fn _pen_main(_: &mut Stack, _: ContinuationFunction) -> ffi::c
     ffi::cps::Result::new()
 }
 
-fn main() {
-    // TODO Allocate a closure in an async block below instead.
-    // Without this extra variable definition, memory leak tests fail somehow.
-    let closure = ffi::Arc::new(ffi::Closure::new(_pen_main as *const u8, ()));
-    let code: ffi::Number = Runtime::new().unwrap().block_on(async {
-        let code = ffi::future::from_closure(closure).await;
+#[tokio::main]
+async fn main() {
+    let _: ffi::None =
+        ffi::future::from_closure(ffi::Arc::new(ffi::Closure::new(_pen_main as *const u8, ())))
+            .await;
 
-        // HACK Wait for all I/O buffers to be flushed (hopefully.)
-        sleep(Duration::from_millis(50)).await;
-
-        code
-    });
-
-    exit(f64::from(code) as i32);
+    // HACK Wait for all I/O buffers to be flushed (hopefully.)
+    sleep(Duration::from_millis(50)).await;
 }
