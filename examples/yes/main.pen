@@ -1,6 +1,6 @@
 import Console'Print
-import System'Context { Context }
-import System'Environment
+import Os'Context { Context }
+import Os'Environment
 
 import 'arguments
 

@@ -1,8 +1,8 @@
 import Console'Print
-import System'Context { Context }
-import System'Environment
-import System'Tcp
-import System'Tcp'Stream { Stream }
+import Os'Context { Context }
+import Os'Environment
+import Os'Tcp
+import Os'Tcp'Stream { Stream }
 
 import 'arguments
 

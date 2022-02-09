@@ -1,11 +1,11 @@
 import Console'Print
-import System'Context { Context }
-import System'Environment
-import System'File
-import System'Tcp
-import System'Tcp'AcceptedStream
-import System'Tcp'Listener { Listener }
-import System'Tcp'Stream { Stream }
+import Os'Context { Context }
+import Os'Environment
+import Os'File
+import Os'Tcp
+import Os'Tcp'AcceptedStream
+import Os'Tcp'Listener { Listener }
+import Os'Tcp'Stream { Stream }
 
 import 'arguments
 
