@@ -14,18 +14,18 @@ type ContinuationFunction = ffi::cps::ContinuationFunction<ExitCode, Option<Exit
 #[cfg(not(test))]
 #[link(name = "main")]
 extern "C" {
-    fn _pen_os_main(stack: &mut Stack, continuation: ContinuationFunction) -> ffi::cps::Result;
+    fn _pen_main(stack: &mut Stack, continuation: ContinuationFunction) -> ffi::cps::Result;
 }
 
 #[cfg(test)]
-unsafe extern "C" fn _pen_os_main(_: &mut Stack, _: ContinuationFunction) -> ffi::cps::Result {
+unsafe extern "C" fn _pen_main(_: &mut Stack, _: ContinuationFunction) -> ffi::cps::Result {
     ffi::cps::Result::new()
 }
 
 fn main() {
     // TODO Allocate a closure in an async block below instead.
     // Without this extra variable definition, memory leak tests fail somehow.
-    let closure = ffi::Arc::new(ffi::Closure::new(_pen_os_main as *const u8, ()));
+    let closure = ffi::Arc::new(ffi::Closure::new(_pen_main as *const u8, ()));
     let code: ffi::Number = Runtime::new().unwrap().block_on(async {
         let code = ffi::future::from_closure(closure).await;
 
