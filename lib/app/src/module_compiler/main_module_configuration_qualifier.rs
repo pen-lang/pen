@@ -8,11 +8,13 @@ pub fn qualify(
     Ok(MainModuleConfiguration {
         source_main_function_name: configuration.source_main_function_name.clone(),
         object_main_function_name: configuration.object_main_function_name.clone(),
+        // TODO Support type aliases too.
         context_type_name: context_interface
-            .type_aliases()
+            .type_definitions()
             .iter()
-            .find(|alias| {
-                alias.original_name() == configuration.context_type_name && alias.is_public()
+            .find(|definition| {
+                definition.original_name() == configuration.context_type_name
+                    && definition.is_public()
             })
             .ok_or(ApplicationError::ContextTypeNotFound)?
             .name()
