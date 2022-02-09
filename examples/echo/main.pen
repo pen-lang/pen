@@ -3,17 +3,12 @@ import Core'String
 import Os'Context { Context }
 import Os'Environment
 
-main = \(ctx Context) number {
+main = \(ctx Context) none {
   if x = run(ctx) as none {
-    0
+    none
   } else {
-    Print'Line(ctx, if x = source(x) as string {
-      x
-    } else {
-      "unknown error"
-    })
-
-    1
+    Print'Line(ctx, if x = source(x) as string { x } else { "unknown error" })
+    Process'Exit(1)
   }
 }
 
