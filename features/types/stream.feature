@@ -29,7 +29,7 @@ Feature: List as stream
     main = \(ctx Context) none {
       [none Hello'Hello(ctx)]
 
-      0
+      none
     }
     """
     When I successfully run `pen build`
@@ -46,11 +46,11 @@ Feature: List as stream
       if [x, ...xs] = [none Hello'Hello(ctx)] {
         x()
         x()
+
+        none
       } else {
         none
       }
-
-      0
     }
     """
     When I successfully run `pen build`
@@ -72,7 +72,7 @@ Feature: List as stream
     main = \(ctx Context) none {
       [none ...foo(ctx)]
 
-      0
+      none
     }
     """
     When I successfully run `pen build`
@@ -95,11 +95,11 @@ Feature: List as stream
       if [x, ...xs] = [none ...foo(ctx)] {
         x()
         x()
+
+        none
       } else {
         none
       }
-
-      0
     }
     """
     When I successfully run `pen build`
