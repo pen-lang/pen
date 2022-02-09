@@ -93,9 +93,7 @@ pub fn compile_modules(
                                             output_directory,
                                         )?,
                                     ),
-                                    &[application_configuration
-                                        .main_function_module_basename
-                                        .clone()],
+                                    &[application_configuration.context_module_basename.clone()],
                                     &infrastructure.file_path_configuration,
                                 ),
                                 &infrastructure.file_path_configuration,

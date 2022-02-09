@@ -44,8 +44,7 @@ pub fn compile_main(
     main_module_configuration: &MainModuleConfiguration,
 ) -> Result<mir::ir::Module, CompileError> {
     let context = CompileContext::new(module, compile_configuration.clone().into());
-    let module =
-        main_function_compiler::compile(module, context.types(), main_module_configuration)?;
+    let module = main_function_compiler::compile(module, main_module_configuration)?;
     let (module, _) = compile_module(&module, &context)?;
 
     Ok(module)

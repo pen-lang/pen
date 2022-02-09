@@ -1,12 +1,10 @@
 use super::{error::CompileError, main_module_configuration::MainModuleConfiguration};
-use fnv::FnvHashMap;
-use hir::{analysis::types::type_canonicalizer, ir::*, types::Type};
+use hir::{ir::*, types};
 
 const MAIN_FUNCTION_WRAPPER_SUFFIX: &str = "__wrapper";
 
 pub fn compile(
     module: &Module,
-    types: &FnvHashMap<String, Type>,
     main_module_configuration: &MainModuleConfiguration,
 ) -> Result<Module, CompileError> {
     let definition = module
@@ -19,14 +17,17 @@ pub fn compile(
 
     let position = definition.position();
 
-    let type_ = module
+    let context_type = module
         .type_aliases()
         .iter()
-        .find(|alias| alias.name() == main_module_configuration.main_function_type_name)
-        .ok_or_else(|| CompileError::MainFunctionTypeUndefined(module.position().clone()))?
+        .find(|alias| alias.name() == main_module_configuration.context_type_name)
+        .ok_or_else(|| CompileError::ContextTypeUndefined(module.position().clone()))?
         .type_();
-    let function_type = type_canonicalizer::canonicalize_function(type_, types)?
-        .ok_or_else(|| CompileError::FunctionExpected(type_.position().clone()))?;
+    let function_type = types::Function::new(
+        vec![context_type.clone()],
+        types::None::new(position.clone()),
+        position.clone(),
+    );
     let arguments = function_type
         .arguments()
         .iter()

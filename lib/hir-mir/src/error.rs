@@ -18,7 +18,7 @@ pub enum CompileError {
     InvalidTryOperation(Position),
     ListExpected(Position),
     MainFunctionNotFound(Position),
-    MainFunctionTypeUndefined(Position),
+    ContextTypeUndefined(Position),
     MirTypeCheck(mir::analysis::TypeCheckError),
     MissingElseBlock(Position),
     RecordFieldPrivate(Position),
@@ -96,7 +96,7 @@ impl Display for CompileError {
             Self::MainFunctionNotFound(position) => {
                 write!(formatter, "main function not found\n{}", position)
             }
-            Self::MainFunctionTypeUndefined(position) => {
+            Self::ContextTypeUndefined(position) => {
                 write!(formatter, "main function type undefined\n{}", position)
             }
             Self::MirTypeCheck(error) => {

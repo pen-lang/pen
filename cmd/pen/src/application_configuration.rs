@@ -5,11 +5,11 @@ pub static APPLICATION_CONFIGURATION: Lazy<Arc<app::ApplicationConfiguration>> =
     app::ApplicationConfiguration {
         application_filename: "app".into(),
         main_module_basename: "main".into(),
-        main_function_module_basename: "MainFunction".into(),
+        context_module_basename: "Context".into(),
         main_module: app::MainModuleConfiguration {
             source_main_function_name: "main".into(),
             object_main_function_name: "_pen_main".into(),
-            main_function_type_name: "MainFunction".into(),
+            context_type_name: "Context".into(),
         },
     }
     .into()
