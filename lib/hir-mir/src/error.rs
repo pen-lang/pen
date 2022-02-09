@@ -97,7 +97,7 @@ impl Display for CompileError {
                 write!(formatter, "main function not found\n{}", position)
             }
             Self::ContextTypeUndefined(position) => {
-                write!(formatter, "main function type undefined\n{}", position)
+                write!(formatter, "context type undefined\n{}", position)
             }
             Self::MirTypeCheck(error) => {
                 write!(formatter, "failed to check types in MIR: {}", error)
