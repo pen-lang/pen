@@ -26,13 +26,17 @@ unsafe extern "C" fn _pen_os_main(_: &mut Stack, _: ContinuationFunction) -> ffi
 }
 
 fn main() {
-    let code: ffi::Number =
-        Runtime::new()
-            .unwrap()
-            .block_on(ffi::future::from_closure(ffi::Arc::new(ffi::Closure::new(
-                _pen_os_main as *const u8,
-                (),
-            ))));
+    // TODO Allocate a closure in an async block below instead.
+    // Without this extra variable definition, memory leak tests fail somehow.
+    let closure = ffi::Arc::new(ffi::Closure::new(_pen_os_main as *const u8, ()));
+    let code: ffi::Number = Runtime::new().unwrap().block_on(async {
+        let code = ffi::future::from_closure(closure).await;
+
+        stdout().flush().await.unwrap();
+        stderr().flush().await.unwrap();
+
+        code
+    });
 
     exit(f64::from(code) as i32);
 }
