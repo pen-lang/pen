@@ -5,6 +5,7 @@ use crate::{
 };
 use std::error::Error;
 
+// TODO Use a package type field.
 pub fn find(
     infrastructure: &Infrastructure,
     package_directory: &FilePath,

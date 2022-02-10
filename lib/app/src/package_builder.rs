@@ -74,6 +74,7 @@ pub fn build(
     Ok(())
 }
 
+// TODO Use a package type field.
 fn is_application_package(
     infrastructure: &Infrastructure,
     main_package_directory: &FilePath,
