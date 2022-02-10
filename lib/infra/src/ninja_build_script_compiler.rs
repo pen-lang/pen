@@ -141,7 +141,7 @@ impl NinjaBuildScriptCompiler {
                     object_file.with_extension(self.ninja_dynamic_dependency_file_extension);
                 let bit_code_file = object_file.with_extension(self.bit_code_file_extension);
 
-                vec![
+                [
                     format!(
                         "build {} {}: compile {} {} || {}",
                         bit_code_file.display(),
@@ -196,7 +196,7 @@ impl NinjaBuildScriptCompiler {
                     object_file.with_extension(self.ninja_dynamic_dependency_file_extension);
                 let bit_code_file = object_file.with_extension(self.bit_code_file_extension);
 
-                vec![
+                [
                     format!(
                         "build {} {}: compile_test {} {} || {}",
                         bit_code_file.display(),
@@ -246,7 +246,7 @@ impl NinjaBuildScriptCompiler {
             .file_path_converter
             .convert_to_os_path(target.main_function_interface_file());
 
-        Ok(vec![
+        Ok([
             format!(
                 "build {}: compile_main {} {} | {} || {}",
                 bit_code_file.display(),
@@ -416,7 +416,7 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
         target_triple: Option<&str>,
         child_build_script_files: &[FilePath],
     ) -> Result<String, Box<dyn Error>> {
-        Ok(vec![
+        Ok([
             "ninja_required_version = 1.10".into(),
             format!(
                 "builddir = {}",

@@ -4,6 +4,9 @@ mod spawn;
 mod unreachable;
 mod utilities;
 
+use std::time::Duration;
+use tokio::time::sleep;
+
 type ContinuationFunction = ffi::cps::ContinuationFunction<ffi::None, ffi::None>;
 
 #[cfg(not(test))]
@@ -26,4 +29,7 @@ extern "C" fn _pen_main(
 #[tokio::main]
 async fn main() {
     ffi::future::from_function(_pen_main).await;
+
+    // HACK Wait for all I/O buffers to be flushed (hopefully.)
+    sleep(Duration::from_millis(50)).await;
 }

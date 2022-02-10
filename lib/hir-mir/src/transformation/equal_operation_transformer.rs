@@ -332,7 +332,7 @@ mod tests {
                 ),
                 &CompileContext::dummy(
                     Default::default(),
-                    vec![(
+                    [(
                         "foo".into(),
                         vec![types::RecordField::new(
                             "x",

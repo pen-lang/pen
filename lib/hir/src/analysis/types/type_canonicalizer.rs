@@ -237,7 +237,7 @@ mod tests {
         assert_eq!(
             canonicalize(
                 &Reference::new("t", Position::fake()).into(),
-                &vec![("t".into(), Number::new(Position::fake()).into())]
+                &[("t".into(), Number::new(Position::fake()).into())]
                     .into_iter()
                     .collect(),
             ),
@@ -263,7 +263,7 @@ mod tests {
                     Position::fake()
                 )
                 .into(),
-                &vec![("t".into(), Number::new(Position::fake()).into())]
+                &[("t".into(), Number::new(Position::fake()).into())]
                     .into_iter()
                     .collect(),
             ),

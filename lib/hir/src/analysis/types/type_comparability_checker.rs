@@ -66,7 +66,7 @@ mod tests {
         assert!(check(
             &types::Record::new("foo", Position::fake()).into(),
             &Default::default(),
-            &vec![(
+            &[(
                 "foo".into(),
                 vec![types::RecordField::new(
                     "foo",
@@ -84,7 +84,7 @@ mod tests {
         assert!(!check(
             &types::Record::new("foo", Position::fake()).into(),
             &Default::default(),
-            &vec![(
+            &[(
                 "foo".into(),
                 vec![types::RecordField::new(
                     "x",
@@ -106,7 +106,7 @@ mod tests {
         assert!(!check(
             &types::Record::new("foo", Position::fake()).into(),
             &Default::default(),
-            &vec![(
+            &[(
                 "foo".into(),
                 vec![types::RecordField::new(
                     "x",

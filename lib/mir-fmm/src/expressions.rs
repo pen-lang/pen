@@ -153,10 +153,10 @@ pub fn compile(
                         types::compile_string(),
                         module_builder.define_anonymous_variable(
                             fmm::build::record(
-                                vec![fmm::ir::Primitive::PointerInteger(
-                                    string.value().len() as i64
-                                )
-                                .into()]
+                                [
+                                    fmm::ir::Primitive::PointerInteger(string.value().len() as i64)
+                                        .into(),
+                                ]
                                 .into_iter()
                                 .chain(
                                     string

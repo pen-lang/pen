@@ -55,7 +55,7 @@ impl Display for ParseError {
         write!(
             formatter,
             "{}",
-            vec![
+            [
                 Some(self.message.clone()),
                 if self.expected.is_empty() {
                     None

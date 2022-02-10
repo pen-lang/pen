@@ -37,7 +37,7 @@ mod tests {
     fn sort_packages() {
         assert_eq!(
             sort(
-                &vec![
+                &[
                     (
                         url::Url::parse("file:///foo").unwrap(),
                         PackageConfiguration::new(Default::default(), false)

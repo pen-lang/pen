@@ -73,7 +73,7 @@ mod tests {
                 ),
                 &CompileContext::dummy(
                     Default::default(),
-                    vec![(
+                    [(
                         "r".into(),
                         vec![
                             types::RecordField::new("x", types::Number::new(Position::fake())),

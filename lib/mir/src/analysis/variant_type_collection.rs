@@ -54,12 +54,12 @@ fn collect_from_expression(expression: &Expression) -> FnvHashSet<Type> {
             .flat_map(collect_from_expression)
             .collect(),
         Expression::RecordField(field) => collect_from_expression(field.record()),
-        Expression::TryOperation(operation) => vec![operation.type_().clone()]
+        Expression::TryOperation(operation) => [operation.type_().clone()]
             .into_iter()
             .chain(collect_from_expression(operation.operand()))
             .chain(collect_from_expression(operation.then()))
             .collect(),
-        Expression::Variant(variant) => vec![variant.type_().clone()]
+        Expression::Variant(variant) => [variant.type_().clone()]
             .into_iter()
             .chain(collect_from_expression(variant.payload()))
             .collect(),
@@ -75,7 +75,7 @@ fn collect_from_case(case: &Case) -> FnvHashSet<Type> {
     collect_from_expression(case.argument())
         .into_iter()
         .chain(case.alternatives().iter().flat_map(|alternative| {
-            vec![alternative.type_().clone()]
+            [alternative.type_().clone()]
                 .into_iter()
                 .chain(collect_from_expression(alternative.expression()))
         }))

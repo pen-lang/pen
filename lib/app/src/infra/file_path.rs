@@ -44,7 +44,7 @@ impl FilePath {
         if let Some(last) = self.components.last() {
             Self::new(
                 self.components().take(self.components.len() - 1).chain(
-                    vec![regex::Regex::new(r"(\..*)?$")
+                    [regex::Regex::new(r"(\..*)?$")
                         .unwrap()
                         .replace(
                             last,
