@@ -25,5 +25,5 @@ extern "C" fn _pen_main(
 
 #[tokio::main]
 async fn main() {
-    let _: ffi::None = ffi::future::from_function(_pen_main).await;
+    ffi::future::from_function(_pen_main).await;
 }
