@@ -39,7 +39,7 @@ Feature: OS
       if _ = readFile(ctx) as none {
         none
       } else {
-        Process'Exit(1)
+        Process'Exit(ctx, 1)
       }
     }
     """
@@ -67,7 +67,7 @@ Feature: OS
       if _ = readFile(ctx) as none {
         none
       } else {
-        Process'Exit(1)
+        Process'Exit(ctx, 1)
       }
     }
     """
@@ -99,7 +99,7 @@ Feature: OS
       if _ = readDirectory(ctx) as none {
         none
       } else {
-        Process'Exit(1)
+        Process'Exit(ctx, 1)
       }
     }
     """
