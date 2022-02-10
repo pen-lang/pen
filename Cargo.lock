@@ -680,7 +680,7 @@ dependencies = [
 
 [[package]]
 name = "pen-ffi-macro"
-version = "0.1.21"
+version = "0.1.22"
 dependencies = [
  "convert_case",
  "pen-ffi",
