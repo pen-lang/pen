@@ -4,9 +4,9 @@ use crate::{
     file_path_configuration::{DEFAULT_TARGET_DIRECTORY, OUTPUT_DIRECTORY, PRELUDE_PACKAGE_URL},
     infrastructure,
 };
-use std::sync::Arc;
+use std::{error::Error, sync::Arc};
 
-pub fn build(target_triple: Option<&str>, verbose: bool) -> Result<(), Box<dyn std::error::Error>> {
+pub fn build(target_triple: Option<&str>, verbose: bool) -> Result<(), Box<dyn Error>> {
     let main_package_directory = main_package_directory_finder::find()?;
     let file_path_converter = Arc::new(infra::FilePathConverter::new(
         main_package_directory.clone(),
