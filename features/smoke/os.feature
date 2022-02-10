@@ -16,6 +16,7 @@ Feature: OS
     import Os'Context { Context }
     import Os'File
     import Os'File'OpenOptions
+    import Os'Process
 
     readFile = \(ctx Context) none | error {
       f = File'Open(ctx, "foo.txt")?
@@ -34,11 +35,11 @@ Feature: OS
       none
     }
 
-    main = \(ctx Context) number {
+    main = \(ctx Context) none {
       if _ = readFile(ctx) as none {
-        0
+        none
       } else {
-        1
+        Process'Exit(ctx, 1)
       }
     }
     """
@@ -52,6 +53,7 @@ Feature: OS
     """pen
     import Os'Context { Context }
     import Os'File
+    import Os'Process
 
     readFile = \(ctx Context) none | error {
       f = File'Open(ctx, "foo.txt")?
@@ -61,11 +63,11 @@ Feature: OS
       none
     }
 
-    main = \(ctx Context) number {
+    main = \(ctx Context) none {
       if _ = readFile(ctx) as none {
-        0
+        none
       } else {
-        1
+        Process'Exit(ctx, 1)
       }
     }
     """
@@ -81,6 +83,7 @@ Feature: OS
     import Os'Context { Context }
     import Os'File
     import Os'Directory
+    import Os'Process
 
     readDirectory = \(ctx Context) none | error {
       File'Write(
@@ -92,11 +95,11 @@ Feature: OS
       none
     }
 
-    main = \(ctx Context) number {
+    main = \(ctx Context) none {
       if _ = readDirectory(ctx) as none {
-        0
+        none
       } else {
-        1
+        Process'Exit(ctx, 1)
       }
     }
     """
@@ -110,8 +113,8 @@ Feature: OS
     """pen
     import Os'Context { Context }
 
-    main = \(ctx Context) number {
-      f = go \() number { 0 }
+    main = \(ctx Context) none {
+      f = go \() none { none }
 
       f()
     }

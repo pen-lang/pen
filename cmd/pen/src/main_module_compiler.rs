@@ -6,7 +6,7 @@ pub fn compile(
     source_file: &str,
     dependency_file: &str,
     object_file: &str,
-    main_function_interface_file: &str,
+    context_interface_file: &str,
     target_triple: Option<&str>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let main_package_directory = main_package_directory_finder::find()?;
@@ -17,7 +17,7 @@ pub fn compile(
         &file_path_converter.convert_to_file_path(source_file)?,
         &file_path_converter.convert_to_file_path(dependency_file)?,
         &file_path_converter.convert_to_file_path(object_file)?,
-        &file_path_converter.convert_to_file_path(main_function_interface_file)?,
+        &file_path_converter.convert_to_file_path(context_interface_file)?,
         target_triple,
         &COMPILE_CONFIGURATION,
         &APPLICATION_CONFIGURATION,

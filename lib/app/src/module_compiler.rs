@@ -51,15 +51,15 @@ pub fn compile_main(
     source_file: &FilePath,
     dependency_file: &FilePath,
     object_file: &FilePath,
-    main_function_interface_file: &FilePath,
+    context_interface_file: &FilePath,
     target_triple: Option<&str>,
     compile_configuration: &CompileConfiguration,
     application_configuration: &ApplicationConfiguration,
 ) -> Result<(), Box<dyn Error>> {
-    let main_function_interface = interface_serializer::deserialize(
+    let context_interface = interface_serializer::deserialize(
         &infrastructure
             .file_system
-            .read_to_vec(main_function_interface_file)?,
+            .read_to_vec(context_interface_file)?,
     )?;
 
     compile_mir_module(
@@ -69,7 +69,7 @@ pub fn compile_main(
                 infrastructure,
                 source_file,
                 dependency_file,
-                Some(&main_function_interface),
+                Some(&context_interface),
             )?,
             &prelude_type_configuration_qualifier::qualify(
                 &compile_configuration.hir,
@@ -77,7 +77,7 @@ pub fn compile_main(
             ),
             &main_module_configuration_qualifier::qualify(
                 &application_configuration.main_module,
-                &main_function_interface,
+                &context_interface,
             )?,
         )?,
         object_file,
@@ -125,7 +125,7 @@ fn compile_to_hir(
     infrastructure: &Infrastructure,
     source_file: &FilePath,
     dependency_file: &FilePath,
-    main_function_interface: Option<&interface::Module>,
+    context_interface: Option<&interface::Module>,
 ) -> Result<hir::ir::Module, Box<dyn Error>> {
     let (interface_files, prelude_interface_files) = dependency_serializer::deserialize(
         &infrastructure.file_system.read_to_vec(dependency_file)?,
@@ -158,7 +158,7 @@ fn compile_to_hir(
             .map(|file| {
                 interface_serializer::deserialize(&infrastructure.file_system.read_to_vec(file)?)
             })
-            .chain(main_function_interface.cloned().map(Ok))
+            .chain(context_interface.cloned().map(Ok))
             .collect::<Result<Vec<_>, _>>()?,
     )?)
 }

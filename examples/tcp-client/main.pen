@@ -3,20 +3,16 @@ import Os'Context { Context }
 import Os'Environment
 import Os'Tcp
 import Os'Tcp'Stream { Stream }
+import Os'Process
 
 import 'arguments
 
-main = \(ctx Context) number {
-  if x = run(ctx) as none {
-    0
+main = \(ctx Context) none {
+  if e = run(ctx) as none {
+    none
   } else {
-    Print'Line(ctx, if x = source(x) as string {
-      x
-    } else {
-      "unknown error"
-    })
-
-    1
+    Print'Line(ctx, if s = source(e) as string { s } else { "unknown error" })
+    Process'Exit(ctx, 1)
   }
 }
 

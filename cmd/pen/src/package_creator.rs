@@ -35,10 +35,10 @@ pub fn create(package_directory: &str, library: bool) -> Result<(), Box<dyn std:
                 import Os'Context { Context }
                 import Os'File
 
-                main = \\(ctx Context) number {
+                main = \\(ctx Context) none {
                   File'Write(ctx, File'StdOut(), \"Hello, world!\\n\")
 
-                  0
+                  none
                 }
                 "
             ),

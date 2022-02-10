@@ -80,9 +80,9 @@ dependencies = [
 
 [[package]]
 name = "autocfg"
-version = "1.0.1"
+version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cdb031dd78e28731d87d56cc8ffef4a8f36ca26c38fe2de700543e627f8a464a"
+checksum = "d468802bab17cbc0cc575e9b053f41e72aa36bfa6b7f55e3529ffa43161b97fa"
 
 [[package]]
 name = "bincode"
@@ -519,9 +519,9 @@ checksum = "e2abad23fbc42b3700f2f279844dc832adb2b2eb069b2df918f455c4e18cc646"
 
 [[package]]
 name = "libc"
-version = "0.2.115"
+version = "0.2.117"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0a8d982fa7a96a000f6ec4cfe966de9703eccde29750df2bb8949da91b0e818d"
+checksum = "e74d72e0f9b65b5b4ca49a346af3976df0f9c61d550727f349ecd559f251a26c"
 
 [[package]]
 name = "linked-hash-map"
@@ -531,9 +531,9 @@ checksum = "7fb9b38af92608140b86b693604b9ffcc5824240a484d1ecd4795bacb2fe88f3"
 
 [[package]]
 name = "llvm-sys"
-version = "130.0.2"
+version = "130.0.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4f38d1ea35454f962c372c7cdbe15d3ed42284e1ee9d0d2f21341633469ecdcd"
+checksum = "95eb03b4f7ae21f48ef7c565a3e3aa22c50616aea64645fb1fd7f6f56b51c274"
 dependencies = [
  "cc",
  "lazy_static",
@@ -671,7 +671,7 @@ dependencies = [
 
 [[package]]
 name = "pen-ffi"
-version = "0.3.39"
+version = "0.3.41"
 dependencies = [
  "futures",
  "pen-ffi-macro",
@@ -680,7 +680,7 @@ dependencies = [
 
 [[package]]
 name = "pen-ffi-macro"
-version = "0.1.21"
+version = "0.1.22"
 dependencies = [
  "convert_case",
  "pen-ffi",

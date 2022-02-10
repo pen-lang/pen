@@ -135,7 +135,7 @@ type FfiUdpDatagramResult {
   Error string
 }
 
-New = \() Context {
+UnsafeNew = \() Context {
   Context{
     inner: InnerContext{
       ReadStdIn: _pen_os_read_stdin,

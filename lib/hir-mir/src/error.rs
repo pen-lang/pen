@@ -18,9 +18,9 @@ pub enum CompileError {
     InvalidTryOperation(Position),
     ListExpected(Position),
     MainFunctionNotFound(Position),
-    MainFunctionTypeUndefined(Position),
     MirTypeCheck(mir::analysis::TypeCheckError),
     MissingElseBlock(Position),
+    NewContextFunctionNotFound(Position),
     RecordFieldPrivate(Position),
     RecordFieldUnknown(Position),
     RecordFieldMissing(Position),
@@ -96,9 +96,6 @@ impl Display for CompileError {
             Self::MainFunctionNotFound(position) => {
                 write!(formatter, "main function not found\n{}", position)
             }
-            Self::MainFunctionTypeUndefined(position) => {
-                write!(formatter, "main function type undefined\n{}", position)
-            }
             Self::MirTypeCheck(error) => {
                 write!(formatter, "failed to check types in MIR: {}", error)
             }
@@ -108,6 +105,9 @@ impl Display for CompileError {
                     "missing else block in if-type expression\n{}",
                     position
                 )
+            }
+            Self::NewContextFunctionNotFound(position) => {
+                write!(formatter, "new context function not found\n{}", position)
             }
             Self::RecordFieldPrivate(position) => {
                 write!(formatter, "private record field\n{}", position)

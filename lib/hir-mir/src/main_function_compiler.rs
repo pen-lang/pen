@@ -1,6 +1,10 @@
 use super::{error::CompileError, main_module_configuration::MainModuleConfiguration};
 use fnv::FnvHashMap;
-use hir::{analysis::types::type_canonicalizer, ir::*, types::Type};
+use hir::{
+    analysis::types::type_resolver,
+    ir::*,
+    types::{self, Type},
+};
 
 const MAIN_FUNCTION_WRAPPER_SUFFIX: &str = "__wrapper";
 
@@ -9,30 +13,32 @@ pub fn compile(
     types: &FnvHashMap<String, Type>,
     main_module_configuration: &MainModuleConfiguration,
 ) -> Result<Module, CompileError> {
-    let definition = module
+    let main_function_definition = module
         .definitions()
         .iter()
         .find(|definition| {
             definition.original_name() == main_module_configuration.source_main_function_name
         })
         .ok_or_else(|| CompileError::MainFunctionNotFound(module.position().clone()))?;
+    let position = main_function_definition.position();
 
-    let position = definition.position();
-
-    let type_ = module
-        .type_aliases()
+    let context_type = type_resolver::resolve(
+        &types::Reference::new(
+            &main_module_configuration.context_type_name,
+            position.clone(),
+        ),
+        types,
+    )?;
+    let function_type = types::Function::new(
+        vec![context_type],
+        types::None::new(position.clone()),
+        position.clone(),
+    );
+    let new_context_function_definition = module
+        .declarations()
         .iter()
-        .find(|alias| alias.name() == main_module_configuration.main_function_type_name)
-        .ok_or_else(|| CompileError::MainFunctionTypeUndefined(module.position().clone()))?
-        .type_();
-    let function_type = type_canonicalizer::canonicalize_function(type_, types)?
-        .ok_or_else(|| CompileError::FunctionExpected(type_.position().clone()))?;
-    let arguments = function_type
-        .arguments()
-        .iter()
-        .enumerate()
-        .map(|(index, type_)| Argument::new(format!("x{}", index), type_.clone()))
-        .collect::<Vec<_>>();
+        .find(|definition| definition.name() == main_module_configuration.new_context_function_name)
+        .ok_or_else(|| CompileError::NewContextFunctionNotFound(module.position().clone()))?;
 
     Ok(Module::new(
         module.type_definitions().to_vec(),
@@ -50,15 +56,21 @@ pub fn compile(
                     + MAIN_FUNCTION_WRAPPER_SUFFIX,
                 &main_module_configuration.object_main_function_name,
                 Lambda::new(
-                    arguments.clone(),
+                    vec![],
                     function_type.result().clone(),
                     Call::new(
                         None,
-                        Variable::new(definition.name(), position.clone()),
-                        arguments
-                            .iter()
-                            .map(|argument| Variable::new(argument.name(), position.clone()).into())
-                            .collect(),
+                        Variable::new(main_function_definition.name(), position.clone()),
+                        vec![Call::new(
+                            None,
+                            Variable::new(
+                                new_context_function_definition.name(),
+                                new_context_function_definition.position().clone(),
+                            ),
+                            vec![],
+                            position.clone(),
+                        )
+                        .into()],
                         position.clone(),
                     ),
                     position.clone(),

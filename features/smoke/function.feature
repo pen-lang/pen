@@ -28,10 +28,10 @@ Feature: Function
       }
     }
 
-    main = \(ctx Context) number {
+    main = \(ctx Context) none {
       f(1)()
 
-      0
+      none
     }
     """
     When I successfully run `pen build`
@@ -46,10 +46,10 @@ Feature: Function
       [none \(x none) none { x }(none)]
     }
 
-    main = \(ctx Context) number {
+    main = \(ctx Context) none {
       f()
 
-      0
+      none
     }
     """
     When I successfully run `pen build`

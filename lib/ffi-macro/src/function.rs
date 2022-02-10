@@ -46,6 +46,7 @@ fn generate_function(attributes: &AttributeArgs, function: &ItemFn) -> Result<To
         .collect::<Vec<_>>();
     let output_type = parse_output_type(function, &crate_path);
     let statements = parse_statements(function, &crate_path);
+    let attributes = &function.attrs;
 
     Ok(quote! {
         #[no_mangle]
@@ -58,6 +59,7 @@ fn generate_function(attributes: &AttributeArgs, function: &ItemFn) -> Result<To
 
             type OutputFuture = Pin<Box<dyn Future<Output = #output_type>>>;
 
+            #(#attributes)*
             async fn create_future(#arguments) -> #output_type {
                 #(#statements);*
             }
@@ -97,8 +99,10 @@ fn generate_sync_function(function: &ItemFn, crate_path: &Path) -> TokenStream {
     let arguments = &function.sig.inputs;
     let output_type = parse_output_type(function, crate_path);
     let statements = parse_statements(function, crate_path);
+    let attributes = &function.attrs;
 
     quote! {
+        #(#attributes)*
         #[no_mangle]
         extern "C" fn #function_name(#arguments) -> #output_type {
             #(#statements);*

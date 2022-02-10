@@ -14,8 +14,8 @@ Feature: Concurrency
     """pen
     import Os'Context { Context }
 
-    main = \(ctx Context) number {
-      f = go \() number { 0 }
+    main = \(ctx Context) none {
+      f = go \() none { none }
 
       f()
     }

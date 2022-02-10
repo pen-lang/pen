@@ -1,4 +1,5 @@
 use pen_ffi_macro::bindgen;
+use std::process::exit;
 
 #[bindgen(crate = "pen_ffi")]
 fn default_return_type() {}
@@ -14,4 +15,10 @@ fn sync_function() -> f64 {
 #[bindgen(crate = "pen_ffi")]
 async fn async_function() -> f64 {
     42.0
+}
+
+#[bindgen(crate = "pen_ffi")]
+#[allow(unreachable_code)]
+fn unreachable_by_exit() {
+    exit(0)
 }

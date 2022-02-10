@@ -14,14 +14,14 @@ Feature: List
     """pen
     import Os'Context { Context }
 
-    main = \(ctx Context) number {
+    main = \(ctx Context) none {
       if [x, ...xs] = [none ...[none none]] {
         x()
       } else {
         none
       }
 
-      0
+      none
     }
     """
     When I successfully run `pen build`
@@ -31,14 +31,15 @@ Feature: List
     Given a file named "main.pen" with:
     """pen
     import Os'Context { Context }
+    import Os'Process
 
-    main = \(ctx Context) number {
+    main = \(ctx Context) none {
       if [x, ..._] = [any "foo"] {
         x()
 
-        0
+        none
       } else {
-        1
+        Process'Exit(ctx, 1)
       }
     }
     """
@@ -49,6 +50,7 @@ Feature: List
     Given a file named "main.pen" with:
     """pen
     import Os'Context { Context }
+    import Os'Process
 
     f = \(xss [[boolean]]) [[number]] {
       [[number]
@@ -57,13 +59,13 @@ Feature: List
       ]
     }
 
-    main = \(ctx Context) number {
+    main = \(ctx Context) none {
       if [x, ..._] = f([[boolean] [boolean true, false]]) {
         x()
 
-        0
+        none
       } else {
-        1
+        Process'Exit(ctx, 1)
       }
     }
     """
@@ -75,10 +77,10 @@ Feature: List
     """pen
     import Os'Context
 
-    main = \(ctx Context) number {
+    main = \(ctx Context) none {
       [none y() for y in [none 1]]
 
-      0
+      none
     }
     """
     When I run `pen build`
