@@ -44,7 +44,5 @@ pub fn build(target_triple: Option<&str>, verbose: bool) -> Result<(), Box<dyn E
         target_triple,
         &url::Url::parse(PRELUDE_PACKAGE_URL)?,
         &APPLICATION_CONFIGURATION,
-    )?;
-
-    Ok(())
+    )
 }
