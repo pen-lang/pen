@@ -16,7 +16,7 @@ extern "C" {
 }
 
 #[cfg(test)]
-unsafe extern "C" fn _pen_main(
+extern "C" fn _pen_main(
     _: &mut ffi::cps::AsyncStack<ffi::None>,
     _: ContinuationFunction,
 ) -> ffi::cps::Result {
