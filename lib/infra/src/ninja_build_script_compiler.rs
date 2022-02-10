@@ -244,7 +244,7 @@ impl NinjaBuildScriptCompiler {
         let bit_code_file = object_file.with_extension(self.bit_code_file_extension);
         let main_function_interface_file = self
             .file_path_converter
-            .convert_to_os_path(target.main_function_interface_file());
+            .convert_to_os_path(target.context_interface_file());
 
         Ok([
             format!(
