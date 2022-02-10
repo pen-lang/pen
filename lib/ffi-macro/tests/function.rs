@@ -1,5 +1,5 @@
-use std::process::exit;
 use pen_ffi_macro::bindgen;
+use std::process::exit;
 
 #[bindgen(crate = "pen_ffi")]
 fn default_return_type() {}

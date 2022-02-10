@@ -2,7 +2,7 @@ use std::{process::exit, time::Duration};
 use tokio::time::sleep;
 
 #[ffi::bindgen]
-async fn _pen_os_exit(code: ffi::Number) {
+async fn _pen_os_exit(code: ffi::Number) -> ffi::None {
     // HACK Wait for all I/O buffers to be flushed (hopefully.)
     sleep(Duration::from_millis(50)).await;
 
