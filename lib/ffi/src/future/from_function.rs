@@ -2,7 +2,7 @@ use crate::cps::{self, AsyncStack, ContinuationFunction, StepFunction};
 use core::task::Poll;
 use futures::future::poll_fn;
 
-type InitialStepFunction<T> = extern "C" fn(
+type InitialStepFunction<T> = unsafe extern "C" fn(
     stack: &mut AsyncStack<T>,
     continuation: ContinuationFunction<T, T>,
 ) -> cps::Result;
@@ -18,7 +18,9 @@ pub async fn from_function<T>(initial_step: InitialStepFunction<T>) -> T {
             if let Some((step, continue_)) = trampoline {
                 step(stack, continue_);
             } else {
-                initial_step(stack, resolve);
+                unsafe {
+                    initial_step(stack, resolve);
+                }
             }
         });
 
