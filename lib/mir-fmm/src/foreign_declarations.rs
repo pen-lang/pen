@@ -29,7 +29,7 @@ fn compile_entry_function(
     declaration: &mir::ir::ForeignDeclaration,
     types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, fmm::build::BuildError> {
-    let arguments = vec![fmm::ir::Argument::new(
+    let arguments = [fmm::ir::Argument::new(
         "_closure",
         types::compile_untyped_closure_pointer(),
     )]

@@ -175,7 +175,7 @@ pub fn compile_entry_function(
     types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> fmm::types::Function {
     fmm::types::Function::new(
-        vec![compile_untyped_closure_pointer().into()]
+        [compile_untyped_closure_pointer().into()]
             .into_iter()
             .chain(type_.arguments().iter().map(|type_| compile(type_, types)))
             .collect(),

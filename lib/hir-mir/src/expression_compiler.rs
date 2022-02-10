@@ -989,7 +989,7 @@ mod tests {
                     .into(),
                     &CompileContext::dummy(
                         Default::default(),
-                        vec![(
+                        [(
                             "r".into(),
                             vec![types::RecordField::new(
                                 "x",
@@ -1032,7 +1032,7 @@ mod tests {
                     .into(),
                     &CompileContext::dummy(
                         Default::default(),
-                        vec![(
+                        [(
                             "r".into(),
                             vec![
                                 types::RecordField::new("x", types::Number::new(Position::fake())),
@@ -1094,7 +1094,7 @@ mod tests {
                     )
                     .into(),
                     &CompileContext::dummy(
-                        vec![("r".into(), types::Record::new("r", Position::fake()).into())]
+                        [("r".into(), types::Record::new("r", Position::fake()).into())]
                             .into_iter()
                             .collect(),
                         [("r".into(), vec![])].into_iter().collect()
@@ -1122,7 +1122,7 @@ mod tests {
                     )
                     .into(),
                     &CompileContext::dummy(
-                        vec![(
+                        [(
                             "error".into(),
                             types::Record::new("error", Position::fake()).into()
                         )]
@@ -1169,7 +1169,7 @@ mod tests {
                     )
                     .into(),
                     &CompileContext::dummy(
-                        vec![(
+                        [(
                             "error".into(),
                             types::Record::new("error", Position::fake()).into()
                         )]

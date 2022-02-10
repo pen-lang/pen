@@ -7,7 +7,7 @@ pub fn compile(
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     Ok(instruction_builder.call(
         closures::compile_load_entry_function(instruction_builder, closure_pointer.clone())?,
-        vec![fmm::build::bit_cast(
+        [fmm::build::bit_cast(
             types::compile_untyped_closure_pointer(),
             closure_pointer.clone(),
         )

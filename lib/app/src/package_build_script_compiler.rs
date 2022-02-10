@@ -232,7 +232,7 @@ pub fn compile_test(
         infrastructure
             .build_script_compiler
             .compile_test(
-                &vec![
+                &[
                     file_path_resolver::resolve_main_package_test_archive_file(
                         output_directory,
                         &infrastructure.file_path_configuration,

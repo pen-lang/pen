@@ -333,7 +333,7 @@ fn compile_arguments(
     definition: &mir::ir::Definition,
     types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> Vec<fmm::ir::Argument> {
-    vec![fmm::ir::Argument::new(
+    [fmm::ir::Argument::new(
         CLOSURE_NAME,
         types::compile_untyped_closure_pointer(),
     )]
@@ -419,7 +419,7 @@ mod tests {
                 mir::types::Type::Number,
             ),
             true,
-            &vec![(
+            &[(
                 "f".into(),
                 fmm::build::TypedExpression::new(
                     fmm::ir::Variable::new("f"),

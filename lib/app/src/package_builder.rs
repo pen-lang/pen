@@ -16,7 +16,7 @@ pub fn build(
     prelude_package_url: &url::Url,
     application_configuration: &ApplicationConfiguration,
 ) -> Result<(), Box<dyn Error>> {
-    let child_build_script_files = vec![package_build_script_compiler::compile_modules(
+    let child_build_script_files = [package_build_script_compiler::compile_modules(
         infrastructure,
         main_package_directory,
         output_directory,
