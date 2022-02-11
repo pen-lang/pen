@@ -71,9 +71,9 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                 .setting(clap::AppSettings::Hidden)
                 .about("Compiles a main module")
                 .arg(
-                    clap::Arg::new("main function interface file")
-                        .short('f')
-                        .long("main-function-interface-file")
+                    clap::Arg::new("context interface file")
+                        .short('c')
+                        .long("context-interface-file")
                         .required(true)
                         .takes_value(true),
                 )
@@ -190,7 +190,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
             matches.value_of("source file").unwrap(),
             matches.value_of("dependency file").unwrap(),
             matches.value_of("object file").unwrap(),
-            matches.value_of("main function interface file").unwrap(),
+            matches.value_of("context interface file").unwrap(),
             matches.value_of("target"),
         ),
         ("compile-prelude", matches) => prelude_module_compiler::compile(
