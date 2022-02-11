@@ -565,10 +565,6 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
         archive_files: &[FilePath],
         application_file: &FilePath,
     ) -> Result<String, Box<dyn Error>> {
-        let system_package_directories = system_package_directories
-            .iter()
-            .map(|directory| self.file_path_converter.convert_to_os_path(directory))
-            .collect::<Vec<_>>();
         let application_file = self
             .file_path_converter
             .convert_to_os_path(application_file);
@@ -577,8 +573,13 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
             "rule link".into(),
             format!(
                 "  command = {} -t $target -o $out $in",
-                self.find_link_script(&system_package_directories)?
-                    .display(),
+                self.find_link_script(
+                    &system_package_directories
+                        .iter()
+                        .map(|directory| self.file_path_converter.convert_to_os_path(directory))
+                        .collect::<Vec<_>>()
+                )?
+                .display(),
             ),
             "  description = linking application".into(),
             format!(
