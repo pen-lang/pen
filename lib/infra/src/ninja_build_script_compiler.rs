@@ -72,7 +72,7 @@ impl NinjaBuildScriptCompiler {
             "  description = compiling module of $source_file",
             "rule compile_main",
             "  command = pen compile-main --target $target \
-                 -c $context_interface_file $in $out",
+                 $context_options $in $out",
             "  description = compiling module of $source_file",
             "rule compile_prelude",
             "  command = pen compile-prelude --target $target $in $out",
@@ -262,7 +262,7 @@ impl NinjaBuildScriptCompiler {
                 ninja_dependency_file.display(),
             ),
             format!(
-                "  context_file_options = {}",
+                "  context_options = {}",
                 context_interface_files
                     .iter()
                     .map(|path| format!("-c {}", path.display()))
