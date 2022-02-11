@@ -94,7 +94,7 @@ pub fn compile_modules(
                                     &file_path_resolver::resolve_source_file(
                                         &file_path_resolver::resolve_package_directory(
                                             output_directory,
-                                            &url,
+                                            url,
                                         ),
                                         &[application_configuration
                                             .context_module_basename
@@ -187,7 +187,7 @@ pub fn compile_application(
                     output_directory,
                 )?
                 .values()
-                .map(|url| file_path_resolver::resolve_package_directory(output_directory, &url))
+                .map(|url| file_path_resolver::resolve_package_directory(output_directory, url))
                 .collect::<Vec<_>>(),
                 &[file_path_resolver::resolve_main_package_archive_file(
                     output_directory,

@@ -12,7 +12,7 @@ pub fn read(
 ) -> Result<BTreeMap<String, PackageConfiguration>, Box<dyn Error>> {
     configuration
         .dependencies()
-        .into_iter()
+        .iter()
         .map(|(key, url)| -> Result<_, Box<dyn Error>> {
             Ok((
                 key.clone(),

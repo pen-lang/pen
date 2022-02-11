@@ -423,10 +423,9 @@ impl NinjaBuildScriptCompiler {
     ) -> Result<PathBuf, Box<dyn Error>> {
         let scripts = system_package_directories
             .iter()
-            .map(|directory| {
+            .flat_map(|directory| {
                 package_script_finder::find(directory, self.link_script_basename).transpose()
             })
-            .flatten()
             .collect::<Result<Vec<_>, _>>()?;
 
         match scripts.as_slice() {
