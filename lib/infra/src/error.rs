@@ -6,11 +6,12 @@ pub enum InfrastructureError {
     CommandNotFound(String),
     CreateDirectory { path: PathBuf, source: io::Error },
     EnvironmentVariableNotFound(String),
-    LinkScriptNotFound(PathBuf),
+    LinkScriptNotFound,
     PackageUrlSchemeNotSupported(url::Url),
     ReadDirectory { path: PathBuf, source: io::Error },
     ReadFile { path: PathBuf, source: io::Error },
     TooManyFfiBuildScripts(PathBuf),
+    TooManyLinkScripts(Vec<PathBuf>),
     WriteFile { path: PathBuf, source: io::Error },
 }
 
@@ -21,11 +22,12 @@ impl Error for InfrastructureError {
             Self::CommandNotFound(_) => None,
             Self::CreateDirectory { path: _, source } => Some(source),
             Self::EnvironmentVariableNotFound(_) => None,
-            Self::LinkScriptNotFound(_) => None,
+            Self::LinkScriptNotFound => None,
             Self::PackageUrlSchemeNotSupported(_) => None,
             Self::ReadDirectory { path: _, source } => Some(source),
             Self::ReadFile { path: _, source } => Some(source),
             Self::TooManyFfiBuildScripts(_) => None,
+            Self::TooManyLinkScripts(_) => None,
             Self::WriteFile { path: _, source } => Some(source),
         }
     }
@@ -51,11 +53,9 @@ impl Display for InfrastructureError {
             Self::EnvironmentVariableNotFound(name) => {
                 write!(formatter, "environment variable \"{}\" not found", name)
             }
-            Self::LinkScriptNotFound(directory) => write!(
-                formatter,
-                "link script not found in system package \"{}\"",
-                directory.display()
-            ),
+            Self::LinkScriptNotFound => {
+                write!(formatter, "link script not found in any system packages")
+            }
             Self::PackageUrlSchemeNotSupported(url) => {
                 write!(formatter, "package URL scheme not supported {}", url)
             }
@@ -72,6 +72,17 @@ impl Display for InfrastructureError {
                     formatter,
                     "too many FFI build scripts in package directory \"{}\"",
                     path.display()
+                )
+            }
+            Self::TooManyLinkScripts(paths) => {
+                write!(
+                    formatter,
+                    "too many link scripts in multiple system packages: {}",
+                    paths
+                        .iter()
+                        .map(|path| path.display().to_string())
+                        .collect::<Vec<_>>()
+                        .join(", ")
                 )
             }
             Self::WriteFile { path, source: _ } => {

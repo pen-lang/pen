@@ -28,7 +28,7 @@ pub trait BuildScriptCompiler {
 
     fn compile_application(
         &self,
-        system_package_directory: &FilePath,
+        system_package_directories: &[FilePath],
         archive_files: &[FilePath],
         application_file: &FilePath,
     ) -> Result<String, Box<dyn Error>>;

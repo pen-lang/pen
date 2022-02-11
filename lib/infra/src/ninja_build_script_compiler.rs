@@ -3,7 +3,7 @@ use crate::{
     default_target_finder, llvm_command_finder, package_script_finder, InfrastructureError,
 };
 use app::infra::FilePath;
-use std::{error::Error, sync::Arc};
+use std::{error::Error, path::PathBuf, sync::Arc};
 
 const FFI_ARCHIVE_DIRECTORY: &str = "ffi";
 const AR_DESCRIPTION: &str = "  description = archiving package of $package_directory";
@@ -242,9 +242,11 @@ impl NinjaBuildScriptCompiler {
         let ninja_dependency_file =
             object_file.with_extension(self.ninja_dynamic_dependency_file_extension);
         let bit_code_file = object_file.with_extension(self.bit_code_file_extension);
-        let main_function_interface_file = self
-            .file_path_converter
-            .convert_to_os_path(target.context_interface_file());
+        let context_interface_files = target
+            .context_interface_files()
+            .iter()
+            .map(|path| self.file_path_converter.convert_to_os_path(path))
+            .collect::<Vec<_>>();
 
         Ok([
             format!(
@@ -252,12 +254,20 @@ impl NinjaBuildScriptCompiler {
                 bit_code_file.display(),
                 source_file.display(),
                 dependency_file.display(),
-                main_function_interface_file.display(),
+                context_interface_files
+                    .iter()
+                    .map(|path| path.display().to_string())
+                    .collect::<Vec<_>>()
+                    .join(" "),
                 ninja_dependency_file.display(),
             ),
             format!(
-                "  main_function_interface_file = {}",
-                main_function_interface_file.display()
+                "  context_file_options = {}",
+                context_interface_files
+                    .iter()
+                    .map(|path| format!("-c {}", path.display()))
+                    .collect::<Vec<_>>()
+                    .join(" ")
             ),
             format!("  dyndep = {}", ninja_dependency_file.display()),
             format!("  source_file = {}", target.source_file()),
@@ -406,6 +416,25 @@ impl NinjaBuildScriptCompiler {
             .collect::<Vec<_>>()
             .join(" ")
     }
+
+    fn find_link_script(
+        &self,
+        system_package_directories: &[PathBuf],
+    ) -> Result<PathBuf, Box<dyn Error>> {
+        let link_scripts = system_package_directories
+            .iter()
+            .map(|directory| {
+                package_script_finder::find(directory, self.link_script_basename).transpose()
+            })
+            .flatten()
+            .collect::<Result<Vec<_>, _>>()?;
+
+        match link_scripts.as_slice() {
+            [] => Err(InfrastructureError::LinkScriptNotFound.into()),
+            [script] => Ok(script.into()),
+            _ => Err(InfrastructureError::TooManyLinkScripts(link_scripts).into()),
+        }
+    }
 }
 
 impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
@@ -532,13 +561,14 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
 
     fn compile_application(
         &self,
-        system_package_directory: &FilePath,
+        system_package_directories: &[FilePath],
         archive_files: &[FilePath],
         application_file: &FilePath,
     ) -> Result<String, Box<dyn Error>> {
-        let system_package_directory = self
-            .file_path_converter
-            .convert_to_os_path(system_package_directory);
+        let system_package_directories = system_package_directories
+            .iter()
+            .map(|directory| self.file_path_converter.convert_to_os_path(directory))
+            .collect::<Vec<_>>();
         let application_file = self
             .file_path_converter
             .convert_to_os_path(application_file);
@@ -547,10 +577,7 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
             "rule link".into(),
             format!(
                 "  command = {} -t $target -o $out $in",
-                package_script_finder::find(&system_package_directory, self.link_script_basename)?
-                    .ok_or(InfrastructureError::LinkScriptNotFound(
-                        system_package_directory,
-                    ))?
+                self.find_link_script(&system_package_directories)?
                     .display(),
             ),
             "  description = linking application".into(),

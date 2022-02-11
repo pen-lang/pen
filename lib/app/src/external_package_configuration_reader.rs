@@ -9,18 +9,21 @@ pub fn read_main(
     infrastructure: &Infrastructure,
     package_directory: &FilePath,
     output_directory: &FilePath,
-) -> Result<BTreeMap<url::Url, PackageConfiguration>, Box<dyn Error>> {
+) -> Result<BTreeMap<String, (url::Url, PackageConfiguration)>, Box<dyn Error>> {
     infrastructure
         .package_configuration_reader
         .read(package_directory)?
         .dependencies()
-        .values()
-        .map(|url| -> Result<_, Box<dyn Error>> {
+        .into_iter()
+        .map(|(key, url)| -> Result<_, Box<dyn Error>> {
             Ok((
-                url.clone(),
-                infrastructure.package_configuration_reader.read(
-                    &file_path_resolver::resolve_package_directory(output_directory, url),
-                )?,
+                key.clone(),
+                (
+                    url.clone(),
+                    infrastructure.package_configuration_reader.read(
+                        &file_path_resolver::resolve_package_directory(output_directory, url),
+                    )?,
+                ),
             ))
         })
         .collect::<Result<_, _>>()
