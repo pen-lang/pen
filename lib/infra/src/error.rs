@@ -77,10 +77,10 @@ impl Display for InfrastructureError {
             Self::MultipleLinkScripts(paths) => {
                 write!(
                     formatter,
-                    "multiple link scripts found in system packages: {}",
+                    "multiple link scripts found in system packages {}",
                     paths
                         .iter()
-                        .map(|path| path.display().to_string())
+                        .map(|path| format!("\"{}\"", path.display()))
                         .collect::<Vec<_>>()
                         .join(", ")
                 )
