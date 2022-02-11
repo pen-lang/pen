@@ -17,7 +17,7 @@ pub fn find(
         [script] => Some(script.into()),
         _ => {
             return Err(
-                InfrastructureError::TooManyFfiBuildScripts(package_directory.into()).into(),
+                InfrastructureError::MultipleFfiBuildScripts(package_directory.into()).into(),
             )
         }
     })
