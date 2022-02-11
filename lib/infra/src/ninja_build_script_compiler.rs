@@ -432,7 +432,7 @@ impl NinjaBuildScriptCompiler {
         match scripts.as_slice() {
             [] => Err(InfrastructureError::LinkScriptNotFound.into()),
             [script] => Ok(script.into()),
-            _ => Err(InfrastructureError::TooManyLinkScripts(scripts).into()),
+            _ => Err(InfrastructureError::MultipleLinkScripts(scripts).into()),
         }
     }
 }

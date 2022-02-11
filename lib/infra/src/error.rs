@@ -11,7 +11,7 @@ pub enum InfrastructureError {
     ReadDirectory { path: PathBuf, source: io::Error },
     ReadFile { path: PathBuf, source: io::Error },
     TooManyFfiBuildScripts(PathBuf),
-    TooManyLinkScripts(Vec<PathBuf>),
+    MultipleLinkScripts(Vec<PathBuf>),
     WriteFile { path: PathBuf, source: io::Error },
 }
 
@@ -27,7 +27,7 @@ impl Error for InfrastructureError {
             Self::ReadDirectory { path: _, source } => Some(source),
             Self::ReadFile { path: _, source } => Some(source),
             Self::TooManyFfiBuildScripts(_) => None,
-            Self::TooManyLinkScripts(_) => None,
+            Self::MultipleLinkScripts(_) => None,
             Self::WriteFile { path: _, source } => Some(source),
         }
     }
@@ -74,10 +74,10 @@ impl Display for InfrastructureError {
                     path.display()
                 )
             }
-            Self::TooManyLinkScripts(paths) => {
+            Self::MultipleLinkScripts(paths) => {
                 write!(
                     formatter,
-                    "too many link scripts in multiple system packages: {}",
+                    "multiple link scripts found in system packages: {}",
                     paths
                         .iter()
                         .map(|path| path.display().to_string())
