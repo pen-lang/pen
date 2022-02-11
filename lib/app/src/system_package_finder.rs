@@ -12,15 +12,21 @@ pub fn find(
     package_directory: &FilePath,
     output_directory: &FilePath,
 ) -> Result<FnvHashMap<String, url::Url>, Box<dyn Error>> {
-    let system_packages = external_package_configuration_reader::read_main(
+    let package_configuration = infrastructure
+        .package_configuration_reader
+        .read(package_directory)?;
+    let system_packages = external_package_configuration_reader::read(
         infrastructure,
-        package_directory,
+        &package_configuration,
         output_directory,
     )?
     .into_iter()
-    .filter_map(|(key, (url, configuration))| {
+    .filter_map(|(key, configuration)| {
         if configuration.is_system() {
-            Some((key, url))
+            Some((
+                key.clone(),
+                package_configuration.dependencies()[&key].clone(),
+            ))
         } else {
             None
         }
