@@ -421,7 +421,7 @@ impl NinjaBuildScriptCompiler {
         &self,
         system_package_directories: &[PathBuf],
     ) -> Result<PathBuf, Box<dyn Error>> {
-        let link_scripts = system_package_directories
+        let scripts = system_package_directories
             .iter()
             .map(|directory| {
                 package_script_finder::find(directory, self.link_script_basename).transpose()
@@ -429,10 +429,10 @@ impl NinjaBuildScriptCompiler {
             .flatten()
             .collect::<Result<Vec<_>, _>>()?;
 
-        match link_scripts.as_slice() {
+        match scripts.as_slice() {
             [] => Err(InfrastructureError::LinkScriptNotFound.into()),
             [script] => Ok(script.into()),
-            _ => Err(InfrastructureError::TooManyLinkScripts(link_scripts).into()),
+            _ => Err(InfrastructureError::TooManyLinkScripts(scripts).into()),
         }
     }
 }
