@@ -6,8 +6,7 @@ use hir::{
     types::{self, Type},
 };
 
-const ORIGINAL_CONTEXT_NAME: &str = "context";
-const MAIN_FUNCTION_WRAPPER_SUFFIX: &str = "__wrapper";
+const MAIN_FUNCTION_WRAPPER_SUFFIX: &str = ":wrapper";
 
 pub fn compile(
     module: &Module,
@@ -24,8 +23,8 @@ pub fn compile(
     let position = main_function_definition.position();
 
     let context_type_definition = TypeDefinition::new(
-        "main:context",
-        ORIGINAL_CONTEXT_NAME,
+        &main_module_configuration.context_type_name,
+        &main_module_configuration.context_type_name,
         main_module_configuration
             .contexts
             .iter()
@@ -68,7 +67,12 @@ pub fn compile(
     );
 
     Ok(Module::new(
-        module.type_definitions().to_vec(),
+        module
+            .type_definitions()
+            .iter()
+            .cloned()
+            .chain([context_type_definition])
+            .collect(),
         module.type_aliases().to_vec(),
         module.foreign_declarations().to_vec(),
         module.declarations().to_vec(),

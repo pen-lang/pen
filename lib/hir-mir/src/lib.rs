@@ -46,7 +46,10 @@ pub fn compile_main(
     let context = CompileContext::new(module, compile_configuration.clone().into());
     let module =
         main_function_compiler::compile(module, context.types(), main_module_configuration)?;
-    let (module, _) = compile_module(&module, &context)?;
+    let (module, _) = compile_module(
+        &module,
+        &CompileContext::new(&module, compile_configuration.clone().into()),
+    )?;
 
     Ok(module)
 }

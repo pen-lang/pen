@@ -5,12 +5,11 @@ use std::error::Error;
 pub fn qualify(
     configuration: &MainModuleConfiguration,
     context_interfaces: &FnvHashMap<String, interface::Module>,
-    main_module_prefix: &str,
 ) -> Result<hir_mir::MainModuleConfiguration, Box<dyn Error>> {
     Ok(hir_mir::MainModuleConfiguration {
         source_main_function_name: configuration.source_main_function_name.clone(),
         object_main_function_name: configuration.object_main_function_name.clone(),
-        context_type_name: main_module_prefix.to_owned() + &configuration.main_context_type_name,
+        context_type_name: configuration.main_context_type_name.clone(),
         contexts: context_interfaces
             .iter()
             .map(|(key, interface)| Ok((key.clone(), qualify_context(interface, configuration)?)))
