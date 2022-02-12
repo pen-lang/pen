@@ -15,11 +15,7 @@ pub fn initialize(
 ) -> Result<(), Box<dyn Error>> {
     initialize_prelude(infrastructure, prelude_package_url, output_directory)?;
 
-    external_package_initializer::initialize_recursively(
-        infrastructure,
-        package_directory,
-        output_directory,
-    )?;
+    external_package_initializer::initialize(infrastructure, package_directory, output_directory)?;
 
     Ok(())
 }
