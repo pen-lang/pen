@@ -6,6 +6,7 @@ use hir::{
     types::{self, Type},
 };
 
+const ORIGINAL_CONTEXT_NAME: &str = "context";
 const MAIN_FUNCTION_WRAPPER_SUFFIX: &str = "__wrapper";
 
 pub fn compile(
@@ -24,7 +25,7 @@ pub fn compile(
 
     let context_type_definition = TypeDefinition::new(
         "main:context",
-        "context",
+        ORIGINAL_CONTEXT_NAME,
         main_module_configuration
             .contexts
             .iter()

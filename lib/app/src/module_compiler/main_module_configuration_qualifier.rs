@@ -5,10 +5,12 @@ use std::error::Error;
 pub fn qualify(
     configuration: &MainModuleConfiguration,
     context_interfaces: &FnvHashMap<String, interface::Module>,
+    main_module_prefix: &str,
 ) -> Result<hir_mir::MainModuleConfiguration, Box<dyn Error>> {
     Ok(hir_mir::MainModuleConfiguration {
         source_main_function_name: configuration.source_main_function_name.clone(),
         object_main_function_name: configuration.object_main_function_name.clone(),
+        context_type_name: main_module_prefix.to_owned() + &configuration.main_context_type_name,
         contexts: context_interfaces
             .iter()
             .map(|(key, interface)| Ok((key.clone(), qualify_context(interface, configuration)?)))
@@ -26,7 +28,7 @@ fn qualify_context(
             .type_definitions()
             .iter()
             .find(|definition| {
-                definition.original_name() == configuration.context_type_name
+                definition.original_name() == configuration.system_context_type_name
                     && definition.is_public()
             })
             .ok_or(ApplicationError::ContextTypeNotFound)?
@@ -36,7 +38,7 @@ fn qualify_context(
             .declarations()
             .iter()
             .find(|definition| {
-                definition.original_name() == configuration.new_context_function_name
+                definition.original_name() == configuration.new_system_context_function_name
             })
             .ok_or(ApplicationError::NewContextFunctionNotFound)?
             .name()

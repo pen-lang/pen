@@ -83,6 +83,7 @@ pub fn compile_main(
             &main_module_configuration_qualifier::qualify(
                 &application_configuration.main_module,
                 &context_interfaces,
+                &format!("{}:", source_file),
             )?,
         )?,
         object_file,
