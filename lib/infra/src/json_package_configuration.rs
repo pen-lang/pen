@@ -10,21 +10,21 @@ pub enum JsonPackageType {
 }
 
 impl From<app::PackageType> for JsonPackageType {
-    fn from(type_: app::PackageType) -> JsonPackageType {
+    fn from(type_: app::PackageType) -> Self {
         match type_ {
-            app::PackageType::Application => JsonPackageType::Application,
-            app::PackageType::Library => JsonPackageType::Library,
-            app::PackageType::System => JsonPackageType::System,
+            app::PackageType::Application => Self::Application,
+            app::PackageType::Library => Self::Library,
+            app::PackageType::System => Self::System,
         }
     }
 }
 
 impl From<JsonPackageType> for app::PackageType {
-    fn from(type_: JsonPackageType) -> app::PackageType {
+    fn from(type_: JsonPackageType) -> Self {
         match type_ {
-            JsonPackageType::Application => app::PackageType::Application,
-            JsonPackageType::Library => app::PackageType::Library,
-            JsonPackageType::System => app::PackageType::System,
+            JsonPackageType::Application => Self::Application,
+            JsonPackageType::Library => Self::Library,
+            JsonPackageType::System => Self::System,
         }
     }
 }
