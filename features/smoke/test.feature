@@ -3,6 +3,7 @@ Feature: Testing
     Given a file named "pen.json" with:
     """json
     {
+      "type": "library",
       "dependencies": {
         "Test": "pen:///test"
       }

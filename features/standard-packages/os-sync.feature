@@ -3,6 +3,7 @@ Feature: OS (synchronous version)
     Given a file named "pen.json" with:
     """json
     {
+      "type": "application",
       "dependencies": {
         "Os": "pen:///os-sync",
         "Core": "pen:///core"

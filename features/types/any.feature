@@ -2,7 +2,10 @@ Feature: Any
   Background:
     Given a file named "pen.json" with:
     """json
-    { "dependencies": {} }
+    {
+      "type": "library",
+      "dependencies": {}
+    }
     """
 
   Scenario: Use an any type

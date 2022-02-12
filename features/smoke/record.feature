@@ -2,7 +2,10 @@ Feature: Record
   Background:
     Given a file named "pen.json" with:
     """json
-    { "dependencies": {} }
+    {
+      "type": "library",
+      "dependencies": {}
+    }
     """
 
   Scenario: Import a record with no field

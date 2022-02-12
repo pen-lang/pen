@@ -2,7 +2,10 @@ Feature: String
   Background:
     Given a file named "pen.json" with:
     """json
-    { "dependencies": {} }
+    {
+      "type": "library",
+      "dependencies": {}
+    }
     """
 
   Scenario: Use a string literal

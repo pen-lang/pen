@@ -2,7 +2,10 @@ Feature: Union
   Background:
     Given a file named "pen.json" with:
     """json
-    { "dependencies": {} }
+    {
+      "type": "library",
+      "dependencies": {}
+    }
     """
 
   Scenario: Upcast a number into a union

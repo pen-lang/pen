@@ -3,6 +3,7 @@ Feature: Memory leak
     Given a file named "pen.json" with:
     """json
     {
+      "type": "application",
       "dependencies": {
         "Core": "pen:///core",
         "Os": "pen:///os-sync"

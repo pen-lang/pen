@@ -2,7 +2,10 @@ Feature: Error
   Background:
     Given a file named "pen.json" with:
     """json
-    { "dependencies": {} }
+    {
+      "type": "library",
+      "dependencies": {}
+    }
     """
 
   Scenario: Call an error function
