@@ -19,7 +19,7 @@ Feature: String
       if "foo" == "foo" {
         none
       } else {
-        Process'Exit(ctx, 1)
+        Process'Exit(ctx.Os, 1)
       }
     }
     """

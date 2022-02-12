@@ -17,11 +17,11 @@ Feature: List
     main = \(ctx context) none {
       if [x, ...xs] = [none ...[none none]] {
         x()
-      } else {
-        none
-      }
 
-      none
+        none
+      } else {
+        Process'Exit(ctx.Os, 1)
+      }
     }
     """
     When I successfully run `pen build`
@@ -39,7 +39,7 @@ Feature: List
 
         none
       } else {
-        Process'Exit(ctx, 1)
+        Process'Exit(ctx.Os, 1)
       }
     }
     """
@@ -65,7 +65,7 @@ Feature: List
 
         none
       } else {
-        Process'Exit(ctx, 1)
+        Process'Exit(ctx.Os, 1)
       }
     }
     """
