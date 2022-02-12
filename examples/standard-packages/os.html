@@ -157,11 +157,11 @@
 import Os'File
 import Os'Process
 
-main = \(ctx Context) none {
-  if _ = run(ctx) as none {
+main = \(ctx context) none {
+  if _ = run(ctx.Os) as none {
     none
   } else {
-    Process'Exit(ctx, 1)
+    Process'Exit(ctx.Os, 1)
   }
 }
 
@@ -182,12 +182,18 @@ import Os'Environment
 import Os'File
 import Os'Process
 
-main = \(ctx Context) none {
-  if _ = File'Write(ctx, File'StdOut(), String'Join(Environment'Arguments(ctx), &quot; &quot;)) as number {
+main = \(ctx context) none {
+  if _ = run(ctx.Os) as none {
     none
   } else {
-    Process'Exit(ctx, 1)
+    Process'Exit(ctx.Os, 1)
   }
+}
+
+run = \(ctx Context) none | error {
+  File'Write(ctx, File'StdOut(), String'Join(Environment'Arguments(ctx), &quot; &quot;))?
+
+  none
 }
 </code></pre>
 <p><em>When</em> I successfully run <code>pen build</code></p>
@@ -201,18 +207,18 @@ import Os'File
 import Os'Environment
 import Os'Process
 
-printEnvironmentVariable = \(ctx Context) none | error {
+main = \(ctx context) none {
+  if _ = run(ctx.Os) as none {
+    none
+  } else {
+    Process'Exit(ctx.Os, 1)
+  }
+}
+
+run = \(ctx Context) none | error {
   File'Write(ctx, File'StdOut(), Environment'Variable(ctx, &quot;FOO&quot;)?)?
 
   none
-}
-
-main = \(ctx Context) none {
-  if _ = printEnvironmentVariable(ctx) as none {
-    none
-  } else {
-    Process'Exit(ctx, 1)
-  }
 }
 </code></pre>
 <p><em>And</em> I append &quot;foo&quot; to the environment variable &quot;FOO&quot;</p>
@@ -225,12 +231,18 @@ main = \(ctx Context) none {
 import Os'File { File }
 import Os'Process
 
-main = \(ctx Context) none {
-  if f = File'Open(ctx, &quot;./foo.txt&quot;) as File {
+main = \(ctx context) none {
+  if _ = run(ctx.Os) as none {
     none
   } else {
-    Process'Exit(ctx, 1)
+    Process'Exit(ctx.Os, 1)
   }
+}
+
+run = \(ctx Context) none | error {
+  File'Open(ctx, &quot;./foo.txt&quot;)?
+
+  none
 }
 </code></pre>
 <p><em>And</em> a file named &quot;foo.txt&quot; with &quot;&quot;</p>
@@ -243,21 +255,21 @@ import Os'File
 import Os'File'OpenOptions
 import Os'Process
 
-readFile = \(ctx Context) none | error {
+main = \(ctx context) none {
+  if _ = run(ctx.Os) as none {
+    none
+  } else {
+    Process'Exit(ctx.Os, 1)
+  }
+}
+
+run = \(ctx Context) none | error {
   f = File'Open(ctx, &quot;foo.txt&quot;)?
   d = File'Read(ctx, f)?
 
   File'Write(ctx, File'StdOut(), d)?
 
   none
-}
-
-main = \(ctx Context) none {
-  if _ = readFile(ctx) as none {
-    none
-  } else {
-    Process'Exit(ctx, 1)
-  }
 }
 </code></pre>
 <p><em>And</em> a file named &quot;foo.txt&quot; with &quot;foo&quot;</p>
@@ -270,20 +282,20 @@ main = \(ctx Context) none {
 import Os'File
 import Os'Process
 
-readFile = \(ctx Context) none | error {
+main = \(ctx context) none {
+  if _ = run(ctx.Os) as none {
+    none
+  } else {
+    Process'Exit(ctx.Os, 1)
+  }
+}
+
+run = \(ctx Context) none | error {
   f = File'Open(ctx, &quot;foo.txt&quot;)?
   d = File'ReadLimit(ctx, f, 5)?
   File'Write(ctx, File'StdOut(), d)?
 
   none
-}
-
-main = \(ctx Context) none {
-  if _ = readFile(ctx) as none {
-    none
-  } else {
-    Process'Exit(ctx, 1)
-  }
 }
 </code></pre>
 <p><em>And</em> a file named &quot;foo.txt&quot; with &quot;Hello, world!&quot;</p>
@@ -297,7 +309,15 @@ import Os'File
 import Os'File'OpenOptions
 import Os'Process
 
-writeFile = \(ctx Context) none | error {
+main = \(ctx context) none {
+  if _ = run(ctx.Os) as none {
+    none
+  } else {
+    Process'Exit(ctx.Os, 1)
+  }
+}
+
+run = \(ctx Context) none | error {
   f = File'OpenWithOptions(
     ctx,
     &quot;./foo.txt&quot;,
@@ -307,14 +327,6 @@ writeFile = \(ctx Context) none | error {
   File'Write(ctx, f, &quot;foo&quot;)?
 
   none
-}
-
-main = \(ctx Context) none {
-  if _ = writeFile(ctx) as none {
-    none
-  } else {
-    Process'Exit(ctx, 1)
-  }
 }
 </code></pre>
 <p><em>And</em> a file named &quot;foo.txt&quot; with &quot;&quot;</p>
@@ -327,11 +339,11 @@ main = \(ctx Context) none {
 import Os'File
 import Os'Process
 
-main = \(ctx Context) none {
-  if _ = File'Copy(ctx, &quot;foo.txt&quot;, &quot;bar.txt&quot;) as none {
+main = \(ctx context) none {
+  if _ = File'Copy(ctx.Os, &quot;foo.txt&quot;, &quot;bar.txt&quot;) as none {
     none
   } else {
-    Process'Exit(ctx, 1)
+    Process'Exit(ctx.Os, 1)
   }
 }
 </code></pre>
@@ -346,11 +358,11 @@ main = \(ctx Context) none {
 import Os'File
 import Os'Process
 
-main = \(ctx Context) none {
-  if _ = File'Move(ctx, &quot;foo.txt&quot;, &quot;bar.txt&quot;) as none {
+main = \(ctx context) none {
+  if _ = File'Move(ctx.Os, &quot;foo.txt&quot;, &quot;bar.txt&quot;) as none {
     none
   } else {
-    Process'Exit(ctx, 1)
+    Process'Exit(ctx.Os, 1)
   }
 }
 </code></pre>
@@ -365,11 +377,11 @@ main = \(ctx Context) none {
 import Os'File
 import Os'Process
 
-main = \(ctx Context) none {
-  if _ = File'Remove(ctx, &quot;foo.txt&quot;) as none {
+main = \(ctx context) none {
+  if _ = File'Remove(ctx.Os, &quot;foo.txt&quot;) as none {
     none
   } else {
-    Process'Exit(ctx, 1)
+    Process'Exit(ctx.Os, 1)
   }
 }
 </code></pre>
@@ -385,7 +397,15 @@ import Os'File
 import Os'Directory
 import Os'Process
 
-readDirectory = \(ctx Context) none | error {
+main = \(ctx context) none {
+  if _ = run(ctx.Os) as none {
+    none
+  } else {
+    Process'Exit(ctx.Os, 1)
+  }
+}
+
+run = \(ctx Context) none | error {
   File'Write(
     ctx,
     File'StdOut(),
@@ -393,14 +413,6 @@ readDirectory = \(ctx Context) none | error {
   )?
 
   none
-}
-
-main = \(ctx Context) none {
-  if _ = readDirectory(ctx) as none {
-    none
-  } else {
-    Process'Exit(ctx, 1)
-  }
 }
 </code></pre>
 <p><em>When</em> I successfully run <code>pen build</code></p>
@@ -413,11 +425,11 @@ main = \(ctx Context) none {
 import Os'Directory
 import Os'Process
 
-main = \(ctx Context) none {
-  if _ = Directory'Create(ctx, &quot;foo&quot;) as none {
+main = \(ctx context) none {
+  if _ = Directory'Create(ctx.Os, &quot;foo&quot;) as none {
     none
   } else {
-    Process'Exit(ctx, 1)
+    Process'Exit(ctx.Os, 1)
   }
 }
 </code></pre>
@@ -430,11 +442,11 @@ main = \(ctx Context) none {
 import Os'Directory
 import Os'Process
 
-main = \(ctx Context) none {
-  if _ = Directory'Remove(ctx, &quot;foo&quot;) as none {
+main = \(ctx context) none {
+  if _ = Directory'Remove(ctx.Os, &quot;foo&quot;) as none {
     none
   } else {
-    Process'Exit(ctx, 1)
+    Process'Exit(ctx.Os, 1)
   }
 }
 </code></pre>
@@ -449,8 +461,8 @@ import Os'File
 import Os'File'Metadata { Metadata }
 import Os'Process
 
-main = \(ctx Context) none {
-  m = File'Metadata(ctx, &quot;foo&quot;)
+main = \(ctx context) none {
+  m = File'Metadata(ctx.Os, &quot;foo&quot;)
 
   c = if m = m as Metadata {
     if m.Size == 3 {
@@ -462,7 +474,7 @@ main = \(ctx Context) none {
     1
   }
 
-  Process'Exit(ctx, c)
+  Process'Exit(ctx.Os, c)
 }
 </code></pre>
 <p><em>And</em> a file named &quot;foo&quot; with:</p>
@@ -478,18 +490,18 @@ import Os'File
 import Os'Process
 import Os'Time
 
+main = \(ctx context) none {
+  if m = run(ctx.Os) as none {
+    none
+  } else {
+    Process'Exit(ctx.Os, 1)
+  }
+}
+
 run = \(ctx Context) none | error {
   File'Write(ctx, File'StdOut(), Number'String(Time'Now(ctx)))?
 
   none
-}
-
-main = \(ctx Context) none {
-  if m = run(ctx) as none {
-    none
-  } else {
-    Process'Exit(ctx, 1)
-  }
 }
 </code></pre>
 <p><em>When</em> I successfully run <code>pen build</code></p>
@@ -499,8 +511,8 @@ main = \(ctx Context) none {
 <pre><code class="language-pen">import Os'Context { Context }
 import Os'Time
 
-main = \(ctx Context) none {
-  Time'Sleep(ctx, 1)
+main = \(ctx context) none {
+  Time'Sleep(ctx.Os, 1)
 }
 </code></pre>
 <p><em>When</em> I successfully run <code>pen build</code></p>
@@ -513,18 +525,18 @@ import Os'File
 import Os'Process
 import Os'Random
 
+main = \(ctx context) none {
+  if m = run(ctx.Os) as none {
+    none
+  } else {
+    Process'Exit(ctx.Os, 1)
+  }
+}
+
 run = \(ctx Context) none | error {
   File'Write(ctx, File'StdOut(), Number'String(Random'Number(ctx)))?
 
   none
-}
-
-main = \(ctx Context) none {
-  if m = run(ctx) as none {
-    none
-  } else {
-    Process'Exit(ctx, 1)
-  }
 }
 </code></pre>
 <p><em>When</em> I successfully run <code>pen build</code></p>
@@ -534,8 +546,8 @@ main = \(ctx Context) none {
 <pre><code class="language-pen">import Os'Context { Context }
 import Os'Process
 
-main = \(ctx Context) none {
-  Process'Exit(ctx, 42)
+main = \(ctx context) none {
+  Process'Exit(ctx.Os, 42)
 }
 </code></pre>
 <p><em>When</em> I successfully run <code>pen build</code></p>
