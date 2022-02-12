@@ -23,11 +23,10 @@ Feature: List as stream
   Scenario: Evaluate an element lazily
     Given a file named "main.pen" with:
     """pen
-    import Os'Context { Context }
     import 'Hello
 
     main = \(ctx context) none {
-      [none Hello'Hello(ctx)]
+      [none Hello'Hello(ctx.Os)]
 
       none
     }
@@ -39,17 +38,17 @@ Feature: List as stream
   Scenario: Evaluate an element lazily but only once
     Given a file named "main.pen" with:
     """pen
-    import Os'Context { Context }
+    import Os'Process
     import 'Hello
 
     main = \(ctx context) none {
-      if [x, ...xs] = [none Hello'Hello(ctx)] {
+      if [x, ...xs] = [none Hello'Hello(ctx.Os)] {
         x()
         x()
 
         none
       } else {
-        none
+        Process'Exit(ctx.Os, 1)
       }
     }
     """
@@ -70,7 +69,7 @@ Feature: List as stream
     }
 
     main = \(ctx context) none {
-      [none ...foo(ctx)]
+      [none ...foo(ctx.Os)]
 
       none
     }
@@ -83,6 +82,7 @@ Feature: List as stream
     Given a file named "main.pen" with:
     """pen
     import Os'Context { Context }
+    import Os'Process
     import 'Hello
 
     foo = \(ctx Context) [none] {
@@ -92,11 +92,8 @@ Feature: List as stream
     }
 
     main = \(ctx context) none {
-      if [x, ...xs] = [none ...foo(ctx)] {
-        x()
-        x()
-
-        none
+      if [x, ...xs] = [none ...foo(ctx.Os)] {
+        Process'Exit(ctx.Os, 1)
       } else {
         none
       }

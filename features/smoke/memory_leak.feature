@@ -35,7 +35,7 @@ Feature: Memory leak
     import Os'File
 
     main = \(ctx context) none {
-      File'Write(ctx, File'StdOut(), "Hello, world!\n")
+      File'Write(ctx.Os, File'StdOut(), "Hello, world!\n")
 
       none
     }

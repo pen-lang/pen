@@ -12,7 +12,7 @@ Feature: List
   Scenario: Force multiple elements of a list
     Given a file named "main.pen" with:
     """pen
-    import Os'Context { Context }
+    import Os'Process
 
     main = \(ctx context) none {
       if [x, ...xs] = [none ...[none none]] {
@@ -30,7 +30,6 @@ Feature: List
   Scenario: Force an element in a list of any type
     Given a file named "main.pen" with:
     """pen
-    import Os'Context { Context }
     import Os'Process
 
     main = \(ctx context) none {
@@ -75,8 +74,6 @@ Feature: List
   Scenario: Compile list comprehension with wrong typing
     Given a file named "main.pen" with:
     """pen
-    import Os'Context
-
     main = \(ctx context) none {
       [none y() for y in [none 1]]
 
