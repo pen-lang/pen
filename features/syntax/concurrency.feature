@@ -14,7 +14,7 @@ Feature: Concurrency
     """pen
     import Os'Context { Context }
 
-    main = \(ctx Context) none {
+    main = \(ctx context) none {
       f = go \() none { none }
 
       f()

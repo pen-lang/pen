@@ -1,8 +1,8 @@
 import Os'Context { Context }
 import Os'File
 
-main = \(ctx Context) none {
-  _ = File'Write(ctx, File'StdOut(), "Hello, world!\n")
+main = \(ctx context) none {
+  _ = File'Write(ctx.Os, File'StdOut(), "Hello, world!\n")
 
   none
 }

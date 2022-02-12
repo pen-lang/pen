@@ -12,16 +12,16 @@ Feature: List
   Scenario: Force multiple elements of a list
     Given a file named "main.pen" with:
     """pen
-    import Os'Context { Context }
+    import Os'Process
 
-    main = \(ctx Context) none {
+    main = \(ctx context) none {
       if [x, ...xs] = [none ...[none none]] {
         x()
-      } else {
-        none
-      }
 
-      none
+        none
+      } else {
+        Process'Exit(ctx.Os, 1)
+      }
     }
     """
     When I successfully run `pen build`
@@ -30,16 +30,15 @@ Feature: List
   Scenario: Force an element in a list of any type
     Given a file named "main.pen" with:
     """pen
-    import Os'Context { Context }
     import Os'Process
 
-    main = \(ctx Context) none {
+    main = \(ctx context) none {
       if [x, ..._] = [any "foo"] {
         x()
 
         none
       } else {
-        Process'Exit(ctx, 1)
+        Process'Exit(ctx.Os, 1)
       }
     }
     """
@@ -59,13 +58,13 @@ Feature: List
       ]
     }
 
-    main = \(ctx Context) none {
+    main = \(ctx context) none {
       if [x, ..._] = f([[boolean] [boolean true, false]]) {
         x()
 
         none
       } else {
-        Process'Exit(ctx, 1)
+        Process'Exit(ctx.Os, 1)
       }
     }
     """
@@ -75,9 +74,7 @@ Feature: List
   Scenario: Compile list comprehension with wrong typing
     Given a file named "main.pen" with:
     """pen
-    import Os'Context
-
-    main = \(ctx Context) none {
+    main = \(ctx context) none {
       [none y() for y in [none 1]]
 
       none

@@ -28,7 +28,7 @@ Feature: Function
       }
     }
 
-    main = \(ctx Context) none {
+    main = \(ctx context) none {
       f(1)()
 
       none
@@ -46,7 +46,7 @@ Feature: Function
       [none \(x none) none { x }(none)]
     }
 
-    main = \(ctx Context) none {
+    main = \(ctx context) none {
       f()
 
       none

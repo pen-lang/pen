@@ -8,7 +8,6 @@ pub enum ApplicationError {
     NewContextFunctionNotFound,
     PackageNotFound(String),
     SystemPackageNotFound,
-    TooManySystemPackages,
     Test,
 }
 
@@ -32,9 +31,6 @@ impl Display for ApplicationError {
             }
             Self::SystemPackageNotFound => {
                 write!(formatter, "system package not found")
-            }
-            Self::TooManySystemPackages => {
-                write!(formatter, "too many system package")
             }
             Self::Test => write!(formatter, "test failed"),
         }

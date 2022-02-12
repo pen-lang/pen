@@ -1,21 +1,22 @@
 use crate::infra::FilePath;
+use std::collections::BTreeMap;
 
 pub struct MainModuleTarget {
     source_file: FilePath,
     object_file: FilePath,
-    main_function_interface_file: FilePath,
+    context_interface_files: BTreeMap<String, FilePath>,
 }
 
 impl MainModuleTarget {
     pub fn new(
         source_file: FilePath,
         object_file: FilePath,
-        main_function_interface_file: FilePath,
+        context_interface_files: BTreeMap<String, FilePath>,
     ) -> Self {
         Self {
             source_file,
             object_file,
-            main_function_interface_file,
+            context_interface_files,
         }
     }
 
@@ -27,7 +28,7 @@ impl MainModuleTarget {
         &self.object_file
     }
 
-    pub fn main_function_interface_file(&self) -> &FilePath {
-        &self.main_function_interface_file
+    pub fn context_interface_files(&self) -> &BTreeMap<String, FilePath> {
+        &self.context_interface_files
     }
 }

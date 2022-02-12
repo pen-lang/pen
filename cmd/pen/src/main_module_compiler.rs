@@ -1,12 +1,12 @@
 use super::{compile_configuration::COMPILE_CONFIGURATION, main_package_directory_finder};
 use crate::{application_configuration::APPLICATION_CONFIGURATION, infrastructure};
-use std::sync::Arc;
+use std::{collections::BTreeMap, error::Error, sync::Arc};
 
 pub fn compile(
     source_file: &str,
     dependency_file: &str,
     object_file: &str,
-    context_interface_file: &str,
+    context_interface_files: &BTreeMap<&str, &str>,
     target_triple: Option<&str>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let main_package_directory = main_package_directory_finder::find()?;
@@ -17,7 +17,10 @@ pub fn compile(
         &file_path_converter.convert_to_file_path(source_file)?,
         &file_path_converter.convert_to_file_path(dependency_file)?,
         &file_path_converter.convert_to_file_path(object_file)?,
-        &file_path_converter.convert_to_file_path(context_interface_file)?,
+        &context_interface_files
+            .iter()
+            .map(|(&key, path)| Ok((key.into(), file_path_converter.convert_to_file_path(path)?)))
+            .collect::<Result<BTreeMap<_, _>, Box<dyn Error>>>()?,
         target_triple,
         &COMPILE_CONFIGURATION,
         &APPLICATION_CONFIGURATION,

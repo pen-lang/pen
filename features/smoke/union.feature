@@ -14,7 +14,7 @@ Feature: Union
     """pen
     import Os'Context { Context }
 
-    main = \(ctx Context) none {
+    main = \(ctx context) none {
       x = if true {
         [none]
       } else {

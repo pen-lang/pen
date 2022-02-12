@@ -3,6 +3,7 @@ use crate::{
     external_package_configuration_reader,
     infra::{FilePath, Infrastructure},
 };
+use fnv::FnvHashMap;
 use std::error::Error;
 
 // TODO Use a package type field.
@@ -10,25 +11,31 @@ pub fn find(
     infrastructure: &Infrastructure,
     package_directory: &FilePath,
     output_directory: &FilePath,
-) -> Result<url::Url, Box<dyn Error>> {
-    let urls = external_package_configuration_reader::read_main(
+) -> Result<FnvHashMap<String, url::Url>, Box<dyn Error>> {
+    let package_configuration = infrastructure
+        .package_configuration_reader
+        .read(package_directory)?;
+    let system_packages = external_package_configuration_reader::read(
         infrastructure,
-        package_directory,
+        &package_configuration,
         output_directory,
     )?
     .into_iter()
-    .filter_map(|(url, configuration)| {
+    .filter_map(|(key, configuration)| {
         if configuration.is_system() {
-            Some(url)
+            Some((
+                key.clone(),
+                package_configuration.dependencies()[&key].clone(),
+            ))
         } else {
             None
         }
     })
-    .collect::<Vec<_>>();
+    .collect::<FnvHashMap<_, _>>();
 
-    match urls.as_slice() {
-        [] => Err(ApplicationError::SystemPackageNotFound.into()),
-        [url] => Ok(url.clone()),
-        _ => Err(ApplicationError::TooManySystemPackages.into()),
+    if system_packages.is_empty() {
+        Err(ApplicationError::SystemPackageNotFound.into())
+    } else {
+        Ok(system_packages)
     }
 }

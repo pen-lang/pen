@@ -29,6 +29,7 @@ dependencies = [
  "bincode",
  "fmm",
  "fmm-llvm",
+ "fnv",
  "hir",
  "hir_mir",
  "interface",

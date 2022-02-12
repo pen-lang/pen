@@ -34,7 +34,7 @@ pub use error::CompileError;
 pub use error_type_configuration::ErrorTypeConfiguration;
 use hir::{analysis::types::type_existence_validator, ir::*};
 pub use list_type_configuration::ListTypeConfiguration;
-pub use main_module_configuration::MainModuleConfiguration;
+pub use main_module_configuration::*;
 pub use string_type_configuration::StringTypeConfiguration;
 pub use test_module_configuration::TestModuleConfiguration;
 
@@ -46,7 +46,10 @@ pub fn compile_main(
     let context = CompileContext::new(module, compile_configuration.clone().into());
     let module =
         main_function_compiler::compile(module, context.types(), main_module_configuration)?;
-    let (module, _) = compile_module(&module, &context)?;
+    let (module, _) = compile_module(
+        &module,
+        &CompileContext::new(&module, compile_configuration.clone().into()),
+    )?;
 
     Ok(module)
 }

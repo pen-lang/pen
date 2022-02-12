@@ -18,7 +18,15 @@ Feature: OS
     import Os'File'OpenOptions
     import Os'Process
 
-    readFile = \(ctx Context) none | error {
+    main = \(ctx context) none {
+      if _ = run(ctx.Os) as none {
+        none
+      } else {
+        Process'Exit(ctx.Os, 1)
+      }
+    }
+
+    run = \(ctx Context) none | error {
       f = File'Open(ctx, "foo.txt")?
       d = File'Read(ctx, f)?
       f = File'OpenWithOptions(
@@ -34,14 +42,6 @@ Feature: OS
 
       none
     }
-
-    main = \(ctx Context) none {
-      if _ = readFile(ctx) as none {
-        none
-      } else {
-        Process'Exit(ctx, 1)
-      }
-    }
     """
     And a file named "foo.txt" with "foo"
     When I successfully run `pen build`
@@ -55,20 +55,20 @@ Feature: OS
     import Os'File
     import Os'Process
 
-    readFile = \(ctx Context) none | error {
+    main = \(ctx context) none {
+      if _ = run(ctx.Os) as none {
+        none
+      } else {
+        Process'Exit(ctx.Os, 1)
+      }
+    }
+
+    run = \(ctx Context) none | error {
       f = File'Open(ctx, "foo.txt")?
       d = File'ReadLimit(ctx, f, 5)?
       File'Write(ctx, File'StdOut(), d)?
 
       none
-    }
-
-    main = \(ctx Context) none {
-      if _ = readFile(ctx) as none {
-        none
-      } else {
-        Process'Exit(ctx, 1)
-      }
     }
     """
     And a file named "foo.txt" with "Hello, world!"
@@ -85,7 +85,15 @@ Feature: OS
     import Os'Directory
     import Os'Process
 
-    readDirectory = \(ctx Context) none | error {
+    main = \(ctx context) none {
+      if _ = run(ctx.Os) as none {
+        none
+      } else {
+        Process'Exit(ctx.Os, 1)
+      }
+    }
+
+    run = \(ctx Context) none | error {
       File'Write(
         ctx,
         File'StdOut(),
@@ -93,14 +101,6 @@ Feature: OS
       )?
 
       none
-    }
-
-    main = \(ctx Context) none {
-      if _ = readDirectory(ctx) as none {
-        none
-      } else {
-        Process'Exit(ctx, 1)
-      }
     }
     """
     When I successfully run `pen build`
@@ -113,7 +113,7 @@ Feature: OS
     """pen
     import Os'Context { Context }
 
-    main = \(ctx Context) none {
+    main = \(ctx context) none {
       f = go \() none { none }
 
       f()

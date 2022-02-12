@@ -6,11 +6,12 @@ pub enum InfrastructureError {
     CommandNotFound(String),
     CreateDirectory { path: PathBuf, source: io::Error },
     EnvironmentVariableNotFound(String),
-    LinkScriptNotFound(PathBuf),
+    LinkScriptNotFound,
     PackageUrlSchemeNotSupported(url::Url),
     ReadDirectory { path: PathBuf, source: io::Error },
     ReadFile { path: PathBuf, source: io::Error },
-    TooManyFfiBuildScripts(PathBuf),
+    MultipleFfiBuildScripts(PathBuf),
+    MultipleLinkScripts(Vec<PathBuf>),
     WriteFile { path: PathBuf, source: io::Error },
 }
 
@@ -21,11 +22,12 @@ impl Error for InfrastructureError {
             Self::CommandNotFound(_) => None,
             Self::CreateDirectory { path: _, source } => Some(source),
             Self::EnvironmentVariableNotFound(_) => None,
-            Self::LinkScriptNotFound(_) => None,
+            Self::LinkScriptNotFound => None,
             Self::PackageUrlSchemeNotSupported(_) => None,
             Self::ReadDirectory { path: _, source } => Some(source),
             Self::ReadFile { path: _, source } => Some(source),
-            Self::TooManyFfiBuildScripts(_) => None,
+            Self::MultipleFfiBuildScripts(_) => None,
+            Self::MultipleLinkScripts(_) => None,
             Self::WriteFile { path: _, source } => Some(source),
         }
     }
@@ -51,11 +53,9 @@ impl Display for InfrastructureError {
             Self::EnvironmentVariableNotFound(name) => {
                 write!(formatter, "environment variable \"{}\" not found", name)
             }
-            Self::LinkScriptNotFound(directory) => write!(
-                formatter,
-                "link script not found in system package \"{}\"",
-                directory.display()
-            ),
+            Self::LinkScriptNotFound => {
+                write!(formatter, "link script not found in any system packages")
+            }
             Self::PackageUrlSchemeNotSupported(url) => {
                 write!(formatter, "package URL scheme not supported {}", url)
             }
@@ -67,11 +67,22 @@ impl Display for InfrastructureError {
             Self::ReadFile { path, source: _ } => {
                 write!(formatter, "failed to read file {}", path.to_string_lossy())
             }
-            Self::TooManyFfiBuildScripts(path) => {
+            Self::MultipleFfiBuildScripts(path) => {
                 write!(
                     formatter,
-                    "too many FFI build scripts in package directory \"{}\"",
+                    "multiple FFI build scripts found in package directory \"{}\"",
                     path.display()
+                )
+            }
+            Self::MultipleLinkScripts(paths) => {
+                write!(
+                    formatter,
+                    "multiple link scripts found in system packages {}",
+                    paths
+                        .iter()
+                        .map(|path| format!("\"{}\"", path.display()))
+                        .collect::<Vec<_>>()
+                        .join(", ")
                 )
             }
             Self::WriteFile { path, source: _ } => {

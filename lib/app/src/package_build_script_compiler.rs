@@ -82,22 +82,32 @@ pub fn compile_modules(
                         Ok(MainModuleTarget::new(
                             target.source_file().clone(),
                             target.object_file().clone(),
-                            file_path_resolver::resolve_interface_file(
+                            system_package_finder::find(
+                                infrastructure,
+                                package_directory,
                                 output_directory,
-                                &file_path_resolver::resolve_source_file(
-                                    &file_path_resolver::resolve_package_directory(
+                            )?
+                            .into_iter()
+                            .map(|(key, url)| {
+                                (
+                                    key,
+                                    file_path_resolver::resolve_interface_file(
                                         output_directory,
-                                        &system_package_finder::find(
-                                            infrastructure,
-                                            package_directory,
-                                            output_directory,
-                                        )?,
+                                        &file_path_resolver::resolve_source_file(
+                                            &file_path_resolver::resolve_package_directory(
+                                                output_directory,
+                                                &url,
+                                            ),
+                                            &[application_configuration
+                                                .context_module_basename
+                                                .clone()],
+                                            &infrastructure.file_path_configuration,
+                                        ),
+                                        &infrastructure.file_path_configuration,
                                     ),
-                                    &[application_configuration.context_module_basename.clone()],
-                                    &infrastructure.file_path_configuration,
-                                ),
-                                &infrastructure.file_path_configuration,
-                            ),
+                                )
+                            })
+                            .collect(),
                         ))
                     })
                     .transpose()?
@@ -174,14 +184,14 @@ pub fn compile_application(
         infrastructure
             .build_script_compiler
             .compile_application(
-                &file_path_resolver::resolve_package_directory(
+                &system_package_finder::find(
+                    infrastructure,
+                    main_package_directory,
                     output_directory,
-                    &system_package_finder::find(
-                        infrastructure,
-                        main_package_directory,
-                        output_directory,
-                    )?,
-                ),
+                )?
+                .values()
+                .map(|url| file_path_resolver::resolve_package_directory(output_directory, url))
+                .collect::<Vec<_>>(),
                 &[file_path_resolver::resolve_main_package_archive_file(
                     output_directory,
                     &infrastructure.file_path_configuration,

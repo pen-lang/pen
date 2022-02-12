@@ -5,4 +5,10 @@ pub struct ApplicationConfiguration {
     pub main_module: MainModuleConfiguration,
 }
 
-pub type MainModuleConfiguration = hir_mir::MainModuleConfiguration;
+pub struct MainModuleConfiguration {
+    pub source_main_function_name: String,
+    pub object_main_function_name: String,
+    pub main_context_type_name: String,
+    pub system_context_type_name: String,
+    pub new_system_context_function_name: String,
+}

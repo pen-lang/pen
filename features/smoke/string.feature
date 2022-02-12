@@ -15,11 +15,11 @@ Feature: String
     import Os'Context { Context }
     import Os'Process
 
-    main = \(ctx Context) none {
+    main = \(ctx context) none {
       if "foo" == "foo" {
         none
       } else {
-        Process'Exit(ctx, 1)
+        Process'Exit(ctx.Os, 1)
       }
     }
     """
