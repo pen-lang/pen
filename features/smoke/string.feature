@@ -15,7 +15,7 @@ Feature: String
     import Os'Context { Context }
     import Os'Process
 
-    main = \(ctx Context) none {
+    main = \(ctx context) none {
       if "foo" == "foo" {
         none
       } else {

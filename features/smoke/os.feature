@@ -35,7 +35,7 @@ Feature: OS
       none
     }
 
-    main = \(ctx Context) none {
+    main = \(ctx context) none {
       if _ = readFile(ctx) as none {
         none
       } else {
@@ -63,7 +63,7 @@ Feature: OS
       none
     }
 
-    main = \(ctx Context) none {
+    main = \(ctx context) none {
       if _ = readFile(ctx) as none {
         none
       } else {
@@ -95,7 +95,7 @@ Feature: OS
       none
     }
 
-    main = \(ctx Context) none {
+    main = \(ctx context) none {
       if _ = readDirectory(ctx) as none {
         none
       } else {
@@ -113,7 +113,7 @@ Feature: OS
     """pen
     import Os'Context { Context }
 
-    main = \(ctx Context) none {
+    main = \(ctx context) none {
       f = go \() none { none }
 
       f()

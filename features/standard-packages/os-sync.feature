@@ -17,7 +17,7 @@ Feature: OS (synchronous version)
     import Os'File
     import Os'Process
 
-    main = \(ctx Context) none {
+    main = \(ctx context) none {
       if _ = run(ctx) as none {
         none
       } else {
@@ -44,7 +44,7 @@ Feature: OS (synchronous version)
     import Os'File
     import Os'Process
 
-    main = \(ctx Context) none {
+    main = \(ctx context) none {
       if _ = File'Write(ctx, File'StdOut(), String'Join(Environment'Arguments(ctx), " ")) as number {
         none
       } else {
@@ -71,7 +71,7 @@ Feature: OS (synchronous version)
       none
     }
 
-    main = \(ctx Context) none {
+    main = \(ctx context) none {
       if _ = printEnvironmentVariable(ctx) as none {
         none
       } else {
@@ -91,7 +91,7 @@ Feature: OS (synchronous version)
     import Os'File { File }
     import Os'Process
 
-    main = \(ctx Context) none {
+    main = \(ctx context) none {
       if f = File'Open(ctx, "./foo.txt") as File {
         none
       } else {
@@ -120,7 +120,7 @@ Feature: OS (synchronous version)
       none
     }
 
-    main = \(ctx Context) none {
+    main = \(ctx context) none {
       if _ = readFile(ctx) as none {
         none
       } else {
@@ -148,7 +148,7 @@ Feature: OS (synchronous version)
       none
     }
 
-    main = \(ctx Context) none {
+    main = \(ctx context) none {
       if _ = readFile(ctx) as none {
         none
       } else {
@@ -181,7 +181,7 @@ Feature: OS (synchronous version)
       none
     }
 
-    main = \(ctx Context) none {
+    main = \(ctx context) none {
       if _ = writeFile(ctx) as none {
         none
       } else {
@@ -201,7 +201,7 @@ Feature: OS (synchronous version)
     import Os'File
     import Os'Process
 
-    main = \(ctx Context) none {
+    main = \(ctx context) none {
       if _ = File'Copy(ctx, "foo.txt", "bar.txt") as none {
         none
       } else {
@@ -222,7 +222,7 @@ Feature: OS (synchronous version)
     import Os'File
     import Os'Process
 
-    main = \(ctx Context) none {
+    main = \(ctx context) none {
       if _ = File'Move(ctx, "foo.txt", "bar.txt") as none {
         none
       } else {
@@ -243,7 +243,7 @@ Feature: OS (synchronous version)
     import Os'File
     import Os'Process
 
-    main = \(ctx Context) none {
+    main = \(ctx context) none {
       if _ = File'Remove(ctx, "foo.txt") as none {
         none
       } else {
@@ -275,7 +275,7 @@ Feature: OS (synchronous version)
       none
     }
 
-    main = \(ctx Context) none {
+    main = \(ctx context) none {
       if _ = readDirectory(ctx) as none {
         none
       } else {
@@ -295,7 +295,7 @@ Feature: OS (synchronous version)
     import Os'Directory
     import Os'Process
 
-    main = \(ctx Context) none {
+    main = \(ctx context) none {
       if _ = Directory'Create(ctx, "foo") as none {
         none
       } else {
@@ -314,7 +314,7 @@ Feature: OS (synchronous version)
     import Os'Directory
     import Os'Process
 
-    main = \(ctx Context) none {
+    main = \(ctx context) none {
       if _ = Directory'Remove(ctx, "foo") as none {
         none
       } else {
@@ -335,7 +335,7 @@ Feature: OS (synchronous version)
     import Os'File'Metadata { Metadata }
     import Os'Process
 
-    main = \(ctx Context) none {
+    main = \(ctx context) none {
       m = File'Metadata(ctx, "foo")
 
       c = if m = m as Metadata {
@@ -373,7 +373,7 @@ Feature: OS (synchronous version)
       none
     }
 
-    main = \(ctx Context) none {
+    main = \(ctx context) none {
       if m = run(ctx) as none {
         none
       } else {
@@ -390,7 +390,7 @@ Feature: OS (synchronous version)
     import Os'Context { Context }
     import Os'Time
 
-    main = \(ctx Context) none {
+    main = \(ctx context) none {
       Time'Sleep(ctx, 1)
     }
     """
@@ -412,7 +412,7 @@ Feature: OS (synchronous version)
       none
     }
 
-    main = \(ctx Context) none {
+    main = \(ctx context) none {
       if m = run(ctx) as none {
         none
       } else {
@@ -429,7 +429,7 @@ Feature: OS (synchronous version)
     import Os'Context { Context }
     import Os'Process
 
-    main = \(ctx Context) none {
+    main = \(ctx context) none {
       Process'Exit(ctx, 42)
     }
     """

@@ -19,7 +19,7 @@ Feature: Memory leak
       f(none)
     }
 
-    main = \(ctx Context) none {
+    main = \(ctx context) none {
       f(none)
 
       none
@@ -34,7 +34,7 @@ Feature: Memory leak
     import Os'Context { Context }
     import Os'File
 
-    main = \(ctx Context) none {
+    main = \(ctx context) none {
       File'Write(ctx, File'StdOut(), "Hello, world!\n")
 
       none
@@ -52,7 +52,7 @@ Feature: Memory leak
       x number
     }
 
-    main = \(ctx Context) none {
+    main = \(ctx context) none {
       _ = foo{x: 42}
 
       none
@@ -70,7 +70,7 @@ Feature: Memory leak
       x number
     }
 
-    main = \(ctx Context) none {
+    main = \(ctx context) none {
       _ = foo{x: 42}.x
 
       none
@@ -88,7 +88,7 @@ Feature: Memory leak
       x
     }
 
-    main = \(ctx Context) none {
+    main = \(ctx context) none {
       f("")
 
       none
@@ -106,7 +106,7 @@ Feature: Memory leak
       x number
     }
 
-    main = \(ctx Context) none {
+    main = \(ctx context) none {
       x = foo{x: 42}
       x = x.x
 
@@ -125,7 +125,7 @@ Feature: Memory leak
       x number
     }
 
-    main = \(ctx Context) none {
+    main = \(ctx context) none {
       x = foo{x: 42}
       _ = \() number { x.x }
 
@@ -141,7 +141,7 @@ Feature: Memory leak
     import Core'Number
     import Os'Context { Context }
 
-    main = \(ctx Context) none {
+    main = \(ctx context) none {
       Number'String(42)
 
       none
@@ -156,7 +156,7 @@ Feature: Memory leak
     import Core'String
     import Os'Context { Context }
 
-    main = \(ctx Context) none {
+    main = \(ctx context) none {
       String'Join([string "hello", "world"], " ")
 
       none
@@ -174,7 +174,7 @@ Feature: Memory leak
       x number
     }
 
-    main = \(ctx Context) none {
+    main = \(ctx context) none {
       x = foo{x: 42}
       _ = [foo x]
 
@@ -193,7 +193,7 @@ Feature: Memory leak
       x number
     }
 
-    main = \(ctx Context) none {
+    main = \(ctx context) none {
       x = foo{x: 42}
 
       if [x, ...xs] = [foo x] {
@@ -217,7 +217,7 @@ Feature: Memory leak
       x number
     }
 
-    main = \(ctx Context) none {
+    main = \(ctx context) none {
       [foo foo{x: 42}]
 
       none
@@ -235,7 +235,7 @@ Feature: Memory leak
       x number
     }
 
-    main = \(ctx Context) none {
+    main = \(ctx context) none {
       if [x, ...xs] = [foo foo{x: 42}] {
         x()
       } else {
@@ -253,7 +253,7 @@ Feature: Memory leak
     """pen
     import Os'Context { Context }
 
-    main = \(ctx Context) none {
+    main = \(ctx context) none {
       xs = [none none]
 
       if [x, ..._] = xs {

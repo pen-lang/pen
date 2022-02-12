@@ -12,7 +12,7 @@ Feature: Building packages
     """pen
     import Os'Context { Context }
 
-    main = \(ctx Context) none {
+    main = \(ctx context) none {
       none
     }
     """
@@ -46,7 +46,7 @@ Feature: Building packages
     """pen
     import Os'Context { Context }
 
-    main = \(ctx Context) none {
+    main = \(ctx context) none {
       none
     }
     """

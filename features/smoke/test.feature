@@ -47,7 +47,7 @@ Feature: Testing
     """pen
     import Os'Context { Context }
 
-    main = \(ctx Context) none {
+    main = \(ctx context) none {
       none
     }
     """

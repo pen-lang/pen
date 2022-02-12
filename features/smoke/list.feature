@@ -14,7 +14,7 @@ Feature: List
     """pen
     import Os'Context { Context }
 
-    main = \(ctx Context) none {
+    main = \(ctx context) none {
       if [x, ...xs] = [none ...[none none]] {
         x()
       } else {
@@ -33,7 +33,7 @@ Feature: List
     import Os'Context { Context }
     import Os'Process
 
-    main = \(ctx Context) none {
+    main = \(ctx context) none {
       if [x, ..._] = [any "foo"] {
         x()
 
@@ -59,7 +59,7 @@ Feature: List
       ]
     }
 
-    main = \(ctx Context) none {
+    main = \(ctx context) none {
       if [x, ..._] = f([[boolean] [boolean true, false]]) {
         x()
 
@@ -77,7 +77,7 @@ Feature: List
     """pen
     import Os'Context
 
-    main = \(ctx Context) none {
+    main = \(ctx context) none {
       [none y() for y in [none 1]]
 
       none
