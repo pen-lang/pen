@@ -32,6 +32,7 @@ pub fn sort(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::package_configuration::PackageType;
 
     #[test]
     fn sort_packages() {
@@ -40,27 +41,27 @@ mod tests {
                 &[
                     (
                         url::Url::parse("file:///foo").unwrap(),
-                        PackageConfiguration::new(Default::default(), false)
+                        PackageConfiguration::new(PackageType::Application, Default::default())
                     ),
                     (
                         url::Url::parse("file:///bar").unwrap(),
                         PackageConfiguration::new(
+                            PackageType::Application,
                             [
                                 ("Foo".into(), url::Url::parse("file:///foo").unwrap()),
                                 ("Baz".into(), url::Url::parse("file:///baz").unwrap())
                             ]
                             .into_iter()
                             .collect(),
-                            false
                         )
                     ),
                     (
                         url::Url::parse("file:///baz").unwrap(),
                         PackageConfiguration::new(
+                            PackageType::Application,
                             [("Foo".into(), url::Url::parse("file:///foo").unwrap()),]
                                 .into_iter()
                                 .collect(),
-                            false
                         )
                     )
                 ]

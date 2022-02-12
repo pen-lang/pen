@@ -2,19 +2,50 @@ use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub enum JsonPackageType {
+    Application,
+    Library,
+    System,
+}
+
+impl From<app::PackageType> for JsonPackageType {
+    fn from(type_: app::PackageType) -> JsonPackageType {
+        match type_ {
+            app::PackageType::Application => JsonPackageType::Application,
+            app::PackageType::Library => JsonPackageType::Library,
+            app::PackageType::System => JsonPackageType::System,
+        }
+    }
+}
+
+impl From<JsonPackageType> for app::PackageType {
+    fn from(type_: JsonPackageType) -> app::PackageType {
+        match type_ {
+            JsonPackageType::Application => app::PackageType::Application,
+            JsonPackageType::Library => app::PackageType::Library,
+            JsonPackageType::System => app::PackageType::System,
+        }
+    }
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct JsonPackageConfiguration {
+    pub type_: JsonPackageType,
     pub dependencies: BTreeMap<String, String>,
-    pub system: Option<bool>,
 }
 
 impl JsonPackageConfiguration {
-    pub fn new(dependencies: BTreeMap<String, url::Url>, system: bool) -> Self {
+    pub fn new(
+        type_: impl Into<JsonPackageType>,
+        dependencies: BTreeMap<String, url::Url>,
+    ) -> Self {
         Self {
+            type_: type_.into(),
             dependencies: dependencies
                 .iter()
                 .map(|(name, url)| (name.clone(), url.as_str().into()))
                 .collect(),
-            system: if system { Some(true) } else { None },
         }
     }
 
@@ -23,6 +54,7 @@ impl JsonPackageConfiguration {
         base_url: &url::Url,
     ) -> Result<app::PackageConfiguration, url::ParseError> {
         Ok(app::PackageConfiguration::new(
+            self.type_.into(),
             self.dependencies
                 .into_iter()
                 .map(|(name, url)| {
@@ -32,7 +64,6 @@ impl JsonPackageConfiguration {
                     ))
                 })
                 .collect::<Result<_, url::ParseError>>()?,
-            self.system.unwrap_or_default(),
         ))
     }
 }
