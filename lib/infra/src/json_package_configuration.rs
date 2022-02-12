@@ -31,6 +31,7 @@ impl From<JsonPackageType> for app::PackageType {
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct JsonPackageConfiguration {
+    #[serde(rename = "type")]
     pub type_: JsonPackageType,
     pub dependencies: BTreeMap<String, String>,
 }
