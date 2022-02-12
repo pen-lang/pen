@@ -92,10 +92,16 @@ Feature: List as stream
     }
 
     main = \(ctx context) none {
-      if [x, ...xs] = [none ...foo(ctx.Os)] {
+      xs = [none ...foo(ctx.Os)]
+
+      if [x, ...xs] = xs {
         Process'Exit(ctx.Os, 1)
       } else {
-        none
+        if [x, ...xs] = xs {
+          Process'Exit(ctx.Os, 1)
+        } else {
+          none
+        }
       }
     }
     """
