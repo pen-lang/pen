@@ -18,10 +18,10 @@ Feature: OS (synchronous version)
     import Os'Process
 
     main = \(ctx context) none {
-      if _ = run(ctx) as none {
+      if _ = run(ctx.Os) as none {
         none
       } else {
-        Process'Exit(ctx, 1)
+        Process'Exit(ctx.Os, 1)
       }
     }
 
@@ -45,11 +45,17 @@ Feature: OS (synchronous version)
     import Os'Process
 
     main = \(ctx context) none {
-      if _ = File'Write(ctx, File'StdOut(), String'Join(Environment'Arguments(ctx), " ")) as number {
+      if _ = run(ctx.Os) as none {
         none
       } else {
-        Process'Exit(ctx, 1)
+        Process'Exit(ctx.Os, 1)
       }
+    }
+
+    run = \(ctx Context) none | error {
+      File'Write(ctx, File'StdOut(), String'Join(Environment'Arguments(ctx), " "))?
+
+      none
     }
     """
     When I successfully run `pen build`
@@ -65,18 +71,18 @@ Feature: OS (synchronous version)
     import Os'Environment
     import Os'Process
 
-    printEnvironmentVariable = \(ctx Context) none | error {
+    main = \(ctx context) none {
+      if _ = run(ctx.Os) as none {
+        none
+      } else {
+        Process'Exit(ctx.Os, 1)
+      }
+    }
+
+    run = \(ctx Context) none | error {
       File'Write(ctx, File'StdOut(), Environment'Variable(ctx, "FOO")?)?
 
       none
-    }
-
-    main = \(ctx context) none {
-      if _ = printEnvironmentVariable(ctx) as none {
-        none
-      } else {
-        Process'Exit(ctx, 1)
-      }
     }
     """
     And I append "foo" to the environment variable "FOO"
@@ -92,11 +98,17 @@ Feature: OS (synchronous version)
     import Os'Process
 
     main = \(ctx context) none {
-      if f = File'Open(ctx, "./foo.txt") as File {
+      if _ = run(ctx.Os) as none {
         none
       } else {
-        Process'Exit(ctx, 1)
+        Process'Exit(ctx.Os, 1)
       }
+    }
+
+    run = \(ctx Context) none | error {
+      File'Open(ctx, "./foo.txt")?
+
+      none
     }
     """
     And a file named "foo.txt" with ""
@@ -111,21 +123,21 @@ Feature: OS (synchronous version)
     import Os'File'OpenOptions
     import Os'Process
 
-    readFile = \(ctx Context) none | error {
+    main = \(ctx context) none {
+      if _ = run(ctx.Os) as none {
+        none
+      } else {
+        Process'Exit(ctx.Os, 1)
+      }
+    }
+
+    run = \(ctx Context) none | error {
       f = File'Open(ctx, "foo.txt")?
       d = File'Read(ctx, f)?
 
       File'Write(ctx, File'StdOut(), d)?
 
       none
-    }
-
-    main = \(ctx context) none {
-      if _ = readFile(ctx) as none {
-        none
-      } else {
-        Process'Exit(ctx, 1)
-      }
     }
     """
     And a file named "foo.txt" with "foo"
@@ -140,20 +152,20 @@ Feature: OS (synchronous version)
     import Os'File
     import Os'Process
 
-    readFile = \(ctx Context) none | error {
+    main = \(ctx context) none {
+      if _ = run(ctx.Os) as none {
+        none
+      } else {
+        Process'Exit(ctx.Os, 1)
+      }
+    }
+
+    run = \(ctx Context) none | error {
       f = File'Open(ctx, "foo.txt")?
       d = File'ReadLimit(ctx, f, 5)?
       File'Write(ctx, File'StdOut(), d)?
 
       none
-    }
-
-    main = \(ctx context) none {
-      if _ = readFile(ctx) as none {
-        none
-      } else {
-        Process'Exit(ctx, 1)
-      }
     }
     """
     And a file named "foo.txt" with "Hello, world!"
@@ -169,7 +181,15 @@ Feature: OS (synchronous version)
     import Os'File'OpenOptions
     import Os'Process
 
-    writeFile = \(ctx Context) none | error {
+    main = \(ctx context) none {
+      if _ = run(ctx.Os) as none {
+        none
+      } else {
+        Process'Exit(ctx.Os, 1)
+      }
+    }
+
+    run = \(ctx Context) none | error {
       f = File'OpenWithOptions(
         ctx,
         "./foo.txt",
@@ -179,14 +199,6 @@ Feature: OS (synchronous version)
       File'Write(ctx, f, "foo")?
 
       none
-    }
-
-    main = \(ctx context) none {
-      if _ = writeFile(ctx) as none {
-        none
-      } else {
-        Process'Exit(ctx, 1)
-      }
     }
     """
     And a file named "foo.txt" with ""
@@ -202,10 +214,10 @@ Feature: OS (synchronous version)
     import Os'Process
 
     main = \(ctx context) none {
-      if _ = File'Copy(ctx, "foo.txt", "bar.txt") as none {
+      if _ = File'Copy(ctx.Os, "foo.txt", "bar.txt") as none {
         none
       } else {
-        Process'Exit(ctx, 1)
+        Process'Exit(ctx.Os, 1)
       }
     }
     """
@@ -223,10 +235,10 @@ Feature: OS (synchronous version)
     import Os'Process
 
     main = \(ctx context) none {
-      if _ = File'Move(ctx, "foo.txt", "bar.txt") as none {
+      if _ = File'Move(ctx.Os, "foo.txt", "bar.txt") as none {
         none
       } else {
-        Process'Exit(ctx, 1)
+        Process'Exit(ctx.Os, 1)
       }
     }
     """
@@ -244,10 +256,10 @@ Feature: OS (synchronous version)
     import Os'Process
 
     main = \(ctx context) none {
-      if _ = File'Remove(ctx, "foo.txt") as none {
+      if _ = File'Remove(ctx.Os, "foo.txt") as none {
         none
       } else {
-        Process'Exit(ctx, 1)
+        Process'Exit(ctx.Os, 1)
       }
     }
     """
@@ -265,7 +277,15 @@ Feature: OS (synchronous version)
     import Os'Directory
     import Os'Process
 
-    readDirectory = \(ctx Context) none | error {
+    main = \(ctx context) none {
+      if _ = run(ctx.Os) as none {
+        none
+      } else {
+        Process'Exit(ctx.Os, 1)
+      }
+    }
+
+    run = \(ctx Context) none | error {
       File'Write(
         ctx,
         File'StdOut(),
@@ -273,14 +293,6 @@ Feature: OS (synchronous version)
       )?
 
       none
-    }
-
-    main = \(ctx context) none {
-      if _ = readDirectory(ctx) as none {
-        none
-      } else {
-        Process'Exit(ctx, 1)
-      }
     }
     """
     When I successfully run `pen build`
@@ -296,10 +308,10 @@ Feature: OS (synchronous version)
     import Os'Process
 
     main = \(ctx context) none {
-      if _ = Directory'Create(ctx, "foo") as none {
+      if _ = Directory'Create(ctx.Os, "foo") as none {
         none
       } else {
-        Process'Exit(ctx, 1)
+        Process'Exit(ctx.Os, 1)
       }
     }
     """
@@ -315,10 +327,10 @@ Feature: OS (synchronous version)
     import Os'Process
 
     main = \(ctx context) none {
-      if _ = Directory'Remove(ctx, "foo") as none {
+      if _ = Directory'Remove(ctx.Os, "foo") as none {
         none
       } else {
-        Process'Exit(ctx, 1)
+        Process'Exit(ctx.Os, 1)
       }
     }
     """
@@ -336,7 +348,7 @@ Feature: OS (synchronous version)
     import Os'Process
 
     main = \(ctx context) none {
-      m = File'Metadata(ctx, "foo")
+      m = File'Metadata(ctx.Os, "foo")
 
       c = if m = m as Metadata {
         if m.Size == 3 {
@@ -348,7 +360,7 @@ Feature: OS (synchronous version)
         1
       }
 
-      Process'Exit(ctx, c)
+      Process'Exit(ctx.Os, c)
     }
     """
     And a file named "foo" with:
@@ -367,18 +379,18 @@ Feature: OS (synchronous version)
     import Os'Process
     import Os'Time
 
+    main = \(ctx context) none {
+      if m = run(ctx.Os) as none {
+        none
+      } else {
+        Process'Exit(ctx.Os, 1)
+      }
+    }
+
     run = \(ctx Context) none | error {
       File'Write(ctx, File'StdOut(), Number'String(Time'Now(ctx)))?
 
       none
-    }
-
-    main = \(ctx context) none {
-      if m = run(ctx) as none {
-        none
-      } else {
-        Process'Exit(ctx, 1)
-      }
     }
     """
     When I successfully run `pen build`
@@ -391,7 +403,7 @@ Feature: OS (synchronous version)
     import Os'Time
 
     main = \(ctx context) none {
-      Time'Sleep(ctx, 1)
+      Time'Sleep(ctx.Os, 1)
     }
     """
     When I successfully run `pen build`
@@ -406,18 +418,18 @@ Feature: OS (synchronous version)
     import Os'Process
     import Os'Random
 
+    main = \(ctx context) none {
+      if m = run(ctx.Os) as none {
+        none
+      } else {
+        Process'Exit(ctx.Os, 1)
+      }
+    }
+
     run = \(ctx Context) none | error {
       File'Write(ctx, File'StdOut(), Number'String(Random'Number(ctx)))?
 
       none
-    }
-
-    main = \(ctx context) none {
-      if m = run(ctx) as none {
-        none
-      } else {
-        Process'Exit(ctx, 1)
-      }
     }
     """
     When I successfully run `pen build`
@@ -430,7 +442,7 @@ Feature: OS (synchronous version)
     import Os'Process
 
     main = \(ctx context) none {
-      Process'Exit(ctx, 42)
+      Process'Exit(ctx.Os, 42)
     }
     """
     When I successfully run `pen build`
