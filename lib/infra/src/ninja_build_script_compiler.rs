@@ -3,7 +3,7 @@ use crate::{
     default_target_finder, llvm_command_finder, package_script_finder, InfrastructureError,
 };
 use app::infra::FilePath;
-use std::{error::Error, path::PathBuf, sync::Arc};
+use std::{collections::BTreeMap, error::Error, path::PathBuf, sync::Arc};
 
 const FFI_ARCHIVE_DIRECTORY: &str = "ffi";
 const AR_DESCRIPTION: &str = "  description = archiving package of $package_directory";
@@ -245,8 +245,13 @@ impl NinjaBuildScriptCompiler {
         let context_interface_files = target
             .context_interface_files()
             .iter()
-            .map(|path| self.file_path_converter.convert_to_os_path(path))
-            .collect::<Vec<_>>();
+            .map(|(key, path)| {
+                (
+                    key.clone(),
+                    self.file_path_converter.convert_to_os_path(path),
+                )
+            })
+            .collect::<BTreeMap<_, _>>();
 
         Ok([
             format!(
@@ -255,7 +260,7 @@ impl NinjaBuildScriptCompiler {
                 source_file.display(),
                 dependency_file.display(),
                 context_interface_files
-                    .iter()
+                    .values()
                     .map(|path| path.display().to_string())
                     .collect::<Vec<_>>()
                     .join(" "),
@@ -265,7 +270,7 @@ impl NinjaBuildScriptCompiler {
                 "  context_options = {}",
                 context_interface_files
                     .iter()
-                    .map(|path| format!("-c {}", path.display()))
+                    .map(|(key, path)| format!("-c {} {}", key, path.display()))
                     .collect::<Vec<_>>()
                     .join(" ")
             ),

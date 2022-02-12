@@ -12,7 +12,8 @@ pub use compile_configuration::{
     CompileConfiguration, ConcurrencyConfiguration, ErrorTypeConfiguration, FmmConfiguration,
     HirConfiguration, ListTypeConfiguration, StringTypeConfiguration,
 };
-use std::error::Error;
+use fnv::FnvHashMap;
+use std::{collections::BTreeMap, error::Error};
 
 const PRELUDE_PREFIX: &str = "prelude:";
 
@@ -26,7 +27,7 @@ pub fn compile(
     compile_configuration: &CompileConfiguration,
 ) -> Result<(), Box<dyn Error>> {
     let (module, module_interface) = hir_mir::compile(
-        &compile_to_hir(infrastructure, source_file, dependency_file, None)?,
+        &compile_to_hir(infrastructure, source_file, dependency_file, &[])?,
         &prelude_type_configuration_qualifier::qualify(&compile_configuration.hir, PRELUDE_PREFIX),
     )?;
 
@@ -51,16 +52,20 @@ pub fn compile_main(
     source_file: &FilePath,
     dependency_file: &FilePath,
     object_file: &FilePath,
-    context_interface_file: &FilePath,
+    context_interface_files: &BTreeMap<String, FilePath>,
     target_triple: Option<&str>,
     compile_configuration: &CompileConfiguration,
     application_configuration: &ApplicationConfiguration,
 ) -> Result<(), Box<dyn Error>> {
-    let context_interface = interface_serializer::deserialize(
-        &infrastructure
-            .file_system
-            .read_to_vec(context_interface_file)?,
-    )?;
+    let context_interfaces = context_interface_files
+        .iter()
+        .map(|(key, file)| {
+            Ok((
+                key.clone(),
+                interface_serializer::deserialize(&infrastructure.file_system.read_to_vec(file)?)?,
+            ))
+        })
+        .collect::<Result<FnvHashMap<_, _>, Box<dyn Error>>>()?;
 
     compile_mir_module(
         infrastructure,
@@ -69,7 +74,7 @@ pub fn compile_main(
                 infrastructure,
                 source_file,
                 dependency_file,
-                Some(&context_interface),
+                &context_interfaces.values().cloned().collect::<Vec<_>>(),
             )?,
             &prelude_type_configuration_qualifier::qualify(
                 &compile_configuration.hir,
@@ -77,7 +82,7 @@ pub fn compile_main(
             ),
             &main_module_configuration_qualifier::qualify(
                 &application_configuration.main_module,
-                &context_interface,
+                &context_interfaces,
             )?,
         )?,
         object_file,
@@ -100,7 +105,7 @@ pub fn compile_test(
     test_module_configuration: &TestModuleConfiguration,
 ) -> Result<(), Box<dyn Error>> {
     let (module, test_information) = hir_mir::compile_test(
-        &compile_to_hir(infrastructure, source_file, dependency_file, None)?,
+        &compile_to_hir(infrastructure, source_file, dependency_file, &[])?,
         &prelude_type_configuration_qualifier::qualify(&compile_configuration.hir, PRELUDE_PREFIX),
         test_module_configuration,
     )?;
@@ -125,7 +130,7 @@ fn compile_to_hir(
     infrastructure: &Infrastructure,
     source_file: &FilePath,
     dependency_file: &FilePath,
-    context_interface: Option<&interface::Module>,
+    extra_prelude_interfaces: &[interface::Module],
 ) -> Result<hir::ir::Module, Box<dyn Error>> {
     let (interface_files, prelude_interface_files) = dependency_serializer::deserialize(
         &infrastructure.file_system.read_to_vec(dependency_file)?,
@@ -158,7 +163,7 @@ fn compile_to_hir(
             .map(|file| {
                 interface_serializer::deserialize(&infrastructure.file_system.read_to_vec(file)?)
             })
-            .chain(context_interface.cloned().map(Ok))
+            .chain(extra_prelude_interfaces.iter().cloned().map(Ok))
             .collect::<Result<Vec<_>, _>>()?,
     )?)
 }

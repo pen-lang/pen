@@ -87,24 +87,27 @@ pub fn compile_modules(
                                 package_directory,
                                 output_directory,
                             )?
-                            .values()
-                            .map(|url| {
-                                file_path_resolver::resolve_interface_file(
-                                    output_directory,
-                                    &file_path_resolver::resolve_source_file(
-                                        &file_path_resolver::resolve_package_directory(
-                                            output_directory,
-                                            url,
+                            .into_iter()
+                            .map(|(key, url)| {
+                                (
+                                    key,
+                                    file_path_resolver::resolve_interface_file(
+                                        output_directory,
+                                        &file_path_resolver::resolve_source_file(
+                                            &file_path_resolver::resolve_package_directory(
+                                                output_directory,
+                                                &url,
+                                            ),
+                                            &[application_configuration
+                                                .context_module_basename
+                                                .clone()],
+                                            &infrastructure.file_path_configuration,
                                         ),
-                                        &[application_configuration
-                                            .context_module_basename
-                                            .clone()],
                                         &infrastructure.file_path_configuration,
                                     ),
-                                    &infrastructure.file_path_configuration,
                                 )
                             })
-                            .collect::<Vec<_>>(),
+                            .collect(),
                         ))
                     })
                     .transpose()?

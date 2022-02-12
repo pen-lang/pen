@@ -75,7 +75,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                         .short('c')
                         .long("context-interface-file")
                         .required(true)
-                        .takes_value(true),
+                        .number_of_values(2),
                 )
                 .arg(clap::Arg::new("source file").required(true))
                 .arg(clap::Arg::new("dependency file").required(true))
@@ -186,13 +186,25 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
             matches.value_of("interface file").unwrap(),
             matches.value_of("target"),
         ),
-        ("compile-main", matches) => main_module_compiler::compile(
-            matches.value_of("source file").unwrap(),
-            matches.value_of("dependency file").unwrap(),
-            matches.value_of("object file").unwrap(),
-            matches.value_of("context interface file").unwrap(),
-            matches.value_of("target"),
-        ),
+        ("compile-main", matches) => {
+            let context_options = matches
+                .values_of("context interface file")
+                .unwrap()
+                .collect::<Vec<_>>();
+
+            main_module_compiler::compile(
+                matches.value_of("source file").unwrap(),
+                matches.value_of("dependency file").unwrap(),
+                matches.value_of("object file").unwrap(),
+                &context_options
+                    .iter()
+                    .step_by(2)
+                    .cloned()
+                    .zip(context_options.iter().skip(1).step_by(2).cloned())
+                    .collect(),
+                matches.value_of("target"),
+            )
+        }
         ("compile-prelude", matches) => prelude_module_compiler::compile(
             matches.value_of("source file").unwrap(),
             matches.value_of("object file").unwrap(),
