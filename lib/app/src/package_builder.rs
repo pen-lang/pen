@@ -4,7 +4,7 @@ use crate::{
     error::ApplicationError,
     external_package_configuration_reader, external_package_topological_sorter,
     infra::{FilePath, Infrastructure},
-    package_build_script_compiler,
+    package_build_script_compiler, PackageType,
 };
 use std::error::Error;
 
@@ -42,11 +42,12 @@ pub fn build(
         }),
     )
     .chain(
-        if is_application_package(
-            infrastructure,
-            main_package_directory,
-            application_configuration,
-        )? {
+        if infrastructure
+            .package_configuration_reader
+            .read(main_package_directory)?
+            .type_()
+            == PackageType::Application
+        {
             Some(package_build_script_compiler::compile_application(
                 infrastructure,
                 main_package_directory,
@@ -72,19 +73,4 @@ pub fn build(
         .map_err(|_| ApplicationError::Build)?;
 
     Ok(())
-}
-
-// TODO Use a package type field.
-fn is_application_package(
-    infrastructure: &Infrastructure,
-    main_package_directory: &FilePath,
-    application_configuration: &ApplicationConfiguration,
-) -> Result<bool, Box<dyn Error>> {
-    Ok(infrastructure
-        .file_system
-        .exists(&file_path_resolver::resolve_source_file(
-            main_package_directory,
-            &[application_configuration.main_module_basename.clone()],
-            &infrastructure.file_path_configuration,
-        )))
 }
