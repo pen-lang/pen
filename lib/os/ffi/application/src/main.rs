@@ -1,6 +1,6 @@
+mod concurrency;
 mod debug;
 mod heap;
-mod concurrency;
 mod unreachable;
 mod utilities;
 
