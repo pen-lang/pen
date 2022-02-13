@@ -17,6 +17,11 @@ Those are examples of applications and libraries written in Pen.
   - [Server](tcp-server)
 - [Conway's game of life](life-game)
 
+## Algorithms
+
+- [Fizz buzz](algorithms/fizz-buzz)
+- [The napsack problem](algorithms/napsack)
+
 ## Libraries
 
 - [`Console`](console)
