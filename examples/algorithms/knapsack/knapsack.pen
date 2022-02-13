@@ -11,6 +11,7 @@ type Bag {
   Capacity number
 }
 
+# TODO Test this.
 Pack = \(b Bag, is [Item]) [Item] {
   packItems(
     NumberMap'Set(NumberMap'New(), 0, [Item]),
