@@ -26,6 +26,7 @@ Feature: Packages
     And a file named "pen.json" with:
     """json
     {
+      "type": "library",
       "dependencies": {
         "Foo": "../foo"
       }
