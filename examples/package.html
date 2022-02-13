@@ -144,7 +144,10 @@
                         <h1 id="packages"><a class="header" href="#packages">Packages</a></h1>
 <h2 id="background"><a class="header" href="#background">Background</a></h2>
 <p><em>Given</em> a file named &quot;foo/pen.json&quot; with:</p>
-<pre><code class="language-json">{ &quot;dependencies&quot;: {} }
+<pre><code class="language-json">{
+  &quot;type&quot;: &quot;library&quot;,
+  &quot;dependencies&quot;: {}
+}
 </code></pre>
 <p><em>And</em> a file named &quot;foo/Foo.pen&quot; with:</p>
 <pre><code class="language-pen">type Foo = number
@@ -162,6 +165,7 @@ Foo = \() number {
 <p><em>And</em> I cd to &quot;bar&quot;</p>
 <p><em>And</em> a file named &quot;pen.json&quot; with:</p>
 <pre><code class="language-json">{
+  &quot;type&quot;: &quot;library&quot;,
   &quot;dependencies&quot;: {
     &quot;Foo&quot;: &quot;../foo&quot;
   }
