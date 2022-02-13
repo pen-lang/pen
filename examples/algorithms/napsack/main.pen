@@ -20,13 +20,13 @@ main = \(ctx context) none {
   is = pack(bag, items)
 
   File'Write(
-    ctx.Os, 
-    File'StdOut(), 
+    ctx.Os,
+    File'StdOut(),
     String'Join(
-      [string 
-        String'Join([string showItem(i()) for i in is], ", "), 
+      [string
+        String'Join([string showItem(i()) for i in is], ", "),
         "\n",
-      ], 
+      ],
       "",
     ),
   )
@@ -35,14 +35,14 @@ main = \(ctx context) none {
 }
 
 showItem = \(i Item) string {
-  String'Join([string "(", Number'String(i.cost), ", ", Number'String(i.value), ")"], "") 
+  String'Join([string "(", Number'String(i.cost), ", ", Number'String(i.value), ")"], "")
 }
 
 pack = \(b Bag, is [Item]) [Item] {
   packItems(
     NumberMap'Set(NumberMap'New(), 0, [Item]),
-    b, 
-    is, 
+    b,
+    is,
   )
 }
 
@@ -55,7 +55,7 @@ packItems = \(states Map, b Bag, is [Item]) [Item] {
     )
   } else {
     best(
-      [[Item] if x = x() as [Item] { x } else { [Item] } for x in NumberMap'Values(states)], 
+      [[Item] if x = x() as [Item] { x } else { [Item] } for x in NumberMap'Values(states)],
       [Item],
     )
   }
@@ -65,19 +65,19 @@ packItem = \(b Bag, i Item, states Map, cost number) Map {
   newCost = cost + i.cost
 
   if newCost > b.capacity {
-    states 
+    states
   } else {
-    if is = NumberMap'Get(states, cost, none) as [Item] { 
+    if is = NumberMap'Get(states, cost, none) as [Item] {
       is = [Item i, ...is]
 
       if js = NumberMap'Get(states, newCost, none) as [Item] {
         if totalValue(is) > totalValue(js) {
-          NumberMap'Set(states, newCost, is) 
+          NumberMap'Set(states, newCost, is)
         } else {
           states
         }
       } else {
-        NumberMap'Set(states, newCost, is) 
+        NumberMap'Set(states, newCost, is)
       }
     } else {
       states
@@ -90,7 +90,7 @@ best = \(iss [[Item]], is [Item]) [Item] {
     if totalValue(js()) > totalValue(is) {
       best(iss, js())
     } else {
-      best(iss, is) 
+      best(iss, is)
     }
   } else {
     is
