@@ -1,4 +1,5 @@
 {
+  "type": "library",
   "dependencies": {
     "Core": "pen:///core",
     "Os": "pen:///os",

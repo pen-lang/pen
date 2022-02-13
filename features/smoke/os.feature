@@ -3,6 +3,7 @@ Feature: OS
     Given a file named "pen.json" with:
     """json
     {
+      "type": "application",
       "dependencies": {
         "Os": "pen:///os",
         "Core": "pen:///core"

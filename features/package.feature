@@ -2,7 +2,10 @@ Feature: Packages
   Background:
     Given a file named "foo/pen.json" with:
     """json
-    { "dependencies": {} }
+    {
+      "type": "library",
+      "dependencies": {}
+    }
     """
     And a file named "foo/Foo.pen" with:
     """pen
@@ -23,6 +26,7 @@ Feature: Packages
     And a file named "pen.json" with:
     """json
     {
+      "type": "library",
       "dependencies": {
         "Foo": "../foo"
       }

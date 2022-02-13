@@ -1,4 +1,5 @@
 {
+  "type": "application",
   "dependencies": {
     "Console": "../console",
     "Os": "pen:///os"

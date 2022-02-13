@@ -2,11 +2,11 @@ use crate::{
     error::ApplicationError,
     external_package_configuration_reader,
     infra::{FilePath, Infrastructure},
+    package_configuration::PackageType,
 };
 use fnv::FnvHashMap;
 use std::error::Error;
 
-// TODO Use a package type field.
 pub fn find(
     infrastructure: &Infrastructure,
     package_directory: &FilePath,
@@ -22,7 +22,7 @@ pub fn find(
     )?
     .into_iter()
     .filter_map(|(key, configuration)| {
-        if configuration.is_system() {
+        if configuration.type_() == PackageType::System {
             Some((
                 key.clone(),
                 package_configuration.dependencies()[&key].clone(),

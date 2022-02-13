@@ -3,6 +3,7 @@ Feature: Core
     Given a file named "pen.json" with:
     """json
     {
+      "type": "library",
       "dependencies": {
         "Core": "pen:///core"
       }

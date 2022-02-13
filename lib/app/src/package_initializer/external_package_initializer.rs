@@ -5,7 +5,7 @@ use crate::{
 };
 use std::error::Error;
 
-pub fn initialize_recursively(
+pub fn initialize(
     infrastructure: &Infrastructure,
     package_directory: &FilePath,
     output_directory: &FilePath,
@@ -16,13 +16,13 @@ pub fn initialize_recursively(
         .dependencies()
         .values()
     {
-        initialize(infrastructure, url, output_directory)?;
+        initialize_recursively(infrastructure, url, output_directory)?;
     }
 
     Ok(())
 }
 
-fn initialize(
+fn initialize_recursively(
     infrastructure: &Infrastructure,
     package_url: &url::Url,
     output_directory: &FilePath,
@@ -45,7 +45,7 @@ fn initialize(
         ),
     )?;
 
-    initialize_recursively(infrastructure, &package_directory, output_directory)?;
+    initialize(infrastructure, &package_directory, output_directory)?;
 
     Ok(())
 }
