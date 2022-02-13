@@ -1,6 +1,8 @@
 import Core'Map'NumberMap { Map }
 import Core'Number
+import Core'String
 import Os'File
+import Os'Context { Context }
 
 type Item {
   cost number
@@ -15,9 +17,25 @@ main = \(ctx context) none {
   items = [Item Item{cost: 1, value: 1}, Item{cost: 1, value: 2}]
   bag = Bag{capacity: 1}
 
-  pack(bag, items)
+  is = pack(bag, items)
+
+  File'Write(
+    ctx.Os, 
+    File'StdOut(), 
+    String'Join(
+      [string 
+        String'Join([string showItem(i()) for i in is], ", "), 
+        "\n",
+      ], 
+      "",
+    ),
+  )
 
   none
+}
+
+showItem = \(i Item) string {
+  String'Join([string "(", Number'String(i.cost), ", ", Number'String(i.value), ")"], "") 
 }
 
 pack = \(b Bag, is [Item]) [Item] {
