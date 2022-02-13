@@ -3,6 +3,7 @@ Feature: Building packages
     Given a file named "pen.json" with:
     """json
     {
+      "type": "application",
       "dependencies": {
         "Os": "pen:///os"
       }
@@ -22,7 +23,10 @@ Feature: Building packages
   Scenario: Build a library package
     Given a file named "pen.json" with:
     """json
-    { "dependencies": {} }
+    {
+      "type": "library",
+      "dependencies": {}
+    }
     """
     And a file named "Foo.pen" with:
     """pen
@@ -37,6 +41,7 @@ Feature: Building packages
     Given a file named "pen.json" with:
     """json
     {
+      "type": "application",
       "dependencies": {
         "Os": "pen:///os-sync"
       }
@@ -64,7 +69,10 @@ Feature: Building packages
   Scenario Outline: Cross-build a library package
     Given a file named "pen.json" with:
     """json
-    { "dependencies": {} }
+    {
+      "type": "library",
+      "dependencies": {}
+    }
     """
     And a file named "Foo.pen" with:
     """pen

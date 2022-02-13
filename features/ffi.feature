@@ -2,7 +2,10 @@ Feature: FFI
   Background:
     Given a file named "pen.json" with:
     """json
-    { "dependencies": {} }
+    {
+      "type": "library",
+      "dependencies": {}
+    }
     """
 
   Scenario: Import a foreign function of native calling convention

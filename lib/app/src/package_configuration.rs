@@ -1,24 +1,31 @@
 use std::collections::BTreeMap;
 
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum PackageType {
+    Application,
+    Library,
+    System,
+}
+
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct PackageConfiguration {
+    type_: PackageType,
     dependencies: BTreeMap<String, url::Url>,
-    system: bool,
 }
 
 impl PackageConfiguration {
-    pub fn new(dependencies: BTreeMap<String, url::Url>, system: bool) -> Self {
+    pub fn new(type_: PackageType, dependencies: BTreeMap<String, url::Url>) -> Self {
         Self {
+            type_,
             dependencies,
-            system,
         }
+    }
+
+    pub fn type_(&self) -> PackageType {
+        self.type_
     }
 
     pub fn dependencies(&self) -> &BTreeMap<String, url::Url> {
         &self.dependencies
-    }
-
-    pub fn is_system(&self) -> bool {
-        self.system
     }
 }

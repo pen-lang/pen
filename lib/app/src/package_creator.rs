@@ -1,7 +1,7 @@
 use crate::{
     common::file_path_resolver,
     infra::{FilePath, Infrastructure},
-    package_configuration::PackageConfiguration,
+    package_configuration::{PackageConfiguration, PackageType},
     ApplicationConfiguration,
 };
 use std::{collections::BTreeMap, error::Error};
@@ -16,6 +16,7 @@ pub fn create_application(
 ) -> Result<(), Box<dyn Error>> {
     create(
         infrastructure,
+        PackageType::Application,
         &[(system_package_name.into(), system_package_url.clone())]
             .into_iter()
             .collect(),
@@ -33,6 +34,7 @@ pub fn create_library(
 ) -> Result<(), Box<dyn Error>> {
     create(
         infrastructure,
+        PackageType::Library,
         &Default::default(),
         module_basename,
         module_content,
@@ -42,13 +44,14 @@ pub fn create_library(
 
 fn create(
     infrastructure: &Infrastructure,
+    package_type: PackageType,
     dependencies: &BTreeMap<String, url::Url>,
     module_basename: &str,
     module_content: &str,
     package_directory: &FilePath,
 ) -> Result<(), Box<dyn Error>> {
     infrastructure.package_configuration_writer.write(
-        &PackageConfiguration::new(dependencies.clone(), false),
+        &PackageConfiguration::new(package_type, dependencies.clone()),
         package_directory,
     )?;
 

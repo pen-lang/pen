@@ -2,19 +2,51 @@ use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub enum JsonPackageType {
+    Application,
+    Library,
+    System,
+}
+
+impl From<app::PackageType> for JsonPackageType {
+    fn from(type_: app::PackageType) -> Self {
+        match type_ {
+            app::PackageType::Application => Self::Application,
+            app::PackageType::Library => Self::Library,
+            app::PackageType::System => Self::System,
+        }
+    }
+}
+
+impl From<JsonPackageType> for app::PackageType {
+    fn from(type_: JsonPackageType) -> Self {
+        match type_ {
+            JsonPackageType::Application => Self::Application,
+            JsonPackageType::Library => Self::Library,
+            JsonPackageType::System => Self::System,
+        }
+    }
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct JsonPackageConfiguration {
+    #[serde(rename = "type")]
+    pub type_: JsonPackageType,
     pub dependencies: BTreeMap<String, String>,
-    pub system: Option<bool>,
 }
 
 impl JsonPackageConfiguration {
-    pub fn new(dependencies: BTreeMap<String, url::Url>, system: bool) -> Self {
+    pub fn new(
+        type_: impl Into<JsonPackageType>,
+        dependencies: BTreeMap<String, url::Url>,
+    ) -> Self {
         Self {
+            type_: type_.into(),
             dependencies: dependencies
                 .iter()
                 .map(|(name, url)| (name.clone(), url.as_str().into()))
                 .collect(),
-            system: if system { Some(true) } else { None },
         }
     }
 
@@ -23,6 +55,7 @@ impl JsonPackageConfiguration {
         base_url: &url::Url,
     ) -> Result<app::PackageConfiguration, url::ParseError> {
         Ok(app::PackageConfiguration::new(
+            self.type_.into(),
             self.dependencies
                 .into_iter()
                 .map(|(name, url)| {
@@ -32,7 +65,6 @@ impl JsonPackageConfiguration {
                     ))
                 })
                 .collect::<Result<_, url::ParseError>>()?,
-            self.system.unwrap_or_default(),
         ))
     }
 }

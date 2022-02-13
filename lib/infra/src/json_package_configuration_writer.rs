@@ -29,8 +29,8 @@ impl app::infra::PackageConfigurationWriter for JsonPackageConfigurationWriter {
                 self.build_configuration_filename,
             ])),
             (serde_json::to_string_pretty(&JsonPackageConfiguration::new(
+                configuration.type_(),
                 configuration.dependencies().clone(),
-                configuration.is_system(),
             ))? + "\n")
                 .as_bytes(),
         )?;

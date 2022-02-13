@@ -23,5 +23,5 @@ mod test_module_finder;
 pub mod test_runner;
 
 pub use application_configuration::{ApplicationConfiguration, MainModuleConfiguration};
-pub use package_configuration::PackageConfiguration;
+pub use package_configuration::{PackageConfiguration, PackageType};
 pub use test_configuration::{TestConfiguration, TestModuleConfiguration};

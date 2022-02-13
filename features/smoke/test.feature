@@ -3,6 +3,7 @@ Feature: Testing
     Given a file named "pen.json" with:
     """json
     {
+      "type": "library",
       "dependencies": {
         "Test": "pen:///test"
       }
@@ -37,6 +38,7 @@ Feature: Testing
     Given a file named "pen.json" with:
     """json
     {
+      "type": "application",
       "dependencies": {
         "Os": "pen:///os",
         "Test": "pen:///test"
@@ -67,7 +69,10 @@ Feature: Testing
   Scenario: Run tests without a Test package
     Given a file named "pen.json" with:
     """json
-    { "dependencies": {} }
+    { 
+      "type": "library",
+      "dependencies": {} 
+    }
     """
     And a file named "Foo.test.pen" with:
     """pen

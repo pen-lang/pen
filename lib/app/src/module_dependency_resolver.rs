@@ -16,6 +16,10 @@ pub fn resolve(
     dependency_file: &FilePath,
     build_script_dependency_file: &FilePath,
 ) -> Result<(), Box<dyn Error>> {
+    let package_configuration = infrastructure
+        .package_configuration_reader
+        .read(package_directory)?;
+
     let interface_files = parse::parse(
         &infrastructure.file_system.read_to_string(source_file)?,
         &infrastructure.file_path_displayer.display(source_file),
@@ -32,9 +36,7 @@ pub fn resolve(
             ast::ModulePath::External(path) => file_path_resolver::resolve_source_file(
                 &file_path_resolver::resolve_package_directory(
                     output_directory,
-                    infrastructure
-                        .package_configuration_reader
-                        .read(package_directory)?
+                    package_configuration
                         .dependencies()
                         .get(path.package())
                         .ok_or_else(|| ApplicationError::PackageNotFound(path.package().into()))?,
