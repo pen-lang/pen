@@ -1,0 +1,77 @@
+import Core'Map'NumberMap { Map }
+import Core'Number
+import Core'String
+
+type Item {
+  Cost number
+  Value number
+}
+
+type Bag {
+  Capacity number
+}
+
+Pack = \(b Bag, is [Item]) [Item] {
+  packItems(
+    NumberMap'Set(NumberMap'New(), 0, [Item]),
+    b,
+    is,
+  )
+}
+
+packItems = \(states Map, b Bag, is [Item]) [Item] {
+  if [i, ...is] = is {
+    packItems(
+      packItem(b, i(), states, 0),
+      b,
+      is,
+    )
+  } else {
+    best(
+      [[Item] if x = x() as [Item] { x } else { [Item] } for x in NumberMap'Values(states)],
+      [Item],
+    )
+  }
+}
+
+packItem = \(b Bag, i Item, states Map, cost number) Map {
+  newCost = cost + i.Cost
+
+  if newCost > b.Capacity {
+    states
+  } else {
+    states = if is = NumberMap'Get(states, cost, none) as [Item] {
+      is = [Item i, ...is]
+
+      if js = NumberMap'Get(states, newCost, none) as [Item] {
+        if totalValue(is) > totalValue(js) {
+          NumberMap'Set(states, newCost, is)
+        } else {
+          states
+        }
+      } else {
+        NumberMap'Set(states, newCost, is)
+      }
+    } else {
+      states
+    }
+
+    packItem(b, i, states, cost + 1)
+  }
+}
+
+best = \(iss [[Item]], is [Item]) [Item] {
+  if [js, ...iss] = iss {
+    if totalValue(js()) > totalValue(is) {
+      best(iss, js())
+    } else {
+      best(iss, is)
+    }
+  } else {
+    is
+  }
+}
+
+totalValue = \(is [Item]) number {
+  Number'Sum([number i().Value for i in is])
+}

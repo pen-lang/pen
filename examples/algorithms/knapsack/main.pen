@@ -1,23 +1,17 @@
-import Core'Map'NumberMap { Map }
 import Core'Number
 import Core'String
 import Os'File
 import Os'Context { Context }
-
-type Item {
-  cost number
-  value number
-}
-
-type Bag {
-  capacity number
-}
+import 'knapsack { Bag, Item }
 
 main = \(ctx context) none {
-  items = [Item Item{cost: 1, value: 1}, Item{cost: 1, value: 2}]
-  bag = Bag{capacity: 1}
-
-  is = pack(bag, items)
+  is = knapsack'Pack(
+    Bag{Capacity: 1},
+    [Item
+      Item{Cost: 1, Value: 1},
+      Item{Cost: 1, Value: 2},
+    ],
+  )
 
   File'Write(
     ctx.Os,
@@ -35,68 +29,5 @@ main = \(ctx context) none {
 }
 
 showItem = \(i Item) string {
-  String'Join([string "(", Number'String(i.cost), ", ", Number'String(i.value), ")"], "")
-}
-
-pack = \(b Bag, is [Item]) [Item] {
-  packItems(
-    NumberMap'Set(NumberMap'New(), 0, [Item]),
-    b,
-    is,
-  )
-}
-
-packItems = \(states Map, b Bag, is [Item]) [Item] {
-  if [i, ...is] = is {
-    packItems(
-      packItem(b, i(), states, 0),
-      b,
-      is,
-    )
-  } else {
-    best(
-      [[Item] if x = x() as [Item] { x } else { [Item] } for x in NumberMap'Values(states)],
-      [Item],
-    )
-  }
-}
-
-packItem = \(b Bag, i Item, states Map, cost number) Map {
-  newCost = cost + i.cost
-
-  if newCost > b.capacity {
-    states
-  } else {
-    if is = NumberMap'Get(states, cost, none) as [Item] {
-      is = [Item i, ...is]
-
-      if js = NumberMap'Get(states, newCost, none) as [Item] {
-        if totalValue(is) > totalValue(js) {
-          NumberMap'Set(states, newCost, is)
-        } else {
-          states
-        }
-      } else {
-        NumberMap'Set(states, newCost, is)
-      }
-    } else {
-      states
-    }
-  }
-}
-
-best = \(iss [[Item]], is [Item]) [Item] {
-  if [js, ...iss] = iss {
-    if totalValue(js()) > totalValue(is) {
-      best(iss, js())
-    } else {
-      best(iss, is)
-    }
-  } else {
-    is
-  }
-}
-
-totalValue = \(is [Item]) number {
-  Number'Sum([number i().value for i in is])
+  String'Join([string "(", Number'String(i.Cost), ", ", Number'String(i.Value), ")"], "")
 }
