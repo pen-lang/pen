@@ -9,7 +9,7 @@ Feature: Concurrency
     }
     """
 
-  Scenario: Use concurrent operation
+  Scenario: Use spawn operation
     Given a file named "main.pen" with:
     """pen
     main = \(ctx context) none {
