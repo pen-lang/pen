@@ -11,6 +11,6 @@ async fn spawn_and_unwrap(future: impl Future<Output = ffi::Any> + Send + 'stati
 }
 
 #[no_mangle]
-extern "C" fn _pen_join(xs: ffi::Arc<ffi::List>) -> ffi::Arc<ffi::List> {
-    unsafe { _pen_os_join(xs) }
+extern "C" fn _pen_join(_list: ffi::Arc<ffi::List>) -> ffi::Arc<ffi::List> {
+    todo!()
 }
