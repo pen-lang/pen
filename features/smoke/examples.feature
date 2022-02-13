@@ -9,18 +9,20 @@ Feature: Examples
     And I successfully run `pen_test_on_linux.sh`
 
     Examples:
-      | example     |
-      | cat         |
-      | console     |
-      | echo        |
-      | hello-world |
-      | life-game   |
-      | ls          |
-      | tcp-client  |
-      | tcp-server  |
-      | udp-client  |
-      | udp-server  |
-      | yes         |
+      | example              |
+      | algorithms/fizz-buzz |
+      | algorithms/knapsack  |
+      | cat                  |
+      | console              |
+      | echo                 |
+      | hello-world          |
+      | life-game            |
+      | ls                   |
+      | tcp-client           |
+      | tcp-server           |
+      | udp-client           |
+      | udp-server           |
+      | yes                  |
 
   Scenario Outline: Test memory leak
     Given I run the following script:
