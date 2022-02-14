@@ -20,6 +20,7 @@ Those are examples of applications and libraries written in Pen.
 ## Algorithms
 
 - [Fizz buzz](algorithms/fizz-buzz)
+- [Quick sort](algorithms/quick-sort)
 - [The knapsack problem](algorithms/knapsack)
 
 ## Libraries

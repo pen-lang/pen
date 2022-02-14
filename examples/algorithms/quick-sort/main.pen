@@ -1,0 +1,53 @@
+import Core'Number
+import Core'String
+import Os'File
+import Os'Random
+
+total = \() number { 20 }
+
+main = \(ctx context) none {
+  ns = [number 3, 2, 1, 2]
+
+  printNumbers(
+    ctx.Os,
+    sort([number Random'Number(ctx.Os) * total() for _ in Number'Sequence(total())]),
+  )
+
+  none
+}
+
+printNumbers = \(ctx Context, ns [number]) none | error {
+  if [n, ...ns] = ns {
+    File'Write(ctx, File'StdOut(), String'Join([string Number'String(n()), "\n"], ""))?
+
+    printNumbers(ctx, ns)
+  } else {
+    none
+  }
+}
+
+sort = \(ns [number]) [number] {
+  if [n, ...ns] = ns {
+    f = \(x number) boolean { x < n() }
+
+    [number 
+      ...sort(filter(ns, f)), 
+      n(),
+      ...sort(filter(ns, \(x number) boolean { !f(x) })),
+    ]
+  } else {
+    [number]
+  }
+}
+
+filter = \(ns [number], include \(number) boolean) [number] {
+  if [n, ...ns] = ns {
+    if include(n()) {
+      [number n(), ...filter(ns, include)]
+    } else {
+      filter(ns, include)
+    }
+  } else {
+    [number]
+  }
+}
