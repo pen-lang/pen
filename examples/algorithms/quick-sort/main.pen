@@ -30,8 +30,8 @@ sort = \(ns [number]) [number] {
   if [n, ...ns] = ns {
     f = \(x number) boolean { x < n() }
 
-    [number 
-      ...sort(filter(ns, f)), 
+    [number
+      ...sort(filter(ns, f)),
       n(),
       ...sort(filter(ns, \(x number) boolean { !f(x) })),
     ]
