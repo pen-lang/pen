@@ -1,4 +1,4 @@
-use futures::Stream;
+use futures::{stream, Stream};
 use std::future::Future;
 use tokio::spawn;
 use tokio_stream::{StreamExt, StreamMap};
@@ -45,7 +45,7 @@ fn convert_list_to_stream(_list: ffi::Arc<ffi::List>) -> impl Stream<Item = ffi:
     todo!();
 
     #[allow(unreachable_code)]
-    futures::stream::iter(vec![])
+    stream::iter(vec![])
 }
 
 // TODO Move this to `pen_ffi::stream::from_stream()`.
