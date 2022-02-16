@@ -132,7 +132,8 @@ impl<S> DerefMut for AsyncStack<S> {
 
 // We can mark async stacks Send + Send because:
 //
-// - Stack should implement Send + Sync. Currently, we don't as we don't need to.
+// - Stack should implement Send + Sync. Currently, we don't as we don't need
+//   to.
 // - Option<*mut Context> is cleared to None on every non-preemptive run.
 unsafe impl<S: Send> Send for AsyncStack<S> {}
 
