@@ -127,7 +127,7 @@ mod tests {
     fn drop_send_and_sync(_: impl Send + Sync) {}
 
     #[test]
-    fn impelement_send_and_sync() {
+    fn implement_send_and_sync() {
         drop_send_and_sync(Arc::new(()));
     }
 }
