@@ -36,6 +36,10 @@ impl Drop for Any {
     }
 }
 
+unsafe impl Sync for Any {}
+
+unsafe impl Send for Any {}
+
 #[repr(C)]
 pub struct TypeInformation {
     pub clone: extern "C" fn(u64) -> u64,
