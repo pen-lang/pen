@@ -140,9 +140,9 @@ dependencies = [
 
 [[package]]
 name = "libc"
-version = "0.2.117"
+version = "0.2.118"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e74d72e0f9b65b5b4ca49a346af3976df0f9c61d550727f349ecd559f251a26c"
+checksum = "06e509672465a0504304aa87f9f176f2b2b716ed8fb105ebe5c02dc6dce96a94"
 
 [[package]]
 name = "memchr"
@@ -175,9 +175,9 @@ dependencies = [
 
 [[package]]
 name = "pen-ffi"
-version = "0.3.41"
+version = "0.3.42"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a943690902801d381a7160e2341a2b0ea98fd3b64d5c5d4c27bf6ae0a33add1c"
+checksum = "f357426357adee6b22cece64a849534769e396ab54eae4afbf814ae655fae0a8"
 dependencies = [
  "futures",
  "pen-ffi-macro",
@@ -185,9 +185,9 @@ dependencies = [
 
 [[package]]
 name = "pen-ffi-macro"
-version = "0.1.22"
+version = "0.1.23"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c6803dc6978a6272ef3cbf1baab05b480c48e35d4e7fa85064e97dde7e7224c0"
+checksum = "e555d012ce558bb9dc970d0f78ec63620bf2d8b8123e0a37fd6283da869e0735"
 dependencies = [
  "convert_case",
  "quote",
