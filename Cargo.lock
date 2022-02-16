@@ -210,7 +210,7 @@ checksum = "279fb028e20b3c4c320317955b77c5e0c9701f05a1d309905d6fc702cdc5053e"
 [[package]]
 name = "fmm"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#6487714afe84e982934d55dfb8d8649580c92eb5"
+source = "git+https://github.com/raviqqe/fmm?branch=main#91017bbdfc75699b1e6d09c6566bcb7cef92dd03"
 dependencies = [
  "fnv",
  "hamt",
@@ -222,7 +222,7 @@ dependencies = [
 [[package]]
 name = "fmm-c"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#6487714afe84e982934d55dfb8d8649580c92eb5"
+source = "git+https://github.com/raviqqe/fmm?branch=main#91017bbdfc75699b1e6d09c6566bcb7cef92dd03"
 dependencies = [
  "fmm",
  "fnv",
@@ -232,7 +232,7 @@ dependencies = [
 [[package]]
 name = "fmm-llvm"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#6487714afe84e982934d55dfb8d8649580c92eb5"
+source = "git+https://github.com/raviqqe/fmm?branch=main#91017bbdfc75699b1e6d09c6566bcb7cef92dd03"
 dependencies = [
  "fmm",
  "hamt",
@@ -520,9 +520,9 @@ checksum = "e2abad23fbc42b3700f2f279844dc832adb2b2eb069b2df918f455c4e18cc646"
 
 [[package]]
 name = "libc"
-version = "0.2.117"
+version = "0.2.118"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e74d72e0f9b65b5b4ca49a346af3976df0f9c61d550727f349ecd559f251a26c"
+checksum = "06e509672465a0504304aa87f9f176f2b2b716ed8fb105ebe5c02dc6dce96a94"
 
 [[package]]
 name = "linked-hash-map"
@@ -614,9 +614,9 @@ dependencies = [
 
 [[package]]
 name = "output_vt100"
-version = "0.1.2"
+version = "0.1.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "53cdc5b785b7a58c5aad8216b3dfa114df64b0b06ae6e1501cef91df2fbdf8f9"
+checksum = "628223faebab4e3e40667ee0b2336d34a5b960ff60ea743ddfdbcf7770bcfb66"
 dependencies = [
  "winapi",
 ]
@@ -672,7 +672,7 @@ dependencies = [
 
 [[package]]
 name = "pen-ffi"
-version = "0.3.41"
+version = "0.3.42"
 dependencies = [
  "futures",
  "pen-ffi-macro",
@@ -681,7 +681,7 @@ dependencies = [
 
 [[package]]
 name = "pen-ffi-macro"
-version = "0.1.22"
+version = "0.1.23"
 dependencies = [
  "convert_case",
  "pen-ffi",
@@ -850,9 +850,9 @@ dependencies = [
 
 [[package]]
 name = "serde_json"
-version = "1.0.78"
+version = "1.0.79"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d23c1ba4cf0efd44be32017709280b32d1cea5c3f1275c3b6d9e8bc54f758085"
+checksum = "8e8d9fa5c3b304765ce1fd9c4c8a3de2c8db365a5b91be52f186efc675681d95"
 dependencies = [
  "itoa",
  "ryu",
