@@ -116,8 +116,6 @@ impl<S> AsyncStack<S> {
     }
 }
 
-unsafe impl<S: Send> Send for AsyncStack<S> {}
-
 impl<S> Deref for AsyncStack<S> {
     type Target = Stack;
 
@@ -131,6 +129,10 @@ impl<S> DerefMut for AsyncStack<S> {
         &mut self.stack
     }
 }
+
+unsafe impl<S: Send> Send for AsyncStack<S> {}
+
+unsafe impl<S: Sync> Sync for AsyncStack<S> {}
 
 #[allow(dead_code)]
 extern "C" {
