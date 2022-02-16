@@ -56,7 +56,7 @@ fn convert_list_to_stream(list: ffi::Arc<ffi::List>) -> impl Stream<Item = ffi::
         let mut first_rest = unsafe { _pen_os_first_rest(list) };
 
         while first_rest.ok {
-            yield first_rest.first.clone();
+            yield ffi::future::from_closure::<(), ffi::Any>(first_rest.first.clone()).await;
             first_rest = unsafe { _pen_os_first_rest(first_rest.rest.clone()) };
         }
     }
@@ -64,7 +64,7 @@ fn convert_list_to_stream(list: ffi::Arc<ffi::List>) -> impl Stream<Item = ffi::
 
 // TODO Move this to `pen_ffi::stream::from_stream()`.
 async fn convert_stream_to_list(
-    stream: impl Stream<Item = ffi::Any> + Sync + Send + 'static,
+    stream: impl Stream<Item = ffi::Any> + Send + Sync + 'static,
 ) -> ffi::Arc<ffi::List> {
     convert_pinned_stream(Arc::new(RwLock::new(Box::pin(stream)))).await
 }
