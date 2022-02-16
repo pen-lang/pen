@@ -62,11 +62,6 @@ impl<T: Default> Default for Arc<T> {
     }
 }
 
-// TODO Are these impl's necessary?
-unsafe impl<T: Send + Sync> Send for Arc<T> {}
-
-unsafe impl<T: Send + Sync> Sync for Arc<T> {}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -127,5 +122,12 @@ mod tests {
         fn load_payload() {
             assert_eq!(*Arc::new(()), ());
         }
+    }
+
+    fn drop_send_and_sync(_: impl Send + Sync) {}
+
+    #[test]
+    fn impelement_send_and_sync() {
+        drop_send_and_sync(Arc::new(()));
     }
 }
