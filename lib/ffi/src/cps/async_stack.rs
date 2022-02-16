@@ -134,11 +134,6 @@ unsafe impl<S: Send> Send for AsyncStack<S> {}
 
 unsafe impl<S: Sync> Sync for AsyncStack<S> {}
 
-#[allow(dead_code)]
-extern "C" {
-    fn _test_async_stack_ffi_safety(_: &mut AsyncStack);
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -171,6 +166,11 @@ mod tests {
 
     extern "C" fn continuation(_: &mut AsyncStack, _: TestResult) -> cps::Result {
         cps::Result::new()
+    }
+
+    #[allow(dead_code)]
+    extern "C" {
+        fn _test_async_stack_ffi_safety(_: &mut AsyncStack);
     }
 
     #[test]
