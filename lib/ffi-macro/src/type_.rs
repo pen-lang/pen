@@ -29,7 +29,7 @@ fn generate_type(attributes: &AttributeArgs, type_: &ItemStruct) -> Result<Token
             use core::{mem, ptr};
             use super::#type_name;
 
-            unsafe fn transmute_into_payload<T>(data: T) -> u64 {
+            unsafe fn transmute_into_payload<T: Send + Sync>(data: T) -> u64 {
                 let mut payload = 0;
 
                 ptr::write(&mut payload as *mut u64 as *mut T, data);
@@ -37,7 +37,7 @@ fn generate_type(attributes: &AttributeArgs, type_: &ItemStruct) -> Result<Token
                 payload
             }
 
-            unsafe fn transmute_from_payload<T>(payload: u64) -> T {
+            unsafe fn transmute_from_payload<T: Send + Sync>(payload: u64) -> T {
                 ptr::read(&payload as *const u64 as *const T)
             }
 
