@@ -101,6 +101,10 @@ impl ArcBlock {
     }
 }
 
+unsafe impl Send for ArcBlock {}
+
+unsafe impl Sync for ArcBlock {}
+
 #[cfg(test)]
 mod tests {
     use super::*;
