@@ -1,0 +1,7 @@
+foreign "c" _pen_os_join = \(xss [[any]]) [any] {
+  if [xs, ...xss] = xss {
+    [any ...xs(), ..._pen_os_join(xss)]
+  } else {
+    [any]
+  }
+}
