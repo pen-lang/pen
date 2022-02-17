@@ -54,6 +54,8 @@ impl Default for Any {
 
 #[cfg(test)]
 mod tests {
+    use crate::None;
+
     use super::*;
 
     mod box_ {
@@ -104,13 +106,13 @@ mod tests {
 
     mod rc {
         use super::*;
-        use alloc::rc::Rc;
+        use alloc::sync::Arc;
 
         #[pen_ffi_macro::any(crate = "crate")]
         #[derive(Clone)]
         pub struct TypeA {
             #[allow(dead_code)]
-            value: Rc<f64>,
+            value: Arc<f64>,
         }
 
         #[pen_ffi_macro::any(crate = "crate")]
@@ -118,20 +120,20 @@ mod tests {
         #[derive(Clone)]
         pub struct TypeB {
             #[allow(dead_code)]
-            value: Rc<Rc<f64>>,
+            value: Arc<Arc<f64>>,
         }
 
         #[test]
         fn drop_any() {
             let _ = Any::from(TypeA {
-                value: Rc::new(42.0),
+                value: Arc::new(42.0),
             });
         }
 
         #[test]
         fn clone_any() {
             let x = Any::from(TypeA {
-                value: Rc::new(42.0),
+                value: Arc::new(42.0),
             });
 
             drop(x.clone());
@@ -141,7 +143,7 @@ mod tests {
         #[test]
         fn as_inner() {
             let x = Any::from(TypeA {
-                value: Rc::new(42.0),
+                value: Arc::new(42.0),
             });
 
             let _: &TypeA = (&x).try_into().unwrap();
@@ -170,5 +172,12 @@ mod tests {
             drop(x.clone());
             drop(x)
         }
+    }
+
+    fn drop_send_and_sync(_: impl Send + Sync) {}
+
+    #[test]
+    fn implement_send_and_sync() {
+        drop_send_and_sync(Any::from(None::new()));
     }
 }
