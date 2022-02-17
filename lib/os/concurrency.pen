@@ -15,18 +15,18 @@ foreign "c" _pen_os_first_rest = \(xs [any]) firstRest {
   }
 }
 
-foreign "c" _pen_os_create_list = \(x any, xs \() [any]) [any] {
-  [any x, ...xs()]
-}
-
-foreign "c" _pen_os_empty_list = \() [any] {
-  [any]
-}
-
 foreign "c" _pen_os_to_list = \(x any) [any] {
   if x = x as [any] {
     x
   } else {
     [any]
   }
+}
+
+foreign "c" _pen_os_create_list = \(x any, xs \() [any]) [any] {
+  [any x, ...xs()]
+}
+
+foreign "c" _pen_os_empty_list = \() [any] {
+  [any]
 }
