@@ -429,14 +429,11 @@ mod tests {
                 ),
                 mir::ir::Definition::new(
                     "g",
-                    vec![mir::ir::Argument::new("x", mir::types::Type::Number)],
+                    vec![],
                     mir::ir::Call::new(
-                        mir::types::Function::new(
-                            vec![mir::types::Type::Number],
-                            mir::types::Type::Number,
-                        ),
+                        mir::types::Function::new(vec![], mir::types::Type::Number),
                         mir::ir::Variable::new("f"),
-                        vec![mir::ir::Variable::new("x").into()],
+                        vec![],
                     ),
                     mir::types::Type::Number,
                 ),
