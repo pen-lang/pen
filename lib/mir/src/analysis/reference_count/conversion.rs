@@ -441,7 +441,6 @@ fn convert_expression(
                 moved_variables,
             )
         }
-        Expression::Thunk(_) => todo!(),
         Expression::TryOperation(operation) => {
             let (then, then_moved_variables) =
                 convert_expression(operation.then(), owned_variables, &Default::default())?;

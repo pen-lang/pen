@@ -2,8 +2,7 @@ use super::{
     arithmetic_operation::ArithmeticOperation, byte_string::ByteString, call::Call, case::Case,
     clone_variables::CloneVariables, comparison_operation::ComparisonOperation,
     drop_variables::DropVariables, if_::If, let_::Let, let_recursive::LetRecursive, record::Record,
-    record_field::RecordField, thunk::Thunk, try_operation::TryOperation, variable::Variable,
-    variant::Variant,
+    record_field::RecordField, try_operation::TryOperation, variable::Variable, variant::Variant,
 };
 
 #[derive(Clone, Debug, PartialEq)]
@@ -23,7 +22,6 @@ pub enum Expression {
     Number(f64),
     Record(Record),
     RecordField(RecordField),
-    Thunk(Thunk),
     TryOperation(TryOperation),
     Variable(Variable),
     Variant(Variant),
@@ -38,12 +36,6 @@ impl From<ArithmeticOperation> for Expression {
 impl From<bool> for Expression {
     fn from(bool: bool) -> Self {
         Self::Boolean(bool)
-    }
-}
-
-impl From<Case> for Expression {
-    fn from(case: Case) -> Self {
-        Self::Case(case)
     }
 }
 
@@ -113,12 +105,6 @@ impl From<RecordField> for Expression {
     }
 }
 
-impl From<Thunk> for Expression {
-    fn from(thunk: Thunk) -> Self {
-        Self::Thunk(thunk)
-    }
-}
-
 impl From<TryOperation> for Expression {
     fn from(operation: TryOperation) -> Self {
         Self::TryOperation(operation)
@@ -134,5 +120,11 @@ impl From<Variable> for Expression {
 impl From<Variant> for Expression {
     fn from(variant: Variant) -> Self {
         Self::Variant(variant)
+    }
+}
+
+impl From<Case> for Expression {
+    fn from(case: Case) -> Self {
+        Self::Case(case)
     }
 }

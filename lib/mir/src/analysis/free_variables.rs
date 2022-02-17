@@ -46,7 +46,6 @@ fn find_in_expression(expression: &Expression) -> FnvHashSet<String> {
             .flat_map(find_in_expression)
             .collect(),
         Expression::RecordField(field) => find_in_expression(field.record()),
-        Expression::Thunk(_) => todo!(),
         Expression::TryOperation(operation) => find_in_expression(operation.operand())
             .into_iter()
             .chain(

@@ -213,7 +213,6 @@ fn check_expression(
                 .clone()
         }
         Expression::ByteString(_) => Type::ByteString,
-        Expression::Thunk(_) => todo!(),
         Expression::TryOperation(operation) => {
             let then_variables = variables
                 .clone()
