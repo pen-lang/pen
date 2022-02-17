@@ -23,6 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - run: tools/ci/github/setup.sh
       - run: tools/unused_dependencies.sh
   spell_check:
     runs-on: ubuntu-latest
