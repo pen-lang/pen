@@ -10,11 +10,9 @@ Feature: Concurrency
     }
     """
 
-  Scenario: Use go syntax
+  Scenario: Use spawn operation
     Given a file named "main.pen" with:
     """pen
-    import Os'Context { Context }
-
     main = \(ctx context) none {
       f = go \() none { none }
 
