@@ -424,8 +424,7 @@ mod tests {
             compile_module(&create_module_with_definitions(vec![
                 mir::ir::Definition::thunk(
                     "f",
-                    vec![mir::ir::Argument::new("x", mir::types::Type::Number)],
-                    mir::ir::Variable::new("x"),
+                    mir::ir::Expression::Number(42.0),
                     mir::types::Type::Number,
                 ),
                 mir::ir::Definition::new(
@@ -1139,12 +1138,7 @@ mod tests {
         #[test]
         fn compile_global_thunk() {
             compile_module(&create_module_with_definitions(vec![
-                mir::ir::Definition::thunk(
-                    "f",
-                    vec![],
-                    mir::ir::Expression::None,
-                    mir::types::Type::None,
-                ),
+                mir::ir::Definition::thunk("f", mir::ir::Expression::None, mir::types::Type::None),
             ]));
         }
 
@@ -1153,11 +1147,9 @@ mod tests {
             compile_module(&create_module_with_definitions(vec![
                 mir::ir::Definition::thunk(
                     "f",
-                    vec![],
                     mir::ir::LetRecursive::new(
                         mir::ir::Definition::thunk(
                             "g",
-                            vec![],
                             mir::ir::Expression::None,
                             mir::types::Type::None,
                         ),
@@ -1175,13 +1167,12 @@ mod tests {
         #[test]
         fn compile_local_thunk_with_environment() {
             compile_module(&create_module_with_definitions(vec![
-                mir::ir::Definition::thunk(
+                mir::ir::Definition::new(
                     "f",
                     vec![mir::ir::Argument::new("x", mir::types::Type::Number)],
                     mir::ir::LetRecursive::new(
                         mir::ir::Definition::thunk(
                             "g",
-                            vec![],
                             mir::ir::Variable::new("x"),
                             mir::types::Type::Number,
                         ),

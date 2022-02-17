@@ -27,11 +27,10 @@ impl Definition {
 
     pub fn thunk(
         name: impl Into<String>,
-        arguments: Vec<Argument>,
         body: impl Into<Expression>,
         result_type: impl Into<Type>,
     ) -> Self {
-        Self::with_options(name, vec![], arguments, body, result_type.into(), true)
+        Self::with_options(name, vec![], vec![], body, result_type.into(), true)
     }
 
     #[cfg(test)]

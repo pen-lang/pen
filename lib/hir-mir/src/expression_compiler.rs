@@ -240,7 +240,6 @@ pub fn compile(
             mir::ir::LetRecursive::new(
                 mir::ir::Definition::thunk(
                     THUNK_NAME,
-                    vec![],
                     compile(thunk.expression())?,
                     type_compiler::compile(
                         thunk.type_().ok_or_else(|| {
@@ -534,7 +533,6 @@ fn compile_spawn_operation(
             vec![mir::ir::LetRecursive::new(
                 mir::ir::Definition::thunk(
                     ANY_THUNK_NAME,
-                    vec![],
                     compile(
                         &TypeCoercion::new(
                             result_type.clone(),
@@ -1248,7 +1246,6 @@ mod tests {
                         vec![mir::ir::LetRecursive::new(
                             mir::ir::Definition::thunk(
                                 "$any_thunk",
-                                vec![],
                                 mir::ir::Variant::new(
                                     mir::types::Type::Number,
                                     mir::ir::Expression::Number(42.0)
@@ -1309,7 +1306,6 @@ mod tests {
                         vec![mir::ir::LetRecursive::new(
                             mir::ir::Definition::thunk(
                                 "$any_thunk",
-                                vec![],
                                 mir::ir::Variable::new("x"),
                                 mir::types::Type::Variant
                             ),
