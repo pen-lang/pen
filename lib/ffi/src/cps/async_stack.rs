@@ -116,8 +116,6 @@ impl<S> AsyncStack<S> {
     }
 }
 
-unsafe impl<S: Send> Send for AsyncStack<S> {}
-
 impl<S> Deref for AsyncStack<S> {
     type Target = Stack;
 
@@ -132,10 +130,14 @@ impl<S> DerefMut for AsyncStack<S> {
     }
 }
 
-#[allow(dead_code)]
-extern "C" {
-    fn _test_async_stack_ffi_safety(_: &mut AsyncStack);
-}
+// We can mark async stacks Send + Send because:
+//
+// - Stack should implement Send + Sync. Currently, we don't as we don't need
+//   to.
+// - Option<*mut Context> is cleared to None on every non-preemptive run.
+unsafe impl<S: Send> Send for AsyncStack<S> {}
+
+unsafe impl<S: Sync> Sync for AsyncStack<S> {}
 
 #[cfg(test)]
 mod tests {
@@ -169,6 +171,11 @@ mod tests {
 
     extern "C" fn continuation(_: &mut AsyncStack, _: TestResult) -> cps::Result {
         cps::Result::new()
+    }
+
+    #[allow(dead_code)]
+    extern "C" {
+        fn _test_async_stack_ffi_safety(_: &mut AsyncStack);
     }
 
     #[test]

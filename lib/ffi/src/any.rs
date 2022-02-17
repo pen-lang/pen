@@ -36,10 +36,6 @@ impl Drop for Any {
     }
 }
 
-unsafe impl Sync for Any {}
-
-unsafe impl Send for Any {}
-
 #[repr(C)]
 pub struct TypeInformation {
     pub clone: extern "C" fn(u64) -> u64,
@@ -58,6 +54,8 @@ impl Default for Any {
 
 #[cfg(test)]
 mod tests {
+    use crate::None;
+
     use super::*;
 
     mod box_ {
@@ -174,5 +172,12 @@ mod tests {
             drop(x.clone());
             drop(x)
         }
+    }
+
+    fn drop_send_and_sync(_: impl Send + Sync) {}
+
+    #[test]
+    fn implement_send_and_sync() {
+        drop_send_and_sync(Any::from(None::new()));
     }
 }
