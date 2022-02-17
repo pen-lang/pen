@@ -22,7 +22,7 @@ impl Definition {
         body: impl Into<Expression>,
         result_type: impl Into<Type>,
     ) -> Self {
-        Self::with_options(name, vec![], arguments, body, result_type.into(), false)
+        Self::with_options(name, vec![], arguments, body, result_type, false)
     }
 
     pub fn thunk(
@@ -30,7 +30,7 @@ impl Definition {
         body: impl Into<Expression>,
         result_type: impl Into<Type>,
     ) -> Self {
-        Self::with_options(name, vec![], vec![], body, result_type.into(), true)
+        Self::with_options(name, vec![], vec![], body, result_type, true)
     }
 
     #[cfg(test)]
@@ -39,7 +39,7 @@ impl Definition {
         environment: Vec<Argument>,
         arguments: Vec<Argument>,
         body: impl Into<Expression>,
-        result_type: impl Into<Type> + Clone,
+        result_type: impl Into<Type>,
     ) -> Self {
         Self::with_options(name, environment, arguments, body, result_type, false)
     }
