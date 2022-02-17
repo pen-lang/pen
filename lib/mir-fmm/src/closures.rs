@@ -19,18 +19,6 @@ pub fn compile_entry_function_pointer(
     .into())
 }
 
-pub fn compile_load_entry_function(
-    builder: &fmm::build::InstructionBuilder,
-    closure_pointer: impl Into<fmm::build::TypedExpression>,
-) -> Result<fmm::build::TypedExpression, CompileError> {
-    // Entry functions of thunks need to be loaded atomically
-    // to make thunk update thread-safe.
-    Ok(builder.atomic_load(
-        compile_entry_function_pointer(closure_pointer)?,
-        fmm::ir::AtomicOrdering::Acquire,
-    )?)
-}
-
 pub fn compile_drop_function_pointer(
     closure_pointer: impl Into<fmm::build::TypedExpression>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
