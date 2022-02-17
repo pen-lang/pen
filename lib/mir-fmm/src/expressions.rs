@@ -174,6 +174,7 @@ pub fn compile(
                 )?
             }
         }
+        mir::ir::Expression::Thunk(_) => todo!(),
         mir::ir::Expression::TryOperation(operation) => compile_try_operation(
             module_builder,
             instruction_builder,

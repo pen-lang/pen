@@ -54,6 +54,7 @@ fn collect_from_expression(expression: &Expression) -> FnvHashSet<Type> {
             .flat_map(collect_from_expression)
             .collect(),
         Expression::RecordField(field) => collect_from_expression(field.record()),
+        Expression::Thunk(_) => todo!(),
         Expression::TryOperation(operation) => [operation.type_().clone()]
             .into_iter()
             .chain(collect_from_expression(operation.operand()))

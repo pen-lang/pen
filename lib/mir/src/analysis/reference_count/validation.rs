@@ -154,6 +154,7 @@ fn move_expression(
         Expression::RecordField(field) => {
             move_expression(field.record(), variables)?;
         }
+        Expression::Thunk(_) => todo!(),
         Expression::TryOperation(operation) => {
             move_expression(operation.operand(), variables)?;
 
