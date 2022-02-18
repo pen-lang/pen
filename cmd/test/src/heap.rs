@@ -37,6 +37,9 @@ pub unsafe extern "C" fn _pen_free(pointer: *mut u8) {
 
 fn check_stack_size(size: usize) {
     if size > MAX_STACK_SIZE {
-        panic!("stack overflow: {} bytes (max: {} bytes)", size, MAX_STACK_SIZE);
+        panic!(
+            "stack overflow: {} bytes (max: {} bytes)",
+            size, MAX_STACK_SIZE
+        );
     }
 }
