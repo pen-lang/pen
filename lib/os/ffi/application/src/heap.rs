@@ -1,8 +1,12 @@
 use crate::utilities::is_os_debug;
 use std::alloc::{alloc, dealloc, realloc, Layout};
 
+const MAX_STACK_SIZE: usize = 2 << (2 * 10 + 8);
+
 #[no_mangle]
 pub extern "C" fn _pen_malloc(size: usize) -> *mut u8 {
+    check_stack_size(size);
+
     let pointer =
         (unsafe { alloc(Layout::from_size_align(size, ffi::DEFAULT_MEMORY_ALIGNMENT).unwrap()) })
             as *mut u8;
@@ -16,6 +20,8 @@ pub extern "C" fn _pen_malloc(size: usize) -> *mut u8 {
 
 #[no_mangle]
 pub extern "C" fn _pen_realloc(old_pointer: *mut u8, size: usize) -> *mut u8 {
+    check_stack_size(size);
+
     // Layouts are expected to be ignored by the global allocator.
     let new_pointer = (unsafe {
         realloc(
@@ -48,4 +54,10 @@ pub unsafe extern "C" fn _pen_free(pointer: *mut u8) {
         pointer,
         Layout::from_size_align(0, ffi::DEFAULT_MEMORY_ALIGNMENT).unwrap(),
     )
+}
+
+fn check_stack_size(size: usize) {
+    if size > MAX_STACK_SIZE {
+        panic!("");
+    }
 }
