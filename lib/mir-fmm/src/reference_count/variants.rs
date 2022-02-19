@@ -1,15 +1,13 @@
 use super::{super::error::CompileError, expressions};
-use crate::types;
-use fnv::FnvHashMap;
+use crate::{context::Context, types};
 
 const ARGUMENT_NAME: &str = "_payload";
 
 pub fn compile_variant_clone_function(
-    module_builder: &fmm::build::ModuleBuilder,
+    context: &Context,
     type_: &mir::types::Type,
-    types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    module_builder.define_function(
+    context.module_builder().define_function(
         format!("variant_clone_{}", types::compile_type_id(type_)),
         vec![fmm::ir::Argument::new(
             ARGUMENT_NAME,
@@ -24,10 +22,10 @@ pub fn compile_variant_clone_function(
                         &builder,
                         &fmm::build::variable(ARGUMENT_NAME, types::compile_variant_payload()),
                         type_,
-                        types,
+                        context.types(),
                     )?,
                     type_,
-                    types,
+                    context.types(),
                 )?,
             )?))
         },
@@ -38,11 +36,10 @@ pub fn compile_variant_clone_function(
 }
 
 pub fn compile_variant_drop_function(
-    module_builder: &fmm::build::ModuleBuilder,
+    context: &Context,
     type_: &mir::types::Type,
-    types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    module_builder.define_function(
+    context.module_builder().define_function(
         format!("variant_drop_{}", types::compile_type_id(type_)),
         vec![fmm::ir::Argument::new(
             ARGUMENT_NAME,
@@ -53,9 +50,14 @@ pub fn compile_variant_drop_function(
 
             expressions::drop_expression(
                 &builder,
-                &crate::variants::compile_unboxed_payload(&builder, &payload, type_, types)?,
+                &crate::variants::compile_unboxed_payload(
+                    &builder,
+                    &payload,
+                    type_,
+                    context.types(),
+                )?,
                 type_,
-                types,
+                context.types(),
             )?;
 
             Ok(builder.return_(fmm::ir::VOID_VALUE.clone()))
