@@ -21,9 +21,8 @@ pub fn sort(
         }
     }
 
-    // TODO Return an error on cycle.
     Ok(toposort(&graph, None)
-        .ok_or_else(|| ApplicationError::PackageDependencyCycle)
+        .map_err(|_| ApplicationError::PackageDependencyCycle)?
         .into_iter()
         .map(|index| graph[index].clone())
         .collect())
