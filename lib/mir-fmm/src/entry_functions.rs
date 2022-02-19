@@ -1,6 +1,8 @@
 use super::error::CompileError;
-use crate::yield_::{YIELD_FUNCTION_NAME, YIELD_FUNCTION_TYPE};
-use crate::{closures, expressions, reference_count, types};
+use crate::{
+    closures, expressions, reference_count, types,
+    yield_::{YIELD_FUNCTION_NAME, YIELD_FUNCTION_TYPE},
+};
 use fnv::FnvHashMap;
 
 const CLOSURE_NAME: &str = "_closure";
