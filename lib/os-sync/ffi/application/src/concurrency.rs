@@ -4,6 +4,6 @@ fn _pen_spawn(closure: ffi::Arc<ffi::Closure>) -> ffi::Arc<ffi::Closure> {
 }
 
 #[ffi::bindgen]
-async fn _pen_yield() {
+async fn _pen_yield() -> ffi::None {
     unreachable!("thunk lock detected")
 }
