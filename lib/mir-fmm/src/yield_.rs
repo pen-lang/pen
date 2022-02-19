@@ -10,3 +10,7 @@ pub static YIELD_FUNCTION_TYPE: Lazy<fmm::types::Function> = Lazy::new(|| {
         fmm::types::CallingConvention::Source,
     )
 });
+
+pub fn compile_yield_function_declaration(module_builder: &fmm::build::ModuleBuilder) {
+    module_builder.declare_function(YIELD_FUNCTION_NAME, YIELD_FUNCTION_TYPE.clone());
+}
