@@ -11,7 +11,10 @@ max = \() number { 100 }
 main = \(ctx context) none {
   printNumbers(
     ctx.Os,
-    sort'Sort([number Random'Number(ctx.Os) * max() for _ in Number'Sequence(total())]),
+    sort'Sort([number
+      Number'Floor(Random'Number(ctx.Os) * max())
+      for _ in Number'Sequence(total())
+    ]),
   )
 
   none
