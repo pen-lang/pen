@@ -1,10 +1,9 @@
 use super::error::CompileError;
+use crate::yield_::{YIELD_FUNCTION_NAME, YIELD_FUNCTION_TYPE};
 use crate::{closures, expressions, reference_count, types};
 use fnv::FnvHashMap;
 
 const CLOSURE_NAME: &str = "_closure";
-// TODO Inject this as a configuration.
-const YIELD_FUNCTION_NAME: &str = "_pen_yield";
 
 pub fn compile(
     module_builder: &fmm::build::ModuleBuilder,
@@ -281,14 +280,7 @@ fn compile_locked_thunk_entry(
                 )?,
                 |instruction_builder| {
                     instruction_builder.call(
-                        fmm::build::variable(
-                            YIELD_FUNCTION_NAME,
-                            fmm::types::Function::new(
-                                vec![],
-                                fmm::types::VOID_TYPE.clone(),
-                                fmm::types::CallingConvention::Source,
-                            ),
-                        ),
+                        fmm::build::variable(YIELD_FUNCTION_NAME, YIELD_FUNCTION_TYPE.clone()),
                         vec![],
                     )?;
 
