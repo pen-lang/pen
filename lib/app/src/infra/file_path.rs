@@ -84,10 +84,17 @@ impl FilePath {
         })
     }
 
-    // TODO Check a directory path.
     #[must_use]
-    pub fn relative_to(&self, path: &Self) -> Self {
-        Self::new(self.components().skip(path.components().count()))
+    pub fn relative_to(&self, path: &Self) -> Option<Self> {
+        if self
+            .components()
+            .zip(path.components())
+            .all(|(one, other)| one == other)
+        {
+            Self::new(self.components().skip(path.components().count())).into()
+        } else {
+            None
+        }
     }
 }
 

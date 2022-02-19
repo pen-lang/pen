@@ -104,22 +104,26 @@ fn compile_definition(
     let body = expression_compiler::compile(definition.lambda().body(), context)?;
     let result_type = type_compiler::compile(definition.lambda().result_type(), context)?;
 
-    Ok(mir::ir::Definition::new(
-        definition.name(),
-        definition
-            .lambda()
-            .arguments()
-            .iter()
-            .map(|argument| -> Result<_, CompileError> {
-                Ok(mir::ir::Argument::new(
-                    argument.name(),
-                    type_compiler::compile(argument.type_(), context)?,
-                ))
-            })
-            .collect::<Result<_, _>>()?,
-        body,
-        result_type,
-    ))
+    Ok(if definition.lambda().arguments().is_empty() {
+        mir::ir::Definition::thunk(definition.name(), body, result_type)
+    } else {
+        mir::ir::Definition::new(
+            definition.name(),
+            definition
+                .lambda()
+                .arguments()
+                .iter()
+                .map(|argument| -> Result<_, CompileError> {
+                    Ok(mir::ir::Argument::new(
+                        argument.name(),
+                        type_compiler::compile(argument.type_(), context)?,
+                    ))
+                })
+                .collect::<Result<_, _>>()?,
+            body,
+            result_type,
+        )
+    })
 }
 
 #[cfg(test)]
