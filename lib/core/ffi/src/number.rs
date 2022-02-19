@@ -26,6 +26,16 @@ fn _pen_core_is_nan(x: ffi::Number) -> ffi::Boolean {
     f64::from(x).is_nan().into()
 }
 
+#[ffi::bindgen]
+fn _pen_core_ceil(number: ffi::Number) -> ffi::Number {
+    f64::from(number).ceil().into()
+}
+
+#[ffi::bindgen]
+fn _pen_core_floor(number: ffi::Number) -> ffi::Number {
+    f64::from(number).floor().into()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

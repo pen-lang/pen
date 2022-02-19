@@ -1,0 +1,31 @@
+import Core'Number
+import Core'String
+import Os'File
+import Os'Random
+import 'sort
+
+total = \() number { 20 }
+
+max = \() number { 100 }
+
+main = \(ctx context) none {
+  printNumbers(
+    ctx.Os,
+    sort'Sort([number
+      Number'Floor(Random'Number(ctx.Os) * max())
+      for _ in Number'Sequence(total())
+    ]),
+  )
+
+  none
+}
+
+printNumbers = \(ctx Context, ns [number]) none | error {
+  if [n, ...ns] = ns {
+    File'Write(ctx, File'StdOut(), String'Join([string Number'String(n()), "\n"], ""))?
+
+    printNumbers(ctx, ns)
+  } else {
+    none
+  }
+}

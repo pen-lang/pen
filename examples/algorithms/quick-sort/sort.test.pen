@@ -1,0 +1,10 @@
+import Test'Assert
+import 'sort
+
+TestSortNothing = \() none | error {
+  Assert'True(sort'Sort([number]) == [number])
+}
+
+TestSortNumbers = \() none | error {
+  Assert'True(sort'Sort([number 3, 1, 2]) == [number 1, 2, 3])
+}
