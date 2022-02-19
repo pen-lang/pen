@@ -14,6 +14,7 @@ pub fn find(
     {
         if path
             .relative_to(package_directory)
+            .unwrap()
             .components()
             .next()
             .unwrap()

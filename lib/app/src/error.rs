@@ -6,6 +6,7 @@ pub enum ApplicationError {
     ContextTypeNotFound,
     ModuleNotFound(String),
     NewContextFunctionNotFound,
+    PackageDependencyCycle,
     PackageNotFound(String),
     SystemPackageNotFound,
     Test,
@@ -25,6 +26,9 @@ impl Display for ApplicationError {
             }
             Self::NewContextFunctionNotFound => {
                 write!(formatter, "new context function not found")
+            }
+            Self::PackageDependencyCycle => {
+                write!(formatter, "package dependency cycle detected")
             }
             Self::PackageNotFound(package) => {
                 write!(formatter, "package {} not found", package)
