@@ -1,12 +1,14 @@
+use crate::configuration::Configuration;
 use fnv::FnvHashMap;
 
 pub struct Context {
     module_builder: fmm::build::ModuleBuilder,
     types: FnvHashMap<String, mir::types::RecordBody>,
+    configuration: Configuration,
 }
 
 impl Context {
-    pub fn new(module: &mir::ir::Module) -> Self {
+    pub fn new(module: &mir::ir::Module, configuration: Configuration) -> Self {
         Self {
             module_builder: fmm::build::ModuleBuilder::new(),
             types: module
@@ -14,6 +16,7 @@ impl Context {
                 .iter()
                 .map(|definition| (definition.name().into(), definition.type_().clone()))
                 .collect(),
+            configuration,
         }
     }
 
@@ -23,5 +26,9 @@ impl Context {
 
     pub fn types(&self) -> &FnvHashMap<String, mir::types::RecordBody> {
         &self.types
+    }
+
+    pub fn configuration(&self) -> &Configuration {
+        &self.configuration
     }
 }

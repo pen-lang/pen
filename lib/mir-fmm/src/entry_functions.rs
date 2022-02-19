@@ -1,9 +1,6 @@
 use super::error::CompileError;
 use crate::{
-    closures,
-    context::Context,
-    expressions, reference_count, types,
-    yield_::{YIELD_FUNCTION_NAME, YIELD_FUNCTION_TYPE},
+    closures, context::Context, expressions, reference_count, types, yield_::YIELD_FUNCTION_TYPE,
 };
 use fnv::FnvHashMap;
 
@@ -271,7 +268,10 @@ fn compile_locked_thunk_entry(
                 )?,
                 |instruction_builder| {
                     instruction_builder.call(
-                        fmm::build::variable(YIELD_FUNCTION_NAME, YIELD_FUNCTION_TYPE.clone()),
+                        fmm::build::variable(
+                            &context.configuration().yield_function_name,
+                            YIELD_FUNCTION_TYPE.clone(),
+                        ),
                         vec![],
                     )?;
 
@@ -399,17 +399,15 @@ fn compile_untyped_closure_pointer() -> fmm::build::TypedExpression {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::configuration::CONFIGURATION;
 
     #[test]
     fn do_not_overwrite_global_functions_in_variables() {
         let function_type = mir::types::Function::new(vec![], mir::types::Type::Number);
-        let context = Context::new(&mir::ir::Module::new(
-            vec![],
-            vec![],
-            vec![],
-            vec![],
-            vec![],
-        ));
+        let context = Context::new(
+            &mir::ir::Module::new(vec![], vec![], vec![], vec![], vec![]),
+            CONFIGURATION.clone(),
+        );
 
         compile(
             &context,

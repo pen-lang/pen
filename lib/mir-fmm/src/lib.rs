@@ -1,5 +1,6 @@
 mod calls;
 mod closures;
+mod configuration;
 mod context;
 mod declarations;
 mod definitions;
@@ -15,6 +16,7 @@ mod types;
 mod variants;
 mod yield_;
 
+pub use configuration::Configuration;
 use context::Context;
 use declarations::compile_declaration;
 use definitions::compile_definition;
@@ -25,7 +27,10 @@ use foreign_definitions::compile_foreign_definition;
 use type_information::compile_type_information_global_variable;
 use yield_::compile_yield_function_declaration;
 
-pub fn compile(module: &mir::ir::Module) -> Result<fmm::ir::Module, CompileError> {
+pub fn compile(
+    module: &mir::ir::Module,
+    configuration: &Configuration,
+) -> Result<fmm::ir::Module, CompileError> {
     mir::analysis::check_types(module)?;
 
     let module = mir::analysis::infer_environment(module);
@@ -33,7 +38,7 @@ pub fn compile(module: &mir::ir::Module) -> Result<fmm::ir::Module, CompileError
 
     mir::analysis::check_types(&module)?;
 
-    let context = Context::new(&module);
+    let context = Context::new(&module, configuration.clone());
 
     for type_ in &mir::analysis::collect_variant_types(&module) {
         compile_type_information_global_variable(&context, type_)?;
@@ -85,7 +90,7 @@ pub fn compile(module: &mir::ir::Module) -> Result<fmm::ir::Module, CompileError
         )?;
     }
 
-    compile_yield_function_declaration(context.module_builder());
+    compile_yield_function_declaration(&context);
 
     Ok(context.module_builder().as_module())
 }
@@ -144,9 +149,10 @@ fn compile_global_variables(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::configuration::CONFIGURATION;
 
     fn compile_module(module: &mir::ir::Module) {
-        let module = compile(module).unwrap();
+        let module = compile(module, &CONFIGURATION).unwrap();
 
         compile_final_module(&module);
         compile_final_module(

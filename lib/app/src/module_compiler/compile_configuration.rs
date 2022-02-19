@@ -1,9 +1,11 @@
 pub struct CompileConfiguration {
     pub fmm: FmmConfiguration,
+    pub mir: MirConfiguration,
     pub hir: HirConfiguration,
 }
 
 pub type FmmConfiguration = fmm_llvm::InstructionConfiguration;
+pub type MirConfiguration = mir_fmm::Configuration;
 pub type HirConfiguration = hir_mir::CompileConfiguration;
 pub type ConcurrencyConfiguration = hir_mir::ConcurrencyConfiguration;
 pub type ListTypeConfiguration = hir_mir::ListTypeConfiguration;
