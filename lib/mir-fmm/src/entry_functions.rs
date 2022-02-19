@@ -129,7 +129,6 @@ fn compile_initial_thunk_entry(
     types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     let entry_function_name = module_builder.generate_name();
-    let entry_function_type = types::compile_entry_function(definition.type_(), types);
     let arguments = compile_arguments(definition, types);
 
     module_builder.define_function(
@@ -141,7 +140,10 @@ fn compile_initial_thunk_entry(
             instruction_builder.if_(
                 instruction_builder.compare_and_swap(
                     entry_function_pointer.clone(),
-                    fmm::build::variable(&entry_function_name, entry_function_type.clone()),
+                    fmm::build::variable(
+                        &entry_function_name,
+                        types::compile_entry_function(definition.type_(), types),
+                    ),
                     lock_entry_function.clone(),
                     fmm::ir::AtomicOrdering::Acquire,
                     fmm::ir::AtomicOrdering::Relaxed,
