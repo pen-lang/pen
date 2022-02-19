@@ -12,6 +12,7 @@ mod reference_count;
 mod type_information;
 mod types;
 mod variants;
+mod yield_;
 
 use declarations::compile_declaration;
 use definitions::compile_definition;
@@ -20,6 +21,7 @@ use fnv::FnvHashMap;
 use foreign_declarations::compile_foreign_declaration;
 use foreign_definitions::compile_foreign_definition;
 use type_information::compile_type_information_global_variable;
+use yield_::compile_yield_function_declaration;
 
 pub fn compile(module: &mir::ir::Module) -> Result<fmm::ir::Module, CompileError> {
     mir::analysis::check_types(module)?;
@@ -86,6 +88,8 @@ pub fn compile(module: &mir::ir::Module) -> Result<fmm::ir::Module, CompileError
             &types,
         )?;
     }
+
+    compile_yield_function_declaration(&module_builder);
 
     Ok(module_builder.as_module())
 }

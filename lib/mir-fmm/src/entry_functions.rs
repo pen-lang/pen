@@ -1,5 +1,8 @@
 use super::error::CompileError;
-use crate::{closures, expressions, reference_count, types};
+use crate::{
+    closures, expressions, reference_count, types,
+    yield_::{YIELD_FUNCTION_NAME, YIELD_FUNCTION_TYPE},
+};
 use fnv::FnvHashMap;
 
 const CLOSURE_NAME: &str = "_closure";
@@ -127,7 +130,6 @@ fn compile_initial_thunk_entry(
     types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     let entry_function_name = module_builder.generate_name();
-    let entry_function_type = types::compile_entry_function(definition.type_(), types);
     let arguments = compile_arguments(definition, types);
 
     module_builder.define_function(
@@ -139,7 +141,10 @@ fn compile_initial_thunk_entry(
             instruction_builder.if_(
                 instruction_builder.compare_and_swap(
                     entry_function_pointer.clone(),
-                    fmm::build::variable(&entry_function_name, entry_function_type.clone()),
+                    fmm::build::variable(
+                        &entry_function_name,
+                        types::compile_entry_function(definition.type_(), types),
+                    ),
                     lock_entry_function.clone(),
                     fmm::ir::AtomicOrdering::Acquire,
                     fmm::ir::AtomicOrdering::Relaxed,
@@ -213,20 +218,13 @@ fn compile_initial_thunk_entry(
                     Ok(instruction_builder.return_(value))
                 },
                 |instruction_builder| {
-                    Ok(instruction_builder.return_(
-                        instruction_builder.call(
-                            instruction_builder.atomic_load(
-                                compile_entry_function_pointer(definition, types)?,
-                                fmm::ir::AtomicOrdering::Acquire,
-                            )?,
-                            arguments
-                                .iter()
-                                .map(|argument| {
-                                    fmm::build::variable(argument.name(), argument.type_().clone())
-                                })
-                                .collect(),
+                    Ok(instruction_builder.return_(instruction_builder.call(
+                        instruction_builder.atomic_load(
+                            compile_entry_function_pointer(definition, types)?,
+                            fmm::ir::AtomicOrdering::Acquire,
                         )?,
-                    ))
+                        compile_argument_variables(&arguments),
+                    )?))
                 },
             )?;
 
@@ -257,10 +255,15 @@ fn compile_locked_thunk_entry(
     types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     let entry_function_name = module_builder.generate_name();
+    let entry_function = fmm::build::variable(
+        &entry_function_name,
+        types::compile_entry_function(definition.type_(), types),
+    );
+    let arguments = compile_arguments(definition, types);
 
     module_builder.define_function(
         &entry_function_name,
-        compile_arguments(definition, types),
+        arguments.clone(),
         |instruction_builder| {
             instruction_builder.if_(
                 fmm::build::comparison_operation(
@@ -274,14 +277,20 @@ fn compile_locked_thunk_entry(
                     ),
                     fmm::build::bit_cast(
                         fmm::types::Primitive::PointerInteger,
-                        fmm::build::variable(
-                            &entry_function_name,
-                            types::compile_entry_function(definition.type_(), types),
-                        ),
+                        entry_function.clone(),
                     ),
                 )?,
-                // TODO Return to handle thunk locks asynchronously.
-                |instruction_builder| Ok(instruction_builder.unreachable()),
+                |instruction_builder| {
+                    instruction_builder.call(
+                        fmm::build::variable(YIELD_FUNCTION_NAME, YIELD_FUNCTION_TYPE.clone()),
+                        vec![],
+                    )?;
+
+                    Ok(instruction_builder.return_(instruction_builder.call(
+                        entry_function.clone(),
+                        compile_argument_variables(&arguments),
+                    )?))
+                },
                 |instruction_builder| compile_normal_body(&instruction_builder, definition, types),
             )?;
 
@@ -342,6 +351,13 @@ fn compile_arguments(
         fmm::ir::Argument::new(argument.name(), types::compile(argument.type_(), types))
     }))
     .collect()
+}
+
+fn compile_argument_variables(arguments: &[fmm::ir::Argument]) -> Vec<fmm::build::TypedExpression> {
+    arguments
+        .iter()
+        .map(|argument| fmm::build::variable(argument.name(), argument.type_().clone()))
+        .collect()
 }
 
 fn compile_thunk_value_pointer(
