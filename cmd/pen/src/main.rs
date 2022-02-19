@@ -25,9 +25,9 @@ fn main() {
 }
 
 fn run() -> Result<(), Box<dyn std::error::Error>> {
-    match clap::App::new("pen")
+    match clap::Command::new("pen")
         .version(clap::crate_version!())
-        .setting(clap::AppSettings::SubcommandRequired)
+        .subcommand_required(true)
         .arg(
             clap::Arg::new("verbose")
                 .short('v')
@@ -36,13 +36,13 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                 .help("Uses verbose output"),
         )
         .subcommand(
-            clap::App::new("build")
+            clap::Command::new("build")
                 .about("Builds a package")
                 .arg(build_target_triple_argument().possible_values(CROSS_COMPILE_TARGETS)),
         )
-        .subcommand(clap::App::new("test").about("Tests modules in a package"))
+        .subcommand(clap::Command::new("test").about("Tests modules in a package"))
         .subcommand(
-            clap::App::new("create")
+            clap::Command::new("create")
                 .about("Creates a package")
                 .arg(
                     clap::Arg::new("library")
@@ -57,8 +57,8 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                 ),
         )
         .subcommand(
-            clap::App::new("compile")
-                .setting(clap::AppSettings::Hidden)
+            clap::Command::new("compile")
+                .hide(true)
                 .about("Compiles a module")
                 .arg(clap::Arg::new("source file").required(true))
                 .arg(clap::Arg::new("dependency file").required(true))
@@ -67,8 +67,8 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                 .arg(build_target_triple_argument()),
         )
         .subcommand(
-            clap::App::new("compile-main")
-                .setting(clap::AppSettings::Hidden)
+            clap::Command::new("compile-main")
+                .hide(true)
                 .about("Compiles a main module")
                 .arg(
                     clap::Arg::new("context interface file")
@@ -83,8 +83,8 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                 .arg(build_target_triple_argument()),
         )
         .subcommand(
-            clap::App::new("compile-prelude")
-                .setting(clap::AppSettings::Hidden)
+            clap::Command::new("compile-prelude")
+                .hide(true)
                 .about("Compiles a prelude module")
                 .arg(clap::Arg::new("source file").required(true))
                 .arg(clap::Arg::new("object file").required(true))
@@ -92,8 +92,8 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                 .arg(build_target_triple_argument()),
         )
         .subcommand(
-            clap::App::new("compile-test")
-                .setting(clap::AppSettings::Hidden)
+            clap::Command::new("compile-test")
+                .hide(true)
                 .about("Compiles a test module")
                 .arg(clap::Arg::new("source file").required(true))
                 .arg(clap::Arg::new("dependency file").required(true))
@@ -102,8 +102,8 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                 .arg(build_target_triple_argument()),
         )
         .subcommand(
-            clap::App::new("resolve-dependency")
-                .setting(clap::AppSettings::Hidden)
+            clap::Command::new("resolve-dependency")
+                .hide(true)
                 .about("Resolves module dependency")
                 .arg(
                     clap::Arg::new("package directory")
@@ -133,8 +133,8 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                 .arg(clap::Arg::new("build script dependency file").required(true)),
         )
         .subcommand(
-            clap::App::new("compile-package-test-information")
-                .setting(clap::AppSettings::Hidden)
+            clap::Command::new("compile-package-test-information")
+                .hide(true)
                 .about("Compiles a package test information")
                 .arg(
                     clap::Arg::new("package test information file")
@@ -145,8 +145,8 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                 .arg(clap::Arg::new("test information file").multiple_occurrences(true)),
         )
         .subcommand(
-            clap::App::new("link-test")
-                .setting(clap::AppSettings::Hidden)
+            clap::Command::new("link-test")
+                .hide(true)
                 .about("Links tests")
                 .arg(
                     clap::Arg::new("test file")
