@@ -281,7 +281,6 @@ fn compile_locked_thunk_entry(
                     )?))
                 },
                 |instruction_builder| {
-                    {}
                     compile_normal_body(&instruction_builder, definition, context.types())
                 },
             )?;
