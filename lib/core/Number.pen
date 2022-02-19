@@ -3,6 +3,8 @@ import foreign "c" _pen_core_power \(number, number) number
 import foreign "c" _pen_core_remainder \(number, number) number
 import foreign "c" _pen_core_square_root \(number) number
 import foreign "c" _pen_core_is_nan \(number) boolean
+import foreign "c" _pen_core_ceil \(number) number
+import foreign "c" _pen_core_floor \(number) number
 
 String = \(x number) string {
   _pen_core_convert_number_to_string(x)
@@ -46,4 +48,12 @@ Range = \(min number, max number) [number] {
 
 IsNan = \(x number) boolean {
   _pen_core_is_nan(x)
+}
+
+Ceil = \(x number) number {
+  _pen_core_ceil(x)
+}
+
+Floor = \(x number) number {
+  _pen_core_floor(x)
 }
