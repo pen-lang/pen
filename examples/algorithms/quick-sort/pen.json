@@ -2,6 +2,7 @@
   "type": "application",
   "dependencies": {
     "Core": "pen:///core",
-    "Os": "pen:///os"
+    "Os": "pen:///os",
+    "Test": "pen:///test"
   }
 }
