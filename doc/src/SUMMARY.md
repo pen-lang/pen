@@ -48,6 +48,6 @@
 - [Advanced features](advanced-features/README.md)
   - [Cross compile](advanced-features/cross-compile.md)
   - [Foreign Function Interface (FFI)](advanced-features/ffi.md)
-  - [System injection](advanced-features/system-injection.md)
+  - [Writing system packages](advanced-features/writing-system-packages.md)
 - [Roadmap](roadmap.md)
 - [The Zen](the-zen.md)
