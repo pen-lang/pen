@@ -21,7 +21,18 @@ There are 3 package types: application, library, and system. Those types are spe
 
 ### Application packages
 
-Application packages must have `main.pen` module files at their top directories. Note that every application package must specify at least [one system package](/advanced-features/system-injection.md#system-packages) that links applications in its [package configuration file](#package-configuration).
+Application packages must have `main.pen` module files at their top directories. Those main modules have a `main` function that receives an argument of a `context` type and returns a `none` type. The `context` type is a record type containing context values of system packages with their field names of package names. For example, given system packages named `Http` and `Os`, a main function looks like the following.
+
+```pen
+main = \(ctx context) none {
+  s = fetch(ctx.Http, "https://pen-lang.org/")
+  print(ctx.Os, s)
+
+  none
+}
+```
+
+Every application package must specify one and only one [system package](/advanced-features/system-injection.md#system-packages) that links applications (e.g. the `Os` standard system package) in its [package configuration file](#package-configuration). Otherwise, their builds fail. However, application packages can specify system packages that do no link appilcations (e.g. the `Http` system package in the example above) as many as possible.
 
 ## Package configuration
 
