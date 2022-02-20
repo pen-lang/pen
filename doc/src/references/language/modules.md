@@ -78,7 +78,7 @@ import Foo'Bar'Baz as Blah
 
 ### Unqualified import
 
-You can import functions and types without prefixes by putting their names between `{` and `}` in [import statements](/references/language/syntax.md#import-statement). This is especially useful when module names and imported entities have the same names like `import 'MyType { MyType }`.
+You can import functions and types without prefixes by putting their names between `{` and `}` in [import statements](/references/language/syntax.md#import-statement). This is especially useful when module names and imported functions or types have the same names like `import 'MyType { MyType }`.
 
 ```pen
 import Foo'Bar { Foo, Bar }
