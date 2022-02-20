@@ -255,7 +255,7 @@ It iterates over elements in a given list and generates a new list with elements
 It executes a function in parallel. Its returned value is a future represented as a function that returns a result of the executed function.
 
 ```pen
-future = go \() number {
+f = go \() number {
   ...
 }
 ```
