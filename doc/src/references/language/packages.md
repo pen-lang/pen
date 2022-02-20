@@ -19,6 +19,8 @@ There are 3 package types: application, library, and system. Those types are spe
 - Library packages are imported and used by other packages.
 - System packages are similar to library packages but provide system interfaces to application packages.
 
+### Application packages
+
 Application packages must have `main.pen` module files at their top directories. Note that every application package must specify at least [one system package](/advanced-features/system-injection.md#system-packages) that links applications in its [package configuration file](#package-configuration).
 
 ## Package configuration
