@@ -117,7 +117,7 @@ You can create new lists from existing ones by spreading elements of the old one
 [number x, ...xs]
 ```
 
-Note that **expressions within list literals are evaluated lazily**; they are evaluated only if their values are required but only once.
+Note that **expressions within list literals are evaluated lazily**; they are evaluated only if their values are required.
 
 ## Records
 
