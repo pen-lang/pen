@@ -19,7 +19,7 @@ sayHello = \(ctx Context) none | error {
   none
 }
 
-main = \(ctx context) number {
+main = \(ctx context) none {
   e = sayHello(ctx.Os)
 
   if _ = e as none {
