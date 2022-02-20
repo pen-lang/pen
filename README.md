@@ -84,7 +84,7 @@ The language and its runtime enables thread-safe concurrent/parallel computation
 - Errors as values 
 - Asynchronous I/O
 - Cross compile
-- [Rust](https://www.rust-lang.org/)/C foreign function interface
+- [Rust](https://www.rust-lang.org/) foreign function interface (FFI)
 
 ## License
 
