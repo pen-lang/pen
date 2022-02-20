@@ -62,7 +62,7 @@ Pen aims to make large-scale software development efficient where a number of pe
 
 ### Concurrent/parallel computation
 
-The language and its runtime enables thread-safe concurrent/parallel computation.
+- The language and its runtime enables thread-safe concurrent/parallel computation.
 
 ### System injection
 
