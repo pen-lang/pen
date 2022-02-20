@@ -7,7 +7,6 @@
   - [Testing](guides/testing.md)
   - [Concurrency and parallelism](guides/concurrency-and-parallelism.md)
   - [Coding style](guides/coding-style.md)
-  - [Background](guides/background.md)
 - [References](references/README.md)
   - [Language](references/language/README.md)
     - [Syntax](references/language/syntax.md)
