@@ -86,7 +86,7 @@ Pen aims to make large-scale software development efficient where a number of pe
 - Errors as values
 - Asynchronous I/O
 - Cross compile
-- [Rust](https://www.rust-lang.org/) foreign function interface (FFI)
+- [Rust](https://www.rust-lang.org/)/C Foreign Function Interface (FFI)
 
 ## License
 
