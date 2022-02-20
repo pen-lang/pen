@@ -75,9 +75,8 @@ Pen aims to make large-scale software development efficient where a number of pe
 
 ### Reliable testing
 
-- All unit tests are deterministic.
-- Therefore, testing is always reliable and fast.
-- You never get bothered by flaky or slow tests.
+- Unit tests are always deterministic and fast.
+- No flaky or slow tests bother developers.
 
 ### Even more...
 
