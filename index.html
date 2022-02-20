@@ -149,6 +149,7 @@
 <p>Pen is the programming language that makes software development <strong>scalable</strong>, focusing on software maintainability and portability.</p>
 <pre><code class="language-pen">import Os'Context { Context }
 import Os'File
+import Os'Process
 
 sayHello = \(ctx Context) none | error {
   File'Write(ctx, File'StdOut(), &quot;Hello, world!\n&quot;)?
@@ -156,13 +157,13 @@ sayHello = \(ctx Context) none | error {
   none
 }
 
-main = \(ctx context) number {
+main = \(ctx context) none {
   e = sayHello(ctx.Os)
 
-  if e = e as none {
-    0
+  if _ = e as none {
+    none
   } else if error {
-    1
+    Process'Exit(ctx.Os, 1)
   }
 }
 </code></pre>
