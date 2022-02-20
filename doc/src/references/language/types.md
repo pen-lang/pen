@@ -56,33 +56,41 @@ string
 
 ### Literals
 
-String literals are sequences of bytes in general. Texts in the literals are encoded in [UTF-8](https://en.wikipedia.org/wiki/UTF-8).
+String literals are sequences of bytes. They are often used to represent texts encoded in [UTF-8](https://en.wikipedia.org/wiki/UTF-8).
 
 ```pen
 "foo"
 ```
 
-#### Escapes
+#### Escape sequneces
 
-String literals can contain the following character escapes.
+String literals can contain the following escape sequences.
 
-| Escape | Name            |
-| ------ | --------------- |
-| `\n`   | Newline         |
-| `\r`   | Carriage return |
-| `\t`   | Tab             |
-| `\"`   | Double quote    |
-| `\\`   | Backslash       |
-| `\x9f` | Byte            |
+| Escape sequence | Name            |
+| --------------- | --------------- |
+| `\n`            | Newline         |
+| `\r`            | Carriage return |
+| `\t`            | Tab             |
+| `\"`            | Double quote    |
+| `\\`            | Backslash       |
+| `\x9f`          | Byte            |
 
 ## Functions
 
-A function is a set of operations with arguments and a result.
+A function represents some computation with arguments and a result.
 
 Functions represent not only pure computation but may also execute side effects, such as I/O.
 
 ```pen
 \(number, number) number
+```
+
+### Literals
+
+```pen
+\(x number, y number) number {
+  x + y
+}
 ```
 
 ## Lists
