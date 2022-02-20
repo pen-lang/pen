@@ -1,5 +1,5 @@
 use super::{reference_count, types, CompileError};
-use fnv::FnvHashMap;
+use crate::context::Context;
 use once_cell::sync::Lazy;
 
 const DROP_FUNCTION_ARGUMENT_NAME: &str = "_closure";
@@ -60,16 +60,14 @@ pub fn compile_closure_content(
 }
 
 pub fn compile_drop_function(
-    module_builder: &fmm::build::ModuleBuilder,
+    context: &Context,
     definition: &mir::ir::Definition,
-    types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     compile_drop_function_with_builder(
-        module_builder,
-        types,
+        context,
         |builder, environment_pointer| -> Result<_, CompileError> {
             let environment = builder.load(fmm::build::bit_cast(
-                fmm::types::Pointer::new(types::compile_environment(definition, types)),
+                fmm::types::Pointer::new(types::compile_environment(definition, context.types())),
                 environment_pointer.clone(),
             ))?;
 
@@ -78,7 +76,7 @@ pub fn compile_drop_function(
                     builder,
                     &builder.deconstruct_record(environment.clone(), index)?,
                     free_variable.type_(),
-                    types,
+                    context.types(),
                 )?;
             }
 
@@ -88,25 +86,26 @@ pub fn compile_drop_function(
 }
 
 pub fn compile_normal_thunk_drop_function(
-    module_builder: &fmm::build::ModuleBuilder,
+    context: &Context,
     definition: &mir::ir::Definition,
-    types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     compile_drop_function_with_builder(
-        module_builder,
-        types,
+        context,
         |builder, environment_pointer| -> Result<_, CompileError> {
             reference_count::drop_expression(
                 builder,
                 &builder.load(fmm::build::union_address(
                     fmm::build::bit_cast(
-                        fmm::types::Pointer::new(types::compile_closure_payload(definition, types)),
+                        fmm::types::Pointer::new(types::compile_closure_payload(
+                            definition,
+                            context.types(),
+                        )),
                         environment_pointer.clone(),
                     ),
                     1,
                 )?)?,
                 definition.result_type(),
-                types,
+                context.types(),
             )?;
 
             Ok(())
@@ -115,14 +114,13 @@ pub fn compile_normal_thunk_drop_function(
 }
 
 fn compile_drop_function_with_builder(
-    module_builder: &fmm::build::ModuleBuilder,
-    types: &FnvHashMap<String, mir::types::RecordBody>,
+    context: &Context,
     compile_body: impl Fn(
         &fmm::build::InstructionBuilder,
         &fmm::build::TypedExpression,
     ) -> Result<(), CompileError>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    module_builder.define_anonymous_function(
+    context.module_builder().define_anonymous_function(
         vec![fmm::ir::Argument::new(
             DROP_FUNCTION_ARGUMENT_NAME,
             DROP_FUNCTION_ARGUMENT_TYPE,
@@ -133,7 +131,7 @@ fn compile_drop_function_with_builder(
                 &compile_payload_pointer(fmm::build::bit_cast(
                     fmm::types::Pointer::new(types::compile_unsized_closure(
                         &DUMMY_FUNCTION_TYPE,
-                        types,
+                        context.types(),
                     )),
                     fmm::build::variable(DROP_FUNCTION_ARGUMENT_NAME, DROP_FUNCTION_ARGUMENT_TYPE),
                 ))?,

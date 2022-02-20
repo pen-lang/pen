@@ -1,7 +1,5 @@
+use crate::context::Context;
 use once_cell::sync::Lazy;
-
-// TODO Inject this as a configuration.
-pub const YIELD_FUNCTION_NAME: &str = "_pen_yield";
 
 pub static YIELD_FUNCTION_TYPE: Lazy<fmm::types::Function> = Lazy::new(|| {
     fmm::types::Function::new(
@@ -11,6 +9,9 @@ pub static YIELD_FUNCTION_TYPE: Lazy<fmm::types::Function> = Lazy::new(|| {
     )
 });
 
-pub fn compile_yield_function_declaration(module_builder: &fmm::build::ModuleBuilder) {
-    module_builder.declare_function(YIELD_FUNCTION_NAME, YIELD_FUNCTION_TYPE.clone());
+pub fn compile_yield_function_declaration(context: &Context) {
+    context.module_builder().declare_function(
+        &context.configuration().yield_function_name,
+        YIELD_FUNCTION_TYPE.clone(),
+    );
 }

@@ -1,5 +1,7 @@
 mod calls;
 mod closures;
+mod configuration;
+mod context;
 mod declarations;
 mod definitions;
 mod entry_functions;
@@ -14,6 +16,8 @@ mod types;
 mod variants;
 mod yield_;
 
+pub use configuration::Configuration;
+use context::Context;
 use declarations::compile_declaration;
 use definitions::compile_definition;
 pub use error::CompileError;
@@ -23,7 +27,10 @@ use foreign_definitions::compile_foreign_definition;
 use type_information::compile_type_information_global_variable;
 use yield_::compile_yield_function_declaration;
 
-pub fn compile(module: &mir::ir::Module) -> Result<fmm::ir::Module, CompileError> {
+pub fn compile(
+    module: &mir::ir::Module,
+    configuration: &Configuration,
+) -> Result<fmm::ir::Module, CompileError> {
     mir::analysis::check_types(module)?;
 
     let module = mir::analysis::infer_environment(module);
@@ -31,34 +38,29 @@ pub fn compile(module: &mir::ir::Module) -> Result<fmm::ir::Module, CompileError
 
     mir::analysis::check_types(&module)?;
 
-    let module_builder = fmm::build::ModuleBuilder::new();
-    let types = module
-        .type_definitions()
-        .iter()
-        .map(|definition| (definition.name().into(), definition.type_().clone()))
-        .collect();
+    let context = Context::new(&module, configuration.clone());
 
     for type_ in &mir::analysis::collect_variant_types(&module) {
-        compile_type_information_global_variable(&module_builder, type_, &types)?;
+        compile_type_information_global_variable(&context, type_)?;
     }
 
     for definition in module.type_definitions() {
-        reference_count::compile_record_clone_function(&module_builder, definition, &types)?;
-        reference_count::compile_record_drop_function(&module_builder, definition, &types)?;
+        reference_count::compile_record_clone_function(&context, definition)?;
+        reference_count::compile_record_drop_function(&context, definition)?;
     }
 
     for declaration in module.foreign_declarations() {
-        compile_foreign_declaration(&module_builder, declaration, &types)?;
+        compile_foreign_declaration(&context, declaration)?;
     }
 
     for declaration in module.declarations() {
-        compile_declaration(&module_builder, declaration, &types);
+        compile_declaration(&context, declaration);
     }
 
-    let global_variables = compile_global_variables(&module, &types)?;
+    let global_variables = compile_global_variables(&module, context.types())?;
 
     for definition in module.definitions() {
-        compile_definition(&module_builder, definition, &global_variables, &types)?;
+        compile_definition(&context, definition, &global_variables)?;
     }
 
     let function_types = module
@@ -81,17 +83,16 @@ pub fn compile(module: &mir::ir::Module) -> Result<fmm::ir::Module, CompileError
 
     for definition in module.foreign_definitions() {
         compile_foreign_definition(
-            &module_builder,
+            &context,
             definition,
             function_types[definition.name()],
             &global_variables[definition.name()],
-            &types,
         )?;
     }
 
-    compile_yield_function_declaration(&module_builder);
+    compile_yield_function_declaration(&context);
 
-    Ok(module_builder.as_module())
+    Ok(context.module_builder().as_module())
 }
 
 fn compile_global_variables(
@@ -148,9 +149,10 @@ fn compile_global_variables(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::configuration::CONFIGURATION;
 
     fn compile_module(module: &mir::ir::Module) {
-        let module = compile(module).unwrap();
+        let module = compile(module, &CONFIGURATION).unwrap();
 
         compile_final_module(&module);
         compile_final_module(

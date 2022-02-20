@@ -75,7 +75,8 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                         .short('c')
                         .long("context-interface-file")
                         .required(true)
-                        .number_of_values(2),
+                        .number_of_values(2)
+                        .multiple_occurrences(true),
                 )
                 .arg(clap::Arg::new("source file").required(true))
                 .arg(clap::Arg::new("dependency file").required(true))

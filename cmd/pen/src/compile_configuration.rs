@@ -17,6 +17,9 @@ pub static COMPILE_CONFIGURATION: Lazy<Arc<app::module_compiler::CompileConfigur
                 free_function_name: "_pen_free".into(),
                 unreachable_function_name: Some("_pen_unreachable".into()),
             },
+            mir: app::module_compiler::MirConfiguration {
+                yield_function_name: "_pen_yield".into(),
+            },
             hir: app::module_compiler::HirConfiguration {
                 list_type: app::module_compiler::ListTypeConfiguration {
                     empty_list_function_name: "_emptyList".into(),

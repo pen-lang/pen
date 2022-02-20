@@ -10,7 +10,7 @@ use crate::{
 };
 pub use compile_configuration::{
     CompileConfiguration, ConcurrencyConfiguration, ErrorTypeConfiguration, FmmConfiguration,
-    HirConfiguration, ListTypeConfiguration, StringTypeConfiguration,
+    HirConfiguration, ListTypeConfiguration, MirConfiguration, StringTypeConfiguration,
 };
 use fnv::FnvHashMap;
 use std::{collections::BTreeMap, error::Error};
@@ -36,7 +36,7 @@ pub fn compile(
         &module,
         object_file,
         target_triple,
-        &compile_configuration.fmm,
+        compile_configuration,
     )?;
     infrastructure.file_system.write(
         interface_file,
@@ -87,7 +87,7 @@ pub fn compile_main(
         )?,
         object_file,
         target_triple,
-        &compile_configuration.fmm,
+        compile_configuration,
     )?;
 
     Ok(())
@@ -115,7 +115,7 @@ pub fn compile_test(
         &module,
         object_file,
         target_triple,
-        &compile_configuration.fmm,
+        compile_configuration,
     )?;
 
     infrastructure.file_system.write(
@@ -174,7 +174,7 @@ pub fn compile_prelude(
     object_file: &FilePath,
     interface_file: &FilePath,
     target_triple: Option<&str>,
-    fmm_configuration: &FmmConfiguration,
+    compile_configuration: &CompileConfiguration,
 ) -> Result<(), Box<dyn Error>> {
     let (module, module_interface) = hir_mir::compile_prelude(&ast_hir::compile_prelude(
         &parse::parse(
@@ -189,7 +189,7 @@ pub fn compile_prelude(
         &module,
         object_file,
         target_triple,
-        fmm_configuration,
+        compile_configuration,
     )?;
     infrastructure.file_system.write(
         interface_file,
@@ -204,16 +204,16 @@ fn compile_mir_module(
     module: &mir::ir::Module,
     object_file: &FilePath,
     target_triple: Option<&str>,
-    instruction_configuration: &FmmConfiguration,
+    compile_configuration: &CompileConfiguration,
 ) -> Result<(), Box<dyn Error>> {
     infrastructure.file_system.write(
         object_file,
         &fmm_llvm::compile_to_bit_code(
             &fmm::analysis::transform_to_cps(
-                &mir_fmm::compile(module)?,
+                &mir_fmm::compile(module, &compile_configuration.mir)?,
                 fmm::types::VOID_TYPE.clone(),
             )?,
-            instruction_configuration,
+            &compile_configuration.fmm,
             target_triple,
         )?,
     )?;

@@ -1,18 +1,17 @@
 use crate::{
     closures,
+    context::Context,
     types::{self, FUNCTION_ARGUMENT_OFFSET},
 };
-use fnv::FnvHashMap;
 
 pub fn compile_foreign_declaration(
-    module_builder: &fmm::build::ModuleBuilder,
+    context: &Context,
     declaration: &mir::ir::ForeignDeclaration,
-    types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> Result<(), fmm::build::BuildError> {
-    module_builder.define_variable(
+    context.module_builder().define_variable(
         declaration.name(),
         closures::compile_closure_content(
-            compile_entry_function(module_builder, declaration, types)?,
+            compile_entry_function(context, declaration)?,
             fmm::ir::Undefined::new(types::compile_closure_drop_function()),
             fmm::build::record(vec![]),
         ),
@@ -25,9 +24,8 @@ pub fn compile_foreign_declaration(
 }
 
 fn compile_entry_function(
-    module_builder: &fmm::build::ModuleBuilder,
+    context: &Context,
     declaration: &mir::ir::ForeignDeclaration,
-    types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, fmm::build::BuildError> {
     let arguments = [fmm::ir::Argument::new(
         "_closure",
@@ -41,7 +39,10 @@ fn compile_entry_function(
             .iter()
             .enumerate()
             .map(|(index, type_)| {
-                fmm::ir::Argument::new(format!("arg_{}", index), types::compile(type_, types))
+                fmm::ir::Argument::new(
+                    format!("arg_{}", index),
+                    types::compile(type_, context.types()),
+                )
             }),
     )
     .collect::<Vec<_>>();
@@ -49,15 +50,15 @@ fn compile_entry_function(
     let foreign_function_type = types::compile_foreign_function(
         declaration.type_(),
         declaration.calling_convention(),
-        types,
+        context.types(),
     );
 
-    module_builder.define_anonymous_function(
+    context.module_builder().define_anonymous_function(
         arguments.clone(),
         |instruction_builder| {
             Ok(instruction_builder.return_(
                 instruction_builder.call(
-                    module_builder.declare_function(
+                    context.module_builder().declare_function(
                         declaration.foreign_name(),
                         foreign_function_type.clone(),
                     ),

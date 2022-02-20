@@ -1,3 +1,5 @@
+use crate::context::Context;
+
 use super::{
     super::{error::CompileError, types},
     expressions, pointers, record_utilities,
@@ -7,14 +9,13 @@ use fnv::FnvHashMap;
 const ARGUMENT_NAME: &str = "_record";
 
 pub fn compile_record_clone_function(
-    module_builder: &fmm::build::ModuleBuilder,
+    context: &Context,
     definition: &mir::ir::TypeDefinition,
-    types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> Result<(), CompileError> {
     let record_type = mir::types::Record::new(definition.name());
-    let fmm_record_type = types::compile_record(&record_type, types);
+    let fmm_record_type = types::compile_record(&record_type, context.types());
 
-    module_builder.define_function(
+    context.module_builder().define_function(
         record_utilities::get_record_clone_function_name(definition.name()),
         vec![fmm::ir::Argument::new(
             ARGUMENT_NAME,
@@ -24,7 +25,7 @@ pub fn compile_record_clone_function(
             let record = fmm::build::variable(ARGUMENT_NAME, fmm_record_type.clone());
 
             Ok(
-                builder.return_(if types::is_record_boxed(&record_type, types) {
+                builder.return_(if types::is_record_boxed(&record_type, context.types()) {
                     pointers::clone_pointer(&builder, &record)?
                 } else {
                     fmm::build::record(
@@ -41,10 +42,10 @@ pub fn compile_record_clone_function(
                                         &record,
                                         &record_type,
                                         index,
-                                        types,
+                                        context.types(),
                                     )?,
                                     type_,
-                                    types,
+                                    context.types(),
                                 )
                             })
                             .collect::<Result<_, _>>()?,
@@ -62,14 +63,13 @@ pub fn compile_record_clone_function(
 }
 
 pub fn compile_record_drop_function(
-    module_builder: &fmm::build::ModuleBuilder,
+    context: &Context,
     definition: &mir::ir::TypeDefinition,
-    types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> Result<(), CompileError> {
     let record_type = mir::types::Record::new(definition.name());
-    let fmm_record_type = types::compile_record(&record_type, types);
+    let fmm_record_type = types::compile_record(&record_type, context.types());
 
-    module_builder.define_function(
+    context.module_builder().define_function(
         record_utilities::get_record_drop_function_name(definition.name()),
         vec![fmm::ir::Argument::new(
             ARGUMENT_NAME,
@@ -78,14 +78,26 @@ pub fn compile_record_drop_function(
         |builder| -> Result<_, CompileError> {
             let record = fmm::build::variable(ARGUMENT_NAME, fmm_record_type.clone());
 
-            if types::is_record_boxed(&record_type, types) {
+            if types::is_record_boxed(&record_type, context.types()) {
                 pointers::drop_pointer(&builder, &record, |builder| {
-                    drop_record_fields(builder, &record, &record_type, definition.type_(), types)?;
+                    drop_record_fields(
+                        builder,
+                        &record,
+                        &record_type,
+                        definition.type_(),
+                        context.types(),
+                    )?;
 
                     Ok(())
                 })?;
             } else {
-                drop_record_fields(&builder, &record, &record_type, definition.type_(), types)?;
+                drop_record_fields(
+                    &builder,
+                    &record,
+                    &record_type,
+                    definition.type_(),
+                    context.types(),
+                )?;
             }
 
             Ok(builder.return_(fmm::ir::VOID_VALUE.clone()))

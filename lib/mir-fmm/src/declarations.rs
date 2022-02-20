@@ -1,13 +1,9 @@
 use super::types;
-use fnv::FnvHashMap;
+use crate::context::Context;
 
-pub fn compile_declaration(
-    module_builder: &fmm::build::ModuleBuilder,
-    declaration: &mir::ir::Declaration,
-    types: &FnvHashMap<String, mir::types::RecordBody>,
-) {
-    module_builder.declare_variable(
+pub fn compile_declaration(context: &Context, declaration: &mir::ir::Declaration) {
+    context.module_builder().declare_variable(
         declaration.name(),
-        types::compile_unsized_closure(declaration.type_(), types),
+        types::compile_unsized_closure(declaration.type_(), context.types()),
     );
 }
