@@ -265,5 +265,5 @@ future = go \() number {
 Comments start with `#` and end with new-line characters.
 
 ```pen
-# This is an important comment.
+# This is a comment.
 ```
