@@ -121,7 +121,7 @@ Note that **expressions within list literals are evaluated lazily**; they are ev
 
 ## Records
 
-It is a combination of types as a single type. Each field of a record type is composed of its name and type.
+It combines multiple types into a single type. Each field of a record type is composed of its name and type.
 
 Fields are not accessible outside modules where they are defined by default.
 
@@ -152,7 +152,7 @@ person{name: "foo", age: 42}
 You can also create new records from existing ones spreading fields of the old ones into the new ones.
 
 ```pen
-person{...john, name: "bar"}
+person{...one, name: "bar"}
 ```
 
 You can access field values by appending their names with `.` prefixes to expressions of record types.
