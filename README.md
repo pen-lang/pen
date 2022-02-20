@@ -63,6 +63,7 @@ Pen aims to make large-scale software development efficient where a number of pe
 ### Concurrent/parallel computation
 
 - The language and its runtime enables thread-safe concurrent/parallel computation.
+- For more information, see [Concurrency and parallelism](https://pen-lang.org/guides/concurrency-and-parallelism.html).
 
 ### System packages
 
