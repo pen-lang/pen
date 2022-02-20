@@ -64,9 +64,10 @@ Pen aims to make large-scale software development efficient where a number of pe
 
 - The language and its runtime enables thread-safe concurrent/parallel computation.
 
-### System injection
+### System packages
 
-- [System injection](https://pen-lang.org/advanced-features/system-injection.html) is a novel mechanism to isolate application logic from implementation details.
+- [System packages](https://pen-lang.org/advanced-features/system-injection.html) encapsulates side effects as seprate libraries. 
+- It also isolates application logic from implementation details.
 - The language injects system functions into applications explicitly.
 - Developers can even define their own system functions.
 
@@ -81,7 +82,7 @@ Pen aims to make large-scale software development efficient where a number of pe
 - Static typing
 - Immutable values
 - Pure functions by default
-- Errors as values 
+- Errors as values
 - Asynchronous I/O
 - Cross compile
 - [Rust](https://www.rust-lang.org/) foreign function interface (FFI)
