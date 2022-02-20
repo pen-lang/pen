@@ -12,7 +12,7 @@ Statements are constructs that declare functions and types in modules.
 
 ### Import statement
 
-It imports types and functions from another module in the same or another package.
+It imports types and functions from another module from the same or another package.
 
 See [Modules](modules.md) for more details.
 
