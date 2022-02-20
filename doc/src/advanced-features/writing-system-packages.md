@@ -1,13 +1,13 @@
-# System injection
+# Writing system packages
 
-Using system injection, you can define sets of functions and types to build applications on top of them. Also, you can link applications in different file formats of your choice. Those functions, types and application linking logic are bundled into special packages called [system packages](#system-packages).
+Using writing system packages, you can define sets of functions and types to build applications on top of them. Also, you can link applications in different file formats of your choice. Those functions, types and application linking logic are bundled into special packages called [system packages](#system-packages).
 
 > Caveat: Providing bad system packages which do not conform to conventions can break the ecosystem of the language. Please be careful to follow the conventions to keep applications maintainable and portable!
 
 ## System packages
 
 System packages are special library packages that define functions and types for applications to interact with the world.
-Each [application package](/references/language/packages.md#kinds-of-packages) needs to specify a system package in [its package configuration](/references/language/packages.md#package-configuration).
+Each [application package](/references/language/packages.md#package-types) needs to specify a system package in [its package configuration](/references/language/packages.md#package-configuration).
 
 System packages do the following three things.
 

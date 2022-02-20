@@ -32,7 +32,7 @@ main = \(ctx context) none {
 }
 ```
 
-Every application package must specify one and only one [system package](/advanced-features/system-injection.md#system-packages) that links applications (e.g. the `Os` standard system package) in its [package configuration file](#package-configuration). Otherwise, their builds fail. However, application packages can specify system packages that do no link appilcations (e.g. the `Http` system package in the example above) as many as possible.
+Every application package must specify one and only one [system package](/advanced-features/writing-system-packages.md#system-packages) that links applications (e.g. the `Os` standard system package) in its [package configuration file](#package-configuration). Otherwise, their builds fail. However, application packages can specify system packages that do no link applications (e.g. the `Http` system package in the example above) as many as possible.
 
 ## Package configuration
 
