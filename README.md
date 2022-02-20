@@ -66,10 +66,11 @@ Pen aims to make large-scale software development efficient where a number of pe
 
 ### System packages
 
-- [System packages](https://pen-lang.org/advanced-features/system-injection.html) encapsulates side effects as seprate libraries. 
-- It also isolates application logic from implementation details.
-- The language injects system functions into applications explicitly.
-- Developers can even define their own system functions.
+- [System packages](https://pen-lang.org/advanced-features/system-injection.html) encapsulates side effects as separate packages.
+- That leads to:
+  - Better software architecture
+  - High software portability
+  - Deterministic testing
 
 ### Deterministic testing
 
