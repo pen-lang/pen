@@ -6,7 +6,7 @@ Pen provides simple syntax for concurrent/parallel programming. The `go` express
 
 ```pen
 f = go \() number {
-
+  computeExpensive(x, y, z)
 }
 ```
 
