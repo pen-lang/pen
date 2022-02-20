@@ -71,9 +71,9 @@ Pen aims to make large-scale software development efficient where a number of pe
 - That leads to:
   - Better software architecture
   - High software portability
-  - Deterministic testing
+  - [Reliable testing](#reliable-testing)
 
-### Deterministic testing
+### Reliable testing
 
 - All unit tests are deterministic.
 - Therefore, testing is always reliable and fast.
