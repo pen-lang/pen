@@ -97,7 +97,7 @@ If you want to keep values of intermediate expressions for later use, you can de
 
 ## Expressions
 
-Expressions express what functions actually compute. Notably, expressions can be nested; expressions often contain other expressions inside.
+Expressions represent some computation. Expressions can be nested; expressions often contain other expressions inside.
 
 ### Function call
 
@@ -184,7 +184,7 @@ x?
 
 It creates a function.
 
-First, functions declare their argument names and types (`x number` and `y number`) and their result types (`number`). After that, function bodies of [blocks](#block) describe what the functions compute.
+First, functions declare their argument names and types (`x number` and `y number`) and their result types (`number`). After that, function bodies of [blocks](#block) describe how the functions compute result values.
 
 ```pen
 \(x number, y number) number {

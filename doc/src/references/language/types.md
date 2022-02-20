@@ -77,7 +77,7 @@ String literals can contain the following escape sequences.
 
 ## Functions
 
-A function represents some computation with arguments and a result.
+A function represents reusable computation with arguments and a result.
 
 Functions represent not only pure computation but may also execute side effects, such as I/O.
 
