@@ -114,10 +114,10 @@ A list literal contains its element type and elements as expressions.
 You can create new lists from existing ones by spreading elements of the old ones prefixed by `...` into the new ones.
 
 ```pen
-[person x, ...xs]
+[number x, ...xs]
 ```
 
-**Expressions within list literals are evaluated lazily**; they are evaluated only if their values are required but only once.
+Note that **expressions within list literals are evaluated lazily**; they are evaluated only if their values are required but only once.
 
 ## Records
 
