@@ -6,7 +6,7 @@
 [![License](https://img.shields.io/badge/license-MIT%20%2B%20Apache%202.0-yellow?style=flat-square)](https://github.com/pen-lang/pen/blob/main/LICENSE.md)
 [![Twitter](https://img.shields.io/badge/twitter-%40pen__language-blue?style=flat-square)](https://twitter.com/pen_language)
 
-Pen is the programming language that makes software development **scalable**, focusing on software maintainability and portability.
+Pen is the programming language to make software development **scalable**, focusing on software maintainability and portability.
 
 ```pen
 import Os'Context { Context }
