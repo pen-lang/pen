@@ -30,7 +30,7 @@ Then, you will see an executable file named `app` in the directory. Run it to se
 
 ## For more information...
 
-Now, you can start editing `.pen` files and build your own application!
+Now, you can start editing `*.pen` files and build your own application!
 
 - For more code examples, see [Examples](/examples).
 - To know more about the language's components, see [Syntax](/references/language/syntax.md) and [Types](/references/language/types.md).
