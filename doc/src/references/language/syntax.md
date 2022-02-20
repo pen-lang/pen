@@ -1,6 +1,6 @@
 # Syntax
 
-This page describes syntactical components of the language. You can compose programs building up those constructs. See also [Types](types.md) about syntax for specific data types.
+This page describes syntactical constructs of the language. You can compose programs building up those constructs. See also [Types](types.md) about syntax for specific data types.
 
 ## Module
 
@@ -12,7 +12,7 @@ Statements are constructs that declare functions and types in modules.
 
 ### Import statement
 
-It imports types and functions from another module in the same or another package.
+It imports types and functions from another module from the same or another package.
 
 See [Modules](modules.md) for more details.
 
@@ -22,9 +22,9 @@ import Foo'Bar
 
 ### Foreign import statement
 
-It imports a function in a foreign language.
+It imports a function from a foreign language.
 
-See [FFI](/advanced-features/ffi.md) for more details.
+See [Foreign Function Interface (FFI)](/advanced-features/ffi.md) for more details.
 
 ```pen
 import foreign "c" foo \(number, number) number
@@ -63,9 +63,9 @@ foo = \(x number, y number) number {
 
 ### Foreign function definition
 
-It defines a function exported for foreign languages.
+It defines a function exported to foreign languages.
 
-See [FFI](/advanced-features/ffi.md) for more details.
+See [Foreign Function Interface (FFI)](/advanced-features/ffi.md) for more details.
 
 ```pen
 foreign "c" foo = \(x number, y number) number {
@@ -85,7 +85,7 @@ A block consists of 1 or more expressions wrapped in `{` and `}`. Values of the 
 }
 ```
 
-If you want to save results of intermediate expressions for later use, you can define variables putting their names and `=` operators in front of the expressions.
+If you want to keep values of intermediate expressions for later use, you can define variables putting their names and `=` operators in front of the expressions.
 
 ```pen
 {
@@ -97,7 +97,7 @@ If you want to save results of intermediate expressions for later use, you can d
 
 ## Expressions
 
-Expressions express what functions actually compute. Notably, expressions can be nested; expressions often contain other expressions inside.
+Expressions represent some computation. Expressions can be nested; expressions often contain other expressions inside.
 
 ### Function call
 
@@ -184,7 +184,7 @@ x?
 
 It creates a function.
 
-First, functions declare their argument names and types (`x number` and `y number`) and their result types (`number`). After that, function bodies of [blocks](#block) describe what the functions compute.
+First, functions declare their argument names and types (`x number` and `y number`) and their result types (`number`). After that, function bodies of [blocks](#block) describe how the functions compute result values.
 
 ```pen
 \(x number, y number) number {
@@ -265,5 +265,5 @@ future = go \() number {
 Comments start with `#` and end with new-line characters.
 
 ```pen
-# This is an important comment.
+# This is a comment.
 ```

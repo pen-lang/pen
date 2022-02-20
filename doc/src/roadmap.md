@@ -18,8 +18,8 @@ Items are ordered by priority.
 - [x] Parallel computation
 - [x] Binary operations
 - [x] List comprehension
-- [ ] Multiple system packages
-- [ ] Map type
+- [x] Multiple system packages
+- [x] Map type
 - [ ] Code formatter
 - [ ] Documentation generator
 - [ ] Vector type
