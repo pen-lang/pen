@@ -1,6 +1,6 @@
 # Modules
 
-Modules are sets of functions and types. Using modules, you can split large programs into smaller chunks to make them comprehensive and reusable.
+Modules are sets of functions and types. Using modules, you can split large programs into smaller chunks.
 
 Each source file suffixed with a `.pen` file extension composes a module. Modules are exported to and imported from other modules.
 
