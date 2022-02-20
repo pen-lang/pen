@@ -1,4 +1,4 @@
-# Concurrent/parallel programming
+# Concurrency and parallelism
 
 Concurrent programming lets programs use CPU time efficiently without blocking on I/O or synchronization. And parallel programming lets you leverage multi-core CPUs.
 
