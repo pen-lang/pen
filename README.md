@@ -65,17 +65,21 @@ Pen aims to make large-scale software development efficient where a number of pe
   - Asynchronous operations
   - Parallel computation
 
-### Deterministic testing
+### Concurrent/parallel computation
 
-- All unit tests are deterministic.
-- Therefore, testing is always reliable and fast.
-- You never get bothered by flaky or slow tests.
+The language and its runtime enables thread-safe concurrent/parallel computation.
 
 ### System injection
 
 - [System injection](https://pen-lang.org/advanced-features/system-injection.html) is a novel mechanism to isolate application logic from implementation details.
 - The language injects system functions into applications explicitly.
 - Developers can even define their own system functions.
+
+### Deterministic testing
+
+- All unit tests are deterministic.
+- Therefore, testing is always reliable and fast.
+- You never get bothered by flaky or slow tests.
 
 ### Others
 
@@ -86,12 +90,6 @@ Pen aims to make large-scale software development efficient where a number of pe
 - Asynchronous operations
 - Cross compile
 - [Rust](https://www.rust-lang.org/)/C foreign function interface
-
-### Work in progress...
-
-#### Parallel computation
-
-The runtime and library provide tools for thread-safe parallel computation that leverage multi-core CPUs.
 
 ## License
 
