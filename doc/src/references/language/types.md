@@ -161,14 +161,6 @@ You can access field values by appending their names with `.` prefixes to expres
 john.name
 ```
 
-### Literals
-
-Their values are accessible as variables of their names.
-
-```pen
-foo
-```
-
 ## Unions
 
 It is a union of multiple types.
