@@ -1,6 +1,6 @@
 # Concurrency and parallelism
 
-Concurrent programming lets programs use CPU time efficiently without blocking on I/O or synchronization. And parallel programming lets them leverage multi-core CPUs for speed.
+Concurrent programs use CPU time efficiently without blocking on I/O or synchronization. And parallel programs leverage multi-core CPUs to compute something in parallel for speed.
 
 Pen provides simple syntax for concurrent and/or parallel programming. The `go` expression of the `go` keyword followed by a function with no argument runs the function in a separate execution context.
 
