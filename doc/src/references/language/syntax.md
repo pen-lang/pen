@@ -22,7 +22,7 @@ import Foo'Bar
 
 ### Foreign import statement
 
-It imports a function in a foreign language.
+It imports a function from a foreign language.
 
 See [Foreign Function Interface (FFI)](/advanced-features/ffi.md) for more details.
 
@@ -63,9 +63,9 @@ foo = \(x number, y number) number {
 
 ### Foreign function definition
 
-It defines a function exported for foreign languages.
+It defines a function exported to foreign languages.
 
-See [FFI](/advanced-features/ffi.md) for more details.
+See [Foreign Function Interface (FFI)](/advanced-features/ffi.md) for more details.
 
 ```pen
 foreign "c" foo = \(x number, y number) number {
@@ -85,7 +85,7 @@ A block consists of 1 or more expressions wrapped in `{` and `}`. Values of the 
 }
 ```
 
-If you want to save results of intermediate expressions for later use, you can define variables putting their names and `=` operators in front of the expressions.
+If you want to keep values of intermediate expressions for later use, you can define variables putting their names and `=` operators in front of the expressions.
 
 ```pen
 {
