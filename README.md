@@ -11,6 +11,7 @@ Pen is the programming language that makes software development **scalable**, fo
 ```pen
 import Os'Context { Context }
 import Os'File
+import Os'Process
 
 sayHello = \(ctx Context) none | error {
   File'Write(ctx, File'StdOut(), "Hello, world!\n")?
@@ -21,10 +22,10 @@ sayHello = \(ctx Context) none | error {
 main = \(ctx context) number {
   e = sayHello(ctx.Os)
 
-  if e = e as none {
-    0
+  if _ = e as none {
+    none
   } else if error {
-    1
+    Process'Exit(ctx.Os, 1)
   }
 }
 ```
