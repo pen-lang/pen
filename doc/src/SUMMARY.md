@@ -5,6 +5,7 @@
   - [Getting started](guides/getting-started.md)
   - [Install](guides/install.md)
   - [Testing](guides/testing.md)
+  - [Concurrent/parallel programming](guides/concurrent-parallel-programming.md)
   - [Coding style](guides/coding-style.md)
   - [Background](guides/background.md)
 - [References](references/README.md)
