@@ -62,7 +62,7 @@ String literals are sequences of bytes. They are often used to represent texts e
 "foo"
 ```
 
-#### Escape sequeneces
+#### Escape sequences
 
 String literals can contain the following escape sequences.
 
