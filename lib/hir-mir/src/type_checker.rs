@@ -140,6 +140,8 @@ fn check_expression(
             }
 
             for branch in if_.branches() {
+                check_subsumption(branch.type_(), &argument_type)?;
+
                 check_expression(
                     branch.expression(),
                     &variables
@@ -1018,6 +1020,41 @@ mod tests {
                         )],
                         Some(ElseBranch::new(
                             Some(types::Any::new(Position::fake()).into()),
+                            None::new(Position::fake()),
+                            Position::fake(),
+                        )),
+                        Position::fake(),
+                    ),
+                    Position::fake(),
+                ),
+                false,
+            )]))
+            .unwrap();
+        }
+
+        #[test]
+        #[should_panic]
+        fn fail_to_check_union_due_to_mismatched_branch_type() {
+            let union_type = types::Union::new(
+                types::Number::new(Position::fake()),
+                types::None::new(Position::fake()),
+                Position::fake(),
+            );
+
+            check_module(&Module::empty().set_definitions(vec![Definition::fake(
+                "f",
+                Lambda::new(
+                    vec![Argument::new("x", union_type.clone())],
+                    types::None::new(Position::fake()),
+                    IfType::new(
+                        "y",
+                        Variable::new("x", Position::fake()),
+                        vec![IfTypeBranch::new(
+                            types::Boolean::new(Position::fake()),
+                            None::new(Position::fake()),
+                        )],
+                        Some(ElseBranch::new(
+                            Some(union_type.into()),
                             None::new(Position::fake()),
                             Position::fake(),
                         )),
