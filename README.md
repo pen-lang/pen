@@ -68,10 +68,6 @@ Pen aims to make large-scale software development efficient where a number of pe
 
 - [System packages](https://pen-lang.org/advanced-features/system-injection.html) encapsulates side effects as separate packages.
 - No other packages have side effects unless injected them into explicitly.
-- That leads to:
-  - Better software architecture
-  - High software portability
-  - [Reliable testing](#reliable-testing)
 
 ### Reliable testing
 
