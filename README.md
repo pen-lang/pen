@@ -58,12 +58,7 @@ Pen aims to make large-scale software development efficient where a number of pe
 ### Minimal language
 
 - Its [syntax][syntax] and [type system](https://pen-lang.org/references/language/types.html) are small, simple, and easy to learn.
-- Yet, the language supports all the modern features, such as:
-  - Functional programming
-  - Effect system
-  - Dependency injection
-  - Asynchronous operations
-  - Parallel computation
+- Yet, the language supports all the modern features.
 
 ### Concurrent/parallel computation
 
