@@ -24,7 +24,7 @@ import Foo'Bar
 
 It imports a function in a foreign language.
 
-See [FFI](/advanced-features/ffi.md) for more details.
+See [Foreign Function Interface (FFI)](/advanced-features/ffi.md) for more details.
 
 ```pen
 import foreign "c" foo \(number, number) number
