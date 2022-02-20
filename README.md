@@ -76,13 +76,13 @@ The language and its runtime enables thread-safe concurrent/parallel computation
 - Therefore, testing is always reliable and fast.
 - You never get bothered by flaky or slow tests.
 
-### Others
+### Even more...
 
 - Static typing
 - Immutable values
 - Pure functions by default
-- Errors as values (no runtime error)
-- Asynchronous operations
+- Errors as values 
+- Asynchronous I/O
 - Cross compile
 - [Rust](https://www.rust-lang.org/)/C foreign function interface
 
