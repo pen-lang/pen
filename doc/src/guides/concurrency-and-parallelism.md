@@ -12,4 +12,4 @@ f = go \() number {
 
 The `go` expression returns a function of the type same as the given expression (a.k.a. futures or promises in other languages.) The function returns a resulting value of the function execution.
 
-The `go` expression may or may not block the current execution context depending on its implementation. For example, the built-in `Os` package runs the given function in parallel if multiple cores are available in CPUs.
+The `go` expression may or may not block the current execution context depending on its implementation. For example, the built-in `Os` package runs the given function in parallel if multiple CPU cores are available.
