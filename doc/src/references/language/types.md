@@ -95,7 +95,7 @@ Functions represent not only pure computation but may also execute side effects,
 
 ## Lists
 
-It is a list of values of a type. Its element type is put between `[` and `]`.
+It is a list of values. Its element type is put between `[` and `]`.
 
 ```pen
 [number]
