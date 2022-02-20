@@ -68,7 +68,7 @@ String literals can contain the following escape sequences.
 
 | Escape sequence | Name            |
 | --------------- | --------------- |
-| `\n`            | Newline         |
+| `\n`            | New line         |
 | `\r`            | Carriage return |
 | `\t`            | Tab             |
 | `\"`            | Double quote    |
