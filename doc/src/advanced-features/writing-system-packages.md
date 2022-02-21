@@ -1,6 +1,9 @@
 # Writing system packages
 
-Using writing system packages, you can define sets of functions and types to build applications on top of them. Also, you can link applications in different file formats of your choice. Those functions, types and application linking logic are bundled into special packages called [system packages](#system-packages).
+The language provides the standard system packages of `Os` and `OsSync` by default. However, by writing your own system packages, you can achieve the following:
+
+- Define your own sets of functions with side effects.
+- Link applications in arbitrary file formats.
 
 > Caveat: Providing bad system packages which do not conform to conventions can break the ecosystem of the language. Please be careful to follow the conventions to keep applications maintainable and portable!
 
