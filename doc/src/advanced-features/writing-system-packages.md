@@ -1,6 +1,6 @@
 # Writing system packages
 
-Using existing system packages covers most use cases of application development. However, by writing your own system packages, you can achieve the following:
+Using existing system packages covers most use cases in application development. However, by writing your own system packages, you can achieve the following:
 
 - Define your own system interfaces of functions and types with side effects.
 - Link applications in arbitrary file formats.
