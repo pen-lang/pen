@@ -36,6 +36,14 @@ main = \(ctx context) none {
 
 Every application package must specify one and only one [system package](/advanced-features/writing-system-packages.md#system-packages) that links applications (e.g. the `Os` standard system package) in its [package configuration file](#package-configuration). Otherwise, their builds fail. However, application packages can specify system packages that do no link applications (e.g. the `Http` system package in the example above) as many as possible.
 
+### Library packages
+
+> WIP
+
+### System packages
+
+> WIP
+
 ## Package configuration
 
 Each package has its configuration file named `pen.json` in a [JSON](https://www.json.org/json-en.html) format at its top directory. The JSON file has a field named `type` specifying its type and a field named `dependencies` specifying names and URLs of external packages.
