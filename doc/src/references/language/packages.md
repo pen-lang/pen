@@ -19,8 +19,7 @@ There are 3 package types: application, library, and system. Those types are spe
 
 ### Application packages
 
-Application packages build applications, often, of executable files.
-Application packages must have `main.pen` module files at their top directories. Those main modules have a `main` function that receives an argument of a `context` type and returns a `none` type. The `context` type is a record type containing context values of system packages with their field names of package names. For example, given system packages named `Http` and `Os`, a main function looks like the following.
+Application packages build applications often as executable files. Every application package must have a `main.pen` module file at its top directory. Those main modules have a `main` function that receives an argument of a `context` type and returns a `none` type. The `context` type is a record type containing context values of system packages with their field names of package names. For example, given system packages named `Http` and `Os`, a main function looks like the following.
 
 ```pen
 main = \(ctx context) none {
