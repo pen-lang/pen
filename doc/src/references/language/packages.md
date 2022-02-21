@@ -8,7 +8,7 @@ The following entities compose packages.
 
 - Standard packages bundled in [installation](/guides/install.md) of the language
 - Remote repositories managed by version control systems (VCS)
-  - Currently, only [Git](https://git-scm.com/) is supported as a VCS.
+  - Currently, the language supports only [Git](https://git-scm.com/) as a VCS.
 - Directories with [package configuration files](#package-configuration) on file systems
 
 During builds of packages, the language's build system automatically download and initialize their dependency packages based on their URLs.
@@ -17,12 +17,9 @@ During builds of packages, the language's build system automatically download an
 
 There are 3 package types: application, library, and system. Those types are specified in [package configuration files](#package-configuration).
 
-- Application packages build applications, often, of executable files.
-- Library packages are imported and used by other packages.
-- System packages are similar to library packages but provide system interfaces to application packages.
-
 ### Application packages
 
+Application packages build applications, often, of executable files.
 Application packages must have `main.pen` module files at their top directories. Those main modules have a `main` function that receives an argument of a `context` type and returns a `none` type. The `context` type is a record type containing context values of system packages with their field names of package names. For example, given system packages named `Http` and `Os`, a main function looks like the following.
 
 ```pen
@@ -38,15 +35,20 @@ Every application package must specify one and only one [system package](/advanc
 
 ### Library packages
 
-> WIP
+Library packages are imported and used by other packages.
 
 ### System packages
 
-> WIP
+System packages are similar to library packages but provide system interfaces to application packages.
 
 ## Package configuration
 
-Each package has its configuration file named `pen.json` in a [JSON](https://www.json.org/json-en.html) format at its top directory. The JSON file has a field named `type` specifying its type and a field named `dependencies` specifying names and URLs of external packages.
+Each package has its configuration file named `pen.json` in a [JSON](https://www.json.org/json-en.html) format at its top directory. The JSON file has the following fields.
+
+| Name           | Required | Description                                                 |
+| -------------- | -------- | ----------------------------------------------------------- |
+| `type`         | Yes      | Package type (either `application`, `library`, or `system`) |
+| `dependencies` | Yes      | Map of package names to their URLs                          |
 
 Package URLs have different protocol schemes depending on where they are located.
 
