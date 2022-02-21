@@ -1,8 +1,8 @@
 # Writing system packages
 
-The language provides the standard system packages of `Os` and `OsSync` by default. However, by writing your own system packages, you can achieve the following:
+Using existing system packages covers most use cases of application development. However, by writing your own system packages, you can achieve the following:
 
-- Define your own sets of functions with side effects.
+- Define your own system interfaces of functions and types with side effects.
 - Link applications in arbitrary file formats.
 
 > Caveat: Providing bad system packages which do not conform to conventions can break the ecosystem of the language. Please be careful to follow the conventions to keep applications maintainable and portable!
