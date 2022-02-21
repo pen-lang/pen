@@ -34,6 +34,7 @@
     "koka",
     "lcov",
     "malloc",
+    "mdbook",
     "modifiability",
     "mtriple",
     "optind",
