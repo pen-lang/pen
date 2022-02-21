@@ -19,7 +19,7 @@ There are 3 package types: application, library, and system. Those types are spe
 
 ### Application packages
 
-Application packages build applications often as executable files. Every application package must have a `main.pen` module file at its top directory. Those main modules have a `main` function that receives an argument of a `context` type and returns a `none` type. The `context` type is a record type containing context values of system packages with their field names of package names. For example, given system packages named `Http` and `Os`, a main function looks like the following.
+Application packages build applications often as executable files. Every application package must have a `main.pen` module file at its top directory. The main module has a `main` function that receives an argument of a `context` type and returns a `none` type. The `context` type is a record type containing context values of system packages with their field names of package names. For example, given system packages named `Http` and `Os`, a main function looks like the following.
 
 ```pen
 main = \(ctx context) none {
@@ -30,7 +30,7 @@ main = \(ctx context) none {
 }
 ```
 
-Every application package must specify one and only one [system package](/advanced-features/writing-system-packages.md#system-packages) that links applications (e.g. the `Os` standard system package) in its [package configuration file](#package-configuration). Otherwise, their builds fail. However, application packages can specify system packages that do no link applications (e.g. the `Http` system package in the example above) as many as possible.
+Every application package must specify one and only one [system package](#system-packages) that links applications (e.g. the `Os` standard system package) in its [package configuration file](#package-configuration). However, application packages can specify system packages that do no link applications (e.g. the `Http` system package in the example above) as many as possible.
 
 ### Library packages
 
