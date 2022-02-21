@@ -11,6 +11,8 @@ The following entities compose packages.
   - Currently, only [Git](https://git-scm.com/) is supported as a VCS.
 - Directories with [package configuration files](#package-configuration) on file systems
 
+During builds of packages, the language's build system automatically download and initialize their dependency packages based on their URLs.
+
 ## Package types
 
 There are 3 package types: application, library, and system. Those types are specified in [package configuration files](#package-configuration).
