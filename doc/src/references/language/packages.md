@@ -42,7 +42,7 @@ System packages contain functions and types that have side effects to provide sy
 
 Although they can be imported by library packages as well as application packages, then they are expected not to cause any side effects.
 
-If you want to write your own system packages, see [Writing system packages](/advanced-features/writing-system-packages.html).
+If you want to write your own system packages, see [Writing system packages](/advanced-features/writing-system-packages.md).
 
 ## Package configuration
 
