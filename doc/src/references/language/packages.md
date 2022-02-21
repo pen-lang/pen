@@ -30,15 +30,19 @@ main = \(ctx context) none {
 }
 ```
 
-Every application package must specify one and only one [system package](#system-packages) that links applications (e.g. the `Os` standard system package) in its [package configuration file](#package-configuration). However, application packages can specify system packages that do no link applications (e.g. the `Http` system package in the example above) as many as possible.
+Every application package must specify one and only one [system package](#system-packages) that links applications (e.g. the `Os` standard system package) in its [package configuration file](#package-configuration). However, application packages can specify system packages that do not link applications (e.g. the `Http` system package in the example above) as many as possible.
 
 ### Library packages
 
-Library packages are imported and used by other packages.
+Library packages contain functions and types that have _no_ side effects. They are imported and used by other packages.
 
 ### System packages
 
-System packages are similar to library packages but provide system interfaces to application packages.
+System packages contain functions and types that have side effects to provide system interfaces to application packages. The language currently provides the two standard system packages of `Os` and `OsSync`.
+
+Although they can be imported by library packages as well as application packages, then they are expected not to cause any side effects.
+
+if you want to write your own system packages, see [Writing system packages](/advanced-features/writing-system-packages.html).
 
 ## Package configuration
 
