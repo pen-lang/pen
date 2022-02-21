@@ -4,7 +4,7 @@ Using FFI, you can import or export functions in foreign languages, such as [Rus
 
 ## Importing functions in foreign languages
 
-You can import functions in foreign languages using [foreign import statements](/references/language/syntax.md#foreign-import-statement). The statements specify the foreign functions' calling convention, names and types. After imported, the functions are available under the names.
+You can import functions in foreign languages using [foreign import statements](/references/language/syntax.md#foreign-import-statement). The statements specify the foreign functions' calling convention, names and types.
 
 You might specify calling conventions of foreign functions in a format of string literals after `import foreign` keywords optionally. Currently, only the C calling convention is supported as `"c"`. If the options are omitted, the functions are imported with the native calling convention of the language.
 
@@ -12,7 +12,7 @@ You might specify calling conventions of foreign functions in a format of string
 import foreign "c" foo \(number, number) number
 ```
 
-> Caveat: You can import foreign functions that might make side effects **only in [system packages](writing-system-packages.md#system-packages)**. See also [Writing system packages](writing-system-packages.md).
+> Caveat: You can import foreign functions that might cause side effects **only in [system packages](writing-system-packages.md#system-packages)**. See also [Writing system packages](writing-system-packages.md).
 
 ## Exporting functions to foreign languages
 
