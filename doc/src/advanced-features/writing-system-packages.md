@@ -79,4 +79,4 @@ The scripts should accept the following command line arguments. Outputs of the s
 
 ## Examples
 
-[The `Os` standard package](https://github.com/pen-lang/pen/tree/main/lib/os) is one of examples of system packages.
+[The `Os` standard package](https://github.com/pen-lang/pen/tree/main/lib/os) is an example of system packages.
