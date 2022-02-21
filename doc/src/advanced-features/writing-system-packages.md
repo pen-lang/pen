@@ -7,12 +7,11 @@ Using existing system packages covers most use cases in application development.
 
 > Caveat: Providing bad system packages which do not conform to conventions can break the ecosystem of the language! In the worst cases, they might make applications malfunction. Please be careful to follow the conventions to keep applications maintainable and portable.
 
-## System packages
+This page assumes that you have already read [Packages](/references/language/packages.md).
 
-System packages are special library packages that define functions and types for applications to interact with the world.
-Each [application package](/references/language/packages.md#package-types) needs to specify a system package in [its package configuration](/references/language/packages.md#package-configuration).
+## Functionalities of system packages
 
-System packages do the following three things.
+System packages have the following three functionalities.
 
 ### Defining main function types
 
