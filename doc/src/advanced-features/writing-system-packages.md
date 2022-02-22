@@ -53,7 +53,7 @@ Note that **system packages should never expose side effects directly through th
 For example, a system package for command line applications might have the following types and functions:
 
 ```pen
-# Defines a foreign function to output a string in console.
+# Define a foreign function to output a string in console.
 import foreign "c" _pen_cli_print \(string) none
 
 type Context {
