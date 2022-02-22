@@ -48,7 +48,7 @@ System packages are the only places where you can define functions that have sid
 - Networking
 - Random number generation
 
-Note that **system packages should never expose side effects directly through their functions**; all exported functions of their APIs must be purely functional. Instead, you need to pass a `Context` type to every effectful function for them to make side effects. Then, actual context values of the type are injected into entry points of applications: the `main` functions.
+Note that **system packages should never expose side effects directly through their functions**; all public functions in system packages must be purely functional. Instead, you need to pass a `Context` type to every effectful function for it to make side effects. 
 
 For example, a system package for command line applications should have the following types and functions:
 
