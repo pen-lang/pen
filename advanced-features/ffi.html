@@ -144,12 +144,12 @@
                         <h1 id="foreign-function-interface-ffi"><a class="header" href="#foreign-function-interface-ffi">Foreign Function Interface (FFI)</a></h1>
 <p>Using FFI, you can import or export functions in foreign languages, such as <a href="https://www.rust-lang.org/">Rust</a> and C.</p>
 <h2 id="importing-functions-in-foreign-languages"><a class="header" href="#importing-functions-in-foreign-languages">Importing functions in foreign languages</a></h2>
-<p>You can import functions in foreign languages using <a href="/references/language/syntax.html#foreign-import-statement">foreign import statements</a>. The statements specify the foreign functions' calling convention, names and types. After imported, the functions are available under the names.</p>
+<p>You can import functions in foreign languages using <a href="/references/language/syntax.html#foreign-import-statement">foreign import statements</a>. The statements specify the foreign functions' calling convention, names and types.</p>
 <p>You might specify calling conventions of foreign functions in a format of string literals after <code>import foreign</code> keywords optionally. Currently, only the C calling convention is supported as <code>&quot;c&quot;</code>. If the options are omitted, the functions are imported with the native calling convention of the language.</p>
 <pre><code class="language-pen">import foreign &quot;c&quot; foo \(number, number) number
 </code></pre>
 <blockquote>
-<p>Caveat: You can import foreign functions that might make side effects <strong>only in <a href="writing-system-packages.html#system-packages">system packages</a></strong>. See also <a href="writing-system-packages.html">Writing system packages</a>.</p>
+<p>Caveat: You can import foreign functions that might cause side effects <strong>only in system packages</strong>. See also <a href="writing-system-packages.html">Writing system packages</a>.</p>
 </blockquote>
 <h2 id="exporting-functions-to-foreign-languages"><a class="header" href="#exporting-functions-to-foreign-languages">Exporting functions to foreign languages</a></h2>
 <p>You can export functions to foreign languages using <a href="/references/language/syntax.html#foreign-function-definition">foreign function definitions</a>, which have <code>foreign</code> keywords in front of normal function definitions.</p>
@@ -158,13 +158,17 @@
   ...
 }
 </code></pre>
-<h2 id="building-custom-libraries-in-foreign-languages"><a class="header" href="#building-custom-libraries-in-foreign-languages">Building custom libraries in foreign languages</a></h2>
-<p>You might want to build libraries in foreign languages so that you can use their functions in your packages. If that's your case, you can set up <code>pen-ffi</code> scripts in your packages. The script files run on every build and output absolute paths to <code>.a</code> archive files of your libraries in foreign languages built by the scripts. The script files may or may not have file extensions.</p>
+<h2 id="building-libraries-of-foreign-languages"><a class="header" href="#building-libraries-of-foreign-languages">Building libraries of foreign languages</a></h2>
+<p>During builds of your packages, you might want to build libraries of foreign languages so that you can use their functions. If that's your case, you can set up <code>pen-ffi</code> scripts in your packages. The script files run on every build and output absolute paths to <code>.a</code> archive files of your libraries in foreign languages built by the scripts. The script files may or may not have file extensions.</p>
 <p>The <code>pen-ffi</code> scripts should accept the following command line arguments.</p>
 <table><thead><tr><th>Argument</th><th>Required</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>-t &lt;target&gt;</code></td><td>No</td><td>Custom target triple of builds</td></tr>
 </tbody></table>
-<p>One of examples in practice is <a href="https://github.com/pen-lang/pen/blob/main/lib/core/pen-ffi.sh">a <code>pen-ffi.sh</code> file in the core library</a>.</p>
+<p>One of examples in practice is <a href="https://github.com/pen-lang/pen/blob/main/lib/core/pen-ffi.sh">a <code>pen-ffi.sh</code> file in the <code>Core</code> library</a>.</p>
+<h2 id="native-calling-convention-in-pen"><a class="header" href="#native-calling-convention-in-pen">Native calling convention in Pen</a></h2>
+<blockquote>
+<p>WIP</p>
+</blockquote>
 
                     </main>
 

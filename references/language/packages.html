@@ -149,20 +149,16 @@
 <li>Standard packages bundled in <a href="/guides/install.html">installation</a> of the language</li>
 <li>Remote repositories managed by version control systems (VCS)
 <ul>
-<li>Currently, only <a href="https://git-scm.com/">Git</a> is supported as a VCS.</li>
+<li>Currently, the language supports only <a href="https://git-scm.com/">Git</a> as a VCS.</li>
 </ul>
 </li>
 <li>Directories with <a href="#package-configuration">package configuration files</a> on file systems</li>
 </ul>
+<p>During builds of packages, the language's build system automatically download and initialize their dependency packages based on their URLs.</p>
 <h2 id="package-types"><a class="header" href="#package-types">Package types</a></h2>
 <p>There are 3 package types: application, library, and system. Those types are specified in <a href="#package-configuration">package configuration files</a>.</p>
-<ul>
-<li>Application packages build applications, often, of executable files.</li>
-<li>Library packages are imported and used by other packages.</li>
-<li>System packages are similar to library packages but provide system interfaces to application packages.</li>
-</ul>
 <h3 id="application-packages"><a class="header" href="#application-packages">Application packages</a></h3>
-<p>Application packages must have <code>main.pen</code> module files at their top directories. Those main modules have a <code>main</code> function that receives an argument of a <code>context</code> type and returns a <code>none</code> type. The <code>context</code> type is a record type containing context values of system packages with their field names of package names. For example, given system packages named <code>Http</code> and <code>Os</code>, a main function looks like the following.</p>
+<p>Application packages build applications often as executable files. Every application package must have a <code>main.pen</code> module file at its top directory. The main module has a <code>main</code> function that receives an argument of a <code>context</code> type and returns a <code>none</code> type. The <code>context</code> type is a record type containing context values of system packages with their field names of package names. For example, given system packages named <code>Http</code> and <code>Os</code>, a main function looks like the following.</p>
 <pre><code class="language-pen">main = \(ctx context) none {
   s = fetch(ctx.Http, &quot;https://pen-lang.org/&quot;)
   print(ctx.Os, s)
@@ -170,9 +166,19 @@
   none
 }
 </code></pre>
-<p>Every application package must specify one and only one <a href="/advanced-features/writing-system-packages.html#system-packages">system package</a> that links applications (e.g. the <code>Os</code> standard system package) in its <a href="#package-configuration">package configuration file</a>. Otherwise, their builds fail. However, application packages can specify system packages that do no link applications (e.g. the <code>Http</code> system package in the example above) as many as possible.</p>
+<p>Every application package must specify one and only one <a href="#system-packages">system package</a> that links applications (e.g. the <code>Os</code> standard system package) in its <a href="#package-configuration">package configuration file</a>. However, application packages can specify system packages that do not link applications (e.g. the <code>Http</code> system package in the example above) as many as possible.</p>
+<h3 id="library-packages"><a class="header" href="#library-packages">Library packages</a></h3>
+<p>Library packages contain functions and types that have <em>no</em> side effects. They are imported and used by other packages.</p>
+<h3 id="system-packages"><a class="header" href="#system-packages">System packages</a></h3>
+<p>System packages contain functions and types that have side effects to provide system interfaces to application packages. The language currently provides the two standard system packages of <code>Os</code> and <code>OsSync</code>.</p>
+<p>Although they can be imported by library packages as well as application packages, then they are expected not to cause any side effects.</p>
+<p>If you want to write your own system packages, see <a href="/advanced-features/writing-system-packages.html">Writing system packages</a>.</p>
 <h2 id="package-configuration"><a class="header" href="#package-configuration">Package configuration</a></h2>
-<p>Each package has its configuration file named <code>pen.json</code> in a <a href="https://www.json.org/json-en.html">JSON</a> format at its top directory. The JSON file has a field named <code>type</code> specifying its type and a field named <code>dependencies</code> specifying names and URLs of external packages.</p>
+<p>Each package has its configuration file named <code>pen.json</code> in a <a href="https://www.json.org/json-en.html">JSON</a> format at its top directory. The JSON file has the following fields.</p>
+<table><thead><tr><th>Name</th><th>Required</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>type</code></td><td>Yes</td><td>Package type (either <code>application</code>, <code>library</code>, or <code>system</code>)</td></tr>
+<tr><td><code>dependencies</code></td><td>Yes</td><td>Map of package names to their URLs</td></tr>
+</tbody></table>
 <p>Package URLs have different protocol schemes depending on where they are located.</p>
 <ul>
 <li>Standard packages: <code>pen</code></li>
