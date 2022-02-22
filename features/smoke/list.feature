@@ -76,10 +76,31 @@ Feature: List
     Given a file named "main.pen" with:
     """pen
     main = \(ctx context) none {
-      [none y() for y in [none 1]]
+      _ = [none x() for x in [none 1]]
 
       none
     }
     """
     When I run `pen build`
     Then the stderr should contain "types not matched"
+
+  Scenario: Evaluate list comprehension lazily
+    Given a file named "main.pen" with:
+    """pen
+    import Os'Context { Context }
+    import Os'Process
+
+    xs = \(ctx Context) [none] {
+      Process'Exit(ctx, 1)
+
+      [none]
+    }
+
+    main = \(ctx context) none {
+      _ = [none x() for x in xs(ctx.Os)]
+
+      none
+    }
+    """
+    When I successfully run `pen build`
+    Then I successfully run `./app`

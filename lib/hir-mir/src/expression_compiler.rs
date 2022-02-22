@@ -125,58 +125,90 @@ pub fn compile(
             let output_element_type = comprehension.output_type();
             let list_type = type_compiler::compile_list(context)?;
 
-            mir::ir::LetRecursive::new(
-                mir::ir::Definition::new(
-                    CLOSURE_NAME,
-                    vec![mir::ir::Argument::new(LIST_NAME, list_type.clone())],
-                    compile(
-                        &IfList::new(
-                            Some(input_element_type.clone()),
-                            Variable::new(LIST_NAME, position.clone()),
-                            comprehension.element_name(),
-                            LIST_NAME,
-                            List::new(
-                                output_element_type.clone(),
-                                vec![
-                                    ListElement::Single(comprehension.element().clone()),
-                                    ListElement::Multiple(
-                                        Call::new(
-                                            Some(
-                                                types::Function::new(
-                                                    vec![types::List::new(
-                                                        input_element_type.clone(),
-                                                        position.clone(),
-                                                    )
-                                                    .into()],
-                                                    types::List::new(
-                                                        output_element_type.clone(),
-                                                        position.clone(),
-                                                    ),
-                                                    position.clone(),
-                                                )
-                                                .into(),
-                                            ),
-                                            Variable::new(CLOSURE_NAME, position.clone()),
-                                            vec![Variable::new(LIST_NAME, position.clone()).into()],
-                                            position.clone(),
-                                        )
-                                        .into(),
-                                    ),
-                                ],
-                                position.clone(),
-                            ),
-                            List::new(output_element_type.clone(), vec![], position.clone()),
-                            position.clone(),
-                        )
-                        .into(),
-                    )?,
+            mir::ir::Call::new(
+                mir::types::Function::new(
+                    vec![mir::types::Function::new(vec![], list_type.clone()).into()],
                     list_type.clone(),
                 ),
-                mir::ir::Call::new(
-                    mir::types::Function::new(vec![list_type.clone().into()], list_type),
+                mir::ir::Variable::new(&context.configuration()?.list_type.lazy_function_name),
+                vec![mir::ir::LetRecursive::new(
+                    mir::ir::Definition::new(
+                        CLOSURE_NAME,
+                        vec![],
+                        mir::ir::LetRecursive::new(
+                            mir::ir::Definition::new(
+                                CLOSURE_NAME,
+                                vec![mir::ir::Argument::new(LIST_NAME, list_type.clone())],
+                                compile(
+                                    &IfList::new(
+                                        Some(input_element_type.clone()),
+                                        Variable::new(LIST_NAME, position.clone()),
+                                        comprehension.element_name(),
+                                        LIST_NAME,
+                                        List::new(
+                                            output_element_type.clone(),
+                                            vec![
+                                                ListElement::Single(
+                                                    comprehension.element().clone(),
+                                                ),
+                                                ListElement::Multiple(
+                                                    Call::new(
+                                                        Some(
+                                                            types::Function::new(
+                                                                vec![types::List::new(
+                                                                    input_element_type.clone(),
+                                                                    position.clone(),
+                                                                )
+                                                                .into()],
+                                                                types::List::new(
+                                                                    output_element_type.clone(),
+                                                                    position.clone(),
+                                                                ),
+                                                                position.clone(),
+                                                            )
+                                                            .into(),
+                                                        ),
+                                                        Variable::new(
+                                                            CLOSURE_NAME,
+                                                            position.clone(),
+                                                        ),
+                                                        vec![Variable::new(
+                                                            LIST_NAME,
+                                                            position.clone(),
+                                                        )
+                                                        .into()],
+                                                        position.clone(),
+                                                    )
+                                                    .into(),
+                                                ),
+                                            ],
+                                            position.clone(),
+                                        ),
+                                        List::new(
+                                            output_element_type.clone(),
+                                            vec![],
+                                            position.clone(),
+                                        ),
+                                        position.clone(),
+                                    )
+                                    .into(),
+                                )?,
+                                list_type.clone(),
+                            ),
+                            mir::ir::Call::new(
+                                mir::types::Function::new(
+                                    vec![list_type.clone().into()],
+                                    list_type.clone(),
+                                ),
+                                mir::ir::Variable::new(CLOSURE_NAME),
+                                vec![compile(comprehension.list())?],
+                            ),
+                        ),
+                        list_type,
+                    ),
                     mir::ir::Variable::new(CLOSURE_NAME),
-                    vec![compile(comprehension.list())?],
-                ),
+                )
+                .into()],
             )
             .into()
         }
