@@ -37,3 +37,7 @@ The `pen-ffi` scripts should accept the following command line arguments.
 | `-t <target>` | No       | Custom target triple of builds |
 
 One of examples in practice is [a `pen-ffi.sh` file in the `Core` library](https://github.com/pen-lang/pen/blob/main/lib/core/pen-ffi.sh).
+
+## Native calling convention in Pen
+
+> WIP
