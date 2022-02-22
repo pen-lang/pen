@@ -76,7 +76,7 @@ Feature: List
     Given a file named "main.pen" with:
     """pen
     main = \(ctx context) none {
-      [none y() for y in [none 1]]
+      [none x() for x in [none 1]]
 
       none
     }
@@ -90,7 +90,7 @@ Feature: List
     import Os'Process
 
     main = \(ctx context) none {
-      [none y() for y in [none Process'Exit(1)]]
+      [none x() for x in [none Process'Exit(ctx.Os, 1)]]
 
       none
     }
