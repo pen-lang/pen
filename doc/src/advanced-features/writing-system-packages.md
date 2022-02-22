@@ -67,15 +67,15 @@ Print = \(s string) none {
 
 ### Linking application files (optional)
 
-System packages have optional script files named `pen-link` at their top directories. On every build of application packages using the system packages, the script files run given object files specified as command line arguments to link application files. The script files may or may not have file extensions.
+System packages might have optional script files named `pen-link` at their top directories. On every build of application packages using the system packages, the script files run given object files specified as command line arguments to link application files. The script files may or may not have file extensions.
 
 The scripts should accept the following command line arguments.
 
-| Argument           | Required | Description                    |
-| ------------------ | -------- | ------------------------------ |
-| `-t <target>`      | No       | Target triple                  |
-| `-o <application>` | Yes      | Path of an application file    |
-| `<archive>...`     | Yes      | Paths of archive files to link |
+| Argument           | Required | Description                                                    |
+| ------------------ | -------- | -------------------------------------------------------------- |
+| `-t <target>`      | No       | Target triple                                                  |
+| `-o <application>` | Yes      | Path of an application file                                    |
+| `<archive>...`     | Yes      | Paths of archive files sorted topologically from main packages |
 
 ## Examples
 
