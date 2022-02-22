@@ -48,7 +48,7 @@ System packages are the only places where you can define functions that have sid
 - Networking
 - Random number generation
 
-Note that **system packages should never expose side effects directly through their functions**; all public functions in system packages must be purely functional. Instead, you need to pass a `Context` type to every effectful function for it to make side effects. 
+Note that **system packages should never expose side effects directly through their functions**; all public functions in system packages must be purely functional. Instead, you need to pass a `Context` type to every effectful function for it to make side effects.
 
 For example, a system package for command line applications might have the following types and functions:
 
@@ -58,7 +58,6 @@ import foreign _pen_cli_print \(string) none
 
 type Context {
   print: _pen_cli_print,
-  ...
 }
 
 Print = \(ctx Context, s string) none {
