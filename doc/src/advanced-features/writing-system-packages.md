@@ -1,80 +1,95 @@
 # Writing system packages
 
-Using writing system packages, you can define sets of functions and types to build applications on top of them. Also, you can link applications in different file formats of your choice. Those functions, types and application linking logic are bundled into special packages called [system packages](#system-packages).
+Using existing system packages covers most use cases in application development. However, by writing your own system packages, you can achieve the following:
 
-> Caveat: Providing bad system packages which do not conform to conventions can break the ecosystem of the language. Please be careful to follow the conventions to keep applications maintainable and portable!
+- Define your own system interfaces of functions and types with side effects.
+- Link applications in arbitrary file formats.
 
-## System packages
+This page assumes that you have already read [Packages](/references/language/packages.md).
 
-System packages are special library packages that define functions and types for applications to interact with the world.
-Each [application package](/references/language/packages.md#package-types) needs to specify a system package in [its package configuration](/references/language/packages.md#package-configuration).
+> Caveat: Providing bad system packages which do not conform to conventions can break the ecosystem of the language! In the worst cases, they might make applications malfunction. Please be careful to follow the conventions to keep applications maintainable and portable.
 
-System packages do the following three things.
+## Functionalities of system packages
 
-### Defining main function types
+System packages have the following functionalities:
 
-Every system package must have a module named `MainFunction.pen` in which a `MainFunction` function type is defined. Literally, the function type is used as a type of `main` functions in `main.pen` modules in application packages using the system package.
+- Define context types.
+- Provide system interfaces as functions and types.
+- Link application files.
 
-For example, a system package for command line applications might have the following `MainFunction.pen` module:
+### Defining context types
+
+Every system package must have a module named `Context` at the top level. The module defines a `Context` type and an `UnsafeNew` function that returns a `Context` value with no argument.
+
+For example, a system package for command line applications might have the following `Context` module:
 
 ```pen
-import 'Context { Context }
+...
 
-type MainFunction = \(Context) none | error
+type Context {
+  print \(string) none
+}
+
+UnsafeNew = \() Context {
+  Context{
+    print: ...
+  }
+}
 ```
 
-At the liking phase, actual main functions compiled from source codes are available as `_pen_main` in object files. And the object files are passed to system packages' [linking scripts](#linking-application-files) described later.
+The language's compiler uses these type and function to compose a `context` type passed to `main` functions in `main` modules in application packages.
 
 ### Providing system functions and types
 
-System packages are the only places where you can define functions that have side effects. Because they provide those system functions, applications can perform side effects, such as:
+System packages are the only places where you can define functions that have side effects. Thanks to system packages, applications can perform effects to interact with the world, such as:
 
-- I/O (console output, file system operations, etc.)
+- Console input/output
+- File system operations
+- Networking
 - Random number generation
-- Concurrent/parallel computation
 
-#### Conventions
+Note that **system packages should never expose side effects directly through their functions**; all public functions in system packages must be purely functional. Instead, you need to pass a `Context` type to every effect-ful function for it to make side effects.
 
-**System packages should never expose side effects directly through their functions**; all exported functions of their APIs must be pure. Instead, every system package should provide (usually) one _context_ type on which those functions depend to make side effects. Then, actual context values of the type are injected into entry points of applications: the `main` functions.
-
-For example, a system package for command line applications should have the following types and functions:
+For example, a system package for command line applications might have the following types and functions:
 
 ```pen
-# Defines a foreign function to output a string on console.
-import foreign "c" _pen_cli_put_string \(string) none
+# Define a foreign function to output a string in console.
+import foreign _pen_cli_print \(string) none
 
 type Context {
-  putString: _pen_cli_put_string,
-  ...
+  print: _pen_cli_print,
 }
 
 Print = \(ctx Context, s string) none {
-  ctx.putString(s)
+  ctx.print(s)
 }
 ```
 
 rather than:
 
 ```pen
-import foreign "c" _pen_cli_put_string \(string) none
+import foreign _pen_cli_print \(string) none
 
 Print = \(s string) none {
-  _pen_cli_put_string(s)
+  # Oh, no! We make side effects in a public function directly.
+  _pen_cli_print(s)
 }
 ```
 
-### Linking application files
+### Linking application files (optional)
 
-Each system package has a script file named `pen-link` at its top directory. On every build, the executable file is run with object files specified as command line arguments to link an application file. The script files may or may not have file extensions.
+System packages might have optional script files named `pen-link` at their top directories. On every build of application packages using the system packages, the script files run given object files specified as command line arguments to link application files. The script files may or may not have file extensions.
 
-The scripts should accept the following command line arguments. Outputs of the scripts are discarded unless some errors occur during linking.
+The scripts should accept the following command line arguments.
 
-| Argument           | Required | Description                    |
-| ------------------ | -------- | ------------------------------ |
-| `-t <target>`      | No       | Target triple                  |
-| `-o <application>` | Yes      | Path of an application file    |
-| `<archive>...`     | Yes      | Paths of archive files to link |
+| Argument           | Required | Description                                                    |
+| ------------------ | -------- | -------------------------------------------------------------- |
+| `-t <target>`      | No       | Target triple                                                  |
+| `-o <application>` | Yes      | Path of an application file                                    |
+| `<archive>...`     | Yes      | Paths of archive files sorted topologically from main packages |
+
+At the liking phase, compiled main functions are available under a symbol named `_pen_main` with the language's native calling convention.
 
 ## Examples
 
-[The OS standard package](https://github.com/pen-lang/pen/tree/main/lib/os) is one of examples of system packages.
+[The `Os` standard package](https://github.com/pen-lang/pen/tree/main/lib/os) is an example of system packages.
