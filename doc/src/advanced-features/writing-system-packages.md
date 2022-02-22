@@ -32,7 +32,7 @@ type Context {
 
 UnsafeNew = \() Context {
   Context{
-    print: \(s string) none { _ffi_print(s) }
+    print: ...
   }
 }
 ```
@@ -50,29 +50,29 @@ System packages are the only places where you can define functions that have sid
 
 Note that **system packages should never expose side effects directly through their functions**; all public functions in system packages must be purely functional. Instead, you need to pass a `Context` type to every effectful function for it to make side effects. 
 
-For example, a system package for command line applications should have the following types and functions:
+For example, a system package for command line applications might have the following types and functions:
 
 ```pen
-# Defines a foreign function to output a string on console.
-import foreign "c" _pen_cli_put_string \(string) none
+# Defines a foreign function to output a string in console.
+import foreign "c" _pen_cli_print \(string) none
 
 type Context {
-  putString: _pen_cli_put_string,
+  print: _pen_cli_print,
   ...
 }
 
 Print = \(ctx Context, s string) none {
-  ctx.putString(s)
+  ctx.print(s)
 }
 ```
 
 rather than:
 
 ```pen
-import foreign "c" _pen_cli_put_string \(string) none
+import foreign "c" _pen_cli_print \(string) none
 
 Print = \(s string) none {
-  _pen_cli_put_string(s)
+  _pen_cli_print(s)
 }
 ```
 
