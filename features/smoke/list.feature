@@ -83,3 +83,17 @@ Feature: List
     """
     When I run `pen build`
     Then the stderr should contain "types not matched"
+
+  Scenario: Evaluate list comprehension lazily
+    Given a file named "main.pen" with:
+    """pen
+    import Os'Process
+
+    main = \(ctx context) none {
+      [none y() for y in [none Process'Exit(1)]]
+
+      none
+    }
+    """
+    When I successfully run `pen build`
+    Then I successfully run `./app`
