@@ -11,21 +11,33 @@ This page assumes that you have already read [Packages](/references/language/pac
 
 ## Functionalities of system packages
 
-System packages have the following three functionalities.
+System packages have the following functionalities:
 
-### Defining main function types
+- Define context types.
+- Provide system interfaces as functions and types.
+- Link application files.
 
-Every system package must have a module named `MainFunction.pen` in which a `MainFunction` function type is defined. Literally, the function type is used as a type of `main` functions in `main.pen` modules in application packages using the system package.
+### Defining context types
 
-For example, a system package for command line applications might have the following `MainFunction.pen` module:
+Every system package must have a module named `Context` at the top level. The module defines a `Context` type and an `UnsafeNew` function that returns a `Context` value with no argument. 
+
+For example, a system package for command line applications might have the following `Context` module:
 
 ```pen
-import 'Context { Context }
+...
 
-type MainFunction = \(Context) none | error
+type Context {
+  print \(string) none
+}
+
+UnsafeNew = \() Context {
+  Context{
+    print: \(s string) none { _ffi_print(s) }
+  }
+}
 ```
 
-At the liking phase, actual main functions compiled from source codes are available as `_pen_main` in object files. And the object files are passed to system packages' [linking scripts](#linking-application-files) described later.
+The language's compiler uses these type and function to compose a `context` type passed to `main` functions in `main` modules in application packages.
 
 ### Providing system functions and types
 
@@ -76,6 +88,8 @@ The scripts should accept the following command line arguments.
 | `-t <target>`      | No       | Target triple                                                  |
 | `-o <application>` | Yes      | Path of an application file                                    |
 | `<archive>...`     | Yes      | Paths of archive files sorted topologically from main packages |
+
+At the liking phase, compiled main functions are available under a symbol named `_pen_main` with the language's native calling convention. 
 
 ## Examples
 
