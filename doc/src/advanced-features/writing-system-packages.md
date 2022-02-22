@@ -54,7 +54,7 @@ For example, a system package for command line applications might have the follo
 
 ```pen
 # Define a foreign function to output a string in console.
-import foreign "c" _pen_cli_print \(string) none
+import foreign _pen_cli_print \(string) none
 
 type Context {
   print: _pen_cli_print,
@@ -69,9 +69,10 @@ Print = \(ctx Context, s string) none {
 rather than:
 
 ```pen
-import foreign "c" _pen_cli_print \(string) none
+import foreign _pen_cli_print \(string) none
 
 Print = \(s string) none {
+  # Oh, no! We make side effects in a public function directly.
   _pen_cli_print(s)
 }
 ```
