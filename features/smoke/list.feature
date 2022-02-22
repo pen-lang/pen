@@ -76,7 +76,7 @@ Feature: List
     Given a file named "main.pen" with:
     """pen
     main = \(ctx context) none {
-      [none x() for x in [none 1]]
+      _ = [none x() for x in [none 1]]
 
       none
     }
@@ -87,10 +87,17 @@ Feature: List
   Scenario: Evaluate list comprehension lazily
     Given a file named "main.pen" with:
     """pen
+    import Os'Context { Context }
     import Os'Process
 
+    xs = \(ctx Context) [none] {
+      Process'Exit(ctx.Os, 1)
+
+      [none]
+    }
+
     main = \(ctx context) none {
-      [none x() for x in [none Process'Exit(ctx.Os, 1)]]
+      _ = [none x() for x in xs(ctx.Os)]
 
       none
     }
