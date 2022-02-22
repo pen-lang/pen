@@ -41,14 +41,14 @@ The language's compiler uses these type and function to compose a `context` type
 
 ### Providing system functions and types
 
-System packages are the only places where you can define functions that have side effects. Thanks to sytem packages, applications can perform effects to interact with the world, such as:
+System packages are the only places where you can define functions that have side effects. Thanks to system packages, applications can perform effects to interact with the world, such as:
 
 - Console input/output
 - File system operations
 - Networking
 - Random number generation
 
-Note that **system packages should never expose side effects directly through their functions**; all public functions in system packages must be purely functional. Instead, you need to pass a `Context` type to every effectful function for it to make side effects.
+Note that **system packages should never expose side effects directly through their functions**; all public functions in system packages must be purely functional. Instead, you need to pass a `Context` type to every effect-ful function for it to make side effects.
 
 For example, a system package for command line applications might have the following types and functions:
 
