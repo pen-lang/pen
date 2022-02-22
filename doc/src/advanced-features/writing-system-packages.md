@@ -19,7 +19,7 @@ System packages have the following functionalities:
 
 ### Defining context types
 
-Every system package must have a module named `Context` at the top level. The module defines a `Context` type and an `UnsafeNew` function that returns a `Context` value with no argument. 
+Every system package must have a module named `Context` at the top level. The module defines a `Context` type and an `UnsafeNew` function that returns a `Context` value with no argument.
 
 For example, a system package for command line applications might have the following `Context` module:
 
@@ -41,15 +41,14 @@ The language's compiler uses these type and function to compose a `context` type
 
 ### Providing system functions and types
 
-System packages are the only places where you can define functions that have side effects. Because they provide those system functions, applications can perform side effects, such as:
+System packages are the only places where you can define functions that have side effects. Thanks to sytem packages, applications can perform effects to interact with the world, such as:
 
-- I/O (console output, file system operations, etc.)
+- Console input/output
+- File system operations
+- Networking
 - Random number generation
-- Concurrent/parallel computation
 
-#### Conventions
-
-**System packages should never expose side effects directly through their functions**; all exported functions of their APIs must be pure. Instead, every system package should provide (usually) one _context_ type on which those functions depend to make side effects. Then, actual context values of the type are injected into entry points of applications: the `main` functions.
+Note that **system packages should never expose side effects directly through their functions**; all exported functions of their APIs must be purely functional. Instead, you need to pass a `Context` type to every effectful function for them to make side effects. Then, actual context values of the type are injected into entry points of applications: the `main` functions.
 
 For example, a system package for command line applications should have the following types and functions:
 
@@ -89,7 +88,7 @@ The scripts should accept the following command line arguments.
 | `-o <application>` | Yes      | Path of an application file                                    |
 | `<archive>...`     | Yes      | Paths of archive files sorted topologically from main packages |
 
-At the liking phase, compiled main functions are available under a symbol named `_pen_main` with the language's native calling convention. 
+At the liking phase, compiled main functions are available under a symbol named `_pen_main` with the language's native calling convention.
 
 ## Examples
 
