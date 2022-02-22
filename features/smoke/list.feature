@@ -91,7 +91,7 @@ Feature: List
     import Os'Process
 
     xs = \(ctx Context) [none] {
-      Process'Exit(ctx.Os, 1)
+      Process'Exit(ctx, 1)
 
       [none]
     }
