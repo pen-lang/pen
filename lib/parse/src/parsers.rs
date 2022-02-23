@@ -142,12 +142,10 @@ fn foreign_import<'a>() -> impl Parser<Stream<'a>, Output = ForeignImport> {
 fn calling_convention<'a>() -> impl Parser<Stream<'a>, Output = CallingConvention> {
     string_literal()
         .expected("calling convention")
-        .then(|string| {
-            if string.value() == "c".as_bytes() {
-                value(CallingConvention::C).left()
-            } else {
-                unexpected_any("unknown calling convention").right()
-            }
+        .then(|string| match string.value() {
+            b"c" => value(CallingConvention::C).left(),
+            b"trampoline" => value(CallingConvention::Trampoline).left(),
+            _ => unexpected_any("unknown calling convention").right(),
         })
 }
 

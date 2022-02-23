@@ -1,7 +1,8 @@
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum CallingConvention {
-    Native,
     C,
+    Native,
+    Trampoline,
 }
 
 impl Default for CallingConvention {

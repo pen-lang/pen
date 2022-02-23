@@ -66,8 +66,9 @@ pub fn compile(module: &Module, context: &CompileContext) -> Result<mir::ir::Mod
 
 fn compile_calling_convention(calling_convention: CallingConvention) -> mir::ir::CallingConvention {
     match calling_convention {
-        CallingConvention::Native => mir::ir::CallingConvention::Source,
         CallingConvention::C => mir::ir::CallingConvention::Target,
+        CallingConvention::Native => mir::ir::CallingConvention::Source,
+        CallingConvention::Trampoline => todo!(),
     }
 }
 

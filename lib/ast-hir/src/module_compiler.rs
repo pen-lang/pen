@@ -80,6 +80,7 @@ fn compile_calling_convention(calling_convention: ast::CallingConvention) -> ir:
     match calling_convention {
         ast::CallingConvention::C => ir::CallingConvention::C,
         ast::CallingConvention::Native => ir::CallingConvention::Native,
+        ast::CallingConvention::Trampoline => ir::CallingConvention::Trampoline,
     }
 }
 

@@ -2,4 +2,5 @@
 pub enum CallingConvention {
     C,
     Native,
+    Trampoline,
 }
