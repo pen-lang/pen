@@ -19,7 +19,7 @@ pub type Trampoline<T, S> = (StepFunction<T, S>, ContinuationFunction<T, S>);
 // Something like AsyncStackManager that creates async stacks with proper
 // lifetime every time when it's given contexts can be implemented potentially.
 // The reason we set those contexts unsafely with the `run_with_context` method
-// in the current implementation is to keep struct type compatibility between
+// in the current implementation is to keep struct type compatible between
 // Stack and AsyncStack at the ABI level.
 #[repr(C)]
 #[derive(Debug)]
