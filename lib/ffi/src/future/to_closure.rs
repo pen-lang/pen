@@ -43,7 +43,7 @@ extern "C" fn resume<O, F: Future<Output = O>>(
     poll(stack, continue_, future)
 }
 
-extern "C" fn poll<O, F: Future<Output = O>>(
+fn poll<O, F: Future<Output = O>>(
     stack: &mut AsyncStack,
     continue_: ContinuationFunction<O>,
     mut future: Pin<Box<F>>,
