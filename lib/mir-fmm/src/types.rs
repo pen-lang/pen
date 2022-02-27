@@ -211,6 +211,7 @@ fn compile_calling_convention(
     match calling_convention {
         mir::ir::CallingConvention::Source => fmm::types::CallingConvention::Source,
         mir::ir::CallingConvention::Target => fmm::types::CallingConvention::Target,
+        mir::ir::CallingConvention::Trampoline => todo!(),
     }
 }
 

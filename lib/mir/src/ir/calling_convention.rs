@@ -2,4 +2,5 @@
 pub enum CallingConvention {
     Source,
     Target,
+    Trampoline,
 }

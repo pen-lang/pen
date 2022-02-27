@@ -68,7 +68,7 @@ fn compile_calling_convention(calling_convention: CallingConvention) -> mir::ir:
     match calling_convention {
         CallingConvention::C => mir::ir::CallingConvention::Target,
         CallingConvention::Native => mir::ir::CallingConvention::Source,
-        CallingConvention::Trampoline => todo!(),
+        CallingConvention::Trampoline => mir::ir::CallingConvention::Trampoline,
     }
 }
 
