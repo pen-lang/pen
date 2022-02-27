@@ -445,7 +445,7 @@ dependencies = [
 [[package]]
 name = "inkwell"
 version = "0.1.0"
-source = "git+https://github.com/TheDan64/inkwell?branch=master#c0e13b70e90f7f35c6704e0a9bb8a00bdb2e75bc"
+source = "git+https://github.com/TheDan64/inkwell?branch=master#c71d7edb782e0335411cef2830032b27fd0db9f7"
 dependencies = [
  "either",
  "inkwell_internals",
@@ -458,7 +458,7 @@ dependencies = [
 [[package]]
 name = "inkwell_internals"
 version = "0.5.0"
-source = "git+https://github.com/TheDan64/inkwell?branch=master#c0e13b70e90f7f35c6704e0a9bb8a00bdb2e75bc"
+source = "git+https://github.com/TheDan64/inkwell?branch=master#c71d7edb782e0335411cef2830032b27fd0db9f7"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -520,9 +520,9 @@ checksum = "e2abad23fbc42b3700f2f279844dc832adb2b2eb069b2df918f455c4e18cc646"
 
 [[package]]
 name = "libc"
-version = "0.2.118"
+version = "0.2.119"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "06e509672465a0504304aa87f9f176f2b2b716ed8fb105ebe5c02dc6dce96a94"
+checksum = "1bf2e165bb3457c8e098ea76f3e3bc9db55f87aa90d52d0e6be741470916aaa4"
 
 [[package]]
 name = "linked-hash-map"
@@ -672,7 +672,7 @@ dependencies = [
 
 [[package]]
 name = "pen-ffi"
-version = "0.3.43"
+version = "0.3.44"
 dependencies = [
  "futures",
  "pen-ffi-macro",
@@ -681,7 +681,7 @@ dependencies = [
 
 [[package]]
 name = "pen-ffi-macro"
-version = "0.1.23"
+version = "0.1.24"
 dependencies = [
  "convert_case",
  "pen-ffi",

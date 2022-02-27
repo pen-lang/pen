@@ -117,9 +117,9 @@ dependencies = [
 
 [[package]]
 name = "getrandom"
-version = "0.2.4"
+version = "0.2.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "418d37c8b1d42553c93648be529cb70f920d3baf8ef469b74b9638df426e0b4c"
+checksum = "d39cd93900197114fa1fcb7ae84ca742095eed9442088988ae74fa744e930e77"
 dependencies = [
  "cfg-if",
  "libc",
@@ -137,9 +137,9 @@ dependencies = [
 
 [[package]]
 name = "libc"
-version = "0.2.118"
+version = "0.2.119"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "06e509672465a0504304aa87f9f176f2b2b716ed8fb105ebe5c02dc6dce96a94"
+checksum = "1bf2e165bb3457c8e098ea76f3e3bc9db55f87aa90d52d0e6be741470916aaa4"
 
 [[package]]
 name = "lock_api"
@@ -256,9 +256,9 @@ dependencies = [
 
 [[package]]
 name = "pen-ffi"
-version = "0.3.43"
+version = "0.3.44"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f3d5f33aea0bbe12571e83d1aba732855c0c9b76d22c17bde45a26314bc98255"
+checksum = "8558ad8b6176c29395f3c693007eb29fa81169df0f32d79d04cc84043caefcd4"
 dependencies = [
  "futures",
  "pen-ffi-macro",
@@ -266,9 +266,9 @@ dependencies = [
 
 [[package]]
 name = "pen-ffi-macro"
-version = "0.1.23"
+version = "0.1.24"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e555d012ce558bb9dc970d0f78ec63620bf2d8b8123e0a37fd6283da869e0735"
+checksum = "4eb4eda7ee28b014696157a5302c7cb91582544d45479eb8edd67c4fdeab7d77"
 dependencies = [
  "convert_case",
  "quote",
