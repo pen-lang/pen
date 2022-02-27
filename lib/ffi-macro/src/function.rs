@@ -79,9 +79,7 @@ fn generate_function(attributes: &AttributeArgs, function: &ItemFn) -> Result<To
                     },
                     Poll::Pending => {
                         stack.suspend(resume, continue_, future).unwrap();
-                        stack.push(
-                            null::<ContinuationFunction>(),
-                        );
+                        stack.push(null::<ContinuationFunction>());
                     }
                 }
 
