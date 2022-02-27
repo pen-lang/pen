@@ -55,9 +55,10 @@ fn generate_function(attributes: &AttributeArgs, function: &ItemFn) -> Result<To
             continue_: #crate_path::cps::ContinuationFunction<#output_type, ()>,
             #arguments
         ) -> #crate_path::cps::Result {
-            use core::{future::Future, pin::Pin, task::Poll};
+            use core::{future::Future, pin::Pin, ptr::null, task::Poll};
 
             type OutputFuture = Pin<Box<dyn Future<Output = #output_type>>>;
+            type ContinuationFunction = #crate_path::cps::ContinuationFunction<#output_type, ()>;
 
             #(#attributes)*
             async fn create_future(#arguments) -> #output_type {
@@ -66,18 +67,25 @@ fn generate_function(attributes: &AttributeArgs, function: &ItemFn) -> Result<To
 
             let mut future: OutputFuture = Box::pin(create_future(#(#argument_names),*));
 
-            extern "C" fn poll(
+            fn poll(
                 stack: &mut #crate_path::cps::AsyncStack<()>,
-                continue_: #crate_path::cps::ContinuationFunction<#output_type, ()>,
+                continue_: ContinuationFunction,
                 mut future: OutputFuture,
             ) -> #crate_path::cps::Result {
                 match future.as_mut().poll(stack.context().unwrap()) {
-                    Poll::Ready(value) => continue_(stack, value),
+                    Poll::Ready(value) => {
+                        stack.push(value);
+                        stack.push(continue_);
+                    },
                     Poll::Pending => {
                         stack.suspend(resume, continue_, future).unwrap();
-                        #crate_path::cps::Result::new()
+                        stack.push(
+                            null::<ContinuationFunction>(),
+                        );
                     }
                 }
+
+                #crate_path::cps::Result::new()
             }
 
             extern "C" fn resume(
