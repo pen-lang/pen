@@ -76,6 +76,31 @@ impl<S> AsyncStack<S> {
         Ok(())
     }
 
+    pub fn trampoline<T>(
+        &mut self,
+        continuation: ContinuationFunction<T, S>,
+        value: T,
+    ) -> Result<(), CpsError> {
+        self.transition_action(AsyncStackAction::Suspend, AsyncStackAction::Resume)?;
+
+        extern "C" fn step<T, S>(
+            stack: &mut AsyncStack<S>,
+            continue_: ContinuationFunction<T, S>,
+        ) -> cps::Result {
+            let value = stack.pop::<T>();
+
+            continue_(stack, value)
+        }
+
+        let step: StepFunction<T, S> = step;
+
+        self.stack.push(value);
+        self.stack.push(step);
+        self.stack.push(continuation);
+
+        Ok(())
+    }
+
     pub fn resume<T>(&mut self) -> Result<Trampoline<T, S>, CpsError> {
         self.transition_action(AsyncStackAction::Resume, AsyncStackAction::Restore)?;
 
