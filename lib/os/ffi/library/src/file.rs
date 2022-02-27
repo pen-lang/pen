@@ -1,11 +1,10 @@
 use super::{error::OsError, open_file_options::OpenFileOptions};
 use crate::{result::FfiResult, utilities};
-use std::{
-    ops::DerefMut,
-    path::Path,
-    sync::{Arc, LockResult, RwLock, RwLockWriteGuard},
+use std::{ops::DerefMut, path::Path, sync::Arc};
+use tokio::{
+    fs::{self, File, OpenOptions},
+    sync::{RwLock, RwLockWriteGuard},
 };
-use tokio::fs::{self, File, OpenOptions};
 
 #[derive(Clone, Default)]
 pub struct OsFile {
@@ -19,10 +18,11 @@ impl OsFile {
         })
     }
 
-    pub fn lock(&self) -> Result<RwLockWriteGuard<File>, OsError> {
-        Ok(TryInto::<&OsFileInner>::try_into(&self.inner)
+    pub async fn lock(&self) -> RwLockWriteGuard<'_, File> {
+        TryInto::<&OsFileInner>::try_into(&self.inner)
             .unwrap()
-            .get_mut()?)
+            .get_mut()
+            .await
     }
 }
 
@@ -39,8 +39,8 @@ impl OsFileInner {
         }
     }
 
-    pub fn get_mut(&self) -> LockResult<RwLockWriteGuard<'_, File>> {
-        self.file.write()
+    pub async fn get_mut(&self) -> RwLockWriteGuard<'_, File> {
+        self.file.write().await
     }
 }
 
@@ -81,7 +81,7 @@ async fn _pen_os_read_file(file: ffi::Arc<OsFile>) -> ffi::Arc<FfiResult<ffi::By
 }
 
 async fn read_file(file: ffi::Arc<OsFile>) -> Result<ffi::ByteString, OsError> {
-    utilities::read(file.lock()?.deref_mut()).await
+    utilities::read(file.lock().await.deref_mut()).await
 }
 
 #[ffi::bindgen]
@@ -96,7 +96,7 @@ async fn read_limit_file(
     file: ffi::Arc<OsFile>,
     limit: ffi::Number,
 ) -> Result<ffi::ByteString, OsError> {
-    utilities::read_limit(file.lock()?.deref_mut(), f64::from(limit) as usize).await
+    utilities::read_limit(file.lock().await.deref_mut(), f64::from(limit) as usize).await
 }
 
 #[ffi::bindgen]
@@ -111,7 +111,7 @@ async fn write_file(
     file: ffi::Arc<OsFile>,
     bytes: ffi::ByteString,
 ) -> Result<ffi::Number, OsError> {
-    utilities::write(file.lock()?.deref_mut(), bytes).await
+    utilities::write(file.lock().await.deref_mut(), bytes).await
 }
 
 #[ffi::bindgen]

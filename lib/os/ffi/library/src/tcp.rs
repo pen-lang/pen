@@ -1,11 +1,9 @@
 use crate::{error::OsError, result::FfiResult};
-use std::{
-    str,
-    sync::{Arc, LockResult, RwLock, RwLockWriteGuard},
-};
+use std::{str, sync::Arc};
 use tokio::{
     io::{AsyncReadExt, AsyncWriteExt},
     net,
+    sync::{RwLock, RwLockWriteGuard},
 };
 
 #[derive(Clone, Default)]
@@ -21,10 +19,11 @@ impl TcpListener {
         .into()
     }
 
-    pub fn lock(&self) -> Result<RwLockWriteGuard<net::TcpListener>, OsError> {
-        Ok(TryInto::<&TcpListenerInner>::try_into(&self.inner)
+    pub async fn lock(&self) -> RwLockWriteGuard<'_, net::TcpListener> {
+        TryInto::<&TcpListenerInner>::try_into(&self.inner)
             .unwrap()
-            .get_mut()?)
+            .get_mut()
+            .await
     }
 }
 
@@ -41,8 +40,8 @@ impl TcpListenerInner {
         }
     }
 
-    pub fn get_mut(&self) -> LockResult<RwLockWriteGuard<'_, net::TcpListener>> {
-        self.listener.write()
+    pub async fn get_mut(&self) -> RwLockWriteGuard<'_, net::TcpListener> {
+        self.listener.write().await
     }
 }
 
@@ -59,10 +58,11 @@ impl TcpStream {
         .into()
     }
 
-    pub fn lock(&self) -> Result<RwLockWriteGuard<net::TcpStream>, OsError> {
-        Ok(TryInto::<&TcpStreamInner>::try_into(&self.inner)
+    pub async fn lock(&self) -> RwLockWriteGuard<'_, net::TcpStream> {
+        TryInto::<&TcpStreamInner>::try_into(&self.inner)
             .unwrap()
-            .get_mut()?)
+            .get_mut()
+            .await
     }
 }
 
@@ -79,8 +79,8 @@ impl TcpStreamInner {
         }
     }
 
-    pub fn get_mut(&self) -> LockResult<RwLockWriteGuard<'_, net::TcpStream>> {
-        self.socket.write()
+    pub async fn get_mut(&self) -> RwLockWriteGuard<'_, net::TcpStream> {
+        self.socket.write().await
     }
 }
 
@@ -120,7 +120,7 @@ async fn _pen_os_tcp_accept(
 }
 
 async fn accept(listener: ffi::Arc<TcpListener>) -> Result<ffi::Arc<TcpAcceptedStream>, OsError> {
-    let (stream, address) = listener.lock()?.accept().await?;
+    let (stream, address) = listener.lock().await.accept().await?;
 
     Ok(TcpAcceptedStream {
         stream: TcpStream::new(stream),
@@ -142,7 +142,7 @@ async fn receive(
     limit: ffi::Number,
 ) -> Result<ffi::ByteString, OsError> {
     let mut buffer = vec![0; f64::from(limit) as usize];
-    let size = socket.lock()?.read(&mut buffer).await?;
+    let size = socket.lock().await.read(&mut buffer).await?;
 
     buffer.truncate(size);
 
@@ -158,5 +158,5 @@ async fn _pen_os_tcp_send(
 }
 
 async fn send(socket: ffi::Arc<TcpStream>, data: ffi::ByteString) -> Result<ffi::Number, OsError> {
-    Ok((socket.lock()?.write(data.as_slice()).await? as f64).into())
+    Ok((socket.lock().await.write(data.as_slice()).await? as f64).into())
 }
