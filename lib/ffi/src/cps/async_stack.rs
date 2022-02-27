@@ -1,7 +1,6 @@
 use super::{async_stack_action::AsyncStackAction, CpsError, Stack};
 use crate::cps;
-use alloc::vec;
-use alloc::vec::Vec;
+use alloc::{vec, vec::Vec};
 use core::{
     future::Future,
     intrinsics::transmute,
