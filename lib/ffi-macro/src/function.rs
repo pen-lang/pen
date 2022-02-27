@@ -66,7 +66,7 @@ fn generate_function(attributes: &AttributeArgs, function: &ItemFn) -> Result<To
 
             let mut future: OutputFuture = Box::pin(create_future(#(#argument_names),*));
 
-            extern "C" fn poll(
+            fn poll(
                 stack: &mut #crate_path::cps::AsyncStack<()>,
                 continue_: #crate_path::cps::ContinuationFunction<#output_type, ()>,
                 mut future: OutputFuture,
@@ -80,7 +80,7 @@ fn generate_function(attributes: &AttributeArgs, function: &ItemFn) -> Result<To
                 }
             }
 
-            extern "C" fn resume(
+            fn resume(
                 stack: &mut #crate_path::cps::AsyncStack<()>,
                 continue_: #crate_path::cps::ContinuationFunction<#output_type, ()>,
             ) -> #crate_path::cps::Result {
