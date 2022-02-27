@@ -3,7 +3,7 @@ use core::fmt::{self, Display, Formatter};
 
 #[derive(Debug, PartialEq)]
 pub enum CpsError {
-    UnexpectedAsyncStackAction(AsyncStackAction),
+    UnexpectedAsyncStackAction(Option<AsyncStackAction>),
 }
 
 // TODO Implement std::error::Error when it is not `no_std`.
