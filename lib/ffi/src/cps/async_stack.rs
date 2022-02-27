@@ -7,10 +7,8 @@ use core::{
     task::Context,
 };
 
-pub type StepFunction<T, S = ()> = extern "C" fn(
-    stack: &mut AsyncStack<S>,
-    continuation: ContinuationFunction<T, S>,
-) -> cps::Result;
+pub type StepFunction<T, S = ()> =
+    fn(stack: &mut AsyncStack<S>, continuation: ContinuationFunction<T, S>) -> cps::Result;
 
 pub type ContinuationFunction<T, S = ()> = extern "C" fn(&mut AsyncStack<S>, T) -> cps::Result;
 
