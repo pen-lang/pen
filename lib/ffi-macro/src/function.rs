@@ -86,7 +86,7 @@ fn generate_function(attributes: &AttributeArgs, function: &ItemFn) -> Result<To
                 #crate_path::cps::Result::new()
             }
 
-            extern "C" fn resume(
+            fn resume(
                 stack: &mut #crate_path::cps::AsyncStack<()>,
                 continue_: #crate_path::cps::ContinuationFunction<#output_type, ()>,
             ) -> #crate_path::cps::Result {

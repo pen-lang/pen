@@ -34,7 +34,7 @@ extern "C" fn get_result<O, F: Future<Output = O>>(
     )
 }
 
-extern "C" fn resume<O, F: Future<Output = O>>(
+fn resume<O, F: Future<Output = O>>(
     stack: &mut AsyncStack,
     continue_: ContinuationFunction<O>,
 ) -> cps::Result {
