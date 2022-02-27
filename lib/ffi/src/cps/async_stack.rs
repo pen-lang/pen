@@ -69,8 +69,6 @@ impl<S> AsyncStack<S> {
     ) -> Result<(), CpsError> {
         self.transition_action(AsyncStackAction::Suspend, AsyncStackAction::Resume)?;
 
-        self.next_action = AsyncStackAction::Resume;
-
         self.stack.push(future);
         self.stack.push(step);
         self.stack.push(continuation);
