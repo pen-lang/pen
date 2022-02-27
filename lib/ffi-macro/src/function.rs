@@ -73,7 +73,7 @@ fn generate_function(attributes: &AttributeArgs, function: &ItemFn) -> Result<To
             ) -> #crate_path::cps::Result {
                 match future.as_mut().poll(stack.context().unwrap()) {
                     Poll::Ready(value) => {
-                        stack.trampoline(continue_, future).unwrap();
+                        stack.trampoline(continue_, value).unwrap();
                     }
                     Poll::Pending => {
                         stack.suspend(resume, continue_, future).unwrap();
