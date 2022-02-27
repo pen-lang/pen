@@ -81,7 +81,7 @@ impl<S> AsyncStack<S> {
     ) -> Result<(), CpsError> {
         self.transition_action(AsyncStackAction::Suspend, AsyncStackAction::Resume)?;
 
-        extern "C" fn step<T, S>(
+        fn step<T, S>(
             stack: &mut AsyncStack<S>,
             continue_: ContinuationFunction<T, S>,
         ) -> cps::Result {
