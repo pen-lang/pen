@@ -161,7 +161,7 @@ mod tests {
 
     type TestResult = usize;
 
-    extern "C" fn step(_: &mut AsyncStack, _: ContinuationFunction<TestResult, ()>) -> cps::Result {
+    fn step(_: &mut AsyncStack, _: ContinuationFunction<TestResult, ()>) -> cps::Result {
         cps::Result::new()
     }
 
