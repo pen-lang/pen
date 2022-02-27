@@ -49,6 +49,7 @@ extern "C" fn poll<O, F: Future<Output = O>>(
     mut future: Pin<Box<F>>,
 ) -> cps::Result {
     match future.as_mut().poll(stack.context().unwrap()) {
+        // TODO Use a trampoline calling convention.
         Poll::Ready(value) => continue_(stack, value),
         Poll::Pending => {
             stack.suspend(resume::<O, F>, continue_, future).unwrap();
