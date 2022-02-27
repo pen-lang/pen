@@ -1,9 +1,9 @@
 use crate::{error::OsError, result::FfiResult};
-use std::{
-    str,
-    sync::{Arc, LockResult, RwLock, RwLockWriteGuard},
+use std::{str, sync::Arc};
+use tokio::{
+    net,
+    sync::{RwLock, RwLockWriteGuard},
 };
-use tokio::net;
 
 const MAX_UDP_PAYLOAD_SIZE: usize = 512;
 
@@ -20,10 +20,11 @@ impl UdpSocket {
         .into()
     }
 
-    pub fn lock(&self) -> Result<RwLockWriteGuard<net::UdpSocket>, OsError> {
-        Ok(TryInto::<&UdpSocketInner>::try_into(&self.inner)
+    pub async fn lock(&self) -> RwLockWriteGuard<'_, net::UdpSocket> {
+        TryInto::<&UdpSocketInner>::try_into(&self.inner)
             .unwrap()
-            .get_mut()?)
+            .get_mut()
+            .await
     }
 }
 
@@ -40,8 +41,8 @@ impl UdpSocketInner {
         }
     }
 
-    pub fn get_mut(&self) -> LockResult<RwLockWriteGuard<'_, net::UdpSocket>> {
-        self.socket.write()
+    pub async fn get_mut(&self) -> RwLockWriteGuard<'_, net::UdpSocket> {
+        self.socket.write().await
     }
 }
 
@@ -72,7 +73,8 @@ async fn _pen_os_udp_connect(
 
 async fn connect(socket: ffi::Arc<UdpSocket>, address: ffi::ByteString) -> Result<(), OsError> {
     socket
-        .lock()?
+        .lock()
+        .await
         .connect(str::from_utf8(address.as_slice())?)
         .await?;
 
@@ -86,7 +88,7 @@ async fn _pen_os_udp_receive(socket: ffi::Arc<UdpSocket>) -> ffi::Arc<FfiResult<
 
 async fn receive(socket: ffi::Arc<UdpSocket>) -> Result<ffi::ByteString, OsError> {
     let mut buffer = vec![0; MAX_UDP_PAYLOAD_SIZE];
-    let size = socket.lock()?.recv(&mut buffer).await?;
+    let size = socket.lock().await.recv(&mut buffer).await?;
 
     buffer.truncate(size);
 
@@ -102,7 +104,7 @@ async fn _pen_os_udp_receive_from(
 
 async fn receive_from(socket: ffi::Arc<UdpSocket>) -> Result<ffi::Arc<UdpDatagram>, OsError> {
     let mut buffer = vec![0; MAX_UDP_PAYLOAD_SIZE];
-    let (size, address) = socket.lock()?.recv_from(&mut buffer).await?;
+    let (size, address) = socket.lock().await.recv_from(&mut buffer).await?;
 
     buffer.truncate(size);
 
@@ -122,7 +124,7 @@ async fn _pen_os_udp_send(
 }
 
 async fn send(socket: ffi::Arc<UdpSocket>, data: ffi::ByteString) -> Result<ffi::Number, OsError> {
-    let size = socket.lock()?.send(data.as_slice()).await?;
+    let size = socket.lock().await.send(data.as_slice()).await?;
 
     Ok((size as f64).into())
 }
@@ -142,7 +144,8 @@ async fn send_to(
     address: ffi::ByteString,
 ) -> Result<ffi::Number, OsError> {
     let size = socket
-        .lock()?
+        .lock()
+        .await
         .send_to(data.as_slice(), str::from_utf8(address.as_slice())?)
         .await?;
 
