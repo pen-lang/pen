@@ -27,9 +27,7 @@ fn _pen_join_strings(mut list: ffi::Arc<ffi::List>, separator: ffi::ByteString) 
         }
 
         first = false;
-        string.extend(
-            unsafe { _pen_core_to_string(ffi::BoxAny::new(first_rest.first.clone())) }.as_slice(),
-        );
+        string.extend(unsafe { _pen_core_to_string(first_rest.first.clone().into()) }.as_slice());
         list = first_rest.rest.clone();
     }
 }
