@@ -1,0 +1,155 @@
+use crate::{context::CompileContext, error::CompileError};
+use hir::{analysis::types::type_canonicalizer, ir::*, types::Type};
+
+pub fn validate(module: &Module, context: &CompileContext) -> Result<(), CompileError> {
+    for declaration in module.foreign_declarations() {
+        validate_foreign_declaration(context, declaration)?;
+    }
+
+    for definition in module.definitions() {
+        validate_definition(context, definition)?;
+    }
+
+    Ok(())
+}
+
+fn validate_foreign_declaration(
+    context: &CompileContext,
+    declaration: &ForeignDeclaration,
+) -> Result<(), CompileError> {
+    let function_type =
+        type_canonicalizer::canonicalize_function(declaration.type_(), context.types())?
+            .ok_or_else(|| {
+                CompileError::FunctionExpected(declaration.type_().position().clone())
+            })?;
+
+    for argument_type in function_type.arguments() {
+        validate_type(context, argument_type)?;
+    }
+
+    validate_type(context, function_type.result())?;
+
+    Ok(())
+}
+
+fn validate_definition(
+    context: &CompileContext,
+    definition: &Definition,
+) -> Result<(), CompileError> {
+    for argument in definition.lambda().arguments() {
+        validate_type(context, argument.type_())?;
+    }
+
+    validate_type(context, definition.lambda().result_type())?;
+
+    Ok(())
+}
+
+fn validate_type(context: &CompileContext, type_: &Type) -> Result<(), CompileError> {
+    if type_canonicalizer::canonicalize(type_, context.types())?.is_variant() {
+        return Err(CompileError::VariantTypeInFfi(type_.position().clone()));
+    }
+
+    Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::compile_configuration::COMPILE_CONFIGURATION;
+    use hir::test::ModuleFake;
+    use hir::types;
+    use position::{test::PositionFake, Position};
+
+    fn validate_module(module: &Module) -> Result<(), CompileError> {
+        validate(
+            module,
+            &CompileContext::new(module, COMPILE_CONFIGURATION.clone().into()),
+        )
+    }
+
+    #[test]
+    fn validate_empty_module() -> Result<(), CompileError> {
+        validate_module(&Module::empty())
+    }
+
+    #[test]
+    fn fail_to_validate_foreign_declaration_argument() {
+        assert_eq!(
+            validate_module(&Module::empty().set_foreign_declarations(vec![
+                ForeignDeclaration::new(
+                    "f",
+                    "f",
+                    CallingConvention::C,
+                    types::Function::new(
+                        vec![types::Any::new(Position::fake()).into()],
+                        types::Number::new(Position::fake()),
+                        Position::fake()
+                    ),
+                    Position::fake(),
+                )
+            ])),
+            Err(CompileError::VariantTypeInFfi(Position::fake()))
+        );
+    }
+
+    #[test]
+    fn fail_to_validate_foreign_declaration_return_value() {
+        assert_eq!(
+            validate_module(&Module::empty().set_foreign_declarations(vec![
+                ForeignDeclaration::new(
+                    "f",
+                    "f",
+                    CallingConvention::C,
+                    types::Function::new(
+                        vec![],
+                        types::Any::new(Position::fake()),
+                        Position::fake()
+                    ),
+                    Position::fake(),
+                )
+            ])),
+            Err(CompileError::VariantTypeInFfi(Position::fake()))
+        );
+    }
+
+    #[test]
+    fn fail_to_validate_definition_argument() {
+        assert_eq!(
+            validate_module(&Module::empty().set_definitions(vec![Definition::new(
+                "f",
+                "f",
+                Lambda::new(
+                    vec![Argument::new("x", types::Any::new(Position::fake()))],
+                    types::None::new(Position::fake()),
+                    None::new(Position::fake()),
+                    Position::fake(),
+                ),
+                Some(ForeignDefinitionConfiguration::new(CallingConvention::C)),
+                false,
+                Position::fake(),
+            )])),
+            Err(CompileError::VariantTypeInFfi(Position::fake()))
+        );
+    }
+
+    #[test]
+    fn fail_to_validate_definition_return_value() {
+        assert_eq!(
+            validate_module(&Module::empty().set_definitions(vec![Definition::new(
+                "f",
+                "f",
+                Lambda::new(
+                    vec![],
+                    types::Any::new(Position::fake()),
+                    None::new(Position::fake()),
+                    Position::fake(),
+                ),
+                Some(ForeignDefinitionConfiguration::new(CallingConvention::C)),
+                false,
+                Position::fake(),
+            )])),
+            Err(CompileError::VariantTypeInFfi(Position::fake()))
+        );
+    }
+}

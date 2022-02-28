@@ -35,8 +35,8 @@ pub use main_module_configuration::*;
 pub use string_type_configuration::StringTypeConfiguration;
 pub use test_module_configuration::TestModuleConfiguration;
 use validation::{
-    duplicate_function_name_validator, duplicate_type_name_validator, record_field_validator,
-    try_operation_validator,
+    duplicate_function_name_validator, duplicate_type_name_validator, ffi_variant_type_validator,
+    record_field_validator, try_operation_validator,
 };
 
 pub fn compile_main(
@@ -102,6 +102,7 @@ fn compile_module(
     type_checker::check_types(&module, context)?;
     try_operation_validator::validate(&module, context)?;
     record_field_validator::validate(&module, context)?;
+    ffi_variant_type_validator::validate(&module, context)?;
     let module = type_coercer::coerce_types(&module, context)?;
     type_checker::check_types(&module, context)?;
 

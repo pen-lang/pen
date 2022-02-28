@@ -37,6 +37,7 @@ pub enum CompileError {
     UnionTypeExpected(Position),
     UnreachableCode(Position),
     VariableNotFound(Variable),
+    VariantTypeInFfi(Position),
     WrongArgumentCount(Position),
 }
 
@@ -174,6 +175,13 @@ impl Display for CompileError {
                 variable.name(),
                 variable.position()
             ),
+            Self::VariantTypeInFfi(position) => {
+                write!(
+                    formatter,
+                    "union and any type not supported in FFI\n{}",
+                    position
+                )
+            }
             Self::WrongArgumentCount(position) => {
                 write!(
                     formatter,
