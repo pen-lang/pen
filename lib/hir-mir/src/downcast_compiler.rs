@@ -16,8 +16,8 @@ pub fn compile(
     let position = expression.position();
     let from = type_canonicalizer::canonicalize(from, context.types())?;
 
-    if !from.is_union() && !from.is_any() {
-        return Err(CompileError::UnionOrAnyTypeExpected(
+    if !from.is_variant() {
+        return Err(CompileError::VariantTypeExpected(
             expression.position().clone(),
         ));
     } else if !type_subsumption_checker::check(to, &from, context.types())? {
@@ -155,7 +155,7 @@ mod tests {
                 &types::None::new(Position::fake()).into(),
                 &None::new(Position::fake()).into(),
             ),
-            Err(CompileError::UnionOrAnyTypeExpected(Position::fake()))
+            Err(CompileError::VariantTypeExpected(Position::fake()))
         );
     }
 }
