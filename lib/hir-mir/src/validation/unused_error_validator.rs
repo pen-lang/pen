@@ -82,7 +82,7 @@ mod tests {
     }
 
     #[test]
-    fn fail_to_validate_none_type() {
+    fn validate_none_type() {
         assert_eq!(
             validate_module(
                 &Module::empty()
@@ -104,7 +104,7 @@ mod tests {
                         false,
                     )]),
             ),
-            Err(CompileError::MissingTryOperation(Position::fake())),
+            Ok(()),
         );
     }
 
