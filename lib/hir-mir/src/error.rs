@@ -20,6 +20,7 @@ pub enum CompileError {
     MainFunctionNotFound(Position),
     MirTypeCheck(mir::analysis::TypeCheckError),
     MissingElseBlock(Position),
+    MissingTryOperation(Position),
     NewContextFunctionNotFound(Position),
     RecordFieldPrivate(Position),
     RecordFieldUnknown(Position),
@@ -106,6 +107,9 @@ impl Display for CompileError {
                     "missing else block in if-type expression\n{}",
                     position
                 )
+            }
+            Self::MissingTryOperation(position) => {
+                write!(formatter, "missing try operation\n{}", position)
             }
             Self::NewContextFunctionNotFound(position) => {
                 write!(formatter, "new context function not found\n{}", position)
