@@ -172,7 +172,7 @@ mod tests {
                 false,
                 Position::fake(),
             )])),
-            Err(CompileError::VariantTypeInFfi(Position::fake()))
+            Ok(())
         );
     }
 }
