@@ -1,6 +1,8 @@
 use crate::{context::CompileContext, error::CompileError};
 use hir::{analysis::types::type_canonicalizer, ir::*, types::Type};
 
+// Validate variant types in FFI because the current backend cannot handle them
+// properly for some targets (e.g. i386.)
 pub fn validate(module: &Module, context: &CompileContext) -> Result<(), CompileError> {
     for declaration in module.foreign_declarations() {
         validate_foreign_declaration(context, declaration)?;
