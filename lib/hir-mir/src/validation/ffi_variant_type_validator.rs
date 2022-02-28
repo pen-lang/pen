@@ -57,8 +57,7 @@ fn validate_type(context: &CompileContext, type_: &Type) -> Result<(), CompileEr
 mod tests {
     use super::*;
     use crate::compile_configuration::COMPILE_CONFIGURATION;
-    use hir::test::ModuleFake;
-    use hir::types;
+    use hir::{test::ModuleFake, types};
     use position::{test::PositionFake, Position};
 
     fn validate_module(module: &Module) -> Result<(), CompileError> {
