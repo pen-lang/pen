@@ -25,3 +25,9 @@ impl Deref for BoxAny {
         &self.inner.value
     }
 }
+
+impl From<Any> for BoxAny {
+    fn from(x: Any) -> Self {
+        Self::new(x)
+    }
+}

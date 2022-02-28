@@ -133,8 +133,8 @@ fn check_expression(
                 context.types(),
             )?;
 
-            if !argument_type.is_union() && !argument_type.is_any() {
-                return Err(CompileError::UnionOrAnyTypeExpected(
+            if !argument_type.is_variant() {
+                return Err(CompileError::VariantTypeExpected(
                     if_.argument().position().clone(),
                 ));
             }

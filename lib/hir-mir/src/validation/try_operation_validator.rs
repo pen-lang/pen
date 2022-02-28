@@ -1,4 +1,4 @@
-use super::{context::CompileContext, CompileError};
+use crate::{context::CompileContext, error::CompileError};
 use hir::{
     analysis::types::type_subsumption_checker,
     ir::*,

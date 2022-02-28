@@ -1,4 +1,4 @@
-use super::{context::CompileContext, CompileError};
+use crate::{context::CompileContext, CompileError};
 use fnv::FnvHashSet;
 use hir::{
     analysis::{ir::expression_visitor, types::type_canonicalizer},

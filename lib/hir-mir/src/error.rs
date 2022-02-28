@@ -33,10 +33,11 @@ pub enum CompileError {
     TypeNotInferred(Position),
     TypesNotComparable(Position),
     TypesNotMatched(Position, Position),
-    UnionOrAnyTypeExpected(Position),
+    VariantTypeExpected(Position),
     UnionTypeExpected(Position),
     UnreachableCode(Position),
     VariableNotFound(Variable),
+    VariantTypeInFfi(Position),
     WrongArgumentCount(Position),
 }
 
@@ -159,7 +160,7 @@ impl Display for CompileError {
                 "types not matched\n{}\n{}",
                 lhs_position, rhs_position
             ),
-            Self::UnionOrAnyTypeExpected(position) => {
+            Self::VariantTypeExpected(position) => {
                 write!(formatter, "union or any type expected\n{}", position)
             }
             Self::UnionTypeExpected(position) => {
@@ -174,6 +175,13 @@ impl Display for CompileError {
                 variable.name(),
                 variable.position()
             ),
+            Self::VariantTypeInFfi(position) => {
+                write!(
+                    formatter,
+                    "union and any type not supported in FFI\n{}",
+                    position
+                )
+            }
             Self::WrongArgumentCount(position) => {
                 write!(
                     formatter,
