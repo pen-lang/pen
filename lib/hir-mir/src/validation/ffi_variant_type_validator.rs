@@ -36,6 +36,10 @@ fn validate_definition(
     context: &CompileContext,
     definition: &Definition,
 ) -> Result<(), CompileError> {
+    if definition.foreign_definition_configuration().is_none() {
+        return Ok(());
+    }
+
     for argument in definition.lambda().arguments() {
         validate_type(context, argument.type_())?;
     }
@@ -145,6 +149,26 @@ mod tests {
                     Position::fake(),
                 ),
                 Some(ForeignDefinitionConfiguration::new(CallingConvention::C)),
+                false,
+                Position::fake(),
+            )])),
+            Err(CompileError::VariantTypeInFfi(Position::fake()))
+        );
+    }
+
+    #[test]
+    fn validate_non_foreign_definition() {
+        assert_eq!(
+            validate_module(&Module::empty().set_definitions(vec![Definition::new(
+                "f",
+                "f",
+                Lambda::new(
+                    vec![],
+                    types::Any::new(Position::fake()),
+                    None::new(Position::fake()),
+                    Position::fake(),
+                ),
+                None,
                 false,
                 Position::fake(),
             )])),
