@@ -108,6 +108,11 @@ impl<V> AsyncStack<V> {
         self.stack.push(step);
         self.stack.push(continuation);
 
+        self.context()
+            .ok_or_else(|| CpsError::MissingContext)?
+            .waker()
+            .wake_by_ref();
+
         Ok(())
     }
 
@@ -202,7 +207,7 @@ mod tests {
         cps::Result::new()
     }
 
-    extern "C" fn continuation(_: &mut AsyncStack, _: TestResult) -> cps::Result {
+    extern "C" fn continue_(_: &mut AsyncStack, _: TestResult) -> cps::Result {
         cps::Result::new()
     }
 
@@ -235,7 +240,7 @@ mod tests {
     fn suspend() {
         let mut stack = AsyncStack::new(TEST_CAPACITY);
 
-        stack.suspend(step, continuation, ready(42)).unwrap();
+        stack.suspend(step, continue_, ready(42)).unwrap();
     }
 
     #[tokio::test]
@@ -246,7 +251,7 @@ mod tests {
 
         let future: TestFuture = ready(42);
 
-        stack.suspend(step, continuation, future).unwrap();
+        stack.suspend(step, continue_, future).unwrap();
         stack.resume::<()>().unwrap();
         assert_eq!(stack.restore::<TestFuture>().unwrap().await, 42);
     }
@@ -259,10 +264,38 @@ mod tests {
 
         let future: TestFuture = ready(());
 
-        stack.suspend(step, continuation, future).unwrap();
+        stack.suspend(step, continue_, future).unwrap();
         assert_eq!(
             stack.restore::<TestFuture>().unwrap_err(),
             CpsError::UnexpectedAsyncStackAction(Some(AsyncStackAction::Resume))
         );
+    }
+
+    #[tokio::test]
+    async fn trampoline_and_resume() {
+        type Stack = AsyncStack<usize>;
+
+        let mut stack = Stack::new(TEST_CAPACITY);
+
+        extern "C" fn continue_(stack: &mut Stack, value: usize) -> cps::Result {
+            stack.resolve(value);
+
+            cps::Result::new()
+        }
+
+        let waker = create_waker();
+        let mut context = Context::from_waker(&waker);
+
+        stack.run_with_context(&mut context, |stack| {
+            stack.trampoline(continue_, 42).unwrap();
+        });
+
+        let (step, continue_) = stack.resume::<()>().unwrap();
+
+        stack.run_with_context(&mut context, |stack| {
+            step(stack, continue_);
+        });
+
+        assert_eq!(stack.resolved_value(), Some(42));
     }
 }

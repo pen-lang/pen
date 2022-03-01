@@ -3,6 +3,7 @@ use core::fmt::{self, Display, Formatter};
 
 #[derive(Debug, PartialEq)]
 pub enum CpsError {
+    MissingContext,
     UnexpectedAsyncStackAction(Option<AsyncStackAction>),
 }
 
@@ -11,6 +12,9 @@ pub enum CpsError {
 impl Display for CpsError {
     fn fmt(&self, formatter: &mut Formatter) -> Result<(), fmt::Error> {
         match self {
+            Self::MissingContext => {
+                write!(formatter, "missing context")
+            }
             Self::UnexpectedAsyncStackAction(expected) => {
                 write!(formatter, "invalid stack action (expected: {:?})", expected)
             }
