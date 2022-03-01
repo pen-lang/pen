@@ -28,7 +28,7 @@ pub fn validate(module: &Module, context: &CompileContext) -> Result<(), Compile
                     context.types(),
                 )?
             {
-                return Err(CompileError::MissingTryOperation(
+                return Err(CompileError::UnusedErrorValue(
                     expression.position().clone(),
                 ));
             }
@@ -162,7 +162,7 @@ mod tests {
                         false,
                     )]),
             ),
-            Err(CompileError::MissingTryOperation(Position::fake())),
+            Err(CompileError::UnusedErrorValue(Position::fake())),
         );
     }
 
@@ -195,7 +195,7 @@ mod tests {
                         false,
                     )]),
             ),
-            Err(CompileError::MissingTryOperation(Position::fake())),
+            Err(CompileError::UnusedErrorValue(Position::fake())),
         );
     }
 }

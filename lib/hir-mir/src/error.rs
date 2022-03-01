@@ -20,7 +20,7 @@ pub enum CompileError {
     MainFunctionNotFound(Position),
     MirTypeCheck(mir::analysis::TypeCheckError),
     MissingElseBlock(Position),
-    MissingTryOperation(Position),
+    UnusedErrorValue(Position),
     NewContextFunctionNotFound(Position),
     RecordFieldPrivate(Position),
     RecordFieldUnknown(Position),
@@ -108,8 +108,8 @@ impl Display for CompileError {
                     position
                 )
             }
-            Self::MissingTryOperation(position) => {
-                write!(formatter, "missing try operation\n{}", position)
+            Self::UnusedErrorValue(position) => {
+                write!(formatter, "unused error value\n{}", position)
             }
             Self::NewContextFunctionNotFound(position) => {
                 write!(formatter, "new context function not found\n{}", position)
