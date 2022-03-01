@@ -1,6 +1,9 @@
 use crate::{context::CompileContext, CompileError};
 use hir::{
-    analysis::{ir::expression_visitor, types::type_subsumption_checker},
+    analysis::{
+        ir::expression_visitor,
+        types::{type_canonicalizer, type_subsumption_checker},
+    },
     ir::*,
     types,
 };
@@ -14,6 +17,7 @@ pub fn validate(module: &Module, context: &CompileContext) -> Result<(), Compile
                 .ok_or_else(|| CompileError::TypeNotInferred(expression.position().clone()))?;
 
             if let_.name().is_none()
+                && !type_canonicalizer::canonicalize(type_, context.types())?.is_any()
                 && type_subsumption_checker::check(
                     &types::Reference::new(
                         &context.configuration()?.error_type.error_type_name,
