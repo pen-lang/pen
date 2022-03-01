@@ -15,7 +15,7 @@ Feature: List as stream
     import Os'File
 
     Hello = \(ctx Context) none {
-      File'Write(ctx, File'StdOut(), "hello")
+      _ = File'Write(ctx, File'StdOut(), "hello")
 
       none
     }
