@@ -109,6 +109,33 @@ mod tests {
     }
 
     #[test]
+    fn validate_any_type() {
+        assert_eq!(
+            validate_module(
+                &Module::empty()
+                    .set_type_definitions(vec![ERROR_TYPE_DEFINITION.clone()])
+                    .set_definitions(vec![Definition::fake(
+                        "f",
+                        Lambda::new(
+                            vec![],
+                            types::None::new(Position::fake()),
+                            Let::new(
+                                None,
+                                Some(types::Any::new(Position::fake()).into()),
+                                None::new(Position::fake()),
+                                None::new(Position::fake()),
+                                Position::fake(),
+                            ),
+                            Position::fake(),
+                        ),
+                        false,
+                    )]),
+            ),
+            Ok(()),
+        );
+    }
+
+    #[test]
     fn fail_to_validate_error_type() {
         assert_eq!(
             validate_module(
