@@ -75,6 +75,10 @@ impl Type {
     pub fn is_union(&self) -> bool {
         matches!(self, Type::Union(_))
     }
+
+    pub fn is_variant(&self) -> bool {
+        self.is_any() || self.is_union()
+    }
 }
 
 impl From<Any> for Type {

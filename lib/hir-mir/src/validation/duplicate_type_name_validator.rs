@@ -1,4 +1,4 @@
-use super::CompileError;
+use crate::error::CompileError;
 use fnv::FnvHashMap;
 use hir::ir::*;
 use position::Position;

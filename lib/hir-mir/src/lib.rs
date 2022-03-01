@@ -2,8 +2,6 @@ mod compile_configuration;
 mod concurrency_configuration;
 mod context;
 mod downcast_compiler;
-mod duplicate_function_name_validator;
-mod duplicate_type_name_validator;
 mod environment_creator;
 mod error;
 mod error_type_configuration;
@@ -14,18 +12,17 @@ mod main_function_compiler;
 mod main_module_configuration;
 mod module_compiler;
 mod module_interface_compiler;
-mod record_field_validator;
 mod spawn_function_declaration_compiler;
 mod string_type_configuration;
 mod test_function_compiler;
 mod test_module_configuration;
 mod transformation;
-mod try_operation_validator;
 mod type_checker;
 mod type_coercer;
 mod type_compiler;
 mod type_extractor;
 mod type_inferrer;
+mod validation;
 
 use self::{context::CompileContext, transformation::record_equal_function_transformer};
 pub use compile_configuration::CompileConfiguration;
@@ -37,6 +34,10 @@ pub use list_type_configuration::ListTypeConfiguration;
 pub use main_module_configuration::*;
 pub use string_type_configuration::StringTypeConfiguration;
 pub use test_module_configuration::TestModuleConfiguration;
+use validation::{
+    duplicate_function_name_validator, duplicate_type_name_validator, ffi_variant_type_validator,
+    record_field_validator, try_operation_validator,
+};
 
 pub fn compile_main(
     module: &Module,
@@ -101,6 +102,7 @@ fn compile_module(
     type_checker::check_types(&module, context)?;
     try_operation_validator::validate(&module, context)?;
     record_field_validator::validate(&module, context)?;
+    ffi_variant_type_validator::validate(&module, context)?;
     let module = type_coercer::coerce_types(&module, context)?;
     type_checker::check_types(&module, context)?;
 
