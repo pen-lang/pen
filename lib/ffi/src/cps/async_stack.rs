@@ -80,6 +80,10 @@ impl<S> AsyncStack<S> {
         Ok(())
     }
 
+    // Trampoilne a continuation function call to call it from the near bottom
+    // of stack clearing the current stack frames.
+    // Without this due to the lack of tail call elimination in Rust, machine
+    // stacks can grow arbitrarily deep.
     pub fn trampoline<T>(
         &mut self,
         continuation: ContinuationFunction<T, S>,
