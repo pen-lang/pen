@@ -93,9 +93,9 @@ impl<V> AsyncStack<V> {
         self.validate_action(AsyncStackAction::Suspend)?;
         self.push_next_actions(&[AsyncStackAction::Resume, AsyncStackAction::Suspend]);
 
-        fn step<T, S>(
-            stack: &mut AsyncStack<S>,
-            continue_: ContinuationFunction<T, S>,
+        fn step<T, V>(
+            stack: &mut AsyncStack<V>,
+            continue_: ContinuationFunction<T, V>,
         ) -> cps::Result {
             let value = stack.pop::<T>();
 
