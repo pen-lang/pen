@@ -109,7 +109,7 @@ impl<V> AsyncStack<V> {
         self.stack.push(continuation);
 
         self.context()
-            .ok_or_else(|| CpsError::MissingContext)?
+            .ok_or(CpsError::MissingContext)?
             .waker()
             .wake_by_ref();
 
