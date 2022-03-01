@@ -168,9 +168,9 @@ impl<V> DerefMut for AsyncStack<V> {
 // - Stack should implement Send + Sync. Currently, we don't as we don't need
 //   to.
 // - Option<*mut Context> is cleared to None on every non-preemptive run.
-unsafe impl<S: Send> Send for AsyncStack<S> {}
+unsafe impl<V: Send> Send for AsyncStack<V> {}
 
-unsafe impl<S: Sync> Sync for AsyncStack<S> {}
+unsafe impl<V: Sync> Sync for AsyncStack<V> {}
 
 #[cfg(test)]
 mod tests {
