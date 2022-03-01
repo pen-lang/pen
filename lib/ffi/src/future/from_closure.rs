@@ -5,16 +5,16 @@ use crate::{
 use core::{intrinsics::transmute, task::Poll};
 use futures::future::poll_fn;
 
-type InitialStepFunction<T, S> = extern "C" fn(
+type InitialStepFunction<T, V> = extern "C" fn(
     stack: &mut AsyncStack<T>,
     continuation: ContinuationFunction<T, T>,
-    closure: Arc<Closure<S>>,
+    closure: Arc<Closure<V>>,
 ) -> cps::Result;
 
 const INITIAL_STACK_CAPACITY: usize = 64;
 
-pub async fn from_closure<T, S>(closure: Arc<Closure<T>>) -> S {
-    let mut trampoline: Option<(StepFunction<(), S>, ContinuationFunction<(), S>)> = None;
+pub async fn from_closure<T, V>(closure: Arc<Closure<T>>) -> V {
+    let mut trampoline: Option<(StepFunction<(), V>, ContinuationFunction<(), V>)> = None;
     let mut stack = AsyncStack::new(INITIAL_STACK_CAPACITY);
 
     poll_fn(move |context| {
@@ -24,7 +24,7 @@ pub async fn from_closure<T, S>(closure: Arc<Closure<T>>) -> S {
             } else {
                 unsafe {
                     let entry_function =
-                        transmute::<_, InitialStepFunction<S, T>>(closure.entry_function());
+                        transmute::<_, InitialStepFunction<V, T>>(closure.entry_function());
                     entry_function(stack, resolve, closure.clone());
                 }
             }
