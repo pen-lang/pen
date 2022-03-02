@@ -175,9 +175,9 @@ dependencies = [
 
 [[package]]
 name = "pen-ffi"
-version = "0.3.45"
+version = "0.3.47"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cb0c2a89a955cd3a22e49a3bb56f008fcf77821b9a02859d214c9b0757ba2b93"
+checksum = "2a3abec3ce466b67f27bb7e200b9575fbb925b29dc678cea10a19a578e8211fd"
 dependencies = [
  "futures",
  "pen-ffi-macro",
@@ -185,9 +185,9 @@ dependencies = [
 
 [[package]]
 name = "pen-ffi-macro"
-version = "0.1.24"
+version = "0.1.25"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4eb4eda7ee28b014696157a5302c7cb91582544d45479eb8edd67c4fdeab7d77"
+checksum = "31daea8e830ad260310ceefab549f35308e828dc889c74c27f58b1a5423cdc02"
 dependencies = [
  "convert_case",
  "quote",
@@ -262,9 +262,9 @@ dependencies = [
 
 [[package]]
 name = "redox_syscall"
-version = "0.2.10"
+version = "0.2.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8383f39639269cde97d255a32bdb68c047337295414940c68bdd30c2e13203ff"
+checksum = "8380fe0152551244f0747b1bf41737e0f8a74f97a14ccefd1148187271634f3c"
 dependencies = [
  "bitflags",
 ]

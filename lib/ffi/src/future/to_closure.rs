@@ -49,10 +49,13 @@ fn poll<O, F: Future<Output = O>>(
     mut future: Pin<Box<F>>,
 ) -> cps::Result {
     match future.as_mut().poll(stack.context().unwrap()) {
-        Poll::Ready(value) => continue_(stack, value),
+        Poll::Ready(value) => {
+            stack.trampoline(continue_, value).unwrap();
+        }
         Poll::Pending => {
             stack.suspend(resume::<O, F>, continue_, future).unwrap();
-            cps::Result::new()
         }
     }
+
+    cps::Result::new()
 }
