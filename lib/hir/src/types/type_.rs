@@ -35,6 +35,21 @@ impl Type {
         }
     }
 
+    pub fn set_position(self, position: Position) -> Type {
+        match self {
+            Self::Any(any) => any.set_position(position).into(),
+            Self::Boolean(boolean) => boolean.set_position(position).into(),
+            Self::Function(function) => function.set_position(position).into(),
+            Self::List(list) => list.set_position(position).into(),
+            Self::None(none) => none.set_position(position).into(),
+            Self::Number(number) => number.set_position(position).into(),
+            Self::Record(record) => record.set_position(position).into(),
+            Self::Reference(reference) => reference.set_position(position).into(),
+            Self::String(string) => string.set_position(position).into(),
+            Self::Union(union) => union.set_position(position).into(),
+        }
+    }
+
     pub fn into_function(self) -> Option<Function> {
         match self {
             Type::Function(function) => Some(function),

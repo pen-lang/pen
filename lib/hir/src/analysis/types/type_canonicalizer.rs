@@ -60,9 +60,9 @@ fn canonicalize_union(union: &Union, types: &FnvHashMap<String, Type>) -> Result
         .into_iter()
         .reduce(|one, other| {
             if one.is_any() {
-                one
+                one.set_position(union.position().clone())
             } else if other.is_any() {
-                other
+                other.set_position(union.position().clone())
             } else {
                 Union::new(one, other, union.position().clone()).into()
             }
