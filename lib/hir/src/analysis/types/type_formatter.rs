@@ -16,10 +16,10 @@ pub fn format(
             &function
                 .arguments()
                 .iter()
-                .map(|type_| format!("{}", type_))
-                .collect::<Vec<_>>()
+                .map(|type_| format(type_))
+                .collect::<Result<Vec<_>, _>>()?
                 .join(", "),
-            &function.result(),
+            format(function.result())?,
         ),
         Type::List(list) => format!("[{}]", format(list.element())?),
         Type::None(_) => "none".into(),
