@@ -13,7 +13,7 @@ main = \(ctx context) none {
     ],
   )
 
-  File'Write(
+  _ = File'Write(
     ctx.Os,
     File'StdOut(),
     String'Join(

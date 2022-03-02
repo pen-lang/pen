@@ -23,6 +23,7 @@ exclude = [
   "lib/prelude",
   "lib/os",
   "lib/os-sync",
+  "lib/test",
   "tmp",
 ]
 
