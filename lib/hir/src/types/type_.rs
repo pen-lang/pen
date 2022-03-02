@@ -35,7 +35,7 @@ impl Type {
         }
     }
 
-    pub fn set_position(self, position: Position) -> Type {
+    pub fn set_position(self, position: Position) -> Self {
         match self {
             Self::Any(any) => any.set_position(position).into(),
             Self::Boolean(boolean) => boolean.set_position(position).into(),
