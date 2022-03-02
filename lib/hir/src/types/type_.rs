@@ -2,8 +2,10 @@ use super::{
     any::Any, boolean::Boolean, byte_string::ByteString, function::Function, list::List,
     none::None, number::Number, record::Record, reference::Reference, union::Union,
 };
+use core::fmt;
 use position::Position;
 use serde::{Deserialize, Serialize};
+use std::fmt::{Display, Formatter};
 
 #[derive(Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub enum Type {
@@ -78,6 +80,23 @@ impl Type {
 
     pub fn is_variant(&self) -> bool {
         self.is_any() || self.is_union()
+    }
+}
+
+impl Display for Type {
+    fn fmt(&self, formatter: &mut Formatter) -> fmt::Result {
+        match self {
+            Self::Any(any) => write!(formatter, "{}", any),
+            Self::Boolean(boolean) => write!(formatter, "{}", boolean),
+            Self::Function(function) => write!(formatter, "{}", function),
+            Self::List(list) => write!(formatter, "{}", list),
+            Self::None(none) => write!(formatter, "{}", none),
+            Self::Number(number) => write!(formatter, "{}", number),
+            Self::Record(record) => write!(formatter, "{}", record),
+            Self::Reference(reference) => write!(formatter, "{}", reference),
+            Self::String(string) => write!(formatter, "{}", string),
+            Self::Union(union) => write!(formatter, "{}", union),
+        }
     }
 }
 

@@ -1,5 +1,7 @@
+use core::fmt;
 use position::Position;
 use serde::{Deserialize, Serialize};
+use std::fmt::{Display, Formatter};
 
 #[derive(Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Boolean {
@@ -13,5 +15,11 @@ impl Boolean {
 
     pub fn position(&self) -> &Position {
         &self.position
+    }
+}
+
+impl Display for Boolean {
+    fn fmt(&self, formatter: &mut Formatter) -> fmt::Result {
+        write!(formatter, "boolean")
     }
 }

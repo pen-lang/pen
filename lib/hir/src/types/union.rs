@@ -1,7 +1,11 @@
 use super::Type;
+use core::fmt;
 use position::Position;
 use serde::{Deserialize, Serialize};
-use std::sync::Arc;
+use std::{
+    fmt::{Display, Formatter},
+    sync::Arc,
+};
 
 #[derive(Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Union {
@@ -29,5 +33,11 @@ impl Union {
 
     pub fn position(&self) -> &Position {
         &self.position
+    }
+}
+
+impl Display for Union {
+    fn fmt(&self, formatter: &mut Formatter) -> fmt::Result {
+        write!(formatter, "{} | {}", &self.lhs, &self.rhs)
     }
 }
