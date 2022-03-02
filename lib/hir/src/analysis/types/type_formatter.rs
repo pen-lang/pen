@@ -16,7 +16,7 @@ pub fn format(
             &function
                 .arguments()
                 .iter()
-                .map(|type_| format(type_))
+                .map(format)
                 .collect::<Result<Vec<_>, _>>()?
                 .join(", "),
             format(function.result())?,
