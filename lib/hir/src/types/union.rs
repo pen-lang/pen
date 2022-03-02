@@ -30,4 +30,9 @@ impl Union {
     pub fn position(&self) -> &Position {
         &self.position
     }
+
+    pub fn set_position(mut self, position: Position) -> Self {
+        self.position = position;
+        self
+    }
 }
