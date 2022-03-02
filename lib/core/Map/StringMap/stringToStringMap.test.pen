@@ -89,7 +89,7 @@ TestMapMerge = \() none | error {
     map'Set(map'New(), "bar", "bar"),
   )
 
-  Assert'True(map'Get(m, "foo") == "foo")
+  Assert'True(map'Get(m, "foo") == "foo")?
   Assert'True(map'Get(m, "bar") == "bar")
 }
 

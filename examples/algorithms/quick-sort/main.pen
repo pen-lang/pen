@@ -9,7 +9,7 @@ total = \() number { 20 }
 max = \() number { 100 }
 
 main = \(ctx context) none {
-  printNumbers(
+  _ = printNumbers(
     ctx.Os,
     sort'Sort([number
       Number'Floor(Random'Number(ctx.Os) * max())
