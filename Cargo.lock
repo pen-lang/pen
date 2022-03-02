@@ -660,7 +660,7 @@ dependencies = [
 
 [[package]]
 name = "pen"
-version = "0.3.14"
+version = "0.3.15"
 dependencies = [
  "app",
  "clap",
