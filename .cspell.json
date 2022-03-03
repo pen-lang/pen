@@ -33,6 +33,7 @@
     "itertools",
     "koka",
     "lcov",
+    "libc",
     "malloc",
     "mdbook",
     "modifiability",
