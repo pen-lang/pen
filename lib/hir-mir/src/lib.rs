@@ -5,6 +5,7 @@ mod downcast_compiler;
 mod error;
 mod error_type_configuration;
 mod expression_compiler;
+mod ffi_variant_type_validator;
 mod generic_type_definition_compiler;
 mod list_type_configuration;
 mod main_function_compiler;
@@ -17,7 +18,6 @@ mod test_function_compiler;
 mod test_module_configuration;
 mod transformation;
 mod type_compiler;
-mod validation;
 
 use self::{context::CompileContext, transformation::record_equal_function_transformer};
 pub use compile_configuration::CompileConfiguration;
@@ -36,7 +36,6 @@ pub use list_type_configuration::ListTypeConfiguration;
 pub use main_module_configuration::*;
 pub use string_type_configuration::StringTypeConfiguration;
 pub use test_module_configuration::TestModuleConfiguration;
-use validation::ffi_variant_type_validator;
 
 pub fn compile_main(
     module: &Module,
