@@ -2,7 +2,6 @@ mod compile_configuration;
 mod concurrency_configuration;
 mod context;
 mod downcast_compiler;
-mod environment_creator;
 mod error;
 mod error_type_configuration;
 mod expression_compiler;

@@ -1,14 +1,17 @@
-use super::{context::CompileContext, environment_creator, CompileError};
+use super::{context::CompileContext, CompileError};
 use fnv::FnvHashMap;
 use hir::{
-    analysis::{record_field_resolver, type_canonicalizer, type_equality_checker, type_extractor},
+    analysis::{
+        module_environment_creator, record_field_resolver, type_canonicalizer,
+        type_equality_checker, type_extractor,
+    },
     ir::*,
     types::{self, Type},
 };
 use position::Position;
 
 pub fn coerce_types(module: &Module, context: &CompileContext) -> Result<Module, CompileError> {
-    let variables = environment_creator::create_from_module(module);
+    let variables = module_environment_creator::create(module);
 
     Ok(Module::new(
         module.type_definitions().to_vec(),

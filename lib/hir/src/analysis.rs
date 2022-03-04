@@ -2,7 +2,7 @@ mod context;
 pub mod definition_qualifier;
 mod error;
 pub mod expression_visitor;
-mod module_environment_creator;
+pub mod module_environment_creator;
 pub mod record_field_resolver;
 pub mod type_canonicalizer;
 pub mod type_checker;
