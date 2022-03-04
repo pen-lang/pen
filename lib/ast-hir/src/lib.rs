@@ -9,7 +9,7 @@ mod prelude_module_modifier;
 use error::CompileError;
 use fnv::FnvHashMap;
 use hir::{
-    analysis::ir::{definition_qualifier, type_qualifier},
+    analysis::{definition_qualifier, type_qualifier},
     ir,
 };
 use imported_module::ImportedModule;

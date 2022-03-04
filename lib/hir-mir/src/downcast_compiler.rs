@@ -1,6 +1,6 @@
 use crate::{context::CompileContext, CompileError};
 use hir::{
-    analysis::types::{type_canonicalizer, type_equality_checker, type_subsumption_checker},
+    analysis::{type_canonicalizer, type_equality_checker, type_subsumption_checker},
     ir::*,
     types::Type,
 };

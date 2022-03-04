@@ -13,7 +13,7 @@ use crate::{
 };
 use fnv::FnvHashMap;
 use hir::{
-    analysis::types::{
+    analysis::{
         record_field_resolver, type_canonicalizer, type_equality_checker,
         union_type_member_calculator,
     },

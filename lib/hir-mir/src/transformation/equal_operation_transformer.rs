@@ -1,7 +1,7 @@
 use super::super::error::CompileError;
 use crate::{context::CompileContext, transformation::record_type_information_compiler};
 use hir::{
-    analysis::types::{
+    analysis::{
         type_canonicalizer, type_comparability_checker, type_equality_checker, type_resolver,
         union_type_member_calculator,
     },

@@ -1,7 +1,7 @@
 use super::super::error::CompileError;
 use crate::{context::CompileContext, downcast_compiler};
 use hir::{
-    analysis::types::type_equality_checker,
+    analysis::type_equality_checker,
     ir::*,
     types::{self, Type},
 };

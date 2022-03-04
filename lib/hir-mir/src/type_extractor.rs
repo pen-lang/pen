@@ -1,7 +1,7 @@
 use super::{context::CompileContext, CompileError};
 use fnv::FnvHashMap;
 use hir::{
-    analysis::types::{record_field_resolver, type_canonicalizer, union_type_creator},
+    analysis::{record_field_resolver, type_canonicalizer, union_type_creator},
     ir::*,
     types::{self, Type},
 };

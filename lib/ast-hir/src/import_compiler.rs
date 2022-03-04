@@ -2,7 +2,7 @@ use super::name_qualifier;
 use crate::imported_module::ImportedModule;
 use fnv::FnvHashMap;
 use hir::{
-    analysis::ir::{type_transformer, variable_renamer},
+    analysis::{type_transformer, variable_renamer},
     ir,
     types::{self, Type},
 };

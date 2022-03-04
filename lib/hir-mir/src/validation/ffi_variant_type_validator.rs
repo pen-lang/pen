@@ -1,5 +1,5 @@
 use crate::{context::CompileContext, error::CompileError};
-use hir::{analysis::types::type_canonicalizer, ir::*, types::Type};
+use hir::{analysis::type_canonicalizer, ir::*, types::Type};
 
 // Validate variant types in FFI because the current backend cannot handle them
 // properly for some targets (e.g. i386.)

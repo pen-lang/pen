@@ -1,7 +1,7 @@
 use crate::{context::CompileContext, CompileError};
 use fnv::FnvHashSet;
 use hir::{
-    analysis::{ir::expression_visitor, types::type_canonicalizer},
+    analysis::{expression_visitor, type_canonicalizer},
     ir::*,
 };
 

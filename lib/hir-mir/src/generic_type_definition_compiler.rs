@@ -2,8 +2,8 @@ use super::{context::CompileContext, type_compiler, CompileError};
 use fnv::{FnvHashMap, FnvHashSet};
 use hir::{
     analysis::{
-        ir::expression_visitor,
-        types::{union_type_member_calculator, TypeError},
+        expression_visitor,
+        union_type_member_calculator, TypeError,
     },
     ir::*,
     types::Type,

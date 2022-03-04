@@ -1,7 +1,7 @@
 use super::{context::CompileContext, environment_creator, type_extractor, CompileError};
 use fnv::{FnvHashMap, FnvHashSet};
 use hir::{
-    analysis::types::{
+    analysis::{
         record_field_resolver, type_canonicalizer, type_equality_checker, type_subsumption_checker,
         union_type_creator,
     },

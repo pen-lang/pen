@@ -1,5 +1,5 @@
 use super::error::TypeError;
-use crate::{analysis::ir::type_transformer, ir::*, types::Type};
+use crate::{analysis::type_transformer, ir::*, types::Type};
 use fnv::FnvHashSet;
 use std::cell::RefCell;
 

@@ -1,6 +1,6 @@
 use crate::{context::CompileContext, error::CompileError};
 use hir::{
-    analysis::types::type_subsumption_checker,
+    analysis::type_subsumption_checker,
     ir::*,
     types::{self, Type},
 };
