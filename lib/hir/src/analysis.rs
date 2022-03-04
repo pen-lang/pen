@@ -30,5 +30,28 @@ pub mod unused_error_validator;
 pub mod variable_renamer;
 pub mod variable_transformer;
 
+use crate::ir::Module;
 pub use context::AnalysisContext;
 pub use error::AnalysisError;
+
+pub fn analyze(context: &AnalysisContext, module: &Module) -> Result<Module, AnalysisError> {
+    duplicate_function_name_validator::validate(module)?;
+    duplicate_type_name_validator::validate(module)?;
+    type_existence_validator::validate(
+        module,
+        &context.types().keys().cloned().collect(),
+        &context.records().keys().cloned().collect(),
+    )?;
+
+    let module = type_inferrer::infer(context, &module)?;
+    type_checker::check_types(context, &module)?;
+
+    try_operation_validator::validate(context, &module)?;
+    record_field_validator::validate(context, &module)?;
+    unused_error_validator::validate(context, &module)?;
+
+    let module = type_coercer::coerce_types(context, &module)?;
+    type_checker::check_types(context, &module)?;
+
+    Ok(module)
+}

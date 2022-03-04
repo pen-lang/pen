@@ -95,17 +95,18 @@ fn compile_module(
         &context.records().keys().cloned().collect(),
     )?;
 
-    let module = record_equal_function_transformer::transform(module, context)?;
     let module = type_inferrer::infer(context.analysis(), &module)?;
     type_checker::check_types(context.analysis(), &module)?;
 
     try_operation_validator::validate(context.analysis(), &module)?;
     record_field_validator::validate(context.analysis(), &module)?;
     unused_error_validator::validate(context.analysis(), &module)?;
-    ffi_variant_type_validator::validate(&module, context)?;
 
     let module = type_coercer::coerce_types(context.analysis(), &module)?;
     type_checker::check_types(context.analysis(), &module)?;
+
+    let module = record_equal_function_transformer::transform(&module, context)?;
+    ffi_variant_type_validator::validate(&module, context)?;
 
     Ok((
         {
