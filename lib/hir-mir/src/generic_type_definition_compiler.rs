@@ -1,10 +1,7 @@
 use super::{context::CompileContext, type_compiler, CompileError};
 use fnv::{FnvHashMap, FnvHashSet};
 use hir::{
-    analysis::{
-        expression_visitor,
-        union_type_member_calculator, TypeError,
-    },
+    analysis::{expression_visitor, union_type_member_calculator, AnalysisError},
     ir::*,
     types::Type,
 };
@@ -49,7 +46,7 @@ fn compile_type_definition(
 fn collect_types(
     module: &Module,
     types: &FnvHashMap<String, Type>,
-) -> Result<FnvHashSet<Type>, TypeError> {
+) -> Result<FnvHashSet<Type>, AnalysisError> {
     let mut lower_types = FnvHashSet::default();
 
     expression_visitor::visit(module, |expression| match expression {

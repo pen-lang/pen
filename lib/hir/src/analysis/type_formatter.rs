@@ -1,11 +1,11 @@
-use super::TypeError;
+use super::AnalysisError;
 use crate::types::Type;
 use fnv::FnvHashMap;
 
 pub fn format(
     type_: &Type,
     original_names: &FnvHashMap<String, String>,
-) -> Result<String, TypeError> {
+) -> Result<String, AnalysisError> {
     let format = |type_| format(type_, original_names);
 
     Ok(match type_ {
@@ -26,11 +26,11 @@ pub fn format(
         Type::Number(_) => "number".into(),
         Type::Record(record) => original_names
             .get(record.name())
-            .ok_or_else(|| TypeError::RecordNotFound(record.clone()))?
+            .ok_or_else(|| AnalysisError::RecordNotFound(record.clone()))?
             .clone(),
         Type::Reference(reference) => original_names
             .get(reference.name())
-            .ok_or_else(|| TypeError::TypeNotFound(reference.clone()))?
+            .ok_or_else(|| AnalysisError::TypeNotFound(reference.clone()))?
             .clone(),
         Type::String(_) => "string".into(),
         Type::Union(union) => format!("{} | {}", format(union.lhs())?, format(union.rhs())?),

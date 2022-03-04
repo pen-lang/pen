@@ -1,4 +1,4 @@
-use hir::{analysis::TypeError, ir::*, types};
+use hir::{analysis::AnalysisError, ir::*, types};
 use position::Position;
 use std::{
     error::Error,
@@ -29,7 +29,7 @@ pub enum CompileError {
     RecordNotFound(types::Record),
     SpawnOperationArguments(Position),
     TryOperationInList(Position),
-    TypeAnalysis(TypeError),
+    TypeAnalysis(AnalysisError),
     TypeNotFound(types::Reference),
     TypeNotInferred(Position),
     TypesNotComparable(Position),
@@ -205,8 +205,8 @@ impl From<mir::analysis::TypeCheckError> for CompileError {
     }
 }
 
-impl From<TypeError> for CompileError {
-    fn from(error: TypeError) -> Self {
+impl From<AnalysisError> for CompileError {
+    fn from(error: AnalysisError) -> Self {
         Self::TypeAnalysis(error)
     }
 }

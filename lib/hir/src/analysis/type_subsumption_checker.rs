@@ -1,4 +1,4 @@
-use super::{type_canonicalizer, type_equality_checker, TypeError};
+use super::{type_canonicalizer, type_equality_checker, AnalysisError};
 use crate::types::Type;
 use fnv::FnvHashMap;
 
@@ -6,7 +6,7 @@ pub fn check(
     lower: &Type,
     upper: &Type,
     types: &FnvHashMap<String, Type>,
-) -> Result<bool, TypeError> {
+) -> Result<bool, AnalysisError> {
     check_canonical(
         &type_canonicalizer::canonicalize(lower, types)?,
         &type_canonicalizer::canonicalize(upper, types)?,
@@ -18,7 +18,7 @@ fn check_canonical(
     lower: &Type,
     upper: &Type,
     types: &FnvHashMap<String, Type>,
-) -> Result<bool, TypeError> {
+) -> Result<bool, AnalysisError> {
     let check = |lower, upper| check_canonical(lower, upper, types);
 
     Ok(match (&lower, &upper) {

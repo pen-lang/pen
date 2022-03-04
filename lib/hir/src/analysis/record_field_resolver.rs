@@ -1,4 +1,4 @@
-use super::{type_canonicalizer, TypeError};
+use super::{type_canonicalizer, AnalysisError};
 use crate::types::*;
 use fnv::FnvHashMap;
 use position::Position;
@@ -8,11 +8,11 @@ pub fn resolve<'a>(
     position: &Position,
     types: &FnvHashMap<String, Type>,
     records: &'a FnvHashMap<String, Vec<RecordField>>,
-) -> Result<&'a [RecordField], TypeError> {
+) -> Result<&'a [RecordField], AnalysisError> {
     let record = type_canonicalizer::canonicalize_record(type_, types)?
-        .ok_or_else(|| TypeError::RecordExpected(position.clone()))?;
+        .ok_or_else(|| AnalysisError::RecordExpected(position.clone()))?;
 
     Ok(records
         .get(record.name())
-        .ok_or_else(|| TypeError::RecordNotFound(record.clone()))?)
+        .ok_or_else(|| AnalysisError::RecordNotFound(record.clone()))?)
 }

@@ -1,4 +1,4 @@
-use super::{error::TypeError, type_canonicalizer};
+use super::{error::AnalysisError, type_canonicalizer};
 use crate::types::Type;
 use fnv::FnvHashMap;
 use std::{
@@ -6,7 +6,7 @@ use std::{
     hash::{Hash, Hasher},
 };
 
-pub fn calculate(type_: &Type, types: &FnvHashMap<String, Type>) -> Result<String, TypeError> {
+pub fn calculate(type_: &Type, types: &FnvHashMap<String, Type>) -> Result<String, AnalysisError> {
     let mut hasher = DefaultHasher::new();
 
     calculate_canonical_string(type_, types)?.hash(&mut hasher);
@@ -17,11 +17,14 @@ pub fn calculate(type_: &Type, types: &FnvHashMap<String, Type>) -> Result<Strin
 fn calculate_canonical_string(
     type_: &Type,
     types: &FnvHashMap<String, Type>,
-) -> Result<String, TypeError> {
+) -> Result<String, AnalysisError> {
     calculate_string(&type_canonicalizer::canonicalize(type_, types)?, types)
 }
 
-fn calculate_string(type_: &Type, types: &FnvHashMap<String, Type>) -> Result<String, TypeError> {
+fn calculate_string(
+    type_: &Type,
+    types: &FnvHashMap<String, Type>,
+) -> Result<String, AnalysisError> {
     let calculate_string = |type_| calculate_string(type_, types);
 
     Ok(match type_ {

@@ -19,4 +19,4 @@ pub mod union_type_member_calculator;
 pub mod variable_renamer;
 pub mod variable_transformer;
 
-pub use error::TypeError;
+pub use error::AnalysisError;
