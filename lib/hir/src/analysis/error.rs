@@ -8,6 +8,8 @@ use std::{
 #[derive(Clone, Debug, PartialEq)]
 pub enum AnalysisError {
     AnyTypeBranch(Position),
+    DuplicateFunctionNames(Position, Position),
+    DuplicateTypeNames(Position, Position),
     ErrorTypeUndefined,
     FunctionExpected(Position),
     ListExpected(Position),
@@ -37,6 +39,12 @@ impl Display for AnalysisError {
                     "any type cannot be used for downcast\n{}",
                     position
                 )
+            }
+            Self::DuplicateFunctionNames(one, other) => {
+                write!(formatter, "duplicate function names\n{}\n{}", one, other)
+            }
+            Self::DuplicateTypeNames(one, other) => {
+                write!(formatter, "duplicate type names\n{}\n{}", one, other)
             }
             Self::ErrorTypeUndefined => {
                 write!(formatter, "error type undefined")

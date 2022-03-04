@@ -1,5 +1,7 @@
 mod context;
 pub mod definition_qualifier;
+pub mod duplicate_function_name_validator;
+pub mod duplicate_type_name_validator;
 mod error;
 pub mod expression_visitor;
 pub mod module_environment_creator;

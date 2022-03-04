@@ -10,8 +10,6 @@ pub enum CompileError {
     Analysis(AnalysisError),
     AnyEqualOperation(Position),
     CompileConfigurationNotProvided,
-    DuplicateFunctionNames(Position, Position),
-    DuplicateTypeNames(Position, Position),
     FunctionEqualOperation(Position),
     FunctionExpected(Position),
     InvalidRecordEqualOperation(Position),
@@ -40,12 +38,6 @@ impl Display for CompileError {
             }
             Self::CompileConfigurationNotProvided => {
                 write!(formatter, "compile configuration not provided")
-            }
-            Self::DuplicateFunctionNames(one, other) => {
-                write!(formatter, "duplicate function names\n{}\n{}", one, other)
-            }
-            Self::DuplicateTypeNames(one, other) => {
-                write!(formatter, "duplicate type names\n{}\n{}", one, other)
             }
             Self::FunctionEqualOperation(position) => {
                 write!(
