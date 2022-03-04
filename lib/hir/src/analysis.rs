@@ -5,6 +5,7 @@ mod error;
 pub mod expression_visitor;
 pub mod record_field_resolver;
 pub mod type_canonicalizer;
+pub mod type_checker;
 pub mod type_collector;
 pub mod type_comparability_checker;
 pub mod type_difference_calculator;

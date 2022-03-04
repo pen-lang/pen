@@ -1,6 +1,8 @@
 use crate::{context::CompileContext, CompileError};
 use hir::{
-    analysis::{type_canonicalizer, type_equality_checker, type_subsumption_checker},
+    analysis::{
+        type_canonicalizer, type_equality_checker, type_subsumption_checker, AnalysisError,
+    },
     ir::*,
     types::Type,
 };
@@ -17,14 +19,11 @@ pub fn compile(
     let from = type_canonicalizer::canonicalize(from, context.types())?;
 
     if !from.is_variant() {
-        return Err(CompileError::VariantTypeExpected(
-            expression.position().clone(),
-        ));
+        return Err(AnalysisError::VariantExpected(expression.position().clone()).into());
     } else if !type_subsumption_checker::check(to, &from, context.types())? {
-        return Err(CompileError::TypesNotMatched(
-            to.position().clone(),
-            from.position().clone(),
-        ));
+        return Err(
+            AnalysisError::TypesNotMatched(to.position().clone(), from.position().clone()).into(),
+        );
     }
 
     Ok(
@@ -140,10 +139,7 @@ mod tests {
                 &types::Any::new(Position::fake()).into(),
                 &Variable::new("x", Position::fake()).into(),
             ),
-            Err(CompileError::TypesNotMatched(
-                Position::fake(),
-                Position::fake()
-            ))
+            Err(AnalysisError::TypesNotMatched(Position::fake(), Position::fake()).into())
         );
     }
 
@@ -155,7 +151,7 @@ mod tests {
                 &types::None::new(Position::fake()).into(),
                 &None::new(Position::fake()).into(),
             ),
-            Err(CompileError::VariantTypeExpected(Position::fake()))
+            Err(AnalysisError::VariantExpected(Position::fake()).into())
         );
     }
 }

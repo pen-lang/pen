@@ -1,6 +1,5 @@
-use super::{context::CompileContext, environment_creator, CompileError};
-use fnv::{FnvHashMap, FnvHashSet};
-use hir::{
+use super::{context::AnalysisContext, environment_creator, AnalysisError};
+use crate::{
     analysis::{
         record_field_resolver, type_canonicalizer, type_equality_checker, type_extractor,
         type_subsumption_checker, union_type_creator,
@@ -8,24 +7,26 @@ use hir::{
     ir::*,
     types::{self, Type},
 };
+use fnv::{FnvHashMap, FnvHashSet};
 
-pub fn check_types(module: &Module, context: &CompileContext) -> Result<(), CompileError> {
+pub fn check_types(context: &AnalysisContext, module: &Module) -> Result<(), AnalysisError> {
     let variables = environment_creator::create_from_module(module);
 
     for definition in module.definitions() {
-        check_lambda(definition.lambda(), &variables, context)?;
+        check_lambda(context, definition.lambda(), &variables)?;
     }
 
     Ok(())
 }
 
 fn check_lambda(
+    context: &AnalysisContext,
     lambda: &Lambda,
     variables: &FnvHashMap<String, Type>,
-    context: &CompileContext,
-) -> Result<types::Function, CompileError> {
+) -> Result<types::Function, AnalysisError> {
     check_subsumption(
         &check_expression(
+            context,
             lambda.body(),
             &variables
                 .clone()
@@ -37,7 +38,6 @@ fn check_lambda(
                         .map(|argument| (argument.name().into(), argument.type_().clone())),
                 )
                 .collect(),
-            context,
         )?,
         lambda.result_type(),
         context.types(),
@@ -47,12 +47,12 @@ fn check_lambda(
 }
 
 fn check_expression(
+    context: &AnalysisContext,
     expression: &Expression,
     variables: &FnvHashMap<String, Type>,
-    context: &CompileContext,
-) -> Result<Type, CompileError> {
+) -> Result<Type, AnalysisError> {
     let check_expression =
-        |expression, variables: &_| check_expression(expression, variables, context);
+        |expression, variables: &_| check_expression(context, expression, variables);
     let check_subsumption = |lower: &_, upper| check_subsumption(lower, upper, context.types());
 
     Ok(match expression {
@@ -60,16 +60,16 @@ fn check_expression(
         Expression::Call(call) => {
             let type_ = call
                 .function_type()
-                .ok_or_else(|| CompileError::TypeNotInferred(call.position().clone()))?;
+                .ok_or_else(|| AnalysisError::TypeNotInferred(call.position().clone()))?;
             let function_type = type_canonicalizer::canonicalize_function(type_, context.types())?
                 .ok_or_else(|| {
-                    CompileError::FunctionExpected(call.function().position().clone())
+                    AnalysisError::FunctionExpected(call.function().position().clone())
                 })?;
 
             check_subsumption(&check_expression(call.function(), variables)?, type_)?;
 
             if call.arguments().len() != function_type.arguments().len() {
-                return Err(CompileError::WrongArgumentCount(call.position().clone()));
+                return Err(AnalysisError::WrongArgumentCount(call.position().clone()));
             }
 
             for (argument, type_) in call.arguments().iter().zip(function_type.arguments()) {
@@ -87,13 +87,13 @@ fn check_expression(
             check_expression(if_.then(), variables)?;
             check_expression(if_.else_(), variables)?;
 
-            type_extractor::extract_from_expression(context.analysis(), expression, variables)?
+            type_extractor::extract_from_expression(context, expression, variables)?
         }
         Expression::IfList(if_) => {
             let list_type = types::List::new(
                 if_.type_()
                     .ok_or_else(|| {
-                        CompileError::TypeNotInferred(if_.argument().position().clone())
+                        AnalysisError::TypeNotInferred(if_.argument().position().clone())
                     })?
                     .clone(),
                 if_.position().clone(),
@@ -125,7 +125,7 @@ fn check_expression(
             )?;
             check_expression(if_.else_(), variables)?;
 
-            type_extractor::extract_from_expression(context.analysis(), expression, variables)?
+            type_extractor::extract_from_expression(context, expression, variables)?
         }
         Expression::IfType(if_) => {
             let argument_type = type_canonicalizer::canonicalize(
@@ -134,7 +134,7 @@ fn check_expression(
             )?;
 
             if !argument_type.is_variant() {
-                return Err(CompileError::VariantTypeExpected(
+                return Err(AnalysisError::VariantExpected(
                     if_.argument().position().clone(),
                 ));
             }
@@ -152,7 +152,7 @@ fn check_expression(
                 )?;
 
                 if type_canonicalizer::canonicalize(branch.type_(), context.types())?.is_any() {
-                    return Err(CompileError::AnyTypeBranch(
+                    return Err(AnalysisError::AnyTypeBranch(
                         branch.type_().position().clone(),
                     ));
                 }
@@ -169,7 +169,7 @@ fn check_expression(
                             branch
                                 .type_()
                                 .ok_or_else(|| {
-                                    CompileError::TypeNotInferred(branch.position().clone())
+                                    AnalysisError::TypeNotInferred(branch.position().clone())
                                 })?
                                 .clone(),
                         )])
@@ -187,17 +187,17 @@ fn check_expression(
                 .unwrap(),
                 context.types(),
             )? {
-                return Err(CompileError::MissingElseBlock(if_.position().clone()));
+                return Err(AnalysisError::MissingElseBlock(if_.position().clone()));
             }
 
-            type_extractor::extract_from_expression(context.analysis(), expression, variables)?
+            type_extractor::extract_from_expression(context, expression, variables)?
         }
-        Expression::Lambda(lambda) => check_lambda(lambda, variables, context)?.into(),
+        Expression::Lambda(lambda) => check_lambda(context, lambda, variables)?.into(),
         Expression::Let(let_) => {
             check_subsumption(
                 &check_expression(let_.bound_expression(), variables)?,
                 let_.type_().ok_or_else(|| {
-                    CompileError::TypeNotInferred(let_.bound_expression().position().clone())
+                    AnalysisError::TypeNotInferred(let_.bound_expression().position().clone())
                 })?,
             )?;
 
@@ -211,7 +211,7 @@ fn check_expression(
                             name.into(),
                             let_.type_()
                                 .ok_or_else(|| {
-                                    CompileError::TypeNotInferred(let_.position().clone())
+                                    AnalysisError::TypeNotInferred(let_.position().clone())
                                 })?
                                 .clone(),
                         ))
@@ -231,7 +231,7 @@ fn check_expression(
                                 context.types(),
                             )?
                             .ok_or_else(|| {
-                                CompileError::ListExpected(expression.position().clone())
+                                AnalysisError::ListExpected(expression.position().clone())
                             })?
                             .element(),
                             list.type_(),
@@ -249,7 +249,7 @@ fn check_expression(
             let position = comprehension.position();
             let input_type = comprehension
                 .input_type()
-                .ok_or_else(|| CompileError::TypeNotInferred(position.clone()))?;
+                .ok_or_else(|| AnalysisError::TypeNotInferred(position.clone()))?;
 
             check_subsumption(
                 &check_expression(
@@ -276,7 +276,7 @@ fn check_expression(
         }
         Expression::None(none) => types::None::new(none.position().clone()).into(),
         Expression::Number(number) => types::Number::new(number.position().clone()).into(),
-        Expression::Operation(operation) => check_operation(operation, variables, context)?,
+        Expression::Operation(operation) => check_operation(context, operation, variables)?,
         Expression::RecordConstruction(construction) => {
             let field_types = record_field_resolver::resolve(
                 construction.type_(),
@@ -292,7 +292,7 @@ fn check_expression(
                         .iter()
                         .find(|field_type| field_type.name() == field.name())
                         .ok_or_else(|| {
-                            CompileError::RecordFieldUnknown(expression.position().clone())
+                            AnalysisError::UnknownRecordField(expression.position().clone())
                         })?
                         .type_(),
                 )?;
@@ -306,7 +306,7 @@ fn check_expression(
 
             for field_type in field_types {
                 if !field_names.contains(field_type.name()) {
-                    return Err(CompileError::RecordFieldMissing(
+                    return Err(AnalysisError::RecordFieldMissing(
                         construction.position().clone(),
                     ));
                 }
@@ -317,7 +317,7 @@ fn check_expression(
         Expression::RecordDeconstruction(deconstruction) => {
             let type_ = deconstruction
                 .type_()
-                .ok_or_else(|| CompileError::TypeNotInferred(deconstruction.position().clone()))?;
+                .ok_or_else(|| AnalysisError::TypeNotInferred(deconstruction.position().clone()))?;
 
             check_subsumption(
                 &check_expression(deconstruction.record(), variables)?,
@@ -334,7 +334,9 @@ fn check_expression(
             field_types
                 .iter()
                 .find(|field_type| field_type.name() == deconstruction.field_name())
-                .ok_or_else(|| CompileError::RecordFieldUnknown(deconstruction.position().clone()))?
+                .ok_or_else(|| {
+                    AnalysisError::UnknownRecordField(deconstruction.position().clone())
+                })?
                 .type_()
                 .clone()
         }
@@ -358,7 +360,7 @@ fn check_expression(
                         .iter()
                         .find(|field_type| field_type.name() == field.name())
                         .ok_or_else(|| {
-                            CompileError::RecordFieldUnknown(expression.position().clone())
+                            AnalysisError::UnknownRecordField(expression.position().clone())
                         })?
                         .type_(),
                 )?;
@@ -370,11 +372,11 @@ fn check_expression(
         Expression::Thunk(thunk) => {
             let type_ = thunk
                 .type_()
-                .ok_or_else(|| CompileError::TypeNotInferred(thunk.position().clone()))?;
+                .ok_or_else(|| AnalysisError::TypeNotInferred(thunk.position().clone()))?;
 
             check_subsumption(&check_expression(thunk.expression(), variables)?, type_)?;
 
-            type_extractor::extract_from_expression(context.analysis(), expression, variables)?
+            type_extractor::extract_from_expression(context, expression, variables)?
         }
         Expression::TypeCoercion(coercion) => {
             check_subsumption(
@@ -392,17 +394,17 @@ fn check_expression(
         }
         Expression::Variable(variable) => variables
             .get(variable.name())
-            .ok_or_else(|| CompileError::VariableNotFound(variable.clone()))?
+            .ok_or_else(|| AnalysisError::VariableNotFound(variable.clone()))?
             .clone(),
     })
 }
 
 fn check_operation(
+    context: &AnalysisContext,
     operation: &Operation,
     variables: &FnvHashMap<String, Type>,
-    context: &CompileContext,
-) -> Result<Type, CompileError> {
-    let check_expression = |expression| check_expression(expression, variables, context);
+) -> Result<Type, AnalysisError> {
+    let check_expression = |expression| check_expression(context, expression, variables);
     let check_subsumption = |lower: &_, upper| check_subsumption(lower, upper, context.types());
 
     Ok(match operation {
@@ -416,12 +418,12 @@ fn check_operation(
         }
         Operation::Spawn(operation) => {
             if !operation.function().arguments().is_empty() {
-                return Err(CompileError::SpawnOperationArguments(
+                return Err(AnalysisError::SpawnOperationArguments(
                     operation.position().clone(),
                 ));
             }
 
-            check_lambda(operation.function(), variables, context)?.into()
+            check_lambda(context, operation.function(), variables)?.into()
         }
         Operation::Boolean(operation) => {
             let boolean_type = types::Boolean::new(operation.position().clone()).into();
@@ -434,26 +436,20 @@ fn check_operation(
         Operation::Equality(operation) => {
             let operand_type = operation
                 .type_()
-                .ok_or_else(|| CompileError::TypeNotInferred(operation.position().clone()))?;
+                .ok_or_else(|| AnalysisError::TypeNotInferred(operation.position().clone()))?;
 
             check_subsumption(&check_expression(operation.lhs())?, operand_type)?;
             check_subsumption(&check_expression(operation.rhs())?, operand_type)?;
 
-            let lhs_type = type_extractor::extract_from_expression(
-                context.analysis(),
-                operation.lhs(),
-                variables,
-            )?;
-            let rhs_type = type_extractor::extract_from_expression(
-                context.analysis(),
-                operation.rhs(),
-                variables,
-            )?;
+            let lhs_type =
+                type_extractor::extract_from_expression(context, operation.lhs(), variables)?;
+            let rhs_type =
+                type_extractor::extract_from_expression(context, operation.rhs(), variables)?;
 
             if !type_subsumption_checker::check(&lhs_type, &rhs_type, context.types())?
                 && !type_subsumption_checker::check(&rhs_type, &lhs_type, context.types())?
             {
-                return Err(CompileError::TypesNotComparable(
+                return Err(AnalysisError::TypesNotComparable(
                     operation.position().clone(),
                 ));
             }
@@ -479,20 +475,20 @@ fn check_operation(
             let position = operation.position();
             let success_type = operation
                 .type_()
-                .ok_or_else(|| CompileError::TypeNotInferred(position.clone()))?;
-            let error_type = types::Reference::new(
-                &context.configuration()?.error_type.error_type_name,
-                position.clone(),
-            )
-            .into();
+                .ok_or_else(|| AnalysisError::TypeNotInferred(position.clone()))?;
             let union_type = check_expression(operation.expression())?;
 
-            check_subsumption(&error_type, &union_type)?;
+            check_subsumption(context.error_type()?, &union_type)?;
             check_subsumption(success_type, &union_type)?;
 
             check_subsumption(
                 &union_type,
-                &types::Union::new(success_type.clone(), error_type, position.clone()).into(),
+                &types::Union::new(
+                    success_type.clone(),
+                    context.error_type()?.clone(),
+                    position.clone(),
+                )
+                .into(),
             )?;
 
             success_type.clone()
@@ -504,11 +500,11 @@ fn check_subsumption(
     lower: &Type,
     upper: &Type,
     types: &FnvHashMap<String, Type>,
-) -> Result<(), CompileError> {
+) -> Result<(), AnalysisError> {
     if type_subsumption_checker::check(lower, upper, types)? {
         Ok(())
     } else {
-        Err(CompileError::TypesNotMatched(
+        Err(AnalysisError::TypesNotMatched(
             lower.position().clone(),
             upper.position().clone(),
         ))
@@ -518,24 +514,30 @@ fn check_subsumption(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::compile_configuration::COMPILE_CONFIGURATION;
-    use hir::test::{DefinitionFake, ForeignDeclarationFake, ModuleFake, TypeDefinitionFake};
+    use crate::{
+        analysis::type_collector,
+        test::{DefinitionFake, ForeignDeclarationFake, ModuleFake, TypeDefinitionFake},
+    };
     use position::{test::PositionFake, Position};
 
-    fn check_module(module: &Module) -> Result<(), CompileError> {
+    fn check_module(module: &Module) -> Result<(), AnalysisError> {
         check_types(
+            &AnalysisContext::new(
+                type_collector::collect(module),
+                type_collector::collect_records(module),
+                Some(types::Record::new("error", Position::fake()).into()),
+            ),
             module,
-            &CompileContext::new(module, COMPILE_CONFIGURATION.clone().into()),
         )
     }
 
     #[test]
-    fn check_empty_module() -> Result<(), CompileError> {
+    fn check_empty_module() -> Result<(), AnalysisError> {
         check_module(&Module::empty())
     }
 
     #[test]
-    fn check_definition() -> Result<(), CompileError> {
+    fn check_definition() -> Result<(), AnalysisError> {
         check_module(&Module::empty().set_definitions(vec![Definition::fake(
             "x",
             Lambda::new(
@@ -576,7 +578,7 @@ mod tests {
                     )])
                     .set_foreign_declarations(vec![ForeignDeclaration::fake("y", function_type,)])
             ),
-            Err(CompileError::TypesNotMatched(
+            Err(AnalysisError::TypesNotMatched(
                 Position::fake(),
                 Position::fake()
             ))
@@ -606,7 +608,7 @@ mod tests {
         use super::*;
 
         #[test]
-        fn check_subsumption_of_function_result_type() -> Result<(), CompileError> {
+        fn check_subsumption_of_function_result_type() -> Result<(), AnalysisError> {
             check_module(&Module::empty().set_definitions(vec![Definition::fake(
                 "x",
                 Lambda::new(
@@ -636,7 +638,7 @@ mod tests {
                     ),
                     false,
                 )])),
-                Err(CompileError::TypesNotMatched(
+                Err(AnalysisError::TypesNotMatched(
                     Position::fake(),
                     Position::fake()
                 ))
@@ -687,7 +689,7 @@ mod tests {
                     ),
                     false,
                 )])),
-                Err(CompileError::TypesNotMatched(
+                Err(AnalysisError::TypesNotMatched(
                     Position::fake(),
                     Position::fake()
                 ))
@@ -760,7 +762,7 @@ mod tests {
                     ),
                     false,
                 )]),),
-                Err(CompileError::TypesNotMatched(
+                Err(AnalysisError::TypesNotMatched(
                     Position::fake(),
                     Position::fake()
                 ))
@@ -785,7 +787,7 @@ mod tests {
                     ),
                     false,
                 )]),),
-                Err(CompileError::TypesNotMatched(
+                Err(AnalysisError::TypesNotMatched(
                     Position::fake(),
                     Position::fake()
                 ))
@@ -1249,7 +1251,7 @@ mod tests {
                     ),
                     false,
                 )],)),
-                Err(CompileError::TypesNotMatched(
+                Err(AnalysisError::TypesNotMatched(
                     Position::fake(),
                     Position::fake()
                 ))
@@ -1331,7 +1333,7 @@ mod tests {
                     ),
                     false,
                 )])),
-                Err(CompileError::TypesNotComparable(Position::fake()))
+                Err(AnalysisError::TypesNotComparable(Position::fake()))
             );
         }
 
@@ -1509,7 +1511,7 @@ mod tests {
                             false,
                         )]),
                 ),
-                Err(CompileError::TypesNotMatched(
+                Err(AnalysisError::TypesNotMatched(
                     Position::fake(),
                     Position::fake()
                 ))
@@ -1547,7 +1549,7 @@ mod tests {
                             false,
                         )]),
                 ),
-                Err(CompileError::TypesNotMatched(
+                Err(AnalysisError::TypesNotMatched(
                     Position::fake(),
                     Position::fake()
                 ))
@@ -1608,7 +1610,7 @@ mod tests {
                     ),
                     false,
                 )])),
-                Err(CompileError::SpawnOperationArguments(Position::fake()))
+                Err(AnalysisError::SpawnOperationArguments(Position::fake()))
             );
         }
     }
@@ -1617,7 +1619,7 @@ mod tests {
         use super::*;
 
         #[test]
-        fn check_record() -> Result<(), CompileError> {
+        fn check_record() -> Result<(), AnalysisError> {
             let reference_type = types::Reference::new("r", Position::fake());
 
             check_module(
@@ -1685,7 +1687,7 @@ mod tests {
                             false
                         )])
                 ),
-                Err(CompileError::RecordFieldMissing(_))
+                Err(AnalysisError::RecordFieldMissing(_))
             ));
         }
 
@@ -1722,12 +1724,12 @@ mod tests {
                             false
                         )])
                 ),
-                Err(CompileError::RecordFieldUnknown(_))
+                Err(AnalysisError::UnknownRecordField(_))
             ));
         }
 
         #[test]
-        fn check_record_update() -> Result<(), CompileError> {
+        fn check_record_update() -> Result<(), AnalysisError> {
             let reference_type = types::Reference::new("r", Position::fake());
 
             check_module(
@@ -1765,7 +1767,7 @@ mod tests {
         }
 
         #[test]
-        fn check_record_deconstruction() -> Result<(), CompileError> {
+        fn check_record_deconstruction() -> Result<(), AnalysisError> {
             let reference_type = types::Reference::new("r", Position::fake());
 
             check_module(
@@ -1831,7 +1833,7 @@ mod tests {
                             false,
                         )])
                 ),
-                Err(CompileError::RecordFieldUnknown(Position::fake()))
+                Err(AnalysisError::UnknownRecordField(Position::fake()))
             );
         }
 
@@ -1858,7 +1860,7 @@ mod tests {
                             false,
                         )])
                 ),
-                Err(CompileError::TypesNotMatched(
+                Err(AnalysisError::TypesNotMatched(
                     Position::fake(),
                     Position::fake()
                 ))
@@ -1931,7 +1933,7 @@ mod tests {
                     ),
                     false,
                 )])),
-                Err(CompileError::TypesNotMatched(
+                Err(AnalysisError::TypesNotMatched(
                     Position::fake(),
                     Position::fake()
                 ))
@@ -1963,7 +1965,7 @@ mod tests {
                     ),
                     false,
                 )]),),
-                Err(CompileError::TypesNotMatched(
+                Err(AnalysisError::TypesNotMatched(
                     Position::fake(),
                     Position::fake(),
                 ))
@@ -2098,7 +2100,7 @@ mod tests {
                     ),
                     false,
                 )])),
-                Err(CompileError::TypesNotMatched(
+                Err(AnalysisError::TypesNotMatched(
                     Position::fake(),
                     Position::fake()
                 ))
@@ -2234,7 +2236,7 @@ mod tests {
                     ),
                     false,
                 )]),),
-                Err(CompileError::TypesNotMatched(
+                Err(AnalysisError::TypesNotMatched(
                     Position::fake(),
                     Position::fake()
                 ))
@@ -2264,7 +2266,7 @@ mod tests {
                     ),
                     false,
                 )]),),
-                Err(CompileError::TypesNotMatched(
+                Err(AnalysisError::TypesNotMatched(
                     Position::fake(),
                     Position::fake()
                 ))

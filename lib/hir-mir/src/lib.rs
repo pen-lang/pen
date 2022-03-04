@@ -17,7 +17,6 @@ mod string_type_configuration;
 mod test_function_compiler;
 mod test_module_configuration;
 mod transformation;
-mod type_checker;
 mod type_coercer;
 mod type_compiler;
 mod validation;
@@ -28,7 +27,7 @@ pub use concurrency_configuration::ConcurrencyConfiguration;
 pub use error::CompileError;
 pub use error_type_configuration::ErrorTypeConfiguration;
 use hir::{
-    analysis::{type_existence_validator, type_inferrer},
+    analysis::{type_checker, type_existence_validator, type_inferrer},
     ir::*,
 };
 pub use list_type_configuration::ListTypeConfiguration;
@@ -100,7 +99,7 @@ fn compile_module(
 
     let module = record_equal_function_transformer::transform(module, context)?;
     let module = type_inferrer::infer(context.analysis(), &module)?;
-    type_checker::check_types(&module, context)?;
+    type_checker::check_types(context.analysis(), &module)?;
 
     try_operation_validator::validate(&module, context)?;
     record_field_validator::validate(&module, context)?;
@@ -108,7 +107,7 @@ fn compile_module(
     unused_error_validator::validate(&module, context)?;
 
     let module = type_coercer::coerce_types(&module, context)?;
-    type_checker::check_types(&module, context)?;
+    type_checker::check_types(context.analysis(), &module)?;
 
     Ok((
         {
