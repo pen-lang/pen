@@ -1,28 +1,24 @@
-use crate::{context::CompileContext, error::CompileError};
-use hir::{
-    analysis::{type_subsumption_checker, AnalysisError},
-    ir::*,
-    types::{self, Type},
-};
+use super::{context::AnalysisContext, error::AnalysisError};
+use crate::{analysis::type_subsumption_checker, ir::*, types::Type};
 
-pub fn validate(module: &Module, context: &CompileContext) -> Result<(), CompileError> {
+pub fn validate(context: &AnalysisContext, module: &Module) -> Result<(), AnalysisError> {
     for definition in module.definitions() {
-        validate_lambda(definition.lambda(), context)?;
+        validate_lambda(context, definition.lambda())?;
     }
 
     Ok(())
 }
 
-fn validate_lambda(lambda: &Lambda, context: &CompileContext) -> Result<(), CompileError> {
-    validate_expression(lambda.body(), Some(lambda.result_type()), context)
+fn validate_lambda(context: &AnalysisContext, lambda: &Lambda) -> Result<(), AnalysisError> {
+    validate_expression(context, lambda.body(), Some(lambda.result_type()))
 }
 
 fn validate_expression(
+    context: &AnalysisContext,
     expression: &Expression,
     result_type: Option<&Type>,
-    context: &CompileContext,
-) -> Result<(), CompileError> {
-    let validate = |expression| validate_expression(expression, result_type, context);
+) -> Result<(), AnalysisError> {
+    let validate = |expression| validate_expression(context, expression, result_type);
 
     match expression {
         Expression::Call(call) => {
@@ -57,7 +53,7 @@ fn validate_expression(
             validate(coercion.argument())?;
         }
         Expression::Lambda(lambda) => {
-            validate_lambda(lambda, context)?;
+            validate_lambda(context, lambda)?;
         }
         Expression::Let(let_) => {
             validate(let_.bound_expression())?;
@@ -66,18 +62,18 @@ fn validate_expression(
         Expression::List(list) => {
             for element in list.elements() {
                 validate_expression(
+                    context,
                     match element {
                         ListElement::Multiple(expression) => expression,
                         ListElement::Single(expression) => expression,
                     },
                     None,
-                    context,
                 )?;
             }
         }
         Expression::ListComprehension(comprehension) => {
-            validate_expression(comprehension.element(), None, context)?;
-            validate_expression(comprehension.list(), None, context)?;
+            validate_expression(context, comprehension.element(), None)?;
+            validate_expression(context, comprehension.list(), None)?;
         }
         Expression::Operation(operation) => match operation {
             Operation::Arithmetic(operation) => {
@@ -85,7 +81,7 @@ fn validate_expression(
                 validate(operation.rhs())?;
             }
             Operation::Spawn(operation) => {
-                validate_lambda(operation.function(), context)?;
+                validate_lambda(context, operation.function())?;
             }
             Operation::Boolean(operation) => {
                 validate(operation.lhs())?;
@@ -105,20 +101,16 @@ fn validate_expression(
             Operation::Try(operation) => {
                 if let Some(result_type) = result_type {
                     if !type_subsumption_checker::check(
-                        &types::Reference::new(
-                            &context.configuration()?.error_type.error_type_name,
-                            result_type.position().clone(),
-                        )
-                        .into(),
+                        context.error_type()?,
                         result_type,
                         context.types(),
                     )? {
-                        return Err(CompileError::InvalidTryOperation(
+                        return Err(AnalysisError::InvalidTryOperation(
                             operation.position().clone(),
                         ));
                     }
                 } else {
-                    return Err(CompileError::TryOperationInList(
+                    return Err(AnalysisError::TryOperationInList(
                         operation.position().clone(),
                     ));
                 }
@@ -143,13 +135,13 @@ fn validate_expression(
         }
         Expression::Thunk(thunk) => {
             validate_expression(
+                context,
                 thunk.expression(),
                 Some(
                     thunk
                         .type_()
                         .ok_or_else(|| AnalysisError::TypeNotInferred(thunk.position().clone()))?,
                 ),
-                context,
             )?;
         }
         Expression::Boolean(_)
@@ -166,21 +158,27 @@ fn validate_expression(
 mod tests {
     use super::*;
     use crate::{
-        compile_configuration::COMPILE_CONFIGURATION,
-        error_type_configuration::ERROR_TYPE_CONFIGURATION,
+        analysis::type_collector,
+        test::{DefinitionFake, ModuleFake, TypeDefinitionFake},
+        types,
     };
-    use hir::test::{DefinitionFake, ModuleFake, TypeDefinitionFake};
     use position::{test::PositionFake, Position};
 
-    fn validate_module(module: &Module) -> Result<(), CompileError> {
+    const ERROR_TYPE_NAME: &str = "error";
+
+    fn validate_module(module: &Module) -> Result<(), AnalysisError> {
         validate(
+            &AnalysisContext::new(
+                type_collector::collect(module),
+                type_collector::collect_records(module),
+                Some(types::Record::new(ERROR_TYPE_NAME, Position::fake()).into()),
+            ),
             module,
-            &CompileContext::new(module, COMPILE_CONFIGURATION.clone().into()),
         )
     }
 
     #[test]
-    fn validate_empty_module() -> Result<(), CompileError> {
+    fn validate_empty_module() -> Result<(), AnalysisError> {
         validate_module(&Module::empty())
     }
 
@@ -203,10 +201,7 @@ mod tests {
                                 "x",
                                 types::Union::new(
                                     types::None::new(Position::fake()),
-                                    types::Reference::new(
-                                        &ERROR_TYPE_CONFIGURATION.error_type_name,
-                                        Position::fake(),
-                                    ),
+                                    types::Reference::new(ERROR_TYPE_NAME, Position::fake(),),
                                     Position::fake(),
                                 ),
                             )],
@@ -221,14 +216,13 @@ mod tests {
                         false,
                     )])
             ),
-            Err(CompileError::InvalidTryOperation(Position::fake()))
+            Err(AnalysisError::InvalidTryOperation(Position::fake()))
         );
     }
 
     #[test]
     fn validate_thunk() {
-        let error_type =
-            types::Reference::new(&ERROR_TYPE_CONFIGURATION.error_type_name, Position::fake());
+        let error_type = types::Reference::new(ERROR_TYPE_NAME, Position::fake());
         let union_type = types::Union::new(
             types::None::new(Position::fake()),
             error_type,
@@ -274,8 +268,7 @@ mod tests {
 
     #[test]
     fn fail_to_validate_thunk() {
-        let error_type =
-            types::Reference::new(&ERROR_TYPE_CONFIGURATION.error_type_name, Position::fake());
+        let error_type = types::Reference::new(ERROR_TYPE_NAME, Position::fake());
 
         assert_eq!(
             validate_module(
@@ -317,14 +310,13 @@ mod tests {
                         false,
                     )])
             ),
-            Err(CompileError::InvalidTryOperation(Position::fake()))
+            Err(AnalysisError::InvalidTryOperation(Position::fake()))
         );
     }
 
     #[test]
     fn fail_to_validate_list() {
-        let error_type =
-            types::Reference::new(&ERROR_TYPE_CONFIGURATION.error_type_name, Position::fake());
+        let error_type = types::Reference::new(ERROR_TYPE_NAME, Position::fake());
 
         assert_eq!(
             validate_module(
@@ -369,7 +361,7 @@ mod tests {
                         false,
                     )])
             ),
-            Err(CompileError::TryOperationInList(Position::fake()))
+            Err(AnalysisError::TryOperationInList(Position::fake()))
         );
     }
 
@@ -411,7 +403,7 @@ mod tests {
                         false,
                     )])
             ),
-            Err(CompileError::TryOperationInList(Position::fake()))
+            Err(AnalysisError::TryOperationInList(Position::fake()))
         );
     }
 
@@ -453,7 +445,7 @@ mod tests {
                         false,
                     )])
             ),
-            Err(CompileError::TryOperationInList(Position::fake()))
+            Err(AnalysisError::TryOperationInList(Position::fake()))
         );
     }
 }

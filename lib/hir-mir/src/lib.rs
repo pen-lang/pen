@@ -26,8 +26,9 @@ pub use error::CompileError;
 pub use error_type_configuration::ErrorTypeConfiguration;
 use hir::{
     analysis::{
-        duplicate_function_name_validator, duplicate_type_name_validator, type_checker,
-        type_coercer, type_existence_validator, type_inferrer,
+        duplicate_function_name_validator, duplicate_type_name_validator, record_field_validator,
+        try_operation_validator, type_checker, type_coercer, type_existence_validator,
+        type_inferrer, unused_error_validator,
     },
     ir::*,
 };
@@ -35,10 +36,7 @@ pub use list_type_configuration::ListTypeConfiguration;
 pub use main_module_configuration::*;
 pub use string_type_configuration::StringTypeConfiguration;
 pub use test_module_configuration::TestModuleConfiguration;
-use validation::{
-    ffi_variant_type_validator, record_field_validator, try_operation_validator,
-    unused_error_validator,
-};
+use validation::ffi_variant_type_validator;
 
 pub fn compile_main(
     module: &Module,
@@ -102,10 +100,10 @@ fn compile_module(
     let module = type_inferrer::infer(context.analysis(), &module)?;
     type_checker::check_types(context.analysis(), &module)?;
 
-    try_operation_validator::validate(&module, context)?;
-    record_field_validator::validate(&module, context)?;
+    try_operation_validator::validate(context.analysis(), &module)?;
+    record_field_validator::validate(context.analysis(), &module)?;
+    unused_error_validator::validate(context.analysis(), &module)?;
     ffi_variant_type_validator::validate(&module, context)?;
-    unused_error_validator::validate(&module, context)?;
 
     let module = type_coercer::coerce_types(context.analysis(), &module)?;
     type_checker::check_types(context.analysis(), &module)?;
@@ -341,7 +339,7 @@ mod tests {
                         false,
                     )])
             ),
-            Err(CompileError::InvalidTryOperation(Position::fake()))
+            Err(AnalysisError::InvalidTryOperation(Position::fake()).into())
         );
     }
 }

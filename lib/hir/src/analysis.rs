@@ -6,6 +6,8 @@ mod error;
 pub mod expression_visitor;
 pub mod module_environment_creator;
 pub mod record_field_resolver;
+pub mod record_field_validator;
+pub mod try_operation_validator;
 pub mod type_canonicalizer;
 pub mod type_checker;
 pub mod type_coercer;
@@ -24,6 +26,7 @@ pub mod type_subsumption_checker;
 pub mod type_transformer;
 pub mod union_type_creator;
 pub mod union_type_member_calculator;
+pub mod unused_error_validator;
 pub mod variable_renamer;
 pub mod variable_transformer;
 
