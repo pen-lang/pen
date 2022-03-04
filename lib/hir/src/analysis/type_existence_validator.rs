@@ -1,5 +1,5 @@
-use super::error::TypeError;
-use crate::{analysis::ir::type_transformer, ir::*, types::Type};
+use super::error::AnalysisError;
+use crate::{analysis::type_transformer, ir::*, types::Type};
 use fnv::FnvHashSet;
 use std::cell::RefCell;
 
@@ -7,17 +7,17 @@ pub fn validate(
     module: &Module,
     types: &FnvHashSet<String>,
     records: &FnvHashSet<String>,
-) -> Result<(), TypeError> {
+) -> Result<(), AnalysisError> {
     for type_ in &collect_types(module) {
         match type_ {
             Type::Record(record) => {
                 if !records.contains(record.name()) {
-                    return Err(TypeError::RecordNotFound(record.clone()));
+                    return Err(AnalysisError::RecordNotFound(record.clone()));
                 }
             }
             Type::Reference(reference) => {
                 if !types.contains(reference.name()) {
-                    return Err(TypeError::TypeNotFound(reference.clone()));
+                    return Err(AnalysisError::TypeNotFound(reference.clone()));
                 }
             }
             Type::Any(_)
@@ -68,7 +68,7 @@ mod tests {
                 &Default::default(),
                 &Default::default(),
             ),
-            Err(TypeError::TypeNotFound(types::Reference::new(
+            Err(AnalysisError::TypeNotFound(types::Reference::new(
                 "foo",
                 Position::fake()
             )))
@@ -88,7 +88,7 @@ mod tests {
                 &Default::default(),
                 &Default::default(),
             ),
-            Err(TypeError::TypeNotFound(types::Reference::new(
+            Err(AnalysisError::TypeNotFound(types::Reference::new(
                 "foo",
                 Position::fake()
             )))
@@ -112,7 +112,7 @@ mod tests {
                 &Default::default(),
                 &Default::default(),
             ),
-            Err(TypeError::RecordNotFound(types::Record::new(
+            Err(AnalysisError::RecordNotFound(types::Record::new(
                 "foo",
                 Position::fake()
             )))

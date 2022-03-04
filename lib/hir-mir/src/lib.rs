@@ -2,7 +2,6 @@ mod compile_configuration;
 mod concurrency_configuration;
 mod context;
 mod downcast_compiler;
-mod environment_creator;
 mod error;
 mod error_type_configuration;
 mod expression_compiler;
@@ -17,11 +16,7 @@ mod string_type_configuration;
 mod test_function_compiler;
 mod test_module_configuration;
 mod transformation;
-mod type_checker;
-mod type_coercer;
 mod type_compiler;
-mod type_extractor;
-mod type_inferrer;
 mod validation;
 
 use self::{context::CompileContext, transformation::record_equal_function_transformer};
@@ -29,7 +24,10 @@ pub use compile_configuration::CompileConfiguration;
 pub use concurrency_configuration::ConcurrencyConfiguration;
 pub use error::CompileError;
 pub use error_type_configuration::ErrorTypeConfiguration;
-use hir::{analysis::types::type_existence_validator, ir::*};
+use hir::{
+    analysis::{type_checker, type_coercer, type_existence_validator, type_inferrer},
+    ir::*,
+};
 pub use list_type_configuration::ListTypeConfiguration;
 pub use main_module_configuration::*;
 pub use string_type_configuration::StringTypeConfiguration;
@@ -98,16 +96,16 @@ fn compile_module(
     )?;
 
     let module = record_equal_function_transformer::transform(module, context)?;
-    let module = type_inferrer::infer_types(&module, context)?;
-    type_checker::check_types(&module, context)?;
+    let module = type_inferrer::infer(context.analysis(), &module)?;
+    type_checker::check_types(context.analysis(), &module)?;
 
     try_operation_validator::validate(&module, context)?;
     record_field_validator::validate(&module, context)?;
     ffi_variant_type_validator::validate(&module, context)?;
     unused_error_validator::validate(&module, context)?;
 
-    let module = type_coercer::coerce_types(&module, context)?;
-    type_checker::check_types(&module, context)?;
+    let module = type_coercer::coerce_types(context.analysis(), &module)?;
+    type_checker::check_types(context.analysis(), &module)?;
 
     Ok((
         {

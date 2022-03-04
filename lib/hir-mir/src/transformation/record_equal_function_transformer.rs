@@ -1,7 +1,7 @@
 use crate::{
     context::CompileContext, transformation::record_type_information_compiler, CompileError,
 };
-use hir::{analysis::types::type_comparability_checker, ir::*, types};
+use hir::{analysis::type_comparability_checker, ir::*, types};
 
 const LHS_NAME: &str = "$lhs";
 const RHS_NAME: &str = "$rhs";

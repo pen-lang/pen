@@ -1,4 +1,4 @@
-use super::{type_canonicalizer, union_type_creator, union_type_member_calculator, TypeError};
+use super::{type_canonicalizer, union_type_creator, union_type_member_calculator, AnalysisError};
 use crate::types::Type;
 use fnv::FnvHashMap;
 
@@ -6,7 +6,7 @@ pub fn calculate(
     one: &Type,
     other: &Type,
     types: &FnvHashMap<String, Type>,
-) -> Result<Option<Type>, TypeError> {
+) -> Result<Option<Type>, AnalysisError> {
     let one = type_canonicalizer::canonicalize(one, types)?;
     let other = type_canonicalizer::canonicalize(other, types)?;
 

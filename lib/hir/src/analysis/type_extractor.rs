@@ -1,27 +1,27 @@
-use super::{context::CompileContext, CompileError};
-use fnv::FnvHashMap;
-use hir::{
-    analysis::types::{record_field_resolver, type_canonicalizer, union_type_creator},
+use super::{AnalysisContext, AnalysisError};
+use crate::{
+    analysis::{record_field_resolver, type_canonicalizer, union_type_creator},
     ir::*,
     types::{self, Type},
 };
+use fnv::FnvHashMap;
 
 pub fn extract_from_expression(
+    context: &AnalysisContext,
     expression: &Expression,
     variables: &FnvHashMap<String, Type>,
-    context: &CompileContext,
-) -> Result<Type, CompileError> {
+) -> Result<Type, AnalysisError> {
     let extract_from_expression =
-        |expression, variables: &_| extract_from_expression(expression, variables, context);
+        |expression, variables: &_| extract_from_expression(context, expression, variables);
 
     Ok(match expression {
         Expression::Boolean(boolean) => types::Boolean::new(boolean.position().clone()).into(),
         Expression::Call(call) => type_canonicalizer::canonicalize_function(
             call.function_type()
-                .ok_or_else(|| CompileError::TypeNotInferred(call.position().clone()))?,
+                .ok_or_else(|| AnalysisError::TypeNotInferred(call.position().clone()))?,
             context.types(),
         )?
-        .ok_or_else(|| CompileError::FunctionExpected(call.function().position().clone()))?
+        .ok_or_else(|| AnalysisError::FunctionExpected(call.function().position().clone()))?
         .result()
         .clone(),
         Expression::If(if_) => types::Union::new(
@@ -35,7 +35,7 @@ pub fn extract_from_expression(
                 &extract_from_expression(if_.argument(), variables)?,
                 context.types(),
             )?
-            .ok_or_else(|| CompileError::ListExpected(if_.argument().position().clone()))?;
+            .ok_or_else(|| AnalysisError::ListExpected(if_.argument().position().clone()))?;
 
             types::Union::new(
                 extract_from_expression(
@@ -90,7 +90,7 @@ pub fn extract_from_expression(
                                         branch
                                             .type_()
                                             .ok_or_else(|| {
-                                                CompileError::TypeNotInferred(
+                                                AnalysisError::TypeNotInferred(
                                                     branch.position().clone(),
                                                 )
                                             })?
@@ -121,12 +121,12 @@ pub fn extract_from_expression(
                 .into_iter()
                 .chain(
                     let_.name()
-                        .map(|name| -> Result<_, CompileError> {
+                        .map(|name| -> Result<_, AnalysisError> {
                             Ok((
                                 name.into(),
                                 let_.type_()
                                     .ok_or_else(|| {
-                                        CompileError::TypeNotInferred(let_.position().clone())
+                                        AnalysisError::TypeNotInferred(let_.position().clone())
                                     })?
                                     .clone(),
                             ))
@@ -151,21 +151,21 @@ pub fn extract_from_expression(
             | Operation::Order(_) => types::Boolean::new(expression.position().clone()).into(),
             Operation::Try(operation) => operation
                 .type_()
-                .ok_or_else(|| CompileError::TypeNotInferred(operation.position().clone()))?
+                .ok_or_else(|| AnalysisError::TypeNotInferred(operation.position().clone()))?
                 .clone(),
         },
         Expression::RecordConstruction(construction) => construction.type_().clone(),
         Expression::RecordDeconstruction(deconstruction) => record_field_resolver::resolve(
             deconstruction
                 .type_()
-                .ok_or_else(|| CompileError::TypeNotInferred(deconstruction.position().clone()))?,
+                .ok_or_else(|| AnalysisError::TypeNotInferred(deconstruction.position().clone()))?,
             deconstruction.position(),
             context.types(),
             context.records(),
         )?
         .iter()
         .find(|field| field.name() == deconstruction.field_name())
-        .ok_or_else(|| CompileError::RecordFieldUnknown(deconstruction.position().clone()))?
+        .ok_or_else(|| AnalysisError::UnknownRecordField(deconstruction.position().clone()))?
         .type_()
         .clone(),
         Expression::RecordUpdate(update) => update.type_().clone(),
@@ -174,7 +174,7 @@ pub fn extract_from_expression(
             vec![],
             thunk
                 .type_()
-                .ok_or_else(|| CompileError::TypeNotInferred(thunk.position().clone()))?
+                .ok_or_else(|| AnalysisError::TypeNotInferred(thunk.position().clone()))?
                 .clone(),
             thunk.position().clone(),
         )
@@ -183,7 +183,7 @@ pub fn extract_from_expression(
         Expression::Variable(variable) => variables
             .get(variable.name())
             .cloned()
-            .ok_or_else(|| CompileError::VariableNotFound(variable.clone()))?,
+            .ok_or_else(|| AnalysisError::VariableNotFound(variable.clone()))?,
     })
 }
 
@@ -205,10 +205,15 @@ mod tests {
     use position::{test::PositionFake, Position};
     use pretty_assertions::assert_eq;
 
+    fn empty_context() -> AnalysisContext {
+        AnalysisContext::new(Default::default(), Default::default(), None)
+    }
+
     #[test]
     fn extract_from_let() {
         assert_eq!(
             extract_from_expression(
+                &empty_context(),
                 &Let::new(
                     Some("x".into()),
                     Some(types::None::new(Position::fake()).into()),
@@ -218,7 +223,6 @@ mod tests {
                 )
                 .into(),
                 &Default::default(),
-                &CompileContext::dummy(Default::default(), Default::default()),
             )
             .unwrap(),
             types::None::new(Position::fake()).into(),
@@ -229,6 +233,7 @@ mod tests {
     fn extract_from_try_operation() {
         assert_eq!(
             extract_from_expression(
+                &empty_context(),
                 &TryOperation::new(
                     Some(types::None::new(Position::fake()).into()),
                     Variable::new("x", Position::fake()),
@@ -236,7 +241,6 @@ mod tests {
                 )
                 .into(),
                 &Default::default(),
-                &CompileContext::dummy(Default::default(), Default::default()),
             )
             .unwrap(),
             types::None::new(Position::fake()).into(),
@@ -247,6 +251,7 @@ mod tests {
     fn extract_from_thunk() {
         assert_eq!(
             extract_from_expression(
+                &empty_context(),
                 &Thunk::new(
                     Some(types::None::new(Position::fake()).into()),
                     Variable::new("x", Position::fake()),
@@ -254,7 +259,6 @@ mod tests {
                 )
                 .into(),
                 &Default::default(),
-                &CompileContext::dummy(Default::default(), Default::default()),
             ),
             Ok(
                 types::Function::new(vec![], types::None::new(Position::fake()), Position::fake())
@@ -267,11 +271,11 @@ mod tests {
     fn fail_to_extract_from_thunk() {
         assert_eq!(
             extract_from_expression(
+                &empty_context(),
                 &Thunk::new(None, Variable::new("x", Position::fake()), Position::fake()).into(),
                 &Default::default(),
-                &CompileContext::dummy(Default::default(), Default::default()),
             ),
-            Err(CompileError::TypeNotInferred(Position::fake())),
+            Err(AnalysisError::TypeNotInferred(Position::fake())),
         );
     }
 
@@ -279,6 +283,7 @@ mod tests {
     fn extract_from_spawn_operation() {
         assert_eq!(
             extract_from_expression(
+                &empty_context(),
                 &SpawnOperation::new(
                     Lambda::new(
                         vec![],
@@ -290,7 +295,6 @@ mod tests {
                 )
                 .into(),
                 &Default::default(),
-                &CompileContext::dummy(Default::default(), Default::default()),
             ),
             Ok(
                 types::Function::new(vec![], types::None::new(Position::fake()), Position::fake())

@@ -1,4 +1,4 @@
-use super::{record_field_resolver, type_resolver, TypeError};
+use super::{record_field_resolver, type_resolver, AnalysisError};
 use crate::types::{RecordField, Type};
 use fnv::{FnvHashMap, FnvHashSet};
 
@@ -6,7 +6,7 @@ pub fn check(
     type_: &Type,
     types: &FnvHashMap<String, Type>,
     record_types: &FnvHashMap<String, Vec<RecordField>>,
-) -> Result<bool, TypeError> {
+) -> Result<bool, AnalysisError> {
     check_with_cache(type_, &Default::default(), types, record_types)
 }
 
@@ -15,7 +15,7 @@ fn check_with_cache(
     record_names: &FnvHashSet<String>,
     types: &FnvHashMap<String, Type>,
     record_types: &FnvHashMap<String, Vec<RecordField>>,
-) -> Result<bool, TypeError> {
+) -> Result<bool, AnalysisError> {
     let check_with_cache =
         |type_, record_names| check_with_cache(type_, record_names, types, record_types);
 

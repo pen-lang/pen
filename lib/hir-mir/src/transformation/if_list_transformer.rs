@@ -1,7 +1,7 @@
 use super::super::error::CompileError;
 use crate::{context::CompileContext, downcast_compiler};
 use hir::{
-    analysis::types::type_equality_checker,
+    analysis::{type_equality_checker, AnalysisError},
     ir::*,
     types::{self, Type},
 };
@@ -14,7 +14,7 @@ pub fn transform(if_: &IfList, context: &CompileContext) -> Result<Expression, C
 
     let element_type = if_
         .type_()
-        .ok_or_else(|| CompileError::TypeNotInferred(position.clone()))?;
+        .ok_or_else(|| AnalysisError::TypeNotInferred(position.clone()))?;
     let any_list_type = types::Reference::new(&configuration.list_type_name, position.clone());
     let first_rest_type =
         types::Reference::new(&configuration.first_rest_type_name, position.clone());

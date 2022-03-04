@@ -1,7 +1,7 @@
 use super::{error::CompileError, main_module_configuration::MainModuleConfiguration};
 use fnv::FnvHashMap;
 use hir::{
-    analysis::types::type_resolver,
+    analysis::type_resolver,
     ir::*,
     types::{self, Type},
 };

@@ -1,7 +1,7 @@
 use crate::{context::CompileContext, CompileError};
 use fnv::FnvHashSet;
 use hir::{
-    analysis::{ir::expression_visitor, types::type_canonicalizer},
+    analysis::{expression_visitor, type_canonicalizer, AnalysisError},
     ir::*,
 };
 
@@ -26,7 +26,7 @@ pub fn validate(module: &Module, context: &CompileContext) -> Result<(), Compile
             Expression::RecordDeconstruction(deconstruction) => {
                 let record_type = type_canonicalizer::canonicalize_record(
                     deconstruction.type_().ok_or_else(|| {
-                        CompileError::TypeNotInferred(deconstruction.position().clone())
+                        AnalysisError::TypeNotInferred(deconstruction.position().clone())
                     })?,
                     context.types(),
                 )?

@@ -1,6 +1,6 @@
 use crate::{context::CompileContext, error::CompileError};
 use fnv::FnvHashSet;
-use hir::{analysis::types::record_field_resolver, ir::*};
+use hir::{analysis::record_field_resolver, ir::*};
 
 const RECORD_NAME: &str = "$record";
 
