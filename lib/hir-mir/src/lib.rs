@@ -24,14 +24,7 @@ pub use compile_configuration::CompileConfiguration;
 pub use concurrency_configuration::ConcurrencyConfiguration;
 pub use error::CompileError;
 pub use error_type_configuration::ErrorTypeConfiguration;
-use hir::{
-    analysis::{
-        duplicate_function_name_validator, duplicate_type_name_validator, record_field_validator,
-        try_operation_validator, type_checker, type_coercer, type_existence_validator,
-        type_inferrer, unused_error_validator,
-    },
-    ir::*,
-};
+use hir::ir::*;
 pub use list_type_configuration::ListTypeConfiguration;
 pub use main_module_configuration::*;
 pub use string_type_configuration::StringTypeConfiguration;
@@ -87,23 +80,7 @@ fn compile_module(
     module: &Module,
     context: &CompileContext,
 ) -> Result<(mir::ir::Module, interface::Module), CompileError> {
-    duplicate_function_name_validator::validate(module)?;
-    duplicate_type_name_validator::validate(module)?;
-    type_existence_validator::validate(
-        module,
-        &context.types().keys().cloned().collect(),
-        &context.records().keys().cloned().collect(),
-    )?;
-
-    let module = type_inferrer::infer(context.analysis(), &module)?;
-    type_checker::check_types(context.analysis(), &module)?;
-
-    try_operation_validator::validate(context.analysis(), &module)?;
-    record_field_validator::validate(context.analysis(), &module)?;
-    unused_error_validator::validate(context.analysis(), &module)?;
-
-    let module = type_coercer::coerce_types(context.analysis(), &module)?;
-    type_checker::check_types(context.analysis(), &module)?;
+    let module = hir::analysis::analyze(context.analysis(), module)?;
 
     let module = record_equal_function_transformer::transform(&module, context)?;
     ffi_variant_type_validator::validate(&module, context)?;
