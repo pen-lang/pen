@@ -22,3 +22,11 @@ pub fn collect(module: &Module) -> FnvHashMap<String, Type> {
         )
         .collect()
 }
+
+pub fn collect_records(module: &Module) -> FnvHashMap<String, Vec<types::RecordField>> {
+    module
+        .type_definitions()
+        .iter()
+        .map(|definition| (definition.name().into(), definition.fields().to_vec()))
+        .collect()
+}

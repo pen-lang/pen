@@ -8,7 +8,7 @@ use crate::{
 };
 use fnv::FnvHashMap;
 
-pub fn infer_types(context: &AnalysisContext, module: &Module) -> Result<Module, AnalysisError> {
+pub fn infer(context: &AnalysisContext, module: &Module) -> Result<Module, AnalysisError> {
     let variables = environment_creator::create_from_module(module);
 
     Ok(Module::new(
@@ -341,7 +341,7 @@ fn infer_expression(
                                 &expression,
                                 variables,
                             )?,
-                            &context.error_type(),
+                            context.error_type()?,
                             context.types(),
                         )? {
                             if type_.is_any() {
@@ -437,13 +437,20 @@ fn infer_expression(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test::{DefinitionFake, ModuleFake, TypeDefinitionFake};
+    use crate::{
+        analysis::type_collector,
+        test::{DefinitionFake, ModuleFake, TypeDefinitionFake},
+    };
     use position::{test::PositionFake, Position};
     use pretty_assertions::assert_eq;
 
     fn infer_module(module: &Module) -> Result<Module, AnalysisError> {
-        infer_types(
-            &AnalysisContext::new(module, types::Record::new("error", Position::fake())),
+        infer(
+            &AnalysisContext::new(
+                type_collector::collect(module),
+                type_collector::collect_records(module),
+                Some(types::Record::new("error", Position::fake()).into()),
+            ),
             module,
         )
     }

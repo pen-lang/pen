@@ -1,27 +1,24 @@
-use crate::{
-    analysis::type_collector,
-    ir::*,
-    types::{self, Type},
-};
+use super::AnalysisError;
+use crate::types::{self, Type};
 use fnv::FnvHashMap;
 
 #[derive(Debug)]
 pub struct AnalysisContext {
     types: FnvHashMap<String, Type>,
     records: FnvHashMap<String, Vec<types::RecordField>>,
-    error_type: Type,
+    error_type: Option<Type>,
 }
 
 impl AnalysisContext {
-    pub fn new(module: &Module, error_type: impl Into<Type>) -> Self {
+    pub fn new(
+        types: FnvHashMap<String, Type>,
+        records: FnvHashMap<String, Vec<types::RecordField>>,
+        error_type: Option<Type>,
+    ) -> Self {
         Self {
-            types: type_collector::collect(module),
-            records: module
-                .type_definitions()
-                .iter()
-                .map(|definition| (definition.name().into(), definition.fields().to_vec()))
-                .collect(),
-            error_type: error_type.into(),
+            types,
+            records,
+            error_type,
         }
     }
 
@@ -33,7 +30,9 @@ impl AnalysisContext {
         &self.records
     }
 
-    pub fn error_type(&self) -> &Type {
-        &self.error_type
+    pub fn error_type(&self) -> Result<&Type, AnalysisError> {
+        self.error_type
+            .as_ref()
+            .ok_or_else(|| AnalysisError::ErrorTypeUndefined)
     }
 }

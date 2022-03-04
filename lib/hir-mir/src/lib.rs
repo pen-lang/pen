@@ -21,7 +21,6 @@ mod type_checker;
 mod type_coercer;
 mod type_compiler;
 mod type_extractor;
-mod type_inferrer;
 mod validation;
 
 use self::{context::CompileContext, transformation::record_equal_function_transformer};
@@ -29,7 +28,10 @@ pub use compile_configuration::CompileConfiguration;
 pub use concurrency_configuration::ConcurrencyConfiguration;
 pub use error::CompileError;
 pub use error_type_configuration::ErrorTypeConfiguration;
-use hir::{analysis::type_existence_validator, ir::*};
+use hir::{
+    analysis::{type_existence_validator, type_inferrer},
+    ir::*,
+};
 pub use list_type_configuration::ListTypeConfiguration;
 pub use main_module_configuration::*;
 pub use string_type_configuration::StringTypeConfiguration;
@@ -98,7 +100,7 @@ fn compile_module(
     )?;
 
     let module = record_equal_function_transformer::transform(module, context)?;
-    let module = type_inferrer::infer_types(&module, context)?;
+    let module = type_inferrer::infer(context.hir(), &module)?;
     type_checker::check_types(&module, context)?;
 
     try_operation_validator::validate(&module, context)?;

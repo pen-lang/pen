@@ -7,6 +7,7 @@ use std::{
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum AnalysisError {
+    ErrorTypeUndefined,
     FunctionExpected(Position),
     ListExpected(Position),
     RecordExpected(Position),
@@ -22,6 +23,9 @@ pub enum AnalysisError {
 impl Display for AnalysisError {
     fn fmt(&self, formatter: &mut Formatter) -> fmt::Result {
         match self {
+            Self::ErrorTypeUndefined => {
+                write!(formatter, "error type undefined")
+            }
             Self::FunctionExpected(position) => {
                 write!(formatter, "function expected\n{}", position)
             }
