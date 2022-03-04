@@ -1,6 +1,5 @@
-use super::{context::CompileContext, CompileError};
-use fnv::FnvHashMap;
-use hir::{
+use super::{context::AnalysisContext, AnalysisError};
+use crate::{
     analysis::{
         module_environment_creator, record_field_resolver, type_canonicalizer,
         type_equality_checker, type_extractor,
@@ -8,9 +7,10 @@ use hir::{
     ir::*,
     types::{self, Type},
 };
+use fnv::FnvHashMap;
 use position::Position;
 
-pub fn coerce_types(module: &Module, context: &CompileContext) -> Result<Module, CompileError> {
+pub fn coerce_types(context: &AnalysisContext, module: &Module) -> Result<Module, AnalysisError> {
     let variables = module_environment_creator::create(module);
 
     Ok(Module::new(
@@ -21,17 +21,17 @@ pub fn coerce_types(module: &Module, context: &CompileContext) -> Result<Module,
         module
             .definitions()
             .iter()
-            .map(|definition| transform_definition(definition, &variables, context))
+            .map(|definition| transform_definition(context, definition, &variables))
             .collect::<Result<_, _>>()?,
         module.position().clone(),
     ))
 }
 
 fn transform_definition(
+    context: &AnalysisContext,
     definition: &Definition,
     variables: &FnvHashMap<String, Type>,
-    context: &CompileContext,
-) -> Result<Definition, CompileError> {
+) -> Result<Definition, AnalysisError> {
     Ok(Definition::new(
         definition.name(),
         definition.original_name(),
@@ -45,8 +45,8 @@ fn transform_definition(
 fn transform_lambda(
     lambda: &Lambda,
     variables: &FnvHashMap<String, Type>,
-    context: &CompileContext,
-) -> Result<Lambda, CompileError> {
+    context: &AnalysisContext,
+) -> Result<Lambda, AnalysisError> {
     let variables = variables
         .clone()
         .into_iter()
@@ -62,42 +62,42 @@ fn transform_lambda(
         lambda.arguments().to_vec(),
         lambda.result_type().clone(),
         coerce_expression(
-            &transform_expression(lambda.body(), &variables, context)?,
+            context,
+            &transform_expression(context, lambda.body(), &variables)?,
             lambda.result_type(),
             &variables,
-            context,
         )?,
         lambda.position().clone(),
     ))
 }
 
 fn transform_expression(
+    context: &AnalysisContext,
     expression: &Expression,
     variables: &FnvHashMap<String, Type>,
-    context: &CompileContext,
-) -> Result<Expression, CompileError> {
+) -> Result<Expression, AnalysisError> {
     let transform_expression =
-        |expression, variables: &_| transform_expression(expression, variables, context);
+        |expression, variables: &_| transform_expression(context, expression, variables);
     let transform_and_coerce_expression = |expression, type_: &_, variables: &_| {
         coerce_expression(
+            context,
             &transform_expression(expression, variables)?,
             type_,
             variables,
-            context,
         )
     };
     let extract_type = |expression, variables| {
-        type_extractor::extract_from_expression(context.analysis(), expression, variables)
+        type_extractor::extract_from_expression(context, expression, variables)
     };
 
     Ok(match expression {
         Expression::Call(call) => {
             let function_type = type_canonicalizer::canonicalize_function(
                 call.function_type()
-                    .ok_or_else(|| CompileError::TypeNotInferred(call.position().clone()))?,
+                    .ok_or_else(|| AnalysisError::TypeNotInferred(call.position().clone()))?,
                 context.types(),
             )?
-            .ok_or_else(|| CompileError::FunctionExpected(call.position().clone()))?;
+            .ok_or_else(|| AnalysisError::FunctionExpected(call.position().clone()))?;
 
             Call::new(
                 call.function_type().cloned(),
@@ -128,7 +128,7 @@ fn transform_expression(
             let list_type = types::List::new(
                 if_.type_()
                     .ok_or_else(|| {
-                        CompileError::TypeNotInferred(if_.argument().position().clone())
+                        AnalysisError::TypeNotInferred(if_.argument().position().clone())
                     })?
                     .clone(),
                 if_.argument().position().clone(),
@@ -173,7 +173,7 @@ fn transform_expression(
                 transform_expression(if_.argument(), variables)?,
                 if_.branches()
                     .iter()
-                    .map(|branch| -> Result<_, CompileError> {
+                    .map(|branch| -> Result<_, AnalysisError> {
                         Ok(IfTypeBranch::new(
                             branch.type_().clone(),
                             transform_and_coerce_expression(
@@ -189,7 +189,7 @@ fn transform_expression(
                     })
                     .collect::<Result<Vec<_>, _>>()?,
                 if_.else_()
-                    .map(|branch| -> Result<_, CompileError> {
+                    .map(|branch| -> Result<_, AnalysisError> {
                         Ok(ElseBranch::new(
                             branch.type_().cloned(),
                             transform_and_coerce_expression(
@@ -203,7 +203,7 @@ fn transform_expression(
                                         branch
                                             .type_()
                                             .ok_or_else(|| {
-                                                CompileError::TypeNotInferred(
+                                                AnalysisError::TypeNotInferred(
                                                     branch.position().clone(),
                                                 )
                                             })?
@@ -231,12 +231,12 @@ fn transform_expression(
                     .into_iter()
                     .chain(
                         let_.name()
-                            .map(|name| -> Result<_, CompileError> {
+                            .map(|name| -> Result<_, AnalysisError> {
                                 Ok((
                                     name.into(),
                                     let_.type_()
                                         .ok_or_else(|| {
-                                            CompileError::TypeNotInferred(
+                                            AnalysisError::TypeNotInferred(
                                                 let_.bound_expression().position().clone(),
                                             )
                                         })?
@@ -269,7 +269,7 @@ fn transform_expression(
                         ),
                     })
                 })
-                .collect::<Result<_, CompileError>>()?,
+                .collect::<Result<_, AnalysisError>>()?,
             list.position().clone(),
         )
         .into(),
@@ -277,7 +277,7 @@ fn transform_expression(
             let position = comprehension.position();
             let input_type = comprehension
                 .input_type()
-                .ok_or_else(|| CompileError::TypeNotInferred(position.clone()))?;
+                .ok_or_else(|| AnalysisError::TypeNotInferred(position.clone()))?;
 
             ListComprehension::new(
                 comprehension.input_type().cloned(),
@@ -324,7 +324,7 @@ fn transform_expression(
             Operation::Equality(operation) => {
                 let type_ = operation
                     .type_()
-                    .ok_or_else(|| CompileError::TypeNotInferred(operation.position().clone()))?;
+                    .ok_or_else(|| AnalysisError::TypeNotInferred(operation.position().clone()))?;
 
                 EqualityOperation::new(
                     operation.type_().cloned(),
@@ -392,7 +392,7 @@ fn transform_expression(
                 thunk.expression(),
                 thunk
                     .type_()
-                    .ok_or_else(|| CompileError::TypeNotInferred(thunk.position().clone()))?,
+                    .ok_or_else(|| AnalysisError::TypeNotInferred(thunk.position().clone()))?,
                 variables,
             )?,
             thunk.position().clone(),
@@ -418,8 +418,8 @@ fn transform_record_fields(
     position: &Position,
     record_type: &Type,
     variables: &FnvHashMap<String, Type>,
-    context: &CompileContext,
-) -> Result<Vec<RecordField>, CompileError> {
+    context: &AnalysisContext,
+) -> Result<Vec<RecordField>, AnalysisError> {
     let field_types =
         record_field_resolver::resolve(record_type, position, context.types(), context.records())?;
 
@@ -429,14 +429,14 @@ fn transform_record_fields(
             Ok(RecordField::new(
                 field.name(),
                 coerce_expression(
-                    &transform_expression(field.expression(), variables, context)?,
+                    context,
+                    &transform_expression(context, field.expression(), variables)?,
                     field_types
                         .iter()
                         .find(|field_type| field_type.name() == field.name())
-                        .ok_or_else(|| CompileError::RecordFieldUnknown(field.position().clone()))?
+                        .ok_or_else(|| AnalysisError::UnknownRecordField(field.position().clone()))?
                         .type_(),
                     variables,
-                    context,
                 )?,
                 field.position().clone(),
             ))
@@ -445,13 +445,12 @@ fn transform_record_fields(
 }
 
 fn coerce_expression(
+    context: &AnalysisContext,
     expression: &Expression,
     upper_type: &Type,
     variables: &FnvHashMap<String, Type>,
-    context: &CompileContext,
-) -> Result<Expression, CompileError> {
-    let lower_type =
-        type_extractor::extract_from_expression(context.analysis(), expression, variables)?;
+) -> Result<Expression, AnalysisError> {
+    let lower_type = type_extractor::extract_from_expression(context, expression, variables)?;
 
     Ok(
         if type_equality_checker::check(&lower_type, upper_type, context.types())? {
@@ -471,15 +470,21 @@ fn coerce_expression(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::compile_configuration::COMPILE_CONFIGURATION;
-    use hir::test::{DefinitionFake, ModuleFake, TypeDefinitionFake};
+    use crate::{
+        analysis::type_collector,
+        test::{DefinitionFake, ModuleFake, TypeDefinitionFake},
+    };
     use position::{test::PositionFake, Position};
     use pretty_assertions::assert_eq;
 
-    fn coerce_module(module: &Module) -> Result<Module, CompileError> {
+    fn coerce_module(module: &Module) -> Result<Module, AnalysisError> {
         coerce_types(
+            &AnalysisContext::new(
+                type_collector::collect(module),
+                type_collector::collect_records(module),
+                Some(types::Record::new("error", Position::fake()).into()),
+            ),
             module,
-            &CompileContext::new(module, COMPILE_CONFIGURATION.clone().into()),
         )
     }
 

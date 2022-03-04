@@ -16,7 +16,6 @@ mod string_type_configuration;
 mod test_function_compiler;
 mod test_module_configuration;
 mod transformation;
-mod type_coercer;
 mod type_compiler;
 mod validation;
 
@@ -26,7 +25,7 @@ pub use concurrency_configuration::ConcurrencyConfiguration;
 pub use error::CompileError;
 pub use error_type_configuration::ErrorTypeConfiguration;
 use hir::{
-    analysis::{type_checker, type_existence_validator, type_inferrer},
+    analysis::{type_checker, type_coercer, type_existence_validator, type_inferrer},
     ir::*,
 };
 pub use list_type_configuration::ListTypeConfiguration;
@@ -105,7 +104,7 @@ fn compile_module(
     ffi_variant_type_validator::validate(&module, context)?;
     unused_error_validator::validate(&module, context)?;
 
-    let module = type_coercer::coerce_types(&module, context)?;
+    let module = type_coercer::coerce_types(context.analysis(), &module)?;
     type_checker::check_types(context.analysis(), &module)?;
 
     Ok((
