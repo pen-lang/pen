@@ -1,7 +1,11 @@
-use super::{context::AnalysisContext, environment_creator, type_extractor, AnalysisError};
-use super::{type_canonicalizer, type_difference_calculator, union_type_creator};
-use crate::ir::*;
-use crate::types::{self, Type};
+use super::{
+    context::AnalysisContext, environment_creator, type_canonicalizer, type_difference_calculator,
+    type_extractor, union_type_creator, AnalysisError,
+};
+use crate::{
+    ir::*,
+    types::{self, Type},
+};
 use fnv::FnvHashMap;
 
 pub fn infer_types(context: &AnalysisContext, module: &Module) -> Result<Module, AnalysisError> {
