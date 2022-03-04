@@ -15,7 +15,7 @@ use fnv::FnvHashMap;
 use hir::{
     analysis::{
         record_field_resolver, type_canonicalizer, type_equality_checker,
-        union_type_member_calculator,
+        union_type_member_calculator, AnalysisError,
     },
     ir::*,
     types::{self, Type},
@@ -32,7 +32,7 @@ pub fn compile(
         Expression::Call(call) => mir::ir::Call::new(
             type_compiler::compile(
                 call.function_type()
-                    .ok_or_else(|| CompileError::TypeNotInferred(call.position().clone()))?,
+                    .ok_or_else(|| AnalysisError::TypeNotInferred(call.position().clone()))?,
                 context,
             )?
             .into_function()
@@ -103,7 +103,7 @@ pub fn compile(
             let_.name().unwrap_or_default(),
             type_compiler::compile(
                 let_.type_()
-                    .ok_or_else(|| CompileError::TypeNotInferred(let_.position().clone()))?,
+                    .ok_or_else(|| AnalysisError::TypeNotInferred(let_.position().clone()))?,
                 context,
             )?,
             compile(let_.bound_expression())?,
@@ -121,7 +121,7 @@ pub fn compile(
             let position = comprehension.position();
             let input_element_type = comprehension
                 .input_type()
-                .ok_or_else(|| CompileError::TypeNotInferred(position.clone()))?;
+                .ok_or_else(|| AnalysisError::TypeNotInferred(position.clone()))?;
             let output_element_type = comprehension.output_type();
             let list_type = type_compiler::compile_list(context)?;
 
@@ -275,7 +275,7 @@ pub fn compile(
                     compile(thunk.expression())?,
                     type_compiler::compile(
                         thunk.type_().ok_or_else(|| {
-                            CompileError::TypeNotInferred(thunk.position().clone())
+                            AnalysisError::TypeNotInferred(thunk.position().clone())
                         })?,
                         context,
                     )?,
@@ -466,7 +466,7 @@ fn compile_operation(
             EqualityOperator::Equal => {
                 match type_canonicalizer::canonicalize(
                     operation.type_().ok_or_else(|| {
-                        CompileError::TypeNotInferred(operation.position().clone())
+                        AnalysisError::TypeNotInferred(operation.position().clone())
                     })?,
                     context.types(),
                 )? {
@@ -513,7 +513,7 @@ fn compile_operation(
         Operation::Try(operation) => {
             let success_type = operation
                 .type_()
-                .ok_or_else(|| CompileError::TypeNotInferred(operation.position().clone()))?;
+                .ok_or_else(|| AnalysisError::TypeNotInferred(operation.position().clone()))?;
             let error_type = type_compiler::compile(
                 &types::Reference::new(
                     &context.configuration()?.error_type.error_type_name,

@@ -24,13 +24,13 @@ pub enum CompileError {
     RecordFieldUnknown(Position),
     RecordExpected(Position),
     TryOperationInList(Position),
-    TypeNotInferred(Position),
     VariantTypeInFfi(Position),
 }
 
 impl Display for CompileError {
     fn fmt(&self, formatter: &mut Formatter) -> fmt::Result {
         match self {
+            Self::Analysis(error) => write!(formatter, "{}", error),
             Self::AnyEqualOperation(position) => {
                 write!(
                     formatter,
@@ -98,10 +98,6 @@ impl Display for CompileError {
                     "try operation not allowed in list literal\n{}",
                     position
                 )
-            }
-            Self::Analysis(error) => write!(formatter, "{}", error),
-            Self::TypeNotInferred(position) => {
-                write!(formatter, "type not inferred\n{}", position)
             }
             Self::VariantTypeInFfi(position) => {
                 write!(

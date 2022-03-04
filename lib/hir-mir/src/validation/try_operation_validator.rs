@@ -1,6 +1,6 @@
 use crate::{context::CompileContext, error::CompileError};
 use hir::{
-    analysis::type_subsumption_checker,
+    analysis::{type_subsumption_checker, AnalysisError},
     ir::*,
     types::{self, Type},
 };
@@ -147,7 +147,7 @@ fn validate_expression(
                 Some(
                     thunk
                         .type_()
-                        .ok_or_else(|| CompileError::TypeNotInferred(thunk.position().clone()))?,
+                        .ok_or_else(|| AnalysisError::TypeNotInferred(thunk.position().clone()))?,
                 ),
                 context,
             )?;

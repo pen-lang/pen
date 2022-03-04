@@ -1,6 +1,6 @@
 use crate::{context::CompileContext, CompileError};
 use hir::{
-    analysis::{expression_visitor, type_canonicalizer, type_subsumption_checker},
+    analysis::{expression_visitor, type_canonicalizer, type_subsumption_checker, AnalysisError},
     ir::*,
     types,
 };
@@ -11,7 +11,7 @@ pub fn validate(module: &Module, context: &CompileContext) -> Result<(), Compile
             let expression = let_.bound_expression();
             let type_ = let_
                 .type_()
-                .ok_or_else(|| CompileError::TypeNotInferred(expression.position().clone()))?;
+                .ok_or_else(|| AnalysisError::TypeNotInferred(expression.position().clone()))?;
 
             if let_.name().is_none()
                 && !type_canonicalizer::canonicalize(type_, context.types())?.is_any()
