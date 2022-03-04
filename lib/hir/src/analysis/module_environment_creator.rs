@@ -2,7 +2,7 @@ use super::type_extractor;
 use crate::{ir::*, types::Type};
 use fnv::FnvHashMap;
 
-pub fn create_from_module(module: &Module) -> FnvHashMap<String, Type> {
+pub fn create(module: &Module) -> FnvHashMap<String, Type> {
     module
         .declarations()
         .iter()
@@ -39,15 +39,15 @@ mod tests {
             types::Function::new(vec![], types::None::new(Position::fake()), Position::fake());
 
         assert_eq!(
-            create_from_module(&Module::empty().set_foreign_declarations(vec![
-                ForeignDeclaration::new(
+            create(
+                &Module::empty().set_foreign_declarations(vec![ForeignDeclaration::new(
                     "foo",
                     "bar",
                     CallingConvention::Native,
                     type_.clone(),
                     Position::fake()
-                )
-            ])),
+                )])
+            ),
             [("foo".into(), type_.into())].into_iter().collect()
         );
     }

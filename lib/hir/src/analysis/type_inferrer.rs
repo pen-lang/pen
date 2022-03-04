@@ -1,6 +1,6 @@
 use super::{
-    context::AnalysisContext, environment_creator, type_canonicalizer, type_difference_calculator,
-    type_extractor, union_type_creator, AnalysisError,
+    context::AnalysisContext, module_environment_creator, type_canonicalizer,
+    type_difference_calculator, type_extractor, union_type_creator, AnalysisError,
 };
 use crate::{
     ir::*,
@@ -9,7 +9,7 @@ use crate::{
 use fnv::FnvHashMap;
 
 pub fn infer(context: &AnalysisContext, module: &Module) -> Result<Module, AnalysisError> {
-    let variables = environment_creator::create_from_module(module);
+    let variables = module_environment_creator::create(module);
 
     Ok(Module::new(
         module.type_definitions().to_vec(),

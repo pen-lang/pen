@@ -1,4 +1,4 @@
-use super::{context::AnalysisContext, environment_creator, AnalysisError};
+use super::{context::AnalysisContext, module_environment_creator, AnalysisError};
 use crate::{
     analysis::{
         record_field_resolver, type_canonicalizer, type_equality_checker, type_extractor,
@@ -10,7 +10,7 @@ use crate::{
 use fnv::{FnvHashMap, FnvHashSet};
 
 pub fn check_types(context: &AnalysisContext, module: &Module) -> Result<(), AnalysisError> {
-    let variables = environment_creator::create_from_module(module);
+    let variables = module_environment_creator::create(module);
 
     for definition in module.definitions() {
         check_lambda(context, definition.lambda(), &variables)?;
