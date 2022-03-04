@@ -20,7 +20,6 @@ mod transformation;
 mod type_checker;
 mod type_coercer;
 mod type_compiler;
-mod type_extractor;
 mod validation;
 
 use self::{context::CompileContext, transformation::record_equal_function_transformer};
@@ -100,7 +99,7 @@ fn compile_module(
     )?;
 
     let module = record_equal_function_transformer::transform(module, context)?;
-    let module = type_inferrer::infer(context.hir(), &module)?;
+    let module = type_inferrer::infer(context.analysis(), &module)?;
     type_checker::check_types(&module, context)?;
 
     try_operation_validator::validate(&module, context)?;

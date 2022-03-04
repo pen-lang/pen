@@ -1,5 +1,5 @@
-use super::{error::CompileError, type_extractor};
-use hir::ir;
+use super::error::CompileError;
+use hir::{analysis::type_extractor, ir};
 
 pub fn compile(module: &ir::Module) -> Result<interface::Module, CompileError> {
     Ok(interface::Module::new(

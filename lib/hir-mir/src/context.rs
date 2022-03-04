@@ -8,14 +8,14 @@ use hir::{
 
 #[derive(Debug)]
 pub struct CompileContext {
-    hir_context: AnalysisContext,
+    analysis_context: AnalysisContext,
     configuration: Option<CompileConfiguration>,
 }
 
 impl CompileContext {
     pub fn new(module: &Module, configuration: Option<CompileConfiguration>) -> Self {
         Self {
-            hir_context: AnalysisContext::new(
+            analysis_context: AnalysisContext::new(
                 type_collector::collect(module),
                 type_collector::collect_records(module),
                 configuration.as_ref().map(|configuration| {
@@ -39,7 +39,7 @@ impl CompileContext {
         use position::{test::PositionFake, Position};
 
         Self {
-            hir_context: AnalysisContext::new(
+            analysis_context: AnalysisContext::new(
                 types,
                 records,
                 Some(
@@ -55,15 +55,15 @@ impl CompileContext {
     }
 
     pub fn types(&self) -> &FnvHashMap<String, Type> {
-        self.hir_context.types()
+        self.analysis_context.types()
     }
 
     pub fn records(&self) -> &FnvHashMap<String, Vec<types::RecordField>> {
-        self.hir_context.records()
+        self.analysis_context.records()
     }
 
-    pub fn hir(&self) -> &AnalysisContext {
-        &self.hir_context
+    pub fn analysis(&self) -> &AnalysisContext {
+        &self.analysis_context
     }
 
     pub fn configuration(&self) -> Result<&CompileConfiguration, CompileError> {

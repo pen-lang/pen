@@ -1,9 +1,9 @@
-use super::{context::CompileContext, environment_creator, type_extractor, CompileError};
+use super::{context::CompileContext, environment_creator, CompileError};
 use fnv::{FnvHashMap, FnvHashSet};
 use hir::{
     analysis::{
-        record_field_resolver, type_canonicalizer, type_equality_checker, type_subsumption_checker,
-        union_type_creator,
+        record_field_resolver, type_canonicalizer, type_equality_checker, type_extractor,
+        type_subsumption_checker, union_type_creator,
     },
     ir::*,
     types::{self, Type},
@@ -87,7 +87,7 @@ fn check_expression(
             check_expression(if_.then(), variables)?;
             check_expression(if_.else_(), variables)?;
 
-            type_extractor::extract_from_expression(expression, variables, context)?
+            type_extractor::extract_from_expression(context.analysis(), expression, variables)?
         }
         Expression::IfList(if_) => {
             let list_type = types::List::new(
@@ -125,7 +125,7 @@ fn check_expression(
             )?;
             check_expression(if_.else_(), variables)?;
 
-            type_extractor::extract_from_expression(expression, variables, context)?
+            type_extractor::extract_from_expression(context.analysis(), expression, variables)?
         }
         Expression::IfType(if_) => {
             let argument_type = type_canonicalizer::canonicalize(
@@ -190,7 +190,7 @@ fn check_expression(
                 return Err(CompileError::MissingElseBlock(if_.position().clone()));
             }
 
-            type_extractor::extract_from_expression(expression, variables, context)?
+            type_extractor::extract_from_expression(context.analysis(), expression, variables)?
         }
         Expression::Lambda(lambda) => check_lambda(lambda, variables, context)?.into(),
         Expression::Let(let_) => {
@@ -374,7 +374,7 @@ fn check_expression(
 
             check_subsumption(&check_expression(thunk.expression(), variables)?, type_)?;
 
-            type_extractor::extract_from_expression(expression, variables, context)?
+            type_extractor::extract_from_expression(context.analysis(), expression, variables)?
         }
         Expression::TypeCoercion(coercion) => {
             check_subsumption(
@@ -439,10 +439,16 @@ fn check_operation(
             check_subsumption(&check_expression(operation.lhs())?, operand_type)?;
             check_subsumption(&check_expression(operation.rhs())?, operand_type)?;
 
-            let lhs_type =
-                type_extractor::extract_from_expression(operation.lhs(), variables, context)?;
-            let rhs_type =
-                type_extractor::extract_from_expression(operation.rhs(), variables, context)?;
+            let lhs_type = type_extractor::extract_from_expression(
+                context.analysis(),
+                operation.lhs(),
+                variables,
+            )?;
+            let rhs_type = type_extractor::extract_from_expression(
+                context.analysis(),
+                operation.rhs(),
+                variables,
+            )?;
 
             if !type_subsumption_checker::check(&lhs_type, &rhs_type, context.types())?
                 && !type_subsumption_checker::check(&rhs_type, &lhs_type, context.types())?

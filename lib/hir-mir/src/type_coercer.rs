@@ -1,7 +1,7 @@
-use super::{context::CompileContext, environment_creator, type_extractor, CompileError};
+use super::{context::CompileContext, environment_creator, CompileError};
 use fnv::FnvHashMap;
 use hir::{
-    analysis::{record_field_resolver, type_canonicalizer, type_equality_checker},
+    analysis::{record_field_resolver, type_canonicalizer, type_equality_checker, type_extractor},
     ir::*,
     types::{self, Type},
 };
@@ -84,7 +84,7 @@ fn transform_expression(
         )
     };
     let extract_type = |expression, variables| {
-        type_extractor::extract_from_expression(expression, variables, context)
+        type_extractor::extract_from_expression(context.analysis(), expression, variables)
     };
 
     Ok(match expression {
@@ -447,7 +447,8 @@ fn coerce_expression(
     variables: &FnvHashMap<String, Type>,
     context: &CompileContext,
 ) -> Result<Expression, CompileError> {
-    let lower_type = type_extractor::extract_from_expression(expression, variables, context)?;
+    let lower_type =
+        type_extractor::extract_from_expression(context.analysis(), expression, variables)?;
 
     Ok(
         if type_equality_checker::check(&lower_type, upper_type, context.types())? {
