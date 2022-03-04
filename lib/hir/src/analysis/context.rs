@@ -33,6 +33,6 @@ impl AnalysisContext {
     pub fn error_type(&self) -> Result<&Type, AnalysisError> {
         self.error_type
             .as_ref()
-            .ok_or_else(|| AnalysisError::ErrorTypeUndefined)
+            .ok_or(AnalysisError::ErrorTypeUndefined)
     }
 }
