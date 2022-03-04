@@ -1,9 +1,6 @@
 use crate::{context::CompileContext, CompileError};
 use hir::{
-    analysis::{
-        expression_visitor,
-        type_canonicalizer, type_subsumption_checker,
-    },
+    analysis::{expression_visitor, type_canonicalizer, type_subsumption_checker},
     ir::*,
     types,
 };
