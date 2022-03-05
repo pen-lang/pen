@@ -173,7 +173,7 @@ fn transform_expression(
                 transform_expression(if_.argument(), variables)?,
                 if_.branches()
                     .iter()
-                    .map(|branch| -> Result<_, AnalysisError> {
+                    .map(|branch| {
                         Ok(IfTypeBranch::new(
                             branch.type_().clone(),
                             transform_and_coerce_expression(
@@ -187,9 +187,9 @@ fn transform_expression(
                             )?,
                         ))
                     })
-                    .collect::<Result<Vec<_>, _>>()?,
+                    .collect::<Result<_, _>>()?,
                 if_.else_()
-                    .map(|branch| -> Result<_, AnalysisError> {
+                    .map(|branch| {
                         Ok(ElseBranch::new(
                             branch.type_().cloned(),
                             transform_and_coerce_expression(
@@ -231,7 +231,7 @@ fn transform_expression(
                     .into_iter()
                     .chain(
                         let_.name()
-                            .map(|name| -> Result<_, AnalysisError> {
+                            .map(|name| {
                                 Ok((
                                     name.into(),
                                     let_.type_()
@@ -269,7 +269,7 @@ fn transform_expression(
                         ),
                     })
                 })
-                .collect::<Result<_, AnalysisError>>()?,
+                .collect::<Result<_, _>>()?,
             list.position().clone(),
         )
         .into(),
