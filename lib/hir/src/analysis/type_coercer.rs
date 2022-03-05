@@ -336,7 +336,7 @@ fn transform_expression(
                         ),
                     })
                 })
-                .collect::<Result<_, AnalysisError>>()?,
+                .collect::<Result<_, _>>()?,
             map.position().clone(),
         )
         .into(),
