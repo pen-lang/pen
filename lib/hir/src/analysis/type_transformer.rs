@@ -45,6 +45,12 @@ fn transform_type(type_: &Type, transform: &impl Fn(&Type) -> Type) -> Type {
         Type::List(list) => {
             types::List::new(transform_deeply(list.element()), list.position().clone()).into()
         }
+        Type::Map(map) => types::Map::new(
+            transform_deeply(map.key()),
+            transform_deeply(map.value()),
+            map.position().clone(),
+        )
+        .into(),
         Type::Union(union) => types::Union::new(
             transform_deeply(union.lhs()),
             transform_deeply(union.rhs()),
