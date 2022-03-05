@@ -35,6 +35,9 @@ fn check_canonical(
                 && check(one.result(), other.result())?
         }
         (Type::List(one), Type::List(other)) => check(one.element(), other.element())?,
+        (Type::Map(one), Type::Map(other)) => {
+            check(one.key(), other.key())? && check(one.value(), other.value())?
+        }
         (Type::Union(one), Type::Union(other)) => {
             check(one.lhs(), other.lhs())? && check(one.rhs(), other.rhs())?
         }

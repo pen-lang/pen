@@ -7,3 +7,9 @@ pub enum MapElement {
     Map(Expression),
     Removal(Expression),
 }
+
+impl From<MapEntry> for MapElement {
+    fn from(entry: MapEntry) -> Self {
+        Self::Insertion(entry)
+    }
+}

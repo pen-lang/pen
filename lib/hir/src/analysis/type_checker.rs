@@ -423,9 +423,9 @@ fn check_expression(
                 coercion.from(),
             )?;
 
-            if type_canonicalizer::canonicalize_list(coercion.from(), context.types())?.is_none()
-                || type_canonicalizer::canonicalize_list(coercion.to(), context.types())?.is_none()
-            {
+            let to_type = type_canonicalizer::canonicalize(coercion.to(), context.types())?;
+
+            if !to_type.is_list() && !to_type.is_map() {
                 check_subsumption(coercion.from(), coercion.to())?;
             }
 
@@ -2147,6 +2147,301 @@ mod tests {
         }
     }
 
+    mod map {
+        use super::*;
+        use pretty_assertions::assert_eq;
+
+        #[test]
+        fn check_no_element() {
+            assert_eq!(
+                check_module(&Module::empty().set_definitions(vec![Definition::fake(
+                    "x",
+                    Lambda::new(
+                        vec![],
+                        types::Map::new(
+                            types::None::new(Position::fake()),
+                            types::None::new(Position::fake()),
+                            Position::fake(),
+                        ),
+                        Map::new(
+                            types::None::new(Position::fake()),
+                            types::None::new(Position::fake()),
+                            vec![],
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    ),
+                    false,
+                )])),
+                Ok(()),
+            );
+        }
+
+        #[test]
+        fn check_single_element() {
+            assert_eq!(
+                check_module(&Module::empty().set_definitions(vec![Definition::fake(
+                    "x",
+                    Lambda::new(
+                        vec![],
+                        types::Map::new(
+                            types::None::new(Position::fake()),
+                            types::None::new(Position::fake()),
+                            Position::fake(),
+                        ),
+                        Map::new(
+                            types::None::new(Position::fake()),
+                            types::None::new(Position::fake()),
+                            vec![MapEntry::new(
+                                    None::new(Position::fake()),
+                                    None::new(Position::fake()),
+                                    Position::fake(),
+                                )
+                                .into()],
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    ),
+                    false,
+                )])),
+                Ok(()),
+            );
+        }
+
+        #[test]
+        fn fail_to_check_key_type() {
+            assert_eq!(
+                check_module(&Module::empty().set_definitions(vec![Definition::fake(
+                    "x",
+                    Lambda::new(
+                        vec![],
+                        types::Map::new(
+                            types::None::new(Position::fake()),
+                            types::None::new(Position::fake()),
+                            Position::fake(),
+                        ),
+                        Map::new(
+                            types::None::new(Position::fake()),
+                            types::None::new(Position::fake()),
+                            vec![MapEntry::new(
+                                    Number::new(42.0, Position::fake()),
+                                    None::new(Position::fake()),
+                                    Position::fake(),
+                                )
+                                .into()],
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    ),
+                    false,
+                )])),
+                Err(AnalysisError::TypesNotMatched(
+                    Position::fake(),
+                    Position::fake()
+                )),
+            );
+        }
+
+        #[test]
+        fn fail_to_check_value_type() {
+            assert_eq!(
+                check_module(&Module::empty().set_definitions(vec![Definition::fake(
+                    "x",
+                    Lambda::new(
+                        vec![],
+                        types::Map::new(
+                            types::None::new(Position::fake()),
+                            types::None::new(Position::fake()),
+                            Position::fake(),
+                        ),
+                        Map::new(
+                            types::None::new(Position::fake()),
+                            types::None::new(Position::fake()),
+                            vec![MapEntry::new(
+                                    None::new(Position::fake()),
+                                    Number::new(42.0, Position::fake()),
+                                    Position::fake(),
+                                )
+                                .into()],
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    ),
+                    false,
+                )])),
+                Err(AnalysisError::TypesNotMatched(
+                    Position::fake(),
+                    Position::fake()
+                )),
+            );
+        }
+
+        #[test]
+        fn check_multiple_elements() {
+            let map_type = types::Map::new(
+                types::None::new(Position::fake()),
+                types::None::new(Position::fake()),
+                Position::fake(),
+            );
+
+            assert_eq!(
+                check_module(&Module::empty().set_definitions(vec![Definition::fake(
+                    "x",
+                    Lambda::new(
+                        vec![Argument::new("x", map_type.clone())],
+                        map_type,
+                        Map::new(
+                            types::None::new(Position::fake()),
+                            types::None::new(Position::fake()),
+                            vec![MapElement::Map(Variable::new("x", Position::fake()).into())],
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    ),
+                    false,
+                )])),
+                Ok(()),
+            );
+        }
+
+        #[test]
+        fn check_multiple_elements_with_wrong_key_type() {
+            let map_type = types::Map::new(
+                types::None::new(Position::fake()),
+                types::None::new(Position::fake()),
+                Position::fake(),
+            );
+
+            assert_eq!(
+                check_module(&Module::empty().set_definitions(vec![Definition::fake(
+                    "x",
+                    Lambda::new(
+                        vec![Argument::new(
+                            "x",
+                            types::Map::new(
+                                types::Number::new(Position::fake()),
+                                types::None::new(Position::fake()),
+                                Position::fake(),
+                            )
+                        )],
+                        map_type,
+                        Map::new(
+                            types::None::new(Position::fake()),
+                            types::None::new(Position::fake()),
+                            vec![MapElement::Map(Variable::new("x", Position::fake()).into())],
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    ),
+                    false,
+                )])),
+                Err(AnalysisError::TypesNotMatched(
+                    Position::fake(),
+                    Position::fake()
+                )),
+            );
+        }
+
+        #[test]
+        fn check_multiple_elements_with_wrong_value_type() {
+            let map_type = types::Map::new(
+                types::None::new(Position::fake()),
+                types::None::new(Position::fake()),
+                Position::fake(),
+            );
+
+            assert_eq!(
+                check_module(&Module::empty().set_definitions(vec![Definition::fake(
+                    "x",
+                    Lambda::new(
+                        vec![Argument::new(
+                            "x",
+                            types::Map::new(
+                                types::None::new(Position::fake()),
+                                types::Number::new(Position::fake()),
+                                Position::fake(),
+                            )
+                        )],
+                        map_type,
+                        Map::new(
+                            types::None::new(Position::fake()),
+                            types::None::new(Position::fake()),
+                            vec![MapElement::Map(Variable::new("x", Position::fake()).into())],
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    ),
+                    false,
+                )])),
+                Err(AnalysisError::TypesNotMatched(
+                    Position::fake(),
+                    Position::fake()
+                )),
+            );
+        }
+
+        #[test]
+        fn check_key_removal() {
+            let map_type = types::Map::new(
+                types::None::new(Position::fake()),
+                types::None::new(Position::fake()),
+                Position::fake(),
+            );
+
+            assert_eq!(
+                check_module(&Module::empty().set_definitions(vec![Definition::fake(
+                    "x",
+                    Lambda::new(
+                        vec![],
+                        map_type,
+                        Map::new(
+                            types::None::new(Position::fake()),
+                            types::None::new(Position::fake()),
+                            vec![MapElement::Removal(None::new(Position::fake()).into())],
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    ),
+                    false,
+                )])),
+                Ok(()),
+            );
+        }
+
+        #[test]
+        fn check_key_removal_with_wrong_key_type() {
+            let map_type = types::Map::new(
+                types::None::new(Position::fake()),
+                types::None::new(Position::fake()),
+                Position::fake(),
+            );
+
+            assert_eq!(
+                check_module(&Module::empty().set_definitions(vec![Definition::fake(
+                    "x",
+                    Lambda::new(
+                        vec![],
+                        map_type,
+                        Map::new(
+                            types::None::new(Position::fake()),
+                            types::None::new(Position::fake()),
+                            vec![MapElement::Removal(
+                                Number::new(42.0, Position::fake()).into()
+                            )],
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    ),
+                    false,
+                )])),
+                Err(AnalysisError::TypesNotMatched(
+                    Position::fake(),
+                    Position::fake()
+                )),
+            );
+        }
+    }
+
     mod if_list {
         use super::*;
         use pretty_assertions::assert_eq;
@@ -2377,6 +2672,43 @@ mod tests {
                     TypeCoercion::new(
                         none_list_type,
                         any_list_type,
+                        Variable::new("x", Position::fake()),
+                        Position::fake(),
+                    ),
+                    Position::fake(),
+                ),
+                false,
+            )]))
+            .unwrap();
+        }
+
+        #[test]
+        fn check_map() {
+            let key_type = types::Union::new(
+                types::ByteString::new(Position::fake()),
+                types::None::new(Position::fake()),
+                Position::fake(),
+            );
+            let value_type = types::Union::new(
+                types::Number::new(Position::fake()),
+                types::None::new(Position::fake()),
+                Position::fake(),
+            );
+            let none_map_type = types::Map::new(
+                types::None::new(Position::fake()),
+                types::None::new(Position::fake()),
+                Position::fake(),
+            );
+            let union_map_type = types::Map::new(key_type, value_type, Position::fake());
+
+            check_module(&Module::empty().set_definitions(vec![Definition::fake(
+                "x",
+                Lambda::new(
+                    vec![Argument::new("x", none_map_type.clone())],
+                    union_map_type.clone(),
+                    TypeCoercion::new(
+                        none_map_type,
+                        union_map_type,
                         Variable::new("x", Position::fake()),
                         Position::fake(),
                     ),

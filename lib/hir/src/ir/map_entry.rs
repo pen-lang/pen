@@ -1,10 +1,11 @@
 use super::expression::Expression;
 use position::Position;
+use std::sync::Arc;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct MapEntry {
-    key: Expression,
-    value: Expression,
+    key: Arc<Expression>,
+    value: Arc<Expression>,
     position: Position,
 }
 
@@ -15,8 +16,8 @@ impl MapEntry {
         position: Position,
     ) -> Self {
         Self {
-            key: key.into(),
-            value: value.into(),
+            key: key.into().into(),
+            value: value.into().into(),
             position,
         }
     }
