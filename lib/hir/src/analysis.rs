@@ -34,6 +34,7 @@ use crate::ir::Module;
 pub use context::AnalysisContext;
 pub use error::AnalysisError;
 
+// Validate a module and replace subtyping with type coercion there.
 pub fn analyze(context: &AnalysisContext, module: &Module) -> Result<Module, AnalysisError> {
     duplicate_function_name_validator::validate(module)?;
     duplicate_type_name_validator::validate(module)?;
