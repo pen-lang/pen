@@ -1,5 +1,9 @@
 use crate::{context::CompileContext, error::CompileError};
-use hir::{analysis::type_canonicalizer, ir::*, types::Type};
+use hir::{
+    analysis::{type_canonicalizer, AnalysisError},
+    ir::*,
+    types::Type,
+};
 
 // Validate variant types in FFI because the current backend cannot handle them
 // properly for some targets (e.g. i386.)
@@ -22,7 +26,7 @@ fn validate_foreign_declaration(
     let function_type =
         type_canonicalizer::canonicalize_function(declaration.type_(), context.types())?
             .ok_or_else(|| {
-                CompileError::FunctionExpected(declaration.type_().position().clone())
+                AnalysisError::FunctionExpected(declaration.type_().position().clone())
             })?;
 
     for argument_type in function_type.arguments() {
