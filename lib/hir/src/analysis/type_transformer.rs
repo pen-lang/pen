@@ -238,9 +238,7 @@ fn transform_expression(expression: &Expression, transform: &impl Fn(&Type) -> T
                         transform_expression(entry.value(), transform),
                         entry.position().clone(),
                     )),
-                    MapElement::Map(other) => {
-                        MapElement::Map(transform_expression(other, transform))
-                    }
+                    MapElement::Map(map) => MapElement::Map(transform_expression(map, transform)),
                     MapElement::Removal(key) => {
                         MapElement::Removal(transform_expression(key, transform))
                     }

@@ -289,9 +289,7 @@ fn infer_expression(
                             infer_expression(entry.value(), variables)?,
                             entry.position().clone(),
                         )),
-                        MapElement::Map(other) => {
-                            MapElement::Map(infer_expression(other, variables)?)
-                        }
+                        MapElement::Map(map) => MapElement::Map(infer_expression(map, variables)?),
                         MapElement::Removal(key) => {
                             MapElement::Removal(infer_expression(key, variables)?)
                         }
