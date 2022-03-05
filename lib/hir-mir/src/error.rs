@@ -11,7 +11,6 @@ pub enum CompileError {
     AnyEqualOperation(Position),
     CompileConfigurationNotProvided,
     FunctionEqualOperation(Position),
-    FunctionExpected(Position),
     InvalidRecordEqualOperation(Position),
     MainFunctionNotFound(Position),
     MirTypeCheck(mir::analysis::TypeCheckError),
@@ -39,9 +38,6 @@ impl Display for CompileError {
                     "equal operator cannot be used with function type\n{}",
                     position
                 )
-            }
-            Self::FunctionExpected(position) => {
-                write!(formatter, "function expected\n{}", position)
             }
             Self::InvalidRecordEqualOperation(position) => {
                 write!(
