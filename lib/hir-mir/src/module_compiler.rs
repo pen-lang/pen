@@ -3,7 +3,7 @@ use super::{
     CompileError,
 };
 use crate::spawn_function_declaration_compiler;
-use hir::ir::*;
+use hir::{analysis::AnalysisError, ir::*};
 
 pub fn compile(module: &Module, context: &CompileContext) -> Result<mir::ir::Module, CompileError> {
     Ok(mir::ir::Module::new(
@@ -25,7 +25,7 @@ pub fn compile(module: &Module, context: &CompileContext) -> Result<mir::ir::Mod
                     type_compiler::compile(declaration.type_(), context)?
                         .into_function()
                         .ok_or_else(|| {
-                            CompileError::FunctionExpected(declaration.position().clone())
+                            AnalysisError::FunctionExpected(declaration.position().clone())
                         })?,
                     compile_calling_convention(declaration.calling_convention()),
                 ))

@@ -36,7 +36,7 @@ pub fn compile(
                 context,
             )?
             .into_function()
-            .ok_or_else(|| CompileError::FunctionExpected(call.position().clone()))?,
+            .ok_or_else(|| AnalysisError::FunctionExpected(call.position().clone()))?,
             compile(call.function())?,
             call.arguments()
                 .iter()
