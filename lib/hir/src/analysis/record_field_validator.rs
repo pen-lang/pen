@@ -1,11 +1,11 @@
-use crate::{context::CompileContext, CompileError};
-use fnv::FnvHashSet;
-use hir::{
+use super::AnalysisContext;
+use crate::{
     analysis::{expression_visitor, type_canonicalizer, AnalysisError},
     ir::*,
 };
+use fnv::FnvHashSet;
 
-pub fn validate(module: &Module, context: &CompileContext) -> Result<(), CompileError> {
+pub fn validate(context: &AnalysisContext, module: &Module) -> Result<(), AnalysisError> {
     let open_records = collect_open_records(module.type_definitions());
 
     for expression in collect_expressions(module) {
@@ -14,11 +14,11 @@ pub fn validate(module: &Module, context: &CompileContext) -> Result<(), Compile
                 let record_type =
                     type_canonicalizer::canonicalize_record(construction.type_(), context.types())?
                         .ok_or_else(|| {
-                            CompileError::RecordExpected(construction.position().clone())
+                            AnalysisError::RecordExpected(construction.position().clone())
                         })?;
 
                 if !open_records.contains(record_type.name()) {
-                    return Err(CompileError::RecordFieldPrivate(
+                    return Err(AnalysisError::RecordFieldPrivate(
                         construction.position().clone(),
                     ));
                 }
@@ -30,10 +30,10 @@ pub fn validate(module: &Module, context: &CompileContext) -> Result<(), Compile
                     })?,
                     context.types(),
                 )?
-                .ok_or_else(|| CompileError::RecordExpected(deconstruction.position().clone()))?;
+                .ok_or_else(|| AnalysisError::RecordExpected(deconstruction.position().clone()))?;
 
                 if !open_records.contains(record_type.name()) {
-                    return Err(CompileError::RecordFieldPrivate(
+                    return Err(AnalysisError::RecordFieldPrivate(
                         deconstruction.position().clone(),
                     ));
                 }
@@ -41,10 +41,10 @@ pub fn validate(module: &Module, context: &CompileContext) -> Result<(), Compile
             Expression::RecordUpdate(update) => {
                 let record_type =
                     type_canonicalizer::canonicalize_record(update.type_(), context.types())?
-                        .ok_or_else(|| CompileError::RecordExpected(update.position().clone()))?;
+                        .ok_or_else(|| AnalysisError::RecordExpected(update.position().clone()))?;
 
                 if !open_records.contains(record_type.name()) {
-                    return Err(CompileError::RecordFieldPrivate(update.position().clone()));
+                    return Err(AnalysisError::RecordFieldPrivate(update.position().clone()));
                 }
             }
             _ => {}
@@ -87,17 +87,21 @@ fn is_record_open(definition: &TypeDefinition) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::compile_configuration::COMPILE_CONFIGURATION;
-    use hir::{
+    use crate::{
+        analysis::type_collector,
         test::{DefinitionFake, ModuleFake, TypeDefinitionFake},
         types,
     };
     use position::{test::PositionFake, Position};
 
-    fn validate_module(module: &Module) -> Result<(), CompileError> {
+    fn validate_module(module: &Module) -> Result<(), AnalysisError> {
         validate(
+            &AnalysisContext::new(
+                type_collector::collect(module),
+                type_collector::collect_records(module),
+                Some(types::Record::new("error", Position::fake()).into()),
+            ),
             module,
-            &CompileContext::new(module, COMPILE_CONFIGURATION.clone().into()),
         )
     }
 

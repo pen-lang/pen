@@ -1,14 +1,14 @@
-use crate::error::CompileError;
+use super::AnalysisError;
+use crate::ir::*;
 use fnv::FnvHashMap;
-use hir::ir::*;
 use position::Position;
 
-pub fn validate(module: &Module) -> Result<(), CompileError> {
+pub fn validate(module: &Module) -> Result<(), AnalysisError> {
     let mut definitions = FnvHashMap::<&str, &Position>::default();
 
     for definition in module.definitions() {
         if let Some(&position) = definitions.get(definition.name()) {
-            return Err(CompileError::DuplicateFunctionNames(
+            return Err(AnalysisError::DuplicateFunctionNames(
                 position.clone(),
                 definition.position().clone(),
             ));
@@ -23,7 +23,7 @@ pub fn validate(module: &Module) -> Result<(), CompileError> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use hir::{
+    use crate::{
         test::{DefinitionFake, ModuleFake},
         types,
     };
@@ -44,7 +44,7 @@ mod tests {
 
         assert_eq!(
             validate(&Module::empty().set_definitions(vec![definition.clone(), definition])),
-            Err(CompileError::DuplicateFunctionNames(
+            Err(AnalysisError::DuplicateFunctionNames(
                 Position::fake(),
                 Position::fake()
             ))

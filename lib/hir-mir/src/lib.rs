@@ -5,6 +5,7 @@ mod downcast_compiler;
 mod error;
 mod error_type_configuration;
 mod expression_compiler;
+mod ffi_variant_type_validator;
 mod generic_type_definition_compiler;
 mod list_type_configuration;
 mod main_function_compiler;
@@ -17,25 +18,17 @@ mod test_function_compiler;
 mod test_module_configuration;
 mod transformation;
 mod type_compiler;
-mod validation;
 
 use self::{context::CompileContext, transformation::record_equal_function_transformer};
 pub use compile_configuration::CompileConfiguration;
 pub use concurrency_configuration::ConcurrencyConfiguration;
 pub use error::CompileError;
 pub use error_type_configuration::ErrorTypeConfiguration;
-use hir::{
-    analysis::{type_checker, type_coercer, type_existence_validator, type_inferrer},
-    ir::*,
-};
+use hir::ir::*;
 pub use list_type_configuration::ListTypeConfiguration;
 pub use main_module_configuration::*;
 pub use string_type_configuration::StringTypeConfiguration;
 pub use test_module_configuration::TestModuleConfiguration;
-use validation::{
-    duplicate_function_name_validator, duplicate_type_name_validator, ffi_variant_type_validator,
-    record_field_validator, try_operation_validator, unused_error_validator,
-};
 
 pub fn compile_main(
     module: &Module,
@@ -87,25 +80,9 @@ fn compile_module(
     module: &Module,
     context: &CompileContext,
 ) -> Result<(mir::ir::Module, interface::Module), CompileError> {
-    duplicate_function_name_validator::validate(module)?;
-    duplicate_type_name_validator::validate(module)?;
-    type_existence_validator::validate(
-        module,
-        &context.types().keys().cloned().collect(),
-        &context.records().keys().cloned().collect(),
-    )?;
-
-    let module = record_equal_function_transformer::transform(module, context)?;
-    let module = type_inferrer::infer(context.analysis(), &module)?;
-    type_checker::check_types(context.analysis(), &module)?;
-
-    try_operation_validator::validate(&module, context)?;
-    record_field_validator::validate(&module, context)?;
-    ffi_variant_type_validator::validate(&module, context)?;
-    unused_error_validator::validate(&module, context)?;
-
-    let module = type_coercer::coerce_types(context.analysis(), &module)?;
-    type_checker::check_types(context.analysis(), &module)?;
+    let module = hir::analysis::analyze(context.analysis(), module)?;
+    let module = record_equal_function_transformer::transform(context, &module)?;
+    ffi_variant_type_validator::validate(context, &module)?;
 
     Ok((
         {
@@ -125,6 +102,7 @@ mod tests {
         error_type_configuration::ERROR_TYPE_CONFIGURATION,
     };
     use hir::{
+        analysis::AnalysisError,
         test::{DefinitionFake, ModuleFake, TypeDefinitionFake},
         types,
     };
@@ -296,10 +274,7 @@ mod tests {
 
         assert_eq!(
             compile_module(&Module::empty().set_definitions(vec![definition.clone(), definition])),
-            Err(CompileError::DuplicateFunctionNames(
-                Position::fake(),
-                Position::fake()
-            ))
+            Err(AnalysisError::DuplicateFunctionNames(Position::fake(), Position::fake()).into())
         );
     }
 
@@ -340,7 +315,7 @@ mod tests {
                         false,
                     )])
             ),
-            Err(CompileError::InvalidTryOperation(Position::fake()))
+            Err(AnalysisError::InvalidTryOperation(Position::fake()).into())
         );
     }
 }

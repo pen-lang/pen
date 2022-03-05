@@ -8,21 +8,28 @@ use std::{
 #[derive(Clone, Debug, PartialEq)]
 pub enum AnalysisError {
     AnyTypeBranch(Position),
+    DuplicateFunctionNames(Position, Position),
+    DuplicateTypeNames(Position, Position),
     ErrorTypeUndefined,
     FunctionExpected(Position),
+    InvalidTryOperation(Position),
     ListExpected(Position),
     MissingElseBlock(Position),
     RecordExpected(Position),
     RecordFieldMissing(Position),
+    RecordFieldPrivate(Position),
+    RecordFieldUnknown(Position),
     RecordNotFound(Record),
     SpawnOperationArguments(Position),
-    TypesNotComparable(Position),
+    TryOperationInList(Position),
     TypeNotFound(Reference),
     TypeNotInferred(Position),
+    TypesNotComparable(Position),
     TypesNotMatched(Position, Position),
     UnionExpected(Position),
     UnknownRecordField(Position),
     UnreachableCode(Position),
+    UnusedErrorValue(Position),
     VariableNotFound(Variable),
     VariantExpected(Position),
     WrongArgumentCount(Position),
@@ -38,11 +45,24 @@ impl Display for AnalysisError {
                     position
                 )
             }
+            Self::DuplicateFunctionNames(one, other) => {
+                write!(formatter, "duplicate function names\n{}\n{}", one, other)
+            }
+            Self::DuplicateTypeNames(one, other) => {
+                write!(formatter, "duplicate type names\n{}\n{}", one, other)
+            }
             Self::ErrorTypeUndefined => {
                 write!(formatter, "error type undefined")
             }
             Self::FunctionExpected(position) => {
                 write!(formatter, "function expected\n{}", position)
+            }
+            Self::InvalidTryOperation(position) => {
+                write!(
+                    formatter,
+                    "try operation cannot be used in function not returning error\n{}",
+                    position
+                )
             }
             Self::ListExpected(position) => {
                 write!(formatter, "list expected\n{}", position)
@@ -60,12 +80,25 @@ impl Display for AnalysisError {
             Self::RecordFieldMissing(position) => {
                 write!(formatter, "missing record field\n{}", position)
             }
+            Self::RecordFieldPrivate(position) => {
+                write!(formatter, "private record field\n{}", position)
+            }
+            Self::RecordFieldUnknown(position) => {
+                write!(formatter, "unknown record field\n{}", position)
+            }
             Self::RecordNotFound(record) => write!(
                 formatter,
                 "record type \"{}\" not found\n{}",
                 record.name(),
                 record.position()
             ),
+            Self::TryOperationInList(position) => {
+                write!(
+                    formatter,
+                    "try operation not allowed in list literal\n{}",
+                    position
+                )
+            }
             Self::SpawnOperationArguments(position) => {
                 write!(
                     formatter,
@@ -98,6 +131,9 @@ impl Display for AnalysisError {
             }
             Self::UnreachableCode(position) => {
                 write!(formatter, "unreachable code\n{}", position)
+            }
+            Self::UnusedErrorValue(position) => {
+                write!(formatter, "unused error value\n{}", position)
             }
             Self::VariableNotFound(variable) => write!(
                 formatter,

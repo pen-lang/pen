@@ -3,7 +3,7 @@ use hir::{analysis::type_canonicalizer, ir::*, types::Type};
 
 // Validate variant types in FFI because the current backend cannot handle them
 // properly for some targets (e.g. i386.)
-pub fn validate(module: &Module, context: &CompileContext) -> Result<(), CompileError> {
+pub fn validate(context: &CompileContext, module: &Module) -> Result<(), CompileError> {
     for declaration in module.foreign_declarations() {
         validate_foreign_declaration(context, declaration)?;
     }
@@ -68,8 +68,8 @@ mod tests {
 
     fn validate_module(module: &Module) -> Result<(), CompileError> {
         validate(
-            module,
             &CompileContext::new(module, COMPILE_CONFIGURATION.clone().into()),
+            module,
         )
     }
 

@@ -1,9 +1,9 @@
-use crate::error::CompileError;
+use super::AnalysisError;
+use crate::ir::*;
 use fnv::FnvHashMap;
-use hir::ir::*;
 use position::Position;
 
-pub fn validate(module: &Module) -> Result<(), CompileError> {
+pub fn validate(module: &Module) -> Result<(), AnalysisError> {
     let mut definitions = FnvHashMap::<&str, &Position>::default();
 
     for (name, position) in module
@@ -18,7 +18,7 @@ pub fn validate(module: &Module) -> Result<(), CompileError> {
         )
     {
         if let Some(&position) = definitions.get(name) {
-            return Err(CompileError::DuplicateTypeNames(
+            return Err(AnalysisError::DuplicateTypeNames(
                 position.clone(),
                 position.clone(),
             ));
@@ -33,7 +33,7 @@ pub fn validate(module: &Module) -> Result<(), CompileError> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use hir::{
+    use crate::{
         test::{ModuleFake, TypeAliasFake, TypeDefinitionFake},
         types,
     };
@@ -45,7 +45,7 @@ mod tests {
 
         assert_eq!(
             validate(&Module::empty().set_type_definitions(vec![definition.clone(), definition])),
-            Err(CompileError::DuplicateTypeNames(
+            Err(AnalysisError::DuplicateTypeNames(
                 Position::fake(),
                 Position::fake()
             ))
@@ -58,7 +58,7 @@ mod tests {
 
         assert_eq!(
             validate(&Module::empty().set_type_aliases(vec![alias.clone(), alias])),
-            Err(CompileError::DuplicateTypeNames(
+            Err(AnalysisError::DuplicateTypeNames(
                 Position::fake(),
                 Position::fake()
             ))
@@ -84,7 +84,7 @@ mod tests {
                         false
                     )])
             ),
-            Err(CompileError::DuplicateTypeNames(
+            Err(AnalysisError::DuplicateTypeNames(
                 Position::fake(),
                 Position::fake()
             ))

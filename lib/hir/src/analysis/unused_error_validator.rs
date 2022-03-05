@@ -1,11 +1,10 @@
-use crate::{context::CompileContext, CompileError};
-use hir::{
-    analysis::{expression_visitor, type_canonicalizer, type_subsumption_checker, AnalysisError},
+use super::{context::AnalysisContext, AnalysisError};
+use crate::{
+    analysis::{expression_visitor, type_canonicalizer, type_subsumption_checker},
     ir::*,
-    types,
 };
 
-pub fn validate(module: &Module, context: &CompileContext) -> Result<(), CompileError> {
+pub fn validate(context: &AnalysisContext, module: &Module) -> Result<(), AnalysisError> {
     for expression in collect_expressions(module) {
         if let Expression::Let(let_) = expression {
             let expression = let_.bound_expression();
@@ -15,17 +14,9 @@ pub fn validate(module: &Module, context: &CompileContext) -> Result<(), Compile
 
             if let_.name().is_none()
                 && !type_canonicalizer::canonicalize(type_, context.types())?.is_any()
-                && type_subsumption_checker::check(
-                    &types::Reference::new(
-                        &context.configuration()?.error_type.error_type_name,
-                        type_.position().clone(),
-                    )
-                    .into(),
-                    type_,
-                    context.types(),
-                )?
+                && type_subsumption_checker::check(context.error_type()?, type_, context.types())?
             {
-                return Err(CompileError::UnusedErrorValue(
+                return Err(AnalysisError::UnusedErrorValue(
                     expression.position().clone(),
                 ));
             }
@@ -50,35 +41,29 @@ fn collect_expressions(module: &Module) -> Vec<Expression> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::compile_configuration::COMPILE_CONFIGURATION;
-    use hir::{
+    use crate::{
+        analysis::type_collector,
         test::{DefinitionFake, ModuleFake, TypeDefinitionFake},
         types::{self, Type},
     };
     use once_cell::sync::Lazy;
     use position::{test::PositionFake, Position};
 
-    static ERROR_TYPE: Lazy<Type> = Lazy::new(|| {
-        types::Reference::new(
-            &COMPILE_CONFIGURATION.error_type.error_type_name,
-            Position::fake(),
-        )
-        .into()
-    });
-    static ERROR_TYPE_DEFINITION: Lazy<TypeDefinition> = Lazy::new(|| {
-        TypeDefinition::fake(
-            &COMPILE_CONFIGURATION.error_type.error_type_name,
-            vec![],
-            false,
-            false,
-            false,
-        )
-    });
+    const ERROR_TYPE_NAME: &str = "error";
 
-    fn validate_module(module: &Module) -> Result<(), CompileError> {
+    static ERROR_TYPE: Lazy<Type> =
+        Lazy::new(|| types::Reference::new(ERROR_TYPE_NAME, Position::fake()).into());
+    static ERROR_TYPE_DEFINITION: Lazy<TypeDefinition> =
+        Lazy::new(|| TypeDefinition::fake(ERROR_TYPE_NAME, vec![], false, false, false));
+
+    fn validate_module(module: &Module) -> Result<(), AnalysisError> {
         validate(
+            &AnalysisContext::new(
+                type_collector::collect(module),
+                type_collector::collect_records(module),
+                Some(types::Record::new("error", Position::fake()).into()),
+            ),
             module,
-            &CompileContext::new(module, COMPILE_CONFIGURATION.clone().into()),
         )
     }
 
@@ -159,7 +144,7 @@ mod tests {
                         false,
                     )]),
             ),
-            Err(CompileError::UnusedErrorValue(Position::fake())),
+            Err(AnalysisError::UnusedErrorValue(Position::fake())),
         );
     }
 
@@ -192,7 +177,7 @@ mod tests {
                         false,
                     )]),
             ),
-            Err(CompileError::UnusedErrorValue(Position::fake())),
+            Err(AnalysisError::UnusedErrorValue(Position::fake())),
         );
     }
 }
