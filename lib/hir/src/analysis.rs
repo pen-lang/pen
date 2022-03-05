@@ -43,7 +43,7 @@ pub fn analyze(context: &AnalysisContext, module: &Module) -> Result<Module, Ana
         &context.records().keys().cloned().collect(),
     )?;
 
-    let module = type_inferrer::infer(context, &module)?;
+    let module = type_inferrer::infer(context, module)?;
     type_checker::check_types(context, &module)?;
 
     try_operation_validator::validate(context, &module)?;

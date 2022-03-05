@@ -6,7 +6,7 @@ use hir::{analysis::type_comparability_checker, ir::*, types};
 const LHS_NAME: &str = "$lhs";
 const RHS_NAME: &str = "$rhs";
 
-pub fn transform(module: &Module, context: &CompileContext) -> Result<Module, CompileError> {
+pub fn transform(context: &CompileContext, module: &Module) -> Result<Module, CompileError> {
     let mut equal_function_definitions = vec![];
     let mut equal_function_declarations = vec![];
 
@@ -129,8 +129,8 @@ mod tests {
 
     fn transform_module(module: &Module) -> Result<Module, CompileError> {
         transform(
-            module,
             &CompileContext::new(module, COMPILE_CONFIGURATION.clone().into()),
+            module,
         )
     }
 

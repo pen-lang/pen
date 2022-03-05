@@ -81,9 +81,8 @@ fn compile_module(
     context: &CompileContext,
 ) -> Result<(mir::ir::Module, interface::Module), CompileError> {
     let module = hir::analysis::analyze(context.analysis(), module)?;
-
-    let module = record_equal_function_transformer::transform(&module, context)?;
-    ffi_variant_type_validator::validate(&module, context)?;
+    let module = record_equal_function_transformer::transform(context, &module)?;
+    ffi_variant_type_validator::validate(context, &module)?;
 
     Ok((
         {
