@@ -164,6 +164,26 @@ fn transform_expression(
             comprehension.position().clone(),
         )
         .into(),
+        Expression::Map(map) => Map::new(
+            map.key_type().clone(),
+            map.value_type().clone(),
+            map.elements()
+                .iter()
+                .map(|element| match element {
+                    MapElement::Insertion(entry) => MapElement::Insertion(MapEntry::new(
+                        transform_expression(entry.key(), transform),
+                        transform_expression(entry.value(), transform),
+                        entry.position().clone(),
+                    )),
+                    MapElement::Map(map) => MapElement::Map(transform_expression(map, transform)),
+                    MapElement::Removal(expression) => {
+                        MapElement::Removal(transform_expression(expression, transform))
+                    }
+                })
+                .collect(),
+            map.position().clone(),
+        )
+        .into(),
         Expression::Operation(operation) => transform_operation(operation, transform).into(),
         Expression::RecordConstruction(construction) => RecordConstruction::new(
             construction.type_().clone(),

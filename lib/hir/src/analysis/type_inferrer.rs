@@ -277,6 +277,30 @@ fn infer_expression(
             )
             .into()
         }
+        Expression::Map(map) => Map::new(
+            map.key_type().clone(),
+            map.value_type().clone(),
+            map.elements()
+                .iter()
+                .map(|element| {
+                    Ok(match element {
+                        MapElement::Insertion(entry) => MapElement::Insertion(MapEntry::new(
+                            infer_expression(entry.key(), variables)?,
+                            infer_expression(entry.value(), variables)?,
+                            entry.position().clone(),
+                        )),
+                        MapElement::Map(other) => {
+                            MapElement::Map(infer_expression(other, variables)?)
+                        }
+                        MapElement::Removal(key) => {
+                            MapElement::Removal(infer_expression(key, variables)?)
+                        }
+                    })
+                })
+                .collect::<Result<_, AnalysisError>>()?,
+            map.position().clone(),
+        )
+        .into(),
         Expression::Operation(operation) => match operation {
             Operation::Arithmetic(operation) => ArithmeticOperation::new(
                 operation.operator(),

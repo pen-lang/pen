@@ -14,6 +14,7 @@ pub enum AnalysisError {
     FunctionExpected(Position),
     InvalidTryOperation(Position),
     ListExpected(Position),
+    MapExpected(Position),
     MissingElseBlock(Position),
     RecordExpected(Position),
     RecordFieldMissing(Position),
@@ -66,6 +67,9 @@ impl Display for AnalysisError {
             }
             Self::ListExpected(position) => {
                 write!(formatter, "list expected\n{}", position)
+            }
+            Self::MapExpected(position) => {
+                write!(formatter, "map expected\n{}", position)
             }
             Self::MissingElseBlock(position) => {
                 write!(

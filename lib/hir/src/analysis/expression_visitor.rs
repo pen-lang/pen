@@ -64,6 +64,18 @@ fn visit_expression(expression: &Expression, visit: &mut impl FnMut(&Expression)
             visit_expression(comprehension.element());
             visit_expression(comprehension.list());
         }
+        Expression::Map(map) => {
+            for element in map.elements() {
+                match element {
+                    MapElement::Insertion(entry) => {
+                        visit_expression(entry.key());
+                        visit_expression(entry.value());
+                    }
+                    MapElement::Map(expression) => visit_expression(expression),
+                    MapElement::Removal(expression) => visit_expression(expression),
+                }
+            }
+        }
         Expression::Operation(operation) => match operation {
             Operation::Arithmetic(operation) => {
                 visit_expression(operation.lhs());

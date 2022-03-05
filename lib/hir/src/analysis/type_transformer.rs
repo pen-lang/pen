@@ -227,6 +227,28 @@ fn transform_expression(expression: &Expression, transform: &impl Fn(&Type) -> T
             comprehension.position().clone(),
         )
         .into(),
+        Expression::Map(map) => Map::new(
+            transform(map.key_type()),
+            transform(map.value_type()),
+            map.elements()
+                .iter()
+                .map(|element| match element {
+                    MapElement::Insertion(entry) => MapElement::Insertion(MapEntry::new(
+                        transform_expression(entry.key(), transform),
+                        transform_expression(entry.value(), transform),
+                        entry.position().clone(),
+                    )),
+                    MapElement::Map(other) => {
+                        MapElement::Map(transform_expression(other, transform))
+                    }
+                    MapElement::Removal(key) => {
+                        MapElement::Removal(transform_expression(key, transform))
+                    }
+                })
+                .collect(),
+            map.position().clone(),
+        )
+        .into(),
         Expression::Operation(operation) => transform_operation(operation, transform).into(),
         Expression::RecordConstruction(construction) => RecordConstruction::new(
             transform(construction.type_()),

@@ -1,5 +1,5 @@
 use super::{
-    boolean::Boolean, call::Call, if_::If, if_list::IfList, if_type::IfType, list::List,
+    boolean::Boolean, call::Call, if_::If, if_list::IfList, if_type::IfType, list::List, map::Map,
     none::None, number::Number, operation::Operation, record_construction::RecordConstruction,
     record_deconstruction::RecordDeconstruction, record_update::RecordUpdate, string::ByteString,
     type_coercion::TypeCoercion, variable::Variable, Lambda, Let, ListComprehension, Thunk,
@@ -17,6 +17,7 @@ pub enum Expression {
     Let(Let),
     List(List),
     ListComprehension(ListComprehension),
+    Map(Map),
     None(None),
     Number(Number),
     Operation(Operation),
@@ -41,6 +42,7 @@ impl Expression {
             Self::Let(let_) => let_.position(),
             Self::List(list) => list.position(),
             Self::ListComprehension(comprehension) => comprehension.position(),
+            Self::Map(map) => map.position(),
             Self::None(none) => none.position(),
             Self::Number(number) => number.position(),
             Self::Operation(operation) => operation.position(),
@@ -103,6 +105,12 @@ impl From<If> for Expression {
     }
 }
 
+impl From<IfList> for Expression {
+    fn from(if_: IfList) -> Self {
+        Self::IfList(if_)
+    }
+}
+
 impl From<Lambda> for Expression {
     fn from(lambda: Lambda) -> Self {
         Self::Lambda(lambda)
@@ -127,9 +135,9 @@ impl From<ListComprehension> for Expression {
     }
 }
 
-impl From<IfList> for Expression {
-    fn from(if_: IfList) -> Self {
-        Self::IfList(if_)
+impl From<Map> for Expression {
+    fn from(map: Map) -> Self {
+        Self::Map(map)
     }
 }
 

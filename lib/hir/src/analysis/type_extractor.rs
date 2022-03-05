@@ -135,6 +135,12 @@ pub fn extract_from_expression(
                 )
                 .collect(),
         )?,
+        Expression::Map(map) => types::Map::new(
+            map.key_type().clone(),
+            map.value_type().clone(),
+            map.position().clone(),
+        )
+        .into(),
         Expression::None(none) => types::None::new(none.position().clone()).into(),
         Expression::Number(number) => types::Number::new(number.position().clone()).into(),
         Expression::Operation(operation) => match operation {

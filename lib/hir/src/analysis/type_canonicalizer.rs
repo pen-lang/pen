@@ -54,6 +54,13 @@ pub fn canonicalize_list(
     Ok(canonicalize(type_, types)?.into_list())
 }
 
+pub fn canonicalize_map(
+    type_: &Type,
+    types: &FnvHashMap<String, Type>,
+) -> Result<Option<Map>, AnalysisError> {
+    Ok(canonicalize(type_, types)?.into_map())
+}
+
 pub fn canonicalize_record(
     type_: &Type,
     types: &FnvHashMap<String, Type>,

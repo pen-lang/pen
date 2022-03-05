@@ -301,6 +301,45 @@ fn transform_expression(
             )
             .into()
         }
+        Expression::Map(map) => Map::new(
+            map.key_type().clone(),
+            map.value_type().clone(),
+            map.elements()
+                .iter()
+                .map(|element| {
+                    Ok(match element {
+                        MapElement::Insertion(entry) => MapElement::Insertion(MapEntry::new(
+                            transform_and_coerce_expression(
+                                entry.key(),
+                                map.key_type(),
+                                variables,
+                            )?,
+                            transform_and_coerce_expression(
+                                entry.value(),
+                                map.value_type(),
+                                variables,
+                            )?,
+                            entry.position().clone(),
+                        )),
+                        MapElement::Map(other) => MapElement::Map(transform_and_coerce_expression(
+                            other,
+                            &types::Map::new(
+                                map.key_type().clone(),
+                                map.value_type().clone(),
+                                map.position().clone(),
+                            )
+                            .into(),
+                            variables,
+                        )?),
+                        MapElement::Removal(key) => MapElement::Removal(
+                            transform_and_coerce_expression(key, map.key_type(), variables)?,
+                        ),
+                    })
+                })
+                .collect::<Result<_, AnalysisError>>()?,
+            map.position().clone(),
+        )
+        .into(),
         Expression::Operation(operation) => match operation {
             Operation::Arithmetic(operation) => ArithmeticOperation::new(
                 operation.operator(),

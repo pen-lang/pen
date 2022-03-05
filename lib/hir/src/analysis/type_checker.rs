@@ -274,6 +274,45 @@ fn check_expression(
 
             types::List::new(comprehension.output_type().clone(), position.clone()).into()
         }
+        Expression::Map(map) => {
+            for element in map.elements() {
+                match element {
+                    MapElement::Insertion(entry) => {
+                        check_subsumption(
+                            &check_expression(entry.key(), variables)?,
+                            map.key_type(),
+                        )?;
+                        check_subsumption(
+                            &check_expression(entry.value(), variables)?,
+                            map.value_type(),
+                        )?;
+                    }
+                    MapElement::Map(expression) => {
+                        let map_type = type_canonicalizer::canonicalize_map(
+                            &check_expression(expression, variables)?,
+                            context.types(),
+                        )?
+                        .ok_or_else(|| AnalysisError::MapExpected(expression.position().clone()))?;
+
+                        check_subsumption(map_type.key(), map.key_type())?;
+                        check_subsumption(map_type.value(), map.value_type())?;
+                    }
+                    MapElement::Removal(expression) => {
+                        check_subsumption(
+                            &check_expression(expression, variables)?,
+                            map.key_type(),
+                        )?;
+                    }
+                }
+            }
+
+            types::Map::new(
+                map.key_type().clone(),
+                map.value_type().clone(),
+                map.position().clone(),
+            )
+            .into()
+        }
         Expression::None(none) => types::None::new(none.position().clone()).into(),
         Expression::Number(number) => types::Number::new(number.position().clone()).into(),
         Expression::Operation(operation) => check_operation(context, operation, variables)?,

@@ -75,6 +75,18 @@ fn validate_expression(
             validate_expression(context, comprehension.element(), None)?;
             validate_expression(context, comprehension.list(), None)?;
         }
+        Expression::Map(map) => {
+            for element in map.elements() {
+                match element {
+                    MapElement::Insertion(entry) => {
+                        validate(entry.key())?;
+                        validate(entry.value())?
+                    }
+                    MapElement::Map(expression) => validate(expression)?,
+                    MapElement::Removal(expression) => validate(expression)?,
+                }
+            }
+        }
         Expression::Operation(operation) => match operation {
             Operation::Arithmetic(operation) => {
                 validate(operation.lhs())?;
