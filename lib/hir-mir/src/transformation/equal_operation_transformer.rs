@@ -226,6 +226,7 @@ fn transform_equal_operation(
     })
 }
 
+// TODO Do not generate equal functions dynamically but define them once globally.
 fn compile_any_equal_function(
     context: &CompileContext,
     type_: &Type,
