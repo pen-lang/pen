@@ -5,6 +5,7 @@ pub fn qualify(
     hir_mir::CompileConfiguration {
         error_type: qualify_error_type_configuration(&configuration.error_type, prelude_prefix),
         list_type: qualify_list_type_configuration(&configuration.list_type, prelude_prefix),
+        map_type: qualify_map_type_configuration(&configuration.map_type, prelude_prefix),
         string_type: qualify_string_type_configuration(&configuration.string_type, prelude_prefix),
         concurrency: configuration.concurrency.clone(),
     }
@@ -28,6 +29,16 @@ fn qualify_list_type_configuration(
         rest_function_name: prelude_prefix.to_owned() + &configuration.rest_function_name,
         list_type_name: prelude_prefix.to_owned() + &configuration.list_type_name,
         first_rest_type_name: prelude_prefix.to_owned() + &configuration.first_rest_type_name,
+    }
+}
+
+fn qualify_map_type_configuration(
+    configuration: &hir_mir::MapTypeConfiguration,
+    prelude_prefix: &str,
+) -> hir_mir::MapTypeConfiguration {
+    hir_mir::MapTypeConfiguration {
+        empty_map_function_name: prelude_prefix.to_owned() + &configuration.empty_map_function_name,
+        map_type_name: prelude_prefix.to_owned() + &configuration.map_type_name,
     }
 }
 

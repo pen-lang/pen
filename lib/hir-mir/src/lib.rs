@@ -10,6 +10,7 @@ mod generic_type_definition_compiler;
 mod list_type_configuration;
 mod main_function_compiler;
 mod main_module_configuration;
+mod map_type_configuration;
 mod module_compiler;
 mod module_interface_compiler;
 mod spawn_function_declaration_compiler;
@@ -27,6 +28,7 @@ pub use error_type_configuration::ErrorTypeConfiguration;
 use hir::ir::*;
 pub use list_type_configuration::ListTypeConfiguration;
 pub use main_module_configuration::*;
+pub use map_type_configuration::MapTypeConfiguration;
 pub use string_type_configuration::StringTypeConfiguration;
 pub use test_module_configuration::TestModuleConfiguration;
 

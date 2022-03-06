@@ -33,6 +33,10 @@ pub static COMPILE_CONFIGURATION: Lazy<Arc<app::module_compiler::CompileConfigur
                     list_type_name: "_anyList".into(),
                     first_rest_type_name: "_firstRest".into(),
                 },
+                map_type: app::module_compiler::MapTypeConfiguration {
+                    empty_map_function_name: "_emptyMap".into(),
+                    map_type_name: "_anyMap".into(),
+                },
                 string_type: app::module_compiler::StringTypeConfiguration {
                     equal_function_name: "_equalStrings".into(),
                 },

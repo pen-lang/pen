@@ -82,8 +82,10 @@ pub fn compile_concrete_list_name(
     ))
 }
 
-pub fn compile_map(_context: &CompileContext) -> Result<mir::types::Record, CompileError> {
-    todo!()
+pub fn compile_map(context: &CompileContext) -> Result<mir::types::Record, CompileError> {
+    Ok(mir::types::Record::new(
+        &context.configuration()?.map_type.map_type_name,
+    ))
 }
 
 pub fn compile_concrete_map(
