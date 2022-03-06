@@ -40,6 +40,12 @@ pub static COMPILE_CONFIGURATION: Lazy<Arc<app::module_compiler::CompileConfigur
                     merge_function_name: "_mergeMaps".into(),
                     remove_function_name: "_removeMap".into(),
                     set_function_name: "_setMap".into(),
+                    hash: app::module_compiler::HashConfiguration {
+                        number_hash_function_name: "_hashNumber".into(),
+                        string_hash_function_name: "_hashString".into(),
+                        list_hash_function_name: "_hashList".into(),
+                        map_hash_function_name: "_hashMap".into(),
+                    },
                 },
                 string_type: app::module_compiler::StringTypeConfiguration {
                     equal_function_name: "_equalStrings".into(),

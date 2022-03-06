@@ -28,7 +28,7 @@ pub use error_type_configuration::ErrorTypeConfiguration;
 use hir::ir::*;
 pub use list_type_configuration::ListTypeConfiguration;
 pub use main_module_configuration::*;
-pub use map_type_configuration::MapTypeConfiguration;
+pub use map_type_configuration::{HashConfiguration, MapTypeConfiguration};
 pub use string_type_configuration::StringTypeConfiguration;
 pub use test_module_configuration::TestModuleConfiguration;
 
