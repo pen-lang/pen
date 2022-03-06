@@ -1462,5 +1462,180 @@ mod tests {
                 )]))
             );
         }
+
+        #[test]
+        fn coerce_map_keys() {
+            let union_type = types::Union::new(
+                types::Number::new(Position::fake()),
+                types::None::new(Position::fake()),
+                Position::fake(),
+            );
+            let from_map_type = types::Map::new(
+                types::None::new(Position::fake()),
+                types::None::new(Position::fake()),
+                Position::fake(),
+            );
+            let to_map_type = types::Map::new(
+                union_type.clone(),
+                types::None::new(Position::fake()),
+                Position::fake(),
+            );
+
+            assert_eq!(
+                coerce_module(&Module::empty().set_definitions(vec![Definition::fake(
+                    "f",
+                    Lambda::new(
+                        vec![Argument::new("x", from_map_type.clone())],
+                        to_map_type.clone(),
+                        Map::new(
+                            to_map_type.key().clone(),
+                            to_map_type.value().clone(),
+                            vec![MapElement::Map(Variable::new("x", Position::fake()).into())],
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    ),
+                    false,
+                )])),
+                Ok(Module::empty().set_definitions(vec![Definition::fake(
+                    "f",
+                    Lambda::new(
+                        vec![Argument::new("x", from_map_type.clone())],
+                        to_map_type.clone(),
+                        Map::new(
+                            to_map_type.key().clone(),
+                            to_map_type.value().clone(),
+                            vec![MapElement::Map(
+                                TypeCoercion::new(
+                                    from_map_type,
+                                    to_map_type,
+                                    Variable::new("x", Position::fake()),
+                                    Position::fake(),
+                                )
+                                .into()
+                            )],
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    ),
+                    false,
+                )]))
+            );
+        }
+
+        #[test]
+        fn coerce_map_values() {
+            let union_type = types::Union::new(
+                types::Number::new(Position::fake()),
+                types::None::new(Position::fake()),
+                Position::fake(),
+            );
+            let from_map_type = types::Map::new(
+                types::None::new(Position::fake()),
+                types::None::new(Position::fake()),
+                Position::fake(),
+            );
+            let to_map_type = types::Map::new(
+                types::None::new(Position::fake()),
+                union_type.clone(),
+                Position::fake(),
+            );
+
+            assert_eq!(
+                coerce_module(&Module::empty().set_definitions(vec![Definition::fake(
+                    "f",
+                    Lambda::new(
+                        vec![Argument::new("x", from_map_type.clone())],
+                        to_map_type.clone(),
+                        Map::new(
+                            to_map_type.key().clone(),
+                            to_map_type.value().clone(),
+                            vec![MapElement::Map(Variable::new("x", Position::fake()).into())],
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    ),
+                    false,
+                )])),
+                Ok(Module::empty().set_definitions(vec![Definition::fake(
+                    "f",
+                    Lambda::new(
+                        vec![Argument::new("x", from_map_type.clone())],
+                        to_map_type.clone(),
+                        Map::new(
+                            to_map_type.key().clone(),
+                            to_map_type.value().clone(),
+                            vec![MapElement::Map(
+                                TypeCoercion::new(
+                                    from_map_type,
+                                    to_map_type,
+                                    Variable::new("x", Position::fake()),
+                                    Position::fake(),
+                                )
+                                .into()
+                            )],
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    ),
+                    false,
+                )]))
+            );
+        }
+
+        #[test]
+        fn coerce_key_removal() {
+            let union_type = types::Union::new(
+                types::Number::new(Position::fake()),
+                types::None::new(Position::fake()),
+                Position::fake(),
+            );
+            let map_type = types::Map::new(
+                union_type.clone(),
+                types::None::new(Position::fake()),
+                Position::fake(),
+            );
+
+            assert_eq!(
+                coerce_module(&Module::empty().set_definitions(vec![Definition::fake(
+                    "f",
+                    Lambda::new(
+                        vec![],
+                        map_type.clone(),
+                        Map::new(
+                            union_type.clone(),
+                            types::None::new(Position::fake()),
+                            vec![MapElement::Removal(None::new(Position::fake()).into())],
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    ),
+                    false,
+                )])),
+                Ok(Module::empty().set_definitions(vec![Definition::fake(
+                    "f",
+                    Lambda::new(
+                        vec![],
+                        map_type.clone(),
+                        Map::new(
+                            union_type.clone(),
+                            types::None::new(Position::fake()),
+                            vec![MapElement::Removal(
+                                TypeCoercion::new(
+                                    types::None::new(Position::fake()),
+                                    union_type,
+                                    None::new(Position::fake()),
+                                    Position::fake(),
+                                )
+                                .into()
+                            )],
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    ),
+                    false,
+                )]))
+            );
+        }
     }
 }
