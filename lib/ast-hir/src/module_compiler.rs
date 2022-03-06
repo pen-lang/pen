@@ -276,6 +276,32 @@ fn compile_expression(expression: &ast::Expression) -> Result<ir::Expression, Co
             comprehension.position().clone(),
         )
         .into(),
+        ast::Expression::Map(map) => ir::Map::new(
+            map.key_type().clone(),
+            map.value_type().clone(),
+            map.elements()
+                .iter()
+                .map(|element| {
+                    Ok(match element {
+                        ast::MapElement::Insertion(entry) => {
+                            ir::MapElement::Insertion(ir::MapEntry::new(
+                                compile_expression(entry.key())?,
+                                compile_expression(entry.value())?,
+                                entry.position().clone(),
+                            ))
+                        }
+                        ast::MapElement::Map(element) => {
+                            ir::MapElement::Map(compile_expression(element)?)
+                        }
+                        ast::MapElement::Removal(element) => {
+                            ir::MapElement::Removal(compile_expression(element)?)
+                        }
+                    })
+                })
+                .collect::<Result<_, _>>()?,
+            map.position().clone(),
+        )
+        .into(),
         ast::Expression::None(none) => ir::None::new(none.position().clone()).into(),
         ast::Expression::Number(number) => {
             ir::Number::new(number.value(), number.position().clone()).into()
