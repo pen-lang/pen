@@ -1,3 +1,5 @@
+import foreign "c" _pen_prelude_combine_hashes \(number, number) number
+
 type _anyList {
   node \() _node | none
 }
@@ -93,5 +95,21 @@ _equalNodes = \(f \(any, any) boolean, x _node | none, y _node | none) boolean {
     } else {
       true
     }
+  }
+}
+
+_hashList = \(f \(any) number, l _anyList) number {
+  _hashNode(f, l.node, 0)
+}
+
+_hashNode = \(f \(any) number, node \() _node | none, h number) number {
+  if n = node() as _node {
+    _hashNode(
+      f,
+      n.rest,
+      _pen_prelude_combine_hashes(h, f(n)),
+    )
+  } else {
+    h
   }
 }
