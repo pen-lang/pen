@@ -1379,7 +1379,7 @@ mod tests {
                     "f",
                     Lambda::new(
                         vec![],
-                        map_type.clone(),
+                        map_type,
                         Map::new(
                             union_type.clone(),
                             types::None::new(Position::fake()),
@@ -1439,7 +1439,7 @@ mod tests {
                     "f",
                     Lambda::new(
                         vec![],
-                        map_type.clone(),
+                        map_type,
                         Map::new(
                             types::None::new(Position::fake()),
                             union_type.clone(),
@@ -1476,7 +1476,7 @@ mod tests {
                 Position::fake(),
             );
             let to_map_type = types::Map::new(
-                union_type.clone(),
+                union_type,
                 types::None::new(Position::fake()),
                 Position::fake(),
             );
@@ -1537,7 +1537,7 @@ mod tests {
             );
             let to_map_type = types::Map::new(
                 types::None::new(Position::fake()),
-                union_type.clone(),
+                union_type,
                 Position::fake(),
             );
 
@@ -1616,7 +1616,7 @@ mod tests {
                     "f",
                     Lambda::new(
                         vec![],
-                        map_type.clone(),
+                        map_type,
                         Map::new(
                             union_type.clone(),
                             types::None::new(Position::fake()),
