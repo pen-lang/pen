@@ -136,6 +136,7 @@ fn transform_equal_operation(
             )
             .into()
         }
+        Type::Map(_) => todo!(),
         Type::None(_) => Boolean::new(true, position.clone()).into(),
         Type::Number(_) => EqualityOperation::new(
             Some(type_.clone()),

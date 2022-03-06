@@ -212,6 +212,7 @@ pub fn compile(
             )
             .into()
         }
+        Expression::Map(_) => todo!(),
         Expression::None(_) => mir::ir::Expression::None,
         Expression::Number(number) => mir::ir::Expression::Number(number.value()),
         Expression::Operation(operation) => compile_operation(operation, context)?,
@@ -317,6 +318,16 @@ pub fn compile(
                     Type::List(list_type) => {
                         let concrete_type =
                             type_compiler::compile_concrete_list(list_type, context.types())?;
+
+                        mir::ir::Variant::new(
+                            concrete_type.clone(),
+                            mir::ir::Record::new(concrete_type, vec![argument]),
+                        )
+                        .into()
+                    }
+                    Type::Map(map_type) => {
+                        let concrete_type =
+                            type_compiler::compile_concrete_map(map_type, context.types())?;
 
                         mir::ir::Variant::new(
                             concrete_type.clone(),
