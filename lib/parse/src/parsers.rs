@@ -2875,6 +2875,26 @@ mod tests {
                     )
                     .into(),
                 ),
+                (
+                    "{number:none ...none}",
+                    Map::new(
+                        types::Number::new(Position::fake()),
+                        types::None::new(Position::fake()),
+                        vec![MapElement::Map(None::new(Position::fake()).into())],
+                        Position::fake(),
+                    )
+                    .into(),
+                ),
+                (
+                    "{number:none none}",
+                    Map::new(
+                        types::Number::new(Position::fake()),
+                        types::None::new(Position::fake()),
+                        vec![MapElement::Removal(None::new(Position::fake()).into())],
+                        Position::fake(),
+                    )
+                    .into(),
+                ),
             ] {
                 assert_eq!(expression().parse(stream(source, "")).unwrap().0, target);
             }
