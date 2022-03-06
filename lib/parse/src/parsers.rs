@@ -239,6 +239,18 @@ fn list_type<'a>() -> impl Parser<Stream<'a>, Output = types::List> {
         .expected("list type")
 }
 
+fn map_type<'a>() -> impl Parser<Stream<'a>, Output = types::Map> {
+    (
+        attempt(position().skip(sign("{"))),
+        type_(),
+        sign(":"),
+        type_(),
+        sign("}"),
+    )
+        .map(|(position, key, _, value, _)| types::Map::new(key, value, position))
+        .expected("map type")
+}
+
 fn atomic_type<'a>() -> impl Parser<Stream<'a>, Output = Type> {
     choice((
         boolean_type().map(Type::from),
@@ -248,6 +260,7 @@ fn atomic_type<'a>() -> impl Parser<Stream<'a>, Output = Type> {
         any_type().map(Type::from),
         reference_type().map(Type::from),
         list_type().map(Type::from),
+        map_type().map(Type::from),
         between(sign("("), sign(")"), type_()),
     ))
 }
@@ -1538,6 +1551,19 @@ mod tests {
                             .into()
                     ],
                     types::List::new(types::None::new(Position::fake()), Position::fake()),
+                    Position::fake()
+                )
+                .into()
+            );
+        }
+
+        #[test]
+        fn parse_map_type() {
+            assert_eq!(
+                type_().parse(stream("{number:none}", "")).unwrap().0,
+                types::Map::new(
+                    types::Number::new(Position::fake()),
+                    types::None::new(Position::fake()),
                     Position::fake()
                 )
                 .into()
