@@ -37,7 +37,8 @@ fn qualify_map_type_configuration(
     prelude_prefix: &str,
 ) -> hir_mir::MapTypeConfiguration {
     hir_mir::MapTypeConfiguration {
-        empty_map_function_name: prelude_prefix.to_owned() + &configuration.empty_map_function_name,
+        empty_function_name: prelude_prefix.to_owned() + &configuration.empty_function_name,
+        equal_function_name: prelude_prefix.to_owned() + &configuration.equal_function_name,
         map_type_name: prelude_prefix.to_owned() + &configuration.map_type_name,
     }
 }

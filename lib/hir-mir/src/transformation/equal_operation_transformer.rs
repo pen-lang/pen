@@ -63,7 +63,6 @@ fn transform_equal_operation(
         .into(),
         Type::Function(_) => return Err(CompileError::FunctionEqualOperation(position.clone())),
         Type::List(list_type) => {
-            let element_type = list_type.element();
             let any_list_type = types::Reference::new(
                 &context.configuration()?.list_type.list_type_name,
                 position.clone(),
@@ -73,15 +72,7 @@ fn transform_equal_operation(
                 Some(
                     types::Function::new(
                         vec![
-                            types::Function::new(
-                                vec![
-                                    types::Any::new(position.clone()).into(),
-                                    types::Any::new(position.clone()).into(),
-                                ],
-                                types::Boolean::new(position.clone()),
-                                position.clone(),
-                            )
-                            .into(),
+                            compile_any_equal_function_type(position).into(),
                             any_list_type.clone().into(),
                             any_list_type.into(),
                         ],
@@ -95,40 +86,7 @@ fn transform_equal_operation(
                     position.clone(),
                 ),
                 vec![
-                    Lambda::new(
-                        vec![
-                            Argument::new(LHS_NAME, types::Any::new(position.clone())),
-                            Argument::new(RHS_NAME, types::Any::new(position.clone())),
-                        ],
-                        types::Boolean::new(position.clone()),
-                        IfType::new(
-                            LHS_NAME,
-                            Variable::new(LHS_NAME, position.clone()),
-                            vec![IfTypeBranch::new(
-                                element_type.clone(),
-                                IfType::new(
-                                    RHS_NAME,
-                                    Variable::new(RHS_NAME, position.clone()),
-                                    vec![IfTypeBranch::new(
-                                        element_type.clone(),
-                                        transform_equal_operation(
-                                            element_type,
-                                            &Variable::new(LHS_NAME, position.clone()).into(),
-                                            &Variable::new(RHS_NAME, position.clone()).into(),
-                                            position,
-                                            context,
-                                        )?,
-                                    )],
-                                    None,
-                                    position.clone(),
-                                ),
-                            )],
-                            None,
-                            position.clone(),
-                        ),
-                        position.clone(),
-                    )
-                    .into(),
+                    compile_any_equal_function(context, list_type.element(), position)?.into(),
                     lhs.clone(),
                     rhs.clone(),
                 ],
@@ -136,7 +94,38 @@ fn transform_equal_operation(
             )
             .into()
         }
-        Type::Map(_) => todo!(),
+        Type::Map(map_type) => {
+            let any_map_type = types::Reference::new(
+                &context.configuration()?.map_type.map_type_name,
+                position.clone(),
+            );
+
+            Call::new(
+                Some(
+                    types::Function::new(
+                        vec![
+                            compile_any_equal_function_type(position).into(),
+                            any_map_type.clone().into(),
+                            any_map_type.into(),
+                        ],
+                        types::Boolean::new(position.clone()),
+                        position.clone(),
+                    )
+                    .into(),
+                ),
+                Variable::new(
+                    &context.configuration()?.map_type.equal_function_name,
+                    position.clone(),
+                ),
+                vec![
+                    compile_any_equal_function(context, map_type.value(), position)?.into(),
+                    lhs.clone(),
+                    rhs.clone(),
+                ],
+                position.clone(),
+            )
+            .into()
+        }
         Type::None(_) => Boolean::new(true, position.clone()).into(),
         Type::Number(_) => EqualityOperation::new(
             Some(type_.clone()),
@@ -235,6 +224,57 @@ fn transform_equal_operation(
             context,
         )?,
     })
+}
+
+fn compile_any_equal_function(
+    context: &CompileContext,
+    type_: &Type,
+    position: &Position,
+) -> Result<Lambda, CompileError> {
+    Ok(Lambda::new(
+        vec![
+            Argument::new(LHS_NAME, types::Any::new(position.clone())),
+            Argument::new(RHS_NAME, types::Any::new(position.clone())),
+        ],
+        types::Boolean::new(position.clone()),
+        IfType::new(
+            LHS_NAME,
+            Variable::new(LHS_NAME, position.clone()),
+            vec![IfTypeBranch::new(
+                type_.clone(),
+                IfType::new(
+                    RHS_NAME,
+                    Variable::new(RHS_NAME, position.clone()),
+                    vec![IfTypeBranch::new(
+                        type_.clone(),
+                        transform_equal_operation(
+                            type_,
+                            &Variable::new(LHS_NAME, position.clone()).into(),
+                            &Variable::new(RHS_NAME, position.clone()).into(),
+                            position,
+                            context,
+                        )?,
+                    )],
+                    None,
+                    position.clone(),
+                ),
+            )],
+            None,
+            position.clone(),
+        ),
+        position.clone(),
+    ))
+}
+
+fn compile_any_equal_function_type(position: &Position) -> types::Function {
+    types::Function::new(
+        vec![
+            types::Any::new(position.clone()).into(),
+            types::Any::new(position.clone()).into(),
+        ],
+        types::Boolean::new(position.clone()),
+        position.clone(),
+    )
 }
 
 #[cfg(test)]
