@@ -267,11 +267,34 @@ mod tests {
                 Variable::new("x", Position::fake()),
                 vec![
                     IfTypeBranch::new(
+                        types::None::new(Position::fake()),
+                        IfType::new(
+                            RHS_NAME,
+                            Variable::new("y", Position::fake()),
+                            vec![
+                                IfTypeBranch::new(
+                                    types::None::new(Position::fake()),
+                                    Boolean::new(true, Position::fake()),
+                                ),
+                                IfTypeBranch::new(
+                                    types::Number::new(Position::fake()),
+                                    Boolean::new(false, Position::fake()),
+                                ),
+                            ],
+                            None,
+                            Position::fake(),
+                        ),
+                    ),
+                    IfTypeBranch::new(
                         types::Number::new(Position::fake()),
                         IfType::new(
                             RHS_NAME,
                             Variable::new("y", Position::fake()),
                             vec![
+                                IfTypeBranch::new(
+                                    types::None::new(Position::fake()),
+                                    Boolean::new(false, Position::fake()),
+                                ),
                                 IfTypeBranch::new(
                                     types::Number::new(Position::fake()),
                                     EqualityOperation::new(
@@ -281,29 +304,6 @@ mod tests {
                                         Variable::new(RHS_NAME, Position::fake()),
                                         Position::fake(),
                                     ),
-                                ),
-                                IfTypeBranch::new(
-                                    types::None::new(Position::fake()),
-                                    Boolean::new(false, Position::fake()),
-                                ),
-                            ],
-                            None,
-                            Position::fake(),
-                        ),
-                    ),
-                    IfTypeBranch::new(
-                        types::None::new(Position::fake()),
-                        IfType::new(
-                            RHS_NAME,
-                            Variable::new("y", Position::fake()),
-                            vec![
-                                IfTypeBranch::new(
-                                    types::Number::new(Position::fake()),
-                                    Boolean::new(false, Position::fake()),
-                                ),
-                                IfTypeBranch::new(
-                                    types::None::new(Position::fake()),
-                                    Boolean::new(true, Position::fake()),
                                 ),
                             ],
                             None,
