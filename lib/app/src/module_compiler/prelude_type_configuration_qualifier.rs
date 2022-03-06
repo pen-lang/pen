@@ -40,6 +40,9 @@ fn qualify_map_type_configuration(
         empty_function_name: prelude_prefix.to_owned() + &configuration.empty_function_name,
         equal_function_name: prelude_prefix.to_owned() + &configuration.equal_function_name,
         map_type_name: prelude_prefix.to_owned() + &configuration.map_type_name,
+        merge_function_name: prelude_prefix.to_owned() + &configuration.merge_function_name,
+        remove_function_name: prelude_prefix.to_owned() + &configuration.remove_function_name,
+        set_function_name: prelude_prefix.to_owned() + &configuration.set_function_name,
     }
 }
 

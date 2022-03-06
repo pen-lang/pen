@@ -9,7 +9,9 @@ use super::{
 use crate::{
     concurrency_configuration::MODULE_LOCAL_SPAWN_FUNCTION_NAME,
     downcast_compiler,
-    transformation::{list_literal_transformer, record_update_transformer},
+    transformation::{
+        list_literal_transformer, map_literal_transformer, record_update_transformer,
+    },
 };
 use fnv::FnvHashMap;
 use hir::{
@@ -212,7 +214,10 @@ pub fn compile(
             )
             .into()
         }
-        Expression::Map(_) => todo!(),
+        Expression::Map(map) => compile(&map_literal_transformer::transform(
+            map,
+            &context.configuration()?.map_type,
+        ))?,
         Expression::None(_) => mir::ir::Expression::None,
         Expression::Number(number) => mir::ir::Expression::Number(number.value()),
         Expression::Operation(operation) => compile_operation(operation, context)?,
