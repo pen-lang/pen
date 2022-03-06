@@ -30,6 +30,7 @@ impl AnalysisContext {
         &self.records
     }
 
+    // TODO Can we introduce a built-in error type in HIR and remove this method?
     pub fn error_type(&self) -> Result<&Type, AnalysisError> {
         self.error_type
             .as_ref()
