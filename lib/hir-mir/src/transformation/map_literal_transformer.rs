@@ -81,7 +81,7 @@ fn transform_map(
                     Some(
                         types::Function::new(
                             vec![any_map_type.clone().into(), any_map_type.clone().into()],
-                            any_map_type.clone(),
+                            any_map_type,
                             position.clone(),
                         )
                         .into(),
