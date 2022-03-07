@@ -56,7 +56,7 @@ type _hamt {
   entry32 _entry
 }
 
-maxLevel = \() number { 60 / 5 }
+_maxLevel = \() number { 60 / 5 }
 
 maxIndex = \() number { 32 }
 
@@ -111,7 +111,7 @@ get = \(hamt _hamt, key any, layer number, level number, cfg _configuration) any
       _empty{}
     }
   } else if _hamt {
-    if level > maxLevel() {
+    if level > _maxLevel() {
       get(e, key, layer + 1, 1, cfg)
     } else {
       get(e, key, layer, level + 1, cfg)
@@ -144,7 +144,7 @@ set = \(hamt _hamt, key any, value any, layer number, level number, cfg _configu
       update(u._hamt, true)
     }
   } else if _hamt {
-    u = if level > maxLevel() {
+    u = if level > _maxLevel() {
       set(e, key, value, layer + 1, 1, cfg)
     } else {
       set(e, key, value, layer, level + 1, cfg)
@@ -176,7 +176,7 @@ delete = \(hamt _hamt, key any, layer number, level number, cfg _configuration) 
       _update{_hamt: hamt, Size: false}
     }
   } else if _hamt {
-    u = if level > maxLevel() {
+    u = if level > _maxLevel() {
       delete(e, key, layer + 1, 1, cfg)
     } else {
       delete(e, key, layer, level + 1, cfg)
@@ -190,24 +190,6 @@ delete = \(hamt _hamt, key any, layer number, level number, cfg _configuration) 
 
 index = \(key any, layer number, level number, cfg _configuration) number {
   _pen_prelude_hash_to_index(cfg.HashKey(key), layer, level)
-}
-
-Keys = \(m _hamt) [any] {
-  keys(m, 1)
-}
-
-keys = \(m _hamt, i number) [any] {
-  if i > maxIndex() {
-    [any]
-  } else {
-    if e = _getEntry(m, i) as _keyValue {
-      [any e.key, ...keys(m, i + 1)]
-    } else if _hamt {
-      [any ...Keys(e), ...keys(m, i + 1)]
-    } else if none {
-      keys(m, i + 1)
-    }
-  }
 }
 
 _getEntry = \(hamt _hamt, index number) _entry {
