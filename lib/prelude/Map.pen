@@ -14,8 +14,8 @@ type _configuration {
   HashKey \(any) number
 }
 
-type _update {
-  _hamt _hamt
+type _hamtUpdate {
+  hamt _hamt
   Size boolean
 }
 
@@ -58,9 +58,7 @@ type _hamt {
 
 _maxLevel = \() number { 60 / 5 }
 
-maxIndex = \() number { 32 }
-
-New = \() _hamt {
+_newHamt = \() _hamt {
   _hamt{
     entry1: none,
     entry2: none,
@@ -97,14 +95,14 @@ New = \() _hamt {
   }
 }
 
-Get = \(hamt _hamt, key any, cfg _configuration) any {
-  get(hamt, key, 1, 1, cfg)
+_getHamt = \(hamt _hamt, key any, cfg _configuration) any {
+  _getValue(hamt, key, 1, 1, cfg)
 }
 
 # A layer is composed of a tree of HAMT and used to re-hash keys.
 # A level is composed of a node of HAMT and used to segment hash values into entry indexes.
-get = \(hamt _hamt, key any, layer number, level number, cfg _configuration) any {
-  if e = _getEntry(hamt, index(key, layer, level, cfg)) as _keyValue {
+_getValue = \(hamt _hamt, key any, layer number, level number, cfg _configuration) any {
+  if e = _getEntry(hamt, _hamtIndex(key, layer, level, cfg)) as _keyValue {
     if cfg.EqualKeys(e.key, key) {
       e.value
     } else {
@@ -112,23 +110,23 @@ get = \(hamt _hamt, key any, layer number, level number, cfg _configuration) any
     }
   } else if _hamt {
     if level > _maxLevel() {
-      get(e, key, layer + 1, 1, cfg)
+      _getValue(e, key, layer + 1, 1, cfg)
     } else {
-      get(e, key, layer, level + 1, cfg)
+      _getValue(e, key, layer, level + 1, cfg)
     }
   } else if none {
     _empty{}
   }
 }
 
-Set = \(hamt _hamt, key any, value any, cfg _configuration) _update {
-  set(hamt, key, value, 1, 1, cfg)
+_setHamt = \(hamt _hamt, key any, value any, cfg _configuration) _hamtUpdate {
+  _setKeyValue(hamt, key, value, 1, 1, cfg)
 }
 
-set = \(hamt _hamt, key any, value any, layer number, level number, cfg _configuration) _update {
-  i = index(key, layer, level, cfg)
-  update = \(e _entry, size boolean) _update {
-    _update{_hamt: _setEntry(hamt, i, e), Size: size}
+_setKeyValue = \(hamt _hamt, key any, value any, layer number, level number, cfg _configuration) _hamtUpdate {
+  i = _hamtIndex(key, layer, level, cfg)
+  update = \(e _entry, size boolean) _hamtUpdate {
+    _hamtUpdate{_hamt: _setEntry(hamt, i, e), Size: size}
   }
 
   if e = _getEntry(hamt, i) as _keyValue {
@@ -138,16 +136,16 @@ set = \(hamt _hamt, key any, value any, layer number, level number, cfg _configu
       update(_keyValue{key: key, value: value}, false)
     } else {
       l = level + 1
-      u = set(New(), e.key, e.value, layer, l, cfg)
-      u = set(u._hamt, key, value, layer, l, cfg)
+      u = _setKeyValue(_newHamt(), e.key, e.value, layer, l, cfg)
+      u = _setKeyValue(u._hamt, key, value, layer, l, cfg)
 
       update(u._hamt, true)
     }
   } else if _hamt {
     u = if level > _maxLevel() {
-      set(e, key, value, layer + 1, 1, cfg)
+      _setKeyValue(e, key, value, layer + 1, 1, cfg)
     } else {
-      set(e, key, value, layer, level + 1, cfg)
+      _setKeyValue(e, key, value, layer, level + 1, cfg)
     }
 
     update(u._hamt, u.Size)
@@ -156,15 +154,15 @@ set = \(hamt _hamt, key any, value any, layer number, level number, cfg _configu
   }
 }
 
-Delete = \(hamt _hamt, key any, cfg _configuration) _update {
-  delete(hamt, key, 1, 1, cfg)
+_deleteHamt = \(hamt _hamt, key any, cfg _configuration) _hamtUpdate {
+  _deleteKey(hamt, key, 1, 1, cfg)
 }
 
 # TODO Normalize tree structures.
-delete = \(hamt _hamt, key any, layer number, level number, cfg _configuration) _update {
-  i = index(key, layer, level, cfg)
-  update = \(e _entry, size boolean) _update {
-    _update{_hamt: _setEntry(hamt, i, e), Size: size}
+_deleteKey = \(hamt _hamt, key any, layer number, level number, cfg _configuration) _hamtUpdate {
+  i = _hamtIndex(key, layer, level, cfg)
+  update = \(e _entry, size boolean) _hamtUpdate {
+    _hamtUpdate{_hamt: _setEntry(hamt, i, e), Size: size}
   }
 
   if e = _getEntry(hamt, i) as _keyValue {
@@ -173,22 +171,22 @@ delete = \(hamt _hamt, key any, layer number, level number, cfg _configuration) 
     if cfg.EqualKeys(e.key, key) {
       update(none, true)
     } else {
-      _update{_hamt: hamt, Size: false}
+      _hamtUpdate{_hamt: hamt, Size: false}
     }
   } else if _hamt {
     u = if level > _maxLevel() {
-      delete(e, key, layer + 1, 1, cfg)
+      _deleteKey(e, key, layer + 1, 1, cfg)
     } else {
-      delete(e, key, layer, level + 1, cfg)
+      _deleteKey(e, key, layer, level + 1, cfg)
     }
 
     update(u._hamt, u.Size)
   } else if none {
-    _update{_hamt: hamt, Size: false}
+    _hamtUpdate{_hamt: hamt, Size: false}
   }
 }
 
-index = \(key any, layer number, level number, cfg _configuration) number {
+_hamtIndex = \(key any, layer number, level number, cfg _configuration) number {
   _pen_prelude_hash_to_index(cfg.HashKey(key), layer, level)
 }
 
