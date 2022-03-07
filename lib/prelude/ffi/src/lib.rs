@@ -35,6 +35,23 @@ fn _pen_prelude_hash_string(string: ffi::ByteString) -> ffi::Number {
     hash(&string)
 }
 
+#[ffi::bindgen]
+fn _pen_prelude_hash_to_index(
+    hash: ffi::Number,
+    layer: ffi::Number,
+    level: ffi::Number,
+) -> ffi::Number {
+    ((((f64::from(_pen_prelude_combine_hashes(
+        hash,
+        _pen_prelude_hash_number(layer),
+    ))
+    .to_bits()
+        >> (5 * (f64::from(level) as u64 - 1)))
+        & 0b11111)
+        + 1) as f64)
+        .into()
+}
+
 fn hash(value: &impl Hash) -> ffi::Number {
     let mut hasher = SipHasher::new();
 
