@@ -137,9 +137,9 @@ _setKeyValue = \(hamt _hamt, key any, value any, layer number, level number, cfg
     } else {
       l = level + 1
       u = _setKeyValue(_newHamt(), e.key, e.value, layer, l, cfg)
-      u = _setKeyValue(u._hamt, key, value, layer, l, cfg)
+      u = _setKeyValue(u.hamt, key, value, layer, l, cfg)
 
-      update(u._hamt, true)
+      update(u.hamt, true)
     }
   } else if _hamt {
     u = if level > _maxLevel() {
@@ -148,7 +148,7 @@ _setKeyValue = \(hamt _hamt, key any, value any, layer number, level number, cfg
       _setKeyValue(e, key, value, layer, level + 1, cfg)
     }
 
-    update(u._hamt, u.Size)
+    update(u.hamt, u.Size)
   } else if none {
     update(_keyValue{key: key, value: value}, true)
   }
@@ -180,7 +180,7 @@ _deleteKey = \(hamt _hamt, key any, layer number, level number, cfg _configurati
       _deleteKey(e, key, layer, level + 1, cfg)
     }
 
-    update(u._hamt, u.Size)
+    update(u.hamt, u.Size)
   } else if none {
     _hamtUpdate{_hamt: hamt, Size: false}
   }
