@@ -126,7 +126,7 @@ _setHamt = \(hamt _hamt, key any, value any, cfg _configuration) _hamtUpdate {
 _setKeyValue = \(hamt _hamt, key any, value any, layer number, level number, cfg _configuration) _hamtUpdate {
   i = _hamtIndex(key, layer, level, cfg)
   update = \(e _entry, size boolean) _hamtUpdate {
-    _hamtUpdate{_hamt: _setEntry(hamt, i, e), Size: size}
+    _hamtUpdate{hamt: _setEntry(hamt, i, e), Size: size}
   }
 
   if e = _getEntry(hamt, i) as _keyValue {
@@ -162,7 +162,7 @@ _deleteHamt = \(hamt _hamt, key any, cfg _configuration) _hamtUpdate {
 _deleteKey = \(hamt _hamt, key any, layer number, level number, cfg _configuration) _hamtUpdate {
   i = _hamtIndex(key, layer, level, cfg)
   update = \(e _entry, size boolean) _hamtUpdate {
-    _hamtUpdate{_hamt: _setEntry(hamt, i, e), Size: size}
+    _hamtUpdate{hamt: _setEntry(hamt, i, e), Size: size}
   }
 
   if e = _getEntry(hamt, i) as _keyValue {
@@ -171,7 +171,7 @@ _deleteKey = \(hamt _hamt, key any, layer number, level number, cfg _configurati
     if cfg.EqualKeys(e.key, key) {
       update(none, true)
     } else {
-      _hamtUpdate{_hamt: hamt, Size: false}
+      _hamtUpdate{hamt: hamt, Size: false}
     }
   } else if _hamt {
     u = if level > _maxLevel() {
@@ -182,7 +182,7 @@ _deleteKey = \(hamt _hamt, key any, layer number, level number, cfg _configurati
 
     update(u.hamt, u.Size)
   } else if none {
-    _hamtUpdate{_hamt: hamt, Size: false}
+    _hamtUpdate{hamt: hamt, Size: false}
   }
 }
 
