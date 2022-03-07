@@ -5,20 +5,22 @@ use crate::{
 };
 
 pub fn validate(context: &AnalysisContext, module: &Module) -> Result<(), AnalysisError> {
-    for expression in collect_expressions(module) {
-        if let Expression::Let(let_) = expression {
-            let expression = let_.bound_expression();
-            let type_ = let_
-                .type_()
-                .ok_or_else(|| AnalysisError::TypeNotInferred(expression.position().clone()))?;
+    if let Ok(error_type) = context.error_type() {
+        for expression in collect_expressions(module) {
+            if let Expression::Let(let_) = expression {
+                let expression = let_.bound_expression();
+                let type_ = let_
+                    .type_()
+                    .ok_or_else(|| AnalysisError::TypeNotInferred(expression.position().clone()))?;
 
-            if let_.name().is_none()
-                && !type_canonicalizer::canonicalize(type_, context.types())?.is_any()
-                && type_subsumption_checker::check(context.error_type()?, type_, context.types())?
-            {
-                return Err(AnalysisError::UnusedErrorValue(
-                    expression.position().clone(),
-                ));
+                if let_.name().is_none()
+                    && !type_canonicalizer::canonicalize(type_, context.types())?.is_any()
+                    && type_subsumption_checker::check(error_type, type_, context.types())?
+                {
+                    return Err(AnalysisError::UnusedErrorValue(
+                        expression.position().clone(),
+                    ));
+                }
             }
         }
     }
