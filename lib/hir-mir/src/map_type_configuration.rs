@@ -8,7 +8,7 @@ pub static MAP_TYPE_CONFIGURATION: Lazy<MapTypeConfiguration> =
         equal_function_name: "equalMaps".into(),
         map_type_name: "GenericMap".into(),
         merge_function_name: "mergeMaps".into(),
-        remove_function_name: "removeMap".into(),
+        delete_function_name: "removeMap".into(),
         set_function_name: "setMap".into(),
         hash: HASH_CONFIGURATION.clone(),
     });
@@ -27,7 +27,7 @@ pub struct MapTypeConfiguration {
     pub equal_function_name: String,
     pub map_type_name: String,
     pub merge_function_name: String,
-    pub remove_function_name: String,
+    pub delete_function_name: String,
     pub set_function_name: String,
     pub hash: HashConfiguration,
 }

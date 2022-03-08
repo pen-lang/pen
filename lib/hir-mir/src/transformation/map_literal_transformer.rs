@@ -103,7 +103,7 @@ fn transform_map(
                         )
                         .into(),
                     ),
-                    Variable::new(&configuration.remove_function_name, position.clone()),
+                    Variable::new(&configuration.delete_function_name, position.clone()),
                     vec![
                         rest_expression(),
                         TypeCoercion::new(
