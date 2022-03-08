@@ -21,7 +21,7 @@ type _mapContext {
 
 type _hamtUpdate {
   hamt _hamt
-  Size boolean
+  size boolean
 }
 
 type _entry = _keyValue | _hamt | none
@@ -135,8 +135,10 @@ _getValue = \(ctx _mapContext, hamt _hamt, key any, layer number, level number) 
   }
 }
 
-_setMap = \(ctx _mapContext, m _map, key any, value any) _hamtUpdate {
-  _setKeyValue(ctx, m.hamt, key, value, 1, 1)
+_setMap = \(ctx _mapContext, m _map, key any, value any) _map {
+  u = _setKeyValue(ctx, m.hamt, key, value, 1, 1)
+
+  _map{hamt: u.hamt, size: m.size + if u.size { 1 } else { 0 }}
 }
 
 _setKeyValue = \(
@@ -149,7 +151,7 @@ _setKeyValue = \(
 ) _hamtUpdate {
   i = _hamtIndex(ctx, key, layer, level)
   update = \(e _entry, size boolean) _hamtUpdate {
-    _hamtUpdate{hamt: _setEntry(hamt, i, e), Size: size}
+    _hamtUpdate{hamt: _setEntry(hamt, i, e), size: size}
   }
 
   if e = _getEntry(hamt, i) as _keyValue {
@@ -171,21 +173,23 @@ _setKeyValue = \(
       _setKeyValue(ctx, e, key, value, layer, level + 1)
     }
 
-    update(u.hamt, u.Size)
+    update(u.hamt, u.size)
   } else if none {
     update(_keyValue{key: key, value: value}, true)
   }
 }
 
-_deleteHamt = \(ctx _mapContext, hamt _hamt, key any) _hamtUpdate {
-  _deleteKey(ctx, hamt, key, 1, 1)
+_deleteMap = \(ctx _mapContext, m _map, key any) _map {
+  u = _deleteKey(ctx, m.hamt, key, 1, 1)
+
+  _map{hamt: u.hamt, size: m.size - if u.size { 1 } else { 0 }}
 }
 
 # TODO Normalize tree structures.
 _deleteKey = \(ctx _mapContext, hamt _hamt, key any, layer number, level number) _hamtUpdate {
   i = _hamtIndex(ctx, key, layer, level)
   update = \(e _entry, size boolean) _hamtUpdate {
-    _hamtUpdate{hamt: _setEntry(hamt, i, e), Size: size}
+    _hamtUpdate{hamt: _setEntry(hamt, i, e), size: size}
   }
 
   if e = _getEntry(hamt, i) as _keyValue {
@@ -194,7 +198,7 @@ _deleteKey = \(ctx _mapContext, hamt _hamt, key any, layer number, level number)
     if ctx.equalKeys(e.key, key) {
       update(none, true)
     } else {
-      _hamtUpdate{hamt: hamt, Size: false}
+      _hamtUpdate{hamt: hamt, size: false}
     }
   } else if _hamt {
     u = if level > _maxLevel() {
@@ -203,9 +207,9 @@ _deleteKey = \(ctx _mapContext, hamt _hamt, key any, layer number, level number)
       _deleteKey(ctx, e, key, layer, level + 1)
     }
 
-    update(u.hamt, u.Size)
+    update(u.hamt, u.size)
   } else if none {
-    _hamtUpdate{hamt: hamt, Size: false}
+    _hamtUpdate{hamt: hamt, size: false}
   }
 }
 
