@@ -2,6 +2,11 @@ import foreign "c" _pen_prelude_combine_hashes \(number, number) number
 import foreign "c" _pen_prelude_hash_number \(number) number
 import foreign "c" _pen_prelude_hash_to_index \(number, number, number) number
 
+type _map {
+  hamt _hamt
+  size number
+}
+
 type _empty {}
 
 type _keyValue {
@@ -9,7 +14,7 @@ type _keyValue {
   value any
 }
 
-type _configuration {
+type _context {
   EqualKeys \(any, any) boolean
   HashKey \(any) number
 }
@@ -58,6 +63,10 @@ type _hamt {
 
 _maxLevel = \() number { 60 / 5 }
 
+_newMap = \() _map {
+  _map{hamt: _newHamt(), size: 0}
+}
+
 _newHamt = \() _hamt {
   _hamt{
     entry1: none,
@@ -95,36 +104,36 @@ _newHamt = \() _hamt {
   }
 }
 
-_getHamt = \(hamt _hamt, key any, cfg _configuration) any {
-  _getValue(hamt, key, 1, 1, cfg)
+_getHamt = \(hamt _hamt, key any, ctx _context) any {
+  _getValue(hamt, key, 1, 1, ctx)
 }
 
 # A layer is composed of a tree of HAMT and used to re-hash keys.
 # A level is composed of a node of HAMT and used to segment hash values into entry indexes.
-_getValue = \(hamt _hamt, key any, layer number, level number, cfg _configuration) any {
-  if e = _getEntry(hamt, _hamtIndex(key, layer, level, cfg)) as _keyValue {
-    if cfg.EqualKeys(e.key, key) {
+_getValue = \(hamt _hamt, key any, layer number, level number, ctx _context) any {
+  if e = _getEntry(hamt, _hamtIndex(key, layer, level, ctx)) as _keyValue {
+    if ctx.EqualKeys(e.key, key) {
       e.value
     } else {
       _empty{}
     }
   } else if _hamt {
     if level > _maxLevel() {
-      _getValue(e, key, layer + 1, 1, cfg)
+      _getValue(e, key, layer + 1, 1, ctx)
     } else {
-      _getValue(e, key, layer, level + 1, cfg)
+      _getValue(e, key, layer, level + 1, ctx)
     }
   } else if none {
     _empty{}
   }
 }
 
-_setHamt = \(hamt _hamt, key any, value any, cfg _configuration) _hamtUpdate {
-  _setKeyValue(hamt, key, value, 1, 1, cfg)
+_setHamt = \(hamt _hamt, key any, value any, ctx _context) _hamtUpdate {
+  _setKeyValue(hamt, key, value, 1, 1, ctx)
 }
 
-_setKeyValue = \(hamt _hamt, key any, value any, layer number, level number, cfg _configuration) _hamtUpdate {
-  i = _hamtIndex(key, layer, level, cfg)
+_setKeyValue = \(hamt _hamt, key any, value any, layer number, level number, ctx _context) _hamtUpdate {
+  i = _hamtIndex(key, layer, level, ctx)
   update = \(e _entry, size boolean) _hamtUpdate {
     _hamtUpdate{hamt: _setEntry(hamt, i, e), Size: size}
   }
@@ -132,20 +141,20 @@ _setKeyValue = \(hamt _hamt, key any, value any, layer number, level number, cfg
   if e = _getEntry(hamt, i) as _keyValue {
     # TODO Remove a useless function call below of workaround for a bug in LLVM 13.0.0.
     _pen_prelude_hash_number(42)
-    if cfg.EqualKeys(e.key, key) {
+    if ctx.EqualKeys(e.key, key) {
       update(_keyValue{key: key, value: value}, false)
     } else {
       l = level + 1
-      u = _setKeyValue(_newHamt(), e.key, e.value, layer, l, cfg)
-      u = _setKeyValue(u.hamt, key, value, layer, l, cfg)
+      u = _setKeyValue(_newHamt(), e.key, e.value, layer, l, ctx)
+      u = _setKeyValue(u.hamt, key, value, layer, l, ctx)
 
       update(u.hamt, true)
     }
   } else if _hamt {
     u = if level > _maxLevel() {
-      _setKeyValue(e, key, value, layer + 1, 1, cfg)
+      _setKeyValue(e, key, value, layer + 1, 1, ctx)
     } else {
-      _setKeyValue(e, key, value, layer, level + 1, cfg)
+      _setKeyValue(e, key, value, layer, level + 1, ctx)
     }
 
     update(u.hamt, u.Size)
@@ -154,13 +163,13 @@ _setKeyValue = \(hamt _hamt, key any, value any, layer number, level number, cfg
   }
 }
 
-_deleteHamt = \(hamt _hamt, key any, cfg _configuration) _hamtUpdate {
-  _deleteKey(hamt, key, 1, 1, cfg)
+_deleteHamt = \(hamt _hamt, key any, ctx _context) _hamtUpdate {
+  _deleteKey(hamt, key, 1, 1, ctx)
 }
 
 # TODO Normalize tree structures.
-_deleteKey = \(hamt _hamt, key any, layer number, level number, cfg _configuration) _hamtUpdate {
-  i = _hamtIndex(key, layer, level, cfg)
+_deleteKey = \(hamt _hamt, key any, layer number, level number, ctx _context) _hamtUpdate {
+  i = _hamtIndex(key, layer, level, ctx)
   update = \(e _entry, size boolean) _hamtUpdate {
     _hamtUpdate{hamt: _setEntry(hamt, i, e), Size: size}
   }
@@ -168,16 +177,16 @@ _deleteKey = \(hamt _hamt, key any, layer number, level number, cfg _configurati
   if e = _getEntry(hamt, i) as _keyValue {
     # TODO Remove a useless function call below of workaround for a bug in LLVM 13.0.0.
     _pen_prelude_hash_number(42)
-    if cfg.EqualKeys(e.key, key) {
+    if ctx.EqualKeys(e.key, key) {
       update(none, true)
     } else {
       _hamtUpdate{hamt: hamt, Size: false}
     }
   } else if _hamt {
     u = if level > _maxLevel() {
-      _deleteKey(e, key, layer + 1, 1, cfg)
+      _deleteKey(e, key, layer + 1, 1, ctx)
     } else {
-      _deleteKey(e, key, layer, level + 1, cfg)
+      _deleteKey(e, key, layer, level + 1, ctx)
     }
 
     update(u.hamt, u.Size)
@@ -186,8 +195,8 @@ _deleteKey = \(hamt _hamt, key any, layer number, level number, cfg _configurati
   }
 }
 
-_hamtIndex = \(key any, layer number, level number, cfg _configuration) number {
-  _pen_prelude_hash_to_index(cfg.HashKey(key), layer, level)
+_hamtIndex = \(key any, layer number, level number, ctx _context) number {
+  _pen_prelude_hash_to_index(ctx.HashKey(key), layer, level)
 }
 
 _getEntry = \(hamt _hamt, index number) _entry {
