@@ -14,9 +14,9 @@ type _keyValue {
   value any
 }
 
-type _context {
-  EqualKeys \(any, any) boolean
-  HashKey \(any) number
+type _mapContext {
+  equalKeys \(any, any) boolean
+  hashKey \(any) number
 }
 
 type _hamtUpdate {
@@ -67,6 +67,13 @@ _newMap = \() _map {
   _map{hamt: _newHamt(), size: 0}
 }
 
+_newMapContext = \(
+  e \(any, any) boolean,
+  h \(any) number,
+) _mapContext {
+  _mapContext{equalKeys: e, hashKey: h}
+}
+
 _newHamt = \() _hamt {
   _hamt{
     entry1: none,
@@ -104,36 +111,43 @@ _newHamt = \() _hamt {
   }
 }
 
-_getHamt = \(hamt _hamt, key any, ctx _context) any {
-  _getValue(hamt, key, 1, 1, ctx)
+_getMap = \(ctx _mapContext, m _map, key any) any {
+  _getValue(ctx, m.hamt, key, 1, 1)
 }
 
 # A layer is composed of a tree of HAMT and used to re-hash keys.
 # A level is composed of a node of HAMT and used to segment hash values into entry indexes.
-_getValue = \(hamt _hamt, key any, layer number, level number, ctx _context) any {
-  if e = _getEntry(hamt, _hamtIndex(key, layer, level, ctx)) as _keyValue {
-    if ctx.EqualKeys(e.key, key) {
+_getValue = \(ctx _mapContext, hamt _hamt, key any, layer number, level number) any {
+  if e = _getEntry(hamt, _hamtIndex(ctx, key, layer, level)) as _keyValue {
+    if ctx.equalKeys(e.key, key) {
       e.value
     } else {
       _empty{}
     }
   } else if _hamt {
     if level > _maxLevel() {
-      _getValue(e, key, layer + 1, 1, ctx)
+      _getValue(ctx, e, key, layer + 1, 1)
     } else {
-      _getValue(e, key, layer, level + 1, ctx)
+      _getValue(ctx, e, key, layer, level + 1)
     }
   } else if none {
     _empty{}
   }
 }
 
-_setHamt = \(hamt _hamt, key any, value any, ctx _context) _hamtUpdate {
-  _setKeyValue(hamt, key, value, 1, 1, ctx)
+_setMap = \(ctx _mapContext, m _map, key any, value any) _hamtUpdate {
+  _setKeyValue(ctx, m.hamt, key, value, 1, 1)
 }
 
-_setKeyValue = \(hamt _hamt, key any, value any, layer number, level number, ctx _context) _hamtUpdate {
-  i = _hamtIndex(key, layer, level, ctx)
+_setKeyValue = \(
+  ctx _mapContext,
+  hamt _hamt,
+  key any,
+  value any,
+  layer number,
+  level number,
+) _hamtUpdate {
+  i = _hamtIndex(ctx, key, layer, level)
   update = \(e _entry, size boolean) _hamtUpdate {
     _hamtUpdate{hamt: _setEntry(hamt, i, e), Size: size}
   }
@@ -141,20 +155,20 @@ _setKeyValue = \(hamt _hamt, key any, value any, layer number, level number, ctx
   if e = _getEntry(hamt, i) as _keyValue {
     # TODO Remove a useless function call below of workaround for a bug in LLVM 13.0.0.
     _pen_prelude_hash_number(42)
-    if ctx.EqualKeys(e.key, key) {
+    if ctx.equalKeys(e.key, key) {
       update(_keyValue{key: key, value: value}, false)
     } else {
       l = level + 1
-      u = _setKeyValue(_newHamt(), e.key, e.value, layer, l, ctx)
-      u = _setKeyValue(u.hamt, key, value, layer, l, ctx)
+      u = _setKeyValue(ctx, _newHamt(), e.key, e.value, layer, l)
+      u = _setKeyValue(ctx, u.hamt, key, value, layer, l)
 
       update(u.hamt, true)
     }
   } else if _hamt {
     u = if level > _maxLevel() {
-      _setKeyValue(e, key, value, layer + 1, 1, ctx)
+      _setKeyValue(ctx, e, key, value, layer + 1, 1)
     } else {
-      _setKeyValue(e, key, value, layer, level + 1, ctx)
+      _setKeyValue(ctx, e, key, value, layer, level + 1)
     }
 
     update(u.hamt, u.Size)
@@ -163,13 +177,13 @@ _setKeyValue = \(hamt _hamt, key any, value any, layer number, level number, ctx
   }
 }
 
-_deleteHamt = \(hamt _hamt, key any, ctx _context) _hamtUpdate {
-  _deleteKey(hamt, key, 1, 1, ctx)
+_deleteHamt = \(ctx _mapContext, hamt _hamt, key any) _hamtUpdate {
+  _deleteKey(ctx, hamt, key, 1, 1)
 }
 
 # TODO Normalize tree structures.
-_deleteKey = \(hamt _hamt, key any, layer number, level number, ctx _context) _hamtUpdate {
-  i = _hamtIndex(key, layer, level, ctx)
+_deleteKey = \(ctx _mapContext, hamt _hamt, key any, layer number, level number) _hamtUpdate {
+  i = _hamtIndex(ctx, key, layer, level)
   update = \(e _entry, size boolean) _hamtUpdate {
     _hamtUpdate{hamt: _setEntry(hamt, i, e), Size: size}
   }
@@ -177,16 +191,16 @@ _deleteKey = \(hamt _hamt, key any, layer number, level number, ctx _context) _h
   if e = _getEntry(hamt, i) as _keyValue {
     # TODO Remove a useless function call below of workaround for a bug in LLVM 13.0.0.
     _pen_prelude_hash_number(42)
-    if ctx.EqualKeys(e.key, key) {
+    if ctx.equalKeys(e.key, key) {
       update(none, true)
     } else {
       _hamtUpdate{hamt: hamt, Size: false}
     }
   } else if _hamt {
     u = if level > _maxLevel() {
-      _deleteKey(e, key, layer + 1, 1, ctx)
+      _deleteKey(ctx, e, key, layer + 1, 1)
     } else {
-      _deleteKey(e, key, layer, level + 1, ctx)
+      _deleteKey(ctx, e, key, layer, level + 1)
     }
 
     update(u.hamt, u.Size)
@@ -195,8 +209,8 @@ _deleteKey = \(hamt _hamt, key any, layer number, level number, ctx _context) _h
   }
 }
 
-_hamtIndex = \(key any, layer number, level number, ctx _context) number {
-  _pen_prelude_hash_to_index(ctx.HashKey(key), layer, level)
+_hamtIndex = \(ctx _mapContext, key any, layer number, level number) number {
+  _pen_prelude_hash_to_index(ctx.hashKey(key), layer, level)
 }
 
 _getEntry = \(hamt _hamt, index number) _entry {
