@@ -17,7 +17,9 @@ type _keyValue {
 
 type _mapContext {
   equalKeys \(any, any) boolean
+  equalValues \(any, any) boolean
   hashKey \(any) number
+  hashValue \(any) number
 }
 
 type _hamtUpdate {
@@ -67,11 +69,18 @@ _maxLevel = \() number { 60 / 5 }
 _newMap = \(
   equalKeys \(any, any) boolean,
   hashKey \(any) number,
+  equalValues \(any, any) boolean,
+  hashValue \(any) number,
 ) _map {
   _map{
-    hamt: _newHamt(), 
+    hamt: _newHamt(),
     size: 0,
-    context: _mapContext{equalKeys: equalKeys, hashKey: hashKey},
+    context: _mapContext{
+      equalKeys: equalKeys,
+      hashKey: hashKey,
+      equalValues: equalValues,
+      hashValue: hashValue,
+    },
   }
 }
 
@@ -140,15 +149,15 @@ _getValue = \(ctx _mapContext, hamt _hamt, key any, layer number, level number) 
 }
 
 _setMap = \(
-  map _map, 
-  key any, 
+  map _map,
+  key any,
   value any,
 ) _map {
   u = _setKeyValue(map.context, map.hamt, key, value, 1, 1)
 
   _map{
-    hamt: u.hamt, 
-    size: map.size + if u.size { 1 } else { 0 }, 
+    hamt: u.hamt,
+    size: map.size + if u.size { 1 } else { 0 },
     context: map.context,
   }
 }
@@ -192,13 +201,13 @@ _setKeyValue = \(
 }
 
 _deleteMap = \(
-  map _map, 
+  map _map,
   key any,
 ) _map {
   u = _deleteKey(map.context, map.hamt, key, 1, 1)
 
   _map{
-    hamt: u.hamt, 
+    hamt: u.hamt,
     size: map.size - if u.size { 1 } else { 0 },
     context: map.context,
   }
