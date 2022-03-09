@@ -33,15 +33,14 @@ fn transform_map(
         )
         .into(),
         [element, ..] => {
-            let rest_expression = || {
-                transform_map(
-                    key_type,
-                    value_type,
-                    &elements[1..],
-                    position,
-                    configuration,
-                )
-            };
+            let rest_expression = transform_map(
+                key_type,
+                value_type,
+                &elements[1..],
+                position,
+                configuration,
+            );
+
             match element {
                 MapElement::Insertion(entry) => Call::new(
                     Some(
@@ -58,7 +57,7 @@ fn transform_map(
                     ),
                     Variable::new(&configuration.set_function_name, position.clone()),
                     vec![
-                        rest_expression(),
+                        rest_expression,
                         TypeCoercion::new(
                             key_type.clone(),
                             types::Any::new(position.clone()),
@@ -87,7 +86,7 @@ fn transform_map(
                         .into(),
                     ),
                     Variable::new(&configuration.merge_function_name, position.clone()),
-                    vec![expression.clone(), rest_expression()],
+                    vec![expression.clone(), rest_expression],
                     position.clone(),
                 )
                 .into(),
@@ -105,7 +104,7 @@ fn transform_map(
                     ),
                     Variable::new(&configuration.delete_function_name, position.clone()),
                     vec![
-                        rest_expression(),
+                        rest_expression,
                         TypeCoercion::new(
                             key_type.clone(),
                             types::Any::new(position.clone()),
