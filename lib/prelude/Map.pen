@@ -5,6 +5,7 @@ import foreign "c" _pen_prelude_hash_to_index \(number, number, number) number
 type _map {
   hamt _hamt
   size number
+  context _mapContext
 }
 
 type _empty {}
@@ -63,15 +64,15 @@ type _hamt {
 
 _maxLevel = \() number { 60 / 5 }
 
-_newMap = \() _map {
-  _map{hamt: _newHamt(), size: 0}
-}
-
-_newMapContext = \(
-  e \(any, any) boolean,
-  h \(any) number,
-) _mapContext {
-  _mapContext{equalKeys: e, hashKey: h}
+_newMap = \(
+  equalKeys \(any, any) boolean,
+  hashKey \(any) number,
+) _map {
+  _map{
+    hamt: _newHamt(), 
+    size: 0,
+    context: _mapContext{equalKeys: equalKeys, hashKey: hashKey},
+  }
 }
 
 _newHamt = \() _hamt {
@@ -111,8 +112,11 @@ _newHamt = \() _hamt {
   }
 }
 
-_getMap = \(ctx _mapContext, m _map, key any) any {
-  _getValue(ctx, m.hamt, key, 1, 1)
+_getMap = \(
+  map _map,
+  key any,
+) any {
+  _getValue(map.context, map.hamt, key, 1, 1)
 }
 
 # A layer is composed of a tree of HAMT and used to re-hash keys.
@@ -135,10 +139,18 @@ _getValue = \(ctx _mapContext, hamt _hamt, key any, layer number, level number) 
   }
 }
 
-_setMap = \(ctx _mapContext, m _map, key any, value any) _map {
-  u = _setKeyValue(ctx, m.hamt, key, value, 1, 1)
+_setMap = \(
+  map _map, 
+  key any, 
+  value any,
+) _map {
+  u = _setKeyValue(map.context, map.hamt, key, value, 1, 1)
 
-  _map{hamt: u.hamt, size: m.size + if u.size { 1 } else { 0 }}
+  _map{
+    hamt: u.hamt, 
+    size: map.size + if u.size { 1 } else { 0 }, 
+    context: map.context,
+  }
 }
 
 _setKeyValue = \(
@@ -179,10 +191,17 @@ _setKeyValue = \(
   }
 }
 
-_deleteMap = \(ctx _mapContext, m _map, key any) _map {
-  u = _deleteKey(ctx, m.hamt, key, 1, 1)
+_deleteMap = \(
+  map _map, 
+  key any,
+) _map {
+  u = _deleteKey(map.context, map.hamt, key, 1, 1)
 
-  _map{hamt: u.hamt, size: m.size - if u.size { 1 } else { 0 }}
+  _map{
+    hamt: u.hamt, 
+    size: map.size - if u.size { 1 } else { 0 },
+    context: map.context,
+  }
 }
 
 # TODO Normalize tree structures.
