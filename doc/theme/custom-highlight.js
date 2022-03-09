@@ -1,7 +1,7 @@
 hljs.registerLanguage("pen", (hljs) => ({
   name: "Pen",
   keywords: {
-    keyword: "as else for foreign if import in type",
+    keyword: "as else for foreign go if import in type",
     built_in: "any boolean error none number string",
     literal: "false none true",
   },
