@@ -165,7 +165,7 @@ fn compile_any_hash_function(
     ))
 }
 
-fn transform_hash_calculation(
+pub fn transform_hash_calculation(
     context: &CompileContext,
     value: &Expression,
     type_: &Type,

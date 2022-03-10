@@ -20,9 +20,9 @@ mod test_module_configuration;
 mod transformation;
 mod type_compiler;
 
-use self::{context::CompileContext, transformation::record_equal_function_transformer};
 pub use compile_configuration::CompileConfiguration;
 pub use concurrency_configuration::ConcurrencyConfiguration;
+use context::CompileContext;
 pub use error::CompileError;
 pub use error_type_configuration::ErrorTypeConfiguration;
 use hir::ir::*;
@@ -31,6 +31,7 @@ pub use main_module_configuration::*;
 pub use map_type_configuration::{HashConfiguration, MapTypeConfiguration};
 pub use string_type_configuration::StringTypeConfiguration;
 pub use test_module_configuration::TestModuleConfiguration;
+use transformation::{record_equal_function_transformer, record_hash_function_transformer};
 
 pub fn compile_main(
     module: &Module,
@@ -84,6 +85,7 @@ fn compile_module(
 ) -> Result<(mir::ir::Module, interface::Module), CompileError> {
     let module = hir::analysis::analyze(context.analysis(), module)?;
     let module = record_equal_function_transformer::transform(context, &module)?;
+    let module = record_hash_function_transformer::transform(context, &module)?;
     ffi_variant_type_validator::validate(context, &module)?;
 
     Ok((
