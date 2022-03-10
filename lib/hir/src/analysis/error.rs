@@ -25,7 +25,7 @@ pub enum AnalysisError {
     TryOperationInList(Position),
     TypeNotFound(Reference),
     TypeNotInferred(Position),
-    TypesNotComparable(Position),
+    TypeNotComparable(Position),
     TypesNotMatched(Position, Position),
     UnionExpected(Position),
     UnknownRecordField(Position),
@@ -110,7 +110,7 @@ impl Display for AnalysisError {
                     position
                 )
             }
-            Self::TypesNotComparable(position) => {
+            Self::TypeNotComparable(position) => {
                 write!(formatter, "types not comparable\n{}", position)
             }
             Self::TypeNotFound(reference) => write!(

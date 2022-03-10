@@ -214,10 +214,7 @@ pub fn compile(
             )
             .into()
         }
-        Expression::Map(map) => compile(&map_literal_transformer::transform(
-            map,
-            &context.configuration()?.map_type,
-        ))?,
+        Expression::Map(map) => compile(&map_literal_transformer::transform(context, map)?)?,
         Expression::None(_) => mir::ir::Expression::None,
         Expression::Number(number) => mir::ir::Expression::Number(number.value()),
         Expression::Operation(operation) => compile_operation(operation, context)?,

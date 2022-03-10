@@ -19,6 +19,7 @@ pub fn transform(
 ) -> Result<Expression, CompileError> {
     Ok(if operation.operator() == EqualityOperator::Equal {
         transform_equal_operation(
+            context,
             &type_canonicalizer::canonicalize(
                 operation
                     .type_()
@@ -28,7 +29,6 @@ pub fn transform(
             operation.lhs(),
             operation.rhs(),
             operation.position(),
-            context,
         )?
     } else {
         operation.clone().into()
@@ -36,14 +36,14 @@ pub fn transform(
 }
 
 fn transform_equal_operation(
+    context: &CompileContext,
     type_: &Type,
     lhs: &Expression,
     rhs: &Expression,
     position: &Position,
-    context: &CompileContext,
 ) -> Result<Expression, CompileError> {
     Ok(match type_ {
-        Type::Any(_) => return Err(CompileError::AnyEqualOperation(position.clone())),
+        Type::Any(_) => return Err(AnalysisError::TypeNotComparable(position.clone()).into()),
         Type::Boolean(_) => If::new(
             lhs.clone(),
             If::new(
@@ -61,7 +61,7 @@ fn transform_equal_operation(
             position.clone(),
         )
         .into(),
-        Type::Function(_) => return Err(CompileError::FunctionEqualOperation(position.clone())),
+        Type::Function(_) => return Err(AnalysisError::TypeNotComparable(position.clone()).into()),
         Type::List(list_type) => {
             let any_list_type = types::Reference::new(
                 &context.configuration()?.list_type.list_type_name,
@@ -191,13 +191,13 @@ fn transform_equal_operation(
                                                 context.types(),
                                             )? {
                                                 transform_equal_operation(
+                                                    context,
                                                     rhs_type,
                                                     &Variable::new(LHS_NAME, position.clone())
                                                         .into(),
                                                     &Variable::new(RHS_NAME, position.clone())
                                                         .into(),
                                                     position,
-                                                    context,
                                                 )?
                                             } else {
                                                 Boolean::new(false, position.clone()).into()
@@ -217,18 +217,19 @@ fn transform_equal_operation(
             .into()
         }
         Type::Reference(reference) => transform_equal_operation(
+            context,
             &type_resolver::resolve(reference, context.types())?,
             lhs,
             rhs,
             position,
-            context,
         )?,
     })
 }
 
 // TODO Do not generate equal functions dynamically but define them once
 // globally.
-fn compile_any_equal_function(
+// Can we simply lift them up to global functions as optimization in MIR?
+pub fn compile_any_equal_function(
     context: &CompileContext,
     type_: &Type,
     position: &Position,
@@ -250,11 +251,11 @@ fn compile_any_equal_function(
                     vec![IfTypeBranch::new(
                         type_.clone(),
                         transform_equal_operation(
+                            context,
                             type_,
                             &Variable::new(LHS_NAME, position.clone()).into(),
                             &Variable::new(RHS_NAME, position.clone()).into(),
                             position,
-                            context,
                         )?,
                     )],
                     None,
@@ -422,7 +423,7 @@ mod tests {
                 ),
                 &CompileContext::dummy(Default::default(), Default::default())
             ),
-            Err(CompileError::AnyEqualOperation(Position::fake()))
+            Err(AnalysisError::TypeNotComparable(Position::fake()).into())
         );
     }
 
@@ -446,7 +447,7 @@ mod tests {
                 ),
                 &CompileContext::dummy(Default::default(), Default::default())
             ),
-            Err(CompileError::FunctionEqualOperation(Position::fake()))
+            Err(AnalysisError::TypeNotComparable(Position::fake()).into())
         );
     }
 }

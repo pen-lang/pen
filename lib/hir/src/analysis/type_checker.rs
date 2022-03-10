@@ -488,7 +488,7 @@ fn check_operation(
             if !type_subsumption_checker::check(&lhs_type, &rhs_type, context.types())?
                 && !type_subsumption_checker::check(&rhs_type, &lhs_type, context.types())?
             {
-                return Err(AnalysisError::TypesNotComparable(
+                return Err(AnalysisError::TypeNotComparable(
                     operation.position().clone(),
                 ));
             }
@@ -1372,7 +1372,7 @@ mod tests {
                     ),
                     false,
                 )])),
-                Err(AnalysisError::TypesNotComparable(Position::fake()))
+                Err(AnalysisError::TypeNotComparable(Position::fake()))
             );
         }
 
