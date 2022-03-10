@@ -14,8 +14,8 @@ const LHS_NAME: &str = "$lhs";
 const RHS_NAME: &str = "$rhs";
 
 pub fn transform(
-    operation: &EqualityOperation,
     context: &CompileContext,
+    operation: &EqualityOperation,
 ) -> Result<Expression, CompileError> {
     Ok(if operation.operator() == EqualityOperator::Equal {
         transform_equal_operation(
@@ -296,6 +296,7 @@ mod tests {
 
         assert_eq!(
             transform(
+                &CompileContext::dummy(Default::default(), Default::default()),
                 &EqualityOperation::new(
                     Some(union_type.into()),
                     EqualityOperator::Equal,
@@ -303,7 +304,6 @@ mod tests {
                     Variable::new("y", Position::fake()),
                     Position::fake()
                 ),
-                &CompileContext::dummy(Default::default(), Default::default())
             ),
             Ok(IfType::new(
                 LHS_NAME,
@@ -367,13 +367,6 @@ mod tests {
 
         assert_eq!(
             transform(
-                &EqualityOperation::new(
-                    Some(record_type.clone().into()),
-                    EqualityOperator::Equal,
-                    Variable::new("x", Position::fake()),
-                    Variable::new("y", Position::fake()),
-                    Position::fake()
-                ),
                 &CompileContext::dummy(
                     Default::default(),
                     [(
@@ -385,7 +378,14 @@ mod tests {
                     )]
                     .into_iter()
                     .collect()
-                )
+                ),
+                &EqualityOperation::new(
+                    Some(record_type.clone().into()),
+                    EqualityOperator::Equal,
+                    Variable::new("x", Position::fake()),
+                    Variable::new("y", Position::fake()),
+                    Position::fake()
+                ),
             ),
             Ok(Call::new(
                 Some(
@@ -414,6 +414,7 @@ mod tests {
     fn fail_to_transform_with_any() {
         assert_eq!(
             transform(
+                &CompileContext::dummy(Default::default(), Default::default()),
                 &EqualityOperation::new(
                     Some(types::Any::new(Position::fake()).into()),
                     EqualityOperator::Equal,
@@ -421,7 +422,6 @@ mod tests {
                     Variable::new("y", Position::fake()),
                     Position::fake()
                 ),
-                &CompileContext::dummy(Default::default(), Default::default())
             ),
             Err(AnalysisError::TypeNotComparable(Position::fake()).into())
         );
@@ -431,6 +431,7 @@ mod tests {
     fn fail_to_transform_with_function() {
         assert_eq!(
             transform(
+                &CompileContext::dummy(Default::default(), Default::default()),
                 &EqualityOperation::new(
                     Some(
                         types::Function::new(
@@ -445,7 +446,6 @@ mod tests {
                     Variable::new("y", Position::fake()),
                     Position::fake()
                 ),
-                &CompileContext::dummy(Default::default(), Default::default())
             ),
             Err(AnalysisError::TypeNotComparable(Position::fake()).into())
         );
