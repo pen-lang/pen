@@ -28,7 +28,7 @@ fn transform_map(
         [] => Call::new(
             Some(types::Function::new(vec![], any_map_type, position.clone()).into()),
             Variable::new(&configuration.empty_function_name, position.clone()),
-            vec![],
+            vec![todo!(), todo!(), todo!(), todo!()],
             position.clone(),
         )
         .into(),
