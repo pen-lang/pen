@@ -71,6 +71,7 @@ fn qualify_hash_configuration(
     prelude_prefix: &str,
 ) -> hir_mir::HashConfiguration {
     hir_mir::HashConfiguration {
+        combine_function_name: prelude_prefix.to_owned() + &configuration.combine_function_name,
         number_hash_function_name: prelude_prefix.to_owned()
             + &configuration.number_hash_function_name,
         string_hash_function_name: prelude_prefix.to_owned()

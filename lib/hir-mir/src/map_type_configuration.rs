@@ -15,6 +15,7 @@ pub static MAP_TYPE_CONFIGURATION: Lazy<MapTypeConfiguration> =
 
 #[cfg(test)]
 pub static HASH_CONFIGURATION: Lazy<HashConfiguration> = Lazy::new(|| HashConfiguration {
+    combine_function_name: "combineHashes".into(),
     number_hash_function_name: "hashNumber".into(),
     string_hash_function_name: "hashString".into(),
     list_hash_function_name: "hashList".into(),
@@ -34,6 +35,7 @@ pub struct MapTypeConfiguration {
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct HashConfiguration {
+    pub combine_function_name: String,
     pub number_hash_function_name: String,
     pub string_hash_function_name: String,
     pub list_hash_function_name: String,

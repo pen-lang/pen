@@ -41,6 +41,7 @@ pub static COMPILE_CONFIGURATION: Lazy<Arc<app::module_compiler::CompileConfigur
                     delete_function_name: "_deleteMap".into(),
                     set_function_name: "_setMap".into(),
                     hash: app::module_compiler::HashConfiguration {
+                        combine_function_name: "_combineHashes".into(),
                         number_hash_function_name: "_hashNumber".into(),
                         string_hash_function_name: "_hashString".into(),
                         list_hash_function_name: "_hashList".into(),
