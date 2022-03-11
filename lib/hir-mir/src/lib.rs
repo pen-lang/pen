@@ -104,13 +104,30 @@ mod tests {
     use crate::{
         compile_configuration::COMPILE_CONFIGURATION,
         error_type_configuration::ERROR_TYPE_CONFIGURATION,
+        map_type_configuration::HASH_CONFIGURATION,
     };
     use hir::{
         analysis::AnalysisError,
         test::{DefinitionFake, ModuleFake, TypeDefinitionFake},
         types,
     };
+    use once_cell::sync::Lazy;
     use position::{test::PositionFake, Position};
+
+    static COMBINE_HASH_FUNCTION_DECLARATION: Lazy<Declaration> = Lazy::new(|| {
+        Declaration::new(
+            &HASH_CONFIGURATION.combine_function_name,
+            types::Function::new(
+                vec![
+                    types::Number::new(Position::fake()).into(),
+                    types::Number::new(Position::fake()).into(),
+                ],
+                types::Number::new(Position::fake()),
+                Position::fake(),
+            ),
+            Position::fake(),
+        )
+    });
 
     // TODO Test types included in prelude modules by mocking them.
     fn compile_module(
@@ -206,6 +223,7 @@ mod tests {
                     false,
                     false,
                 )])
+                .set_declarations(vec![COMBINE_HASH_FUNCTION_DECLARATION.clone()])
                 .set_definitions(vec![Definition::fake(
                     "x",
                     Lambda::new(
@@ -244,6 +262,7 @@ mod tests {
                     false,
                     false,
                 )])
+                .set_declarations(vec![COMBINE_HASH_FUNCTION_DECLARATION.clone()])
                 .set_definitions(vec![Definition::fake(
                     "x",
                     Lambda::new(
