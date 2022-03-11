@@ -1,3 +1,4 @@
+use super::hash_calculation_transformer;
 use crate::{
     context::CompileContext, transformation::record_type_information_compiler, CompileError,
 };
@@ -7,8 +8,6 @@ use hir::{
     types::{self, Type},
 };
 use position::Position;
-
-use super::map_literal_transformer;
 
 const RECORD_NAME: &str = "$x";
 
@@ -90,7 +89,7 @@ fn compile_hash_function_definition(
                         Variable::new(&configuration.combine_function_name, position.clone()),
                         vec![
                             expression?,
-                            map_literal_transformer::transform_hash_calculation(
+                            hash_calculation_transformer::transform(
                                 context,
                                 &RecordDeconstruction::new(
                                     Some(record_type.clone().into()),

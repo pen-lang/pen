@@ -86,7 +86,7 @@ fn transform_equal_operation(
                     position.clone(),
                 ),
                 vec![
-                    compile_any_equal_function(context, list_type.element(), position)?.into(),
+                    transform_any_function(context, list_type.element(), position)?.into(),
                     lhs.clone(),
                     rhs.clone(),
                 ],
@@ -94,7 +94,7 @@ fn transform_equal_operation(
             )
             .into()
         }
-        Type::Map(map_type) => {
+        Type::Map(_) => {
             let any_map_type = types::Reference::new(
                 &context.configuration()?.map_type.map_type_name,
                 position.clone(),
@@ -103,11 +103,7 @@ fn transform_equal_operation(
             Call::new(
                 Some(
                     types::Function::new(
-                        vec![
-                            compile_any_equal_function_type(position).into(),
-                            any_map_type.clone().into(),
-                            any_map_type.into(),
-                        ],
+                        vec![any_map_type.clone().into(), any_map_type.into()],
                         types::Boolean::new(position.clone()),
                         position.clone(),
                     )
@@ -117,11 +113,7 @@ fn transform_equal_operation(
                     &context.configuration()?.map_type.equal_function_name,
                     position.clone(),
                 ),
-                vec![
-                    compile_any_equal_function(context, map_type.value(), position)?.into(),
-                    lhs.clone(),
-                    rhs.clone(),
-                ],
+                vec![lhs.clone(), rhs.clone()],
                 position.clone(),
             )
             .into()
@@ -229,7 +221,7 @@ fn transform_equal_operation(
 // TODO Do not generate equal functions dynamically but define them once
 // globally.
 // Can we simply lift them up to global functions as optimization in MIR?
-pub fn compile_any_equal_function(
+pub fn transform_any_function(
     context: &CompileContext,
     type_: &Type,
     position: &Position,

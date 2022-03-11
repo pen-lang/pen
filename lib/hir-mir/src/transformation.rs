@@ -1,5 +1,6 @@
 pub mod boolean_operation_transformer;
 pub mod equal_operation_transformer;
+mod hash_calculation_transformer;
 pub mod if_list_transformer;
 pub mod list_literal_transformer;
 pub mod map_literal_transformer;
