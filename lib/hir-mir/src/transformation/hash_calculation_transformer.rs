@@ -31,7 +31,7 @@ pub fn transform(
             Some(
                 types::Function::new(
                     vec![
-                        compile_any_hash_function_type(position).into(),
+                        compile_any_function_type(position).into(),
                         types::Reference::new(
                             &configuration.list_type.list_type_name,
                             position.clone(),
@@ -191,7 +191,7 @@ pub fn transform_any_function(
     ))
 }
 
-fn compile_any_hash_function_type(position: &Position) -> types::Function {
+fn compile_any_function_type(position: &Position) -> types::Function {
     types::Function::new(
         vec![types::Any::new(position.clone()).into()],
         types::Number::new(position.clone()),

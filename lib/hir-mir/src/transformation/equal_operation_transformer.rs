@@ -72,7 +72,7 @@ fn transform_equal_operation(
                 Some(
                     types::Function::new(
                         vec![
-                            compile_any_equal_function_type(position).into(),
+                            compile_any_function_type(position).into(),
                             any_list_type.clone().into(),
                             any_list_type.into(),
                         ],
@@ -261,7 +261,7 @@ pub fn transform_any_function(
     ))
 }
 
-fn compile_any_equal_function_type(position: &Position) -> types::Function {
+fn compile_any_function_type(position: &Position) -> types::Function {
     types::Function::new(
         vec![
             types::Any::new(position.clone()).into(),
