@@ -12,6 +12,10 @@ use position::Position;
 const RECORD_NAME: &str = "$x";
 
 pub fn transform(context: &CompileContext, module: &Module) -> Result<Module, CompileError> {
+    if context.configuration().is_err() {
+        return Ok(module.clone());
+    }
+
     let mut function_definitions = vec![];
     let mut function_declarations = vec![];
 
@@ -24,14 +28,7 @@ pub fn transform(context: &CompileContext, module: &Module) -> Result<Module, Co
             continue;
         }
 
-        if type_definition.is_external()
-            && type_comparability_checker::check(
-                &types::Record::new(type_definition.name(), type_definition.position().clone())
-                    .into(),
-                context.types(),
-                context.records(),
-            )?
-        {
+        if type_definition.is_external() {
             function_declarations.push(compile_hash_function_declaration(type_definition));
         } else {
             function_definitions.push(compile_hash_function_definition(context, type_definition)?);
