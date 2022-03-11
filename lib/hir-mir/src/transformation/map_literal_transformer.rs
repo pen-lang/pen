@@ -32,7 +32,7 @@ fn transform_map(
         position.clone(),
     ));
     let hash_function_type = Type::from(types::Function::new(
-        vec![any_type.clone()],
+        vec![any_type],
         types::Number::new(position.clone()),
         position.clone(),
     ));
@@ -44,8 +44,8 @@ fn transform_map(
                     vec![
                         equal_function_type.clone(),
                         hash_function_type.clone(),
-                        equal_function_type.clone(),
-                        hash_function_type.clone(),
+                        equal_function_type,
+                        hash_function_type,
                     ],
                     any_map_type,
                     position.clone(),
