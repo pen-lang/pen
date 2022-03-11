@@ -48,7 +48,17 @@ Feature: Map
     When I successfully run `pen build`
     Then the exit status should be 0
 
-  Scenario: Create a map of a union type
+  Scenario: Create a map of a union type key
+    Given a file named "Foo.pen" with:
+    """pen
+    f = \() {string|none:number} {
+      {string|none:number "foo": 1, none: 2}
+    }
+    """
+    When I successfully run `pen build`
+    Then the exit status should be 0
+
+  Scenario: Create a map of a union type value
     Given a file named "Foo.pen" with:
     """pen
     f = \() {string:number|none} {
