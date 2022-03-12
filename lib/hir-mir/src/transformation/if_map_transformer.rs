@@ -16,7 +16,6 @@ pub fn transform(context: &CompileContext, if_: &IfMap) -> Result<Expression, Co
     let value_type = if_
         .value_type()
         .ok_or_else(|| AnalysisError::TypeNotInferred(position.clone()))?;
-    let any_map_type = types::Reference::new(&configuration.map_type_name, position.clone());
     let any_type = Type::from(types::Any::new(position.clone()));
 
     Ok(IfType::new(
@@ -24,7 +23,11 @@ pub fn transform(context: &CompileContext, if_: &IfMap) -> Result<Expression, Co
         Call::new(
             Some(
                 types::Function::new(
-                    vec![any_map_type.clone().into(), any_type.clone()],
+                    vec![
+                        types::Reference::new(&configuration.map_type_name, position.clone())
+                            .into(),
+                        any_type.clone(),
+                    ],
                     any_type.clone(),
                     position.clone(),
                 )
