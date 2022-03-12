@@ -182,7 +182,7 @@ fn transform_expression(
                 if_.value_type().cloned(),
                 if_.name(),
                 transform_expression(if_.map(), variables)?,
-                transform_expression(if_.key(), variables)?,
+                transform_and_coerce_expression(if_.key(), map_type.key(), variables)?,
                 transform_and_coerce_expression(
                     if_.then(),
                     &result_type,
@@ -877,6 +877,66 @@ mod tests {
                             None::new(Position::fake()),
                             Position::fake(),
                         ),
+                        Position::fake(),
+                    ),
+                    Position::fake(),
+                ),
+                false,
+            )]))
+        );
+    }
+
+    #[test]
+    fn coerce_key_in_if_map() {
+        let union_type = types::Union::new(
+            types::Boolean::new(Position::fake()),
+            types::None::new(Position::fake()),
+            Position::fake(),
+        );
+        let map_type = types::Map::new(
+            union_type.clone(),
+            types::Number::new(Position::fake()),
+            Position::fake(),
+        );
+
+        assert_eq!(
+            coerce_module(&Module::empty().set_definitions(vec![Definition::fake(
+                "f",
+                Lambda::new(
+                    vec![Argument::new("xs", map_type.clone())],
+                    types::None::new(Position::fake()),
+                    IfMap::new(
+                        Some(map_type.key().clone()),
+                        Some(map_type.value().clone()),
+                        "x",
+                        Variable::new("xs", Position::fake()),
+                        Boolean::new(true, Position::fake()),
+                        None::new(Position::fake()),
+                        None::new(Position::fake()),
+                        Position::fake(),
+                    ),
+                    Position::fake(),
+                ),
+                false,
+            )])),
+            Ok(Module::empty().set_definitions(vec![Definition::fake(
+                "f",
+                Lambda::new(
+                    vec![Argument::new("xs", map_type.clone())],
+                    types::None::new(Position::fake()),
+                    IfMap::new(
+                        Some(map_type.key().clone()),
+                        Some(map_type.value().clone()),
+                        "x",
+                        Variable::new("xs", Position::fake()),
+                        TypeCoercion::new(
+                            types::Boolean::new(Position::fake()),
+                            union_type.clone(),
+                            Boolean::new(true, Position::fake()),
+                            Position::fake(),
+                        ),
+                        None::new(Position::fake()),
+                        None::new(Position::fake()),
                         Position::fake(),
                     ),
                     Position::fake(),
