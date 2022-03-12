@@ -12,6 +12,8 @@ use position::Position;
 const RECORD_NAME: &str = "$x";
 
 pub fn transform(context: &CompileContext, module: &Module) -> Result<Module, CompileError> {
+    // We cannot define hash functions for record types if hash configuration is not
+    // available.
     if context.configuration().is_err() {
         return Ok(module.clone());
     }
