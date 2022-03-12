@@ -1,6 +1,6 @@
 ---
 source: lib/hir-mir/src/transformation/if_map_transformer.rs
-assertion_line: 69
+assertion_line: 81
 expression: "transform(&CompileContext::dummy(Default::default(), Default::default()),\n          &IfMap::new(Some(types::Number::new(Position::fake()).into()),\n                      Some(types::Number::new(Position::fake()).into()), \"x\",\n                      Variable::new(\"xs\", Position::fake()),\n                      Variable::new(\"k\", Position::fake()),\n                      None::new(Position::fake()),\n                      None::new(Position::fake()), Position::fake()))"
 ---
 Ok(
@@ -77,9 +77,39 @@ Ok(
                                 },
                             },
                         ),
-                        Variable(
-                            Variable {
-                                name: "k",
+                        TypeCoercion(
+                            TypeCoercion {
+                                from: Number(
+                                    Number {
+                                        position: Position {
+                                            path: "",
+                                            line_number: 0,
+                                            column_number: 0,
+                                            line: "",
+                                        },
+                                    },
+                                ),
+                                to: Any(
+                                    Any {
+                                        position: Position {
+                                            path: "",
+                                            line_number: 0,
+                                            column_number: 0,
+                                            line: "",
+                                        },
+                                    },
+                                ),
+                                argument: Variable(
+                                    Variable {
+                                        name: "k",
+                                        position: Position {
+                                            path: "",
+                                            line_number: 0,
+                                            column_number: 0,
+                                            line: "",
+                                        },
+                                    },
+                                ),
                                 position: Position {
                                     path: "",
                                     line_number: 0,

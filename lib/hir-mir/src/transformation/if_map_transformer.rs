@@ -34,7 +34,16 @@ pub fn transform(context: &CompileContext, if_: &IfMap) -> Result<Expression, Co
                 .into(),
             ),
             Variable::new(&configuration.get_function_name, position.clone()),
-            vec![if_.map().clone(), if_.key().clone()],
+            vec![
+                if_.map().clone(),
+                TypeCoercion::new(
+                    key_type.clone(),
+                    any_type.clone(),
+                    if_.key().clone(),
+                    position.clone(),
+                )
+                .into(),
+            ],
             position.clone(),
         ),
         vec![IfTypeBranch::new(
