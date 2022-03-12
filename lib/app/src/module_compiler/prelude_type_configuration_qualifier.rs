@@ -58,8 +58,10 @@ fn qualify_map_type_configuration(
     hir_mir::MapTypeConfiguration {
         empty_function_name: prelude_prefix.to_owned() + &configuration.empty_function_name,
         equal_function_name: prelude_prefix.to_owned() + &configuration.equal_function_name,
+        get_function_name: prelude_prefix.to_owned() + &configuration.get_function_name,
         map_type_name: prelude_prefix.to_owned() + &configuration.map_type_name,
         merge_function_name: prelude_prefix.to_owned() + &configuration.merge_function_name,
+        empty_type_name: prelude_prefix.to_owned() + &configuration.empty_type_name,
         delete_function_name: prelude_prefix.to_owned() + &configuration.delete_function_name,
         set_function_name: prelude_prefix.to_owned() + &configuration.set_function_name,
         hash: qualify_hash_configuration(&configuration.hash, prelude_prefix),

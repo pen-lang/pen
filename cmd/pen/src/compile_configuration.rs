@@ -35,7 +35,9 @@ pub static COMPILE_CONFIGURATION: Lazy<Arc<app::module_compiler::CompileConfigur
                 },
                 map_type: app::module_compiler::MapTypeConfiguration {
                     empty_function_name: "_newMap".into(),
+                    empty_type_name: "_empty".into(),
                     equal_function_name: "_equalMaps".into(),
+                    get_function_name: "_getMap".into(),
                     map_type_name: "_map".into(),
                     merge_function_name: "_mergeMaps".into(),
                     delete_function_name: "_deleteMap".into(),
