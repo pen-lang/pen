@@ -13,4 +13,4 @@ itertools = "0.10"
 position = { path = "../position" }
 
 [dev-dependencies]
-pretty_assertions = "1.1"
+pretty_assertions = "1.2"
