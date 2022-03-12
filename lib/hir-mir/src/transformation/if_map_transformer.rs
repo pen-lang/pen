@@ -57,7 +57,7 @@ pub fn transform(context: &CompileContext, if_: &IfMap) -> Result<Expression, Co
                 Some(value_type.clone()),
                 downcast_compiler::compile(
                     &any_type,
-                    key_type,
+                    value_type,
                     &Variable::new(if_.name(), position.clone()).into(),
                     context,
                 )?,
@@ -82,11 +82,11 @@ mod tests {
             &CompileContext::dummy(Default::default(), Default::default()),
             &IfMap::new(
                 Some(types::Number::new(Position::fake()).into()),
-                Some(types::Number::new(Position::fake()).into()),
+                Some(types::None::new(Position::fake()).into()),
                 "x",
                 Variable::new("xs", Position::fake()),
                 Variable::new("k", Position::fake()),
-                None::new(Position::fake()),
+                Variable::new("x", Position::fake()),
                 None::new(Position::fake()),
                 Position::fake(),
             ),

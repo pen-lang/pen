@@ -1,7 +1,7 @@
 ---
 source: lib/hir-mir/src/transformation/if_map_transformer.rs
 assertion_line: 81
-expression: "transform(&CompileContext::dummy(Default::default(), Default::default()),\n          &IfMap::new(Some(types::Number::new(Position::fake()).into()),\n                      Some(types::Number::new(Position::fake()).into()), \"x\",\n                      Variable::new(\"xs\", Position::fake()),\n                      Variable::new(\"k\", Position::fake()),\n                      None::new(Position::fake()),\n                      None::new(Position::fake()), Position::fake()))"
+expression: "transform(&CompileContext::dummy(Default::default(), Default::default()),\n          &IfMap::new(Some(types::Number::new(Position::fake()).into()),\n                      Some(types::None::new(Position::fake()).into()), \"x\",\n                      Variable::new(\"xs\", Position::fake()),\n                      Variable::new(\"k\", Position::fake()),\n                      Variable::new(\"x\", Position::fake()),\n                      None::new(Position::fake()), Position::fake()))"
 ---
 Ok(
     IfType(
@@ -172,8 +172,8 @@ Ok(
                                 "x",
                             ),
                             type_: Some(
-                                Number(
-                                    Number {
+                                None(
+                                    None {
                                         position: Position {
                                             path: "",
                                             line_number: 0,
@@ -199,8 +199,8 @@ Ok(
                                     ),
                                     branches: [
                                         IfTypeBranch {
-                                            type_: Number(
-                                                Number {
+                                            type_: None(
+                                                None {
                                                     position: Position {
                                                         path: "",
                                                         line_number: 0,
@@ -231,8 +231,9 @@ Ok(
                                     },
                                 },
                             ),
-                            expression: None(
-                                None {
+                            expression: Variable(
+                                Variable {
+                                    name: "x",
                                     position: Position {
                                         path: "",
                                         line_number: 0,
