@@ -1,7 +1,9 @@
 use super::record_type_information_compiler;
 use crate::{context::CompileContext, CompileError};
 use hir::{
-    analysis::{type_comparability_checker, type_resolver, union_type_member_calculator},
+    analysis::{
+        type_comparability_checker, type_resolver, union_type_member_calculator, AnalysisError,
+    },
     ir::*,
     types::{self, Type},
 };
@@ -75,6 +77,7 @@ pub fn transform(
             position.clone(),
         )
         .into(),
+        Type::None(_) => Number::new(NONE_HASH, position.clone()).into(),
         Type::Number(_) => compile_concrete_hash_function_call(
             &configuration.map_type.hash.number_hash_function_name,
             value,
@@ -131,8 +134,8 @@ pub fn transform(
             &type_resolver::resolve(reference, context.types())?,
             position,
         )?,
-        Type::Any(_) | Type::Function(_) | Type::None(_) => {
-            Number::new(NONE_HASH, position.clone()).into()
+        Type::Any(_) | Type::Function(_) => {
+            return Err(AnalysisError::TypeNotComparable(position.clone()).into())
         }
     })
 }

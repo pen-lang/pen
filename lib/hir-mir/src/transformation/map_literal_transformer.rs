@@ -1,6 +1,7 @@
 use super::{equal_operation_transformer, hash_calculation_transformer};
 use crate::{context::CompileContext, CompileError};
 use hir::{
+    analysis::type_comparability_checker,
     ir::*,
     types::{self, Type},
 };
@@ -53,18 +54,37 @@ fn transform_map(
                 .into(),
             ),
             Variable::new(&configuration.empty_function_name, position.clone()),
-            vec![
+            [
                 equal_operation_transformer::transform_any_function(context, key_type, position)?
                     .into(),
                 hash_calculation_transformer::transform_any_function(context, key_type, position)?
                     .into(),
-                equal_operation_transformer::transform_any_function(context, value_type, position)?
-                    .into(),
-                hash_calculation_transformer::transform_any_function(
-                    context, value_type, position,
-                )?
-                .into(),
-            ],
+            ]
+            .into_iter()
+            .chain(
+                if type_comparability_checker::check(
+                    value_type,
+                    context.types(),
+                    context.records(),
+                )? {
+                    [
+                        equal_operation_transformer::transform_any_function(
+                            context, value_type, position,
+                        )?
+                        .into(),
+                        hash_calculation_transformer::transform_any_function(
+                            context, value_type, position,
+                        )?
+                        .into(),
+                    ]
+                } else {
+                    [
+                        compile_fake_equal_function(position).into(),
+                        compile_fake_hash_function(position).into(),
+                    ]
+                },
+            )
+            .collect(),
             position.clone(),
         )
         .into(),
@@ -150,4 +170,75 @@ fn transform_map(
             }
         }
     })
+}
+
+fn compile_fake_equal_function(position: &Position) -> Lambda {
+    Lambda::new(
+        vec![
+            Argument::new("", types::Any::new(position.clone())),
+            Argument::new("", types::Any::new(position.clone())),
+        ],
+        types::Boolean::new(position.clone()),
+        Boolean::new(false, position.clone()),
+        position.clone(),
+    )
+}
+
+fn compile_fake_hash_function(position: &Position) -> Lambda {
+    Lambda::new(
+        vec![Argument::new("", types::Any::new(position.clone()))],
+        types::Number::new(position.clone()),
+        Number::new(0.0, position.clone()),
+        position.clone(),
+    )
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use position::test::PositionFake;
+
+    #[test]
+    fn transform_empty_map() {
+        insta::assert_debug_snapshot!(transform(
+            &CompileContext::dummy(Default::default(), Default::default()),
+            &Map::new(
+                types::None::new(Position::fake()),
+                types::None::new(Position::fake()),
+                vec![],
+                Position::fake()
+            ),
+        ));
+    }
+
+    #[test]
+    fn transform_empty_map_with_function_value() {
+        insta::assert_debug_snapshot!(transform(
+            &CompileContext::dummy(Default::default(), Default::default()),
+            &Map::new(
+                types::None::new(Position::fake()),
+                types::Function::new(vec![], types::None::new(Position::fake()), Position::fake()),
+                vec![],
+                Position::fake()
+            ),
+        ));
+    }
+
+    #[test]
+    fn transform_map_with_entry() {
+        insta::assert_debug_snapshot!(transform(
+            &CompileContext::dummy(Default::default(), Default::default()),
+            &Map::new(
+                types::None::new(Position::fake()),
+                types::None::new(Position::fake()),
+                vec![MapEntry::new(
+                    None::new(Position::fake()),
+                    None::new(Position::fake()),
+                    Position::fake()
+                )
+                .into()],
+                Position::fake()
+            ),
+        ));
+    }
 }
