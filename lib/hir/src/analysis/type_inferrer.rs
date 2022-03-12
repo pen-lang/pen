@@ -143,7 +143,37 @@ fn infer_expression(
             )
             .into()
         }
-        Expression::IfMap(_) => todo!(),
+        Expression::IfMap(if_) => {
+            let map = infer_expression(if_.map(), variables)?;
+            let key = infer_expression(if_.key(), variables)?;
+            let map_type = type_canonicalizer::canonicalize_map(
+                &type_extractor::extract_from_expression(context, &map, variables)?,
+                context.types(),
+            )?
+            .ok_or_else(|| AnalysisError::MapExpected(if_.map().position().clone()))?;
+
+            let then = infer_expression(
+                if_.then(),
+                &variables
+                    .clone()
+                    .into_iter()
+                    .chain([(if_.name().into(), map_type.value().clone())])
+                    .collect(),
+            )?;
+            let else_ = infer_expression(if_.else_(), variables)?;
+
+            IfMap::new(
+                Some(map_type.key().clone()),
+                Some(map_type.value().clone()),
+                if_.name(),
+                map,
+                key,
+                then,
+                else_,
+                if_.position().clone(),
+            )
+            .into()
+        }
         Expression::IfType(if_) => {
             let argument = infer_expression(if_.argument(), variables)?;
             let branches = if_
@@ -1369,6 +1399,123 @@ mod tests {
                                     .into()
                                 ),
                                 Variable::new("ys", Position::fake()),
+                                Variable::new("z", Position::fake()),
+                                Position::fake()
+                            ),
+                            None::new(Position::fake()),
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    ),
+                    false,
+                )],))
+            );
+        }
+    }
+
+    mod if_map {
+        use super::*;
+        use pretty_assertions::assert_eq;
+
+        #[test]
+        fn infer() {
+            let map_type = types::Map::new(
+                types::Boolean::new(Position::fake()),
+                types::None::new(Position::fake()),
+                Position::fake(),
+            );
+
+            assert_eq!(
+                infer_module(&Module::empty().set_definitions(vec![Definition::fake(
+                    "f",
+                    Lambda::new(
+                        vec![Argument::new("x", map_type.clone())],
+                        types::None::new(Position::fake()),
+                        IfMap::new(
+                            None,
+                            None,
+                            "y",
+                            Variable::new("x", Position::fake()),
+                            Boolean::new(true, Position::fake()),
+                            Variable::new("y", Position::fake()),
+                            None::new(Position::fake()),
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    ),
+                    false,
+                )])),
+                Ok(Module::empty().set_definitions(vec![Definition::fake(
+                    "f",
+                    Lambda::new(
+                        vec![Argument::new("x", map_type)],
+                        types::None::new(Position::fake()),
+                        IfMap::new(
+                            Some(types::Boolean::new(Position::fake()).into()),
+                            Some(types::None::new(Position::fake()).into()),
+                            "y",
+                            Variable::new("x", Position::fake()),
+                            Boolean::new(true, Position::fake()),
+                            Variable::new("y", Position::fake()),
+                            None::new(Position::fake()),
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    ),
+                    false,
+                )],))
+            );
+        }
+
+        #[test]
+        fn infer_with_name() {
+            let map_type = types::Map::new(
+                types::Boolean::new(Position::fake()),
+                types::None::new(Position::fake()),
+                Position::fake(),
+            );
+
+            assert_eq!(
+                infer_module(&Module::empty().set_definitions(vec![Definition::fake(
+                    "f",
+                    Lambda::new(
+                        vec![Argument::new("x", map_type.clone())],
+                        types::None::new(Position::fake()),
+                        IfMap::new(
+                            None,
+                            None,
+                            "y",
+                            Variable::new("x", Position::fake()),
+                            Boolean::new(true, Position::fake()),
+                            Let::new(
+                                Some("z".into()),
+                                None,
+                                Variable::new("y", Position::fake()),
+                                Variable::new("z", Position::fake()),
+                                Position::fake()
+                            ),
+                            None::new(Position::fake()),
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    ),
+                    false,
+                )])),
+                Ok(Module::empty().set_definitions(vec![Definition::fake(
+                    "f",
+                    Lambda::new(
+                        vec![Argument::new("x", map_type)],
+                        types::None::new(Position::fake()),
+                        IfMap::new(
+                            Some(types::Boolean::new(Position::fake()).into()),
+                            Some(types::None::new(Position::fake()).into()),
+                            "y",
+                            Variable::new("x", Position::fake()),
+                            Boolean::new(true, Position::fake()),
+                            Let::new(
+                                Some("z".into()),
+                                Some(types::None::new(Position::fake()).into()),
+                                Variable::new("y", Position::fake()),
                                 Variable::new("z", Position::fake()),
                                 Position::fake()
                             ),
