@@ -149,10 +149,7 @@ fn transform_expression(expression: &Expression, transform: &impl Fn(&Type) -> T
         Expression::Call(call) => Call::new(
             call.function_type().map(transform),
             transform_expression(call.function()),
-            call.arguments()
-                .iter()
-                .map(|argument| transform_expression(argument))
-                .collect(),
+            call.arguments().iter().map(transform_expression).collect(),
             call.position().clone(),
         )
         .into(),

@@ -127,7 +127,35 @@ fn check_expression(
 
             type_extractor::extract_from_expression(context, expression, variables)?
         }
-        Expression::IfMap(_) => todo!(),
+        Expression::IfMap(if_) => {
+            let map_type = types::Map::new(
+                if_.key_type()
+                    .ok_or_else(|| AnalysisError::TypeNotInferred(if_.map().position().clone()))?
+                    .clone(),
+                if_.value_type()
+                    .ok_or_else(|| AnalysisError::TypeNotInferred(if_.map().position().clone()))?
+                    .clone(),
+                if_.position().clone(),
+            );
+
+            check_subsumption(&check_expression(if_.key(), variables)?, map_type.key())?;
+            check_subsumption(
+                &check_expression(if_.map(), variables)?,
+                &map_type.clone().into(),
+            )?;
+
+            check_expression(
+                if_.then(),
+                &variables
+                    .clone()
+                    .into_iter()
+                    .chain([(if_.name().into(), map_type.value().clone())])
+                    .collect(),
+            )?;
+            check_expression(if_.else_(), variables)?;
+
+            type_extractor::extract_from_expression(context, expression, variables)?
+        }
         Expression::IfType(if_) => {
             let argument_type = type_canonicalizer::canonicalize(
                 &check_expression(if_.argument(), variables)?,
@@ -2601,6 +2629,187 @@ mod tests {
                     ),
                     false,
                 )]),),
+                Err(AnalysisError::TypesNotMatched(
+                    Position::fake(),
+                    Position::fake()
+                ))
+            );
+        }
+    }
+
+    mod if_map {
+        use super::*;
+        use pretty_assertions::assert_eq;
+
+        #[test]
+        fn check() {
+            let map_type = types::Map::new(
+                types::Boolean::new(Position::fake()),
+                types::None::new(Position::fake()),
+                Position::fake(),
+            );
+
+            check_module(&Module::empty().set_definitions(vec![Definition::fake(
+                "x",
+                Lambda::new(
+                    vec![Argument::new("x", map_type.clone())],
+                    types::None::new(Position::fake()),
+                    IfMap::new(
+                        Some(map_type.key().clone()),
+                        Some(map_type.value().clone()),
+                        "y",
+                        Variable::new("x", Position::fake()),
+                        Boolean::new(true, Position::fake()),
+                        Variable::new("y", Position::fake()),
+                        None::new(Position::fake()),
+                        Position::fake(),
+                    ),
+                    Position::fake(),
+                ),
+                false,
+            )]))
+            .unwrap();
+        }
+
+        #[test]
+        fn check_union_type_result() {
+            let map_type = types::Map::new(
+                types::Boolean::new(Position::fake()),
+                types::None::new(Position::fake()),
+                Position::fake(),
+            );
+
+            check_module(&Module::empty().set_definitions(vec![Definition::fake(
+                "x",
+                Lambda::new(
+                    vec![Argument::new("x", map_type.clone())],
+                    types::Union::new(
+                        types::Number::new(Position::fake()),
+                        types::None::new(Position::fake()),
+                        Position::fake(),
+                    ),
+                    IfMap::new(
+                        Some(map_type.key().clone()),
+                        Some(map_type.value().clone()),
+                        "y",
+                        Variable::new("x", Position::fake()),
+                        Boolean::new(true, Position::fake()),
+                        Variable::new("y", Position::fake()),
+                        Number::new(42.0, Position::fake()),
+                        Position::fake(),
+                    ),
+                    Position::fake(),
+                ),
+                false,
+            )]))
+            .unwrap();
+        }
+
+        #[test]
+        fn fail_to_check_map() {
+            let map_type = types::Map::new(
+                types::Boolean::new(Position::fake()),
+                types::None::new(Position::fake()),
+                Position::fake(),
+            );
+
+            assert_eq!(
+                check_module(&Module::empty().set_definitions(vec![Definition::fake(
+                    "x",
+                    Lambda::new(
+                        vec![Argument::new(
+                            "x",
+                            types::Map::new(
+                                types::Number::new(Position::fake()),
+                                types::None::new(Position::fake()),
+                                Position::fake(),
+                            )
+                        )],
+                        types::None::new(Position::fake()),
+                        IfMap::new(
+                            Some(map_type.key().clone()),
+                            Some(map_type.value().clone()),
+                            "y",
+                            Variable::new("x", Position::fake()),
+                            Boolean::new(true, Position::fake()),
+                            None::new(Position::fake()),
+                            None::new(Position::fake()),
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    ),
+                    false,
+                )]),),
+                Err(AnalysisError::TypesNotMatched(
+                    Position::fake(),
+                    Position::fake()
+                ))
+            );
+        }
+
+        #[test]
+        fn fail_to_check_key() {
+            let map_type = types::Map::new(
+                types::Boolean::new(Position::fake()),
+                types::None::new(Position::fake()),
+                Position::fake(),
+            );
+
+            assert_eq!(
+                check_module(&Module::empty().set_definitions(vec![Definition::fake(
+                    "x",
+                    Lambda::new(
+                        vec![Argument::new("x", map_type.clone())],
+                        types::None::new(Position::fake()),
+                        IfMap::new(
+                            Some(map_type.key().clone()),
+                            Some(map_type.value().clone()),
+                            "y",
+                            Variable::new("x", Position::fake()),
+                            Number::new(42.0, Position::fake()),
+                            None::new(Position::fake()),
+                            None::new(Position::fake()),
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    ),
+                    false,
+                )]),),
+                Err(AnalysisError::TypesNotMatched(
+                    Position::fake(),
+                    Position::fake()
+                ))
+            );
+        }
+
+        #[test]
+        fn fail_to_check_result() {
+            let map_type = types::Map::new(
+                types::Boolean::new(Position::fake()),
+                types::None::new(Position::fake()),
+                Position::fake(),
+            );
+
+            assert_eq!(
+                check_module(&Module::empty().set_definitions(vec![Definition::fake(
+                    "x",
+                    Lambda::new(
+                        vec![Argument::new("x", map_type.clone())],
+                        types::None::new(Position::fake()),
+                        IfMap::new(
+                            Some(map_type.key().clone()),
+                            Some(map_type.value().clone()),
+                            "y",
+                            Variable::new("x", Position::fake()),
+                            Boolean::new(true, Position::fake()),
+                            Number::new(42.0, Position::fake()),
+                            None::new(Position::fake()),
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    ),
+                    false,
+                )])),
                 Err(AnalysisError::TypesNotMatched(
                     Position::fake(),
                     Position::fake()

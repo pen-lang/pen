@@ -16,6 +16,7 @@ pub struct IfMap {
 }
 
 impl IfMap {
+    #[allow(clippy::too_many_arguments)]
     pub fn new(
         key_type: Option<Type>,
         value_type: Option<Type>,
