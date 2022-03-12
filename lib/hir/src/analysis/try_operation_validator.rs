@@ -38,6 +38,12 @@ fn validate_expression(
             validate(if_.then())?;
             validate(if_.else_())?;
         }
+        Expression::IfMap(if_) => {
+            validate(if_.map())?;
+            validate(if_.key())?;
+            validate(if_.then())?;
+            validate(if_.else_())?;
+        }
         Expression::IfType(if_) => {
             validate(if_.argument())?;
 

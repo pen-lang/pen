@@ -33,6 +33,12 @@ fn visit_expression(expression: &Expression, visit: &mut impl FnMut(&Expression)
             visit_expression(if_.then());
             visit_expression(if_.else_());
         }
+        Expression::IfMap(if_) => {
+            visit_expression(if_.map());
+            visit_expression(if_.key());
+            visit_expression(if_.then());
+            visit_expression(if_.else_());
+        }
         Expression::IfType(if_) => {
             visit_expression(if_.argument());
 

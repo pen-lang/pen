@@ -86,6 +86,23 @@ fn transform_expression(
             if_.position().clone(),
         )
         .into(),
+        Expression::IfMap(if_) => IfMap::new(
+            if_.key_type().cloned(),
+            if_.value_type().cloned(),
+            if_.name(),
+            transform_expression(if_.map(), transform),
+            transform_expression(if_.key(), transform),
+            transform_expression(if_.then(), &|variable| {
+                if if_.name() == variable.name() {
+                    variable.clone().into()
+                } else {
+                    transform(variable)
+                }
+            }),
+            transform_expression(if_.else_(), transform),
+            if_.position().clone(),
+        )
+        .into(),
         Expression::IfType(if_) => {
             let branch_transform = &|variable: &Variable| {
                 if if_.name() == variable.name() {

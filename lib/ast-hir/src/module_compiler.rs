@@ -224,6 +224,17 @@ fn compile_expression(expression: &ast::Expression) -> Result<ir::Expression, Co
             if_.position().clone(),
         )
         .into(),
+        ast::Expression::IfMap(if_) => ir::IfMap::new(
+            None,
+            None,
+            if_.name(),
+            compile_expression(if_.map())?,
+            compile_expression(if_.key())?,
+            compile_block(if_.then())?,
+            compile_block(if_.else_())?,
+            if_.position().clone(),
+        )
+        .into(),
         ast::Expression::IfType(if_) => ir::IfType::new(
             if_.name(),
             compile_expression(if_.argument())?,

@@ -165,6 +165,7 @@ fn transform_expression(
             )
             .into()
         }
+        Expression::IfMap(_) => todo!(),
         Expression::IfType(if_) => {
             let result_type = extract_type(expression, variables)?;
 

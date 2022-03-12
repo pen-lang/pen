@@ -10,7 +10,8 @@ use crate::{
     concurrency_configuration::MODULE_LOCAL_SPAWN_FUNCTION_NAME,
     downcast_compiler,
     transformation::{
-        list_literal_transformer, map_literal_transformer, record_update_transformer,
+        if_map_transformer, list_literal_transformer, map_literal_transformer,
+        record_update_transformer,
     },
 };
 use fnv::FnvHashMap;
@@ -52,7 +53,8 @@ pub fn compile(
             compile(if_.else_())?,
         )
         .into(),
-        Expression::IfList(if_) => compile(&if_list_transformer::transform(if_, context)?)?,
+        Expression::IfList(if_) => compile(&if_list_transformer::transform(context, if_)?)?,
+        Expression::IfMap(if_) => compile(&if_map_transformer::transform(context, if_)?)?,
         Expression::IfType(if_) => mir::ir::Case::new(
             compile(if_.argument())?,
             if_.branches()

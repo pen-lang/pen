@@ -127,6 +127,7 @@ fn check_expression(
 
             type_extractor::extract_from_expression(context, expression, variables)?
         }
+        Expression::IfMap(_) => todo!(),
         Expression::IfType(if_) => {
             let argument_type = type_canonicalizer::canonicalize(
                 &check_expression(if_.argument(), variables)?,

@@ -3,7 +3,7 @@ use super::{
     none::None, number::Number, record::Record, string::ByteString, variable::Variable,
     BinaryOperation, Lambda, ListComprehension, RecordDeconstruction, UnaryOperation,
 };
-use crate::{Map, SpawnOperation};
+use crate::{IfMap, Map, SpawnOperation};
 use position::Position;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -13,6 +13,7 @@ pub enum Expression {
     Call(Call),
     If(If),
     IfList(IfList),
+    IfMap(IfMap),
     IfType(IfType),
     Lambda(Lambda),
     List(List),
@@ -36,6 +37,7 @@ impl Expression {
             Self::Call(call) => call.position(),
             Self::If(if_) => if_.position(),
             Self::IfList(if_) => if_.position(),
+            Self::IfMap(if_) => if_.position(),
             Self::IfType(if_) => if_.position(),
             Self::Lambda(lambda) => lambda.position(),
             Self::List(list) => list.position(),
@@ -92,6 +94,12 @@ impl From<If> for Expression {
 impl From<IfList> for Expression {
     fn from(if_: IfList) -> Self {
         Self::IfList(if_)
+    }
+}
+
+impl From<IfMap> for Expression {
+    fn from(if_: IfMap) -> Self {
+        Self::IfMap(if_)
     }
 }
 

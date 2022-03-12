@@ -143,6 +143,7 @@ fn infer_expression(
             )
             .into()
         }
+        Expression::IfMap(_) => todo!(),
         Expression::IfType(if_) => {
             let argument = infer_expression(if_.argument(), variables)?;
             let branches = if_
