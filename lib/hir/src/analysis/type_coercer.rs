@@ -189,7 +189,7 @@ fn transform_expression(
                     &variables
                         .clone()
                         .into_iter()
-                        .chain([(if_.name().into(), map_type.value().clone().into())])
+                        .chain([(if_.name().into(), map_type.value().clone())])
                         .collect(),
                 )?,
                 transform_and_coerce_expression(if_.else_(), &result_type, variables)?,
