@@ -43,7 +43,6 @@ fn transform_equal_operation(
     position: &Position,
 ) -> Result<Expression, CompileError> {
     Ok(match type_ {
-        Type::Any(_) => return Err(AnalysisError::TypeNotComparable(position.clone()).into()),
         Type::Boolean(_) => If::new(
             lhs.clone(),
             If::new(
@@ -61,7 +60,6 @@ fn transform_equal_operation(
             position.clone(),
         )
         .into(),
-        Type::Function(_) => return Err(AnalysisError::TypeNotComparable(position.clone()).into()),
         Type::List(list_type) => {
             let any_list_type = types::Reference::new(
                 &context.configuration()?.list_type.list_type_name,
@@ -215,6 +213,9 @@ fn transform_equal_operation(
             rhs,
             position,
         )?,
+        Type::Any(_) | Type::Function(_) => {
+            return Err(AnalysisError::TypeNotComparable(position.clone()).into())
+        }
     })
 }
 
