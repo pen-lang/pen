@@ -6,7 +6,7 @@ set -e
 
 prepare_unit_test
 
-toolchain=nightly-2021-12-20
+toolchain=nightly-2022-03-01
 
 rustup install $toolchain
 rustup component add --toolchain $toolchain llvm-tools-preview
