@@ -38,6 +38,20 @@ Feature: Map
     When I successfully run `pen build`
     Then the exit status should be 0
 
+  Scenario: Get a value in a map
+    Given a file named "Foo.pen" with:
+    """pen
+    f = \(xs {string:number}) number {
+      if x = xs["foo"] {
+        x
+      } else {
+        0
+      }
+    }
+    """
+    When I successfully run `pen build`
+    Then the exit status should be 0
+
   Scenario: Merge maps
     Given a file named "Foo.pen" with:
     """pen
