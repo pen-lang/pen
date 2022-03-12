@@ -165,7 +165,38 @@ fn transform_expression(
             )
             .into()
         }
-        Expression::IfMap(_) => todo!(),
+        Expression::IfMap(if_) => {
+            let map_type = types::Map::new(
+                if_.key_type()
+                    .ok_or_else(|| AnalysisError::TypeNotInferred(if_.map().position().clone()))?
+                    .clone(),
+                if_.value_type()
+                    .ok_or_else(|| AnalysisError::TypeNotInferred(if_.map().position().clone()))?
+                    .clone(),
+                if_.map().position().clone(),
+            );
+            let result_type = extract_type(expression, variables)?;
+
+            IfMap::new(
+                if_.key_type().cloned(),
+                if_.value_type().cloned(),
+                if_.name(),
+                transform_expression(if_.map(), variables)?,
+                transform_expression(if_.key(), variables)?,
+                transform_and_coerce_expression(
+                    if_.then(),
+                    &result_type,
+                    &variables
+                        .clone()
+                        .into_iter()
+                        .chain([(if_.name().into(), map_type.value().clone().into())])
+                        .collect(),
+                )?,
+                transform_and_coerce_expression(if_.else_(), &result_type, variables)?,
+                if_.position().clone(),
+            )
+            .into()
+        }
         Expression::IfType(if_) => {
             let result_type = extract_type(expression, variables)?;
 
@@ -787,6 +818,71 @@ mod tests {
                 ),
                 false,
             )],))
+        );
+    }
+
+    #[test]
+    fn coerce_if_map() {
+        let union_type = types::Union::new(
+            types::Number::new(Position::fake()),
+            types::None::new(Position::fake()),
+            Position::fake(),
+        );
+        let map_type = types::Map::new(
+            types::Boolean::new(Position::fake()),
+            types::Number::new(Position::fake()),
+            Position::fake(),
+        );
+
+        assert_eq!(
+            coerce_module(&Module::empty().set_definitions(vec![Definition::fake(
+                "f",
+                Lambda::new(
+                    vec![Argument::new("xs", map_type.clone())],
+                    union_type.clone(),
+                    IfMap::new(
+                        Some(map_type.key().clone()),
+                        Some(map_type.value().clone()),
+                        "x",
+                        Variable::new("xs", Position::fake()),
+                        Boolean::new(true, Position::fake()),
+                        Variable::new("x", Position::fake()),
+                        None::new(Position::fake()),
+                        Position::fake(),
+                    ),
+                    Position::fake(),
+                ),
+                false,
+            )],)),
+            Ok(Module::empty().set_definitions(vec![Definition::fake(
+                "f",
+                Lambda::new(
+                    vec![Argument::new("xs", map_type.clone())],
+                    union_type.clone(),
+                    IfMap::new(
+                        Some(map_type.key().clone()),
+                        Some(map_type.value().clone()),
+                        "x",
+                        Variable::new("xs", Position::fake()),
+                        Boolean::new(true, Position::fake()),
+                        TypeCoercion::new(
+                            types::Number::new(Position::fake()),
+                            union_type.clone(),
+                            Variable::new("x", Position::fake()),
+                            Position::fake(),
+                        ),
+                        TypeCoercion::new(
+                            types::None::new(Position::fake()),
+                            union_type,
+                            None::new(Position::fake()),
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    ),
+                    Position::fake(),
+                ),
+                false,
+            )]))
         );
     }
 
