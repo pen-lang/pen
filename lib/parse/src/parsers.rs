@@ -482,8 +482,9 @@ fn atomic_expression<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
     lazy(|| {
         no_partial(choice((
             spawn_operation().map(Expression::from),
-            if_type().map(Expression::from),
             if_list().map(Expression::from),
+            if_map().map(Expression::from),
+            if_type().map(Expression::from),
             if_().map(Expression::from),
             lambda().map(Expression::from),
             record().map(Expression::from),
@@ -563,6 +564,28 @@ fn if_list<'a>() -> impl Parser<Stream<'a>, Output = IfList> {
             },
         )
         .expected("if-list expression")
+}
+
+fn if_map<'a>() -> impl Parser<Stream<'a>, Output = IfMap> {
+    (
+        attempt((
+            position(),
+            keyword("if"),
+            identifier(),
+            sign("="),
+            expression(),
+            sign("["),
+        )),
+        expression(),
+        sign("]"),
+        block(),
+        keyword("else"),
+        block(),
+    )
+        .map(|((position, _, name, _, map, _), key, _, then, _, else_)| {
+            IfMap::new(name, map, key, then, else_, position)
+        })
+        .expected("if-map expression")
 }
 
 fn if_type<'a>() -> impl Parser<Stream<'a>, Output = IfType> {
@@ -2012,6 +2035,24 @@ mod tests {
                     Variable::new("xs", Position::fake()),
                     "x",
                     "xs",
+                    Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                    Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                    Position::fake(),
+                )
+            );
+        }
+
+        #[test]
+        fn parse_if_map() {
+            assert_eq!(
+                if_map()
+                    .parse(stream("if x=xs[42]{none}else{none}", ""))
+                    .unwrap()
+                    .0,
+                IfMap::new(
+                    "x",
+                    Variable::new("xs", Position::fake()),
+                    Number::new(42.0, Position::fake()),
                     Block::new(vec![], None::new(Position::fake()), Position::fake()),
                     Block::new(vec![], None::new(Position::fake()), Position::fake()),
                     Position::fake(),
