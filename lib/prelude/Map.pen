@@ -263,6 +263,34 @@ _mergeHamt = \(m _map, h _hamt, i number) _map {
   }
 }
 
+_hashMap = \(m _map) number {
+  headerHash = 5
+
+  _hashHamtResursively(m.context, m.hamt, 1, headerHash)
+}
+
+_hashHamtResursively = \(ctx _mapContext, h _hamt, index number, hash number) number {
+  if index > 32 {
+    hash
+  } else {
+    if e = _getEntry(h, index) as _keyValue {
+      hash = _pen_prelude_combine_hashes(hash, ctx.hashKey(e.key))
+      hash = _pen_prelude_combine_hashes(hash, ctx.hashValue(e.value))
+
+      _hashHamtResursively(ctx, h, index + 1, hash)
+    } else if _hamt {
+      _hashHamtResursively(
+        ctx, 
+        h, 
+        index + 1,
+        _pen_prelude_combine_hashes(hash, _hashHamtResursively(ctx, e, 1, hash)), 
+      )
+    } else if none {
+      _hashHamtResursively(ctx, h, index + 1, hash)
+    }
+  }
+}
+
 _hamtIndex = \(ctx _mapContext, key any, layer number, level number) number {
   _pen_prelude_hash_to_index(ctx.hashKey(key), layer, level)
 }
