@@ -6,6 +6,7 @@ run apt update --fix-missing && apt install -y \
 	git \
 	libz-dev \
 	lsb-release \
+	openssl \
 	ruby-bundler \
 	ruby-dev \
 	software-properties-common \
