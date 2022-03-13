@@ -263,6 +263,38 @@ _mergeHamt = \(m _map, h _hamt, i number) _map {
   }
 }
 
+_equalMaps = \(x _map, y _map) boolean {
+  _equalHamts(x.context, x.hamt, y.hamt, 1)
+}
+
+_equalHamts = \(ctx _mapContext, h1 _hamt, h2 _hamt, i number) boolean {
+  if i > 32 {
+    true
+  } else {
+    rest = \() boolean { _equalHamts(ctx, h1, h2, i + 1) }
+
+    if e1 = _getEntry(h1, i) as _keyValue {
+      if e2 = _getEntry(h2, i) as _keyValue {
+        ctx.equalKeys(e1, e2) & ctx.equalValues(e1.value, e2.value) & rest()
+      } else {
+        false
+      }
+    } else if _hamt {
+      if e2 = _getEntry(h2, i) as _hamt {
+        _equalHamts(ctx, e1, e2, 1) & rest()
+      } else {
+        false
+      }
+    } else if none {
+      if _ = _getEntry(h2, i) as none {
+        rest()
+      } else {
+        false
+      }
+    }
+  }
+}
+
 _hashMap = \(m _map) number {
   headerHash = 5
 
