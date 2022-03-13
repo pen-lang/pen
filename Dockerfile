@@ -14,7 +14,8 @@ run apt update --fix-missing && apt install -y \
 	wget
 run curl -fsSL https://apt.llvm.org/llvm.sh | bash /dev/stdin 14
 run curl --proto =https --tlsv1.2 -sSf https://sh.rustup.rs | sh /dev/stdin -y
-run git clone https://github.com/pen-lang/pen /root/pen
+
+copy . /root/pen
 
 workdir /root/pen
 
@@ -26,5 +27,3 @@ run . ~/.cargo/env && cargo install sccache turtle-build
 
 env PEN_ROOT=/root/pen
 env PATH="/usr/lib/llvm-14/bin:$PATH"
-
-run . ~/.cargo/env && tools/integration_test.sh
