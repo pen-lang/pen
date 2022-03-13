@@ -24,3 +24,5 @@ run . ~/.cargo/env && cargo install turtle-build
 
 env PEN_ROOT=/root/pen
 env PATH="/usr/lib/llvm-14/bin:$PATH"
+
+run . ~/.cargo/env && tools/integration_test.sh
