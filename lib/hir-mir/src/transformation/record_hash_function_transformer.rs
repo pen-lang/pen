@@ -147,6 +147,14 @@ mod tests {
     use pretty_assertions::assert_eq;
 
     static HASH_TYPE: Lazy<Type> = Lazy::new(|| compile_hash_type(&Position::fake()).into());
+    static COMBINE_HASH_FUNCTION_TYPE: Lazy<Type> = Lazy::new(|| {
+        types::Function::new(
+            vec![HASH_TYPE.clone(), HASH_TYPE.clone()],
+            HASH_TYPE.clone(),
+            Position::fake(),
+        )
+        .into()
+    });
 
     fn transform_module(module: &Module) -> Result<Module, CompileError> {
         transform(
@@ -182,28 +190,14 @@ mod tests {
                         vec![Argument::new(RECORD_NAME, record_type.clone()),],
                         HASH_TYPE.clone(),
                         Call::new(
-                            Some(
-                                types::Function::new(
-                                    vec![HASH_TYPE.clone(), HASH_TYPE.clone()],
-                                    HASH_TYPE.clone(),
-                                    Position::fake()
-                                )
-                                .into()
-                            ),
+                            Some(COMBINE_HASH_FUNCTION_TYPE.clone()),
                             Variable::new(
                                 &COMPILE_CONFIGURATION.map_type.hash.combine_function_name,
                                 Position::fake()
                             ),
                             vec![
                                 Call::new(
-                                    Some(
-                                        types::Function::new(
-                                            vec![HASH_TYPE.clone(), HASH_TYPE.clone()],
-                                            HASH_TYPE.clone(),
-                                            Position::fake()
-                                        )
-                                        .into()
-                                    ),
+                                    Some(COMBINE_HASH_FUNCTION_TYPE.clone()),
                                     Variable::new(
                                         &COMPILE_CONFIGURATION.map_type.hash.combine_function_name,
                                         Position::fake()

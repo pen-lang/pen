@@ -201,3 +201,133 @@ fn compile_any_function_type(position: &Position) -> types::Function {
         position.clone(),
     )
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::map_type_configuration::HASH_CONFIGURATION;
+    use once_cell::sync::Lazy;
+    use position::{test::PositionFake, Position};
+    use pretty_assertions::assert_eq;
+
+    static HASH_TYPE: Lazy<Type> = Lazy::new(|| types::Number::new(Position::fake()).into());
+
+    #[test]
+    fn transform_with_union() {
+        let union_type = types::Union::new(
+            types::Number::new(Position::fake()),
+            types::None::new(Position::fake()),
+            Position::fake(),
+        );
+
+        assert_eq!(
+            transform(
+                &CompileContext::dummy(Default::default(), Default::default()),
+                &Variable::new("x", Position::fake()).into(),
+                &union_type.into(),
+                &Position::fake(),
+            ),
+            Ok(IfType::new(
+                "$x",
+                Variable::new("x", Position::fake()),
+                vec![
+                    IfTypeBranch::new(
+                        types::None::new(Position::fake()),
+                        Number::new(0.0, Position::fake()),
+                    ),
+                    IfTypeBranch::new(
+                        types::Number::new(Position::fake()),
+                        Call::new(
+                            Some(
+                                types::Function::new(
+                                    vec![types::Number::new(Position::fake()).into()],
+                                    HASH_TYPE.clone(),
+                                    Position::fake()
+                                )
+                                .into()
+                            ),
+                            Variable::new(
+                                &HASH_CONFIGURATION.number_hash_function_name,
+                                Position::fake()
+                            ),
+                            vec![Variable::new("$x", Position::fake()).into()],
+                            Position::fake()
+                        ),
+                    ),
+                ],
+                None,
+                Position::fake(),
+            )
+            .into())
+        );
+    }
+
+    #[test]
+    fn transform_with_record() {
+        let record_type = types::Record::new("foo", Position::fake());
+
+        assert_eq!(
+            transform(
+                &CompileContext::dummy(
+                    Default::default(),
+                    [(
+                        "foo".into(),
+                        vec![types::RecordField::new(
+                            "x",
+                            types::None::new(Position::fake())
+                        )]
+                    )]
+                    .into_iter()
+                    .collect()
+                ),
+                &Variable::new("x", Position::fake()).into(),
+                &record_type.clone().into(),
+                &Position::fake(),
+            ),
+            Ok(Call::new(
+                Some(
+                    types::Function::new(
+                        vec![record_type.clone().into()],
+                        HASH_TYPE.clone(),
+                        Position::fake(),
+                    )
+                    .into(),
+                ),
+                Variable::new(
+                    record_type_information_compiler::compile_hash_function_name(&record_type),
+                    Position::fake(),
+                ),
+                vec![Variable::new("x", Position::fake()).into()],
+                Position::fake()
+            )
+            .into())
+        );
+    }
+
+    #[test]
+    fn fail_to_transform_with_any() {
+        assert_eq!(
+            transform(
+                &CompileContext::dummy(Default::default(), Default::default()),
+                &Variable::new("x", Position::fake()).into(),
+                &types::Any::new(Position::fake()).into(),
+                &Position::fake(),
+            ),
+            Err(AnalysisError::TypeNotComparable(Position::fake()).into())
+        );
+    }
+
+    #[test]
+    fn fail_to_transform_with_function() {
+        assert_eq!(
+            transform(
+                &CompileContext::dummy(Default::default(), Default::default()),
+                &Variable::new("x", Position::fake()).into(),
+                &types::Function::new(vec![], types::None::new(Position::fake()), Position::fake())
+                    .into(),
+                &Position::fake(),
+            ),
+            Err(AnalysisError::TypeNotComparable(Position::fake()).into())
+        );
+    }
+}
