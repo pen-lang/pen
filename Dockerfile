@@ -8,5 +8,4 @@ run git clone https://github.com/pen-lang/pen /root/pen
 
 workdir /root/pen
 
-run . ~/.cargo/env
-run cargo build 
+run . ~/.cargo/env && cargo build 
