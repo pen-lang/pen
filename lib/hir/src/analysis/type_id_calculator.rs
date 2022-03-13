@@ -41,6 +41,11 @@ fn calculate_string(
             calculate_string(function.result())?
         ),
         Type::List(list) => format!("[{}]", calculate_string(list.element())?),
+        Type::Map(map) => format!(
+            "{{{}:{}}}",
+            calculate_string(map.key())?,
+            calculate_string(map.value())?
+        ),
         Type::None(_) => "none".into(),
         Type::Number(_) => "number".into(),
         Type::Record(record) => record.name().into(),

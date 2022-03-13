@@ -19,14 +19,7 @@ pub fn transform(context: &CompileContext, module: &Module) -> Result<Module, Co
             continue;
         }
 
-        if type_definition.is_external()
-            && type_comparability_checker::check(
-                &types::Record::new(type_definition.name(), type_definition.position().clone())
-                    .into(),
-                context.types(),
-                context.records(),
-            )?
-        {
+        if type_definition.is_external() {
             equal_function_declarations.push(compile_equal_function_declaration(type_definition));
         } else {
             equal_function_definitions.push(compile_equal_function_definition(type_definition));

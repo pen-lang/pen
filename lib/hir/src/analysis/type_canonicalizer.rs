@@ -21,6 +21,12 @@ pub fn canonicalize(type_: &Type, types: &FnvHashMap<String, Type>) -> Result<Ty
             list.position().clone(),
         )
         .into(),
+        Type::Map(map) => Map::new(
+            canonicalize(map.key(), types)?,
+            canonicalize(map.value(), types)?,
+            map.position().clone(),
+        )
+        .into(),
         Type::Union(union) => canonicalize_union(union, types)?,
         Type::Any(_)
         | Type::Boolean(_)
@@ -46,6 +52,13 @@ pub fn canonicalize_list(
     types: &FnvHashMap<String, Type>,
 ) -> Result<Option<List>, AnalysisError> {
     Ok(canonicalize(type_, types)?.into_list())
+}
+
+pub fn canonicalize_map(
+    type_: &Type,
+    types: &FnvHashMap<String, Type>,
+) -> Result<Option<Map>, AnalysisError> {
+    Ok(canonicalize(type_, types)?.into_map())
 }
 
 pub fn canonicalize_record(
@@ -87,6 +100,7 @@ fn collect_types(
         | Type::Function(_)
         | Type::Record(_)
         | Type::List(_)
+        | Type::Map(_)
         | Type::None(_)
         | Type::Number(_)
         | Type::String(_) => [canonicalize(type_, types)?].into_iter().collect(),

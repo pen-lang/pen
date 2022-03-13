@@ -22,6 +22,7 @@ pub fn format(
             format(function.result())?,
         ),
         Type::List(list) => format!("[{}]", format(list.element())?),
+        Type::Map(map) => format!("{{ {}: {} }}", format(map.key())?, format(map.value())?),
         Type::None(_) => "none".into(),
         Type::Number(_) => "number".into(),
         Type::Record(record) => original_names

@@ -14,11 +14,12 @@ const LHS_NAME: &str = "$lhs";
 const RHS_NAME: &str = "$rhs";
 
 pub fn transform(
-    operation: &EqualityOperation,
     context: &CompileContext,
+    operation: &EqualityOperation,
 ) -> Result<Expression, CompileError> {
     Ok(if operation.operator() == EqualityOperator::Equal {
         transform_equal_operation(
+            context,
             &type_canonicalizer::canonicalize(
                 operation
                     .type_()
@@ -28,7 +29,6 @@ pub fn transform(
             operation.lhs(),
             operation.rhs(),
             operation.position(),
-            context,
         )?
     } else {
         operation.clone().into()
@@ -36,14 +36,13 @@ pub fn transform(
 }
 
 fn transform_equal_operation(
+    context: &CompileContext,
     type_: &Type,
     lhs: &Expression,
     rhs: &Expression,
     position: &Position,
-    context: &CompileContext,
 ) -> Result<Expression, CompileError> {
     Ok(match type_ {
-        Type::Any(_) => return Err(CompileError::AnyEqualOperation(position.clone())),
         Type::Boolean(_) => If::new(
             lhs.clone(),
             If::new(
@@ -61,9 +60,7 @@ fn transform_equal_operation(
             position.clone(),
         )
         .into(),
-        Type::Function(_) => return Err(CompileError::FunctionEqualOperation(position.clone())),
         Type::List(list_type) => {
-            let element_type = list_type.element();
             let any_list_type = types::Reference::new(
                 &context.configuration()?.list_type.list_type_name,
                 position.clone(),
@@ -73,15 +70,7 @@ fn transform_equal_operation(
                 Some(
                     types::Function::new(
                         vec![
-                            types::Function::new(
-                                vec![
-                                    types::Any::new(position.clone()).into(),
-                                    types::Any::new(position.clone()).into(),
-                                ],
-                                types::Boolean::new(position.clone()),
-                                position.clone(),
-                            )
-                            .into(),
+                            compile_any_function_type(position).into(),
                             any_list_type.clone().into(),
                             any_list_type.into(),
                         ],
@@ -95,43 +84,34 @@ fn transform_equal_operation(
                     position.clone(),
                 ),
                 vec![
-                    Lambda::new(
-                        vec![
-                            Argument::new(LHS_NAME, types::Any::new(position.clone())),
-                            Argument::new(RHS_NAME, types::Any::new(position.clone())),
-                        ],
-                        types::Boolean::new(position.clone()),
-                        IfType::new(
-                            LHS_NAME,
-                            Variable::new(LHS_NAME, position.clone()),
-                            vec![IfTypeBranch::new(
-                                element_type.clone(),
-                                IfType::new(
-                                    RHS_NAME,
-                                    Variable::new(RHS_NAME, position.clone()),
-                                    vec![IfTypeBranch::new(
-                                        element_type.clone(),
-                                        transform_equal_operation(
-                                            element_type,
-                                            &Variable::new(LHS_NAME, position.clone()).into(),
-                                            &Variable::new(RHS_NAME, position.clone()).into(),
-                                            position,
-                                            context,
-                                        )?,
-                                    )],
-                                    None,
-                                    position.clone(),
-                                ),
-                            )],
-                            None,
-                            position.clone(),
-                        ),
-                        position.clone(),
-                    )
-                    .into(),
+                    transform_any_function(context, list_type.element(), position)?.into(),
                     lhs.clone(),
                     rhs.clone(),
                 ],
+                position.clone(),
+            )
+            .into()
+        }
+        Type::Map(_) => {
+            let any_map_type = types::Reference::new(
+                &context.configuration()?.map_type.map_type_name,
+                position.clone(),
+            );
+
+            Call::new(
+                Some(
+                    types::Function::new(
+                        vec![any_map_type.clone().into(), any_map_type.into()],
+                        types::Boolean::new(position.clone()),
+                        position.clone(),
+                    )
+                    .into(),
+                ),
+                Variable::new(
+                    &context.configuration()?.map_type.equal_function_name,
+                    position.clone(),
+                ),
+                vec![lhs.clone(), rhs.clone()],
                 position.clone(),
             )
             .into()
@@ -201,13 +181,13 @@ fn transform_equal_operation(
                                                 context.types(),
                                             )? {
                                                 transform_equal_operation(
+                                                    context,
                                                     rhs_type,
                                                     &Variable::new(LHS_NAME, position.clone())
                                                         .into(),
                                                     &Variable::new(RHS_NAME, position.clone())
                                                         .into(),
                                                     position,
-                                                    context,
                                                 )?
                                             } else {
                                                 Boolean::new(false, position.clone()).into()
@@ -227,13 +207,70 @@ fn transform_equal_operation(
             .into()
         }
         Type::Reference(reference) => transform_equal_operation(
+            context,
             &type_resolver::resolve(reference, context.types())?,
             lhs,
             rhs,
             position,
-            context,
         )?,
+        Type::Any(_) | Type::Function(_) => {
+            return Err(AnalysisError::TypeNotComparable(position.clone()).into())
+        }
     })
+}
+
+// TODO Do not generate equal functions dynamically but define them once
+// globally.
+// Can we simply lift them up to global functions as optimization in MIR?
+pub fn transform_any_function(
+    context: &CompileContext,
+    type_: &Type,
+    position: &Position,
+) -> Result<Lambda, CompileError> {
+    Ok(Lambda::new(
+        vec![
+            Argument::new(LHS_NAME, types::Any::new(position.clone())),
+            Argument::new(RHS_NAME, types::Any::new(position.clone())),
+        ],
+        types::Boolean::new(position.clone()),
+        IfType::new(
+            LHS_NAME,
+            Variable::new(LHS_NAME, position.clone()),
+            vec![IfTypeBranch::new(
+                type_.clone(),
+                IfType::new(
+                    RHS_NAME,
+                    Variable::new(RHS_NAME, position.clone()),
+                    vec![IfTypeBranch::new(
+                        type_.clone(),
+                        transform_equal_operation(
+                            context,
+                            type_,
+                            &Variable::new(LHS_NAME, position.clone()).into(),
+                            &Variable::new(RHS_NAME, position.clone()).into(),
+                            position,
+                        )?,
+                    )],
+                    None,
+                    position.clone(),
+                ),
+            )],
+            None,
+            position.clone(),
+        ),
+        position.clone(),
+    ))
+}
+
+fn compile_any_function_type(position: &Position) -> types::Function {
+    types::Function::new(
+        vec![
+            types::Any::new(position.clone()).into(),
+            types::Any::new(position.clone()).into(),
+        ],
+        types::Boolean::new(position.clone()),
+        position.clone(),
+    )
 }
 
 #[cfg(test)]
@@ -252,6 +289,7 @@ mod tests {
 
         assert_eq!(
             transform(
+                &CompileContext::dummy(Default::default(), Default::default()),
                 &EqualityOperation::new(
                     Some(union_type.into()),
                     EqualityOperator::Equal,
@@ -259,18 +297,40 @@ mod tests {
                     Variable::new("y", Position::fake()),
                     Position::fake()
                 ),
-                &CompileContext::dummy(Default::default(), Default::default())
             ),
             Ok(IfType::new(
                 LHS_NAME,
                 Variable::new("x", Position::fake()),
                 vec![
                     IfTypeBranch::new(
+                        types::None::new(Position::fake()),
+                        IfType::new(
+                            RHS_NAME,
+                            Variable::new("y", Position::fake()),
+                            vec![
+                                IfTypeBranch::new(
+                                    types::None::new(Position::fake()),
+                                    Boolean::new(true, Position::fake()),
+                                ),
+                                IfTypeBranch::new(
+                                    types::Number::new(Position::fake()),
+                                    Boolean::new(false, Position::fake()),
+                                ),
+                            ],
+                            None,
+                            Position::fake(),
+                        ),
+                    ),
+                    IfTypeBranch::new(
                         types::Number::new(Position::fake()),
                         IfType::new(
                             RHS_NAME,
                             Variable::new("y", Position::fake()),
                             vec![
+                                IfTypeBranch::new(
+                                    types::None::new(Position::fake()),
+                                    Boolean::new(false, Position::fake()),
+                                ),
                                 IfTypeBranch::new(
                                     types::Number::new(Position::fake()),
                                     EqualityOperation::new(
@@ -280,29 +340,6 @@ mod tests {
                                         Variable::new(RHS_NAME, Position::fake()),
                                         Position::fake(),
                                     ),
-                                ),
-                                IfTypeBranch::new(
-                                    types::None::new(Position::fake()),
-                                    Boolean::new(false, Position::fake()),
-                                ),
-                            ],
-                            None,
-                            Position::fake(),
-                        ),
-                    ),
-                    IfTypeBranch::new(
-                        types::None::new(Position::fake()),
-                        IfType::new(
-                            RHS_NAME,
-                            Variable::new("y", Position::fake()),
-                            vec![
-                                IfTypeBranch::new(
-                                    types::Number::new(Position::fake()),
-                                    Boolean::new(false, Position::fake()),
-                                ),
-                                IfTypeBranch::new(
-                                    types::None::new(Position::fake()),
-                                    Boolean::new(true, Position::fake()),
                                 ),
                             ],
                             None,
@@ -323,13 +360,6 @@ mod tests {
 
         assert_eq!(
             transform(
-                &EqualityOperation::new(
-                    Some(record_type.clone().into()),
-                    EqualityOperator::Equal,
-                    Variable::new("x", Position::fake()),
-                    Variable::new("y", Position::fake()),
-                    Position::fake()
-                ),
                 &CompileContext::dummy(
                     Default::default(),
                     [(
@@ -341,7 +371,14 @@ mod tests {
                     )]
                     .into_iter()
                     .collect()
-                )
+                ),
+                &EqualityOperation::new(
+                    Some(record_type.clone().into()),
+                    EqualityOperator::Equal,
+                    Variable::new("x", Position::fake()),
+                    Variable::new("y", Position::fake()),
+                    Position::fake()
+                ),
             ),
             Ok(Call::new(
                 Some(
@@ -370,6 +407,7 @@ mod tests {
     fn fail_to_transform_with_any() {
         assert_eq!(
             transform(
+                &CompileContext::dummy(Default::default(), Default::default()),
                 &EqualityOperation::new(
                     Some(types::Any::new(Position::fake()).into()),
                     EqualityOperator::Equal,
@@ -377,9 +415,8 @@ mod tests {
                     Variable::new("y", Position::fake()),
                     Position::fake()
                 ),
-                &CompileContext::dummy(Default::default(), Default::default())
             ),
-            Err(CompileError::AnyEqualOperation(Position::fake()))
+            Err(AnalysisError::TypeNotComparable(Position::fake()).into())
         );
     }
 
@@ -387,6 +424,7 @@ mod tests {
     fn fail_to_transform_with_function() {
         assert_eq!(
             transform(
+                &CompileContext::dummy(Default::default(), Default::default()),
                 &EqualityOperation::new(
                     Some(
                         types::Function::new(
@@ -401,9 +439,8 @@ mod tests {
                     Variable::new("y", Position::fake()),
                     Position::fake()
                 ),
-                &CompileContext::dummy(Default::default(), Default::default())
             ),
-            Err(CompileError::FunctionEqualOperation(Position::fake()))
+            Err(AnalysisError::TypeNotComparable(Position::fake()).into())
         );
     }
 }

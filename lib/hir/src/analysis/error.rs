@@ -14,6 +14,7 @@ pub enum AnalysisError {
     FunctionExpected(Position),
     InvalidTryOperation(Position),
     ListExpected(Position),
+    MapExpected(Position),
     MissingElseBlock(Position),
     RecordExpected(Position),
     RecordFieldMissing(Position),
@@ -24,7 +25,7 @@ pub enum AnalysisError {
     TryOperationInList(Position),
     TypeNotFound(Reference),
     TypeNotInferred(Position),
-    TypesNotComparable(Position),
+    TypeNotComparable(Position),
     TypesNotMatched(Position, Position),
     UnionExpected(Position),
     UnknownRecordField(Position),
@@ -67,6 +68,9 @@ impl Display for AnalysisError {
             Self::ListExpected(position) => {
                 write!(formatter, "list expected\n{}", position)
             }
+            Self::MapExpected(position) => {
+                write!(formatter, "map expected\n{}", position)
+            }
             Self::MissingElseBlock(position) => {
                 write!(
                     formatter,
@@ -106,7 +110,7 @@ impl Display for AnalysisError {
                     position
                 )
             }
-            Self::TypesNotComparable(position) => {
+            Self::TypeNotComparable(position) => {
                 write!(formatter, "types not comparable\n{}", position)
             }
             Self::TypeNotFound(reference) => write!(

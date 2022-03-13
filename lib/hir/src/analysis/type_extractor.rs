@@ -62,6 +62,27 @@ pub fn extract_from_expression(
             )
             .into()
         }
+        Expression::IfMap(if_) => {
+            let map_type = type_canonicalizer::canonicalize_map(
+                &extract_from_expression(if_.map(), variables)?,
+                context.types(),
+            )?
+            .ok_or_else(|| AnalysisError::MapExpected(if_.map().position().clone()))?;
+
+            types::Union::new(
+                extract_from_expression(
+                    if_.then(),
+                    &variables
+                        .clone()
+                        .into_iter()
+                        .chain([(if_.name().into(), map_type.value().clone())])
+                        .collect(),
+                )?,
+                extract_from_expression(if_.else_(), variables)?,
+                if_.position().clone(),
+            )
+            .into()
+        }
         Expression::IfType(if_) => union_type_creator::create(
             &if_.branches()
                 .iter()
@@ -135,6 +156,12 @@ pub fn extract_from_expression(
                 )
                 .collect(),
         )?,
+        Expression::Map(map) => types::Map::new(
+            map.key_type().clone(),
+            map.value_type().clone(),
+            map.position().clone(),
+        )
+        .into(),
         Expression::None(none) => types::None::new(none.position().clone()).into(),
         Expression::Number(number) => types::Number::new(number.position().clone()).into(),
         Expression::Operation(operation) => match operation {
