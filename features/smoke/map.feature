@@ -30,7 +30,7 @@ Feature: Map
     }
     """
     When I successfully run `pen build`
-    Then the exit status should be 0
+    Then I successfully run `./app`
 
   Scenario: Get an entry with a union key
     Given a file named "main.pen" with:
@@ -52,7 +52,7 @@ Feature: Map
     }
     """
     When I successfully run `pen build`
-    Then the exit status should be 0
+    Then I successfully run `./app`
 
   Scenario: Fail to get an entry
     Given a file named "main.pen" with:
@@ -70,7 +70,7 @@ Feature: Map
     }
     """
     When I successfully run `pen build`
-    Then the exit status should be 0
+    Then I successfully run `./app`
 
   Scenario: Create a map with unions
     Given a file named "main.pen" with:
@@ -84,4 +84,34 @@ Feature: Map
     }
     """
     When I successfully run `pen build`
-    Then the exit status should be 0
+    Then I successfully run `./app`
+
+  Scenario: Get an entry in a merged map
+    Given a file named "main.pen" with:
+    """pen
+    import Os'Process
+
+    main = \(ctx context) none {
+      xs = {string: number
+        ...{string: number "foo": 40},
+        ...{string: number "bar": 2},
+      }
+      fail = \() none { Process'Exit(ctx.Os, 1) }
+
+      if x = xs["foo"] {
+        if y = xs["bar"] {
+          if x + y == 42 {
+            none
+          } else {
+            fail()
+          }
+        } else {
+          fail()
+        }
+      } else {
+        fail()
+      }
+    }
+    """
+    When I successfully run `pen build`
+    Then I successfully run `./app`
