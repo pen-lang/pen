@@ -20,7 +20,7 @@ env LLVM_SYS_130_PREFIX=/usr/lib/llvm-14
 
 run . ~/.cargo/env && cargo build
 run . ~/.cargo/env && cargo install --locked --path cmd/pen
-run . ~/.cargo/env && cargo install turtle-build
+run . ~/.cargo/env && cargo install sccache turtle-build
 
 env PEN_ROOT=/root/pen
 env PATH="/usr/lib/llvm-14/bin:$PATH"
