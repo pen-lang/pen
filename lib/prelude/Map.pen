@@ -390,8 +390,10 @@ _getEntry = \(hamt _hamt, index number) _entry {
     hamt.entry30
   } else if index == 31 {
     hamt.entry31
-  } else {
+  } else if index == 32 {
     hamt.entry32
+  } else {
+    none
   }
 }
 
@@ -458,7 +460,9 @@ _setEntry = \(hamt _hamt, index number, entry _entry) _hamt {
     _hamt{...hamt, entry30: entry}
   } else if index == 31 {
     _hamt{...hamt, entry31: entry}
-  } else {
+  } else if index == 32 {
     _hamt{...hamt, entry32: entry}
+  } else {
+    hamt
   }
 }
