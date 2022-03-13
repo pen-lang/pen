@@ -266,10 +266,10 @@ _mergeHamt = \(m _map, h _hamt, i number) _map {
 _hashMap = \(m _map) number {
   headerHash = 5
 
-  _hashHamtResursively(m.context, m.hamt, 1, headerHash)
+  _hashHamt(m.context, m.hamt, 1, headerHash)
 }
 
-_hashHamtResursively = \(ctx _mapContext, h _hamt, index number, hash number) number {
+_hashHamt = \(ctx _mapContext, h _hamt, index number, hash number) number {
   if index > 32 {
     hash
   } else {
@@ -277,16 +277,16 @@ _hashHamtResursively = \(ctx _mapContext, h _hamt, index number, hash number) nu
       hash = _pen_prelude_combine_hashes(hash, ctx.hashKey(e.key))
       hash = _pen_prelude_combine_hashes(hash, ctx.hashValue(e.value))
 
-      _hashHamtResursively(ctx, h, index + 1, hash)
+      _hashHamt(ctx, h, index + 1, hash)
     } else if _hamt {
-      _hashHamtResursively(
-        ctx, 
-        h, 
+      _hashHamt(
+        ctx,
+        h,
         index + 1,
-        _pen_prelude_combine_hashes(hash, _hashHamtResursively(ctx, e, 1, hash)), 
+        _pen_prelude_combine_hashes(hash, _hashHamt(ctx, e, 1, hash)),
       )
     } else if none {
-      _hashHamtResursively(ctx, h, index + 1, hash)
+      _hashHamt(ctx, h, index + 1, hash)
     }
   }
 }
