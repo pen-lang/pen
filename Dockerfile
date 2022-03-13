@@ -10,4 +10,4 @@ workdir /root/pen
 
 env LLVM_SYS_130_PREFIX=/usr/lib/llvm-14
 
-run . ~/.cargo/env && cargo build 
+run . ~/.cargo/env && cargo build
