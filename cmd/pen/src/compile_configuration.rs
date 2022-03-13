@@ -33,6 +33,23 @@ pub static COMPILE_CONFIGURATION: Lazy<Arc<app::module_compiler::CompileConfigur
                     list_type_name: "_anyList".into(),
                     first_rest_type_name: "_firstRest".into(),
                 },
+                map_type: app::module_compiler::MapTypeConfiguration {
+                    empty_function_name: "_newMap".into(),
+                    empty_type_name: "_empty".into(),
+                    equal_function_name: "_equalMaps".into(),
+                    get_function_name: "_getMap".into(),
+                    map_type_name: "_map".into(),
+                    merge_function_name: "_mergeMaps".into(),
+                    delete_function_name: "_deleteMap".into(),
+                    set_function_name: "_setMap".into(),
+                    hash: app::module_compiler::HashConfiguration {
+                        combine_function_name: "_combineHashes".into(),
+                        number_hash_function_name: "_hashNumber".into(),
+                        string_hash_function_name: "_hashString".into(),
+                        list_hash_function_name: "_hashList".into(),
+                        map_hash_function_name: "_hashMap".into(),
+                    },
+                },
                 string_type: app::module_compiler::StringTypeConfiguration {
                     equal_function_name: "_equalStrings".into(),
                 },

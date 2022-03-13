@@ -5,6 +5,7 @@ pub fn qualify(
     hir_mir::CompileConfiguration {
         error_type: qualify_error_type_configuration(&configuration.error_type, prelude_prefix),
         list_type: qualify_list_type_configuration(&configuration.list_type, prelude_prefix),
+        map_type: qualify_map_type_configuration(&configuration.map_type, prelude_prefix),
         string_type: qualify_string_type_configuration(&configuration.string_type, prelude_prefix),
         concurrency: configuration.concurrency.clone(),
     }
@@ -47,5 +48,37 @@ fn qualify_error_type_configuration(
     hir_mir::ErrorTypeConfiguration {
         error_type_name: prelude_prefix.to_owned() + &configuration.error_type_name,
         source_function_name: prelude_prefix.to_owned() + &configuration.source_function_name,
+    }
+}
+
+fn qualify_map_type_configuration(
+    configuration: &hir_mir::MapTypeConfiguration,
+    prelude_prefix: &str,
+) -> hir_mir::MapTypeConfiguration {
+    hir_mir::MapTypeConfiguration {
+        empty_function_name: prelude_prefix.to_owned() + &configuration.empty_function_name,
+        equal_function_name: prelude_prefix.to_owned() + &configuration.equal_function_name,
+        get_function_name: prelude_prefix.to_owned() + &configuration.get_function_name,
+        map_type_name: prelude_prefix.to_owned() + &configuration.map_type_name,
+        merge_function_name: prelude_prefix.to_owned() + &configuration.merge_function_name,
+        empty_type_name: prelude_prefix.to_owned() + &configuration.empty_type_name,
+        delete_function_name: prelude_prefix.to_owned() + &configuration.delete_function_name,
+        set_function_name: prelude_prefix.to_owned() + &configuration.set_function_name,
+        hash: qualify_hash_configuration(&configuration.hash, prelude_prefix),
+    }
+}
+
+fn qualify_hash_configuration(
+    configuration: &hir_mir::HashConfiguration,
+    prelude_prefix: &str,
+) -> hir_mir::HashConfiguration {
+    hir_mir::HashConfiguration {
+        combine_function_name: prelude_prefix.to_owned() + &configuration.combine_function_name,
+        number_hash_function_name: prelude_prefix.to_owned()
+            + &configuration.number_hash_function_name,
+        string_hash_function_name: prelude_prefix.to_owned()
+            + &configuration.string_hash_function_name,
+        list_hash_function_name: prelude_prefix.to_owned() + &configuration.list_hash_function_name,
+        map_hash_function_name: prelude_prefix.to_owned() + &configuration.map_hash_function_name,
     }
 }

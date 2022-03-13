@@ -8,9 +8,7 @@ use std::{
 #[derive(Clone, Debug, PartialEq)]
 pub enum CompileError {
     Analysis(AnalysisError),
-    AnyEqualOperation(Position),
     CompileConfigurationNotProvided,
-    FunctionEqualOperation(Position),
     InvalidRecordEqualOperation(Position),
     MainFunctionNotFound(Position),
     MirTypeCheck(mir::analysis::TypeCheckError),
@@ -22,22 +20,8 @@ impl Display for CompileError {
     fn fmt(&self, formatter: &mut Formatter) -> fmt::Result {
         match self {
             Self::Analysis(error) => write!(formatter, "{}", error),
-            Self::AnyEqualOperation(position) => {
-                write!(
-                    formatter,
-                    "equal operator cannot be used with any type\n{}",
-                    position
-                )
-            }
             Self::CompileConfigurationNotProvided => {
                 write!(formatter, "compile configuration not provided")
-            }
-            Self::FunctionEqualOperation(position) => {
-                write!(
-                    formatter,
-                    "equal operator cannot be used with function type\n{}",
-                    position
-                )
             }
             Self::InvalidRecordEqualOperation(position) => {
                 write!(

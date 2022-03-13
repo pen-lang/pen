@@ -24,6 +24,7 @@ pub fn validate(
             | Type::Boolean(_)
             | Type::Function(_)
             | Type::List(_)
+            | Type::Map(_)
             | Type::None(_)
             | Type::Number(_)
             | Type::String(_)

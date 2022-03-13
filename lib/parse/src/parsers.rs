@@ -239,6 +239,18 @@ fn list_type<'a>() -> impl Parser<Stream<'a>, Output = types::List> {
         .expected("list type")
 }
 
+fn map_type<'a>() -> impl Parser<Stream<'a>, Output = types::Map> {
+    (
+        attempt(position().skip(sign("{"))),
+        type_(),
+        sign(":"),
+        type_(),
+        sign("}"),
+    )
+        .map(|(position, key, _, value, _)| types::Map::new(key, value, position))
+        .expected("map type")
+}
+
 fn atomic_type<'a>() -> impl Parser<Stream<'a>, Output = Type> {
     choice((
         boolean_type().map(Type::from),
@@ -248,6 +260,7 @@ fn atomic_type<'a>() -> impl Parser<Stream<'a>, Output = Type> {
         any_type().map(Type::from),
         reference_type().map(Type::from),
         list_type().map(Type::from),
+        map_type().map(Type::from),
         between(sign("("), sign(")"), type_()),
     ))
 }
@@ -469,13 +482,15 @@ fn atomic_expression<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
     lazy(|| {
         no_partial(choice((
             spawn_operation().map(Expression::from),
-            if_type().map(Expression::from),
             if_list().map(Expression::from),
+            if_map().map(Expression::from),
+            if_type().map(Expression::from),
             if_().map(Expression::from),
             lambda().map(Expression::from),
             record().map(Expression::from),
             list_comprehension().map(Expression::from),
             list_literal().map(Expression::from),
+            map_literal().map(Expression::from),
             boolean_literal().map(Expression::from),
             none_literal().map(Expression::from),
             number_literal().map(Expression::from),
@@ -549,6 +564,28 @@ fn if_list<'a>() -> impl Parser<Stream<'a>, Output = IfList> {
             },
         )
         .expected("if-list expression")
+}
+
+fn if_map<'a>() -> impl Parser<Stream<'a>, Output = IfMap> {
+    (
+        attempt((
+            position(),
+            keyword("if"),
+            identifier(),
+            sign("="),
+            expression(),
+            sign("["),
+        )),
+        expression(),
+        sign("]"),
+        block(),
+        keyword("else"),
+        block(),
+    )
+        .map(|((position, _, name, _, map, _), key, _, then, _, else_)| {
+            IfMap::new(name, map, key, then, else_, position)
+        })
+        .expected("if-map expression")
 }
 
 fn if_type<'a>() -> impl Parser<Stream<'a>, Output = IfType> {
@@ -730,6 +767,33 @@ fn list_comprehension<'a>() -> impl Parser<Stream<'a>, Output = ListComprehensio
             },
         )
         .expected("list literal")
+}
+
+fn map_literal<'a>() -> impl Parser<Stream<'a>, Output = Map> {
+    (
+        attempt(position().skip(sign("{"))),
+        type_(),
+        sign(":"),
+        type_(),
+        sep_end_by(map_element(), sign(",")),
+        sign("}"),
+    )
+        .map(|(position, key_type, _, value_type, elements, _)| {
+            Map::new(key_type, value_type, elements, position)
+        })
+        .expected("map literal")
+}
+
+fn map_element<'a>() -> impl Parser<Stream<'a>, Output = MapElement> {
+    choice((
+        (
+            attempt((position(), expression()).skip(sign(":"))),
+            expression(),
+        )
+            .map(|((position, key), value)| MapEntry::new(key, value, position).into()),
+        sign("...").with(expression()).map(MapElement::Map),
+        expression().map(MapElement::Removal),
+    ))
 }
 
 fn variable<'a>() -> impl Parser<Stream<'a>, Output = Variable> {
@@ -1543,6 +1607,19 @@ mod tests {
                 .into()
             );
         }
+
+        #[test]
+        fn parse_map_type() {
+            assert_eq!(
+                type_().parse(stream("{number:none}", "")).unwrap().0,
+                types::Map::new(
+                    types::Number::new(Position::fake()),
+                    types::None::new(Position::fake()),
+                    Position::fake()
+                )
+                .into()
+            );
+        }
     }
 
     mod expressions {
@@ -1958,6 +2035,24 @@ mod tests {
                     Variable::new("xs", Position::fake()),
                     "x",
                     "xs",
+                    Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                    Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                    Position::fake(),
+                )
+            );
+        }
+
+        #[test]
+        fn parse_if_map() {
+            assert_eq!(
+                if_map()
+                    .parse(stream("if x=xs[42]{none}else{none}", ""))
+                    .unwrap()
+                    .0,
+                IfMap::new(
+                    "x",
+                    Variable::new("xs", Position::fake()),
+                    Number::new(42.0, Position::fake()),
                     Block::new(vec![], None::new(Position::fake()), Position::fake()),
                     Block::new(vec![], None::new(Position::fake()), Position::fake()),
                     Position::fake(),
@@ -2767,6 +2862,82 @@ mod tests {
                     list_comprehension().parse(stream(source, "")).unwrap().0,
                     target
                 );
+            }
+        }
+
+        #[test]
+        fn parse_map() {
+            for (source, target) in vec![
+                (
+                    "{none:none}",
+                    Map::new(
+                        types::None::new(Position::fake()),
+                        types::None::new(Position::fake()),
+                        vec![],
+                        Position::fake(),
+                    )
+                    .into(),
+                ),
+                (
+                    "{none:none none:none}",
+                    Map::new(
+                        types::None::new(Position::fake()),
+                        types::None::new(Position::fake()),
+                        vec![MapEntry::new(
+                            None::new(Position::fake()),
+                            None::new(Position::fake()),
+                            Position::fake(),
+                        )
+                        .into()],
+                        Position::fake(),
+                    )
+                    .into(),
+                ),
+                (
+                    "{number:none 1:none,2:none}",
+                    Map::new(
+                        types::Number::new(Position::fake()),
+                        types::None::new(Position::fake()),
+                        vec![
+                            MapEntry::new(
+                                Number::new(1.0, Position::fake()),
+                                None::new(Position::fake()),
+                                Position::fake(),
+                            )
+                            .into(),
+                            MapEntry::new(
+                                Number::new(2.0, Position::fake()),
+                                None::new(Position::fake()),
+                                Position::fake(),
+                            )
+                            .into(),
+                        ],
+                        Position::fake(),
+                    )
+                    .into(),
+                ),
+                (
+                    "{none:none ...none}",
+                    Map::new(
+                        types::None::new(Position::fake()),
+                        types::None::new(Position::fake()),
+                        vec![MapElement::Map(None::new(Position::fake()).into())],
+                        Position::fake(),
+                    )
+                    .into(),
+                ),
+                (
+                    "{none:none none}",
+                    Map::new(
+                        types::None::new(Position::fake()),
+                        types::None::new(Position::fake()),
+                        vec![MapElement::Removal(None::new(Position::fake()).into())],
+                        Position::fake(),
+                    )
+                    .into(),
+                ),
+            ] {
+                assert_eq!(expression().parse(stream(source, "")).unwrap().0, target);
             }
         }
     }

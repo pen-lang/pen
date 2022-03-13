@@ -9,7 +9,10 @@ use super::{
 use crate::{
     concurrency_configuration::MODULE_LOCAL_SPAWN_FUNCTION_NAME,
     downcast_compiler,
-    transformation::{list_literal_transformer, record_update_transformer},
+    transformation::{
+        if_map_transformer, list_literal_transformer, map_literal_transformer,
+        record_update_transformer,
+    },
 };
 use fnv::FnvHashMap;
 use hir::{
@@ -50,7 +53,8 @@ pub fn compile(
             compile(if_.else_())?,
         )
         .into(),
-        Expression::IfList(if_) => compile(&if_list_transformer::transform(if_, context)?)?,
+        Expression::IfList(if_) => compile(&if_list_transformer::transform(context, if_)?)?,
+        Expression::IfMap(if_) => compile(&if_map_transformer::transform(context, if_)?)?,
         Expression::IfType(if_) => mir::ir::Case::new(
             compile(if_.argument())?,
             if_.branches()
@@ -212,6 +216,7 @@ pub fn compile(
             )
             .into()
         }
+        Expression::Map(map) => compile(&map_literal_transformer::transform(context, map)?)?,
         Expression::None(_) => mir::ir::Expression::None,
         Expression::Number(number) => mir::ir::Expression::Number(number.value()),
         Expression::Operation(operation) => compile_operation(operation, context)?,
@@ -317,6 +322,16 @@ pub fn compile(
                     Type::List(list_type) => {
                         let concrete_type =
                             type_compiler::compile_concrete_list(list_type, context.types())?;
+
+                        mir::ir::Variant::new(
+                            concrete_type.clone(),
+                            mir::ir::Record::new(concrete_type, vec![argument]),
+                        )
+                        .into()
+                    }
+                    Type::Map(map_type) => {
+                        let concrete_type =
+                            type_compiler::compile_concrete_map(map_type, context.types())?;
 
                         mir::ir::Variant::new(
                             concrete_type.clone(),
@@ -487,7 +502,7 @@ fn compile_operation(
                         vec![compile(operation.lhs())?, compile(operation.rhs())?],
                     )
                     .into(),
-                    _ => compile(&equal_operation_transformer::transform(operation, context)?)?,
+                    _ => compile(&equal_operation_transformer::transform(context, operation)?)?,
                 }
             }
             EqualityOperator::NotEqual => {
@@ -813,19 +828,6 @@ mod tests {
                     mir::ir::Variable::new("x"),
                     vec![
                         mir::ir::Alternative::new(
-                            mir::types::Type::Number,
-                            "y",
-                            mir::ir::Let::new(
-                                "y",
-                                mir::types::Type::Variant,
-                                mir::ir::Variant::new(
-                                    mir::types::Type::Number,
-                                    mir::ir::Variable::new("y")
-                                ),
-                                mir::ir::Expression::None
-                            )
-                        ),
-                        mir::ir::Alternative::new(
                             mir::types::Type::None,
                             "y",
                             mir::ir::Let::new(
@@ -833,6 +835,19 @@ mod tests {
                                 mir::types::Type::Variant,
                                 mir::ir::Variant::new(
                                     mir::types::Type::None,
+                                    mir::ir::Variable::new("y")
+                                ),
+                                mir::ir::Expression::None
+                            )
+                        ),
+                        mir::ir::Alternative::new(
+                            mir::types::Type::Number,
+                            "y",
+                            mir::ir::Let::new(
+                                "y",
+                                mir::types::Type::Variant,
+                                mir::ir::Variant::new(
+                                    mir::types::Type::Number,
                                     mir::ir::Variable::new("y")
                                 ),
                                 mir::ir::Expression::None
@@ -966,19 +981,6 @@ mod tests {
                     mir::ir::Variable::new("x"),
                     vec![
                         mir::ir::Alternative::new(
-                            mir::types::Type::None,
-                            "y",
-                            mir::ir::Let::new(
-                                "y",
-                                mir::types::Type::Variant,
-                                mir::ir::Variant::new(
-                                    mir::types::Type::None,
-                                    mir::ir::Variable::new("y")
-                                ),
-                                mir::ir::Variable::new("y")
-                            ),
-                        ),
-                        mir::ir::Alternative::new(
                             concrete_list_type.clone(),
                             "y",
                             mir::ir::Let::new(
@@ -986,6 +988,19 @@ mod tests {
                                 mir::types::Type::Variant,
                                 mir::ir::Variant::new(
                                     concrete_list_type,
+                                    mir::ir::Variable::new("y")
+                                ),
+                                mir::ir::Variable::new("y")
+                            ),
+                        ),
+                        mir::ir::Alternative::new(
+                            mir::types::Type::None,
+                            "y",
+                            mir::ir::Let::new(
+                                "y",
+                                mir::types::Type::Variant,
+                                mir::ir::Variant::new(
+                                    mir::types::Type::None,
                                     mir::ir::Variable::new("y")
                                 ),
                                 mir::ir::Variable::new("y")
@@ -1217,19 +1232,6 @@ mod tests {
                     ),
                     vec![
                         mir::ir::Alternative::new(
-                            mir::types::Type::Number,
-                            "$success",
-                            mir::ir::Let::new(
-                                "$success",
-                                mir::types::Type::Variant,
-                                mir::ir::Variant::new(
-                                    mir::types::Type::Number,
-                                    mir::ir::Variable::new("$success")
-                                ),
-                                mir::ir::Variable::new("$success"),
-                            ),
-                        ),
-                        mir::ir::Alternative::new(
                             mir::types::Type::None,
                             "$success",
                             mir::ir::Let::new(
@@ -1237,6 +1239,19 @@ mod tests {
                                 mir::types::Type::Variant,
                                 mir::ir::Variant::new(
                                     mir::types::Type::None,
+                                    mir::ir::Variable::new("$success")
+                                ),
+                                mir::ir::Variable::new("$success"),
+                            ),
+                        ),
+                        mir::ir::Alternative::new(
+                            mir::types::Type::Number,
+                            "$success",
+                            mir::ir::Let::new(
+                                "$success",
+                                mir::types::Type::Variant,
+                                mir::ir::Variant::new(
+                                    mir::types::Type::Number,
                                     mir::ir::Variable::new("$success")
                                 ),
                                 mir::ir::Variable::new("$success"),
