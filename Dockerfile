@@ -4,9 +4,9 @@ run apt update --fix-missing && apt install -y \
 	build-essential \
 	curl \
 	git \
+	libssl-dev \
 	libz-dev \
 	lsb-release \
-	openssl \
 	pkg-config \
 	ruby-bundler \
 	ruby-dev \
