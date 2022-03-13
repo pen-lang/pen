@@ -213,7 +213,6 @@ _deleteMap = \(
   }
 }
 
-# TODO Normalize tree structures.
 _deleteKey = \(ctx _mapContext, hamt _hamt, key any, layer number, level number) _hamtUpdate {
   i = _hamtIndex(ctx, key, layer, level)
   update = \(e _entry, size boolean) _hamtUpdate {
@@ -235,9 +234,33 @@ _deleteKey = \(ctx _mapContext, hamt _hamt, key any, layer number, level number)
       _deleteKey(ctx, e, key, layer, level + 1)
     }
 
-    update(u.hamt, u.size)
+    update(_normalizeHamt(u.hamt), u.size)
   } else if none {
     _hamtUpdate{hamt: hamt, size: false}
+  }
+}
+
+_normalizeHamt = \(h _hamt) _entry { 
+  if e = _getSingleEntry(h, 1, none) as none { 
+    h 
+  } else {
+    e
+  }
+}
+
+_getSingleEntry = \(h _hamt, i number, e _entry) _entry { 
+  if i > 32 {
+    e
+  } else {
+    if ee = _getEntry(h, i) as none {
+      _getSingleEntry(h, i + 1, e)
+    } else {
+      if _ = e as none {
+        _getSingleEntry(h, i + 1, ee)
+      } else {
+        none
+      }
+    }
   }
 }
 
