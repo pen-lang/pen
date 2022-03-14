@@ -294,32 +294,28 @@ pub fn compile(
             let to = type_canonicalizer::canonicalize(coercion.to(), context.types())?;
             let argument = compile(coercion.argument())?;
 
-            if from.is_list() && to.is_list() {
-                argument
-            } else {
-                match &from {
-                    Type::Boolean(_)
-                    | Type::None(_)
-                    | Type::Number(_)
-                    | Type::Record(_)
-                    | Type::String(_) => mir::ir::Variant::new(
-                        type_compiler::compile(context, coercion.from())?,
-                        argument,
-                    )
-                    .into(),
-                    Type::Function(function_type) => {
-                        let concrete_type = type_compiler::compile_concrete_function(
-                            function_type,
-                            context.types(),
-                        )?;
+            match &from {
+                Type::Boolean(_)
+                | Type::None(_)
+                | Type::Number(_)
+                | Type::Record(_)
+                | Type::String(_) => {
+                    mir::ir::Variant::new(type_compiler::compile(context, &from)?, argument).into()
+                }
+                Type::Function(function_type) => {
+                    let concrete_type =
+                        type_compiler::compile_concrete_function(function_type, context.types())?;
 
-                        mir::ir::Variant::new(
-                            concrete_type.clone(),
-                            mir::ir::Record::new(concrete_type, vec![argument]),
-                        )
-                        .into()
-                    }
-                    Type::List(list_type) => {
+                    mir::ir::Variant::new(
+                        concrete_type.clone(),
+                        mir::ir::Record::new(concrete_type, vec![argument]),
+                    )
+                    .into()
+                }
+                Type::List(list_type) => {
+                    if to.is_list() {
+                        argument
+                    } else {
                         let concrete_type =
                             type_compiler::compile_concrete_list(list_type, context.types())?;
 
@@ -329,7 +325,11 @@ pub fn compile(
                         )
                         .into()
                     }
-                    Type::Map(map_type) => {
+                }
+                Type::Map(map_type) => {
+                    if to.is_map() {
+                        argument
+                    } else {
                         let concrete_type =
                             type_compiler::compile_concrete_map(map_type, context.types())?;
 
@@ -339,9 +339,9 @@ pub fn compile(
                         )
                         .into()
                     }
-                    Type::Any(_) | Type::Union(_) => argument,
-                    Type::Reference(_) => unreachable!(),
                 }
+                Type::Any(_) | Type::Union(_) => argument,
+                Type::Reference(_) => unreachable!(),
             }
         }
         Expression::Variable(variable) => mir::ir::Variable::new(variable.name()).into(),
