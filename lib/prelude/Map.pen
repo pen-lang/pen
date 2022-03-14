@@ -240,15 +240,15 @@ _deleteKey = \(ctx _mapContext, hamt _hamt, key any, layer number, level number)
   }
 }
 
-_normalizeHamt = \(h _hamt) _entry { 
-  if e = _getSingleEntry(h, 1, none) as none { 
-    h 
+_normalizeHamt = \(h _hamt) _entry {
+  if e = _getSingleEntry(h, 1, none) as none {
+    h
   } else {
     e
   }
 }
 
-_getSingleEntry = \(h _hamt, i number, e _entry) _entry { 
+_getSingleEntry = \(h _hamt, i number, e _entry) _entry {
   if i > 32 {
     e
   } else {

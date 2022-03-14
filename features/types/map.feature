@@ -62,6 +62,16 @@ Feature: Map
     When I successfully run `pen build`
     Then the exit status should be 0
 
+  Scenario: Merge a map of different types
+    Given a file named "Foo.pen" with:
+    """pen
+    f = \(xs {string: number}) {string | none: number | none} {
+      {string | none: number | none ...xs}
+    }
+    """
+    When I successfully run `pen build`
+    Then the exit status should be 0
+
   Scenario: Create a map of a union type key
     Given a file named "Foo.pen" with:
     """pen
