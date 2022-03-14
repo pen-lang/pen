@@ -46,13 +46,10 @@ fn compile_type_definition(
             )
             .into()]),
         )),
-        Type::Any(_)
-        | Type::Boolean(_)
-        | Type::String(_)
-        | Type::None(_)
-        | Type::Number(_)
-        | Type::Record(_) => None,
-        Type::Reference(_) | Type::Union(_) => unreachable!(),
+        Type::Boolean(_) | Type::String(_) | Type::None(_) | Type::Number(_) | Type::Record(_) => {
+            None
+        }
+        Type::Any(_) | Type::Reference(_) | Type::Union(_) => unreachable!(),
     })
 }
 
