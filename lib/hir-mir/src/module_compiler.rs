@@ -5,7 +5,7 @@ use super::{
 use crate::spawn_function_declaration_compiler;
 use hir::{analysis::AnalysisError, ir::*};
 
-pub fn compile(module: &Module, context: &CompileContext) -> Result<mir::ir::Module, CompileError> {
+pub fn compile(context: &CompileContext, module: &Module) -> Result<mir::ir::Module, CompileError> {
     Ok(mir::ir::Module::new(
         module
             .type_definitions()
@@ -139,8 +139,8 @@ mod tests {
 
     fn compile_module(module: &Module) -> Result<mir::ir::Module, CompileError> {
         compile(
-            module,
             &CompileContext::new(module, COMPILE_CONFIGURATION.clone().into()),
+            module,
         )
     }
 
