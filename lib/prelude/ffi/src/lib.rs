@@ -25,9 +25,20 @@ fn _pen_prelude_combine_hashes(one: ffi::Number, other: ffi::Number) -> ffi::Num
 
 #[ffi::bindgen]
 fn _pen_prelude_hash_number(number: ffi::Number) -> ffi::Number {
-    // TODO Normalize a floating point number!
+    let number = f64::from(number);
+
+    // We normalize a floating point number before hash calculation.
     // https://internals.rust-lang.org/t/f32-f64-should-implement-hash/5436
-    hash(&f64::from(number).to_bits())
+    hash(
+        &(if number == 0.0 {
+            0.0
+        } else if number.is_nan() {
+            f64::NAN
+        } else {
+            number
+        })
+        .to_bits(),
+    )
 }
 
 #[ffi::bindgen]
