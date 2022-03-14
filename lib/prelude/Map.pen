@@ -213,7 +213,6 @@ _deleteMap = \(
   }
 }
 
-# TODO Normalize tree structures.
 _deleteKey = \(ctx _mapContext, hamt _hamt, key any, layer number, level number) _hamtUpdate {
   i = _hamtIndex(ctx, key, layer, level)
   update = \(e _entry, size boolean) _hamtUpdate {
@@ -235,9 +234,33 @@ _deleteKey = \(ctx _mapContext, hamt _hamt, key any, layer number, level number)
       _deleteKey(ctx, e, key, layer, level + 1)
     }
 
-    update(u.hamt, u.size)
+    update(_normalizeHamt(u.hamt), u.size)
   } else if none {
     _hamtUpdate{hamt: hamt, size: false}
+  }
+}
+
+_normalizeHamt = \(h _hamt) _entry {
+  if e = _getSingleEntry(h, 1, none) as none {
+    h
+  } else {
+    e
+  }
+}
+
+_getSingleEntry = \(h _hamt, i number, e _entry) _entry {
+  if i > 32 {
+    e
+  } else {
+    if ee = _getEntry(h, i) as none {
+      _getSingleEntry(h, i + 1, e)
+    } else {
+      if _ = e as none {
+        _getSingleEntry(h, i + 1, ee)
+      } else {
+        none
+      }
+    }
   }
 }
 
@@ -260,6 +283,66 @@ _mergeHamt = \(m _map, h _hamt, i number) _map {
       h,
       i + 1,
     )
+  }
+}
+
+_equalMaps = \(x _map, y _map) boolean {
+  _equalHamts(x.context, x.hamt, y.hamt, 1)
+}
+
+_equalHamts = \(ctx _mapContext, h1 _hamt, h2 _hamt, i number) boolean {
+  if i > 32 {
+    true
+  } else {
+    rest = \() boolean { _equalHamts(ctx, h1, h2, i + 1) }
+
+    if e1 = _getEntry(h1, i) as _keyValue {
+      if e2 = _getEntry(h2, i) as _keyValue {
+        ctx.equalKeys(e1, e2) & ctx.equalValues(e1.value, e2.value) & rest()
+      } else {
+        false
+      }
+    } else if _hamt {
+      if e2 = _getEntry(h2, i) as _hamt {
+        _equalHamts(ctx, e1, e2, 1) & rest()
+      } else {
+        false
+      }
+    } else if none {
+      if _ = _getEntry(h2, i) as none {
+        rest()
+      } else {
+        false
+      }
+    }
+  }
+}
+
+_hashMap = \(m _map) number {
+  headerHash = 5
+
+  _hashHamt(m.context, m.hamt, 1, headerHash)
+}
+
+_hashHamt = \(ctx _mapContext, h _hamt, index number, hash number) number {
+  if index > 32 {
+    hash
+  } else {
+    if e = _getEntry(h, index) as _keyValue {
+      hash = _pen_prelude_combine_hashes(hash, ctx.hashKey(e.key))
+      hash = _pen_prelude_combine_hashes(hash, ctx.hashValue(e.value))
+
+      _hashHamt(ctx, h, index + 1, hash)
+    } else if _hamt {
+      _hashHamt(
+        ctx,
+        h,
+        index + 1,
+        _pen_prelude_combine_hashes(hash, _hashHamt(ctx, e, 1, hash)),
+      )
+    } else if none {
+      _hashHamt(ctx, h, index + 1, hash)
+    }
   }
 }
 
@@ -330,8 +413,10 @@ _getEntry = \(hamt _hamt, index number) _entry {
     hamt.entry30
   } else if index == 31 {
     hamt.entry31
-  } else {
+  } else if index == 32 {
     hamt.entry32
+  } else {
+    none
   }
 }
 
@@ -398,7 +483,9 @@ _setEntry = \(hamt _hamt, index number, entry _entry) _hamt {
     _hamt{...hamt, entry30: entry}
   } else if index == 31 {
     _hamt{...hamt, entry31: entry}
-  } else {
+  } else if index == 32 {
     _hamt{...hamt, entry32: entry}
+  } else {
+    hamt
   }
 }

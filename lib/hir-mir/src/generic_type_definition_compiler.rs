@@ -39,7 +39,20 @@ fn compile_type_definition(
             )
             .into()]),
         )),
-        _ => None,
+        Type::Map(map_type) => Some(mir::ir::TypeDefinition::new(
+            type_compiler::compile_concrete_map_name(map_type, context.types())?,
+            mir::types::RecordBody::new(vec![mir::types::Record::new(
+                &context.configuration()?.map_type.map_type_name,
+            )
+            .into()]),
+        )),
+        Type::Any(_)
+        | Type::Boolean(_)
+        | Type::String(_)
+        | Type::None(_)
+        | Type::Number(_)
+        | Type::Record(_) => None,
+        Type::Reference(_) | Type::Union(_) => unreachable!(),
     })
 }
 

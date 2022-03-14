@@ -90,7 +90,7 @@ fn compile_module(
 
     Ok((
         {
-            let module = module_compiler::compile(&module, context)?;
+            let module = module_compiler::compile(context, &module)?;
             mir::analysis::check_types(&module)?;
             module
         },

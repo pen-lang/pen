@@ -5,7 +5,7 @@ use hir::{
     types::{self, Type},
 };
 
-pub fn compile(type_: &Type, context: &CompileContext) -> Result<mir::types::Type, CompileError> {
+pub fn compile(context: &CompileContext, type_: &Type) -> Result<mir::types::Type, CompileError> {
     Ok(
         match type_canonicalizer::canonicalize(type_, context.types())? {
             Type::Boolean(_) => mir::types::Type::Boolean,
@@ -26,7 +26,7 @@ pub fn compile_function(
     function: &types::Function,
     context: &CompileContext,
 ) -> Result<mir::types::Function, CompileError> {
-    let compile = |type_| compile(type_, context);
+    let compile = |type_| compile(context, type_);
 
     Ok(mir::types::Function::new(
         function
