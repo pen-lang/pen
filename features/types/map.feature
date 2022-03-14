@@ -11,8 +11,8 @@ Feature: Map
   Scenario: Create an empty map
     Given a file named "Foo.pen" with:
     """pen
-    f = \() {string:number} {
-      {string:number}
+    f = \() {string: number} {
+      {string: number}
     }
     """
     When I successfully run `pen build`
@@ -21,8 +21,8 @@ Feature: Map
   Scenario: Create a map with an entry
     Given a file named "Foo.pen" with:
     """pen
-    f = \() {string:number} {
-      {string:number "foo": 42}
+    f = \() {string: number} {
+      {string: number "foo": 42}
     }
     """
     When I successfully run `pen build`
@@ -31,8 +31,8 @@ Feature: Map
   Scenario: Create a map with two elements
     Given a file named "Foo.pen" with:
     """pen
-    f = \() {string:number} {
-      {string:number "foo": 1, "bar": 2}
+    f = \() {string: number} {
+      {string: number "foo": 1, "bar": 2}
     }
     """
     When I successfully run `pen build`
@@ -41,7 +41,7 @@ Feature: Map
   Scenario: Get a value in a map
     Given a file named "Foo.pen" with:
     """pen
-    f = \(xs {string:number}) number {
+    f = \(xs {string: number}) number {
       if x = xs["foo"] {
         x
       } else {
@@ -55,8 +55,8 @@ Feature: Map
   Scenario: Merge maps
     Given a file named "Foo.pen" with:
     """pen
-    f = \(xs {string:number}) {string:number} {
-      {string:number ...xs, ...xs}
+    f = \(xs {string: number}) {string: number} {
+      {string: number ...xs, ...xs}
     }
     """
     When I successfully run `pen build`
@@ -75,8 +75,8 @@ Feature: Map
   Scenario: Create a map of a union type value
     Given a file named "Foo.pen" with:
     """pen
-    f = \() {string:number|none} {
-      {string:number|none "foo": 42, "bar": none}
+    f = \() {string: number | none} {
+      {string: number | none "foo": 42, "bar": none}
     }
     """
     When I successfully run `pen build`
