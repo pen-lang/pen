@@ -62,8 +62,8 @@ fn collect_types(
 ) -> Result<FnvHashSet<Type>, AnalysisError> {
     let mut lower_types = FnvHashSet::default();
 
-    // We need to visit expressions other than type coercion too because they
-    // might be desugared just before compilation.
+    // We need to visit expressions other than type coercion too because type
+    // coercion might be generated just before compilation.
     expression_visitor::visit(module, |expression| match expression {
         Expression::IfList(if_) => {
             lower_types.insert(if_.type_().unwrap().clone());
