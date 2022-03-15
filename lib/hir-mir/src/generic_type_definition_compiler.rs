@@ -62,9 +62,15 @@ fn collect_types(
 ) -> Result<FnvHashSet<Type>, AnalysisError> {
     let mut lower_types = FnvHashSet::default();
 
+    // We need to visit expressions other than type coercion too because they
+    // might be desugared just before compilation.
     expression_visitor::visit(module, |expression| match expression {
         Expression::IfList(if_) => {
             lower_types.insert(if_.type_().unwrap().clone());
+        }
+        Expression::IfMap(if_) => {
+            lower_types.insert(if_.key_type().unwrap().clone());
+            lower_types.insert(if_.value_type().unwrap().clone());
         }
         Expression::IfType(if_) => {
             lower_types.extend(
@@ -77,6 +83,10 @@ fn collect_types(
         }
         Expression::List(list) => {
             lower_types.insert(list.type_().clone());
+        }
+        Expression::Map(map) => {
+            lower_types.insert(map.key_type().clone());
+            lower_types.insert(map.value_type().clone());
         }
         Expression::ListComprehension(comprehension) => {
             lower_types.insert(comprehension.input_type().unwrap().clone());
@@ -446,7 +456,7 @@ mod tests {
                         types::None::new(Position::fake()),
                         IfList::new(
                             Some(list_type.clone().into()),
-                            List::new(types::None::new(Position::fake()), vec![], Position::fake()),
+                            List::new(list_type.clone(), vec![], Position::fake()),
                             "x",
                             "xs",
                             None::new(Position::fake()),
@@ -466,6 +476,61 @@ mod tests {
                 )
                 .into()]),
             )])
+        );
+    }
+
+    #[test]
+    fn collect_type_from_if_map() {
+        let context = CompileContext::dummy(Default::default(), Default::default());
+        let key_type = types::List::new(types::Number::new(Position::fake()), Position::fake());
+        let value_type = types::List::new(types::None::new(Position::fake()), Position::fake());
+        let map_type = types::Map::new(key_type.clone(), value_type.clone(), Position::fake());
+
+        assert_eq!(
+            compile(
+                &Module::empty().set_definitions(vec![Definition::fake(
+                    "foo",
+                    Lambda::new(
+                        vec![],
+                        types::None::new(Position::fake()),
+                        IfMap::new(
+                            Some(map_type.key().clone().into()),
+                            Some(map_type.value().clone().into()),
+                            "x",
+                            Map::new(
+                                map_type.key().clone(),
+                                map_type.value().clone(),
+                                vec![],
+                                Position::fake()
+                            ),
+                            Number::new(42.0, Position::fake()),
+                            None::new(Position::fake()),
+                            None::new(Position::fake()),
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    ),
+                    false,
+                )]),
+                &context,
+            ),
+            Ok(vec![
+                mir::ir::TypeDefinition::new(
+                    type_compiler::compile_concrete_list_name(&key_type, context.types()).unwrap(),
+                    mir::types::RecordBody::new(vec![mir::types::Record::new(
+                        &context.configuration().unwrap().list_type.list_type_name
+                    )
+                    .into()]),
+                ),
+                mir::ir::TypeDefinition::new(
+                    type_compiler::compile_concrete_list_name(&value_type, context.types())
+                        .unwrap(),
+                    mir::types::RecordBody::new(vec![mir::types::Record::new(
+                        &context.configuration().unwrap().list_type.list_type_name
+                    )
+                    .into()]),
+                )
+            ])
         );
     }
 }
