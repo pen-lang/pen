@@ -533,4 +533,49 @@ mod tests {
             ])
         );
     }
+
+    #[test]
+    fn collect_type_from_map_literal() {
+        let context = CompileContext::dummy(Default::default(), Default::default());
+        let key_type = types::List::new(types::Number::new(Position::fake()), Position::fake());
+        let value_type = types::List::new(types::None::new(Position::fake()), Position::fake());
+
+        assert_eq!(
+            compile(
+                &Module::empty().set_definitions(vec![Definition::fake(
+                    "foo",
+                    Lambda::new(
+                        vec![],
+                        types::None::new(Position::fake()),
+                        Map::new(
+                            key_type.clone(),
+                            value_type.clone(),
+                            vec![],
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    ),
+                    false,
+                )]),
+                &context,
+            ),
+            Ok(vec![
+                mir::ir::TypeDefinition::new(
+                    type_compiler::compile_concrete_list_name(&key_type, context.types()).unwrap(),
+                    mir::types::RecordBody::new(vec![mir::types::Record::new(
+                        &context.configuration().unwrap().list_type.list_type_name
+                    )
+                    .into()]),
+                ),
+                mir::ir::TypeDefinition::new(
+                    type_compiler::compile_concrete_list_name(&value_type, context.types())
+                        .unwrap(),
+                    mir::types::RecordBody::new(vec![mir::types::Record::new(
+                        &context.configuration().unwrap().list_type.list_type_name
+                    )
+                    .into()]),
+                )
+            ])
+        );
+    }
 }
