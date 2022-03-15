@@ -60,20 +60,20 @@ fn collect_types(
     module: &Module,
     types: &FnvHashMap<String, Type>,
 ) -> Result<FnvHashSet<Type>, AnalysisError> {
-    let mut types = FnvHashSet::default();
+    let mut lower_types = FnvHashSet::default();
 
     // We need to visit expressions other than type coercion too because type
     // coercion might be generated just before compilation.
     expression_visitor::visit(module, |expression| match expression {
         Expression::IfList(if_) => {
-            types.insert(if_.type_().unwrap().clone());
+            lower_types.insert(if_.type_().unwrap().clone());
         }
         Expression::IfMap(if_) => {
-            types.insert(if_.key_type().unwrap().clone());
-            types.insert(if_.value_type().unwrap().clone());
+            lower_types.insert(if_.key_type().unwrap().clone());
+            lower_types.insert(if_.value_type().unwrap().clone());
         }
         Expression::IfType(if_) => {
-            types.extend(
+            lower_types.extend(
                 if_.branches()
                     .iter()
                     .map(|branch| branch.type_())
@@ -82,26 +82,26 @@ fn collect_types(
             );
         }
         Expression::List(list) => {
-            types.insert(list.type_().clone());
+            lower_types.insert(list.type_().clone());
         }
         Expression::Map(map) => {
-            types.insert(map.key_type().clone());
-            types.insert(map.value_type().clone());
+            lower_types.insert(map.key_type().clone());
+            lower_types.insert(map.value_type().clone());
         }
         Expression::ListComprehension(comprehension) => {
-            types.insert(comprehension.input_type().unwrap().clone());
-            types.insert(comprehension.output_type().clone());
+            lower_types.insert(comprehension.input_type().unwrap().clone());
+            lower_types.insert(comprehension.output_type().clone());
         }
         Expression::TypeCoercion(coercion) => {
-            types.insert(coercion.from().clone());
+            lower_types.insert(coercion.from().clone());
         }
         Expression::Operation(Operation::Try(operation)) => {
-            types.extend(operation.type_().cloned());
+            lower_types.extend(operation.type_().cloned());
         }
         _ => {}
     });
 
-    Ok(types
+    Ok(lower_types
         .into_iter()
         .map(|type_| union_type_member_calculator::calculate(&type_, types))
         .collect::<Result<Vec<_>, _>>()?
