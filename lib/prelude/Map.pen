@@ -287,7 +287,7 @@ _mergeHamt = \(m _map, h _hamt, i number) _map {
 }
 
 _equalMaps = \(x _map, y _map) boolean {
-  _equalHamts(x.context, x.hamt, y.hamt, 1)
+  x.size == y.size & _equalHamts(x.context, x.hamt, y.hamt, 1)
 }
 
 _equalHamts = \(ctx _mapContext, h1 _hamt, h2 _hamt, i number) boolean {
