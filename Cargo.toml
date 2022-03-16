@@ -20,6 +20,7 @@ exclude = [
   "cmd/test",
   "examples",
   "lib/core",
+  "lib/json",
   "lib/prelude",
   "lib/os",
   "lib/os-sync",
