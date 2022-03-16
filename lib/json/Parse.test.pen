@@ -1,0 +1,6 @@
+import Test'Assert
+import 'Parse { Parse }
+
+ParseNone = \() none | error {
+  Assert'True(Parse("none")?.Value == none)
+}
