@@ -1,5 +1,6 @@
 import Test'Assert
 import 'Parse { Parse }
+import 'Value
 
 ParseNone = \() none | error {
   Assert'True(Parse("none")?.Value == none)
