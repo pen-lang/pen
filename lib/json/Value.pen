@@ -1,0 +1,6 @@
+type Value =
+  number |
+  string |
+  none |
+  [Value] |
+  {string: Value}
