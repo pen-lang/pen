@@ -9,19 +9,16 @@ pub fn calculate(
     types: &FnvHashMap<String, Type>,
 ) -> Result<BTreeSet<Type>, AnalysisError> {
     Ok(
-        calculate_canonical(&type_canonicalizer::canonicalize(type_, types)?, types)?
+        calculate_canonical(&type_canonicalizer::canonicalize(type_, types)?)?
             .into_iter()
             .collect(),
     )
 }
 
-fn calculate_canonical(
-    type_: &Type,
-    types: &FnvHashMap<String, Type>,
-) -> Result<FnvHashSet<Type>, AnalysisError> {
+fn calculate_canonical(type_: &Type) -> Result<FnvHashSet<Type>, AnalysisError> {
     Ok(match type_ {
-        Type::Union(union) => calculate_canonical(union.lhs(), types)?
-            .union(&calculate_canonical(union.rhs(), types)?)
+        Type::Union(union) => calculate_canonical(union.lhs())?
+            .union(&calculate_canonical(union.rhs())?)
             .cloned()
             .collect(),
         _ => [type_.clone()].into_iter().collect(),

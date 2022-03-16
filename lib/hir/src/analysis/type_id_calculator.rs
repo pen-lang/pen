@@ -18,14 +18,11 @@ fn calculate_canonical_string(
     type_: &Type,
     types: &FnvHashMap<String, Type>,
 ) -> Result<String, AnalysisError> {
-    calculate_string(&type_canonicalizer::canonicalize(type_, types)?, types)
+    calculate_string(&type_canonicalizer::canonicalize(type_, types)?)
 }
 
-fn calculate_string(
-    type_: &Type,
-    types: &FnvHashMap<String, Type>,
-) -> Result<String, AnalysisError> {
-    let calculate_string = |type_| calculate_string(type_, types);
+fn calculate_string(type_: &Type) -> Result<String, AnalysisError> {
+    let calculate_string = |type_| calculate_string(type_);
 
     Ok(match type_ {
         Type::Any(_) => "any".into(),

@@ -10,16 +10,11 @@ pub fn check(
     check_canonical(
         &type_canonicalizer::canonicalize(one, types)?,
         &type_canonicalizer::canonicalize(other, types)?,
-        types,
     )
 }
 
-fn check_canonical(
-    one: &Type,
-    other: &Type,
-    types: &FnvHashMap<String, Type>,
-) -> Result<bool, AnalysisError> {
-    let check = |one, other| check_canonical(one, other, types);
+fn check_canonical(one: &Type, other: &Type) -> Result<bool, AnalysisError> {
+    let check = |one, other| check_canonical(one, other);
 
     Ok(match (&one, &other) {
         (Type::Function(one), Type::Function(other)) => {
