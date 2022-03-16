@@ -30,7 +30,7 @@ fn collect_references(type_: &Type) -> FnvHashSet<&str> {
         Type::Function(function) => function
             .arguments()
             .iter()
-            .flat_map(|type_| collect_references(type_))
+            .flat_map(collect_references)
             .chain(collect_references(function.result()))
             .collect(),
         Type::List(list) => collect_references(list.element()),
