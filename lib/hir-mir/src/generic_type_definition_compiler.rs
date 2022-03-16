@@ -456,7 +456,7 @@ mod tests {
                         types::None::new(Position::fake()),
                         IfList::new(
                             Some(list_type.clone().into()),
-                            List::new(list_type.clone(), vec![], Position::fake()),
+                            List::new(list_type.element().clone(), vec![], Position::fake()),
                             "x",
                             "xs",
                             None::new(Position::fake()),
