@@ -2,5 +2,5 @@ import Core'String
 import 'Value { Value }
 
 Parse = \(s string) Value | error {
-  error("not implemented")
+  Value{Value: none}
 }
