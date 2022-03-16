@@ -1,6 +1,7 @@
 type Value =
+  boolean |
+  none |
   number |
   string |
-  none |
   [Value] |
   {string: Value}
