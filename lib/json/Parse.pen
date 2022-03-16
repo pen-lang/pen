@@ -2,5 +2,13 @@ import Core'String
 import 'Value { Value }
 
 Parse = \(s string) Value | error {
-  Value{Value: none}
+  if s == "null" {
+    Value{Value: none}
+  } else if s == "true" {
+    Value{Value: true}
+  } else if s == "false" {
+    Value{Value: false}
+  } else {
+    error("not implemented")
+  }
 }

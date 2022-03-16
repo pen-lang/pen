@@ -2,6 +2,14 @@ import Test'Assert
 import 'Parse { Parse }
 import 'Value
 
-ParseNone = \() none | error {
-  Assert'True(Parse("none")?.Value == none)
+ParseNull = \() none | error {
+  Assert'True(Parse("null")?.Value == none)
+}
+
+ParseTrue = \() none | error {
+  Assert'True(Parse("true")?.Value == true)
+}
+
+ParseFalse = \() none | error {
+  Assert'True(Parse("false")?.Value == false)
 }
