@@ -88,6 +88,8 @@ fn transform_map(
             position.clone(),
         )
         .into(),
+        // TODO Optimize cases where only a single element of MapElement::Map
+        // exists when we pass context functions dynamically.
         [element, ..] => {
             let rest_expression =
                 transform_map(context, key_type, value_type, &elements[1..], position)?;
