@@ -1,7 +1,0 @@
-type Value =
-  boolean |
-  none |
-  number |
-  string |
-  [Value] |
-  {string: Value}
