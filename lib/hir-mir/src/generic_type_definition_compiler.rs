@@ -95,9 +95,15 @@ fn collect_types(
         Expression::TypeCoercion(coercion) => {
             lower_types.insert(coercion.from().clone());
         }
-        Expression::Operation(Operation::Try(operation)) => {
-            lower_types.extend(operation.type_().cloned());
-        }
+        Expression::Operation(operation) => match operation {
+            Operation::Equality(operation) => {
+                lower_types.extend(operation.type_().cloned());
+            }
+            Operation::Try(operation) => {
+                lower_types.extend(operation.type_().cloned());
+            }
+            _ => {}
+        },
         _ => {}
     });
 
@@ -262,6 +268,49 @@ mod tests {
                             )],
                             None,
                             Position::fake()
+                        ),
+                        Position::fake(),
+                    ),
+                    false,
+                )]),
+                &context,
+            ),
+            Ok(vec![mir::ir::TypeDefinition::new(
+                type_compiler::compile_concrete_list_name(&list_type, context.types()).unwrap(),
+                mir::types::RecordBody::new(vec![mir::types::Record::new(
+                    &context.configuration().unwrap().list_type.list_type_name
+                )
+                .into()]),
+            )])
+        );
+    }
+
+    #[test]
+    fn collect_type_from_equal_operation() {
+        let context = CompileContext::dummy(Default::default(), Default::default());
+        let list_type = types::List::new(types::None::new(Position::fake()), Position::fake());
+        let union_type = types::Union::new(
+            list_type.clone(),
+            types::Record::new(
+                &context.configuration().unwrap().error_type.error_type_name,
+                Position::fake(),
+            ),
+            Position::fake(),
+        );
+
+        assert_eq!(
+            compile(
+                &Module::empty().set_definitions(vec![Definition::fake(
+                    "foo",
+                    Lambda::new(
+                        vec![Argument::new("x", union_type)],
+                        types::Boolean::new(Position::fake()),
+                        EqualityOperation::new(
+                            Some(list_type.clone().into()),
+                            EqualityOperator::Equal,
+                            Variable::new("x", Position::fake()),
+                            Variable::new("x", Position::fake()),
+                            Position::fake(),
                         ),
                         Position::fake(),
                     ),
