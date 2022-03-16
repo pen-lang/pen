@@ -1,4 +1,6 @@
 {
   "type": "library",
-  "dependencies": {}
+  "dependencies": {
+    "Core": "pen:///core"
+  }
 }

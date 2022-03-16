@@ -1,5 +1,6 @@
-import 'Json { Json }
+import Core'String
+import 'Value { Value }
 
-Parse = \(s string) Json | error {
+Parse = \(s string) Value | error {
   error("not implemented")
 }
