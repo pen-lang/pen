@@ -7,39 +7,30 @@ pub fn check(
     other: &Type,
     types: &FnvHashMap<String, Type>,
 ) -> Result<bool, AnalysisError> {
-    check_canonical(
+    Ok(check_canonical(
         &type_canonicalizer::canonicalize(one, types)?,
         &type_canonicalizer::canonicalize(other, types)?,
-        types,
-    )
+    ))
 }
 
-fn check_canonical(
-    one: &Type,
-    other: &Type,
-    types: &FnvHashMap<String, Type>,
-) -> Result<bool, AnalysisError> {
-    let check = |one, other| check_canonical(one, other, types);
-
-    Ok(match (&one, &other) {
+fn check_canonical(one: &Type, other: &Type) -> bool {
+    match (&one, &other) {
         (Type::Function(one), Type::Function(other)) => {
             one.arguments().len() == other.arguments().len()
                 && one
                     .arguments()
                     .iter()
                     .zip(other.arguments())
-                    .map(|(one, other)| check(one, other))
-                    .collect::<Result<Vec<_>, _>>()?
-                    .iter()
-                    .all(|&ok| ok)
-                && check(one.result(), other.result())?
+                    .map(|(one, other)| check_canonical(one, other))
+                    .all(|ok| ok)
+                && check_canonical(one.result(), other.result())
         }
-        (Type::List(one), Type::List(other)) => check(one.element(), other.element())?,
+        (Type::List(one), Type::List(other)) => check_canonical(one.element(), other.element()),
         (Type::Map(one), Type::Map(other)) => {
-            check(one.key(), other.key())? && check(one.value(), other.value())?
+            check_canonical(one.key(), other.key()) && check_canonical(one.value(), other.value())
         }
         (Type::Union(one), Type::Union(other)) => {
-            check(one.lhs(), other.lhs())? && check(one.rhs(), other.rhs())?
+            check_canonical(one.lhs(), other.lhs()) && check_canonical(one.rhs(), other.rhs())
         }
         (Type::Record(one), Type::Record(other)) => one.name() == other.name(),
         (Type::Any(_), Type::Any(_))
@@ -49,7 +40,7 @@ fn check_canonical(
         | (Type::String(_), Type::String(_)) => true,
         (Type::Reference(_), _) | (_, Type::Reference(_)) => unreachable!(),
         _ => false,
-    })
+    }
 }
 
 #[cfg(test)]
