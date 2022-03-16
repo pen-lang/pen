@@ -21,6 +21,7 @@ pub enum AnalysisError {
     RecordFieldPrivate(Position),
     RecordFieldUnknown(Position),
     RecordNotFound(Record),
+    RecursiveTypeAlias(Position),
     SpawnOperationArguments(Position),
     TryOperationInList(Position),
     TypeNotFound(Reference),
@@ -96,6 +97,9 @@ impl Display for AnalysisError {
                 record.name(),
                 record.position()
             ),
+            Self::RecursiveTypeAlias(position) => {
+                write!(formatter, "recursive type alias\n{}", position)
+            }
             Self::TryOperationInList(position) => {
                 write!(
                     formatter,
