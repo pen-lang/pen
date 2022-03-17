@@ -13,3 +13,19 @@ ParseTrue = \() none | error {
 ParseFalse = \() none | error {
   Assert'True(Parse("false")? == Value'New(false))
 }
+
+SkipSpace = \() none | error {
+  Assert'True(Parse(" null")? == Value'New(none))
+}
+
+SkipTab = \() none | error {
+  Assert'True(Parse("\tnull")? == Value'New(none))
+}
+
+SkipNewline = \() none | error {
+  Assert'True(Parse("\nnull")? == Value'New(none))
+}
+
+SkipSpaces = \() none | error {
+  Assert'True(Parse("  null")? == Value'New(none))
+}

@@ -22,7 +22,7 @@ Parse = \(s string) Value | error {
 }
 
 parseAtomic = \(v View) state | error {
-  v = parseWhitespace(v)
+  v = whitespaces(v)
 
   if View'HasPrefix(v, nullLiteral()) {
     state(Value'New(none), View'Seek(v, Byte'Length(nullLiteral())))
@@ -31,23 +31,34 @@ parseAtomic = \(v View) state | error {
   } else if View'HasPrefix(v, falseLiteral()) {
     state(Value'New(false), View'Seek(v, Byte'Length(falseLiteral())))
   } else if View'HasPrefix(v, "\"") {
-    parseString(v)
+    string_(v)
   } else {
-    parseNumber(v)
+    number_(v)
   }
 }
 
-parseString = \(v View) state | error {
+string_ = \(v View) state | error {
   # TODO
   error("not implemented")
 }
 
-parseNumber = \(v View) state | error {
+number_ = \(v View) state | error {
   # TODO
   error("not implemented")
 }
 
-parseWhitespace = \(v View) View {
-  # TODO
-  v
+whitespaces = \(v View) View {
+  if vv = whitespace(v) as View {
+    whitespaces(vv)
+  } else {
+    v
+  }
+}
+
+whitespace = \(v View) View | none {
+  if View'HasPrefix(v, " ") | View'HasPrefix(v, "\t") | View'HasPrefix(v, "\n") {
+    View'Seek(v, 1)
+  } else {
+    none
+  }
 }
