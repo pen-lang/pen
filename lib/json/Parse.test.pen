@@ -3,13 +3,13 @@ import 'Parse { Parse }
 import 'Value
 
 ParseNull = \() none | error {
-  Assert'True(Parse("null")?.Value == none)
+  Assert'True(Parse("null")? == Value'New(none))
 }
 
 ParseTrue = \() none | error {
-  Assert'True(Parse("true")?.Value == true)
+  Assert'True(Parse("true")? == Value'New(true))
 }
 
 ParseFalse = \() none | error {
-  Assert'True(Parse("false")?.Value == false)
+  Assert'True(Parse("false")? == Value'New(false))
 }

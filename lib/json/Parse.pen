@@ -18,7 +18,7 @@ state = \(v Value, i View) state {
 }
 
 Parse = \(s string) Value | error {
-  parseAtomic(view'New(s, 0))?.value
+  parseAtomic(view'New(s))?.value
 }
 
 parseAtomic = \(v View) state | error {

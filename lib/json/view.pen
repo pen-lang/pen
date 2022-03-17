@@ -3,8 +3,8 @@ type View {
   index number
 }
 
-New = \(s string, index number) View {
-  View{value: s, index: index}
+New = \(s string) View {
+  View{value: s, index: 1}
 }
 
 HasPrefix = \(v View, s string) boolean {
@@ -13,5 +13,5 @@ HasPrefix = \(v View, s string) boolean {
 }
 
 Seek = \(v View, n number) View {
-  New(v.value, v.index + n)
+  View{value: v.value, index: v.index + n}
 }
