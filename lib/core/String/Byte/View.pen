@@ -1,3 +1,5 @@
+import foreign "c" _pen_core_view_has_prefix \(string, number, string) boolean
+
 type View {
   value string
   index number
@@ -8,8 +10,7 @@ New = \(s string) View {
 }
 
 HasPrefix = \(v View, s string) boolean {
-  # TODO Implement this.
-  false
+  _pen_core_view_has_prefix(v.value, v.index, s)
 }
 
 Seek = \(v View, n number) View {

@@ -1,5 +1,5 @@
 import Core'String'Byte
-import 'view { View }
+import Core'String'Byte'View { View }
 import 'Value { Value }
 
 type state {
@@ -18,19 +18,19 @@ state = \(v Value, i View) state {
 }
 
 Parse = \(s string) Value | error {
-  parseAtomic(view'New(s))?.value
+  parseAtomic(View'New(s))?.value
 }
 
 parseAtomic = \(v View) state | error {
   v = parseWhitespace(v)
 
-  if view'HasPrefix(v, nullLiteral()) {
-    state(Value'New(none), view'Seek(v, Byte'Length(nullLiteral())))
-  } else if view'HasPrefix(v, trueLiteral()) {
-    state(Value'New(true), view'Seek(v, Byte'Length(trueLiteral())))
-  } else if view'HasPrefix(v, falseLiteral()) {
-    state(Value'New(false), view'Seek(v, Byte'Length(falseLiteral())))
-  } else if view'HasPrefix(v, "\"") {
+  if View'HasPrefix(v, nullLiteral()) {
+    state(Value'New(none), View'Seek(v, Byte'Length(nullLiteral())))
+  } else if View'HasPrefix(v, trueLiteral()) {
+    state(Value'New(true), View'Seek(v, Byte'Length(trueLiteral())))
+  } else if View'HasPrefix(v, falseLiteral()) {
+    state(Value'New(false), View'Seek(v, Byte'Length(falseLiteral())))
+  } else if View'HasPrefix(v, "\"") {
     parseString(v)
   } else {
     parseNumber(v)

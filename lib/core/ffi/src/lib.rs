@@ -2,6 +2,7 @@
 
 extern crate alloc;
 
+mod view;
 mod bit;
 mod hamt;
 mod number;

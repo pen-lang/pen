@@ -1,0 +1,10 @@
+import Test'Assert
+import 'String'Byte'View
+
+HasPrefix = \() none | error {
+  Assert'True(View'HasPrefix(View'New("foo"), "foo"))
+}
+
+HasPrefixInMiddle = \() none | error {
+  Assert'True(View'HasPrefix(View'Seek(View'New("foo"), 1), "oo"))
+}
