@@ -18,8 +18,8 @@ mod tests {
     #[test]
     fn check_prefix() {
         assert!(bool::from(_pen_core_view_has_prefix(
-            "foobarbaz".into(),
-            4.0.into(),
+            "foo bar baz".into(),
+            5.0.into(),
             "bar".into()
         )));
     }
