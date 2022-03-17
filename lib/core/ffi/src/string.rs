@@ -45,6 +45,11 @@ fn _pen_core_utf8_slice(
 }
 
 #[ffi::bindgen]
+fn _pen_core_byte_length(string: ffi::ByteString) -> ffi::Number {
+    (string.as_slice().len() as f64).into()
+}
+
+#[ffi::bindgen]
 fn _pen_core_byte_slice(
     string: ffi::ByteString,
     start: ffi::Number,
