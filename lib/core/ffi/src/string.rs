@@ -13,7 +13,10 @@ extern "C" {
 }
 
 #[ffi::bindgen]
-fn _pen_join_strings(mut list: ffi::Arc<ffi::List>, separator: ffi::ByteString) -> ffi::ByteString {
+fn _pen_core_join_strings(
+    mut list: ffi::Arc<ffi::List>,
+    separator: ffi::ByteString,
+) -> ffi::ByteString {
     let mut first = true;
     let mut string = vec![];
 
@@ -33,10 +36,32 @@ fn _pen_join_strings(mut list: ffi::Arc<ffi::List>, separator: ffi::ByteString) 
 }
 
 #[ffi::bindgen]
-fn _pen_slice_string(
+fn _pen_core_utf8_slice(
     string: ffi::ByteString,
     start: ffi::Number,
     end: ffi::Number,
 ) -> ffi::ByteString {
     string.char_slice(start, end)
+}
+
+#[ffi::bindgen]
+fn _pen_core_byte_slice(
+    string: ffi::ByteString,
+    start: ffi::Number,
+    end: ffi::Number,
+) -> ffi::ByteString {
+    string.as_slice()[f64::from(start) as usize - 1..f64::from(end) as usize].into()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn slice_bytes() {
+        assert_eq!(
+            _pen_core_byte_slice("hello".into(), 2.0.into(), 4.0.into()),
+            "ell".into()
+        );
+    }
 }

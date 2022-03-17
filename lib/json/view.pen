@@ -1,0 +1,17 @@
+type View {
+  value string
+  index number
+}
+
+New = \(s string, index number) View {
+  View{value: s, index: index}
+}
+
+HasPrefix = \(v View, s string) boolean {
+  # TODO Implement this.
+  false
+}
+
+Seek = \(v View, n number) View {
+  New(v.value, v.index + n)
+}

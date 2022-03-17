@@ -1,14 +1,53 @@
-import Core'String
+import Core'String'Byte
+import 'view { View }
 import 'Value { Value }
 
+type state {
+  value Value
+  input View
+}
+
+nullLiteral = \() string { "null" }
+
+trueLiteral = \() string { "true" }
+
+falseLiteral = \() string { "false" }
+
+state = \(v Value, i View) state {
+  state{value: v, input: i}
+}
+
 Parse = \(s string) Value | error {
-  if s == "null" {
-    Value{Value: none}
-  } else if s == "true" {
-    Value{Value: true}
-  } else if s == "false" {
-    Value{Value: false}
+  parseAtomic(view'New(s, 0))?.value
+}
+
+parseAtomic = \(v View) state | error {
+  v = parseWhitespace(v)
+
+  if view'HasPrefix(v, nullLiteral()) {
+    state(Value'New(none), view'Seek(v, Byte'Length(nullLiteral())))
+  } else if view'HasPrefix(v, trueLiteral()) {
+    state(Value'New(true), view'Seek(v, Byte'Length(trueLiteral())))
+  } else if view'HasPrefix(v, falseLiteral()) {
+    state(Value'New(false), view'Seek(v, Byte'Length(falseLiteral())))
+  } else if view'HasPrefix(v, "\"") {
+    parseString(v)
   } else {
-    error("not implemented")
+    parseNumber(v)
   }
+}
+
+parseString = \(v View) state | error {
+  # TODO
+  error("not implemented")
+}
+
+parseNumber = \(v View) state | error {
+  # TODO
+  error("not implemented")
+}
+
+parseWhitespace = \(v View) View {
+  # TODO
+  v
 }

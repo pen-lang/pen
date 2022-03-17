@@ -1,3 +1,13 @@
 type Value {
-  Value boolean | none | number | string | [Value] | {string: Value}
+  raw raw
+}
+
+type raw = boolean | none | number | string | [Value] | {string: Value}
+
+New = \(r raw) Value {
+  Value{raw: r}
+}
+
+Raw = \(v Value) raw {
+  v.raw
 }
