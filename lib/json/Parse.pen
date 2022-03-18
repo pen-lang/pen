@@ -22,7 +22,13 @@ stringResult = \(s string, i View) stringResult {
 }
 
 Parse = \(s string) Value | error {
-  parseAtomic(View'New(s))?.value
+  r = parseAtomic(View'New(s))?
+
+  if View'Length(whitespaces(r.input)) == 0 {
+    r.value
+  } else {
+    error("unexpected character")
+  }
 }
 
 parseAtomic = \(v View) result | error {

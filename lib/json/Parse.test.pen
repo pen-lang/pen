@@ -41,3 +41,11 @@ SkipNewline = \() none | error {
 SkipSpaces = \() none | error {
   Assert'True(Parse("  null")? == Value'New(none))
 }
+
+SkipTrailingSpaces = \() none | error {
+  Assert'True(Parse("null  ")? == Value'New(none))
+}
+
+FailUnexpectedCharacter = \() none | error {
+  Assert'True(if r = Parse("nulll") as error { true } else { false })
+}
