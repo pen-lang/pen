@@ -13,12 +13,6 @@ type stringState {
   input View
 }
 
-nullLiteral = \() string { "null" }
-
-trueLiteral = \() string { "true" }
-
-falseLiteral = \() string { "false" }
-
 state = \(v Value, i View) state {
   state{value: v, input: i}
 }
@@ -34,16 +28,46 @@ Parse = \(s string) Value | error {
 parseAtomic = \(v View) state | error {
   v = whitespaces(v)
 
-  if View'HasPrefix(v, nullLiteral()) {
-    state(Value'New(none), View'Seek(v, Byte'Length(nullLiteral())))
-  } else if View'HasPrefix(v, trueLiteral()) {
-    state(Value'New(true), View'Seek(v, Byte'Length(trueLiteral())))
-  } else if View'HasPrefix(v, falseLiteral()) {
-    state(Value'New(false), View'Seek(v, Byte'Length(falseLiteral())))
+  if View'HasPrefix(v, "n") {
+    null(v)
+  } else if View'HasPrefix(v, "t") {
+    true_(v)
+  } else if View'HasPrefix(v, "f") {
+    false_(v)
   } else if View'HasPrefix(v, "\"") {
     string_(v)
   } else {
     number_(v)
+  }
+}
+
+null = \(v View) state | error {
+  s = "null"
+
+  if View'HasPrefix(v, s) {
+    state(Value'New(none), View'Seek(v, Byte'Length(s)))
+  } else {
+    error("null expected")
+  }
+}
+
+true_ = \(v View) state | error {
+  s = "true"
+
+  if View'HasPrefix(v, s) {
+    state(Value'New(true), View'Seek(v, Byte'Length(s)))
+  } else {
+    error("true expected")
+  }
+}
+
+false_ = \(v View) state | error {
+  s = "false"
+
+  if View'HasPrefix(v, s) {
+    state(Value'New(false), View'Seek(v, Byte'Length(s)))
+  } else {
+    error("false expected")
   }
 }
 
