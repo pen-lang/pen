@@ -22,6 +22,10 @@ ParseString = \() none | error {
   Assert'True(Parse("\"foo\"")? == Value'New("foo"))
 }
 
+ParseStringWithDoubleQuote = \() none | error {
+  Assert'True(Parse("\"\\\"\"")? == Value'New("\""))
+}
+
 SkipSpace = \() none | error {
   Assert'True(Parse(" null")? == Value'New(none))
 }
