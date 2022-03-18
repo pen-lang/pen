@@ -90,6 +90,8 @@ stringCharacters = \(v View, ss [string]) stringResult {
     # TODO Optimize appending string elements.
     stringCharacters(r.input, [string ...ss, r.value])
   }
+
+  # TODO Handle EOF.
 }
 
 stringCharacter = \(v View) stringResult | none {
