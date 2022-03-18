@@ -3,29 +3,29 @@ import Core'String'Byte
 import Core'String'Byte'View { View }
 import 'Value { Value }
 
-type state {
+type result {
   value Value
   input View
 }
 
-type stringState {
+type stringResult {
   value string
   input View
 }
 
-state = \(v Value, i View) state {
-  state{value: v, input: i}
+result = \(v Value, i View) result {
+  result{value: v, input: i}
 }
 
-stringState = \(s string, i View) stringState {
-  stringState{value: s, input: i}
+stringResult = \(s string, i View) stringResult {
+  stringResult{value: s, input: i}
 }
 
 Parse = \(s string) Value | error {
   parseAtomic(View'New(s))?.value
 }
 
-parseAtomic = \(v View) state | error {
+parseAtomic = \(v View) result | error {
   v = whitespaces(v)
 
   if View'HasPrefix(v, "n") {
@@ -41,62 +41,62 @@ parseAtomic = \(v View) state | error {
   }
 }
 
-null = \(v View) state | error {
+null = \(v View) result | error {
   s = "null"
 
   if View'HasPrefix(v, s) {
-    state(Value'New(none), View'Seek(v, Byte'Length(s)))
+    result(Value'New(none), View'Seek(v, Byte'Length(s)))
   } else {
     error("null expected")
   }
 }
 
-true_ = \(v View) state | error {
+true_ = \(v View) result | error {
   s = "true"
 
   if View'HasPrefix(v, s) {
-    state(Value'New(true), View'Seek(v, Byte'Length(s)))
+    result(Value'New(true), View'Seek(v, Byte'Length(s)))
   } else {
     error("true expected")
   }
 }
 
-false_ = \(v View) state | error {
+false_ = \(v View) result | error {
   s = "false"
 
   if View'HasPrefix(v, s) {
-    state(Value'New(false), View'Seek(v, Byte'Length(s)))
+    result(Value'New(false), View'Seek(v, Byte'Length(s)))
   } else {
     error("false expected")
   }
 }
 
-string_ = \(v View) state | error {
+string_ = \(v View) result | error {
   s = stringCharacters(View'Seek(v, 1), [string])
 
-  state(Value'New(s.value), View'Seek(s.input, 1))
+  result(Value'New(s.value), View'Seek(s.input, 1))
 }
 
-stringCharacters = \(v View, ss [string]) stringState {
+stringCharacters = \(v View, ss [string]) stringResult {
   if s = stringCharacter(v) as none {
-    stringState(String'Join(ss, ""), v)
+    stringResult(String'Join(ss, ""), v)
   } else {
     # TODO Optimize appending string elements.
     stringCharacters(s.input, [string ...ss, s.value])
   }
 }
 
-stringCharacter = \(v View) stringState | none {
+stringCharacter = \(v View) stringResult | none {
   if View'HasPrefix(v, "\\\"") {
-    stringState("\"", View'Seek(v, 2))
+    stringResult("\"", View'Seek(v, 2))
   } else if View'HasPrefix(v, "\"") {
     none
   } else {
-    stringState(Byte'Slice(View'ToString(v), 1, 1), View'Seek(v, 1))
+    stringResult(Byte'Slice(View'ToString(v), 1, 1), View'Seek(v, 1))
   }
 }
 
-number_ = \(v View) state | error {
+number_ = \(v View) result | error {
   # TODO
   error("not implemented")
 }
