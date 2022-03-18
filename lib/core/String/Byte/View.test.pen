@@ -8,3 +8,11 @@ HasPrefix = \() none | error {
 HasPrefixInMiddle = \() none | error {
   Assert'True(View'HasPrefix(View'Seek(View'New("foo"), 1), "oo"))
 }
+
+Length = \() none | error {
+  Assert'True(View'Length(View'New("foo")) == 3)
+}
+
+ToString = \() none | error {
+  Assert'True(View'ToString(View'New("foo")) == "foo")
+}

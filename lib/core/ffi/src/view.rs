@@ -12,6 +12,11 @@ fn _pen_core_view_has_prefix(
 }
 
 #[ffi::bindgen]
+fn _pen_core_view_length(string: ffi::ByteString, index: ffi::Number) -> ffi::Number {
+    (string.as_slice()[f64::from(index) as usize - 1..].len() as f64).into()
+}
+
+#[ffi::bindgen]
 fn _pen_core_view_to_string(string: ffi::ByteString, index: ffi::Number) -> ffi::ByteString {
     string.as_slice()[f64::from(index) as usize - 1..].into()
 }
@@ -36,6 +41,14 @@ mod tests {
             1.0.into(),
             "bar".into()
         )));
+    }
+
+    #[test]
+    fn length() {
+        assert_eq!(
+            _pen_core_view_length("foo bar".into(), 5.0.into(),),
+            3.0.into()
+        );
     }
 
     #[test]
