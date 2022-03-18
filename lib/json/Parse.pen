@@ -1,9 +1,15 @@
+import Core'String
 import Core'String'Byte
 import Core'String'Byte'View { View }
 import 'Value { Value }
 
 type state {
   value Value
+  input View
+}
+
+type stringState {
+  value string
   input View
 }
 
@@ -15,6 +21,10 @@ falseLiteral = \() string { "false" }
 
 state = \(v Value, i View) state {
   state{value: v, input: i}
+}
+
+stringState = \(s string, i View) stringState {
+  stringState{value: s, input: i}
 }
 
 Parse = \(s string) Value | error {
@@ -38,8 +48,28 @@ parseAtomic = \(v View) state | error {
 }
 
 string_ = \(v View) state | error {
-  # TODO
-  error("not implemented")
+  s = stringCharacters(View'Seek(v, 1), [string])
+
+  state(Value'New(s.value), View'Seek(s.input, 1))
+}
+
+stringCharacters = \(v View, ss [string]) stringState {
+  if s = stringCharacter(v) as none {
+    stringState(String'Join(ss, ""), v)
+  } else {
+    # TODO Optimize appending string elements.
+    stringCharacters(s.input, [string ...ss, s.value])
+  }
+}
+
+stringCharacter = \(v View) stringState | none {
+  if View'HasPrefix(v, "\\\"") {
+    stringState("\"", View'Seek(v, 2))
+  } else if View'HasPrefix(v, "\"") {
+    none
+  } else {
+    stringState(Byte'Slice(View'ToString(v), 1, 1), View'Seek(v, 1))
+  }
 }
 
 number_ = \(v View) state | error {

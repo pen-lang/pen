@@ -8,7 +8,12 @@ fn _pen_core_view_has_prefix(
     let index = f64::from(index) as usize - 1;
     let prefix = prefix.as_slice();
 
-    (&string[index..index + prefix.len()] == prefix).into()
+    (&string[index..(index + prefix.len()).min(string.len())] == prefix).into()
+}
+
+#[ffi::bindgen]
+fn _pen_core_view_to_string(string: ffi::ByteString, index: ffi::Number) -> ffi::ByteString {
+    string.as_slice()[f64::from(index) as usize - 1..].into()
 }
 
 #[cfg(test)]
@@ -31,5 +36,13 @@ mod tests {
             1.0.into(),
             "bar".into()
         )));
+    }
+
+    #[test]
+    fn to_string() {
+        assert_eq!(
+            _pen_core_view_to_string("foo bar".into(), 5.0.into(),),
+            "bar".into()
+        );
     }
 }
