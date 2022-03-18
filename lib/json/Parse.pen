@@ -22,7 +22,7 @@ stringResult = \(s string, i View) stringResult {
 }
 
 Parse = \(s string) Value | error {
-  r = parseAtomic(View'New(s))?
+  r = value(View'New(s))?
 
   if View'Length(blanks(r.input)) == 0 {
     r.value
@@ -31,7 +31,7 @@ Parse = \(s string) Value | error {
   }
 }
 
-parseAtomic = \(v View) result | error {
+value = \(v View) result | error {
   v = blanks(v)
 
   if View'HasPrefix(v, "n") {
