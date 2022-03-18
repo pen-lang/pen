@@ -72,17 +72,17 @@ false_ = \(v View) result | error {
 }
 
 string_ = \(v View) result | error {
-  s = stringCharacters(View'Seek(v, 1), [string])
+  r = stringCharacters(View'Seek(v, 1), [string])
 
-  result(Value'New(s.value), View'Seek(s.input, 1))
+  result(Value'New(r.value), View'Seek(r.input, 1))
 }
 
 stringCharacters = \(v View, ss [string]) stringResult {
-  if s = stringCharacter(v) as none {
+  if r = stringCharacter(v) as none {
     stringResult(String'Join(ss, ""), v)
   } else {
     # TODO Optimize appending string elements.
-    stringCharacters(s.input, [string ...ss, s.value])
+    stringCharacters(r.input, [string ...ss, r.value])
   }
 }
 
