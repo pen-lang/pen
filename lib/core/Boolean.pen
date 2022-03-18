@@ -1,0 +1,23 @@
+Any = \(bs [boolean]) boolean {
+  if [b, ...bs] = bs {
+    if b() {
+      true
+    } else {
+      Any(bs)
+    }
+  } else  {
+    false
+  }
+}
+
+All = \(bs [boolean]) boolean {
+  if [b, ...bs] = bs {
+    if b() {
+      All(bs) 
+    } else {
+      false
+    }
+  } else  {
+    true
+  }
+}
