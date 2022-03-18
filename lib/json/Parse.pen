@@ -24,7 +24,7 @@ stringResult = \(s string, i View) stringResult {
 Parse = \(s string) Value | error {
   r = parseAtomic(View'New(s))?
 
-  if View'Length(whitespaces(r.input)) == 0 {
+  if View'Length(blanks(r.input)) == 0 {
     r.value
   } else {
     error("unexpected character")
@@ -32,7 +32,7 @@ Parse = \(s string) Value | error {
 }
 
 parseAtomic = \(v View) result | error {
-  v = whitespaces(v)
+  v = blanks(v)
 
   if View'HasPrefix(v, "n") {
     null(v)
@@ -107,15 +107,15 @@ number_ = \(v View) result | error {
   error("not implemented")
 }
 
-whitespaces = \(v View) View {
-  if vv = whitespace(v) as View {
-    whitespaces(vv)
+blanks = \(v View) View {
+  if vv = blank(v) as View {
+    blanks(vv)
   } else {
     v
   }
 }
 
-whitespace = \(v View) View | none {
+blank = \(v View) View | none {
   if View'HasPrefix(v, " ") | View'HasPrefix(v, "\t") | View'HasPrefix(v, "\n") {
     View'Seek(v, 1)
   } else {

@@ -47,5 +47,5 @@ SkipTrailingSpaces = \() none | error {
 }
 
 FailUnexpectedCharacter = \() none | error {
-  Assert'True(if r = Parse("nulll") as error { true } else { false })
+  Assert'True(if r = Parse("null a") as error { true } else { false })
 }
