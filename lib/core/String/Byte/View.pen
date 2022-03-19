@@ -35,7 +35,7 @@ Slice = \(v View, start number, end number) View {
 
   View{
     value: v.value,
-    start: Number'Minimum(v.start + start - 1, e),
+    start: Number'Minimum(v.start + start - 1, e + 1),
     end: e,
   }
 }
