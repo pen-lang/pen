@@ -37,7 +37,7 @@ arrayResult = \(vs [Value], i View) arrayResult {
 Parse = \(s string) Value | error {
   r = value(View'New(s))?
 
-  if View'Length(blanks(r.input)) == 0 {
+  if View'Length(blank(r.input)) == 0 {
     r.value
   } else {
     error("unexpected character")
@@ -45,7 +45,7 @@ Parse = \(s string) Value | error {
 }
 
 value = \(v View) result | error {
-  v = blanks(v)
+  v = blank(v)
 
   if View'HasPrefix(v, "n") {
     null(v)
@@ -177,7 +177,7 @@ nonZeroDigit = \(v View) View | none {
 array = \(v View) result | error {
   if View'HasPrefix(v, "[") {
     r = arrayElements(View'Seek(v, 1), [Value])
-    v = blanks(r.input)
+    v = blank(r.input)
 
     if View'HasPrefix(v, "]") {
       result(Value'New(r.array), View'Seek(v, 1))
@@ -192,7 +192,7 @@ array = \(v View) result | error {
 arrayElements = \(v View, vs [Value]) arrayResult {
   if r = value(v) as result {
     vs = [Value ...vs, r.value]
-    v = blanks(r.input)
+    v = blank(r.input)
 
     if View'HasPrefix(v, ",") {
       arrayElements(View'Seek(v, 1), vs)
@@ -208,19 +208,11 @@ object = \(v View) result | error {
   error("TODO")
 }
 
-blanks = \(v View) View {
-  if w = blank(v) as View {
-    blanks(w)
+blank = \(v View) View {
+  if View'HasPrefix(v, " ") | View'HasPrefix(v, "\t") | View'HasPrefix(v, "\n") {
+    blank(View'Seek(v, 1))
   } else {
     v
-  }
-}
-
-blank = \(v View) View | none {
-  if View'HasPrefix(v, " ") | View'HasPrefix(v, "\t") | View'HasPrefix(v, "\n") {
-    View'Seek(v, 1)
-  } else {
-    none
   }
 }
 
