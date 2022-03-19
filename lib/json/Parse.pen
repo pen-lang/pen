@@ -17,12 +17,21 @@ type stringResult {
   input View
 }
 
+type arrayResult {
+  array [Value]
+  input View
+}
+
 result = \(v Value, i View) result {
   result{value: v, input: i}
 }
 
 stringResult = \(s string, i View) stringResult {
   stringResult{value: s, input: i}
+}
+
+arrayResult = \(vs [Value], i View) arrayResult {
+  arrayResult{array: vs, input: i}
 }
 
 Parse = \(s string) Value | error {
@@ -139,7 +148,7 @@ integer = \(v View) View | error {
 
 digits = \(v View) View {
   if w = digit(v) as View {
-    digits(w) 
+    digits(w)
   } else {
     v
   }
@@ -166,7 +175,33 @@ nonZeroDigit = \(v View) View | none {
 }
 
 array = \(v View) result | error {
-  error("TODO")
+  if View'HasPrefix(v, "[") {
+    r = arrayElements(View'Seek(v, 1), [Value])
+    v = blanks(r.input)
+
+    if View'HasPrefix(v, "]") {
+      result(Value'New(r.array), View'Seek(v, 1))
+    } else {
+      error("] expected")
+    }
+  } else {
+    error("array expected")
+  }
+}
+
+arrayElements = \(v View, vs [Value]) arrayResult {
+  if r = value(v) as result {
+    vs = [Value ...vs, r.value]
+    v = blanks(r.input)
+
+    if View'HasPrefix(v, ",") {
+      arrayElements(View'Seek(v, 1), vs)
+    } else {
+      arrayResult(vs, r.input)
+    }
+  } else {
+    arrayResult(vs, v)
+  }
 }
 
 object = \(v View) result | error {

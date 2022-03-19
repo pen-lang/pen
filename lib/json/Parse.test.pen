@@ -1,6 +1,6 @@
 import Test'Assert
 import 'Parse { Parse }
-import 'Value
+import 'Value { Value }
 
 ParseNull = \() none | error {
   Assert'True(Parse("null")? == Value'New(none))
@@ -57,6 +57,23 @@ FailToParseStringWithUnexpectedEnd = \() none | error {
 
 ParseStringWithDoubleQuote = \() none | error {
   Assert'True(Parse("\"\\\"\"")? == Value'New("\""))
+}
+
+ParseArray = \() none | error {
+  Assert'True(Parse("[]")? == Value'New([Value]))?
+  Assert'True(Parse("[42]")? == Value'New([Value Value'New(42)]))?
+  Assert'True(Parse("[ 42 ]")? == Value'New([Value Value'New(42)]))?
+  Assert'True(Parse("[0,1]")? == Value'New([Value Value'New(0), Value'New(1)]))?
+  Assert'True(Parse("[0 , 1]")? == Value'New([Value Value'New(0), Value'New(1)]))?
+  Assert'True(Parse("[0, 1, 2]")? == Value'New([Value Value'New(0), Value'New(1), Value'New(2)]))
+}
+
+ParseNestedArray = \() none | error {
+  Assert'True(Parse("[[]]")? == Value'New([Value Value'New([Value])]))
+}
+
+FailToParseTrailingCommaInArray = \() none | error {
+  Assert'Error(Parse("[0,]")?)
 }
 
 SkipSpace = \() none | error {

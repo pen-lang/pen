@@ -2,7 +2,15 @@ True = \(x boolean) none | error {
   if x {
     none
   } else {
-    error("condition is not true")
+    error("condition is false")
+  }
+}
+
+Error = \(x any) none | error {
+  if x = x as error {
+    none
+  } else {
+    error("error expected")
   }
 }
 
