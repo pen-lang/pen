@@ -841,9 +841,12 @@ fn keyword<'a>(name: &'static str) -> impl Parser<Stream<'a>, Output = ()> {
         unreachable!("undefined keyword");
     }
 
-    token(attempt(string(name)).skip(not_followed_by(alpha_num())))
-        .with(value(()))
-        .expected(name)
+    token(attempt(string(name)).skip(not_followed_by(choice((
+        alpha_num(),
+        combine::parser::char::char('_'),
+    )))))
+    .with(value(()))
+    .expected(name)
 }
 
 fn sign<'a>(sign: &'static str) -> impl Parser<Stream<'a>, Output = ()> {
@@ -2961,6 +2964,7 @@ mod tests {
         assert!(keyword("type").parse(stream("bar", "")).is_err());
         // spell-checker: disable-next-line
         assert!(keyword("type").parse(stream("typer", "")).is_err());
+        assert!(keyword("type").parse(stream("type_", "")).is_err());
         assert!(keyword("type").parse(stream("type", "")).is_ok());
     }
 
