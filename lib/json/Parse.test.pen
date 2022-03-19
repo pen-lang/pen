@@ -22,13 +22,13 @@ ParseString = \() none | error {
   Assert'True(Parse("\"foo\"")? == Value'New("foo"))
 }
 
-FailToParseStringWithEnexpectedEnd = \() none | error {
+FailToParseStringWithUnexpectedEnd = \() none | error {
   Assert'True(
     if r = Parse("\"") as error {
-      if s = source(r) as string { 
-        s == "unexpected end of string" 
-      } else { 
-        false 
+      if s = source(r) as string {
+        s == "unexpected end of string"
+      } else {
+        false
       }
     } else {
       false
