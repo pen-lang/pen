@@ -5,6 +5,8 @@ import foreign "c" _pen_core_square_root \(number) number
 import foreign "c" _pen_core_is_nan \(number) boolean
 import foreign "c" _pen_core_ceil \(number) number
 import foreign "c" _pen_core_floor \(number) number
+import foreign "c" _pen_core_nan \() number
+import foreign "c" _pen_core_infinity \() number
 
 String = \(x number) string {
   _pen_core_convert_number_to_string(x)
@@ -56,4 +58,32 @@ Ceil = \(x number) number {
 
 Floor = \(x number) number {
   _pen_core_floor(x)
+}
+
+Nan = \() number {
+  _pen_core_nan()
+}
+
+Infinity = \() number {
+  _pen_core_infinity()
+}
+
+Minimum = \(x number, y number) number {
+  if IsNan(x) | IsNan(y) {
+    Nan()
+  } else if x < y {
+    x
+  } else {
+    y
+  }
+}
+
+Maximum = \(x number, y number) number {
+  if IsNan(x) | IsNan(y) {
+    Nan()
+  } else if x > y {
+    x
+  } else {
+    y
+  }
 }

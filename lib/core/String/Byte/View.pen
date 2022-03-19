@@ -1,28 +1,45 @@
-import foreign "c" _pen_core_view_has_prefix \(string, number, string) boolean
-import foreign "c" _pen_core_view_length \(string, number) number
-import foreign "c" _pen_core_view_to_string \(string, number) string
+import 'Number
+import 'String'Byte
+
+import foreign "c" _pen_core_view_has_prefix \(string, number, number, string) boolean
+import foreign "c" _pen_core_view_to_string \(string, number, number) string
 
 type View {
   value string
-  index number
+  start number
+  end number
 }
 
 New = \(s string) View {
-  View{value: s, index: 1}
+  View{
+    value: s,
+    start: 1,
+    end: Byte'Length(s),
+  }
 }
 
 HasPrefix = \(v View, s string) boolean {
-  _pen_core_view_has_prefix(v.value, v.index, s)
+  _pen_core_view_has_prefix(v.value, v.start, v.end, s)
 }
 
 Length = \(v View) number {
-  _pen_core_view_length(v.value, v.index)
+  v.end - v.start + 1
 }
 
 Seek = \(v View, n number) View {
-  View{value: v.value, index: v.index + n}
+  Slice(v, n + 1, Number'Infinity())
+}
+
+Slice = \(v View, start number, end number) View {
+  e = Number'Minimum(v.start + end - 1, v.end)
+
+  View{
+    value: v.value,
+    start: Number'Minimum(v.start + start - 1, e),
+    end: e,
+  }
 }
 
 ToString = \(v View) string {
-  _pen_core_view_to_string(v.value, v.index)
+  _pen_core_view_to_string(v.value, v.start, v.end)
 }
