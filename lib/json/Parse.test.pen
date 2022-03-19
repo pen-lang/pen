@@ -73,7 +73,7 @@ ParseNestedArray = \() none | error {
 }
 
 FailToParseTrailingCommaInArray = \() none | error {
-  Assert'Error(Parse("[0,]")?)
+  Assert'Error(Parse("[0,]"))
 }
 
 SkipSpace = \() none | error {

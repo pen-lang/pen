@@ -101,21 +101,21 @@ string_ = \(v View) result | error {
 }
 
 stringCharacters = \(v View, ss [string]) stringResult | error {
-  if r = stringCharacter(v)? as none {
+  if View'HasPrefix(v, "\"") {
     stringResult(String'Join(ss, ""), v)
   } else {
+    r = stringCharacter(v)?
+
     # TODO Optimize appending string elements.
     stringCharacters(r.input, [string ...ss, r.value])
   }
 }
 
-stringCharacter = \(v View) stringResult | none | error {
+stringCharacter = \(v View) stringResult | error {
   if View'HasPrefix(v, "\\\"") {
     stringResult("\"", View'Seek(v, 2))
-  } else if View'HasPrefix(v, "\"") {
-    none
   } else if View'Length(v) == 0 {
-    unexpectedEnd()
+    error("unexpected end of string")
   } else {
     stringResult(Byte'Slice(View'ToString(v), 1, 1), View'Seek(v, 1))
   }
@@ -176,7 +176,7 @@ nonZeroDigit = \(v View) View | none {
 
 array = \(v View) result | error {
   if View'HasPrefix(v, "[") {
-    r = arrayElements(View'Seek(v, 1), [Value])
+    r = arrayElements(View'Seek(v, 1), [Value])?
     v = blank(r.input)
 
     if View'HasPrefix(v, "]") {
@@ -189,13 +189,19 @@ array = \(v View) result | error {
   }
 }
 
-arrayElements = \(v View, vs [Value]) arrayResult {
+arrayElements = \(v View, vs [Value]) arrayResult | error {
   if r = value(v) as result {
     vs = [Value ...vs, r.value]
     v = blank(r.input)
 
     if View'HasPrefix(v, ",") {
-      arrayElements(View'Seek(v, 1), vs)
+      v = blank(View'Seek(v, 1))
+
+      if View'HasPrefix(v, "]") {
+        error("unexpected ]")
+      } else {
+        arrayElements(v, vs)
+      }
     } else {
       arrayResult(vs, r.input)
     }
@@ -214,8 +220,4 @@ blank = \(v View) View {
   } else {
     v
   }
-}
-
-unexpectedEnd = \() error {
-  error("unexpected end of string")
 }
