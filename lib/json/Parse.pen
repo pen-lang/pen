@@ -78,27 +78,27 @@ false_ = \(v View) result | error {
 }
 
 string_ = \(v View) result | error {
-  r = stringCharacters(View'Seek(v, 1), [string])
+  r = stringCharacters(View'Seek(v, 1), [string])?
 
   result(Value'New(r.value), View'Seek(r.input, 1))
 }
 
-stringCharacters = \(v View, ss [string]) stringResult {
-  if r = stringCharacter(v) as none {
+stringCharacters = \(v View, ss [string]) stringResult | error {
+  if r = stringCharacter(v)? as none {
     stringResult(String'Join(ss, ""), v)
   } else {
     # TODO Optimize appending string elements.
     stringCharacters(r.input, [string ...ss, r.value])
   }
-
-  # TODO Handle EOF.
 }
 
-stringCharacter = \(v View) stringResult | none {
+stringCharacter = \(v View) stringResult | none | error {
   if View'HasPrefix(v, "\\\"") {
     stringResult("\"", View'Seek(v, 2))
   } else if View'HasPrefix(v, "\"") {
     none
+  } else if View'Length(v) == 0 {
+    unexpectedEnd()
   } else {
     stringResult(Byte'Slice(View'ToString(v), 1, 1), View'Seek(v, 1))
   }
@@ -110,8 +110,8 @@ number_ = \(v View) result | error {
 }
 
 blanks = \(v View) View {
-  if vv = blank(v) as View {
-    blanks(vv)
+  if w = blank(v) as View {
+    blanks(w)
   } else {
     v
   }
@@ -123,4 +123,8 @@ blank = \(v View) View | none {
   } else {
     none
   }
+}
+
+unexpectedEnd = \() error {
+  error("unexpected end of string")
 }

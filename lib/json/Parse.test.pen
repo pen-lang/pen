@@ -22,6 +22,20 @@ ParseString = \() none | error {
   Assert'True(Parse("\"foo\"")? == Value'New("foo"))
 }
 
+FailToParseStringWithEnexpectedEnd = \() none | error {
+  Assert'True(
+    if r = Parse("\"") as error {
+      if s = source(r) as string { 
+        s == "unexpected end of string" 
+      } else { 
+        false 
+      }
+    } else {
+      false
+    },
+  )
+}
+
 ParseStringWithDoubleQuote = \() none | error {
   Assert'True(Parse("\"\\\"\"")? == Value'New("\""))
 }
