@@ -18,6 +18,18 @@ New = \(s string) View {
   }
 }
 
+Viewee = \(v View) string {
+  v.value
+}
+
+Start = \(v View) number {
+  v.start
+}
+
+End = \(v View) number {
+  v.end
+}
+
 HasPrefix = \(v View, s string) boolean {
   _pen_core_view_has_prefix(v.value, v.start, v.end, s)
 }
@@ -43,3 +55,5 @@ Slice = \(v View, start number, end number) View {
 ToString = \(v View) string {
   _pen_core_view_to_string(v.value, v.start, v.end)
 }
+
+
