@@ -124,7 +124,7 @@ stringCharacter = \(v View) stringResult | error {
 number_ = \(v View) result | error {
   i = View'Start(v)
 
-  v = View'Seek(v, if View'HasPrefix(v, "-") { 1 } else { 0 })
+  v = if View'HasPrefix(v, "-") { View'Seek(v, 1) } else { v }
   v = integer(v)?
   v = if View'HasPrefix(v, ".") { digits(View'Seek(v, 1)) } else { v }
 
