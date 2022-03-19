@@ -17,6 +17,7 @@ ParseFalse = \() none | error {
 ParseInteger = \() none | error {
   Assert'True(Parse("0")? == Value'New(0))?
   Assert'True(Parse("1")? == Value'New(1))?
+  Assert'True(Parse("9")? == Value'New(9))?
   Assert'True(Parse("42")? == Value'New(42))
 }
 
