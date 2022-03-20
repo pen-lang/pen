@@ -2,7 +2,7 @@ use ast::{types::Type, *};
 
 const INDENT: &str = "  ";
 
-// TODO Merge positions.
+// TODO Merge comments.
 pub fn format(module: &Module) -> String {
     [
         module
