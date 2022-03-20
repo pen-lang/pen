@@ -1,20 +1,32 @@
 use ast::*;
 
+// TODO Merge positions.
 pub fn format(module: &Module) -> String {
-    module
-        .imports()
-        .iter()
-        .map(format_import)
-        .chain(module.foreign_imports().iter().map(format_foreign_import))
-        .chain(
-            module
-                .type_definitions()
-                .iter()
-                .flat_map(format_type_definition),
-        )
-        .chain(module.definitions().iter().flat_map(format_definition))
-        .collect::<Vec<String>>()
-        .join("\n\n")
+    [
+        module
+            .imports()
+            .iter()
+            .map(format_import)
+            .collect::<Vec<_>>()
+            .join("\n"),
+        module
+            .foreign_imports()
+            .iter()
+            .map(format_foreign_import)
+            .collect::<Vec<_>>()
+            .join("\n"),
+    ]
+    .into_iter()
+    .filter(|string| !string.is_empty())
+    .chain(
+        module
+            .type_definitions()
+            .iter()
+            .flat_map(format_type_definition),
+    )
+    .chain(module.definitions().iter().flat_map(format_definition))
+    .collect::<Vec<String>>()
+    .join("\n\n")
         + "\n"
 }
 
