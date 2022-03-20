@@ -1,5 +1,7 @@
 use ast::{types::Type, *};
 
+const INDENT: &str = "  ";
+
 // TODO Merge positions.
 pub fn format(module: &Module) -> String {
     [
@@ -18,13 +20,8 @@ pub fn format(module: &Module) -> String {
     ]
     .into_iter()
     .filter(|string| !string.is_empty())
-    .chain(
-        module
-            .type_definitions()
-            .iter()
-            .flat_map(format_type_definition),
-    )
-    .chain(module.definitions().iter().flat_map(format_definition))
+    .chain(module.type_definitions().iter().map(format_type_definition))
+    .chain(module.definitions().iter().map(format_definition))
     .collect::<Vec<_>>()
     .join("\n\n")
         + "\n"
@@ -74,11 +71,49 @@ fn format_foreign_import(import: &ForeignImport) -> String {
         .join(" ")
 }
 
-fn format_type_definition(_definition: &TypeDefinition) -> Vec<String> {
-    todo!()
+fn format_type_definition(definition: &TypeDefinition) -> String {
+    match definition {
+        TypeDefinition::RecordDefinition(definition) => format_record_definition(definition),
+        TypeDefinition::TypeAlias(alias) => format_type_alias(alias),
+    }
 }
 
-fn format_definition(_definition: &Definition) -> Vec<String> {
+fn format_record_definition(definition: &RecordDefinition) -> String {
+    let head = ["type", definition.name(), "{"].join(" ");
+
+    if definition.fields().is_empty() {
+        head + "}"
+    } else {
+        [
+            head,
+            definition
+                .fields()
+                .iter()
+                .map(|field| {
+                    indent_line(
+                        field.name().to_owned() + " " + &format_type(field.type_()),
+                        1,
+                    )
+                })
+                .collect::<Vec<_>>()
+                .join(",\n"),
+            "}".into(),
+        ]
+        .join("\n")
+    }
+}
+
+fn format_type_alias(alias: &TypeAlias) -> String {
+    [
+        "type".into(),
+        alias.name().into(),
+        "=".into(),
+        format_type(alias.type_()),
+    ]
+    .join(" ")
+}
+
+fn format_definition(_definition: &Definition) -> String {
     todo!()
 }
 
@@ -122,6 +157,10 @@ fn format_type(type_: &Type) -> String {
             format_type(union.rhs())
         ),
     }
+}
+
+fn indent_line(string: impl AsRef<str>, level: usize) -> String {
+    INDENT.repeat(level) + string.as_ref()
 }
 
 #[cfg(test)]
@@ -277,6 +316,59 @@ mod tests {
                 .into()
             ),
             "(\\() none) | none"
+        );
+    }
+
+    #[test]
+    fn format_record_definition_with_no_field() {
+        assert_eq!(
+            format(&Module::new(
+                vec![],
+                vec![],
+                vec![RecordDefinition::new("foo", vec![], Position::fake()).into()],
+                vec![],
+                Position::fake()
+            )),
+            "type foo {}\n"
+        );
+    }
+
+    #[test]
+    fn format_record_definition_with_field() {
+        assert_eq!(
+            format(&Module::new(
+                vec![],
+                vec![],
+                vec![RecordDefinition::new(
+                    "foo",
+                    vec![types::RecordField::new(
+                        "foo",
+                        types::None::new(Position::fake())
+                    )],
+                    Position::fake()
+                )
+                .into()],
+                vec![],
+                Position::fake()
+            )),
+            "type foo {\n  foo none\n}\n"
+        );
+    }
+
+    #[test]
+    fn format_type_alias() {
+        assert_eq!(
+            format(&Module::new(
+                vec![],
+                vec![],
+                vec![
+                    TypeAlias::new("foo", types::None::new(Position::fake()), Position::fake())
+                        .into()
+                ],
+                vec![],
+                Position::fake()
+            )),
+            "type foo = none\n"
         );
     }
 }
