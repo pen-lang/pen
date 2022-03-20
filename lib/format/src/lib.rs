@@ -31,20 +31,16 @@ pub fn format(module: &Module) -> String {
 }
 
 fn format_import(import: &Import) -> String {
-    format!(
-        "import {}{}{}",
-        format_module_path(import.module_path()),
-        if let Some(prefix) = import.prefix() {
-            format!(" as {}", prefix)
+    ["import".into(), format_module_path(import.module_path())]
+        .into_iter()
+        .chain(import.prefix().map(|prefix| format!("as {}", prefix)))
+        .chain(if import.unqualified_names().is_empty() {
+            None
         } else {
-            "".into()
-        },
-        if import.unqualified_names().is_empty() {
-            "".into()
-        } else {
-            format!(" {{ {} }}", import.unqualified_names().join(", "))
-        }
-    )
+            Some(format!("{{ {} }}", import.unqualified_names().join(", ")))
+        })
+        .collect::<Vec<_>>()
+        .join(" ")
 }
 
 fn format_module_path(path: &ModulePath) -> String {
