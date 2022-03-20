@@ -67,7 +67,7 @@ fn format_module_path_components(components: &[String]) -> String {
 }
 
 fn format_foreign_import(import: &ForeignImport) -> String {
-    ["import foreign".to_string()]
+    ["import foreign".into()]
         .into_iter()
         .chain(match import.calling_convention() {
             CallingConvention::C => Some("\"c\"".into()),
