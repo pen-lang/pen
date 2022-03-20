@@ -260,6 +260,10 @@ dependencies = [
 [[package]]
 name = "format"
 version = "0.1.0"
+dependencies = [
+ "ast",
+ "position",
+]
 
 [[package]]
 name = "futures"
