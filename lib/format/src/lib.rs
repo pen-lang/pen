@@ -100,10 +100,31 @@ fn format_type(type_: &Type) -> String {
                 .join(", "),
             format_type(function.result()),
         ),
+        Type::List(list) => format!("[{}]", format_type(list.element())),
+        Type::Map(map) => format!(
+            "{{{}: {}}}",
+            format_type(map.key()),
+            format_type(map.value())
+        ),
         Type::None(_) => "none".into(),
         Type::Number(_) => "number".into(),
+        Type::Record(record) => record.name().into(),
+        Type::Reference(reference) => reference.name().into(),
         Type::String(_) => "string".into(),
-        _ => todo!(),
+        // TODO Handle functions better.
+        Type::Union(union) => format!(
+            "{} | {}",
+            {
+                let type_ = format_type(union.lhs());
+
+                if union.lhs().is_function() {
+                    format!("({})", type_)
+                } else {
+                    type_
+                }
+            },
+            format_type(union.rhs())
+        ),
     }
 }
 
@@ -241,6 +262,25 @@ mod tests {
                 Position::fake()
             )),
             "import foreign \"c\" foo \\() none\n"
+        );
+    }
+
+    #[test]
+    fn format_function_type_in_union_type() {
+        assert_eq!(
+            format_type(
+                &types::Union::new(
+                    types::Function::new(
+                        vec![],
+                        types::None::new(Position::fake()),
+                        Position::fake()
+                    ),
+                    types::None::new(Position::fake()),
+                    Position::fake()
+                )
+                .into()
+            ),
+            "(\\() none) | none"
         );
     }
 }
