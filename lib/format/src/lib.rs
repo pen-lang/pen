@@ -142,7 +142,6 @@ fn format_type(type_: &Type) -> String {
         Type::Record(record) => record.name().into(),
         Type::Reference(reference) => reference.name().into(),
         Type::String(_) => "string".into(),
-        // TODO Handle functions better.
         Type::Union(union) => format!(
             "{} | {}",
             {
