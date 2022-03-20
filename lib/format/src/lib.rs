@@ -1,4 +1,4 @@
-use ast::*;
+use ast::{types::Type, *};
 
 // TODO Merge positions.
 pub fn format(module: &Module) -> String {
@@ -25,7 +25,7 @@ pub fn format(module: &Module) -> String {
             .flat_map(format_type_definition),
     )
     .chain(module.definitions().iter().flat_map(format_definition))
-    .collect::<Vec<String>>()
+    .collect::<Vec<_>>()
     .join("\n\n")
         + "\n"
 }
@@ -66,8 +66,16 @@ fn format_module_path_components(components: &[String]) -> String {
     components.join("'")
 }
 
-fn format_foreign_import(_import: &ForeignImport) -> String {
-    todo!()
+fn format_foreign_import(import: &ForeignImport) -> String {
+    ["import foreign".to_string()]
+        .into_iter()
+        .chain(match import.calling_convention() {
+            CallingConvention::C => Some("\"c\"".into()),
+            CallingConvention::Native => None,
+        })
+        .chain([import.name().into(), format_type(import.type_())])
+        .collect::<Vec<_>>()
+        .join(" ")
 }
 
 fn format_type_definition(_definition: &TypeDefinition) -> Vec<String> {
@@ -76,6 +84,27 @@ fn format_type_definition(_definition: &TypeDefinition) -> Vec<String> {
 
 fn format_definition(_definition: &Definition) -> Vec<String> {
     todo!()
+}
+
+fn format_type(type_: &Type) -> String {
+    match type_ {
+        Type::Any(_) => "any".into(),
+        Type::Boolean(_) => "boolean".into(),
+        Type::Function(function) => format!(
+            "\\({}) {}",
+            function
+                .arguments()
+                .iter()
+                .map(format_type)
+                .collect::<Vec<_>>()
+                .join(", "),
+            format_type(function.result()),
+        ),
+        Type::None(_) => "none".into(),
+        Type::Number(_) => "number".into(),
+        Type::String(_) => "string".into(),
+        _ => todo!(),
+    }
 }
 
 #[cfg(test)]
@@ -166,6 +195,52 @@ mod tests {
                 Position::fake()
             )),
             "import 'Foo'Bar { Baz, Blah }\n"
+        );
+    }
+
+    #[test]
+    fn format_foreign_import() {
+        assert_eq!(
+            format(&Module::new(
+                vec![],
+                vec![ForeignImport::new(
+                    "foo",
+                    CallingConvention::Native,
+                    types::Function::new(
+                        vec![],
+                        types::None::new(Position::fake()),
+                        Position::fake()
+                    ),
+                    Position::fake(),
+                )],
+                vec![],
+                vec![],
+                Position::fake()
+            )),
+            "import foreign foo \\() none\n"
+        );
+    }
+
+    #[test]
+    fn format_foreign_import_with_c_calling_convention() {
+        assert_eq!(
+            format(&Module::new(
+                vec![],
+                vec![ForeignImport::new(
+                    "foo",
+                    CallingConvention::C,
+                    types::Function::new(
+                        vec![],
+                        types::None::new(Position::fake()),
+                        Position::fake()
+                    ),
+                    Position::fake(),
+                )],
+                vec![],
+                vec![],
+                Position::fake()
+            )),
+            "import foreign \"c\" foo \\() none\n"
         );
     }
 }
