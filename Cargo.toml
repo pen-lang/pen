@@ -1,21 +1,4 @@
 [workspace]
-members = [
-  "cmd/pen",
-  "lib/app",
-  "lib/ast",
-  "lib/ast-hir",
-  "lib/ffi",
-  "lib/ffi-macro",
-  "lib/hir",
-  "lib/hir-mir",
-  "lib/infra",
-  "lib/interface",
-  "lib/mir",
-  "lib/mir-fmm",
-  "lib/parse",
-  "lib/position",
-  "lib/test-info",
-]
 exclude = [
   "cmd/test",
   "examples",
