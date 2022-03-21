@@ -222,6 +222,31 @@ fn format_expression(expression: &Expression) -> String {
             .chain([format_block(if_.else_())])
             .collect::<Vec<_>>()
             .join(" "),
+        Expression::IfType(if_) => [
+            "if".into(),
+            if_.name().into(),
+            "=".into(),
+            format_expression(if_.argument()),
+            "as".into(),
+            format_type(if_.branches()[0].type_()),
+            format_block(if_.branches()[0].block()),
+        ]
+        .into_iter()
+        .chain(if_.branches().iter().skip(1).flat_map(|branch| {
+            [
+                "else".into(),
+                "if".into(),
+                format_type(branch.type_()),
+                format_block(branch.block()),
+            ]
+        }))
+        .chain(
+            if_.else_()
+                .into_iter()
+                .flat_map(|block| ["else".into(), format_block(block)]),
+        )
+        .collect::<Vec<_>>()
+        .join(" "),
         Expression::Lambda(lambda) => format_lambda(lambda),
         Expression::None(_) => "none".into(),
         Expression::Number(number) => format!("{}", number.value()),
@@ -233,6 +258,7 @@ fn format_expression(expression: &Expression) -> String {
                 todo!()
             }
         }
+        Expression::Variable(variable) => variable.name().into(),
         _ => todo!(),
     }
 }
@@ -632,6 +658,82 @@ mod tests {
                     if true {
                       none
                     } else if false {
+                      none
+                    } else {
+                      none
+                    }
+                    "
+                )
+                .trim()
+            );
+        }
+
+        #[test]
+        fn format_if_type() {
+            assert_eq!(
+                format_expression(
+                    &IfType::new(
+                        "x",
+                        Variable::new("y", Position::fake()),
+                        vec![
+                            IfTypeBranch::new(
+                                types::None::new(Position::fake()),
+                                Block::new(vec![], None::new(Position::fake()), Position::fake())
+                            ),
+                            IfTypeBranch::new(
+                                types::Number::new(Position::fake()),
+                                Block::new(vec![], None::new(Position::fake()), Position::fake())
+                            )
+                        ],
+                        None,
+                        Position::fake(),
+                    )
+                    .into()
+                ),
+                indoc!(
+                    "
+                    if x = y as none {
+                      none
+                    } else if number {
+                      none
+                    }
+                    "
+                )
+                .trim()
+            );
+        }
+
+        #[test]
+        fn format_if_type_with_else_block() {
+            assert_eq!(
+                format_expression(
+                    &IfType::new(
+                        "x",
+                        Variable::new("y", Position::fake()),
+                        vec![
+                            IfTypeBranch::new(
+                                types::None::new(Position::fake()),
+                                Block::new(vec![], None::new(Position::fake()), Position::fake())
+                            ),
+                            IfTypeBranch::new(
+                                types::Number::new(Position::fake()),
+                                Block::new(vec![], None::new(Position::fake()), Position::fake())
+                            )
+                        ],
+                        Some(Block::new(
+                            vec![],
+                            None::new(Position::fake()),
+                            Position::fake()
+                        )),
+                        Position::fake(),
+                    )
+                    .into()
+                ),
+                indoc!(
+                    "
+                    if x = y as none {
+                      none
+                    } else if number {
                       none
                     } else {
                       none
