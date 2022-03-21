@@ -232,6 +232,20 @@ fn format_expression(expression: &Expression) -> String {
             format_block(if_.else_()),
         ]
         .join(" "),
+        Expression::IfMap(if_) => [
+            "if".into(),
+            if_.name().into(),
+            "=".into(),
+            format!(
+                "{}[{}]",
+                format_expression(if_.map()),
+                format_expression(if_.key())
+            ),
+            format_block(if_.else_()),
+            "else".into(),
+            format_block(if_.else_()),
+        ]
+        .join(" "),
         Expression::IfType(if_) => [
             "if".into(),
             if_.name().into(),
@@ -695,6 +709,33 @@ mod tests {
                 indoc!(
                     "
                     if [x, ...xs] = ys {
+                      none
+                    } else {
+                      none
+                    }
+                    "
+                )
+                .trim()
+            );
+        }
+
+        #[test]
+        fn format_if_map() {
+            assert_eq!(
+                format_expression(
+                    &IfMap::new(
+                        "x",
+                        Variable::new("xs", Position::fake()),
+                        Variable::new("k", Position::fake()),
+                        Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                        Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                        Position::fake()
+                    )
+                    .into()
+                ),
+                indoc!(
+                    "
+                    if x = xs[k] {
                       none
                     } else {
                       none
