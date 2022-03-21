@@ -206,9 +206,25 @@ fn format_statement(statement: &Statement) -> String {
 
 fn format_expression(expression: &Expression) -> String {
     match expression {
+        Expression::Boolean(boolean) => if boolean.value() { "true" } else { "false" }.into(),
+        Expression::If(if_) => if_
+            .branches()
+            .iter()
+            .flat_map(|branch| {
+                [
+                    "if".into(),
+                    format_expression(branch.condition()),
+                    format_block(branch.block()),
+                    "else".into(),
+                ]
+            })
+            .chain([format_block(if_.else_())])
+            .collect::<Vec<_>>()
+            .join(" "),
         Expression::Lambda(lambda) => format_lambda(lambda),
         Expression::None(_) => "none".into(),
         Expression::Number(number) => format!("{}", number.value()),
+        Expression::String(string) => format!("{:?}", string.value()),
         _ => todo!(),
     }
 }
@@ -578,5 +594,60 @@ mod tests {
                 "
             )
         );
+    }
+
+    mod expression {
+        use super::*;
+
+        #[test]
+        fn format_if() {
+            assert_eq!(
+                format_expression(
+                    &If::new(
+                        vec![
+                            IfBranch::new(
+                                Boolean::new(true, Position::fake()),
+                                Block::new(vec![], None::new(Position::fake()), Position::fake())
+                            ),
+                            IfBranch::new(
+                                Boolean::new(false, Position::fake()),
+                                Block::new(vec![], None::new(Position::fake()), Position::fake())
+                            )
+                        ],
+                        Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                        Position::fake()
+                    )
+                    .into()
+                ),
+                indoc!(
+                    "
+                    if true {
+                      none
+                    } else if false {
+                      none
+                    } else {
+                      none
+                    }
+                    "
+                )
+                .trim()
+            );
+        }
+
+        #[test]
+        fn format_number() {
+            assert_eq!(
+                format_expression(&Number::new(42.0, Position::fake()).into()),
+                "42"
+            );
+        }
+
+        #[test]
+        fn format_string() {
+            assert_eq!(
+                format_expression(&ByteString::new("foo", Position::fake()).into()),
+                "\"foo\""
+            );
+        }
     }
 }
