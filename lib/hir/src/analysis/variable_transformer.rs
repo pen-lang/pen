@@ -72,7 +72,7 @@ fn transform_expression(
         .into(),
         Expression::IfList(if_) => IfList::new(
             if_.type_().cloned(),
-            transform_expression(if_.argument(), transform),
+            transform_expression(if_.list(), transform),
             if_.first_name(),
             if_.rest_name(),
             transform_expression(if_.then(), &|variable| {

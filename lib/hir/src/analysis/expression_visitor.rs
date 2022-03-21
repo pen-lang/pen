@@ -29,7 +29,7 @@ fn visit_expression(expression: &Expression, visit: &mut impl FnMut(&Expression)
             visit_expression(if_.else_());
         }
         Expression::IfList(if_) => {
-            visit_expression(if_.argument());
+            visit_expression(if_.list());
             visit_expression(if_.then());
             visit_expression(if_.else_());
         }

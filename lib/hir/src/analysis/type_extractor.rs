@@ -32,10 +32,10 @@ pub fn extract_from_expression(
         .into(),
         Expression::IfList(if_) => {
             let list_type = type_canonicalizer::canonicalize_list(
-                &extract_from_expression(if_.argument(), variables)?,
+                &extract_from_expression(if_.list(), variables)?,
                 context.types(),
             )?
-            .ok_or_else(|| AnalysisError::ListExpected(if_.argument().position().clone()))?;
+            .ok_or_else(|| AnalysisError::ListExpected(if_.list().position().clone()))?;
 
             types::Union::new(
                 extract_from_expression(
