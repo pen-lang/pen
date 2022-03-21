@@ -236,7 +236,7 @@ fn format_expression(expression: &Expression) -> String {
             "if".into(),
             format!("[{}, ...{}]", if_.first_name(), if_.rest_name()),
             "=".into(),
-            format_expression(if_.argument()),
+            format_expression(if_.list()),
             format_block(if_.else_()),
             "else".into(),
             format_block(if_.else_()),
@@ -288,12 +288,7 @@ fn format_expression(expression: &Expression) -> String {
             format!("go {}", format_lambda(operation.function()))
         }
         Expression::String(string) => {
-            if let Ok(string) = str::from_utf8(string.value()) {
-                // TODO We should not depend on Rust's debug format behavior.
-                format!("{:?}", string)
-            } else {
-                todo!()
-            }
+            format!("\"{}\"", string.value())
         }
         Expression::Variable(variable) => variable.name().into(),
         _ => todo!(),
