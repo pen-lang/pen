@@ -233,6 +233,7 @@ fn indent_line(string: impl AsRef<str>) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use indoc::indoc;
     use position::{test::PositionFake, Position};
 
     #[test]
@@ -418,7 +419,13 @@ mod tests {
                 vec![],
                 Position::fake()
             )),
-            "type foo {\n  foo none\n}\n"
+            indoc!(
+                "
+                type foo {
+                  foo none
+                }
+                "
+            )
         );
     }
 
@@ -483,7 +490,13 @@ mod tests {
                 )],
                 Position::fake()
             )),
-            "foo = \\(x none) none {\n  none\n}\n"
+            indoc!(
+                "
+                foo = \\(x none) none {
+                  none
+                }
+                "
+            )
         );
     }
 
@@ -515,7 +528,14 @@ mod tests {
                 )],
                 Position::fake()
             )),
-            "foo = \\() none {\n  none\n  none\n}\n"
+            indoc!(
+                "
+                foo = \\() none {
+                  none
+                  none
+                }
+                "
+            )
         );
     }
 }
