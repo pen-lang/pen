@@ -207,7 +207,7 @@ fn format_statement(statement: &Statement) -> String {
 
 fn format_expression(expression: &Expression) -> String {
     match expression {
-        Expression::BinaryOperation(_operation) => todo!(),
+        Expression::BinaryOperation(operation) => format_binary_operation(operation),
         Expression::Call(call) => format!(
             "{}({})",
             format_expression(call.function()),
@@ -297,6 +297,63 @@ fn format_expression(expression: &Expression) -> String {
         }
         Expression::Variable(variable) => variable.name().into(),
         _ => todo!(),
+    }
+}
+
+fn format_binary_operation(operation: &BinaryOperation) -> String {
+    [
+        format_operand(operation.lhs(), operation.operator()),
+        format_binary_operator(operation.operator()).into(),
+        format_operand(operation.rhs(), operation.operator()),
+    ]
+    .join(" ")
+}
+
+fn format_operand(operand: &Expression, parent_operator: BinaryOperator) -> String {
+    let string = format_expression(operand);
+
+    if match operand {
+        Expression::BinaryOperation(operation) => Some(operation),
+        _ => None,
+    }
+    .map(|operand| operator_priority(operand.operator()) < operator_priority(parent_operator))
+    .unwrap_or_default()
+    {
+        format!("({})", string)
+    } else {
+        string
+    }
+}
+
+fn format_binary_operator(operator: BinaryOperator) -> &'static str {
+    match operator {
+        BinaryOperator::Or => "|",
+        BinaryOperator::And => "&",
+        BinaryOperator::Equal => "==",
+        BinaryOperator::NotEqual => "!=",
+        BinaryOperator::LessThan => "<",
+        BinaryOperator::LessThanOrEqual => "<=",
+        BinaryOperator::GreaterThan => ">",
+        BinaryOperator::GreaterThanOrEqual => ">=",
+        BinaryOperator::Add => "+",
+        BinaryOperator::Subtract => "-",
+        BinaryOperator::Multiply => "*",
+        BinaryOperator::Divide => "/",
+    }
+}
+
+fn operator_priority(operator: BinaryOperator) -> usize {
+    match operator {
+        BinaryOperator::Or => 1,
+        BinaryOperator::And => 2,
+        BinaryOperator::Equal
+        | BinaryOperator::NotEqual
+        | BinaryOperator::LessThan
+        | BinaryOperator::LessThanOrEqual
+        | BinaryOperator::GreaterThan
+        | BinaryOperator::GreaterThanOrEqual => 3,
+        BinaryOperator::Add | BinaryOperator::Subtract => 4,
+        BinaryOperator::Multiply | BinaryOperator::Divide => 5,
     }
 }
 
@@ -892,6 +949,64 @@ mod tests {
             assert_eq!(
                 format_expression(&ByteString::new("foo", Position::fake()).into()),
                 "\"foo\""
+            );
+        }
+
+        #[test]
+        fn format_binary_operation() {
+            assert_eq!(
+                format_expression(
+                    &BinaryOperation::new(
+                        BinaryOperator::Add,
+                        Number::new(1.0, Position::fake()),
+                        Number::new(2.0, Position::fake()),
+                        Position::fake()
+                    )
+                    .into()
+                ),
+                "1 + 2"
+            );
+        }
+
+        #[test]
+        fn format_nested_binary_operation() {
+            assert_eq!(
+                format_expression(
+                    &BinaryOperation::new(
+                        BinaryOperator::Add,
+                        Number::new(1.0, Position::fake()),
+                        BinaryOperation::new(
+                            BinaryOperator::Multiply,
+                            Number::new(2.0, Position::fake()),
+                            Number::new(3.0, Position::fake()),
+                            Position::fake()
+                        ),
+                        Position::fake()
+                    )
+                    .into()
+                ),
+                "1 + 2 * 3"
+            );
+        }
+
+        #[test]
+        fn format_nested_binary_operation_with_priority() {
+            assert_eq!(
+                format_expression(
+                    &BinaryOperation::new(
+                        BinaryOperator::Multiply,
+                        Number::new(1.0, Position::fake()),
+                        BinaryOperation::new(
+                            BinaryOperator::Add,
+                            Number::new(2.0, Position::fake()),
+                            Number::new(3.0, Position::fake()),
+                            Position::fake()
+                        ),
+                        Position::fake()
+                    )
+                    .into()
+                ),
+                "1 * (2 + 3)"
             );
         }
     }
