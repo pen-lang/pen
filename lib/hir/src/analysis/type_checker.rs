@@ -92,15 +92,13 @@ fn check_expression(
         Expression::IfList(if_) => {
             let list_type = types::List::new(
                 if_.type_()
-                    .ok_or_else(|| {
-                        AnalysisError::TypeNotInferred(if_.argument().position().clone())
-                    })?
+                    .ok_or_else(|| AnalysisError::TypeNotInferred(if_.list().position().clone()))?
                     .clone(),
                 if_.position().clone(),
             );
 
             check_subsumption(
-                &check_expression(if_.argument(), variables)?,
+                &check_expression(if_.list(), variables)?,
                 &list_type.clone().into(),
             )?;
 

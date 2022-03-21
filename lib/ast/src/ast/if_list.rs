@@ -4,7 +4,7 @@ use std::sync::Arc;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct IfList {
-    argument: Arc<Expression>,
+    list: Arc<Expression>,
     first_name: String,
     rest_name: String,
     then: Arc<Block>,
@@ -14,7 +14,7 @@ pub struct IfList {
 
 impl IfList {
     pub fn new(
-        argument: impl Into<Expression>,
+        list: impl Into<Expression>,
         first_name: impl Into<String>,
         rest_name: impl Into<String>,
         then: Block,
@@ -22,7 +22,7 @@ impl IfList {
         position: Position,
     ) -> Self {
         Self {
-            argument: Arc::new(argument.into()),
+            list: Arc::new(list.into()),
             first_name: first_name.into(),
             rest_name: rest_name.into(),
             then: then.into(),
@@ -31,8 +31,8 @@ impl IfList {
         }
     }
 
-    pub fn argument(&self) -> &Expression {
-        &self.argument
+    pub fn list(&self) -> &Expression {
+        &self.list
     }
 
     pub fn first_name(&self) -> &str {

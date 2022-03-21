@@ -6,7 +6,7 @@ use std::sync::Arc;
 #[derive(Clone, Debug, PartialEq)]
 pub struct IfList {
     type_: Option<Type>, // element type
-    argument: Arc<Expression>,
+    list: Arc<Expression>,
     first_name: String,
     rest_name: String,
     then: Arc<Expression>,
@@ -17,7 +17,7 @@ pub struct IfList {
 impl IfList {
     pub fn new(
         type_: Option<Type>,
-        argument: impl Into<Expression>,
+        list: impl Into<Expression>,
         first_name: impl Into<String>,
         rest_name: impl Into<String>,
         then: impl Into<Expression>,
@@ -26,7 +26,7 @@ impl IfList {
     ) -> Self {
         Self {
             type_,
-            argument: Arc::new(argument.into()),
+            list: Arc::new(list.into()),
             first_name: first_name.into(),
             rest_name: rest_name.into(),
             then: then.into().into(),
@@ -39,8 +39,8 @@ impl IfList {
         self.type_.as_ref()
     }
 
-    pub fn argument(&self) -> &Expression {
-        &self.argument
+    pub fn list(&self) -> &Expression {
+        &self.list
     }
 
     pub fn first_name(&self) -> &str {

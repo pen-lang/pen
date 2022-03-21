@@ -104,12 +104,12 @@ fn infer_expression(
             .into()
         }
         Expression::IfList(if_) => {
-            let list = infer_expression(if_.argument(), variables)?;
+            let list = infer_expression(if_.list(), variables)?;
             let list_type = type_canonicalizer::canonicalize_list(
                 &type_extractor::extract_from_expression(context, &list, variables)?,
                 context.types(),
             )?
-            .ok_or_else(|| AnalysisError::ListExpected(if_.argument().position().clone()))?;
+            .ok_or_else(|| AnalysisError::ListExpected(if_.list().position().clone()))?;
 
             let then = infer_expression(
                 if_.then(),
