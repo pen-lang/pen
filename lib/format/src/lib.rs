@@ -222,6 +222,16 @@ fn format_expression(expression: &Expression) -> String {
             .chain([format_block(if_.else_())])
             .collect::<Vec<_>>()
             .join(" "),
+        Expression::IfList(if_) => [
+            "if".into(),
+            format!("[{}, ...{}]", if_.first_name(), if_.rest_name()),
+            "=".into(),
+            format_expression(if_.argument()),
+            format_block(if_.else_()),
+            "else".into(),
+            format_block(if_.else_()),
+        ]
+        .join(" "),
         Expression::IfType(if_) => [
             "if".into(),
             if_.name().into(),
@@ -658,6 +668,33 @@ mod tests {
                     if true {
                       none
                     } else if false {
+                      none
+                    } else {
+                      none
+                    }
+                    "
+                )
+                .trim()
+            );
+        }
+
+        #[test]
+        fn format_if_list() {
+            assert_eq!(
+                format_expression(
+                    &IfList::new(
+                        Variable::new("ys", Position::fake()),
+                        "x",
+                        "xs",
+                        Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                        Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                        Position::fake()
+                    )
+                    .into()
+                ),
+                indoc!(
+                    "
+                    if [x, ...xs] = ys {
                       none
                     } else {
                       none
