@@ -6,6 +6,8 @@ static HEX_CHARACTER_REGEX: Lazy<regex::Regex> =
 
 pub fn compile(string: &str) -> Vec<u8> {
     let string = string
+        .replace("\\\\", "\\")
+        .replace("\\\"", "\"")
         .replace("\\n", "\n")
         .replace("\\r", "\r")
         .replace("\\t", "\t");
@@ -20,6 +22,16 @@ pub fn compile(string: &str) -> Vec<u8> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn compile_back_slash() {
+        assert_eq!(compile("\\\\"), Vec::from("\\"));
+    }
+
+    #[test]
+    fn compile_double_quote() {
+        assert_eq!(compile("\\\""), Vec::from("\""));
+    }
 
     #[test]
     fn compile_newline() {
