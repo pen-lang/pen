@@ -274,6 +274,9 @@ fn format_expression(expression: &Expression) -> String {
         Expression::Lambda(lambda) => format_lambda(lambda),
         Expression::None(_) => "none".into(),
         Expression::Number(number) => format!("{}", number.value()),
+        Expression::SpawnOperation(operation) => {
+            format!("go {}", format_lambda(operation.function()))
+        }
         Expression::String(string) => {
             if let Ok(string) = str::from_utf8(string.value()) {
                 // TODO We should not depend on Rust's debug format behavior.
@@ -827,6 +830,32 @@ mod tests {
             assert_eq!(
                 format_expression(&Number::new(42.0, Position::fake()).into()),
                 "42"
+            );
+        }
+
+        #[test]
+        fn format_spawn_operation() {
+            assert_eq!(
+                format_expression(
+                    &SpawnOperation::new(
+                        Lambda::new(
+                            vec![],
+                            types::None::new(Position::fake()),
+                            Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                            Position::fake(),
+                        ),
+                        Position::fake()
+                    )
+                    .into()
+                ),
+                indoc!(
+                    "
+                    go \\() none {
+                      none
+                    }
+                    "
+                )
+                .trim()
             );
         }
 
