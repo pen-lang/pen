@@ -34,7 +34,7 @@ fn validate_expression(
             validate(if_.else_())?;
         }
         Expression::IfList(if_) => {
-            validate(if_.argument())?;
+            validate(if_.list())?;
             validate(if_.then())?;
             validate(if_.else_())?;
         }

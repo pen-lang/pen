@@ -143,7 +143,7 @@ fn calling_convention<'a>() -> impl Parser<Stream<'a>, Output = CallingConventio
     string_literal()
         .expected("calling convention")
         .then(|string| {
-            if string.value() == "c".as_bytes() {
+            if string.value() == "c" {
                 value(CallingConvention::C).left()
             } else {
                 unexpected_any("unknown calling convention").right()
@@ -715,24 +715,22 @@ fn string_literal<'a>() -> impl Parser<Stream<'a>, Output = ByteString> {
     token((
         attempt(position().skip(character('"'))),
         many(choice((
-            find(string_regex).map(|string: &str| string.as_bytes().to_vec()),
-            character('\\').with(choice((
-                character('\\').map(|_| "\\".as_bytes().to_vec()),
-                character('"').map(|_| "\"".as_bytes().to_vec()),
-                character('n').map(|_| "\n".as_bytes().to_vec()),
-                character('r').map(|_| "\r".as_bytes().to_vec()),
-                character('t').map(|_| "\t".as_bytes().to_vec()),
-                character('x')
-                    .with(find(hex_regex))
-                    .map(|string: &str| vec![u8::from_str_radix(string, 16).unwrap()]),
-            ))),
+            find(string_regex).map(|string: &str| string.into()),
+            special_string_character("\\\\"),
+            special_string_character("\\\""),
+            special_string_character("\\n"),
+            special_string_character("\\r"),
+            special_string_character("\\t"),
+            (attempt(string("\\x")), find(hex_regex)).map(|(prefix, hex)| prefix.to_owned() + hex),
         ))),
         character('"'),
     ))
-    .map(|(position, strings, _): (_, Vec<Vec<u8>>, _)| {
-        ByteString::new(strings.into_iter().flatten().collect::<Vec<u8>>(), position)
-    })
+    .map(|(position, strings, _): (_, Vec<String>, _)| ByteString::new(strings.concat(), position))
     .expected("string literal")
+}
+
+fn special_string_character<'a>(escape: &'static str) -> impl Parser<Stream<'a>, Output = String> {
+    attempt(string(escape)).map(String::from)
 }
 
 fn list_literal<'a>() -> impl Parser<Stream<'a>, Output = List> {
@@ -2700,13 +2698,13 @@ mod tests {
                 (r#""""#, ""),
                 (r#""foo""#, "foo"),
                 (r#""foo bar""#, "foo bar"),
-                (r#""\"""#, "\""),
-                (r#""\n""#, "\n"),
-                (r#""\r""#, "\r"),
-                (r#""\t""#, "\t"),
-                (r#""\\""#, "\\"),
-                (r#""\n\n""#, "\n\n"),
-                (r#""\x42""#, "\x42"),
+                (r#""\"""#, "\\\""),
+                (r#""\n""#, "\\n"),
+                (r#""\r""#, "\\r"),
+                (r#""\t""#, "\\t"),
+                (r#""\\""#, "\\\\"),
+                (r#""\x42""#, "\\x42"),
+                (r#""\n\n""#, "\\n\\n"),
             ] {
                 assert_eq!(
                     string_literal().parse(stream(source, "")).unwrap().0,

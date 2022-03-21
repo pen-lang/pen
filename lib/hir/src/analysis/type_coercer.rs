@@ -127,17 +127,15 @@ fn transform_expression(
         Expression::IfList(if_) => {
             let list_type = types::List::new(
                 if_.type_()
-                    .ok_or_else(|| {
-                        AnalysisError::TypeNotInferred(if_.argument().position().clone())
-                    })?
+                    .ok_or_else(|| AnalysisError::TypeNotInferred(if_.list().position().clone()))?
                     .clone(),
-                if_.argument().position().clone(),
+                if_.list().position().clone(),
             );
             let result_type = extract_type(expression, variables)?;
 
             IfList::new(
                 if_.type_().cloned(),
-                transform_expression(if_.argument(), variables)?,
+                transform_expression(if_.list(), variables)?,
                 if_.first_name(),
                 if_.rest_name(),
                 transform_and_coerce_expression(
