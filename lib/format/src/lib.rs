@@ -1,7 +1,5 @@
 use ast::{types::Type, *};
 
-const INDENT: &str = "  ";
-
 // TODO Merge comments.
 pub fn format(module: &Module) -> String {
     [
@@ -89,9 +87,7 @@ fn format_record_definition(definition: &RecordDefinition) -> String {
             definition
                 .fields()
                 .iter()
-                .map(|field| {
-                    indent_line(field.name().to_owned() + " " + &format_type(field.type_()))
-                })
+                .map(|field| indent(field.name().to_owned() + " " + &format_type(field.type_())))
                 .collect::<Vec<_>>()
                 .join(",\n"),
             "}".into(),
@@ -184,25 +180,15 @@ fn format_lambda(lambda: &Lambda) -> String {
             .collect::<Vec<_>>()
             .join(", "),
         format_type(lambda.result_type()),
-        if lambda.arguments().is_empty() && lambda.body().statements().is_empty() {
-            format!("{{ {} }}", format_expression(lambda.body().expression()))
-        } else {
-            format_block(lambda.body())
-        }
+        format_block(lambda.body())
     )
 }
 
 fn format_block(block: &Block) -> String {
     ["{".into()]
         .into_iter()
-        .chain(
-            block
-                .statements()
-                .iter()
-                .map(format_statement)
-                .map(indent_line),
-        )
-        .chain([indent_line(format_expression(block.expression()))])
+        .chain(block.statements().iter().map(format_statement).map(indent))
+        .chain([indent(format_expression(block.expression()))])
         .chain(["}".into()])
         .collect::<Vec<_>>()
         .join("\n")
@@ -220,14 +206,18 @@ fn format_statement(statement: &Statement) -> String {
 
 fn format_expression(expression: &Expression) -> String {
     match expression {
+        Expression::Lambda(lambda) => format_lambda(lambda),
         Expression::None(_) => "none".into(),
         Expression::Number(number) => format!("{}", number.value()),
         _ => todo!(),
     }
 }
 
-fn indent_line(string: impl AsRef<str>) -> String {
-    INDENT.to_owned() + string.as_ref()
+fn indent(string: impl AsRef<str>) -> String {
+    regex::Regex::new("^|\n")
+        .unwrap()
+        .replace_all(string.as_ref(), "${0}  ")
+        .into()
 }
 
 #[cfg(test)]
@@ -466,7 +456,13 @@ mod tests {
                 )],
                 Position::fake()
             )),
-            "foo = \\() none { none }\n"
+            indoc!(
+                "
+                foo = \\() none {
+                  none
+                }
+                "
+            )
         );
     }
 
@@ -533,6 +529,51 @@ mod tests {
                 foo = \\() none {
                   none
                   none
+                }
+                "
+            )
+        );
+    }
+
+    #[test]
+    fn format_definition_returning_lambda() {
+        assert_eq!(
+            format(&Module::new(
+                vec![],
+                vec![],
+                vec![],
+                vec![Definition::new(
+                    "foo",
+                    Lambda::new(
+                        vec![],
+                        types::Function::new(
+                            vec![],
+                            types::None::new(Position::fake()),
+                            Position::fake()
+                        ),
+                        Block::new(
+                            vec![],
+                            Lambda::new(
+                                vec![],
+                                types::None::new(Position::fake()),
+                                Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                                Position::fake(),
+                            ),
+                            Position::fake()
+                        ),
+                        Position::fake(),
+                    ),
+                    None,
+                    Position::fake()
+                )],
+                Position::fake()
+            )),
+            indoc!(
+                "
+                foo = \\() \\() none {
+                  \\() none {
+                    none
+                  }
                 }
                 "
             )

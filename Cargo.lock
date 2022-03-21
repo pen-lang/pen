@@ -264,6 +264,7 @@ dependencies = [
  "ast",
  "indoc",
  "position",
+ "regex",
 ]
 
 [[package]]
