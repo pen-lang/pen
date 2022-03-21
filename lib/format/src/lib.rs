@@ -207,6 +207,16 @@ fn format_statement(statement: &Statement) -> String {
 
 fn format_expression(expression: &Expression) -> String {
     match expression {
+        Expression::BinaryOperation(_operation) => todo!(),
+        Expression::Call(call) => format!(
+            "{}({})",
+            format_expression(call.function()),
+            call.arguments()
+                .iter()
+                .map(format_expression)
+                .collect::<Vec<_>>()
+                .join(", ")
+        ),
         Expression::Boolean(boolean) => if boolean.value() { "true" } else { "false" }.into(),
         Expression::If(if_) => if_
             .branches()
@@ -659,6 +669,24 @@ mod tests {
 
     mod expression {
         use super::*;
+
+        #[test]
+        fn format_call() {
+            assert_eq!(
+                format_expression(
+                    &Call::new(
+                        Variable::new("foo", Position::fake()),
+                        vec![
+                            Number::new(1.0, Position::fake()).into(),
+                            Number::new(2.0, Position::fake()).into(),
+                        ],
+                        Position::fake()
+                    )
+                    .into()
+                ),
+                "foo(1, 2)"
+            );
+        }
 
         #[test]
         fn format_if() {
