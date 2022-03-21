@@ -1,3 +1,5 @@
+use crate::string_compiler;
+
 use super::error::CompileError;
 use hir::ir;
 use position::Position;
@@ -347,9 +349,11 @@ fn compile_expression(expression: &ast::Expression) -> Result<ir::Expression, Co
                 .into()
             }
         }
-        ast::Expression::String(string) => {
-            ir::ByteString::new(string.value(), string.position().clone()).into()
-        }
+        ast::Expression::String(string) => ir::ByteString::new(
+            string_compiler::compile(string.value()),
+            string.position().clone(),
+        )
+        .into(),
         ast::Expression::UnaryOperation(operation) => {
             let operand = compile_expression(operation.expression())?;
 
