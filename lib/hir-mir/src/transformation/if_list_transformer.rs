@@ -34,7 +34,7 @@ pub fn transform(context: &CompileContext, if_: &IfList) -> Result<Expression, C
                 .into(),
             ),
             Variable::new(&configuration.deconstruct_function_name, position.clone()),
-            vec![if_.argument().clone()],
+            vec![if_.list().clone()],
             position.clone(),
         ),
         vec![

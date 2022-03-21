@@ -64,8 +64,10 @@ dependencies = [
  "hir",
  "interface",
  "itertools",
+ "once_cell",
  "position",
  "pretty_assertions",
+ "regex",
 ]
 
 [[package]]
