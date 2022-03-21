@@ -276,7 +276,7 @@ fn format_expression(expression: &Expression) -> String {
         Expression::Number(number) => format!("{}", number.value()),
         Expression::String(string) => {
             if let Ok(string) = str::from_utf8(string.value()) {
-                // TODO We should not depend on Rust's debug format behaviour.
+                // TODO We should not depend on Rust's debug format behavior.
                 format!("{:?}", string)
             } else {
                 todo!()
