@@ -282,16 +282,24 @@ fn format_expression(expression: &Expression) -> String {
         .collect::<Vec<_>>()
         .join(" "),
         Expression::Lambda(lambda) => format_lambda(lambda),
+        Expression::List(_) => todo!(),
+        Expression::ListComprehension(_) => todo!(),
+        Expression::Map(_) => todo!(),
         Expression::None(_) => "none".into(),
         Expression::Number(number) => format!("{}", number.value()),
+        Expression::Record(_) => todo!(),
+        Expression::RecordDeconstruction(_) => todo!(),
         Expression::SpawnOperation(operation) => {
             format!("go {}", format_lambda(operation.function()))
         }
         Expression::String(string) => {
             format!("\"{}\"", string.value())
         }
+        Expression::UnaryOperation(operation) => match operation.operator() {
+            UnaryOperator::Not => "!".to_owned() + &format_expression(operation.expression()),
+            UnaryOperator::Try => format_expression(operation.expression()) + "?",
+        },
         Expression::Variable(variable) => variable.name().into(),
-        _ => todo!(),
     }
 }
 
@@ -1002,6 +1010,36 @@ mod tests {
                     .into()
                 ),
                 "1 * (2 + 3)"
+            );
+        }
+
+        #[test]
+        fn format_not_operation() {
+            assert_eq!(
+                format_expression(
+                    &UnaryOperation::new(
+                        UnaryOperator::Not,
+                        Variable::new("x", Position::fake()),
+                        Position::fake()
+                    )
+                    .into()
+                ),
+                "!x"
+            );
+        }
+
+        #[test]
+        fn format_try_operation() {
+            assert_eq!(
+                format_expression(
+                    &UnaryOperation::new(
+                        UnaryOperator::Try,
+                        Variable::new("x", Position::fake()),
+                        Position::fake()
+                    )
+                    .into()
+                ),
+                "x?"
             );
         }
     }
