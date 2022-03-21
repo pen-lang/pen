@@ -90,10 +90,7 @@ fn format_record_definition(definition: &RecordDefinition) -> String {
                 .fields()
                 .iter()
                 .map(|field| {
-                    indent_line(
-                        field.name().to_owned() + " " + &format_type(field.type_()),
-                        1,
-                    )
+                    indent_line(field.name().to_owned() + " " + &format_type(field.type_()))
                 })
                 .collect::<Vec<_>>()
                 .join(",\n"),
@@ -113,8 +110,27 @@ fn format_type_alias(alias: &TypeAlias) -> String {
     .join(" ")
 }
 
-fn format_definition(_definition: &Definition) -> String {
-    todo!()
+fn format_definition(definition: &Definition) -> String {
+    definition
+        .foreign_export()
+        .map(|export| {
+            ["export"]
+                .into_iter()
+                .chain(match export.calling_convention() {
+                    CallingConvention::C => Some("\"c\""),
+                    CallingConvention::Native => None,
+                })
+                .collect::<Vec<_>>()
+                .join(" ")
+        })
+        .into_iter()
+        .chain([
+            definition.name().into(),
+            "=".into(),
+            format_lambda(definition.lambda()),
+        ])
+        .collect::<Vec<_>>()
+        .join(" ")
 }
 
 fn format_type(type_: &Type) -> String {
@@ -158,8 +174,60 @@ fn format_type(type_: &Type) -> String {
     }
 }
 
-fn indent_line(string: impl AsRef<str>, level: usize) -> String {
-    INDENT.repeat(level) + string.as_ref()
+fn format_lambda(lambda: &Lambda) -> String {
+    format!(
+        "\\({}) {} {}",
+        lambda
+            .arguments()
+            .iter()
+            .map(|argument| format!("{} {}", argument.name(), format_type(argument.type_())))
+            .collect::<Vec<_>>()
+            .join(", "),
+        format_type(lambda.result_type()),
+        if lambda.arguments().is_empty() && lambda.body().statements().is_empty() {
+            format!("{{ {} }}", format_expression(lambda.body().expression()))
+        } else {
+            format_block(lambda.body())
+        }
+    )
+}
+
+fn format_block(block: &Block) -> String {
+    ["{".into()]
+        .into_iter()
+        .chain(
+            block
+                .statements()
+                .iter()
+                .map(format_statement)
+                .map(indent_line),
+        )
+        .chain([indent_line(format_expression(block.expression()))])
+        .chain(["}".into()])
+        .collect::<Vec<_>>()
+        .join("\n")
+}
+
+fn format_statement(statement: &Statement) -> String {
+    statement
+        .name()
+        .map(|name| format!("{} = ", name))
+        .into_iter()
+        .chain([format_expression(statement.expression())])
+        .collect::<Vec<_>>()
+        .join(" ")
+}
+
+fn format_expression(expression: &Expression) -> String {
+    match expression {
+        Expression::None(_) => "none".into(),
+        Expression::Number(number) => format!("{}", number.value()),
+        _ => todo!(),
+    }
+}
+
+fn indent_line(string: impl AsRef<str>) -> String {
+    INDENT.to_owned() + string.as_ref()
 }
 
 #[cfg(test)]
@@ -368,6 +436,86 @@ mod tests {
                 Position::fake()
             )),
             "type foo = none\n"
+        );
+    }
+
+    #[test]
+    fn format_definition_with_no_argument_and_no_statement() {
+        assert_eq!(
+            format(&Module::new(
+                vec![],
+                vec![],
+                vec![],
+                vec![Definition::new(
+                    "foo",
+                    Lambda::new(
+                        vec![],
+                        types::None::new(Position::fake()),
+                        Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                        Position::fake(),
+                    ),
+                    None,
+                    Position::fake()
+                )],
+                Position::fake()
+            )),
+            "foo = \\() none { none }\n"
+        );
+    }
+
+    #[test]
+    fn format_definition_with_argument() {
+        assert_eq!(
+            format(&Module::new(
+                vec![],
+                vec![],
+                vec![],
+                vec![Definition::new(
+                    "foo",
+                    Lambda::new(
+                        vec![Argument::new("x", types::None::new(Position::fake()))],
+                        types::None::new(Position::fake()),
+                        Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                        Position::fake(),
+                    ),
+                    None,
+                    Position::fake()
+                )],
+                Position::fake()
+            )),
+            "foo = \\(x none) none {\n  none\n}\n"
+        );
+    }
+
+    #[test]
+    fn format_definition_with_statement() {
+        assert_eq!(
+            format(&Module::new(
+                vec![],
+                vec![],
+                vec![],
+                vec![Definition::new(
+                    "foo",
+                    Lambda::new(
+                        vec![],
+                        types::None::new(Position::fake()),
+                        Block::new(
+                            vec![Statement::new(
+                                None,
+                                None::new(Position::fake()),
+                                Position::fake()
+                            )],
+                            None::new(Position::fake()),
+                            Position::fake()
+                        ),
+                        Position::fake(),
+                    ),
+                    None,
+                    Position::fake()
+                )],
+                Position::fake()
+            )),
+            "foo = \\() none {\n  none\n  none\n}\n"
         );
     }
 }
