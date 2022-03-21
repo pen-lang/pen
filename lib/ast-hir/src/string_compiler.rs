@@ -32,7 +32,7 @@ mod tests {
     }
 
     #[test]
-    fn compile_carrige_return() {
+    fn compile_carriage_return() {
         assert_eq!(compile("\\r"), Vec::from("\r"));
     }
 
