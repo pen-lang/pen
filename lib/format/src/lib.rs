@@ -1,4 +1,5 @@
 use ast::{types::Type, *};
+use std::str;
 
 // TODO Merge comments.
 pub fn format(module: &Module) -> String {
@@ -224,7 +225,14 @@ fn format_expression(expression: &Expression) -> String {
         Expression::Lambda(lambda) => format_lambda(lambda),
         Expression::None(_) => "none".into(),
         Expression::Number(number) => format!("{}", number.value()),
-        Expression::String(string) => format!("{:?}", string.value()),
+        Expression::String(string) => {
+            if let Ok(string) = str::from_utf8(string.value()) {
+                // TODO We should not depend on Rust's debug format behaviour.
+                format!("{:?}", string)
+            } else {
+                todo!()
+            }
+        }
         _ => todo!(),
     }
 }
