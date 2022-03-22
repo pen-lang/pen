@@ -282,7 +282,24 @@ fn format_expression(expression: &Expression) -> String {
         .collect::<Vec<_>>()
         .join(" "),
         Expression::Lambda(lambda) => format_lambda(lambda),
-        Expression::List(_) => todo!(),
+        Expression::List(list) => [format!("[{}", format_type(list.type_()))]
+            .into_iter()
+            .chain([
+                if list.elements().is_empty() { "" } else { " " }.into(),
+                list.elements()
+                    .iter()
+                    .map(|element| match element {
+                        ListElement::Multiple(expression) => {
+                            format!("...{}", format_expression(expression))
+                        }
+                        ListElement::Single(expression) => format_expression(expression),
+                    })
+                    .collect::<Vec<_>>()
+                    .join(", "),
+            ])
+            .chain(["]".into()])
+            .collect::<Vec<_>>()
+            .concat(),
         Expression::ListComprehension(_) => todo!(),
         Expression::Map(_) => todo!(),
         Expression::None(_) => "none".into(),
@@ -1041,6 +1058,54 @@ mod tests {
                 ),
                 "x?"
             );
+        }
+
+        mod list {
+            use super::*;
+
+            #[test]
+            fn format_empty() {
+                assert_eq!(
+                    format_expression(
+                        &List::new(types::None::new(Position::fake()), vec![], Position::fake())
+                            .into()
+                    ),
+                    "[none]"
+                );
+            }
+
+            #[test]
+            fn format_element() {
+                assert_eq!(
+                    format_expression(
+                        &List::new(
+                            types::None::new(Position::fake()),
+                            vec![ListElement::Single(None::new(Position::fake()).into())],
+                            Position::fake()
+                        )
+                        .into()
+                    ),
+                    "[none none]"
+                );
+            }
+
+            #[test]
+            fn format_two_elements() {
+                assert_eq!(
+                    format_expression(
+                        &List::new(
+                            types::None::new(Position::fake()),
+                            vec![
+                                ListElement::Single(None::new(Position::fake()).into()),
+                                ListElement::Single(None::new(Position::fake()).into())
+                            ],
+                            Position::fake()
+                        )
+                        .into()
+                    ),
+                    "[none none, none]"
+                );
+            }
         }
     }
 }
