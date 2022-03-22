@@ -283,25 +283,45 @@ fn format_expression(expression: &Expression) -> String {
         .collect::<Vec<_>>()
         .join(" "),
         Expression::Lambda(lambda) => format_lambda(lambda),
-        Expression::List(list) => [format!("[{}", format_type(list.type_()))]
+        Expression::List(list) => ["[".into()]
             .into_iter()
-            .chain([
-                if list.elements().is_empty() { "" } else { " " }.into(),
-                list.elements()
-                    .iter()
-                    .map(|element| match element {
-                        ListElement::Multiple(expression) => {
-                            format!("...{}", format_expression(expression))
-                        }
-                        ListElement::Single(expression) => format_expression(expression),
-                    })
-                    .collect::<Vec<_>>()
-                    .join(", "),
-            ])
+            .chain([[format_type(list.type_())]
+                .into_iter()
+                .chain(if list.elements().is_empty() {
+                    None
+                } else {
+                    Some(
+                        list.elements()
+                            .iter()
+                            .map(|element| match element {
+                                ListElement::Multiple(expression) => {
+                                    format!("...{}", format_expression(expression))
+                                }
+                                ListElement::Single(expression) => format_expression(expression),
+                            })
+                            .collect::<Vec<_>>()
+                            .join(", "),
+                    )
+                })
+                .collect::<Vec<_>>()
+                .join(" ")])
             .chain(["]".into()])
             .collect::<Vec<_>>()
             .concat(),
-        Expression::ListComprehension(_) => todo!(),
+        Expression::ListComprehension(comprehension) => ["[".into()]
+            .into_iter()
+            .chain([[
+                format_type(comprehension.type_()),
+                format_expression(comprehension.element()),
+                "for".into(),
+                comprehension.element_name().into(),
+                "in".into(),
+                format_expression(comprehension.list()),
+            ]
+            .join(" ")])
+            .chain(["]".into()])
+            .collect::<Vec<_>>()
+            .concat(),
         Expression::Map(_) => todo!(),
         Expression::None(_) => "none".into(),
         Expression::Number(number) => format!("{}", number.value()),
@@ -1105,6 +1125,23 @@ mod tests {
                         .into()
                     ),
                     "[none none, none]"
+                );
+            }
+
+            #[test]
+            fn format_comprehension() {
+                assert_eq!(
+                    format_expression(
+                        &ListComprehension::new(
+                            types::None::new(Position::fake()),
+                            None::new(Position::fake()),
+                            "x",
+                            Variable::new("xs", Position::fake()),
+                            Position::fake()
+                        )
+                        .into()
+                    ),
+                    "[none none for x in xs]"
                 );
             }
         }
