@@ -205,6 +205,7 @@ fn format_statement(statement: &Statement) -> String {
         .join(" ")
 }
 
+// TODO Support multi line expressions properly.
 fn format_expression(expression: &Expression) -> String {
     match expression {
         Expression::BinaryOperation(operation) => format_binary_operation(operation),
