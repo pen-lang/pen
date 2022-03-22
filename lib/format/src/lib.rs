@@ -326,7 +326,11 @@ fn format_expression(expression: &Expression) -> String {
         Expression::None(_) => "none".into(),
         Expression::Number(number) => format!("{}", number.value()),
         Expression::Record(_) => todo!(),
-        Expression::RecordDeconstruction(_) => todo!(),
+        Expression::RecordDeconstruction(deconstruction) => format!(
+            "{}.{}",
+            format_expression(deconstruction.expression()),
+            deconstruction.name()
+        ),
         Expression::SpawnOperation(operation) => {
             format!("go {}", format_lambda(operation.function()))
         }
@@ -1078,6 +1082,21 @@ mod tests {
                     .into()
                 ),
                 "x?"
+            );
+        }
+
+        #[test]
+        fn format_record_deconstruction() {
+            assert_eq!(
+                format_expression(
+                    &RecordDeconstruction::new(
+                        Variable::new("x", Position::fake()),
+                        "y",
+                        Position::fake()
+                    )
+                    .into()
+                ),
+                "x.y"
             );
         }
 
