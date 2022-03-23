@@ -1,5 +1,5 @@
 use ast::{types::Type, *};
-use std::str;
+use std::{ops::Deref, str};
 
 // TODO Merge comments.
 pub fn format(module: &Module) -> String {
@@ -238,20 +238,7 @@ fn format_expression(expression: &Expression) -> String {
                 .join(", ")
         ),
         Expression::Boolean(boolean) => if boolean.value() { "true" } else { "false" }.into(),
-        Expression::If(if_) => if_
-            .branches()
-            .iter()
-            .flat_map(|branch| {
-                [
-                    "if".into(),
-                    format_expression(branch.condition()),
-                    format_block(branch.block()),
-                    "else".into(),
-                ]
-            })
-            .chain([format_block(if_.else_())])
-            .collect::<Vec<_>>()
-            .join(" "),
+        Expression::If(if_) => format_if(if_),
         Expression::IfList(if_) => [
             "if".into(),
             format!("[{}, ...{}]", if_.first_name(), if_.rest_name()),
@@ -276,31 +263,7 @@ fn format_expression(expression: &Expression) -> String {
             format_block(if_.else_()),
         ]
         .join(" "),
-        Expression::IfType(if_) => [
-            "if".into(),
-            if_.name().into(),
-            "=".into(),
-            format_expression(if_.argument()),
-            "as".into(),
-            format_type(if_.branches()[0].type_()),
-            format_block(if_.branches()[0].block()),
-        ]
-        .into_iter()
-        .chain(if_.branches().iter().skip(1).flat_map(|branch| {
-            [
-                "else".into(),
-                "if".into(),
-                format_type(branch.type_()),
-                format_block(branch.block()),
-            ]
-        }))
-        .chain(
-            if_.else_()
-                .into_iter()
-                .flat_map(|block| ["else".into(), format_block(block)]),
-        )
-        .collect::<Vec<_>>()
-        .join(" "),
+        Expression::IfType(if_) => format_if_type(if_),
         Expression::Lambda(lambda) => format_lambda(lambda),
         Expression::List(list) => ["[".into()]
             .into_iter()
@@ -421,6 +384,98 @@ fn format_expression(expression: &Expression) -> String {
     }
 }
 
+fn format_if(if_: &If) -> String {
+    let branches = if_
+        .branches()
+        .iter()
+        .map(|branch| {
+            (
+                format_expression(branch.condition()),
+                format_block(branch.block()),
+            )
+        })
+        .collect::<Vec<_>>();
+    let else_ = format_block(if_.else_());
+    let single_line = branches.len() == 1
+        && branches
+            .iter()
+            .flat_map(|(condition, block)| [condition.as_str(), &block])
+            .chain([else_.as_str()])
+            .all(is_single_line);
+
+    if_.branches()
+        .iter()
+        .zip(branches)
+        .flat_map(|(branch, (condition, block))| {
+            [
+                "if".into(),
+                condition,
+                fall_back_to_multi_line(single_line, block, || {
+                    format_multi_line_block(branch.block())
+                }),
+                "else".into(),
+            ]
+        })
+        .chain([fall_back_to_multi_line(single_line, else_, || {
+            format_multi_line_block(if_.else_())
+        })])
+        .collect::<Vec<_>>()
+        .join(" ")
+}
+
+fn format_if_type(if_: &IfType) -> String {
+    let argument = format_expression(if_.argument());
+    let branches = if_
+        .branches()
+        .iter()
+        .map(|branch| format_block(branch.block()))
+        .collect::<Vec<_>>();
+    let else_ = if_.else_().map(|block| format_block(block));
+    let single_line = branches.len() == 1
+        && branches
+            .iter()
+            .chain(else_.as_ref())
+            .chain([&argument])
+            .all(|string| is_single_line(string));
+
+    [
+        "if".into(),
+        if_.name().into(),
+        "=".into(),
+        argument,
+        "as".into(),
+        format_type(if_.branches()[0].type_()),
+        fall_back_to_multi_line(single_line, branches[0].clone(), || {
+            format_multi_line_block(if_.branches()[0].block())
+        }),
+    ]
+    .into_iter()
+    .chain(
+        if_.branches()
+            .iter()
+            .zip(branches)
+            .skip(1)
+            .flat_map(|(branch, string)| {
+                [
+                    "else".into(),
+                    "if".into(),
+                    format_type(branch.type_()),
+                    fall_back_to_multi_line(single_line, string, || {
+                        format_multi_line_block(branch.block())
+                    }),
+                ]
+            }),
+    )
+    .chain(if_.else_().iter().zip(else_).flat_map(|(block, string)| {
+        [
+            "else".into(),
+            fall_back_to_multi_line(single_line, string, || format_multi_line_block(block)),
+        ]
+    }))
+    .collect::<Vec<_>>()
+    .join(" ")
+}
+
 fn format_binary_operation(operation: &BinaryOperation) -> String {
     [
         format_operand(operation.lhs(), operation.operator()),
@@ -475,6 +530,18 @@ fn operator_priority(operator: BinaryOperator) -> usize {
         | BinaryOperator::GreaterThanOrEqual => 3,
         BinaryOperator::Add | BinaryOperator::Subtract => 4,
         BinaryOperator::Multiply | BinaryOperator::Divide => 5,
+    }
+}
+
+fn fall_back_to_multi_line(
+    single_line: bool,
+    cache: String,
+    format_multi_line: impl Fn() -> String,
+) -> String {
+    if single_line || !is_single_line(&cache) {
+        cache
+    } else {
+        format_multi_line()
     }
 }
 
@@ -1024,16 +1091,7 @@ mod tests {
                     )
                     .into()
                 ),
-                indoc!(
-                    "
-                    if [x, ...xs] = ys {
-                      x
-                    } else {
-                      none
-                    }
-                    "
-                )
-                .trim()
+                "if [x, ...xs] = ys { x } else { none }"
             );
         }
 
@@ -1055,16 +1113,7 @@ mod tests {
                     )
                     .into()
                 ),
-                indoc!(
-                    "
-                    if x = xs[k] {
-                      x
-                    } else {
-                      none
-                    }
-                    "
-                )
-                .trim()
+                "if x = xs[k] { x } else { none }"
             );
         }
 
