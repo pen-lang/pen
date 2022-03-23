@@ -1,6 +1,8 @@
 use ast::{types::Type, *};
 use std::str;
 
+const INDENT_DEPTH: usize = 2;
+
 // TODO Consider introducing a minimum editor width to enforce single-line
 // formats in some occasions.
 
@@ -567,7 +569,10 @@ fn fall_back_to_multi_line(
 fn indent(string: impl AsRef<str>) -> String {
     regex::Regex::new("^|\n")
         .unwrap()
-        .replace_all(string.as_ref(), "${0}  ")
+        .replace_all(
+            string.as_ref(),
+            "${0}".to_owned() + &" ".repeat(INDENT_DEPTH),
+        )
         .into()
 }
 
