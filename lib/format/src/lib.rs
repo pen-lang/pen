@@ -198,7 +198,7 @@ fn format_block(block: &Block) -> String {
 fn format_statement(statement: &Statement) -> String {
     statement
         .name()
-        .map(|name| format!("{} = ", name))
+        .map(|name| format!("{} =", name))
         .into_iter()
         .chain([format_expression(statement.expression())])
         .collect::<Vec<_>>()
@@ -853,6 +853,85 @@ mod tests {
                 "
             )
         );
+    }
+
+    mod block {
+        use super::*;
+
+        #[test]
+        fn format() {
+            assert_eq!(
+                format_block(&Block::new(
+                    vec![],
+                    None::new(Position::fake()),
+                    Position::fake()
+                )),
+                indoc!(
+                    "
+                    {
+                      none
+                    }
+                    "
+                )
+                .trim()
+            );
+        }
+
+        #[test]
+        fn format_statement() {
+            assert_eq!(
+                format_block(&Block::new(
+                    vec![Statement::new(
+                        None,
+                        Call::new(
+                            Variable::new("f", Position::fake()),
+                            vec![],
+                            Position::fake()
+                        ),
+                        Position::fake()
+                    )],
+                    None::new(Position::fake()),
+                    Position::fake()
+                )),
+                indoc!(
+                    "
+                    {
+                      f()
+                      none
+                    }
+                    "
+                )
+                .trim()
+            );
+        }
+
+        #[test]
+        fn format_statement_with_name() {
+            assert_eq!(
+                format_block(&Block::new(
+                    vec![Statement::new(
+                        Some("x".into()),
+                        Call::new(
+                            Variable::new("f", Position::fake()),
+                            vec![],
+                            Position::fake()
+                        ),
+                        Position::fake()
+                    )],
+                    None::new(Position::fake()),
+                    Position::fake()
+                )),
+                indoc!(
+                    "
+                    {
+                      x = f()
+                      none
+                    }
+                    "
+                )
+                .trim()
+            );
+        }
     }
 
     mod expression {
