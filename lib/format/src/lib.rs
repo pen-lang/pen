@@ -1,5 +1,5 @@
 use ast::{types::Type, *};
-use std::{ops::Deref, str};
+use std::str;
 
 // TODO Merge comments.
 pub fn format(module: &Module) -> String {
