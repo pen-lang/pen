@@ -204,6 +204,7 @@ fn format_block(block: &Block) -> String {
     }
 }
 
+// TODO Support spacing among statements.
 fn format_multi_line_block(block: &Block) -> String {
     ["{".into()]
         .into_iter()
@@ -224,10 +225,10 @@ fn format_statement(statement: &Statement) -> String {
         .join(" ")
 }
 
-// TODO Support multi line expressions.
 fn format_expression(expression: &Expression) -> String {
     match expression {
         Expression::BinaryOperation(operation) => format_binary_operation(operation),
+        // TODO Support multiple lines.
         Expression::Call(call) => format!(
             "{}({})",
             format_expression(call.function()),
@@ -265,6 +266,7 @@ fn format_expression(expression: &Expression) -> String {
         .join(" "),
         Expression::IfType(if_) => format_if_type(if_),
         Expression::Lambda(lambda) => format_lambda(lambda),
+        // TODO Support multiple lines.
         Expression::List(list) => ["[".into()]
             .into_iter()
             .chain([[format_type(list.type_())]
@@ -290,6 +292,7 @@ fn format_expression(expression: &Expression) -> String {
             .chain(["]".into()])
             .collect::<Vec<_>>()
             .concat(),
+        // TODO Support multiple lines.
         Expression::ListComprehension(comprehension) => ["[".into()]
             .into_iter()
             .chain([[
@@ -304,6 +307,7 @@ fn format_expression(expression: &Expression) -> String {
             .chain(["]".into()])
             .collect::<Vec<_>>()
             .concat(),
+        // TODO Support multiple lines.
         Expression::Map(map) => ["{".into()]
             .into_iter()
             .chain([[
@@ -341,6 +345,7 @@ fn format_expression(expression: &Expression) -> String {
             .concat(),
         Expression::None(_) => "none".into(),
         Expression::Number(number) => format!("{}", number.value()),
+        // TODO Support multiple lines.
         Expression::Record(record) => [record.type_name().into(), "{".into()]
             .into_iter()
             .chain(if record.record().is_none() && record.fields().is_empty() {
@@ -477,12 +482,23 @@ fn format_if_type(if_: &IfType) -> String {
 }
 
 fn format_binary_operation(operation: &BinaryOperation) -> String {
+    let single_line =
+        operation.lhs().position().line_number() == operation.rhs().position().line_number();
+    let operator = format_binary_operator(operation.operator()).into();
+
     [
         format_operand(operation.lhs(), operation.operator()),
-        format_binary_operator(operation.operator()).into(),
-        format_operand(operation.rhs(), operation.operator()),
+        [
+            if single_line {
+                operator
+            } else {
+                indent(operator)
+            },
+            format_operand(operation.rhs(), operation.operator()),
+        ]
+        .join(" "),
     ]
-    .join(" ")
+    .join(if single_line { " " } else { "\n" })
 }
 
 fn format_operand(operand: &Expression, parent_operator: BinaryOperator) -> String {
@@ -1235,62 +1251,88 @@ mod tests {
             );
         }
 
-        #[test]
-        fn format_binary_operation() {
-            assert_eq!(
-                format_expression(
-                    &BinaryOperation::new(
-                        BinaryOperator::Add,
-                        Number::new(1.0, Position::fake()),
-                        Number::new(2.0, Position::fake()),
-                        Position::fake()
-                    )
-                    .into()
-                ),
-                "1 + 2"
-            );
-        }
+        mod binary_operation {
+            use super::*;
 
-        #[test]
-        fn format_nested_binary_operation() {
-            assert_eq!(
-                format_expression(
-                    &BinaryOperation::new(
-                        BinaryOperator::Add,
-                        Number::new(1.0, Position::fake()),
-                        BinaryOperation::new(
-                            BinaryOperator::Multiply,
-                            Number::new(2.0, Position::fake()),
-                            Number::new(3.0, Position::fake()),
-                            Position::fake()
-                        ),
-                        Position::fake()
-                    )
-                    .into()
-                ),
-                "1 + 2 * 3"
-            );
-        }
-
-        #[test]
-        fn format_nested_binary_operation_with_priority() {
-            assert_eq!(
-                format_expression(
-                    &BinaryOperation::new(
-                        BinaryOperator::Multiply,
-                        Number::new(1.0, Position::fake()),
-                        BinaryOperation::new(
+            #[test]
+            fn format() {
+                assert_eq!(
+                    format_expression(
+                        &BinaryOperation::new(
                             BinaryOperator::Add,
+                            Number::new(1.0, Position::fake()),
                             Number::new(2.0, Position::fake()),
-                            Number::new(3.0, Position::fake()),
                             Position::fake()
-                        ),
-                        Position::fake()
+                        )
+                        .into()
+                    ),
+                    "1 + 2"
+                );
+            }
+
+            #[test]
+            fn format_multi_line() {
+                assert_eq!(
+                    format_expression(
+                        &BinaryOperation::new(
+                            BinaryOperator::Add,
+                            Number::new(1.0, Position::fake()),
+                            Number::new(2.0, Position::new("", 1, 1, "")),
+                            Position::fake()
+                        )
+                        .into()
+                    ),
+                    indoc!(
+                        "
+                        1
+                          + 2
+                        "
                     )
-                    .into()
-                ),
-                "1 * (2 + 3)"
-            );
+                    .trim()
+                );
+            }
+
+            #[test]
+            fn format_nested_operations() {
+                assert_eq!(
+                    format_expression(
+                        &BinaryOperation::new(
+                            BinaryOperator::Add,
+                            Number::new(1.0, Position::fake()),
+                            BinaryOperation::new(
+                                BinaryOperator::Multiply,
+                                Number::new(2.0, Position::fake()),
+                                Number::new(3.0, Position::fake()),
+                                Position::fake()
+                            ),
+                            Position::fake()
+                        )
+                        .into()
+                    ),
+                    "1 + 2 * 3"
+                );
+            }
+
+            #[test]
+            fn format_nested_operations_with_priority() {
+                assert_eq!(
+                    format_expression(
+                        &BinaryOperation::new(
+                            BinaryOperator::Multiply,
+                            Number::new(1.0, Position::fake()),
+                            BinaryOperation::new(
+                                BinaryOperator::Add,
+                                Number::new(2.0, Position::fake()),
+                                Number::new(3.0, Position::fake()),
+                                Position::fake()
+                            ),
+                            Position::fake()
+                        )
+                        .into()
+                    ),
+                    "1 * (2 + 3)"
+                );
+            }
         }
 
         #[test]
