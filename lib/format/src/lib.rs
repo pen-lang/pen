@@ -322,7 +322,41 @@ fn format_expression(expression: &Expression) -> String {
             .chain(["]".into()])
             .collect::<Vec<_>>()
             .concat(),
-        Expression::Map(_) => todo!(),
+        Expression::Map(map) => ["{".into()]
+            .into_iter()
+            .chain([[
+                format_type(map.key_type()) + ":",
+                format_type(map.value_type()),
+            ]
+            .into_iter()
+            .chain(if map.elements().is_empty() {
+                None
+            } else {
+                Some(
+                    map.elements()
+                        .iter()
+                        .map(|element| match element {
+                            MapElement::Map(expression) => {
+                                format!("...{}", format_expression(expression))
+                            }
+                            MapElement::Insertion(entry) => {
+                                format!(
+                                    "{}: {}",
+                                    format_expression(entry.key()),
+                                    format_expression(entry.value())
+                                )
+                            }
+                            MapElement::Removal(expression) => format_expression(expression),
+                        })
+                        .collect::<Vec<_>>()
+                        .join(", "),
+                )
+            })
+            .collect::<Vec<_>>()
+            .join(" ")])
+            .chain(["}".into()])
+            .collect::<Vec<_>>()
+            .concat(),
         Expression::None(_) => "none".into(),
         Expression::Number(number) => format!("{}", number.value()),
         Expression::Record(_) => todo!(),
@@ -1162,6 +1196,76 @@ mod tests {
                     ),
                     "[none none for x in xs]"
                 );
+            }
+
+            mod map {
+                use super::*;
+
+                #[test]
+                fn format_empty() {
+                    assert_eq!(
+                        format_expression(
+                            &Map::new(
+                                types::ByteString::new(Position::fake()),
+                                types::Number::new(Position::fake()),
+                                vec![],
+                                Position::fake()
+                            )
+                            .into()
+                        ),
+                        "{string: number}"
+                    );
+                }
+
+                #[test]
+                fn format_entry() {
+                    assert_eq!(
+                        format_expression(
+                            &Map::new(
+                                types::ByteString::new(Position::fake()),
+                                types::Number::new(Position::fake()),
+                                vec![MapEntry::new(
+                                    ByteString::new("foo", Position::fake()),
+                                    Number::new(42.0, Position::fake()),
+                                    Position::fake()
+                                )
+                                .into()],
+                                Position::fake()
+                            )
+                            .into()
+                        ),
+                        "{string: number \"foo\": 42}"
+                    );
+                }
+
+                #[test]
+                fn format_two_entries() {
+                    assert_eq!(
+                        format_expression(
+                            &Map::new(
+                                types::ByteString::new(Position::fake()),
+                                types::Number::new(Position::fake()),
+                                vec![
+                                    MapEntry::new(
+                                        ByteString::new("foo", Position::fake()),
+                                        Number::new(1.0, Position::fake()),
+                                        Position::fake()
+                                    )
+                                    .into(),
+                                    MapEntry::new(
+                                        ByteString::new("bar", Position::fake()),
+                                        Number::new(2.0, Position::fake()),
+                                        Position::fake()
+                                    )
+                                    .into()
+                                ],
+                                Position::fake()
+                            )
+                            .into()
+                        ),
+                        "{string: number \"foo\": 1, \"bar\": 2}"
+                    );
+                }
             }
         }
     }
