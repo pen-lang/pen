@@ -359,7 +359,29 @@ fn format_expression(expression: &Expression) -> String {
             .concat(),
         Expression::None(_) => "none".into(),
         Expression::Number(number) => format!("{}", number.value()),
-        Expression::Record(_) => todo!(),
+        Expression::Record(record) => [record.type_name().into(), "{".into()]
+            .into_iter()
+            .chain(if record.fields().is_empty() {
+                None
+            } else {
+                Some(
+                    record
+                        .fields()
+                        .iter()
+                        .map(|field| {
+                            format!(
+                                "{}: {}",
+                                field.name(),
+                                format_expression(field.expression())
+                            )
+                        })
+                        .collect::<Vec<_>>()
+                        .join(", "),
+                )
+            })
+            .chain(["}".into()])
+            .collect::<Vec<_>>()
+            .concat(),
         Expression::RecordDeconstruction(deconstruction) => format!(
             "{}.{}",
             format_expression(deconstruction.expression()),

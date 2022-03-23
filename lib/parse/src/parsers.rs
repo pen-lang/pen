@@ -644,13 +644,7 @@ fn record<'a>() -> impl Parser<Stream<'a>, Output = Record> {
                 .len()
                 == fields.len()
             {
-                value(Record::new(
-                    types::Reference::new(name, position.clone()),
-                    record,
-                    fields,
-                    position,
-                ))
-                .left()
+                value(Record::new(name, record, fields, position)).left()
             } else {
                 unexpected_any("duplicate keys in record literal").right()
             }
@@ -2465,18 +2459,13 @@ mod tests {
 
             assert_eq!(
                 record().parse(stream("Foo{}", "")).unwrap().0,
-                Record::new(
-                    types::Reference::new("Foo", Position::fake()),
-                    None,
-                    vec![],
-                    Position::fake()
-                )
+                Record::new("Foo", None, vec![], Position::fake())
             );
 
             assert_eq!(
                 expression().parse(stream("Foo{foo:42}", "")).unwrap().0,
                 Record::new(
-                    types::Reference::new("Foo", Position::fake()),
+                    "Foo",
                     None,
                     vec![RecordField::new(
                         "foo",
@@ -2491,7 +2480,7 @@ mod tests {
             assert_eq!(
                 record().parse(stream("Foo{foo:42}", "")).unwrap().0,
                 Record::new(
-                    types::Reference::new("Foo", Position::fake()),
+                    "Foo",
                     None,
                     vec![RecordField::new(
                         "foo",
@@ -2505,7 +2494,7 @@ mod tests {
             assert_eq!(
                 record().parse(stream("Foo{foo:42,bar:42}", "")).unwrap().0,
                 Record::new(
-                    types::Reference::new("Foo", Position::fake()),
+                    "Foo",
                     None,
                     vec![
                         RecordField::new(
@@ -2533,7 +2522,7 @@ mod tests {
                 Call::new(
                     Variable::new("foo", Position::fake()),
                     vec![Record::new(
-                        types::Reference::new("Foo", Position::fake()),
+                        "Foo",
                         None,
                         vec![RecordField::new(
                             "foo",
@@ -2551,7 +2540,7 @@ mod tests {
             assert_eq!(
                 record().parse(stream("Foo{foo:bar(42)}", "")).unwrap().0,
                 Record::new(
-                    types::Reference::new("Foo", Position::fake()),
+                    "Foo",
                     None,
                     vec![RecordField::new(
                         "foo",
@@ -2571,7 +2560,7 @@ mod tests {
             assert_eq!(
                 record().parse(stream("Foo{...foo,bar:42}", "")).unwrap().0,
                 Record::new(
-                    types::Reference::new("Foo", Position::fake()),
+                    "Foo",
                     Some(Variable::new("foo", Position::fake()).into()),
                     vec![RecordField::new(
                         "bar",
@@ -2585,7 +2574,7 @@ mod tests {
             assert_eq!(
                 record().parse(stream("Foo{...foo,bar:42,}", "")).unwrap().0,
                 Record::new(
-                    types::Reference::new("Foo", Position::fake()),
+                    "Foo",
                     Some(Variable::new("foo", Position::fake()).into()),
                     vec![RecordField::new(
                         "bar",
@@ -2602,7 +2591,7 @@ mod tests {
                     .unwrap()
                     .0,
                 Record::new(
-                    types::Reference::new("Foo", Position::fake()),
+                    "Foo",
                     Some(Variable::new("foo", Position::fake()).into()),
                     vec![RecordField::new(
                         "bar",
