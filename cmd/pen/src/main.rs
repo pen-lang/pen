@@ -59,7 +59,6 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         )
         .subcommand(
             clap::Command::new("format")
-                .hide(true)
                 .about("Formats a module file"),
         )
         .subcommand(
