@@ -186,7 +186,7 @@ fn format_lambda(lambda: &Lambda) -> String {
             .collect::<Vec<_>>()
             .join(", "),
         format_type(lambda.result_type()),
-        format_multi_line_block(lambda.body())
+        format_block(lambda.body())
     )
 }
 
@@ -250,9 +250,9 @@ fn format_expression(expression: &Expression) -> String {
             format!("[{}, ...{}]", if_.first_name(), if_.rest_name()),
             "=".into(),
             format_expression(if_.list()),
-            format_block(if_.then()),
+            format_multi_line_block(if_.then()),
             "else".into(),
-            format_block(if_.else_()),
+            format_multi_line_block(if_.else_()),
         ]
         .join(" "),
         Expression::IfMap(if_) => [
@@ -264,9 +264,9 @@ fn format_expression(expression: &Expression) -> String {
                 format_expression(if_.map()),
                 format_expression(if_.key())
             ),
-            format_block(if_.then()),
+            format_multi_line_block(if_.then()),
             "else".into(),
-            format_block(if_.else_()),
+            format_multi_line_block(if_.else_()),
         ]
         .join(" "),
         Expression::IfType(if_) => format_if_type(if_),
@@ -409,7 +409,7 @@ fn format_if(if_: &If) -> String {
     let single_line = branches.len() == 1
         && branches
             .iter()
-            .flat_map(|(condition, block)| [condition.as_str(), &block])
+            .flat_map(|(condition, block)| [condition.as_str(), block])
             .chain([else_.as_str()])
             .all(is_single_line);
 
@@ -440,7 +440,7 @@ fn format_if_type(if_: &IfType) -> String {
         .iter()
         .map(|branch| format_block(branch.block()))
         .collect::<Vec<_>>();
-    let else_ = if_.else_().map(|block| format_block(block));
+    let else_ = if_.else_().map(format_block);
     let single_line = branches.len() == 1
         && branches
             .iter()
@@ -845,13 +845,7 @@ mod tests {
                 )],
                 Position::fake()
             )),
-            indoc!(
-                "
-                foo = \\() none {
-                  none
-                }
-                "
-            )
+            "foo = \\() none { none }\n"
         );
     }
 
@@ -875,13 +869,7 @@ mod tests {
                 )],
                 Position::fake()
             )),
-            indoc!(
-                "
-                foo = \\(x none) none {
-                  none
-                }
-                "
-            )
+            "foo = \\(x none) none { none }\n"
         );
     }
 
@@ -957,15 +945,7 @@ mod tests {
                 )],
                 Position::fake()
             )),
-            indoc!(
-                "
-                foo = \\() \\() none {
-                  \\() none {
-                    none
-                  }
-                }
-                "
-            )
+            "foo = \\() \\() none { \\() none { none } }\n"
         );
     }
 
@@ -1115,7 +1095,16 @@ mod tests {
                     )
                     .into()
                 ),
-                "if [x, ...xs] = ys { x } else { none }"
+                indoc!(
+                    "
+                    if [x, ...xs] = ys {
+                      x
+                    } else {
+                      none
+                    }
+                    "
+                )
+                .trim()
             );
         }
 
@@ -1137,7 +1126,16 @@ mod tests {
                     )
                     .into()
                 ),
-                "if x = xs[k] { x } else { none }"
+                indoc!(
+                    "
+                    if x = xs[k] {
+                      x
+                    } else {
+                      none
+                    }
+                    "
+                )
+                .trim()
             );
         }
 
@@ -1240,14 +1238,7 @@ mod tests {
                     )
                     .into()
                 ),
-                indoc!(
-                    "
-                    go \\() none {
-                      none
-                    }
-                    "
-                )
-                .trim()
+                "go \\() none { none }"
             );
         }
 
