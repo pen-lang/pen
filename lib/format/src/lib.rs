@@ -1266,6 +1266,42 @@ mod tests {
                         "{string: number \"foo\": 1, \"bar\": 2}"
                     );
                 }
+
+                #[test]
+                fn format_removal() {
+                    assert_eq!(
+                        format_expression(
+                            &Map::new(
+                                types::ByteString::new(Position::fake()),
+                                types::Number::new(Position::fake()),
+                                vec![MapElement::Removal(
+                                    ByteString::new("foo", Position::fake()).into()
+                                )],
+                                Position::fake()
+                            )
+                            .into()
+                        ),
+                        "{string: number \"foo\"}"
+                    );
+                }
+
+                #[test]
+                fn format_map() {
+                    assert_eq!(
+                        format_expression(
+                            &Map::new(
+                                types::ByteString::new(Position::fake()),
+                                types::Number::new(Position::fake()),
+                                vec![MapElement::Map(
+                                    Variable::new("xs", Position::fake()).into()
+                                )],
+                                Position::fake()
+                            )
+                            .into()
+                        ),
+                        "{string: number ...xs}"
+                    );
+                }
             }
         }
     }
