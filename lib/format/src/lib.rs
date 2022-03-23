@@ -256,16 +256,40 @@ fn format_statement(statement: &Statement) -> String {
 fn format_expression(expression: &Expression) -> String {
     match expression {
         Expression::BinaryOperation(operation) => format_binary_operation(operation),
-        // TODO Support multiple lines.
-        Expression::Call(call) => format!(
-            "{}({})",
-            format_expression(call.function()),
-            call.arguments()
-                .iter()
-                .map(format_expression)
+        Expression::Call(call) => {
+            let single_line = call.arguments().is_empty()
+                || Some(call.function().position().line_number())
+                    == call
+                        .arguments()
+                        .get(0)
+                        .map(|expression| expression.position().line_number());
+
+            [format!("{}(", format_expression(call.function()))]
+                .into_iter()
+                .chain(if call.arguments().is_empty() {
+                    None
+                } else {
+                    Some(
+                        call.arguments()
+                            .iter()
+                            .map(|expression| {
+                                let expression = format_expression(expression);
+
+                                if single_line {
+                                    expression
+                                } else {
+                                    indent(expression)
+                                }
+                            })
+                            .collect::<Vec<_>>()
+                            .join(&(",".to_owned() + if single_line { " " } else { "\n" }))
+                            + if single_line { "" } else { "," },
+                    )
+                })
+                .chain([")".into()])
                 .collect::<Vec<_>>()
-                .join(", ")
-        ),
+                .join(if single_line { "" } else { "\n" })
+        }
         Expression::Boolean(boolean) => if boolean.value() { "true" } else { "false" }.into(),
         Expression::If(if_) => format_if(if_),
         Expression::IfList(if_) => [
@@ -1181,22 +1205,52 @@ mod tests {
     mod expression {
         use super::*;
 
-        #[test]
-        fn format_call() {
-            assert_eq!(
-                format_expression(
-                    &Call::new(
-                        Variable::new("foo", Position::fake()),
-                        vec![
-                            Number::new(1.0, Position::fake()).into(),
-                            Number::new(2.0, Position::fake()).into(),
-                        ],
-                        Position::fake()
+        mod call {
+            use super::*;
+
+            #[test]
+            fn format() {
+                assert_eq!(
+                    format_expression(
+                        &Call::new(
+                            Variable::new("foo", Position::fake()),
+                            vec![
+                                Number::new(1.0, Position::fake()).into(),
+                                Number::new(2.0, Position::fake()).into(),
+                            ],
+                            Position::fake()
+                        )
+                        .into()
+                    ),
+                    "foo(1, 2)"
+                );
+            }
+
+            #[test]
+            fn format_multi_line() {
+                assert_eq!(
+                    format_expression(
+                        &Call::new(
+                            Variable::new("foo", Position::new("", 1, 1, "")),
+                            vec![
+                                Number::new(1.0, Position::new("", 2, 1, "")).into(),
+                                Number::new(2.0, Position::fake()).into(),
+                            ],
+                            Position::fake()
+                        )
+                        .into()
+                    ),
+                    indoc!(
+                        "
+                        foo(
+                          1,
+                          2,
+                        )
+                        "
                     )
-                    .into()
-                ),
-                "foo(1, 2)"
-            );
+                    .trim()
+                );
+            }
         }
 
         #[test]
