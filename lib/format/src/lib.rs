@@ -8,7 +8,7 @@ const INDENT_DEPTH: usize = 2;
 
 // TODO Merge comments.
 pub fn format(module: &Module) -> String {
-    [
+    let string = [
         module
             .imports()
             .iter()
@@ -28,7 +28,12 @@ pub fn format(module: &Module) -> String {
     .chain(module.definitions().iter().map(format_definition))
     .collect::<Vec<_>>()
     .join("\n\n")
-        + "\n"
+        + "\n";
+
+    regex::Regex::new(r"\n *\n")
+        .unwrap()
+        .replace_all(&string, "\n\n")
+        .into()
 }
 
 fn format_import(import: &Import) -> String {
@@ -199,21 +204,39 @@ fn format_block(block: &Block) -> String {
     {
         ["{", &expression, "}"].join(" ")
     } else {
-        ["{".into()]
-            .into_iter()
-            .chain(block.statements().iter().map(format_statement).map(indent))
-            .chain([indent(format_expression(block.expression()))])
-            .chain(["}".into()])
-            .collect::<Vec<_>>()
-            .join("\n")
+        format_multi_line_block(block)
     }
 }
 
-// TODO Support spacing among statements.
 fn format_multi_line_block(block: &Block) -> String {
     ["{".into()]
         .into_iter()
-        .chain(block.statements().iter().map(format_statement).map(indent))
+        .chain(
+            block
+                .statements()
+                .iter()
+                .zip(
+                    block
+                        .statements()
+                        .iter()
+                        .skip(1)
+                        .map(|statement| statement.position())
+                        .chain([block.expression().position()])
+                        .map(|position| position.line_number()),
+                )
+                .map(|(current, next_line_number)| {
+                    // TODO Use end positions of spans when they are available.
+                    let line_count = next_line_number - current.position().line_number();
+                    let current = format_statement(current);
+
+                    if count_lines(&current) >= line_count {
+                        current
+                    } else {
+                        current + "\n"
+                    }
+                })
+                .map(indent),
+        )
         .chain([indent(format_expression(block.expression()))])
         .chain(["}".into()])
         .collect::<Vec<_>>()
@@ -574,6 +597,10 @@ fn indent(string: impl AsRef<str>) -> String {
             "${0}".to_owned() + &" ".repeat(INDENT_DEPTH),
         )
         .into()
+}
+
+fn count_lines(string: &str) -> usize {
+    string.trim().matches('\n').count() + 1
 }
 
 fn is_single_line(string: &str) -> bool {
@@ -953,7 +980,7 @@ mod tests {
         use super::*;
 
         #[test]
-        fn format() {
+        fn format_() {
             assert_eq!(
                 format_block(&Block::new(
                     vec![],
@@ -1017,6 +1044,136 @@ mod tests {
                     "
                 )
                 .trim()
+            );
+        }
+
+        #[test]
+        fn format_statement_with_no_blank_line() {
+            assert_eq!(
+                format_block(&Block::new(
+                    vec![Statement::new(
+                        None,
+                        Call::new(
+                            Variable::new("f", Position::fake()),
+                            vec![],
+                            Position::fake()
+                        ),
+                        Position::new("", 1, 1, "")
+                    )],
+                    None::new(Position::new("", 2, 1, "")),
+                    Position::fake()
+                )),
+                indoc!(
+                    "
+                    {
+                      f()
+                      none
+                    }
+                    "
+                )
+                .trim()
+            );
+        }
+
+        #[test]
+        fn format_statement_with_one_blank_line() {
+            assert_eq!(
+                format_block(&Block::new(
+                    vec![Statement::new(
+                        None,
+                        Call::new(
+                            Variable::new("f", Position::fake()),
+                            vec![],
+                            Position::fake()
+                        ),
+                        Position::new("", 1, 1, "")
+                    )],
+                    None::new(Position::new("", 3, 1, "")),
+                    Position::fake()
+                )),
+                indoc!(
+                    "
+                    {
+                      f()
+                      
+                      none
+                    }
+                    "
+                )
+                .trim()
+            );
+        }
+
+        #[test]
+        fn format_statement_with_two_blank_lines() {
+            assert_eq!(
+                format_block(&Block::new(
+                    vec![Statement::new(
+                        None,
+                        Call::new(
+                            Variable::new("f", Position::fake()),
+                            vec![],
+                            Position::fake()
+                        ),
+                        Position::new("", 1, 1, "")
+                    )],
+                    None::new(Position::new("", 4, 1, "")),
+                    Position::fake()
+                )),
+                indoc!(
+                    "
+                    {
+                      f()
+                      
+                      none
+                    }
+                    "
+                )
+                .trim()
+            );
+        }
+
+        #[test]
+        fn format_statement_with_trimmed_blank_line() {
+            assert_eq!(
+                format(&Module::new(
+                    vec![],
+                    vec![],
+                    vec![],
+                    vec![Definition::new(
+                        "foo",
+                        Lambda::new(
+                            vec![],
+                            types::None::new(Position::fake()),
+                            Block::new(
+                                vec![Statement::new(
+                                    None,
+                                    Call::new(
+                                        Variable::new("f", Position::fake()),
+                                        vec![],
+                                        Position::fake()
+                                    ),
+                                    Position::new("", 1, 1, "")
+                                )],
+                                None::new(Position::new("", 3, 1, "")),
+                                Position::fake()
+                            ),
+                            Position::fake(),
+                        ),
+                        None,
+                        Position::fake()
+                    )],
+                    Position::fake()
+                )),
+                indoc!(
+                    "
+                    foo = \\() none {
+                      f()
+
+                      none
+                    }
+                    "
+                )
             );
         }
     }
