@@ -90,7 +90,7 @@ fn format_record_definition(definition: &RecordDefinition) -> String {
                 .iter()
                 .map(|field| indent(field.name().to_owned() + " " + &format_type(field.type_())))
                 .collect::<Vec<_>>()
-                .join(",\n"),
+                .join("\n"),
             "}".into(),
         ]
         .join("\n")
@@ -659,6 +659,35 @@ mod tests {
                 "
                 type foo {
                   foo none
+                }
+                "
+            )
+        );
+    }
+
+    #[test]
+    fn format_record_definition_with_two_fields() {
+        assert_eq!(
+            format(&Module::new(
+                vec![],
+                vec![],
+                vec![RecordDefinition::new(
+                    "foo",
+                    vec![
+                        types::RecordField::new("foo", types::None::new(Position::fake())),
+                        types::RecordField::new("bar", types::None::new(Position::fake()))
+                    ],
+                    Position::fake()
+                )
+                .into()],
+                vec![],
+                Position::fake()
+            )),
+            indoc!(
+                "
+                type foo {
+                  foo none
+                  bar none
                 }
                 "
             )
