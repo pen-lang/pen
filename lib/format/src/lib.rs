@@ -181,11 +181,30 @@ fn format_lambda(lambda: &Lambda) -> String {
             .collect::<Vec<_>>()
             .join(", "),
         format_type(lambda.result_type()),
-        format_block(lambda.body())
+        format_multi_line_block(lambda.body())
     )
 }
 
 fn format_block(block: &Block) -> String {
+    let expression = format_expression(block.expression());
+
+    if block.statements().is_empty()
+        && block.position().line_number() == block.expression().position().line_number()
+        && is_single_line(&expression)
+    {
+        ["{", &expression, "}"].join(" ")
+    } else {
+        ["{".into()]
+            .into_iter()
+            .chain(block.statements().iter().map(format_statement).map(indent))
+            .chain([indent(format_expression(block.expression()))])
+            .chain(["}".into()])
+            .collect::<Vec<_>>()
+            .join("\n")
+    }
+}
+
+fn format_multi_line_block(block: &Block) -> String {
     ["{".into()]
         .into_iter()
         .chain(block.statements().iter().map(format_statement).map(indent))
@@ -464,6 +483,10 @@ fn indent(string: impl AsRef<str>) -> String {
         .unwrap()
         .replace_all(string.as_ref(), "${0}  ")
         .into()
+}
+
+fn is_single_line(string: &str) -> bool {
+    !string.contains('\n')
 }
 
 #[cfg(test)]
@@ -866,14 +889,7 @@ mod tests {
                     None::new(Position::fake()),
                     Position::fake()
                 )),
-                indoc!(
-                    "
-                    {
-                      none
-                    }
-                    "
-                )
-                .trim()
+                "{ none }"
             );
         }
 
