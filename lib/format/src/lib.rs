@@ -1,6 +1,9 @@
 use ast::{types::Type, *};
 use std::str;
 
+// TODO Consider introducing a minimum editor width to enforce single-line
+// formats in some occasions.
+
 // TODO Merge comments.
 pub fn format(module: &Module) -> String {
     [
