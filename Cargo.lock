@@ -30,6 +30,7 @@ dependencies = [
  "fmm",
  "fmm-llvm",
  "fnv",
+ "format",
  "hir",
  "hir_mir",
  "interface",

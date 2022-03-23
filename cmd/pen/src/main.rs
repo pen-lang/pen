@@ -6,6 +6,7 @@ mod infrastructure;
 mod main_module_compiler;
 mod main_package_directory_finder;
 mod module_compiler;
+mod module_formatter;
 mod package_builder;
 mod package_creator;
 mod package_test_information_compiler;
@@ -55,6 +56,11 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                         .required(true)
                         .help("Sets a package directory"),
                 ),
+        )
+        .subcommand(
+            clap::Command::new("format")
+                .hide(true)
+                .about("Formats a module file"),
         )
         .subcommand(
             clap::Command::new("compile")
@@ -180,6 +186,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
             matches.value_of("directory").unwrap(),
             matches.is_present("library"),
         ),
+        ("format", _) => module_formatter::format(),
         ("compile", matches) => module_compiler::compile(
             matches.value_of("source file").unwrap(),
             matches.value_of("dependency file").unwrap(),
