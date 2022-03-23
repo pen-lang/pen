@@ -238,7 +238,7 @@ fn format_expression(expression: &Expression) -> String {
             format!("[{}, ...{}]", if_.first_name(), if_.rest_name()),
             "=".into(),
             format_expression(if_.list()),
-            format_block(if_.else_()),
+            format_block(if_.then()),
             "else".into(),
             format_block(if_.else_()),
         ]
@@ -252,7 +252,7 @@ fn format_expression(expression: &Expression) -> String {
                 format_expression(if_.map()),
                 format_expression(if_.key())
             ),
-            format_block(if_.else_()),
+            format_block(if_.then()),
             "else".into(),
             format_block(if_.else_()),
         ]
@@ -919,7 +919,11 @@ mod tests {
                         Variable::new("ys", Position::fake()),
                         "x",
                         "xs",
-                        Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                        Block::new(
+                            vec![],
+                            Variable::new("x", Position::fake()),
+                            Position::fake()
+                        ),
                         Block::new(vec![], None::new(Position::fake()), Position::fake()),
                         Position::fake()
                     )
@@ -928,7 +932,7 @@ mod tests {
                 indoc!(
                     "
                     if [x, ...xs] = ys {
-                      none
+                      x
                     } else {
                       none
                     }
@@ -946,7 +950,11 @@ mod tests {
                         "x",
                         Variable::new("xs", Position::fake()),
                         Variable::new("k", Position::fake()),
-                        Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                        Block::new(
+                            vec![],
+                            Variable::new("x", Position::fake()),
+                            Position::fake()
+                        ),
                         Block::new(vec![], None::new(Position::fake()), Position::fake()),
                         Position::fake()
                     )
@@ -955,7 +963,7 @@ mod tests {
                 indoc!(
                     "
                     if x = xs[k] {
-                      none
+                      x
                     } else {
                       none
                     }
