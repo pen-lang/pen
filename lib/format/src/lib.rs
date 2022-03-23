@@ -361,20 +361,21 @@ fn format_expression(expression: &Expression) -> String {
         Expression::Number(number) => format!("{}", number.value()),
         Expression::Record(record) => [record.type_name().into(), "{".into()]
             .into_iter()
-            .chain(if record.fields().is_empty() {
+            .chain(if record.record().is_none() && record.fields().is_empty() {
                 None
             } else {
                 Some(
                     record
-                        .fields()
-                        .iter()
-                        .map(|field| {
+                        .record()
+                        .map(|expression| format!("...{}", format_expression(expression)))
+                        .into_iter()
+                        .chain(record.fields().iter().map(|field| {
                             format!(
                                 "{}: {}",
                                 field.name(),
                                 format_expression(field.expression())
                             )
-                        })
+                        }))
                         .collect::<Vec<_>>()
                         .join(", "),
                 )
@@ -1323,6 +1324,85 @@ mod tests {
                         .into()
                     ),
                     "{string: number ...xs}"
+                );
+            }
+        }
+
+        mod record {
+            use super::*;
+
+            #[test]
+            fn format_empty() {
+                assert_eq!(
+                    format_expression(&Record::new("foo", None, vec![], Position::fake()).into()),
+                    "foo{}"
+                );
+            }
+
+            #[test]
+            fn format_field() {
+                assert_eq!(
+                    format_expression(
+                        &Record::new(
+                            "foo",
+                            None,
+                            vec![RecordField::new(
+                                "x",
+                                None::new(Position::fake()),
+                                Position::fake()
+                            )],
+                            Position::fake()
+                        )
+                        .into()
+                    ),
+                    "foo{x: none}"
+                );
+            }
+
+            #[test]
+            fn format_two_fields() {
+                assert_eq!(
+                    format_expression(
+                        &Record::new(
+                            "foo",
+                            None,
+                            vec![
+                                RecordField::new(
+                                    "x",
+                                    Number::new(1.0, Position::fake()),
+                                    Position::fake()
+                                ),
+                                RecordField::new(
+                                    "y",
+                                    Number::new(2.0, Position::fake()),
+                                    Position::fake()
+                                )
+                            ],
+                            Position::fake()
+                        )
+                        .into()
+                    ),
+                    "foo{x: 1, y: 2}"
+                );
+            }
+
+            #[test]
+            fn format_update() {
+                assert_eq!(
+                    format_expression(
+                        &Record::new(
+                            "foo",
+                            Some(Variable::new("r", Position::fake()).into()),
+                            vec![RecordField::new(
+                                "x",
+                                None::new(Position::fake()),
+                                Position::fake()
+                            )],
+                            Position::fake()
+                        )
+                        .into()
+                    ),
+                    "foo{...r, x: none}"
                 );
             }
         }
