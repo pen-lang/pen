@@ -57,10 +57,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                         .help("Sets a package directory"),
                 ),
         )
-        .subcommand(
-            clap::Command::new("format")
-                .about("Formats a module file"),
-        )
+        .subcommand(clap::Command::new("format").about("Formats a module file"))
         .subcommand(
             clap::Command::new("compile")
                 .hide(true)
