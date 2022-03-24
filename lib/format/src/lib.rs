@@ -402,42 +402,57 @@ fn format_expression(expression: &Expression) -> String {
                     .join("\n")
             }
         }
-        // TODO Support multiple lines.
-        Expression::Map(map) => ["{".into()]
-            .into_iter()
-            .chain([[
-                format_type(map.key_type()) + ":",
-                format_type(map.value_type()),
-            ]
-            .into_iter()
-            .chain(if map.elements().is_empty() {
-                None
-            } else {
-                Some(
-                    map.elements()
-                        .iter()
-                        .map(|element| match element {
-                            MapElement::Map(expression) => {
-                                format!("...{}", format_expression(expression))
-                            }
-                            MapElement::Insertion(entry) => {
-                                format!(
-                                    "{}: {}",
-                                    format_expression(entry.key()),
-                                    format_expression(entry.value())
-                                )
-                            }
-                            MapElement::Removal(expression) => format_expression(expression),
+        Expression::Map(map) => {
+            let type_ = format_type(map.key_type()) + ": " + &format_type(map.value_type());
+            let elements = map
+                .elements()
+                .iter()
+                .map(|element| match element {
+                    MapElement::Map(expression) => {
+                        format!("...{}", format_expression(expression))
+                    }
+                    MapElement::Insertion(entry) => {
+                        format!(
+                            "{}: {}",
+                            format_expression(entry.key()),
+                            format_expression(entry.value())
+                        )
+                    }
+                    MapElement::Removal(expression) => format_expression(expression),
+                })
+                .collect::<Vec<_>>();
+
+            if elements.is_empty()
+                || Some(map.position().line_number())
+                    == map
+                        .elements()
+                        .get(0)
+                        .map(|element| element.position().line_number())
+                    && elements.iter().all(|element| is_single_line(&element))
+            {
+                ["{".into()]
+                    .into_iter()
+                    .chain([[type_]
+                        .into_iter()
+                        .chain(if map.elements().is_empty() {
+                            None
+                        } else {
+                            Some(elements.join(", "))
                         })
                         .collect::<Vec<_>>()
-                        .join(", "),
-                )
-            })
-            .collect::<Vec<_>>()
-            .join(" ")])
-            .chain(["}".into()])
-            .collect::<Vec<_>>()
-            .concat(),
+                        .join(" ")])
+                    .chain(["}".into()])
+                    .collect::<Vec<_>>()
+                    .concat()
+            } else {
+                [format!("{{{}", type_)]
+                    .into_iter()
+                    .chain(elements.into_iter().map(|element| indent(element) + ","))
+                    .chain(["}".into()])
+                    .collect::<Vec<_>>()
+                    .join("\n")
+            }
+        }
         Expression::None(_) => "none".into(),
         Expression::Number(number) => format!("{}", number.value()),
         Expression::Record(record) => {
@@ -1902,6 +1917,71 @@ mod tests {
                         .into()
                     ),
                     "{string: number ...xs}"
+                );
+            }
+
+            #[test]
+            fn format_multi_line() {
+                assert_eq!(
+                    format_expression(
+                        &Map::new(
+                            types::ByteString::new(Position::fake()),
+                            types::Number::new(Position::fake()),
+                            vec![MapEntry::new(
+                                ByteString::new("foo", Position::fake()),
+                                Number::new(1.0, Position::fake()),
+                                Position::new("", 2, 1, "")
+                            )
+                            .into()],
+                            Position::new("", 1, 1, "")
+                        )
+                        .into()
+                    ),
+                    indoc!(
+                        "
+                        {string: number
+                          \"foo\": 1,
+                        }
+                        "
+                    )
+                    .trim(),
+                );
+            }
+
+            #[test]
+            fn format_multi_line_with_two_entries() {
+                assert_eq!(
+                    format_expression(
+                        &Map::new(
+                            types::ByteString::new(Position::fake()),
+                            types::Number::new(Position::fake()),
+                            vec![
+                                MapEntry::new(
+                                    ByteString::new("foo", Position::fake()),
+                                    Number::new(1.0, Position::fake()),
+                                    Position::new("", 2, 1, "")
+                                )
+                                .into(),
+                                MapEntry::new(
+                                    ByteString::new("bar", Position::fake()),
+                                    Number::new(2.0, Position::fake()),
+                                    Position::fake()
+                                )
+                                .into()
+                            ],
+                            Position::new("", 1, 1, "")
+                        )
+                        .into()
+                    ),
+                    indoc!(
+                        "
+                        {string: number
+                          \"foo\": 1,
+                          \"bar\": 2,
+                        }
+                        "
+                    )
+                    .trim(),
                 );
             }
         }
