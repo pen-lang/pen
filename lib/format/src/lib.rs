@@ -30,9 +30,9 @@ pub fn format(module: &Module) -> String {
     .join("\n\n")
         + "\n";
 
-    regex::Regex::new(r"\n *\n")
+    regex::Regex::new(r"[ \t]*\n")
         .unwrap()
-        .replace_all(&string, "\n\n")
+        .replace_all(&string, "\n")
         .into()
 }
 
@@ -256,16 +256,45 @@ fn format_statement(statement: &Statement) -> String {
 fn format_expression(expression: &Expression) -> String {
     match expression {
         Expression::BinaryOperation(operation) => format_binary_operation(operation),
-        // TODO Support multiple lines.
-        Expression::Call(call) => format!(
-            "{}({})",
-            format_expression(call.function()),
-            call.arguments()
+        Expression::Call(call) => {
+            let head = format!("{}(", format_expression(call.function()));
+            let arguments = call
+                .arguments()
                 .iter()
                 .map(format_expression)
-                .collect::<Vec<_>>()
-                .join(", ")
-        ),
+                .collect::<Vec<_>>();
+
+            if call.arguments().is_empty()
+                || Some(call.function().position().line_number())
+                    == call
+                        .arguments()
+                        .get(0)
+                        .map(|expression| expression.position().line_number())
+                    && arguments.iter().all(|argument| is_single_line(argument))
+            {
+                [head]
+                    .into_iter()
+                    .chain(if call.arguments().is_empty() {
+                        None
+                    } else {
+                        Some(arguments.join(", "))
+                    })
+                    .chain([")".into()])
+                    .collect::<Vec<_>>()
+                    .concat()
+            } else {
+                [head]
+                    .into_iter()
+                    .chain(
+                        call.arguments()
+                            .iter()
+                            .map(|expression| indent(format_expression(expression)) + ","),
+                    )
+                    .chain([")".into()])
+                    .collect::<Vec<_>>()
+                    .join("\n")
+            }
+        }
         Expression::Boolean(boolean) => if boolean.value() { "true" } else { "false" }.into(),
         Expression::If(if_) => format_if(if_),
         Expression::IfList(if_) => [
@@ -294,110 +323,179 @@ fn format_expression(expression: &Expression) -> String {
         .join(" "),
         Expression::IfType(if_) => format_if_type(if_),
         Expression::Lambda(lambda) => format_lambda(lambda),
-        // TODO Support multiple lines.
-        Expression::List(list) => ["[".into()]
-            .into_iter()
-            .chain([[format_type(list.type_())]
-                .into_iter()
-                .chain(if list.elements().is_empty() {
-                    None
-                } else {
-                    Some(
-                        list.elements()
-                            .iter()
-                            .map(|element| match element {
-                                ListElement::Multiple(expression) => {
-                                    format!("...{}", format_expression(expression))
-                                }
-                                ListElement::Single(expression) => format_expression(expression),
-                            })
-                            .collect::<Vec<_>>()
-                            .join(", "),
-                    )
-                })
-                .collect::<Vec<_>>()
-                .join(" ")])
-            .chain(["]".into()])
-            .collect::<Vec<_>>()
-            .concat(),
-        // TODO Support multiple lines.
-        Expression::ListComprehension(comprehension) => ["[".into()]
-            .into_iter()
-            .chain([[
-                format_type(comprehension.type_()),
-                format_expression(comprehension.element()),
-                "for".into(),
-                comprehension.element_name().into(),
-                "in".into(),
-                format_expression(comprehension.list()),
-            ]
-            .join(" ")])
-            .chain(["]".into()])
-            .collect::<Vec<_>>()
-            .concat(),
-        // TODO Support multiple lines.
-        Expression::Map(map) => ["{".into()]
-            .into_iter()
-            .chain([[
-                format_type(map.key_type()) + ":",
-                format_type(map.value_type()),
-            ]
-            .into_iter()
-            .chain(if map.elements().is_empty() {
-                None
-            } else {
-                Some(
-                    map.elements()
-                        .iter()
-                        .map(|element| match element {
-                            MapElement::Map(expression) => {
-                                format!("...{}", format_expression(expression))
-                            }
-                            MapElement::Insertion(entry) => {
-                                format!(
-                                    "{}: {}",
-                                    format_expression(entry.key()),
-                                    format_expression(entry.value())
-                                )
-                            }
-                            MapElement::Removal(expression) => format_expression(expression),
+        Expression::List(list) => {
+            let type_ = format_type(list.type_());
+            let elements = list
+                .elements()
+                .iter()
+                .map(format_list_element)
+                .collect::<Vec<_>>();
+
+            if elements.is_empty()
+                || Some(list.position().line_number())
+                    == list
+                        .elements()
+                        .get(0)
+                        .map(|element| element.position().line_number())
+                    && elements.iter().all(|element| is_single_line(element))
+            {
+                ["[".into()]
+                    .into_iter()
+                    .chain([[type_]
+                        .into_iter()
+                        .chain(if elements.is_empty() {
+                            None
+                        } else {
+                            Some(elements.join(", "))
                         })
                         .collect::<Vec<_>>()
-                        .join(", "),
-                )
-            })
-            .collect::<Vec<_>>()
-            .join(" ")])
-            .chain(["}".into()])
-            .collect::<Vec<_>>()
-            .concat(),
+                        .join(" ")])
+                    .chain(["]".into()])
+                    .collect::<Vec<_>>()
+                    .concat()
+            } else {
+                [format!("[{}", type_)]
+                    .into_iter()
+                    .chain(elements.into_iter().map(|element| indent(element) + ","))
+                    .chain(["]".into()])
+                    .collect::<Vec<_>>()
+                    .join("\n")
+            }
+        }
+        Expression::ListComprehension(comprehension) => {
+            let type_ = format_type(comprehension.type_());
+            let element = format_expression(comprehension.element());
+            let list = format_expression(comprehension.list());
+
+            if comprehension.position().line_number()
+                == comprehension.element().position().line_number()
+                && is_single_line(&element)
+                && is_single_line(&list)
+            {
+                ["[".into()]
+                    .into_iter()
+                    .chain([[
+                        type_,
+                        element,
+                        "for".into(),
+                        comprehension.element_name().into(),
+                        "in".into(),
+                        list,
+                    ]
+                    .join(" ")])
+                    .chain(["]".into()])
+                    .collect::<Vec<_>>()
+                    .concat()
+            } else {
+                [format!("[{}", type_)]
+                    .into_iter()
+                    .chain(
+                        [
+                            element,
+                            format!("for {} in {}", comprehension.element_name(), list),
+                        ]
+                        .iter()
+                        .map(indent),
+                    )
+                    .chain(["]".into()])
+                    .collect::<Vec<_>>()
+                    .join("\n")
+            }
+        }
+        Expression::Map(map) => {
+            let type_ = format_type(map.key_type()) + ": " + &format_type(map.value_type());
+            let elements = map
+                .elements()
+                .iter()
+                .map(|element| match element {
+                    MapElement::Map(expression) => {
+                        format!("...{}", format_expression(expression))
+                    }
+                    MapElement::Insertion(entry) => {
+                        format!(
+                            "{}: {}",
+                            format_expression(entry.key()),
+                            format_expression(entry.value())
+                        )
+                    }
+                    MapElement::Removal(expression) => format_expression(expression),
+                })
+                .collect::<Vec<_>>();
+
+            if elements.is_empty()
+                || Some(map.position().line_number())
+                    == map
+                        .elements()
+                        .get(0)
+                        .map(|element| element.position().line_number())
+                    && elements.iter().all(|element| is_single_line(element))
+            {
+                ["{".into()]
+                    .into_iter()
+                    .chain([[type_]
+                        .into_iter()
+                        .chain(if map.elements().is_empty() {
+                            None
+                        } else {
+                            Some(elements.join(", "))
+                        })
+                        .collect::<Vec<_>>()
+                        .join(" ")])
+                    .chain(["}".into()])
+                    .collect::<Vec<_>>()
+                    .concat()
+            } else {
+                [format!("{{{}", type_)]
+                    .into_iter()
+                    .chain(elements.into_iter().map(|element| indent(element) + ","))
+                    .chain(["}".into()])
+                    .collect::<Vec<_>>()
+                    .join("\n")
+            }
+        }
         Expression::None(_) => "none".into(),
         Expression::Number(number) => format!("{}", number.value()),
-        // TODO Support multiple lines.
-        Expression::Record(record) => [record.type_name().into(), "{".into()]
-            .into_iter()
-            .chain(if record.record().is_none() && record.fields().is_empty() {
-                None
+        Expression::Record(record) => {
+            let elements = record
+                .record()
+                .map(|expression| format!("...{}", format_expression(expression)))
+                .into_iter()
+                .chain(record.fields().iter().map(|field| {
+                    format!(
+                        "{}: {}",
+                        field.name(),
+                        format_expression(field.expression())
+                    )
+                }))
+                .collect::<Vec<_>>();
+
+            if record.fields().is_empty()
+                || Some(record.position().line_number())
+                    == record
+                        .fields()
+                        .get(0)
+                        .map(|field| field.position().line_number())
+                    && elements.iter().all(|element| is_single_line(element))
+            {
+                [record.type_name().into(), "{".into()]
+                    .into_iter()
+                    .chain(if record.record().is_none() && record.fields().is_empty() {
+                        None
+                    } else {
+                        Some(elements.join(", "))
+                    })
+                    .chain(["}".into()])
+                    .collect::<Vec<_>>()
+                    .concat()
             } else {
-                Some(
-                    record
-                        .record()
-                        .map(|expression| format!("...{}", format_expression(expression)))
-                        .into_iter()
-                        .chain(record.fields().iter().map(|field| {
-                            format!(
-                                "{}: {}",
-                                field.name(),
-                                format_expression(field.expression())
-                            )
-                        }))
-                        .collect::<Vec<_>>()
-                        .join(", "),
-                )
-            })
-            .chain(["}".into()])
-            .collect::<Vec<_>>()
-            .concat(),
+                [record.type_name().to_owned() + "{"]
+                    .into_iter()
+                    .chain(elements.into_iter().map(|line| indent(line) + ","))
+                    .chain(["}".into()])
+                    .collect::<Vec<_>>()
+                    .join("\n")
+            }
+        }
         Expression::RecordDeconstruction(deconstruction) => format!(
             "{}.{}",
             format_expression(deconstruction.expression()),
@@ -507,6 +605,15 @@ fn format_if_type(if_: &IfType) -> String {
     }))
     .collect::<Vec<_>>()
     .join(" ")
+}
+
+fn format_list_element(element: &ListElement) -> String {
+    match element {
+        ListElement::Multiple(expression) => {
+            format!("...{}", format_expression(expression))
+        }
+        ListElement::Single(expression) => format_expression(expression),
+    }
 }
 
 fn format_binary_operation(operation: &BinaryOperation) -> String {
@@ -1181,22 +1288,52 @@ mod tests {
     mod expression {
         use super::*;
 
-        #[test]
-        fn format_call() {
-            assert_eq!(
-                format_expression(
-                    &Call::new(
-                        Variable::new("foo", Position::fake()),
-                        vec![
-                            Number::new(1.0, Position::fake()).into(),
-                            Number::new(2.0, Position::fake()).into(),
-                        ],
-                        Position::fake()
+        mod call {
+            use super::*;
+
+            #[test]
+            fn format() {
+                assert_eq!(
+                    format_expression(
+                        &Call::new(
+                            Variable::new("foo", Position::fake()),
+                            vec![
+                                Number::new(1.0, Position::fake()).into(),
+                                Number::new(2.0, Position::fake()).into(),
+                            ],
+                            Position::fake()
+                        )
+                        .into()
+                    ),
+                    "foo(1, 2)"
+                );
+            }
+
+            #[test]
+            fn format_multi_line() {
+                assert_eq!(
+                    format_expression(
+                        &Call::new(
+                            Variable::new("foo", Position::new("", 1, 1, "")),
+                            vec![
+                                Number::new(1.0, Position::new("", 2, 1, "")).into(),
+                                Number::new(2.0, Position::fake()).into(),
+                            ],
+                            Position::fake()
+                        )
+                        .into()
+                    ),
+                    indoc!(
+                        "
+                        foo(
+                          1,
+                          2,
+                        )
+                        "
                     )
-                    .into()
-                ),
-                "foo(1, 2)"
-            );
+                    .trim()
+                );
+            }
         }
 
         #[test]
@@ -1584,6 +1721,58 @@ mod tests {
             }
 
             #[test]
+            fn format_multi_line() {
+                assert_eq!(
+                    format_expression(
+                        &List::new(
+                            types::None::new(Position::fake()),
+                            vec![ListElement::Single(
+                                None::new(Position::new("", 2, 1, "")).into()
+                            )],
+                            Position::new("", 1, 1, "")
+                        )
+                        .into()
+                    ),
+                    indoc!(
+                        "
+                        [none
+                          none,
+                        ]
+                        "
+                    )
+                    .trim()
+                );
+            }
+
+            #[test]
+            fn format_multi_line_with_two_elements() {
+                assert_eq!(
+                    format_expression(
+                        &List::new(
+                            types::Number::new(Position::fake()),
+                            vec![
+                                ListElement::Single(
+                                    Number::new(1.0, Position::new("", 2, 1, "")).into()
+                                ),
+                                ListElement::Single(Number::new(2.0, Position::fake()).into())
+                            ],
+                            Position::new("", 1, 1, "")
+                        )
+                        .into()
+                    ),
+                    indoc!(
+                        "
+                        [number
+                          1,
+                          2,
+                        ]
+                        "
+                    )
+                    .trim()
+                );
+            }
+
+            #[test]
             fn format_comprehension() {
                 assert_eq!(
                     format_expression(
@@ -1597,6 +1786,31 @@ mod tests {
                         .into()
                     ),
                     "[none none for x in xs]"
+                );
+            }
+
+            #[test]
+            fn format_multi_line_comprehension() {
+                assert_eq!(
+                    format_expression(
+                        &ListComprehension::new(
+                            types::None::new(Position::fake()),
+                            None::new(Position::new("", 2, 1, "")),
+                            "x",
+                            Variable::new("xs", Position::fake()),
+                            Position::new("", 1, 1, "")
+                        )
+                        .into()
+                    ),
+                    indoc!(
+                        "
+                        [none
+                          none
+                          for x in xs
+                        ]
+                        "
+                    )
+                    .trim()
                 );
             }
         }
@@ -1705,6 +1919,71 @@ mod tests {
                     "{string: number ...xs}"
                 );
             }
+
+            #[test]
+            fn format_multi_line() {
+                assert_eq!(
+                    format_expression(
+                        &Map::new(
+                            types::ByteString::new(Position::fake()),
+                            types::Number::new(Position::fake()),
+                            vec![MapEntry::new(
+                                ByteString::new("foo", Position::fake()),
+                                Number::new(1.0, Position::fake()),
+                                Position::new("", 2, 1, "")
+                            )
+                            .into()],
+                            Position::new("", 1, 1, "")
+                        )
+                        .into()
+                    ),
+                    indoc!(
+                        "
+                        {string: number
+                          \"foo\": 1,
+                        }
+                        "
+                    )
+                    .trim(),
+                );
+            }
+
+            #[test]
+            fn format_multi_line_with_two_entries() {
+                assert_eq!(
+                    format_expression(
+                        &Map::new(
+                            types::ByteString::new(Position::fake()),
+                            types::Number::new(Position::fake()),
+                            vec![
+                                MapEntry::new(
+                                    ByteString::new("foo", Position::fake()),
+                                    Number::new(1.0, Position::fake()),
+                                    Position::new("", 2, 1, "")
+                                )
+                                .into(),
+                                MapEntry::new(
+                                    ByteString::new("bar", Position::fake()),
+                                    Number::new(2.0, Position::fake()),
+                                    Position::fake()
+                                )
+                                .into()
+                            ],
+                            Position::new("", 1, 1, "")
+                        )
+                        .into()
+                    ),
+                    indoc!(
+                        "
+                        {string: number
+                          \"foo\": 1,
+                          \"bar\": 2,
+                        }
+                        "
+                    )
+                    .trim(),
+                );
+            }
         }
 
         mod record {
@@ -1782,6 +2061,68 @@ mod tests {
                         .into()
                     ),
                     "foo{...r, x: none}"
+                );
+            }
+
+            #[test]
+            fn format_multi_line() {
+                assert_eq!(
+                    format_expression(
+                        &Record::new(
+                            "foo",
+                            None,
+                            vec![RecordField::new(
+                                "x",
+                                None::new(Position::fake()),
+                                Position::new("", 2, 1, "")
+                            )],
+                            Position::new("", 1, 1, "")
+                        )
+                        .into()
+                    ),
+                    indoc!(
+                        "
+                        foo{
+                          x: none,
+                        }
+                        "
+                    )
+                    .trim(),
+                );
+            }
+
+            #[test]
+            fn format_multi_line_with_two_fields() {
+                assert_eq!(
+                    format_expression(
+                        &Record::new(
+                            "foo",
+                            None,
+                            vec![
+                                RecordField::new(
+                                    "x",
+                                    None::new(Position::fake()),
+                                    Position::new("", 2, 1, "")
+                                ),
+                                RecordField::new(
+                                    "y",
+                                    None::new(Position::fake()),
+                                    Position::new("", 2, 1, "")
+                                )
+                            ],
+                            Position::new("", 1, 1, "")
+                        )
+                        .into()
+                    ),
+                    indoc!(
+                        "
+                        foo{
+                          x: none,
+                          y: none,
+                        }
+                        "
+                    )
+                    .trim(),
                 );
             }
         }
