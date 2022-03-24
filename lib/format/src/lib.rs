@@ -326,7 +326,7 @@ fn format_expression(expression: &Expression) -> String {
                 .map(format_list_element)
                 .collect::<Vec<_>>();
 
-            if list.elements().is_empty()
+            if elements.is_empty()
                 || Some(list.position().line_number())
                     == list
                         .elements()
@@ -338,16 +338,10 @@ fn format_expression(expression: &Expression) -> String {
                     .into_iter()
                     .chain([[type_]
                         .into_iter()
-                        .chain(if list.elements().is_empty() {
+                        .chain(if elements.is_empty() {
                             None
                         } else {
-                            Some(
-                                list.elements()
-                                    .iter()
-                                    .map(format_list_element)
-                                    .collect::<Vec<_>>()
-                                    .join(", "),
-                            )
+                            Some(elements.join(", "))
                         })
                         .collect::<Vec<_>>()
                         .join(" ")])
@@ -357,31 +351,52 @@ fn format_expression(expression: &Expression) -> String {
             } else {
                 [format!("[{}", type_)]
                     .into_iter()
+                    .chain(elements.into_iter().map(|element| indent(element) + ","))
+                    .chain(["]".into()])
+                    .collect::<Vec<_>>()
+                    .join("\n")
+            }
+        }
+        Expression::ListComprehension(comprehension) => {
+            let type_ = format_type(comprehension.type_());
+            let element = format_expression(comprehension.element());
+            let list = format_expression(comprehension.list());
+
+            if comprehension.position().line_number()
+                == comprehension.list().position().line_number()
+                && is_single_line(&element)
+                && is_single_line(&list)
+            {
+                ["[".into()]
+                    .into_iter()
+                    .chain([[
+                        type_,
+                        element,
+                        "for".into(),
+                        comprehension.element_name().into(),
+                        "in".into(),
+                        list,
+                    ]
+                    .join(" ")])
+                    .chain(["]".into()])
+                    .collect::<Vec<_>>()
+                    .concat()
+            } else {
+                [format!("[{}", type_)]
+                    .into_iter()
                     .chain(
-                        list.elements()
-                            .iter()
-                            .map(|element| indent(format_list_element(element)) + ","),
+                        [
+                            element,
+                            format!("for {} in {}", comprehension.element_name(), list),
+                        ]
+                        .iter()
+                        .map(indent),
                     )
                     .chain(["]".into()])
                     .collect::<Vec<_>>()
                     .join("\n")
             }
         }
-        // TODO Support multiple lines.
-        Expression::ListComprehension(comprehension) => ["[".into()]
-            .into_iter()
-            .chain([[
-                format_type(comprehension.type_()),
-                format_expression(comprehension.element()),
-                "for".into(),
-                comprehension.element_name().into(),
-                "in".into(),
-                format_expression(comprehension.list()),
-            ]
-            .join(" ")])
-            .chain(["]".into()])
-            .collect::<Vec<_>>()
-            .concat(),
         // TODO Support multiple lines.
         Expression::Map(map) => ["{".into()]
             .into_iter()
@@ -1735,6 +1750,31 @@ mod tests {
                         .into()
                     ),
                     "[none none for x in xs]"
+                );
+            }
+
+            #[test]
+            fn format_multi_line_comprehension() {
+                assert_eq!(
+                    format_expression(
+                        &ListComprehension::new(
+                            types::None::new(Position::fake()),
+                            None::new(Position::new("", 2, 1, "")),
+                            "x",
+                            Variable::new("xs", Position::fake()),
+                            Position::new("", 1, 1, "")
+                        )
+                        .into()
+                    ),
+                    indoc!(
+                        "
+                        [none
+                          none
+                          for x in xs
+                        ]
+                        "
+                    )
+                    .trim()
                 );
             }
         }
