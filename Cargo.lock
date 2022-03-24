@@ -30,6 +30,7 @@ dependencies = [
  "fmm",
  "fmm-llvm",
  "fnv",
+ "format",
  "hir",
  "hir_mir",
  "interface",
@@ -257,6 +258,16 @@ checksum = "5fc25a87fa4fd2094bffb06925852034d90a17f0d1e05197d4956d3555752191"
 dependencies = [
  "matches",
  "percent-encoding",
+]
+
+[[package]]
+name = "format"
+version = "0.1.0"
+dependencies = [
+ "ast",
+ "indoc",
+ "position",
+ "regex",
 ]
 
 [[package]]

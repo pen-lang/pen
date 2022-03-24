@@ -1,0 +1,12 @@
+[package]
+name = "format"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+ast = { path = "../ast" }
+position = { path = "../position" }
+regex = "1"
+
+[dev-dependencies]
+indoc = "1"

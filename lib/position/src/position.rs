@@ -31,6 +31,10 @@ impl Position {
     pub fn path(&self) -> &str {
         &self.path
     }
+
+    pub fn line_number(&self) -> usize {
+        self.line_number
+    }
 }
 
 impl Display for Position {
