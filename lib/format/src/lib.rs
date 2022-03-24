@@ -319,15 +319,21 @@ fn format_expression(expression: &Expression) -> String {
         Expression::IfType(if_) => format_if_type(if_),
         Expression::Lambda(lambda) => format_lambda(lambda),
         Expression::List(list) => {
-            let single_line = list.elements().is_empty()
+            let type_ = format_type(list.type_());
+            let elements = list
+                .elements()
+                .iter()
+                .map(format_list_element)
+                .collect::<Vec<_>>();
+
+            if list.elements().is_empty()
                 || Some(list.position().line_number())
                     == list
                         .elements()
                         .get(0)
-                        .map(|element| element.position().line_number());
-            let type_ = format_type(list.type_());
-
-            if single_line {
+                        .map(|element| element.position().line_number())
+                    && elements.iter().all(|element| is_single_line(&element))
+            {
                 ["[".into()]
                     .into_iter()
                     .chain([[type_]
