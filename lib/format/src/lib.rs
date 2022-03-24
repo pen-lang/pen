@@ -182,16 +182,37 @@ fn format_type(type_: &Type) -> String {
 }
 
 fn format_lambda(lambda: &Lambda) -> String {
+    let arguments = lambda
+        .arguments()
+        .iter()
+        .map(|argument| format!("{} {}", argument.name(), format_type(argument.type_())))
+        .collect::<Vec<_>>();
+    let single_line = arguments.is_empty()
+        || Some(lambda.position().line_number())
+            == lambda
+                .arguments()
+                .get(0)
+                .map(|argument| argument.type_().position().line_number())
+            && arguments.iter().all(|argument| is_single_line(argument));
+
     format!(
-        "\\({}) {} {}",
-        lambda
-            .arguments()
-            .iter()
-            .map(|argument| format!("{} {}", argument.name(), format_type(argument.type_())))
-            .collect::<Vec<_>>()
-            .join(", "),
+        "\\{} {} {}",
+        if single_line {
+            "(".to_owned() + &arguments.join(", ") + ")"
+        } else {
+            ["(".into()]
+                .into_iter()
+                .chain(arguments.into_iter().map(|argument| indent(argument) + ","))
+                .chain([")".into()])
+                .collect::<Vec<_>>()
+                .join("\n")
+        },
         format_type(lambda.result_type()),
-        format_block(lambda.body())
+        if single_line {
+            format_block(lambda.body())
+        } else {
+            format_multi_line_block(lambda.body())
+        }
     )
 }
 
@@ -1507,6 +1528,115 @@ mod tests {
                 )
                 .trim()
             );
+        }
+
+        mod lambda {
+            use super::*;
+
+            #[test]
+            fn format() {
+                assert_eq!(
+                    format_expression(
+                        &Lambda::new(
+                            vec![],
+                            types::None::new(Position::fake()),
+                            Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                            Position::fake()
+                        )
+                        .into()
+                    ),
+                    "\\() none { none }"
+                );
+            }
+
+            #[test]
+            fn format_multi_line_body() {
+                assert_eq!(
+                    format_expression(
+                        &Lambda::new(
+                            vec![],
+                            types::None::new(Position::fake()),
+                            Block::new(
+                                vec![Statement::new(
+                                    Some("x".into()),
+                                    None::new(Position::fake()),
+                                    Position::fake()
+                                )],
+                                None::new(Position::fake()),
+                                Position::fake()
+                            ),
+                            Position::fake()
+                        )
+                        .into()
+                    ),
+                    indoc!(
+                        "
+                        \\() none {
+                          x = none
+                          none
+                        }
+                        "
+                    )
+                    .trim()
+                );
+            }
+
+            #[test]
+            fn format_multi_line_argument() {
+                assert_eq!(
+                    format_expression(
+                        &Lambda::new(
+                            vec![Argument::new(
+                                "x",
+                                types::None::new(Position::new("", 2, 1, ""))
+                            )],
+                            types::None::new(Position::fake()),
+                            Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                            Position::new("", 1, 1, "")
+                        )
+                        .into()
+                    ),
+                    indoc!(
+                        "
+                        \\(
+                          x none,
+                        ) none {
+                          none
+                        }
+                        "
+                    )
+                    .trim()
+                );
+            }
+
+            #[test]
+            fn format_multi_line_arguments() {
+                assert_eq!(
+                    format_expression(
+                        &Lambda::new(
+                            vec![
+                                Argument::new("x", types::None::new(Position::new("", 2, 1, ""))),
+                                Argument::new("y", types::None::new(Position::fake()))
+                            ],
+                            types::None::new(Position::fake()),
+                            Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                            Position::new("", 1, 1, "")
+                        )
+                        .into()
+                    ),
+                    indoc!(
+                        "
+                        \\(
+                          x none,
+                          y none,
+                        ) none {
+                          none
+                        }
+                        "
+                    )
+                    .trim()
+                );
+            }
         }
 
         #[test]
