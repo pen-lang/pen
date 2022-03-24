@@ -257,38 +257,43 @@ fn format_expression(expression: &Expression) -> String {
     match expression {
         Expression::BinaryOperation(operation) => format_binary_operation(operation),
         Expression::Call(call) => {
-            let single_line = call.arguments().is_empty()
+            let head = format!("{}(", format_expression(call.function()));
+            let arguments = call
+                .arguments()
+                .iter()
+                .map(|expression| format_expression(expression))
+                .collect::<Vec<_>>();
+
+            if call.arguments().is_empty()
                 || Some(call.function().position().line_number())
                     == call
                         .arguments()
                         .get(0)
-                        .map(|expression| expression.position().line_number());
-
-            [format!("{}(", format_expression(call.function()))]
-                .into_iter()
-                .chain(if call.arguments().is_empty() {
-                    None
-                } else {
-                    Some(
+                        .map(|expression| expression.position().line_number())
+                    && arguments.iter().all(|argument| is_single_line(argument))
+            {
+                [head]
+                    .into_iter()
+                    .chain(if call.arguments().is_empty() {
+                        None
+                    } else {
+                        Some(arguments.join(&(", ")))
+                    })
+                    .chain([")".into()])
+                    .collect::<Vec<_>>()
+                    .concat()
+            } else {
+                [head]
+                    .into_iter()
+                    .chain(
                         call.arguments()
                             .iter()
-                            .map(|expression| {
-                                let expression = format_expression(expression);
-
-                                if single_line {
-                                    expression
-                                } else {
-                                    indent(expression)
-                                }
-                            })
-                            .collect::<Vec<_>>()
-                            .join(&(",".to_owned() + if single_line { " " } else { "\n" }))
-                            + if single_line { "" } else { "," },
+                            .map(|expression| indent(format_expression(expression)) + ","),
                     )
-                })
-                .chain([")".into()])
-                .collect::<Vec<_>>()
-                .join(if single_line { "" } else { "\n" })
+                    .chain([")".into()])
+                    .collect::<Vec<_>>()
+                    .join("\n")
+            }
         }
         Expression::Boolean(boolean) => if boolean.value() { "true" } else { "false" }.into(),
         Expression::If(if_) => format_if(if_),
