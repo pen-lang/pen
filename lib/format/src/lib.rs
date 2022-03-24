@@ -121,7 +121,7 @@ fn format_definition(definition: &Definition) -> String {
     definition
         .foreign_export()
         .map(|export| {
-            ["export"]
+            ["foreign"]
                 .into_iter()
                 .chain(match export.calling_convention() {
                     CallingConvention::C => Some("\"c\""),
@@ -980,128 +980,184 @@ mod tests {
         );
     }
 
-    #[test]
-    fn format_definition_with_no_argument_and_no_statement() {
-        assert_eq!(
-            format(&Module::new(
-                vec![],
-                vec![],
-                vec![],
-                vec![Definition::new(
-                    "foo",
-                    Lambda::new(
-                        vec![],
-                        types::None::new(Position::fake()),
-                        Block::new(vec![], None::new(Position::fake()), Position::fake()),
-                        Position::fake(),
-                    ),
-                    None,
-                    Position::fake()
-                )],
-                Position::fake()
-            )),
-            "foo = \\() none { none }\n"
-        );
-    }
+    mod definition {
+        use super::*;
 
-    #[test]
-    fn format_definition_with_argument() {
-        assert_eq!(
-            format(&Module::new(
-                vec![],
-                vec![],
-                vec![],
-                vec![Definition::new(
-                    "foo",
-                    Lambda::new(
-                        vec![Argument::new("x", types::None::new(Position::fake()))],
-                        types::None::new(Position::fake()),
-                        Block::new(vec![], None::new(Position::fake()), Position::fake()),
-                        Position::fake(),
-                    ),
-                    None,
+        #[test]
+        fn format_with_no_argument_and_no_statement() {
+            assert_eq!(
+                format(&Module::new(
+                    vec![],
+                    vec![],
+                    vec![],
+                    vec![Definition::new(
+                        "foo",
+                        Lambda::new(
+                            vec![],
+                            types::None::new(Position::fake()),
+                            Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                            Position::fake(),
+                        ),
+                        None,
+                        Position::fake()
+                    )],
                     Position::fake()
-                )],
-                Position::fake()
-            )),
-            "foo = \\(x none) none { none }\n"
-        );
-    }
+                )),
+                "foo = \\() none { none }\n"
+            );
+        }
 
-    #[test]
-    fn format_definition_with_statement() {
-        assert_eq!(
-            format(&Module::new(
-                vec![],
-                vec![],
-                vec![],
-                vec![Definition::new(
-                    "foo",
-                    Lambda::new(
-                        vec![],
-                        types::None::new(Position::fake()),
-                        Block::new(
-                            vec![Statement::new(
-                                None,
+        #[test]
+        fn format_with_argument() {
+            assert_eq!(
+                format(&Module::new(
+                    vec![],
+                    vec![],
+                    vec![],
+                    vec![Definition::new(
+                        "foo",
+                        Lambda::new(
+                            vec![Argument::new("x", types::None::new(Position::fake()))],
+                            types::None::new(Position::fake()),
+                            Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                            Position::fake(),
+                        ),
+                        None,
+                        Position::fake()
+                    )],
+                    Position::fake()
+                )),
+                "foo = \\(x none) none { none }\n"
+            );
+        }
+
+        #[test]
+        fn format_with_statement() {
+            assert_eq!(
+                format(&Module::new(
+                    vec![],
+                    vec![],
+                    vec![],
+                    vec![Definition::new(
+                        "foo",
+                        Lambda::new(
+                            vec![],
+                            types::None::new(Position::fake()),
+                            Block::new(
+                                vec![Statement::new(
+                                    None,
+                                    None::new(Position::fake()),
+                                    Position::fake()
+                                )],
                                 None::new(Position::fake()),
                                 Position::fake()
-                            )],
-                            None::new(Position::fake()),
-                            Position::fake()
+                            ),
+                            Position::fake(),
                         ),
-                        Position::fake(),
-                    ),
-                    None,
+                        None,
+                        Position::fake()
+                    )],
                     Position::fake()
-                )],
-                Position::fake()
-            )),
-            indoc!(
-                "
+                )),
+                indoc!(
+                    "
                 foo = \\() none {
                   none
                   none
                 }
                 "
-            )
-        );
-    }
+                )
+            );
+        }
 
-    #[test]
-    fn format_definition_returning_lambda() {
-        assert_eq!(
-            format(&Module::new(
-                vec![],
-                vec![],
-                vec![],
-                vec![Definition::new(
-                    "foo",
-                    Lambda::new(
-                        vec![],
-                        types::Function::new(
+        #[test]
+        fn format_returning_lambda() {
+            assert_eq!(
+                format(&Module::new(
+                    vec![],
+                    vec![],
+                    vec![],
+                    vec![Definition::new(
+                        "foo",
+                        Lambda::new(
                             vec![],
-                            types::None::new(Position::fake()),
-                            Position::fake()
-                        ),
-                        Block::new(
-                            vec![],
-                            Lambda::new(
+                            types::Function::new(
                                 vec![],
                                 types::None::new(Position::fake()),
-                                Block::new(vec![], None::new(Position::fake()), Position::fake()),
-                                Position::fake(),
+                                Position::fake()
                             ),
-                            Position::fake()
+                            Block::new(
+                                vec![],
+                                Lambda::new(
+                                    vec![],
+                                    types::None::new(Position::fake()),
+                                    Block::new(
+                                        vec![],
+                                        None::new(Position::fake()),
+                                        Position::fake()
+                                    ),
+                                    Position::fake(),
+                                ),
+                                Position::fake()
+                            ),
+                            Position::fake(),
                         ),
-                        Position::fake(),
-                    ),
-                    None,
+                        None,
+                        Position::fake()
+                    )],
                     Position::fake()
-                )],
-                Position::fake()
-            )),
-            "foo = \\() \\() none { \\() none { none } }\n"
-        );
+                )),
+                "foo = \\() \\() none { \\() none { none } }\n"
+            );
+        }
+
+        #[test]
+        fn format_with_foreign_export() {
+            assert_eq!(
+                format(&Module::new(
+                    vec![],
+                    vec![],
+                    vec![],
+                    vec![Definition::new(
+                        "foo",
+                        Lambda::new(
+                            vec![],
+                            types::None::new(Position::fake()),
+                            Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                            Position::fake(),
+                        ),
+                        Some(ForeignExport::new(CallingConvention::Native)),
+                        Position::fake()
+                    )],
+                    Position::fake()
+                )),
+                "foreign foo = \\() none { none }\n"
+            );
+        }
+
+        #[test]
+        fn format_with_foreign_export_and_custom_calling_convention() {
+            assert_eq!(
+                format(&Module::new(
+                    vec![],
+                    vec![],
+                    vec![],
+                    vec![Definition::new(
+                        "foo",
+                        Lambda::new(
+                            vec![],
+                            types::None::new(Position::fake()),
+                            Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                            Position::fake(),
+                        ),
+                        Some(ForeignExport::new(CallingConvention::C)),
+                        Position::fake()
+                    )],
+                    Position::fake()
+                )),
+                "foreign \"c\" foo = \\() none { none }\n"
+            );
+        }
     }
 
     mod block {
