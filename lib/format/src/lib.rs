@@ -261,7 +261,7 @@ fn format_expression(expression: &Expression) -> String {
             let arguments = call
                 .arguments()
                 .iter()
-                .map(|expression| format_expression(expression))
+                .map(format_expression)
                 .collect::<Vec<_>>();
 
             if call.arguments().is_empty()
@@ -277,7 +277,7 @@ fn format_expression(expression: &Expression) -> String {
                     .chain(if call.arguments().is_empty() {
                         None
                     } else {
-                        Some(arguments.join(&(", ")))
+                        Some(arguments.join(", "))
                     })
                     .chain([")".into()])
                     .collect::<Vec<_>>()
@@ -337,7 +337,7 @@ fn format_expression(expression: &Expression) -> String {
                         .elements()
                         .get(0)
                         .map(|element| element.position().line_number())
-                    && elements.iter().all(|element| is_single_line(&element))
+                    && elements.iter().all(|element| is_single_line(element))
             {
                 ["[".into()]
                     .into_iter()
@@ -475,7 +475,7 @@ fn format_expression(expression: &Expression) -> String {
                         .fields()
                         .get(0)
                         .map(|field| field.position().line_number())
-                    && elements.iter().all(|element| is_single_line(&element))
+                    && elements.iter().all(|element| is_single_line(element))
             {
                 [record.type_name().into(), "{".into()]
                     .into_iter()
@@ -488,7 +488,7 @@ fn format_expression(expression: &Expression) -> String {
                     .collect::<Vec<_>>()
                     .concat()
             } else {
-                [record.type_name().to_owned() + "{".into()]
+                [record.type_name().to_owned() + "{"]
                     .into_iter()
                     .chain(elements.into_iter().map(|line| indent(line) + ","))
                     .chain(["}".into()])
