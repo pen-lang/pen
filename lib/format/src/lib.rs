@@ -363,7 +363,7 @@ fn format_expression(expression: &Expression) -> String {
             let list = format_expression(comprehension.list());
 
             if comprehension.position().line_number()
-                == comprehension.list().position().line_number()
+                == comprehension.element().position().line_number()
                 && is_single_line(&element)
                 && is_single_line(&list)
             {
@@ -435,31 +435,47 @@ fn format_expression(expression: &Expression) -> String {
             .concat(),
         Expression::None(_) => "none".into(),
         Expression::Number(number) => format!("{}", number.value()),
-        // TODO Support multiple lines.
-        Expression::Record(record) => [record.type_name().into(), "{".into()]
-            .into_iter()
-            .chain(if record.record().is_none() && record.fields().is_empty() {
-                None
+        Expression::Record(record) => {
+            let elements = record
+                .record()
+                .map(|expression| format!("...{}", format_expression(expression)))
+                .into_iter()
+                .chain(record.fields().iter().map(|field| {
+                    format!(
+                        "{}: {}",
+                        field.name(),
+                        format_expression(field.expression())
+                    )
+                }))
+                .collect::<Vec<_>>();
+
+            if record.fields().is_empty()
+                || Some(record.position().line_number())
+                    == record
+                        .fields()
+                        .get(0)
+                        .map(|field| field.position().line_number())
+                    && elements.iter().all(|element| is_single_line(&element))
+            {
+                [record.type_name().into(), "{".into()]
+                    .into_iter()
+                    .chain(if record.record().is_none() && record.fields().is_empty() {
+                        None
+                    } else {
+                        Some(elements.join(", "))
+                    })
+                    .chain(["}".into()])
+                    .collect::<Vec<_>>()
+                    .concat()
             } else {
-                Some(
-                    record
-                        .record()
-                        .map(|expression| format!("...{}", format_expression(expression)))
-                        .into_iter()
-                        .chain(record.fields().iter().map(|field| {
-                            format!(
-                                "{}: {}",
-                                field.name(),
-                                format_expression(field.expression())
-                            )
-                        }))
-                        .collect::<Vec<_>>()
-                        .join(", "),
-                )
-            })
-            .chain(["}".into()])
-            .collect::<Vec<_>>()
-            .concat(),
+                [record.type_name().to_owned() + "{".into()]
+                    .into_iter()
+                    .chain(elements.into_iter().map(|line| indent(line) + ","))
+                    .chain(["}".into()])
+                    .collect::<Vec<_>>()
+                    .join("\n")
+            }
+        }
         Expression::RecordDeconstruction(deconstruction) => format!(
             "{}.{}",
             format_expression(deconstruction.expression()),
@@ -1960,6 +1976,68 @@ mod tests {
                         .into()
                     ),
                     "foo{...r, x: none}"
+                );
+            }
+
+            #[test]
+            fn format_multi_line() {
+                assert_eq!(
+                    format_expression(
+                        &Record::new(
+                            "foo",
+                            None,
+                            vec![RecordField::new(
+                                "x",
+                                None::new(Position::fake()),
+                                Position::new("", 2, 1, "")
+                            )],
+                            Position::new("", 1, 1, "")
+                        )
+                        .into()
+                    ),
+                    indoc!(
+                        "
+                        foo{
+                          x: none,
+                        }
+                        "
+                    )
+                    .trim(),
+                );
+            }
+
+            #[test]
+            fn format_multi_line_with_two_fields() {
+                assert_eq!(
+                    format_expression(
+                        &Record::new(
+                            "foo",
+                            None,
+                            vec![
+                                RecordField::new(
+                                    "x",
+                                    None::new(Position::fake()),
+                                    Position::new("", 2, 1, "")
+                                ),
+                                RecordField::new(
+                                    "y",
+                                    None::new(Position::fake()),
+                                    Position::new("", 2, 1, "")
+                                )
+                            ],
+                            Position::new("", 1, 1, "")
+                        )
+                        .into()
+                    ),
+                    indoc!(
+                        "
+                        foo{
+                          x: none,
+                          y: none,
+                        }
+                        "
+                    )
+                    .trim(),
                 );
             }
         }
