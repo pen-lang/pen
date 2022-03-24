@@ -428,7 +428,7 @@ fn format_expression(expression: &Expression) -> String {
                         .elements()
                         .get(0)
                         .map(|element| element.position().line_number())
-                    && elements.iter().all(|element| is_single_line(&element))
+                    && elements.iter().all(|element| is_single_line(element))
             {
                 ["{".into()]
                     .into_iter()
