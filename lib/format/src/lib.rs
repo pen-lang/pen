@@ -318,32 +318,49 @@ fn format_expression(expression: &Expression) -> String {
         .join(" "),
         Expression::IfType(if_) => format_if_type(if_),
         Expression::Lambda(lambda) => format_lambda(lambda),
-        // TODO Support multiple lines.
-        Expression::List(list) => ["[".into()]
-            .into_iter()
-            .chain([[format_type(list.type_())]
-                .into_iter()
-                .chain(if list.elements().is_empty() {
-                    None
-                } else {
-                    Some(
+        Expression::List(list) => {
+            let single_line = list.elements().is_empty()
+                || Some(list.position().line_number())
+                    == list
+                        .elements()
+                        .get(0)
+                        .map(|element| element.position().line_number());
+            let type_ = format_type(list.type_());
+
+            if single_line {
+                ["[".into()]
+                    .into_iter()
+                    .chain([[type_]
+                        .into_iter()
+                        .chain(if list.elements().is_empty() {
+                            None
+                        } else {
+                            Some(
+                                list.elements()
+                                    .iter()
+                                    .map(format_list_element)
+                                    .collect::<Vec<_>>()
+                                    .join(", "),
+                            )
+                        })
+                        .collect::<Vec<_>>()
+                        .join(" ")])
+                    .chain(["]".into()])
+                    .collect::<Vec<_>>()
+                    .concat()
+            } else {
+                [format!("[{}", type_)]
+                    .into_iter()
+                    .chain(
                         list.elements()
                             .iter()
-                            .map(|element| match element {
-                                ListElement::Multiple(expression) => {
-                                    format!("...{}", format_expression(expression))
-                                }
-                                ListElement::Single(expression) => format_expression(expression),
-                            })
-                            .collect::<Vec<_>>()
-                            .join(", "),
+                            .map(|element| indent(format_list_element(element)) + ","),
                     )
-                })
-                .collect::<Vec<_>>()
-                .join(" ")])
-            .chain(["]".into()])
-            .collect::<Vec<_>>()
-            .concat(),
+                    .chain(["]".into()])
+                    .collect::<Vec<_>>()
+                    .join("\n")
+            }
+        }
         // TODO Support multiple lines.
         Expression::ListComprehension(comprehension) => ["[".into()]
             .into_iter()
@@ -531,6 +548,15 @@ fn format_if_type(if_: &IfType) -> String {
     }))
     .collect::<Vec<_>>()
     .join(" ")
+}
+
+fn format_list_element(element: &ListElement) -> String {
+    match element {
+        ListElement::Multiple(expression) => {
+            format!("...{}", format_expression(expression))
+        }
+        ListElement::Single(expression) => format_expression(expression),
+    }
 }
 
 fn format_binary_operation(operation: &BinaryOperation) -> String {
@@ -1634,6 +1660,58 @@ mod tests {
                         .into()
                     ),
                     "[none none, none]"
+                );
+            }
+
+            #[test]
+            fn format_multi_line() {
+                assert_eq!(
+                    format_expression(
+                        &List::new(
+                            types::None::new(Position::fake()),
+                            vec![ListElement::Single(
+                                None::new(Position::new("", 2, 1, "")).into()
+                            )],
+                            Position::new("", 1, 1, "")
+                        )
+                        .into()
+                    ),
+                    indoc!(
+                        "
+                        [none
+                          none,
+                        ]
+                        "
+                    )
+                    .trim()
+                );
+            }
+
+            #[test]
+            fn format_multi_line_with_two_elements() {
+                assert_eq!(
+                    format_expression(
+                        &List::new(
+                            types::Number::new(Position::fake()),
+                            vec![
+                                ListElement::Single(
+                                    Number::new(1.0, Position::new("", 2, 1, "")).into()
+                                ),
+                                ListElement::Single(Number::new(2.0, Position::fake()).into())
+                            ],
+                            Position::new("", 1, 1, "")
+                        )
+                        .into()
+                    ),
+                    indoc!(
+                        "
+                        [number
+                          1,
+                          2,
+                        ]
+                        "
+                    )
+                    .trim()
                 );
             }
 
