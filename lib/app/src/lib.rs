@@ -13,6 +13,7 @@ mod package_build_script_compiler;
 pub mod package_builder;
 mod package_configuration;
 pub mod package_creator;
+pub mod package_formatter;
 pub mod package_initializer;
 mod package_test_builder;
 pub mod package_test_information_compiler;

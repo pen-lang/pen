@@ -6,9 +6,9 @@ mod infrastructure;
 mod main_module_compiler;
 mod main_package_directory_finder;
 mod module_compiler;
-mod module_formatter;
 mod package_builder;
 mod package_creator;
+mod package_formatter;
 mod package_test_information_compiler;
 mod prelude_module_compiler;
 mod test_configuration;
@@ -57,7 +57,14 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                         .help("Sets a package directory"),
                 ),
         )
-        .subcommand(clap::Command::new("format").about("Formats a module file"))
+        .subcommand(
+            clap::Command::new("format").about("Formats a package").arg(
+                clap::Arg::new("stdin")
+                    .long("stdin")
+                    .takes_value(false)
+                    .help("Formats stdin instead"),
+            ),
+        )
         .subcommand(
             clap::Command::new("compile")
                 .hide(true)
@@ -182,7 +189,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
             matches.value_of("directory").unwrap(),
             matches.is_present("library"),
         ),
-        ("format", _) => module_formatter::format(),
+        ("format", matches) => package_formatter::format(matches.is_present("stdin")),
         ("compile", matches) => module_compiler::compile(
             matches.value_of("source file").unwrap(),
             matches.value_of("dependency file").unwrap(),
