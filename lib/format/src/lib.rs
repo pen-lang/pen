@@ -750,6 +750,10 @@ mod tests {
     use indoc::indoc;
     use position::{test::PositionFake, Position};
 
+    fn line_position(line: usize) -> Position {
+        Position::new("", line, 1, "")
+    }
+
     #[test]
     fn format_empty_module() {
         assert_eq!(
@@ -1251,9 +1255,9 @@ mod tests {
                             vec![],
                             Position::fake()
                         ),
-                        Position::new("", 1, 1, "")
+                        line_position(1)
                     )],
-                    None::new(Position::new("", 2, 1, "")),
+                    None::new(line_position(2)),
                     Position::fake()
                 )),
                 indoc!(
@@ -1279,9 +1283,9 @@ mod tests {
                             vec![],
                             Position::fake()
                         ),
-                        Position::new("", 1, 1, "")
+                        line_position(1)
                     )],
-                    None::new(Position::new("", 3, 1, "")),
+                    None::new(line_position(3)),
                     Position::fake()
                 )),
                 indoc!(
@@ -1308,9 +1312,9 @@ mod tests {
                             vec![],
                             Position::fake()
                         ),
-                        Position::new("", 1, 1, "")
+                        line_position(1)
                     )],
-                    None::new(Position::new("", 4, 1, "")),
+                    None::new(line_position(4)),
                     Position::fake()
                 )),
                 indoc!(
@@ -1346,9 +1350,9 @@ mod tests {
                                         vec![],
                                         Position::fake()
                                     ),
-                                    Position::new("", 1, 1, "")
+                                    line_position(1)
                                 )],
-                                None::new(Position::new("", 3, 1, "")),
+                                None::new(line_position(3)),
                                 Position::fake()
                             ),
                             Position::fake(),
@@ -1400,9 +1404,9 @@ mod tests {
                 assert_eq!(
                     format_expression(
                         &Call::new(
-                            Variable::new("foo", Position::new("", 1, 1, "")),
+                            Variable::new("foo", line_position(1)),
                             vec![
-                                Number::new(1.0, Position::new("", 2, 1, "")).into(),
+                                Number::new(1.0, line_position(2)).into(),
                                 Number::new(2.0, Position::fake()).into(),
                             ],
                             Position::fake()
@@ -1651,13 +1655,10 @@ mod tests {
                 assert_eq!(
                     format_expression(
                         &Lambda::new(
-                            vec![Argument::new(
-                                "x",
-                                types::None::new(Position::new("", 2, 1, ""))
-                            )],
+                            vec![Argument::new("x", types::None::new(line_position(2)))],
                             types::None::new(Position::fake()),
                             Block::new(vec![], None::new(Position::fake()), Position::fake()),
-                            Position::new("", 1, 1, "")
+                            line_position(1)
                         )
                         .into()
                     ),
@@ -1680,12 +1681,12 @@ mod tests {
                     format_expression(
                         &Lambda::new(
                             vec![
-                                Argument::new("x", types::None::new(Position::new("", 2, 1, ""))),
+                                Argument::new("x", types::None::new(line_position(2))),
                                 Argument::new("y", types::None::new(Position::fake()))
                             ],
                             types::None::new(Position::fake()),
                             Block::new(vec![], None::new(Position::fake()), Position::fake()),
-                            Position::new("", 1, 1, "")
+                            line_position(1)
                         )
                         .into()
                     ),
@@ -1765,7 +1766,7 @@ mod tests {
                         &BinaryOperation::new(
                             BinaryOperator::Add,
                             Number::new(1.0, Position::fake()),
-                            Number::new(2.0, Position::new("", 1, 1, "")),
+                            Number::new(2.0, line_position(1)),
                             Position::fake()
                         )
                         .into()
@@ -1945,10 +1946,8 @@ mod tests {
                     format_expression(
                         &List::new(
                             types::None::new(Position::fake()),
-                            vec![ListElement::Single(
-                                None::new(Position::new("", 2, 1, "")).into()
-                            )],
-                            Position::new("", 1, 1, "")
+                            vec![ListElement::Single(None::new(line_position(2)).into())],
+                            line_position(1)
                         )
                         .into()
                     ),
@@ -1970,12 +1969,10 @@ mod tests {
                         &List::new(
                             types::Number::new(Position::fake()),
                             vec![
-                                ListElement::Single(
-                                    Number::new(1.0, Position::new("", 2, 1, "")).into()
-                                ),
+                                ListElement::Single(Number::new(1.0, line_position(2)).into()),
                                 ListElement::Single(Number::new(2.0, Position::fake()).into())
                             ],
-                            Position::new("", 1, 1, "")
+                            line_position(1)
                         )
                         .into()
                     ),
@@ -2014,10 +2011,10 @@ mod tests {
                     format_expression(
                         &ListComprehension::new(
                             types::None::new(Position::fake()),
-                            None::new(Position::new("", 2, 1, "")),
+                            None::new(line_position(2)),
                             "x",
                             Variable::new("xs", Position::fake()),
-                            Position::new("", 1, 1, "")
+                            line_position(1)
                         )
                         .into()
                     ),
@@ -2149,10 +2146,10 @@ mod tests {
                             vec![MapEntry::new(
                                 ByteString::new("foo", Position::fake()),
                                 Number::new(1.0, Position::fake()),
-                                Position::new("", 2, 1, "")
+                                line_position(2)
                             )
                             .into()],
-                            Position::new("", 1, 1, "")
+                            line_position(1)
                         )
                         .into()
                     ),
@@ -2178,7 +2175,7 @@ mod tests {
                                 MapEntry::new(
                                     ByteString::new("foo", Position::fake()),
                                     Number::new(1.0, Position::fake()),
-                                    Position::new("", 2, 1, "")
+                                    line_position(2)
                                 )
                                 .into(),
                                 MapEntry::new(
@@ -2188,7 +2185,7 @@ mod tests {
                                 )
                                 .into()
                             ],
-                            Position::new("", 1, 1, "")
+                            line_position(1)
                         )
                         .into()
                     ),
@@ -2293,9 +2290,9 @@ mod tests {
                             vec![RecordField::new(
                                 "x",
                                 None::new(Position::fake()),
-                                Position::new("", 2, 1, "")
+                                line_position(2)
                             )],
-                            Position::new("", 1, 1, "")
+                            line_position(1)
                         )
                         .into()
                     ),
@@ -2321,15 +2318,15 @@ mod tests {
                                 RecordField::new(
                                     "x",
                                     None::new(Position::fake()),
-                                    Position::new("", 2, 1, "")
+                                    line_position(2)
                                 ),
                                 RecordField::new(
                                     "y",
                                     None::new(Position::fake()),
-                                    Position::new("", 2, 1, "")
+                                    line_position(2)
                                 )
                             ],
-                            Position::new("", 1, 1, "")
+                            line_position(1)
                         )
                         .into()
                     ),
