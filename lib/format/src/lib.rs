@@ -30,9 +30,9 @@ pub fn format(module: &Module) -> String {
     .join("\n\n")
         + "\n";
 
-    regex::Regex::new(r"\n *\n")
+    regex::Regex::new(r"[ \t]*\n")
         .unwrap()
-        .replace_all(&string, "\n\n")
+        .replace_all(&string, "\n")
         .into()
 }
 
