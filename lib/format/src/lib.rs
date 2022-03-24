@@ -528,10 +528,19 @@ fn format_expression(expression: &Expression) -> String {
         Expression::String(string) => {
             format!("\"{}\"", string.value())
         }
-        Expression::UnaryOperation(operation) => match operation.operator() {
-            UnaryOperator::Not => "!".to_owned() + &format_expression(operation.expression()),
-            UnaryOperator::Try => format_expression(operation.expression()) + "?",
-        },
+        Expression::UnaryOperation(operation) => {
+            let operand = format_expression(operation.expression());
+            let operand = if matches!(operation.expression(), Expression::BinaryOperation(_)) {
+                "(".to_owned() + &operand + ")"
+            } else {
+                operand
+            };
+
+            match operation.operator() {
+                UnaryOperator::Not => "!".to_owned() + &operand,
+                UnaryOperator::Try => operand + "?",
+            }
+        }
         Expression::Variable(variable) => variable.name().into(),
     }
 }
@@ -1814,34 +1823,58 @@ mod tests {
             }
         }
 
-        #[test]
-        fn format_not_operation() {
-            assert_eq!(
-                format_expression(
-                    &UnaryOperation::new(
-                        UnaryOperator::Not,
-                        Variable::new("x", Position::fake()),
-                        Position::fake()
-                    )
-                    .into()
-                ),
-                "!x"
-            );
-        }
+        mod unary_operation {
+            use super::*;
 
-        #[test]
-        fn format_try_operation() {
-            assert_eq!(
-                format_expression(
-                    &UnaryOperation::new(
-                        UnaryOperator::Try,
-                        Variable::new("x", Position::fake()),
-                        Position::fake()
-                    )
-                    .into()
-                ),
-                "x?"
-            );
+            #[test]
+            fn format_not_operation() {
+                assert_eq!(
+                    format_expression(
+                        &UnaryOperation::new(
+                            UnaryOperator::Not,
+                            Variable::new("x", Position::fake()),
+                            Position::fake()
+                        )
+                        .into()
+                    ),
+                    "!x"
+                );
+            }
+
+            #[test]
+            fn format_try_operation() {
+                assert_eq!(
+                    format_expression(
+                        &UnaryOperation::new(
+                            UnaryOperator::Try,
+                            Variable::new("x", Position::fake()),
+                            Position::fake()
+                        )
+                        .into()
+                    ),
+                    "x?"
+                );
+            }
+
+            #[test]
+            fn format_with_binary_operation() {
+                assert_eq!(
+                    format_expression(
+                        &UnaryOperation::new(
+                            UnaryOperator::Not,
+                            BinaryOperation::new(
+                                BinaryOperator::And,
+                                Boolean::new(true, Position::fake()),
+                                Boolean::new(false, Position::fake()),
+                                Position::fake()
+                            ),
+                            Position::fake()
+                        )
+                        .into(),
+                    ),
+                    "!(true & false)"
+                );
+            }
         }
 
         #[test]
