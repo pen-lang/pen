@@ -39,7 +39,7 @@ static DECIMAL_REGEX: Lazy<regex::Regex> =
     Lazy::new(|| regex::Regex::new(r"^-?([1-9][0-9]*|0)(\.[0-9]+)?").unwrap());
 static STRING_CHARACTER_REGEX: Lazy<regex::Regex> =
     Lazy::new(|| regex::Regex::new(r#"^[^\\"]"#).unwrap());
-static HEX_CHARACTER_REGEX: Lazy<regex::Regex> =
+static BYTE_CHARACTER_REGEX: Lazy<regex::Regex> =
     Lazy::new(|| regex::Regex::new(r"^[0-9a-fA-F]{2}").unwrap());
 
 pub fn module<'a>() -> impl Parser<Stream<'a>, Output = Module> {
@@ -704,7 +704,7 @@ fn decimal_literal<'a>() -> impl Parser<Stream<'a>, Output = f64> {
 
 fn string_literal<'a>() -> impl Parser<Stream<'a>, Output = ByteString> {
     let string_regex: &'static regex::Regex = &STRING_CHARACTER_REGEX;
-    let hex_regex: &'static regex::Regex = &HEX_CHARACTER_REGEX;
+    let byte_regex: &'static regex::Regex = &BYTE_CHARACTER_REGEX;
 
     token((
         attempt(position().skip(character('"'))),
@@ -715,7 +715,8 @@ fn string_literal<'a>() -> impl Parser<Stream<'a>, Output = ByteString> {
             special_string_character("\\n"),
             special_string_character("\\r"),
             special_string_character("\\t"),
-            (attempt(string("\\x")), find(hex_regex)).map(|(prefix, hex)| prefix.to_owned() + hex),
+            (attempt(string("\\x")), find(byte_regex))
+                .map(|(prefix, byte)| prefix.to_owned() + byte),
         ))),
         character('"'),
     ))
