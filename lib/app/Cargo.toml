@@ -11,6 +11,7 @@ bincode = "1"
 fmm = { git = "https://github.com/raviqqe/fmm", branch = "main" }
 fmm-llvm = { git = "https://github.com/raviqqe/fmm", branch = "main" }
 fnv = "1"
+format = { path = "../format" }
 hir = { path = "../hir" }
 hir_mir = { path = "../hir-mir" }
 interface = { path = "../interface" }

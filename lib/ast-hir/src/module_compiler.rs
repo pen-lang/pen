@@ -1,7 +1,7 @@
 use crate::string_compiler;
 
 use super::error::CompileError;
-use hir::ir;
+use hir::{ir, types};
 use position::Position;
 
 pub fn compile(module: &ast::Module) -> Result<ir::Module, CompileError> {
@@ -320,6 +320,7 @@ fn compile_expression(expression: &ast::Expression) -> Result<ir::Expression, Co
             ir::Number::new(number.value(), number.position().clone()).into()
         }
         ast::Expression::Record(record) => {
+            let type_ = types::Reference::new(record.type_name(), record.position().clone());
             let fields = record
                 .fields()
                 .iter()
@@ -334,19 +335,14 @@ fn compile_expression(expression: &ast::Expression) -> Result<ir::Expression, Co
 
             if let Some(old_record) = record.record() {
                 ir::RecordUpdate::new(
-                    record.type_().clone(),
+                    type_,
                     compile_expression(old_record)?,
                     fields,
                     record.position().clone(),
                 )
                 .into()
             } else {
-                ir::RecordConstruction::new(
-                    record.type_().clone(),
-                    fields,
-                    record.position().clone(),
-                )
-                .into()
+                ir::RecordConstruction::new(type_, fields, record.position().clone()).into()
             }
         }
         ast::Expression::String(string) => ir::ByteString::new(
