@@ -357,9 +357,7 @@ fn check_expression(
                     field_types
                         .iter()
                         .find(|field_type| field_type.name() == field.name())
-                        .ok_or_else(|| {
-                            AnalysisError::UnknownRecordField(expression.position().clone())
-                        })?
+                        .ok_or_else(|| AnalysisError::UnknownRecordField(field.position().clone()))?
                         .type_(),
                 )?;
             }
@@ -425,9 +423,7 @@ fn check_expression(
                     field_types
                         .iter()
                         .find(|field_type| field_type.name() == field.name())
-                        .ok_or_else(|| {
-                            AnalysisError::UnknownRecordField(expression.position().clone())
-                        })?
+                        .ok_or_else(|| AnalysisError::UnknownRecordField(field.position().clone()))?
                         .type_(),
                 )?;
             }
