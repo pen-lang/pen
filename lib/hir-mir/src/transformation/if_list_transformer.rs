@@ -8,7 +8,7 @@ use hir::{
 
 const FIRST_REST_NAME: &str = "$firstRest";
 
-pub fn transform(if_: &IfList, context: &CompileContext) -> Result<Expression, CompileError> {
+pub fn transform(context: &CompileContext, if_: &IfList) -> Result<Expression, CompileError> {
     let configuration = &context.configuration()?.list_type;
     let position = if_.position();
 
@@ -34,7 +34,7 @@ pub fn transform(if_: &IfList, context: &CompileContext) -> Result<Expression, C
                 .into(),
             ),
             Variable::new(&configuration.deconstruct_function_name, position.clone()),
-            vec![if_.argument().clone()],
+            vec![if_.list().clone()],
             position.clone(),
         ),
         vec![
@@ -127,6 +127,7 @@ mod tests {
     #[test]
     fn transform_if_list_with_number_type() {
         insta::assert_debug_snapshot!(transform(
+            &CompileContext::dummy(Default::default(), Default::default()),
             &IfList::new(
                 Some(types::Number::new(Position::fake()).into()),
                 Variable::new("xs", Position::fake()),
@@ -136,13 +137,13 @@ mod tests {
                 None::new(Position::fake()),
                 Position::fake(),
             ),
-            &CompileContext::dummy(Default::default(), Default::default()),
         ));
     }
 
     #[test]
     fn transform_if_list_with_any_type() {
         insta::assert_debug_snapshot!(transform(
+            &CompileContext::dummy(Default::default(), Default::default()),
             &IfList::new(
                 Some(types::Any::new(Position::fake()).into()),
                 Variable::new("xs", Position::fake()),
@@ -152,7 +153,6 @@ mod tests {
                 None::new(Position::fake()),
                 Position::fake(),
             ),
-            &CompileContext::dummy(Default::default(), Default::default()),
         ));
     }
 }

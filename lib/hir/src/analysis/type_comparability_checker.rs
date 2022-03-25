@@ -24,6 +24,10 @@ fn check_with_cache(
         Type::Boolean(_) => true,
         Type::Function(_) => false,
         Type::List(list) => check_with_cache(list.element(), record_names)?,
+        Type::Map(map) => {
+            check_with_cache(map.key(), record_names)?
+                && check_with_cache(map.value(), record_names)?
+        }
         Type::None(_) => true,
         Type::Number(_) => true,
         Type::Record(record) => {

@@ -7,6 +7,7 @@ pub mod expression_visitor;
 pub mod module_environment_creator;
 pub mod record_field_resolver;
 pub mod record_field_validator;
+pub mod recursive_type_alias_validator;
 pub mod try_operation_validator;
 pub mod type_canonicalizer;
 pub mod type_checker;
@@ -43,6 +44,7 @@ pub fn analyze(context: &AnalysisContext, module: &Module) -> Result<Module, Ana
         &context.types().keys().cloned().collect(),
         &context.records().keys().cloned().collect(),
     )?;
+    recursive_type_alias_validator::validate(module)?;
 
     let module = type_inferrer::infer(context, module)?;
     type_checker::check_types(context, &module)?;

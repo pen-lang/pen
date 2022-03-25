@@ -9,7 +9,10 @@ use super::{
 use crate::{
     concurrency_configuration::MODULE_LOCAL_SPAWN_FUNCTION_NAME,
     downcast_compiler,
-    transformation::{list_literal_transformer, record_update_transformer},
+    transformation::{
+        if_map_transformer, list_literal_transformer, map_literal_transformer,
+        record_update_transformer,
+    },
 };
 use fnv::FnvHashMap;
 use hir::{
@@ -31,9 +34,9 @@ pub fn compile(
         Expression::Boolean(boolean) => mir::ir::Expression::Boolean(boolean.value()),
         Expression::Call(call) => mir::ir::Call::new(
             type_compiler::compile(
+                context,
                 call.function_type()
                     .ok_or_else(|| AnalysisError::TypeNotInferred(call.position().clone()))?,
-                context,
             )?
             .into_function()
             .ok_or_else(|| AnalysisError::FunctionExpected(call.position().clone()))?,
@@ -50,7 +53,8 @@ pub fn compile(
             compile(if_.else_())?,
         )
         .into(),
-        Expression::IfList(if_) => compile(&if_list_transformer::transform(if_, context)?)?,
+        Expression::IfList(if_) => compile(&if_list_transformer::transform(context, if_)?)?,
+        Expression::IfMap(if_) => compile(&if_map_transformer::transform(context, if_)?)?,
         Expression::IfType(if_) => mir::ir::Case::new(
             compile(if_.argument())?,
             if_.branches()
@@ -102,9 +106,9 @@ pub fn compile(
         Expression::Let(let_) => mir::ir::Let::new(
             let_.name().unwrap_or_default(),
             type_compiler::compile(
+                context,
                 let_.type_()
                     .ok_or_else(|| AnalysisError::TypeNotInferred(let_.position().clone()))?,
-                context,
             )?,
             compile(let_.bound_expression())?,
             compile(let_.expression())?,
@@ -212,6 +216,7 @@ pub fn compile(
             )
             .into()
         }
+        Expression::Map(map) => compile(&map_literal_transformer::transform(context, map)?)?,
         Expression::None(_) => mir::ir::Expression::None,
         Expression::Number(number) => mir::ir::Expression::Number(number.value()),
         Expression::Operation(operation) => compile_operation(operation, context)?,
@@ -222,7 +227,7 @@ pub fn compile(
                 context.types(),
                 context.records(),
             )?;
-            let record_type = type_compiler::compile(construction.type_(), context)?
+            let record_type = type_compiler::compile(context, construction.type_())?
                 .into_record()
                 .unwrap();
 
@@ -246,7 +251,7 @@ pub fn compile(
             let type_ = deconstruction.type_().unwrap();
 
             mir::ir::RecordField::new(
-                type_compiler::compile(type_, context)?
+                type_compiler::compile(context, type_)?
                     .into_record()
                     .unwrap(),
                 record_field_resolver::resolve(
@@ -274,10 +279,10 @@ pub fn compile(
                     THUNK_NAME,
                     compile(thunk.expression())?,
                     type_compiler::compile(
+                        context,
                         thunk.type_().ok_or_else(|| {
                             AnalysisError::TypeNotInferred(thunk.position().clone())
                         })?,
-                        context,
                     )?,
                 ),
                 mir::ir::Variable::new(THUNK_NAME),
@@ -289,32 +294,28 @@ pub fn compile(
             let to = type_canonicalizer::canonicalize(coercion.to(), context.types())?;
             let argument = compile(coercion.argument())?;
 
-            if from.is_list() && to.is_list() {
-                argument
-            } else {
-                match &from {
-                    Type::Boolean(_)
-                    | Type::None(_)
-                    | Type::Number(_)
-                    | Type::Record(_)
-                    | Type::String(_) => mir::ir::Variant::new(
-                        type_compiler::compile(coercion.from(), context)?,
-                        argument,
-                    )
-                    .into(),
-                    Type::Function(function_type) => {
-                        let concrete_type = type_compiler::compile_concrete_function(
-                            function_type,
-                            context.types(),
-                        )?;
+            match &from {
+                Type::Boolean(_)
+                | Type::None(_)
+                | Type::Number(_)
+                | Type::Record(_)
+                | Type::String(_) => {
+                    mir::ir::Variant::new(type_compiler::compile(context, &from)?, argument).into()
+                }
+                Type::Function(function_type) => {
+                    let concrete_type =
+                        type_compiler::compile_concrete_function(function_type, context.types())?;
 
-                        mir::ir::Variant::new(
-                            concrete_type.clone(),
-                            mir::ir::Record::new(concrete_type, vec![argument]),
-                        )
-                        .into()
-                    }
-                    Type::List(list_type) => {
+                    mir::ir::Variant::new(
+                        concrete_type.clone(),
+                        mir::ir::Record::new(concrete_type, vec![argument]),
+                    )
+                    .into()
+                }
+                Type::List(list_type) => {
+                    if to.is_list() {
+                        argument
+                    } else {
                         let concrete_type =
                             type_compiler::compile_concrete_list(list_type, context.types())?;
 
@@ -324,9 +325,23 @@ pub fn compile(
                         )
                         .into()
                     }
-                    Type::Any(_) | Type::Union(_) => argument,
-                    Type::Reference(_) => unreachable!(),
                 }
+                Type::Map(map_type) => {
+                    if to.is_map() {
+                        argument
+                    } else {
+                        let concrete_type =
+                            type_compiler::compile_concrete_map(map_type, context.types())?;
+
+                        mir::ir::Variant::new(
+                            concrete_type.clone(),
+                            mir::ir::Record::new(concrete_type, vec![argument]),
+                        )
+                        .into()
+                    }
+                }
+                Type::Any(_) | Type::Union(_) => argument,
+                Type::Reference(_) => unreachable!(),
             }
         }
         Expression::Variable(variable) => mir::ir::Variable::new(variable.name()).into(),
@@ -348,12 +363,12 @@ fn compile_lambda(
                 .map(|argument| -> Result<_, CompileError> {
                     Ok(mir::ir::Argument::new(
                         argument.name(),
-                        type_compiler::compile(argument.type_(), context)?,
+                        type_compiler::compile(context, argument.type_())?,
                     ))
                 })
                 .collect::<Result<_, _>>()?,
             compile(lambda.body(), context)?,
-            type_compiler::compile(lambda.result_type(), context)?,
+            type_compiler::compile(context, lambda.result_type())?,
         ),
         mir::ir::Variable::new(CLOSURE_NAME),
     )
@@ -372,7 +387,7 @@ fn compile_alternatives(
     union_type_member_calculator::calculate(&type_, context.types())?
         .into_iter()
         .map(|member_type| {
-            let compiled_member_type = type_compiler::compile(&member_type, context)?;
+            let compiled_member_type = type_compiler::compile(context, &member_type)?;
 
             Ok(match &member_type {
                 Type::Function(function_type) => compile_generic_type_alternative(
@@ -487,7 +502,7 @@ fn compile_operation(
                         vec![compile(operation.lhs())?, compile(operation.rhs())?],
                     )
                     .into(),
-                    _ => compile(&equal_operation_transformer::transform(operation, context)?)?,
+                    _ => compile(&equal_operation_transformer::transform(context, operation)?)?,
                 }
             }
             EqualityOperator::NotEqual => {
@@ -515,12 +530,12 @@ fn compile_operation(
                 .type_()
                 .ok_or_else(|| AnalysisError::TypeNotInferred(operation.position().clone()))?;
             let error_type = type_compiler::compile(
+                context,
                 &types::Reference::new(
                     &context.configuration()?.error_type.error_type_name,
                     operation.position().clone(),
                 )
                 .into(),
-                context,
             )?;
 
             mir::ir::Case::new(
@@ -558,7 +573,7 @@ fn compile_spawn_operation(
 
     Ok(mir::ir::Let::new(
         ANY_THUNK_NAME,
-        type_compiler::compile(&thunk_type, context)?,
+        type_compiler::compile(context, &thunk_type)?,
         mir::ir::Call::new(
             type_compiler::compile_spawn_function(),
             mir::ir::Variable::new(MODULE_LOCAL_SPAWN_FUNCTION_NAME),
@@ -575,7 +590,7 @@ fn compile_spawn_operation(
                         .into(),
                         context,
                     )?,
-                    type_compiler::compile(&any_type, context)?,
+                    type_compiler::compile(context, &any_type)?,
                 ),
                 mir::ir::Variable::new(ANY_THUNK_NAME),
             )
@@ -600,7 +615,7 @@ fn compile_spawn_operation(
                     )?,
                     context,
                 )?,
-                type_compiler::compile(result_type, context)?,
+                type_compiler::compile(context, result_type)?,
             ),
             mir::ir::Variable::new(THUNK_NAME),
         ),
@@ -624,12 +639,12 @@ fn compile_record_fields(
             mir::ir::Let::new(
                 field_name.clone(),
                 type_compiler::compile(
+                    context,
                     field_types
                         .iter()
                         .find(|field_type| field_type.name() == field.name())
                         .ok_or_else(|| AnalysisError::RecordFieldUnknown(field.position().clone()))?
                         .type_(),
-                    context,
                 )?,
                 compile(field.expression(), context)?,
                 compile_record_fields(
@@ -813,19 +828,6 @@ mod tests {
                     mir::ir::Variable::new("x"),
                     vec![
                         mir::ir::Alternative::new(
-                            mir::types::Type::Number,
-                            "y",
-                            mir::ir::Let::new(
-                                "y",
-                                mir::types::Type::Variant,
-                                mir::ir::Variant::new(
-                                    mir::types::Type::Number,
-                                    mir::ir::Variable::new("y")
-                                ),
-                                mir::ir::Expression::None
-                            )
-                        ),
-                        mir::ir::Alternative::new(
                             mir::types::Type::None,
                             "y",
                             mir::ir::Let::new(
@@ -833,6 +835,19 @@ mod tests {
                                 mir::types::Type::Variant,
                                 mir::ir::Variant::new(
                                     mir::types::Type::None,
+                                    mir::ir::Variable::new("y")
+                                ),
+                                mir::ir::Expression::None
+                            )
+                        ),
+                        mir::ir::Alternative::new(
+                            mir::types::Type::Number,
+                            "y",
+                            mir::ir::Let::new(
+                                "y",
+                                mir::types::Type::Variant,
+                                mir::ir::Variant::new(
+                                    mir::types::Type::Number,
                                     mir::ir::Variable::new("y")
                                 ),
                                 mir::ir::Expression::None
@@ -966,19 +981,6 @@ mod tests {
                     mir::ir::Variable::new("x"),
                     vec![
                         mir::ir::Alternative::new(
-                            mir::types::Type::None,
-                            "y",
-                            mir::ir::Let::new(
-                                "y",
-                                mir::types::Type::Variant,
-                                mir::ir::Variant::new(
-                                    mir::types::Type::None,
-                                    mir::ir::Variable::new("y")
-                                ),
-                                mir::ir::Variable::new("y")
-                            ),
-                        ),
-                        mir::ir::Alternative::new(
                             concrete_list_type.clone(),
                             "y",
                             mir::ir::Let::new(
@@ -986,6 +988,19 @@ mod tests {
                                 mir::types::Type::Variant,
                                 mir::ir::Variant::new(
                                     concrete_list_type,
+                                    mir::ir::Variable::new("y")
+                                ),
+                                mir::ir::Variable::new("y")
+                            ),
+                        ),
+                        mir::ir::Alternative::new(
+                            mir::types::Type::None,
+                            "y",
+                            mir::ir::Let::new(
+                                "y",
+                                mir::types::Type::Variant,
+                                mir::ir::Variant::new(
+                                    mir::types::Type::None,
                                     mir::ir::Variable::new("y")
                                 ),
                                 mir::ir::Variable::new("y")
@@ -1217,19 +1232,6 @@ mod tests {
                     ),
                     vec![
                         mir::ir::Alternative::new(
-                            mir::types::Type::Number,
-                            "$success",
-                            mir::ir::Let::new(
-                                "$success",
-                                mir::types::Type::Variant,
-                                mir::ir::Variant::new(
-                                    mir::types::Type::Number,
-                                    mir::ir::Variable::new("$success")
-                                ),
-                                mir::ir::Variable::new("$success"),
-                            ),
-                        ),
-                        mir::ir::Alternative::new(
                             mir::types::Type::None,
                             "$success",
                             mir::ir::Let::new(
@@ -1237,6 +1239,19 @@ mod tests {
                                 mir::types::Type::Variant,
                                 mir::ir::Variant::new(
                                     mir::types::Type::None,
+                                    mir::ir::Variable::new("$success")
+                                ),
+                                mir::ir::Variable::new("$success"),
+                            ),
+                        ),
+                        mir::ir::Alternative::new(
+                            mir::types::Type::Number,
+                            "$success",
+                            mir::ir::Let::new(
+                                "$success",
+                                mir::types::Type::Variant,
+                                mir::ir::Variant::new(
+                                    mir::types::Type::Number,
                                     mir::ir::Variable::new("$success")
                                 ),
                                 mir::ir::Variable::new("$success"),

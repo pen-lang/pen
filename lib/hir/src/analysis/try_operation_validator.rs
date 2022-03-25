@@ -34,7 +34,13 @@ fn validate_expression(
             validate(if_.else_())?;
         }
         Expression::IfList(if_) => {
-            validate(if_.argument())?;
+            validate(if_.list())?;
+            validate(if_.then())?;
+            validate(if_.else_())?;
+        }
+        Expression::IfMap(if_) => {
+            validate(if_.map())?;
+            validate(if_.key())?;
             validate(if_.then())?;
             validate(if_.else_())?;
         }
@@ -74,6 +80,18 @@ fn validate_expression(
         Expression::ListComprehension(comprehension) => {
             validate_expression(context, comprehension.element(), None)?;
             validate_expression(context, comprehension.list(), None)?;
+        }
+        Expression::Map(map) => {
+            for element in map.elements() {
+                match element {
+                    MapElement::Insertion(entry) => {
+                        validate(entry.key())?;
+                        validate(entry.value())?
+                    }
+                    MapElement::Map(expression) => validate(expression)?,
+                    MapElement::Removal(expression) => validate(expression)?,
+                }
+            }
         }
         Expression::Operation(operation) => match operation {
             Operation::Arithmetic(operation) => {

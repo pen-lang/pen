@@ -25,6 +25,7 @@
     "foo",
     "getopts",
     "hamt",
+    "hamts",
     "hasher",
     "idempotently",
     "indoc",

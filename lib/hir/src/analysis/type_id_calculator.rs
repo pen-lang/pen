@@ -18,16 +18,13 @@ fn calculate_canonical_string(
     type_: &Type,
     types: &FnvHashMap<String, Type>,
 ) -> Result<String, AnalysisError> {
-    calculate_string(&type_canonicalizer::canonicalize(type_, types)?, types)
+    Ok(calculate_string(&type_canonicalizer::canonicalize(
+        type_, types,
+    )?))
 }
 
-fn calculate_string(
-    type_: &Type,
-    types: &FnvHashMap<String, Type>,
-) -> Result<String, AnalysisError> {
-    let calculate_string = |type_| calculate_string(type_, types);
-
-    Ok(match type_ {
+fn calculate_string(type_: &Type) -> String {
+    match type_ {
         Type::Any(_) => "any".into(),
         Type::Boolean(_) => "boolean".into(),
         Type::Function(function) => format!(
@@ -36,22 +33,27 @@ fn calculate_string(
                 .arguments()
                 .iter()
                 .map(calculate_string)
-                .collect::<Result<Vec<_>, _>>()?
+                .collect::<Vec<_>>()
                 .join(","),
-            calculate_string(function.result())?
+            calculate_string(function.result())
         ),
-        Type::List(list) => format!("[{}]", calculate_string(list.element())?),
+        Type::List(list) => format!("[{}]", calculate_string(list.element())),
+        Type::Map(map) => format!(
+            "{{{}:{}}}",
+            calculate_string(map.key()),
+            calculate_string(map.value())
+        ),
         Type::None(_) => "none".into(),
         Type::Number(_) => "number".into(),
         Type::Record(record) => record.name().into(),
         Type::String(_) => "string".into(),
         Type::Union(union) => format!(
             "({}|{})",
-            calculate_string(union.lhs())?,
-            calculate_string(union.rhs())?,
+            calculate_string(union.lhs()),
+            calculate_string(union.rhs()),
         ),
         Type::Reference(_) => unreachable!(),
-    })
+    }
 }
 
 #[cfg(test)]

@@ -143,7 +143,7 @@ fn calling_convention<'a>() -> impl Parser<Stream<'a>, Output = CallingConventio
     string_literal()
         .expected("calling convention")
         .then(|string| {
-            if string.value() == "c".as_bytes() {
+            if string.value() == "c" {
                 value(CallingConvention::C).left()
             } else {
                 unexpected_any("unknown calling convention").right()
@@ -239,6 +239,18 @@ fn list_type<'a>() -> impl Parser<Stream<'a>, Output = types::List> {
         .expected("list type")
 }
 
+fn map_type<'a>() -> impl Parser<Stream<'a>, Output = types::Map> {
+    (
+        attempt(position().skip(sign("{"))),
+        type_(),
+        sign(":"),
+        type_(),
+        sign("}"),
+    )
+        .map(|(position, key, _, value, _)| types::Map::new(key, value, position))
+        .expected("map type")
+}
+
 fn atomic_type<'a>() -> impl Parser<Stream<'a>, Output = Type> {
     choice((
         boolean_type().map(Type::from),
@@ -248,6 +260,7 @@ fn atomic_type<'a>() -> impl Parser<Stream<'a>, Output = Type> {
         any_type().map(Type::from),
         reference_type().map(Type::from),
         list_type().map(Type::from),
+        map_type().map(Type::from),
         between(sign("("), sign(")"), type_()),
     ))
 }
@@ -469,13 +482,15 @@ fn atomic_expression<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
     lazy(|| {
         no_partial(choice((
             spawn_operation().map(Expression::from),
-            if_type().map(Expression::from),
             if_list().map(Expression::from),
+            if_map().map(Expression::from),
+            if_type().map(Expression::from),
             if_().map(Expression::from),
             lambda().map(Expression::from),
             record().map(Expression::from),
             list_comprehension().map(Expression::from),
             list_literal().map(Expression::from),
+            map_literal().map(Expression::from),
             boolean_literal().map(Expression::from),
             none_literal().map(Expression::from),
             number_literal().map(Expression::from),
@@ -551,6 +566,28 @@ fn if_list<'a>() -> impl Parser<Stream<'a>, Output = IfList> {
         .expected("if-list expression")
 }
 
+fn if_map<'a>() -> impl Parser<Stream<'a>, Output = IfMap> {
+    (
+        attempt((
+            position(),
+            keyword("if"),
+            identifier(),
+            sign("="),
+            expression(),
+            sign("["),
+        )),
+        expression(),
+        sign("]"),
+        block(),
+        keyword("else"),
+        block(),
+    )
+        .map(|((position, _, name, _, map, _), key, _, then, _, else_)| {
+            IfMap::new(name, map, key, then, else_, position)
+        })
+        .expected("if-map expression")
+}
+
 fn if_type<'a>() -> impl Parser<Stream<'a>, Output = IfType> {
     (
         attempt((position(), keyword("if"), identifier(), sign("="))),
@@ -607,13 +644,7 @@ fn record<'a>() -> impl Parser<Stream<'a>, Output = Record> {
                 .len()
                 == fields.len()
             {
-                value(Record::new(
-                    types::Reference::new(name, position.clone()),
-                    record,
-                    fields,
-                    position,
-                ))
-                .left()
+                value(Record::new(name, record, fields, position)).left()
             } else {
                 unexpected_any("duplicate keys in record literal").right()
             }
@@ -678,24 +709,22 @@ fn string_literal<'a>() -> impl Parser<Stream<'a>, Output = ByteString> {
     token((
         attempt(position().skip(character('"'))),
         many(choice((
-            find(string_regex).map(|string: &str| string.as_bytes().to_vec()),
-            character('\\').with(choice((
-                character('\\').map(|_| "\\".as_bytes().to_vec()),
-                character('"').map(|_| "\"".as_bytes().to_vec()),
-                character('n').map(|_| "\n".as_bytes().to_vec()),
-                character('r').map(|_| "\r".as_bytes().to_vec()),
-                character('t').map(|_| "\t".as_bytes().to_vec()),
-                character('x')
-                    .with(find(hex_regex))
-                    .map(|string: &str| vec![u8::from_str_radix(string, 16).unwrap()]),
-            ))),
+            find(string_regex).map(|string: &str| string.into()),
+            special_string_character("\\\\"),
+            special_string_character("\\\""),
+            special_string_character("\\n"),
+            special_string_character("\\r"),
+            special_string_character("\\t"),
+            (attempt(string("\\x")), find(hex_regex)).map(|(prefix, hex)| prefix.to_owned() + hex),
         ))),
         character('"'),
     ))
-    .map(|(position, strings, _): (_, Vec<Vec<u8>>, _)| {
-        ByteString::new(strings.into_iter().flatten().collect::<Vec<u8>>(), position)
-    })
+    .map(|(position, strings, _): (_, Vec<String>, _)| ByteString::new(strings.concat(), position))
     .expected("string literal")
+}
+
+fn special_string_character<'a>(escape: &'static str) -> impl Parser<Stream<'a>, Output = String> {
+    attempt(string(escape)).map(String::from)
 }
 
 fn list_literal<'a>() -> impl Parser<Stream<'a>, Output = List> {
@@ -730,6 +759,33 @@ fn list_comprehension<'a>() -> impl Parser<Stream<'a>, Output = ListComprehensio
             },
         )
         .expected("list literal")
+}
+
+fn map_literal<'a>() -> impl Parser<Stream<'a>, Output = Map> {
+    (
+        attempt(position().skip(sign("{"))),
+        type_(),
+        sign(":"),
+        type_(),
+        sep_end_by(map_element(), sign(",")),
+        sign("}"),
+    )
+        .map(|(position, key_type, _, value_type, elements, _)| {
+            Map::new(key_type, value_type, elements, position)
+        })
+        .expected("map literal")
+}
+
+fn map_element<'a>() -> impl Parser<Stream<'a>, Output = MapElement> {
+    choice((
+        (
+            attempt((position(), expression()).skip(sign(":"))),
+            expression(),
+        )
+            .map(|((position, key), value)| MapEntry::new(key, value, position).into()),
+        sign("...").with(expression()).map(MapElement::Map),
+        expression().map(MapElement::Removal),
+    ))
 }
 
 fn variable<'a>() -> impl Parser<Stream<'a>, Output = Variable> {
@@ -777,9 +833,12 @@ fn keyword<'a>(name: &'static str) -> impl Parser<Stream<'a>, Output = ()> {
         unreachable!("undefined keyword");
     }
 
-    token(attempt(string(name)).skip(not_followed_by(alpha_num())))
-        .with(value(()))
-        .expected(name)
+    token(attempt(string(name)).skip(not_followed_by(choice((
+        alpha_num(),
+        combine::parser::char::char('_'),
+    )))))
+    .with(value(()))
+    .expected(name)
 }
 
 fn sign<'a>(sign: &'static str) -> impl Parser<Stream<'a>, Output = ()> {
@@ -1543,6 +1602,19 @@ mod tests {
                 .into()
             );
         }
+
+        #[test]
+        fn parse_map_type() {
+            assert_eq!(
+                type_().parse(stream("{number:none}", "")).unwrap().0,
+                types::Map::new(
+                    types::Number::new(Position::fake()),
+                    types::None::new(Position::fake()),
+                    Position::fake()
+                )
+                .into()
+            );
+        }
     }
 
     mod expressions {
@@ -1965,6 +2037,24 @@ mod tests {
             );
         }
 
+        #[test]
+        fn parse_if_map() {
+            assert_eq!(
+                if_map()
+                    .parse(stream("if x=xs[42]{none}else{none}", ""))
+                    .unwrap()
+                    .0,
+                IfMap::new(
+                    "x",
+                    Variable::new("xs", Position::fake()),
+                    Number::new(42.0, Position::fake()),
+                    Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                    Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                    Position::fake(),
+                )
+            );
+        }
+
         mod call {
             use super::*;
             use pretty_assertions::assert_eq;
@@ -2369,18 +2459,13 @@ mod tests {
 
             assert_eq!(
                 record().parse(stream("Foo{}", "")).unwrap().0,
-                Record::new(
-                    types::Reference::new("Foo", Position::fake()),
-                    None,
-                    vec![],
-                    Position::fake()
-                )
+                Record::new("Foo", None, vec![], Position::fake())
             );
 
             assert_eq!(
                 expression().parse(stream("Foo{foo:42}", "")).unwrap().0,
                 Record::new(
-                    types::Reference::new("Foo", Position::fake()),
+                    "Foo",
                     None,
                     vec![RecordField::new(
                         "foo",
@@ -2395,7 +2480,7 @@ mod tests {
             assert_eq!(
                 record().parse(stream("Foo{foo:42}", "")).unwrap().0,
                 Record::new(
-                    types::Reference::new("Foo", Position::fake()),
+                    "Foo",
                     None,
                     vec![RecordField::new(
                         "foo",
@@ -2409,7 +2494,7 @@ mod tests {
             assert_eq!(
                 record().parse(stream("Foo{foo:42,bar:42}", "")).unwrap().0,
                 Record::new(
-                    types::Reference::new("Foo", Position::fake()),
+                    "Foo",
                     None,
                     vec![
                         RecordField::new(
@@ -2437,7 +2522,7 @@ mod tests {
                 Call::new(
                     Variable::new("foo", Position::fake()),
                     vec![Record::new(
-                        types::Reference::new("Foo", Position::fake()),
+                        "Foo",
                         None,
                         vec![RecordField::new(
                             "foo",
@@ -2455,7 +2540,7 @@ mod tests {
             assert_eq!(
                 record().parse(stream("Foo{foo:bar(42)}", "")).unwrap().0,
                 Record::new(
-                    types::Reference::new("Foo", Position::fake()),
+                    "Foo",
                     None,
                     vec![RecordField::new(
                         "foo",
@@ -2475,7 +2560,7 @@ mod tests {
             assert_eq!(
                 record().parse(stream("Foo{...foo,bar:42}", "")).unwrap().0,
                 Record::new(
-                    types::Reference::new("Foo", Position::fake()),
+                    "Foo",
                     Some(Variable::new("foo", Position::fake()).into()),
                     vec![RecordField::new(
                         "bar",
@@ -2489,7 +2574,7 @@ mod tests {
             assert_eq!(
                 record().parse(stream("Foo{...foo,bar:42,}", "")).unwrap().0,
                 Record::new(
-                    types::Reference::new("Foo", Position::fake()),
+                    "Foo",
                     Some(Variable::new("foo", Position::fake()).into()),
                     vec![RecordField::new(
                         "bar",
@@ -2506,7 +2591,7 @@ mod tests {
                     .unwrap()
                     .0,
                 Record::new(
-                    types::Reference::new("Foo", Position::fake()),
+                    "Foo",
                     Some(Variable::new("foo", Position::fake()).into()),
                     vec![RecordField::new(
                         "bar",
@@ -2602,13 +2687,13 @@ mod tests {
                 (r#""""#, ""),
                 (r#""foo""#, "foo"),
                 (r#""foo bar""#, "foo bar"),
-                (r#""\"""#, "\""),
-                (r#""\n""#, "\n"),
-                (r#""\r""#, "\r"),
-                (r#""\t""#, "\t"),
-                (r#""\\""#, "\\"),
-                (r#""\n\n""#, "\n\n"),
-                (r#""\x42""#, "\x42"),
+                (r#""\"""#, "\\\""),
+                (r#""\n""#, "\\n"),
+                (r#""\r""#, "\\r"),
+                (r#""\t""#, "\\t"),
+                (r#""\\""#, "\\\\"),
+                (r#""\x42""#, "\\x42"),
+                (r#""\n\n""#, "\\n\\n"),
             ] {
                 assert_eq!(
                     string_literal().parse(stream(source, "")).unwrap().0,
@@ -2769,6 +2854,82 @@ mod tests {
                 );
             }
         }
+
+        #[test]
+        fn parse_map() {
+            for (source, target) in vec![
+                (
+                    "{none:none}",
+                    Map::new(
+                        types::None::new(Position::fake()),
+                        types::None::new(Position::fake()),
+                        vec![],
+                        Position::fake(),
+                    )
+                    .into(),
+                ),
+                (
+                    "{none:none none:none}",
+                    Map::new(
+                        types::None::new(Position::fake()),
+                        types::None::new(Position::fake()),
+                        vec![MapEntry::new(
+                            None::new(Position::fake()),
+                            None::new(Position::fake()),
+                            Position::fake(),
+                        )
+                        .into()],
+                        Position::fake(),
+                    )
+                    .into(),
+                ),
+                (
+                    "{number:none 1:none,2:none}",
+                    Map::new(
+                        types::Number::new(Position::fake()),
+                        types::None::new(Position::fake()),
+                        vec![
+                            MapEntry::new(
+                                Number::new(1.0, Position::fake()),
+                                None::new(Position::fake()),
+                                Position::fake(),
+                            )
+                            .into(),
+                            MapEntry::new(
+                                Number::new(2.0, Position::fake()),
+                                None::new(Position::fake()),
+                                Position::fake(),
+                            )
+                            .into(),
+                        ],
+                        Position::fake(),
+                    )
+                    .into(),
+                ),
+                (
+                    "{none:none ...none}",
+                    Map::new(
+                        types::None::new(Position::fake()),
+                        types::None::new(Position::fake()),
+                        vec![MapElement::Map(None::new(Position::fake()).into())],
+                        Position::fake(),
+                    )
+                    .into(),
+                ),
+                (
+                    "{none:none none}",
+                    Map::new(
+                        types::None::new(Position::fake()),
+                        types::None::new(Position::fake()),
+                        vec![MapElement::Removal(None::new(Position::fake()).into())],
+                        Position::fake(),
+                    )
+                    .into(),
+                ),
+            ] {
+                assert_eq!(expression().parse(stream(source, "")).unwrap().0, target);
+            }
+        }
     }
 
     #[test]
@@ -2790,6 +2951,7 @@ mod tests {
         assert!(keyword("type").parse(stream("bar", "")).is_err());
         // spell-checker: disable-next-line
         assert!(keyword("type").parse(stream("typer", "")).is_err());
+        assert!(keyword("type").parse(stream("type_", "")).is_err());
         assert!(keyword("type").parse(stream("type", "")).is_ok());
     }
 

@@ -29,7 +29,13 @@ fn visit_expression(expression: &Expression, visit: &mut impl FnMut(&Expression)
             visit_expression(if_.else_());
         }
         Expression::IfList(if_) => {
-            visit_expression(if_.argument());
+            visit_expression(if_.list());
+            visit_expression(if_.then());
+            visit_expression(if_.else_());
+        }
+        Expression::IfMap(if_) => {
+            visit_expression(if_.map());
+            visit_expression(if_.key());
             visit_expression(if_.then());
             visit_expression(if_.else_());
         }
@@ -63,6 +69,18 @@ fn visit_expression(expression: &Expression, visit: &mut impl FnMut(&Expression)
         Expression::ListComprehension(comprehension) => {
             visit_expression(comprehension.element());
             visit_expression(comprehension.list());
+        }
+        Expression::Map(map) => {
+            for element in map.elements() {
+                match element {
+                    MapElement::Insertion(entry) => {
+                        visit_expression(entry.key());
+                        visit_expression(entry.value());
+                    }
+                    MapElement::Map(expression) => visit_expression(expression),
+                    MapElement::Removal(expression) => visit_expression(expression),
+                }
+            }
         }
         Expression::Operation(operation) => match operation {
             Operation::Arithmetic(operation) => {

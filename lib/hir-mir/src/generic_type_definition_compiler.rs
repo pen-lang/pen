@@ -39,7 +39,20 @@ fn compile_type_definition(
             )
             .into()]),
         )),
-        _ => None,
+        Type::Map(map_type) => Some(mir::ir::TypeDefinition::new(
+            type_compiler::compile_concrete_map_name(map_type, context.types())?,
+            mir::types::RecordBody::new(vec![mir::types::Record::new(
+                &context.configuration()?.map_type.map_type_name,
+            )
+            .into()]),
+        )),
+        Type::Any(_)
+        | Type::Boolean(_)
+        | Type::String(_)
+        | Type::None(_)
+        | Type::Number(_)
+        | Type::Record(_) => None,
+        Type::Reference(_) | Type::Union(_) => unreachable!(),
     })
 }
 
@@ -49,9 +62,15 @@ fn collect_types(
 ) -> Result<FnvHashSet<Type>, AnalysisError> {
     let mut lower_types = FnvHashSet::default();
 
+    // We need to visit expressions other than type coercion too because type
+    // coercion might be generated just before compilation.
     expression_visitor::visit(module, |expression| match expression {
         Expression::IfList(if_) => {
             lower_types.insert(if_.type_().unwrap().clone());
+        }
+        Expression::IfMap(if_) => {
+            lower_types.insert(if_.key_type().unwrap().clone());
+            lower_types.insert(if_.value_type().unwrap().clone());
         }
         Expression::IfType(if_) => {
             lower_types.extend(
@@ -65,6 +84,10 @@ fn collect_types(
         Expression::List(list) => {
             lower_types.insert(list.type_().clone());
         }
+        Expression::Map(map) => {
+            lower_types.insert(map.key_type().clone());
+            lower_types.insert(map.value_type().clone());
+        }
         Expression::ListComprehension(comprehension) => {
             lower_types.insert(comprehension.input_type().unwrap().clone());
             lower_types.insert(comprehension.output_type().clone());
@@ -72,9 +95,15 @@ fn collect_types(
         Expression::TypeCoercion(coercion) => {
             lower_types.insert(coercion.from().clone());
         }
-        Expression::Operation(Operation::Try(operation)) => {
-            lower_types.extend(operation.type_().cloned());
-        }
+        Expression::Operation(operation) => match operation {
+            Operation::Equality(operation) => {
+                lower_types.extend(operation.type_().cloned());
+            }
+            Operation::Try(operation) => {
+                lower_types.extend(operation.type_().cloned());
+            }
+            _ => {}
+        },
         _ => {}
     });
 
@@ -239,6 +268,49 @@ mod tests {
                             )],
                             None,
                             Position::fake()
+                        ),
+                        Position::fake(),
+                    ),
+                    false,
+                )]),
+                &context,
+            ),
+            Ok(vec![mir::ir::TypeDefinition::new(
+                type_compiler::compile_concrete_list_name(&list_type, context.types()).unwrap(),
+                mir::types::RecordBody::new(vec![mir::types::Record::new(
+                    &context.configuration().unwrap().list_type.list_type_name
+                )
+                .into()]),
+            )])
+        );
+    }
+
+    #[test]
+    fn collect_type_from_equal_operation() {
+        let context = CompileContext::dummy(Default::default(), Default::default());
+        let list_type = types::List::new(types::None::new(Position::fake()), Position::fake());
+        let union_type = types::Union::new(
+            list_type.clone(),
+            types::Record::new(
+                &context.configuration().unwrap().error_type.error_type_name,
+                Position::fake(),
+            ),
+            Position::fake(),
+        );
+
+        assert_eq!(
+            compile(
+                &Module::empty().set_definitions(vec![Definition::fake(
+                    "foo",
+                    Lambda::new(
+                        vec![Argument::new("x", union_type)],
+                        types::Boolean::new(Position::fake()),
+                        EqualityOperation::new(
+                            Some(list_type.clone().into()),
+                            EqualityOperator::Equal,
+                            Variable::new("x", Position::fake()),
+                            Variable::new("x", Position::fake()),
+                            Position::fake(),
                         ),
                         Position::fake(),
                     ),
@@ -433,7 +505,7 @@ mod tests {
                         types::None::new(Position::fake()),
                         IfList::new(
                             Some(list_type.clone().into()),
-                            List::new(types::None::new(Position::fake()), vec![], Position::fake()),
+                            List::new(list_type.element().clone(), vec![], Position::fake()),
                             "x",
                             "xs",
                             None::new(Position::fake()),
@@ -453,6 +525,106 @@ mod tests {
                 )
                 .into()]),
             )])
+        );
+    }
+
+    #[test]
+    fn collect_type_from_if_map() {
+        let context = CompileContext::dummy(Default::default(), Default::default());
+        let key_type = types::List::new(types::Number::new(Position::fake()), Position::fake());
+        let value_type = types::List::new(types::None::new(Position::fake()), Position::fake());
+        let map_type = types::Map::new(key_type.clone(), value_type.clone(), Position::fake());
+
+        assert_eq!(
+            compile(
+                &Module::empty().set_definitions(vec![Definition::fake(
+                    "foo",
+                    Lambda::new(
+                        vec![],
+                        types::None::new(Position::fake()),
+                        IfMap::new(
+                            Some(map_type.key().clone().into()),
+                            Some(map_type.value().clone().into()),
+                            "x",
+                            Map::new(
+                                map_type.key().clone(),
+                                map_type.value().clone(),
+                                vec![],
+                                Position::fake()
+                            ),
+                            Number::new(42.0, Position::fake()),
+                            None::new(Position::fake()),
+                            None::new(Position::fake()),
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    ),
+                    false,
+                )]),
+                &context,
+            ),
+            Ok(vec![
+                mir::ir::TypeDefinition::new(
+                    type_compiler::compile_concrete_list_name(&key_type, context.types()).unwrap(),
+                    mir::types::RecordBody::new(vec![mir::types::Record::new(
+                        &context.configuration().unwrap().list_type.list_type_name
+                    )
+                    .into()]),
+                ),
+                mir::ir::TypeDefinition::new(
+                    type_compiler::compile_concrete_list_name(&value_type, context.types())
+                        .unwrap(),
+                    mir::types::RecordBody::new(vec![mir::types::Record::new(
+                        &context.configuration().unwrap().list_type.list_type_name
+                    )
+                    .into()]),
+                )
+            ])
+        );
+    }
+
+    #[test]
+    fn collect_type_from_map_literal() {
+        let context = CompileContext::dummy(Default::default(), Default::default());
+        let key_type = types::List::new(types::Number::new(Position::fake()), Position::fake());
+        let value_type = types::List::new(types::None::new(Position::fake()), Position::fake());
+
+        assert_eq!(
+            compile(
+                &Module::empty().set_definitions(vec![Definition::fake(
+                    "foo",
+                    Lambda::new(
+                        vec![],
+                        types::None::new(Position::fake()),
+                        Map::new(
+                            key_type.clone(),
+                            value_type.clone(),
+                            vec![],
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    ),
+                    false,
+                )]),
+                &context,
+            ),
+            Ok(vec![
+                mir::ir::TypeDefinition::new(
+                    type_compiler::compile_concrete_list_name(&key_type, context.types()).unwrap(),
+                    mir::types::RecordBody::new(vec![mir::types::Record::new(
+                        &context.configuration().unwrap().list_type.list_type_name
+                    )
+                    .into()]),
+                ),
+                mir::ir::TypeDefinition::new(
+                    type_compiler::compile_concrete_list_name(&value_type, context.types())
+                        .unwrap(),
+                    mir::types::RecordBody::new(vec![mir::types::Record::new(
+                        &context.configuration().unwrap().list_type.list_type_name
+                    )
+                    .into()]),
+                )
+            ])
         );
     }
 }

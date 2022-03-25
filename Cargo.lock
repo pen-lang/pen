@@ -30,6 +30,7 @@ dependencies = [
  "fmm",
  "fmm-llvm",
  "fnv",
+ "format",
  "hir",
  "hir_mir",
  "interface",
@@ -64,8 +65,10 @@ dependencies = [
  "hir",
  "interface",
  "itertools",
+ "once_cell",
  "position",
  "pretty_assertions",
+ "regex",
 ]
 
 [[package]]
@@ -210,7 +213,7 @@ checksum = "279fb028e20b3c4c320317955b77c5e0c9701f05a1d309905d6fc702cdc5053e"
 [[package]]
 name = "fmm"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#47aa595b348eb7052d1dc2394c42927c51f8bb59"
+source = "git+https://github.com/raviqqe/fmm?branch=main#587e8160786ff64328aa6341b738f000bff139b2"
 dependencies = [
  "fnv",
  "hamt",
@@ -222,7 +225,7 @@ dependencies = [
 [[package]]
 name = "fmm-c"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#47aa595b348eb7052d1dc2394c42927c51f8bb59"
+source = "git+https://github.com/raviqqe/fmm?branch=main#587e8160786ff64328aa6341b738f000bff139b2"
 dependencies = [
  "fmm",
  "fnv",
@@ -232,7 +235,7 @@ dependencies = [
 [[package]]
 name = "fmm-llvm"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#47aa595b348eb7052d1dc2394c42927c51f8bb59"
+source = "git+https://github.com/raviqqe/fmm?branch=main#587e8160786ff64328aa6341b738f000bff139b2"
 dependencies = [
  "fmm",
  "hamt",
@@ -255,6 +258,16 @@ checksum = "5fc25a87fa4fd2094bffb06925852034d90a17f0d1e05197d4956d3555752191"
 dependencies = [
  "matches",
  "percent-encoding",
+]
+
+[[package]]
+name = "format"
+version = "0.1.0"
+dependencies = [
+ "ast",
+ "indoc",
+ "position",
+ "regex",
 ]
 
 [[package]]
@@ -378,6 +391,7 @@ version = "0.1.0"
 dependencies = [
  "fnv",
  "once_cell",
+ "petgraph",
  "position",
  "pretty_assertions",
  "serde",
@@ -736,9 +750,9 @@ dependencies = [
 
 [[package]]
 name = "pretty_assertions"
-version = "1.1.0"
+version = "1.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "76d5b548b725018ab5496482b45cb8bef21e9fed1858a6d674e3a8a0f0bb5d50"
+checksum = "57c038cb5319b9c704bf9c227c261d275bfec0ad438118a2787ce47944fb228b"
 dependencies = [
  "ansi_term",
  "ctor",

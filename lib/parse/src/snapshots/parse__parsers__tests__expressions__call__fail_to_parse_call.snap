@@ -1,8 +1,7 @@
 ---
 source: lib/parse/src/parsers.rs
-assertion_line: 2020
+assertion_line: 2144
 expression: "expression().parse(stream(source,\n                          \"\")).map_err(|error|\n                                           ParseError::new(source, \"\",\n                                                           error)).err()"
-
 ---
 Some(
     ParseError {
@@ -13,16 +12,19 @@ Some(
             "if",
             "\\(",
             "[",
+            "{",
             "false",
             "true",
             "none",
             "`\"`",
-            "if-type expression",
             "if-list expression",
+            "if-map expression",
+            "if-type expression",
             "if expression",
             "function expression",
             "record literal",
             "list literal",
+            "map literal",
             "boolean literal",
             "none literal",
             "number literal",

@@ -5,6 +5,7 @@ mod module_compiler;
 mod module_prefix_collector;
 mod name_qualifier;
 mod prelude_module_modifier;
+mod string_compiler;
 
 use error::CompileError;
 use fnv::FnvHashMap;

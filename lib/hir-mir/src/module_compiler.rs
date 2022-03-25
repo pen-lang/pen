@@ -5,7 +5,7 @@ use super::{
 use crate::spawn_function_declaration_compiler;
 use hir::{analysis::AnalysisError, ir::*};
 
-pub fn compile(module: &Module, context: &CompileContext) -> Result<mir::ir::Module, CompileError> {
+pub fn compile(context: &CompileContext, module: &Module) -> Result<mir::ir::Module, CompileError> {
     Ok(mir::ir::Module::new(
         module
             .type_definitions()
@@ -22,7 +22,7 @@ pub fn compile(module: &Module, context: &CompileContext) -> Result<mir::ir::Mod
                 Ok(mir::ir::ForeignDeclaration::new(
                     declaration.name(),
                     declaration.foreign_name(),
-                    type_compiler::compile(declaration.type_(), context)?
+                    type_compiler::compile(context, declaration.type_())?
                         .into_function()
                         .ok_or_else(|| {
                             AnalysisError::FunctionExpected(declaration.position().clone())
@@ -81,7 +81,7 @@ fn compile_type_definition(
             type_definition
                 .fields()
                 .iter()
-                .map(|field| type_compiler::compile(field.type_(), context))
+                .map(|field| type_compiler::compile(context, field.type_()))
                 .collect::<Result<_, _>>()?,
         ),
     ))
@@ -102,7 +102,7 @@ fn compile_definition(
     context: &CompileContext,
 ) -> Result<mir::ir::Definition, CompileError> {
     let body = expression_compiler::compile(definition.lambda().body(), context)?;
-    let result_type = type_compiler::compile(definition.lambda().result_type(), context)?;
+    let result_type = type_compiler::compile(context, definition.lambda().result_type())?;
 
     Ok(if definition.lambda().arguments().is_empty() {
         mir::ir::Definition::thunk(definition.name(), body, result_type)
@@ -116,7 +116,7 @@ fn compile_definition(
                 .map(|argument| -> Result<_, CompileError> {
                     Ok(mir::ir::Argument::new(
                         argument.name(),
-                        type_compiler::compile(argument.type_(), context)?,
+                        type_compiler::compile(context, argument.type_())?,
                     ))
                 })
                 .collect::<Result<_, _>>()?,
@@ -139,8 +139,8 @@ mod tests {
 
     fn compile_module(module: &Module) -> Result<mir::ir::Module, CompileError> {
         compile(
-            module,
             &CompileContext::new(module, COMPILE_CONFIGURATION.clone().into()),
+            module,
         )
     }
 

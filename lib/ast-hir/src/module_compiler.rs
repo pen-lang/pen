@@ -1,5 +1,7 @@
+use crate::string_compiler;
+
 use super::error::CompileError;
-use hir::ir;
+use hir::{ir, types};
 use position::Position;
 
 pub fn compile(module: &ast::Module) -> Result<ir::Module, CompileError> {
@@ -216,9 +218,20 @@ fn compile_expression(expression: &ast::Expression) -> Result<ir::Expression, Co
         ast::Expression::If(if_) => compile_if(if_.branches(), if_.else_(), if_.position())?.into(),
         ast::Expression::IfList(if_) => ir::IfList::new(
             None,
-            compile_expression(if_.argument())?,
+            compile_expression(if_.list())?,
             if_.first_name(),
             if_.rest_name(),
+            compile_block(if_.then())?,
+            compile_block(if_.else_())?,
+            if_.position().clone(),
+        )
+        .into(),
+        ast::Expression::IfMap(if_) => ir::IfMap::new(
+            None,
+            None,
+            if_.name(),
+            compile_expression(if_.map())?,
+            compile_expression(if_.key())?,
             compile_block(if_.then())?,
             compile_block(if_.else_())?,
             if_.position().clone(),
@@ -276,11 +289,38 @@ fn compile_expression(expression: &ast::Expression) -> Result<ir::Expression, Co
             comprehension.position().clone(),
         )
         .into(),
+        ast::Expression::Map(map) => ir::Map::new(
+            map.key_type().clone(),
+            map.value_type().clone(),
+            map.elements()
+                .iter()
+                .map(|element| {
+                    Ok(match element {
+                        ast::MapElement::Insertion(entry) => {
+                            ir::MapElement::Insertion(ir::MapEntry::new(
+                                compile_expression(entry.key())?,
+                                compile_expression(entry.value())?,
+                                entry.position().clone(),
+                            ))
+                        }
+                        ast::MapElement::Map(element) => {
+                            ir::MapElement::Map(compile_expression(element)?)
+                        }
+                        ast::MapElement::Removal(element) => {
+                            ir::MapElement::Removal(compile_expression(element)?)
+                        }
+                    })
+                })
+                .collect::<Result<_, _>>()?,
+            map.position().clone(),
+        )
+        .into(),
         ast::Expression::None(none) => ir::None::new(none.position().clone()).into(),
         ast::Expression::Number(number) => {
             ir::Number::new(number.value(), number.position().clone()).into()
         }
         ast::Expression::Record(record) => {
+            let type_ = types::Reference::new(record.type_name(), record.position().clone());
             let fields = record
                 .fields()
                 .iter()
@@ -295,24 +335,21 @@ fn compile_expression(expression: &ast::Expression) -> Result<ir::Expression, Co
 
             if let Some(old_record) = record.record() {
                 ir::RecordUpdate::new(
-                    record.type_().clone(),
+                    type_,
                     compile_expression(old_record)?,
                     fields,
                     record.position().clone(),
                 )
                 .into()
             } else {
-                ir::RecordConstruction::new(
-                    record.type_().clone(),
-                    fields,
-                    record.position().clone(),
-                )
-                .into()
+                ir::RecordConstruction::new(type_, fields, record.position().clone()).into()
             }
         }
-        ast::Expression::String(string) => {
-            ir::ByteString::new(string.value(), string.position().clone()).into()
-        }
+        ast::Expression::String(string) => ir::ByteString::new(
+            string_compiler::compile(string.value()),
+            string.position().clone(),
+        )
+        .into(),
         ast::Expression::UnaryOperation(operation) => {
             let operand = compile_expression(operation.expression())?;
 

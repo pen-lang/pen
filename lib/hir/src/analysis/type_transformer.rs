@@ -45,6 +45,12 @@ fn transform_type(type_: &Type, transform: &impl Fn(&Type) -> Type) -> Type {
         Type::List(list) => {
             types::List::new(transform_deeply(list.element()), list.position().clone()).into()
         }
+        Type::Map(map) => types::Map::new(
+            transform_deeply(map.key()),
+            transform_deeply(map.value()),
+            map.position().clone(),
+        )
+        .into(),
         Type::Union(union) => types::Union::new(
             transform_deeply(union.lhs()),
             transform_deeply(union.rhs()),
@@ -137,50 +143,60 @@ fn transform_lambda(lambda: &Lambda, transform: &impl Fn(&Type) -> Type) -> Lamb
 }
 
 fn transform_expression(expression: &Expression, transform: &impl Fn(&Type) -> Type) -> Expression {
+    let transform_expression = |expression| transform_expression(expression, transform);
+
     match expression {
         Expression::Call(call) => Call::new(
             call.function_type().map(transform),
-            transform_expression(call.function(), transform),
-            call.arguments()
-                .iter()
-                .map(|argument| transform_expression(argument, transform))
-                .collect(),
+            transform_expression(call.function()),
+            call.arguments().iter().map(transform_expression).collect(),
             call.position().clone(),
         )
         .into(),
         Expression::If(if_) => If::new(
-            transform_expression(if_.condition(), transform),
-            transform_expression(if_.then(), transform),
-            transform_expression(if_.else_(), transform),
+            transform_expression(if_.condition()),
+            transform_expression(if_.then()),
+            transform_expression(if_.else_()),
             if_.position().clone(),
         )
         .into(),
         Expression::IfList(if_) => IfList::new(
             if_.type_().map(transform),
-            transform_expression(if_.argument(), transform),
+            transform_expression(if_.list()),
             if_.first_name(),
             if_.rest_name(),
-            transform_expression(if_.then(), transform),
-            transform_expression(if_.else_(), transform),
+            transform_expression(if_.then()),
+            transform_expression(if_.else_()),
+            if_.position().clone(),
+        )
+        .into(),
+        Expression::IfMap(if_) => IfMap::new(
+            if_.key_type().map(transform),
+            if_.value_type().map(transform),
+            if_.name(),
+            transform_expression(if_.map()),
+            transform_expression(if_.key()),
+            transform_expression(if_.then()),
+            transform_expression(if_.else_()),
             if_.position().clone(),
         )
         .into(),
         Expression::IfType(if_) => IfType::new(
             if_.name(),
-            transform_expression(if_.argument(), transform),
+            transform_expression(if_.argument()),
             if_.branches()
                 .iter()
                 .map(|branch| {
                     IfTypeBranch::new(
                         transform(branch.type_()),
-                        transform_expression(branch.expression(), transform),
+                        transform_expression(branch.expression()),
                     )
                 })
                 .collect(),
             if_.else_().map(|branch| {
                 ElseBranch::new(
                     branch.type_().map(transform),
-                    transform_expression(branch.expression(), transform),
+                    transform_expression(branch.expression()),
                     branch.position().clone(),
                 )
             }),
@@ -191,8 +207,8 @@ fn transform_expression(expression: &Expression, transform: &impl Fn(&Type) -> T
         Expression::Let(let_) => Let::new(
             let_.name().map(String::from),
             let_.type_().map(transform),
-            transform_expression(let_.bound_expression(), transform),
-            transform_expression(let_.expression(), transform),
+            transform_expression(let_.bound_expression()),
+            transform_expression(let_.expression()),
             let_.position().clone(),
         )
         .into(),
@@ -202,10 +218,10 @@ fn transform_expression(expression: &Expression, transform: &impl Fn(&Type) -> T
                 .iter()
                 .map(|element| match element {
                     ListElement::Multiple(element) => {
-                        ListElement::Multiple(transform_expression(element, transform))
+                        ListElement::Multiple(transform_expression(element))
                     }
                     ListElement::Single(element) => {
-                        ListElement::Single(transform_expression(element, transform))
+                        ListElement::Single(transform_expression(element))
                     }
                 })
                 .collect(),
@@ -215,10 +231,28 @@ fn transform_expression(expression: &Expression, transform: &impl Fn(&Type) -> T
         Expression::ListComprehension(comprehension) => ListComprehension::new(
             comprehension.input_type().map(transform),
             transform(comprehension.output_type()),
-            transform_expression(comprehension.element(), transform),
+            transform_expression(comprehension.element()),
             comprehension.element_name(),
-            transform_expression(comprehension.list(), transform),
+            transform_expression(comprehension.list()),
             comprehension.position().clone(),
+        )
+        .into(),
+        Expression::Map(map) => Map::new(
+            transform(map.key_type()),
+            transform(map.value_type()),
+            map.elements()
+                .iter()
+                .map(|element| match element {
+                    MapElement::Insertion(entry) => MapElement::Insertion(MapEntry::new(
+                        transform_expression(entry.key()),
+                        transform_expression(entry.value()),
+                        entry.position().clone(),
+                    )),
+                    MapElement::Map(map) => MapElement::Map(transform_expression(map)),
+                    MapElement::Removal(key) => MapElement::Removal(transform_expression(key)),
+                })
+                .collect(),
+            map.position().clone(),
         )
         .into(),
         Expression::Operation(operation) => transform_operation(operation, transform).into(),
@@ -230,7 +264,7 @@ fn transform_expression(expression: &Expression, transform: &impl Fn(&Type) -> T
                 .map(|field| {
                     RecordField::new(
                         field.name(),
-                        transform_expression(field.expression(), transform),
+                        transform_expression(field.expression()),
                         field.position().clone(),
                     )
                 })
@@ -240,21 +274,21 @@ fn transform_expression(expression: &Expression, transform: &impl Fn(&Type) -> T
         .into(),
         Expression::RecordDeconstruction(deconstruction) => RecordDeconstruction::new(
             deconstruction.type_().map(transform),
-            transform_expression(deconstruction.record(), transform),
+            transform_expression(deconstruction.record()),
             deconstruction.field_name(),
             deconstruction.position().clone(),
         )
         .into(),
         Expression::RecordUpdate(update) => RecordUpdate::new(
             transform(update.type_()),
-            transform_expression(update.record(), transform),
+            transform_expression(update.record()),
             update
                 .fields()
                 .iter()
                 .map(|field| {
                     RecordField::new(
                         field.name(),
-                        transform_expression(field.expression(), transform),
+                        transform_expression(field.expression()),
                         field.position().clone(),
                     )
                 })
@@ -264,14 +298,14 @@ fn transform_expression(expression: &Expression, transform: &impl Fn(&Type) -> T
         .into(),
         Expression::Thunk(thunk) => Thunk::new(
             thunk.type_().map(transform),
-            transform_expression(thunk.expression(), transform),
+            transform_expression(thunk.expression()),
             thunk.position().clone(),
         )
         .into(),
         Expression::TypeCoercion(coercion) => TypeCoercion::new(
             transform(coercion.from()),
             transform(coercion.to()),
-            transform_expression(coercion.argument(), transform),
+            transform_expression(coercion.argument()),
             coercion.position().clone(),
         )
         .into(),
@@ -284,11 +318,13 @@ fn transform_expression(expression: &Expression, transform: &impl Fn(&Type) -> T
 }
 
 fn transform_operation(operation: &Operation, transform: &impl Fn(&Type) -> Type) -> Operation {
+    let transform_expression = |expression| transform_expression(expression, transform);
+
     match operation {
         Operation::Arithmetic(operation) => ArithmeticOperation::new(
             operation.operator(),
-            transform_expression(operation.lhs(), transform),
-            transform_expression(operation.rhs(), transform),
+            transform_expression(operation.lhs()),
+            transform_expression(operation.rhs()),
             operation.position().clone(),
         )
         .into(),
@@ -299,34 +335,34 @@ fn transform_operation(operation: &Operation, transform: &impl Fn(&Type) -> Type
         .into(),
         Operation::Boolean(operation) => BooleanOperation::new(
             operation.operator(),
-            transform_expression(operation.lhs(), transform),
-            transform_expression(operation.rhs(), transform),
+            transform_expression(operation.lhs()),
+            transform_expression(operation.rhs()),
             operation.position().clone(),
         )
         .into(),
         Operation::Equality(operation) => EqualityOperation::new(
             operation.type_().map(transform),
             operation.operator(),
-            transform_expression(operation.lhs(), transform),
-            transform_expression(operation.rhs(), transform),
+            transform_expression(operation.lhs()),
+            transform_expression(operation.rhs()),
             operation.position().clone(),
         )
         .into(),
         Operation::Not(operation) => NotOperation::new(
-            transform_expression(operation.expression(), transform),
+            transform_expression(operation.expression()),
             operation.position().clone(),
         )
         .into(),
         Operation::Order(operation) => OrderOperation::new(
             operation.operator(),
-            transform_expression(operation.lhs(), transform),
-            transform_expression(operation.rhs(), transform),
+            transform_expression(operation.lhs()),
+            transform_expression(operation.rhs()),
             operation.position().clone(),
         )
         .into(),
         Operation::Try(operation) => TryOperation::new(
             operation.type_().map(transform),
-            transform_expression(operation.expression(), transform),
+            transform_expression(operation.expression()),
             operation.position().clone(),
         )
         .into(),

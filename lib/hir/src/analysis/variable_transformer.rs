@@ -72,11 +72,28 @@ fn transform_expression(
         .into(),
         Expression::IfList(if_) => IfList::new(
             if_.type_().cloned(),
-            transform_expression(if_.argument(), transform),
+            transform_expression(if_.list(), transform),
             if_.first_name(),
             if_.rest_name(),
             transform_expression(if_.then(), &|variable| {
                 if if_.first_name() == variable.name() || if_.rest_name() == variable.name() {
+                    variable.clone().into()
+                } else {
+                    transform(variable)
+                }
+            }),
+            transform_expression(if_.else_(), transform),
+            if_.position().clone(),
+        )
+        .into(),
+        Expression::IfMap(if_) => IfMap::new(
+            if_.key_type().cloned(),
+            if_.value_type().cloned(),
+            if_.name(),
+            transform_expression(if_.map(), transform),
+            transform_expression(if_.key(), transform),
+            transform_expression(if_.then(), &|variable| {
+                if if_.name() == variable.name() {
                     variable.clone().into()
                 } else {
                     transform(variable)
@@ -162,6 +179,26 @@ fn transform_expression(
             comprehension.element_name(),
             transform_expression(comprehension.list(), transform),
             comprehension.position().clone(),
+        )
+        .into(),
+        Expression::Map(map) => Map::new(
+            map.key_type().clone(),
+            map.value_type().clone(),
+            map.elements()
+                .iter()
+                .map(|element| match element {
+                    MapElement::Insertion(entry) => MapElement::Insertion(MapEntry::new(
+                        transform_expression(entry.key(), transform),
+                        transform_expression(entry.value(), transform),
+                        entry.position().clone(),
+                    )),
+                    MapElement::Map(map) => MapElement::Map(transform_expression(map, transform)),
+                    MapElement::Removal(key) => {
+                        MapElement::Removal(transform_expression(key, transform))
+                    }
+                })
+                .collect(),
+            map.position().clone(),
         )
         .into(),
         Expression::Operation(operation) => transform_operation(operation, transform).into(),

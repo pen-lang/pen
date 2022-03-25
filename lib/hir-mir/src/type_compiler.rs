@@ -5,12 +5,13 @@ use hir::{
     types::{self, Type},
 };
 
-pub fn compile(type_: &Type, context: &CompileContext) -> Result<mir::types::Type, CompileError> {
+pub fn compile(context: &CompileContext, type_: &Type) -> Result<mir::types::Type, CompileError> {
     Ok(
         match type_canonicalizer::canonicalize(type_, context.types())? {
             Type::Boolean(_) => mir::types::Type::Boolean,
             Type::Function(function) => compile_function(&function, context)?.into(),
             Type::List(_) => compile_list(context)?.into(),
+            Type::Map(_) => compile_map(context)?.into(),
             Type::None(_) => mir::types::Type::None,
             Type::Number(_) => mir::types::Type::Number,
             Type::Record(record) => mir::types::Record::new(record.name()).into(),
@@ -25,7 +26,7 @@ pub fn compile_function(
     function: &types::Function,
     context: &CompileContext,
 ) -> Result<mir::types::Function, CompileError> {
-    let compile = |type_| compile(type_, context);
+    let compile = |type_| compile(context, type_);
 
     Ok(mir::types::Function::new(
         function
@@ -78,6 +79,32 @@ pub fn compile_concrete_list_name(
     Ok(format!(
         "_list_{}",
         type_id_calculator::calculate(list.element(), types)?
+    ))
+}
+
+pub fn compile_map(context: &CompileContext) -> Result<mir::types::Record, CompileError> {
+    Ok(mir::types::Record::new(
+        &context.configuration()?.map_type.map_type_name,
+    ))
+}
+
+pub fn compile_concrete_map(
+    map: &types::Map,
+    types: &FnvHashMap<String, Type>,
+) -> Result<mir::types::Record, CompileError> {
+    Ok(mir::types::Record::new(compile_concrete_map_name(
+        map, types,
+    )?))
+}
+
+pub fn compile_concrete_map_name(
+    map: &types::Map,
+    types: &FnvHashMap<String, Type>,
+) -> Result<String, CompileError> {
+    Ok(format!(
+        "_map_{}_{}",
+        type_id_calculator::calculate(map.key(), types)?,
+        type_id_calculator::calculate(map.value(), types)?,
     ))
 }
 

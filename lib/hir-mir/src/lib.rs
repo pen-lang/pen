@@ -10,6 +10,7 @@ mod generic_type_definition_compiler;
 mod list_type_configuration;
 mod main_function_compiler;
 mod main_module_configuration;
+mod map_type_configuration;
 mod module_compiler;
 mod module_interface_compiler;
 mod spawn_function_declaration_compiler;
@@ -19,16 +20,18 @@ mod test_module_configuration;
 mod transformation;
 mod type_compiler;
 
-use self::{context::CompileContext, transformation::record_equal_function_transformer};
 pub use compile_configuration::CompileConfiguration;
 pub use concurrency_configuration::ConcurrencyConfiguration;
+use context::CompileContext;
 pub use error::CompileError;
 pub use error_type_configuration::ErrorTypeConfiguration;
 use hir::ir::*;
 pub use list_type_configuration::ListTypeConfiguration;
 pub use main_module_configuration::*;
+pub use map_type_configuration::{HashConfiguration, MapTypeConfiguration};
 pub use string_type_configuration::StringTypeConfiguration;
 pub use test_module_configuration::TestModuleConfiguration;
+use transformation::{record_equal_function_transformer, record_hash_function_transformer};
 
 pub fn compile_main(
     module: &Module,
@@ -82,11 +85,12 @@ fn compile_module(
 ) -> Result<(mir::ir::Module, interface::Module), CompileError> {
     let module = hir::analysis::analyze(context.analysis(), module)?;
     let module = record_equal_function_transformer::transform(context, &module)?;
+    let module = record_hash_function_transformer::transform(context, &module)?;
     ffi_variant_type_validator::validate(context, &module)?;
 
     Ok((
         {
-            let module = module_compiler::compile(&module, context)?;
+            let module = module_compiler::compile(context, &module)?;
             mir::analysis::check_types(&module)?;
             module
         },
@@ -100,13 +104,30 @@ mod tests {
     use crate::{
         compile_configuration::COMPILE_CONFIGURATION,
         error_type_configuration::ERROR_TYPE_CONFIGURATION,
+        map_type_configuration::HASH_CONFIGURATION,
     };
     use hir::{
         analysis::AnalysisError,
         test::{DefinitionFake, ModuleFake, TypeDefinitionFake},
         types,
     };
+    use once_cell::sync::Lazy;
     use position::{test::PositionFake, Position};
+
+    static COMBINE_HASH_FUNCTION_DECLARATION: Lazy<Declaration> = Lazy::new(|| {
+        Declaration::new(
+            &HASH_CONFIGURATION.combine_function_name,
+            types::Function::new(
+                vec![
+                    types::Number::new(Position::fake()).into(),
+                    types::Number::new(Position::fake()).into(),
+                ],
+                types::Number::new(Position::fake()),
+                Position::fake(),
+            ),
+            Position::fake(),
+        )
+    });
 
     // TODO Test types included in prelude modules by mocking them.
     fn compile_module(
@@ -202,6 +223,7 @@ mod tests {
                     false,
                     false,
                 )])
+                .set_declarations(vec![COMBINE_HASH_FUNCTION_DECLARATION.clone()])
                 .set_definitions(vec![Definition::fake(
                     "x",
                     Lambda::new(
@@ -240,6 +262,7 @@ mod tests {
                     false,
                     false,
                 )])
+                .set_declarations(vec![COMBINE_HASH_FUNCTION_DECLARATION.clone()])
                 .set_definitions(vec![Definition::fake(
                     "x",
                     Lambda::new(

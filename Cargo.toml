@@ -6,6 +6,7 @@ members = [
   "lib/ast-hir",
   "lib/ffi",
   "lib/ffi-macro",
+  "lib/format",
   "lib/hir",
   "lib/hir-mir",
   "lib/infra",
@@ -29,3 +30,4 @@ exclude = [
 
 [profile.release]
 lto = true
+strip = true
