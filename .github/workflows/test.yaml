@@ -5,6 +5,7 @@ on:
       - main
   pull_request:
     types:
+      - edited
       - labeled
 concurrency:
   group: test-${{ github.ref }}
