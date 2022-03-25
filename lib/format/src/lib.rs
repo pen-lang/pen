@@ -8,13 +8,14 @@ const INDENT_DEPTH: usize = 2;
 
 // TODO Merge comments.
 pub fn format(module: &Module) -> String {
+    let (external_imports, internal_imports) = module
+        .imports()
+        .iter()
+        .partition::<Vec<_>, _>(|import| matches!(import.module_path(), ModulePath::External(_)));
+
     let string = [
-        module
-            .imports()
-            .iter()
-            .map(format_import)
-            .collect::<Vec<_>>()
-            .join("\n"),
+        format_imports(&external_imports),
+        format_imports(&internal_imports),
         module
             .foreign_imports()
             .iter()
@@ -34,6 +35,17 @@ pub fn format(module: &Module) -> String {
         .unwrap()
         .replace_all(&string, "\n")
         .into()
+}
+
+fn format_imports(imports: &[&Import]) -> String {
+    let mut imports = imports
+        .iter()
+        .map(|import| format_import(import))
+        .collect::<Vec<_>>();
+
+    imports.sort();
+
+    imports.join("\n")
 }
 
 fn format_import(import: &Import) -> String {
@@ -840,6 +852,89 @@ mod tests {
                     Position::fake()
                 )),
                 "import 'Foo'Bar { Baz, Blah }\n"
+            );
+        }
+
+        #[test]
+        fn sort_module_imports_with_external_paths() {
+            assert_eq!(
+                format(&Module::new(
+                    vec![
+                        Import::new(
+                            ExternalModulePath::new("Foo", vec!["Foo".into()]),
+                            None,
+                            vec![],
+                        ),
+                        Import::new(
+                            ExternalModulePath::new("Bar", vec!["Bar".into()]),
+                            None,
+                            vec![]
+                        )
+                    ],
+                    vec![],
+                    vec![],
+                    vec![],
+                    Position::fake()
+                )),
+                indoc!(
+                    "
+                    import Bar'Bar
+                    import Foo'Foo
+                    "
+                )
+            );
+        }
+
+        #[test]
+        fn sort_module_imports_with_internal_paths() {
+            assert_eq!(
+                format(&Module::new(
+                    vec![
+                        Import::new(InternalModulePath::new(vec!["Foo".into()]), None, vec![],),
+                        Import::new(InternalModulePath::new(vec!["Bar".into()]), None, vec![])
+                    ],
+                    vec![],
+                    vec![],
+                    vec![],
+                    Position::fake()
+                )),
+                indoc!(
+                    "
+                    import 'Bar
+                    import 'Foo
+                    "
+                )
+            );
+        }
+
+        #[test]
+        fn sort_module_imports_with_external_and_internal_paths() {
+            assert_eq!(
+                format(&Module::new(
+                    vec![
+                        Import::new(
+                            InternalModulePath::new(vec!["Foo".into(), "Bar".into()]),
+                            None,
+                            vec![],
+                        ),
+                        Import::new(
+                            ExternalModulePath::new("Package", vec!["Foo".into(), "Bar".into()]),
+                            None,
+                            vec![]
+                        )
+                    ],
+                    vec![],
+                    vec![],
+                    vec![],
+                    Position::fake()
+                )),
+                indoc!(
+                    "
+                    import Package'Foo'Bar
+
+                    import 'Foo'Bar
+                    "
+                )
             );
         }
     }
