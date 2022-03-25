@@ -768,76 +768,80 @@ mod tests {
         );
     }
 
-    #[test]
-    fn format_internal_module_import() {
-        assert_eq!(
-            format(&Module::new(
-                vec![Import::new(
-                    InternalModulePath::new(vec!["Foo".into(), "Bar".into()]),
-                    None,
+    mod import {
+        use super::*;
+
+        #[test]
+        fn format_internal_module_import() {
+            assert_eq!(
+                format(&Module::new(
+                    vec![Import::new(
+                        InternalModulePath::new(vec!["Foo".into(), "Bar".into()]),
+                        None,
+                        vec![],
+                    )],
                     vec![],
-                )],
-                vec![],
-                vec![],
-                vec![],
-                Position::fake()
-            )),
-            "import 'Foo'Bar\n"
-        );
-    }
+                    vec![],
+                    vec![],
+                    Position::fake()
+                )),
+                "import 'Foo'Bar\n"
+            );
+        }
 
-    #[test]
-    fn format_external_module_import() {
-        assert_eq!(
-            format(&Module::new(
-                vec![Import::new(
-                    ExternalModulePath::new("Package", vec!["Foo".into(), "Bar".into()]),
-                    None,
-                    vec![]
-                )],
-                vec![],
-                vec![],
-                vec![],
-                Position::fake()
-            )),
-            "import Package'Foo'Bar\n"
-        );
-    }
+        #[test]
+        fn format_external_module_import() {
+            assert_eq!(
+                format(&Module::new(
+                    vec![Import::new(
+                        ExternalModulePath::new("Package", vec!["Foo".into(), "Bar".into()]),
+                        None,
+                        vec![]
+                    )],
+                    vec![],
+                    vec![],
+                    vec![],
+                    Position::fake()
+                )),
+                "import Package'Foo'Bar\n"
+            );
+        }
 
-    #[test]
-    fn format_prefixed_module_import() {
-        assert_eq!(
-            format(&Module::new(
-                vec![Import::new(
-                    InternalModulePath::new(vec!["Foo".into(), "Bar".into()]),
-                    Some("Baz".into()),
-                    vec![]
-                )],
-                vec![],
-                vec![],
-                vec![],
-                Position::fake()
-            )),
-            "import 'Foo'Bar as Baz\n"
-        );
-    }
+        #[test]
+        fn format_prefixed_module_import() {
+            assert_eq!(
+                format(&Module::new(
+                    vec![Import::new(
+                        InternalModulePath::new(vec!["Foo".into(), "Bar".into()]),
+                        Some("Baz".into()),
+                        vec![]
+                    )],
+                    vec![],
+                    vec![],
+                    vec![],
+                    Position::fake()
+                )),
+                "import 'Foo'Bar as Baz\n"
+            );
+        }
 
-    #[test]
-    fn format_unqualified_module_import() {
-        assert_eq!(
-            format(&Module::new(
-                vec![Import::new(
-                    InternalModulePath::new(vec!["Foo".into(), "Bar".into()]),
-                    None,
-                    vec!["Baz".into(), "Blah".into()]
-                )],
-                vec![],
-                vec![],
-                vec![],
-                Position::fake()
-            )),
-            "import 'Foo'Bar { Baz, Blah }\n"
-        );
+        #[test]
+        fn format_unqualified_module_import() {
+            assert_eq!(
+                format(&Module::new(
+                    vec![Import::new(
+                        InternalModulePath::new(vec!["Foo".into(), "Bar".into()]),
+                        None,
+                        vec!["Baz".into(), "Blah".into()]
+                    )],
+                    vec![],
+                    vec![],
+                    vec![],
+                    Position::fake()
+                )),
+                "import 'Foo'Bar { Baz, Blah }\n"
+            );
+        }
     }
 
     #[test]
