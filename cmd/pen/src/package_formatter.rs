@@ -5,7 +5,7 @@ use std::{
     sync::Arc,
 };
 
-const STDIN_PATH: &str = "foo";
+const STDIN_PATH: &str = "<stdin>";
 
 pub fn format(stdin: bool) -> Result<(), Box<dyn Error>> {
     if stdin {
