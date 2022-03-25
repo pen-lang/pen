@@ -38,7 +38,8 @@ static HEXADECIMAL_REGEX: Lazy<regex::Regex> =
     Lazy::new(|| regex::Regex::new(r"^0x([1-9a-f][0-9a-f]*|0)").unwrap());
 static DECIMAL_REGEX: Lazy<regex::Regex> =
     Lazy::new(|| regex::Regex::new(r"^-?([1-9][0-9]*|0)(\.[0-9]+)?").unwrap());
-static STRING_REGEX: Lazy<regex::Regex> = Lazy::new(|| regex::Regex::new(r#"^[^\\"]"#).unwrap());
+static STRING_CHARACTER_REGEX: Lazy<regex::Regex> =
+    Lazy::new(|| regex::Regex::new(r#"^[^\\"]"#).unwrap());
 static HEX_CHARACTER_REGEX: Lazy<regex::Regex> =
     Lazy::new(|| regex::Regex::new("[0-9a-fA-F][0-9a-fA-F]").unwrap());
 
@@ -703,13 +704,13 @@ fn decimal_literal<'a>() -> impl Parser<Stream<'a>, Output = f64> {
 }
 
 fn string_literal<'a>() -> impl Parser<Stream<'a>, Output = ByteString> {
-    let string_regex: &'static regex::Regex = &STRING_REGEX;
+    let string_regex: &'static regex::Regex = &STRING_CHARACTER_REGEX;
     let hex_regex: &'static regex::Regex = &HEX_CHARACTER_REGEX;
 
     token((
         attempt(position().skip(character('"'))),
         many(choice((
-            find(string_regex).map(|string: &str| string.into()),
+            find(string_regex).map(String::from),
             special_string_character("\\\\"),
             special_string_character("\\\""),
             special_string_character("\\n"),
