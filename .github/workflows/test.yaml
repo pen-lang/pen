@@ -44,7 +44,7 @@ jobs:
           fail_ci_if_error: true
   feature_tests:
     needs: build
-    if: ${{ github.event.label.name == 'integration-test' }}
+    if: ${{ github.ref == 'refs/heads/main' || github.event.label.name == 'integration-test' }}
     strategy:
       matrix:
         os:
