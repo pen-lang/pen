@@ -40,6 +40,7 @@
     - [Building packages](examples/commands/build.md)
     - [Creating packages](examples/commands/create.md)
     - [Testing packages](examples/commands/test.md)
+    - [Formatting module files](examples/commands/format.md)
   - [Standard packages](examples/standard-packages/README.md)
     - [Core](examples/standard-packages/core.md)
     - [OS](examples/standard-packages/os.md)
