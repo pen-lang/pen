@@ -62,7 +62,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                 clap::Arg::new("stdin")
                     .long("stdin")
                     .takes_value(false)
-                    .help("Formats stdin instead"),
+                    .help("Formats stdin"),
             ),
         )
         .subcommand(
