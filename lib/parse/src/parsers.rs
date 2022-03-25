@@ -32,16 +32,15 @@ static KEYWORDS: Lazy<Vec<&str>> = Lazy::new(|| {
 });
 const OPERATOR_CHARACTERS: &str = "+-*/=<>&|!?";
 
-static BINARY_REGEX: Lazy<regex::Regex> =
-    Lazy::new(|| regex::Regex::new(r"^0b(1[01]*|0)").unwrap());
+static BINARY_REGEX: Lazy<regex::Regex> = Lazy::new(|| regex::Regex::new(r"^0b[01]+").unwrap());
 static HEXADECIMAL_REGEX: Lazy<regex::Regex> =
-    Lazy::new(|| regex::Regex::new(r"^0x([1-9a-f][0-9a-f]*|0)").unwrap());
+    Lazy::new(|| regex::Regex::new(r"^0x[0-9a-fA-F]+").unwrap());
 static DECIMAL_REGEX: Lazy<regex::Regex> =
     Lazy::new(|| regex::Regex::new(r"^-?([1-9][0-9]*|0)(\.[0-9]+)?").unwrap());
 static STRING_CHARACTER_REGEX: Lazy<regex::Regex> =
     Lazy::new(|| regex::Regex::new(r#"^[^\\"]"#).unwrap());
 static HEX_CHARACTER_REGEX: Lazy<regex::Regex> =
-    Lazy::new(|| regex::Regex::new("[0-9a-fA-F][0-9a-fA-F]").unwrap());
+    Lazy::new(|| regex::Regex::new(r"^[0-9a-fA-F]{2}").unwrap());
 
 pub fn module<'a>() -> impl Parser<Stream<'a>, Output = Module> {
     (
