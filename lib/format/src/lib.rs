@@ -220,7 +220,10 @@ fn format_lambda(lambda: &Lambda) -> String {
                 .join("\n")
         },
         format_type(lambda.result_type()),
-        if single_line_arguments {
+        if single_line_arguments
+            && lambda.position().line_number()
+                == lambda.body().expression().position().line_number()
+        {
             format_block(lambda.body())
         } else {
             format_multi_line_block(lambda.body())
@@ -1858,6 +1861,29 @@ mod tests {
                         "
                         \\() none {
                           x = none
+                          none
+                        }
+                        "
+                    )
+                    .trim()
+                );
+            }
+
+            #[test]
+            fn format_single_line_arguments_with_multi_line_body_of_expression() {
+                assert_eq!(
+                    format_expression(
+                        &Lambda::new(
+                            vec![],
+                            types::None::new(Position::fake()),
+                            Block::new(vec![], None::new(line_position(2)), Position::fake()),
+                            line_position(1)
+                        )
+                        .into()
+                    ),
+                    indoc!(
+                        "
+                        \\() none {
                           none
                         }
                         "
