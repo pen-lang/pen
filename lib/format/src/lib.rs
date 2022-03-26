@@ -199,7 +199,7 @@ fn format_lambda(lambda: &Lambda) -> String {
         .iter()
         .map(|argument| format!("{} {}", argument.name(), format_type(argument.type_())))
         .collect::<Vec<_>>();
-    let single_line = arguments.is_empty()
+    let single_line_arguments = arguments.is_empty()
         || Some(lambda.position().line_number())
             == lambda
                 .arguments()
@@ -209,7 +209,7 @@ fn format_lambda(lambda: &Lambda) -> String {
 
     format!(
         "\\{} {} {}",
-        if single_line {
+        if single_line_arguments {
             "(".to_owned() + &arguments.join(", ") + ")"
         } else {
             ["(".into()]
@@ -220,7 +220,7 @@ fn format_lambda(lambda: &Lambda) -> String {
                 .join("\n")
         },
         format_type(lambda.result_type()),
-        if single_line {
+        if single_line_arguments {
             format_block(lambda.body())
         } else {
             format_multi_line_block(lambda.body())
