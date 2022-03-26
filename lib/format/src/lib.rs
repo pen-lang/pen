@@ -205,7 +205,7 @@ fn format_lambda(lambda: &Lambda) -> String {
                 .arguments()
                 .get(0)
                 .map(|argument| argument.type_().position().line_number())
-            && arguments.iter().all(|argument| is_single_line(argument));
+            && arguments.iter().all(is_single_line);
 
     format!(
         "\\{} {} {}",
@@ -622,7 +622,7 @@ fn format_if_type(if_: &IfType) -> String {
             .into_iter()
             .chain(&branches)
             .chain(else_.as_ref())
-            .all(|string| is_single_line(string))
+            .all(is_single_line)
         && Some(if_.position().line_number())
             == if_
                 .branches()
