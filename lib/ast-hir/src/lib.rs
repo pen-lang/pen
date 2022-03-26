@@ -4,6 +4,7 @@ mod imported_module;
 mod module_compiler;
 mod module_prefix_collector;
 mod name_qualifier;
+mod number_compiler;
 mod prelude_module_modifier;
 mod string_compiler;
 

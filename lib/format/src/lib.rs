@@ -487,7 +487,11 @@ fn format_expression(expression: &Expression) -> String {
             }
         }
         Expression::None(_) => "none".into(),
-        Expression::Number(number) => format!("{}", number.value()),
+        Expression::Number(number) => match number.value() {
+            NumberRepresentation::Binary(string) => "0b".to_owned() + string,
+            NumberRepresentation::Hexadecimal(string) => "0x".to_owned() + &string.to_uppercase(),
+            NumberRepresentation::FloatingPoint(string) => string.clone(),
+        },
         Expression::Record(record) => {
             let elements = record
                 .record()
@@ -1487,8 +1491,16 @@ mod tests {
                         &Call::new(
                             Variable::new("foo", Position::fake()),
                             vec![
-                                Number::new(1.0, Position::fake()).into(),
-                                Number::new(2.0, Position::fake()).into(),
+                                Number::new(
+                                    NumberRepresentation::FloatingPoint("1".into()),
+                                    Position::fake()
+                                )
+                                .into(),
+                                Number::new(
+                                    NumberRepresentation::FloatingPoint("2".into()),
+                                    Position::fake()
+                                )
+                                .into(),
                             ],
                             Position::fake()
                         )
@@ -1505,8 +1517,16 @@ mod tests {
                         &Call::new(
                             Variable::new("foo", line_position(1)),
                             vec![
-                                Number::new(1.0, line_position(2)).into(),
-                                Number::new(2.0, Position::fake()).into(),
+                                Number::new(
+                                    NumberRepresentation::FloatingPoint("1".into()),
+                                    line_position(2)
+                                )
+                                .into(),
+                                Number::new(
+                                    NumberRepresentation::FloatingPoint("2".into()),
+                                    Position::fake()
+                                )
+                                .into(),
                             ],
                             Position::fake()
                         )
@@ -1807,7 +1827,13 @@ mod tests {
         #[test]
         fn format_number() {
             assert_eq!(
-                format_expression(&Number::new(42.0, Position::fake()).into()),
+                format_expression(
+                    &Number::new(
+                        NumberRepresentation::FloatingPoint("42".into()),
+                        Position::fake()
+                    )
+                    .into()
+                ),
                 "42"
             );
         }
@@ -1848,8 +1874,14 @@ mod tests {
                     format_expression(
                         &BinaryOperation::new(
                             BinaryOperator::Add,
-                            Number::new(1.0, Position::fake()),
-                            Number::new(2.0, Position::fake()),
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("1".into()),
+                                Position::fake()
+                            ),
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("2".into()),
+                                Position::fake()
+                            ),
                             Position::fake()
                         )
                         .into()
@@ -1864,8 +1896,14 @@ mod tests {
                     format_expression(
                         &BinaryOperation::new(
                             BinaryOperator::Add,
-                            Number::new(1.0, Position::fake()),
-                            Number::new(2.0, line_position(1)),
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("1".into()),
+                                Position::fake()
+                            ),
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("2".into()),
+                                line_position(1)
+                            ),
                             Position::fake()
                         )
                         .into()
@@ -1886,11 +1924,20 @@ mod tests {
                     format_expression(
                         &BinaryOperation::new(
                             BinaryOperator::Add,
-                            Number::new(1.0, Position::fake()),
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("1".into()),
+                                Position::fake()
+                            ),
                             BinaryOperation::new(
                                 BinaryOperator::Multiply,
-                                Number::new(2.0, Position::fake()),
-                                Number::new(3.0, Position::fake()),
+                                Number::new(
+                                    NumberRepresentation::FloatingPoint("2".into()),
+                                    Position::fake()
+                                ),
+                                Number::new(
+                                    NumberRepresentation::FloatingPoint("3".into()),
+                                    Position::fake()
+                                ),
                                 Position::fake()
                             ),
                             Position::fake()
@@ -1907,11 +1954,20 @@ mod tests {
                     format_expression(
                         &BinaryOperation::new(
                             BinaryOperator::Multiply,
-                            Number::new(1.0, Position::fake()),
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("1".into()),
+                                Position::fake()
+                            ),
                             BinaryOperation::new(
                                 BinaryOperator::Add,
-                                Number::new(2.0, Position::fake()),
-                                Number::new(3.0, Position::fake()),
+                                Number::new(
+                                    NumberRepresentation::FloatingPoint("2".into()),
+                                    Position::fake()
+                                ),
+                                Number::new(
+                                    NumberRepresentation::FloatingPoint("3".into()),
+                                    Position::fake()
+                                ),
                                 Position::fake()
                             ),
                             Position::fake()
@@ -2068,8 +2124,20 @@ mod tests {
                         &List::new(
                             types::Number::new(Position::fake()),
                             vec![
-                                ListElement::Single(Number::new(1.0, line_position(2)).into()),
-                                ListElement::Single(Number::new(2.0, Position::fake()).into())
+                                ListElement::Single(
+                                    Number::new(
+                                        NumberRepresentation::FloatingPoint("1".into()),
+                                        line_position(2)
+                                    )
+                                    .into()
+                                ),
+                                ListElement::Single(
+                                    Number::new(
+                                        NumberRepresentation::FloatingPoint("2".into()),
+                                        Position::fake()
+                                    )
+                                    .into()
+                                )
                             ],
                             line_position(1)
                         )
@@ -2158,7 +2226,10 @@ mod tests {
                             types::Number::new(Position::fake()),
                             vec![MapEntry::new(
                                 ByteString::new("foo", Position::fake()),
-                                Number::new(42.0, Position::fake()),
+                                Number::new(
+                                    NumberRepresentation::FloatingPoint("42".into()),
+                                    Position::fake()
+                                ),
                                 Position::fake()
                             )
                             .into()],
@@ -2180,13 +2251,19 @@ mod tests {
                             vec![
                                 MapEntry::new(
                                     ByteString::new("foo", Position::fake()),
-                                    Number::new(1.0, Position::fake()),
+                                    Number::new(
+                                        NumberRepresentation::FloatingPoint("1".into()),
+                                        Position::fake()
+                                    ),
                                     Position::fake()
                                 )
                                 .into(),
                                 MapEntry::new(
                                     ByteString::new("bar", Position::fake()),
-                                    Number::new(2.0, Position::fake()),
+                                    Number::new(
+                                        NumberRepresentation::FloatingPoint("2".into()),
+                                        Position::fake()
+                                    ),
                                     Position::fake()
                                 )
                                 .into()
@@ -2244,7 +2321,10 @@ mod tests {
                             types::Number::new(Position::fake()),
                             vec![MapEntry::new(
                                 ByteString::new("foo", Position::fake()),
-                                Number::new(1.0, Position::fake()),
+                                Number::new(
+                                    NumberRepresentation::FloatingPoint("1".into()),
+                                    Position::fake()
+                                ),
                                 line_position(2)
                             )
                             .into()],
@@ -2273,13 +2353,19 @@ mod tests {
                             vec![
                                 MapEntry::new(
                                     ByteString::new("foo", Position::fake()),
-                                    Number::new(1.0, Position::fake()),
+                                    Number::new(
+                                        NumberRepresentation::FloatingPoint("1".into()),
+                                        Position::fake()
+                                    ),
                                     line_position(2)
                                 )
                                 .into(),
                                 MapEntry::new(
                                     ByteString::new("bar", Position::fake()),
-                                    Number::new(2.0, Position::fake()),
+                                    Number::new(
+                                        NumberRepresentation::FloatingPoint("2".into()),
+                                        Position::fake()
+                                    ),
                                     Position::fake()
                                 )
                                 .into()
@@ -2342,12 +2428,18 @@ mod tests {
                             vec![
                                 RecordField::new(
                                     "x",
-                                    Number::new(1.0, Position::fake()),
+                                    Number::new(
+                                        NumberRepresentation::FloatingPoint("1".into()),
+                                        Position::fake()
+                                    ),
                                     Position::fake()
                                 ),
                                 RecordField::new(
                                     "y",
-                                    Number::new(2.0, Position::fake()),
+                                    Number::new(
+                                        NumberRepresentation::FloatingPoint("2".into()),
+                                        Position::fake()
+                                    ),
                                     Position::fake()
                                 )
                             ],
