@@ -605,52 +605,57 @@ fn format_if_type(if_: &IfType) -> String {
     let branches = if_
         .branches()
         .iter()
-        .map(|branch| format_block(branch.block()))
+        .map(|branch| format_type(branch.type_()) + " " + &format_block(branch.block()))
         .collect::<Vec<_>>();
     let else_ = if_.else_().map(format_block);
-    let single_line = branches.len() == 1
-        && branches
-            .iter()
-            .chain(else_.as_ref())
-            .chain([&argument])
-            .all(|string| is_single_line(string));
 
-    [
+    let head = [
         "if".into(),
         if_.name().into(),
         "=".into(),
-        argument,
+        argument.clone(),
         "as".into(),
-        format_type(if_.branches()[0].type_()),
-        fall_back_to_multi_line(single_line, branches[0].clone(), || {
-            format_multi_line_block(if_.branches()[0].block())
-        }),
-    ]
-    .into_iter()
-    .chain(
-        if_.branches()
-            .iter()
-            .zip(branches)
-            .skip(1)
-            .flat_map(|(branch, string)| {
-                [
-                    "else".into(),
-                    "if".into(),
-                    format_type(branch.type_()),
-                    fall_back_to_multi_line(single_line, string, || {
-                        format_multi_line_block(branch.block())
-                    }),
-                ]
-            }),
-    )
-    .chain(if_.else_().iter().zip(else_).flat_map(|(block, string)| {
-        [
-            "else".into(),
-            fall_back_to_multi_line(single_line, string, || format_multi_line_block(block)),
-        ]
-    }))
-    .collect::<Vec<_>>()
-    .join(" ")
+    ];
+
+    if branches.iter().chain(&else_).count() <= 2
+        && [&argument]
+            .into_iter()
+            .chain(&branches)
+            .chain(else_.as_ref())
+            .all(|string| is_single_line(string))
+        && Some(if_.position().line_number())
+            == if_
+                .branches()
+                .get(0)
+                .map(|branch| branch.block().expression().position().line_number())
+    {
+        head.into_iter()
+            .chain([branches.join(" else if ")])
+            .chain(else_.into_iter().flat_map(|block| ["else".into(), block]))
+            .collect::<Vec<_>>()
+            .join(" ")
+    } else {
+        head.into_iter()
+            .chain([if_
+                .branches()
+                .iter()
+                .map(|branch| {
+                    [
+                        format_type(branch.type_()),
+                        format_multi_line_block(branch.block()),
+                    ]
+                    .join(" ")
+                })
+                .collect::<Vec<_>>()
+                .join(" else if ")])
+            .chain(
+                if_.else_()
+                    .iter()
+                    .flat_map(|block| ["else".into(), format_multi_line_block(block)]),
+            )
+            .collect::<Vec<_>>()
+            .join(" ")
+    }
 }
 
 fn format_list_element(element: &ListElement) -> String {
@@ -1642,69 +1647,122 @@ mod tests {
             );
         }
 
-        #[test]
-        fn format_if_type() {
-            assert_eq!(
-                format_expression(
-                    &IfType::new(
-                        "x",
-                        Variable::new("y", Position::fake()),
-                        vec![
-                            IfTypeBranch::new(
-                                types::None::new(Position::fake()),
-                                Block::new(vec![], None::new(Position::fake()), Position::fake())
-                            ),
-                            IfTypeBranch::new(
-                                types::Number::new(Position::fake()),
-                                Block::new(vec![], None::new(Position::fake()), Position::fake())
-                            )
-                        ],
-                        None,
-                        Position::fake(),
-                    )
-                    .into()
-                ),
-                indoc!(
-                    "
-                    if x = y as none {
-                      none
-                    } else if number {
-                      none
-                    }
-                    "
-                )
-                .trim()
-            );
-        }
+        mod if_type {
+            use super::*;
 
-        #[test]
-        fn format_if_type_with_else_block() {
-            assert_eq!(
-                format_expression(
-                    &IfType::new(
-                        "x",
-                        Variable::new("y", Position::fake()),
-                        vec![
-                            IfTypeBranch::new(
-                                types::None::new(Position::fake()),
-                                Block::new(vec![], None::new(Position::fake()), Position::fake())
-                            ),
-                            IfTypeBranch::new(
-                                types::Number::new(Position::fake()),
-                                Block::new(vec![], None::new(Position::fake()), Position::fake())
-                            )
-                        ],
-                        Some(Block::new(
-                            vec![],
-                            None::new(Position::fake()),
-                            Position::fake()
-                        )),
-                        Position::fake(),
+            #[test]
+            fn format_single_line() {
+                assert_eq!(
+                    format_expression(
+                        &IfType::new(
+                            "x",
+                            Variable::new("y", Position::fake()),
+                            vec![
+                                IfTypeBranch::new(
+                                    types::None::new(Position::fake()),
+                                    Block::new(
+                                        vec![],
+                                        None::new(Position::fake()),
+                                        Position::fake()
+                                    )
+                                ),
+                                IfTypeBranch::new(
+                                    types::Number::new(Position::fake()),
+                                    Block::new(
+                                        vec![],
+                                        None::new(Position::fake()),
+                                        Position::fake()
+                                    )
+                                )
+                            ],
+                            None,
+                            Position::fake(),
+                        )
+                        .into()
+                    ),
+                    "if x = y as none { none } else if number { none }"
+                );
+            }
+
+            #[test]
+            fn format_multi_line() {
+                assert_eq!(
+                    format_expression(
+                        &IfType::new(
+                            "x",
+                            Variable::new("y", Position::fake()),
+                            vec![
+                                IfTypeBranch::new(
+                                    types::None::new(Position::fake()),
+                                    Block::new(
+                                        vec![],
+                                        None::new(line_position(2)),
+                                        Position::fake()
+                                    )
+                                ),
+                                IfTypeBranch::new(
+                                    types::Number::new(Position::fake()),
+                                    Block::new(
+                                        vec![],
+                                        None::new(Position::fake()),
+                                        Position::fake()
+                                    )
+                                )
+                            ],
+                            None,
+                            line_position(1),
+                        )
+                        .into()
+                    ),
+                    indoc!(
+                        "
+                        if x = y as none {
+                          none
+                        } else if number {
+                          none
+                        }
+                        "
                     )
-                    .into()
-                ),
-                indoc!(
-                    "
+                    .trim()
+                );
+            }
+
+            #[test]
+            fn format_with_else_block() {
+                assert_eq!(
+                    format_expression(
+                        &IfType::new(
+                            "x",
+                            Variable::new("y", Position::fake()),
+                            vec![
+                                IfTypeBranch::new(
+                                    types::None::new(Position::fake()),
+                                    Block::new(
+                                        vec![],
+                                        None::new(Position::fake()),
+                                        Position::fake()
+                                    )
+                                ),
+                                IfTypeBranch::new(
+                                    types::Number::new(Position::fake()),
+                                    Block::new(
+                                        vec![],
+                                        None::new(Position::fake()),
+                                        Position::fake()
+                                    )
+                                )
+                            ],
+                            Some(Block::new(
+                                vec![],
+                                None::new(Position::fake()),
+                                Position::fake()
+                            )),
+                            Position::fake(),
+                        )
+                        .into()
+                    ),
+                    indoc!(
+                        "
                     if x = y as none {
                       none
                     } else if number {
@@ -1713,9 +1771,10 @@ mod tests {
                       none
                     }
                     "
-                )
-                .trim()
-            );
+                    )
+                    .trim()
+                );
+            }
         }
 
         mod lambda {
