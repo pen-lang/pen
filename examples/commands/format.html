@@ -149,14 +149,14 @@
   &quot;dependencies&quot;: {}
 }
 </code></pre>
-<p><em>And</em> a file named &quot;main.pen&quot; with:</p>
+<p><em>And</em> a file named &quot;Foo.pen&quot; with:</p>
 <pre><code class="language-pen">Foo = \() none {
 
   none
 }
 </code></pre>
 <p><em>When</em> I successfully run <code>pen format</code></p>
-<p><em>Then</em> a file named &quot;Foo.pen&quot; contains exactly:</p>
+<p><em>Then</em> a file named &quot;Foo.pen&quot; should contain exactly:</p>
 <pre><code>Foo = \() none {
   none
 }
