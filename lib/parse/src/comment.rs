@@ -1,17 +1,20 @@
 use position::Position;
 
 pub struct Comment {
-    lines: Vec<String>,
+    line: String,
     position: Position,
 }
 
 impl Comment {
-    pub fn new(lines: Vec<String>, position: Position) -> Self {
-        Self { lines, position }
+    pub fn new(line: impl Into<String>, position: Position) -> Self {
+        Self {
+            line: line.into(),
+            position,
+        }
     }
 
-    pub fn lines(&self) -> &[String] {
-        &self.lines
+    pub fn lines(&self) -> &str {
+        &self.line
     }
 
     pub fn position(&self) -> &Position {
