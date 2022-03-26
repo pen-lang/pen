@@ -4,13 +4,13 @@ use ast::*;
 pub fn compile(number: &Number) -> Result<f64, CompileError> {
     Ok(match number.value() {
         NumberRepresentation::Binary(string) => {
-            usize::from_str_radix(&string, 2).map_err(|error| CompileError::ParseInteger {
+            usize::from_str_radix(string, 2).map_err(|error| CompileError::ParseInteger {
                 error,
                 position: number.position().clone(),
             })? as f64
         }
         NumberRepresentation::Hexadecimal(string) => {
-            usize::from_str_radix(&string, 16).map_err(|error| CompileError::ParseInteger {
+            usize::from_str_radix(string, 16).map_err(|error| CompileError::ParseInteger {
                 error,
                 position: number.position().clone(),
             })? as f64

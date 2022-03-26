@@ -10,7 +10,7 @@ pub struct Number {
 impl Number {
     pub fn new(value: NumberRepresentation, position: Position) -> Self {
         Self {
-            value: value.into(),
+            value,
             position,
         }
     }
