@@ -1824,18 +1824,47 @@ mod tests {
             }
         }
 
-        #[test]
-        fn format_number() {
-            assert_eq!(
-                format_expression(
-                    &Number::new(
-                        NumberRepresentation::FloatingPoint("42".into()),
-                        Position::fake()
-                    )
-                    .into()
-                ),
-                "42"
-            );
+        mod number {
+            use super::*;
+
+            #[test]
+            fn format_decimal_float() {
+                assert_eq!(
+                    format_expression(
+                        &Number::new(
+                            NumberRepresentation::FloatingPoint("42".into()),
+                            Position::fake()
+                        )
+                        .into()
+                    ),
+                    "42"
+                );
+            }
+
+            #[test]
+            fn format_binary() {
+                assert_eq!(
+                    format_expression(
+                        &Number::new(NumberRepresentation::Binary("01".into()), Position::fake())
+                            .into()
+                    ),
+                    "0b01"
+                );
+            }
+
+            #[test]
+            fn format_hexadecimal() {
+                assert_eq!(
+                    format_expression(
+                        &Number::new(
+                            NumberRepresentation::Hexadecimal("fa".into()),
+                            Position::fake()
+                        )
+                        .into()
+                    ),
+                    "0xFA"
+                );
+            }
         }
 
         #[test]
