@@ -9,10 +9,7 @@ pub struct Number {
 
 impl Number {
     pub fn new(value: NumberRepresentation, position: Position) -> Self {
-        Self {
-            value,
-            position,
-        }
+        Self { value, position }
     }
 
     pub fn value(&self) -> &NumberRepresentation {
