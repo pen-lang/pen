@@ -303,7 +303,7 @@ fn format_expression(expression: &Expression) -> String {
                         .arguments()
                         .get(0)
                         .map(|expression| expression.position().line_number())
-                    && arguments.iter().all(|argument| is_single_line(argument))
+                    && arguments.iter().all(is_single_line)
             {
                 [head]
                     .into_iter()
@@ -370,7 +370,7 @@ fn format_expression(expression: &Expression) -> String {
                         .elements()
                         .get(0)
                         .map(|element| element.position().line_number())
-                    && elements.iter().all(|element| is_single_line(element))
+                    && elements.iter().all(is_single_line)
             {
                 ["[".into()]
                     .into_iter()
@@ -461,7 +461,7 @@ fn format_expression(expression: &Expression) -> String {
                         .elements()
                         .get(0)
                         .map(|element| element.position().line_number())
-                    && elements.iter().all(|element| is_single_line(element))
+                    && elements.iter().all(is_single_line)
             {
                 ["{".into()]
                     .into_iter()
@@ -512,7 +512,7 @@ fn format_expression(expression: &Expression) -> String {
                         .fields()
                         .get(0)
                         .map(|field| field.position().line_number())
-                    && elements.iter().all(|element| is_single_line(element))
+                    && elements.iter().all(is_single_line)
             {
                 [record.type_name().into(), "{".into()]
                     .into_iter()
