@@ -640,11 +640,7 @@ fn format_if_type(if_: &IfType) -> String {
                 .branches()
                 .iter()
                 .map(|branch| {
-                    [
-                        format_type(branch.type_()),
-                        format_multi_line_block(branch.block()),
-                    ]
-                    .join(" ")
+                    format_type(branch.type_()) + " " + &format_multi_line_block(branch.block())
                 })
                 .collect::<Vec<_>>()
                 .join(" else if ")])
