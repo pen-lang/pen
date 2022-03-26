@@ -7,7 +7,7 @@ Feature: Formatting module files
       "dependencies": {}
     }
     """
-    And a file named "main.pen" with:
+    And a file named "Foo.pen" with:
     """pen
     Foo = \() none {
 
@@ -15,7 +15,7 @@ Feature: Formatting module files
     }
     """
     When I successfully run `pen format`
-    Then a file named "Foo.pen" contains exactly:
+    Then a file named "Foo.pen" should contain exactly:
     """
     Foo = \() none {
       none

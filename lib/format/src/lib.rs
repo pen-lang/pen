@@ -8,13 +8,14 @@ const INDENT_DEPTH: usize = 2;
 
 // TODO Merge comments.
 pub fn format(module: &Module) -> String {
+    let (external_imports, internal_imports) = module
+        .imports()
+        .iter()
+        .partition::<Vec<_>, _>(|import| matches!(import.module_path(), ModulePath::External(_)));
+
     let string = [
-        module
-            .imports()
-            .iter()
-            .map(format_import)
-            .collect::<Vec<_>>()
-            .join("\n"),
+        format_imports(&external_imports),
+        format_imports(&internal_imports),
         module
             .foreign_imports()
             .iter()
@@ -34,6 +35,17 @@ pub fn format(module: &Module) -> String {
         .unwrap()
         .replace_all(&string, "\n")
         .into()
+}
+
+fn format_imports(imports: &[&Import]) -> String {
+    let mut imports = imports
+        .iter()
+        .map(|import| format_import(import))
+        .collect::<Vec<_>>();
+
+    imports.sort();
+
+    imports.join("\n")
 }
 
 fn format_import(import: &Import) -> String {
@@ -187,17 +199,17 @@ fn format_lambda(lambda: &Lambda) -> String {
         .iter()
         .map(|argument| format!("{} {}", argument.name(), format_type(argument.type_())))
         .collect::<Vec<_>>();
-    let single_line = arguments.is_empty()
+    let single_line_arguments = arguments.is_empty()
         || Some(lambda.position().line_number())
             == lambda
                 .arguments()
                 .get(0)
                 .map(|argument| argument.type_().position().line_number())
-            && arguments.iter().all(|argument| is_single_line(argument));
+            && arguments.iter().all(is_single_line);
 
     format!(
         "\\{} {} {}",
-        if single_line {
+        if single_line_arguments {
             "(".to_owned() + &arguments.join(", ") + ")"
         } else {
             ["(".into()]
@@ -208,7 +220,10 @@ fn format_lambda(lambda: &Lambda) -> String {
                 .join("\n")
         },
         format_type(lambda.result_type()),
-        if single_line {
+        if single_line_arguments
+            && lambda.position().line_number()
+                == lambda.body().expression().position().line_number()
+        {
             format_block(lambda.body())
         } else {
             format_multi_line_block(lambda.body())
@@ -219,10 +234,7 @@ fn format_lambda(lambda: &Lambda) -> String {
 fn format_block(block: &Block) -> String {
     let expression = format_expression(block.expression());
 
-    if block.statements().is_empty()
-        && block.position().line_number() == block.expression().position().line_number()
-        && is_single_line(&expression)
-    {
+    if block.statements().is_empty() && is_single_line(&expression) {
         ["{", &expression, "}"].join(" ")
     } else {
         format_multi_line_block(block)
@@ -291,7 +303,7 @@ fn format_expression(expression: &Expression) -> String {
                         .arguments()
                         .get(0)
                         .map(|expression| expression.position().line_number())
-                    && arguments.iter().all(|argument| is_single_line(argument))
+                    && arguments.iter().all(is_single_line)
             {
                 [head]
                     .into_iter()
@@ -358,7 +370,7 @@ fn format_expression(expression: &Expression) -> String {
                         .elements()
                         .get(0)
                         .map(|element| element.position().line_number())
-                    && elements.iter().all(|element| is_single_line(element))
+                    && elements.iter().all(is_single_line)
             {
                 ["[".into()]
                     .into_iter()
@@ -449,7 +461,7 @@ fn format_expression(expression: &Expression) -> String {
                         .elements()
                         .get(0)
                         .map(|element| element.position().line_number())
-                    && elements.iter().all(|element| is_single_line(element))
+                    && elements.iter().all(is_single_line)
             {
                 ["{".into()]
                     .into_iter()
@@ -475,7 +487,11 @@ fn format_expression(expression: &Expression) -> String {
             }
         }
         Expression::None(_) => "none".into(),
-        Expression::Number(number) => format!("{}", number.value()),
+        Expression::Number(number) => match number.value() {
+            NumberRepresentation::Binary(string) => "0b".to_owned() + string,
+            NumberRepresentation::Hexadecimal(string) => "0x".to_owned() + &string.to_uppercase(),
+            NumberRepresentation::FloatingPoint(string) => string.clone(),
+        },
         Expression::Record(record) => {
             let elements = record
                 .record()
@@ -496,7 +512,7 @@ fn format_expression(expression: &Expression) -> String {
                         .fields()
                         .get(0)
                         .map(|field| field.position().line_number())
-                    && elements.iter().all(|element| is_single_line(element))
+                    && elements.iter().all(is_single_line)
             {
                 [record.type_name().into(), "{".into()]
                     .into_iter()
@@ -549,39 +565,39 @@ fn format_if(if_: &If) -> String {
     let branches = if_
         .branches()
         .iter()
-        .map(|branch| {
-            (
-                format_expression(branch.condition()),
-                format_block(branch.block()),
-            )
-        })
+        .map(|branch| format_expression(branch.condition()) + " " + &format_block(branch.block()))
         .collect::<Vec<_>>();
     let else_ = format_block(if_.else_());
-    let single_line = branches.len() == 1
-        && branches
-            .iter()
-            .flat_map(|(condition, block)| [condition.as_str(), block])
-            .chain([else_.as_str()])
-            .all(is_single_line);
 
-    if_.branches()
-        .iter()
-        .zip(branches)
-        .flat_map(|(branch, (condition, block))| {
-            [
-                "if".into(),
-                condition,
-                fall_back_to_multi_line(single_line, block, || {
-                    format_multi_line_block(branch.block())
-                }),
-                "else".into(),
-            ]
-        })
-        .chain([fall_back_to_multi_line(single_line, else_, || {
-            format_multi_line_block(if_.else_())
-        })])
-        .collect::<Vec<_>>()
-        .join(" ")
+    if branches.len() == 1
+        && branches.iter().chain([&else_]).all(is_single_line)
+        && Some(if_.position().line_number())
+            == if_
+                .branches()
+                .get(0)
+                .map(|branch| branch.block().expression().position().line_number())
+    {
+        branches
+            .into_iter()
+            .flat_map(|branch| ["if".into(), branch, "else".into()])
+            .chain([else_])
+            .collect::<Vec<_>>()
+            .join(" ")
+    } else {
+        if_.branches()
+            .iter()
+            .flat_map(|branch| {
+                [
+                    "if".into(),
+                    format_expression(branch.condition()),
+                    format_multi_line_block(branch.block()),
+                    "else".into(),
+                ]
+            })
+            .chain([format_multi_line_block(if_.else_())])
+            .collect::<Vec<_>>()
+            .join(" ")
+    }
 }
 
 fn format_if_type(if_: &IfType) -> String {
@@ -589,52 +605,53 @@ fn format_if_type(if_: &IfType) -> String {
     let branches = if_
         .branches()
         .iter()
-        .map(|branch| format_block(branch.block()))
+        .map(|branch| format_type(branch.type_()) + " " + &format_block(branch.block()))
         .collect::<Vec<_>>();
     let else_ = if_.else_().map(format_block);
-    let single_line = branches.len() == 1
-        && branches
-            .iter()
-            .chain(else_.as_ref())
-            .chain([&argument])
-            .all(|string| is_single_line(string));
 
-    [
+    let head = [
         "if".into(),
         if_.name().into(),
         "=".into(),
-        argument,
+        argument.clone(),
         "as".into(),
-        format_type(if_.branches()[0].type_()),
-        fall_back_to_multi_line(single_line, branches[0].clone(), || {
-            format_multi_line_block(if_.branches()[0].block())
-        }),
-    ]
-    .into_iter()
-    .chain(
-        if_.branches()
-            .iter()
-            .zip(branches)
-            .skip(1)
-            .flat_map(|(branch, string)| {
-                [
-                    "else".into(),
-                    "if".into(),
-                    format_type(branch.type_()),
-                    fall_back_to_multi_line(single_line, string, || {
-                        format_multi_line_block(branch.block())
-                    }),
-                ]
-            }),
-    )
-    .chain(if_.else_().iter().zip(else_).flat_map(|(block, string)| {
-        [
-            "else".into(),
-            fall_back_to_multi_line(single_line, string, || format_multi_line_block(block)),
-        ]
-    }))
-    .collect::<Vec<_>>()
-    .join(" ")
+    ];
+
+    if branches.iter().chain(&else_).count() <= 2
+        && [&argument]
+            .into_iter()
+            .chain(&branches)
+            .chain(else_.as_ref())
+            .all(is_single_line)
+        && Some(if_.position().line_number())
+            == if_
+                .branches()
+                .get(0)
+                .map(|branch| branch.block().expression().position().line_number())
+    {
+        head.into_iter()
+            .chain([branches.join(" else if ")])
+            .chain(else_.into_iter().flat_map(|block| ["else".into(), block]))
+            .collect::<Vec<_>>()
+            .join(" ")
+    } else {
+        head.into_iter()
+            .chain([if_
+                .branches()
+                .iter()
+                .map(|branch| {
+                    format_type(branch.type_()) + " " + &format_multi_line_block(branch.block())
+                })
+                .collect::<Vec<_>>()
+                .join(" else if ")])
+            .chain(
+                if_.else_()
+                    .iter()
+                    .flat_map(|block| ["else".into(), format_multi_line_block(block)]),
+            )
+            .collect::<Vec<_>>()
+            .join(" ")
+    }
 }
 
 fn format_list_element(element: &ListElement) -> String {
@@ -714,18 +731,6 @@ fn operator_priority(operator: BinaryOperator) -> usize {
     }
 }
 
-fn fall_back_to_multi_line(
-    single_line: bool,
-    cache: String,
-    format_multi_line: impl Fn() -> String,
-) -> String {
-    if single_line || !is_single_line(&cache) {
-        cache
-    } else {
-        format_multi_line()
-    }
-}
-
 fn indent(string: impl AsRef<str>) -> String {
     regex::Regex::new("^|\n")
         .unwrap()
@@ -740,8 +745,8 @@ fn count_lines(string: &str) -> usize {
     string.trim().matches('\n').count() + 1
 }
 
-fn is_single_line(string: &str) -> bool {
-    !string.contains('\n')
+fn is_single_line(string: impl AsRef<str>) -> bool {
+    !string.as_ref().contains('\n')
 }
 
 #[cfg(test)]
@@ -768,76 +773,163 @@ mod tests {
         );
     }
 
-    #[test]
-    fn format_internal_module_import() {
-        assert_eq!(
-            format(&Module::new(
-                vec![Import::new(
-                    InternalModulePath::new(vec!["Foo".into(), "Bar".into()]),
-                    None,
+    mod import {
+        use super::*;
+
+        #[test]
+        fn format_internal_module_import() {
+            assert_eq!(
+                format(&Module::new(
+                    vec![Import::new(
+                        InternalModulePath::new(vec!["Foo".into(), "Bar".into()]),
+                        None,
+                        vec![],
+                    )],
                     vec![],
-                )],
-                vec![],
-                vec![],
-                vec![],
-                Position::fake()
-            )),
-            "import 'Foo'Bar\n"
-        );
-    }
+                    vec![],
+                    vec![],
+                    Position::fake()
+                )),
+                "import 'Foo'Bar\n"
+            );
+        }
 
-    #[test]
-    fn format_external_module_import() {
-        assert_eq!(
-            format(&Module::new(
-                vec![Import::new(
-                    ExternalModulePath::new("Package", vec!["Foo".into(), "Bar".into()]),
-                    None,
-                    vec![]
-                )],
-                vec![],
-                vec![],
-                vec![],
-                Position::fake()
-            )),
-            "import Package'Foo'Bar\n"
-        );
-    }
+        #[test]
+        fn format_external_module_import() {
+            assert_eq!(
+                format(&Module::new(
+                    vec![Import::new(
+                        ExternalModulePath::new("Package", vec!["Foo".into(), "Bar".into()]),
+                        None,
+                        vec![]
+                    )],
+                    vec![],
+                    vec![],
+                    vec![],
+                    Position::fake()
+                )),
+                "import Package'Foo'Bar\n"
+            );
+        }
 
-    #[test]
-    fn format_prefixed_module_import() {
-        assert_eq!(
-            format(&Module::new(
-                vec![Import::new(
-                    InternalModulePath::new(vec!["Foo".into(), "Bar".into()]),
-                    Some("Baz".into()),
-                    vec![]
-                )],
-                vec![],
-                vec![],
-                vec![],
-                Position::fake()
-            )),
-            "import 'Foo'Bar as Baz\n"
-        );
-    }
+        #[test]
+        fn format_prefixed_module_import() {
+            assert_eq!(
+                format(&Module::new(
+                    vec![Import::new(
+                        InternalModulePath::new(vec!["Foo".into(), "Bar".into()]),
+                        Some("Baz".into()),
+                        vec![]
+                    )],
+                    vec![],
+                    vec![],
+                    vec![],
+                    Position::fake()
+                )),
+                "import 'Foo'Bar as Baz\n"
+            );
+        }
 
-    #[test]
-    fn format_unqualified_module_import() {
-        assert_eq!(
-            format(&Module::new(
-                vec![Import::new(
-                    InternalModulePath::new(vec!["Foo".into(), "Bar".into()]),
-                    None,
-                    vec!["Baz".into(), "Blah".into()]
-                )],
-                vec![],
-                vec![],
-                vec![],
-                Position::fake()
-            )),
-            "import 'Foo'Bar { Baz, Blah }\n"
-        );
+        #[test]
+        fn format_unqualified_module_import() {
+            assert_eq!(
+                format(&Module::new(
+                    vec![Import::new(
+                        InternalModulePath::new(vec!["Foo".into(), "Bar".into()]),
+                        None,
+                        vec!["Baz".into(), "Blah".into()]
+                    )],
+                    vec![],
+                    vec![],
+                    vec![],
+                    Position::fake()
+                )),
+                "import 'Foo'Bar { Baz, Blah }\n"
+            );
+        }
+
+        #[test]
+        fn sort_module_imports_with_external_paths() {
+            assert_eq!(
+                format(&Module::new(
+                    vec![
+                        Import::new(
+                            ExternalModulePath::new("Foo", vec!["Foo".into()]),
+                            None,
+                            vec![],
+                        ),
+                        Import::new(
+                            ExternalModulePath::new("Bar", vec!["Bar".into()]),
+                            None,
+                            vec![]
+                        )
+                    ],
+                    vec![],
+                    vec![],
+                    vec![],
+                    Position::fake()
+                )),
+                indoc!(
+                    "
+                    import Bar'Bar
+                    import Foo'Foo
+                    "
+                )
+            );
+        }
+
+        #[test]
+        fn sort_module_imports_with_internal_paths() {
+            assert_eq!(
+                format(&Module::new(
+                    vec![
+                        Import::new(InternalModulePath::new(vec!["Foo".into()]), None, vec![],),
+                        Import::new(InternalModulePath::new(vec!["Bar".into()]), None, vec![])
+                    ],
+                    vec![],
+                    vec![],
+                    vec![],
+                    Position::fake()
+                )),
+                indoc!(
+                    "
+                    import 'Bar
+                    import 'Foo
+                    "
+                )
+            );
+        }
+
+        #[test]
+        fn sort_module_imports_with_external_and_internal_paths() {
+            assert_eq!(
+                format(&Module::new(
+                    vec![
+                        Import::new(
+                            InternalModulePath::new(vec!["Foo".into(), "Bar".into()]),
+                            None,
+                            vec![],
+                        ),
+                        Import::new(
+                            ExternalModulePath::new("Package", vec!["Foo".into(), "Bar".into()]),
+                            None,
+                            vec![]
+                        )
+                    ],
+                    vec![],
+                    vec![],
+                    vec![],
+                    Position::fake()
+                )),
+                indoc!(
+                    "
+                    import Package'Foo'Bar
+
+                    import 'Foo'Bar
+                    "
+                )
+            );
+        }
     }
 
     #[test]
@@ -1388,8 +1480,16 @@ mod tests {
                         &Call::new(
                             Variable::new("foo", Position::fake()),
                             vec![
-                                Number::new(1.0, Position::fake()).into(),
-                                Number::new(2.0, Position::fake()).into(),
+                                Number::new(
+                                    NumberRepresentation::FloatingPoint("1".into()),
+                                    Position::fake()
+                                )
+                                .into(),
+                                Number::new(
+                                    NumberRepresentation::FloatingPoint("2".into()),
+                                    Position::fake()
+                                )
+                                .into(),
                             ],
                             Position::fake()
                         )
@@ -1406,8 +1506,16 @@ mod tests {
                         &Call::new(
                             Variable::new("foo", line_position(1)),
                             vec![
-                                Number::new(1.0, line_position(2)).into(),
-                                Number::new(2.0, Position::fake()).into(),
+                                Number::new(
+                                    NumberRepresentation::FloatingPoint("1".into()),
+                                    line_position(2)
+                                )
+                                .into(),
+                                Number::new(
+                                    NumberRepresentation::FloatingPoint("2".into()),
+                                    Position::fake()
+                                )
+                                .into(),
                             ],
                             Position::fake()
                         )
@@ -1426,39 +1534,96 @@ mod tests {
             }
         }
 
-        #[test]
-        fn format_if() {
-            assert_eq!(
-                format_expression(
-                    &If::new(
-                        vec![
-                            IfBranch::new(
+        mod if_ {
+            use super::*;
+
+            #[test]
+            fn format_single_line() {
+                assert_eq!(
+                    format_expression(
+                        &If::new(
+                            vec![IfBranch::new(
                                 Boolean::new(true, Position::fake()),
                                 Block::new(vec![], None::new(Position::fake()), Position::fake())
-                            ),
-                            IfBranch::new(
-                                Boolean::new(false, Position::fake()),
-                                Block::new(vec![], None::new(Position::fake()), Position::fake())
-                            )
-                        ],
-                        Block::new(vec![], None::new(Position::fake()), Position::fake()),
-                        Position::fake()
+                            )],
+                            Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                            Position::fake()
+                        )
+                        .into()
+                    ),
+                    "if true { none } else { none }"
+                );
+            }
+
+            #[test]
+            fn format_multi_line_with_multi_line_input() {
+                assert_eq!(
+                    format_expression(
+                        &If::new(
+                            vec![IfBranch::new(
+                                Boolean::new(true, Position::fake()),
+                                Block::new(vec![], None::new(line_position(2)), Position::fake())
+                            )],
+                            Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                            line_position(1)
+                        )
+                        .into()
+                    ),
+                    indoc!(
+                        "
+                        if true {
+                          none
+                        } else {
+                          none
+                        }
+                        "
                     )
-                    .into()
-                ),
-                indoc!(
-                    "
-                    if true {
-                      none
-                    } else if false {
-                      none
-                    } else {
-                      none
-                    }
-                    "
-                )
-                .trim()
-            );
+                    .trim()
+                );
+            }
+
+            #[test]
+            fn format_multi_line_with_multiple_branches() {
+                assert_eq!(
+                    format_expression(
+                        &If::new(
+                            vec![
+                                IfBranch::new(
+                                    Boolean::new(true, Position::fake()),
+                                    Block::new(
+                                        vec![],
+                                        None::new(Position::fake()),
+                                        Position::fake()
+                                    )
+                                ),
+                                IfBranch::new(
+                                    Boolean::new(false, Position::fake()),
+                                    Block::new(
+                                        vec![],
+                                        None::new(Position::fake()),
+                                        Position::fake()
+                                    )
+                                )
+                            ],
+                            Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                            Position::fake()
+                        )
+                        .into()
+                    ),
+                    indoc!(
+                        "
+                        if true {
+                          none
+                        } else if false {
+                          none
+                        } else {
+                          none
+                        }
+                        "
+                    )
+                    .trim()
+                );
+            }
         }
 
         #[test]
@@ -1523,69 +1688,122 @@ mod tests {
             );
         }
 
-        #[test]
-        fn format_if_type() {
-            assert_eq!(
-                format_expression(
-                    &IfType::new(
-                        "x",
-                        Variable::new("y", Position::fake()),
-                        vec![
-                            IfTypeBranch::new(
-                                types::None::new(Position::fake()),
-                                Block::new(vec![], None::new(Position::fake()), Position::fake())
-                            ),
-                            IfTypeBranch::new(
-                                types::Number::new(Position::fake()),
-                                Block::new(vec![], None::new(Position::fake()), Position::fake())
-                            )
-                        ],
-                        None,
-                        Position::fake(),
-                    )
-                    .into()
-                ),
-                indoc!(
-                    "
-                    if x = y as none {
-                      none
-                    } else if number {
-                      none
-                    }
-                    "
-                )
-                .trim()
-            );
-        }
+        mod if_type {
+            use super::*;
 
-        #[test]
-        fn format_if_type_with_else_block() {
-            assert_eq!(
-                format_expression(
-                    &IfType::new(
-                        "x",
-                        Variable::new("y", Position::fake()),
-                        vec![
-                            IfTypeBranch::new(
-                                types::None::new(Position::fake()),
-                                Block::new(vec![], None::new(Position::fake()), Position::fake())
-                            ),
-                            IfTypeBranch::new(
-                                types::Number::new(Position::fake()),
-                                Block::new(vec![], None::new(Position::fake()), Position::fake())
-                            )
-                        ],
-                        Some(Block::new(
-                            vec![],
-                            None::new(Position::fake()),
-                            Position::fake()
-                        )),
-                        Position::fake(),
+            #[test]
+            fn format_single_line() {
+                assert_eq!(
+                    format_expression(
+                        &IfType::new(
+                            "x",
+                            Variable::new("y", Position::fake()),
+                            vec![
+                                IfTypeBranch::new(
+                                    types::None::new(Position::fake()),
+                                    Block::new(
+                                        vec![],
+                                        None::new(Position::fake()),
+                                        Position::fake()
+                                    )
+                                ),
+                                IfTypeBranch::new(
+                                    types::Number::new(Position::fake()),
+                                    Block::new(
+                                        vec![],
+                                        None::new(Position::fake()),
+                                        Position::fake()
+                                    )
+                                )
+                            ],
+                            None,
+                            Position::fake(),
+                        )
+                        .into()
+                    ),
+                    "if x = y as none { none } else if number { none }"
+                );
+            }
+
+            #[test]
+            fn format_multi_line() {
+                assert_eq!(
+                    format_expression(
+                        &IfType::new(
+                            "x",
+                            Variable::new("y", Position::fake()),
+                            vec![
+                                IfTypeBranch::new(
+                                    types::None::new(Position::fake()),
+                                    Block::new(
+                                        vec![],
+                                        None::new(line_position(2)),
+                                        Position::fake()
+                                    )
+                                ),
+                                IfTypeBranch::new(
+                                    types::Number::new(Position::fake()),
+                                    Block::new(
+                                        vec![],
+                                        None::new(Position::fake()),
+                                        Position::fake()
+                                    )
+                                )
+                            ],
+                            None,
+                            line_position(1),
+                        )
+                        .into()
+                    ),
+                    indoc!(
+                        "
+                        if x = y as none {
+                          none
+                        } else if number {
+                          none
+                        }
+                        "
                     )
-                    .into()
-                ),
-                indoc!(
-                    "
+                    .trim()
+                );
+            }
+
+            #[test]
+            fn format_with_else_block() {
+                assert_eq!(
+                    format_expression(
+                        &IfType::new(
+                            "x",
+                            Variable::new("y", Position::fake()),
+                            vec![
+                                IfTypeBranch::new(
+                                    types::None::new(Position::fake()),
+                                    Block::new(
+                                        vec![],
+                                        None::new(Position::fake()),
+                                        Position::fake()
+                                    )
+                                ),
+                                IfTypeBranch::new(
+                                    types::Number::new(Position::fake()),
+                                    Block::new(
+                                        vec![],
+                                        None::new(Position::fake()),
+                                        Position::fake()
+                                    )
+                                )
+                            ],
+                            Some(Block::new(
+                                vec![],
+                                None::new(Position::fake()),
+                                Position::fake()
+                            )),
+                            Position::fake(),
+                        )
+                        .into()
+                    ),
+                    indoc!(
+                        "
                     if x = y as none {
                       none
                     } else if number {
@@ -1594,9 +1812,10 @@ mod tests {
                       none
                     }
                     "
-                )
-                .trim()
-            );
+                    )
+                    .trim()
+                );
+            }
         }
 
         mod lambda {
@@ -1642,6 +1861,29 @@ mod tests {
                         "
                         \\() none {
                           x = none
+                          none
+                        }
+                        "
+                    )
+                    .trim()
+                );
+            }
+
+            #[test]
+            fn format_single_line_arguments_with_multi_line_body_of_expression() {
+                assert_eq!(
+                    format_expression(
+                        &Lambda::new(
+                            vec![],
+                            types::None::new(Position::fake()),
+                            Block::new(vec![], None::new(line_position(2)), Position::fake()),
+                            line_position(1)
+                        )
+                        .into()
+                    ),
+                    indoc!(
+                        "
+                        \\() none {
                           none
                         }
                         "
@@ -1705,12 +1947,47 @@ mod tests {
             }
         }
 
-        #[test]
-        fn format_number() {
-            assert_eq!(
-                format_expression(&Number::new(42.0, Position::fake()).into()),
-                "42"
-            );
+        mod number {
+            use super::*;
+
+            #[test]
+            fn format_decimal_float() {
+                assert_eq!(
+                    format_expression(
+                        &Number::new(
+                            NumberRepresentation::FloatingPoint("42".into()),
+                            Position::fake()
+                        )
+                        .into()
+                    ),
+                    "42"
+                );
+            }
+
+            #[test]
+            fn format_binary() {
+                assert_eq!(
+                    format_expression(
+                        &Number::new(NumberRepresentation::Binary("01".into()), Position::fake())
+                            .into()
+                    ),
+                    "0b01"
+                );
+            }
+
+            #[test]
+            fn format_hexadecimal() {
+                assert_eq!(
+                    format_expression(
+                        &Number::new(
+                            NumberRepresentation::Hexadecimal("fa".into()),
+                            Position::fake()
+                        )
+                        .into()
+                    ),
+                    "0xFA"
+                );
+            }
         }
 
         #[test]
@@ -1749,8 +2026,14 @@ mod tests {
                     format_expression(
                         &BinaryOperation::new(
                             BinaryOperator::Add,
-                            Number::new(1.0, Position::fake()),
-                            Number::new(2.0, Position::fake()),
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("1".into()),
+                                Position::fake()
+                            ),
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("2".into()),
+                                Position::fake()
+                            ),
                             Position::fake()
                         )
                         .into()
@@ -1765,8 +2048,14 @@ mod tests {
                     format_expression(
                         &BinaryOperation::new(
                             BinaryOperator::Add,
-                            Number::new(1.0, Position::fake()),
-                            Number::new(2.0, line_position(1)),
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("1".into()),
+                                Position::fake()
+                            ),
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("2".into()),
+                                line_position(1)
+                            ),
                             Position::fake()
                         )
                         .into()
@@ -1787,11 +2076,20 @@ mod tests {
                     format_expression(
                         &BinaryOperation::new(
                             BinaryOperator::Add,
-                            Number::new(1.0, Position::fake()),
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("1".into()),
+                                Position::fake()
+                            ),
                             BinaryOperation::new(
                                 BinaryOperator::Multiply,
-                                Number::new(2.0, Position::fake()),
-                                Number::new(3.0, Position::fake()),
+                                Number::new(
+                                    NumberRepresentation::FloatingPoint("2".into()),
+                                    Position::fake()
+                                ),
+                                Number::new(
+                                    NumberRepresentation::FloatingPoint("3".into()),
+                                    Position::fake()
+                                ),
                                 Position::fake()
                             ),
                             Position::fake()
@@ -1808,11 +2106,20 @@ mod tests {
                     format_expression(
                         &BinaryOperation::new(
                             BinaryOperator::Multiply,
-                            Number::new(1.0, Position::fake()),
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("1".into()),
+                                Position::fake()
+                            ),
                             BinaryOperation::new(
                                 BinaryOperator::Add,
-                                Number::new(2.0, Position::fake()),
-                                Number::new(3.0, Position::fake()),
+                                Number::new(
+                                    NumberRepresentation::FloatingPoint("2".into()),
+                                    Position::fake()
+                                ),
+                                Number::new(
+                                    NumberRepresentation::FloatingPoint("3".into()),
+                                    Position::fake()
+                                ),
                                 Position::fake()
                             ),
                             Position::fake()
@@ -1969,8 +2276,20 @@ mod tests {
                         &List::new(
                             types::Number::new(Position::fake()),
                             vec![
-                                ListElement::Single(Number::new(1.0, line_position(2)).into()),
-                                ListElement::Single(Number::new(2.0, Position::fake()).into())
+                                ListElement::Single(
+                                    Number::new(
+                                        NumberRepresentation::FloatingPoint("1".into()),
+                                        line_position(2)
+                                    )
+                                    .into()
+                                ),
+                                ListElement::Single(
+                                    Number::new(
+                                        NumberRepresentation::FloatingPoint("2".into()),
+                                        Position::fake()
+                                    )
+                                    .into()
+                                )
                             ],
                             line_position(1)
                         )
@@ -2059,7 +2378,10 @@ mod tests {
                             types::Number::new(Position::fake()),
                             vec![MapEntry::new(
                                 ByteString::new("foo", Position::fake()),
-                                Number::new(42.0, Position::fake()),
+                                Number::new(
+                                    NumberRepresentation::FloatingPoint("42".into()),
+                                    Position::fake()
+                                ),
                                 Position::fake()
                             )
                             .into()],
@@ -2081,13 +2403,19 @@ mod tests {
                             vec![
                                 MapEntry::new(
                                     ByteString::new("foo", Position::fake()),
-                                    Number::new(1.0, Position::fake()),
+                                    Number::new(
+                                        NumberRepresentation::FloatingPoint("1".into()),
+                                        Position::fake()
+                                    ),
                                     Position::fake()
                                 )
                                 .into(),
                                 MapEntry::new(
                                     ByteString::new("bar", Position::fake()),
-                                    Number::new(2.0, Position::fake()),
+                                    Number::new(
+                                        NumberRepresentation::FloatingPoint("2".into()),
+                                        Position::fake()
+                                    ),
                                     Position::fake()
                                 )
                                 .into()
@@ -2145,7 +2473,10 @@ mod tests {
                             types::Number::new(Position::fake()),
                             vec![MapEntry::new(
                                 ByteString::new("foo", Position::fake()),
-                                Number::new(1.0, Position::fake()),
+                                Number::new(
+                                    NumberRepresentation::FloatingPoint("1".into()),
+                                    Position::fake()
+                                ),
                                 line_position(2)
                             )
                             .into()],
@@ -2174,13 +2505,19 @@ mod tests {
                             vec![
                                 MapEntry::new(
                                     ByteString::new("foo", Position::fake()),
-                                    Number::new(1.0, Position::fake()),
+                                    Number::new(
+                                        NumberRepresentation::FloatingPoint("1".into()),
+                                        Position::fake()
+                                    ),
                                     line_position(2)
                                 )
                                 .into(),
                                 MapEntry::new(
                                     ByteString::new("bar", Position::fake()),
-                                    Number::new(2.0, Position::fake()),
+                                    Number::new(
+                                        NumberRepresentation::FloatingPoint("2".into()),
+                                        Position::fake()
+                                    ),
                                     Position::fake()
                                 )
                                 .into()
@@ -2243,12 +2580,18 @@ mod tests {
                             vec![
                                 RecordField::new(
                                     "x",
-                                    Number::new(1.0, Position::fake()),
+                                    Number::new(
+                                        NumberRepresentation::FloatingPoint("1".into()),
+                                        Position::fake()
+                                    ),
                                     Position::fake()
                                 ),
                                 RecordField::new(
                                     "y",
-                                    Number::new(2.0, Position::fake()),
+                                    Number::new(
+                                        NumberRepresentation::FloatingPoint("2".into()),
+                                        Position::fake()
+                                    ),
                                     Position::fake()
                                 )
                             ],
