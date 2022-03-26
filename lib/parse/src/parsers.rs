@@ -1,5 +1,5 @@
 use super::operations::*;
-use crate::stream::Stream;
+use crate::{comment::Comment, stream::Stream};
 use ast::{
     types::{self, Type},
     *,
@@ -7,7 +7,7 @@ use ast::{
 use combine::{
     attempt, choice, look_ahead, many, many1, none_of, one_of, optional,
     parser::{
-        char::{alpha_num, char as character, digit, letter, space, spaces, string},
+        char::{alpha_num, char as character, digit, letter, space, string},
         combinator::{lazy, no_partial, not_followed_by},
         regex::find,
         sequence::between,
@@ -883,17 +883,22 @@ fn eof<'a>() -> impl Parser<Stream<'a>, Output = ()> {
 }
 
 fn blank<'a>() -> impl Parser<Stream<'a>, Output = ()> {
-    many::<Vec<_>, _, _>(choice((space().with(value(())), comment()))).with(value(()))
+    many::<Vec<_>, _, _>(choice((space().with(value(())), comment().with(value(())))))
+        .with(value(()))
 }
 
-fn comment<'a>() -> impl Parser<Stream<'a>, Output = ()> {
-    string("#")
-        .with(many::<Vec<_>, _, _>(none_of("\n".chars())))
-        .with(choice((
+fn comment<'a>() -> impl Parser<Stream<'a>, Output = Comment> {
+    (
+        attempt((position(), string("#"))),
+        many::<Vec<_>, _, _>(none_of("\n".chars())),
+    )
+        .map(|((position, _), string)| {
+            Comment::new(string.into_iter().collect::<String>().trim_end(), position)
+        })
+        .skip(choice((
             combine::parser::char::newline().with(value(())),
             eof(),
         )))
-        .with(spaces())
         .expected("comment")
 }
 
