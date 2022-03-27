@@ -12,27 +12,31 @@ pub fn format(module: &Module, _comments: &[Comment]) -> String {
         .iter()
         .partition::<Vec<_>, _>(|import| matches!(import.module_path(), ModulePath::External(_)));
 
-    let string = [
-        format_imports(&external_imports),
-        format_imports(&internal_imports),
-        module
-            .foreign_imports()
-            .iter()
-            .map(format_foreign_import)
-            .collect::<Vec<_>>()
-            .join("\n"),
-    ]
-    .into_iter()
-    .filter(|string| !string.is_empty())
-    .chain(module.type_definitions().iter().map(format_type_definition))
-    .chain(module.definitions().iter().map(format_definition))
-    .collect::<Vec<_>>()
-    .join("\n\n")
-        + "\n";
+    remove_trailing_spaces(
+        [
+            format_imports(&external_imports),
+            format_imports(&internal_imports),
+            module
+                .foreign_imports()
+                .iter()
+                .map(format_foreign_import)
+                .collect::<Vec<_>>()
+                .join("\n"),
+        ]
+        .into_iter()
+        .filter(|string| !string.is_empty())
+        .chain(module.type_definitions().iter().map(format_type_definition))
+        .chain(module.definitions().iter().map(format_definition))
+        .collect::<Vec<_>>()
+        .join("\n\n")
+            + "\n",
+    )
+}
 
+fn remove_trailing_spaces(string: impl AsRef<str>) -> String {
     regex::Regex::new(r"[ \t]*\n")
         .unwrap()
-        .replace_all(&string, "\n")
+        .replace_all(string.as_ref(), "\n")
         .into()
 }
 
