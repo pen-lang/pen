@@ -12,7 +12,7 @@ pub fn format(module: &Module, _comments: &[Comment]) -> String {
         .iter()
         .partition::<Vec<_>, _>(|import| matches!(import.module_path(), ModulePath::External(_)));
 
-    remove_trailing_spaces(
+    format_spaces(
         [
             format_imports(&external_imports),
             format_imports(&internal_imports),
@@ -33,7 +33,7 @@ pub fn format(module: &Module, _comments: &[Comment]) -> String {
     )
 }
 
-fn remove_trailing_spaces(string: impl AsRef<str>) -> String {
+fn format_spaces(string: impl AsRef<str>) -> String {
     regex::Regex::new(r"[ \t]*\n")
         .unwrap()
         .replace_all(string.as_ref(), "\n")
