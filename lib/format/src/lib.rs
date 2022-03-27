@@ -2805,5 +2805,27 @@ mod tests {
                 "#foo\ntype foo {}\n"
             );
         }
+
+        #[test]
+        fn format_type_alias() {
+            assert_eq!(
+                format(
+                    &Module::new(
+                        vec![],
+                        vec![],
+                        vec![TypeAlias::new(
+                            "foo",
+                            types::None::new(Position::fake()),
+                            line_position(2)
+                        )
+                        .into()],
+                        vec![],
+                        Position::fake()
+                    ),
+                    &[Comment::new("foo", line_position(1))]
+                ),
+                "#foo\ntype foo = none\n"
+            );
+        }
     }
 }
