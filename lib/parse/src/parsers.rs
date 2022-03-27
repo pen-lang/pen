@@ -32,7 +32,7 @@ static KEYWORDS: Lazy<Vec<&str>> = Lazy::new(|| {
 });
 const OPERATOR_CHARACTERS: &str = "+-*/=<>&|!?";
 
-static SIGN_CHARACTERS: Lazy<String> = Lazy::new(|| OPERATOR_CHARACTERS.to_owned() + "'.\\{}()[]");
+static SIGN_CHARACTERS: Lazy<String> = Lazy::new(|| OPERATOR_CHARACTERS.to_owned() + "',.\\{}()[]");
 
 static BINARY_REGEX: Lazy<regex::Regex> = Lazy::new(|| regex::Regex::new(r"^0b[01]+").unwrap());
 static HEXADECIMAL_REGEX: Lazy<regex::Regex> =
@@ -77,10 +77,13 @@ pub fn comments<'a>() -> impl Parser<Stream<'a>, Output = Vec<Comment>> {
         choice((
             comment().map(Some),
             raw_string_literal().map(|_| None),
-            raw_identifier_or_keyword().map(|_| None),
+            letter().map(|_| None),
+            digit().map(|_| None),
+            character('_').map(|_| None),
             one_of(SIGN_CHARACTERS.chars()).map(|_| None),
         )),
     ))
+    .skip(eof())
     .map(|comments: Vec<_>| comments.into_iter().flatten().collect())
 }
 
@@ -3260,6 +3263,14 @@ mod tests {
                     Comment::new("foo", Position::fake()),
                     Comment::new("bar", Position::fake())
                 ]
+            );
+        }
+
+        #[test]
+        fn parse_comment_before_newlines() {
+            assert_eq!(
+                comments().parse(stream("#foo\n\n", "")).unwrap().0,
+                vec![Comment::new("foo", Position::fake())]
             );
         }
 
