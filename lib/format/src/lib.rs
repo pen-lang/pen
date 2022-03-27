@@ -51,15 +51,21 @@ pub fn format(module: &Module, comments: &[Comment]) -> String {
             .filter(|string| !string.is_empty())
             .collect::<Vec<_>>()
             .join("\n\n")
-            + "\n",
+            + "\n\n"
+            + &format_all_comments(&comments),
     )
 }
 
 fn format_spaces(string: impl AsRef<str>) -> String {
-    regex::Regex::new(r"[ \t]*\n")
+    let string = regex::Regex::new(r"[ \t]*\n")
         .unwrap()
-        .replace_all(string.as_ref(), "\n")
-        .into()
+        .replace_all(string.as_ref(), "\n");
+
+    let string = regex::Regex::new(r"\n\n\n+")
+        .unwrap()
+        .replace_all(&string, "\n\n");
+
+    string.trim().to_owned() + "\n"
 }
 
 fn format_imports(imports: &[&Import]) -> String {
@@ -789,14 +795,15 @@ fn operator_priority(operator: BinaryOperator) -> usize {
 fn format_comments<'c>(comments: &'c [Comment], position: &Position) -> (String, &'c [Comment]) {
     let (before, after) = comment::split_before(comments, position.line_number());
 
-    (
-        before
-            .iter()
-            .map(|comment| "#".to_owned() + comment.line() + "\n")
-            .collect::<Vec<_>>()
-            .concat(),
-        after,
-    )
+    (format_all_comments(before), after)
+}
+
+fn format_all_comments(comments: &[Comment]) -> String {
+    comments
+        .iter()
+        .map(|comment| "#".to_owned() + comment.line() + "\n")
+        .collect::<Vec<_>>()
+        .concat()
 }
 
 fn indent(string: impl AsRef<str>) -> String {
@@ -2761,6 +2768,17 @@ mod tests {
 
     mod comment {
         use super::*;
+
+        #[test]
+        fn format_comment() {
+            assert_eq!(
+                format(
+                    &Module::new(vec![], vec![], vec![], vec![], Position::fake()),
+                    &[Comment::new("foo", Position::fake())]
+                ),
+                "#foo\n"
+            );
+        }
 
         #[test]
         fn format_definition() {
