@@ -1,4 +1,8 @@
+mod context;
+
 use ast::{types::Type, *};
+use context::Context;
+use position::Position;
 use std::str;
 
 const INDENT_DEPTH: usize = 2;
@@ -6,7 +10,9 @@ const INDENT_DEPTH: usize = 2;
 // TODO Consider introducing a minimum editor width to enforce single-line
 // formats in some occasions.
 
-pub fn format(module: &Module, _comments: &[Comment]) -> String {
+pub fn format(module: &Module, comments: &[Comment]) -> String {
+    let mut context = Context::new(comments.to_vec());
+
     let (external_imports, internal_imports) = module
         .imports()
         .iter()
@@ -26,7 +32,12 @@ pub fn format(module: &Module, _comments: &[Comment]) -> String {
         .into_iter()
         .filter(|string| !string.is_empty())
         .chain(module.type_definitions().iter().map(format_type_definition))
-        .chain(module.definitions().iter().map(format_definition))
+        .chain(
+            module
+                .definitions()
+                .iter()
+                .map(|definition| format_definition(&mut context, definition)),
+        )
         .collect::<Vec<_>>()
         .join("\n\n")
             + "\n",
@@ -132,27 +143,28 @@ fn format_type_alias(alias: &TypeAlias) -> String {
     .join(" ")
 }
 
-fn format_definition(definition: &Definition) -> String {
-    definition
-        .foreign_export()
-        .map(|export| {
-            ["foreign"]
-                .into_iter()
-                .chain(match export.calling_convention() {
-                    CallingConvention::C => Some("\"c\""),
-                    CallingConvention::Native => None,
-                })
-                .collect::<Vec<_>>()
-                .join(" ")
-        })
-        .into_iter()
-        .chain([
-            definition.name().into(),
-            "=".into(),
-            format_lambda(definition.lambda()),
-        ])
-        .collect::<Vec<_>>()
-        .join(" ")
+fn format_definition(context: &mut Context, definition: &Definition) -> String {
+    format_comments(context, definition.position())
+        + &definition
+            .foreign_export()
+            .map(|export| {
+                ["foreign"]
+                    .into_iter()
+                    .chain(match export.calling_convention() {
+                        CallingConvention::C => Some("\"c\""),
+                        CallingConvention::Native => None,
+                    })
+                    .collect::<Vec<_>>()
+                    .join(" ")
+            })
+            .into_iter()
+            .chain([
+                definition.name().into(),
+                "=".into(),
+                format_lambda(definition.lambda()),
+            ])
+            .collect::<Vec<_>>()
+            .join(" ")
 }
 
 fn format_type(type_: &Type) -> String {
@@ -732,6 +744,15 @@ fn operator_priority(operator: BinaryOperator) -> usize {
         BinaryOperator::Add | BinaryOperator::Subtract => 4,
         BinaryOperator::Multiply | BinaryOperator::Divide => 5,
     }
+}
+
+fn format_comments(context: &mut Context, position: &Position) -> String {
+    context
+        .pop_before_line(position.line_number())
+        .into_iter()
+        .map(|comment| "#".to_owned() + comment.line() + "\n")
+        .collect::<Vec<_>>()
+        .concat()
 }
 
 fn indent(string: impl AsRef<str>) -> String {
@@ -2691,6 +2712,37 @@ mod tests {
                     .trim(),
                 );
             }
+        }
+    }
+
+    mod comment {
+        use super::*;
+
+        #[test]
+        fn format_definition() {
+            assert_eq!(
+                format(
+                    &Module::new(
+                        vec![],
+                        vec![],
+                        vec![],
+                        vec![Definition::new(
+                            "foo",
+                            Lambda::new(
+                                vec![],
+                                types::None::new(Position::fake()),
+                                Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                                Position::fake(),
+                            ),
+                            None,
+                            line_position(2)
+                        )],
+                        Position::fake()
+                    ),
+                    &[Comment::new("foo", line_position(1))]
+                ),
+                "#foo\nfoo = \\() none { none }\n"
+            );
         }
     }
 }
