@@ -7,7 +7,7 @@ mod stream;
 use combine::Parser;
 use comment::Comment;
 pub use error::ParseError;
-use parsers::module;
+use parsers::{comments, module};
 use stream::stream;
 
 pub fn parse(source: &str, path: &str) -> Result<ast::Module, ParseError> {
@@ -17,8 +17,11 @@ pub fn parse(source: &str, path: &str) -> Result<ast::Module, ParseError> {
         .map_err(|error| ParseError::new(source, path, error))
 }
 
-pub fn parse_comments(_source: &str, _path: &str) -> Result<Vec<Comment>, ParseError> {
-    Ok(vec![])
+pub fn parse_comments(source: &str, path: &str) -> Result<Vec<Comment>, ParseError> {
+    comments()
+        .parse(stream(source, path))
+        .map(|(module, _)| module)
+        .map_err(|error| ParseError::new(source, path, error))
 }
 
 #[cfg(test)]

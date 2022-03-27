@@ -1,5 +1,6 @@
 use position::Position;
 
+#[derive(Clone, Debug, PartialEq)]
 pub struct Comment {
     line: String,
     position: Position,
