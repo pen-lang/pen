@@ -6,8 +6,7 @@ const INDENT_DEPTH: usize = 2;
 // TODO Consider introducing a minimum editor width to enforce single-line
 // formats in some occasions.
 
-// TODO Merge comments.
-pub fn format(module: &Module) -> String {
+pub fn format(module: &Module, _comments: &[Comment]) -> String {
     let (external_imports, internal_imports) = module
         .imports()
         .iter()
@@ -759,10 +758,14 @@ mod tests {
         Position::new("", line, 1, "")
     }
 
+    fn format_module(module: &Module) -> String {
+        format(module, &[])
+    }
+
     #[test]
     fn format_empty_module() {
         assert_eq!(
-            format(&Module::new(
+            format_module(&Module::new(
                 vec![],
                 vec![],
                 vec![],
@@ -779,7 +782,7 @@ mod tests {
         #[test]
         fn format_internal_module_import() {
             assert_eq!(
-                format(&Module::new(
+                format_module(&Module::new(
                     vec![Import::new(
                         InternalModulePath::new(vec!["Foo".into(), "Bar".into()]),
                         None,
@@ -797,7 +800,7 @@ mod tests {
         #[test]
         fn format_external_module_import() {
             assert_eq!(
-                format(&Module::new(
+                format_module(&Module::new(
                     vec![Import::new(
                         ExternalModulePath::new("Package", vec!["Foo".into(), "Bar".into()]),
                         None,
@@ -815,7 +818,7 @@ mod tests {
         #[test]
         fn format_prefixed_module_import() {
             assert_eq!(
-                format(&Module::new(
+                format_module(&Module::new(
                     vec![Import::new(
                         InternalModulePath::new(vec!["Foo".into(), "Bar".into()]),
                         Some("Baz".into()),
@@ -833,7 +836,7 @@ mod tests {
         #[test]
         fn format_unqualified_module_import() {
             assert_eq!(
-                format(&Module::new(
+                format_module(&Module::new(
                     vec![Import::new(
                         InternalModulePath::new(vec!["Foo".into(), "Bar".into()]),
                         None,
@@ -851,7 +854,7 @@ mod tests {
         #[test]
         fn sort_module_imports_with_external_paths() {
             assert_eq!(
-                format(&Module::new(
+                format_module(&Module::new(
                     vec![
                         Import::new(
                             ExternalModulePath::new("Foo", vec!["Foo".into()]),
@@ -881,7 +884,7 @@ mod tests {
         #[test]
         fn sort_module_imports_with_internal_paths() {
             assert_eq!(
-                format(&Module::new(
+                format_module(&Module::new(
                     vec![
                         Import::new(InternalModulePath::new(vec!["Foo".into()]), None, vec![],),
                         Import::new(InternalModulePath::new(vec!["Bar".into()]), None, vec![])
@@ -903,7 +906,7 @@ mod tests {
         #[test]
         fn sort_module_imports_with_external_and_internal_paths() {
             assert_eq!(
-                format(&Module::new(
+                format_module(&Module::new(
                     vec![
                         Import::new(
                             InternalModulePath::new(vec!["Foo".into(), "Bar".into()]),
@@ -935,7 +938,7 @@ mod tests {
     #[test]
     fn format_foreign_import() {
         assert_eq!(
-            format(&Module::new(
+            format_module(&Module::new(
                 vec![],
                 vec![ForeignImport::new(
                     "foo",
@@ -958,7 +961,7 @@ mod tests {
     #[test]
     fn format_foreign_import_with_c_calling_convention() {
         assert_eq!(
-            format(&Module::new(
+            format_module(&Module::new(
                 vec![],
                 vec![ForeignImport::new(
                     "foo",
@@ -1000,7 +1003,7 @@ mod tests {
     #[test]
     fn format_record_definition_with_no_field() {
         assert_eq!(
-            format(&Module::new(
+            format_module(&Module::new(
                 vec![],
                 vec![],
                 vec![RecordDefinition::new("foo", vec![], Position::fake()).into()],
@@ -1014,7 +1017,7 @@ mod tests {
     #[test]
     fn format_record_definition_with_field() {
         assert_eq!(
-            format(&Module::new(
+            format_module(&Module::new(
                 vec![],
                 vec![],
                 vec![RecordDefinition::new(
@@ -1042,7 +1045,7 @@ mod tests {
     #[test]
     fn format_record_definition_with_two_fields() {
         assert_eq!(
-            format(&Module::new(
+            format_module(&Module::new(
                 vec![],
                 vec![],
                 vec![RecordDefinition::new(
@@ -1071,7 +1074,7 @@ mod tests {
     #[test]
     fn format_type_alias() {
         assert_eq!(
-            format(&Module::new(
+            format_module(&Module::new(
                 vec![],
                 vec![],
                 vec![
@@ -1091,7 +1094,7 @@ mod tests {
         #[test]
         fn format_with_no_argument_and_no_statement() {
             assert_eq!(
-                format(&Module::new(
+                format_module(&Module::new(
                     vec![],
                     vec![],
                     vec![],
@@ -1115,7 +1118,7 @@ mod tests {
         #[test]
         fn format_with_argument() {
             assert_eq!(
-                format(&Module::new(
+                format_module(&Module::new(
                     vec![],
                     vec![],
                     vec![],
@@ -1139,7 +1142,7 @@ mod tests {
         #[test]
         fn format_with_statement() {
             assert_eq!(
-                format(&Module::new(
+                format_module(&Module::new(
                     vec![],
                     vec![],
                     vec![],
@@ -1178,7 +1181,7 @@ mod tests {
         #[test]
         fn format_returning_lambda() {
             assert_eq!(
-                format(&Module::new(
+                format_module(&Module::new(
                     vec![],
                     vec![],
                     vec![],
@@ -1219,7 +1222,7 @@ mod tests {
         #[test]
         fn format_with_foreign_export() {
             assert_eq!(
-                format(&Module::new(
+                format_module(&Module::new(
                     vec![],
                     vec![],
                     vec![],
@@ -1243,7 +1246,7 @@ mod tests {
         #[test]
         fn format_with_foreign_export_and_custom_calling_convention() {
             assert_eq!(
-                format(&Module::new(
+                format_module(&Module::new(
                     vec![],
                     vec![],
                     vec![],
@@ -1425,7 +1428,7 @@ mod tests {
         #[test]
         fn format_statement_with_trimmed_blank_line() {
             assert_eq!(
-                format(&Module::new(
+                format_module(&Module::new(
                     vec![],
                     vec![],
                     vec![],

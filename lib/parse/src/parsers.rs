@@ -1,5 +1,5 @@
 use super::operations::*;
-use crate::{comment::Comment, stream::Stream};
+use crate::stream::Stream;
 use ast::{
     types::{self, Type},
     *,
