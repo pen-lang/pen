@@ -11,7 +11,7 @@ impl Context {
         Self { comments }
     }
 
-    pub fn pop_before_line(&mut self, line_number: usize) -> Vec<Comment> {
+    pub fn pop_before(&mut self, line_number: usize) -> Vec<Comment> {
         self.comments
             .splice(
                 ..self
@@ -25,7 +25,7 @@ impl Context {
             .collect()
     }
 
-    pub fn pop_on_line(&mut self, line_number: usize) -> Option<Comment> {
+    pub fn pop_current(&mut self, line_number: usize) -> Option<Comment> {
         self.comments
             .iter()
             .position(|comment| comment.position().line_number() == line_number)

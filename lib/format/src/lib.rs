@@ -748,7 +748,7 @@ fn operator_priority(operator: BinaryOperator) -> usize {
 
 fn format_comments(context: &mut Context, position: &Position) -> String {
     context
-        .pop_before_line(position.line_number())
+        .pop_before(position.line_number())
         .into_iter()
         .map(|comment| "#".to_owned() + comment.line() + "\n")
         .collect::<Vec<_>>()
