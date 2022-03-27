@@ -32,8 +32,6 @@ static KEYWORDS: Lazy<Vec<&str>> = Lazy::new(|| {
 });
 const OPERATOR_CHARACTERS: &str = "+-*/=<>&|!?";
 
-static SIGN_CHARACTERS: Lazy<String> = Lazy::new(|| OPERATOR_CHARACTERS.to_owned() + "',.\\{}()[]");
-
 static BINARY_REGEX: Lazy<regex::Regex> = Lazy::new(|| regex::Regex::new(r"^0b[01]+").unwrap());
 static HEXADECIMAL_REGEX: Lazy<regex::Regex> =
     Lazy::new(|| regex::Regex::new(r"^0x[0-9a-fA-F]+").unwrap());
@@ -77,10 +75,7 @@ pub fn comments<'a>() -> impl Parser<Stream<'a>, Output = Vec<Comment>> {
         choice((
             comment().map(Some),
             raw_string_literal().map(|_| None),
-            letter().map(|_| None),
-            digit().map(|_| None),
-            character('_').map(|_| None),
-            one_of(SIGN_CHARACTERS.chars()).map(|_| None),
+            none_of("\"#".chars()).map(|_| None),
         )),
     ))
     .skip(eof())
