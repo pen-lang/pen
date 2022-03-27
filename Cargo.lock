@@ -666,6 +666,7 @@ dependencies = [
  "ast",
  "combine",
  "fnv",
+ "indoc",
  "insta",
  "once_cell",
  "position",

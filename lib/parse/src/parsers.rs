@@ -1,5 +1,5 @@
 use super::operations::*;
-use crate::stream::Stream;
+use crate::{comment::Comment, stream::Stream};
 use ast::{
     types::{self, Type},
     *,
@@ -31,6 +31,8 @@ static KEYWORDS: Lazy<Vec<&str>> = Lazy::new(|| {
     .collect()
 });
 const OPERATOR_CHARACTERS: &str = "+-*/=<>&|!?";
+
+static SIGN_CHARACTERS: Lazy<String> = Lazy::new(|| OPERATOR_CHARACTERS.to_owned() + "'.\\{}()[]");
 
 static BINARY_REGEX: Lazy<regex::Regex> = Lazy::new(|| regex::Regex::new(r"^0b[01]+").unwrap());
 static HEXADECIMAL_REGEX: Lazy<regex::Regex> =
@@ -66,6 +68,20 @@ pub fn module<'a>() -> impl Parser<Stream<'a>, Output = Module> {
                 )
             },
         )
+}
+
+pub fn comments<'a>() -> impl Parser<Stream<'a>, Output = Vec<Comment>> {
+    many(between(
+        spaces(),
+        spaces(),
+        choice((
+            comment().map(Some),
+            raw_string_literal().map(|_| None),
+            raw_identifier().map(|_| None),
+            one_of(SIGN_CHARACTERS.chars()).map(|_| None),
+        )),
+    ))
+    .map(|comments: Vec<_>| comments.into_iter().flatten().collect())
 }
 
 fn import<'a>() -> impl Parser<Stream<'a>, Output = Import> {
@@ -703,10 +719,14 @@ fn decimal_literal<'a>() -> impl Parser<Stream<'a>, Output = NumberRepresentatio
 }
 
 fn string_literal<'a>() -> impl Parser<Stream<'a>, Output = ByteString> {
+    token(raw_string_literal())
+}
+
+fn raw_string_literal<'a>() -> impl Parser<Stream<'a>, Output = ByteString> {
     let string_regex: &'static regex::Regex = &STRING_CHARACTER_REGEX;
     let byte_regex: &'static regex::Regex = &BYTE_CHARACTER_REGEX;
 
-    token((
+    (
         attempt(position().skip(character('"'))),
         many(choice((
             find(string_regex).map(String::from),
@@ -719,9 +739,11 @@ fn string_literal<'a>() -> impl Parser<Stream<'a>, Output = ByteString> {
                 .map(|(prefix, byte)| prefix.to_owned() + byte),
         ))),
         character('"'),
-    ))
-    .map(|(position, strings, _): (_, Vec<String>, _)| ByteString::new(strings.concat(), position))
-    .expected("string literal")
+    )
+        .map(|(position, strings, _): (_, Vec<String>, _)| {
+            ByteString::new(strings.concat(), position)
+        })
+        .expected("string literal")
 }
 
 fn special_string_character<'a>(escape: &'static str) -> impl Parser<Stream<'a>, Output = String> {
@@ -883,17 +905,22 @@ fn eof<'a>() -> impl Parser<Stream<'a>, Output = ()> {
 }
 
 fn blank<'a>() -> impl Parser<Stream<'a>, Output = ()> {
-    many::<Vec<_>, _, _>(choice((space().with(value(())), comment()))).with(value(()))
+    many::<Vec<_>, _, _>(choice((space().with(value(())), comment().with(value(())))))
+        .with(value(()))
 }
 
-fn comment<'a>() -> impl Parser<Stream<'a>, Output = ()> {
-    string("#")
-        .with(many::<Vec<_>, _, _>(none_of("\n".chars())))
-        .with(choice((
+fn comment<'a>() -> impl Parser<Stream<'a>, Output = Comment> {
+    (
+        attempt((position(), string("#"))),
+        many::<Vec<_>, _, _>(none_of("\n".chars())),
+    )
+        .map(|((position, _), string)| {
+            Comment::new(string.into_iter().collect::<String>().trim_end(), position)
+        })
+        .skip(choice((
             combine::parser::char::newline().with(value(())),
             eof(),
         )))
-        .with(spaces())
         .expected("comment")
 }
 
@@ -901,6 +928,7 @@ fn comment<'a>() -> impl Parser<Stream<'a>, Output = ()> {
 mod tests {
     use super::*;
     use crate::{error::ParseError, stream::stream};
+    use indoc::indoc;
     use position::test::PositionFake;
     use pretty_assertions::assert_eq;
 
@@ -3201,5 +3229,119 @@ mod tests {
         assert!(comment().parse(stream("#", "")).is_ok());
         assert!(comment().parse(stream("#\n", "")).is_ok());
         assert!(comment().parse(stream("#x\n", "")).is_ok());
+    }
+
+    mod comments {
+        use super::*;
+        use pretty_assertions::assert_eq;
+
+        #[test]
+        fn parse_comment() {
+            assert_eq!(
+                comments().parse(stream("#foo", "")).unwrap().0,
+                vec![Comment::new("foo", Position::fake())]
+            );
+        }
+
+        #[test]
+        fn parse_comment_after_space() {
+            assert_eq!(
+                comments().parse(stream(" #foo", "")).unwrap().0,
+                vec![Comment::new("foo", Position::fake())]
+            );
+        }
+
+        #[test]
+        fn parse_comment_before_space() {
+            assert_eq!(
+                comments().parse(stream("#foo\n #bar", "")).unwrap().0,
+                vec![
+                    Comment::new("foo", Position::fake()),
+                    Comment::new("bar", Position::fake())
+                ]
+            );
+        }
+
+        #[test]
+        fn parse_two_line_comments() {
+            assert_eq!(
+                comments()
+                    .parse(stream(
+                        indoc!(
+                            "
+                            #foo
+                            #bar
+                            "
+                        ),
+                        ""
+                    ))
+                    .unwrap()
+                    .0,
+                vec![
+                    Comment::new("foo", Position::fake()),
+                    Comment::new("bar", Position::fake())
+                ]
+            );
+        }
+
+        #[test]
+        fn parse_comment_after_token() {
+            assert_eq!(
+                comments().parse(stream("foo#foo", "")).unwrap().0,
+                vec![Comment::new("foo", Position::fake())]
+            );
+        }
+
+        #[test]
+        fn parse_comment_before_token() {
+            assert_eq!(
+                comments().parse(stream("#foo\nfoo#bar", "")).unwrap().0,
+                vec![
+                    Comment::new("foo", Position::fake()),
+                    Comment::new("bar", Position::fake())
+                ]
+            );
+        }
+
+        #[test]
+        fn parse_comment_after_sign() {
+            assert_eq!(
+                comments().parse(stream("+#foo", "")).unwrap().0,
+                vec![Comment::new("foo", Position::fake())]
+            );
+        }
+
+        #[test]
+        fn parse_comment_before_sign() {
+            assert_eq!(
+                comments().parse(stream("#foo\n+#bar", "")).unwrap().0,
+                vec![
+                    Comment::new("foo", Position::fake()),
+                    Comment::new("bar", Position::fake())
+                ]
+            );
+        }
+
+        #[test]
+        fn parse_comment_after_string() {
+            assert_eq!(
+                comments().parse(stream("\"string\"#foo", "")).unwrap().0,
+                vec![Comment::new("foo", Position::fake())]
+            );
+        }
+
+        #[test]
+        fn parse_comment_before_string() {
+            assert_eq!(
+                comments()
+                    .parse(stream("#foo\n\"string\"#bar", ""))
+                    .unwrap()
+                    .0,
+                vec![
+                    Comment::new("foo", Position::fake()),
+                    Comment::new("bar", Position::fake())
+                ]
+            );
+        }
     }
 }
