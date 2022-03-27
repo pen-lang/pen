@@ -77,7 +77,7 @@ pub fn comments<'a>() -> impl Parser<Stream<'a>, Output = Vec<Comment>> {
         choice((
             comment().map(Some),
             raw_string_literal().map(|_| None),
-            raw_identifier().map(|_| None),
+            raw_identifier_or_keyword().map(|_| None),
             one_of(SIGN_CHARACTERS.chars()).map(|_| None),
         )),
     ))
@@ -834,11 +834,7 @@ fn identifier<'a>() -> impl Parser<Stream<'a>, Output = String> {
 }
 
 fn raw_identifier<'a>() -> impl Parser<Stream<'a>, Output = String> {
-    (
-        choice((letter(), combine::parser::char::char('_'))),
-        many(choice((alpha_num(), combine::parser::char::char('_')))),
-    )
-        .map(|(head, tail): (char, String)| [head.into(), tail].concat())
+    raw_identifier_or_keyword()
         .then(|identifier| {
             if KEYWORDS.contains(&identifier.as_str()) {
                 // TODO Fix those misuse of `unexpected_any` combinators.
@@ -849,6 +845,14 @@ fn raw_identifier<'a>() -> impl Parser<Stream<'a>, Output = String> {
             }
         })
         .silent()
+}
+
+fn raw_identifier_or_keyword<'a>() -> impl Parser<Stream<'a>, Output = String> {
+    (
+        choice((letter(), combine::parser::char::char('_'))),
+        many(choice((alpha_num(), combine::parser::char::char('_')))),
+    )
+        .map(|(head, tail): (char, String)| [head.into(), tail].concat())
 }
 
 fn keyword<'a>(name: &'static str) -> impl Parser<Stream<'a>, Output = ()> {
@@ -3285,7 +3289,7 @@ mod tests {
         }
 
         #[test]
-        fn parse_comment_after_token() {
+        fn parse_comment_after_identifier() {
             assert_eq!(
                 comments().parse(stream("foo#foo", "")).unwrap().0,
                 vec![Comment::new("foo", Position::fake())]
@@ -3293,9 +3297,28 @@ mod tests {
         }
 
         #[test]
-        fn parse_comment_before_token() {
+        fn parse_comment_before_identifier() {
             assert_eq!(
                 comments().parse(stream("#foo\nfoo#bar", "")).unwrap().0,
+                vec![
+                    Comment::new("foo", Position::fake()),
+                    Comment::new("bar", Position::fake())
+                ]
+            );
+        }
+
+        #[test]
+        fn parse_comment_after_keyword() {
+            assert_eq!(
+                comments().parse(stream("if#foo", "")).unwrap().0,
+                vec![Comment::new("foo", Position::fake())]
+            );
+        }
+
+        #[test]
+        fn parse_comment_before_keyword() {
+            assert_eq!(
+                comments().parse(stream("#foo\nif#bar", "")).unwrap().0,
                 vec![
                     Comment::new("foo", Position::fake()),
                     Comment::new("bar", Position::fake())
