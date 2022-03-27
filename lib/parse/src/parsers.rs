@@ -7,7 +7,7 @@ use ast::{
 use combine::{
     attempt, choice, look_ahead, many, many1, none_of, one_of, optional,
     parser::{
-        char::{alpha_num, char as character, digit, letter, space, spaces, string},
+        char::{alpha_num, char as character, digit, letter, newline, space, spaces, string},
         combinator::{lazy, no_partial, not_followed_by},
         regex::find,
         sequence::between,
@@ -921,10 +921,7 @@ fn comment<'a>() -> impl Parser<Stream<'a>, Output = Comment> {
         .map(|((position, _), string)| {
             Comment::new(string.into_iter().collect::<String>().trim_end(), position)
         })
-        .skip(choice((
-            combine::parser::char::newline().with(value(())),
-            eof(),
-        )))
+        .skip(choice((newline().with(value(())), eof())))
         .expected("comment")
 }
 
