@@ -1,7 +1,6 @@
-mod context;
+mod comment;
 
 use ast::{types::Type, *};
-use context::Context;
 use position::Position;
 use std::str;
 
@@ -11,35 +10,47 @@ const INDENT_DEPTH: usize = 2;
 // formats in some occasions.
 
 pub fn format(module: &Module, comments: &[Comment]) -> String {
-    let mut context = Context::new(comments.to_vec());
+    let comments = comment::sort(comments);
 
     let (external_imports, internal_imports) = module
         .imports()
         .iter()
         .partition::<Vec<_>, _>(|import| matches!(import.module_path(), ModulePath::External(_)));
 
+    let mut comments = comments.as_slice();
+    let mut sections = vec![
+        format_imports(&external_imports),
+        format_imports(&internal_imports),
+        module
+            .foreign_imports()
+            .iter()
+            .map(format_foreign_import)
+            .collect::<Vec<_>>()
+            .join("\n"),
+    ];
+
+    for definition in module.type_definitions() {
+        let (definition, new_comments) = format_type_definition(definition, &comments);
+
+        sections.push(definition);
+
+        comments = new_comments;
+    }
+
+    for definition in module.definitions() {
+        let (definition, new_comments) = format_definition(definition, &comments);
+
+        sections.push(definition);
+
+        comments = new_comments;
+    }
+
     format_spaces(
-        [
-            format_imports(&external_imports),
-            format_imports(&internal_imports),
-            module
-                .foreign_imports()
-                .iter()
-                .map(format_foreign_import)
-                .collect::<Vec<_>>()
-                .join("\n"),
-        ]
-        .into_iter()
-        .filter(|string| !string.is_empty())
-        .chain(module.type_definitions().iter().map(format_type_definition))
-        .chain(
-            module
-                .definitions()
-                .iter()
-                .map(|definition| format_definition(&mut context, definition)),
-        )
-        .collect::<Vec<_>>()
-        .join("\n\n")
+        sections
+            .into_iter()
+            .filter(|string| !string.is_empty())
+            .collect::<Vec<_>>()
+            .join("\n\n")
             + "\n",
     )
 }
@@ -106,65 +117,94 @@ fn format_foreign_import(import: &ForeignImport) -> String {
         .join(" ")
 }
 
-fn format_type_definition(definition: &TypeDefinition) -> String {
+fn format_type_definition<'c>(
+    definition: &TypeDefinition,
+    comments: &'c [Comment],
+) -> (String, &'c [Comment]) {
     match definition {
-        TypeDefinition::RecordDefinition(definition) => format_record_definition(definition),
-        TypeDefinition::TypeAlias(alias) => format_type_alias(alias),
+        TypeDefinition::RecordDefinition(definition) => {
+            format_record_definition(definition, comments)
+        }
+        TypeDefinition::TypeAlias(alias) => format_type_alias(alias, comments),
     }
 }
 
-fn format_record_definition(definition: &RecordDefinition) -> String {
+fn format_record_definition<'c>(
+    definition: &RecordDefinition,
+    comments: &'c [Comment],
+) -> (String, &'c [Comment]) {
+    let (comment_string, comments) = format_comments(comments, definition.position());
     let head = ["type", definition.name(), "{"].join(" ");
 
-    if definition.fields().is_empty() {
-        head + "}"
-    } else {
-        [
-            head,
-            definition
-                .fields()
-                .iter()
-                .map(|field| indent(field.name().to_owned() + " " + &format_type(field.type_())))
-                .collect::<Vec<_>>()
-                .join("\n"),
-            "}".into(),
-        ]
-        .join("\n")
-    }
+    (
+        comment_string
+            + &if definition.fields().is_empty() {
+                head + "}"
+            } else {
+                [
+                    head,
+                    definition
+                        .fields()
+                        .iter()
+                        .map(|field| {
+                            indent(field.name().to_owned() + " " + &format_type(field.type_()))
+                        })
+                        .collect::<Vec<_>>()
+                        .join("\n"),
+                    "}".into(),
+                ]
+                .join("\n")
+            },
+        comments,
+    )
 }
 
-fn format_type_alias(alias: &TypeAlias) -> String {
-    [
-        "type".into(),
-        alias.name().into(),
-        "=".into(),
-        format_type(alias.type_()),
-    ]
-    .join(" ")
-}
+fn format_type_alias<'c>(alias: &TypeAlias, comments: &'c [Comment]) -> (String, &'c [Comment]) {
+    let (comment_string, comments) = format_comments(comments, alias.position());
 
-fn format_definition(context: &mut Context, definition: &Definition) -> String {
-    format_comments(context, definition.position())
-        + &definition
-            .foreign_export()
-            .map(|export| {
-                ["foreign"]
-                    .into_iter()
-                    .chain(match export.calling_convention() {
-                        CallingConvention::C => Some("\"c\""),
-                        CallingConvention::Native => None,
-                    })
-                    .collect::<Vec<_>>()
-                    .join(" ")
-            })
-            .into_iter()
-            .chain([
-                definition.name().into(),
+    (
+        comment_string
+            + &[
+                "type".into(),
+                alias.name().into(),
                 "=".into(),
-                format_lambda(definition.lambda()),
-            ])
-            .collect::<Vec<_>>()
-            .join(" ")
+                format_type(alias.type_()),
+            ]
+            .join(" "),
+        comments,
+    )
+}
+
+fn format_definition<'c>(
+    definition: &Definition,
+    comments: &'c [Comment],
+) -> (String, &'c [Comment]) {
+    let (comment_string, comments) = format_comments(comments, definition.position());
+
+    (
+        comment_string
+            + &definition
+                .foreign_export()
+                .map(|export| {
+                    ["foreign"]
+                        .into_iter()
+                        .chain(match export.calling_convention() {
+                            CallingConvention::C => Some("\"c\""),
+                            CallingConvention::Native => None,
+                        })
+                        .collect::<Vec<_>>()
+                        .join(" ")
+                })
+                .into_iter()
+                .chain([
+                    definition.name().into(),
+                    "=".into(),
+                    format_lambda(definition.lambda()),
+                ])
+                .collect::<Vec<_>>()
+                .join(" "),
+        comments,
+    )
 }
 
 fn format_type(type_: &Type) -> String {
@@ -746,13 +786,17 @@ fn operator_priority(operator: BinaryOperator) -> usize {
     }
 }
 
-fn format_comments(context: &mut Context, position: &Position) -> String {
-    context
-        .pop_before(position.line_number())
-        .into_iter()
-        .map(|comment| "#".to_owned() + comment.line() + "\n")
-        .collect::<Vec<_>>()
-        .concat()
+fn format_comments<'c>(comments: &'c [Comment], position: &Position) -> (String, &'c [Comment]) {
+    let (before, after) = comment::split_before(comments, position.line_number());
+
+    (
+        before
+            .iter()
+            .map(|comment| "#".to_owned() + comment.line() + "\n")
+            .collect::<Vec<_>>()
+            .concat(),
+        after,
+    )
 }
 
 fn indent(string: impl AsRef<str>) -> String {
@@ -2742,6 +2786,23 @@ mod tests {
                     &[Comment::new("foo", line_position(1))]
                 ),
                 "#foo\nfoo = \\() none { none }\n"
+            );
+        }
+
+        #[test]
+        fn format_type_definition() {
+            assert_eq!(
+                format(
+                    &Module::new(
+                        vec![],
+                        vec![],
+                        vec![RecordDefinition::new("foo", vec![], line_position(2)).into()],
+                        vec![],
+                        Position::fake()
+                    ),
+                    &[Comment::new("foo", line_position(1))]
+                ),
+                "#foo\ntype foo {}\n"
             );
         }
     }
