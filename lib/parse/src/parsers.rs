@@ -84,8 +84,10 @@ pub fn comments<'a>() -> impl Parser<Stream<'a>, Output = Vec<Comment>> {
 
 fn import<'a>() -> impl Parser<Stream<'a>, Output = Import> {
     (
-        attempt(position().skip(
-            keyword("import").with(not_followed_by(keyword("foreign").with(value("foreign")))),
+        attempt((
+            position(),
+            keyword("import"),
+            not_followed_by(keyword("foreign").with(value("foreign"))),
         )),
         module_path(),
         optional(keyword("as").with(identifier())),
@@ -95,7 +97,7 @@ fn import<'a>() -> impl Parser<Stream<'a>, Output = Import> {
             sep_end_by1(identifier(), sign(",")),
         )),
     )
-        .map(|(position, path, prefix, names)| {
+        .map(|((position, _, _), path, prefix, names)| {
             Import::new(path, prefix, names.unwrap_or_default(), position)
         })
         .expected("import statement")
