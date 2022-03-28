@@ -364,15 +364,20 @@ fn format_multi_line_block<'c>(
             .map(|statement| statement.position())
             .chain([block.expression().position()]),
     ) {
-        // TODO Use end positions of spans when they are available.
-        let line_count = next_position.line_number() - statement.position().line_number();
         let (block_comment, new_comments) = format_block_comment(comments, statement.position());
+        // TODO Use end positions of spans when they are available.
+        let line_count = next_position.line_number() as isize
+            - statement.position().line_number() as isize
+            - comment::split_before(comments, next_position.line_number())
+                .0
+                .len() as isize;
+        dbg!(line_count);
         let (statement, new_comments) = format_statement(statement, &new_comments);
 
         statements.push(indent(
             block_comment
                 + &statement
-                + if count_lines(&statement) >= line_count {
+                + if count_lines(&statement) as isize >= line_count {
                     ""
                 } else {
                     "\n"
@@ -2363,11 +2368,11 @@ mod tests {
                             BinaryOperator::Add,
                             Number::new(
                                 NumberRepresentation::FloatingPoint("1".into()),
-                                Position::fake()
+                                line_position(1)
                             ),
                             Number::new(
                                 NumberRepresentation::FloatingPoint("2".into()),
-                                line_position(1)
+                                line_position(2)
                             ),
                             Position::fake()
                         )
@@ -3015,29 +3020,50 @@ mod tests {
         }
 
         #[test]
-        fn format_definition() {
+        fn format_import() {
             assert_eq!(
                 format(
                     &Module::new(
-                        vec![],
-                        vec![],
-                        vec![],
-                        vec![Definition::new(
-                            "foo",
-                            Lambda::new(
-                                vec![],
-                                types::None::new(Position::fake()),
-                                Block::new(vec![], None::new(Position::fake()), Position::fake()),
-                                Position::fake(),
-                            ),
+                        vec![Import::new(
+                            InternalModulePath::new(vec!["Foo".into()]),
                             None,
-                            line_position(2)
+                            vec![],
+                            line_position(2),
                         )],
+                        vec![],
+                        vec![],
+                        vec![],
                         Position::fake()
                     ),
                     &[Comment::new("foo", line_position(1))]
                 ),
-                "#foo\nfoo = \\() none { none }\n"
+                "#foo\nimport 'Foo\n"
+            );
+        }
+
+        #[test]
+        fn format_foreign_import() {
+            assert_eq!(
+                format(
+                    &Module::new(
+                        vec![],
+                        vec![ForeignImport::new(
+                            "foo",
+                            CallingConvention::Native,
+                            types::Function::new(
+                                vec![],
+                                types::None::new(Position::fake()),
+                                Position::fake()
+                            ),
+                            line_position(2),
+                        )],
+                        vec![],
+                        vec![],
+                        Position::fake()
+                    ),
+                    &[Comment::new("foo", line_position(1))]
+                ),
+                "#foo\nimport foreign foo \\() none\n"
             );
         }
 
@@ -3077,6 +3103,153 @@ mod tests {
                     &[Comment::new("foo", line_position(1))]
                 ),
                 "#foo\ntype foo = none\n"
+            );
+        }
+
+        #[test]
+        fn format_definition() {
+            assert_eq!(
+                format(
+                    &Module::new(
+                        vec![],
+                        vec![],
+                        vec![],
+                        vec![Definition::new(
+                            "foo",
+                            Lambda::new(
+                                vec![],
+                                types::None::new(Position::fake()),
+                                Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                                Position::fake(),
+                            ),
+                            None,
+                            line_position(2)
+                        )],
+                        Position::fake()
+                    ),
+                    &[Comment::new("foo", line_position(1))]
+                ),
+                "#foo\nfoo = \\() none { none }\n"
+            );
+        }
+
+        #[test]
+        fn format_statement_in_block() {
+            assert_eq!(
+                format(
+                    &Module::new(
+                        vec![],
+                        vec![],
+                        vec![],
+                        vec![Definition::new(
+                            "foo",
+                            Lambda::new(
+                                vec![],
+                                types::None::new(Position::fake()),
+                                Block::new(
+                                    vec![Statement::new(
+                                        Some("x".into()),
+                                        None::new(Position::fake()),
+                                        line_position(2)
+                                    )],
+                                    None::new(line_position(3)),
+                                    Position::fake()
+                                ),
+                                Position::fake(),
+                            ),
+                            None,
+                            Position::fake()
+                        )],
+                        Position::fake()
+                    ),
+                    &[Comment::new("foo", line_position(1))]
+                ),
+                indoc!(
+                    "
+                    foo = \\() none {
+                      #foo
+                      x = none
+                      none
+                    }
+                    "
+                )
+            );
+        }
+
+        #[test]
+        fn format_result_expression_in_block() {
+            assert_eq!(
+                format(
+                    &Module::new(
+                        vec![],
+                        vec![],
+                        vec![],
+                        vec![Definition::new(
+                            "foo",
+                            Lambda::new(
+                                vec![],
+                                types::None::new(Position::fake()),
+                                Block::new(vec![], None::new(line_position(2)), Position::fake()),
+                                Position::fake(),
+                            ),
+                            None,
+                            Position::fake()
+                        )],
+                        Position::fake()
+                    ),
+                    &[Comment::new("foo", line_position(1))]
+                ),
+                indoc!(
+                    "
+                    foo = \\() none {
+                      #foo
+                      none
+                    }
+                    "
+                )
+            );
+        }
+
+        #[test]
+        fn format_comment_between_statement_and_expression_in_block() {
+            assert_eq!(
+                format(
+                    &Module::new(
+                        vec![],
+                        vec![],
+                        vec![],
+                        vec![Definition::new(
+                            "foo",
+                            Lambda::new(
+                                vec![],
+                                types::None::new(Position::fake()),
+                                Block::new(
+                                    vec![Statement::new(
+                                        Some("x".into()),
+                                        None::new(Position::fake()),
+                                        line_position(1)
+                                    )],
+                                    None::new(line_position(3)),
+                                    Position::fake()
+                                ),
+                                Position::fake(),
+                            ),
+                            None,
+                            Position::fake()
+                        )],
+                        Position::fake()
+                    ),
+                    &[Comment::new("foo", line_position(2))]
+                ),
+                indoc!(
+                    "
+                    foo = \\() none {
+                      x = none
+                      #foo
+                      none
+                    }
+                    "
+                )
             );
         }
     }
