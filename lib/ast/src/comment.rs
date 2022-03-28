@@ -14,7 +14,7 @@ impl Comment {
         }
     }
 
-    pub fn lines(&self) -> &str {
+    pub fn line(&self) -> &str {
         &self.line
     }
 

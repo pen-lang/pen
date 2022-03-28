@@ -1,5 +1,5 @@
 use super::operations::*;
-use crate::{comment::Comment, stream::Stream};
+use crate::stream::Stream;
 use ast::{
     types::{self, Type},
     *,
@@ -7,7 +7,7 @@ use ast::{
 use combine::{
     attempt, choice, look_ahead, many, many1, none_of, one_of, optional,
     parser::{
-        char::{alpha_num, char as character, digit, letter, space, spaces, string},
+        char::{alpha_num, char as character, digit, letter, newline, space, spaces, string},
         combinator::{lazy, no_partial, not_followed_by},
         regex::find,
         sequence::between,
@@ -31,8 +31,6 @@ static KEYWORDS: Lazy<Vec<&str>> = Lazy::new(|| {
     .collect()
 });
 const OPERATOR_CHARACTERS: &str = "+-*/=<>&|!?";
-
-static SIGN_CHARACTERS: Lazy<String> = Lazy::new(|| OPERATOR_CHARACTERS.to_owned() + "'.\\{}()[]");
 
 static BINARY_REGEX: Lazy<regex::Regex> = Lazy::new(|| regex::Regex::new(r"^0b[01]+").unwrap());
 static HEXADECIMAL_REGEX: Lazy<regex::Regex> =
@@ -77,16 +75,20 @@ pub fn comments<'a>() -> impl Parser<Stream<'a>, Output = Vec<Comment>> {
         choice((
             comment().map(Some),
             raw_string_literal().map(|_| None),
-            raw_identifier().map(|_| None),
-            one_of(SIGN_CHARACTERS.chars()).map(|_| None),
+            none_of("\"#".chars()).map(|_| None),
         )),
     ))
+    .skip(eof())
     .map(|comments: Vec<_>| comments.into_iter().flatten().collect())
 }
 
 fn import<'a>() -> impl Parser<Stream<'a>, Output = Import> {
     (
-        attempt(keyword("import").with(not_followed_by(keyword("foreign").with(value("foreign"))))),
+        attempt((
+            position(),
+            keyword("import"),
+            not_followed_by(keyword("foreign").with(value("foreign"))),
+        )),
         module_path(),
         optional(keyword("as").with(identifier())),
         optional(between(
@@ -95,7 +97,9 @@ fn import<'a>() -> impl Parser<Stream<'a>, Output = Import> {
             sep_end_by1(identifier(), sign(",")),
         )),
     )
-        .map(|(_, path, prefix, names)| Import::new(path, prefix, names.unwrap_or_default()))
+        .map(|((position, _, _), path, prefix, names)| {
+            Import::new(path, prefix, names.unwrap_or_default(), position)
+        })
         .expected("import statement")
 }
 
@@ -917,10 +921,7 @@ fn comment<'a>() -> impl Parser<Stream<'a>, Output = Comment> {
         .map(|((position, _), string)| {
             Comment::new(string.into_iter().collect::<String>().trim_end(), position)
         })
-        .skip(choice((
-            combine::parser::char::newline().with(value(())),
-            eof(),
-        )))
+        .skip(choice((newline().with(value(())), eof())))
         .expected("comment")
 }
 
@@ -956,7 +957,8 @@ mod tests {
                     vec![Import::new(
                         ExternalModulePath::new("Foo", vec!["Bar".into()]),
                         None,
-                        vec![]
+                        vec![],
+                        Position::fake()
                     )],
                     vec![],
                     vec![],
@@ -1075,7 +1077,8 @@ mod tests {
                     vec![Import::new(
                         ExternalModulePath::new("Foo", vec!["Bar".into()]),
                         None,
-                        vec![]
+                        vec![],
+                        Position::fake()
                     )],
                     vec![ForeignImport::new(
                         "foo",
@@ -1128,14 +1131,20 @@ mod tests {
         fn parse_import() {
             assert_eq!(
                 import().parse(stream("import 'Foo", "")).unwrap().0,
-                Import::new(InternalModulePath::new(vec!["Foo".into()]), None, vec![]),
+                Import::new(
+                    InternalModulePath::new(vec!["Foo".into()]),
+                    None,
+                    vec![],
+                    Position::fake()
+                ),
             );
             assert_eq!(
                 import().parse(stream("import Foo'Bar", "")).unwrap().0,
                 Import::new(
                     ExternalModulePath::new("Foo", vec!["Bar".into()]),
                     None,
-                    vec![]
+                    vec![],
+                    Position::fake()
                 ),
             );
         }
@@ -1147,7 +1156,8 @@ mod tests {
                 Import::new(
                     InternalModulePath::new(vec!["Foo".into()]),
                     Some("foo".into()),
-                    vec![]
+                    vec![],
+                    Position::fake()
                 ),
             );
         }
@@ -1159,7 +1169,8 @@ mod tests {
                 Import::new(
                     InternalModulePath::new(vec!["Foo".into()]),
                     None,
-                    vec!["Foo".into()]
+                    vec!["Foo".into()],
+                    Position::fake()
                 ),
             );
         }
@@ -1174,7 +1185,8 @@ mod tests {
                 Import::new(
                     InternalModulePath::new(vec!["Foo".into()]),
                     None,
-                    vec!["Foo".into(), "Bar".into()]
+                    vec!["Foo".into(), "Bar".into()],
+                    Position::fake()
                 ),
             );
         }
@@ -3263,6 +3275,14 @@ mod tests {
         }
 
         #[test]
+        fn parse_comment_before_newlines() {
+            assert_eq!(
+                comments().parse(stream("#foo\n\n", "")).unwrap().0,
+                vec![Comment::new("foo", Position::fake())]
+            );
+        }
+
+        #[test]
         fn parse_two_line_comments() {
             assert_eq!(
                 comments()
@@ -3285,7 +3305,7 @@ mod tests {
         }
 
         #[test]
-        fn parse_comment_after_token() {
+        fn parse_comment_after_identifier() {
             assert_eq!(
                 comments().parse(stream("foo#foo", "")).unwrap().0,
                 vec![Comment::new("foo", Position::fake())]
@@ -3293,9 +3313,28 @@ mod tests {
         }
 
         #[test]
-        fn parse_comment_before_token() {
+        fn parse_comment_before_identifier() {
             assert_eq!(
                 comments().parse(stream("#foo\nfoo#bar", "")).unwrap().0,
+                vec![
+                    Comment::new("foo", Position::fake()),
+                    Comment::new("bar", Position::fake())
+                ]
+            );
+        }
+
+        #[test]
+        fn parse_comment_after_keyword() {
+            assert_eq!(
+                comments().parse(stream("if#foo", "")).unwrap().0,
+                vec![Comment::new("foo", Position::fake())]
+            );
+        }
+
+        #[test]
+        fn parse_comment_before_keyword() {
+            assert_eq!(
+                comments().parse(stream("#foo\nif#bar", "")).unwrap().0,
                 vec![
                     Comment::new("foo", Position::fake()),
                     Comment::new("bar", Position::fake())

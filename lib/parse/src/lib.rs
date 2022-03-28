@@ -1,11 +1,10 @@
-mod comment;
 mod error;
 mod operations;
 mod parsers;
 mod stream;
 
+use ast::Comment;
 use combine::Parser;
-use comment::Comment;
 pub use error::ParseError;
 use parsers::{comments, module};
 use stream::stream;

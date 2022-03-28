@@ -18,8 +18,8 @@ Ok(
                                             name: "GenericMap",
                                             position: Position {
                                                 path: "",
-                                                line_number: 0,
-                                                column_number: 0,
+                                                line_number: 1,
+                                                column_number: 1,
                                                 line: "",
                                             },
                                         },
@@ -28,8 +28,8 @@ Ok(
                                         Any {
                                             position: Position {
                                                 path: "",
-                                                line_number: 0,
-                                                column_number: 0,
+                                                line_number: 1,
+                                                column_number: 1,
                                                 line: "",
                                             },
                                         },
@@ -39,16 +39,16 @@ Ok(
                                     Any {
                                         position: Position {
                                             path: "",
-                                            line_number: 0,
-                                            column_number: 0,
+                                            line_number: 1,
+                                            column_number: 1,
                                             line: "",
                                         },
                                     },
                                 ),
                                 position: Position {
                                     path: "",
-                                    line_number: 0,
-                                    column_number: 0,
+                                    line_number: 1,
+                                    column_number: 1,
                                     line: "",
                                 },
                             },
@@ -59,8 +59,8 @@ Ok(
                             name: "getMap",
                             position: Position {
                                 path: "",
-                                line_number: 0,
-                                column_number: 0,
+                                line_number: 1,
+                                column_number: 1,
                                 line: "",
                             },
                         },
@@ -71,8 +71,8 @@ Ok(
                                 name: "xs",
                                 position: Position {
                                     path: "",
-                                    line_number: 0,
-                                    column_number: 0,
+                                    line_number: 1,
+                                    column_number: 1,
                                     line: "",
                                 },
                             },
@@ -83,8 +83,8 @@ Ok(
                                     Number {
                                         position: Position {
                                             path: "",
-                                            line_number: 0,
-                                            column_number: 0,
+                                            line_number: 1,
+                                            column_number: 1,
                                             line: "",
                                         },
                                     },
@@ -93,8 +93,8 @@ Ok(
                                     Any {
                                         position: Position {
                                             path: "",
-                                            line_number: 0,
-                                            column_number: 0,
+                                            line_number: 1,
+                                            column_number: 1,
                                             line: "",
                                         },
                                     },
@@ -104,16 +104,16 @@ Ok(
                                         name: "k",
                                         position: Position {
                                             path: "",
-                                            line_number: 0,
-                                            column_number: 0,
+                                            line_number: 1,
+                                            column_number: 1,
                                             line: "",
                                         },
                                     },
                                 ),
                                 position: Position {
                                     path: "",
-                                    line_number: 0,
-                                    column_number: 0,
+                                    line_number: 1,
+                                    column_number: 1,
                                     line: "",
                                 },
                             },
@@ -121,8 +121,8 @@ Ok(
                     ],
                     position: Position {
                         path: "",
-                        line_number: 0,
-                        column_number: 0,
+                        line_number: 1,
+                        column_number: 1,
                         line: "",
                     },
                 },
@@ -134,8 +134,8 @@ Ok(
                             name: "notFound",
                             position: Position {
                                 path: "",
-                                line_number: 0,
-                                column_number: 0,
+                                line_number: 1,
+                                column_number: 1,
                                 line: "",
                             },
                         },
@@ -144,8 +144,8 @@ Ok(
                         None {
                             position: Position {
                                 path: "",
-                                line_number: 0,
-                                column_number: 0,
+                                line_number: 1,
+                                column_number: 1,
                                 line: "",
                             },
                         },
@@ -159,8 +159,8 @@ Ok(
                             Any {
                                 position: Position {
                                     path: "",
-                                    line_number: 0,
-                                    column_number: 0,
+                                    line_number: 1,
+                                    column_number: 1,
                                     line: "",
                                 },
                             },
@@ -176,8 +176,8 @@ Ok(
                                     None {
                                         position: Position {
                                             path: "",
-                                            line_number: 0,
-                                            column_number: 0,
+                                            line_number: 1,
+                                            column_number: 1,
                                             line: "",
                                         },
                                     },
@@ -191,8 +191,8 @@ Ok(
                                             name: "x",
                                             position: Position {
                                                 path: "",
-                                                line_number: 0,
-                                                column_number: 0,
+                                                line_number: 1,
+                                                column_number: 1,
                                                 line: "",
                                             },
                                         },
@@ -203,8 +203,8 @@ Ok(
                                                 None {
                                                     position: Position {
                                                         path: "",
-                                                        line_number: 0,
-                                                        column_number: 0,
+                                                        line_number: 1,
+                                                        column_number: 1,
                                                         line: "",
                                                     },
                                                 },
@@ -214,8 +214,8 @@ Ok(
                                                     name: "$value",
                                                     position: Position {
                                                         path: "",
-                                                        line_number: 0,
-                                                        column_number: 0,
+                                                        line_number: 1,
+                                                        column_number: 1,
                                                         line: "",
                                                     },
                                                 },
@@ -225,8 +225,8 @@ Ok(
                                     else_: None,
                                     position: Position {
                                         path: "",
-                                        line_number: 0,
-                                        column_number: 0,
+                                        line_number: 1,
+                                        column_number: 1,
                                         line: "",
                                     },
                                 },
@@ -236,32 +236,32 @@ Ok(
                                     name: "x",
                                     position: Position {
                                         path: "",
-                                        line_number: 0,
-                                        column_number: 0,
+                                        line_number: 1,
+                                        column_number: 1,
                                         line: "",
                                     },
                                 },
                             ),
                             position: Position {
                                 path: "",
-                                line_number: 0,
-                                column_number: 0,
+                                line_number: 1,
+                                column_number: 1,
                                 line: "",
                             },
                         },
                     ),
                     position: Position {
                         path: "",
-                        line_number: 0,
-                        column_number: 0,
+                        line_number: 1,
+                        column_number: 1,
                         line: "",
                     },
                 },
             ),
             position: Position {
                 path: "",
-                line_number: 0,
-                column_number: 0,
+                line_number: 1,
+                column_number: 1,
                 line: "",
             },
         },
