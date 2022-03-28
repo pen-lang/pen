@@ -838,7 +838,11 @@ fn identifier<'a>() -> impl Parser<Stream<'a>, Output = String> {
 }
 
 fn raw_identifier<'a>() -> impl Parser<Stream<'a>, Output = String> {
-    raw_identifier_or_keyword()
+    (
+        choice((letter(), combine::parser::char::char('_'))),
+        many(choice((alpha_num(), combine::parser::char::char('_')))),
+    )
+        .map(|(head, tail): (char, String)| [head.into(), tail].concat())
         .then(|identifier| {
             if KEYWORDS.contains(&identifier.as_str()) {
                 // TODO Fix those misuse of `unexpected_any` combinators.
@@ -849,14 +853,6 @@ fn raw_identifier<'a>() -> impl Parser<Stream<'a>, Output = String> {
             }
         })
         .silent()
-}
-
-fn raw_identifier_or_keyword<'a>() -> impl Parser<Stream<'a>, Output = String> {
-    (
-        choice((letter(), combine::parser::char::char('_'))),
-        many(choice((alpha_num(), combine::parser::char::char('_')))),
-    )
-        .map(|(head, tail): (char, String)| [head.into(), tail].concat())
 }
 
 fn keyword<'a>(name: &'static str) -> impl Parser<Stream<'a>, Output = ()> {
