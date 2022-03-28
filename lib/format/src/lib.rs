@@ -30,14 +30,14 @@ pub fn format(module: &Module, comments: &[Comment]) -> String {
     ];
 
     for definition in module.type_definitions() {
-        let (definition, new_comments) = format_type_definition(definition, &comments);
+        let (definition, new_comments) = format_type_definition(definition, comments);
 
         sections.push(definition);
         comments = new_comments;
     }
 
     for definition in module.definitions() {
-        let (definition, new_comments) = format_definition(definition, &comments);
+        let (definition, new_comments) = format_definition(definition, comments);
 
         sections.push(definition);
         comments = new_comments;
@@ -50,7 +50,7 @@ pub fn format(module: &Module, comments: &[Comment]) -> String {
             .collect::<Vec<_>>()
             .join("\n\n")
             + "\n\n"
-            + &format_all_comments(&comments),
+            + &format_all_comments(comments),
     )
 }
 

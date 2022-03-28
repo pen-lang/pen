@@ -12,7 +12,7 @@ pub fn split_before(comments: &[Comment], line_number: usize) -> (&[Comment], &[
     let index = comments
         .iter()
         .position(|comment| comment.position().line_number() >= line_number)
-        .unwrap_or_else(|| comments.len());
+        .unwrap_or(comments.len());
 
     (&comments[..index], &comments[index..])
 }
