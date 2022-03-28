@@ -300,10 +300,11 @@ fn format_lambda<'c>(lambda: &Lambda, mut comments: &'c [Comment]) -> (String, &
 
         for (string, argument) in arguments.into_iter().zip(lambda.arguments()) {
             // TODO Use Argument::position().
-            let (suffix_comment, new_comments) =
-                format_suffix_comment(comments, argument.type_().position());
+            let position = argument.type_().position();
+            let (block_comment, new_comments) = format_block_comment(comments, position);
+            let (suffix_comment, new_comments) = format_suffix_comment(new_comments, position);
 
-            argument_lines.push(indent(string) + "," + &suffix_comment + "\n");
+            argument_lines.push(indent(block_comment + &string) + "," + &suffix_comment + "\n");
             comments = new_comments;
         }
 
@@ -3409,6 +3410,77 @@ mod tests {
 
                       #bar
                       y = none
+                      none
+                    }
+                    "
+                )
+            );
+        }
+
+        #[test]
+        fn format_suffix_comment_on_function_argument() {
+            assert_eq!(
+                format(
+                    &Module::new(
+                        vec![],
+                        vec![],
+                        vec![],
+                        vec![Definition::new(
+                            "foo",
+                            Lambda::new(
+                                vec![Argument::new("x", types::None::new(line_position(2)))],
+                                types::None::new(Position::fake()),
+                                Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                                Position::fake(),
+                            ),
+                            None,
+                            line_position(1)
+                        )],
+                        Position::fake()
+                    ),
+                    &[Comment::new("foo", line_position(2))]
+                ),
+                indoc!(
+                    "
+                    foo = \\(
+                      x none, #foo
+                    ) none {
+                      none
+                    }
+                    "
+                )
+            );
+        }
+
+        #[test]
+        fn format_block_comment_on_function_argument() {
+            assert_eq!(
+                format(
+                    &Module::new(
+                        vec![],
+                        vec![],
+                        vec![],
+                        vec![Definition::new(
+                            "foo",
+                            Lambda::new(
+                                vec![Argument::new("x", types::None::new(line_position(3)))],
+                                types::None::new(Position::fake()),
+                                Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                                Position::fake(),
+                            ),
+                            None,
+                            line_position(1)
+                        )],
+                        Position::fake()
+                    ),
+                    &[Comment::new("foo", line_position(2))]
+                ),
+                indoc!(
+                    "
+                    foo = \\(
+                      #foo
+                      x none,
+                    ) none {
                       none
                     }
                     "
