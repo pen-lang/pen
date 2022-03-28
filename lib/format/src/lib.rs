@@ -3487,5 +3487,92 @@ mod tests {
                 )
             );
         }
+
+        #[test]
+        fn format_suffix_comment_on_call_argument() {
+            assert_eq!(
+                format(
+                    &Module::new(
+                        vec![],
+                        vec![],
+                        vec![],
+                        vec![Definition::new(
+                            "foo",
+                            Lambda::new(
+                                vec![],
+                                types::None::new(Position::fake()),
+                                Block::new(
+                                    vec![],
+                                    Call::new(
+                                        Variable::new("f", Position::fake()),
+                                        vec![None::new(line_position(2)).into()],
+                                        line_position(1)
+                                    ),
+                                    Position::fake()
+                                ),
+                                Position::fake(),
+                            ),
+                            None,
+                            Position::fake()
+                        )],
+                        Position::fake()
+                    ),
+                    &[Comment::new("foo", line_position(2))]
+                ),
+                indoc!(
+                    "
+                    foo = \\() none {
+                      f(
+                        none, #foo
+                      )
+                    }
+                    "
+                )
+            );
+        }
+
+        #[test]
+        fn format_block_comment_on_call_argument() {
+            assert_eq!(
+                format(
+                    &Module::new(
+                        vec![],
+                        vec![],
+                        vec![],
+                        vec![Definition::new(
+                            "foo",
+                            Lambda::new(
+                                vec![],
+                                types::None::new(Position::fake()),
+                                Block::new(
+                                    vec![],
+                                    Call::new(
+                                        Variable::new("f", Position::fake()),
+                                        vec![None::new(line_position(3)).into()],
+                                        line_position(1)
+                                    ),
+                                    Position::fake()
+                                ),
+                                Position::fake(),
+                            ),
+                            None,
+                            Position::fake()
+                        )],
+                        Position::fake()
+                    ),
+                    &[Comment::new("foo", line_position(2))]
+                ),
+                indoc!(
+                    "
+                    foo = \\() none {
+                      f(
+                        #foo
+                        none,
+                      )
+                    }
+                    "
+                )
+            );
+        }
     }
 }
