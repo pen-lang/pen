@@ -45,7 +45,7 @@ pub fn format(module: &Module, comments: &[Comment]) -> String {
             .collect::<Vec<_>>()
             .join("\n\n")
             + "\n\n"
-            + &format_all_comments(comments),
+            + &format_all_comments(comments, None),
     )
 }
 
@@ -1006,13 +1006,32 @@ fn format_block_comment<'c>(
 ) -> (String, &'c [Comment]) {
     let (before, after) = comment::split_before(comments, position.line_number());
 
-    (format_all_comments(before), after)
+    (
+        format_all_comments(before, Some(position.line_number())),
+        after,
+    )
 }
 
-fn format_all_comments(comments: &[Comment]) -> String {
+fn format_all_comments(comments: &[Comment], last_line_number: Option<usize>) -> String {
     comments
         .iter()
-        .map(|comment| "#".to_owned() + comment.line() + "\n")
+        .zip(
+            comments
+                .iter()
+                .skip(1)
+                .map(|comment| comment.position().line_number())
+                .chain([last_line_number.unwrap_or(usize::MAX)]),
+        )
+        .map(|(comment, next_line_number)| {
+            "#".to_owned()
+                + comment.line().trim_end()
+                + "\n"
+                + if comment.position().line_number() + 1 < next_line_number {
+                    "\n"
+                } else {
+                    ""
+                }
+        })
         .collect::<Vec<_>>()
         .concat()
 }
@@ -3014,6 +3033,54 @@ mod tests {
                     &[Comment::new("foo", Position::fake())]
                 ),
                 "#foo\n"
+            );
+        }
+
+        #[test]
+        fn keep_spaces_between_comments() {
+            assert_eq!(
+                format(
+                    &Module::new(vec![], vec![], vec![], vec![], Position::fake()),
+                    &[
+                        Comment::new("foo", line_position(1)),
+                        Comment::new("bar", line_position(3)),
+                    ]
+                ),
+                indoc!(
+                    "
+                    #foo
+
+                    #bar
+                    ",
+                ),
+            );
+        }
+
+        #[test]
+        fn keep_spaces_between_comment_and_next_line() {
+            assert_eq!(
+                format(
+                    &Module::new(
+                        vec![Import::new(
+                            InternalModulePath::new(vec!["Foo".into()]),
+                            None,
+                            vec![],
+                            line_position(3),
+                        )],
+                        vec![],
+                        vec![],
+                        vec![],
+                        Position::fake()
+                    ),
+                    &[Comment::new("foo", line_position(1))]
+                ),
+                indoc!(
+                    "
+                    #foo
+
+                    import 'Foo
+                    ",
+                ),
             );
         }
 
