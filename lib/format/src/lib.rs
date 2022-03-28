@@ -300,17 +300,10 @@ fn format_lambda<'c>(lambda: &Lambda, mut comments: &'c [Comment]) -> (String, &
 
         for (string, argument) in arguments.into_iter().zip(lambda.arguments()) {
             // TODO Use Argument::position().
-            let (comment, new_comments) =
+            let (suffix_comment, new_comments) =
                 format_suffix_comment(comments, argument.type_().position());
 
-            argument_lines.push(
-                indent(string)
-                    + ","
-                    + &comment
-                        .map(|comment| " ".to_owned() + &comment)
-                        .unwrap_or_default()
-                    + "\n",
-            );
+            argument_lines.push(indent(string) + "," + &suffix_comment + "\n");
             comments = new_comments;
         }
 
@@ -372,12 +365,15 @@ fn format_multi_line_block<'c>(
             - comment::split_before(comments, next_position.line_number())
                 .0
                 .len() as isize;
-        let (statement, new_comments) = format_statement(statement, new_comments);
+        let (statement_string, new_comments) = format_statement(statement, new_comments);
+        let (suffix_comment, new_comments) =
+            format_suffix_comment(new_comments, statement.position());
 
         statements.push(indent(
             block_comment
-                + &statement
-                + if count_lines(&statement) as isize >= line_count {
+                + &statement_string
+                + &suffix_comment
+                + if count_lines(&statement_string) as isize >= line_count {
                     ""
                 } else {
                     "\n"
@@ -993,11 +989,13 @@ fn operator_priority(operator: BinaryOperator) -> usize {
 fn format_suffix_comment<'c>(
     comments: &'c [Comment],
     position: &Position,
-) -> (Option<String>, &'c [Comment]) {
-    let (current, comments) = comment::split_current(comments, position.line_number());
+) -> (String, &'c [Comment]) {
+    let (comment, comments) = comment::split_current(comments, position.line_number());
 
     (
-        current.map(|comment| "#".to_owned() + comment.line()),
+        comment
+            .map(|comment| " #".to_owned() + comment.line())
+            .unwrap_or_default(),
         comments,
     )
 }
@@ -3246,6 +3244,48 @@ mod tests {
                     foo = \\() none {
                       x = none
                       #foo
+                      none
+                    }
+                    "
+                )
+            );
+        }
+
+        #[test]
+        fn format_suffix_comment_after_statement() {
+            assert_eq!(
+                format(
+                    &Module::new(
+                        vec![],
+                        vec![],
+                        vec![],
+                        vec![Definition::new(
+                            "foo",
+                            Lambda::new(
+                                vec![],
+                                types::None::new(Position::fake()),
+                                Block::new(
+                                    vec![Statement::new(
+                                        Some("x".into()),
+                                        None::new(Position::fake()),
+                                        line_position(2)
+                                    )],
+                                    None::new(line_position(3)),
+                                    Position::fake()
+                                ),
+                                Position::fake(),
+                            ),
+                            None,
+                            Position::fake()
+                        )],
+                        Position::fake()
+                    ),
+                    &[Comment::new("foo", line_position(2))]
+                ),
+                indoc!(
+                    "
+                    foo = \\() none {
+                      x = none #foo
                       none
                     }
                     "
