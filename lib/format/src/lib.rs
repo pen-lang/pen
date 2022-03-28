@@ -362,7 +362,7 @@ fn format_multi_line_block<'c>(
         // TODO Use end positions of spans when they are available.
         let line_count = next_position.line_number() as isize
             - statement.position().line_number() as isize
-            - comment::split_before(comments, next_position.line_number())
+            - comment::split_before(new_comments, next_position.line_number())
                 .0
                 .len() as isize;
         let (statement_string, new_comments) = format_statement(statement, new_comments);
@@ -3353,6 +3353,62 @@ mod tests {
                     "
                     foo = \\() none {
                       x = none #foo
+                      none
+                    }
+                    "
+                )
+            );
+        }
+
+        #[test]
+        fn format_space_between_two_statement_comments() {
+            assert_eq!(
+                format(
+                    &Module::new(
+                        vec![],
+                        vec![],
+                        vec![],
+                        vec![Definition::new(
+                            "foo",
+                            Lambda::new(
+                                vec![],
+                                types::None::new(Position::fake()),
+                                Block::new(
+                                    vec![
+                                        Statement::new(
+                                            Some("x".into()),
+                                            None::new(Position::fake()),
+                                            line_position(3)
+                                        ),
+                                        Statement::new(
+                                            Some("y".into()),
+                                            None::new(Position::fake()),
+                                            line_position(6)
+                                        )
+                                    ],
+                                    None::new(line_position(7)),
+                                    Position::fake()
+                                ),
+                                Position::fake(),
+                            ),
+                            None,
+                            Position::fake()
+                        )],
+                        Position::fake()
+                    ),
+                    &[
+                        Comment::new("foo", line_position(2)),
+                        Comment::new("bar", line_position(5))
+                    ]
+                ),
+                indoc!(
+                    "
+                    foo = \\() none {
+                      #foo
+                      x = none
+
+                      #bar
+                      y = none
                       none
                     }
                     "
