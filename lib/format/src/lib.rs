@@ -381,13 +381,14 @@ fn format_multi_line_block<'c>(
         comments = new_comments;
     }
 
+    let (block_comment, comments) = format_block_comment(comments, block.expression().position());
     let (expression, comments) = format_expression(block.expression(), comments);
 
     (
         ["{".into()]
             .into_iter()
             .chain(statements)
-            .chain([indent(expression)])
+            .chain([indent(block_comment + &expression)])
             .chain(["}".into()])
             .collect::<Vec<_>>()
             .join("\n"),
