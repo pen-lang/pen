@@ -366,10 +366,12 @@ fn format_multi_line_block<'c>(
     ) {
         // TODO Use end positions of spans when they are available.
         let line_count = next_position.line_number() - statement.position().line_number();
-        let (statement, new_comments) = format_statement(statement, comments);
+        let (block_comment, new_comments) = format_block_comment(comments, statement.position());
+        let (statement, new_comments) = format_statement(statement, &new_comments);
 
         statements.push(indent(
-            statement.clone()
+            block_comment
+                + &statement
                 + if count_lines(&statement) >= line_count {
                     ""
                 } else {
