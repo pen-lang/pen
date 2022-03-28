@@ -299,6 +299,7 @@ fn format_lambda<'c>(lambda: &Lambda, mut comments: &'c [Comment]) -> (String, &
         let mut argument_lines = vec![];
 
         for (string, argument) in arguments.into_iter().zip(lambda.arguments()) {
+            // TODO Use Argument::position().
             let (comment, new_comments) =
                 format_suffix_comment(comments, argument.type_().position());
 
@@ -371,7 +372,6 @@ fn format_multi_line_block<'c>(
             - comment::split_before(comments, next_position.line_number())
                 .0
                 .len() as isize;
-        dbg!(line_count);
         let (statement, new_comments) = format_statement(statement, &new_comments);
 
         statements.push(indent(
