@@ -17,17 +17,12 @@ pub fn format(module: &Module, comments: &[Comment]) -> String {
         .iter()
         .partition::<Vec<_>, _>(|import| matches!(import.module_path(), ModulePath::External(_)));
 
-    let mut comments = comments.as_slice();
-    let mut sections = vec![
-        format_imports(&external_imports),
-        format_imports(&internal_imports),
-        module
-            .foreign_imports()
-            .iter()
-            .map(format_foreign_import)
-            .collect::<Vec<_>>()
-            .join("\n"),
-    ];
+    let (external_imports, comments) = format_imports(&external_imports, &comments);
+    let (internal_imports, comments) = format_imports(&internal_imports, comments);
+    let (foreign_imports, mut comments) =
+        format_foreign_imports(module.foreign_imports(), comments);
+
+    let mut sections = vec![external_imports, internal_imports, foreign_imports];
 
     for definition in module.type_definitions() {
         let (definition, new_comments) = format_type_definition(definition, comments);
@@ -66,28 +61,54 @@ fn format_spaces(string: impl AsRef<str>) -> String {
     string.trim().to_owned() + "\n"
 }
 
-fn format_imports(imports: &[&Import]) -> String {
-    let mut imports = imports
-        .iter()
-        .map(|import| format_import(import))
-        .collect::<Vec<_>>();
+fn format_imports<'c>(imports: &[&Import], mut comments: &'c [Comment]) -> (String, &'c [Comment]) {
+    let mut strings = vec![];
 
-    imports.sort();
+    for import in imports {
+        let (import, new_comments) = format_import(import, comments);
 
-    imports.join("\n")
+        strings.push(import);
+        comments = new_comments;
+    }
+
+    strings.sort();
+
+    (strings.join("\n"), comments)
 }
 
-fn format_import(import: &Import) -> String {
-    ["import".into(), format_module_path(import.module_path())]
-        .into_iter()
-        .chain(import.prefix().map(|prefix| format!("as {}", prefix)))
-        .chain(if import.unqualified_names().is_empty() {
-            None
-        } else {
-            Some(format!("{{ {} }}", import.unqualified_names().join(", ")))
-        })
-        .collect::<Vec<_>>()
-        .join(" ")
+fn format_import<'c>(import: &Import, comments: &'c [Comment]) -> (String, &'c [Comment]) {
+    let (block_comment, comments) = format_block_comment(comments, import.position());
+
+    (
+        block_comment
+            + &["import".into(), format_module_path(import.module_path())]
+                .into_iter()
+                .chain(import.prefix().map(|prefix| format!("as {}", prefix)))
+                .chain(if import.unqualified_names().is_empty() {
+                    None
+                } else {
+                    Some(format!("{{ {} }}", import.unqualified_names().join(", ")))
+                })
+                .collect::<Vec<_>>()
+                .join(" "),
+        comments,
+    )
+}
+
+fn format_foreign_imports<'c>(
+    imports: &[ForeignImport],
+    mut comments: &'c [Comment],
+) -> (String, &'c [Comment]) {
+    let mut strings = vec![];
+
+    for import in imports {
+        let (string, new_comments) = format_foreign_import(import, comments);
+
+        strings.push(string);
+        comments = new_comments;
+    }
+
+    (strings.join("\n"), comments)
 }
 
 fn format_module_path(path: &ModulePath) -> String {
@@ -109,16 +130,25 @@ fn format_module_path_components(components: &[String]) -> String {
     components.join("'")
 }
 
-fn format_foreign_import(import: &ForeignImport) -> String {
-    ["import foreign".into()]
-        .into_iter()
-        .chain(match import.calling_convention() {
-            CallingConvention::C => Some("\"c\"".into()),
-            CallingConvention::Native => None,
-        })
-        .chain([import.name().into(), format_type(import.type_())])
-        .collect::<Vec<_>>()
-        .join(" ")
+fn format_foreign_import<'c>(
+    import: &ForeignImport,
+    comments: &'c [Comment],
+) -> (String, &'c [Comment]) {
+    let (block_comment, comments) = format_block_comment(comments, import.position());
+
+    (
+        block_comment
+            + &["import foreign".into()]
+                .into_iter()
+                .chain(match import.calling_convention() {
+                    CallingConvention::C => Some("\"c\"".into()),
+                    CallingConvention::Native => None,
+                })
+                .chain([import.name().into(), format_type(import.type_())])
+                .collect::<Vec<_>>()
+                .join(" "),
+        comments,
+    )
 }
 
 fn format_type_definition<'c>(
@@ -137,11 +167,11 @@ fn format_record_definition<'c>(
     definition: &RecordDefinition,
     comments: &'c [Comment],
 ) -> (String, &'c [Comment]) {
-    let (comment_string, comments) = format_comments(comments, definition.position());
+    let (block_comment, comments) = format_block_comment(comments, definition.position());
     let head = ["type", definition.name(), "{"].join(" ");
 
     (
-        comment_string
+        block_comment
             + &if definition.fields().is_empty() {
                 head + "}"
             } else {
@@ -164,10 +194,10 @@ fn format_record_definition<'c>(
 }
 
 fn format_type_alias<'c>(alias: &TypeAlias, comments: &'c [Comment]) -> (String, &'c [Comment]) {
-    let (comment_string, comments) = format_comments(comments, alias.position());
+    let (block_comment, comments) = format_block_comment(comments, alias.position());
 
     (
-        comment_string
+        block_comment
             + &[
                 "type".into(),
                 alias.name().into(),
@@ -183,11 +213,11 @@ fn format_definition<'c>(
     definition: &Definition,
     comments: &'c [Comment],
 ) -> (String, &'c [Comment]) {
-    let (comment_string, comments) = format_comments(comments, definition.position());
+    let (block_comment, comments) = format_block_comment(comments, definition.position());
     let (lambda, comments) = format_lambda(definition.lambda(), comments);
 
     (
-        comment_string
+        block_comment
             + &definition
                 .foreign_export()
                 .map(|export| {
@@ -964,7 +994,10 @@ fn format_suffix_comment<'c>(
     )
 }
 
-fn format_comments<'c>(comments: &'c [Comment], position: &Position) -> (String, &'c [Comment]) {
+fn format_block_comment<'c>(
+    comments: &'c [Comment],
+    position: &Position,
+) -> (String, &'c [Comment]) {
     let (before, after) = comment::split_before(comments, position.line_number());
 
     (format_all_comments(before), after)
@@ -1035,6 +1068,7 @@ mod tests {
                         InternalModulePath::new(vec!["Foo".into(), "Bar".into()]),
                         None,
                         vec![],
+                        Position::fake(),
                     )],
                     vec![],
                     vec![],
@@ -1052,7 +1086,8 @@ mod tests {
                     vec![Import::new(
                         ExternalModulePath::new("Package", vec!["Foo".into(), "Bar".into()]),
                         None,
-                        vec![]
+                        vec![],
+                        Position::fake()
                     )],
                     vec![],
                     vec![],
@@ -1070,7 +1105,8 @@ mod tests {
                     vec![Import::new(
                         InternalModulePath::new(vec!["Foo".into(), "Bar".into()]),
                         Some("Baz".into()),
-                        vec![]
+                        vec![],
+                        Position::fake()
                     )],
                     vec![],
                     vec![],
@@ -1088,7 +1124,8 @@ mod tests {
                     vec![Import::new(
                         InternalModulePath::new(vec!["Foo".into(), "Bar".into()]),
                         None,
-                        vec!["Baz".into(), "Blah".into()]
+                        vec!["Baz".into(), "Blah".into()],
+                        Position::fake()
                     )],
                     vec![],
                     vec![],
@@ -1108,11 +1145,13 @@ mod tests {
                             ExternalModulePath::new("Foo", vec!["Foo".into()]),
                             None,
                             vec![],
+                            Position::fake(),
                         ),
                         Import::new(
                             ExternalModulePath::new("Bar", vec!["Bar".into()]),
                             None,
-                            vec![]
+                            vec![],
+                            Position::fake()
                         )
                     ],
                     vec![],
@@ -1134,8 +1173,18 @@ mod tests {
             assert_eq!(
                 format_module(&Module::new(
                     vec![
-                        Import::new(InternalModulePath::new(vec!["Foo".into()]), None, vec![],),
-                        Import::new(InternalModulePath::new(vec!["Bar".into()]), None, vec![])
+                        Import::new(
+                            InternalModulePath::new(vec!["Foo".into()]),
+                            None,
+                            vec![],
+                            Position::fake(),
+                        ),
+                        Import::new(
+                            InternalModulePath::new(vec!["Bar".into()]),
+                            None,
+                            vec![],
+                            Position::fake()
+                        )
                     ],
                     vec![],
                     vec![],
@@ -1160,11 +1209,13 @@ mod tests {
                             InternalModulePath::new(vec!["Foo".into(), "Bar".into()]),
                             None,
                             vec![],
+                            Position::fake(),
                         ),
                         Import::new(
                             ExternalModulePath::new("Package", vec!["Foo".into(), "Bar".into()]),
                             None,
-                            vec![]
+                            vec![],
+                            Position::fake()
                         )
                     ],
                     vec![],

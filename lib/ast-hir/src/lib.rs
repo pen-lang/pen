@@ -80,7 +80,12 @@ mod tests {
         assert_eq!(
             compile(
                 &ast::Module::new(
-                    vec![ast::Import::new(path.clone(), None, vec![])],
+                    vec![ast::Import::new(
+                        path.clone(),
+                        None,
+                        vec![],
+                        Position::fake()
+                    )],
                     vec![],
                     vec![],
                     vec![],
