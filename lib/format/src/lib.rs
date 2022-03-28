@@ -372,7 +372,7 @@ fn format_multi_line_block<'c>(
             - comment::split_before(comments, next_position.line_number())
                 .0
                 .len() as isize;
-        let (statement, new_comments) = format_statement(statement, &new_comments);
+        let (statement, new_comments) = format_statement(statement, new_comments);
 
         statements.push(indent(
             block_comment
