@@ -1,4 +1,5 @@
 mod comment;
+mod ir;
 
 use ast::{types::Type, *};
 use position::Position;
