@@ -45,7 +45,7 @@ pub fn format(module: &Module, comments: &[Comment]) -> String {
             .collect::<Vec<_>>()
             .join("\n\n")
             + "\n\n"
-            + &format_all_comments(comments),
+            + &format_all_comments(comments, None),
     )
 }
 
@@ -300,10 +300,11 @@ fn format_lambda<'c>(lambda: &Lambda, mut comments: &'c [Comment]) -> (String, &
 
         for (string, argument) in arguments.into_iter().zip(lambda.arguments()) {
             // TODO Use Argument::position().
-            let (suffix_comment, new_comments) =
-                format_suffix_comment(comments, argument.type_().position());
+            let position = argument.type_().position();
+            let (block_comment, new_comments) = format_block_comment(comments, position);
+            let (suffix_comment, new_comments) = format_suffix_comment(new_comments, position);
 
-            argument_lines.push(indent(string) + "," + &suffix_comment + "\n");
+            argument_lines.push(indent(block_comment + &string) + "," + &suffix_comment + "\n");
             comments = new_comments;
         }
 
@@ -362,7 +363,7 @@ fn format_multi_line_block<'c>(
         // TODO Use end positions of spans when they are available.
         let line_count = next_position.line_number() as isize
             - statement.position().line_number() as isize
-            - comment::split_before(comments, next_position.line_number())
+            - comment::split_before(new_comments, next_position.line_number())
                 .0
                 .len() as isize;
         let (statement_string, new_comments) = format_statement(statement, new_comments);
@@ -1006,13 +1007,32 @@ fn format_block_comment<'c>(
 ) -> (String, &'c [Comment]) {
     let (before, after) = comment::split_before(comments, position.line_number());
 
-    (format_all_comments(before), after)
+    (
+        format_all_comments(before, Some(position.line_number())),
+        after,
+    )
 }
 
-fn format_all_comments(comments: &[Comment]) -> String {
+fn format_all_comments(comments: &[Comment], last_line_number: Option<usize>) -> String {
     comments
         .iter()
-        .map(|comment| "#".to_owned() + comment.line() + "\n")
+        .zip(
+            comments
+                .iter()
+                .skip(1)
+                .map(|comment| comment.position().line_number())
+                .chain([last_line_number.unwrap_or(usize::MAX)]),
+        )
+        .map(|(comment, next_line_number)| {
+            "#".to_owned()
+                + comment.line().trim_end()
+                + "\n"
+                + if comment.position().line_number() + 1 < next_line_number {
+                    "\n"
+                } else {
+                    ""
+                }
+        })
         .collect::<Vec<_>>()
         .concat()
 }
@@ -3018,6 +3038,54 @@ mod tests {
         }
 
         #[test]
+        fn keep_spaces_between_comments() {
+            assert_eq!(
+                format(
+                    &Module::new(vec![], vec![], vec![], vec![], Position::fake()),
+                    &[
+                        Comment::new("foo", line_position(1)),
+                        Comment::new("bar", line_position(3)),
+                    ]
+                ),
+                indoc!(
+                    "
+                    #foo
+
+                    #bar
+                    ",
+                ),
+            );
+        }
+
+        #[test]
+        fn keep_spaces_between_comment_and_next_line() {
+            assert_eq!(
+                format(
+                    &Module::new(
+                        vec![Import::new(
+                            InternalModulePath::new(vec!["Foo".into()]),
+                            None,
+                            vec![],
+                            line_position(3),
+                        )],
+                        vec![],
+                        vec![],
+                        vec![],
+                        Position::fake()
+                    ),
+                    &[Comment::new("foo", line_position(1))]
+                ),
+                indoc!(
+                    "
+                    #foo
+
+                    import 'Foo
+                    ",
+                ),
+            );
+        }
+
+        #[test]
         fn format_import() {
             assert_eq!(
                 format(
@@ -3286,6 +3354,133 @@ mod tests {
                     "
                     foo = \\() none {
                       x = none #foo
+                      none
+                    }
+                    "
+                )
+            );
+        }
+
+        #[test]
+        fn format_space_between_two_statement_comments() {
+            assert_eq!(
+                format(
+                    &Module::new(
+                        vec![],
+                        vec![],
+                        vec![],
+                        vec![Definition::new(
+                            "foo",
+                            Lambda::new(
+                                vec![],
+                                types::None::new(Position::fake()),
+                                Block::new(
+                                    vec![
+                                        Statement::new(
+                                            Some("x".into()),
+                                            None::new(Position::fake()),
+                                            line_position(3)
+                                        ),
+                                        Statement::new(
+                                            Some("y".into()),
+                                            None::new(Position::fake()),
+                                            line_position(6)
+                                        )
+                                    ],
+                                    None::new(line_position(7)),
+                                    Position::fake()
+                                ),
+                                Position::fake(),
+                            ),
+                            None,
+                            Position::fake()
+                        )],
+                        Position::fake()
+                    ),
+                    &[
+                        Comment::new("foo", line_position(2)),
+                        Comment::new("bar", line_position(5))
+                    ]
+                ),
+                indoc!(
+                    "
+                    foo = \\() none {
+                      #foo
+                      x = none
+
+                      #bar
+                      y = none
+                      none
+                    }
+                    "
+                )
+            );
+        }
+
+        #[test]
+        fn format_suffix_comment_on_function_argument() {
+            assert_eq!(
+                format(
+                    &Module::new(
+                        vec![],
+                        vec![],
+                        vec![],
+                        vec![Definition::new(
+                            "foo",
+                            Lambda::new(
+                                vec![Argument::new("x", types::None::new(line_position(2)))],
+                                types::None::new(Position::fake()),
+                                Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                                Position::fake(),
+                            ),
+                            None,
+                            line_position(1)
+                        )],
+                        Position::fake()
+                    ),
+                    &[Comment::new("foo", line_position(2))]
+                ),
+                indoc!(
+                    "
+                    foo = \\(
+                      x none, #foo
+                    ) none {
+                      none
+                    }
+                    "
+                )
+            );
+        }
+
+        #[test]
+        fn format_block_comment_on_function_argument() {
+            assert_eq!(
+                format(
+                    &Module::new(
+                        vec![],
+                        vec![],
+                        vec![],
+                        vec![Definition::new(
+                            "foo",
+                            Lambda::new(
+                                vec![Argument::new("x", types::None::new(line_position(3)))],
+                                types::None::new(Position::fake()),
+                                Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                                Position::fake(),
+                            ),
+                            None,
+                            line_position(1)
+                        )],
+                        Position::fake()
+                    ),
+                    &[Comment::new("foo", line_position(2))]
+                ),
+                indoc!(
+                    "
+                    foo = \\(
+                      #foo
+                      x none,
+                    ) none {
                       none
                     }
                     "
