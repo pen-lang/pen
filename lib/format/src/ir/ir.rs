@@ -2,7 +2,6 @@
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum Document {
-    // TODO Remove this.
     Comment(String),
     Sequence(Vec<Document>),
     // TODO Replace this with a function?

@@ -30,9 +30,14 @@ fn format_document(context: &mut Context, document: &Document, level: usize, bro
         Document::Line => {
             if broken {
                 context.outputs.extend(
-                    [context.comments.join(" ").into(), "\n".into()]
-                        .into_iter()
-                        .chain(repeat("  ".into()).take(level)),
+                    if context.comments.is_empty() {
+                        None
+                    } else {
+                        Some(" # ".to_owned() + &context.comments.join(" "))
+                    }
+                    .into_iter()
+                    .chain(["\n".into()])
+                    .chain(repeat("  ".into()).take(level)),
                 );
                 context.comments.clear();
             } else {
@@ -109,6 +114,18 @@ mod tests {
                     "
                 )
                 .trim(),
+            );
+        }
+    }
+
+    mod comment {
+        use super::*;
+
+        #[test]
+        fn format_comment_between_strings() {
+            assert_eq!(
+                format(&vec!["{".into(), comment("foo"), "}".into(), line()].into()),
+                "{} # foo\n",
             );
         }
     }
