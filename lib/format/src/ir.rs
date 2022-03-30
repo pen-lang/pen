@@ -1,5 +1,8 @@
 pub mod build;
 pub mod format;
+mod utils;
+
+pub use utils::*;
 
 // https://homepages.inf.ed.ac.uk/wadler/papers/prettier/prettier.pdf
 
@@ -8,9 +11,10 @@ pub enum Document {
     // TODO Remove this.
     Comment(String),
     Sequence(Vec<Document>),
-    // TODO Remove this?
+    // TODO Replace this with a function?
     Flatten(Box<Document>),
-    Line,
+    HardLine,
+    SoftLine,
     Indent(Box<Document>),
     String(String),
 }
