@@ -1,18 +1,16 @@
 pub mod build;
 pub mod format;
 
+// https://homepages.inf.ed.ac.uk/wadler/papers/prettier/prettier.pdf
+
 #[derive(Clone, Debug, PartialEq)]
 pub enum Document {
+    // TODO Remove this.
     Comment(String),
-    Documents(Vec<Document>),
-    Group {
-        document: Box<Document>,
-        broken: bool,
-    },
-    Line {
-        document: Box<Document>,
-        soft: bool,
-    },
+    Sequence(Vec<Document>),
+    // TODO Remove this?
+    Flatten(Box<Document>),
+    Line,
     Indent(Box<Document>),
     String(String),
 }
@@ -31,6 +29,6 @@ impl From<String> for Document {
 
 impl From<Vec<Document>> for Document {
     fn from(documents: Vec<Document>) -> Self {
-        Self::Documents(documents)
+        Self::Sequence(documents)
     }
 }
