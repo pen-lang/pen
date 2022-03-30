@@ -10,3 +10,16 @@ pub fn is_broken(document: &Document) -> bool {
         }
     }
 }
+
+pub fn count_lines(document: &Document) -> usize {
+    count_lines_in_document(document) + 1
+}
+
+fn count_lines_in_document(document: &Document) -> usize {
+    match document {
+        Document::Indent(document) => count_lines(document),
+        Document::Sequence(documents) => documents.iter().map(count_lines).sum(),
+        Document::LineSuffix(_) | Document::Flatten(_) | Document::Break | Document::String(_) => 0,
+        Document::Line => 1,
+    }
+}
