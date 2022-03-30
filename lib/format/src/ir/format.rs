@@ -27,21 +27,19 @@ fn format_document(context: &mut Context, document: &Document, level: usize, bro
         }
         Document::Flatten(document) => format_document(context, document, level, false),
         Document::Indent(document) => format_document(context, document, level + 1, broken),
-        Document::SoftLine => {
+        Document::Line => {
             if broken {
-                format_document(context, &Document::HardLine, level, broken);
+                context.outputs.extend(
+                    [context.comments.join(" ").into(), "\n".into()]
+                        .into_iter()
+                        .chain(repeat("  ".into()).take(level)),
+                );
+                context.comments.clear();
             } else {
                 context.outputs.extend([" ".into()]);
             }
         }
-        Document::HardLine => {
-            context.outputs.extend(
-                [context.comments.join(" ").into(), "\n".into()]
-                    .into_iter()
-                    .chain(repeat("  ".into()).take(level)),
-            );
-            context.comments.clear();
-        }
+        Document::Break => {}
         Document::String(string) => context.outputs.push(string.clone()),
     }
 }
@@ -63,8 +61,8 @@ mod tests {
         fn create_group() -> Document {
             vec![
                 "{".into(),
-                indent(vec![soft_line(), "foo".into(), soft_line(), "bar".into()]),
-                soft_line(),
+                indent(vec![line(), "foo".into(), line(), "bar".into()]),
+                line(),
                 "}".into(),
             ]
             .into()
@@ -97,8 +95,8 @@ mod tests {
                 format(
                     &vec![
                         "{".into(),
-                        indent(vec![soft_line(), flatten(create_group())]),
-                        soft_line(),
+                        indent(vec![line(), flatten(create_group())]),
+                        line(),
                         "}".into(),
                     ]
                     .into()

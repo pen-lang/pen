@@ -7,8 +7,8 @@ pub enum Document {
     Sequence(Vec<Document>),
     // TODO Replace this with a function?
     Flatten(Box<Document>),
-    HardLine,
-    SoftLine,
+    Break,
+    Line,
     Indent(Box<Document>),
     String(String),
 }

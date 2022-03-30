@@ -12,10 +12,10 @@ pub fn indent(document: impl Into<Document>) -> Document {
     Document::Indent(document.into().into())
 }
 
-pub fn soft_line() -> Document {
-    Document::SoftLine
+pub fn line() -> Document {
+    Document::Line
 }
 
 pub fn hard_line() -> Document {
-    Document::HardLine
+    vec![Document::Break, Document::Line].into()
 }
