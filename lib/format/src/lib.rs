@@ -1,4 +1,5 @@
 mod comment;
+mod compile;
 mod ir;
 
 use ast::{types::Type, *};
