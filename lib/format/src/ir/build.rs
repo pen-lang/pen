@@ -1,7 +1,7 @@
 use super::Document;
 
-pub fn comment(string: impl Into<String>) -> Document {
-    Document::Comment(string.into())
+pub fn line_suffix(string: impl Into<String>) -> Document {
+    Document::LineSuffix(string.into())
 }
 
 pub fn flatten(document: impl Into<Document>) -> Document {

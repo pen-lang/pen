@@ -3,13 +3,13 @@ use std::iter::repeat;
 
 struct Context {
     outputs: Vec<String>,
-    comments: Vec<String>,
+    line_suffixes: Vec<String>,
 }
 
 pub fn format(document: &Document) -> String {
     let mut context = Context {
         outputs: vec![],
-        comments: vec![],
+        line_suffixes: vec![],
     };
 
     format_document(&mut context, &document, 0, true);
@@ -19,7 +19,7 @@ pub fn format(document: &Document) -> String {
 
 fn format_document(context: &mut Context, document: &Document, level: usize, broken: bool) {
     match document {
-        Document::Comment(comment) => context.comments.push(comment.clone()),
+        Document::LineSuffix(suffix) => context.line_suffixes.push(suffix.clone()),
         Document::Sequence(documents) => {
             for document in documents {
                 format_document(context, document, level, broken);
@@ -30,16 +30,16 @@ fn format_document(context: &mut Context, document: &Document, level: usize, bro
         Document::Line => {
             if broken {
                 context.outputs.extend(
-                    if context.comments.is_empty() {
+                    if context.line_suffixes.is_empty() {
                         None
                     } else {
-                        Some(" # ".to_owned() + &context.comments.join(" "))
+                        Some(context.line_suffixes.join(" "))
                     }
                     .into_iter()
                     .chain(["\n".into()])
                     .chain(repeat("  ".into()).take(level)),
                 );
-                context.comments.clear();
+                context.line_suffixes.clear();
             } else {
                 context.outputs.extend([" ".into()]);
             }
@@ -124,7 +124,7 @@ mod tests {
         #[test]
         fn format_comment_between_strings() {
             assert_eq!(
-                format(&vec!["{".into(), comment("foo"), "}".into(), line()].into()),
+                format(&vec!["{".into(), line_suffix(" # foo"), "}".into(), line()].into()),
                 "{} # foo\n",
             );
         }

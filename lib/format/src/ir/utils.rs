@@ -5,6 +5,8 @@ pub fn is_broken(document: &Document) -> bool {
         Document::Break => true,
         Document::Indent(document) => is_broken(document),
         Document::Sequence(documents) => documents.iter().all(is_broken),
-        Document::Comment(_) | Document::Flatten(_) | Document::Line | Document::String(_) => false,
+        Document::LineSuffix(_) | Document::Flatten(_) | Document::Line | Document::String(_) => {
+            false
+        }
     }
 }
