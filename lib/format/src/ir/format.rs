@@ -29,24 +29,33 @@ fn format_document(context: &mut Context, document: &Document, level: usize, bro
         Document::Indent(document) => format_document(context, document, level + 1, broken),
         Document::Line => {
             if broken {
-                context.outputs.extend(
-                    if context.line_suffixes.is_empty() {
-                        None
-                    } else {
-                        Some(context.line_suffixes.join(" "))
-                    }
-                    .into_iter()
-                    .chain(["\n".into()])
-                    .chain(repeat("  ".into()).take(level)),
-                );
-                context.line_suffixes.clear();
+                format_line(context, level);
             } else {
                 context.outputs.extend([" ".into()]);
+            }
+        }
+        Document::SoftLine => {
+            if broken {
+                format_line(context, level);
             }
         }
         Document::Break => {}
         Document::String(string) => context.outputs.push(string.clone()),
     }
+}
+
+fn format_line(context: &mut Context, level: usize) {
+    context.outputs.extend(
+        if context.line_suffixes.is_empty() {
+            None
+        } else {
+            Some(context.line_suffixes.join(" "))
+        }
+        .into_iter()
+        .chain(["\n".into()])
+        .chain(repeat("  ".into()).take(level)),
+    );
+    context.line_suffixes.clear();
 }
 
 #[cfg(test)]

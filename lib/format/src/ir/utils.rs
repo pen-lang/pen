@@ -5,9 +5,11 @@ pub fn is_broken(document: &Document) -> bool {
         Document::Break => true,
         Document::Indent(document) => is_broken(document),
         Document::Sequence(documents) => documents.iter().all(is_broken),
-        Document::LineSuffix(_) | Document::Flatten(_) | Document::Line | Document::String(_) => {
-            false
-        }
+        Document::LineSuffix(_)
+        | Document::Flatten(_)
+        | Document::Line
+        | Document::SoftLine
+        | Document::String(_) => false,
     }
 }
 
@@ -20,6 +22,6 @@ fn count_lines_in_document(document: &Document) -> usize {
         Document::Indent(document) => count_lines(document),
         Document::Sequence(documents) => documents.iter().map(count_lines).sum(),
         Document::LineSuffix(_) | Document::Flatten(_) | Document::Break | Document::String(_) => 0,
-        Document::Line => 1,
+        Document::Line | Document::SoftLine => 1,
     }
 }

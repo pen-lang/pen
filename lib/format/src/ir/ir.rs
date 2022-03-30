@@ -8,6 +8,7 @@ pub enum Document {
     Flatten(Box<Document>),
     Break,
     Line,
+    SoftLine,
     Indent(Box<Document>),
     String(String),
 }

@@ -1,7 +1,8 @@
 pub mod build;
-pub mod format;
+mod format;
 mod ir;
 mod utils;
 
+pub use self::format::format;
 pub use ir::*;
 pub use utils::*;
