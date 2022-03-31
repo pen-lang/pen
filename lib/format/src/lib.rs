@@ -75,7 +75,7 @@ fn format_import<'c>(import: &Import, comments: &'c [Comment]) -> (Document, &'c
             "import ".into(),
             format_module_path(import.module_path()),
             if let Some(prefix) = import.prefix() {
-                vec![" as ".into(), prefix.into()].into()
+                sequence([" as ", prefix])
             } else {
                 empty()
             },
@@ -171,40 +171,32 @@ fn compile_record_definition<'c>(
     comments: &'c [Comment],
 ) -> (Document, &'c [Comment]) {
     let (block_comment, comments) = compile_block_comment(comments, definition.position());
-    let document = vec![
+    let document = sequence([
         "type ".into(),
         definition.name().into(),
         " {".into(),
-        indent(
-            definition
-                .fields()
-                .iter()
-                .map(|field| {
-                    vec![
-                        line(),
-                        field.name().into(),
-                        " ".into(),
-                        compile_type(field.type_()),
-                    ]
-                    .into()
-                })
-                .collect::<Vec<_>>(),
-        ),
+        indent(sequence(definition.fields().iter().map(|field| {
+            sequence([
+                line(),
+                field.name().into(),
+                " ".into(),
+                compile_type(field.type_()),
+            ])
+        }))),
         soft_line(),
         "}".into(),
-    ];
+    ]);
 
     (
-        vec![
+        sequence([
             block_comment,
             if definition.fields().is_empty() {
                 flatten(document)
             } else {
-                document.into()
+                document
             },
             line(),
-        ]
-        .into(),
+        ]),
         comments,
     )
 }
@@ -213,18 +205,14 @@ fn compile_type_alias<'c>(alias: &TypeAlias, comments: &'c [Comment]) -> (Docume
     let (block_comment, comments) = compile_block_comment(comments, alias.position());
 
     (
-        vec![
+        sequence([
             block_comment,
-            vec![
-                "type ".into(),
-                alias.name().into(),
-                " = ".into(),
-                compile_type(alias.type_()),
-            ]
-            .into(),
+            "type ".into(),
+            alias.name().into(),
+            " = ".into(),
+            compile_type(alias.type_()),
             line(),
-        ]
-        .into(),
+        ]),
         comments,
     )
 }
@@ -262,28 +250,26 @@ fn compile_type(type_: &Type) -> Document {
     match type_ {
         Type::Any(_) => "any".into(),
         Type::Boolean(_) => "boolean".into(),
-        Type::Function(function) => vec![
+        Type::Function(function) => sequence([
             "\\(".into(),
-            function
-                .arguments()
-                .iter()
-                .map(compile_type)
-                .intersperse(", ".into())
-                .collect::<Vec<_>>()
-                .into(),
+            sequence(
+                function
+                    .arguments()
+                    .iter()
+                    .map(compile_type)
+                    .intersperse(", ".into()),
+            ),
             ") ".into(),
             compile_type(function.result()),
-        ]
-        .into(),
-        Type::List(list) => vec!["[".into(), compile_type(list.element()), "]".into()].into(),
-        Type::Map(map) => vec![
+        ]),
+        Type::List(list) => sequence(["[".into(), compile_type(list.element()), "]".into()]),
+        Type::Map(map) => sequence([
             "{".into(),
             compile_type(map.key()),
             ": ".into(),
             compile_type(map.value()),
             "}".into(),
-        ]
-        .into(),
+        ]),
         Type::None(_) => "none".into(),
         Type::Number(_) => "number".into(),
         Type::Record(record) => record.name().into(),
@@ -292,16 +278,15 @@ fn compile_type(type_: &Type) -> Document {
         Type::Union(union) => {
             let lhs = compile_type(union.lhs());
 
-            vec![
+            sequence([
                 if union.lhs().is_function() {
-                    vec!["(".into(), lhs, ")".into()].into()
+                    sequence(["(".into(), lhs, ")".into()])
                 } else {
                     lhs
                 },
                 " | ".into(),
                 compile_type(union.rhs()),
-            ]
-            .into()
+            ])
         }
     }
 }
@@ -1023,9 +1008,11 @@ fn compile_suffix_comment<'c>(
     let (comment, comments) = comment::split_current(comments, position.line_number());
 
     (
-        comment
-            .map(|comment| line_suffix(" #".to_owned() + comment.line().trim_end()))
-            .unwrap_or_else(|| empty()),
+        if let Some(comment) = comment {
+            line_suffix(" #".to_owned() + comment.line().trim_end())
+        } else {
+            empty()
+        },
         comments,
     )
 }
@@ -1043,29 +1030,28 @@ fn compile_block_comment<'c>(
 }
 
 fn compile_all_comments(comments: &[Comment], last_line_number: Option<usize>) -> Document {
-    comments
-        .iter()
-        .zip(
-            comments
-                .iter()
-                .skip(1)
-                .map(|comment| comment.position().line_number())
-                .chain([last_line_number.unwrap_or(usize::MAX)]),
-        )
-        .map(|(comment, next_line_number)| {
-            vec![
-                "#".into(),
-                comment.line().trim_end().into(),
-                if comment.position().line_number() + 1 < next_line_number {
-                    line()
-                } else {
-                    empty()
-                },
-            ]
-            .into()
-        })
-        .collect::<Vec<_>>()
-        .into()
+    sequence(
+        comments
+            .iter()
+            .zip(
+                comments
+                    .iter()
+                    .skip(1)
+                    .map(|comment| comment.position().line_number())
+                    .chain([last_line_number.unwrap_or(usize::MAX)]),
+            )
+            .map(|(comment, next_line_number)| {
+                sequence([
+                    "#".into(),
+                    comment.line().trim_end().into(),
+                    if comment.position().line_number() + 1 < next_line_number {
+                        line()
+                    } else {
+                        empty()
+                    },
+                ])
+            }),
+    )
 }
 
 #[cfg(test)]
