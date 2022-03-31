@@ -1,44 +1,30 @@
-mod comment;
+mod context;
 mod ir;
 
 use ast::{types::Type, *};
+use context::Context;
 use ir::{build::*, count_lines, Document};
 use itertools::Itertools;
 use position::Position;
 
 pub fn format(module: &Module, comments: &[Comment]) -> String {
-    let comments = comment::sort(comments);
+    let mut context = Context::new(comments.to_vec());
 
     let (external_imports, internal_imports) = module
         .imports()
         .iter()
         .partition::<Vec<_>, _>(|import| matches!(import.module_path(), ModulePath::External(_)));
 
-    let (external_imports, comments) = format_imports(&external_imports, &comments);
-    let (internal_imports, mut comments) = format_imports(&internal_imports, comments);
+    let external_imports = format_imports(&mut context, &external_imports);
+    let internal_imports = format_imports(&mut context, &internal_imports);
     // let (foreign_imports, mut comments) =
     //     format_foreign_imports(module.foreign_imports(), comments);
-
-    // let mut sections = vec![external_imports, internal_imports, foreign_imports];
-    let mut sections = vec![
-        if count_lines(&external_imports) == 0 {
-            empty()
-        } else {
-            sequence([external_imports, line()])
-        },
-        if count_lines(&internal_imports) == 0 {
-            empty()
-        } else {
-            sequence([internal_imports, line()])
-        },
-    ];
-
-    for definition in module.type_definitions() {
-        let (definition, new_comments) = compile_type_definition(definition, comments);
-
-        sections.push(definition);
-        comments = new_comments;
-    }
+    let type_definitions = sequence(
+        module
+            .type_definitions()
+            .iter()
+            .map(|definition| compile_type_definition(&mut context, definition)),
+    );
 
     // for definition in module.definitions() {
     //     let (definition, new_comments) = format_definition(definition, comments);
@@ -47,57 +33,58 @@ pub fn format(module: &Module, comments: &[Comment]) -> String {
     //     comments = new_comments;
     // }
 
-    ir::format(&sections.into()).trim().to_owned() + "\n"
+    ir::format(&sequence(
+        [external_imports, internal_imports, type_definitions]
+            .into_iter()
+            .map(|document| {
+                if count_lines(&document) == 0 {
+                    empty()
+                } else {
+                    sequence([document, line()])
+                }
+            }),
+    ))
+    .trim()
+    .to_owned()
+        + "\n"
 }
 
-fn format_imports<'c>(
-    imports: &[&Import],
-    mut comments: &'c [Comment],
-) -> (Document, &'c [Comment]) {
-    let mut documents = vec![];
-
-    for import in imports.iter().sorted_by_key(|import| import.module_path()) {
-        let (import, new_comments) = format_import(import, comments);
-
-        documents.push(import);
-        comments = new_comments;
-    }
-
-    (documents.into(), comments)
-}
-
-fn format_import<'c>(import: &Import, comments: &'c [Comment]) -> (Document, &'c [Comment]) {
-    let (block_comment, comments) = compile_block_comment(comments, import.position());
-
-    (
-        sequence([
-            block_comment,
-            "import ".into(),
-            format_module_path(import.module_path()),
-            if let Some(prefix) = import.prefix() {
-                sequence([" as ", prefix])
-            } else {
-                empty()
-            },
-            if import.unqualified_names().is_empty() {
-                empty()
-            } else {
-                sequence([
-                    " { ".into(),
-                    sequence(
-                        import
-                            .unqualified_names()
-                            .iter()
-                            .map(|name| name.clone())
-                            .intersperse(", ".into()),
-                    ),
-                    " }".into(),
-                ])
-            },
-            line(),
-        ]),
-        comments,
+fn format_imports(context: &mut Context, imports: &[&Import]) -> Document {
+    sequence(
+        imports
+            .iter()
+            .sorted_by_key(|import| import.module_path())
+            .map(|import| format_import(context, import)),
     )
+}
+
+fn format_import(context: &mut Context, import: &Import) -> Document {
+    sequence([
+        compile_block_comment(context, import.position()),
+        "import ".into(),
+        format_module_path(import.module_path()),
+        if let Some(prefix) = import.prefix() {
+            sequence([" as ", prefix])
+        } else {
+            empty()
+        },
+        if import.unqualified_names().is_empty() {
+            empty()
+        } else {
+            sequence([
+                " { ".into(),
+                sequence(
+                    import
+                        .unqualified_names()
+                        .iter()
+                        .map(|name| name.clone())
+                        .intersperse(", ".into()),
+                ),
+                " }".into(),
+            ])
+        },
+        line(),
+    ])
 }
 
 fn format_module_path(path: &ModulePath) -> Document {
@@ -117,7 +104,7 @@ fn format_module_path_components(components: &[String]) -> Document {
     components.join("'").into()
 }
 
-// fn format_foreign_imports<'c>(
+// fn format_foreign_imports(
 //     imports: &[ForeignImport],
 //     mut comments: &'c [Comment],
 // ) -> (String, &'c [Comment]) {
@@ -133,7 +120,7 @@ fn format_module_path_components(components: &[String]) -> Document {
 //     (strings.join("\n"), comments)
 // }
 
-// fn format_foreign_import<'c>(
+// fn format_foreign_import(
 //     import: &ForeignImport,
 //     comments: &'c [Comment],
 // ) -> (String, &'c [Comment]) {
@@ -154,23 +141,16 @@ fn format_module_path_components(components: &[String]) -> Document {
 //     )
 // }
 
-fn compile_type_definition<'c>(
-    definition: &TypeDefinition,
-    comments: &'c [Comment],
-) -> (Document, &'c [Comment]) {
+fn compile_type_definition(context: &mut Context, definition: &TypeDefinition) -> Document {
     match definition {
         TypeDefinition::RecordDefinition(definition) => {
-            compile_record_definition(definition, comments)
+            compile_record_definition(context, definition)
         }
-        TypeDefinition::TypeAlias(alias) => compile_type_alias(alias, comments),
+        TypeDefinition::TypeAlias(alias) => compile_type_alias(context, alias),
     }
 }
 
-fn compile_record_definition<'c>(
-    definition: &RecordDefinition,
-    comments: &'c [Comment],
-) -> (Document, &'c [Comment]) {
-    let (block_comment, comments) = compile_block_comment(comments, definition.position());
+fn compile_record_definition(context: &mut Context, definition: &RecordDefinition) -> Document {
     let document = sequence([
         "type ".into(),
         definition.name().into(),
@@ -187,37 +167,29 @@ fn compile_record_definition<'c>(
         "}".into(),
     ]);
 
-    (
-        sequence([
-            block_comment,
-            if definition.fields().is_empty() {
-                flatten(document)
-            } else {
-                document
-            },
-            line(),
-        ]),
-        comments,
-    )
+    sequence([
+        compile_block_comment(context, definition.position()),
+        if definition.fields().is_empty() {
+            flatten(document)
+        } else {
+            document
+        },
+        line(),
+    ])
 }
 
-fn compile_type_alias<'c>(alias: &TypeAlias, comments: &'c [Comment]) -> (Document, &'c [Comment]) {
-    let (block_comment, comments) = compile_block_comment(comments, alias.position());
-
-    (
-        sequence([
-            block_comment,
-            "type ".into(),
-            alias.name().into(),
-            " = ".into(),
-            compile_type(alias.type_()),
-            line(),
-        ]),
-        comments,
-    )
+fn compile_type_alias(context: &mut Context, alias: &TypeAlias) -> Document {
+    sequence([
+        compile_block_comment(context, alias.position()),
+        "type ".into(),
+        alias.name().into(),
+        " = ".into(),
+        compile_type(alias.type_()),
+        line(),
+    ])
 }
 
-// fn format_definition<'c>(
+// fn format_definition(
 //     definition: &Definition,
 //     comments: &'c [Comment],
 // ) -> (String, &'c [Comment]) {
@@ -291,7 +263,7 @@ fn compile_type(type_: &Type) -> Document {
     }
 }
 
-// fn format_lambda<'c>(lambda: &Lambda, mut comments: &'c [Comment]) -> (String, &'c [Comment]) {
+// fn format_lambda(lambda: &Lambda, mut comments: &'c [Comment]) -> (String, &'c [Comment]) {
 //     let arguments = lambda
 //         .arguments()
 //         .iter()
@@ -347,7 +319,7 @@ fn compile_type(type_: &Type) -> Document {
 //     )
 // }
 
-// fn format_block<'c>(block: &Block, comments: &'c [Comment]) -> (String, &'c [Comment]) {
+// fn format_block(block: &Block, comments: &'c [Comment]) -> (String, &'c [Comment]) {
 //     let (expression, new_comments) = format_expression(block.expression(), comments);
 
 //     if block.statements().is_empty() && is_single_line(&expression) {
@@ -357,7 +329,7 @@ fn compile_type(type_: &Type) -> Document {
 //     }
 // }
 
-// fn format_multi_line_block<'c>(
+// fn format_multi_line_block(
 //     block: &Block,
 //     mut comments: &'c [Comment],
 // ) -> (String, &'c [Comment]) {
@@ -410,7 +382,7 @@ fn compile_type(type_: &Type) -> Document {
 //     )
 // }
 
-// fn format_statement<'c>(statement: &Statement, comments: &'c [Comment]) -> (String, &'c [Comment]) {
+// fn format_statement(statement: &Statement, comments: &'c [Comment]) -> (String, &'c [Comment]) {
 //     let (expression, comments) = format_expression(statement.expression(), comments);
 
 //     (
@@ -425,7 +397,7 @@ fn compile_type(type_: &Type) -> Document {
 //     )
 // }
 
-// fn format_expression<'c>(
+// fn format_expression(
 //     expression: &Expression,
 //     mut comments: &'c [Comment],
 // ) -> (String, &'c [Comment]) {
@@ -747,7 +719,7 @@ fn compile_type(type_: &Type) -> Document {
 //     }
 // }
 
-// fn format_if<'c>(if_: &If, original_comments: &'c [Comment]) -> (String, &'c [Comment]) {
+// fn format_if(if_: &If, original_comments: &'c [Comment]) -> (String, &'c [Comment]) {
 //     let (branches, comments) = {
 //         let mut branches = vec![];
 //         let mut comments = original_comments;
@@ -801,7 +773,7 @@ fn compile_type(type_: &Type) -> Document {
 //     }
 // }
 
-// fn format_if_type<'c>(if_: &IfType, original_comments: &'c [Comment]) -> (String, &'c [Comment]) {
+// fn format_if_type(if_: &IfType, original_comments: &'c [Comment]) -> (String, &'c [Comment]) {
 //     let (argument, original_comments) = format_expression(if_.argument(), original_comments);
 //     let (branches, comments) = {
 //         let mut branches = vec![];
@@ -882,7 +854,7 @@ fn compile_type(type_: &Type) -> Document {
 //     }
 // }
 
-// fn format_list_element<'c>(
+// fn format_list_element(
 //     element: &ListElement,
 //     comments: &'c [Comment],
 // ) -> (String, &'c [Comment]) {
@@ -896,7 +868,7 @@ fn compile_type(type_: &Type) -> Document {
 //     }
 // }
 
-// fn format_map_element<'c>(
+// fn format_map_element(
 //     element: &MapElement,
 //     comments: &'c [Comment],
 // ) -> (String, &'c [Comment]) {
@@ -916,7 +888,7 @@ fn compile_type(type_: &Type) -> Document {
 //     }
 // }
 
-// fn format_binary_operation<'c>(
+// fn format_binary_operation(
 //     operation: &BinaryOperation,
 //     comments: &'c [Comment],
 // ) -> (String, &'c [Comment]) {
@@ -944,7 +916,7 @@ fn compile_type(type_: &Type) -> Document {
 //     )
 // }
 
-// fn format_operand<'c>(
+// fn format_operand(
 //     operand: &Expression,
 //     parent_operator: BinaryOperator,
 //     comments: &'c [Comment],
@@ -1001,31 +973,20 @@ fn operator_priority(operator: BinaryOperator) -> usize {
     }
 }
 
-fn compile_suffix_comment<'c>(
-    comments: &'c [Comment],
-    position: &Position,
-) -> (Document, &'c [Comment]) {
-    let (comment, comments) = comment::split_current(comments, position.line_number());
-
-    (
-        if let Some(comment) = comment {
-            line_suffix(" #".to_owned() + comment.line().trim_end())
-        } else {
-            empty()
-        },
-        comments,
+fn compile_suffix_comment(context: &mut Context, position: &Position) -> Document {
+    sequence(
+        context
+            .split_current(position.line_number())
+            .map(|comment| line_suffix(" #".to_owned() + comment.line().trim_end())),
     )
 }
 
-fn compile_block_comment<'c>(
-    comments: &'c [Comment],
-    position: &Position,
-) -> (Document, &'c [Comment]) {
-    let (before, after) = comment::split_before(comments, position.line_number());
-
-    (
-        compile_all_comments(before, Some(position.line_number())),
-        after,
+fn compile_block_comment(context: &mut Context, position: &Position) -> Document {
+    compile_all_comments(
+        &context
+            .split_before(position.line_number())
+            .collect::<Vec<_>>(),
+        Some(position.line_number()),
     )
 }
 
