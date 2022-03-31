@@ -15,10 +15,9 @@ pub fn format(module: &Module, comments: &[Comment]) -> String {
         .iter()
         .partition::<Vec<_>, _>(|import| matches!(import.module_path(), ModulePath::External(_)));
 
-    let external_imports = format_imports(&mut context, &external_imports);
-    let internal_imports = format_imports(&mut context, &internal_imports);
-    // let (foreign_imports, mut comments) =
-    //     format_foreign_imports(module.foreign_imports(), comments);
+    let external_imports = compile_imports(&mut context, &external_imports);
+    let internal_imports = compile_imports(&mut context, &internal_imports);
+    let foreign_imports = compile_foreign_imports(&mut context, module.foreign_imports());
     let type_definitions = sequence(
         module
             .type_definitions()
@@ -27,42 +26,47 @@ pub fn format(module: &Module, comments: &[Comment]) -> String {
     );
 
     // for definition in module.definitions() {
-    //     let (definition, new_comments) = format_definition(definition, comments);
+    //     let (definition, new_comments) = compile_definition(definition, comments);
 
     //     sections.push(definition);
     //     comments = new_comments;
     // }
 
     ir::format(&sequence(
-        [external_imports, internal_imports, type_definitions]
-            .into_iter()
-            .map(|document| {
-                if count_lines(&document) == 0 {
-                    empty()
-                } else {
-                    sequence([document, line()])
-                }
-            }),
+        [
+            external_imports,
+            internal_imports,
+            foreign_imports,
+            type_definitions,
+        ]
+        .into_iter()
+        .map(|document| {
+            if count_lines(&document) == 0 {
+                empty()
+            } else {
+                sequence([document, line()])
+            }
+        }),
     ))
     .trim()
     .to_owned()
         + "\n"
 }
 
-fn format_imports(context: &mut Context, imports: &[&Import]) -> Document {
+fn compile_imports(context: &mut Context, imports: &[&Import]) -> Document {
     sequence(
         imports
             .iter()
             .sorted_by_key(|import| import.module_path())
-            .map(|import| format_import(context, import)),
+            .map(|import| compile_import(context, import)),
     )
 }
 
-fn format_import(context: &mut Context, import: &Import) -> Document {
+fn compile_import(context: &mut Context, import: &Import) -> Document {
     sequence([
         compile_block_comment(context, import.position()),
         "import ".into(),
-        format_module_path(import.module_path()),
+        compile_module_path(import.module_path()),
         if let Some(prefix) = import.prefix() {
             sequence([" as ", prefix])
         } else {
@@ -87,59 +91,47 @@ fn format_import(context: &mut Context, import: &Import) -> Document {
     ])
 }
 
-fn format_module_path(path: &ModulePath) -> Document {
+fn compile_module_path(path: &ModulePath) -> Document {
     match path {
         ModulePath::External(path) => sequence([
             path.package().into(),
             "'".into(),
-            format_module_path_components(path.components()),
+            compile_module_path_components(path.components()),
         ]),
-        ModulePath::Internal(path) => {
-            sequence(["'".into(), format_module_path_components(path.components())])
-        }
+        ModulePath::Internal(path) => sequence([
+            "'".into(),
+            compile_module_path_components(path.components()),
+        ]),
     }
 }
 
-fn format_module_path_components(components: &[String]) -> Document {
+fn compile_module_path_components(components: &[String]) -> Document {
     components.join("'").into()
 }
 
-// fn format_foreign_imports(
-//     imports: &[ForeignImport],
-//     mut comments: &'c [Comment],
-// ) -> (String, &'c [Comment]) {
-//     let mut strings = vec![];
+fn compile_foreign_imports(context: &mut Context, imports: &[ForeignImport]) -> Document {
+    sequence(
+        imports
+            .iter()
+            .map(|import| compile_foreign_import(context, import)),
+    )
+}
 
-//     for import in imports {
-//         let (string, new_comments) = format_foreign_import(import, comments);
-
-//         strings.push(string);
-//         comments = new_comments;
-//     }
-
-//     (strings.join("\n"), comments)
-// }
-
-// fn format_foreign_import(
-//     import: &ForeignImport,
-//     comments: &'c [Comment],
-// ) -> (String, &'c [Comment]) {
-//     let (block_comment, comments) = format_block_comment(comments, import.position());
-
-//     (
-//         block_comment
-//             + &["import foreign".into()]
-//                 .into_iter()
-//                 .chain(match import.calling_convention() {
-//                     CallingConvention::C => Some("\"c\"".into()),
-//                     CallingConvention::Native => None,
-//                 })
-//                 .chain([import.name().into(), format_type(import.type_())])
-//                 .collect::<Vec<_>>()
-//                 .join(" "),
-//         comments,
-//     )
-// }
+fn compile_foreign_import(context: &mut Context, import: &ForeignImport) -> Document {
+    sequence([
+        compile_block_comment(context, import.position()),
+        "import foreign".into(),
+        match import.calling_convention() {
+            CallingConvention::C => " \"c\"".into(),
+            CallingConvention::Native => empty(),
+        },
+        " ".into(),
+        import.name().into(),
+        " ".into(),
+        compile_type(import.type_()),
+        line(),
+    ])
+}
 
 fn compile_type_definition(context: &mut Context, definition: &TypeDefinition) -> Document {
     match definition {
@@ -189,12 +181,12 @@ fn compile_type_alias(context: &mut Context, alias: &TypeAlias) -> Document {
     ])
 }
 
-// fn format_definition(
+// fn compile_definition(
 //     definition: &Definition,
 //     comments: &'c [Comment],
-// ) -> (String, &'c [Comment]) {
-//     let (block_comment, comments) = format_block_comment(comments, definition.position());
-//     let (lambda, comments) = format_lambda(definition.lambda(), comments);
+// ) -> Document {
+//     let (block_comment, comments) = compile_block_comment(comments, definition.position());
+//     let (lambda, comments) = compile_lambda(definition.lambda(), comments);
 
 //     (
 //         block_comment
@@ -263,11 +255,11 @@ fn compile_type(type_: &Type) -> Document {
     }
 }
 
-// fn format_lambda(lambda: &Lambda, mut comments: &'c [Comment]) -> (String, &'c [Comment]) {
+// fn compile_lambda(lambda: &Lambda, mut comments: &'c [Comment]) -> Document {
 //     let arguments = lambda
 //         .arguments()
 //         .iter()
-//         .map(|argument| format!("{} {}", argument.name(), format_type(argument.type_())))
+//         .map(|argument| format!("{} {}", argument.name(), compile_type(argument.type_())))
 //         .collect::<Vec<_>>();
 //     let single_line_arguments = arguments.is_empty()
 //         || Some(lambda.position().line_number())
@@ -285,8 +277,8 @@ fn compile_type(type_: &Type) -> Document {
 //         for (string, argument) in arguments.into_iter().zip(lambda.arguments()) {
 //             // TODO Use Argument::position().
 //             let position = argument.type_().position();
-//             let (block_comment, new_comments) = format_block_comment(comments, position);
-//             let (suffix_comment, new_comments) = format_suffix_comment(new_comments, position);
+//             let (block_comment, new_comments) = compile_block_comment(comments, position);
+//             let (suffix_comment, new_comments) = compile_suffix_comment(new_comments, position);
 
 //             argument_lines.push(indent(block_comment + &string) + "," + &suffix_comment + "\n");
 //             comments = new_comments;
@@ -303,36 +295,36 @@ fn compile_type(type_: &Type) -> Document {
 //     let (body, comments) = if single_line_arguments
 //         && lambda.position().line_number() == lambda.body().expression().position().line_number()
 //     {
-//         format_block(lambda.body(), comments)
+//         compile_block(lambda.body(), comments)
 //     } else {
-//         format_multi_line_block(lambda.body(), comments)
+//         compile_multi_line_block(lambda.body(), comments)
 //     };
 
 //     (
 //         format!(
 //             "\\{} {} {}",
 //             arguments,
-//             format_type(lambda.result_type()),
+//             compile_type(lambda.result_type()),
 //             body
 //         ),
 //         comments,
 //     )
 // }
 
-// fn format_block(block: &Block, comments: &'c [Comment]) -> (String, &'c [Comment]) {
-//     let (expression, new_comments) = format_expression(block.expression(), comments);
+// fn compile_block(block: &Block, comments: &'c [Comment]) -> Document {
+//     let (expression, new_comments) = compile_expression(block.expression(), comments);
 
 //     if block.statements().is_empty() && is_single_line(&expression) {
 //         (["{", &expression, "}"].join(" "), new_comments)
 //     } else {
-//         format_multi_line_block(block, comments)
+//         compile_multi_line_block(block, comments)
 //     }
 // }
 
-// fn format_multi_line_block(
+// fn compile_multi_line_block(
 //     block: &Block,
 //     mut comments: &'c [Comment],
-// ) -> (String, &'c [Comment]) {
+// ) -> Document {
 //     let mut statements = vec![];
 
 //     for (statement, next_position) in block.statements().iter().zip(
@@ -343,16 +335,16 @@ fn compile_type(type_: &Type) -> Document {
 //             .map(|statement| statement.position())
 //             .chain([block.expression().position()]),
 //     ) {
-//         let (block_comment, new_comments) = format_block_comment(comments, statement.position());
+//         let (block_comment, new_comments) = compile_block_comment(comments, statement.position());
 //         // TODO Use end positions of spans when they are available.
 //         let line_count = next_position.line_number() as isize
 //             - statement.position().line_number() as isize
 //             - comment::split_before(new_comments, next_position.line_number())
 //                 .0
 //                 .len() as isize;
-//         let (statement_string, new_comments) = format_statement(statement, new_comments);
+//         let (statement_string, new_comments) = compile_statement(statement, new_comments);
 //         let (suffix_comment, new_comments) =
-//             format_suffix_comment(new_comments, statement.position());
+//             compile_suffix_comment(new_comments, statement.position());
 
 //         statements.push(indent(
 //             block_comment
@@ -367,8 +359,8 @@ fn compile_type(type_: &Type) -> Document {
 //         comments = new_comments;
 //     }
 
-//     let (block_comment, comments) = format_block_comment(comments, block.expression().position());
-//     let (expression, comments) = format_expression(block.expression(), comments);
+//     let (block_comment, comments) = compile_block_comment(comments, block.expression().position());
+//     let (expression, comments) = compile_expression(block.expression(), comments);
 
 //     (
 //         ["{".into()]
@@ -382,8 +374,8 @@ fn compile_type(type_: &Type) -> Document {
 //     )
 // }
 
-// fn format_statement(statement: &Statement, comments: &'c [Comment]) -> (String, &'c [Comment]) {
-//     let (expression, comments) = format_expression(statement.expression(), comments);
+// fn compile_statement(statement: &Statement, comments: &'c [Comment]) -> Document {
+//     let (expression, comments) = compile_expression(statement.expression(), comments);
 
 //     (
 //         statement
@@ -397,19 +389,19 @@ fn compile_type(type_: &Type) -> Document {
 //     )
 // }
 
-// fn format_expression(
+// fn compile_expression(
 //     expression: &Expression,
 //     mut comments: &'c [Comment],
-// ) -> (String, &'c [Comment]) {
+// ) -> Document {
 //     match expression {
-//         Expression::BinaryOperation(operation) => format_binary_operation(operation, comments),
+//         Expression::BinaryOperation(operation) => compile_binary_operation(operation, comments),
 //         Expression::Call(call) => {
-//             let (function, mut comments) = format_expression(call.function(), comments);
+//             let (function, mut comments) = compile_expression(call.function(), comments);
 //             let head = format!("{}(", function);
 //             let mut arguments = vec![];
 
 //             for argument in call.arguments() {
-//                 let (expression, new_comments) = format_expression(argument, comments);
+//                 let (expression, new_comments) = compile_expression(argument, comments);
 
 //                 arguments.push(expression);
 //                 comments = new_comments;
@@ -452,11 +444,11 @@ fn compile_type(type_: &Type) -> Document {
 //             if boolean.value() { "true" } else { "false" }.into(),
 //             comments,
 //         ),
-//         Expression::If(if_) => format_if(if_, comments),
+//         Expression::If(if_) => compile_if(if_, comments),
 //         Expression::IfList(if_) => {
-//             let (list, comments) = format_expression(if_.list(), comments);
-//             let (then, comments) = format_multi_line_block(if_.then(), comments);
-//             let (else_, comments) = format_multi_line_block(if_.else_(), comments);
+//             let (list, comments) = compile_expression(if_.list(), comments);
+//             let (then, comments) = compile_multi_line_block(if_.then(), comments);
+//             let (else_, comments) = compile_multi_line_block(if_.else_(), comments);
 
 //             (
 //                 [
@@ -473,10 +465,10 @@ fn compile_type(type_: &Type) -> Document {
 //             )
 //         }
 //         Expression::IfMap(if_) => {
-//             let (map, comments) = format_expression(if_.map(), comments);
-//             let (key, comments) = format_expression(if_.key(), comments);
-//             let (then, comments) = format_multi_line_block(if_.then(), comments);
-//             let (else_, comments) = format_multi_line_block(if_.else_(), comments);
+//             let (map, comments) = compile_expression(if_.map(), comments);
+//             let (key, comments) = compile_expression(if_.key(), comments);
+//             let (then, comments) = compile_multi_line_block(if_.then(), comments);
+//             let (else_, comments) = compile_multi_line_block(if_.else_(), comments);
 
 //             (
 //                 [
@@ -492,14 +484,14 @@ fn compile_type(type_: &Type) -> Document {
 //                 comments,
 //             )
 //         }
-//         Expression::IfType(if_) => format_if_type(if_, comments),
-//         Expression::Lambda(lambda) => format_lambda(lambda, comments),
+//         Expression::IfType(if_) => compile_if_type(if_, comments),
+//         Expression::Lambda(lambda) => compile_lambda(lambda, comments),
 //         Expression::List(list) => {
-//             let type_ = format_type(list.type_());
+//             let type_ = compile_type(list.type_());
 //             let mut elements = vec![];
 
 //             for element in list.elements() {
-//                 let (element, new_comments) = format_list_element(element, comments);
+//                 let (element, new_comments) = compile_list_element(element, comments);
 
 //                 elements.push(element);
 //                 comments = new_comments;
@@ -543,9 +535,9 @@ fn compile_type(type_: &Type) -> Document {
 //             }
 //         }
 //         Expression::ListComprehension(comprehension) => {
-//             let type_ = format_type(comprehension.type_());
-//             let (element, comments) = format_expression(comprehension.element(), comments);
-//             let (list, comments) = format_expression(comprehension.list(), comments);
+//             let type_ = compile_type(comprehension.type_());
+//             let (element, comments) = compile_expression(comprehension.element(), comments);
+//             let (list, comments) = compile_expression(comprehension.list(), comments);
 
 //             (
 //                 if comprehension.position().line_number()
@@ -586,11 +578,11 @@ fn compile_type(type_: &Type) -> Document {
 //             )
 //         }
 //         Expression::Map(map) => {
-//             let type_ = format_type(map.key_type()) + ": " + &format_type(map.value_type());
+//             let type_ = compile_type(map.key_type()) + ": " + &compile_type(map.value_type());
 //             let mut elements = vec![];
 
 //             for element in map.elements() {
-//                 let (element, new_comments) = format_map_element(element, comments);
+//                 let (element, new_comments) = compile_map_element(element, comments);
 
 //                 elements.push(element);
 //                 comments = new_comments;
@@ -643,7 +635,7 @@ fn compile_type(type_: &Type) -> Document {
 //         ),
 //         Expression::Record(record) => {
 //             let (old_record, mut comments) = if let Some(record) = record.record() {
-//                 let (record, comments) = format_expression(record, comments);
+//                 let (record, comments) = compile_expression(record, comments);
 
 //                 (Some(format!("...{}", record)), comments)
 //             } else {
@@ -652,7 +644,7 @@ fn compile_type(type_: &Type) -> Document {
 //             let mut elements = old_record.into_iter().collect::<Vec<_>>();
 
 //             for field in record.fields() {
-//                 let (expression, new_comments) = format_expression(field.expression(), comments);
+//                 let (expression, new_comments) = compile_expression(field.expression(), comments);
 
 //                 elements.push(format!("{}: {}", field.name(), expression,));
 //                 comments = new_comments;
@@ -689,18 +681,18 @@ fn compile_type(type_: &Type) -> Document {
 //             )
 //         }
 //         Expression::RecordDeconstruction(deconstruction) => {
-//             let (record, comments) = format_expression(deconstruction.expression(), comments);
+//             let (record, comments) = compile_expression(deconstruction.expression(), comments);
 
 //             (format!("{}.{}", record, deconstruction.name()), comments)
 //         }
 //         Expression::SpawnOperation(operation) => {
-//             let (lambda, comments) = format_lambda(operation.function(), comments);
+//             let (lambda, comments) = compile_lambda(operation.function(), comments);
 
 //             (format!("go {}", lambda), comments)
 //         }
 //         Expression::String(string) => (format!("\"{}\"", string.value()), comments),
 //         Expression::UnaryOperation(operation) => {
-//             let (operand, comments) = format_expression(operation.expression(), comments);
+//             let (operand, comments) = compile_expression(operation.expression(), comments);
 //             let operand = if matches!(operation.expression(), Expression::BinaryOperation(_)) {
 //                 "(".to_owned() + &operand + ")"
 //             } else {
@@ -719,14 +711,14 @@ fn compile_type(type_: &Type) -> Document {
 //     }
 // }
 
-// fn format_if(if_: &If, original_comments: &'c [Comment]) -> (String, &'c [Comment]) {
+// fn compile_if(if_: &If, original_comments: &'c [Comment]) -> Document {
 //     let (branches, comments) = {
 //         let mut branches = vec![];
 //         let mut comments = original_comments;
 
 //         for branch in if_.branches() {
-//             let (expression, new_comments) = format_expression(branch.condition(), comments);
-//             let (block, new_comments) = format_block(branch.block(), new_comments);
+//             let (expression, new_comments) = compile_expression(branch.condition(), comments);
+//             let (block, new_comments) = compile_block(branch.block(), new_comments);
 
 //             branches.push(expression + " " + &block);
 //             comments = new_comments;
@@ -734,7 +726,7 @@ fn compile_type(type_: &Type) -> Document {
 
 //         (branches, comments)
 //     };
-//     let (else_, comments) = format_block(if_.else_(), comments);
+//     let (else_, comments) = compile_block(if_.else_(), comments);
 
 //     if branches.len() == 1
 //         && branches.iter().chain([&else_]).all(is_single_line)
@@ -758,14 +750,14 @@ fn compile_type(type_: &Type) -> Document {
 //         let mut comments = original_comments;
 
 //         for branch in if_.branches() {
-//             let (expression, new_comments) = format_expression(branch.condition(), comments);
-//             let (block, new_comments) = format_multi_line_block(branch.block(), new_comments);
+//             let (expression, new_comments) = compile_expression(branch.condition(), comments);
+//             let (block, new_comments) = compile_multi_line_block(branch.block(), new_comments);
 
 //             parts.extend(["if".into(), expression, block, "else".into()]);
 //             comments = new_comments;
 //         }
 
-//         let (else_, comments) = format_multi_line_block(if_.else_(), comments);
+//         let (else_, comments) = compile_multi_line_block(if_.else_(), comments);
 
 //         parts.push(else_);
 
@@ -773,23 +765,23 @@ fn compile_type(type_: &Type) -> Document {
 //     }
 // }
 
-// fn format_if_type(if_: &IfType, original_comments: &'c [Comment]) -> (String, &'c [Comment]) {
-//     let (argument, original_comments) = format_expression(if_.argument(), original_comments);
+// fn compile_if_type(if_: &IfType, original_comments: &'c [Comment]) -> Document {
+//     let (argument, original_comments) = compile_expression(if_.argument(), original_comments);
 //     let (branches, comments) = {
 //         let mut branches = vec![];
 //         let mut comments = original_comments;
 
 //         for branch in if_.branches() {
-//             let (block, new_comments) = format_block(branch.block(), comments);
+//             let (block, new_comments) = compile_block(branch.block(), comments);
 
-//             branches.push(format_type(branch.type_()) + " " + &block);
+//             branches.push(compile_type(branch.type_()) + " " + &block);
 //             comments = new_comments;
 //         }
 
 //         (branches, comments)
 //     };
 //     let (else_, comments) = if let Some(block) = if_.else_() {
-//         let (block, comments) = format_block(block, comments);
+//         let (block, comments) = compile_block(block, comments);
 
 //         (Some(block), comments)
 //     } else {
@@ -829,14 +821,14 @@ fn compile_type(type_: &Type) -> Document {
 //         let mut comments = original_comments;
 
 //         for branch in if_.branches() {
-//             let (block, new_comments) = format_multi_line_block(branch.block(), comments);
+//             let (block, new_comments) = compile_multi_line_block(branch.block(), comments);
 
-//             branches.push(format_type(branch.type_()) + " " + &block);
+//             branches.push(compile_type(branch.type_()) + " " + &block);
 //             comments = new_comments;
 //         }
 
 //         let (else_, comments) = if let Some(block) = if_.else_() {
-//             let (block, comments) = format_multi_line_block(block, comments);
+//             let (block, comments) = compile_multi_line_block(block, comments);
 
 //             (Some(block), comments)
 //         } else {
@@ -854,49 +846,49 @@ fn compile_type(type_: &Type) -> Document {
 //     }
 // }
 
-// fn format_list_element(
+// fn compile_list_element(
 //     element: &ListElement,
 //     comments: &'c [Comment],
-// ) -> (String, &'c [Comment]) {
+// ) -> Document {
 //     match element {
 //         ListElement::Multiple(expression) => {
-//             let (expression, comments) = format_expression(expression, comments);
+//             let (expression, comments) = compile_expression(expression, comments);
 
 //             (format!("...{}", expression), comments)
 //         }
-//         ListElement::Single(expression) => format_expression(expression, comments),
+//         ListElement::Single(expression) => compile_expression(expression, comments),
 //     }
 // }
 
-// fn format_map_element(
+// fn compile_map_element(
 //     element: &MapElement,
 //     comments: &'c [Comment],
-// ) -> (String, &'c [Comment]) {
+// ) -> Document {
 //     match element {
 //         MapElement::Map(expression) => {
-//             let (expression, comments) = format_expression(expression, comments);
+//             let (expression, comments) = compile_expression(expression, comments);
 
 //             (format!("...{}", expression), comments)
 //         }
 //         MapElement::Insertion(entry) => {
-//             let (key, comments) = format_expression(entry.key(), comments);
-//             let (value, comments) = format_expression(entry.value(), comments);
+//             let (key, comments) = compile_expression(entry.key(), comments);
+//             let (value, comments) = compile_expression(entry.value(), comments);
 
 //             (format!("{}: {}", key, value), comments)
 //         }
-//         MapElement::Removal(expression) => format_expression(expression, comments),
+//         MapElement::Removal(expression) => compile_expression(expression, comments),
 //     }
 // }
 
-// fn format_binary_operation(
+// fn compile_binary_operation(
 //     operation: &BinaryOperation,
 //     comments: &'c [Comment],
-// ) -> (String, &'c [Comment]) {
+// ) -> Document {
 //     let single_line =
 //         operation.lhs().position().line_number() == operation.rhs().position().line_number();
-//     let operator = format_binary_operator(operation.operator()).into();
-//     let (lhs, comments) = format_operand(operation.lhs(), operation.operator(), comments);
-//     let (rhs, comments) = format_operand(operation.rhs(), operation.operator(), comments);
+//     let operator = compile_binary_operator(operation.operator()).into();
+//     let (lhs, comments) = compile_operand(operation.lhs(), operation.operator(), comments);
+//     let (rhs, comments) = compile_operand(operation.rhs(), operation.operator(), comments);
 
 //     (
 //         [
@@ -916,12 +908,12 @@ fn compile_type(type_: &Type) -> Document {
 //     )
 // }
 
-// fn format_operand(
+// fn compile_operand(
 //     operand: &Expression,
 //     parent_operator: BinaryOperator,
 //     comments: &'c [Comment],
-// ) -> (String, &'c [Comment]) {
-//     let (string, comments) = format_expression(operand, comments);
+// ) -> Document {
+//     let (string, comments) = compile_expression(operand, comments);
 
 //     (
 //         if match operand {
@@ -1220,51 +1212,51 @@ mod tests {
         }
     }
 
-    // #[test]
-    // fn format_foreign_import() {
-    //     assert_eq!(
-    //         format_module(&Module::new(
-    //             vec![],
-    //             vec![ForeignImport::new(
-    //                 "foo",
-    //                 CallingConvention::Native,
-    //                 types::Function::new(
-    //                     vec![],
-    //                     types::None::new(Position::fake()),
-    //                     Position::fake()
-    //                 ),
-    //                 Position::fake(),
-    //             )],
-    //             vec![],
-    //             vec![],
-    //             Position::fake()
-    //         )),
-    //         "import foreign foo \\() none\n"
-    //     );
-    // }
+    #[test]
+    fn format_foreign_import() {
+        assert_eq!(
+            format_module(&Module::new(
+                vec![],
+                vec![ForeignImport::new(
+                    "foo",
+                    CallingConvention::Native,
+                    types::Function::new(
+                        vec![],
+                        types::None::new(Position::fake()),
+                        Position::fake()
+                    ),
+                    Position::fake(),
+                )],
+                vec![],
+                vec![],
+                Position::fake()
+            )),
+            "import foreign foo \\() none\n"
+        );
+    }
 
-    // #[test]
-    // fn format_foreign_import_with_c_calling_convention() {
-    //     assert_eq!(
-    //         format_module(&Module::new(
-    //             vec![],
-    //             vec![ForeignImport::new(
-    //                 "foo",
-    //                 CallingConvention::C,
-    //                 types::Function::new(
-    //                     vec![],
-    //                     types::None::new(Position::fake()),
-    //                     Position::fake()
-    //                 ),
-    //                 Position::fake(),
-    //             )],
-    //             vec![],
-    //             vec![],
-    //             Position::fake()
-    //         )),
-    //         "import foreign \"c\" foo \\() none\n"
-    //     );
-    // }
+    #[test]
+    fn format_foreign_import_with_c_calling_convention() {
+        assert_eq!(
+            format_module(&Module::new(
+                vec![],
+                vec![ForeignImport::new(
+                    "foo",
+                    CallingConvention::C,
+                    types::Function::new(
+                        vec![],
+                        types::None::new(Position::fake()),
+                        Position::fake()
+                    ),
+                    Position::fake(),
+                )],
+                vec![],
+                vec![],
+                Position::fake()
+            )),
+            "import foreign \"c\" foo \\() none\n"
+        );
+    }
 
     #[test]
     fn format_record_definition_with_no_field() {
