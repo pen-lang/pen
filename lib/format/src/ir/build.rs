@@ -1,5 +1,14 @@
 use super::Document;
 
+pub fn sequence<D: Into<Document>>(iterator: impl IntoIterator<Item = D>) -> Document {
+    Document::Sequence(
+        iterator
+            .into_iter()
+            .map(|document| document.into())
+            .collect(),
+    )
+}
+
 pub fn line_suffix(string: impl Into<String>) -> Document {
     Document::LineSuffix(string.into())
 }

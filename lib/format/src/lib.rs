@@ -2,29 +2,36 @@ mod comment;
 mod ir;
 
 use ast::{types::Type, *};
-use ir::{build::*, Document};
+use ir::{build::*, count_lines, Document};
 use itertools::Itertools;
 use position::Position;
-
-// TODO Consider introducing a minimum editor width to enforce single-line
-// formats in some occasions.
 
 pub fn format(module: &Module, comments: &[Comment]) -> String {
     let comments = comment::sort(comments);
 
-    // let (external_imports, internal_imports) = module
-    //     .imports()
-    //     .iter()
-    //     .partition::<Vec<_>, _>(|import| matches!(import.module_path(), ModulePath::External(_)));
+    let (external_imports, internal_imports) = module
+        .imports()
+        .iter()
+        .partition::<Vec<_>, _>(|import| matches!(import.module_path(), ModulePath::External(_)));
 
-    // let (external_imports, comments) = format_imports(&external_imports, &comments);
-    // let (internal_imports, comments) = format_imports(&internal_imports, comments);
+    let (external_imports, comments) = format_imports(&external_imports, &comments);
+    let (internal_imports, mut comments) = format_imports(&internal_imports, comments);
     // let (foreign_imports, mut comments) =
     //     format_foreign_imports(module.foreign_imports(), comments);
 
     // let mut sections = vec![external_imports, internal_imports, foreign_imports];
-    let mut sections = vec![];
-    let mut comments = comments.as_slice();
+    let mut sections = vec![
+        if count_lines(&external_imports) == 0 {
+            empty()
+        } else {
+            sequence([external_imports, line()])
+        },
+        if count_lines(&internal_imports) == 0 {
+            empty()
+        } else {
+            sequence([internal_imports, line()])
+        },
+    ];
 
     for definition in module.type_definitions() {
         let (definition, new_comments) = compile_type_definition(definition, comments);
@@ -40,48 +47,75 @@ pub fn format(module: &Module, comments: &[Comment]) -> String {
     //     comments = new_comments;
     // }
 
-    ir::format(
-        &sections
-            .into_iter()
-            .intersperse(vec![line(), line()].into())
-            .collect::<Vec<_>>()
-            .into(),
+    ir::format(&sections.into()).trim().to_owned() + "\n"
+}
+
+fn format_imports<'c>(
+    imports: &[&Import],
+    mut comments: &'c [Comment],
+) -> (Document, &'c [Comment]) {
+    let mut documents = vec![];
+
+    for import in imports.iter().sorted_by_key(|import| import.module_path()) {
+        let (import, new_comments) = format_import(import, comments);
+
+        documents.push(import);
+        comments = new_comments;
+    }
+
+    (documents.into(), comments)
+}
+
+fn format_import<'c>(import: &Import, comments: &'c [Comment]) -> (Document, &'c [Comment]) {
+    let (block_comment, comments) = compile_block_comment(comments, import.position());
+
+    (
+        sequence([
+            block_comment,
+            "import ".into(),
+            format_module_path(import.module_path()),
+            if let Some(prefix) = import.prefix() {
+                vec![" as ".into(), prefix.into()].into()
+            } else {
+                empty()
+            },
+            if import.unqualified_names().is_empty() {
+                empty()
+            } else {
+                sequence([
+                    " { ".into(),
+                    sequence(
+                        import
+                            .unqualified_names()
+                            .iter()
+                            .map(|name| name.clone())
+                            .intersperse(", ".into()),
+                    ),
+                    " }".into(),
+                ])
+            },
+            line(),
+        ]),
+        comments,
     )
 }
 
-// fn format_imports<'c>(imports: &[&Import], mut comments: &'c [Comment]) -> (String, &'c [Comment]) {
-//     let mut strings = vec![];
+fn format_module_path(path: &ModulePath) -> Document {
+    match path {
+        ModulePath::External(path) => sequence([
+            path.package().into(),
+            "'".into(),
+            format_module_path_components(path.components()),
+        ]),
+        ModulePath::Internal(path) => {
+            sequence(["'".into(), format_module_path_components(path.components())])
+        }
+    }
+}
 
-//     for import in imports {
-//         let (import, new_comments) = format_import(import, comments);
-
-//         strings.push(import);
-//         comments = new_comments;
-//     }
-
-//     strings.sort();
-
-//     (strings.join("\n"), comments)
-// }
-
-// fn format_import<'c>(import: &Import, comments: &'c [Comment]) -> (String, &'c [Comment]) {
-//     let (block_comment, comments) = format_block_comment(comments, import.position());
-
-//     (
-//         block_comment
-//             + &["import".into(), format_module_path(import.module_path())]
-//                 .into_iter()
-//                 .chain(import.prefix().map(|prefix| format!("as {}", prefix)))
-//                 .chain(if import.unqualified_names().is_empty() {
-//                     None
-//                 } else {
-//                     Some(format!("{{ {} }}", import.unqualified_names().join(", ")))
-//                 })
-//                 .collect::<Vec<_>>()
-//                 .join(" "),
-//         comments,
-//     )
-// }
+fn format_module_path_components(components: &[String]) -> Document {
+    components.join("'").into()
+}
 
 // fn format_foreign_imports<'c>(
 //     imports: &[ForeignImport],
@@ -97,25 +131,6 @@ pub fn format(module: &Module, comments: &[Comment]) -> String {
 //     }
 
 //     (strings.join("\n"), comments)
-// }
-
-// fn format_module_path(path: &ModulePath) -> String {
-//     match path {
-//         ModulePath::External(path) => {
-//             format!(
-//                 "{}'{}",
-//                 path.package(),
-//                 format_module_path_components(path.components())
-//             )
-//         }
-//         ModulePath::Internal(path) => {
-//             format!("'{}", format_module_path_components(path.components()))
-//         }
-//     }
-// }
-
-// fn format_module_path_components(components: &[String]) -> String {
-//     components.join("'")
 // }
 
 // fn format_foreign_import<'c>(
@@ -1077,186 +1092,186 @@ mod tests {
                 vec![],
                 Position::fake()
             )),
-            ""
+            "\n"
         );
     }
 
-    // mod import {
-    //     use super::*;
+    mod import {
+        use super::*;
 
-    //     #[test]
-    //     fn format_internal_module_import() {
-    //         assert_eq!(
-    //             format_module(&Module::new(
-    //                 vec![Import::new(
-    //                     InternalModulePath::new(vec!["Foo".into(), "Bar".into()]),
-    //                     None,
-    //                     vec![],
-    //                     Position::fake(),
-    //                 )],
-    //                 vec![],
-    //                 vec![],
-    //                 vec![],
-    //                 Position::fake()
-    //             )),
-    //             "import 'Foo'Bar\n"
-    //         );
-    //     }
+        #[test]
+        fn format_internal_module_import() {
+            assert_eq!(
+                format_module(&Module::new(
+                    vec![Import::new(
+                        InternalModulePath::new(vec!["Foo".into(), "Bar".into()]),
+                        None,
+                        vec![],
+                        Position::fake(),
+                    )],
+                    vec![],
+                    vec![],
+                    vec![],
+                    Position::fake()
+                )),
+                "import 'Foo'Bar\n"
+            );
+        }
 
-    //     #[test]
-    //     fn format_external_module_import() {
-    //         assert_eq!(
-    //             format_module(&Module::new(
-    //                 vec![Import::new(
-    //                     ExternalModulePath::new("Package", vec!["Foo".into(), "Bar".into()]),
-    //                     None,
-    //                     vec![],
-    //                     Position::fake()
-    //                 )],
-    //                 vec![],
-    //                 vec![],
-    //                 vec![],
-    //                 Position::fake()
-    //             )),
-    //             "import Package'Foo'Bar\n"
-    //         );
-    //     }
+        #[test]
+        fn format_external_module_import() {
+            assert_eq!(
+                format_module(&Module::new(
+                    vec![Import::new(
+                        ExternalModulePath::new("Package", vec!["Foo".into(), "Bar".into()]),
+                        None,
+                        vec![],
+                        Position::fake()
+                    )],
+                    vec![],
+                    vec![],
+                    vec![],
+                    Position::fake()
+                )),
+                "import Package'Foo'Bar\n"
+            );
+        }
 
-    //     #[test]
-    //     fn format_prefixed_module_import() {
-    //         assert_eq!(
-    //             format_module(&Module::new(
-    //                 vec![Import::new(
-    //                     InternalModulePath::new(vec!["Foo".into(), "Bar".into()]),
-    //                     Some("Baz".into()),
-    //                     vec![],
-    //                     Position::fake()
-    //                 )],
-    //                 vec![],
-    //                 vec![],
-    //                 vec![],
-    //                 Position::fake()
-    //             )),
-    //             "import 'Foo'Bar as Baz\n"
-    //         );
-    //     }
+        #[test]
+        fn format_prefixed_module_import() {
+            assert_eq!(
+                format_module(&Module::new(
+                    vec![Import::new(
+                        InternalModulePath::new(vec!["Foo".into(), "Bar".into()]),
+                        Some("Baz".into()),
+                        vec![],
+                        Position::fake()
+                    )],
+                    vec![],
+                    vec![],
+                    vec![],
+                    Position::fake()
+                )),
+                "import 'Foo'Bar as Baz\n"
+            );
+        }
 
-    //     #[test]
-    //     fn format_unqualified_module_import() {
-    //         assert_eq!(
-    //             format_module(&Module::new(
-    //                 vec![Import::new(
-    //                     InternalModulePath::new(vec!["Foo".into(), "Bar".into()]),
-    //                     None,
-    //                     vec!["Baz".into(), "Blah".into()],
-    //                     Position::fake()
-    //                 )],
-    //                 vec![],
-    //                 vec![],
-    //                 vec![],
-    //                 Position::fake()
-    //             )),
-    //             "import 'Foo'Bar { Baz, Blah }\n"
-    //         );
-    //     }
+        #[test]
+        fn format_unqualified_module_import() {
+            assert_eq!(
+                format_module(&Module::new(
+                    vec![Import::new(
+                        InternalModulePath::new(vec!["Foo".into(), "Bar".into()]),
+                        None,
+                        vec!["Baz".into(), "Blah".into()],
+                        Position::fake()
+                    )],
+                    vec![],
+                    vec![],
+                    vec![],
+                    Position::fake()
+                )),
+                "import 'Foo'Bar { Baz, Blah }\n"
+            );
+        }
 
-    //     #[test]
-    //     fn sort_module_imports_with_external_paths() {
-    //         assert_eq!(
-    //             format_module(&Module::new(
-    //                 vec![
-    //                     Import::new(
-    //                         ExternalModulePath::new("Foo", vec!["Foo".into()]),
-    //                         None,
-    //                         vec![],
-    //                         Position::fake(),
-    //                     ),
-    //                     Import::new(
-    //                         ExternalModulePath::new("Bar", vec!["Bar".into()]),
-    //                         None,
-    //                         vec![],
-    //                         Position::fake()
-    //                     )
-    //                 ],
-    //                 vec![],
-    //                 vec![],
-    //                 vec![],
-    //                 Position::fake()
-    //             )),
-    //             indoc!(
-    //                 "
-    //                 import Bar'Bar
-    //                 import Foo'Foo
-    //                 "
-    //             )
-    //         );
-    //     }
+        #[test]
+        fn sort_module_imports_with_external_paths() {
+            assert_eq!(
+                format_module(&Module::new(
+                    vec![
+                        Import::new(
+                            ExternalModulePath::new("Foo", vec!["Foo".into()]),
+                            None,
+                            vec![],
+                            Position::fake(),
+                        ),
+                        Import::new(
+                            ExternalModulePath::new("Bar", vec!["Bar".into()]),
+                            None,
+                            vec![],
+                            Position::fake()
+                        )
+                    ],
+                    vec![],
+                    vec![],
+                    vec![],
+                    Position::fake()
+                )),
+                indoc!(
+                    "
+                    import Bar'Bar
+                    import Foo'Foo
+                    "
+                )
+            );
+        }
 
-    //     #[test]
-    //     fn sort_module_imports_with_internal_paths() {
-    //         assert_eq!(
-    //             format_module(&Module::new(
-    //                 vec![
-    //                     Import::new(
-    //                         InternalModulePath::new(vec!["Foo".into()]),
-    //                         None,
-    //                         vec![],
-    //                         Position::fake(),
-    //                     ),
-    //                     Import::new(
-    //                         InternalModulePath::new(vec!["Bar".into()]),
-    //                         None,
-    //                         vec![],
-    //                         Position::fake()
-    //                     )
-    //                 ],
-    //                 vec![],
-    //                 vec![],
-    //                 vec![],
-    //                 Position::fake()
-    //             )),
-    //             indoc!(
-    //                 "
-    //                 import 'Bar
-    //                 import 'Foo
-    //                 "
-    //             )
-    //         );
-    //     }
+        #[test]
+        fn sort_module_imports_with_internal_paths() {
+            assert_eq!(
+                format_module(&Module::new(
+                    vec![
+                        Import::new(
+                            InternalModulePath::new(vec!["Foo".into()]),
+                            None,
+                            vec![],
+                            Position::fake(),
+                        ),
+                        Import::new(
+                            InternalModulePath::new(vec!["Bar".into()]),
+                            None,
+                            vec![],
+                            Position::fake()
+                        )
+                    ],
+                    vec![],
+                    vec![],
+                    vec![],
+                    Position::fake()
+                )),
+                indoc!(
+                    "
+                    import 'Bar
+                    import 'Foo
+                    "
+                )
+            );
+        }
 
-    //     #[test]
-    //     fn sort_module_imports_with_external_and_internal_paths() {
-    //         assert_eq!(
-    //             format_module(&Module::new(
-    //                 vec![
-    //                     Import::new(
-    //                         InternalModulePath::new(vec!["Foo".into(), "Bar".into()]),
-    //                         None,
-    //                         vec![],
-    //                         Position::fake(),
-    //                     ),
-    //                     Import::new(
-    //                         ExternalModulePath::new("Package", vec!["Foo".into(), "Bar".into()]),
-    //                         None,
-    //                         vec![],
-    //                         Position::fake()
-    //                     )
-    //                 ],
-    //                 vec![],
-    //                 vec![],
-    //                 vec![],
-    //                 Position::fake()
-    //             )),
-    //             indoc!(
-    //                 "
-    //                 import Package'Foo'Bar
+        #[test]
+        fn sort_module_imports_with_external_and_internal_paths() {
+            assert_eq!(
+                format_module(&Module::new(
+                    vec![
+                        Import::new(
+                            InternalModulePath::new(vec!["Foo".into(), "Bar".into()]),
+                            None,
+                            vec![],
+                            Position::fake(),
+                        ),
+                        Import::new(
+                            ExternalModulePath::new("Package", vec!["Foo".into(), "Bar".into()]),
+                            None,
+                            vec![],
+                            Position::fake()
+                        )
+                    ],
+                    vec![],
+                    vec![],
+                    vec![],
+                    Position::fake()
+                )),
+                indoc!(
+                    "
+                    import Package'Foo'Bar
 
-    //                 import 'Foo'Bar
-    //                 "
-    //             )
-    //         );
-    //     }
-    // }
+                    import 'Foo'Bar
+                    "
+                )
+            );
+        }
+    }
 
     // #[test]
     // fn format_foreign_import() {
