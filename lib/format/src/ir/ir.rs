@@ -2,14 +2,13 @@
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum Document {
+    Flatten(Box<Document>),
+    HardLine,
+    Indent(Box<Document>),
+    Line,
     LineSuffix(String),
     Sequence(Vec<Document>),
-    // TODO Replace this with a function?
-    Flatten(Box<Document>),
-    Break,
-    Line,
     SoftLine,
-    Indent(Box<Document>),
     String(String),
 }
 

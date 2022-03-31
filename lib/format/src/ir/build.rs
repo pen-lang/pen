@@ -21,7 +21,7 @@ pub fn soft_line() -> Document {
 }
 
 pub fn hard_line() -> Document {
-    vec![Document::Break, Document::Line].into()
+    Document::HardLine
 }
 
 pub fn empty() -> Document {

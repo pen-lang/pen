@@ -19,13 +19,8 @@ pub fn format(document: &Document) -> String {
 
 fn format_document(context: &mut Context, document: &Document, level: usize, broken: bool) {
     match document {
-        Document::LineSuffix(suffix) => context.line_suffixes.push(suffix.clone()),
-        Document::Sequence(documents) => {
-            for document in documents {
-                format_document(context, document, level, broken);
-            }
-        }
         Document::Flatten(document) => format_document(context, document, level, false),
+        Document::HardLine => format_line(context, level),
         Document::Indent(document) => format_document(context, document, level + 1, broken),
         Document::Line => {
             if broken {
@@ -34,12 +29,17 @@ fn format_document(context: &mut Context, document: &Document, level: usize, bro
                 context.outputs.extend([" ".into()]);
             }
         }
+        Document::LineSuffix(suffix) => context.line_suffixes.push(suffix.clone()),
+        Document::Sequence(documents) => {
+            for document in documents {
+                format_document(context, document, level, broken);
+            }
+        }
         Document::SoftLine => {
             if broken {
                 format_line(context, level);
             }
         }
-        Document::Break => {}
         Document::String(string) => context.outputs.push(string.clone()),
     }
 }
