@@ -21,15 +21,11 @@ pub fn indent(document: impl Into<Document>) -> Document {
     Document::Indent(document.into().into())
 }
 
-pub fn line() -> Document {
+pub const fn line() -> Document {
     Document::Line
 }
 
-pub fn soft_line() -> Document {
-    Document::SoftLine
-}
-
-pub fn hard_line() -> Document {
+pub const fn hard_line() -> Document {
     Document::HardLine
 }
 
