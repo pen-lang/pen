@@ -143,28 +143,26 @@ fn compile_type_definition(context: &mut Context, definition: &TypeDefinition) -
 }
 
 fn compile_record_definition(context: &mut Context, definition: &RecordDefinition) -> Document {
-    let document = sequence([
-        "type ".into(),
-        definition.name().into(),
-        " {".into(),
-        indent(sequence(definition.fields().iter().map(|field| {
-            sequence([
-                line(),
-                field.name().into(),
-                " ".into(),
-                compile_type(field.type_()),
-            ])
-        }))),
-        soft_line(),
-        "}".into(),
-    ]);
-
     sequence([
         compile_block_comment(context, definition.position()),
+        "type ".into(),
+        definition.name().into(),
         if definition.fields().is_empty() {
-            flatten(document)
+            " {}".into()
         } else {
-            document
+            sequence([
+                " {".into(),
+                indent(sequence(definition.fields().iter().map(|field| {
+                    sequence([
+                        line(),
+                        field.name().into(),
+                        " ".into(),
+                        compile_type(field.type_()),
+                    ])
+                }))),
+                line(),
+                "}".into(),
+            ])
         },
         line(),
     ])
