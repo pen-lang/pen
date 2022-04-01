@@ -97,6 +97,11 @@ mod tests {
         }
 
         #[test]
+        fn format_empty_line_with_indent() {
+            assert_eq!(format(&indent(line())), "\n");
+        }
+
+        #[test]
         fn format_broken_group() {
             assert_eq!(
                 format(&create_group().into()),
