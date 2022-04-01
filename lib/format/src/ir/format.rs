@@ -35,11 +35,6 @@ fn format_document(context: &mut Context, document: &Document, level: usize, bro
                 format_document(context, document, level, broken);
             }
         }
-        Document::SoftLine => {
-            if broken {
-                format_line(context, level);
-            }
-        }
         Document::String(string) => context.outputs.push(string.clone()),
     }
 }

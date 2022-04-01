@@ -1,4 +1,8 @@
 // https://homepages.inf.ed.ac.uk/wadler/papers/prettier/prettier.pdf
+//
+// We need soft-line and if-break nodes to make nodes totally agnostic about if
+// parent nodes are broken or not.
+// (e.g. handling trailing commas in function calls)
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum Document {
@@ -8,7 +12,6 @@ pub enum Document {
     Line,
     LineSuffix(String),
     Sequence(Vec<Document>),
-    SoftLine,
     String(String),
 }
 
