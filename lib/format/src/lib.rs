@@ -1615,8 +1615,11 @@ mod tests {
             ir::format(&compile_expression(&mut Context::new(vec![]), expression))
         }
 
-        fn format_with_comments(expression: &Expression, comments: Vec<Comment>) -> String {
-            ir::format(&compile_expression(&mut Context::new(comments), expression))
+        fn format_with_comments(expression: &Expression, comments: &[Comment]) -> String {
+            ir::format(&compile_expression(
+                &mut Context::new(comments.to_vec()),
+                expression,
+            ))
         }
 
         mod call {
@@ -1696,7 +1699,7 @@ mod tests {
                             Position::fake()
                         )
                         .into(),
-                        vec![Comment::new("foo", line_position(2))]
+                        &[Comment::new("foo", line_position(2))]
                     ),
                     indoc!(
                         "
@@ -1724,7 +1727,7 @@ mod tests {
                             Position::fake()
                         )
                         .into(),
-                        vec![Comment::new("foo", line_position(2))]
+                        &[Comment::new("foo", line_position(2))]
                     ),
                     indoc!(
                         "
@@ -2141,6 +2144,59 @@ mod tests {
                         \\(
                           x none,
                           y none,
+                        ) none {
+                          none
+                        }
+                        "
+                    )
+                    .trim()
+                );
+            }
+
+            #[test]
+            fn format_suffix_comment_on_function_argument() {
+                assert_eq!(
+                    format_with_comments(
+                        &Lambda::new(
+                            vec![Argument::new("x", types::None::new(line_position(2)))],
+                            types::None::new(Position::fake()),
+                            Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                            Position::fake(),
+                        )
+                        .into(),
+                        &[Comment::new("foo", line_position(2))]
+                    ),
+                    indoc!(
+                        "
+                        \\(
+                          x none, #foo
+                        ) none {
+                          none
+                        }
+                        "
+                    )
+                    .trim()
+                );
+            }
+
+            #[test]
+            fn format_block_comment_on_function_argument() {
+                assert_eq!(
+                    format_with_comments(
+                        &Lambda::new(
+                            vec![Argument::new("x", types::None::new(line_position(3)))],
+                            types::None::new(Position::fake()),
+                            Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                            Position::fake(),
+                        )
+                        .into(),
+                        &[Comment::new("foo", line_position(2))]
+                    ),
+                    indoc!(
+                        "
+                        \\(
+                          #foo
+                          x none,
                         ) none {
                           none
                         }
@@ -2924,7 +2980,7 @@ mod tests {
                             line_position(1)
                         )
                         .into(),
-                        vec![Comment::new("foo", line_position(2))]
+                        &[Comment::new("foo", line_position(2))]
                     ),
                     indoc!(
                         "
@@ -2953,7 +3009,7 @@ mod tests {
                             line_position(1)
                         )
                         .into(),
-                        vec![Comment::new("foo", line_position(2))]
+                        &[Comment::new("foo", line_position(2))]
                     ),
                     indoc!(
                         "
@@ -2977,7 +3033,7 @@ mod tests {
                             line_position(1)
                         )
                         .into(),
-                        vec![Comment::new("foo", line_position(2))]
+                        &[Comment::new("foo", line_position(2))]
                     ),
                     indoc!(
                         "
@@ -3002,7 +3058,7 @@ mod tests {
                             line_position(1)
                         )
                         .into(),
-                        vec![Comment::new("foo", line_position(2))]
+                        &[Comment::new("foo", line_position(2))]
                     ),
                     indoc!(
                         "
@@ -3490,77 +3546,6 @@ mod tests {
 
                       #bar
                       y = none
-                      none
-                    }
-                    "
-                )
-            );
-        }
-
-        #[test]
-        fn format_suffix_comment_on_function_argument() {
-            assert_eq!(
-                format(
-                    &Module::new(
-                        vec![],
-                        vec![],
-                        vec![],
-                        vec![Definition::new(
-                            "foo",
-                            Lambda::new(
-                                vec![Argument::new("x", types::None::new(line_position(2)))],
-                                types::None::new(Position::fake()),
-                                Block::new(vec![], None::new(Position::fake()), Position::fake()),
-                                Position::fake(),
-                            ),
-                            None,
-                            line_position(1)
-                        )],
-                        Position::fake()
-                    ),
-                    &[Comment::new("foo", line_position(2))]
-                ),
-                indoc!(
-                    "
-                    foo = \\(
-                      x none, #foo
-                    ) none {
-                      none
-                    }
-                    "
-                )
-            );
-        }
-
-        #[test]
-        fn format_block_comment_on_function_argument() {
-            assert_eq!(
-                format(
-                    &Module::new(
-                        vec![],
-                        vec![],
-                        vec![],
-                        vec![Definition::new(
-                            "foo",
-                            Lambda::new(
-                                vec![Argument::new("x", types::None::new(line_position(3)))],
-                                types::None::new(Position::fake()),
-                                Block::new(vec![], None::new(Position::fake()), Position::fake()),
-                                Position::fake(),
-                            ),
-                            None,
-                            line_position(1)
-                        )],
-                        Position::fake()
-                    ),
-                    &[Comment::new("foo", line_position(2))]
-                ),
-                indoc!(
-                    "
-                    foo = \\(
-                      #foo
-                      x none,
-                    ) none {
                       none
                     }
                     "
