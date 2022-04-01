@@ -884,7 +884,7 @@ fn operator_priority(operator: BinaryOperator) -> usize {
 fn compile_suffix_comment(context: &mut Context, position: &Position) -> Document {
     sequence(
         context
-            .split_current(position.line_number())
+            .drain_current_comment(position.line_number())
             .map(|comment| line_suffix(" #".to_owned() + comment.line().trim_end())),
     )
 }
@@ -892,14 +892,19 @@ fn compile_suffix_comment(context: &mut Context, position: &Position) -> Documen
 fn compile_block_comment(context: &mut Context, position: &Position) -> Document {
     compile_all_comments(
         &context
-            .split_before(position.line_number())
+            .drain_comments_before(position.line_number())
             .collect::<Vec<_>>(),
         Some(position.line_number()),
     )
 }
 
 fn compile_remaining_block_comment(context: &mut Context) -> Document {
-    compile_all_comments(&context.split_before(usize::MAX).collect::<Vec<_>>(), None)
+    compile_all_comments(
+        &context
+            .drain_comments_before(usize::MAX)
+            .collect::<Vec<_>>(),
+        None,
+    )
 }
 
 fn compile_all_comments(comments: &[Comment], last_line_number: Option<usize>) -> Document {

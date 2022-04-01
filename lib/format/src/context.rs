@@ -11,7 +11,11 @@ impl Context {
         Self { comments }
     }
 
-    pub fn split_before(&mut self, line_number: usize) -> impl Iterator<Item = Comment> + '_ {
+    pub fn drain_comments_before(
+        &mut self,
+        line_number: usize,
+    ) -> impl Iterator<Item = Comment> + '_ {
+        // This is O(n) and slow. Haha!
         self.comments.splice(
             ..self
                 .comments
@@ -22,7 +26,10 @@ impl Context {
         )
     }
 
-    pub fn split_current(&mut self, line_number: usize) -> impl Iterator<Item = Comment> + '_ {
-        self.split_before(line_number + 1)
+    pub fn drain_current_comment(
+        &mut self,
+        line_number: usize,
+    ) -> impl Iterator<Item = Comment> + '_ {
+        self.drain_comments_before(line_number + 1)
     }
 }
