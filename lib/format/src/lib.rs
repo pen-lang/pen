@@ -366,7 +366,13 @@ fn compile_expression(context: &mut Context, expression: &Expression) -> Documen
             let arguments = sequence(
                 call.arguments()
                     .iter()
-                    .map(|argument| compile_expression(context, argument))
+                    .map(|argument| {
+                        sequence([
+                            compile_block_comment(context, argument.position()),
+                            compile_expression(context, argument),
+                            compile_suffix_comment(context, argument.position()),
+                        ])
+                    })
                     .intersperse(separator.clone()),
             );
 
@@ -1748,6 +1754,10 @@ mod tests {
             ir::format(&compile_expression(&mut Context::new(vec![]), expression))
         }
 
+        fn format_with_comments(expression: &Expression, comments: Vec<Comment>) -> String {
+            ir::format(&compile_expression(&mut Context::new(comments), expression))
+        }
+
         mod call {
             use super::*;
 
@@ -1804,6 +1814,61 @@ mod tests {
                         foo(
                           1,
                           2,
+                        )
+                        "
+                    )
+                    .trim()
+                );
+            }
+
+            #[test]
+            fn format_block_comment() {
+                assert_eq!(
+                    format_with_comments(
+                        &Call::new(
+                            Variable::new("foo", line_position(1)),
+                            vec![Number::new(
+                                NumberRepresentation::FloatingPoint("1".into()),
+                                line_position(3)
+                            )
+                            .into()],
+                            Position::fake()
+                        )
+                        .into(),
+                        vec![Comment::new("foo", line_position(2))]
+                    ),
+                    indoc!(
+                        "
+                        foo(
+                          #foo
+                          1,
+                        )
+                        "
+                    )
+                    .trim()
+                );
+            }
+
+            #[test]
+            fn format_suffix_comment() {
+                assert_eq!(
+                    format_with_comments(
+                        &Call::new(
+                            Variable::new("foo", line_position(1)),
+                            vec![Number::new(
+                                NumberRepresentation::FloatingPoint("1".into()),
+                                line_position(2)
+                            )
+                            .into()],
+                            Position::fake()
+                        )
+                        .into(),
+                        vec![Comment::new("foo", line_position(2))]
+                    ),
+                    indoc!(
+                        "
+                        foo(
+                          1, #foo
                         )
                         "
                     )
