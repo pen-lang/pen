@@ -634,22 +634,19 @@ fn compile_expression(context: &mut Context, expression: &Expression) -> Documen
         //     (format!("go {}", lambda), comments)
         // }
         Expression::String(string) => sequence(["\"", string.value(), "\""]),
-        // Expression::UnaryOperation(operation) => {
-        //     let (operand, comments) = compile_expression(operation.expression(), comments);
-        //     let operand = if matches!(operation.expression(), Expression::BinaryOperation(_)) {
-        //         "(".to_owned() + &operand + ")"
-        //     } else {
-        //         operand
-        //     };
+        Expression::UnaryOperation(operation) => {
+            let operand = compile_expression(context, operation.expression());
+            let operand = if matches!(operation.expression(), Expression::BinaryOperation(_)) {
+                sequence(["(".into(), operand, ")".into()])
+            } else {
+                operand
+            };
 
-        //     (
-        //         match operation.operator() {
-        //             UnaryOperator::Not => "!".to_owned() + &operand,
-        //             UnaryOperator::Try => operand + "?",
-        //         },
-        //         comments,
-        //     )
-        // }
+            match operation.operator() {
+                UnaryOperator::Not => sequence(["!".into(), operand]),
+                UnaryOperator::Try => sequence([operand, "?".into()]),
+            }
+        }
         Expression::Variable(variable) => variable.name().into(),
         _ => todo!(),
     }
@@ -2367,59 +2364,59 @@ mod tests {
             }
         }
 
-        // mod unary_operation {
-        //     use super::*;
+        mod unary_operation {
+            use super::*;
 
-        //     #[test]
-        //     fn format_not_operation() {
-        //         assert_eq!(
-        //             format(
-        //                 &UnaryOperation::new(
-        //                     UnaryOperator::Not,
-        //                     Variable::new("x", Position::fake()),
-        //                     Position::fake()
-        //                 )
-        //                 .into()
-        //             ),
-        //             "!x"
-        //         );
-        //     }
+            #[test]
+            fn format_not_operation() {
+                assert_eq!(
+                    format(
+                        &UnaryOperation::new(
+                            UnaryOperator::Not,
+                            Variable::new("x", Position::fake()),
+                            Position::fake()
+                        )
+                        .into()
+                    ),
+                    "!x"
+                );
+            }
 
-        //     #[test]
-        //     fn format_try_operation() {
-        //         assert_eq!(
-        //             format(
-        //                 &UnaryOperation::new(
-        //                     UnaryOperator::Try,
-        //                     Variable::new("x", Position::fake()),
-        //                     Position::fake()
-        //                 )
-        //                 .into()
-        //             ),
-        //             "x?"
-        //         );
-        //     }
+            #[test]
+            fn format_try_operation() {
+                assert_eq!(
+                    format(
+                        &UnaryOperation::new(
+                            UnaryOperator::Try,
+                            Variable::new("x", Position::fake()),
+                            Position::fake()
+                        )
+                        .into()
+                    ),
+                    "x?"
+                );
+            }
 
-        //     #[test]
-        //     fn format_with_binary_operation() {
-        //         assert_eq!(
-        //             format(
-        //                 &UnaryOperation::new(
-        //                     UnaryOperator::Not,
-        //                     BinaryOperation::new(
-        //                         BinaryOperator::And,
-        //                         Boolean::new(true, Position::fake()),
-        //                         Boolean::new(false, Position::fake()),
-        //                         Position::fake()
-        //                     ),
-        //                     Position::fake()
-        //                 )
-        //                 .into(),
-        //             ),
-        //             "!(true & false)"
-        //         );
-        //     }
-        // }
+            #[test]
+            fn format_with_binary_operation() {
+                assert_eq!(
+                    format(
+                        &UnaryOperation::new(
+                            UnaryOperator::Not,
+                            BinaryOperation::new(
+                                BinaryOperator::And,
+                                Boolean::new(true, Position::fake()),
+                                Boolean::new(false, Position::fake()),
+                                Position::fake()
+                            ),
+                            Position::fake()
+                        )
+                        .into(),
+                    ),
+                    "!(true & false)"
+                );
+            }
+        }
 
         // #[test]
         // fn format_record_deconstruction() {
