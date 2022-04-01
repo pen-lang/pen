@@ -396,7 +396,7 @@ fn compile_expression(context: &mut Context, expression: &Expression) -> Documen
             ])
         }
         Expression::Boolean(boolean) => if boolean.value() { "true" } else { "false" }.into(),
-        // Expression::If(if_) => compile_if(if_, comments),
+        Expression::If(if_) => compile_if(context, if_),
         Expression::IfList(if_) => sequence([
             sequence(["if [", if_.first_name(), ", ...", if_.rest_name(), "] = "]),
             compile_expression(context, if_.list()),
@@ -415,7 +415,7 @@ fn compile_expression(context: &mut Context, expression: &Expression) -> Documen
             " else ".into(),
             compile_block(context, if_.else_()),
         ]),
-        // Expression::IfType(if_) => compile_if_type(if_, comments),
+        Expression::IfType(if_) => compile_if_type(context, if_),
         Expression::Lambda(lambda) => compile_lambda(context, lambda),
         // Expression::List(list) => {
         //     let type_ = compile_type(list.type_());
@@ -624,140 +624,73 @@ fn compile_expression(context: &mut Context, expression: &Expression) -> Documen
     }
 }
 
-// fn compile_if(if_: &If, original_comments: &'c [Comment]) -> Document {
-//     let (branches, comments) = {
-//         let mut branches = vec![];
-//         let mut comments = original_comments;
+fn compile_if(context: &mut Context, if_: &If) -> Document {
+    let document = sequence([
+        sequence(if_.branches().iter().map(|branch| {
+            sequence([
+                "if ".into(),
+                compile_expression(context, branch.condition()),
+                " ".into(),
+                compile_block(context, branch.block()),
+                " else ".into(),
+            ])
+        })),
+        compile_block(context, if_.else_()),
+    ]);
 
-//         for branch in if_.branches() {
-//             let (expression, new_comments) = compile_expression(branch.condition(), comments);
-//             let (block, new_comments) = compile_block(branch.block(), new_comments);
+    if if_.branches().len() == 1
+        && !is_broken(&document)
+        && Some(if_.position().line_number())
+            == if_
+                .branches()
+                .get(0)
+                .map(|branch| branch.block().expression().position().line_number())
+    {
+        flatten(document)
+    } else {
+        document
+    }
+}
 
-//             branches.push(expression + " " + &block);
-//             comments = new_comments;
-//         }
+fn compile_if_type(context: &mut Context, if_: &IfType) -> Document {
+    let document = sequence([
+        "if ".into(),
+        if_.name().into(),
+        " = ".into(),
+        compile_expression(context, if_.argument()),
+        " as ".into(),
+        sequence(
+            if_.branches()
+                .iter()
+                .map(|branch| {
+                    sequence([
+                        compile_type(branch.type_()),
+                        " ".into(),
+                        compile_block(context, branch.block()),
+                    ])
+                })
+                .intersperse(" else if ".into()),
+        ),
+        if let Some(block) = if_.else_() {
+            sequence([" else ".into(), compile_block(context, block)])
+        } else {
+            empty()
+        },
+    ]);
 
-//         (branches, comments)
-//     };
-//     let (else_, comments) = compile_block(if_.else_(), comments);
-
-//     if branches.len() == 1
-//         && branches.iter().chain([&else_]).all(is_single_line)
-//         && Some(if_.position().line_number())
-//             == if_
-//                 .branches()
-//                 .get(0)
-//                 .map(|branch| branch.block().expression().position().line_number())
-//     {
-//         (
-//             branches
-//                 .into_iter()
-//                 .flat_map(|branch| ["if".into(), branch, "else".into()])
-//                 .chain([else_])
-//                 .collect::<Vec<_>>()
-//                 .join(" "),
-//             comments,
-//         )
-//     } else {
-//         let mut parts = vec![];
-//         let mut comments = original_comments;
-
-//         for branch in if_.branches() {
-//             let (expression, new_comments) = compile_expression(branch.condition(), comments);
-//             let (block, new_comments) = compile_multi_line_block(branch.block(), new_comments);
-
-//             parts.extend(["if".into(), expression, block, "else".into()]);
-//             comments = new_comments;
-//         }
-
-//         let (else_, comments) = compile_multi_line_block(if_.else_(), comments);
-
-//         parts.push(else_);
-
-//         (parts.join(" "), comments)
-//     }
-// }
-
-// fn compile_if_type(if_: &IfType, original_comments: &'c [Comment]) -> Document {
-//     let (argument, original_comments) = compile_expression(if_.argument(), original_comments);
-//     let (branches, comments) = {
-//         let mut branches = vec![];
-//         let mut comments = original_comments;
-
-//         for branch in if_.branches() {
-//             let (block, new_comments) = compile_block(branch.block(), comments);
-
-//             branches.push(compile_type(branch.type_()) + " " + &block);
-//             comments = new_comments;
-//         }
-
-//         (branches, comments)
-//     };
-//     let (else_, comments) = if let Some(block) = if_.else_() {
-//         let (block, comments) = compile_block(block, comments);
-
-//         (Some(block), comments)
-//     } else {
-//         (None, comments)
-//     };
-
-//     let head = [
-//         "if".into(),
-//         if_.name().into(),
-//         "=".into(),
-//         argument.clone(),
-//         "as".into(),
-//     ];
-
-//     if branches.iter().chain(&else_).count() <= 2
-//         && [&argument]
-//             .into_iter()
-//             .chain(&branches)
-//             .chain(else_.as_ref())
-//             .all(is_single_line)
-//         && Some(if_.position().line_number())
-//             == if_
-//                 .branches()
-//                 .get(0)
-//                 .map(|branch| branch.block().expression().position().line_number())
-//     {
-//         (
-//             head.into_iter()
-//                 .chain([branches.join(" else if ")])
-//                 .chain(else_.into_iter().flat_map(|block| ["else".into(), block]))
-//                 .collect::<Vec<_>>()
-//                 .join(" "),
-//             comments,
-//         )
-//     } else {
-//         let mut branches = vec![];
-//         let mut comments = original_comments;
-
-//         for branch in if_.branches() {
-//             let (block, new_comments) = compile_multi_line_block(branch.block(), comments);
-
-//             branches.push(compile_type(branch.type_()) + " " + &block);
-//             comments = new_comments;
-//         }
-
-//         let (else_, comments) = if let Some(block) = if_.else_() {
-//             let (block, comments) = compile_multi_line_block(block, comments);
-
-//             (Some(block), comments)
-//         } else {
-//             (None, comments)
-//         };
-
-//         (
-//             head.into_iter()
-//                 .chain([branches.join(" else if ")])
-//                 .chain(else_.into_iter().flat_map(|block| ["else".into(), block]))
-//                 .collect::<Vec<_>>()
-//                 .join(" "),
-//             comments,
-//         )
-//     }
-// }
+    if if_.branches().len() + if_.else_().iter().count() <= 2
+        && !is_broken(&document)
+        && Some(if_.position().line_number())
+            == if_
+                .branches()
+                .get(0)
+                .map(|branch| branch.block().expression().position().line_number())
+    {
+        flatten(document)
+    } else {
+        document
+    }
+}
 
 // fn compile_list_element(
 //     element: &ListElement,
@@ -1857,97 +1790,97 @@ mod tests {
             }
         }
 
-        // mod if_ {
-        //     use super::*;
+        mod if_ {
+            use super::*;
 
-        //     #[test]
-        //     fn format_single_line() {
-        //         assert_eq!(
-        //             format(
-        //                 &If::new(
-        //                     vec![IfBranch::new(
-        //                         Boolean::new(true, Position::fake()),
-        //                         Block::new(vec![], None::new(Position::fake()), Position::fake())
-        //                     )],
-        //                     Block::new(vec![], None::new(Position::fake()), Position::fake()),
-        //                     Position::fake()
-        //                 )
-        //                 .into()
-        //             ),
-        //             "if true { none } else { none }"
-        //         );
-        //     }
+            #[test]
+            fn format_single_line() {
+                assert_eq!(
+                    format(
+                        &If::new(
+                            vec![IfBranch::new(
+                                Boolean::new(true, Position::fake()),
+                                Block::new(vec![], None::new(Position::fake()), Position::fake())
+                            )],
+                            Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                            Position::fake()
+                        )
+                        .into()
+                    ),
+                    "if true { none } else { none }"
+                );
+            }
 
-        //     #[test]
-        //     fn format_multi_line_with_multi_line_input() {
-        //         assert_eq!(
-        //             format(
-        //                 &If::new(
-        //                     vec![IfBranch::new(
-        //                         Boolean::new(true, Position::fake()),
-        //                         Block::new(vec![], None::new(line_position(2)), Position::fake())
-        //                     )],
-        //                     Block::new(vec![], None::new(Position::fake()), Position::fake()),
-        //                     line_position(1)
-        //                 )
-        //                 .into()
-        //             ),
-        //             indoc!(
-        //                 "
-        //                 if true {
-        //                   none
-        //                 } else {
-        //                   none
-        //                 }
-        //                 "
-        //             )
-        //             .trim()
-        //         );
-        //     }
+            #[test]
+            fn format_multi_line_with_multi_line_input() {
+                assert_eq!(
+                    format(
+                        &If::new(
+                            vec![IfBranch::new(
+                                Boolean::new(true, Position::fake()),
+                                Block::new(vec![], None::new(line_position(2)), Position::fake())
+                            )],
+                            Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                            line_position(1)
+                        )
+                        .into()
+                    ),
+                    indoc!(
+                        "
+                        if true {
+                          none
+                        } else {
+                          none
+                        }
+                        "
+                    )
+                    .trim()
+                );
+            }
 
-        //     #[test]
-        //     fn format_multi_line_with_multiple_branches() {
-        //         assert_eq!(
-        //             format(
-        //                 &If::new(
-        //                     vec![
-        //                         IfBranch::new(
-        //                             Boolean::new(true, Position::fake()),
-        //                             Block::new(
-        //                                 vec![],
-        //                                 None::new(Position::fake()),
-        //                                 Position::fake()
-        //                             )
-        //                         ),
-        //                         IfBranch::new(
-        //                             Boolean::new(false, Position::fake()),
-        //                             Block::new(
-        //                                 vec![],
-        //                                 None::new(Position::fake()),
-        //                                 Position::fake()
-        //                             )
-        //                         )
-        //                     ],
-        //                     Block::new(vec![], None::new(Position::fake()), Position::fake()),
-        //                     Position::fake()
-        //                 )
-        //                 .into()
-        //             ),
-        //             indoc!(
-        //                 "
-        //                 if true {
-        //                   none
-        //                 } else if false {
-        //                   none
-        //                 } else {
-        //                   none
-        //                 }
-        //                 "
-        //             )
-        //             .trim()
-        //         );
-        //     }
-        // }
+            #[test]
+            fn format_multi_line_with_multiple_branches() {
+                assert_eq!(
+                    format(
+                        &If::new(
+                            vec![
+                                IfBranch::new(
+                                    Boolean::new(true, Position::fake()),
+                                    Block::new(
+                                        vec![],
+                                        None::new(Position::fake()),
+                                        Position::fake()
+                                    )
+                                ),
+                                IfBranch::new(
+                                    Boolean::new(false, Position::fake()),
+                                    Block::new(
+                                        vec![],
+                                        None::new(Position::fake()),
+                                        Position::fake()
+                                    )
+                                )
+                            ],
+                            Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                            Position::fake()
+                        )
+                        .into()
+                    ),
+                    indoc!(
+                        "
+                        if true {
+                          none
+                        } else if false {
+                          none
+                        } else {
+                          none
+                        }
+                        "
+                    )
+                    .trim()
+                );
+            }
+        }
 
         #[test]
         fn format_if_list() {
@@ -2011,135 +1944,135 @@ mod tests {
             );
         }
 
-        // mod if_type {
-        //     use super::*;
+        mod if_type {
+            use super::*;
 
-        //     #[test]
-        //     fn format_single_line() {
-        //         assert_eq!(
-        //             format(
-        //                 &IfType::new(
-        //                     "x",
-        //                     Variable::new("y", Position::fake()),
-        //                     vec![
-        //                         IfTypeBranch::new(
-        //                             types::None::new(Position::fake()),
-        //                             Block::new(
-        //                                 vec![],
-        //                                 None::new(Position::fake()),
-        //                                 Position::fake()
-        //                             )
-        //                         ),
-        //                         IfTypeBranch::new(
-        //                             types::Number::new(Position::fake()),
-        //                             Block::new(
-        //                                 vec![],
-        //                                 None::new(Position::fake()),
-        //                                 Position::fake()
-        //                             )
-        //                         )
-        //                     ],
-        //                     None,
-        //                     Position::fake(),
-        //                 )
-        //                 .into()
-        //             ),
-        //             "if x = y as none { none } else if number { none }"
-        //         );
-        //     }
+            #[test]
+            fn format_single_line() {
+                assert_eq!(
+                    format(
+                        &IfType::new(
+                            "x",
+                            Variable::new("y", Position::fake()),
+                            vec![
+                                IfTypeBranch::new(
+                                    types::None::new(Position::fake()),
+                                    Block::new(
+                                        vec![],
+                                        None::new(Position::fake()),
+                                        Position::fake()
+                                    )
+                                ),
+                                IfTypeBranch::new(
+                                    types::Number::new(Position::fake()),
+                                    Block::new(
+                                        vec![],
+                                        None::new(Position::fake()),
+                                        Position::fake()
+                                    )
+                                )
+                            ],
+                            None,
+                            Position::fake(),
+                        )
+                        .into()
+                    ),
+                    "if x = y as none { none } else if number { none }"
+                );
+            }
 
-        //     #[test]
-        //     fn format_multi_line() {
-        //         assert_eq!(
-        //             format(
-        //                 &IfType::new(
-        //                     "x",
-        //                     Variable::new("y", Position::fake()),
-        //                     vec![
-        //                         IfTypeBranch::new(
-        //                             types::None::new(Position::fake()),
-        //                             Block::new(
-        //                                 vec![],
-        //                                 None::new(line_position(2)),
-        //                                 Position::fake()
-        //                             )
-        //                         ),
-        //                         IfTypeBranch::new(
-        //                             types::Number::new(Position::fake()),
-        //                             Block::new(
-        //                                 vec![],
-        //                                 None::new(Position::fake()),
-        //                                 Position::fake()
-        //                             )
-        //                         )
-        //                     ],
-        //                     None,
-        //                     line_position(1),
-        //                 )
-        //                 .into()
-        //             ),
-        //             indoc!(
-        //                 "
-        //                 if x = y as none {
-        //                   none
-        //                 } else if number {
-        //                   none
-        //                 }
-        //                 "
-        //             )
-        //             .trim()
-        //         );
-        //     }
+            #[test]
+            fn format_multi_line() {
+                assert_eq!(
+                    format(
+                        &IfType::new(
+                            "x",
+                            Variable::new("y", Position::fake()),
+                            vec![
+                                IfTypeBranch::new(
+                                    types::None::new(Position::fake()),
+                                    Block::new(
+                                        vec![],
+                                        None::new(line_position(2)),
+                                        Position::fake()
+                                    )
+                                ),
+                                IfTypeBranch::new(
+                                    types::Number::new(Position::fake()),
+                                    Block::new(
+                                        vec![],
+                                        None::new(Position::fake()),
+                                        Position::fake()
+                                    )
+                                )
+                            ],
+                            None,
+                            line_position(1),
+                        )
+                        .into()
+                    ),
+                    indoc!(
+                        "
+                        if x = y as none {
+                          none
+                        } else if number {
+                          none
+                        }
+                        "
+                    )
+                    .trim()
+                );
+            }
 
-        //     #[test]
-        //     fn format_with_else_block() {
-        //         assert_eq!(
-        //             format(
-        //                 &IfType::new(
-        //                     "x",
-        //                     Variable::new("y", Position::fake()),
-        //                     vec![
-        //                         IfTypeBranch::new(
-        //                             types::None::new(Position::fake()),
-        //                             Block::new(
-        //                                 vec![],
-        //                                 None::new(Position::fake()),
-        //                                 Position::fake()
-        //                             )
-        //                         ),
-        //                         IfTypeBranch::new(
-        //                             types::Number::new(Position::fake()),
-        //                             Block::new(
-        //                                 vec![],
-        //                                 None::new(Position::fake()),
-        //                                 Position::fake()
-        //                             )
-        //                         )
-        //                     ],
-        //                     Some(Block::new(
-        //                         vec![],
-        //                         None::new(Position::fake()),
-        //                         Position::fake()
-        //                     )),
-        //                     Position::fake(),
-        //                 )
-        //                 .into()
-        //             ),
-        //             indoc!(
-        //                 "
-        //             if x = y as none {
-        //               none
-        //             } else if number {
-        //               none
-        //             } else {
-        //               none
-        //             }
-        //             "
-        //             )
-        //             .trim()
-        //         );
-        //     }
-        // }
+            #[test]
+            fn format_with_else_block() {
+                assert_eq!(
+                    format(
+                        &IfType::new(
+                            "x",
+                            Variable::new("y", Position::fake()),
+                            vec![
+                                IfTypeBranch::new(
+                                    types::None::new(Position::fake()),
+                                    Block::new(
+                                        vec![],
+                                        None::new(Position::fake()),
+                                        Position::fake()
+                                    )
+                                ),
+                                IfTypeBranch::new(
+                                    types::Number::new(Position::fake()),
+                                    Block::new(
+                                        vec![],
+                                        None::new(Position::fake()),
+                                        Position::fake()
+                                    )
+                                )
+                            ],
+                            Some(Block::new(
+                                vec![],
+                                None::new(Position::fake()),
+                                Position::fake()
+                            )),
+                            Position::fake(),
+                        )
+                        .into()
+                    ),
+                    indoc!(
+                        "
+                    if x = y as none {
+                      none
+                    } else if number {
+                      none
+                    } else {
+                      none
+                    }
+                    "
+                    )
+                    .trim()
+                );
+            }
+        }
 
         mod lambda {
             use super::*;
