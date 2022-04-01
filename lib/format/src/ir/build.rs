@@ -25,6 +25,10 @@ pub const fn line() -> Document {
     Document::Line
 }
 
+pub const fn soft_line() -> Document {
+    Document::SoftLine
+}
+
 pub const fn hard_line() -> Document {
     Document::HardLine
 }
