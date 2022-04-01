@@ -153,11 +153,11 @@ fn compile_record_definition(context: &mut Context, definition: &RecordDefinitio
         compile_block_comment(context, definition.position()),
         "type ".into(),
         definition.name().into(),
+        " {".into(),
         if definition.fields().is_empty() {
-            " {}".into()
+            empty()
         } else {
             sequence([
-                " {".into(),
                 indent(sequence(definition.fields().iter().map(|field| {
                     sequence([
                         line(),
@@ -167,9 +167,9 @@ fn compile_record_definition(context: &mut Context, definition: &RecordDefinitio
                     ])
                 }))),
                 line(),
-                "}".into(),
             ])
         },
+        "}".into(),
         line(),
     ])
 }
