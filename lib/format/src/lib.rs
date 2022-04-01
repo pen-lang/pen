@@ -514,14 +514,23 @@ fn compile_expression(context: &mut Context, expression: &Expression) -> Documen
             let elements = sequence(
                 record
                     .record()
-                    .map(|record| sequence(["...".into(), compile_expression(context, record)]))
+                    .map(|record| {
+                        sequence([
+                            compile_block_comment(context, record.position()),
+                            "...".into(),
+                            compile_expression(context, record),
+                            compile_suffix_comment(context, record.position()),
+                        ])
+                    })
                     .into_iter()
                     .chain(record.fields().iter().map(|field| {
                         {
                             sequence([
+                                compile_block_comment(context, field.position()),
                                 field.name().into(),
                                 ": ".into(),
                                 compile_expression(context, field.expression()),
+                                compile_suffix_comment(context, field.position()),
                             ])
                         }
                     }))
@@ -531,7 +540,7 @@ fn compile_expression(context: &mut Context, expression: &Expression) -> Documen
             sequence([
                 record.type_name().into(),
                 "{".into(),
-                if record.fields().is_empty()
+                if record.record().is_none() && record.fields().is_empty()
                     || Some(record.position().line_number())
                         == if let Some(record) = record.record() {
                             Some(record.position())
@@ -2893,6 +2902,112 @@ mod tests {
                         foo{
                           x: none,
                           y: none,
+                        }
+                        "
+                    )
+                    .trim(),
+                );
+            }
+
+            #[test]
+            fn format_entry_with_block_comment() {
+                assert_eq!(
+                    format_with_comments(
+                        &Record::new(
+                            "foo",
+                            None,
+                            vec![RecordField::new(
+                                "x",
+                                None::new(Position::fake()),
+                                line_position(3)
+                            )],
+                            line_position(1)
+                        )
+                        .into(),
+                        vec![Comment::new("foo", line_position(2))]
+                    ),
+                    indoc!(
+                        "
+                        foo{
+                          #foo
+                          x: none,
+                        }
+                        "
+                    )
+                    .trim(),
+                );
+            }
+
+            #[test]
+            fn format_entry_with_suffix_comment() {
+                assert_eq!(
+                    format_with_comments(
+                        &Record::new(
+                            "foo",
+                            None,
+                            vec![RecordField::new(
+                                "x",
+                                None::new(Position::fake()),
+                                line_position(2)
+                            )],
+                            line_position(1)
+                        )
+                        .into(),
+                        vec![Comment::new("foo", line_position(2))]
+                    ),
+                    indoc!(
+                        "
+                        foo{
+                          x: none, #foo
+                        }
+                        "
+                    )
+                    .trim(),
+                );
+            }
+
+            #[test]
+            fn format_update_with_block_comment() {
+                assert_eq!(
+                    format_with_comments(
+                        &Record::new(
+                            "foo",
+                            Some(Variable::new("x", line_position(3)).into()),
+                            vec![],
+                            line_position(1)
+                        )
+                        .into(),
+                        vec![Comment::new("foo", line_position(2))]
+                    ),
+                    indoc!(
+                        "
+                        foo{
+                          #foo
+                          ...x,
+                        }
+                        "
+                    )
+                    .trim(),
+                );
+            }
+
+            #[test]
+            fn format_update_with_suffix_comment() {
+                assert_eq!(
+                    format_with_comments(
+                        &Record::new(
+                            "foo",
+                            Some(Variable::new("x", line_position(2)).into()),
+                            vec![],
+                            line_position(1)
+                        )
+                        .into(),
+                        vec![Comment::new("foo", line_position(2))]
+                    ),
+                    indoc!(
+                        "
+                        foo{
+                          ...x, #foo
                         }
                         "
                     )
