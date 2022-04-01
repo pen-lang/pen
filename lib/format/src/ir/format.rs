@@ -70,8 +70,7 @@ fn flush(context: &mut Context) {
 
 #[cfg(test)]
 mod tests {
-    use super::super::build::*;
-    use super::*;
+    use super::{super::build::*, *};
     use indoc::indoc;
 
     #[test]
