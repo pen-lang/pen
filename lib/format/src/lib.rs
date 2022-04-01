@@ -1,3 +1,5 @@
+#![allow(unstable_name_collisions)]
+
 mod context;
 mod ir;
 
