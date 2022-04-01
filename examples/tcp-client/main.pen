@@ -1,9 +1,9 @@
 import Console'Print
 import Os'Context { Context }
 import Os'Environment
+import Os'Process
 import Os'Tcp
 import Os'Tcp'Stream { Stream }
-import Os'Process
 
 import 'arguments
 
