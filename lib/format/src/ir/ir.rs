@@ -7,7 +7,7 @@ use std::rc::Rc;
 // not have any "group" combinator.
 //
 // However, we are rather given the "best" format by all information available
-// in the source codes like `gofmt`.
+// in the source codes like Go.
 //
 // We need soft-line and if-break nodes to make nodes totally agnostic about if
 // parent nodes are broken or not. But that also makes IR more complex.
