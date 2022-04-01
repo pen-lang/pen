@@ -339,6 +339,7 @@ fn compile_block(context: &mut Context, block: &Block) -> Document {
             statements,
             compile_block_comment(context, block.expression().position()),
             compile_expression(context, block.expression()),
+            compile_suffix_comment(context, block.expression().position()),
         ])),
         line(),
         "}".into(),
@@ -3309,6 +3310,39 @@ mod tests {
                     foo = \\() none {
                       #foo
                       none
+                    }
+                    "
+                )
+            );
+        }
+
+        #[test]
+        fn format_suffix_comment_of_last_expression() {
+            assert_eq!(
+                format(
+                    &Module::new(
+                        vec![],
+                        vec![],
+                        vec![],
+                        vec![Definition::new(
+                            "foo",
+                            Lambda::new(
+                                vec![],
+                                types::None::new(Position::fake()),
+                                Block::new(vec![], None::new(line_position(2)), Position::fake()),
+                                Position::fake(),
+                            ),
+                            None,
+                            Position::fake()
+                        )],
+                        Position::fake()
+                    ),
+                    &[Comment::new("foo", line_position(2))]
+                ),
+                indoc!(
+                    "
+                    foo = \\() none {
+                      none #foo
                     }
                     "
                 )
