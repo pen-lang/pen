@@ -85,7 +85,7 @@ fn compile_import(context: &mut Context, import: &Import) -> Document {
                     import
                         .unqualified_names()
                         .iter()
-                        .map(|name| name.clone())
+                        .cloned()
                         .intersperse(", ".into()),
                 ),
                 " }".into(),
@@ -535,10 +535,8 @@ fn compile_expression(context: &mut Context, expression: &Expression) -> Documen
                     || Some(record.position().line_number())
                         == if let Some(record) = record.record() {
                             Some(record.position())
-                        } else if let Some(field) = record.fields().get(0) {
-                            Some(field.position())
                         } else {
-                            None
+                            record.fields().get(0).map(|field| field.position())
                         }
                         .map(|position| position.line_number())
                         && !is_broken(&elements)

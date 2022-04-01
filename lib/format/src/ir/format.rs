@@ -15,7 +15,7 @@ pub fn format(document: &Document) -> String {
         line_suffixes: vec![],
     };
 
-    format_document(&mut context, &document, 0, true);
+    format_document(&mut context, document, 0, true);
 
     context.outputs.concat()
 }

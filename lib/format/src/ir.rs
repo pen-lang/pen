@@ -1,8 +1,8 @@
 pub mod build;
+mod document;
 mod format;
-mod ir;
 mod utils;
 
 pub use self::format::format;
-pub use ir::*;
+pub use document::*;
 pub use utils::*;
