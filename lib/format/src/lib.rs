@@ -470,51 +470,38 @@ fn compile_expression(context: &mut Context, expression: &Expression) -> Documen
                 "]".into(),
             ])
         }
-        // Expression::Map(map) => {
-        //     let type_ = compile_type(map.key_type()) + ": " + &compile_type(map.value_type());
-        //     let mut elements = vec![];
+        Expression::Map(map) => {
+            let type_ = sequence([
+                compile_type(map.key_type()),
+                ": ".into(),
+                compile_type(map.value_type()),
+            ]);
+            let separator = Document::from(",");
+            let elements = sequence(
+                map.elements()
+                    .iter()
+                    .map(|element| sequence([line(), compile_map_element(context, element)]))
+                    .intersperse(separator.clone()),
+            );
 
-        //     for element in map.elements() {
-        //         let (element, new_comments) = compile_map_element(element, comments);
-
-        //         elements.push(element);
-        //         comments = new_comments;
-        //     }
-
-        //     (
-        //         if elements.is_empty()
-        //             || Some(map.position().line_number())
-        //                 == map
-        //                     .elements()
-        //                     .get(0)
-        //                     .map(|element| element.position().line_number())
-        //                 && elements.iter().all(is_single_line)
-        //         {
-        //             ["{".into()]
-        //                 .into_iter()
-        //                 .chain([[type_]
-        //                     .into_iter()
-        //                     .chain(if map.elements().is_empty() {
-        //                         None
-        //                     } else {
-        //                         Some(elements.join(", "))
-        //                     })
-        //                     .collect::<Vec<_>>()
-        //                     .join(" ")])
-        //                 .chain(["}".into()])
-        //                 .collect::<Vec<_>>()
-        //                 .concat()
-        //         } else {
-        //             [format!("{{{}", type_)]
-        //                 .into_iter()
-        //                 .chain(elements.into_iter().map(|element| indent(element) + ","))
-        //                 .chain(["}".into()])
-        //                 .collect::<Vec<_>>()
-        //                 .join("\n")
-        //         },
-        //         comments,
-        //     )
-        // }
+            sequence([
+                "{".into(),
+                type_,
+                if map.elements().is_empty()
+                    || Some(map.position().line_number())
+                        == map
+                            .elements()
+                            .get(0)
+                            .map(|element| element.position().line_number())
+                        && !is_broken(&elements)
+                {
+                    flatten(elements)
+                } else {
+                    sequence([indent(elements), separator, line()])
+                },
+                "}".into(),
+            ])
+        }
         Expression::None(_) => "none".into(),
         Expression::Number(number) => match number.value() {
             NumberRepresentation::Binary(string) => "0b".to_owned() + string,
@@ -582,7 +569,6 @@ fn compile_expression(context: &mut Context, expression: &Expression) -> Documen
             }
         }
         Expression::Variable(variable) => variable.name().into(),
-        _ => todo!(),
     }
 }
 
@@ -663,25 +649,19 @@ fn compile_list_element(context: &mut Context, element: &ListElement) -> Documen
     }
 }
 
-// fn compile_map_element(
-//     element: &MapElement,
-//     comments: &'c [Comment],
-// ) -> Document {
-//     match element {
-//         MapElement::Map(expression) => {
-//             let (expression, comments) = compile_expression(expression, comments);
-
-//             (format!("...{}", expression), comments)
-//         }
-//         MapElement::Insertion(entry) => {
-//             let (key, comments) = compile_expression(entry.key(), comments);
-//             let (value, comments) = compile_expression(entry.value(), comments);
-
-//             (format!("{}: {}", key, value), comments)
-//         }
-//         MapElement::Removal(expression) => compile_expression(expression, comments),
-//     }
-// }
+fn compile_map_element(context: &mut Context, element: &MapElement) -> Document {
+    match element {
+        MapElement::Map(expression) => {
+            sequence(["...".into(), compile_expression(context, expression)])
+        }
+        MapElement::Insertion(entry) => sequence([
+            compile_expression(context, entry.key()),
+            ": ".into(),
+            compile_expression(context, entry.value()),
+        ]),
+        MapElement::Removal(expression) => compile_expression(context, expression),
+    }
+}
 
 fn compile_binary_operation(context: &mut Context, operation: &BinaryOperation) -> Document {
     let document = sequence([
@@ -2563,194 +2543,194 @@ mod tests {
             }
         }
 
-        // mod map {
-        //     use super::*;
+        mod map {
+            use super::*;
 
-        //     #[test]
-        //     fn format_empty() {
-        //         assert_eq!(
-        //             format(
-        //                 &Map::new(
-        //                     types::ByteString::new(Position::fake()),
-        //                     types::Number::new(Position::fake()),
-        //                     vec![],
-        //                     Position::fake()
-        //                 )
-        //                 .into()
-        //             ),
-        //             "{string: number}"
-        //         );
-        //     }
+            #[test]
+            fn format_empty() {
+                assert_eq!(
+                    format(
+                        &Map::new(
+                            types::ByteString::new(Position::fake()),
+                            types::Number::new(Position::fake()),
+                            vec![],
+                            Position::fake()
+                        )
+                        .into()
+                    ),
+                    "{string: number}"
+                );
+            }
 
-        //     #[test]
-        //     fn format_entry() {
-        //         assert_eq!(
-        //             format(
-        //                 &Map::new(
-        //                     types::ByteString::new(Position::fake()),
-        //                     types::Number::new(Position::fake()),
-        //                     vec![MapEntry::new(
-        //                         ByteString::new("foo", Position::fake()),
-        //                         Number::new(
-        //                             NumberRepresentation::FloatingPoint("42".into()),
-        //                             Position::fake()
-        //                         ),
-        //                         Position::fake()
-        //                     )
-        //                     .into()],
-        //                     Position::fake()
-        //                 )
-        //                 .into()
-        //             ),
-        //             "{string: number \"foo\": 42}"
-        //         );
-        //     }
+            #[test]
+            fn format_entry() {
+                assert_eq!(
+                    format(
+                        &Map::new(
+                            types::ByteString::new(Position::fake()),
+                            types::Number::new(Position::fake()),
+                            vec![MapEntry::new(
+                                ByteString::new("foo", Position::fake()),
+                                Number::new(
+                                    NumberRepresentation::FloatingPoint("42".into()),
+                                    Position::fake()
+                                ),
+                                Position::fake()
+                            )
+                            .into()],
+                            Position::fake()
+                        )
+                        .into()
+                    ),
+                    "{string: number \"foo\": 42}"
+                );
+            }
 
-        //     #[test]
-        //     fn format_two_entries() {
-        //         assert_eq!(
-        //             format(
-        //                 &Map::new(
-        //                     types::ByteString::new(Position::fake()),
-        //                     types::Number::new(Position::fake()),
-        //                     vec![
-        //                         MapEntry::new(
-        //                             ByteString::new("foo", Position::fake()),
-        //                             Number::new(
-        //                                 NumberRepresentation::FloatingPoint("1".into()),
-        //                                 Position::fake()
-        //                             ),
-        //                             Position::fake()
-        //                         )
-        //                         .into(),
-        //                         MapEntry::new(
-        //                             ByteString::new("bar", Position::fake()),
-        //                             Number::new(
-        //                                 NumberRepresentation::FloatingPoint("2".into()),
-        //                                 Position::fake()
-        //                             ),
-        //                             Position::fake()
-        //                         )
-        //                         .into()
-        //                     ],
-        //                     Position::fake()
-        //                 )
-        //                 .into()
-        //             ),
-        //             "{string: number \"foo\": 1, \"bar\": 2}"
-        //         );
-        //     }
+            #[test]
+            fn format_two_entries() {
+                assert_eq!(
+                    format(
+                        &Map::new(
+                            types::ByteString::new(Position::fake()),
+                            types::Number::new(Position::fake()),
+                            vec![
+                                MapEntry::new(
+                                    ByteString::new("foo", Position::fake()),
+                                    Number::new(
+                                        NumberRepresentation::FloatingPoint("1".into()),
+                                        Position::fake()
+                                    ),
+                                    Position::fake()
+                                )
+                                .into(),
+                                MapEntry::new(
+                                    ByteString::new("bar", Position::fake()),
+                                    Number::new(
+                                        NumberRepresentation::FloatingPoint("2".into()),
+                                        Position::fake()
+                                    ),
+                                    Position::fake()
+                                )
+                                .into()
+                            ],
+                            Position::fake()
+                        )
+                        .into()
+                    ),
+                    "{string: number \"foo\": 1, \"bar\": 2}"
+                );
+            }
 
-        //     #[test]
-        //     fn format_removal() {
-        //         assert_eq!(
-        //             format(
-        //                 &Map::new(
-        //                     types::ByteString::new(Position::fake()),
-        //                     types::Number::new(Position::fake()),
-        //                     vec![MapElement::Removal(
-        //                         ByteString::new("foo", Position::fake()).into()
-        //                     )],
-        //                     Position::fake()
-        //                 )
-        //                 .into()
-        //             ),
-        //             "{string: number \"foo\"}"
-        //         );
-        //     }
+            #[test]
+            fn format_removal() {
+                assert_eq!(
+                    format(
+                        &Map::new(
+                            types::ByteString::new(Position::fake()),
+                            types::Number::new(Position::fake()),
+                            vec![MapElement::Removal(
+                                ByteString::new("foo", Position::fake()).into()
+                            )],
+                            Position::fake()
+                        )
+                        .into()
+                    ),
+                    "{string: number \"foo\"}"
+                );
+            }
 
-        //     #[test]
-        //     fn format_map() {
-        //         assert_eq!(
-        //             format(
-        //                 &Map::new(
-        //                     types::ByteString::new(Position::fake()),
-        //                     types::Number::new(Position::fake()),
-        //                     vec![MapElement::Map(
-        //                         Variable::new("xs", Position::fake()).into()
-        //                     )],
-        //                     Position::fake()
-        //                 )
-        //                 .into()
-        //             ),
-        //             "{string: number ...xs}"
-        //         );
-        //     }
+            #[test]
+            fn format_map() {
+                assert_eq!(
+                    format(
+                        &Map::new(
+                            types::ByteString::new(Position::fake()),
+                            types::Number::new(Position::fake()),
+                            vec![MapElement::Map(
+                                Variable::new("xs", Position::fake()).into()
+                            )],
+                            Position::fake()
+                        )
+                        .into()
+                    ),
+                    "{string: number ...xs}"
+                );
+            }
 
-        //     #[test]
-        //     fn format_multi_line() {
-        //         assert_eq!(
-        //             format(
-        //                 &Map::new(
-        //                     types::ByteString::new(Position::fake()),
-        //                     types::Number::new(Position::fake()),
-        //                     vec![MapEntry::new(
-        //                         ByteString::new("foo", Position::fake()),
-        //                         Number::new(
-        //                             NumberRepresentation::FloatingPoint("1".into()),
-        //                             Position::fake()
-        //                         ),
-        //                         line_position(2)
-        //                     )
-        //                     .into()],
-        //                     line_position(1)
-        //                 )
-        //                 .into()
-        //             ),
-        //             indoc!(
-        //                 "
-        //                 {string: number
-        //                   \"foo\": 1,
-        //                 }
-        //                 "
-        //             )
-        //             .trim(),
-        //         );
-        //     }
+            #[test]
+            fn format_multi_line() {
+                assert_eq!(
+                    format(
+                        &Map::new(
+                            types::ByteString::new(Position::fake()),
+                            types::Number::new(Position::fake()),
+                            vec![MapEntry::new(
+                                ByteString::new("foo", Position::fake()),
+                                Number::new(
+                                    NumberRepresentation::FloatingPoint("1".into()),
+                                    Position::fake()
+                                ),
+                                line_position(2)
+                            )
+                            .into()],
+                            line_position(1)
+                        )
+                        .into()
+                    ),
+                    indoc!(
+                        "
+                        {string: number
+                          \"foo\": 1,
+                        }
+                        "
+                    )
+                    .trim(),
+                );
+            }
 
-        //     #[test]
-        //     fn format_multi_line_with_two_entries() {
-        //         assert_eq!(
-        //             format(
-        //                 &Map::new(
-        //                     types::ByteString::new(Position::fake()),
-        //                     types::Number::new(Position::fake()),
-        //                     vec![
-        //                         MapEntry::new(
-        //                             ByteString::new("foo", Position::fake()),
-        //                             Number::new(
-        //                                 NumberRepresentation::FloatingPoint("1".into()),
-        //                                 Position::fake()
-        //                             ),
-        //                             line_position(2)
-        //                         )
-        //                         .into(),
-        //                         MapEntry::new(
-        //                             ByteString::new("bar", Position::fake()),
-        //                             Number::new(
-        //                                 NumberRepresentation::FloatingPoint("2".into()),
-        //                                 Position::fake()
-        //                             ),
-        //                             Position::fake()
-        //                         )
-        //                         .into()
-        //                     ],
-        //                     line_position(1)
-        //                 )
-        //                 .into()
-        //             ),
-        //             indoc!(
-        //                 "
-        //                 {string: number
-        //                   \"foo\": 1,
-        //                   \"bar\": 2,
-        //                 }
-        //                 "
-        //             )
-        //             .trim(),
-        //         );
-        //     }
-        // }
+            #[test]
+            fn format_multi_line_with_two_entries() {
+                assert_eq!(
+                    format(
+                        &Map::new(
+                            types::ByteString::new(Position::fake()),
+                            types::Number::new(Position::fake()),
+                            vec![
+                                MapEntry::new(
+                                    ByteString::new("foo", Position::fake()),
+                                    Number::new(
+                                        NumberRepresentation::FloatingPoint("1".into()),
+                                        Position::fake()
+                                    ),
+                                    line_position(2)
+                                )
+                                .into(),
+                                MapEntry::new(
+                                    ByteString::new("bar", Position::fake()),
+                                    Number::new(
+                                        NumberRepresentation::FloatingPoint("2".into()),
+                                        Position::fake()
+                                    ),
+                                    Position::fake()
+                                )
+                                .into()
+                            ],
+                            line_position(1)
+                        )
+                        .into()
+                    ),
+                    indoc!(
+                        "
+                        {string: number
+                          \"foo\": 1,
+                          \"bar\": 2,
+                        }
+                        "
+                    )
+                    .trim(),
+                );
+            }
+        }
 
         mod record {
             use super::*;
