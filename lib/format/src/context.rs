@@ -33,10 +33,7 @@ impl Context {
         self.drain_comments_before(line_number + 1)
     }
 
-    pub fn peek_comments_before(
-        &self,
-        line_number: usize,
-    ) -> impl Iterator<Item = &'_ Comment> + '_ {
+    pub fn peek_comments_before(&self, line_number: usize) -> impl Iterator<Item = &Comment> {
         self.comments[..self
             .comments
             .iter()
