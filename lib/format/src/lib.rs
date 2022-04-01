@@ -11,29 +11,31 @@ use position::Position;
 
 pub fn format(module: &Module, comments: &[Comment]) -> String {
     let mut context = Context::new(comments.to_vec());
+    let context = &mut context;
 
     let (external_imports, internal_imports) = module
         .imports()
         .iter()
         .partition::<Vec<_>, _>(|import| matches!(import.module_path(), ModulePath::External(_)));
 
-    ir::format(&sequence([
-        [
-            compile_imports(&mut context, &external_imports),
-            compile_imports(&mut context, &internal_imports),
-            compile_foreign_imports(&mut context, module.foreign_imports()),
+    ir::format(
+        &[
+            compile_imports(context, &external_imports),
+            compile_imports(context, &internal_imports),
+            compile_foreign_imports(context, module.foreign_imports()),
             sequence(
                 module
                     .type_definitions()
                     .iter()
-                    .map(|definition| compile_type_definition(&mut context, definition)),
+                    .map(|definition| compile_type_definition(context, definition)),
             ),
             sequence(
                 module
                     .definitions()
                     .iter()
-                    .map(|definition| compile_definition(&mut context, definition)),
+                    .map(|definition| compile_definition(context, definition)),
             ),
+            compile_remaining_block_comment(context),
         ]
         .into_iter()
         .fold(empty(), |all, document| {
@@ -50,8 +52,7 @@ pub fn format(module: &Module, comments: &[Comment]) -> String {
                 ])
             }
         }),
-        compile_remaining_block_comment(&mut context),
-    ]))
+    )
 }
 
 fn compile_imports(context: &mut Context, imports: &[&Import]) -> Document {
@@ -2934,6 +2935,34 @@ mod tests {
                     #foo
 
                     #bar
+                    ",
+                ),
+            );
+        }
+
+        #[test]
+        fn format_comment_after_last_section() {
+            assert_eq!(
+                format(
+                    &Module::new(
+                        vec![Import::new(
+                            InternalModulePath::new(vec!["Foo".into()]),
+                            None,
+                            vec![],
+                            line_position(1),
+                        )],
+                        vec![],
+                        vec![],
+                        vec![],
+                        Position::fake()
+                    ),
+                    &[Comment::new("foo", line_position(2))]
+                ),
+                indoc!(
+                    "
+                    import 'Foo
+
+                    #foo
                     ",
                 ),
             );
