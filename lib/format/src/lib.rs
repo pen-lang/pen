@@ -3024,7 +3024,12 @@ mod tests {
                     ),
                     &[Comment::new("foo", line_position(1))]
                 ),
-                "#foo\nimport foreign foo \\() none\n"
+                indoc!(
+                    "
+                    #foo
+                    import foreign foo \\() none
+                    ",
+                ),
             );
         }
 
@@ -3041,7 +3046,12 @@ mod tests {
                     ),
                     &[Comment::new("foo", line_position(1))]
                 ),
-                "#foo\ntype foo {}\n"
+                indoc!(
+                    "
+                    #foo
+                    type foo {}
+                    "
+                )
             );
         }
 
@@ -3063,7 +3073,12 @@ mod tests {
                     ),
                     &[Comment::new("foo", line_position(1))]
                 ),
-                "#foo\ntype foo = none\n"
+                indoc!(
+                    "
+                    #foo
+                    type foo = none
+                    "
+                ),
             );
         }
 
@@ -3090,7 +3105,12 @@ mod tests {
                     ),
                     &[Comment::new("foo", line_position(1))]
                 ),
-                "#foo\nfoo = \\() none { none }\n"
+                indoc!(
+                    "
+                    #foo
+                    foo = \\() none { none }
+                    "
+                ),
             );
         }
 
