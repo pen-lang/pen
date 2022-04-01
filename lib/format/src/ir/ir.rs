@@ -15,6 +15,7 @@ use std::rc::Rc;
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum Document {
+    // This needs to be a node because Rust is not lazily evaluated...
     Flatten(Rc<Document>),
     HardLine,
     Indent(Rc<Document>),
