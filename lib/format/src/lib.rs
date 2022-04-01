@@ -362,7 +362,7 @@ fn compile_statement(context: &mut Context, statement: &Statement) -> Document {
 
 fn compile_expression(context: &mut Context, expression: &Expression) -> Document {
     match expression {
-        // Expression::BinaryOperation(operation) => compile_binary_operation(context, operation),
+        Expression::BinaryOperation(operation) => compile_binary_operation(context, operation),
         Expression::Call(call) => {
             let separator = sequence([",".into(), line()]);
             let arguments = indent(sequence(
@@ -824,56 +824,43 @@ fn compile_expression(context: &mut Context, expression: &Expression) -> Documen
 //     }
 // }
 
-// fn compile_binary_operation(
-//     operation: &BinaryOperation,
-//     comments: &'c [Comment],
-// ) -> Document {
-//     let single_line =
-//         operation.lhs().position().line_number() == operation.rhs().position().line_number();
-//     let operator = compile_binary_operator(operation.operator()).into();
-//     let (lhs, comments) = compile_operand(operation.lhs(), operation.operator(), comments);
-//     let (rhs, comments) = compile_operand(operation.rhs(), operation.operator(), comments);
+fn compile_binary_operation(context: &mut Context, operation: &BinaryOperation) -> Document {
+    let document = sequence([
+        compile_operand(context, operation.lhs(), operation.operator()),
+        indent(sequence([
+            line(),
+            compile_binary_operator(operation.operator()),
+            " ".into(),
+            compile_operand(context, operation.rhs(), operation.operator()),
+        ])),
+    ]);
 
-//     (
-//         [
-//             lhs,
-//             [
-//                 if single_line {
-//                     operator
-//                 } else {
-//                     indent(operator)
-//                 },
-//                 rhs,
-//             ]
-//             .join(" "),
-//         ]
-//         .join(if single_line { " " } else { "\n" }),
-//         comments,
-//     )
-// }
+    if operation.lhs().position().line_number() == operation.rhs().position().line_number() {
+        flatten(document)
+    } else {
+        document
+    }
+}
 
-// fn compile_operand(
-//     operand: &Expression,
-//     parent_operator: BinaryOperator,
-//     comments: &'c [Comment],
-// ) -> Document {
-//     let (string, comments) = compile_expression(operand, comments);
+fn compile_operand(
+    context: &mut Context,
+    operand: &Expression,
+    parent_operator: BinaryOperator,
+) -> Document {
+    let document = compile_expression(context, operand);
 
-//     (
-//         if match operand {
-//             Expression::BinaryOperation(operation) => Some(operation),
-//             _ => None,
-//         }
-//         .map(|operand| operator_priority(operand.operator()) < operator_priority(parent_operator))
-//         .unwrap_or_default()
-//         {
-//             format!("({})", string)
-//         } else {
-//             string
-//         },
-//         comments,
-//     )
-// }
+    if match operand {
+        Expression::BinaryOperation(operation) => Some(operation),
+        _ => None,
+    }
+    .map(|operand| operator_priority(operand.operator()) < operator_priority(parent_operator))
+    .unwrap_or_default()
+    {
+        sequence(["(".into(), document, ")".into()])
+    } else {
+        document
+    }
+}
 
 fn compile_binary_operator(operator: BinaryOperator) -> Document {
     match operator {
@@ -2266,119 +2253,119 @@ mod tests {
             );
         }
 
-        // mod binary_operation {
-        //     use super::*;
+        mod binary_operation {
+            use super::*;
 
-        //     #[test]
-        //     fn format_() {
-        //         assert_eq!(
-        //             format(
-        //                 &BinaryOperation::new(
-        //                     BinaryOperator::Add,
-        //                     Number::new(
-        //                         NumberRepresentation::FloatingPoint("1".into()),
-        //                         Position::fake()
-        //                     ),
-        //                     Number::new(
-        //                         NumberRepresentation::FloatingPoint("2".into()),
-        //                         Position::fake()
-        //                     ),
-        //                     Position::fake()
-        //                 )
-        //                 .into()
-        //             ),
-        //             "1 + 2"
-        //         );
-        //     }
+            #[test]
+            fn format_() {
+                assert_eq!(
+                    format(
+                        &BinaryOperation::new(
+                            BinaryOperator::Add,
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("1".into()),
+                                Position::fake()
+                            ),
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("2".into()),
+                                Position::fake()
+                            ),
+                            Position::fake()
+                        )
+                        .into()
+                    ),
+                    "1 + 2"
+                );
+            }
 
-        //     #[test]
-        //     fn format_multi_line() {
-        //         assert_eq!(
-        //             format(
-        //                 &BinaryOperation::new(
-        //                     BinaryOperator::Add,
-        //                     Number::new(
-        //                         NumberRepresentation::FloatingPoint("1".into()),
-        //                         line_position(1)
-        //                     ),
-        //                     Number::new(
-        //                         NumberRepresentation::FloatingPoint("2".into()),
-        //                         line_position(2)
-        //                     ),
-        //                     Position::fake()
-        //                 )
-        //                 .into()
-        //             ),
-        //             indoc!(
-        //                 "
-        //                 1
-        //                   + 2
-        //                 "
-        //             )
-        //             .trim()
-        //         );
-        //     }
+            #[test]
+            fn format_multi_line() {
+                assert_eq!(
+                    format(
+                        &BinaryOperation::new(
+                            BinaryOperator::Add,
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("1".into()),
+                                line_position(1)
+                            ),
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("2".into()),
+                                line_position(2)
+                            ),
+                            Position::fake()
+                        )
+                        .into()
+                    ),
+                    indoc!(
+                        "
+                        1
+                          + 2
+                        "
+                    )
+                    .trim()
+                );
+            }
 
-        //     #[test]
-        //     fn format_nested_operations() {
-        //         assert_eq!(
-        //             format(
-        //                 &BinaryOperation::new(
-        //                     BinaryOperator::Add,
-        //                     Number::new(
-        //                         NumberRepresentation::FloatingPoint("1".into()),
-        //                         Position::fake()
-        //                     ),
-        //                     BinaryOperation::new(
-        //                         BinaryOperator::Multiply,
-        //                         Number::new(
-        //                             NumberRepresentation::FloatingPoint("2".into()),
-        //                             Position::fake()
-        //                         ),
-        //                         Number::new(
-        //                             NumberRepresentation::FloatingPoint("3".into()),
-        //                             Position::fake()
-        //                         ),
-        //                         Position::fake()
-        //                     ),
-        //                     Position::fake()
-        //                 )
-        //                 .into()
-        //             ),
-        //             "1 + 2 * 3"
-        //         );
-        //     }
+            #[test]
+            fn format_nested_operations() {
+                assert_eq!(
+                    format(
+                        &BinaryOperation::new(
+                            BinaryOperator::Add,
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("1".into()),
+                                Position::fake()
+                            ),
+                            BinaryOperation::new(
+                                BinaryOperator::Multiply,
+                                Number::new(
+                                    NumberRepresentation::FloatingPoint("2".into()),
+                                    Position::fake()
+                                ),
+                                Number::new(
+                                    NumberRepresentation::FloatingPoint("3".into()),
+                                    Position::fake()
+                                ),
+                                Position::fake()
+                            ),
+                            Position::fake()
+                        )
+                        .into()
+                    ),
+                    "1 + 2 * 3"
+                );
+            }
 
-        //     #[test]
-        //     fn format_nested_operations_with_priority() {
-        //         assert_eq!(
-        //             format(
-        //                 &BinaryOperation::new(
-        //                     BinaryOperator::Multiply,
-        //                     Number::new(
-        //                         NumberRepresentation::FloatingPoint("1".into()),
-        //                         Position::fake()
-        //                     ),
-        //                     BinaryOperation::new(
-        //                         BinaryOperator::Add,
-        //                         Number::new(
-        //                             NumberRepresentation::FloatingPoint("2".into()),
-        //                             Position::fake()
-        //                         ),
-        //                         Number::new(
-        //                             NumberRepresentation::FloatingPoint("3".into()),
-        //                             Position::fake()
-        //                         ),
-        //                         Position::fake()
-        //                     ),
-        //                     Position::fake()
-        //                 )
-        //                 .into()
-        //             ),
-        //             "1 * (2 + 3)"
-        //         );
-        //     }
-        // }
+            #[test]
+            fn format_nested_operations_with_priority() {
+                assert_eq!(
+                    format(
+                        &BinaryOperation::new(
+                            BinaryOperator::Multiply,
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("1".into()),
+                                Position::fake()
+                            ),
+                            BinaryOperation::new(
+                                BinaryOperator::Add,
+                                Number::new(
+                                    NumberRepresentation::FloatingPoint("2".into()),
+                                    Position::fake()
+                                ),
+                                Number::new(
+                                    NumberRepresentation::FloatingPoint("3".into()),
+                                    Position::fake()
+                                ),
+                                Position::fake()
+                            ),
+                            Position::fake()
+                        )
+                        .into()
+                    ),
+                    "1 * (2 + 3)"
+                );
+            }
+        }
 
         // mod unary_operation {
         //     use super::*;
