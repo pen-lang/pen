@@ -396,45 +396,24 @@ fn compile_expression(context: &mut Context, expression: &Expression) -> Documen
         }
         Expression::Boolean(boolean) => if boolean.value() { "true" } else { "false" }.into(),
         // Expression::If(if_) => compile_if(if_, comments),
-        // Expression::IfList(if_) => {
-        //     let (list, comments) = compile_expression(if_.list(), comments);
-        //     let (then, comments) = compile_multi_line_block(if_.then(), comments);
-        //     let (else_, comments) = compile_multi_line_block(if_.else_(), comments);
-
-        //     (
-        //         [
-        //             "if".into(),
-        //             format!("[{}, ...{}]", if_.first_name(), if_.rest_name()),
-        //             "=".into(),
-        //             list,
-        //             then,
-        //             "else".into(),
-        //             else_,
-        //         ]
-        //         .join(" "),
-        //         comments,
-        //     )
-        // }
-        // Expression::IfMap(if_) => {
-        //     let (map, comments) = compile_expression(if_.map(), comments);
-        //     let (key, comments) = compile_expression(if_.key(), comments);
-        //     let (then, comments) = compile_multi_line_block(if_.then(), comments);
-        //     let (else_, comments) = compile_multi_line_block(if_.else_(), comments);
-
-        //     (
-        //         [
-        //             "if".into(),
-        //             if_.name().into(),
-        //             "=".into(),
-        //             format!("{}[{}]", map, key),
-        //             then,
-        //             "else".into(),
-        //             else_,
-        //         ]
-        //         .join(" "),
-        //         comments,
-        //     )
-        // }
+        Expression::IfList(if_) => sequence([
+            sequence(["if [", if_.first_name(), ", ...", if_.rest_name(), "] = "]),
+            compile_expression(context, if_.list()),
+            " ".into(),
+            compile_block(context, if_.then()),
+            " else ".into(),
+            compile_block(context, if_.else_()),
+        ]),
+        Expression::IfMap(if_) => sequence([
+            sequence(["if ", if_.name(), " = "]),
+            compile_expression(context, if_.map()),
+            "[".into(),
+            compile_expression(context, if_.key()),
+            "] ".into(),
+            compile_block(context, if_.then()),
+            " else ".into(),
+            compile_block(context, if_.else_()),
+        ]),
         // Expression::IfType(if_) => compile_if_type(if_, comments),
         Expression::Lambda(lambda) => compile_lambda(context, lambda),
         // Expression::List(list) => {
@@ -1969,67 +1948,67 @@ mod tests {
         //     }
         // }
 
-        // #[test]
-        // fn format_if_list() {
-        //     assert_eq!(
-        //         format(
-        //             &IfList::new(
-        //                 Variable::new("ys", Position::fake()),
-        //                 "x",
-        //                 "xs",
-        //                 Block::new(
-        //                     vec![],
-        //                     Variable::new("x", Position::fake()),
-        //                     Position::fake()
-        //                 ),
-        //                 Block::new(vec![], None::new(Position::fake()), Position::fake()),
-        //                 Position::fake()
-        //             )
-        //             .into()
-        //         ),
-        //         indoc!(
-        //             "
-        //             if [x, ...xs] = ys {
-        //               x
-        //             } else {
-        //               none
-        //             }
-        //             "
-        //         )
-        //         .trim()
-        //     );
-        // }
+        #[test]
+        fn format_if_list() {
+            assert_eq!(
+                format(
+                    &IfList::new(
+                        Variable::new("ys", Position::fake()),
+                        "x",
+                        "xs",
+                        Block::new(
+                            vec![],
+                            Variable::new("x", Position::fake()),
+                            Position::fake()
+                        ),
+                        Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                        Position::fake()
+                    )
+                    .into()
+                ),
+                indoc!(
+                    "
+                    if [x, ...xs] = ys {
+                      x
+                    } else {
+                      none
+                    }
+                    "
+                )
+                .trim()
+            );
+        }
 
-        // #[test]
-        // fn format_if_map() {
-        //     assert_eq!(
-        //         format(
-        //             &IfMap::new(
-        //                 "x",
-        //                 Variable::new("xs", Position::fake()),
-        //                 Variable::new("k", Position::fake()),
-        //                 Block::new(
-        //                     vec![],
-        //                     Variable::new("x", Position::fake()),
-        //                     Position::fake()
-        //                 ),
-        //                 Block::new(vec![], None::new(Position::fake()), Position::fake()),
-        //                 Position::fake()
-        //             )
-        //             .into()
-        //         ),
-        //         indoc!(
-        //             "
-        //             if x = xs[k] {
-        //               x
-        //             } else {
-        //               none
-        //             }
-        //             "
-        //         )
-        //         .trim()
-        //     );
-        // }
+        #[test]
+        fn format_if_map() {
+            assert_eq!(
+                format(
+                    &IfMap::new(
+                        "x",
+                        Variable::new("xs", Position::fake()),
+                        Variable::new("k", Position::fake()),
+                        Block::new(
+                            vec![],
+                            Variable::new("x", Position::fake()),
+                            Position::fake()
+                        ),
+                        Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                        Position::fake()
+                    )
+                    .into()
+                ),
+                indoc!(
+                    "
+                    if x = xs[k] {
+                      x
+                    } else {
+                      none
+                    }
+                    "
+                )
+                .trim()
+            );
+        }
 
         // mod if_type {
         //     use super::*;
