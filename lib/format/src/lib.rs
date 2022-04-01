@@ -2993,7 +2993,12 @@ mod tests {
                     ),
                     &[Comment::new("foo", line_position(1))]
                 ),
-                "#foo\nimport 'Foo\n"
+                indoc!(
+                    "
+                    #foo
+                    import 'Foo
+                    ",
+                ),
             );
         }
 
