@@ -41,16 +41,12 @@ fn format_document(context: &mut Context, document: &Document, level: usize, bro
 
 fn format_line(context: &mut Context, level: usize) {
     context.outputs.extend(
-        if context.line_suffixes.is_empty() {
-            None
-        } else {
-            Some(context.line_suffixes.join(" "))
-        }
-        .into_iter()
-        .chain(["\n".into()])
-        .chain(repeat("  ".into()).take(level)),
+        context
+            .line_suffixes
+            .drain(..)
+            .chain(["\n".into()])
+            .chain(repeat("  ".into()).take(level)),
     );
-    context.line_suffixes.clear();
 }
 
 #[cfg(test)]
@@ -122,14 +118,31 @@ mod tests {
         }
     }
 
-    mod comment {
+    mod line_suffix {
         use super::*;
 
         #[test]
-        fn format_comment_between_strings() {
+        fn format_line_suffix_between_strings() {
             assert_eq!(
-                format(&vec!["{".into(), line_suffix(" # foo"), "}".into(), line()].into()),
-                "{} # foo\n",
+                format(&vec!["{".into(), line_suffix("foo"), "}".into(), line()].into()),
+                "{}foo\n",
+            );
+        }
+
+        #[test]
+        fn format_two_line_suffixes_between_strings() {
+            assert_eq!(
+                format(
+                    &vec![
+                        "{".into(),
+                        line_suffix("foo"),
+                        line_suffix("bar"),
+                        "}".into(),
+                        line()
+                    ]
+                    .into()
+                ),
+                "{}foobar\n",
             );
         }
     }
