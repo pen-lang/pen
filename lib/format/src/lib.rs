@@ -364,6 +364,7 @@ fn compile_expression(context: &mut Context, expression: &Expression) -> Documen
         Expression::BinaryOperation(operation) => compile_binary_operation(context, operation),
         Expression::Call(call) => {
             let separator = sequence([",".into(), line()]);
+            let function = compile_expression(context, call.function());
             let arguments = sequence(
                 call.arguments()
                     .iter()
@@ -378,7 +379,7 @@ fn compile_expression(context: &mut Context, expression: &Expression) -> Documen
             );
 
             sequence([
-                compile_expression(context, call.function()),
+                function,
                 "(".into(),
                 if call.arguments().is_empty()
                     || Some(call.function().position().line_number())
@@ -417,97 +418,58 @@ fn compile_expression(context: &mut Context, expression: &Expression) -> Documen
         ]),
         Expression::IfType(if_) => compile_if_type(context, if_),
         Expression::Lambda(lambda) => compile_lambda(context, lambda),
-        // Expression::List(list) => {
-        //     let type_ = compile_type(list.type_());
-        //     let mut elements = vec![];
+        Expression::List(list) => {
+            let separator = Document::from(",");
+            let elements = sequence(
+                list.elements()
+                    .iter()
+                    .map(|element| sequence([line(), compile_list_element(context, element)]))
+                    .intersperse(separator.clone()),
+            );
 
-        //     for element in list.elements() {
-        //         let (element, new_comments) = compile_list_element(element, comments);
+            sequence([
+                "[".into(),
+                compile_type(list.type_()),
+                if list.elements().is_empty()
+                    || Some(list.position().line_number())
+                        == list
+                            .elements()
+                            .get(0)
+                            .map(|element| element.position().line_number())
+                        && !is_broken(&elements)
+                {
+                    flatten(elements)
+                } else {
+                    sequence([indent(elements), separator, line()])
+                },
+                "]".into(),
+            ])
+        }
+        Expression::ListComprehension(comprehension) => {
+            let elements = sequence([
+                line(),
+                compile_expression(context, comprehension.element()),
+                line(),
+                "for ".into(),
+                comprehension.element_name().into(),
+                " in ".into(),
+                compile_expression(context, comprehension.list()),
+            ]);
 
-        //         elements.push(element);
-        //         comments = new_comments;
-        //     }
-
-        //     if elements.is_empty()
-        //         || Some(list.position().line_number())
-        //             == list
-        //                 .elements()
-        //                 .get(0)
-        //                 .map(|element| element.position().line_number())
-        //             && elements.iter().all(is_single_line)
-        //     {
-        //         (
-        //             ["[".into()]
-        //                 .into_iter()
-        //                 .chain([[type_]
-        //                     .into_iter()
-        //                     .chain(if elements.is_empty() {
-        //                         None
-        //                     } else {
-        //                         Some(elements.join(", "))
-        //                     })
-        //                     .collect::<Vec<_>>()
-        //                     .join(" ")])
-        //                 .chain(["]".into()])
-        //                 .collect::<Vec<_>>()
-        //                 .concat(),
-        //             comments,
-        //         )
-        //     } else {
-        //         (
-        //             [format!("[{}", type_)]
-        //                 .into_iter()
-        //                 .chain(elements.into_iter().map(|element| indent(element) + ","))
-        //                 .chain(["]".into()])
-        //                 .collect::<Vec<_>>()
-        //                 .join("\n"),
-        //             comments,
-        //         )
-        //     }
-        // }
-        // Expression::ListComprehension(comprehension) => {
-        //     let type_ = compile_type(comprehension.type_());
-        //     let (element, comments) = compile_expression(comprehension.element(), comments);
-        //     let (list, comments) = compile_expression(comprehension.list(), comments);
-
-        //     (
-        //         if comprehension.position().line_number()
-        //             == comprehension.element().position().line_number()
-        //             && is_single_line(&element)
-        //             && is_single_line(&list)
-        //         {
-        //             ["[".into()]
-        //                 .into_iter()
-        //                 .chain([[
-        //                     type_,
-        //                     element,
-        //                     "for".into(),
-        //                     comprehension.element_name().into(),
-        //                     "in".into(),
-        //                     list,
-        //                 ]
-        //                 .join(" ")])
-        //                 .chain(["]".into()])
-        //                 .collect::<Vec<_>>()
-        //                 .concat()
-        //         } else {
-        //             [format!("[{}", type_)]
-        //                 .into_iter()
-        //                 .chain(
-        //                     [
-        //                         element,
-        //                         format!("for {} in {}", comprehension.element_name(), list),
-        //                     ]
-        //                     .iter()
-        //                     .map(indent),
-        //                 )
-        //                 .chain(["]".into()])
-        //                 .collect::<Vec<_>>()
-        //                 .join("\n")
-        //         },
-        //         comments,
-        //     )
-        // }
+            sequence([
+                "[".into(),
+                compile_type(comprehension.type_()),
+                if comprehension.position().line_number()
+                    == comprehension.element().position().line_number()
+                    && !is_broken(&elements)
+                {
+                    flatten(elements)
+                } else {
+                    sequence([indent(elements), line()])
+                },
+                "]".into(),
+            ])
+        }
         // Expression::Map(map) => {
         //     let type_ = compile_type(map.key_type()) + ": " + &compile_type(map.value_type());
         //     let mut elements = vec![];
@@ -692,19 +654,14 @@ fn compile_if_type(context: &mut Context, if_: &IfType) -> Document {
     }
 }
 
-// fn compile_list_element(
-//     element: &ListElement,
-//     comments: &'c [Comment],
-// ) -> Document {
-//     match element {
-//         ListElement::Multiple(expression) => {
-//             let (expression, comments) = compile_expression(expression, comments);
-
-//             (format!("...{}", expression), comments)
-//         }
-//         ListElement::Single(expression) => compile_expression(expression, comments),
-//     }
-// }
+fn compile_list_element(context: &mut Context, element: &ListElement) -> Document {
+    match element {
+        ListElement::Multiple(expression) => {
+            sequence(["...".into(), compile_expression(context, expression)])
+        }
+        ListElement::Single(expression) => compile_expression(context, expression),
+    }
+}
 
 // fn compile_map_element(
 //     element: &MapElement,
@@ -2456,155 +2413,155 @@ mod tests {
             );
         }
 
-        // mod list {
-        //     use super::*;
+        mod list {
+            use super::*;
 
-        //     #[test]
-        //     fn format_empty() {
-        //         assert_eq!(
-        //             format(
-        //                 &List::new(types::None::new(Position::fake()), vec![], Position::fake())
-        //                     .into()
-        //             ),
-        //             "[none]"
-        //         );
-        //     }
+            #[test]
+            fn format_empty() {
+                assert_eq!(
+                    format(
+                        &List::new(types::None::new(Position::fake()), vec![], Position::fake())
+                            .into()
+                    ),
+                    "[none]"
+                );
+            }
 
-        //     #[test]
-        //     fn format_element() {
-        //         assert_eq!(
-        //             format(
-        //                 &List::new(
-        //                     types::None::new(Position::fake()),
-        //                     vec![ListElement::Single(None::new(Position::fake()).into())],
-        //                     Position::fake()
-        //                 )
-        //                 .into()
-        //             ),
-        //             "[none none]"
-        //         );
-        //     }
+            #[test]
+            fn format_element() {
+                assert_eq!(
+                    format(
+                        &List::new(
+                            types::None::new(Position::fake()),
+                            vec![ListElement::Single(None::new(Position::fake()).into())],
+                            Position::fake()
+                        )
+                        .into()
+                    ),
+                    "[none none]"
+                );
+            }
 
-        //     #[test]
-        //     fn format_two_elements() {
-        //         assert_eq!(
-        //             format(
-        //                 &List::new(
-        //                     types::None::new(Position::fake()),
-        //                     vec![
-        //                         ListElement::Single(None::new(Position::fake()).into()),
-        //                         ListElement::Single(None::new(Position::fake()).into())
-        //                     ],
-        //                     Position::fake()
-        //                 )
-        //                 .into()
-        //             ),
-        //             "[none none, none]"
-        //         );
-        //     }
+            #[test]
+            fn format_two_elements() {
+                assert_eq!(
+                    format(
+                        &List::new(
+                            types::None::new(Position::fake()),
+                            vec![
+                                ListElement::Single(None::new(Position::fake()).into()),
+                                ListElement::Single(None::new(Position::fake()).into())
+                            ],
+                            Position::fake()
+                        )
+                        .into()
+                    ),
+                    "[none none, none]"
+                );
+            }
 
-        //     #[test]
-        //     fn format_multi_line() {
-        //         assert_eq!(
-        //             format(
-        //                 &List::new(
-        //                     types::None::new(Position::fake()),
-        //                     vec![ListElement::Single(None::new(line_position(2)).into())],
-        //                     line_position(1)
-        //                 )
-        //                 .into()
-        //             ),
-        //             indoc!(
-        //                 "
-        //                 [none
-        //                   none,
-        //                 ]
-        //                 "
-        //             )
-        //             .trim()
-        //         );
-        //     }
+            #[test]
+            fn format_multi_line() {
+                assert_eq!(
+                    format(
+                        &List::new(
+                            types::None::new(Position::fake()),
+                            vec![ListElement::Single(None::new(line_position(2)).into())],
+                            line_position(1)
+                        )
+                        .into()
+                    ),
+                    indoc!(
+                        "
+                        [none
+                          none,
+                        ]
+                        "
+                    )
+                    .trim()
+                );
+            }
 
-        //     #[test]
-        //     fn format_multi_line_with_two_elements() {
-        //         assert_eq!(
-        //             format(
-        //                 &List::new(
-        //                     types::Number::new(Position::fake()),
-        //                     vec![
-        //                         ListElement::Single(
-        //                             Number::new(
-        //                                 NumberRepresentation::FloatingPoint("1".into()),
-        //                                 line_position(2)
-        //                             )
-        //                             .into()
-        //                         ),
-        //                         ListElement::Single(
-        //                             Number::new(
-        //                                 NumberRepresentation::FloatingPoint("2".into()),
-        //                                 Position::fake()
-        //                             )
-        //                             .into()
-        //                         )
-        //                     ],
-        //                     line_position(1)
-        //                 )
-        //                 .into()
-        //             ),
-        //             indoc!(
-        //                 "
-        //                 [number
-        //                   1,
-        //                   2,
-        //                 ]
-        //                 "
-        //             )
-        //             .trim()
-        //         );
-        //     }
+            #[test]
+            fn format_multi_line_with_two_elements() {
+                assert_eq!(
+                    format(
+                        &List::new(
+                            types::Number::new(Position::fake()),
+                            vec![
+                                ListElement::Single(
+                                    Number::new(
+                                        NumberRepresentation::FloatingPoint("1".into()),
+                                        line_position(2)
+                                    )
+                                    .into()
+                                ),
+                                ListElement::Single(
+                                    Number::new(
+                                        NumberRepresentation::FloatingPoint("2".into()),
+                                        Position::fake()
+                                    )
+                                    .into()
+                                )
+                            ],
+                            line_position(1)
+                        )
+                        .into()
+                    ),
+                    indoc!(
+                        "
+                        [number
+                          1,
+                          2,
+                        ]
+                        "
+                    )
+                    .trim()
+                );
+            }
 
-        //     #[test]
-        //     fn format_comprehension() {
-        //         assert_eq!(
-        //             format(
-        //                 &ListComprehension::new(
-        //                     types::None::new(Position::fake()),
-        //                     None::new(Position::fake()),
-        //                     "x",
-        //                     Variable::new("xs", Position::fake()),
-        //                     Position::fake()
-        //                 )
-        //                 .into()
-        //             ),
-        //             "[none none for x in xs]"
-        //         );
-        //     }
+            #[test]
+            fn format_comprehension() {
+                assert_eq!(
+                    format(
+                        &ListComprehension::new(
+                            types::None::new(Position::fake()),
+                            None::new(Position::fake()),
+                            "x",
+                            Variable::new("xs", Position::fake()),
+                            Position::fake()
+                        )
+                        .into()
+                    ),
+                    "[none none for x in xs]"
+                );
+            }
 
-        //     #[test]
-        //     fn format_multi_line_comprehension() {
-        //         assert_eq!(
-        //             format(
-        //                 &ListComprehension::new(
-        //                     types::None::new(Position::fake()),
-        //                     None::new(line_position(2)),
-        //                     "x",
-        //                     Variable::new("xs", Position::fake()),
-        //                     line_position(1)
-        //                 )
-        //                 .into()
-        //             ),
-        //             indoc!(
-        //                 "
-        //                 [none
-        //                   none
-        //                   for x in xs
-        //                 ]
-        //                 "
-        //             )
-        //             .trim()
-        //         );
-        //     }
-        // }
+            #[test]
+            fn format_multi_line_comprehension() {
+                assert_eq!(
+                    format(
+                        &ListComprehension::new(
+                            types::None::new(Position::fake()),
+                            None::new(line_position(2)),
+                            "x",
+                            Variable::new("xs", Position::fake()),
+                            line_position(1)
+                        )
+                        .into()
+                    ),
+                    indoc!(
+                        "
+                        [none
+                          none
+                          for x in xs
+                        ]
+                        "
+                    )
+                    .trim()
+                );
+            }
+        }
 
         // mod map {
         //     use super::*;
