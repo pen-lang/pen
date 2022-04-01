@@ -533,10 +533,14 @@ fn compile_expression(context: &mut Context, expression: &Expression) -> Documen
                 "{".into(),
                 if record.fields().is_empty()
                     || Some(record.position().line_number())
-                        == record
-                            .fields()
-                            .get(0)
-                            .map(|field| field.position().line_number())
+                        == if let Some(record) = record.record() {
+                            Some(record.position())
+                        } else if let Some(field) = record.fields().get(0) {
+                            Some(field.position())
+                        } else {
+                            None
+                        }
+                        .map(|position| position.line_number())
                         && !is_broken(&elements)
                 {
                     flatten(elements)
@@ -2809,6 +2813,26 @@ mod tests {
                                 Position::fake()
                             )],
                             Position::fake()
+                        )
+                        .into()
+                    ),
+                    "foo{...r, x: none}"
+                );
+            }
+
+            #[test]
+            fn format_multi_line_update_with_entry_on_next_line() {
+                assert_eq!(
+                    format(
+                        &Record::new(
+                            "foo",
+                            Some(Variable::new("r", Position::fake()).into()),
+                            vec![RecordField::new(
+                                "x",
+                                None::new(Position::fake()),
+                                line_position(2)
+                            )],
+                            line_position(1)
                         )
                         .into()
                     ),
