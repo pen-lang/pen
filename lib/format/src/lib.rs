@@ -15,40 +15,43 @@ pub fn format(module: &Module, comments: &[Comment]) -> String {
         .iter()
         .partition::<Vec<_>, _>(|import| matches!(import.module_path(), ModulePath::External(_)));
 
-    format_spaces(&ir::format(&sequence(
-        [
-            compile_imports(&mut context, &external_imports),
-            compile_imports(&mut context, &internal_imports),
-            compile_foreign_imports(&mut context, module.foreign_imports()),
-            sequence(
-                module
-                    .type_definitions()
-                    .iter()
-                    .map(|definition| compile_type_definition(&mut context, definition)),
-            ),
-            sequence(
-                module
-                    .definitions()
-                    .iter()
-                    .map(|definition| compile_definition(&mut context, definition)),
-            ),
-        ]
-        .into_iter()
-        .map(|document| {
-            if count_lines(&document) == 0 {
-                empty()
-            } else {
-                sequence([document, line()])
-            }
-        }),
-    )))
+    format_spaces(&ir::format(&sequence([
+        sequence(
+            [
+                compile_imports(&mut context, &external_imports),
+                compile_imports(&mut context, &internal_imports),
+                compile_foreign_imports(&mut context, module.foreign_imports()),
+                sequence(
+                    module
+                        .type_definitions()
+                        .iter()
+                        .map(|definition| compile_type_definition(&mut context, definition)),
+                ),
+                sequence(
+                    module
+                        .definitions()
+                        .iter()
+                        .map(|definition| compile_definition(&mut context, definition)),
+                ),
+            ]
+            .into_iter()
+            .map(|document| {
+                if count_lines(&document) == 0 {
+                    empty()
+                } else {
+                    sequence([document, line()])
+                }
+            }),
+        ),
+        compile_remaining_block_comment(&mut context),
+    ])))
 }
 
 // TODO Remove this function if possible.
-fn format_spaces(string: &str) -> String {
+fn format_spaces(string: impl AsRef<str>) -> String {
     regex::Regex::new("[ \t]+\n")
         .unwrap()
-        .replace_all(string, "\n")
+        .replace_all(string.as_ref(), "\n")
         .trim()
         .to_owned()
         + "\n"
@@ -185,16 +188,15 @@ fn compile_definition(context: &mut Context, definition: &Definition) -> Documen
         compile_block_comment(context, definition.position()),
         if let Some(export) = definition.foreign_export() {
             sequence([
-                " foreign".into(),
+                "foreign ".into(),
                 match export.calling_convention() {
-                    CallingConvention::C => " \"c\"".into(),
+                    CallingConvention::C => "\"c\" ".into(),
                     CallingConvention::Native => empty(),
                 },
             ])
         } else {
             empty()
         },
-        " ".into(),
         definition.name().into(),
         " = ".into(),
         compile_lambda(context, definition.lambda()),
@@ -281,7 +283,7 @@ fn compile_lambda(context: &mut Context, lambda: &Lambda) -> Document {
         if single_line_arguments {
             flatten(arguments)
         } else {
-            sequence([line(), arguments, separator])
+            sequence([indent(sequence([line(), arguments])), separator])
         },
         ") ".into(),
         compile_type(lambda.result_type()),
@@ -360,7 +362,7 @@ fn compile_expression(context: &mut Context, expression: &Expression) -> Documen
     match expression {
         // Expression::BinaryOperation(operation) => compile_binary_operation(context, operation),
         Expression::Call(call) => {
-            let separator = sequence([", ".into(), line()]);
+            let separator = sequence([",".into(), line()]);
             let arguments = indent(sequence(
                 call.arguments()
                     .iter()
@@ -377,11 +379,11 @@ fn compile_expression(context: &mut Context, expression: &Expression) -> Documen
                             .arguments()
                             .get(0)
                             .map(|expression| expression.position().line_number())
-                        && is_broken(&arguments)
+                        && !is_broken(&arguments)
                 {
                     flatten(arguments)
                 } else {
-                    sequence([line(), arguments, separator.clone()])
+                    sequence([indent(line()), arguments, separator])
                 },
                 ")".into(),
             ])
@@ -922,6 +924,10 @@ fn compile_block_comment(context: &mut Context, position: &Position) -> Document
     )
 }
 
+fn compile_remaining_block_comment(context: &mut Context) -> Document {
+    compile_all_comments(&context.split_before(usize::MAX).collect::<Vec<_>>(), None)
+}
+
 fn compile_all_comments(comments: &[Comment], last_line_number: Option<usize>) -> Document {
     sequence(
         comments
@@ -931,12 +937,13 @@ fn compile_all_comments(comments: &[Comment], last_line_number: Option<usize>) -
                     .iter()
                     .skip(1)
                     .map(|comment| comment.position().line_number())
-                    .chain([last_line_number.unwrap_or(usize::MAX)]),
+                    .chain([last_line_number.unwrap_or(0)]),
             )
             .map(|(comment, next_line_number)| {
                 sequence([
                     "#".into(),
                     comment.line().trim_end().into(),
+                    line(),
                     if comment.position().line_number() + 1 < next_line_number {
                         line()
                     } else {
@@ -1703,1693 +1710,1693 @@ mod tests {
         }
     }
 
-    // mod expression {
-    //     use super::*;
-
-    //     fn format(expression: &Expression) -> String {
-    //         format_expression(expression, &[]).0
-    //     }
-
-    //     mod call {
-    //         use super::*;
-
-    //         #[test]
-    //         fn format_() {
-    //             assert_eq!(
-    //                 format(
-    //                     &Call::new(
-    //                         Variable::new("foo", Position::fake()),
-    //                         vec![
-    //                             Number::new(
-    //                                 NumberRepresentation::FloatingPoint("1".into()),
-    //                                 Position::fake()
-    //                             )
-    //                             .into(),
-    //                             Number::new(
-    //                                 NumberRepresentation::FloatingPoint("2".into()),
-    //                                 Position::fake()
-    //                             )
-    //                             .into(),
-    //                         ],
-    //                         Position::fake()
-    //                     )
-    //                     .into()
-    //                 ),
-    //                 "foo(1, 2)"
-    //             );
-    //         }
-
-    //         #[test]
-    //         fn format_multi_line() {
-    //             assert_eq!(
-    //                 format(
-    //                     &Call::new(
-    //                         Variable::new("foo", line_position(1)),
-    //                         vec![
-    //                             Number::new(
-    //                                 NumberRepresentation::FloatingPoint("1".into()),
-    //                                 line_position(2)
-    //                             )
-    //                             .into(),
-    //                             Number::new(
-    //                                 NumberRepresentation::FloatingPoint("2".into()),
-    //                                 Position::fake()
-    //                             )
-    //                             .into(),
-    //                         ],
-    //                         Position::fake()
-    //                     )
-    //                     .into()
-    //                 ),
-    //                 indoc!(
-    //                     "
-    //                     foo(
-    //                       1,
-    //                       2,
-    //                     )
-    //                     "
-    //                 )
-    //                 .trim()
-    //             );
-    //         }
-    //     }
-
-    //     mod if_ {
-    //         use super::*;
-
-    //         #[test]
-    //         fn format_single_line() {
-    //             assert_eq!(
-    //                 format(
-    //                     &If::new(
-    //                         vec![IfBranch::new(
-    //                             Boolean::new(true, Position::fake()),
-    //                             Block::new(vec![], None::new(Position::fake()), Position::fake())
-    //                         )],
-    //                         Block::new(vec![], None::new(Position::fake()), Position::fake()),
-    //                         Position::fake()
-    //                     )
-    //                     .into()
-    //                 ),
-    //                 "if true { none } else { none }"
-    //             );
-    //         }
-
-    //         #[test]
-    //         fn format_multi_line_with_multi_line_input() {
-    //             assert_eq!(
-    //                 format(
-    //                     &If::new(
-    //                         vec![IfBranch::new(
-    //                             Boolean::new(true, Position::fake()),
-    //                             Block::new(vec![], None::new(line_position(2)), Position::fake())
-    //                         )],
-    //                         Block::new(vec![], None::new(Position::fake()), Position::fake()),
-    //                         line_position(1)
-    //                     )
-    //                     .into()
-    //                 ),
-    //                 indoc!(
-    //                     "
-    //                     if true {
-    //                       none
-    //                     } else {
-    //                       none
-    //                     }
-    //                     "
-    //                 )
-    //                 .trim()
-    //             );
-    //         }
-
-    //         #[test]
-    //         fn format_multi_line_with_multiple_branches() {
-    //             assert_eq!(
-    //                 format(
-    //                     &If::new(
-    //                         vec![
-    //                             IfBranch::new(
-    //                                 Boolean::new(true, Position::fake()),
-    //                                 Block::new(
-    //                                     vec![],
-    //                                     None::new(Position::fake()),
-    //                                     Position::fake()
-    //                                 )
-    //                             ),
-    //                             IfBranch::new(
-    //                                 Boolean::new(false, Position::fake()),
-    //                                 Block::new(
-    //                                     vec![],
-    //                                     None::new(Position::fake()),
-    //                                     Position::fake()
-    //                                 )
-    //                             )
-    //                         ],
-    //                         Block::new(vec![], None::new(Position::fake()), Position::fake()),
-    //                         Position::fake()
-    //                     )
-    //                     .into()
-    //                 ),
-    //                 indoc!(
-    //                     "
-    //                     if true {
-    //                       none
-    //                     } else if false {
-    //                       none
-    //                     } else {
-    //                       none
-    //                     }
-    //                     "
-    //                 )
-    //                 .trim()
-    //             );
-    //         }
-    //     }
-
-    //     #[test]
-    //     fn format_if_list() {
-    //         assert_eq!(
-    //             format(
-    //                 &IfList::new(
-    //                     Variable::new("ys", Position::fake()),
-    //                     "x",
-    //                     "xs",
-    //                     Block::new(
-    //                         vec![],
-    //                         Variable::new("x", Position::fake()),
-    //                         Position::fake()
-    //                     ),
-    //                     Block::new(vec![], None::new(Position::fake()), Position::fake()),
-    //                     Position::fake()
-    //                 )
-    //                 .into()
-    //             ),
-    //             indoc!(
-    //                 "
-    //                 if [x, ...xs] = ys {
-    //                   x
-    //                 } else {
-    //                   none
-    //                 }
-    //                 "
-    //             )
-    //             .trim()
-    //         );
-    //     }
-
-    //     #[test]
-    //     fn format_if_map() {
-    //         assert_eq!(
-    //             format(
-    //                 &IfMap::new(
-    //                     "x",
-    //                     Variable::new("xs", Position::fake()),
-    //                     Variable::new("k", Position::fake()),
-    //                     Block::new(
-    //                         vec![],
-    //                         Variable::new("x", Position::fake()),
-    //                         Position::fake()
-    //                     ),
-    //                     Block::new(vec![], None::new(Position::fake()), Position::fake()),
-    //                     Position::fake()
-    //                 )
-    //                 .into()
-    //             ),
-    //             indoc!(
-    //                 "
-    //                 if x = xs[k] {
-    //                   x
-    //                 } else {
-    //                   none
-    //                 }
-    //                 "
-    //             )
-    //             .trim()
-    //         );
-    //     }
-
-    //     mod if_type {
-    //         use super::*;
-
-    //         #[test]
-    //         fn format_single_line() {
-    //             assert_eq!(
-    //                 format(
-    //                     &IfType::new(
-    //                         "x",
-    //                         Variable::new("y", Position::fake()),
-    //                         vec![
-    //                             IfTypeBranch::new(
-    //                                 types::None::new(Position::fake()),
-    //                                 Block::new(
-    //                                     vec![],
-    //                                     None::new(Position::fake()),
-    //                                     Position::fake()
-    //                                 )
-    //                             ),
-    //                             IfTypeBranch::new(
-    //                                 types::Number::new(Position::fake()),
-    //                                 Block::new(
-    //                                     vec![],
-    //                                     None::new(Position::fake()),
-    //                                     Position::fake()
-    //                                 )
-    //                             )
-    //                         ],
-    //                         None,
-    //                         Position::fake(),
-    //                     )
-    //                     .into()
-    //                 ),
-    //                 "if x = y as none { none } else if number { none }"
-    //             );
-    //         }
-
-    //         #[test]
-    //         fn format_multi_line() {
-    //             assert_eq!(
-    //                 format(
-    //                     &IfType::new(
-    //                         "x",
-    //                         Variable::new("y", Position::fake()),
-    //                         vec![
-    //                             IfTypeBranch::new(
-    //                                 types::None::new(Position::fake()),
-    //                                 Block::new(
-    //                                     vec![],
-    //                                     None::new(line_position(2)),
-    //                                     Position::fake()
-    //                                 )
-    //                             ),
-    //                             IfTypeBranch::new(
-    //                                 types::Number::new(Position::fake()),
-    //                                 Block::new(
-    //                                     vec![],
-    //                                     None::new(Position::fake()),
-    //                                     Position::fake()
-    //                                 )
-    //                             )
-    //                         ],
-    //                         None,
-    //                         line_position(1),
-    //                     )
-    //                     .into()
-    //                 ),
-    //                 indoc!(
-    //                     "
-    //                     if x = y as none {
-    //                       none
-    //                     } else if number {
-    //                       none
-    //                     }
-    //                     "
-    //                 )
-    //                 .trim()
-    //             );
-    //         }
-
-    //         #[test]
-    //         fn format_with_else_block() {
-    //             assert_eq!(
-    //                 format(
-    //                     &IfType::new(
-    //                         "x",
-    //                         Variable::new("y", Position::fake()),
-    //                         vec![
-    //                             IfTypeBranch::new(
-    //                                 types::None::new(Position::fake()),
-    //                                 Block::new(
-    //                                     vec![],
-    //                                     None::new(Position::fake()),
-    //                                     Position::fake()
-    //                                 )
-    //                             ),
-    //                             IfTypeBranch::new(
-    //                                 types::Number::new(Position::fake()),
-    //                                 Block::new(
-    //                                     vec![],
-    //                                     None::new(Position::fake()),
-    //                                     Position::fake()
-    //                                 )
-    //                             )
-    //                         ],
-    //                         Some(Block::new(
-    //                             vec![],
-    //                             None::new(Position::fake()),
-    //                             Position::fake()
-    //                         )),
-    //                         Position::fake(),
-    //                     )
-    //                     .into()
-    //                 ),
-    //                 indoc!(
-    //                     "
-    //                 if x = y as none {
-    //                   none
-    //                 } else if number {
-    //                   none
-    //                 } else {
-    //                   none
-    //                 }
-    //                 "
-    //                 )
-    //                 .trim()
-    //             );
-    //         }
-    //     }
-
-    //     mod lambda {
-    //         use super::*;
-
-    //         #[test]
-    //         fn format_() {
-    //             assert_eq!(
-    //                 format(
-    //                     &Lambda::new(
-    //                         vec![],
-    //                         types::None::new(Position::fake()),
-    //                         Block::new(vec![], None::new(Position::fake()), Position::fake()),
-    //                         Position::fake()
-    //                     )
-    //                     .into()
-    //                 ),
-    //                 "\\() none { none }"
-    //             );
-    //         }
-
-    //         #[test]
-    //         fn format_multi_line_body() {
-    //             assert_eq!(
-    //                 format(
-    //                     &Lambda::new(
-    //                         vec![],
-    //                         types::None::new(Position::fake()),
-    //                         Block::new(
-    //                             vec![Statement::new(
-    //                                 Some("x".into()),
-    //                                 None::new(Position::fake()),
-    //                                 Position::fake()
-    //                             )],
-    //                             None::new(Position::fake()),
-    //                             Position::fake()
-    //                         ),
-    //                         Position::fake()
-    //                     )
-    //                     .into()
-    //                 ),
-    //                 indoc!(
-    //                     "
-    //                     \\() none {
-    //                       x = none
-    //                       none
-    //                     }
-    //                     "
-    //                 )
-    //                 .trim()
-    //             );
-    //         }
-
-    //         #[test]
-    //         fn format_single_line_arguments_with_multi_line_body_of_expression() {
-    //             assert_eq!(
-    //                 format(
-    //                     &Lambda::new(
-    //                         vec![],
-    //                         types::None::new(Position::fake()),
-    //                         Block::new(vec![], None::new(line_position(2)), Position::fake()),
-    //                         line_position(1)
-    //                     )
-    //                     .into()
-    //                 ),
-    //                 indoc!(
-    //                     "
-    //                     \\() none {
-    //                       none
-    //                     }
-    //                     "
-    //                 )
-    //                 .trim()
-    //             );
-    //         }
-
-    //         #[test]
-    //         fn format_multi_line_argument() {
-    //             assert_eq!(
-    //                 format(
-    //                     &Lambda::new(
-    //                         vec![Argument::new("x", types::None::new(line_position(2)))],
-    //                         types::None::new(Position::fake()),
-    //                         Block::new(vec![], None::new(Position::fake()), Position::fake()),
-    //                         line_position(1)
-    //                     )
-    //                     .into()
-    //                 ),
-    //                 indoc!(
-    //                     "
-    //                     \\(
-    //                       x none,
-    //                     ) none {
-    //                       none
-    //                     }
-    //                     "
-    //                 )
-    //                 .trim()
-    //             );
-    //         }
-
-    //         #[test]
-    //         fn format_multi_line_arguments() {
-    //             assert_eq!(
-    //                 format(
-    //                     &Lambda::new(
-    //                         vec![
-    //                             Argument::new("x", types::None::new(line_position(2))),
-    //                             Argument::new("y", types::None::new(Position::fake()))
-    //                         ],
-    //                         types::None::new(Position::fake()),
-    //                         Block::new(vec![], None::new(Position::fake()), Position::fake()),
-    //                         line_position(1)
-    //                     )
-    //                     .into()
-    //                 ),
-    //                 indoc!(
-    //                     "
-    //                     \\(
-    //                       x none,
-    //                       y none,
-    //                     ) none {
-    //                       none
-    //                     }
-    //                     "
-    //                 )
-    //                 .trim()
-    //             );
-    //         }
-    //     }
-
-    //     mod number {
-    //         use super::*;
-
-    //         #[test]
-    //         fn format_decimal_float() {
-    //             assert_eq!(
-    //                 format(
-    //                     &Number::new(
-    //                         NumberRepresentation::FloatingPoint("42".into()),
-    //                         Position::fake()
-    //                     )
-    //                     .into()
-    //                 ),
-    //                 "42"
-    //             );
-    //         }
-
-    //         #[test]
-    //         fn format_binary() {
-    //             assert_eq!(
-    //                 format(
-    //                     &Number::new(NumberRepresentation::Binary("01".into()), Position::fake())
-    //                         .into()
-    //                 ),
-    //                 "0b01"
-    //             );
-    //         }
-
-    //         #[test]
-    //         fn format_hexadecimal() {
-    //             assert_eq!(
-    //                 format(
-    //                     &Number::new(
-    //                         NumberRepresentation::Hexadecimal("fa".into()),
-    //                         Position::fake()
-    //                     )
-    //                     .into()
-    //                 ),
-    //                 "0xFA"
-    //             );
-    //         }
-    //     }
-
-    //     #[test]
-    //     fn format_spawn_operation() {
-    //         assert_eq!(
-    //             format(
-    //                 &SpawnOperation::new(
-    //                     Lambda::new(
-    //                         vec![],
-    //                         types::None::new(Position::fake()),
-    //                         Block::new(vec![], None::new(Position::fake()), Position::fake()),
-    //                         Position::fake(),
-    //                     ),
-    //                     Position::fake()
-    //                 )
-    //                 .into()
-    //             ),
-    //             "go \\() none { none }"
-    //         );
-    //     }
-
-    //     #[test]
-    //     fn format_string() {
-    //         assert_eq!(
-    //             format(&ByteString::new("foo", Position::fake()).into()),
-    //             "\"foo\""
-    //         );
-    //     }
-
-    //     mod binary_operation {
-    //         use super::*;
-
-    //         #[test]
-    //         fn format_() {
-    //             assert_eq!(
-    //                 format(
-    //                     &BinaryOperation::new(
-    //                         BinaryOperator::Add,
-    //                         Number::new(
-    //                             NumberRepresentation::FloatingPoint("1".into()),
-    //                             Position::fake()
-    //                         ),
-    //                         Number::new(
-    //                             NumberRepresentation::FloatingPoint("2".into()),
-    //                             Position::fake()
-    //                         ),
-    //                         Position::fake()
-    //                     )
-    //                     .into()
-    //                 ),
-    //                 "1 + 2"
-    //             );
-    //         }
-
-    //         #[test]
-    //         fn format_multi_line() {
-    //             assert_eq!(
-    //                 format(
-    //                     &BinaryOperation::new(
-    //                         BinaryOperator::Add,
-    //                         Number::new(
-    //                             NumberRepresentation::FloatingPoint("1".into()),
-    //                             line_position(1)
-    //                         ),
-    //                         Number::new(
-    //                             NumberRepresentation::FloatingPoint("2".into()),
-    //                             line_position(2)
-    //                         ),
-    //                         Position::fake()
-    //                     )
-    //                     .into()
-    //                 ),
-    //                 indoc!(
-    //                     "
-    //                     1
-    //                       + 2
-    //                     "
-    //                 )
-    //                 .trim()
-    //             );
-    //         }
-
-    //         #[test]
-    //         fn format_nested_operations() {
-    //             assert_eq!(
-    //                 format(
-    //                     &BinaryOperation::new(
-    //                         BinaryOperator::Add,
-    //                         Number::new(
-    //                             NumberRepresentation::FloatingPoint("1".into()),
-    //                             Position::fake()
-    //                         ),
-    //                         BinaryOperation::new(
-    //                             BinaryOperator::Multiply,
-    //                             Number::new(
-    //                                 NumberRepresentation::FloatingPoint("2".into()),
-    //                                 Position::fake()
-    //                             ),
-    //                             Number::new(
-    //                                 NumberRepresentation::FloatingPoint("3".into()),
-    //                                 Position::fake()
-    //                             ),
-    //                             Position::fake()
-    //                         ),
-    //                         Position::fake()
-    //                     )
-    //                     .into()
-    //                 ),
-    //                 "1 + 2 * 3"
-    //             );
-    //         }
-
-    //         #[test]
-    //         fn format_nested_operations_with_priority() {
-    //             assert_eq!(
-    //                 format(
-    //                     &BinaryOperation::new(
-    //                         BinaryOperator::Multiply,
-    //                         Number::new(
-    //                             NumberRepresentation::FloatingPoint("1".into()),
-    //                             Position::fake()
-    //                         ),
-    //                         BinaryOperation::new(
-    //                             BinaryOperator::Add,
-    //                             Number::new(
-    //                                 NumberRepresentation::FloatingPoint("2".into()),
-    //                                 Position::fake()
-    //                             ),
-    //                             Number::new(
-    //                                 NumberRepresentation::FloatingPoint("3".into()),
-    //                                 Position::fake()
-    //                             ),
-    //                             Position::fake()
-    //                         ),
-    //                         Position::fake()
-    //                     )
-    //                     .into()
-    //                 ),
-    //                 "1 * (2 + 3)"
-    //             );
-    //         }
-    //     }
-
-    //     mod unary_operation {
-    //         use super::*;
-
-    //         #[test]
-    //         fn format_not_operation() {
-    //             assert_eq!(
-    //                 format(
-    //                     &UnaryOperation::new(
-    //                         UnaryOperator::Not,
-    //                         Variable::new("x", Position::fake()),
-    //                         Position::fake()
-    //                     )
-    //                     .into()
-    //                 ),
-    //                 "!x"
-    //             );
-    //         }
-
-    //         #[test]
-    //         fn format_try_operation() {
-    //             assert_eq!(
-    //                 format(
-    //                     &UnaryOperation::new(
-    //                         UnaryOperator::Try,
-    //                         Variable::new("x", Position::fake()),
-    //                         Position::fake()
-    //                     )
-    //                     .into()
-    //                 ),
-    //                 "x?"
-    //             );
-    //         }
-
-    //         #[test]
-    //         fn format_with_binary_operation() {
-    //             assert_eq!(
-    //                 format(
-    //                     &UnaryOperation::new(
-    //                         UnaryOperator::Not,
-    //                         BinaryOperation::new(
-    //                             BinaryOperator::And,
-    //                             Boolean::new(true, Position::fake()),
-    //                             Boolean::new(false, Position::fake()),
-    //                             Position::fake()
-    //                         ),
-    //                         Position::fake()
-    //                     )
-    //                     .into(),
-    //                 ),
-    //                 "!(true & false)"
-    //             );
-    //         }
-    //     }
-
-    //     #[test]
-    //     fn format_record_deconstruction() {
-    //         assert_eq!(
-    //             format(
-    //                 &RecordDeconstruction::new(
-    //                     Variable::new("x", Position::fake()),
-    //                     "y",
-    //                     Position::fake()
-    //                 )
-    //                 .into()
-    //             ),
-    //             "x.y"
-    //         );
-    //     }
-
-    //     mod list {
-    //         use super::*;
-
-    //         #[test]
-    //         fn format_empty() {
-    //             assert_eq!(
-    //                 format(
-    //                     &List::new(types::None::new(Position::fake()), vec![], Position::fake())
-    //                         .into()
-    //                 ),
-    //                 "[none]"
-    //             );
-    //         }
-
-    //         #[test]
-    //         fn format_element() {
-    //             assert_eq!(
-    //                 format(
-    //                     &List::new(
-    //                         types::None::new(Position::fake()),
-    //                         vec![ListElement::Single(None::new(Position::fake()).into())],
-    //                         Position::fake()
-    //                     )
-    //                     .into()
-    //                 ),
-    //                 "[none none]"
-    //             );
-    //         }
-
-    //         #[test]
-    //         fn format_two_elements() {
-    //             assert_eq!(
-    //                 format(
-    //                     &List::new(
-    //                         types::None::new(Position::fake()),
-    //                         vec![
-    //                             ListElement::Single(None::new(Position::fake()).into()),
-    //                             ListElement::Single(None::new(Position::fake()).into())
-    //                         ],
-    //                         Position::fake()
-    //                     )
-    //                     .into()
-    //                 ),
-    //                 "[none none, none]"
-    //             );
-    //         }
-
-    //         #[test]
-    //         fn format_multi_line() {
-    //             assert_eq!(
-    //                 format(
-    //                     &List::new(
-    //                         types::None::new(Position::fake()),
-    //                         vec![ListElement::Single(None::new(line_position(2)).into())],
-    //                         line_position(1)
-    //                     )
-    //                     .into()
-    //                 ),
-    //                 indoc!(
-    //                     "
-    //                     [none
-    //                       none,
-    //                     ]
-    //                     "
-    //                 )
-    //                 .trim()
-    //             );
-    //         }
-
-    //         #[test]
-    //         fn format_multi_line_with_two_elements() {
-    //             assert_eq!(
-    //                 format(
-    //                     &List::new(
-    //                         types::Number::new(Position::fake()),
-    //                         vec![
-    //                             ListElement::Single(
-    //                                 Number::new(
-    //                                     NumberRepresentation::FloatingPoint("1".into()),
-    //                                     line_position(2)
-    //                                 )
-    //                                 .into()
-    //                             ),
-    //                             ListElement::Single(
-    //                                 Number::new(
-    //                                     NumberRepresentation::FloatingPoint("2".into()),
-    //                                     Position::fake()
-    //                                 )
-    //                                 .into()
-    //                             )
-    //                         ],
-    //                         line_position(1)
-    //                     )
-    //                     .into()
-    //                 ),
-    //                 indoc!(
-    //                     "
-    //                     [number
-    //                       1,
-    //                       2,
-    //                     ]
-    //                     "
-    //                 )
-    //                 .trim()
-    //             );
-    //         }
-
-    //         #[test]
-    //         fn format_comprehension() {
-    //             assert_eq!(
-    //                 format(
-    //                     &ListComprehension::new(
-    //                         types::None::new(Position::fake()),
-    //                         None::new(Position::fake()),
-    //                         "x",
-    //                         Variable::new("xs", Position::fake()),
-    //                         Position::fake()
-    //                     )
-    //                     .into()
-    //                 ),
-    //                 "[none none for x in xs]"
-    //             );
-    //         }
-
-    //         #[test]
-    //         fn format_multi_line_comprehension() {
-    //             assert_eq!(
-    //                 format(
-    //                     &ListComprehension::new(
-    //                         types::None::new(Position::fake()),
-    //                         None::new(line_position(2)),
-    //                         "x",
-    //                         Variable::new("xs", Position::fake()),
-    //                         line_position(1)
-    //                     )
-    //                     .into()
-    //                 ),
-    //                 indoc!(
-    //                     "
-    //                     [none
-    //                       none
-    //                       for x in xs
-    //                     ]
-    //                     "
-    //                 )
-    //                 .trim()
-    //             );
-    //         }
-    //     }
-
-    //     mod map {
-    //         use super::*;
-
-    //         #[test]
-    //         fn format_empty() {
-    //             assert_eq!(
-    //                 format(
-    //                     &Map::new(
-    //                         types::ByteString::new(Position::fake()),
-    //                         types::Number::new(Position::fake()),
-    //                         vec![],
-    //                         Position::fake()
-    //                     )
-    //                     .into()
-    //                 ),
-    //                 "{string: number}"
-    //             );
-    //         }
-
-    //         #[test]
-    //         fn format_entry() {
-    //             assert_eq!(
-    //                 format(
-    //                     &Map::new(
-    //                         types::ByteString::new(Position::fake()),
-    //                         types::Number::new(Position::fake()),
-    //                         vec![MapEntry::new(
-    //                             ByteString::new("foo", Position::fake()),
-    //                             Number::new(
-    //                                 NumberRepresentation::FloatingPoint("42".into()),
-    //                                 Position::fake()
-    //                             ),
-    //                             Position::fake()
-    //                         )
-    //                         .into()],
-    //                         Position::fake()
-    //                     )
-    //                     .into()
-    //                 ),
-    //                 "{string: number \"foo\": 42}"
-    //             );
-    //         }
-
-    //         #[test]
-    //         fn format_two_entries() {
-    //             assert_eq!(
-    //                 format(
-    //                     &Map::new(
-    //                         types::ByteString::new(Position::fake()),
-    //                         types::Number::new(Position::fake()),
-    //                         vec![
-    //                             MapEntry::new(
-    //                                 ByteString::new("foo", Position::fake()),
-    //                                 Number::new(
-    //                                     NumberRepresentation::FloatingPoint("1".into()),
-    //                                     Position::fake()
-    //                                 ),
-    //                                 Position::fake()
-    //                             )
-    //                             .into(),
-    //                             MapEntry::new(
-    //                                 ByteString::new("bar", Position::fake()),
-    //                                 Number::new(
-    //                                     NumberRepresentation::FloatingPoint("2".into()),
-    //                                     Position::fake()
-    //                                 ),
-    //                                 Position::fake()
-    //                             )
-    //                             .into()
-    //                         ],
-    //                         Position::fake()
-    //                     )
-    //                     .into()
-    //                 ),
-    //                 "{string: number \"foo\": 1, \"bar\": 2}"
-    //             );
-    //         }
-
-    //         #[test]
-    //         fn format_removal() {
-    //             assert_eq!(
-    //                 format(
-    //                     &Map::new(
-    //                         types::ByteString::new(Position::fake()),
-    //                         types::Number::new(Position::fake()),
-    //                         vec![MapElement::Removal(
-    //                             ByteString::new("foo", Position::fake()).into()
-    //                         )],
-    //                         Position::fake()
-    //                     )
-    //                     .into()
-    //                 ),
-    //                 "{string: number \"foo\"}"
-    //             );
-    //         }
-
-    //         #[test]
-    //         fn format_map() {
-    //             assert_eq!(
-    //                 format(
-    //                     &Map::new(
-    //                         types::ByteString::new(Position::fake()),
-    //                         types::Number::new(Position::fake()),
-    //                         vec![MapElement::Map(
-    //                             Variable::new("xs", Position::fake()).into()
-    //                         )],
-    //                         Position::fake()
-    //                     )
-    //                     .into()
-    //                 ),
-    //                 "{string: number ...xs}"
-    //             );
-    //         }
-
-    //         #[test]
-    //         fn format_multi_line() {
-    //             assert_eq!(
-    //                 format(
-    //                     &Map::new(
-    //                         types::ByteString::new(Position::fake()),
-    //                         types::Number::new(Position::fake()),
-    //                         vec![MapEntry::new(
-    //                             ByteString::new("foo", Position::fake()),
-    //                             Number::new(
-    //                                 NumberRepresentation::FloatingPoint("1".into()),
-    //                                 Position::fake()
-    //                             ),
-    //                             line_position(2)
-    //                         )
-    //                         .into()],
-    //                         line_position(1)
-    //                     )
-    //                     .into()
-    //                 ),
-    //                 indoc!(
-    //                     "
-    //                     {string: number
-    //                       \"foo\": 1,
-    //                     }
-    //                     "
-    //                 )
-    //                 .trim(),
-    //             );
-    //         }
-
-    //         #[test]
-    //         fn format_multi_line_with_two_entries() {
-    //             assert_eq!(
-    //                 format(
-    //                     &Map::new(
-    //                         types::ByteString::new(Position::fake()),
-    //                         types::Number::new(Position::fake()),
-    //                         vec![
-    //                             MapEntry::new(
-    //                                 ByteString::new("foo", Position::fake()),
-    //                                 Number::new(
-    //                                     NumberRepresentation::FloatingPoint("1".into()),
-    //                                     Position::fake()
-    //                                 ),
-    //                                 line_position(2)
-    //                             )
-    //                             .into(),
-    //                             MapEntry::new(
-    //                                 ByteString::new("bar", Position::fake()),
-    //                                 Number::new(
-    //                                     NumberRepresentation::FloatingPoint("2".into()),
-    //                                     Position::fake()
-    //                                 ),
-    //                                 Position::fake()
-    //                             )
-    //                             .into()
-    //                         ],
-    //                         line_position(1)
-    //                     )
-    //                     .into()
-    //                 ),
-    //                 indoc!(
-    //                     "
-    //                     {string: number
-    //                       \"foo\": 1,
-    //                       \"bar\": 2,
-    //                     }
-    //                     "
-    //                 )
-    //                 .trim(),
-    //             );
-    //         }
-    //     }
-
-    //     mod record {
-    //         use super::*;
-
-    //         #[test]
-    //         fn format_empty() {
-    //             assert_eq!(
-    //                 format(&Record::new("foo", None, vec![], Position::fake()).into()),
-    //                 "foo{}"
-    //             );
-    //         }
-
-    //         #[test]
-    //         fn format_field() {
-    //             assert_eq!(
-    //                 format(
-    //                     &Record::new(
-    //                         "foo",
-    //                         None,
-    //                         vec![RecordField::new(
-    //                             "x",
-    //                             None::new(Position::fake()),
-    //                             Position::fake()
-    //                         )],
-    //                         Position::fake()
-    //                     )
-    //                     .into()
-    //                 ),
-    //                 "foo{x: none}"
-    //             );
-    //         }
-
-    //         #[test]
-    //         fn format_two_fields() {
-    //             assert_eq!(
-    //                 format(
-    //                     &Record::new(
-    //                         "foo",
-    //                         None,
-    //                         vec![
-    //                             RecordField::new(
-    //                                 "x",
-    //                                 Number::new(
-    //                                     NumberRepresentation::FloatingPoint("1".into()),
-    //                                     Position::fake()
-    //                                 ),
-    //                                 Position::fake()
-    //                             ),
-    //                             RecordField::new(
-    //                                 "y",
-    //                                 Number::new(
-    //                                     NumberRepresentation::FloatingPoint("2".into()),
-    //                                     Position::fake()
-    //                                 ),
-    //                                 Position::fake()
-    //                             )
-    //                         ],
-    //                         Position::fake()
-    //                     )
-    //                     .into()
-    //                 ),
-    //                 "foo{x: 1, y: 2}"
-    //             );
-    //         }
-
-    //         #[test]
-    //         fn format_update() {
-    //             assert_eq!(
-    //                 format(
-    //                     &Record::new(
-    //                         "foo",
-    //                         Some(Variable::new("r", Position::fake()).into()),
-    //                         vec![RecordField::new(
-    //                             "x",
-    //                             None::new(Position::fake()),
-    //                             Position::fake()
-    //                         )],
-    //                         Position::fake()
-    //                     )
-    //                     .into()
-    //                 ),
-    //                 "foo{...r, x: none}"
-    //             );
-    //         }
-
-    //         #[test]
-    //         fn format_multi_line() {
-    //             assert_eq!(
-    //                 format(
-    //                     &Record::new(
-    //                         "foo",
-    //                         None,
-    //                         vec![RecordField::new(
-    //                             "x",
-    //                             None::new(Position::fake()),
-    //                             line_position(2)
-    //                         )],
-    //                         line_position(1)
-    //                     )
-    //                     .into()
-    //                 ),
-    //                 indoc!(
-    //                     "
-    //                     foo{
-    //                       x: none,
-    //                     }
-    //                     "
-    //                 )
-    //                 .trim(),
-    //             );
-    //         }
-
-    //         #[test]
-    //         fn format_multi_line_with_two_fields() {
-    //             assert_eq!(
-    //                 format(
-    //                     &Record::new(
-    //                         "foo",
-    //                         None,
-    //                         vec![
-    //                             RecordField::new(
-    //                                 "x",
-    //                                 None::new(Position::fake()),
-    //                                 line_position(2)
-    //                             ),
-    //                             RecordField::new(
-    //                                 "y",
-    //                                 None::new(Position::fake()),
-    //                                 line_position(2)
-    //                             )
-    //                         ],
-    //                         line_position(1)
-    //                     )
-    //                     .into()
-    //                 ),
-    //                 indoc!(
-    //                     "
-    //                     foo{
-    //                       x: none,
-    //                       y: none,
-    //                     }
-    //                     "
-    //                 )
-    //                 .trim(),
-    //             );
-    //         }
-    //     }
-    // }
-
-    // mod comment {
-    //     use super::*;
-
-    //     #[test]
-    //     fn format_comment() {
-    //         assert_eq!(
-    //             format(
-    //                 &Module::new(vec![], vec![], vec![], vec![], Position::fake()),
-    //                 &[Comment::new("foo", Position::fake())]
-    //             ),
-    //             "#foo\n"
-    //         );
-    //     }
-
-    //     #[test]
-    //     fn keep_spaces_between_comments() {
-    //         assert_eq!(
-    //             format(
-    //                 &Module::new(vec![], vec![], vec![], vec![], Position::fake()),
-    //                 &[
-    //                     Comment::new("foo", line_position(1)),
-    //                     Comment::new("bar", line_position(3)),
-    //                 ]
-    //             ),
-    //             indoc!(
-    //                 "
-    //                 #foo
-
-    //                 #bar
-    //                 ",
-    //             ),
-    //         );
-    //     }
-
-    //     #[test]
-    //     fn keep_spaces_between_comment_and_next_line() {
-    //         assert_eq!(
-    //             format(
-    //                 &Module::new(
-    //                     vec![Import::new(
-    //                         InternalModulePath::new(vec!["Foo".into()]),
-    //                         None,
-    //                         vec![],
-    //                         line_position(3),
-    //                     )],
-    //                     vec![],
-    //                     vec![],
-    //                     vec![],
-    //                     Position::fake()
-    //                 ),
-    //                 &[Comment::new("foo", line_position(1))]
-    //             ),
-    //             indoc!(
-    //                 "
-    //                 #foo
-
-    //                 import 'Foo
-    //                 ",
-    //             ),
-    //         );
-    //     }
-
-    //     #[test]
-    //     fn format_import() {
-    //         assert_eq!(
-    //             format(
-    //                 &Module::new(
-    //                     vec![Import::new(
-    //                         InternalModulePath::new(vec!["Foo".into()]),
-    //                         None,
-    //                         vec![],
-    //                         line_position(2),
-    //                     )],
-    //                     vec![],
-    //                     vec![],
-    //                     vec![],
-    //                     Position::fake()
-    //                 ),
-    //                 &[Comment::new("foo", line_position(1))]
-    //             ),
-    //             "#foo\nimport 'Foo\n"
-    //         );
-    //     }
-
-    //     #[test]
-    //     fn format_foreign_import() {
-    //         assert_eq!(
-    //             format(
-    //                 &Module::new(
-    //                     vec![],
-    //                     vec![ForeignImport::new(
-    //                         "foo",
-    //                         CallingConvention::Native,
-    //                         types::Function::new(
-    //                             vec![],
-    //                             types::None::new(Position::fake()),
-    //                             Position::fake()
-    //                         ),
-    //                         line_position(2),
-    //                     )],
-    //                     vec![],
-    //                     vec![],
-    //                     Position::fake()
-    //                 ),
-    //                 &[Comment::new("foo", line_position(1))]
-    //             ),
-    //             "#foo\nimport foreign foo \\() none\n"
-    //         );
-    //     }
-
-    //     #[test]
-    //     fn format_type_definition() {
-    //         assert_eq!(
-    //             format(
-    //                 &Module::new(
-    //                     vec![],
-    //                     vec![],
-    //                     vec![RecordDefinition::new("foo", vec![], line_position(2)).into()],
-    //                     vec![],
-    //                     Position::fake()
-    //                 ),
-    //                 &[Comment::new("foo", line_position(1))]
-    //             ),
-    //             "#foo\ntype foo {}\n"
-    //         );
-    //     }
-
-    //     #[test]
-    //     fn format_type_alias() {
-    //         assert_eq!(
-    //             format(
-    //                 &Module::new(
-    //                     vec![],
-    //                     vec![],
-    //                     vec![TypeAlias::new(
-    //                         "foo",
-    //                         types::None::new(Position::fake()),
-    //                         line_position(2)
-    //                     )
-    //                     .into()],
-    //                     vec![],
-    //                     Position::fake()
-    //                 ),
-    //                 &[Comment::new("foo", line_position(1))]
-    //             ),
-    //             "#foo\ntype foo = none\n"
-    //         );
-    //     }
-
-    //     #[test]
-    //     fn format_definition() {
-    //         assert_eq!(
-    //             format(
-    //                 &Module::new(
-    //                     vec![],
-    //                     vec![],
-    //                     vec![],
-    //                     vec![Definition::new(
-    //                         "foo",
-    //                         Lambda::new(
-    //                             vec![],
-    //                             types::None::new(Position::fake()),
-    //                             Block::new(vec![], None::new(Position::fake()), Position::fake()),
-    //                             Position::fake(),
-    //                         ),
-    //                         None,
-    //                         line_position(2)
-    //                     )],
-    //                     Position::fake()
-    //                 ),
-    //                 &[Comment::new("foo", line_position(1))]
-    //             ),
-    //             "#foo\nfoo = \\() none { none }\n"
-    //         );
-    //     }
-
-    //     #[test]
-    //     fn format_statement_in_block() {
-    //         assert_eq!(
-    //             format(
-    //                 &Module::new(
-    //                     vec![],
-    //                     vec![],
-    //                     vec![],
-    //                     vec![Definition::new(
-    //                         "foo",
-    //                         Lambda::new(
-    //                             vec![],
-    //                             types::None::new(Position::fake()),
-    //                             Block::new(
-    //                                 vec![Statement::new(
-    //                                     Some("x".into()),
-    //                                     None::new(Position::fake()),
-    //                                     line_position(2)
-    //                                 )],
-    //                                 None::new(line_position(3)),
-    //                                 Position::fake()
-    //                             ),
-    //                             Position::fake(),
-    //                         ),
-    //                         None,
-    //                         Position::fake()
-    //                     )],
-    //                     Position::fake()
-    //                 ),
-    //                 &[Comment::new("foo", line_position(1))]
-    //             ),
-    //             indoc!(
-    //                 "
-    //                 foo = \\() none {
-    //                   #foo
-    //                   x = none
-    //                   none
-    //                 }
-    //                 "
-    //             )
-    //         );
-    //     }
-
-    //     #[test]
-    //     fn format_result_expression_in_block() {
-    //         assert_eq!(
-    //             format(
-    //                 &Module::new(
-    //                     vec![],
-    //                     vec![],
-    //                     vec![],
-    //                     vec![Definition::new(
-    //                         "foo",
-    //                         Lambda::new(
-    //                             vec![],
-    //                             types::None::new(Position::fake()),
-    //                             Block::new(vec![], None::new(line_position(2)), Position::fake()),
-    //                             Position::fake(),
-    //                         ),
-    //                         None,
-    //                         Position::fake()
-    //                     )],
-    //                     Position::fake()
-    //                 ),
-    //                 &[Comment::new("foo", line_position(1))]
-    //             ),
-    //             indoc!(
-    //                 "
-    //                 foo = \\() none {
-    //                   #foo
-    //                   none
-    //                 }
-    //                 "
-    //             )
-    //         );
-    //     }
-
-    //     #[test]
-    //     fn format_comment_between_statement_and_expression_in_block() {
-    //         assert_eq!(
-    //             format(
-    //                 &Module::new(
-    //                     vec![],
-    //                     vec![],
-    //                     vec![],
-    //                     vec![Definition::new(
-    //                         "foo",
-    //                         Lambda::new(
-    //                             vec![],
-    //                             types::None::new(Position::fake()),
-    //                             Block::new(
-    //                                 vec![Statement::new(
-    //                                     Some("x".into()),
-    //                                     None::new(Position::fake()),
-    //                                     line_position(1)
-    //                                 )],
-    //                                 None::new(line_position(3)),
-    //                                 Position::fake()
-    //                             ),
-    //                             Position::fake(),
-    //                         ),
-    //                         None,
-    //                         Position::fake()
-    //                     )],
-    //                     Position::fake()
-    //                 ),
-    //                 &[Comment::new("foo", line_position(2))]
-    //             ),
-    //             indoc!(
-    //                 "
-    //                 foo = \\() none {
-    //                   x = none
-    //                   #foo
-    //                   none
-    //                 }
-    //                 "
-    //             )
-    //         );
-    //     }
-
-    //     #[test]
-    //     fn format_suffix_comment_after_statement() {
-    //         assert_eq!(
-    //             format(
-    //                 &Module::new(
-    //                     vec![],
-    //                     vec![],
-    //                     vec![],
-    //                     vec![Definition::new(
-    //                         "foo",
-    //                         Lambda::new(
-    //                             vec![],
-    //                             types::None::new(Position::fake()),
-    //                             Block::new(
-    //                                 vec![Statement::new(
-    //                                     Some("x".into()),
-    //                                     None::new(Position::fake()),
-    //                                     line_position(2)
-    //                                 )],
-    //                                 None::new(line_position(3)),
-    //                                 Position::fake()
-    //                             ),
-    //                             Position::fake(),
-    //                         ),
-    //                         None,
-    //                         Position::fake()
-    //                     )],
-    //                     Position::fake()
-    //                 ),
-    //                 &[Comment::new("foo", line_position(2))]
-    //             ),
-    //             indoc!(
-    //                 "
-    //                 foo = \\() none {
-    //                   x = none #foo
-    //                   none
-    //                 }
-    //                 "
-    //             )
-    //         );
-    //     }
-
-    //     #[test]
-    //     fn format_space_between_two_statement_comments() {
-    //         assert_eq!(
-    //             format(
-    //                 &Module::new(
-    //                     vec![],
-    //                     vec![],
-    //                     vec![],
-    //                     vec![Definition::new(
-    //                         "foo",
-    //                         Lambda::new(
-    //                             vec![],
-    //                             types::None::new(Position::fake()),
-    //                             Block::new(
-    //                                 vec![
-    //                                     Statement::new(
-    //                                         Some("x".into()),
-    //                                         None::new(Position::fake()),
-    //                                         line_position(3)
-    //                                     ),
-    //                                     Statement::new(
-    //                                         Some("y".into()),
-    //                                         None::new(Position::fake()),
-    //                                         line_position(6)
-    //                                     )
-    //                                 ],
-    //                                 None::new(line_position(7)),
-    //                                 Position::fake()
-    //                             ),
-    //                             Position::fake(),
-    //                         ),
-    //                         None,
-    //                         Position::fake()
-    //                     )],
-    //                     Position::fake()
-    //                 ),
-    //                 &[
-    //                     Comment::new("foo", line_position(2)),
-    //                     Comment::new("bar", line_position(5))
-    //                 ]
-    //             ),
-    //             indoc!(
-    //                 "
-    //                 foo = \\() none {
-    //                   #foo
-    //                   x = none
-
-    //                   #bar
-    //                   y = none
-    //                   none
-    //                 }
-    //                 "
-    //             )
-    //         );
-    //     }
-
-    //     #[test]
-    //     fn format_suffix_comment_on_function_argument() {
-    //         assert_eq!(
-    //             format(
-    //                 &Module::new(
-    //                     vec![],
-    //                     vec![],
-    //                     vec![],
-    //                     vec![Definition::new(
-    //                         "foo",
-    //                         Lambda::new(
-    //                             vec![Argument::new("x", types::None::new(line_position(2)))],
-    //                             types::None::new(Position::fake()),
-    //                             Block::new(vec![], None::new(Position::fake()), Position::fake()),
-    //                             Position::fake(),
-    //                         ),
-    //                         None,
-    //                         line_position(1)
-    //                     )],
-    //                     Position::fake()
-    //                 ),
-    //                 &[Comment::new("foo", line_position(2))]
-    //             ),
-    //             indoc!(
-    //                 "
-    //                 foo = \\(
-    //                   x none, #foo
-    //                 ) none {
-    //                   none
-    //                 }
-    //                 "
-    //             )
-    //         );
-    //     }
-
-    //     #[test]
-    //     fn format_block_comment_on_function_argument() {
-    //         assert_eq!(
-    //             format(
-    //                 &Module::new(
-    //                     vec![],
-    //                     vec![],
-    //                     vec![],
-    //                     vec![Definition::new(
-    //                         "foo",
-    //                         Lambda::new(
-    //                             vec![Argument::new("x", types::None::new(line_position(3)))],
-    //                             types::None::new(Position::fake()),
-    //                             Block::new(vec![], None::new(Position::fake()), Position::fake()),
-    //                             Position::fake(),
-    //                         ),
-    //                         None,
-    //                         line_position(1)
-    //                     )],
-    //                     Position::fake()
-    //                 ),
-    //                 &[Comment::new("foo", line_position(2))]
-    //             ),
-    //             indoc!(
-    //                 "
-    //                 foo = \\(
-    //                   #foo
-    //                   x none,
-    //                 ) none {
-    //                   none
-    //                 }
-    //                 "
-    //             )
-    //         );
-    //     }
-    // }
+    mod expression {
+        use super::*;
+
+        fn format(expression: &Expression) -> String {
+            ir::format(&compile_expression(&mut Context::new(vec![]), expression))
+        }
+
+        mod call {
+            use super::*;
+
+            #[test]
+            fn format_() {
+                assert_eq!(
+                    format(
+                        &Call::new(
+                            Variable::new("foo", Position::fake()),
+                            vec![
+                                Number::new(
+                                    NumberRepresentation::FloatingPoint("1".into()),
+                                    Position::fake()
+                                )
+                                .into(),
+                                Number::new(
+                                    NumberRepresentation::FloatingPoint("2".into()),
+                                    Position::fake()
+                                )
+                                .into(),
+                            ],
+                            Position::fake()
+                        )
+                        .into()
+                    ),
+                    "foo(1, 2)"
+                );
+            }
+
+            #[test]
+            fn format_multi_line() {
+                assert_eq!(
+                    format(
+                        &Call::new(
+                            Variable::new("foo", line_position(1)),
+                            vec![
+                                Number::new(
+                                    NumberRepresentation::FloatingPoint("1".into()),
+                                    line_position(2)
+                                )
+                                .into(),
+                                Number::new(
+                                    NumberRepresentation::FloatingPoint("2".into()),
+                                    Position::fake()
+                                )
+                                .into(),
+                            ],
+                            Position::fake()
+                        )
+                        .into()
+                    ),
+                    indoc!(
+                        "
+                        foo(
+                          1,
+                          2,
+                        )
+                        "
+                    )
+                    .trim()
+                );
+            }
+        }
+
+        // mod if_ {
+        //     use super::*;
+
+        //     #[test]
+        //     fn format_single_line() {
+        //         assert_eq!(
+        //             format(
+        //                 &If::new(
+        //                     vec![IfBranch::new(
+        //                         Boolean::new(true, Position::fake()),
+        //                         Block::new(vec![], None::new(Position::fake()), Position::fake())
+        //                     )],
+        //                     Block::new(vec![], None::new(Position::fake()), Position::fake()),
+        //                     Position::fake()
+        //                 )
+        //                 .into()
+        //             ),
+        //             "if true { none } else { none }"
+        //         );
+        //     }
+
+        //     #[test]
+        //     fn format_multi_line_with_multi_line_input() {
+        //         assert_eq!(
+        //             format(
+        //                 &If::new(
+        //                     vec![IfBranch::new(
+        //                         Boolean::new(true, Position::fake()),
+        //                         Block::new(vec![], None::new(line_position(2)), Position::fake())
+        //                     )],
+        //                     Block::new(vec![], None::new(Position::fake()), Position::fake()),
+        //                     line_position(1)
+        //                 )
+        //                 .into()
+        //             ),
+        //             indoc!(
+        //                 "
+        //                 if true {
+        //                   none
+        //                 } else {
+        //                   none
+        //                 }
+        //                 "
+        //             )
+        //             .trim()
+        //         );
+        //     }
+
+        //     #[test]
+        //     fn format_multi_line_with_multiple_branches() {
+        //         assert_eq!(
+        //             format(
+        //                 &If::new(
+        //                     vec![
+        //                         IfBranch::new(
+        //                             Boolean::new(true, Position::fake()),
+        //                             Block::new(
+        //                                 vec![],
+        //                                 None::new(Position::fake()),
+        //                                 Position::fake()
+        //                             )
+        //                         ),
+        //                         IfBranch::new(
+        //                             Boolean::new(false, Position::fake()),
+        //                             Block::new(
+        //                                 vec![],
+        //                                 None::new(Position::fake()),
+        //                                 Position::fake()
+        //                             )
+        //                         )
+        //                     ],
+        //                     Block::new(vec![], None::new(Position::fake()), Position::fake()),
+        //                     Position::fake()
+        //                 )
+        //                 .into()
+        //             ),
+        //             indoc!(
+        //                 "
+        //                 if true {
+        //                   none
+        //                 } else if false {
+        //                   none
+        //                 } else {
+        //                   none
+        //                 }
+        //                 "
+        //             )
+        //             .trim()
+        //         );
+        //     }
+        // }
+
+        // #[test]
+        // fn format_if_list() {
+        //     assert_eq!(
+        //         format(
+        //             &IfList::new(
+        //                 Variable::new("ys", Position::fake()),
+        //                 "x",
+        //                 "xs",
+        //                 Block::new(
+        //                     vec![],
+        //                     Variable::new("x", Position::fake()),
+        //                     Position::fake()
+        //                 ),
+        //                 Block::new(vec![], None::new(Position::fake()), Position::fake()),
+        //                 Position::fake()
+        //             )
+        //             .into()
+        //         ),
+        //         indoc!(
+        //             "
+        //             if [x, ...xs] = ys {
+        //               x
+        //             } else {
+        //               none
+        //             }
+        //             "
+        //         )
+        //         .trim()
+        //     );
+        // }
+
+        // #[test]
+        // fn format_if_map() {
+        //     assert_eq!(
+        //         format(
+        //             &IfMap::new(
+        //                 "x",
+        //                 Variable::new("xs", Position::fake()),
+        //                 Variable::new("k", Position::fake()),
+        //                 Block::new(
+        //                     vec![],
+        //                     Variable::new("x", Position::fake()),
+        //                     Position::fake()
+        //                 ),
+        //                 Block::new(vec![], None::new(Position::fake()), Position::fake()),
+        //                 Position::fake()
+        //             )
+        //             .into()
+        //         ),
+        //         indoc!(
+        //             "
+        //             if x = xs[k] {
+        //               x
+        //             } else {
+        //               none
+        //             }
+        //             "
+        //         )
+        //         .trim()
+        //     );
+        // }
+
+        // mod if_type {
+        //     use super::*;
+
+        //     #[test]
+        //     fn format_single_line() {
+        //         assert_eq!(
+        //             format(
+        //                 &IfType::new(
+        //                     "x",
+        //                     Variable::new("y", Position::fake()),
+        //                     vec![
+        //                         IfTypeBranch::new(
+        //                             types::None::new(Position::fake()),
+        //                             Block::new(
+        //                                 vec![],
+        //                                 None::new(Position::fake()),
+        //                                 Position::fake()
+        //                             )
+        //                         ),
+        //                         IfTypeBranch::new(
+        //                             types::Number::new(Position::fake()),
+        //                             Block::new(
+        //                                 vec![],
+        //                                 None::new(Position::fake()),
+        //                                 Position::fake()
+        //                             )
+        //                         )
+        //                     ],
+        //                     None,
+        //                     Position::fake(),
+        //                 )
+        //                 .into()
+        //             ),
+        //             "if x = y as none { none } else if number { none }"
+        //         );
+        //     }
+
+        //     #[test]
+        //     fn format_multi_line() {
+        //         assert_eq!(
+        //             format(
+        //                 &IfType::new(
+        //                     "x",
+        //                     Variable::new("y", Position::fake()),
+        //                     vec![
+        //                         IfTypeBranch::new(
+        //                             types::None::new(Position::fake()),
+        //                             Block::new(
+        //                                 vec![],
+        //                                 None::new(line_position(2)),
+        //                                 Position::fake()
+        //                             )
+        //                         ),
+        //                         IfTypeBranch::new(
+        //                             types::Number::new(Position::fake()),
+        //                             Block::new(
+        //                                 vec![],
+        //                                 None::new(Position::fake()),
+        //                                 Position::fake()
+        //                             )
+        //                         )
+        //                     ],
+        //                     None,
+        //                     line_position(1),
+        //                 )
+        //                 .into()
+        //             ),
+        //             indoc!(
+        //                 "
+        //                 if x = y as none {
+        //                   none
+        //                 } else if number {
+        //                   none
+        //                 }
+        //                 "
+        //             )
+        //             .trim()
+        //         );
+        //     }
+
+        //     #[test]
+        //     fn format_with_else_block() {
+        //         assert_eq!(
+        //             format(
+        //                 &IfType::new(
+        //                     "x",
+        //                     Variable::new("y", Position::fake()),
+        //                     vec![
+        //                         IfTypeBranch::new(
+        //                             types::None::new(Position::fake()),
+        //                             Block::new(
+        //                                 vec![],
+        //                                 None::new(Position::fake()),
+        //                                 Position::fake()
+        //                             )
+        //                         ),
+        //                         IfTypeBranch::new(
+        //                             types::Number::new(Position::fake()),
+        //                             Block::new(
+        //                                 vec![],
+        //                                 None::new(Position::fake()),
+        //                                 Position::fake()
+        //                             )
+        //                         )
+        //                     ],
+        //                     Some(Block::new(
+        //                         vec![],
+        //                         None::new(Position::fake()),
+        //                         Position::fake()
+        //                     )),
+        //                     Position::fake(),
+        //                 )
+        //                 .into()
+        //             ),
+        //             indoc!(
+        //                 "
+        //             if x = y as none {
+        //               none
+        //             } else if number {
+        //               none
+        //             } else {
+        //               none
+        //             }
+        //             "
+        //             )
+        //             .trim()
+        //         );
+        //     }
+        // }
+
+        mod lambda {
+            use super::*;
+
+            #[test]
+            fn format_() {
+                assert_eq!(
+                    format(
+                        &Lambda::new(
+                            vec![],
+                            types::None::new(Position::fake()),
+                            Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                            Position::fake()
+                        )
+                        .into()
+                    ),
+                    "\\() none { none }"
+                );
+            }
+
+            #[test]
+            fn format_multi_line_body() {
+                assert_eq!(
+                    format(
+                        &Lambda::new(
+                            vec![],
+                            types::None::new(Position::fake()),
+                            Block::new(
+                                vec![Statement::new(
+                                    Some("x".into()),
+                                    None::new(Position::fake()),
+                                    Position::fake()
+                                )],
+                                None::new(Position::fake()),
+                                Position::fake()
+                            ),
+                            Position::fake()
+                        )
+                        .into()
+                    ),
+                    indoc!(
+                        "
+                        \\() none {
+                          x = none
+                          none
+                        }
+                        "
+                    )
+                    .trim()
+                );
+            }
+
+            #[test]
+            fn format_single_line_arguments_with_multi_line_body_of_expression() {
+                assert_eq!(
+                    format(
+                        &Lambda::new(
+                            vec![],
+                            types::None::new(Position::fake()),
+                            Block::new(vec![], None::new(line_position(2)), Position::fake()),
+                            line_position(1)
+                        )
+                        .into()
+                    ),
+                    indoc!(
+                        "
+                        \\() none {
+                          none
+                        }
+                        "
+                    )
+                    .trim()
+                );
+            }
+
+            #[test]
+            fn format_multi_line_argument() {
+                assert_eq!(
+                    format(
+                        &Lambda::new(
+                            vec![Argument::new("x", types::None::new(line_position(2)))],
+                            types::None::new(Position::fake()),
+                            Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                            line_position(1)
+                        )
+                        .into()
+                    ),
+                    indoc!(
+                        "
+                        \\(
+                          x none,
+                        ) none {
+                          none
+                        }
+                        "
+                    )
+                    .trim()
+                );
+            }
+
+            #[test]
+            fn format_multi_line_arguments() {
+                assert_eq!(
+                    format(
+                        &Lambda::new(
+                            vec![
+                                Argument::new("x", types::None::new(line_position(2))),
+                                Argument::new("y", types::None::new(Position::fake()))
+                            ],
+                            types::None::new(Position::fake()),
+                            Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                            line_position(1)
+                        )
+                        .into()
+                    ),
+                    indoc!(
+                        "
+                        \\(
+                          x none,
+                          y none,
+                        ) none {
+                          none
+                        }
+                        "
+                    )
+                    .trim()
+                );
+            }
+        }
+
+        mod number {
+            use super::*;
+
+            #[test]
+            fn format_decimal_float() {
+                assert_eq!(
+                    format(
+                        &Number::new(
+                            NumberRepresentation::FloatingPoint("42".into()),
+                            Position::fake()
+                        )
+                        .into()
+                    ),
+                    "42"
+                );
+            }
+
+            #[test]
+            fn format_binary() {
+                assert_eq!(
+                    format(
+                        &Number::new(NumberRepresentation::Binary("01".into()), Position::fake())
+                            .into()
+                    ),
+                    "0b01"
+                );
+            }
+
+            #[test]
+            fn format_hexadecimal() {
+                assert_eq!(
+                    format(
+                        &Number::new(
+                            NumberRepresentation::Hexadecimal("fa".into()),
+                            Position::fake()
+                        )
+                        .into()
+                    ),
+                    "0xFA"
+                );
+            }
+        }
+
+        // #[test]
+        // fn format_spawn_operation() {
+        //     assert_eq!(
+        //         format(
+        //             &SpawnOperation::new(
+        //                 Lambda::new(
+        //                     vec![],
+        //                     types::None::new(Position::fake()),
+        //                     Block::new(vec![], None::new(Position::fake()), Position::fake()),
+        //                     Position::fake(),
+        //                 ),
+        //                 Position::fake()
+        //             )
+        //             .into()
+        //         ),
+        //         "go \\() none { none }"
+        //     );
+        // }
+
+        #[test]
+        fn format_string() {
+            assert_eq!(
+                format(&ByteString::new("foo", Position::fake()).into()),
+                "\"foo\""
+            );
+        }
+
+        // mod binary_operation {
+        //     use super::*;
+
+        //     #[test]
+        //     fn format_() {
+        //         assert_eq!(
+        //             format(
+        //                 &BinaryOperation::new(
+        //                     BinaryOperator::Add,
+        //                     Number::new(
+        //                         NumberRepresentation::FloatingPoint("1".into()),
+        //                         Position::fake()
+        //                     ),
+        //                     Number::new(
+        //                         NumberRepresentation::FloatingPoint("2".into()),
+        //                         Position::fake()
+        //                     ),
+        //                     Position::fake()
+        //                 )
+        //                 .into()
+        //             ),
+        //             "1 + 2"
+        //         );
+        //     }
+
+        //     #[test]
+        //     fn format_multi_line() {
+        //         assert_eq!(
+        //             format(
+        //                 &BinaryOperation::new(
+        //                     BinaryOperator::Add,
+        //                     Number::new(
+        //                         NumberRepresentation::FloatingPoint("1".into()),
+        //                         line_position(1)
+        //                     ),
+        //                     Number::new(
+        //                         NumberRepresentation::FloatingPoint("2".into()),
+        //                         line_position(2)
+        //                     ),
+        //                     Position::fake()
+        //                 )
+        //                 .into()
+        //             ),
+        //             indoc!(
+        //                 "
+        //                 1
+        //                   + 2
+        //                 "
+        //             )
+        //             .trim()
+        //         );
+        //     }
+
+        //     #[test]
+        //     fn format_nested_operations() {
+        //         assert_eq!(
+        //             format(
+        //                 &BinaryOperation::new(
+        //                     BinaryOperator::Add,
+        //                     Number::new(
+        //                         NumberRepresentation::FloatingPoint("1".into()),
+        //                         Position::fake()
+        //                     ),
+        //                     BinaryOperation::new(
+        //                         BinaryOperator::Multiply,
+        //                         Number::new(
+        //                             NumberRepresentation::FloatingPoint("2".into()),
+        //                             Position::fake()
+        //                         ),
+        //                         Number::new(
+        //                             NumberRepresentation::FloatingPoint("3".into()),
+        //                             Position::fake()
+        //                         ),
+        //                         Position::fake()
+        //                     ),
+        //                     Position::fake()
+        //                 )
+        //                 .into()
+        //             ),
+        //             "1 + 2 * 3"
+        //         );
+        //     }
+
+        //     #[test]
+        //     fn format_nested_operations_with_priority() {
+        //         assert_eq!(
+        //             format(
+        //                 &BinaryOperation::new(
+        //                     BinaryOperator::Multiply,
+        //                     Number::new(
+        //                         NumberRepresentation::FloatingPoint("1".into()),
+        //                         Position::fake()
+        //                     ),
+        //                     BinaryOperation::new(
+        //                         BinaryOperator::Add,
+        //                         Number::new(
+        //                             NumberRepresentation::FloatingPoint("2".into()),
+        //                             Position::fake()
+        //                         ),
+        //                         Number::new(
+        //                             NumberRepresentation::FloatingPoint("3".into()),
+        //                             Position::fake()
+        //                         ),
+        //                         Position::fake()
+        //                     ),
+        //                     Position::fake()
+        //                 )
+        //                 .into()
+        //             ),
+        //             "1 * (2 + 3)"
+        //         );
+        //     }
+        // }
+
+        // mod unary_operation {
+        //     use super::*;
+
+        //     #[test]
+        //     fn format_not_operation() {
+        //         assert_eq!(
+        //             format(
+        //                 &UnaryOperation::new(
+        //                     UnaryOperator::Not,
+        //                     Variable::new("x", Position::fake()),
+        //                     Position::fake()
+        //                 )
+        //                 .into()
+        //             ),
+        //             "!x"
+        //         );
+        //     }
+
+        //     #[test]
+        //     fn format_try_operation() {
+        //         assert_eq!(
+        //             format(
+        //                 &UnaryOperation::new(
+        //                     UnaryOperator::Try,
+        //                     Variable::new("x", Position::fake()),
+        //                     Position::fake()
+        //                 )
+        //                 .into()
+        //             ),
+        //             "x?"
+        //         );
+        //     }
+
+        //     #[test]
+        //     fn format_with_binary_operation() {
+        //         assert_eq!(
+        //             format(
+        //                 &UnaryOperation::new(
+        //                     UnaryOperator::Not,
+        //                     BinaryOperation::new(
+        //                         BinaryOperator::And,
+        //                         Boolean::new(true, Position::fake()),
+        //                         Boolean::new(false, Position::fake()),
+        //                         Position::fake()
+        //                     ),
+        //                     Position::fake()
+        //                 )
+        //                 .into(),
+        //             ),
+        //             "!(true & false)"
+        //         );
+        //     }
+        // }
+
+        // #[test]
+        // fn format_record_deconstruction() {
+        //     assert_eq!(
+        //         format(
+        //             &RecordDeconstruction::new(
+        //                 Variable::new("x", Position::fake()),
+        //                 "y",
+        //                 Position::fake()
+        //             )
+        //             .into()
+        //         ),
+        //         "x.y"
+        //     );
+        // }
+
+        // mod list {
+        //     use super::*;
+
+        //     #[test]
+        //     fn format_empty() {
+        //         assert_eq!(
+        //             format(
+        //                 &List::new(types::None::new(Position::fake()), vec![], Position::fake())
+        //                     .into()
+        //             ),
+        //             "[none]"
+        //         );
+        //     }
+
+        //     #[test]
+        //     fn format_element() {
+        //         assert_eq!(
+        //             format(
+        //                 &List::new(
+        //                     types::None::new(Position::fake()),
+        //                     vec![ListElement::Single(None::new(Position::fake()).into())],
+        //                     Position::fake()
+        //                 )
+        //                 .into()
+        //             ),
+        //             "[none none]"
+        //         );
+        //     }
+
+        //     #[test]
+        //     fn format_two_elements() {
+        //         assert_eq!(
+        //             format(
+        //                 &List::new(
+        //                     types::None::new(Position::fake()),
+        //                     vec![
+        //                         ListElement::Single(None::new(Position::fake()).into()),
+        //                         ListElement::Single(None::new(Position::fake()).into())
+        //                     ],
+        //                     Position::fake()
+        //                 )
+        //                 .into()
+        //             ),
+        //             "[none none, none]"
+        //         );
+        //     }
+
+        //     #[test]
+        //     fn format_multi_line() {
+        //         assert_eq!(
+        //             format(
+        //                 &List::new(
+        //                     types::None::new(Position::fake()),
+        //                     vec![ListElement::Single(None::new(line_position(2)).into())],
+        //                     line_position(1)
+        //                 )
+        //                 .into()
+        //             ),
+        //             indoc!(
+        //                 "
+        //                 [none
+        //                   none,
+        //                 ]
+        //                 "
+        //             )
+        //             .trim()
+        //         );
+        //     }
+
+        //     #[test]
+        //     fn format_multi_line_with_two_elements() {
+        //         assert_eq!(
+        //             format(
+        //                 &List::new(
+        //                     types::Number::new(Position::fake()),
+        //                     vec![
+        //                         ListElement::Single(
+        //                             Number::new(
+        //                                 NumberRepresentation::FloatingPoint("1".into()),
+        //                                 line_position(2)
+        //                             )
+        //                             .into()
+        //                         ),
+        //                         ListElement::Single(
+        //                             Number::new(
+        //                                 NumberRepresentation::FloatingPoint("2".into()),
+        //                                 Position::fake()
+        //                             )
+        //                             .into()
+        //                         )
+        //                     ],
+        //                     line_position(1)
+        //                 )
+        //                 .into()
+        //             ),
+        //             indoc!(
+        //                 "
+        //                 [number
+        //                   1,
+        //                   2,
+        //                 ]
+        //                 "
+        //             )
+        //             .trim()
+        //         );
+        //     }
+
+        //     #[test]
+        //     fn format_comprehension() {
+        //         assert_eq!(
+        //             format(
+        //                 &ListComprehension::new(
+        //                     types::None::new(Position::fake()),
+        //                     None::new(Position::fake()),
+        //                     "x",
+        //                     Variable::new("xs", Position::fake()),
+        //                     Position::fake()
+        //                 )
+        //                 .into()
+        //             ),
+        //             "[none none for x in xs]"
+        //         );
+        //     }
+
+        //     #[test]
+        //     fn format_multi_line_comprehension() {
+        //         assert_eq!(
+        //             format(
+        //                 &ListComprehension::new(
+        //                     types::None::new(Position::fake()),
+        //                     None::new(line_position(2)),
+        //                     "x",
+        //                     Variable::new("xs", Position::fake()),
+        //                     line_position(1)
+        //                 )
+        //                 .into()
+        //             ),
+        //             indoc!(
+        //                 "
+        //                 [none
+        //                   none
+        //                   for x in xs
+        //                 ]
+        //                 "
+        //             )
+        //             .trim()
+        //         );
+        //     }
+        // }
+
+        // mod map {
+        //     use super::*;
+
+        //     #[test]
+        //     fn format_empty() {
+        //         assert_eq!(
+        //             format(
+        //                 &Map::new(
+        //                     types::ByteString::new(Position::fake()),
+        //                     types::Number::new(Position::fake()),
+        //                     vec![],
+        //                     Position::fake()
+        //                 )
+        //                 .into()
+        //             ),
+        //             "{string: number}"
+        //         );
+        //     }
+
+        //     #[test]
+        //     fn format_entry() {
+        //         assert_eq!(
+        //             format(
+        //                 &Map::new(
+        //                     types::ByteString::new(Position::fake()),
+        //                     types::Number::new(Position::fake()),
+        //                     vec![MapEntry::new(
+        //                         ByteString::new("foo", Position::fake()),
+        //                         Number::new(
+        //                             NumberRepresentation::FloatingPoint("42".into()),
+        //                             Position::fake()
+        //                         ),
+        //                         Position::fake()
+        //                     )
+        //                     .into()],
+        //                     Position::fake()
+        //                 )
+        //                 .into()
+        //             ),
+        //             "{string: number \"foo\": 42}"
+        //         );
+        //     }
+
+        //     #[test]
+        //     fn format_two_entries() {
+        //         assert_eq!(
+        //             format(
+        //                 &Map::new(
+        //                     types::ByteString::new(Position::fake()),
+        //                     types::Number::new(Position::fake()),
+        //                     vec![
+        //                         MapEntry::new(
+        //                             ByteString::new("foo", Position::fake()),
+        //                             Number::new(
+        //                                 NumberRepresentation::FloatingPoint("1".into()),
+        //                                 Position::fake()
+        //                             ),
+        //                             Position::fake()
+        //                         )
+        //                         .into(),
+        //                         MapEntry::new(
+        //                             ByteString::new("bar", Position::fake()),
+        //                             Number::new(
+        //                                 NumberRepresentation::FloatingPoint("2".into()),
+        //                                 Position::fake()
+        //                             ),
+        //                             Position::fake()
+        //                         )
+        //                         .into()
+        //                     ],
+        //                     Position::fake()
+        //                 )
+        //                 .into()
+        //             ),
+        //             "{string: number \"foo\": 1, \"bar\": 2}"
+        //         );
+        //     }
+
+        //     #[test]
+        //     fn format_removal() {
+        //         assert_eq!(
+        //             format(
+        //                 &Map::new(
+        //                     types::ByteString::new(Position::fake()),
+        //                     types::Number::new(Position::fake()),
+        //                     vec![MapElement::Removal(
+        //                         ByteString::new("foo", Position::fake()).into()
+        //                     )],
+        //                     Position::fake()
+        //                 )
+        //                 .into()
+        //             ),
+        //             "{string: number \"foo\"}"
+        //         );
+        //     }
+
+        //     #[test]
+        //     fn format_map() {
+        //         assert_eq!(
+        //             format(
+        //                 &Map::new(
+        //                     types::ByteString::new(Position::fake()),
+        //                     types::Number::new(Position::fake()),
+        //                     vec![MapElement::Map(
+        //                         Variable::new("xs", Position::fake()).into()
+        //                     )],
+        //                     Position::fake()
+        //                 )
+        //                 .into()
+        //             ),
+        //             "{string: number ...xs}"
+        //         );
+        //     }
+
+        //     #[test]
+        //     fn format_multi_line() {
+        //         assert_eq!(
+        //             format(
+        //                 &Map::new(
+        //                     types::ByteString::new(Position::fake()),
+        //                     types::Number::new(Position::fake()),
+        //                     vec![MapEntry::new(
+        //                         ByteString::new("foo", Position::fake()),
+        //                         Number::new(
+        //                             NumberRepresentation::FloatingPoint("1".into()),
+        //                             Position::fake()
+        //                         ),
+        //                         line_position(2)
+        //                     )
+        //                     .into()],
+        //                     line_position(1)
+        //                 )
+        //                 .into()
+        //             ),
+        //             indoc!(
+        //                 "
+        //                 {string: number
+        //                   \"foo\": 1,
+        //                 }
+        //                 "
+        //             )
+        //             .trim(),
+        //         );
+        //     }
+
+        //     #[test]
+        //     fn format_multi_line_with_two_entries() {
+        //         assert_eq!(
+        //             format(
+        //                 &Map::new(
+        //                     types::ByteString::new(Position::fake()),
+        //                     types::Number::new(Position::fake()),
+        //                     vec![
+        //                         MapEntry::new(
+        //                             ByteString::new("foo", Position::fake()),
+        //                             Number::new(
+        //                                 NumberRepresentation::FloatingPoint("1".into()),
+        //                                 Position::fake()
+        //                             ),
+        //                             line_position(2)
+        //                         )
+        //                         .into(),
+        //                         MapEntry::new(
+        //                             ByteString::new("bar", Position::fake()),
+        //                             Number::new(
+        //                                 NumberRepresentation::FloatingPoint("2".into()),
+        //                                 Position::fake()
+        //                             ),
+        //                             Position::fake()
+        //                         )
+        //                         .into()
+        //                     ],
+        //                     line_position(1)
+        //                 )
+        //                 .into()
+        //             ),
+        //             indoc!(
+        //                 "
+        //                 {string: number
+        //                   \"foo\": 1,
+        //                   \"bar\": 2,
+        //                 }
+        //                 "
+        //             )
+        //             .trim(),
+        //         );
+        //     }
+        // }
+
+        // mod record {
+        //     use super::*;
+
+        //     #[test]
+        //     fn format_empty() {
+        //         assert_eq!(
+        //             format(&Record::new("foo", None, vec![], Position::fake()).into()),
+        //             "foo{}"
+        //         );
+        //     }
+
+        //     #[test]
+        //     fn format_field() {
+        //         assert_eq!(
+        //             format(
+        //                 &Record::new(
+        //                     "foo",
+        //                     None,
+        //                     vec![RecordField::new(
+        //                         "x",
+        //                         None::new(Position::fake()),
+        //                         Position::fake()
+        //                     )],
+        //                     Position::fake()
+        //                 )
+        //                 .into()
+        //             ),
+        //             "foo{x: none}"
+        //         );
+        //     }
+
+        //     #[test]
+        //     fn format_two_fields() {
+        //         assert_eq!(
+        //             format(
+        //                 &Record::new(
+        //                     "foo",
+        //                     None,
+        //                     vec![
+        //                         RecordField::new(
+        //                             "x",
+        //                             Number::new(
+        //                                 NumberRepresentation::FloatingPoint("1".into()),
+        //                                 Position::fake()
+        //                             ),
+        //                             Position::fake()
+        //                         ),
+        //                         RecordField::new(
+        //                             "y",
+        //                             Number::new(
+        //                                 NumberRepresentation::FloatingPoint("2".into()),
+        //                                 Position::fake()
+        //                             ),
+        //                             Position::fake()
+        //                         )
+        //                     ],
+        //                     Position::fake()
+        //                 )
+        //                 .into()
+        //             ),
+        //             "foo{x: 1, y: 2}"
+        //         );
+        //     }
+
+        //     #[test]
+        //     fn format_update() {
+        //         assert_eq!(
+        //             format(
+        //                 &Record::new(
+        //                     "foo",
+        //                     Some(Variable::new("r", Position::fake()).into()),
+        //                     vec![RecordField::new(
+        //                         "x",
+        //                         None::new(Position::fake()),
+        //                         Position::fake()
+        //                     )],
+        //                     Position::fake()
+        //                 )
+        //                 .into()
+        //             ),
+        //             "foo{...r, x: none}"
+        //         );
+        //     }
+
+        //     #[test]
+        //     fn format_multi_line() {
+        //         assert_eq!(
+        //             format(
+        //                 &Record::new(
+        //                     "foo",
+        //                     None,
+        //                     vec![RecordField::new(
+        //                         "x",
+        //                         None::new(Position::fake()),
+        //                         line_position(2)
+        //                     )],
+        //                     line_position(1)
+        //                 )
+        //                 .into()
+        //             ),
+        //             indoc!(
+        //                 "
+        //                 foo{
+        //                   x: none,
+        //                 }
+        //                 "
+        //             )
+        //             .trim(),
+        //         );
+        //     }
+
+        //     #[test]
+        //     fn format_multi_line_with_two_fields() {
+        //         assert_eq!(
+        //             format(
+        //                 &Record::new(
+        //                     "foo",
+        //                     None,
+        //                     vec![
+        //                         RecordField::new(
+        //                             "x",
+        //                             None::new(Position::fake()),
+        //                             line_position(2)
+        //                         ),
+        //                         RecordField::new(
+        //                             "y",
+        //                             None::new(Position::fake()),
+        //                             line_position(2)
+        //                         )
+        //                     ],
+        //                     line_position(1)
+        //                 )
+        //                 .into()
+        //             ),
+        //             indoc!(
+        //                 "
+        //                 foo{
+        //                   x: none,
+        //                   y: none,
+        //                 }
+        //                 "
+        //             )
+        //             .trim(),
+        //         );
+        //     }
+        // }
+    }
+
+    mod comment {
+        use super::*;
+
+        #[test]
+        fn format_comment() {
+            assert_eq!(
+                format(
+                    &Module::new(vec![], vec![], vec![], vec![], Position::fake()),
+                    &[Comment::new("foo", Position::fake())]
+                ),
+                "#foo\n"
+            );
+        }
+
+        #[test]
+        fn keep_spaces_between_comments() {
+            assert_eq!(
+                format(
+                    &Module::new(vec![], vec![], vec![], vec![], Position::fake()),
+                    &[
+                        Comment::new("foo", line_position(1)),
+                        Comment::new("bar", line_position(3)),
+                    ]
+                ),
+                indoc!(
+                    "
+                    #foo
+
+                    #bar
+                    ",
+                ),
+            );
+        }
+
+        #[test]
+        fn keep_spaces_between_comment_and_next_line() {
+            assert_eq!(
+                format(
+                    &Module::new(
+                        vec![Import::new(
+                            InternalModulePath::new(vec!["Foo".into()]),
+                            None,
+                            vec![],
+                            line_position(3),
+                        )],
+                        vec![],
+                        vec![],
+                        vec![],
+                        Position::fake()
+                    ),
+                    &[Comment::new("foo", line_position(1))]
+                ),
+                indoc!(
+                    "
+                    #foo
+
+                    import 'Foo
+                    ",
+                ),
+            );
+        }
+
+        #[test]
+        fn format_import() {
+            assert_eq!(
+                format(
+                    &Module::new(
+                        vec![Import::new(
+                            InternalModulePath::new(vec!["Foo".into()]),
+                            None,
+                            vec![],
+                            line_position(2),
+                        )],
+                        vec![],
+                        vec![],
+                        vec![],
+                        Position::fake()
+                    ),
+                    &[Comment::new("foo", line_position(1))]
+                ),
+                "#foo\nimport 'Foo\n"
+            );
+        }
+
+        #[test]
+        fn format_foreign_import() {
+            assert_eq!(
+                format(
+                    &Module::new(
+                        vec![],
+                        vec![ForeignImport::new(
+                            "foo",
+                            CallingConvention::Native,
+                            types::Function::new(
+                                vec![],
+                                types::None::new(Position::fake()),
+                                Position::fake()
+                            ),
+                            line_position(2),
+                        )],
+                        vec![],
+                        vec![],
+                        Position::fake()
+                    ),
+                    &[Comment::new("foo", line_position(1))]
+                ),
+                "#foo\nimport foreign foo \\() none\n"
+            );
+        }
+
+        #[test]
+        fn format_type_definition() {
+            assert_eq!(
+                format(
+                    &Module::new(
+                        vec![],
+                        vec![],
+                        vec![RecordDefinition::new("foo", vec![], line_position(2)).into()],
+                        vec![],
+                        Position::fake()
+                    ),
+                    &[Comment::new("foo", line_position(1))]
+                ),
+                "#foo\ntype foo {}\n"
+            );
+        }
+
+        #[test]
+        fn format_type_alias() {
+            assert_eq!(
+                format(
+                    &Module::new(
+                        vec![],
+                        vec![],
+                        vec![TypeAlias::new(
+                            "foo",
+                            types::None::new(Position::fake()),
+                            line_position(2)
+                        )
+                        .into()],
+                        vec![],
+                        Position::fake()
+                    ),
+                    &[Comment::new("foo", line_position(1))]
+                ),
+                "#foo\ntype foo = none\n"
+            );
+        }
+
+        #[test]
+        fn format_definition() {
+            assert_eq!(
+                format(
+                    &Module::new(
+                        vec![],
+                        vec![],
+                        vec![],
+                        vec![Definition::new(
+                            "foo",
+                            Lambda::new(
+                                vec![],
+                                types::None::new(Position::fake()),
+                                Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                                Position::fake(),
+                            ),
+                            None,
+                            line_position(2)
+                        )],
+                        Position::fake()
+                    ),
+                    &[Comment::new("foo", line_position(1))]
+                ),
+                "#foo\nfoo = \\() none { none }\n"
+            );
+        }
+
+        #[test]
+        fn format_statement_in_block() {
+            assert_eq!(
+                format(
+                    &Module::new(
+                        vec![],
+                        vec![],
+                        vec![],
+                        vec![Definition::new(
+                            "foo",
+                            Lambda::new(
+                                vec![],
+                                types::None::new(Position::fake()),
+                                Block::new(
+                                    vec![Statement::new(
+                                        Some("x".into()),
+                                        None::new(Position::fake()),
+                                        line_position(2)
+                                    )],
+                                    None::new(line_position(3)),
+                                    Position::fake()
+                                ),
+                                Position::fake(),
+                            ),
+                            None,
+                            Position::fake()
+                        )],
+                        Position::fake()
+                    ),
+                    &[Comment::new("foo", line_position(1))]
+                ),
+                indoc!(
+                    "
+                    foo = \\() none {
+                      #foo
+                      x = none
+                      none
+                    }
+                    "
+                )
+            );
+        }
+
+        #[test]
+        fn format_result_expression_in_block() {
+            assert_eq!(
+                format(
+                    &Module::new(
+                        vec![],
+                        vec![],
+                        vec![],
+                        vec![Definition::new(
+                            "foo",
+                            Lambda::new(
+                                vec![],
+                                types::None::new(Position::fake()),
+                                Block::new(vec![], None::new(line_position(2)), Position::fake()),
+                                Position::fake(),
+                            ),
+                            None,
+                            Position::fake()
+                        )],
+                        Position::fake()
+                    ),
+                    &[Comment::new("foo", line_position(1))]
+                ),
+                indoc!(
+                    "
+                    foo = \\() none {
+                      #foo
+                      none
+                    }
+                    "
+                )
+            );
+        }
+
+        // #[test]
+        // fn format_comment_between_statement_and_expression_in_block() {
+        //     assert_eq!(
+        //         format(
+        //             &Module::new(
+        //                 vec![],
+        //                 vec![],
+        //                 vec![],
+        //                 vec![Definition::new(
+        //                     "foo",
+        //                     Lambda::new(
+        //                         vec![],
+        //                         types::None::new(Position::fake()),
+        //                         Block::new(
+        //                             vec![Statement::new(
+        //                                 Some("x".into()),
+        //                                 None::new(Position::fake()),
+        //                                 line_position(1)
+        //                             )],
+        //                             None::new(line_position(3)),
+        //                             Position::fake()
+        //                         ),
+        //                         Position::fake(),
+        //                     ),
+        //                     None,
+        //                     Position::fake()
+        //                 )],
+        //                 Position::fake()
+        //             ),
+        //             &[Comment::new("foo", line_position(2))]
+        //         ),
+        //         indoc!(
+        //             "
+        //             foo = \\() none {
+        //               x = none
+        //               #foo
+        //               none
+        //             }
+        //             "
+        //         )
+        //     );
+        // }
+
+        #[test]
+        fn format_suffix_comment_after_statement() {
+            assert_eq!(
+                format(
+                    &Module::new(
+                        vec![],
+                        vec![],
+                        vec![],
+                        vec![Definition::new(
+                            "foo",
+                            Lambda::new(
+                                vec![],
+                                types::None::new(Position::fake()),
+                                Block::new(
+                                    vec![Statement::new(
+                                        Some("x".into()),
+                                        None::new(Position::fake()),
+                                        line_position(2)
+                                    )],
+                                    None::new(line_position(3)),
+                                    Position::fake()
+                                ),
+                                Position::fake(),
+                            ),
+                            None,
+                            Position::fake()
+                        )],
+                        Position::fake()
+                    ),
+                    &[Comment::new("foo", line_position(2))]
+                ),
+                indoc!(
+                    "
+                    foo = \\() none {
+                      x = none #foo
+                      none
+                    }
+                    "
+                )
+            );
+        }
+
+        #[test]
+        fn format_space_between_two_statement_comments() {
+            assert_eq!(
+                format(
+                    &Module::new(
+                        vec![],
+                        vec![],
+                        vec![],
+                        vec![Definition::new(
+                            "foo",
+                            Lambda::new(
+                                vec![],
+                                types::None::new(Position::fake()),
+                                Block::new(
+                                    vec![
+                                        Statement::new(
+                                            Some("x".into()),
+                                            None::new(Position::fake()),
+                                            line_position(3)
+                                        ),
+                                        Statement::new(
+                                            Some("y".into()),
+                                            None::new(Position::fake()),
+                                            line_position(6)
+                                        )
+                                    ],
+                                    None::new(line_position(7)),
+                                    Position::fake()
+                                ),
+                                Position::fake(),
+                            ),
+                            None,
+                            Position::fake()
+                        )],
+                        Position::fake()
+                    ),
+                    &[
+                        Comment::new("foo", line_position(2)),
+                        Comment::new("bar", line_position(5))
+                    ]
+                ),
+                indoc!(
+                    "
+                    foo = \\() none {
+                      #foo
+                      x = none
+
+                      #bar
+                      y = none
+                      none
+                    }
+                    "
+                )
+            );
+        }
+
+        #[test]
+        fn format_suffix_comment_on_function_argument() {
+            assert_eq!(
+                format(
+                    &Module::new(
+                        vec![],
+                        vec![],
+                        vec![],
+                        vec![Definition::new(
+                            "foo",
+                            Lambda::new(
+                                vec![Argument::new("x", types::None::new(line_position(2)))],
+                                types::None::new(Position::fake()),
+                                Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                                Position::fake(),
+                            ),
+                            None,
+                            line_position(1)
+                        )],
+                        Position::fake()
+                    ),
+                    &[Comment::new("foo", line_position(2))]
+                ),
+                indoc!(
+                    "
+                    foo = \\(
+                      x none, #foo
+                    ) none {
+                      none
+                    }
+                    "
+                )
+            );
+        }
+
+        #[test]
+        fn format_block_comment_on_function_argument() {
+            assert_eq!(
+                format(
+                    &Module::new(
+                        vec![],
+                        vec![],
+                        vec![],
+                        vec![Definition::new(
+                            "foo",
+                            Lambda::new(
+                                vec![Argument::new("x", types::None::new(line_position(3)))],
+                                types::None::new(Position::fake()),
+                                Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                                Position::fake(),
+                            ),
+                            None,
+                            line_position(1)
+                        )],
+                        Position::fake()
+                    ),
+                    &[Comment::new("foo", line_position(2))]
+                ),
+                indoc!(
+                    "
+                    foo = \\(
+                      #foo
+                      x none,
+                    ) none {
+                      none
+                    }
+                    "
+                )
+            );
+        }
+    }
 }
