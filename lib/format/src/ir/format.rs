@@ -40,7 +40,7 @@ fn format_document(context: &mut Context, document: &Document, level: usize, bro
             context.line_suffixes.push(suffix.clone());
         }
         Document::Sequence(documents) => {
-            for document in documents {
+            for document in documents.as_ref() {
                 format_document(context, document, level, broken);
             }
         }

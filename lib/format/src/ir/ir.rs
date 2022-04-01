@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 // https://homepages.inf.ed.ac.uk/wadler/papers/prettier/prettier.pdf
 //
 // We need soft-line and if-break nodes to make nodes totally agnostic about if
@@ -6,12 +8,12 @@
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum Document {
-    Flatten(Box<Document>),
+    Flatten(Rc<Document>),
     HardLine,
-    Indent(Box<Document>),
+    Indent(Rc<Document>),
     Line,
     LineSuffix(String),
-    Sequence(Vec<Document>),
+    Sequence(Rc<[Document]>),
     String(String),
 }
 
@@ -29,6 +31,6 @@ impl From<String> for Document {
 
 impl From<Vec<Document>> for Document {
     fn from(documents: Vec<Document>) -> Self {
-        Self::Sequence(documents)
+        Self::Sequence(documents.into())
     }
 }
