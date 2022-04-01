@@ -319,10 +319,10 @@ fn compile_block(context: &mut Context, block: &Block) -> Document {
                 let block_comment = compile_block_comment(context, statement.position());
                 // TODO Use end positions of spans when they are available.
                 let line_count = next_position.line_number() as isize
-                    - statement.position().line_number() as isize;
-                // -comment::split_before(new_comments, next_position.line_number())
-                //     .0
-                //     .len() as isize;
+                    - statement.position().line_number() as isize
+                    - context
+                        .peek_comments_before(next_position.line_number())
+                        .count() as isize;
                 let statement_document = compile_statement(context, statement);
                 let extra_line = if count_lines(&statement_document) as isize >= line_count {
                     empty()
@@ -3191,48 +3191,48 @@ mod tests {
             );
         }
 
-        // #[test]
-        // fn format_comment_between_statement_and_expression_in_block() {
-        //     assert_eq!(
-        //         format(
-        //             &Module::new(
-        //                 vec![],
-        //                 vec![],
-        //                 vec![],
-        //                 vec![Definition::new(
-        //                     "foo",
-        //                     Lambda::new(
-        //                         vec![],
-        //                         types::None::new(Position::fake()),
-        //                         Block::new(
-        //                             vec![Statement::new(
-        //                                 Some("x".into()),
-        //                                 None::new(Position::fake()),
-        //                                 line_position(1)
-        //                             )],
-        //                             None::new(line_position(3)),
-        //                             Position::fake()
-        //                         ),
-        //                         Position::fake(),
-        //                     ),
-        //                     None,
-        //                     Position::fake()
-        //                 )],
-        //                 Position::fake()
-        //             ),
-        //             &[Comment::new("foo", line_position(2))]
-        //         ),
-        //         indoc!(
-        //             "
-        //             foo = \\() none {
-        //               x = none
-        //               #foo
-        //               none
-        //             }
-        //             "
-        //         )
-        //     );
-        // }
+        #[test]
+        fn format_comment_between_statement_and_expression_in_block() {
+            assert_eq!(
+                format(
+                    &Module::new(
+                        vec![],
+                        vec![],
+                        vec![],
+                        vec![Definition::new(
+                            "foo",
+                            Lambda::new(
+                                vec![],
+                                types::None::new(Position::fake()),
+                                Block::new(
+                                    vec![Statement::new(
+                                        Some("x".into()),
+                                        None::new(Position::fake()),
+                                        line_position(1)
+                                    )],
+                                    None::new(line_position(3)),
+                                    Position::fake()
+                                ),
+                                Position::fake(),
+                            ),
+                            None,
+                            Position::fake()
+                        )],
+                        Position::fake()
+                    ),
+                    &[Comment::new("foo", line_position(2))]
+                ),
+                indoc!(
+                    "
+                    foo = \\() none {
+                      x = none
+                      #foo
+                      none
+                    }
+                    "
+                )
+            );
+        }
 
         #[test]
         fn format_suffix_comment_after_statement() {

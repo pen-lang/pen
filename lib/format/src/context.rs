@@ -32,4 +32,16 @@ impl Context {
     ) -> impl Iterator<Item = Comment> + '_ {
         self.drain_comments_before(line_number + 1)
     }
+
+    pub fn peek_comments_before(
+        &self,
+        line_number: usize,
+    ) -> impl Iterator<Item = &'_ Comment> + '_ {
+        self.comments[..self
+            .comments
+            .iter()
+            .position(|comment| comment.position().line_number() >= line_number)
+            .unwrap_or(self.comments.len())]
+            .iter()
+    }
 }
