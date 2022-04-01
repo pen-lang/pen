@@ -628,11 +628,9 @@ fn compile_expression(context: &mut Context, expression: &Expression) -> Documen
 
         //     (format!("{}.{}", record, deconstruction.name()), comments)
         // }
-        // Expression::SpawnOperation(operation) => {
-        //     let (lambda, comments) = compile_lambda(operation.function(), comments);
-
-        //     (format!("go {}", lambda), comments)
-        // }
+        Expression::SpawnOperation(operation) => {
+            sequence(["go ".into(), compile_lambda(context, operation.function())])
+        }
         Expression::String(string) => sequence(["\"", string.value(), "\""]),
         Expression::UnaryOperation(operation) => {
             let operand = compile_expression(context, operation.expression());
@@ -2223,24 +2221,24 @@ mod tests {
             }
         }
 
-        // #[test]
-        // fn format_spawn_operation() {
-        //     assert_eq!(
-        //         format(
-        //             &SpawnOperation::new(
-        //                 Lambda::new(
-        //                     vec![],
-        //                     types::None::new(Position::fake()),
-        //                     Block::new(vec![], None::new(Position::fake()), Position::fake()),
-        //                     Position::fake(),
-        //                 ),
-        //                 Position::fake()
-        //             )
-        //             .into()
-        //         ),
-        //         "go \\() none { none }"
-        //     );
-        // }
+        #[test]
+        fn format_spawn_operation() {
+            assert_eq!(
+                format(
+                    &SpawnOperation::new(
+                        Lambda::new(
+                            vec![],
+                            types::None::new(Position::fake()),
+                            Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                            Position::fake(),
+                        ),
+                        Position::fake()
+                    )
+                    .into()
+                ),
+                "go \\() none { none }"
+            );
+        }
 
         #[test]
         fn format_string() {
