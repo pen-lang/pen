@@ -27,13 +27,15 @@ pub fn format(module: &Module, comments: &[Comment]) -> String {
                 module
                     .type_definitions()
                     .iter()
-                    .map(|definition| compile_type_definition(context, definition)),
+                    .map(|definition| compile_type_definition(context, definition))
+                    .intersperse(line()),
             ),
             sequence(
                 module
                     .definitions()
                     .iter()
-                    .map(|definition| compile_definition(context, definition)),
+                    .map(|definition| compile_definition(context, definition))
+                    .intersperse(line()),
             ),
             compile_remaining_block_comment(context),
         ]
@@ -1268,6 +1270,31 @@ mod tests {
         );
     }
 
+    #[test]
+    fn format_multiple_type_aliases() {
+        assert_eq!(
+            format_module(&Module::new(
+                vec![],
+                vec![],
+                vec![
+                    TypeAlias::new("foo", types::None::new(Position::fake()), Position::fake())
+                        .into(),
+                    TypeAlias::new("bar", types::None::new(Position::fake()), Position::fake())
+                        .into()
+                ],
+                vec![],
+                Position::fake()
+            )),
+            indoc!(
+                "
+                type foo = none
+
+                type bar = none
+                "
+            ),
+        );
+    }
+
     mod type_ {
         use super::*;
 
@@ -1319,6 +1346,38 @@ mod tests {
                     Position::fake()
                 )),
                 "foo = \\() none { none }\n"
+            );
+        }
+
+        #[test]
+        fn format_multiple() {
+            let definition = Definition::new(
+                "foo",
+                Lambda::new(
+                    vec![],
+                    types::None::new(Position::fake()),
+                    Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                    Position::fake(),
+                ),
+                None,
+                Position::fake(),
+            );
+
+            assert_eq!(
+                format_module(&Module::new(
+                    vec![],
+                    vec![],
+                    vec![],
+                    vec![definition.clone(), definition],
+                    Position::fake()
+                )),
+                indoc!(
+                    "
+                    foo = \\() none { none }
+
+                    foo = \\() none { none }
+                    "
+                ),
             );
         }
 
