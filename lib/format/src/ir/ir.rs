@@ -17,9 +17,8 @@ use std::rc::Rc;
 pub enum Document {
     // This needs to be a node because Rust is not lazily evaluated...
     Flatten(Rc<Document>),
-    HardLine,
     Indent(Rc<Document>),
-    Line,
+    Line(bool),
     LineSuffix(String),
     Sequence(Rc<[Document]>),
     String(String),

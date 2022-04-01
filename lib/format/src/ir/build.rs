@@ -22,11 +22,11 @@ pub fn indent(document: impl Into<Document>) -> Document {
 }
 
 pub const fn line() -> Document {
-    Document::Line
+    Document::Line(false)
 }
 
 pub const fn hard_line() -> Document {
-    Document::HardLine
+    Document::Line(true)
 }
 
 pub fn empty() -> Document {
