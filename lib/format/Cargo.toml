@@ -5,8 +5,8 @@ edition = "2021"
 
 [dependencies]
 ast = { path = "../ast" }
+itertools = "0.10"
 position = { path = "../position" }
-regex = "1"
 
 [dev-dependencies]
 indoc = "1"

@@ -52,7 +52,7 @@ _lazy = \(x \() _anyList) _anyList {
   _anyList{
     node: \() _node | none {
       x().node()
-    }
+    },
   }
 }
 
@@ -64,7 +64,7 @@ _concatenateLists = \(x \() _anyList, y _anyList) _anyList {
       } else {
         y.node()
       }
-    }
+    },
   }
 }
 

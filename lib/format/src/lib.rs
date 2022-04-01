@@ -1,961 +1,709 @@
-mod comment;
+#![allow(unstable_name_collisions)]
+
+mod context;
+mod ir;
 
 use ast::{types::Type, *};
+use context::Context;
+use ir::{build::*, count_lines, is_broken, Document};
+use itertools::Itertools;
 use position::Position;
-use std::str;
-
-const INDENT_DEPTH: usize = 2;
-
-// TODO Consider introducing a minimum editor width to enforce single-line
-// formats in some occasions.
 
 pub fn format(module: &Module, comments: &[Comment]) -> String {
-    let comments = comment::sort(comments);
+    let mut context = Context::new(comments.to_vec());
+    let context = &mut context;
 
     let (external_imports, internal_imports) = module
         .imports()
         .iter()
         .partition::<Vec<_>, _>(|import| matches!(import.module_path(), ModulePath::External(_)));
 
-    let (external_imports, comments) = format_imports(&external_imports, &comments);
-    let (internal_imports, comments) = format_imports(&internal_imports, comments);
-    let (foreign_imports, mut comments) =
-        format_foreign_imports(module.foreign_imports(), comments);
-
-    let mut sections = vec![external_imports, internal_imports, foreign_imports];
-
-    for definition in module.type_definitions() {
-        let (definition, new_comments) = format_type_definition(definition, comments);
-
-        sections.push(definition);
-        comments = new_comments;
-    }
-
-    for definition in module.definitions() {
-        let (definition, new_comments) = format_definition(definition, comments);
-
-        sections.push(definition);
-        comments = new_comments;
-    }
-
-    format_spaces(
-        sections
-            .into_iter()
-            .filter(|string| !string.is_empty())
-            .collect::<Vec<_>>()
-            .join("\n\n")
-            + "\n\n"
-            + &format_all_comments(comments, None),
+    ir::format(
+        &[
+            compile_imports(context, &external_imports),
+            compile_imports(context, &internal_imports),
+            compile_foreign_imports(context, module.foreign_imports()),
+            sequence(
+                module
+                    .type_definitions()
+                    .iter()
+                    .map(|definition| compile_type_definition(context, definition))
+                    .intersperse(line()),
+            ),
+            sequence(
+                module
+                    .definitions()
+                    .iter()
+                    .map(|definition| compile_definition(context, definition))
+                    .intersperse(line()),
+            ),
+            compile_remaining_block_comment(context),
+        ]
+        .into_iter()
+        .fold(empty(), |all, document| {
+            if count_lines(&document) == 0 {
+                all
+            } else {
+                sequence([
+                    if count_lines(&all) == 0 {
+                        empty()
+                    } else {
+                        sequence([all, line()])
+                    },
+                    document,
+                ])
+            }
+        }),
     )
 }
 
-fn format_spaces(string: impl AsRef<str>) -> String {
-    let string = regex::Regex::new(r"[ \t]*\n")
-        .unwrap()
-        .replace_all(string.as_ref(), "\n");
-
-    let string = regex::Regex::new(r"\n\n\n+")
-        .unwrap()
-        .replace_all(&string, "\n\n");
-
-    string.trim().to_owned() + "\n"
-}
-
-fn format_imports<'c>(imports: &[&Import], mut comments: &'c [Comment]) -> (String, &'c [Comment]) {
-    let mut strings = vec![];
-
-    for import in imports {
-        let (import, new_comments) = format_import(import, comments);
-
-        strings.push(import);
-        comments = new_comments;
-    }
-
-    strings.sort();
-
-    (strings.join("\n"), comments)
-}
-
-fn format_import<'c>(import: &Import, comments: &'c [Comment]) -> (String, &'c [Comment]) {
-    let (block_comment, comments) = format_block_comment(comments, import.position());
-
-    (
-        block_comment
-            + &["import".into(), format_module_path(import.module_path())]
-                .into_iter()
-                .chain(import.prefix().map(|prefix| format!("as {}", prefix)))
-                .chain(if import.unqualified_names().is_empty() {
-                    None
-                } else {
-                    Some(format!("{{ {} }}", import.unqualified_names().join(", ")))
-                })
-                .collect::<Vec<_>>()
-                .join(" "),
-        comments,
+fn compile_imports(context: &mut Context, imports: &[&Import]) -> Document {
+    sequence(
+        imports
+            .iter()
+            .sorted_by_key(|import| import.module_path())
+            .map(|import| compile_import(context, import)),
     )
 }
 
-fn format_foreign_imports<'c>(
-    imports: &[ForeignImport],
-    mut comments: &'c [Comment],
-) -> (String, &'c [Comment]) {
-    let mut strings = vec![];
-
-    for import in imports {
-        let (string, new_comments) = format_foreign_import(import, comments);
-
-        strings.push(string);
-        comments = new_comments;
-    }
-
-    (strings.join("\n"), comments)
+fn compile_import(context: &mut Context, import: &Import) -> Document {
+    sequence([
+        compile_block_comment(context, import.position()),
+        "import ".into(),
+        compile_module_path(import.module_path()),
+        if let Some(prefix) = import.prefix() {
+            sequence([" as ", prefix])
+        } else {
+            empty()
+        },
+        if import.unqualified_names().is_empty() {
+            empty()
+        } else {
+            sequence([
+                " { ".into(),
+                sequence(
+                    import
+                        .unqualified_names()
+                        .iter()
+                        .cloned()
+                        .intersperse(", ".into()),
+                ),
+                " }".into(),
+            ])
+        },
+        line(),
+    ])
 }
 
-fn format_module_path(path: &ModulePath) -> String {
+fn compile_module_path(path: &ModulePath) -> Document {
     match path {
-        ModulePath::External(path) => {
-            format!(
-                "{}'{}",
-                path.package(),
-                format_module_path_components(path.components())
-            )
-        }
-        ModulePath::Internal(path) => {
-            format!("'{}", format_module_path_components(path.components()))
-        }
+        ModulePath::External(path) => sequence([
+            path.package().into(),
+            "'".into(),
+            compile_module_path_components(path.components()),
+        ]),
+        ModulePath::Internal(path) => sequence([
+            "'".into(),
+            compile_module_path_components(path.components()),
+        ]),
     }
 }
 
-fn format_module_path_components(components: &[String]) -> String {
-    components.join("'")
+fn compile_module_path_components(components: &[String]) -> Document {
+    components.join("'").into()
 }
 
-fn format_foreign_import<'c>(
-    import: &ForeignImport,
-    comments: &'c [Comment],
-) -> (String, &'c [Comment]) {
-    let (block_comment, comments) = format_block_comment(comments, import.position());
-
-    (
-        block_comment
-            + &["import foreign".into()]
-                .into_iter()
-                .chain(match import.calling_convention() {
-                    CallingConvention::C => Some("\"c\"".into()),
-                    CallingConvention::Native => None,
-                })
-                .chain([import.name().into(), format_type(import.type_())])
-                .collect::<Vec<_>>()
-                .join(" "),
-        comments,
+fn compile_foreign_imports(context: &mut Context, imports: &[ForeignImport]) -> Document {
+    sequence(
+        imports
+            .iter()
+            .map(|import| compile_foreign_import(context, import)),
     )
 }
 
-fn format_type_definition<'c>(
-    definition: &TypeDefinition,
-    comments: &'c [Comment],
-) -> (String, &'c [Comment]) {
+fn compile_foreign_import(context: &mut Context, import: &ForeignImport) -> Document {
+    sequence([
+        compile_block_comment(context, import.position()),
+        "import foreign".into(),
+        match import.calling_convention() {
+            CallingConvention::C => " \"c\"".into(),
+            CallingConvention::Native => empty(),
+        },
+        " ".into(),
+        import.name().into(),
+        " ".into(),
+        compile_type(import.type_()),
+        line(),
+    ])
+}
+
+fn compile_type_definition(context: &mut Context, definition: &TypeDefinition) -> Document {
     match definition {
         TypeDefinition::RecordDefinition(definition) => {
-            format_record_definition(definition, comments)
+            compile_record_definition(context, definition)
         }
-        TypeDefinition::TypeAlias(alias) => format_type_alias(alias, comments),
+        TypeDefinition::TypeAlias(alias) => compile_type_alias(context, alias),
     }
 }
 
-fn format_record_definition<'c>(
-    definition: &RecordDefinition,
-    comments: &'c [Comment],
-) -> (String, &'c [Comment]) {
-    let (block_comment, comments) = format_block_comment(comments, definition.position());
-    let head = ["type", definition.name(), "{"].join(" ");
-
-    (
-        block_comment
-            + &if definition.fields().is_empty() {
-                head + "}"
-            } else {
-                [
-                    head,
-                    definition
-                        .fields()
-                        .iter()
-                        .map(|field| {
-                            indent(field.name().to_owned() + " " + &format_type(field.type_()))
-                        })
-                        .collect::<Vec<_>>()
-                        .join("\n"),
-                    "}".into(),
-                ]
-                .join("\n")
-            },
-        comments,
-    )
+fn compile_record_definition(context: &mut Context, definition: &RecordDefinition) -> Document {
+    sequence([
+        compile_block_comment(context, definition.position()),
+        "type ".into(),
+        definition.name().into(),
+        " {".into(),
+        if definition.fields().is_empty() {
+            empty()
+        } else {
+            sequence([
+                indent(sequence(definition.fields().iter().map(|field| {
+                    sequence([
+                        line(),
+                        field.name().into(),
+                        " ".into(),
+                        compile_type(field.type_()),
+                    ])
+                }))),
+                line(),
+            ])
+        },
+        "}".into(),
+        line(),
+    ])
 }
 
-fn format_type_alias<'c>(alias: &TypeAlias, comments: &'c [Comment]) -> (String, &'c [Comment]) {
-    let (block_comment, comments) = format_block_comment(comments, alias.position());
-
-    (
-        block_comment
-            + &[
-                "type".into(),
-                alias.name().into(),
-                "=".into(),
-                format_type(alias.type_()),
-            ]
-            .join(" "),
-        comments,
-    )
+fn compile_type_alias(context: &mut Context, alias: &TypeAlias) -> Document {
+    sequence([
+        compile_block_comment(context, alias.position()),
+        "type ".into(),
+        alias.name().into(),
+        " = ".into(),
+        compile_type(alias.type_()),
+        line(),
+    ])
 }
 
-fn format_definition<'c>(
-    definition: &Definition,
-    comments: &'c [Comment],
-) -> (String, &'c [Comment]) {
-    let (block_comment, comments) = format_block_comment(comments, definition.position());
-    let (lambda, comments) = format_lambda(definition.lambda(), comments);
-
-    (
-        block_comment
-            + &definition
-                .foreign_export()
-                .map(|export| {
-                    ["foreign"]
-                        .into_iter()
-                        .chain(match export.calling_convention() {
-                            CallingConvention::C => Some("\"c\""),
-                            CallingConvention::Native => None,
-                        })
-                        .collect::<Vec<_>>()
-                        .join(" ")
-                })
-                .into_iter()
-                .chain([definition.name().into(), "=".into(), lambda])
-                .collect::<Vec<_>>()
-                .join(" "),
-        comments,
-    )
+fn compile_definition(context: &mut Context, definition: &Definition) -> Document {
+    sequence([
+        compile_block_comment(context, definition.position()),
+        if let Some(export) = definition.foreign_export() {
+            sequence([
+                "foreign ".into(),
+                match export.calling_convention() {
+                    CallingConvention::C => "\"c\" ".into(),
+                    CallingConvention::Native => empty(),
+                },
+            ])
+        } else {
+            empty()
+        },
+        definition.name().into(),
+        " = ".into(),
+        compile_lambda(context, definition.lambda()),
+        line(),
+    ])
 }
 
-fn format_type(type_: &Type) -> String {
+fn compile_type(type_: &Type) -> Document {
     match type_ {
         Type::Any(_) => "any".into(),
         Type::Boolean(_) => "boolean".into(),
-        Type::Function(function) => format!(
-            "\\({}) {}",
-            function
-                .arguments()
-                .iter()
-                .map(format_type)
-                .collect::<Vec<_>>()
-                .join(", "),
-            format_type(function.result()),
-        ),
-        Type::List(list) => format!("[{}]", format_type(list.element())),
-        Type::Map(map) => format!(
-            "{{{}: {}}}",
-            format_type(map.key()),
-            format_type(map.value())
-        ),
+        Type::Function(function) => sequence([
+            "\\(".into(),
+            sequence(
+                function
+                    .arguments()
+                    .iter()
+                    .map(compile_type)
+                    .intersperse(", ".into()),
+            ),
+            ") ".into(),
+            compile_type(function.result()),
+        ]),
+        Type::List(list) => sequence(["[".into(), compile_type(list.element()), "]".into()]),
+        Type::Map(map) => sequence([
+            "{".into(),
+            compile_type(map.key()),
+            ": ".into(),
+            compile_type(map.value()),
+            "}".into(),
+        ]),
         Type::None(_) => "none".into(),
         Type::Number(_) => "number".into(),
         Type::Record(record) => record.name().into(),
         Type::Reference(reference) => reference.name().into(),
         Type::String(_) => "string".into(),
-        Type::Union(union) => format!(
-            "{} | {}",
-            {
-                let type_ = format_type(union.lhs());
+        Type::Union(union) => {
+            let lhs = compile_type(union.lhs());
 
+            sequence([
                 if union.lhs().is_function() {
-                    format!("({})", type_)
+                    sequence(["(".into(), lhs, ")".into()])
                 } else {
-                    type_
-                }
-            },
-            format_type(union.rhs())
-        ),
+                    lhs
+                },
+                " | ".into(),
+                compile_type(union.rhs()),
+            ])
+        }
     }
 }
 
-fn format_lambda<'c>(lambda: &Lambda, mut comments: &'c [Comment]) -> (String, &'c [Comment]) {
-    let arguments = lambda
-        .arguments()
-        .iter()
-        .map(|argument| format!("{} {}", argument.name(), format_type(argument.type_())))
-        .collect::<Vec<_>>();
-    let single_line_arguments = arguments.is_empty()
+fn compile_lambda(context: &mut Context, lambda: &Lambda) -> Document {
+    let single_line_arguments = lambda.arguments().is_empty()
         || Some(lambda.position().line_number())
             == lambda
                 .arguments()
                 .get(0)
-                .map(|argument| argument.type_().position().line_number())
-            && arguments.iter().all(is_single_line);
+                .map(|argument| argument.type_().position().line_number());
+    let separator = sequence([",".into(), line()]);
 
-    let arguments = if single_line_arguments {
-        "(".to_owned() + &arguments.join(", ") + ")"
-    } else {
-        let mut argument_lines = vec![];
+    let arguments = sequence(
+        lambda
+            .arguments()
+            .iter()
+            .map(|argument| {
+                // TODO Use Argument::position().
+                let position = argument.type_().position();
 
-        for (string, argument) in arguments.into_iter().zip(lambda.arguments()) {
-            // TODO Use Argument::position().
-            let position = argument.type_().position();
-            let (block_comment, new_comments) = format_block_comment(comments, position);
-            let (suffix_comment, new_comments) = format_suffix_comment(new_comments, position);
+                sequence([
+                    compile_block_comment(context, position),
+                    argument.name().into(),
+                    " ".into(),
+                    compile_type(argument.type_()),
+                    compile_suffix_comment(context, position),
+                ])
+            })
+            .intersperse(separator.clone()),
+    );
+    let body = compile_block(context, lambda.body());
 
-            argument_lines.push(indent(block_comment + &string) + "," + &suffix_comment + "\n");
-            comments = new_comments;
-        }
-
-        ["(".into(), "\n".into()]
-            .into_iter()
-            .chain(argument_lines)
-            .chain([")".into()])
-            .collect::<Vec<_>>()
-            .concat()
-    };
-
-    let (body, comments) = if single_line_arguments
-        && lambda.position().line_number() == lambda.body().expression().position().line_number()
-    {
-        format_block(lambda.body(), comments)
-    } else {
-        format_multi_line_block(lambda.body(), comments)
-    };
-
-    (
-        format!(
-            "\\{} {} {}",
-            arguments,
-            format_type(lambda.result_type()),
+    sequence([
+        "\\(".into(),
+        if single_line_arguments {
+            flatten(arguments)
+        } else {
+            sequence([indent(sequence([line(), arguments])), separator])
+        },
+        ") ".into(),
+        compile_type(lambda.result_type()),
+        " ".into(),
+        if single_line_arguments
+            && lambda.position().line_number()
+                == lambda.body().expression().position().line_number()
+            && !is_broken(&body)
+        {
+            flatten(body)
+        } else {
             body
-        ),
-        comments,
-    )
+        },
+    ])
 }
 
-fn format_block<'c>(block: &Block, comments: &'c [Comment]) -> (String, &'c [Comment]) {
-    let (expression, new_comments) = format_expression(block.expression(), comments);
-
-    if block.statements().is_empty() && is_single_line(&expression) {
-        (["{", &expression, "}"].join(" "), new_comments)
-    } else {
-        format_multi_line_block(block, comments)
-    }
-}
-
-fn format_multi_line_block<'c>(
-    block: &Block,
-    mut comments: &'c [Comment],
-) -> (String, &'c [Comment]) {
-    let mut statements = vec![];
-
-    for (statement, next_position) in block.statements().iter().zip(
+fn compile_block(context: &mut Context, block: &Block) -> Document {
+    let statements = sequence(
         block
             .statements()
             .iter()
-            .skip(1)
-            .map(|statement| statement.position())
-            .chain([block.expression().position()]),
-    ) {
-        let (block_comment, new_comments) = format_block_comment(comments, statement.position());
-        // TODO Use end positions of spans when they are available.
-        let line_count = next_position.line_number() as isize
-            - statement.position().line_number() as isize
-            - comment::split_before(new_comments, next_position.line_number())
-                .0
-                .len() as isize;
-        let (statement_string, new_comments) = format_statement(statement, new_comments);
-        let (suffix_comment, new_comments) =
-            format_suffix_comment(new_comments, statement.position());
-
-        statements.push(indent(
-            block_comment
-                + &statement_string
-                + &suffix_comment
-                + if count_lines(&statement_string) as isize >= line_count {
-                    ""
+            .zip(
+                block
+                    .statements()
+                    .iter()
+                    .skip(1)
+                    .map(|statement| statement.position())
+                    .chain([block.expression().position()]),
+            )
+            .map(|(statement, next_position)| {
+                let block_comment = compile_block_comment(context, statement.position());
+                // TODO Use end positions of spans when they are available.
+                let line_count = next_position.line_number() as isize
+                    - statement.position().line_number() as isize
+                    - context
+                        .peek_comments_before(next_position.line_number())
+                        .count() as isize;
+                let statement_document = compile_statement(context, statement);
+                let extra_line = if count_lines(&statement_document) as isize >= line_count {
+                    empty()
                 } else {
-                    "\n"
-                },
-        ));
-        comments = new_comments;
-    }
+                    line()
+                };
 
-    let (block_comment, comments) = format_block_comment(comments, block.expression().position());
-    let (expression, comments) = format_expression(block.expression(), comments);
+                sequence([block_comment, statement_document, extra_line])
+            }),
+    );
 
-    (
-        ["{".into()]
-            .into_iter()
-            .chain(statements)
-            .chain([indent(block_comment + &expression)])
-            .chain(["}".into()])
-            .collect::<Vec<_>>()
-            .join("\n"),
-        comments,
-    )
+    sequence([
+        "{".into(),
+        indent(sequence([
+            line(),
+            statements,
+            compile_block_comment(context, block.expression().position()),
+            compile_expression(context, block.expression()),
+            compile_suffix_comment(context, block.expression().position()),
+        ])),
+        line(),
+        "}".into(),
+    ])
 }
 
-fn format_statement<'c>(statement: &Statement, comments: &'c [Comment]) -> (String, &'c [Comment]) {
-    let (expression, comments) = format_expression(statement.expression(), comments);
-
-    (
-        statement
-            .name()
-            .map(|name| format!("{} =", name))
-            .into_iter()
-            .chain([expression])
-            .collect::<Vec<_>>()
-            .join(" "),
-        comments,
-    )
+fn compile_statement(context: &mut Context, statement: &Statement) -> Document {
+    sequence([
+        if let Some(name) = statement.name() {
+            sequence([name, " = "])
+        } else {
+            empty()
+        },
+        compile_expression(context, statement.expression()),
+        compile_suffix_comment(context, statement.position()),
+        hard_line(),
+    ])
 }
 
-fn format_expression<'c>(
-    expression: &Expression,
-    mut comments: &'c [Comment],
-) -> (String, &'c [Comment]) {
+fn compile_expression(context: &mut Context, expression: &Expression) -> Document {
     match expression {
-        Expression::BinaryOperation(operation) => format_binary_operation(operation, comments),
+        Expression::BinaryOperation(operation) => compile_binary_operation(context, operation),
         Expression::Call(call) => {
-            let (function, mut comments) = format_expression(call.function(), comments);
-            let head = format!("{}(", function);
-            let mut arguments = vec![];
+            let separator = sequence([",".into(), line()]);
+            let function = compile_expression(context, call.function());
+            let arguments = sequence(
+                call.arguments()
+                    .iter()
+                    .map(|argument| {
+                        sequence([
+                            compile_block_comment(context, argument.position()),
+                            compile_expression(context, argument),
+                            compile_suffix_comment(context, argument.position()),
+                        ])
+                    })
+                    .intersperse(separator.clone()),
+            );
 
-            for argument in call.arguments() {
-                let (expression, new_comments) = format_expression(argument, comments);
-
-                arguments.push(expression);
-                comments = new_comments;
-            }
-
-            if call.arguments().is_empty()
-                || Some(call.function().position().line_number())
-                    == call
-                        .arguments()
-                        .get(0)
-                        .map(|expression| expression.position().line_number())
-                    && arguments.iter().all(is_single_line)
-            {
-                (
-                    [head]
-                        .into_iter()
-                        .chain(if call.arguments().is_empty() {
-                            None
-                        } else {
-                            Some(arguments.join(", "))
-                        })
-                        .chain([")".into()])
-                        .collect::<Vec<_>>()
-                        .concat(),
-                    comments,
-                )
-            } else {
-                (
-                    [head]
-                        .into_iter()
-                        .chain(arguments.iter().map(|argument| indent(argument) + ","))
-                        .chain([")".into()])
-                        .collect::<Vec<_>>()
-                        .join("\n"),
-                    comments,
-                )
-            }
+            sequence([
+                function,
+                "(".into(),
+                if call.arguments().is_empty()
+                    || Some(call.function().position().line_number())
+                        == call
+                            .arguments()
+                            .get(0)
+                            .map(|expression| expression.position().line_number())
+                        && !is_broken(&arguments)
+                {
+                    flatten(arguments)
+                } else {
+                    sequence([indent(sequence([line(), arguments])), separator])
+                },
+                ")".into(),
+            ])
         }
-        Expression::Boolean(boolean) => (
-            if boolean.value() { "true" } else { "false" }.into(),
-            comments,
-        ),
-        Expression::If(if_) => format_if(if_, comments),
-        Expression::IfList(if_) => {
-            let (list, comments) = format_expression(if_.list(), comments);
-            let (then, comments) = format_multi_line_block(if_.then(), comments);
-            let (else_, comments) = format_multi_line_block(if_.else_(), comments);
-
-            (
-                [
-                    "if".into(),
-                    format!("[{}, ...{}]", if_.first_name(), if_.rest_name()),
-                    "=".into(),
-                    list,
-                    then,
-                    "else".into(),
-                    else_,
-                ]
-                .join(" "),
-                comments,
-            )
-        }
-        Expression::IfMap(if_) => {
-            let (map, comments) = format_expression(if_.map(), comments);
-            let (key, comments) = format_expression(if_.key(), comments);
-            let (then, comments) = format_multi_line_block(if_.then(), comments);
-            let (else_, comments) = format_multi_line_block(if_.else_(), comments);
-
-            (
-                [
-                    "if".into(),
-                    if_.name().into(),
-                    "=".into(),
-                    format!("{}[{}]", map, key),
-                    then,
-                    "else".into(),
-                    else_,
-                ]
-                .join(" "),
-                comments,
-            )
-        }
-        Expression::IfType(if_) => format_if_type(if_, comments),
-        Expression::Lambda(lambda) => format_lambda(lambda, comments),
+        Expression::Boolean(boolean) => if boolean.value() { "true" } else { "false" }.into(),
+        Expression::If(if_) => compile_if(context, if_),
+        Expression::IfList(if_) => sequence([
+            sequence(["if [", if_.first_name(), ", ...", if_.rest_name(), "] = "]),
+            compile_expression(context, if_.list()),
+            " ".into(),
+            compile_block(context, if_.then()),
+            " else ".into(),
+            compile_block(context, if_.else_()),
+        ]),
+        Expression::IfMap(if_) => sequence([
+            sequence(["if ", if_.name(), " = "]),
+            compile_expression(context, if_.map()),
+            "[".into(),
+            compile_expression(context, if_.key()),
+            "] ".into(),
+            compile_block(context, if_.then()),
+            " else ".into(),
+            compile_block(context, if_.else_()),
+        ]),
+        Expression::IfType(if_) => compile_if_type(context, if_),
+        Expression::Lambda(lambda) => compile_lambda(context, lambda),
         Expression::List(list) => {
-            let type_ = format_type(list.type_());
-            let mut elements = vec![];
+            let separator = Document::from(",");
+            let elements = sequence(
+                list.elements()
+                    .iter()
+                    .map(|element| sequence([line(), compile_list_element(context, element)]))
+                    .intersperse(separator.clone()),
+            );
 
-            for element in list.elements() {
-                let (element, new_comments) = format_list_element(element, comments);
-
-                elements.push(element);
-                comments = new_comments;
-            }
-
-            if elements.is_empty()
-                || Some(list.position().line_number())
-                    == list
-                        .elements()
-                        .get(0)
-                        .map(|element| element.position().line_number())
-                    && elements.iter().all(is_single_line)
-            {
-                (
-                    ["[".into()]
-                        .into_iter()
-                        .chain([[type_]
-                            .into_iter()
-                            .chain(if elements.is_empty() {
-                                None
-                            } else {
-                                Some(elements.join(", "))
-                            })
-                            .collect::<Vec<_>>()
-                            .join(" ")])
-                        .chain(["]".into()])
-                        .collect::<Vec<_>>()
-                        .concat(),
-                    comments,
-                )
-            } else {
-                (
-                    [format!("[{}", type_)]
-                        .into_iter()
-                        .chain(elements.into_iter().map(|element| indent(element) + ","))
-                        .chain(["]".into()])
-                        .collect::<Vec<_>>()
-                        .join("\n"),
-                    comments,
-                )
-            }
+            sequence([
+                "[".into(),
+                compile_type(list.type_()),
+                if list.elements().is_empty()
+                    || Some(list.position().line_number())
+                        == list
+                            .elements()
+                            .get(0)
+                            .map(|element| element.position().line_number())
+                        && !is_broken(&elements)
+                {
+                    flatten(elements)
+                } else {
+                    sequence([indent(elements), separator, line()])
+                },
+                "]".into(),
+            ])
         }
         Expression::ListComprehension(comprehension) => {
-            let type_ = format_type(comprehension.type_());
-            let (element, comments) = format_expression(comprehension.element(), comments);
-            let (list, comments) = format_expression(comprehension.list(), comments);
+            let elements = sequence([
+                line(),
+                compile_expression(context, comprehension.element()),
+                line(),
+                "for ".into(),
+                comprehension.element_name().into(),
+                " in ".into(),
+                compile_expression(context, comprehension.list()),
+            ]);
 
-            (
+            sequence([
+                "[".into(),
+                compile_type(comprehension.type_()),
                 if comprehension.position().line_number()
                     == comprehension.element().position().line_number()
-                    && is_single_line(&element)
-                    && is_single_line(&list)
+                    && !is_broken(&elements)
                 {
-                    ["[".into()]
-                        .into_iter()
-                        .chain([[
-                            type_,
-                            element,
-                            "for".into(),
-                            comprehension.element_name().into(),
-                            "in".into(),
-                            list,
-                        ]
-                        .join(" ")])
-                        .chain(["]".into()])
-                        .collect::<Vec<_>>()
-                        .concat()
+                    flatten(elements)
                 } else {
-                    [format!("[{}", type_)]
-                        .into_iter()
-                        .chain(
-                            [
-                                element,
-                                format!("for {} in {}", comprehension.element_name(), list),
-                            ]
-                            .iter()
-                            .map(indent),
-                        )
-                        .chain(["]".into()])
-                        .collect::<Vec<_>>()
-                        .join("\n")
+                    sequence([indent(elements), line()])
                 },
-                comments,
-            )
+                "]".into(),
+            ])
         }
         Expression::Map(map) => {
-            let type_ = format_type(map.key_type()) + ": " + &format_type(map.value_type());
-            let mut elements = vec![];
+            let type_ = sequence([
+                compile_type(map.key_type()),
+                ": ".into(),
+                compile_type(map.value_type()),
+            ]);
+            let separator = Document::from(",");
+            let elements = sequence(
+                map.elements()
+                    .iter()
+                    .map(|element| sequence([line(), compile_map_element(context, element)]))
+                    .intersperse(separator.clone()),
+            );
 
-            for element in map.elements() {
-                let (element, new_comments) = format_map_element(element, comments);
-
-                elements.push(element);
-                comments = new_comments;
-            }
-
-            (
-                if elements.is_empty()
+            sequence([
+                "{".into(),
+                type_,
+                if map.elements().is_empty()
                     || Some(map.position().line_number())
                         == map
                             .elements()
                             .get(0)
                             .map(|element| element.position().line_number())
-                        && elements.iter().all(is_single_line)
+                        && !is_broken(&elements)
                 {
-                    ["{".into()]
-                        .into_iter()
-                        .chain([[type_]
-                            .into_iter()
-                            .chain(if map.elements().is_empty() {
-                                None
-                            } else {
-                                Some(elements.join(", "))
-                            })
-                            .collect::<Vec<_>>()
-                            .join(" ")])
-                        .chain(["}".into()])
-                        .collect::<Vec<_>>()
-                        .concat()
+                    flatten(elements)
                 } else {
-                    [format!("{{{}", type_)]
-                        .into_iter()
-                        .chain(elements.into_iter().map(|element| indent(element) + ","))
-                        .chain(["}".into()])
-                        .collect::<Vec<_>>()
-                        .join("\n")
+                    sequence([indent(elements), separator, line()])
                 },
-                comments,
-            )
+                "}".into(),
+            ])
         }
-        Expression::None(_) => ("none".into(), comments),
-        Expression::Number(number) => (
-            match number.value() {
-                NumberRepresentation::Binary(string) => "0b".to_owned() + string,
-                NumberRepresentation::Hexadecimal(string) => {
-                    "0x".to_owned() + &string.to_uppercase()
-                }
-                NumberRepresentation::FloatingPoint(string) => string.clone(),
-            },
-            comments,
-        ),
+        Expression::None(_) => "none".into(),
+        Expression::Number(number) => match number.value() {
+            NumberRepresentation::Binary(string) => "0b".to_owned() + string,
+            NumberRepresentation::Hexadecimal(string) => "0x".to_owned() + &string.to_uppercase(),
+            NumberRepresentation::FloatingPoint(string) => string.clone(),
+        }
+        .into(),
         Expression::Record(record) => {
-            let (old_record, mut comments) = if let Some(record) = record.record() {
-                let (record, comments) = format_expression(record, comments);
+            let separator = sequence([",".into(), line()]);
+            let elements = sequence(
+                record
+                    .record()
+                    .map(|record| sequence(["...".into(), compile_expression(context, record)]))
+                    .into_iter()
+                    .chain(record.fields().iter().map(|field| {
+                        {
+                            sequence([
+                                field.name().into(),
+                                ": ".into(),
+                                compile_expression(context, field.expression()),
+                            ])
+                        }
+                    }))
+                    .intersperse(separator.clone()),
+            );
 
-                (Some(format!("...{}", record)), comments)
-            } else {
-                (None, comments)
-            };
-            let mut elements = old_record.into_iter().collect::<Vec<_>>();
-
-            for field in record.fields() {
-                let (expression, new_comments) = format_expression(field.expression(), comments);
-
-                elements.push(format!("{}: {}", field.name(), expression,));
-                comments = new_comments;
-            }
-
-            (
+            sequence([
+                record.type_name().into(),
+                "{".into(),
                 if record.fields().is_empty()
                     || Some(record.position().line_number())
-                        == record
-                            .fields()
-                            .get(0)
-                            .map(|field| field.position().line_number())
-                        && elements.iter().all(is_single_line)
-                {
-                    [record.type_name().into(), "{".into()]
-                        .into_iter()
-                        .chain(if record.record().is_none() && record.fields().is_empty() {
-                            None
+                        == if let Some(record) = record.record() {
+                            Some(record.position())
                         } else {
-                            Some(elements.join(", "))
-                        })
-                        .chain(["}".into()])
-                        .collect::<Vec<_>>()
-                        .concat()
+                            record.fields().get(0).map(|field| field.position())
+                        }
+                        .map(|position| position.line_number())
+                        && !is_broken(&elements)
+                {
+                    flatten(elements)
                 } else {
-                    [record.type_name().to_owned() + "{"]
-                        .into_iter()
-                        .chain(elements.into_iter().map(|line| indent(line) + ","))
-                        .chain(["}".into()])
-                        .collect::<Vec<_>>()
-                        .join("\n")
+                    sequence([indent(sequence([line(), elements])), separator])
                 },
-                comments,
-            )
+                "}".into(),
+            ])
         }
-        Expression::RecordDeconstruction(deconstruction) => {
-            let (record, comments) = format_expression(deconstruction.expression(), comments);
-
-            (format!("{}.{}", record, deconstruction.name()), comments)
-        }
+        Expression::RecordDeconstruction(deconstruction) => sequence([
+            compile_expression(context, deconstruction.expression()),
+            ".".into(),
+            deconstruction.name().into(),
+        ]),
         Expression::SpawnOperation(operation) => {
-            let (lambda, comments) = format_lambda(operation.function(), comments);
-
-            (format!("go {}", lambda), comments)
+            sequence(["go ".into(), compile_lambda(context, operation.function())])
         }
-        Expression::String(string) => (format!("\"{}\"", string.value()), comments),
+        Expression::String(string) => sequence(["\"", string.value(), "\""]),
         Expression::UnaryOperation(operation) => {
-            let (operand, comments) = format_expression(operation.expression(), comments);
+            let operand = compile_expression(context, operation.expression());
             let operand = if matches!(operation.expression(), Expression::BinaryOperation(_)) {
-                "(".to_owned() + &operand + ")"
+                sequence(["(".into(), operand, ")".into()])
             } else {
                 operand
             };
 
-            (
-                match operation.operator() {
-                    UnaryOperator::Not => "!".to_owned() + &operand,
-                    UnaryOperator::Try => operand + "?",
-                },
-                comments,
-            )
+            match operation.operator() {
+                UnaryOperator::Not => sequence(["!".into(), operand]),
+                UnaryOperator::Try => sequence([operand, "?".into()]),
+            }
         }
-        Expression::Variable(variable) => (variable.name().into(), comments),
+        Expression::Variable(variable) => variable.name().into(),
     }
 }
 
-fn format_if<'c>(if_: &If, original_comments: &'c [Comment]) -> (String, &'c [Comment]) {
-    let (branches, comments) = {
-        let mut branches = vec![];
-        let mut comments = original_comments;
+fn compile_if(context: &mut Context, if_: &If) -> Document {
+    let document = sequence([
+        sequence(if_.branches().iter().map(|branch| {
+            sequence([
+                "if ".into(),
+                compile_expression(context, branch.condition()),
+                " ".into(),
+                compile_block(context, branch.block()),
+                " else ".into(),
+            ])
+        })),
+        compile_block(context, if_.else_()),
+    ]);
 
-        for branch in if_.branches() {
-            let (expression, new_comments) = format_expression(branch.condition(), comments);
-            let (block, new_comments) = format_block(branch.block(), new_comments);
-
-            branches.push(expression + " " + &block);
-            comments = new_comments;
-        }
-
-        (branches, comments)
-    };
-    let (else_, comments) = format_block(if_.else_(), comments);
-
-    if branches.len() == 1
-        && branches.iter().chain([&else_]).all(is_single_line)
+    if if_.branches().len() == 1
+        && !is_broken(&document)
         && Some(if_.position().line_number())
             == if_
                 .branches()
                 .get(0)
                 .map(|branch| branch.block().expression().position().line_number())
     {
-        (
-            branches
-                .into_iter()
-                .flat_map(|branch| ["if".into(), branch, "else".into()])
-                .chain([else_])
-                .collect::<Vec<_>>()
-                .join(" "),
-            comments,
-        )
+        flatten(document)
     } else {
-        let mut parts = vec![];
-        let mut comments = original_comments;
-
-        for branch in if_.branches() {
-            let (expression, new_comments) = format_expression(branch.condition(), comments);
-            let (block, new_comments) = format_multi_line_block(branch.block(), new_comments);
-
-            parts.extend(["if".into(), expression, block, "else".into()]);
-            comments = new_comments;
-        }
-
-        let (else_, comments) = format_multi_line_block(if_.else_(), comments);
-
-        parts.push(else_);
-
-        (parts.join(" "), comments)
+        document
     }
 }
 
-fn format_if_type<'c>(if_: &IfType, original_comments: &'c [Comment]) -> (String, &'c [Comment]) {
-    let (argument, original_comments) = format_expression(if_.argument(), original_comments);
-    let (branches, comments) = {
-        let mut branches = vec![];
-        let mut comments = original_comments;
-
-        for branch in if_.branches() {
-            let (block, new_comments) = format_block(branch.block(), comments);
-
-            branches.push(format_type(branch.type_()) + " " + &block);
-            comments = new_comments;
-        }
-
-        (branches, comments)
-    };
-    let (else_, comments) = if let Some(block) = if_.else_() {
-        let (block, comments) = format_block(block, comments);
-
-        (Some(block), comments)
-    } else {
-        (None, comments)
-    };
-
-    let head = [
-        "if".into(),
+fn compile_if_type(context: &mut Context, if_: &IfType) -> Document {
+    let document = sequence([
+        "if ".into(),
         if_.name().into(),
-        "=".into(),
-        argument.clone(),
-        "as".into(),
-    ];
+        " = ".into(),
+        compile_expression(context, if_.argument()),
+        " as ".into(),
+        sequence(
+            if_.branches()
+                .iter()
+                .map(|branch| {
+                    sequence([
+                        compile_type(branch.type_()),
+                        " ".into(),
+                        compile_block(context, branch.block()),
+                    ])
+                })
+                .intersperse(" else if ".into()),
+        ),
+        if let Some(block) = if_.else_() {
+            sequence([" else ".into(), compile_block(context, block)])
+        } else {
+            empty()
+        },
+    ]);
 
-    if branches.iter().chain(&else_).count() <= 2
-        && [&argument]
-            .into_iter()
-            .chain(&branches)
-            .chain(else_.as_ref())
-            .all(is_single_line)
+    if if_.branches().len() + if_.else_().iter().count() <= 2
+        && !is_broken(&document)
         && Some(if_.position().line_number())
             == if_
                 .branches()
                 .get(0)
                 .map(|branch| branch.block().expression().position().line_number())
     {
-        (
-            head.into_iter()
-                .chain([branches.join(" else if ")])
-                .chain(else_.into_iter().flat_map(|block| ["else".into(), block]))
-                .collect::<Vec<_>>()
-                .join(" "),
-            comments,
-        )
+        flatten(document)
     } else {
-        let mut branches = vec![];
-        let mut comments = original_comments;
-
-        for branch in if_.branches() {
-            let (block, new_comments) = format_multi_line_block(branch.block(), comments);
-
-            branches.push(format_type(branch.type_()) + " " + &block);
-            comments = new_comments;
-        }
-
-        let (else_, comments) = if let Some(block) = if_.else_() {
-            let (block, comments) = format_multi_line_block(block, comments);
-
-            (Some(block), comments)
-        } else {
-            (None, comments)
-        };
-
-        (
-            head.into_iter()
-                .chain([branches.join(" else if ")])
-                .chain(else_.into_iter().flat_map(|block| ["else".into(), block]))
-                .collect::<Vec<_>>()
-                .join(" "),
-            comments,
-        )
+        document
     }
 }
 
-fn format_list_element<'c>(
-    element: &ListElement,
-    comments: &'c [Comment],
-) -> (String, &'c [Comment]) {
+fn compile_list_element(context: &mut Context, element: &ListElement) -> Document {
     match element {
         ListElement::Multiple(expression) => {
-            let (expression, comments) = format_expression(expression, comments);
-
-            (format!("...{}", expression), comments)
+            sequence(["...".into(), compile_expression(context, expression)])
         }
-        ListElement::Single(expression) => format_expression(expression, comments),
+        ListElement::Single(expression) => compile_expression(context, expression),
     }
 }
 
-fn format_map_element<'c>(
-    element: &MapElement,
-    comments: &'c [Comment],
-) -> (String, &'c [Comment]) {
+fn compile_map_element(context: &mut Context, element: &MapElement) -> Document {
     match element {
         MapElement::Map(expression) => {
-            let (expression, comments) = format_expression(expression, comments);
-
-            (format!("...{}", expression), comments)
+            sequence(["...".into(), compile_expression(context, expression)])
         }
-        MapElement::Insertion(entry) => {
-            let (key, comments) = format_expression(entry.key(), comments);
-            let (value, comments) = format_expression(entry.value(), comments);
-
-            (format!("{}: {}", key, value), comments)
-        }
-        MapElement::Removal(expression) => format_expression(expression, comments),
+        MapElement::Insertion(entry) => sequence([
+            compile_expression(context, entry.key()),
+            ": ".into(),
+            compile_expression(context, entry.value()),
+        ]),
+        MapElement::Removal(expression) => compile_expression(context, expression),
     }
 }
 
-fn format_binary_operation<'c>(
-    operation: &BinaryOperation,
-    comments: &'c [Comment],
-) -> (String, &'c [Comment]) {
-    let single_line =
-        operation.lhs().position().line_number() == operation.rhs().position().line_number();
-    let operator = format_binary_operator(operation.operator()).into();
-    let (lhs, comments) = format_operand(operation.lhs(), operation.operator(), comments);
-    let (rhs, comments) = format_operand(operation.rhs(), operation.operator(), comments);
+fn compile_binary_operation(context: &mut Context, operation: &BinaryOperation) -> Document {
+    let document = sequence([
+        compile_operand(context, operation.lhs(), operation.operator()),
+        indent(sequence([
+            line(),
+            compile_binary_operator(operation.operator()),
+            " ".into(),
+            compile_operand(context, operation.rhs(), operation.operator()),
+        ])),
+    ]);
 
-    (
-        [
-            lhs,
-            [
-                if single_line {
-                    operator
-                } else {
-                    indent(operator)
-                },
-                rhs,
-            ]
-            .join(" "),
-        ]
-        .join(if single_line { " " } else { "\n" }),
-        comments,
-    )
+    if operation.lhs().position().line_number() == operation.rhs().position().line_number() {
+        flatten(document)
+    } else {
+        document
+    }
 }
 
-fn format_operand<'c>(
+fn compile_operand(
+    context: &mut Context,
     operand: &Expression,
     parent_operator: BinaryOperator,
-    comments: &'c [Comment],
-) -> (String, &'c [Comment]) {
-    let (string, comments) = format_expression(operand, comments);
+) -> Document {
+    let document = compile_expression(context, operand);
 
-    (
-        if match operand {
-            Expression::BinaryOperation(operation) => Some(operation),
-            _ => None,
-        }
-        .map(|operand| operator_priority(operand.operator()) < operator_priority(parent_operator))
-        .unwrap_or_default()
-        {
-            format!("({})", string)
-        } else {
-            string
-        },
-        comments,
-    )
+    if match operand {
+        Expression::BinaryOperation(operation) => Some(operation),
+        _ => None,
+    }
+    .map(|operand| operator_priority(operand.operator()) < operator_priority(parent_operator))
+    .unwrap_or_default()
+    {
+        sequence(["(".into(), document, ")".into()])
+    } else {
+        document
+    }
 }
 
-fn format_binary_operator(operator: BinaryOperator) -> &'static str {
+fn compile_binary_operator(operator: BinaryOperator) -> Document {
     match operator {
         BinaryOperator::Or => "|",
         BinaryOperator::And => "&",
@@ -970,8 +718,10 @@ fn format_binary_operator(operator: BinaryOperator) -> &'static str {
         BinaryOperator::Multiply => "*",
         BinaryOperator::Divide => "/",
     }
+    .into()
 }
 
+// TODO Define this in an ast crate?
 fn operator_priority(operator: BinaryOperator) -> usize {
     match operator {
         BinaryOperator::Or => 1,
@@ -987,72 +737,56 @@ fn operator_priority(operator: BinaryOperator) -> usize {
     }
 }
 
-fn format_suffix_comment<'c>(
-    comments: &'c [Comment],
-    position: &Position,
-) -> (String, &'c [Comment]) {
-    let (comment, comments) = comment::split_current(comments, position.line_number());
-
-    (
-        comment
-            .map(|comment| " #".to_owned() + comment.line())
-            .unwrap_or_default(),
-        comments,
+fn compile_suffix_comment(context: &mut Context, position: &Position) -> Document {
+    sequence(
+        context
+            .drain_current_comment(position.line_number())
+            .map(|comment| line_suffix(" #".to_owned() + comment.line().trim_end())),
     )
 }
 
-fn format_block_comment<'c>(
-    comments: &'c [Comment],
-    position: &Position,
-) -> (String, &'c [Comment]) {
-    let (before, after) = comment::split_before(comments, position.line_number());
-
-    (
-        format_all_comments(before, Some(position.line_number())),
-        after,
+fn compile_block_comment(context: &mut Context, position: &Position) -> Document {
+    compile_all_comments(
+        &context
+            .drain_comments_before(position.line_number())
+            .collect::<Vec<_>>(),
+        Some(position.line_number()),
     )
 }
 
-fn format_all_comments(comments: &[Comment], last_line_number: Option<usize>) -> String {
-    comments
-        .iter()
-        .zip(
-            comments
-                .iter()
-                .skip(1)
-                .map(|comment| comment.position().line_number())
-                .chain([last_line_number.unwrap_or(usize::MAX)]),
-        )
-        .map(|(comment, next_line_number)| {
-            "#".to_owned()
-                + comment.line().trim_end()
-                + "\n"
-                + if comment.position().line_number() + 1 < next_line_number {
-                    "\n"
-                } else {
-                    ""
-                }
-        })
-        .collect::<Vec<_>>()
-        .concat()
+fn compile_remaining_block_comment(context: &mut Context) -> Document {
+    compile_all_comments(
+        &context
+            .drain_comments_before(usize::MAX)
+            .collect::<Vec<_>>(),
+        None,
+    )
 }
 
-fn indent(string: impl AsRef<str>) -> String {
-    regex::Regex::new("^|\n")
-        .unwrap()
-        .replace_all(
-            string.as_ref(),
-            "${0}".to_owned() + &" ".repeat(INDENT_DEPTH),
-        )
-        .into()
-}
-
-fn count_lines(string: &str) -> usize {
-    string.trim().matches('\n').count() + 1
-}
-
-fn is_single_line(string: impl AsRef<str>) -> bool {
-    !string.as_ref().contains('\n')
+fn compile_all_comments(comments: &[Comment], last_line_number: Option<usize>) -> Document {
+    sequence(
+        comments
+            .iter()
+            .zip(
+                comments
+                    .iter()
+                    .skip(1)
+                    .map(|comment| comment.position().line_number())
+                    .chain([last_line_number.unwrap_or(0)]),
+            )
+            .map(|(comment, next_line_number)| {
+                sequence([
+                    "#".into(),
+                    comment.line().trim_end().into(),
+                    line(),
+                    if comment.position().line_number() + 1 < next_line_number {
+                        line()
+                    } else {
+                        empty()
+                    },
+                ])
+            }),
+    )
 }
 
 #[cfg(test)]
@@ -1079,7 +813,7 @@ mod tests {
                 vec![],
                 Position::fake()
             )),
-            "\n"
+            ""
         );
     }
 
@@ -1307,25 +1041,6 @@ mod tests {
     }
 
     #[test]
-    fn format_function_type_in_union_type() {
-        assert_eq!(
-            format_type(
-                &types::Union::new(
-                    types::Function::new(
-                        vec![],
-                        types::None::new(Position::fake()),
-                        Position::fake()
-                    ),
-                    types::None::new(Position::fake()),
-                    Position::fake()
-                )
-                .into()
-            ),
-            "(\\() none) | none"
-        );
-    }
-
-    #[test]
     fn format_record_definition_with_no_field() {
         assert_eq!(
             format_module(&Module::new(
@@ -1413,6 +1128,58 @@ mod tests {
         );
     }
 
+    #[test]
+    fn format_multiple_type_aliases() {
+        assert_eq!(
+            format_module(&Module::new(
+                vec![],
+                vec![],
+                vec![
+                    TypeAlias::new("foo", types::None::new(Position::fake()), Position::fake())
+                        .into(),
+                    TypeAlias::new("bar", types::None::new(Position::fake()), Position::fake())
+                        .into()
+                ],
+                vec![],
+                Position::fake()
+            )),
+            indoc!(
+                "
+                type foo = none
+
+                type bar = none
+                "
+            ),
+        );
+    }
+
+    mod type_ {
+        use super::*;
+
+        fn format_type(type_: &Type) -> String {
+            ir::format(&compile_type(type_))
+        }
+
+        #[test]
+        fn format_function_type_in_union_type() {
+            assert_eq!(
+                format_type(
+                    &types::Union::new(
+                        types::Function::new(
+                            vec![],
+                            types::None::new(Position::fake()),
+                            Position::fake()
+                        ),
+                        types::None::new(Position::fake()),
+                        Position::fake()
+                    )
+                    .into()
+                ),
+                "(\\() none) | none"
+            );
+        }
+    }
+
     mod definition {
         use super::*;
 
@@ -1437,6 +1204,38 @@ mod tests {
                     Position::fake()
                 )),
                 "foo = \\() none { none }\n"
+            );
+        }
+
+        #[test]
+        fn format_multiple() {
+            let definition = Definition::new(
+                "foo",
+                Lambda::new(
+                    vec![],
+                    types::None::new(Position::fake()),
+                    Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                    Position::fake(),
+                ),
+                None,
+                Position::fake(),
+            );
+
+            assert_eq!(
+                format_module(&Module::new(
+                    vec![],
+                    vec![],
+                    vec![],
+                    vec![definition.clone(), definition],
+                    Position::fake()
+                )),
+                indoc!(
+                    "
+                    foo = \\() none { none }
+
+                    foo = \\() none { none }
+                    "
+                ),
             );
         }
 
@@ -1597,7 +1396,7 @@ mod tests {
         use super::*;
 
         fn format(block: &Block) -> String {
-            format_block(block, &[]).0
+            ir::format(&compile_block(&mut Context::new(vec![]), block)) + "\n"
         }
 
         #[test]
@@ -1608,7 +1407,13 @@ mod tests {
                     None::new(Position::fake()),
                     Position::fake()
                 )),
-                "{ none }"
+                indoc!(
+                    "
+                    {
+                      none
+                    }
+                    "
+                )
             );
         }
 
@@ -1636,7 +1441,6 @@ mod tests {
                     }
                     "
                 )
-                .trim()
             );
         }
 
@@ -1664,7 +1468,6 @@ mod tests {
                     }
                     "
                 )
-                .trim()
             );
         }
 
@@ -1692,7 +1495,6 @@ mod tests {
                     }
                     "
                 )
-                .trim()
             );
         }
 
@@ -1716,12 +1518,11 @@ mod tests {
                     "
                     {
                       f()
-                      
+
                       none
                     }
                     "
                 )
-                .trim()
             );
         }
 
@@ -1745,12 +1546,11 @@ mod tests {
                     "
                     {
                       f()
-                      
+
                       none
                     }
                     "
                 )
-                .trim()
             );
         }
 
@@ -1803,7 +1603,11 @@ mod tests {
         use super::*;
 
         fn format(expression: &Expression) -> String {
-            format_expression(expression, &[]).0
+            ir::format(&compile_expression(&mut Context::new(vec![]), expression))
+        }
+
+        fn format_with_comments(expression: &Expression, comments: Vec<Comment>) -> String {
+            ir::format(&compile_expression(&mut Context::new(comments), expression))
         }
 
         mod call {
@@ -1862,6 +1666,61 @@ mod tests {
                         foo(
                           1,
                           2,
+                        )
+                        "
+                    )
+                    .trim()
+                );
+            }
+
+            #[test]
+            fn format_block_comment() {
+                assert_eq!(
+                    format_with_comments(
+                        &Call::new(
+                            Variable::new("foo", line_position(1)),
+                            vec![Number::new(
+                                NumberRepresentation::FloatingPoint("1".into()),
+                                line_position(3)
+                            )
+                            .into()],
+                            Position::fake()
+                        )
+                        .into(),
+                        vec![Comment::new("foo", line_position(2))]
+                    ),
+                    indoc!(
+                        "
+                        foo(
+                          #foo
+                          1,
+                        )
+                        "
+                    )
+                    .trim()
+                );
+            }
+
+            #[test]
+            fn format_suffix_comment() {
+                assert_eq!(
+                    format_with_comments(
+                        &Call::new(
+                            Variable::new("foo", line_position(1)),
+                            vec![Number::new(
+                                NumberRepresentation::FloatingPoint("1".into()),
+                                line_position(2)
+                            )
+                            .into()],
+                            Position::fake()
+                        )
+                        .into(),
+                        vec![Comment::new("foo", line_position(2))]
+                    ),
+                    indoc!(
+                        "
+                        foo(
+                          1, #foo
                         )
                         "
                     )
@@ -2960,6 +2819,26 @@ mod tests {
             }
 
             #[test]
+            fn format_multi_line_update_with_entry_on_next_line() {
+                assert_eq!(
+                    format(
+                        &Record::new(
+                            "foo",
+                            Some(Variable::new("r", Position::fake()).into()),
+                            vec![RecordField::new(
+                                "x",
+                                None::new(Position::fake()),
+                                line_position(2)
+                            )],
+                            line_position(1)
+                        )
+                        .into()
+                    ),
+                    "foo{...r, x: none}"
+                );
+            }
+
+            #[test]
             fn format_multi_line() {
                 assert_eq!(
                     format(
@@ -3058,6 +2937,34 @@ mod tests {
         }
 
         #[test]
+        fn format_comment_after_last_section() {
+            assert_eq!(
+                format(
+                    &Module::new(
+                        vec![Import::new(
+                            InternalModulePath::new(vec!["Foo".into()]),
+                            None,
+                            vec![],
+                            line_position(1),
+                        )],
+                        vec![],
+                        vec![],
+                        vec![],
+                        Position::fake()
+                    ),
+                    &[Comment::new("foo", line_position(2))]
+                ),
+                indoc!(
+                    "
+                    import 'Foo
+
+                    #foo
+                    ",
+                ),
+            );
+        }
+
+        #[test]
         fn keep_spaces_between_comment_and_next_line() {
             assert_eq!(
                 format(
@@ -3103,7 +3010,12 @@ mod tests {
                     ),
                     &[Comment::new("foo", line_position(1))]
                 ),
-                "#foo\nimport 'Foo\n"
+                indoc!(
+                    "
+                    #foo
+                    import 'Foo
+                    ",
+                ),
             );
         }
 
@@ -3129,7 +3041,12 @@ mod tests {
                     ),
                     &[Comment::new("foo", line_position(1))]
                 ),
-                "#foo\nimport foreign foo \\() none\n"
+                indoc!(
+                    "
+                    #foo
+                    import foreign foo \\() none
+                    ",
+                ),
             );
         }
 
@@ -3146,7 +3063,12 @@ mod tests {
                     ),
                     &[Comment::new("foo", line_position(1))]
                 ),
-                "#foo\ntype foo {}\n"
+                indoc!(
+                    "
+                    #foo
+                    type foo {}
+                    "
+                )
             );
         }
 
@@ -3168,7 +3090,12 @@ mod tests {
                     ),
                     &[Comment::new("foo", line_position(1))]
                 ),
-                "#foo\ntype foo = none\n"
+                indoc!(
+                    "
+                    #foo
+                    type foo = none
+                    "
+                ),
             );
         }
 
@@ -3195,7 +3122,12 @@ mod tests {
                     ),
                     &[Comment::new("foo", line_position(1))]
                 ),
-                "#foo\nfoo = \\() none { none }\n"
+                indoc!(
+                    "
+                    #foo
+                    foo = \\() none { none }
+                    "
+                ),
             );
         }
 
@@ -3270,6 +3202,39 @@ mod tests {
                     foo = \\() none {
                       #foo
                       none
+                    }
+                    "
+                )
+            );
+        }
+
+        #[test]
+        fn format_suffix_comment_of_last_expression() {
+            assert_eq!(
+                format(
+                    &Module::new(
+                        vec![],
+                        vec![],
+                        vec![],
+                        vec![Definition::new(
+                            "foo",
+                            Lambda::new(
+                                vec![],
+                                types::None::new(Position::fake()),
+                                Block::new(vec![], None::new(line_position(2)), Position::fake()),
+                                Position::fake(),
+                            ),
+                            None,
+                            Position::fake()
+                        )],
+                        Position::fake()
+                    ),
+                    &[Comment::new("foo", line_position(2))]
+                ),
+                indoc!(
+                    "
+                    foo = \\() none {
+                      none #foo
                     }
                     "
                 )

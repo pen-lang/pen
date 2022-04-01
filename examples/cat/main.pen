@@ -1,7 +1,7 @@
 import Console'Print
 import Os'Context { Context }
-import Os'File { File }
 import Os'Environment
+import Os'File { File }
 import Os'Process
 
 bufferSize = \() number { 4096 }

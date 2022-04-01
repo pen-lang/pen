@@ -266,8 +266,8 @@ version = "0.1.0"
 dependencies = [
  "ast",
  "indoc",
+ "itertools",
  "position",
- "regex",
 ]
 
 [[package]]
