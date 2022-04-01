@@ -18,33 +18,38 @@ pub fn format(module: &Module, comments: &[Comment]) -> String {
         .partition::<Vec<_>, _>(|import| matches!(import.module_path(), ModulePath::External(_)));
 
     format_spaces(&ir::format(&sequence([
-        sequence(
-            [
-                compile_imports(&mut context, &external_imports),
-                compile_imports(&mut context, &internal_imports),
-                compile_foreign_imports(&mut context, module.foreign_imports()),
-                sequence(
-                    module
-                        .type_definitions()
-                        .iter()
-                        .map(|definition| compile_type_definition(&mut context, definition)),
-                ),
-                sequence(
-                    module
-                        .definitions()
-                        .iter()
-                        .map(|definition| compile_definition(&mut context, definition)),
-                ),
-            ]
-            .into_iter()
-            .map(|document| {
-                if count_lines(&document) == 0 {
-                    empty()
-                } else {
-                    sequence([document, line()])
-                }
-            }),
-        ),
+        [
+            compile_imports(&mut context, &external_imports),
+            compile_imports(&mut context, &internal_imports),
+            compile_foreign_imports(&mut context, module.foreign_imports()),
+            sequence(
+                module
+                    .type_definitions()
+                    .iter()
+                    .map(|definition| compile_type_definition(&mut context, definition)),
+            ),
+            sequence(
+                module
+                    .definitions()
+                    .iter()
+                    .map(|definition| compile_definition(&mut context, definition)),
+            ),
+        ]
+        .into_iter()
+        .fold(empty(), |all, document| {
+            if count_lines(&document) == 0 {
+                all
+            } else {
+                sequence([
+                    if count_lines(&all) == 0 {
+                        empty()
+                    } else {
+                        sequence([all, line()])
+                    },
+                    document,
+                ])
+            }
+        }),
         compile_remaining_block_comment(&mut context),
     ])))
 }
@@ -54,9 +59,7 @@ fn format_spaces(string: impl AsRef<str>) -> String {
     regex::Regex::new("[ \t]+\n")
         .unwrap()
         .replace_all(string.as_ref(), "\n")
-        .trim()
-        .to_owned()
-        + "\n"
+        .into()
 }
 
 fn compile_imports(context: &mut Context, imports: &[&Import]) -> Document {
@@ -957,7 +960,7 @@ mod tests {
                 vec![],
                 Position::fake()
             )),
-            "\n"
+            ""
         );
     }
 
@@ -1486,7 +1489,7 @@ mod tests {
             format_spaces(&ir::format(&compile_block(
                 &mut Context::new(vec![]),
                 block,
-            )))
+            ))) + "\n"
         }
 
         #[test]
