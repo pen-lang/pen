@@ -3,12 +3,15 @@ use std::iter::repeat;
 
 struct Context {
     outputs: Vec<String>,
+    // Omit extra indent output so that we do not need to remove them later.
+    next_level: usize,
     line_suffixes: Vec<String>,
 }
 
 pub fn format(document: &Document) -> String {
     let mut context = Context {
         outputs: vec![],
+        next_level: 0,
         line_suffixes: vec![],
     };
 
@@ -29,24 +32,41 @@ fn format_document(context: &mut Context, document: &Document, level: usize, bro
                 context.outputs.extend([" ".into()]);
             }
         }
-        Document::LineSuffix(suffix) => context.line_suffixes.push(suffix.clone()),
+        Document::LineSuffix(suffix) => {
+            if !suffix.is_empty() {
+                flush(context);
+            }
+
+            context.line_suffixes.push(suffix.clone());
+        }
         Document::Sequence(documents) => {
             for document in documents {
                 format_document(context, document, level, broken);
             }
         }
-        Document::String(string) => context.outputs.push(string.clone()),
+        Document::String(string) => {
+            if !string.is_empty() {
+                flush(context);
+            }
+
+            context.outputs.push(string.clone());
+        }
     }
 }
 
 fn format_line(context: &mut Context, level: usize) {
-    context.outputs.extend(
-        context
-            .line_suffixes
-            .drain(..)
-            .chain(["\n".into()])
-            .chain(repeat("  ".into()).take(level)),
-    );
+    context
+        .outputs
+        .extend(context.line_suffixes.drain(..).chain(["\n".into()]));
+
+    context.next_level = level;
+}
+
+fn flush(context: &mut Context) {
+    context
+        .outputs
+        .extend(repeat("  ".into()).take(context.next_level));
+    context.next_level = 0;
 }
 
 #[cfg(test)]

@@ -17,7 +17,7 @@ pub fn format(module: &Module, comments: &[Comment]) -> String {
         .iter()
         .partition::<Vec<_>, _>(|import| matches!(import.module_path(), ModulePath::External(_)));
 
-    format_spaces(&ir::format(&sequence([
+    ir::format(&sequence([
         [
             compile_imports(&mut context, &external_imports),
             compile_imports(&mut context, &internal_imports),
@@ -51,15 +51,7 @@ pub fn format(module: &Module, comments: &[Comment]) -> String {
             }
         }),
         compile_remaining_block_comment(&mut context),
-    ])))
-}
-
-// TODO Remove this function if possible.
-fn format_spaces(string: impl AsRef<str>) -> String {
-    regex::Regex::new("[ \t]+\n")
-        .unwrap()
-        .replace_all(string.as_ref(), "\n")
-        .into()
+    ]))
 }
 
 fn compile_imports(context: &mut Context, imports: &[&Import]) -> Document {
@@ -1486,10 +1478,7 @@ mod tests {
         use super::*;
 
         fn format(block: &Block) -> String {
-            format_spaces(&ir::format(&compile_block(
-                &mut Context::new(vec![]),
-                block,
-            ))) + "\n"
+            ir::format(&compile_block(&mut Context::new(vec![]), block)) + "\n"
         }
 
         #[test]
