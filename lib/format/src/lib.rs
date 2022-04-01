@@ -365,12 +365,12 @@ fn compile_expression(context: &mut Context, expression: &Expression) -> Documen
         Expression::BinaryOperation(operation) => compile_binary_operation(context, operation),
         Expression::Call(call) => {
             let separator = sequence([",".into(), line()]);
-            let arguments = indent(sequence(
+            let arguments = sequence(
                 call.arguments()
                     .iter()
                     .map(|argument| compile_expression(context, argument))
                     .intersperse(separator.clone()),
-            ));
+            );
 
             sequence([
                 compile_expression(context, call.function()),
@@ -385,7 +385,7 @@ fn compile_expression(context: &mut Context, expression: &Expression) -> Documen
                 {
                     flatten(arguments)
                 } else {
-                    sequence([indent(line()), arguments, separator])
+                    sequence([indent(sequence([line(), arguments])), separator])
                 },
                 ")".into(),
             ])
@@ -576,58 +576,48 @@ fn compile_expression(context: &mut Context, expression: &Expression) -> Documen
             NumberRepresentation::FloatingPoint(string) => string.clone(),
         }
         .into(),
-        // Expression::Record(record) => {
-        //     let (old_record, mut comments) = if let Some(record) = record.record() {
-        //         let (record, comments) = compile_expression(record, comments);
+        Expression::Record(record) => {
+            let separator = sequence([",".into(), line()]);
+            let elements = sequence(
+                record
+                    .record()
+                    .map(|record| sequence(["...".into(), compile_expression(context, record)]))
+                    .into_iter()
+                    .chain(record.fields().iter().map(|field| {
+                        {
+                            sequence([
+                                field.name().into(),
+                                ": ".into(),
+                                compile_expression(context, field.expression()),
+                            ])
+                        }
+                    }))
+                    .intersperse(separator.clone()),
+            );
 
-        //         (Some(format!("...{}", record)), comments)
-        //     } else {
-        //         (None, comments)
-        //     };
-        //     let mut elements = old_record.into_iter().collect::<Vec<_>>();
-
-        //     for field in record.fields() {
-        //         let (expression, new_comments) = compile_expression(field.expression(), comments);
-
-        //         elements.push(format!("{}: {}", field.name(), expression,));
-        //         comments = new_comments;
-        //     }
-
-        //     (
-        //         if record.fields().is_empty()
-        //             || Some(record.position().line_number())
-        //                 == record
-        //                     .fields()
-        //                     .get(0)
-        //                     .map(|field| field.position().line_number())
-        //                 && elements.iter().all(is_single_line)
-        //         {
-        //             [record.type_name().into(), "{".into()]
-        //                 .into_iter()
-        //                 .chain(if record.record().is_none() && record.fields().is_empty() {
-        //                     None
-        //                 } else {
-        //                     Some(elements.join(", "))
-        //                 })
-        //                 .chain(["}".into()])
-        //                 .collect::<Vec<_>>()
-        //                 .concat()
-        //         } else {
-        //             [record.type_name().to_owned() + "{"]
-        //                 .into_iter()
-        //                 .chain(elements.into_iter().map(|line| indent(line) + ","))
-        //                 .chain(["}".into()])
-        //                 .collect::<Vec<_>>()
-        //                 .join("\n")
-        //         },
-        //         comments,
-        //     )
-        // }
-        // Expression::RecordDeconstruction(deconstruction) => {
-        //     let (record, comments) = compile_expression(deconstruction.expression(), comments);
-
-        //     (format!("{}.{}", record, deconstruction.name()), comments)
-        // }
+            sequence([
+                record.type_name().into(),
+                "{".into(),
+                if record.fields().is_empty()
+                    || Some(record.position().line_number())
+                        == record
+                            .fields()
+                            .get(0)
+                            .map(|field| field.position().line_number())
+                        && !is_broken(&elements)
+                {
+                    flatten(elements)
+                } else {
+                    sequence([indent(sequence([line(), elements])), separator])
+                },
+                "}".into(),
+            ])
+        }
+        Expression::RecordDeconstruction(deconstruction) => sequence([
+            compile_expression(context, deconstruction.expression()),
+            ".".into(),
+            deconstruction.name().into(),
+        ]),
         Expression::SpawnOperation(operation) => {
             sequence(["go ".into(), compile_lambda(context, operation.function())])
         }
@@ -2416,20 +2406,20 @@ mod tests {
             }
         }
 
-        // #[test]
-        // fn format_record_deconstruction() {
-        //     assert_eq!(
-        //         format(
-        //             &RecordDeconstruction::new(
-        //                 Variable::new("x", Position::fake()),
-        //                 "y",
-        //                 Position::fake()
-        //             )
-        //             .into()
-        //         ),
-        //         "x.y"
-        //     );
-        // }
+        #[test]
+        fn format_record_deconstruction() {
+            assert_eq!(
+                format(
+                    &RecordDeconstruction::new(
+                        Variable::new("x", Position::fake()),
+                        "y",
+                        Position::fake()
+                    )
+                    .into()
+                ),
+                "x.y"
+            );
+        }
 
         // mod list {
         //     use super::*;
@@ -2770,152 +2760,152 @@ mod tests {
         //     }
         // }
 
-        // mod record {
-        //     use super::*;
+        mod record {
+            use super::*;
 
-        //     #[test]
-        //     fn format_empty() {
-        //         assert_eq!(
-        //             format(&Record::new("foo", None, vec![], Position::fake()).into()),
-        //             "foo{}"
-        //         );
-        //     }
+            #[test]
+            fn format_empty() {
+                assert_eq!(
+                    format(&Record::new("foo", None, vec![], Position::fake()).into()),
+                    "foo{}"
+                );
+            }
 
-        //     #[test]
-        //     fn format_field() {
-        //         assert_eq!(
-        //             format(
-        //                 &Record::new(
-        //                     "foo",
-        //                     None,
-        //                     vec![RecordField::new(
-        //                         "x",
-        //                         None::new(Position::fake()),
-        //                         Position::fake()
-        //                     )],
-        //                     Position::fake()
-        //                 )
-        //                 .into()
-        //             ),
-        //             "foo{x: none}"
-        //         );
-        //     }
+            #[test]
+            fn format_field() {
+                assert_eq!(
+                    format(
+                        &Record::new(
+                            "foo",
+                            None,
+                            vec![RecordField::new(
+                                "x",
+                                None::new(Position::fake()),
+                                Position::fake()
+                            )],
+                            Position::fake()
+                        )
+                        .into()
+                    ),
+                    "foo{x: none}"
+                );
+            }
 
-        //     #[test]
-        //     fn format_two_fields() {
-        //         assert_eq!(
-        //             format(
-        //                 &Record::new(
-        //                     "foo",
-        //                     None,
-        //                     vec![
-        //                         RecordField::new(
-        //                             "x",
-        //                             Number::new(
-        //                                 NumberRepresentation::FloatingPoint("1".into()),
-        //                                 Position::fake()
-        //                             ),
-        //                             Position::fake()
-        //                         ),
-        //                         RecordField::new(
-        //                             "y",
-        //                             Number::new(
-        //                                 NumberRepresentation::FloatingPoint("2".into()),
-        //                                 Position::fake()
-        //                             ),
-        //                             Position::fake()
-        //                         )
-        //                     ],
-        //                     Position::fake()
-        //                 )
-        //                 .into()
-        //             ),
-        //             "foo{x: 1, y: 2}"
-        //         );
-        //     }
+            #[test]
+            fn format_two_fields() {
+                assert_eq!(
+                    format(
+                        &Record::new(
+                            "foo",
+                            None,
+                            vec![
+                                RecordField::new(
+                                    "x",
+                                    Number::new(
+                                        NumberRepresentation::FloatingPoint("1".into()),
+                                        Position::fake()
+                                    ),
+                                    Position::fake()
+                                ),
+                                RecordField::new(
+                                    "y",
+                                    Number::new(
+                                        NumberRepresentation::FloatingPoint("2".into()),
+                                        Position::fake()
+                                    ),
+                                    Position::fake()
+                                )
+                            ],
+                            Position::fake()
+                        )
+                        .into()
+                    ),
+                    "foo{x: 1, y: 2}"
+                );
+            }
 
-        //     #[test]
-        //     fn format_update() {
-        //         assert_eq!(
-        //             format(
-        //                 &Record::new(
-        //                     "foo",
-        //                     Some(Variable::new("r", Position::fake()).into()),
-        //                     vec![RecordField::new(
-        //                         "x",
-        //                         None::new(Position::fake()),
-        //                         Position::fake()
-        //                     )],
-        //                     Position::fake()
-        //                 )
-        //                 .into()
-        //             ),
-        //             "foo{...r, x: none}"
-        //         );
-        //     }
+            #[test]
+            fn format_update() {
+                assert_eq!(
+                    format(
+                        &Record::new(
+                            "foo",
+                            Some(Variable::new("r", Position::fake()).into()),
+                            vec![RecordField::new(
+                                "x",
+                                None::new(Position::fake()),
+                                Position::fake()
+                            )],
+                            Position::fake()
+                        )
+                        .into()
+                    ),
+                    "foo{...r, x: none}"
+                );
+            }
 
-        //     #[test]
-        //     fn format_multi_line() {
-        //         assert_eq!(
-        //             format(
-        //                 &Record::new(
-        //                     "foo",
-        //                     None,
-        //                     vec![RecordField::new(
-        //                         "x",
-        //                         None::new(Position::fake()),
-        //                         line_position(2)
-        //                     )],
-        //                     line_position(1)
-        //                 )
-        //                 .into()
-        //             ),
-        //             indoc!(
-        //                 "
-        //                 foo{
-        //                   x: none,
-        //                 }
-        //                 "
-        //             )
-        //             .trim(),
-        //         );
-        //     }
+            #[test]
+            fn format_multi_line() {
+                assert_eq!(
+                    format(
+                        &Record::new(
+                            "foo",
+                            None,
+                            vec![RecordField::new(
+                                "x",
+                                None::new(Position::fake()),
+                                line_position(2)
+                            )],
+                            line_position(1)
+                        )
+                        .into()
+                    ),
+                    indoc!(
+                        "
+                        foo{
+                          x: none,
+                        }
+                        "
+                    )
+                    .trim(),
+                );
+            }
 
-        //     #[test]
-        //     fn format_multi_line_with_two_fields() {
-        //         assert_eq!(
-        //             format(
-        //                 &Record::new(
-        //                     "foo",
-        //                     None,
-        //                     vec![
-        //                         RecordField::new(
-        //                             "x",
-        //                             None::new(Position::fake()),
-        //                             line_position(2)
-        //                         ),
-        //                         RecordField::new(
-        //                             "y",
-        //                             None::new(Position::fake()),
-        //                             line_position(2)
-        //                         )
-        //                     ],
-        //                     line_position(1)
-        //                 )
-        //                 .into()
-        //             ),
-        //             indoc!(
-        //                 "
-        //                 foo{
-        //                   x: none,
-        //                   y: none,
-        //                 }
-        //                 "
-        //             )
-        //             .trim(),
-        //         );
-        //     }
-        // }
+            #[test]
+            fn format_multi_line_with_two_fields() {
+                assert_eq!(
+                    format(
+                        &Record::new(
+                            "foo",
+                            None,
+                            vec![
+                                RecordField::new(
+                                    "x",
+                                    None::new(Position::fake()),
+                                    line_position(2)
+                                ),
+                                RecordField::new(
+                                    "y",
+                                    None::new(Position::fake()),
+                                    line_position(2)
+                                )
+                            ],
+                            line_position(1)
+                        )
+                        .into()
+                    ),
+                    indoc!(
+                        "
+                        foo{
+                          x: none,
+                          y: none,
+                        }
+                        "
+                    )
+                    .trim(),
+                );
+            }
+        }
     }
 
     mod comment {
