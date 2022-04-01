@@ -15,7 +15,7 @@ impl Context {
         &mut self,
         line_number: usize,
     ) -> impl Iterator<Item = Comment> + '_ {
-        // This is O(n) and slow. Haha!
+        // This is O(n) and slow. Ha ha!
         self.comments.splice(
             ..self
                 .comments
