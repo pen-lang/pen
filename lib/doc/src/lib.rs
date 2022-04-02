@@ -2,8 +2,7 @@ mod ir;
 mod markdown;
 
 use ast::*;
-use ir::build::*;
-use ir::*;
+use ir::{build::*, *};
 
 pub fn generate(path: &ModulePath, module: &Module, comments: &[Comment]) -> String {
     markdown::generate(&compile_module(path, module, comments))
@@ -59,8 +58,7 @@ fn compile_definitions(definitions: &[Definition], comments: &[Comment]) -> Sect
 mod tests {
     use super::*;
     use indoc::indoc;
-    use position::test::PositionFake;
-    use position::Position;
+    use position::{test::PositionFake, Position};
 
     mod module {
         use super::*;
