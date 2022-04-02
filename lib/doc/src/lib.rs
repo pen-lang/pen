@@ -1,3 +1,9 @@
+use ast::*;
+
+pub fn generate(_module: &Module, _comments: &[Comment]) -> String {
+    todo!()
+}
+
 #[cfg(test)]
 mod tests {
     #[test]
