@@ -28,8 +28,19 @@ fn compile_type_definitions(definitions: &[TypeDefinition], comments: &[Comment]
         } else {
             vec![]
         },
-        [],
+        definitions
+            .iter()
+            .map(|definition| compile_type_definition(definition, comments)),
     )
+}
+
+fn compile_type_definition(definition: &TypeDefinition, comments: &[Comment]) -> Section {
+    match definition {
+        TypeDefinition::RecordDefinition(definition) => {
+            section(text([code(definition.name())]), [], [])
+        }
+        TypeDefinition::TypeAlias(alias) => section(text([code(alias.name())]), [], []),
+    }
 }
 
 fn compile_definitions(definitions: &[Definition], comments: &[Comment]) -> Section {
@@ -52,7 +63,6 @@ mod tests {
     use position::Position;
 
     mod module {
-
         use super::*;
 
         fn generate(path: &ModulePath, module: &Module, comments: &[Comment]) -> String {
@@ -78,6 +88,29 @@ mod tests {
                     ## Functions
 
                     No functions are defined.
+                    "
+                )
+            );
+        }
+    }
+
+    mod type_definition {
+        use super::*;
+
+        fn generate(definition: &TypeDefinition, comments: &[Comment]) -> String {
+            markdown::generate(&compile_type_definition(definition, comments))
+        }
+
+        #[test]
+        fn generate_empty() {
+            assert_eq!(
+                generate(
+                    &RecordDefinition::new("Foo", vec![], Position::fake()).into(),
+                    &[]
+                ),
+                indoc!(
+                    "
+                    # `Foo`
                     "
                 )
             );
