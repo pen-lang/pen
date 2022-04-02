@@ -142,14 +142,15 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="formatting-module-files"><a class="header" href="#formatting-module-files">Formatting module files</a></h1>
-<h2 id="format-a-package"><a class="header" href="#format-a-package">Format a package</a></h2>
+<h2 id="background"><a class="header" href="#background">Background</a></h2>
 <p><em>Given</em> a file named &quot;pen.json&quot; with:</p>
 <pre><code class="language-json">{
   &quot;type&quot;: &quot;library&quot;,
   &quot;dependencies&quot;: {}
 }
 </code></pre>
-<p><em>And</em> a file named &quot;Foo.pen&quot; with:</p>
+<h2 id="format-a-package"><a class="header" href="#format-a-package">Format a package</a></h2>
+<p><em>Given</em> a file named &quot;Foo.pen&quot; with:</p>
 <pre><code class="language-pen">Foo = \() none {
 
   none
@@ -161,6 +162,15 @@
   none
 }
 </code></pre>
+<h2 id="format-a-package-1"><a class="header" href="#format-a-package-1">Format a package</a></h2>
+<p><em>Given</em> a file named &quot;Foo.pen&quot; with:</p>
+<pre><code class="language-pen">Foo = \() none {
+
+  none
+}
+</code></pre>
+<p><em>When</em> I run <code>pen format --checked</code></p>
+<p><em>Then</em> the exit status should not be 0.</p>
 
                     </main>
 
