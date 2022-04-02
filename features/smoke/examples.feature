@@ -5,7 +5,8 @@ Feature: Examples
     cp -r $PEN_ROOT/examples .
     """
     When I cd to "examples/<example>"
-    Then I successfully run `pen build`
+    Then I successfully run `pen format --check`
+    And I successfully run `pen build`
     And I successfully run `pen_test_on_linux.sh`
 
     Examples:
