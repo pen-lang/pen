@@ -1,4 +1,5 @@
 use crate::{
+    error::ApplicationError,
     infra::{FilePath, Infrastructure},
     module_finder, module_formatter,
 };
@@ -9,14 +10,13 @@ pub fn format(
     package_directory: &FilePath,
 ) -> Result<(), Box<dyn Error>> {
     for paths in module_finder::find(infrastructure, package_directory)? {
-        infrastructure.file_system.write(
-            &paths,
-            module_formatter::format(
-                &infrastructure.file_system.read_to_string(&paths)?,
-                &infrastructure.file_path_displayer.display(&paths),
-            )?
-            .as_bytes(),
-        )?;
+        let path = infrastructure.file_path_displayer.display(&paths);
+        let source = infrastructure.file_system.read_to_string(&paths)?;
+        let formatted_source = module_formatter::format(&source, &path)?;
+
+        if source != formatted_source {
+            return Err(ApplicationError::Format { path, difference });
+        }
     }
 
     Ok(())
