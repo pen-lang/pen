@@ -5,3 +5,6 @@ edition = "2021"
 
 [dependencies]
 ast = { path = "../ast" }
+
+[dev-dependencies]
+indoc = "1"
