@@ -3,7 +3,7 @@
 mod context;
 mod ir;
 
-use ast::{types::Type, *};
+use ast::{analysis::operator_priority, types::Type, *};
 use context::Context;
 use ir::{build::*, count_lines, is_broken, Document};
 use itertools::Itertools;
@@ -726,22 +726,6 @@ fn compile_binary_operator(operator: BinaryOperator) -> Document {
         BinaryOperator::Divide => "/",
     }
     .into()
-}
-
-// TODO Define this in an ast crate?
-fn operator_priority(operator: BinaryOperator) -> usize {
-    match operator {
-        BinaryOperator::Or => 1,
-        BinaryOperator::And => 2,
-        BinaryOperator::Equal
-        | BinaryOperator::NotEqual
-        | BinaryOperator::LessThan
-        | BinaryOperator::LessThanOrEqual
-        | BinaryOperator::GreaterThan
-        | BinaryOperator::GreaterThanOrEqual => 3,
-        BinaryOperator::Add | BinaryOperator::Subtract => 4,
-        BinaryOperator::Multiply | BinaryOperator::Divide => 5,
-    }
 }
 
 fn compile_line_comment(
