@@ -23,6 +23,8 @@ pub fn check(
     if paths.is_empty() {
         Ok(())
     } else {
+        paths.sort();
+
         Err(ApplicationError::ModuleFilesNotFormatted(paths).into())
     }
 }
