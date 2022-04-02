@@ -414,48 +414,7 @@ fn compile_expression(context: &mut Context, expression: &Expression) -> Documen
         ]),
         Expression::IfType(if_) => compile_if_type(context, if_),
         Expression::Lambda(lambda) => compile_lambda(context, lambda),
-        Expression::List(list) => {
-            let separator = Document::from(",");
-            let elements = sequence(
-                list.elements()
-                    .iter()
-                    .map(|element| {
-                        sequence([
-                            line(),
-                            compile_line_comment(context, element.position(), |context| {
-                                match element {
-                                    ListElement::Multiple(expression) => sequence([
-                                        "...".into(),
-                                        compile_expression(context, expression),
-                                    ]),
-                                    ListElement::Single(expression) => {
-                                        compile_expression(context, expression)
-                                    }
-                                }
-                            }),
-                        ])
-                    })
-                    .intersperse(separator.clone()),
-            );
-
-            sequence([
-                "[".into(),
-                compile_type(list.type_()),
-                if list.elements().is_empty()
-                    || Some(list.position().line_number())
-                        == list
-                            .elements()
-                            .get(0)
-                            .map(|element| element.position().line_number())
-                        && !is_broken(&elements)
-                {
-                    flatten(elements)
-                } else {
-                    break_(sequence([indent(elements), separator, line()]))
-                },
-                "]".into(),
-            ])
-        }
+        Expression::List(list) => compile_list(context, list),
         Expression::ListComprehension(comprehension) => {
             let elements = sequence([
                 line(),
@@ -487,58 +446,7 @@ fn compile_expression(context: &mut Context, expression: &Expression) -> Documen
                 "]".into(),
             ])
         }
-        Expression::Map(map) => {
-            let type_ = sequence([
-                compile_type(map.key_type()),
-                ": ".into(),
-                compile_type(map.value_type()),
-            ]);
-            let separator = Document::from(",");
-            let elements = sequence(
-                map.elements()
-                    .iter()
-                    .map(|element| {
-                        sequence([
-                            line(),
-                            compile_line_comment(context, element.position(), |context| {
-                                match element {
-                                    MapElement::Map(expression) => sequence([
-                                        "...".into(),
-                                        compile_expression(context, expression),
-                                    ]),
-                                    MapElement::Insertion(entry) => sequence([
-                                        compile_expression(context, entry.key()),
-                                        ": ".into(),
-                                        compile_expression(context, entry.value()),
-                                    ]),
-                                    MapElement::Removal(expression) => {
-                                        compile_expression(context, expression)
-                                    }
-                                }
-                            }),
-                        ])
-                    })
-                    .intersperse(separator.clone()),
-            );
-
-            sequence([
-                "{".into(),
-                type_,
-                if map.elements().is_empty()
-                    || Some(map.position().line_number())
-                        == map
-                            .elements()
-                            .get(0)
-                            .map(|element| element.position().line_number())
-                        && !is_broken(&elements)
-                {
-                    flatten(elements)
-                } else {
-                    break_(sequence([indent(elements), separator, line()]))
-                },
-                "}".into(),
-            ])
-        }
+        Expression::Map(map) => compile_map(context, map),
         Expression::None(_) => "none".into(),
         Expression::Number(number) => match number.value() {
             NumberRepresentation::Binary(string) => "0b".to_owned() + string,
@@ -677,6 +585,92 @@ fn compile_if_type(context: &mut Context, if_: &IfType) -> Document {
             && !is_broken(&document),
         document,
     )
+}
+
+fn compile_list(context: &mut Context, list: &List) -> Document {
+    let separator = Document::from(",");
+    let elements = sequence(
+        list.elements()
+            .iter()
+            .map(|element| {
+                sequence([
+                    line(),
+                    compile_line_comment(context, element.position(), |context| match element {
+                        ListElement::Multiple(expression) => {
+                            sequence(["...".into(), compile_expression(context, expression)])
+                        }
+                        ListElement::Single(expression) => compile_expression(context, expression),
+                    }),
+                ])
+            })
+            .intersperse(separator.clone()),
+    );
+
+    sequence([
+        "[".into(),
+        compile_type(list.type_()),
+        if list.elements().is_empty()
+            || Some(list.position().line_number())
+                == list
+                    .elements()
+                    .get(0)
+                    .map(|element| element.position().line_number())
+                && !is_broken(&elements)
+        {
+            flatten(elements)
+        } else {
+            break_(sequence([indent(elements), separator, line()]))
+        },
+        "]".into(),
+    ])
+}
+
+fn compile_map(context: &mut Context, map: &Map) -> Document {
+    let type_ = sequence([
+        compile_type(map.key_type()),
+        ": ".into(),
+        compile_type(map.value_type()),
+    ]);
+    let separator = Document::from(",");
+    let elements = sequence(
+        map.elements()
+            .iter()
+            .map(|element| {
+                sequence([
+                    line(),
+                    compile_line_comment(context, element.position(), |context| match element {
+                        MapElement::Map(expression) => {
+                            sequence(["...".into(), compile_expression(context, expression)])
+                        }
+                        MapElement::Insertion(entry) => sequence([
+                            compile_expression(context, entry.key()),
+                            ": ".into(),
+                            compile_expression(context, entry.value()),
+                        ]),
+                        MapElement::Removal(expression) => compile_expression(context, expression),
+                    }),
+                ])
+            })
+            .intersperse(separator.clone()),
+    );
+
+    sequence([
+        "{".into(),
+        type_,
+        if map.elements().is_empty()
+            || Some(map.position().line_number())
+                == map
+                    .elements()
+                    .get(0)
+                    .map(|element| element.position().line_number())
+                && !is_broken(&elements)
+        {
+            flatten(elements)
+        } else {
+            break_(sequence([indent(elements), separator, line()]))
+        },
+        "}".into(),
+    ])
 }
 
 fn compile_binary_operation(context: &mut Context, operation: &BinaryOperation) -> Document {
