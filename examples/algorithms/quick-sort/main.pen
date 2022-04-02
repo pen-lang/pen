@@ -2,6 +2,7 @@ import Core'Number
 import Core'String
 import Os'File
 import Os'Random
+
 import 'sort
 
 total = \() number { 20 }
@@ -11,12 +12,13 @@ max = \() number { 100 }
 main = \(ctx context) none {
   _ = printNumbers(
     ctx.Os,
-    sort'Sort([number
-      Number'Floor(Random'Number(ctx.Os) * max())
-      for _ in Number'Sequence(total())
-    ]),
+    sort'Sort(
+      [number
+        Number'Floor(Random'Number(ctx.Os) * max())
+        for _ in Number'Sequence(total())
+      ],
+    ),
   )
-
   none
 }
 
