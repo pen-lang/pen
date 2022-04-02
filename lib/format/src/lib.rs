@@ -266,13 +266,13 @@ fn compile_lambda(context: &mut Context, lambda: &Lambda) -> Document {
                 // TODO Use Argument::position().
                 let position = argument.type_().position();
 
-                sequence([
-                    compile_block_comment(context, position),
-                    argument.name().into(),
-                    " ".into(),
-                    compile_type(argument.type_()),
-                    compile_suffix_comment(context, position),
-                ])
+                compile_line_comment(context, position, |_| {
+                    sequence([
+                        argument.name().into(),
+                        " ".into(),
+                        compile_type(argument.type_()),
+                    ])
+                })
             })
             .intersperse(separator.clone()),
     );
@@ -335,9 +335,9 @@ fn compile_block(context: &mut Context, block: &Block) -> Document {
         indent(sequence([
             line(),
             statements,
-            compile_block_comment(context, block.expression().position()),
-            compile_expression(context, block.expression()),
-            compile_suffix_comment(context, block.expression().position()),
+            compile_line_comment(context, block.expression().position(), |context| {
+                compile_expression(context, block.expression())
+            }),
         ])),
         line(),
         "}".into(),
@@ -367,11 +367,9 @@ fn compile_expression(context: &mut Context, expression: &Expression) -> Documen
                 call.arguments()
                     .iter()
                     .map(|argument| {
-                        sequence([
-                            compile_block_comment(context, argument.position()),
-                            compile_expression(context, argument),
-                            compile_suffix_comment(context, argument.position()),
-                        ])
+                        compile_line_comment(context, argument.position(), |context| {
+                            compile_expression(context, argument)
+                        })
                     })
                     .intersperse(separator.clone()),
             );
@@ -421,7 +419,22 @@ fn compile_expression(context: &mut Context, expression: &Expression) -> Documen
             let elements = sequence(
                 list.elements()
                     .iter()
-                    .map(|element| sequence([line(), compile_list_element(context, element)]))
+                    .map(|element| {
+                        sequence([
+                            line(),
+                            compile_line_comment(context, element.position(), |context| {
+                                match element {
+                                    ListElement::Multiple(expression) => sequence([
+                                        "...".into(),
+                                        compile_expression(context, expression),
+                                    ]),
+                                    ListElement::Single(expression) => {
+                                        compile_expression(context, expression)
+                                    }
+                                }
+                            }),
+                        ])
+                    })
                     .intersperse(separator.clone()),
             );
 
@@ -446,12 +459,18 @@ fn compile_expression(context: &mut Context, expression: &Expression) -> Documen
         Expression::ListComprehension(comprehension) => {
             let elements = sequence([
                 line(),
-                compile_expression(context, comprehension.element()),
+                compile_line_comment(context, comprehension.element().position(), |context| {
+                    compile_expression(context, comprehension.element())
+                }),
                 line(),
-                "for ".into(),
-                comprehension.element_name().into(),
-                " in ".into(),
-                compile_expression(context, comprehension.list()),
+                compile_line_comment(context, comprehension.element().position(), |context| {
+                    sequence([
+                        "for ".into(),
+                        comprehension.element_name().into(),
+                        " in ".into(),
+                        compile_expression(context, comprehension.list()),
+                    ])
+                }),
             ]);
 
             sequence([
@@ -478,7 +497,27 @@ fn compile_expression(context: &mut Context, expression: &Expression) -> Documen
             let elements = sequence(
                 map.elements()
                     .iter()
-                    .map(|element| sequence([line(), compile_map_element(context, element)]))
+                    .map(|element| {
+                        sequence([
+                            line(),
+                            compile_line_comment(context, element.position(), |context| {
+                                match element {
+                                    MapElement::Map(expression) => sequence([
+                                        "...".into(),
+                                        compile_expression(context, expression),
+                                    ]),
+                                    MapElement::Insertion(entry) => sequence([
+                                        compile_expression(context, entry.key()),
+                                        ": ".into(),
+                                        compile_expression(context, entry.value()),
+                                    ]),
+                                    MapElement::Removal(expression) => {
+                                        compile_expression(context, expression)
+                                    }
+                                }
+                            }),
+                        ])
+                    })
                     .intersperse(separator.clone()),
             );
 
@@ -513,24 +552,19 @@ fn compile_expression(context: &mut Context, expression: &Expression) -> Documen
                 record
                     .record()
                     .map(|record| {
-                        sequence([
-                            compile_block_comment(context, record.position()),
-                            "...".into(),
-                            compile_expression(context, record),
-                            compile_suffix_comment(context, record.position()),
-                        ])
+                        compile_line_comment(context, record.position(), |context| {
+                            sequence(["...".into(), compile_expression(context, record)])
+                        })
                     })
                     .into_iter()
                     .chain(record.fields().iter().map(|field| {
-                        {
+                        compile_line_comment(context, field.position(), |context| {
                             sequence([
-                                compile_block_comment(context, field.position()),
                                 field.name().into(),
                                 ": ".into(),
                                 compile_expression(context, field.expression()),
-                                compile_suffix_comment(context, field.position()),
                             ])
-                        }
+                        })
                     }))
                     .intersperse(separator.clone()),
             );
@@ -645,29 +679,6 @@ fn compile_if_type(context: &mut Context, if_: &IfType) -> Document {
     )
 }
 
-fn compile_list_element(context: &mut Context, element: &ListElement) -> Document {
-    match element {
-        ListElement::Multiple(expression) => {
-            sequence(["...".into(), compile_expression(context, expression)])
-        }
-        ListElement::Single(expression) => compile_expression(context, expression),
-    }
-}
-
-fn compile_map_element(context: &mut Context, element: &MapElement) -> Document {
-    match element {
-        MapElement::Map(expression) => {
-            sequence(["...".into(), compile_expression(context, expression)])
-        }
-        MapElement::Insertion(entry) => sequence([
-            compile_expression(context, entry.key()),
-            ": ".into(),
-            compile_expression(context, entry.value()),
-        ]),
-        MapElement::Removal(expression) => compile_expression(context, expression),
-    }
-}
-
 fn compile_binary_operation(context: &mut Context, operation: &BinaryOperation) -> Document {
     let document = sequence([
         compile_operand(context, operation.lhs(), operation.operator()),
@@ -737,6 +748,18 @@ fn operator_priority(operator: BinaryOperator) -> usize {
         BinaryOperator::Add | BinaryOperator::Subtract => 4,
         BinaryOperator::Multiply | BinaryOperator::Divide => 5,
     }
+}
+
+fn compile_line_comment(
+    context: &mut Context,
+    position: &Position,
+    document: impl Fn(&mut Context) -> Document,
+) -> Document {
+    sequence([
+        compile_block_comment(context, position),
+        document(context),
+        compile_suffix_comment(context, position),
+    ])
 }
 
 fn compile_suffix_comment(context: &mut Context, position: &Position) -> Document {
