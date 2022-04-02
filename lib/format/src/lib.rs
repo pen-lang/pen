@@ -353,7 +353,7 @@ fn compile_statement(context: &mut Context, statement: &Statement) -> Document {
         },
         compile_expression(context, statement.expression()),
         compile_suffix_comment(context, statement.position()),
-        hard_line(),
+        break_(line()),
     ])
 }
 
@@ -780,7 +780,7 @@ fn compile_all_comments(comments: &[Comment], last_line_number: Option<usize>) -
                 sequence([
                     "#".into(),
                     comment.line().trim_end().into(),
-                    line(),
+                    break_(line()),
                     if comment.position().line_number() + 1 < next_line_number {
                         line()
                     } else {

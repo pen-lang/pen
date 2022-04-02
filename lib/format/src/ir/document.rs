@@ -17,7 +17,7 @@ use std::rc::Rc;
 pub enum Document {
     Break(bool, Rc<Document>),
     Indent(Rc<Document>),
-    Line(bool),
+    Line,
     LineSuffix(String),
     Sequence(Rc<[Document]>),
     String(String),

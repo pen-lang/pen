@@ -24,8 +24,8 @@ fn format_document(context: &mut Context, document: &Document, level: usize, bro
     match document {
         Document::Break(broken, document) => format_document(context, document, level, *broken),
         Document::Indent(document) => format_document(context, document, level + 1, broken),
-        Document::Line(hard) => {
-            if *hard || broken {
+        Document::Line => {
+            if broken {
                 format_line(context, level);
             } else {
                 context.outputs.extend([" ".into()]);

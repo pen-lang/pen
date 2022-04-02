@@ -30,11 +30,7 @@ pub fn indent(document: impl Into<Document>) -> Document {
 }
 
 pub const fn line() -> Document {
-    Document::Line(false)
-}
-
-pub const fn hard_line() -> Document {
-    Document::Line(true)
+    Document::Line
 }
 
 pub fn empty() -> Document {
