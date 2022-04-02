@@ -1,11 +1,11 @@
 name: docker
 on:
   push:
-    branches: 
+    branches:
       - main
   pull_request:
 jobs:
-  build:
+  build_image:
     runs-on: ubuntu-latest
     permissions:
       contents: read

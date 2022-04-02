@@ -1,673 +1,703 @@
+#![allow(unstable_name_collisions)]
+
+mod context;
+mod ir;
+
 use ast::{types::Type, *};
-use std::str;
+use context::Context;
+use ir::{build::*, count_lines, is_broken, Document};
+use itertools::Itertools;
+use position::Position;
 
-const INDENT_DEPTH: usize = 2;
+pub fn format(module: &Module, comments: &[Comment]) -> String {
+    let mut context = Context::new(comments.to_vec());
+    let context = &mut context;
 
-// TODO Consider introducing a minimum editor width to enforce single-line
-// formats in some occasions.
+    let (external_imports, internal_imports) = module
+        .imports()
+        .iter()
+        .partition::<Vec<_>, _>(|import| matches!(import.module_path(), ModulePath::External(_)));
 
-// TODO Merge comments.
-pub fn format(module: &Module) -> String {
-    let string = [
-        module
-            .imports()
-            .iter()
-            .map(format_import)
-            .collect::<Vec<_>>()
-            .join("\n"),
-        module
-            .foreign_imports()
-            .iter()
-            .map(format_foreign_import)
-            .collect::<Vec<_>>()
-            .join("\n"),
-    ]
-    .into_iter()
-    .filter(|string| !string.is_empty())
-    .chain(module.type_definitions().iter().map(format_type_definition))
-    .chain(module.definitions().iter().map(format_definition))
-    .collect::<Vec<_>>()
-    .join("\n\n")
-        + "\n";
-
-    regex::Regex::new(r"[ \t]*\n")
-        .unwrap()
-        .replace_all(&string, "\n")
-        .into()
-}
-
-fn format_import(import: &Import) -> String {
-    ["import".into(), format_module_path(import.module_path())]
-        .into_iter()
-        .chain(import.prefix().map(|prefix| format!("as {}", prefix)))
-        .chain(if import.unqualified_names().is_empty() {
-            None
-        } else {
-            Some(format!("{{ {} }}", import.unqualified_names().join(", ")))
-        })
-        .collect::<Vec<_>>()
-        .join(" ")
-}
-
-fn format_module_path(path: &ModulePath) -> String {
-    match path {
-        ModulePath::External(path) => {
-            format!(
-                "{}'{}",
-                path.package(),
-                format_module_path_components(path.components())
-            )
-        }
-        ModulePath::Internal(path) => {
-            format!("'{}", format_module_path_components(path.components()))
-        }
-    }
-}
-
-fn format_module_path_components(components: &[String]) -> String {
-    components.join("'")
-}
-
-fn format_foreign_import(import: &ForeignImport) -> String {
-    ["import foreign".into()]
-        .into_iter()
-        .chain(match import.calling_convention() {
-            CallingConvention::C => Some("\"c\"".into()),
-            CallingConvention::Native => None,
-        })
-        .chain([import.name().into(), format_type(import.type_())])
-        .collect::<Vec<_>>()
-        .join(" ")
-}
-
-fn format_type_definition(definition: &TypeDefinition) -> String {
-    match definition {
-        TypeDefinition::RecordDefinition(definition) => format_record_definition(definition),
-        TypeDefinition::TypeAlias(alias) => format_type_alias(alias),
-    }
-}
-
-fn format_record_definition(definition: &RecordDefinition) -> String {
-    let head = ["type", definition.name(), "{"].join(" ");
-
-    if definition.fields().is_empty() {
-        head + "}"
-    } else {
-        [
-            head,
-            definition
-                .fields()
-                .iter()
-                .map(|field| indent(field.name().to_owned() + " " + &format_type(field.type_())))
-                .collect::<Vec<_>>()
-                .join("\n"),
-            "}".into(),
+    ir::format(
+        &[
+            compile_imports(context, &external_imports),
+            compile_imports(context, &internal_imports),
+            compile_foreign_imports(context, module.foreign_imports()),
+            sequence(
+                module
+                    .type_definitions()
+                    .iter()
+                    .map(|definition| compile_type_definition(context, definition))
+                    .intersperse(line()),
+            ),
+            sequence(
+                module
+                    .definitions()
+                    .iter()
+                    .map(|definition| compile_definition(context, definition))
+                    .intersperse(line()),
+            ),
+            compile_remaining_block_comment(context),
         ]
-        .join("\n")
+        .into_iter()
+        .fold(empty(), |all, document| {
+            if count_lines(&document) == 0 {
+                all
+            } else {
+                sequence([
+                    if count_lines(&all) == 0 {
+                        empty()
+                    } else {
+                        sequence([all, line()])
+                    },
+                    document,
+                ])
+            }
+        }),
+    )
+}
+
+fn compile_imports(context: &mut Context, imports: &[&Import]) -> Document {
+    sequence(
+        imports
+            .iter()
+            .sorted_by_key(|import| import.module_path())
+            .map(|import| compile_import(context, import)),
+    )
+}
+
+fn compile_import(context: &mut Context, import: &Import) -> Document {
+    sequence([
+        compile_block_comment(context, import.position()),
+        "import ".into(),
+        compile_module_path(import.module_path()),
+        if let Some(prefix) = import.prefix() {
+            sequence([" as ", prefix])
+        } else {
+            empty()
+        },
+        if import.unqualified_names().is_empty() {
+            empty()
+        } else {
+            sequence([
+                " { ".into(),
+                sequence(
+                    import
+                        .unqualified_names()
+                        .iter()
+                        .cloned()
+                        .intersperse(", ".into()),
+                ),
+                " }".into(),
+            ])
+        },
+        line(),
+    ])
+}
+
+fn compile_module_path(path: &ModulePath) -> Document {
+    match path {
+        ModulePath::External(path) => sequence([
+            path.package().into(),
+            "'".into(),
+            compile_module_path_components(path.components()),
+        ]),
+        ModulePath::Internal(path) => sequence([
+            "'".into(),
+            compile_module_path_components(path.components()),
+        ]),
     }
 }
 
-fn format_type_alias(alias: &TypeAlias) -> String {
-    [
-        "type".into(),
+fn compile_module_path_components(components: &[String]) -> Document {
+    components.join("'").into()
+}
+
+fn compile_foreign_imports(context: &mut Context, imports: &[ForeignImport]) -> Document {
+    sequence(
+        imports
+            .iter()
+            .map(|import| compile_foreign_import(context, import)),
+    )
+}
+
+fn compile_foreign_import(context: &mut Context, import: &ForeignImport) -> Document {
+    sequence([
+        compile_block_comment(context, import.position()),
+        "import foreign".into(),
+        match import.calling_convention() {
+            CallingConvention::C => " \"c\"".into(),
+            CallingConvention::Native => empty(),
+        },
+        " ".into(),
+        import.name().into(),
+        " ".into(),
+        compile_type(import.type_()),
+        line(),
+    ])
+}
+
+fn compile_type_definition(context: &mut Context, definition: &TypeDefinition) -> Document {
+    match definition {
+        TypeDefinition::RecordDefinition(definition) => {
+            compile_record_definition(context, definition)
+        }
+        TypeDefinition::TypeAlias(alias) => compile_type_alias(context, alias),
+    }
+}
+
+fn compile_record_definition(context: &mut Context, definition: &RecordDefinition) -> Document {
+    sequence([
+        compile_block_comment(context, definition.position()),
+        "type ".into(),
+        definition.name().into(),
+        " {".into(),
+        if definition.fields().is_empty() {
+            empty()
+        } else {
+            sequence([
+                indent(sequence(definition.fields().iter().map(|field| {
+                    sequence([
+                        line(),
+                        field.name().into(),
+                        " ".into(),
+                        compile_type(field.type_()),
+                    ])
+                }))),
+                line(),
+            ])
+        },
+        "}".into(),
+        line(),
+    ])
+}
+
+fn compile_type_alias(context: &mut Context, alias: &TypeAlias) -> Document {
+    sequence([
+        compile_block_comment(context, alias.position()),
+        "type ".into(),
         alias.name().into(),
-        "=".into(),
-        format_type(alias.type_()),
-    ]
-    .join(" ")
+        " = ".into(),
+        compile_type(alias.type_()),
+        line(),
+    ])
 }
 
-fn format_definition(definition: &Definition) -> String {
-    definition
-        .foreign_export()
-        .map(|export| {
-            ["foreign"]
-                .into_iter()
-                .chain(match export.calling_convention() {
-                    CallingConvention::C => Some("\"c\""),
-                    CallingConvention::Native => None,
-                })
-                .collect::<Vec<_>>()
-                .join(" ")
-        })
-        .into_iter()
-        .chain([
-            definition.name().into(),
-            "=".into(),
-            format_lambda(definition.lambda()),
-        ])
-        .collect::<Vec<_>>()
-        .join(" ")
+fn compile_definition(context: &mut Context, definition: &Definition) -> Document {
+    sequence([
+        compile_block_comment(context, definition.position()),
+        if let Some(export) = definition.foreign_export() {
+            sequence([
+                "foreign ".into(),
+                match export.calling_convention() {
+                    CallingConvention::C => "\"c\" ".into(),
+                    CallingConvention::Native => empty(),
+                },
+            ])
+        } else {
+            empty()
+        },
+        definition.name().into(),
+        " = ".into(),
+        compile_lambda(context, definition.lambda()),
+        line(),
+    ])
 }
 
-fn format_type(type_: &Type) -> String {
+fn compile_type(type_: &Type) -> Document {
     match type_ {
         Type::Any(_) => "any".into(),
         Type::Boolean(_) => "boolean".into(),
-        Type::Function(function) => format!(
-            "\\({}) {}",
-            function
-                .arguments()
-                .iter()
-                .map(format_type)
-                .collect::<Vec<_>>()
-                .join(", "),
-            format_type(function.result()),
-        ),
-        Type::List(list) => format!("[{}]", format_type(list.element())),
-        Type::Map(map) => format!(
-            "{{{}: {}}}",
-            format_type(map.key()),
-            format_type(map.value())
-        ),
+        Type::Function(function) => sequence([
+            "\\(".into(),
+            sequence(
+                function
+                    .arguments()
+                    .iter()
+                    .map(compile_type)
+                    .intersperse(", ".into()),
+            ),
+            ") ".into(),
+            compile_type(function.result()),
+        ]),
+        Type::List(list) => sequence(["[".into(), compile_type(list.element()), "]".into()]),
+        Type::Map(map) => sequence([
+            "{".into(),
+            compile_type(map.key()),
+            ": ".into(),
+            compile_type(map.value()),
+            "}".into(),
+        ]),
         Type::None(_) => "none".into(),
         Type::Number(_) => "number".into(),
         Type::Record(record) => record.name().into(),
         Type::Reference(reference) => reference.name().into(),
         Type::String(_) => "string".into(),
-        Type::Union(union) => format!(
-            "{} | {}",
-            {
-                let type_ = format_type(union.lhs());
+        Type::Union(union) => {
+            let lhs = compile_type(union.lhs());
 
+            sequence([
                 if union.lhs().is_function() {
-                    format!("({})", type_)
+                    sequence(["(".into(), lhs, ")".into()])
                 } else {
-                    type_
-                }
-            },
-            format_type(union.rhs())
-        ),
+                    lhs
+                },
+                " | ".into(),
+                compile_type(union.rhs()),
+            ])
+        }
     }
 }
 
-fn format_lambda(lambda: &Lambda) -> String {
-    let arguments = lambda
-        .arguments()
-        .iter()
-        .map(|argument| format!("{} {}", argument.name(), format_type(argument.type_())))
-        .collect::<Vec<_>>();
-    let single_line = arguments.is_empty()
+fn compile_lambda(context: &mut Context, lambda: &Lambda) -> Document {
+    let single_line_arguments = lambda.arguments().is_empty()
         || Some(lambda.position().line_number())
             == lambda
                 .arguments()
                 .get(0)
-                .map(|argument| argument.type_().position().line_number())
-            && arguments.iter().all(|argument| is_single_line(argument));
+                .map(|argument| argument.type_().position().line_number());
+    let separator = sequence([",".into(), line()]);
 
-    format!(
-        "\\{} {} {}",
-        if single_line {
-            "(".to_owned() + &arguments.join(", ") + ")"
+    let arguments = sequence(
+        lambda
+            .arguments()
+            .iter()
+            .map(|argument| {
+                // TODO Use Argument::position().
+                let position = argument.type_().position();
+
+                sequence([
+                    compile_block_comment(context, position),
+                    argument.name().into(),
+                    " ".into(),
+                    compile_type(argument.type_()),
+                    compile_suffix_comment(context, position),
+                ])
+            })
+            .intersperse(separator.clone()),
+    );
+    let body = compile_block(context, lambda.body());
+
+    sequence([
+        "\\(".into(),
+        if single_line_arguments {
+            flatten(arguments)
         } else {
-            ["(".into()]
-                .into_iter()
-                .chain(arguments.into_iter().map(|argument| indent(argument) + ","))
-                .chain([")".into()])
-                .collect::<Vec<_>>()
-                .join("\n")
+            sequence([indent(sequence([line(), arguments])), separator])
         },
-        format_type(lambda.result_type()),
-        if single_line {
-            format_block(lambda.body())
+        ") ".into(),
+        compile_type(lambda.result_type()),
+        " ".into(),
+        if single_line_arguments
+            && lambda.position().line_number()
+                == lambda.body().expression().position().line_number()
+            && !is_broken(&body)
+        {
+            flatten(body)
         } else {
-            format_multi_line_block(lambda.body())
-        }
-    )
+            body
+        },
+    ])
 }
 
-fn format_block(block: &Block) -> String {
-    let expression = format_expression(block.expression());
+fn compile_block(context: &mut Context, block: &Block) -> Document {
+    let statements = sequence(
+        block
+            .statements()
+            .iter()
+            .zip(
+                block
+                    .statements()
+                    .iter()
+                    .skip(1)
+                    .map(|statement| statement.position())
+                    .chain([block.expression().position()]),
+            )
+            .map(|(statement, next_position)| {
+                let block_comment = compile_block_comment(context, statement.position());
+                // TODO Use end positions of spans when they are available.
+                let line_count = next_position.line_number() as isize
+                    - statement.position().line_number() as isize
+                    - context
+                        .peek_comments_before(next_position.line_number())
+                        .count() as isize;
+                let statement_document = compile_statement(context, statement);
+                let extra_line = if count_lines(&statement_document) as isize >= line_count {
+                    empty()
+                } else {
+                    line()
+                };
 
-    if block.statements().is_empty()
-        && block.position().line_number() == block.expression().position().line_number()
-        && is_single_line(&expression)
-    {
-        ["{", &expression, "}"].join(" ")
-    } else {
-        format_multi_line_block(block)
-    }
+                sequence([block_comment, statement_document, extra_line])
+            }),
+    );
+
+    sequence([
+        "{".into(),
+        indent(sequence([
+            line(),
+            statements,
+            compile_block_comment(context, block.expression().position()),
+            compile_expression(context, block.expression()),
+            compile_suffix_comment(context, block.expression().position()),
+        ])),
+        line(),
+        "}".into(),
+    ])
 }
 
-fn format_multi_line_block(block: &Block) -> String {
-    ["{".into()]
-        .into_iter()
-        .chain(
-            block
-                .statements()
-                .iter()
-                .zip(
-                    block
-                        .statements()
-                        .iter()
-                        .skip(1)
-                        .map(|statement| statement.position())
-                        .chain([block.expression().position()])
-                        .map(|position| position.line_number()),
-                )
-                .map(|(current, next_line_number)| {
-                    // TODO Use end positions of spans when they are available.
-                    let line_count = next_line_number - current.position().line_number();
-                    let current = format_statement(current);
-
-                    if count_lines(&current) >= line_count {
-                        current
-                    } else {
-                        current + "\n"
-                    }
-                })
-                .map(indent),
-        )
-        .chain([indent(format_expression(block.expression()))])
-        .chain(["}".into()])
-        .collect::<Vec<_>>()
-        .join("\n")
+fn compile_statement(context: &mut Context, statement: &Statement) -> Document {
+    sequence([
+        if let Some(name) = statement.name() {
+            sequence([name, " = "])
+        } else {
+            empty()
+        },
+        compile_expression(context, statement.expression()),
+        compile_suffix_comment(context, statement.position()),
+        hard_line(),
+    ])
 }
 
-fn format_statement(statement: &Statement) -> String {
-    statement
-        .name()
-        .map(|name| format!("{} =", name))
-        .into_iter()
-        .chain([format_expression(statement.expression())])
-        .collect::<Vec<_>>()
-        .join(" ")
-}
-
-fn format_expression(expression: &Expression) -> String {
+fn compile_expression(context: &mut Context, expression: &Expression) -> Document {
     match expression {
-        Expression::BinaryOperation(operation) => format_binary_operation(operation),
+        Expression::BinaryOperation(operation) => compile_binary_operation(context, operation),
         Expression::Call(call) => {
-            let head = format!("{}(", format_expression(call.function()));
-            let arguments = call
-                .arguments()
-                .iter()
-                .map(format_expression)
-                .collect::<Vec<_>>();
-
-            if call.arguments().is_empty()
-                || Some(call.function().position().line_number())
-                    == call
-                        .arguments()
-                        .get(0)
-                        .map(|expression| expression.position().line_number())
-                    && arguments.iter().all(|argument| is_single_line(argument))
-            {
-                [head]
-                    .into_iter()
-                    .chain(if call.arguments().is_empty() {
-                        None
-                    } else {
-                        Some(arguments.join(", "))
+            let separator = sequence([",".into(), line()]);
+            let function = compile_expression(context, call.function());
+            let arguments = sequence(
+                call.arguments()
+                    .iter()
+                    .map(|argument| {
+                        sequence([
+                            compile_block_comment(context, argument.position()),
+                            compile_expression(context, argument),
+                            compile_suffix_comment(context, argument.position()),
+                        ])
                     })
-                    .chain([")".into()])
-                    .collect::<Vec<_>>()
-                    .concat()
-            } else {
-                [head]
-                    .into_iter()
-                    .chain(
-                        call.arguments()
-                            .iter()
-                            .map(|expression| indent(format_expression(expression)) + ","),
-                    )
-                    .chain([")".into()])
-                    .collect::<Vec<_>>()
-                    .join("\n")
-            }
+                    .intersperse(separator.clone()),
+            );
+
+            sequence([
+                function,
+                "(".into(),
+                if call.arguments().is_empty()
+                    || Some(call.function().position().line_number())
+                        == call
+                            .arguments()
+                            .get(0)
+                            .map(|expression| expression.position().line_number())
+                        && !is_broken(&arguments)
+                {
+                    flatten(arguments)
+                } else {
+                    sequence([indent(sequence([line(), arguments])), separator])
+                },
+                ")".into(),
+            ])
         }
         Expression::Boolean(boolean) => if boolean.value() { "true" } else { "false" }.into(),
-        Expression::If(if_) => format_if(if_),
-        Expression::IfList(if_) => [
-            "if".into(),
-            format!("[{}, ...{}]", if_.first_name(), if_.rest_name()),
-            "=".into(),
-            format_expression(if_.list()),
-            format_multi_line_block(if_.then()),
-            "else".into(),
-            format_multi_line_block(if_.else_()),
-        ]
-        .join(" "),
-        Expression::IfMap(if_) => [
-            "if".into(),
-            if_.name().into(),
-            "=".into(),
-            format!(
-                "{}[{}]",
-                format_expression(if_.map()),
-                format_expression(if_.key())
-            ),
-            format_multi_line_block(if_.then()),
-            "else".into(),
-            format_multi_line_block(if_.else_()),
-        ]
-        .join(" "),
-        Expression::IfType(if_) => format_if_type(if_),
-        Expression::Lambda(lambda) => format_lambda(lambda),
+        Expression::If(if_) => compile_if(context, if_),
+        Expression::IfList(if_) => sequence([
+            sequence(["if [", if_.first_name(), ", ...", if_.rest_name(), "] = "]),
+            compile_expression(context, if_.list()),
+            " ".into(),
+            compile_block(context, if_.then()),
+            " else ".into(),
+            compile_block(context, if_.else_()),
+        ]),
+        Expression::IfMap(if_) => sequence([
+            sequence(["if ", if_.name(), " = "]),
+            compile_expression(context, if_.map()),
+            "[".into(),
+            compile_expression(context, if_.key()),
+            "] ".into(),
+            compile_block(context, if_.then()),
+            " else ".into(),
+            compile_block(context, if_.else_()),
+        ]),
+        Expression::IfType(if_) => compile_if_type(context, if_),
+        Expression::Lambda(lambda) => compile_lambda(context, lambda),
         Expression::List(list) => {
-            let type_ = format_type(list.type_());
-            let elements = list
-                .elements()
-                .iter()
-                .map(format_list_element)
-                .collect::<Vec<_>>();
+            let separator = Document::from(",");
+            let elements = sequence(
+                list.elements()
+                    .iter()
+                    .map(|element| sequence([line(), compile_list_element(context, element)]))
+                    .intersperse(separator.clone()),
+            );
 
-            if elements.is_empty()
-                || Some(list.position().line_number())
-                    == list
-                        .elements()
-                        .get(0)
-                        .map(|element| element.position().line_number())
-                    && elements.iter().all(|element| is_single_line(element))
-            {
-                ["[".into()]
-                    .into_iter()
-                    .chain([[type_]
-                        .into_iter()
-                        .chain(if elements.is_empty() {
-                            None
-                        } else {
-                            Some(elements.join(", "))
-                        })
-                        .collect::<Vec<_>>()
-                        .join(" ")])
-                    .chain(["]".into()])
-                    .collect::<Vec<_>>()
-                    .concat()
-            } else {
-                [format!("[{}", type_)]
-                    .into_iter()
-                    .chain(elements.into_iter().map(|element| indent(element) + ","))
-                    .chain(["]".into()])
-                    .collect::<Vec<_>>()
-                    .join("\n")
-            }
+            sequence([
+                "[".into(),
+                compile_type(list.type_()),
+                if list.elements().is_empty()
+                    || Some(list.position().line_number())
+                        == list
+                            .elements()
+                            .get(0)
+                            .map(|element| element.position().line_number())
+                        && !is_broken(&elements)
+                {
+                    flatten(elements)
+                } else {
+                    sequence([indent(elements), separator, line()])
+                },
+                "]".into(),
+            ])
         }
         Expression::ListComprehension(comprehension) => {
-            let type_ = format_type(comprehension.type_());
-            let element = format_expression(comprehension.element());
-            let list = format_expression(comprehension.list());
+            let elements = sequence([
+                line(),
+                compile_expression(context, comprehension.element()),
+                line(),
+                "for ".into(),
+                comprehension.element_name().into(),
+                " in ".into(),
+                compile_expression(context, comprehension.list()),
+            ]);
 
-            if comprehension.position().line_number()
-                == comprehension.element().position().line_number()
-                && is_single_line(&element)
-                && is_single_line(&list)
-            {
-                ["[".into()]
-                    .into_iter()
-                    .chain([[
-                        type_,
-                        element,
-                        "for".into(),
-                        comprehension.element_name().into(),
-                        "in".into(),
-                        list,
-                    ]
-                    .join(" ")])
-                    .chain(["]".into()])
-                    .collect::<Vec<_>>()
-                    .concat()
-            } else {
-                [format!("[{}", type_)]
-                    .into_iter()
-                    .chain(
-                        [
-                            element,
-                            format!("for {} in {}", comprehension.element_name(), list),
-                        ]
-                        .iter()
-                        .map(indent),
-                    )
-                    .chain(["]".into()])
-                    .collect::<Vec<_>>()
-                    .join("\n")
-            }
+            sequence([
+                "[".into(),
+                compile_type(comprehension.type_()),
+                if comprehension.position().line_number()
+                    == comprehension.element().position().line_number()
+                    && !is_broken(&elements)
+                {
+                    flatten(elements)
+                } else {
+                    sequence([indent(elements), line()])
+                },
+                "]".into(),
+            ])
         }
         Expression::Map(map) => {
-            let type_ = format_type(map.key_type()) + ": " + &format_type(map.value_type());
-            let elements = map
-                .elements()
-                .iter()
-                .map(|element| match element {
-                    MapElement::Map(expression) => {
-                        format!("...{}", format_expression(expression))
-                    }
-                    MapElement::Insertion(entry) => {
-                        format!(
-                            "{}: {}",
-                            format_expression(entry.key()),
-                            format_expression(entry.value())
-                        )
-                    }
-                    MapElement::Removal(expression) => format_expression(expression),
-                })
-                .collect::<Vec<_>>();
+            let type_ = sequence([
+                compile_type(map.key_type()),
+                ": ".into(),
+                compile_type(map.value_type()),
+            ]);
+            let separator = Document::from(",");
+            let elements = sequence(
+                map.elements()
+                    .iter()
+                    .map(|element| sequence([line(), compile_map_element(context, element)]))
+                    .intersperse(separator.clone()),
+            );
 
-            if elements.is_empty()
-                || Some(map.position().line_number())
-                    == map
-                        .elements()
-                        .get(0)
-                        .map(|element| element.position().line_number())
-                    && elements.iter().all(|element| is_single_line(element))
-            {
-                ["{".into()]
-                    .into_iter()
-                    .chain([[type_]
-                        .into_iter()
-                        .chain(if map.elements().is_empty() {
-                            None
-                        } else {
-                            Some(elements.join(", "))
-                        })
-                        .collect::<Vec<_>>()
-                        .join(" ")])
-                    .chain(["}".into()])
-                    .collect::<Vec<_>>()
-                    .concat()
-            } else {
-                [format!("{{{}", type_)]
-                    .into_iter()
-                    .chain(elements.into_iter().map(|element| indent(element) + ","))
-                    .chain(["}".into()])
-                    .collect::<Vec<_>>()
-                    .join("\n")
-            }
+            sequence([
+                "{".into(),
+                type_,
+                if map.elements().is_empty()
+                    || Some(map.position().line_number())
+                        == map
+                            .elements()
+                            .get(0)
+                            .map(|element| element.position().line_number())
+                        && !is_broken(&elements)
+                {
+                    flatten(elements)
+                } else {
+                    sequence([indent(elements), separator, line()])
+                },
+                "}".into(),
+            ])
         }
         Expression::None(_) => "none".into(),
-        Expression::Number(number) => format!("{}", number.value()),
+        Expression::Number(number) => match number.value() {
+            NumberRepresentation::Binary(string) => "0b".to_owned() + string,
+            NumberRepresentation::Hexadecimal(string) => "0x".to_owned() + &string.to_uppercase(),
+            NumberRepresentation::FloatingPoint(string) => string.clone(),
+        }
+        .into(),
         Expression::Record(record) => {
-            let elements = record
-                .record()
-                .map(|expression| format!("...{}", format_expression(expression)))
-                .into_iter()
-                .chain(record.fields().iter().map(|field| {
-                    format!(
-                        "{}: {}",
-                        field.name(),
-                        format_expression(field.expression())
-                    )
-                }))
-                .collect::<Vec<_>>();
-
-            if record.fields().is_empty()
-                || Some(record.position().line_number())
-                    == record
-                        .fields()
-                        .get(0)
-                        .map(|field| field.position().line_number())
-                    && elements.iter().all(|element| is_single_line(element))
-            {
-                [record.type_name().into(), "{".into()]
-                    .into_iter()
-                    .chain(if record.record().is_none() && record.fields().is_empty() {
-                        None
-                    } else {
-                        Some(elements.join(", "))
+            let separator = sequence([",".into(), line()]);
+            let elements = sequence(
+                record
+                    .record()
+                    .map(|record| {
+                        sequence([
+                            compile_block_comment(context, record.position()),
+                            "...".into(),
+                            compile_expression(context, record),
+                            compile_suffix_comment(context, record.position()),
+                        ])
                     })
-                    .chain(["}".into()])
-                    .collect::<Vec<_>>()
-                    .concat()
-            } else {
-                [record.type_name().to_owned() + "{"]
                     .into_iter()
-                    .chain(elements.into_iter().map(|line| indent(line) + ","))
-                    .chain(["}".into()])
-                    .collect::<Vec<_>>()
-                    .join("\n")
-            }
+                    .chain(record.fields().iter().map(|field| {
+                        {
+                            sequence([
+                                compile_block_comment(context, field.position()),
+                                field.name().into(),
+                                ": ".into(),
+                                compile_expression(context, field.expression()),
+                                compile_suffix_comment(context, field.position()),
+                            ])
+                        }
+                    }))
+                    .intersperse(separator.clone()),
+            );
+
+            sequence([
+                record.type_name().into(),
+                "{".into(),
+                if record.record().is_none() && record.fields().is_empty()
+                    || Some(record.position().line_number())
+                        == if let Some(record) = record.record() {
+                            Some(record.position())
+                        } else {
+                            record.fields().get(0).map(|field| field.position())
+                        }
+                        .map(|position| position.line_number())
+                        && !is_broken(&elements)
+                {
+                    flatten(elements)
+                } else {
+                    sequence([indent(sequence([line(), elements])), separator])
+                },
+                "}".into(),
+            ])
         }
-        Expression::RecordDeconstruction(deconstruction) => format!(
-            "{}.{}",
-            format_expression(deconstruction.expression()),
-            deconstruction.name()
-        ),
+        Expression::RecordDeconstruction(deconstruction) => sequence([
+            compile_expression(context, deconstruction.expression()),
+            ".".into(),
+            deconstruction.name().into(),
+        ]),
         Expression::SpawnOperation(operation) => {
-            format!("go {}", format_lambda(operation.function()))
+            sequence(["go ".into(), compile_lambda(context, operation.function())])
         }
-        Expression::String(string) => {
-            format!("\"{}\"", string.value())
-        }
+        Expression::String(string) => sequence(["\"", string.value(), "\""]),
         Expression::UnaryOperation(operation) => {
-            let operand = format_expression(operation.expression());
+            let operand = compile_expression(context, operation.expression());
             let operand = if matches!(operation.expression(), Expression::BinaryOperation(_)) {
-                "(".to_owned() + &operand + ")"
+                sequence(["(".into(), operand, ")".into()])
             } else {
                 operand
             };
 
             match operation.operator() {
-                UnaryOperator::Not => "!".to_owned() + &operand,
-                UnaryOperator::Try => operand + "?",
+                UnaryOperator::Not => sequence(["!".into(), operand]),
+                UnaryOperator::Try => sequence([operand, "?".into()]),
             }
         }
         Expression::Variable(variable) => variable.name().into(),
     }
 }
 
-fn format_if(if_: &If) -> String {
-    let branches = if_
-        .branches()
-        .iter()
-        .map(|branch| {
-            (
-                format_expression(branch.condition()),
-                format_block(branch.block()),
-            )
-        })
-        .collect::<Vec<_>>();
-    let else_ = format_block(if_.else_());
-    let single_line = branches.len() == 1
-        && branches
-            .iter()
-            .flat_map(|(condition, block)| [condition.as_str(), block])
-            .chain([else_.as_str()])
-            .all(is_single_line);
+fn compile_if(context: &mut Context, if_: &If) -> Document {
+    let document = sequence([
+        sequence(if_.branches().iter().map(|branch| {
+            sequence([
+                "if ".into(),
+                compile_expression(context, branch.condition()),
+                " ".into(),
+                compile_block(context, branch.block()),
+                " else ".into(),
+            ])
+        })),
+        compile_block(context, if_.else_()),
+    ]);
 
-    if_.branches()
-        .iter()
-        .zip(branches)
-        .flat_map(|(branch, (condition, block))| {
-            [
-                "if".into(),
-                condition,
-                fall_back_to_multi_line(single_line, block, || {
-                    format_multi_line_block(branch.block())
-                }),
-                "else".into(),
-            ]
-        })
-        .chain([fall_back_to_multi_line(single_line, else_, || {
-            format_multi_line_block(if_.else_())
-        })])
-        .collect::<Vec<_>>()
-        .join(" ")
-}
-
-fn format_if_type(if_: &IfType) -> String {
-    let argument = format_expression(if_.argument());
-    let branches = if_
-        .branches()
-        .iter()
-        .map(|branch| format_block(branch.block()))
-        .collect::<Vec<_>>();
-    let else_ = if_.else_().map(format_block);
-    let single_line = branches.len() == 1
-        && branches
-            .iter()
-            .chain(else_.as_ref())
-            .chain([&argument])
-            .all(|string| is_single_line(string));
-
-    [
-        "if".into(),
-        if_.name().into(),
-        "=".into(),
-        argument,
-        "as".into(),
-        format_type(if_.branches()[0].type_()),
-        fall_back_to_multi_line(single_line, branches[0].clone(), || {
-            format_multi_line_block(if_.branches()[0].block())
-        }),
-    ]
-    .into_iter()
-    .chain(
-        if_.branches()
-            .iter()
-            .zip(branches)
-            .skip(1)
-            .flat_map(|(branch, string)| {
-                [
-                    "else".into(),
-                    "if".into(),
-                    format_type(branch.type_()),
-                    fall_back_to_multi_line(single_line, string, || {
-                        format_multi_line_block(branch.block())
-                    }),
-                ]
-            }),
-    )
-    .chain(if_.else_().iter().zip(else_).flat_map(|(block, string)| {
-        [
-            "else".into(),
-            fall_back_to_multi_line(single_line, string, || format_multi_line_block(block)),
-        ]
-    }))
-    .collect::<Vec<_>>()
-    .join(" ")
-}
-
-fn format_list_element(element: &ListElement) -> String {
-    match element {
-        ListElement::Multiple(expression) => {
-            format!("...{}", format_expression(expression))
-        }
-        ListElement::Single(expression) => format_expression(expression),
+    if if_.branches().len() == 1
+        && !is_broken(&document)
+        && Some(if_.position().line_number())
+            == if_
+                .branches()
+                .get(0)
+                .map(|branch| branch.block().expression().position().line_number())
+    {
+        flatten(document)
+    } else {
+        document
     }
 }
 
-fn format_binary_operation(operation: &BinaryOperation) -> String {
-    let single_line =
-        operation.lhs().position().line_number() == operation.rhs().position().line_number();
-    let operator = format_binary_operator(operation.operator()).into();
+fn compile_if_type(context: &mut Context, if_: &IfType) -> Document {
+    let document = sequence([
+        "if ".into(),
+        if_.name().into(),
+        " = ".into(),
+        compile_expression(context, if_.argument()),
+        " as ".into(),
+        sequence(
+            if_.branches()
+                .iter()
+                .map(|branch| {
+                    sequence([
+                        compile_type(branch.type_()),
+                        " ".into(),
+                        compile_block(context, branch.block()),
+                    ])
+                })
+                .intersperse(" else if ".into()),
+        ),
+        if let Some(block) = if_.else_() {
+            sequence([" else ".into(), compile_block(context, block)])
+        } else {
+            empty()
+        },
+    ]);
 
-    [
-        format_operand(operation.lhs(), operation.operator()),
-        [
-            if single_line {
-                operator
-            } else {
-                indent(operator)
-            },
-            format_operand(operation.rhs(), operation.operator()),
-        ]
-        .join(" "),
-    ]
-    .join(if single_line { " " } else { "\n" })
+    if if_.branches().len() + if_.else_().iter().count() <= 2
+        && !is_broken(&document)
+        && Some(if_.position().line_number())
+            == if_
+                .branches()
+                .get(0)
+                .map(|branch| branch.block().expression().position().line_number())
+    {
+        flatten(document)
+    } else {
+        document
+    }
 }
 
-fn format_operand(operand: &Expression, parent_operator: BinaryOperator) -> String {
-    let string = format_expression(operand);
+fn compile_list_element(context: &mut Context, element: &ListElement) -> Document {
+    match element {
+        ListElement::Multiple(expression) => {
+            sequence(["...".into(), compile_expression(context, expression)])
+        }
+        ListElement::Single(expression) => compile_expression(context, expression),
+    }
+}
+
+fn compile_map_element(context: &mut Context, element: &MapElement) -> Document {
+    match element {
+        MapElement::Map(expression) => {
+            sequence(["...".into(), compile_expression(context, expression)])
+        }
+        MapElement::Insertion(entry) => sequence([
+            compile_expression(context, entry.key()),
+            ": ".into(),
+            compile_expression(context, entry.value()),
+        ]),
+        MapElement::Removal(expression) => compile_expression(context, expression),
+    }
+}
+
+fn compile_binary_operation(context: &mut Context, operation: &BinaryOperation) -> Document {
+    let document = sequence([
+        compile_operand(context, operation.lhs(), operation.operator()),
+        indent(sequence([
+            line(),
+            compile_binary_operator(operation.operator()),
+            " ".into(),
+            compile_operand(context, operation.rhs(), operation.operator()),
+        ])),
+    ]);
+
+    if operation.lhs().position().line_number() == operation.rhs().position().line_number() {
+        flatten(document)
+    } else {
+        document
+    }
+}
+
+fn compile_operand(
+    context: &mut Context,
+    operand: &Expression,
+    parent_operator: BinaryOperator,
+) -> Document {
+    let document = compile_expression(context, operand);
 
     if match operand {
         Expression::BinaryOperation(operation) => Some(operation),
@@ -676,13 +706,13 @@ fn format_operand(operand: &Expression, parent_operator: BinaryOperator) -> Stri
     .map(|operand| operator_priority(operand.operator()) < operator_priority(parent_operator))
     .unwrap_or_default()
     {
-        format!("({})", string)
+        sequence(["(".into(), document, ")".into()])
     } else {
-        string
+        document
     }
 }
 
-fn format_binary_operator(operator: BinaryOperator) -> &'static str {
+fn compile_binary_operator(operator: BinaryOperator) -> Document {
     match operator {
         BinaryOperator::Or => "|",
         BinaryOperator::And => "&",
@@ -697,8 +727,10 @@ fn format_binary_operator(operator: BinaryOperator) -> &'static str {
         BinaryOperator::Multiply => "*",
         BinaryOperator::Divide => "/",
     }
+    .into()
 }
 
+// TODO Define this in an ast crate?
 fn operator_priority(operator: BinaryOperator) -> usize {
     match operator {
         BinaryOperator::Or => 1,
@@ -714,34 +746,56 @@ fn operator_priority(operator: BinaryOperator) -> usize {
     }
 }
 
-fn fall_back_to_multi_line(
-    single_line: bool,
-    cache: String,
-    format_multi_line: impl Fn() -> String,
-) -> String {
-    if single_line || !is_single_line(&cache) {
-        cache
-    } else {
-        format_multi_line()
-    }
+fn compile_suffix_comment(context: &mut Context, position: &Position) -> Document {
+    sequence(
+        context
+            .drain_current_comment(position.line_number())
+            .map(|comment| line_suffix(" #".to_owned() + comment.line().trim_end())),
+    )
 }
 
-fn indent(string: impl AsRef<str>) -> String {
-    regex::Regex::new("^|\n")
-        .unwrap()
-        .replace_all(
-            string.as_ref(),
-            "${0}".to_owned() + &" ".repeat(INDENT_DEPTH),
-        )
-        .into()
+fn compile_block_comment(context: &mut Context, position: &Position) -> Document {
+    compile_all_comments(
+        &context
+            .drain_comments_before(position.line_number())
+            .collect::<Vec<_>>(),
+        Some(position.line_number()),
+    )
 }
 
-fn count_lines(string: &str) -> usize {
-    string.trim().matches('\n').count() + 1
+fn compile_remaining_block_comment(context: &mut Context) -> Document {
+    compile_all_comments(
+        &context
+            .drain_comments_before(usize::MAX)
+            .collect::<Vec<_>>(),
+        None,
+    )
 }
 
-fn is_single_line(string: &str) -> bool {
-    !string.contains('\n')
+fn compile_all_comments(comments: &[Comment], last_line_number: Option<usize>) -> Document {
+    sequence(
+        comments
+            .iter()
+            .zip(
+                comments
+                    .iter()
+                    .skip(1)
+                    .map(|comment| comment.position().line_number())
+                    .chain([last_line_number.unwrap_or(0)]),
+            )
+            .map(|(comment, next_line_number)| {
+                sequence([
+                    "#".into(),
+                    comment.line().trim_end().into(),
+                    line(),
+                    if comment.position().line_number() + 1 < next_line_number {
+                        line()
+                    } else {
+                        empty()
+                    },
+                ])
+            }),
+    )
 }
 
 #[cfg(test)]
@@ -754,96 +808,205 @@ mod tests {
         Position::new("", line, 1, "")
     }
 
+    fn format_module(module: &Module) -> String {
+        format(module, &[])
+    }
+
     #[test]
     fn format_empty_module() {
         assert_eq!(
-            format(&Module::new(
+            format_module(&Module::new(
                 vec![],
                 vec![],
                 vec![],
                 vec![],
                 Position::fake()
             )),
-            "\n"
+            ""
         );
     }
 
-    #[test]
-    fn format_internal_module_import() {
-        assert_eq!(
-            format(&Module::new(
-                vec![Import::new(
-                    InternalModulePath::new(vec!["Foo".into(), "Bar".into()]),
-                    None,
+    mod import {
+        use super::*;
+
+        #[test]
+        fn format_internal_module_import() {
+            assert_eq!(
+                format_module(&Module::new(
+                    vec![Import::new(
+                        InternalModulePath::new(vec!["Foo".into(), "Bar".into()]),
+                        None,
+                        vec![],
+                        Position::fake(),
+                    )],
                     vec![],
-                )],
-                vec![],
-                vec![],
-                vec![],
-                Position::fake()
-            )),
-            "import 'Foo'Bar\n"
-        );
-    }
+                    vec![],
+                    vec![],
+                    Position::fake()
+                )),
+                "import 'Foo'Bar\n"
+            );
+        }
 
-    #[test]
-    fn format_external_module_import() {
-        assert_eq!(
-            format(&Module::new(
-                vec![Import::new(
-                    ExternalModulePath::new("Package", vec!["Foo".into(), "Bar".into()]),
-                    None,
-                    vec![]
-                )],
-                vec![],
-                vec![],
-                vec![],
-                Position::fake()
-            )),
-            "import Package'Foo'Bar\n"
-        );
-    }
+        #[test]
+        fn format_external_module_import() {
+            assert_eq!(
+                format_module(&Module::new(
+                    vec![Import::new(
+                        ExternalModulePath::new("Package", vec!["Foo".into(), "Bar".into()]),
+                        None,
+                        vec![],
+                        Position::fake()
+                    )],
+                    vec![],
+                    vec![],
+                    vec![],
+                    Position::fake()
+                )),
+                "import Package'Foo'Bar\n"
+            );
+        }
 
-    #[test]
-    fn format_prefixed_module_import() {
-        assert_eq!(
-            format(&Module::new(
-                vec![Import::new(
-                    InternalModulePath::new(vec!["Foo".into(), "Bar".into()]),
-                    Some("Baz".into()),
-                    vec![]
-                )],
-                vec![],
-                vec![],
-                vec![],
-                Position::fake()
-            )),
-            "import 'Foo'Bar as Baz\n"
-        );
-    }
+        #[test]
+        fn format_prefixed_module_import() {
+            assert_eq!(
+                format_module(&Module::new(
+                    vec![Import::new(
+                        InternalModulePath::new(vec!["Foo".into(), "Bar".into()]),
+                        Some("Baz".into()),
+                        vec![],
+                        Position::fake()
+                    )],
+                    vec![],
+                    vec![],
+                    vec![],
+                    Position::fake()
+                )),
+                "import 'Foo'Bar as Baz\n"
+            );
+        }
 
-    #[test]
-    fn format_unqualified_module_import() {
-        assert_eq!(
-            format(&Module::new(
-                vec![Import::new(
-                    InternalModulePath::new(vec!["Foo".into(), "Bar".into()]),
-                    None,
-                    vec!["Baz".into(), "Blah".into()]
-                )],
-                vec![],
-                vec![],
-                vec![],
-                Position::fake()
-            )),
-            "import 'Foo'Bar { Baz, Blah }\n"
-        );
+        #[test]
+        fn format_unqualified_module_import() {
+            assert_eq!(
+                format_module(&Module::new(
+                    vec![Import::new(
+                        InternalModulePath::new(vec!["Foo".into(), "Bar".into()]),
+                        None,
+                        vec!["Baz".into(), "Blah".into()],
+                        Position::fake()
+                    )],
+                    vec![],
+                    vec![],
+                    vec![],
+                    Position::fake()
+                )),
+                "import 'Foo'Bar { Baz, Blah }\n"
+            );
+        }
+
+        #[test]
+        fn sort_module_imports_with_external_paths() {
+            assert_eq!(
+                format_module(&Module::new(
+                    vec![
+                        Import::new(
+                            ExternalModulePath::new("Foo", vec!["Foo".into()]),
+                            None,
+                            vec![],
+                            Position::fake(),
+                        ),
+                        Import::new(
+                            ExternalModulePath::new("Bar", vec!["Bar".into()]),
+                            None,
+                            vec![],
+                            Position::fake()
+                        )
+                    ],
+                    vec![],
+                    vec![],
+                    vec![],
+                    Position::fake()
+                )),
+                indoc!(
+                    "
+                    import Bar'Bar
+                    import Foo'Foo
+                    "
+                )
+            );
+        }
+
+        #[test]
+        fn sort_module_imports_with_internal_paths() {
+            assert_eq!(
+                format_module(&Module::new(
+                    vec![
+                        Import::new(
+                            InternalModulePath::new(vec!["Foo".into()]),
+                            None,
+                            vec![],
+                            Position::fake(),
+                        ),
+                        Import::new(
+                            InternalModulePath::new(vec!["Bar".into()]),
+                            None,
+                            vec![],
+                            Position::fake()
+                        )
+                    ],
+                    vec![],
+                    vec![],
+                    vec![],
+                    Position::fake()
+                )),
+                indoc!(
+                    "
+                    import 'Bar
+                    import 'Foo
+                    "
+                )
+            );
+        }
+
+        #[test]
+        fn sort_module_imports_with_external_and_internal_paths() {
+            assert_eq!(
+                format_module(&Module::new(
+                    vec![
+                        Import::new(
+                            InternalModulePath::new(vec!["Foo".into(), "Bar".into()]),
+                            None,
+                            vec![],
+                            Position::fake(),
+                        ),
+                        Import::new(
+                            ExternalModulePath::new("Package", vec!["Foo".into(), "Bar".into()]),
+                            None,
+                            vec![],
+                            Position::fake()
+                        )
+                    ],
+                    vec![],
+                    vec![],
+                    vec![],
+                    Position::fake()
+                )),
+                indoc!(
+                    "
+                    import Package'Foo'Bar
+
+                    import 'Foo'Bar
+                    "
+                )
+            );
+        }
     }
 
     #[test]
     fn format_foreign_import() {
         assert_eq!(
-            format(&Module::new(
+            format_module(&Module::new(
                 vec![],
                 vec![ForeignImport::new(
                     "foo",
@@ -866,7 +1029,7 @@ mod tests {
     #[test]
     fn format_foreign_import_with_c_calling_convention() {
         assert_eq!(
-            format(&Module::new(
+            format_module(&Module::new(
                 vec![],
                 vec![ForeignImport::new(
                     "foo",
@@ -887,28 +1050,9 @@ mod tests {
     }
 
     #[test]
-    fn format_function_type_in_union_type() {
-        assert_eq!(
-            format_type(
-                &types::Union::new(
-                    types::Function::new(
-                        vec![],
-                        types::None::new(Position::fake()),
-                        Position::fake()
-                    ),
-                    types::None::new(Position::fake()),
-                    Position::fake()
-                )
-                .into()
-            ),
-            "(\\() none) | none"
-        );
-    }
-
-    #[test]
     fn format_record_definition_with_no_field() {
         assert_eq!(
-            format(&Module::new(
+            format_module(&Module::new(
                 vec![],
                 vec![],
                 vec![RecordDefinition::new("foo", vec![], Position::fake()).into()],
@@ -922,7 +1066,7 @@ mod tests {
     #[test]
     fn format_record_definition_with_field() {
         assert_eq!(
-            format(&Module::new(
+            format_module(&Module::new(
                 vec![],
                 vec![],
                 vec![RecordDefinition::new(
@@ -950,7 +1094,7 @@ mod tests {
     #[test]
     fn format_record_definition_with_two_fields() {
         assert_eq!(
-            format(&Module::new(
+            format_module(&Module::new(
                 vec![],
                 vec![],
                 vec![RecordDefinition::new(
@@ -979,7 +1123,7 @@ mod tests {
     #[test]
     fn format_type_alias() {
         assert_eq!(
-            format(&Module::new(
+            format_module(&Module::new(
                 vec![],
                 vec![],
                 vec![
@@ -993,13 +1137,65 @@ mod tests {
         );
     }
 
+    #[test]
+    fn format_multiple_type_aliases() {
+        assert_eq!(
+            format_module(&Module::new(
+                vec![],
+                vec![],
+                vec![
+                    TypeAlias::new("foo", types::None::new(Position::fake()), Position::fake())
+                        .into(),
+                    TypeAlias::new("bar", types::None::new(Position::fake()), Position::fake())
+                        .into()
+                ],
+                vec![],
+                Position::fake()
+            )),
+            indoc!(
+                "
+                type foo = none
+
+                type bar = none
+                "
+            ),
+        );
+    }
+
+    mod type_ {
+        use super::*;
+
+        fn format_type(type_: &Type) -> String {
+            ir::format(&compile_type(type_))
+        }
+
+        #[test]
+        fn format_function_type_in_union_type() {
+            assert_eq!(
+                format_type(
+                    &types::Union::new(
+                        types::Function::new(
+                            vec![],
+                            types::None::new(Position::fake()),
+                            Position::fake()
+                        ),
+                        types::None::new(Position::fake()),
+                        Position::fake()
+                    )
+                    .into()
+                ),
+                "(\\() none) | none"
+            );
+        }
+    }
+
     mod definition {
         use super::*;
 
         #[test]
         fn format_with_no_argument_and_no_statement() {
             assert_eq!(
-                format(&Module::new(
+                format_module(&Module::new(
                     vec![],
                     vec![],
                     vec![],
@@ -1021,9 +1217,41 @@ mod tests {
         }
 
         #[test]
+        fn format_multiple() {
+            let definition = Definition::new(
+                "foo",
+                Lambda::new(
+                    vec![],
+                    types::None::new(Position::fake()),
+                    Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                    Position::fake(),
+                ),
+                None,
+                Position::fake(),
+            );
+
+            assert_eq!(
+                format_module(&Module::new(
+                    vec![],
+                    vec![],
+                    vec![],
+                    vec![definition.clone(), definition],
+                    Position::fake()
+                )),
+                indoc!(
+                    "
+                    foo = \\() none { none }
+
+                    foo = \\() none { none }
+                    "
+                ),
+            );
+        }
+
+        #[test]
         fn format_with_argument() {
             assert_eq!(
-                format(&Module::new(
+                format_module(&Module::new(
                     vec![],
                     vec![],
                     vec![],
@@ -1047,7 +1275,7 @@ mod tests {
         #[test]
         fn format_with_statement() {
             assert_eq!(
-                format(&Module::new(
+                format_module(&Module::new(
                     vec![],
                     vec![],
                     vec![],
@@ -1086,7 +1314,7 @@ mod tests {
         #[test]
         fn format_returning_lambda() {
             assert_eq!(
-                format(&Module::new(
+                format_module(&Module::new(
                     vec![],
                     vec![],
                     vec![],
@@ -1127,7 +1355,7 @@ mod tests {
         #[test]
         fn format_with_foreign_export() {
             assert_eq!(
-                format(&Module::new(
+                format_module(&Module::new(
                     vec![],
                     vec![],
                     vec![],
@@ -1151,7 +1379,7 @@ mod tests {
         #[test]
         fn format_with_foreign_export_and_custom_calling_convention() {
             assert_eq!(
-                format(&Module::new(
+                format_module(&Module::new(
                     vec![],
                     vec![],
                     vec![],
@@ -1176,22 +1404,36 @@ mod tests {
     mod block {
         use super::*;
 
+        fn format(block: &Block) -> String {
+            ir::format(&compile_block(&mut Context::new(vec![]), block)) + "\n"
+        }
+
+        fn format_with_comments(block: &Block, comments: &[Comment]) -> String {
+            ir::format(&compile_block(&mut Context::new(comments.to_vec()), block)) + "\n"
+        }
+
         #[test]
         fn format_() {
             assert_eq!(
-                format_block(&Block::new(
+                format(&Block::new(
                     vec![],
                     None::new(Position::fake()),
                     Position::fake()
                 )),
-                "{ none }"
+                indoc!(
+                    "
+                    {
+                      none
+                    }
+                    "
+                )
             );
         }
 
         #[test]
         fn format_statement() {
             assert_eq!(
-                format_block(&Block::new(
+                format(&Block::new(
                     vec![Statement::new(
                         None,
                         Call::new(
@@ -1212,14 +1454,13 @@ mod tests {
                     }
                     "
                 )
-                .trim()
             );
         }
 
         #[test]
         fn format_statement_with_name() {
             assert_eq!(
-                format_block(&Block::new(
+                format(&Block::new(
                     vec![Statement::new(
                         Some("x".into()),
                         Call::new(
@@ -1240,14 +1481,13 @@ mod tests {
                     }
                     "
                 )
-                .trim()
             );
         }
 
         #[test]
         fn format_statement_with_no_blank_line() {
             assert_eq!(
-                format_block(&Block::new(
+                format(&Block::new(
                     vec![Statement::new(
                         None,
                         Call::new(
@@ -1268,14 +1508,13 @@ mod tests {
                     }
                     "
                 )
-                .trim()
             );
         }
 
         #[test]
         fn format_statement_with_one_blank_line() {
             assert_eq!(
-                format_block(&Block::new(
+                format(&Block::new(
                     vec![Statement::new(
                         None,
                         Call::new(
@@ -1292,19 +1531,18 @@ mod tests {
                     "
                     {
                       f()
-                      
+
                       none
                     }
                     "
                 )
-                .trim()
             );
         }
 
         #[test]
         fn format_statement_with_two_blank_lines() {
             assert_eq!(
-                format_block(&Block::new(
+                format(&Block::new(
                     vec![Statement::new(
                         None,
                         Call::new(
@@ -1321,19 +1559,18 @@ mod tests {
                     "
                     {
                       f()
-                      
+
                       none
                     }
                     "
                 )
-                .trim()
             );
         }
 
         #[test]
         fn format_statement_with_trimmed_blank_line() {
             assert_eq!(
-                format(&Module::new(
+                format_module(&Module::new(
                     vec![],
                     vec![],
                     vec![],
@@ -1373,23 +1610,197 @@ mod tests {
                 )
             );
         }
+
+        #[test]
+        fn format_block_comment_for_statement() {
+            assert_eq!(
+                format_with_comments(
+                    &Block::new(
+                        vec![Statement::new(
+                            Some("x".into()),
+                            None::new(Position::fake()),
+                            line_position(2)
+                        )],
+                        None::new(line_position(3)),
+                        Position::fake()
+                    ),
+                    &[Comment::new("foo", line_position(1))]
+                ),
+                indoc!(
+                    "
+                    {
+                      #foo
+                      x = none
+                      none
+                    }
+                    "
+                )
+            );
+        }
+
+        #[test]
+        fn format_result_expression_in_block() {
+            assert_eq!(
+                format_with_comments(
+                    &Block::new(vec![], None::new(line_position(2)), Position::fake()),
+                    &[Comment::new("foo", line_position(1))]
+                ),
+                indoc!(
+                    "
+                    {
+                      #foo
+                      none
+                    }
+                    "
+                )
+            );
+        }
+
+        #[test]
+        fn format_suffix_comment_of_last_expression() {
+            assert_eq!(
+                format_with_comments(
+                    &Block::new(vec![], None::new(line_position(2)), Position::fake()),
+                    &[Comment::new("foo", line_position(2))]
+                ),
+                indoc!(
+                    "
+                    {
+                      none #foo
+                    }
+                    "
+                )
+            );
+        }
+
+        #[test]
+        fn format_comment_between_statement_and_expression_in_block() {
+            assert_eq!(
+                format_with_comments(
+                    &Block::new(
+                        vec![Statement::new(
+                            Some("x".into()),
+                            None::new(Position::fake()),
+                            line_position(1)
+                        )],
+                        None::new(line_position(3)),
+                        Position::fake()
+                    ),
+                    &[Comment::new("foo", line_position(2))]
+                ),
+                indoc!(
+                    "
+                    {
+                      x = none
+                      #foo
+                      none
+                    }
+                    "
+                )
+            );
+        }
+
+        #[test]
+        fn format_suffix_comment_after_statement() {
+            assert_eq!(
+                format_with_comments(
+                    &Block::new(
+                        vec![Statement::new(
+                            Some("x".into()),
+                            None::new(Position::fake()),
+                            line_position(2)
+                        )],
+                        None::new(line_position(3)),
+                        Position::fake()
+                    ),
+                    &[Comment::new("foo", line_position(2))]
+                ),
+                indoc!(
+                    "
+                    {
+                      x = none #foo
+                      none
+                    }
+                    "
+                )
+            );
+        }
+
+        #[test]
+        fn format_space_between_two_statement_comments() {
+            assert_eq!(
+                format_with_comments(
+                    &Block::new(
+                        vec![
+                            Statement::new(
+                                Some("x".into()),
+                                None::new(Position::fake()),
+                                line_position(3)
+                            ),
+                            Statement::new(
+                                Some("y".into()),
+                                None::new(Position::fake()),
+                                line_position(6)
+                            )
+                        ],
+                        None::new(line_position(7)),
+                        Position::fake()
+                    ),
+                    &[
+                        Comment::new("foo", line_position(2)),
+                        Comment::new("bar", line_position(5))
+                    ]
+                ),
+                indoc!(
+                    "
+                    {
+                      #foo
+                      x = none
+
+                      #bar
+                      y = none
+                      none
+                    }
+                    "
+                )
+            );
+        }
     }
 
     mod expression {
         use super::*;
 
+        fn format(expression: &Expression) -> String {
+            ir::format(&compile_expression(&mut Context::new(vec![]), expression))
+        }
+
+        fn format_with_comments(expression: &Expression, comments: &[Comment]) -> String {
+            ir::format(&compile_expression(
+                &mut Context::new(comments.to_vec()),
+                expression,
+            ))
+        }
+
         mod call {
             use super::*;
 
             #[test]
-            fn format() {
+            fn format_() {
                 assert_eq!(
-                    format_expression(
+                    format(
                         &Call::new(
                             Variable::new("foo", Position::fake()),
                             vec![
-                                Number::new(1.0, Position::fake()).into(),
-                                Number::new(2.0, Position::fake()).into(),
+                                Number::new(
+                                    NumberRepresentation::FloatingPoint("1".into()),
+                                    Position::fake()
+                                )
+                                .into(),
+                                Number::new(
+                                    NumberRepresentation::FloatingPoint("2".into()),
+                                    Position::fake()
+                                )
+                                .into(),
                             ],
                             Position::fake()
                         )
@@ -1402,12 +1813,20 @@ mod tests {
             #[test]
             fn format_multi_line() {
                 assert_eq!(
-                    format_expression(
+                    format(
                         &Call::new(
                             Variable::new("foo", line_position(1)),
                             vec![
-                                Number::new(1.0, line_position(2)).into(),
-                                Number::new(2.0, Position::fake()).into(),
+                                Number::new(
+                                    NumberRepresentation::FloatingPoint("1".into()),
+                                    line_position(2)
+                                )
+                                .into(),
+                                Number::new(
+                                    NumberRepresentation::FloatingPoint("2".into()),
+                                    Position::fake()
+                                )
+                                .into(),
                             ],
                             Position::fake()
                         )
@@ -1424,47 +1843,159 @@ mod tests {
                     .trim()
                 );
             }
+
+            #[test]
+            fn format_block_comment() {
+                assert_eq!(
+                    format_with_comments(
+                        &Call::new(
+                            Variable::new("foo", line_position(1)),
+                            vec![Number::new(
+                                NumberRepresentation::FloatingPoint("1".into()),
+                                line_position(3)
+                            )
+                            .into()],
+                            Position::fake()
+                        )
+                        .into(),
+                        &[Comment::new("foo", line_position(2))]
+                    ),
+                    indoc!(
+                        "
+                        foo(
+                          #foo
+                          1,
+                        )
+                        "
+                    )
+                    .trim()
+                );
+            }
+
+            #[test]
+            fn format_suffix_comment() {
+                assert_eq!(
+                    format_with_comments(
+                        &Call::new(
+                            Variable::new("foo", line_position(1)),
+                            vec![Number::new(
+                                NumberRepresentation::FloatingPoint("1".into()),
+                                line_position(2)
+                            )
+                            .into()],
+                            Position::fake()
+                        )
+                        .into(),
+                        &[Comment::new("foo", line_position(2))]
+                    ),
+                    indoc!(
+                        "
+                        foo(
+                          1, #foo
+                        )
+                        "
+                    )
+                    .trim()
+                );
+            }
         }
 
-        #[test]
-        fn format_if() {
-            assert_eq!(
-                format_expression(
-                    &If::new(
-                        vec![
-                            IfBranch::new(
+        mod if_ {
+            use super::*;
+
+            #[test]
+            fn format_single_line() {
+                assert_eq!(
+                    format(
+                        &If::new(
+                            vec![IfBranch::new(
                                 Boolean::new(true, Position::fake()),
                                 Block::new(vec![], None::new(Position::fake()), Position::fake())
-                            ),
-                            IfBranch::new(
-                                Boolean::new(false, Position::fake()),
-                                Block::new(vec![], None::new(Position::fake()), Position::fake())
-                            )
-                        ],
-                        Block::new(vec![], None::new(Position::fake()), Position::fake()),
-                        Position::fake()
+                            )],
+                            Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                            Position::fake()
+                        )
+                        .into()
+                    ),
+                    "if true { none } else { none }"
+                );
+            }
+
+            #[test]
+            fn format_multi_line_with_multi_line_input() {
+                assert_eq!(
+                    format(
+                        &If::new(
+                            vec![IfBranch::new(
+                                Boolean::new(true, Position::fake()),
+                                Block::new(vec![], None::new(line_position(2)), Position::fake())
+                            )],
+                            Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                            line_position(1)
+                        )
+                        .into()
+                    ),
+                    indoc!(
+                        "
+                        if true {
+                          none
+                        } else {
+                          none
+                        }
+                        "
                     )
-                    .into()
-                ),
-                indoc!(
-                    "
-                    if true {
-                      none
-                    } else if false {
-                      none
-                    } else {
-                      none
-                    }
-                    "
-                )
-                .trim()
-            );
+                    .trim()
+                );
+            }
+
+            #[test]
+            fn format_multi_line_with_multiple_branches() {
+                assert_eq!(
+                    format(
+                        &If::new(
+                            vec![
+                                IfBranch::new(
+                                    Boolean::new(true, Position::fake()),
+                                    Block::new(
+                                        vec![],
+                                        None::new(Position::fake()),
+                                        Position::fake()
+                                    )
+                                ),
+                                IfBranch::new(
+                                    Boolean::new(false, Position::fake()),
+                                    Block::new(
+                                        vec![],
+                                        None::new(Position::fake()),
+                                        Position::fake()
+                                    )
+                                )
+                            ],
+                            Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                            Position::fake()
+                        )
+                        .into()
+                    ),
+                    indoc!(
+                        "
+                        if true {
+                          none
+                        } else if false {
+                          none
+                        } else {
+                          none
+                        }
+                        "
+                    )
+                    .trim()
+                );
+            }
         }
 
         #[test]
         fn format_if_list() {
             assert_eq!(
-                format_expression(
+                format(
                     &IfList::new(
                         Variable::new("ys", Position::fake()),
                         "x",
@@ -1495,7 +2026,7 @@ mod tests {
         #[test]
         fn format_if_map() {
             assert_eq!(
-                format_expression(
+                format(
                     &IfMap::new(
                         "x",
                         Variable::new("xs", Position::fake()),
@@ -1523,69 +2054,122 @@ mod tests {
             );
         }
 
-        #[test]
-        fn format_if_type() {
-            assert_eq!(
-                format_expression(
-                    &IfType::new(
-                        "x",
-                        Variable::new("y", Position::fake()),
-                        vec![
-                            IfTypeBranch::new(
-                                types::None::new(Position::fake()),
-                                Block::new(vec![], None::new(Position::fake()), Position::fake())
-                            ),
-                            IfTypeBranch::new(
-                                types::Number::new(Position::fake()),
-                                Block::new(vec![], None::new(Position::fake()), Position::fake())
-                            )
-                        ],
-                        None,
-                        Position::fake(),
-                    )
-                    .into()
-                ),
-                indoc!(
-                    "
-                    if x = y as none {
-                      none
-                    } else if number {
-                      none
-                    }
-                    "
-                )
-                .trim()
-            );
-        }
+        mod if_type {
+            use super::*;
 
-        #[test]
-        fn format_if_type_with_else_block() {
-            assert_eq!(
-                format_expression(
-                    &IfType::new(
-                        "x",
-                        Variable::new("y", Position::fake()),
-                        vec![
-                            IfTypeBranch::new(
-                                types::None::new(Position::fake()),
-                                Block::new(vec![], None::new(Position::fake()), Position::fake())
-                            ),
-                            IfTypeBranch::new(
-                                types::Number::new(Position::fake()),
-                                Block::new(vec![], None::new(Position::fake()), Position::fake())
-                            )
-                        ],
-                        Some(Block::new(
-                            vec![],
-                            None::new(Position::fake()),
-                            Position::fake()
-                        )),
-                        Position::fake(),
+            #[test]
+            fn format_single_line() {
+                assert_eq!(
+                    format(
+                        &IfType::new(
+                            "x",
+                            Variable::new("y", Position::fake()),
+                            vec![
+                                IfTypeBranch::new(
+                                    types::None::new(Position::fake()),
+                                    Block::new(
+                                        vec![],
+                                        None::new(Position::fake()),
+                                        Position::fake()
+                                    )
+                                ),
+                                IfTypeBranch::new(
+                                    types::Number::new(Position::fake()),
+                                    Block::new(
+                                        vec![],
+                                        None::new(Position::fake()),
+                                        Position::fake()
+                                    )
+                                )
+                            ],
+                            None,
+                            Position::fake(),
+                        )
+                        .into()
+                    ),
+                    "if x = y as none { none } else if number { none }"
+                );
+            }
+
+            #[test]
+            fn format_multi_line() {
+                assert_eq!(
+                    format(
+                        &IfType::new(
+                            "x",
+                            Variable::new("y", Position::fake()),
+                            vec![
+                                IfTypeBranch::new(
+                                    types::None::new(Position::fake()),
+                                    Block::new(
+                                        vec![],
+                                        None::new(line_position(2)),
+                                        Position::fake()
+                                    )
+                                ),
+                                IfTypeBranch::new(
+                                    types::Number::new(Position::fake()),
+                                    Block::new(
+                                        vec![],
+                                        None::new(Position::fake()),
+                                        Position::fake()
+                                    )
+                                )
+                            ],
+                            None,
+                            line_position(1),
+                        )
+                        .into()
+                    ),
+                    indoc!(
+                        "
+                        if x = y as none {
+                          none
+                        } else if number {
+                          none
+                        }
+                        "
                     )
-                    .into()
-                ),
-                indoc!(
-                    "
+                    .trim()
+                );
+            }
+
+            #[test]
+            fn format_with_else_block() {
+                assert_eq!(
+                    format(
+                        &IfType::new(
+                            "x",
+                            Variable::new("y", Position::fake()),
+                            vec![
+                                IfTypeBranch::new(
+                                    types::None::new(Position::fake()),
+                                    Block::new(
+                                        vec![],
+                                        None::new(Position::fake()),
+                                        Position::fake()
+                                    )
+                                ),
+                                IfTypeBranch::new(
+                                    types::Number::new(Position::fake()),
+                                    Block::new(
+                                        vec![],
+                                        None::new(Position::fake()),
+                                        Position::fake()
+                                    )
+                                )
+                            ],
+                            Some(Block::new(
+                                vec![],
+                                None::new(Position::fake()),
+                                Position::fake()
+                            )),
+                            Position::fake(),
+                        )
+                        .into()
+                    ),
+                    indoc!(
+                        "
                     if x = y as none {
                       none
                     } else if number {
@@ -1594,18 +2178,19 @@ mod tests {
                       none
                     }
                     "
-                )
-                .trim()
-            );
+                    )
+                    .trim()
+                );
+            }
         }
 
         mod lambda {
             use super::*;
 
             #[test]
-            fn format() {
+            fn format_() {
                 assert_eq!(
-                    format_expression(
+                    format(
                         &Lambda::new(
                             vec![],
                             types::None::new(Position::fake()),
@@ -1621,7 +2206,7 @@ mod tests {
             #[test]
             fn format_multi_line_body() {
                 assert_eq!(
-                    format_expression(
+                    format(
                         &Lambda::new(
                             vec![],
                             types::None::new(Position::fake()),
@@ -1651,9 +2236,32 @@ mod tests {
             }
 
             #[test]
+            fn format_single_line_arguments_with_multi_line_body_of_expression() {
+                assert_eq!(
+                    format(
+                        &Lambda::new(
+                            vec![],
+                            types::None::new(Position::fake()),
+                            Block::new(vec![], None::new(line_position(2)), Position::fake()),
+                            line_position(1)
+                        )
+                        .into()
+                    ),
+                    indoc!(
+                        "
+                        \\() none {
+                          none
+                        }
+                        "
+                    )
+                    .trim()
+                );
+            }
+
+            #[test]
             fn format_multi_line_argument() {
                 assert_eq!(
-                    format_expression(
+                    format(
                         &Lambda::new(
                             vec![Argument::new("x", types::None::new(line_position(2)))],
                             types::None::new(Position::fake()),
@@ -1678,7 +2286,7 @@ mod tests {
             #[test]
             fn format_multi_line_arguments() {
                 assert_eq!(
-                    format_expression(
+                    format(
                         &Lambda::new(
                             vec![
                                 Argument::new("x", types::None::new(line_position(2))),
@@ -1703,20 +2311,108 @@ mod tests {
                     .trim()
                 );
             }
+
+            #[test]
+            fn format_suffix_comment_on_function_argument() {
+                assert_eq!(
+                    format_with_comments(
+                        &Lambda::new(
+                            vec![Argument::new("x", types::None::new(line_position(2)))],
+                            types::None::new(Position::fake()),
+                            Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                            Position::fake(),
+                        )
+                        .into(),
+                        &[Comment::new("foo", line_position(2))]
+                    ),
+                    indoc!(
+                        "
+                        \\(
+                          x none, #foo
+                        ) none {
+                          none
+                        }
+                        "
+                    )
+                    .trim()
+                );
+            }
+
+            #[test]
+            fn format_block_comment_on_function_argument() {
+                assert_eq!(
+                    format_with_comments(
+                        &Lambda::new(
+                            vec![Argument::new("x", types::None::new(line_position(3)))],
+                            types::None::new(Position::fake()),
+                            Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                            Position::fake(),
+                        )
+                        .into(),
+                        &[Comment::new("foo", line_position(2))]
+                    ),
+                    indoc!(
+                        "
+                        \\(
+                          #foo
+                          x none,
+                        ) none {
+                          none
+                        }
+                        "
+                    )
+                    .trim()
+                );
+            }
         }
 
-        #[test]
-        fn format_number() {
-            assert_eq!(
-                format_expression(&Number::new(42.0, Position::fake()).into()),
-                "42"
-            );
+        mod number {
+            use super::*;
+
+            #[test]
+            fn format_decimal_float() {
+                assert_eq!(
+                    format(
+                        &Number::new(
+                            NumberRepresentation::FloatingPoint("42".into()),
+                            Position::fake()
+                        )
+                        .into()
+                    ),
+                    "42"
+                );
+            }
+
+            #[test]
+            fn format_binary() {
+                assert_eq!(
+                    format(
+                        &Number::new(NumberRepresentation::Binary("01".into()), Position::fake())
+                            .into()
+                    ),
+                    "0b01"
+                );
+            }
+
+            #[test]
+            fn format_hexadecimal() {
+                assert_eq!(
+                    format(
+                        &Number::new(
+                            NumberRepresentation::Hexadecimal("fa".into()),
+                            Position::fake()
+                        )
+                        .into()
+                    ),
+                    "0xFA"
+                );
+            }
         }
 
         #[test]
         fn format_spawn_operation() {
             assert_eq!(
-                format_expression(
+                format(
                     &SpawnOperation::new(
                         Lambda::new(
                             vec![],
@@ -1735,7 +2431,7 @@ mod tests {
         #[test]
         fn format_string() {
             assert_eq!(
-                format_expression(&ByteString::new("foo", Position::fake()).into()),
+                format(&ByteString::new("foo", Position::fake()).into()),
                 "\"foo\""
             );
         }
@@ -1744,13 +2440,19 @@ mod tests {
             use super::*;
 
             #[test]
-            fn format() {
+            fn format_() {
                 assert_eq!(
-                    format_expression(
+                    format(
                         &BinaryOperation::new(
                             BinaryOperator::Add,
-                            Number::new(1.0, Position::fake()),
-                            Number::new(2.0, Position::fake()),
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("1".into()),
+                                Position::fake()
+                            ),
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("2".into()),
+                                Position::fake()
+                            ),
                             Position::fake()
                         )
                         .into()
@@ -1762,11 +2464,17 @@ mod tests {
             #[test]
             fn format_multi_line() {
                 assert_eq!(
-                    format_expression(
+                    format(
                         &BinaryOperation::new(
                             BinaryOperator::Add,
-                            Number::new(1.0, Position::fake()),
-                            Number::new(2.0, line_position(1)),
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("1".into()),
+                                line_position(1)
+                            ),
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("2".into()),
+                                line_position(2)
+                            ),
                             Position::fake()
                         )
                         .into()
@@ -1784,14 +2492,23 @@ mod tests {
             #[test]
             fn format_nested_operations() {
                 assert_eq!(
-                    format_expression(
+                    format(
                         &BinaryOperation::new(
                             BinaryOperator::Add,
-                            Number::new(1.0, Position::fake()),
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("1".into()),
+                                Position::fake()
+                            ),
                             BinaryOperation::new(
                                 BinaryOperator::Multiply,
-                                Number::new(2.0, Position::fake()),
-                                Number::new(3.0, Position::fake()),
+                                Number::new(
+                                    NumberRepresentation::FloatingPoint("2".into()),
+                                    Position::fake()
+                                ),
+                                Number::new(
+                                    NumberRepresentation::FloatingPoint("3".into()),
+                                    Position::fake()
+                                ),
                                 Position::fake()
                             ),
                             Position::fake()
@@ -1805,14 +2522,23 @@ mod tests {
             #[test]
             fn format_nested_operations_with_priority() {
                 assert_eq!(
-                    format_expression(
+                    format(
                         &BinaryOperation::new(
                             BinaryOperator::Multiply,
-                            Number::new(1.0, Position::fake()),
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("1".into()),
+                                Position::fake()
+                            ),
                             BinaryOperation::new(
                                 BinaryOperator::Add,
-                                Number::new(2.0, Position::fake()),
-                                Number::new(3.0, Position::fake()),
+                                Number::new(
+                                    NumberRepresentation::FloatingPoint("2".into()),
+                                    Position::fake()
+                                ),
+                                Number::new(
+                                    NumberRepresentation::FloatingPoint("3".into()),
+                                    Position::fake()
+                                ),
                                 Position::fake()
                             ),
                             Position::fake()
@@ -1830,7 +2556,7 @@ mod tests {
             #[test]
             fn format_not_operation() {
                 assert_eq!(
-                    format_expression(
+                    format(
                         &UnaryOperation::new(
                             UnaryOperator::Not,
                             Variable::new("x", Position::fake()),
@@ -1845,7 +2571,7 @@ mod tests {
             #[test]
             fn format_try_operation() {
                 assert_eq!(
-                    format_expression(
+                    format(
                         &UnaryOperation::new(
                             UnaryOperator::Try,
                             Variable::new("x", Position::fake()),
@@ -1860,7 +2586,7 @@ mod tests {
             #[test]
             fn format_with_binary_operation() {
                 assert_eq!(
-                    format_expression(
+                    format(
                         &UnaryOperation::new(
                             UnaryOperator::Not,
                             BinaryOperation::new(
@@ -1881,7 +2607,7 @@ mod tests {
         #[test]
         fn format_record_deconstruction() {
             assert_eq!(
-                format_expression(
+                format(
                     &RecordDeconstruction::new(
                         Variable::new("x", Position::fake()),
                         "y",
@@ -1899,7 +2625,7 @@ mod tests {
             #[test]
             fn format_empty() {
                 assert_eq!(
-                    format_expression(
+                    format(
                         &List::new(types::None::new(Position::fake()), vec![], Position::fake())
                             .into()
                     ),
@@ -1910,7 +2636,7 @@ mod tests {
             #[test]
             fn format_element() {
                 assert_eq!(
-                    format_expression(
+                    format(
                         &List::new(
                             types::None::new(Position::fake()),
                             vec![ListElement::Single(None::new(Position::fake()).into())],
@@ -1925,7 +2651,7 @@ mod tests {
             #[test]
             fn format_two_elements() {
                 assert_eq!(
-                    format_expression(
+                    format(
                         &List::new(
                             types::None::new(Position::fake()),
                             vec![
@@ -1943,7 +2669,7 @@ mod tests {
             #[test]
             fn format_multi_line() {
                 assert_eq!(
-                    format_expression(
+                    format(
                         &List::new(
                             types::None::new(Position::fake()),
                             vec![ListElement::Single(None::new(line_position(2)).into())],
@@ -1965,12 +2691,24 @@ mod tests {
             #[test]
             fn format_multi_line_with_two_elements() {
                 assert_eq!(
-                    format_expression(
+                    format(
                         &List::new(
                             types::Number::new(Position::fake()),
                             vec![
-                                ListElement::Single(Number::new(1.0, line_position(2)).into()),
-                                ListElement::Single(Number::new(2.0, Position::fake()).into())
+                                ListElement::Single(
+                                    Number::new(
+                                        NumberRepresentation::FloatingPoint("1".into()),
+                                        line_position(2)
+                                    )
+                                    .into()
+                                ),
+                                ListElement::Single(
+                                    Number::new(
+                                        NumberRepresentation::FloatingPoint("2".into()),
+                                        Position::fake()
+                                    )
+                                    .into()
+                                )
                             ],
                             line_position(1)
                         )
@@ -1991,7 +2729,7 @@ mod tests {
             #[test]
             fn format_comprehension() {
                 assert_eq!(
-                    format_expression(
+                    format(
                         &ListComprehension::new(
                             types::None::new(Position::fake()),
                             None::new(Position::fake()),
@@ -2008,7 +2746,7 @@ mod tests {
             #[test]
             fn format_multi_line_comprehension() {
                 assert_eq!(
-                    format_expression(
+                    format(
                         &ListComprehension::new(
                             types::None::new(Position::fake()),
                             None::new(line_position(2)),
@@ -2037,7 +2775,7 @@ mod tests {
             #[test]
             fn format_empty() {
                 assert_eq!(
-                    format_expression(
+                    format(
                         &Map::new(
                             types::ByteString::new(Position::fake()),
                             types::Number::new(Position::fake()),
@@ -2053,13 +2791,16 @@ mod tests {
             #[test]
             fn format_entry() {
                 assert_eq!(
-                    format_expression(
+                    format(
                         &Map::new(
                             types::ByteString::new(Position::fake()),
                             types::Number::new(Position::fake()),
                             vec![MapEntry::new(
                                 ByteString::new("foo", Position::fake()),
-                                Number::new(42.0, Position::fake()),
+                                Number::new(
+                                    NumberRepresentation::FloatingPoint("42".into()),
+                                    Position::fake()
+                                ),
                                 Position::fake()
                             )
                             .into()],
@@ -2074,20 +2815,26 @@ mod tests {
             #[test]
             fn format_two_entries() {
                 assert_eq!(
-                    format_expression(
+                    format(
                         &Map::new(
                             types::ByteString::new(Position::fake()),
                             types::Number::new(Position::fake()),
                             vec![
                                 MapEntry::new(
                                     ByteString::new("foo", Position::fake()),
-                                    Number::new(1.0, Position::fake()),
+                                    Number::new(
+                                        NumberRepresentation::FloatingPoint("1".into()),
+                                        Position::fake()
+                                    ),
                                     Position::fake()
                                 )
                                 .into(),
                                 MapEntry::new(
                                     ByteString::new("bar", Position::fake()),
-                                    Number::new(2.0, Position::fake()),
+                                    Number::new(
+                                        NumberRepresentation::FloatingPoint("2".into()),
+                                        Position::fake()
+                                    ),
                                     Position::fake()
                                 )
                                 .into()
@@ -2103,7 +2850,7 @@ mod tests {
             #[test]
             fn format_removal() {
                 assert_eq!(
-                    format_expression(
+                    format(
                         &Map::new(
                             types::ByteString::new(Position::fake()),
                             types::Number::new(Position::fake()),
@@ -2121,7 +2868,7 @@ mod tests {
             #[test]
             fn format_map() {
                 assert_eq!(
-                    format_expression(
+                    format(
                         &Map::new(
                             types::ByteString::new(Position::fake()),
                             types::Number::new(Position::fake()),
@@ -2139,13 +2886,16 @@ mod tests {
             #[test]
             fn format_multi_line() {
                 assert_eq!(
-                    format_expression(
+                    format(
                         &Map::new(
                             types::ByteString::new(Position::fake()),
                             types::Number::new(Position::fake()),
                             vec![MapEntry::new(
                                 ByteString::new("foo", Position::fake()),
-                                Number::new(1.0, Position::fake()),
+                                Number::new(
+                                    NumberRepresentation::FloatingPoint("1".into()),
+                                    Position::fake()
+                                ),
                                 line_position(2)
                             )
                             .into()],
@@ -2167,20 +2917,26 @@ mod tests {
             #[test]
             fn format_multi_line_with_two_entries() {
                 assert_eq!(
-                    format_expression(
+                    format(
                         &Map::new(
                             types::ByteString::new(Position::fake()),
                             types::Number::new(Position::fake()),
                             vec![
                                 MapEntry::new(
                                     ByteString::new("foo", Position::fake()),
-                                    Number::new(1.0, Position::fake()),
+                                    Number::new(
+                                        NumberRepresentation::FloatingPoint("1".into()),
+                                        Position::fake()
+                                    ),
                                     line_position(2)
                                 )
                                 .into(),
                                 MapEntry::new(
                                     ByteString::new("bar", Position::fake()),
-                                    Number::new(2.0, Position::fake()),
+                                    Number::new(
+                                        NumberRepresentation::FloatingPoint("2".into()),
+                                        Position::fake()
+                                    ),
                                     Position::fake()
                                 )
                                 .into()
@@ -2208,7 +2964,7 @@ mod tests {
             #[test]
             fn format_empty() {
                 assert_eq!(
-                    format_expression(&Record::new("foo", None, vec![], Position::fake()).into()),
+                    format(&Record::new("foo", None, vec![], Position::fake()).into()),
                     "foo{}"
                 );
             }
@@ -2216,7 +2972,7 @@ mod tests {
             #[test]
             fn format_field() {
                 assert_eq!(
-                    format_expression(
+                    format(
                         &Record::new(
                             "foo",
                             None,
@@ -2236,19 +2992,25 @@ mod tests {
             #[test]
             fn format_two_fields() {
                 assert_eq!(
-                    format_expression(
+                    format(
                         &Record::new(
                             "foo",
                             None,
                             vec![
                                 RecordField::new(
                                     "x",
-                                    Number::new(1.0, Position::fake()),
+                                    Number::new(
+                                        NumberRepresentation::FloatingPoint("1".into()),
+                                        Position::fake()
+                                    ),
                                     Position::fake()
                                 ),
                                 RecordField::new(
                                     "y",
-                                    Number::new(2.0, Position::fake()),
+                                    Number::new(
+                                        NumberRepresentation::FloatingPoint("2".into()),
+                                        Position::fake()
+                                    ),
                                     Position::fake()
                                 )
                             ],
@@ -2263,7 +3025,7 @@ mod tests {
             #[test]
             fn format_update() {
                 assert_eq!(
-                    format_expression(
+                    format(
                         &Record::new(
                             "foo",
                             Some(Variable::new("r", Position::fake()).into()),
@@ -2281,9 +3043,29 @@ mod tests {
             }
 
             #[test]
+            fn format_multi_line_update_with_entry_on_next_line() {
+                assert_eq!(
+                    format(
+                        &Record::new(
+                            "foo",
+                            Some(Variable::new("r", Position::fake()).into()),
+                            vec![RecordField::new(
+                                "x",
+                                None::new(Position::fake()),
+                                line_position(2)
+                            )],
+                            line_position(1)
+                        )
+                        .into()
+                    ),
+                    "foo{...r, x: none}"
+                );
+            }
+
+            #[test]
             fn format_multi_line() {
                 assert_eq!(
-                    format_expression(
+                    format(
                         &Record::new(
                             "foo",
                             None,
@@ -2310,7 +3092,7 @@ mod tests {
             #[test]
             fn format_multi_line_with_two_fields() {
                 assert_eq!(
-                    format_expression(
+                    format(
                         &Record::new(
                             "foo",
                             None,
@@ -2341,6 +3123,342 @@ mod tests {
                     .trim(),
                 );
             }
+
+            #[test]
+            fn format_entry_with_block_comment() {
+                assert_eq!(
+                    format_with_comments(
+                        &Record::new(
+                            "foo",
+                            None,
+                            vec![RecordField::new(
+                                "x",
+                                None::new(Position::fake()),
+                                line_position(3)
+                            )],
+                            line_position(1)
+                        )
+                        .into(),
+                        &[Comment::new("foo", line_position(2))]
+                    ),
+                    indoc!(
+                        "
+                        foo{
+                          #foo
+                          x: none,
+                        }
+                        "
+                    )
+                    .trim(),
+                );
+            }
+
+            #[test]
+            fn format_entry_with_suffix_comment() {
+                assert_eq!(
+                    format_with_comments(
+                        &Record::new(
+                            "foo",
+                            None,
+                            vec![RecordField::new(
+                                "x",
+                                None::new(Position::fake()),
+                                line_position(2)
+                            )],
+                            line_position(1)
+                        )
+                        .into(),
+                        &[Comment::new("foo", line_position(2))]
+                    ),
+                    indoc!(
+                        "
+                        foo{
+                          x: none, #foo
+                        }
+                        "
+                    )
+                    .trim(),
+                );
+            }
+
+            #[test]
+            fn format_update_with_block_comment() {
+                assert_eq!(
+                    format_with_comments(
+                        &Record::new(
+                            "foo",
+                            Some(Variable::new("x", line_position(3)).into()),
+                            vec![],
+                            line_position(1)
+                        )
+                        .into(),
+                        &[Comment::new("foo", line_position(2))]
+                    ),
+                    indoc!(
+                        "
+                        foo{
+                          #foo
+                          ...x,
+                        }
+                        "
+                    )
+                    .trim(),
+                );
+            }
+
+            #[test]
+            fn format_update_with_suffix_comment() {
+                assert_eq!(
+                    format_with_comments(
+                        &Record::new(
+                            "foo",
+                            Some(Variable::new("x", line_position(2)).into()),
+                            vec![],
+                            line_position(1)
+                        )
+                        .into(),
+                        &[Comment::new("foo", line_position(2))]
+                    ),
+                    indoc!(
+                        "
+                        foo{
+                          ...x, #foo
+                        }
+                        "
+                    )
+                    .trim(),
+                );
+            }
+        }
+    }
+
+    mod comment {
+        use super::*;
+
+        #[test]
+        fn format_comment() {
+            assert_eq!(
+                format(
+                    &Module::new(vec![], vec![], vec![], vec![], Position::fake()),
+                    &[Comment::new("foo", Position::fake())]
+                ),
+                "#foo\n"
+            );
+        }
+
+        #[test]
+        fn keep_spaces_between_comments() {
+            assert_eq!(
+                format(
+                    &Module::new(vec![], vec![], vec![], vec![], Position::fake()),
+                    &[
+                        Comment::new("foo", line_position(1)),
+                        Comment::new("bar", line_position(3)),
+                    ]
+                ),
+                indoc!(
+                    "
+                    #foo
+
+                    #bar
+                    ",
+                ),
+            );
+        }
+
+        #[test]
+        fn format_comment_after_last_section() {
+            assert_eq!(
+                format(
+                    &Module::new(
+                        vec![Import::new(
+                            InternalModulePath::new(vec!["Foo".into()]),
+                            None,
+                            vec![],
+                            line_position(1),
+                        )],
+                        vec![],
+                        vec![],
+                        vec![],
+                        Position::fake()
+                    ),
+                    &[Comment::new("foo", line_position(2))]
+                ),
+                indoc!(
+                    "
+                    import 'Foo
+
+                    #foo
+                    ",
+                ),
+            );
+        }
+
+        #[test]
+        fn keep_spaces_between_comment_and_next_line() {
+            assert_eq!(
+                format(
+                    &Module::new(
+                        vec![Import::new(
+                            InternalModulePath::new(vec!["Foo".into()]),
+                            None,
+                            vec![],
+                            line_position(3),
+                        )],
+                        vec![],
+                        vec![],
+                        vec![],
+                        Position::fake()
+                    ),
+                    &[Comment::new("foo", line_position(1))]
+                ),
+                indoc!(
+                    "
+                    #foo
+
+                    import 'Foo
+                    ",
+                ),
+            );
+        }
+
+        #[test]
+        fn format_import() {
+            assert_eq!(
+                format(
+                    &Module::new(
+                        vec![Import::new(
+                            InternalModulePath::new(vec!["Foo".into()]),
+                            None,
+                            vec![],
+                            line_position(2),
+                        )],
+                        vec![],
+                        vec![],
+                        vec![],
+                        Position::fake()
+                    ),
+                    &[Comment::new("foo", line_position(1))]
+                ),
+                indoc!(
+                    "
+                    #foo
+                    import 'Foo
+                    ",
+                ),
+            );
+        }
+
+        #[test]
+        fn format_foreign_import() {
+            assert_eq!(
+                format(
+                    &Module::new(
+                        vec![],
+                        vec![ForeignImport::new(
+                            "foo",
+                            CallingConvention::Native,
+                            types::Function::new(
+                                vec![],
+                                types::None::new(Position::fake()),
+                                Position::fake()
+                            ),
+                            line_position(2),
+                        )],
+                        vec![],
+                        vec![],
+                        Position::fake()
+                    ),
+                    &[Comment::new("foo", line_position(1))]
+                ),
+                indoc!(
+                    "
+                    #foo
+                    import foreign foo \\() none
+                    ",
+                ),
+            );
+        }
+
+        #[test]
+        fn format_type_definition() {
+            assert_eq!(
+                format(
+                    &Module::new(
+                        vec![],
+                        vec![],
+                        vec![RecordDefinition::new("foo", vec![], line_position(2)).into()],
+                        vec![],
+                        Position::fake()
+                    ),
+                    &[Comment::new("foo", line_position(1))]
+                ),
+                indoc!(
+                    "
+                    #foo
+                    type foo {}
+                    "
+                )
+            );
+        }
+
+        #[test]
+        fn format_type_alias() {
+            assert_eq!(
+                format(
+                    &Module::new(
+                        vec![],
+                        vec![],
+                        vec![TypeAlias::new(
+                            "foo",
+                            types::None::new(Position::fake()),
+                            line_position(2)
+                        )
+                        .into()],
+                        vec![],
+                        Position::fake()
+                    ),
+                    &[Comment::new("foo", line_position(1))]
+                ),
+                indoc!(
+                    "
+                    #foo
+                    type foo = none
+                    "
+                ),
+            );
+        }
+
+        #[test]
+        fn format_definition() {
+            assert_eq!(
+                format(
+                    &Module::new(
+                        vec![],
+                        vec![],
+                        vec![],
+                        vec![Definition::new(
+                            "foo",
+                            Lambda::new(
+                                vec![],
+                                types::None::new(Position::fake()),
+                                Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                                Position::fake(),
+                            ),
+                            None,
+                            line_position(2)
+                        )],
+                        Position::fake()
+                    ),
+                    &[Comment::new("foo", line_position(1))]
+                ),
+                indoc!(
+                    "
+                    #foo
+                    foo = \\() none { none }
+                    "
+                ),
+            );
         }
     }
 }

@@ -4,6 +4,7 @@ mod imported_module;
 mod module_compiler;
 mod module_prefix_collector;
 mod name_qualifier;
+mod number_compiler;
 mod prelude_module_modifier;
 mod string_compiler;
 
@@ -79,7 +80,12 @@ mod tests {
         assert_eq!(
             compile(
                 &ast::Module::new(
-                    vec![ast::Import::new(path.clone(), None, vec![])],
+                    vec![ast::Import::new(
+                        path.clone(),
+                        None,
+                        vec![],
+                        Position::fake()
+                    )],
                     vec![],
                     vec![],
                     vec![],

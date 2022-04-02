@@ -63,6 +63,7 @@
     "udp",
     "valgrind",
     "viewee",
+    "wadler",
     "wasi",
     "writability"
   ]

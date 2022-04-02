@@ -4,9 +4,10 @@ import Core'Number
 import Core'String
 import Os'Context { Context }
 import Os'File
+import Os'Process
 import Os'Random
 import Os'Time
-import Os'Process
+
 import 'lifeGame
 
 rows = \() number { 20 }

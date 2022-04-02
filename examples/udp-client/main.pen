@@ -3,10 +3,10 @@ import Core'Number
 import Os'Context { Context }
 import Os'Environment
 import Os'File
+import Os'Process
 import Os'Udp
 import Os'Udp'Datagram
 import Os'Udp'Socket { Socket }
-import Os'Process
 
 import 'arguments
 

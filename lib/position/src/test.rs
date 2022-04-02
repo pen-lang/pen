@@ -6,6 +6,6 @@ pub trait PositionFake {
 
 impl PositionFake for Position {
     fn fake() -> Self {
-        Self::new("", 0, 0, "")
+        Self::new("", 1, 1, "")
     }
 }

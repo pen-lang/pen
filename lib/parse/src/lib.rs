@@ -3,13 +3,21 @@ mod operations;
 mod parsers;
 mod stream;
 
+use ast::Comment;
 use combine::Parser;
 pub use error::ParseError;
-use parsers::module;
+use parsers::{comments, module};
 use stream::stream;
 
 pub fn parse(source: &str, path: &str) -> Result<ast::Module, ParseError> {
     module()
+        .parse(stream(source, path))
+        .map(|(module, _)| module)
+        .map_err(|error| ParseError::new(source, path, error))
+}
+
+pub fn parse_comments(source: &str, path: &str) -> Result<Vec<Comment>, ParseError> {
+    comments()
         .parse(stream(source, path))
         .map(|(module, _)| module)
         .map_err(|error| ParseError::new(source, path, error))

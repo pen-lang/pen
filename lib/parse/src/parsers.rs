@@ -5,9 +5,9 @@ use ast::{
     *,
 };
 use combine::{
-    attempt, choice, from_str, look_ahead, many, many1, none_of, one_of, optional,
+    attempt, choice, look_ahead, many, many1, none_of, one_of, optional,
     parser::{
-        char::{alpha_num, char as character, digit, letter, space, spaces, string},
+        char::{alpha_num, char as character, digit, letter, newline, space, spaces, string},
         combinator::{lazy, no_partial, not_followed_by},
         regex::find,
         sequence::between,
@@ -32,15 +32,15 @@ static KEYWORDS: Lazy<Vec<&str>> = Lazy::new(|| {
 });
 const OPERATOR_CHARACTERS: &str = "+-*/=<>&|!?";
 
-static BINARY_REGEX: Lazy<regex::Regex> =
-    Lazy::new(|| regex::Regex::new(r"^0b(1[01]*|0)").unwrap());
+static BINARY_REGEX: Lazy<regex::Regex> = Lazy::new(|| regex::Regex::new(r"^0b[01]+").unwrap());
 static HEXADECIMAL_REGEX: Lazy<regex::Regex> =
-    Lazy::new(|| regex::Regex::new(r"^0x([1-9a-f][0-9a-f]*|0)").unwrap());
+    Lazy::new(|| regex::Regex::new(r"^0x[0-9a-fA-F]+").unwrap());
 static DECIMAL_REGEX: Lazy<regex::Regex> =
     Lazy::new(|| regex::Regex::new(r"^-?([1-9][0-9]*|0)(\.[0-9]+)?").unwrap());
-static STRING_REGEX: Lazy<regex::Regex> = Lazy::new(|| regex::Regex::new(r#"^[^\\"]"#).unwrap());
-static HEX_CHARACTER_REGEX: Lazy<regex::Regex> =
-    Lazy::new(|| regex::Regex::new("[0-9a-fA-F][0-9a-fA-F]").unwrap());
+static STRING_CHARACTER_REGEX: Lazy<regex::Regex> =
+    Lazy::new(|| regex::Regex::new(r#"^[^\\"]"#).unwrap());
+static BYTE_CHARACTER_REGEX: Lazy<regex::Regex> =
+    Lazy::new(|| regex::Regex::new(r"^[0-9a-fA-F]{2}").unwrap());
 
 pub fn module<'a>() -> impl Parser<Stream<'a>, Output = Module> {
     (
@@ -68,9 +68,27 @@ pub fn module<'a>() -> impl Parser<Stream<'a>, Output = Module> {
         )
 }
 
+pub fn comments<'a>() -> impl Parser<Stream<'a>, Output = Vec<Comment>> {
+    many(between(
+        spaces(),
+        spaces(),
+        choice((
+            comment().map(Some),
+            raw_string_literal().map(|_| None),
+            none_of("\"#".chars()).map(|_| None),
+        )),
+    ))
+    .skip(eof())
+    .map(|comments: Vec<_>| comments.into_iter().flatten().collect())
+}
+
 fn import<'a>() -> impl Parser<Stream<'a>, Output = Import> {
     (
-        attempt(keyword("import").with(not_followed_by(keyword("foreign").with(value("foreign"))))),
+        attempt((
+            position(),
+            keyword("import"),
+            not_followed_by(keyword("foreign").with(value("foreign"))),
+        )),
         module_path(),
         optional(keyword("as").with(identifier())),
         optional(between(
@@ -79,7 +97,9 @@ fn import<'a>() -> impl Parser<Stream<'a>, Output = Import> {
             sep_end_by1(identifier(), sign(",")),
         )),
     )
-        .map(|(_, path, prefix, names)| Import::new(path, prefix, names.unwrap_or_default()))
+        .map(|((position, _, _), path, prefix, names)| {
+            Import::new(path, prefix, names.unwrap_or_default(), position)
+        })
         .expected("import statement")
 }
 
@@ -684,43 +704,50 @@ fn number_literal<'a>() -> impl Parser<Stream<'a>, Output = Number> {
     .expected("number literal")
 }
 
-fn binary_literal<'a>() -> impl Parser<Stream<'a>, Output = f64> {
+fn binary_literal<'a>() -> impl Parser<Stream<'a>, Output = NumberRepresentation> {
     let regex: &'static regex::Regex = &BINARY_REGEX;
 
-    find(regex).map(|number: &str| i64::from_str_radix(&number[2..], 2).unwrap() as f64)
+    find(regex).map(|string: &str| NumberRepresentation::Binary(string[2..].into()))
 }
 
-fn hexadecimal_literal<'a>() -> impl Parser<Stream<'a>, Output = f64> {
+fn hexadecimal_literal<'a>() -> impl Parser<Stream<'a>, Output = NumberRepresentation> {
     let regex: &'static regex::Regex = &HEXADECIMAL_REGEX;
 
-    find(regex).map(|number: &str| i64::from_str_radix(&number[2..], 16).unwrap() as f64)
+    find(regex).map(|string: &str| NumberRepresentation::Hexadecimal(string[2..].to_lowercase()))
 }
 
-fn decimal_literal<'a>() -> impl Parser<Stream<'a>, Output = f64> {
+fn decimal_literal<'a>() -> impl Parser<Stream<'a>, Output = NumberRepresentation> {
     let regex: &'static regex::Regex = &DECIMAL_REGEX;
 
-    from_str(find(regex))
+    find(regex).map(|string: &str| NumberRepresentation::FloatingPoint(string.into()))
 }
 
 fn string_literal<'a>() -> impl Parser<Stream<'a>, Output = ByteString> {
-    let string_regex: &'static regex::Regex = &STRING_REGEX;
-    let hex_regex: &'static regex::Regex = &HEX_CHARACTER_REGEX;
+    token(raw_string_literal())
+}
 
-    token((
+fn raw_string_literal<'a>() -> impl Parser<Stream<'a>, Output = ByteString> {
+    let string_regex: &'static regex::Regex = &STRING_CHARACTER_REGEX;
+    let byte_regex: &'static regex::Regex = &BYTE_CHARACTER_REGEX;
+
+    (
         attempt(position().skip(character('"'))),
         many(choice((
-            find(string_regex).map(|string: &str| string.into()),
+            find(string_regex).map(String::from),
             special_string_character("\\\\"),
             special_string_character("\\\""),
             special_string_character("\\n"),
             special_string_character("\\r"),
             special_string_character("\\t"),
-            (attempt(string("\\x")), find(hex_regex)).map(|(prefix, hex)| prefix.to_owned() + hex),
+            (attempt(string("\\x")), find(byte_regex))
+                .map(|(prefix, byte)| prefix.to_owned() + byte),
         ))),
         character('"'),
-    ))
-    .map(|(position, strings, _): (_, Vec<String>, _)| ByteString::new(strings.concat(), position))
-    .expected("string literal")
+    )
+        .map(|(position, strings, _): (_, Vec<String>, _)| {
+            ByteString::new(strings.concat(), position)
+        })
+        .expected("string literal")
 }
 
 fn special_string_character<'a>(escape: &'static str) -> impl Parser<Stream<'a>, Output = String> {
@@ -882,17 +909,19 @@ fn eof<'a>() -> impl Parser<Stream<'a>, Output = ()> {
 }
 
 fn blank<'a>() -> impl Parser<Stream<'a>, Output = ()> {
-    many::<Vec<_>, _, _>(choice((space().with(value(())), comment()))).with(value(()))
+    many::<Vec<_>, _, _>(choice((space().with(value(())), comment().with(value(())))))
+        .with(value(()))
 }
 
-fn comment<'a>() -> impl Parser<Stream<'a>, Output = ()> {
-    string("#")
-        .with(many::<Vec<_>, _, _>(none_of("\n".chars())))
-        .with(choice((
-            combine::parser::char::newline().with(value(())),
-            eof(),
-        )))
-        .with(spaces())
+fn comment<'a>() -> impl Parser<Stream<'a>, Output = Comment> {
+    (
+        attempt((position(), string("#"))),
+        many::<Vec<_>, _, _>(none_of("\n".chars())),
+    )
+        .map(|((position, _), string)| {
+            Comment::new(string.into_iter().collect::<String>().trim_end(), position)
+        })
+        .skip(choice((newline().with(value(())), eof())))
         .expected("comment")
 }
 
@@ -900,6 +929,7 @@ fn comment<'a>() -> impl Parser<Stream<'a>, Output = ()> {
 mod tests {
     use super::*;
     use crate::{error::ParseError, stream::stream};
+    use indoc::indoc;
     use position::test::PositionFake;
     use pretty_assertions::assert_eq;
 
@@ -927,7 +957,8 @@ mod tests {
                     vec![Import::new(
                         ExternalModulePath::new("Foo", vec!["Bar".into()]),
                         None,
-                        vec![]
+                        vec![],
+                        Position::fake()
                     )],
                     vec![],
                     vec![],
@@ -966,7 +997,10 @@ mod tests {
                             types::Number::new(Position::fake()),
                             Block::new(
                                 vec![],
-                                Number::new(42.0, Position::fake()),
+                                Number::new(
+                                    NumberRepresentation::FloatingPoint("42".into()),
+                                    Position::fake()
+                                ),
                                 Position::fake()
                             ),
                             Position::fake()
@@ -997,7 +1031,10 @@ mod tests {
                                 types::Number::new(Position::fake()),
                                 Block::new(
                                     vec![],
-                                    Number::new(42.0, Position::fake()),
+                                    Number::new(
+                                        NumberRepresentation::FloatingPoint("42".into()),
+                                        Position::fake()
+                                    ),
                                     Position::fake()
                                 ),
                                 Position::fake()
@@ -1012,7 +1049,10 @@ mod tests {
                                 types::Number::new(Position::fake()),
                                 Block::new(
                                     vec![],
-                                    Number::new(42.0, Position::fake()),
+                                    Number::new(
+                                        NumberRepresentation::FloatingPoint("42".into()),
+                                        Position::fake()
+                                    ),
                                     Position::fake()
                                 ),
                                 Position::fake()
@@ -1037,7 +1077,8 @@ mod tests {
                     vec![Import::new(
                         ExternalModulePath::new("Foo", vec!["Bar".into()]),
                         None,
-                        vec![]
+                        vec![],
+                        Position::fake()
                     )],
                     vec![ForeignImport::new(
                         "foo",
@@ -1090,14 +1131,20 @@ mod tests {
         fn parse_import() {
             assert_eq!(
                 import().parse(stream("import 'Foo", "")).unwrap().0,
-                Import::new(InternalModulePath::new(vec!["Foo".into()]), None, vec![]),
+                Import::new(
+                    InternalModulePath::new(vec!["Foo".into()]),
+                    None,
+                    vec![],
+                    Position::fake()
+                ),
             );
             assert_eq!(
                 import().parse(stream("import Foo'Bar", "")).unwrap().0,
                 Import::new(
                     ExternalModulePath::new("Foo", vec!["Bar".into()]),
                     None,
-                    vec![]
+                    vec![],
+                    Position::fake()
                 ),
             );
         }
@@ -1109,7 +1156,8 @@ mod tests {
                 Import::new(
                     InternalModulePath::new(vec!["Foo".into()]),
                     Some("foo".into()),
-                    vec![]
+                    vec![],
+                    Position::fake()
                 ),
             );
         }
@@ -1121,7 +1169,8 @@ mod tests {
                 Import::new(
                     InternalModulePath::new(vec!["Foo".into()]),
                     None,
-                    vec!["Foo".into()]
+                    vec!["Foo".into()],
+                    Position::fake()
                 ),
             );
         }
@@ -1136,7 +1185,8 @@ mod tests {
                 Import::new(
                     InternalModulePath::new(vec!["Foo".into()]),
                     None,
-                    vec!["Foo".into(), "Bar".into()]
+                    vec!["Foo".into(), "Bar".into()],
+                    Position::fake()
                 ),
             );
         }
@@ -1258,7 +1308,10 @@ mod tests {
                         types::Number::new(Position::fake()),
                         Block::new(
                             vec![],
-                            Number::new(42.0, Position::fake()),
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("42".into()),
+                                Position::fake()
+                            ),
                             Position::fake()
                         ),
                         Position::fake()
@@ -1283,7 +1336,10 @@ mod tests {
                         types::Number::new(Position::fake()),
                         Block::new(
                             vec![],
-                            Number::new(42.0, Position::fake()),
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("42".into()),
+                                Position::fake()
+                            ),
                             Position::fake()
                         ),
                         Position::fake()
@@ -1308,7 +1364,10 @@ mod tests {
                         types::Number::new(Position::fake()),
                         Block::new(
                             vec![],
-                            Number::new(42.0, Position::fake()),
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("42".into()),
+                                Position::fake()
+                            ),
                             Position::fake()
                         ),
                         Position::fake()
@@ -1333,7 +1392,10 @@ mod tests {
                         types::Number::new(Position::fake()),
                         Block::new(
                             vec![],
-                            Number::new(42.0, Position::fake()),
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("42".into()),
+                                Position::fake()
+                            ),
                             Position::fake()
                         ),
                         Position::fake()
@@ -1626,7 +1688,11 @@ mod tests {
             assert!(expression().parse(stream("", "")).is_err());
             assert_eq!(
                 expression().parse(stream("1", "")).unwrap().0,
-                Number::new(1.0, Position::fake()).into()
+                Number::new(
+                    NumberRepresentation::FloatingPoint("1".into()),
+                    Position::fake()
+                )
+                .into()
             );
             assert_eq!(
                 expression().parse(stream("x", "")).unwrap().0,
@@ -1637,7 +1703,10 @@ mod tests {
                 BinaryOperation::new(
                     BinaryOperator::Add,
                     Variable::new("x", Position::fake()),
-                    Number::new(1.0, Position::fake()),
+                    Number::new(
+                        NumberRepresentation::FloatingPoint("1".into()),
+                        Position::fake()
+                    ),
                     Position::fake()
                 )
                 .into()
@@ -1676,7 +1745,11 @@ mod tests {
         fn parse_deeply_nested_expression() {
             assert_eq!(
                 expression().parse(stream("(((((42)))))", "")).unwrap().0,
-                Number::new(42.0, Position::fake()).into()
+                Number::new(
+                    NumberRepresentation::FloatingPoint("42".into()),
+                    Position::fake()
+                )
+                .into()
             )
         }
 
@@ -1685,7 +1758,11 @@ mod tests {
             assert!(atomic_expression().parse(stream("", "")).is_err());
             assert_eq!(
                 atomic_expression().parse(stream("1", "")).unwrap().0,
-                Number::new(1.0, Position::fake()).into()
+                Number::new(
+                    NumberRepresentation::FloatingPoint("1".into()),
+                    Position::fake()
+                )
+                .into()
             );
             assert_eq!(
                 atomic_expression().parse(stream("x", "")).unwrap().0,
@@ -1709,7 +1786,10 @@ mod tests {
                     types::Number::new(Position::fake()),
                     Block::new(
                         vec![],
-                        Number::new(42.0, Position::fake()),
+                        Number::new(
+                            NumberRepresentation::FloatingPoint("42".into()),
+                            Position::fake()
+                        ),
                         Position::fake()
                     ),
                     Position::fake()
@@ -1729,7 +1809,10 @@ mod tests {
                     types::Number::new(Position::fake()),
                     Block::new(
                         vec![],
-                        Number::new(42.0, Position::fake()),
+                        Number::new(
+                            NumberRepresentation::FloatingPoint("42".into()),
+                            Position::fake()
+                        ),
                         Position::fake()
                     ),
                     Position::fake()
@@ -1746,7 +1829,10 @@ mod tests {
                     types::Reference::new("Foo", Position::fake()),
                     Block::new(
                         vec![],
-                        Number::new(42.0, Position::fake()),
+                        Number::new(
+                            NumberRepresentation::FloatingPoint("42".into()),
+                            Position::fake()
+                        ),
                         Position::fake()
                     ),
                     Position::fake()
@@ -1839,13 +1925,19 @@ mod tests {
                         Boolean::new(true, Position::fake()),
                         Block::new(
                             vec![],
-                            Number::new(42.0, Position::fake()),
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("42".into()),
+                                Position::fake()
+                            ),
                             Position::fake()
                         ),
                     )],
                     Block::new(
                         vec![],
-                        Number::new(13.0, Position::fake()),
+                        Number::new(
+                            NumberRepresentation::FloatingPoint("13".into()),
+                            Position::fake()
+                        ),
                         Position::fake()
                     ),
                     Position::fake(),
@@ -1876,13 +1968,19 @@ mod tests {
                         ),
                         Block::new(
                             vec![],
-                            Number::new(42.0, Position::fake()),
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("42".into()),
+                                Position::fake()
+                            ),
                             Position::fake()
                         ),
                     )],
                     Block::new(
                         vec![],
-                        Number::new(13.0, Position::fake()),
+                        Number::new(
+                            NumberRepresentation::FloatingPoint("13".into()),
+                            Position::fake()
+                        ),
                         Position::fake()
                     ),
                     Position::fake(),
@@ -1899,7 +1997,10 @@ mod tests {
                             Boolean::new(true, Position::fake()),
                             Block::new(
                                 vec![],
-                                Number::new(1.0, Position::fake()),
+                                Number::new(
+                                    NumberRepresentation::FloatingPoint("1".into()),
+                                    Position::fake()
+                                ),
                                 Position::fake()
                             ),
                         ),
@@ -1907,12 +2008,22 @@ mod tests {
                             Boolean::new(true, Position::fake()),
                             Block::new(
                                 vec![],
-                                Number::new(2.0, Position::fake()),
+                                Number::new(
+                                    NumberRepresentation::FloatingPoint("2".into()),
+                                    Position::fake()
+                                ),
                                 Position::fake()
                             ),
                         )
                     ],
-                    Block::new(vec![], Number::new(3.0, Position::fake()), Position::fake()),
+                    Block::new(
+                        vec![],
+                        Number::new(
+                            NumberRepresentation::FloatingPoint("3".into()),
+                            Position::fake()
+                        ),
+                        Position::fake()
+                    ),
                     Position::fake(),
                 )
             );
@@ -2047,7 +2158,10 @@ mod tests {
                 IfMap::new(
                     "x",
                     Variable::new("xs", Position::fake()),
-                    Number::new(42.0, Position::fake()),
+                    Number::new(
+                        NumberRepresentation::FloatingPoint("42".into()),
+                        Position::fake()
+                    ),
                     Block::new(vec![], None::new(Position::fake()), Position::fake()),
                     Block::new(vec![], None::new(Position::fake()), Position::fake()),
                     Position::fake(),
@@ -2089,7 +2203,11 @@ mod tests {
                     expression().parse(stream("f(1)", "")).unwrap().0,
                     Call::new(
                         Variable::new("f", Position::fake()),
-                        vec![Number::new(1.0, Position::fake()).into()],
+                        vec![Number::new(
+                            NumberRepresentation::FloatingPoint("1".into()),
+                            Position::fake()
+                        )
+                        .into()],
                         Position::fake()
                     )
                     .into()
@@ -2099,7 +2217,11 @@ mod tests {
                     expression().parse(stream("f(1,)", "")).unwrap().0,
                     Call::new(
                         Variable::new("f", Position::fake()),
-                        vec![Number::new(1.0, Position::fake()).into()],
+                        vec![Number::new(
+                            NumberRepresentation::FloatingPoint("1".into()),
+                            Position::fake()
+                        )
+                        .into()],
                         Position::fake()
                     )
                     .into()
@@ -2110,8 +2232,16 @@ mod tests {
                     Call::new(
                         Variable::new("f", Position::fake()),
                         vec![
-                            Number::new(1.0, Position::fake()).into(),
-                            Number::new(2.0, Position::fake()).into()
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("1".into()),
+                                Position::fake()
+                            )
+                            .into(),
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("2".into()),
+                                Position::fake()
+                            )
+                            .into()
                         ],
                         Position::fake()
                     )
@@ -2123,8 +2253,16 @@ mod tests {
                     Call::new(
                         Variable::new("f", Position::fake()),
                         vec![
-                            Number::new(1.0, Position::fake()).into(),
-                            Number::new(2.0, Position::fake()).into()
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("1".into()),
+                                Position::fake()
+                            )
+                            .into(),
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("2".into()),
+                                Position::fake()
+                            )
+                            .into()
                         ],
                         Position::fake()
                     )
@@ -2165,7 +2303,10 @@ mod tests {
                     "!42",
                     UnaryOperation::new(
                         UnaryOperator::Not,
-                        Number::new(42.0, Position::fake()),
+                        Number::new(
+                            NumberRepresentation::FloatingPoint("42".into()),
+                            Position::fake(),
+                        ),
                         Position::fake(),
                     ),
                 ),
@@ -2175,7 +2316,11 @@ mod tests {
                         UnaryOperator::Not,
                         Call::new(
                             Variable::new("f", Position::fake()),
-                            vec![Number::new(42.0, Position::fake()).into()],
+                            vec![Number::new(
+                                NumberRepresentation::FloatingPoint("42".into()),
+                                Position::fake(),
+                            )
+                            .into()],
                             Position::fake(),
                         ),
                         Position::fake(),
@@ -2210,7 +2355,10 @@ mod tests {
                         UnaryOperator::Not,
                         UnaryOperation::new(
                             UnaryOperator::Not,
-                            Number::new(42.0, Position::fake()),
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("42".into()),
+                                Position::fake(),
+                            ),
                             Position::fake(),
                         ),
                         Position::fake(),
@@ -2237,7 +2385,10 @@ mod tests {
                         types::Number::new(Position::fake()),
                         Block::new(
                             vec![],
-                            Number::new(42.0, Position::fake()),
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("42".into()),
+                                Position::fake()
+                            ),
                             Position::fake()
                         ),
                         Position::fake()
@@ -2266,8 +2417,14 @@ mod tests {
                     "1+1",
                     BinaryOperation::new(
                         BinaryOperator::Add,
-                        Number::new(1.0, Position::fake()),
-                        Number::new(1.0, Position::fake()),
+                        Number::new(
+                            NumberRepresentation::FloatingPoint("1".into()),
+                            Position::fake(),
+                        ),
+                        Number::new(
+                            NumberRepresentation::FloatingPoint("1".into()),
+                            Position::fake(),
+                        ),
                         Position::fake(),
                     )
                     .into(),
@@ -2278,11 +2435,20 @@ mod tests {
                         BinaryOperator::Add,
                         BinaryOperation::new(
                             BinaryOperator::Add,
-                            Number::new(1.0, Position::fake()),
-                            Number::new(1.0, Position::fake()),
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("1".into()),
+                                Position::fake(),
+                            ),
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("1".into()),
+                                Position::fake(),
+                            ),
                             Position::fake(),
                         ),
-                        Number::new(1.0, Position::fake()),
+                        Number::new(
+                            NumberRepresentation::FloatingPoint("1".into()),
+                            Position::fake(),
+                        ),
                         Position::fake(),
                     )
                     .into(),
@@ -2291,11 +2457,20 @@ mod tests {
                     "1+(1+1)",
                     BinaryOperation::new(
                         BinaryOperator::Add,
-                        Number::new(1.0, Position::fake()),
+                        Number::new(
+                            NumberRepresentation::FloatingPoint("1".into()),
+                            Position::fake(),
+                        ),
                         BinaryOperation::new(
                             BinaryOperator::Add,
-                            Number::new(1.0, Position::fake()),
-                            Number::new(1.0, Position::fake()),
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("1".into()),
+                                Position::fake(),
+                            ),
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("1".into()),
+                                Position::fake(),
+                            ),
                             Position::fake(),
                         ),
                         Position::fake(),
@@ -2308,11 +2483,20 @@ mod tests {
                         BinaryOperator::Subtract,
                         BinaryOperation::new(
                             BinaryOperator::Multiply,
-                            Number::new(1.0, Position::fake()),
-                            Number::new(2.0, Position::fake()),
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("1".into()),
+                                Position::fake(),
+                            ),
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("2".into()),
+                                Position::fake(),
+                            ),
                             Position::fake(),
                         ),
-                        Number::new(3.0, Position::fake()),
+                        Number::new(
+                            NumberRepresentation::FloatingPoint("3".into()),
+                            Position::fake(),
+                        ),
                         Position::fake(),
                     )
                     .into(),
@@ -2321,11 +2505,20 @@ mod tests {
                     "1+2*3",
                     BinaryOperation::new(
                         BinaryOperator::Add,
-                        Number::new(1.0, Position::fake()),
+                        Number::new(
+                            NumberRepresentation::FloatingPoint("1".into()),
+                            Position::fake(),
+                        ),
                         BinaryOperation::new(
                             BinaryOperator::Multiply,
-                            Number::new(2.0, Position::fake()),
-                            Number::new(3.0, Position::fake()),
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("2".into()),
+                                Position::fake(),
+                            ),
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("3".into()),
+                                Position::fake(),
+                            ),
                             Position::fake(),
                         ),
                         Position::fake(),
@@ -2338,14 +2531,26 @@ mod tests {
                         BinaryOperator::Subtract,
                         BinaryOperation::new(
                             BinaryOperator::Multiply,
-                            Number::new(1.0, Position::fake()),
-                            Number::new(2.0, Position::fake()),
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("1".into()),
+                                Position::fake(),
+                            ),
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("2".into()),
+                                Position::fake(),
+                            ),
                             Position::fake(),
                         ),
                         BinaryOperation::new(
                             BinaryOperator::Divide,
-                            Number::new(3.0, Position::fake()),
-                            Number::new(4.0, Position::fake()),
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("3".into()),
+                                Position::fake(),
+                            ),
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("4".into()),
+                                Position::fake(),
+                            ),
                             Position::fake(),
                         ),
                         Position::fake(),
@@ -2356,8 +2561,14 @@ mod tests {
                     "1==1",
                     BinaryOperation::new(
                         BinaryOperator::Equal,
-                        Number::new(1.0, Position::fake()),
-                        Number::new(1.0, Position::fake()),
+                        Number::new(
+                            NumberRepresentation::FloatingPoint("1".into()),
+                            Position::fake(),
+                        ),
+                        Number::new(
+                            NumberRepresentation::FloatingPoint("1".into()),
+                            Position::fake(),
+                        ),
                         Position::fake(),
                     )
                     .into(),
@@ -2389,8 +2600,14 @@ mod tests {
                         Boolean::new(true, Position::fake()),
                         BinaryOperation::new(
                             BinaryOperator::LessThan,
-                            Number::new(1.0, Position::fake()),
-                            Number::new(2.0, Position::fake()),
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("1".into()),
+                                Position::fake(),
+                            ),
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("2".into()),
+                                Position::fake(),
+                            ),
                             Position::fake(),
                         ),
                         Position::fake(),
@@ -2469,7 +2686,10 @@ mod tests {
                     None,
                     vec![RecordField::new(
                         "foo",
-                        Number::new(42.0, Position::fake()),
+                        Number::new(
+                            NumberRepresentation::FloatingPoint("42".into()),
+                            Position::fake()
+                        ),
                         Position::fake()
                     )],
                     Position::fake()
@@ -2484,7 +2704,10 @@ mod tests {
                     None,
                     vec![RecordField::new(
                         "foo",
-                        Number::new(42.0, Position::fake()),
+                        Number::new(
+                            NumberRepresentation::FloatingPoint("42".into()),
+                            Position::fake()
+                        ),
                         Position::fake()
                     )],
                     Position::fake()
@@ -2499,12 +2722,18 @@ mod tests {
                     vec![
                         RecordField::new(
                             "foo",
-                            Number::new(42.0, Position::fake()),
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("42".into()),
+                                Position::fake()
+                            ),
                             Position::fake()
                         ),
                         RecordField::new(
                             "bar",
-                            Number::new(42.0, Position::fake()),
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("42".into()),
+                                Position::fake()
+                            ),
                             Position::fake()
                         )
                     ],
@@ -2526,7 +2755,10 @@ mod tests {
                         None,
                         vec![RecordField::new(
                             "foo",
-                            Number::new(42.0, Position::fake()),
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("42".into()),
+                                Position::fake()
+                            ),
                             Position::fake()
                         )],
                         Position::fake()
@@ -2546,7 +2778,11 @@ mod tests {
                         "foo",
                         Call::new(
                             Variable::new("bar", Position::fake()),
-                            vec![Number::new(42.0, Position::fake()).into()],
+                            vec![Number::new(
+                                NumberRepresentation::FloatingPoint("42".into()),
+                                Position::fake()
+                            )
+                            .into()],
                             Position::fake()
                         ),
                         Position::fake()
@@ -2564,7 +2800,10 @@ mod tests {
                     Some(Variable::new("foo", Position::fake()).into()),
                     vec![RecordField::new(
                         "bar",
-                        Number::new(42.0, Position::fake()),
+                        Number::new(
+                            NumberRepresentation::FloatingPoint("42".into()),
+                            Position::fake()
+                        ),
                         Position::fake()
                     )],
                     Position::fake()
@@ -2578,7 +2817,10 @@ mod tests {
                     Some(Variable::new("foo", Position::fake()).into()),
                     vec![RecordField::new(
                         "bar",
-                        Number::new(42.0, Position::fake()),
+                        Number::new(
+                            NumberRepresentation::FloatingPoint("42".into()),
+                            Position::fake()
+                        ),
                         Position::fake()
                     )],
                     Position::fake()
@@ -2595,7 +2837,10 @@ mod tests {
                     Some(Variable::new("foo", Position::fake()).into()),
                     vec![RecordField::new(
                         "bar",
-                        Number::new(42.0, Position::fake()),
+                        Number::new(
+                            NumberRepresentation::FloatingPoint("42".into()),
+                            Position::fake()
+                        ),
                         Position::fake()
                     )],
                     Position::fake()
@@ -2659,21 +2904,25 @@ mod tests {
             assert!(number_literal().parse(stream("foo", "")).is_err());
             assert!(number_literal().parse(stream("01", "")).is_err());
 
-            for (source, value) in &[
-                ("0", 0.0),
-                ("1", 1.0),
-                ("123456789", 123456789.0),
-                ("-1", -1.0),
-                ("0.1", 0.1),
-                ("0.01", 0.01),
-                ("0b1", 1.0),
-                ("0b10", 2.0),
-                ("0x1", 1.0),
-                ("0xa", 10.0),
+            for (source, value) in [
+                ("0", NumberRepresentation::FloatingPoint("0".into())),
+                ("1", NumberRepresentation::FloatingPoint("1".into())),
+                (
+                    "123456789",
+                    NumberRepresentation::FloatingPoint("123456789".into()),
+                ),
+                ("-1", NumberRepresentation::FloatingPoint("-1".into())),
+                ("0.1", NumberRepresentation::FloatingPoint("0.1".into())),
+                ("0.01", NumberRepresentation::FloatingPoint("0.01".into())),
+                ("0b1", NumberRepresentation::Binary("1".into())),
+                ("0b10", NumberRepresentation::Binary("10".into())),
+                ("0x1", NumberRepresentation::Hexadecimal("1".into())),
+                ("0xFA", NumberRepresentation::Hexadecimal("fa".into())),
+                ("0xfa", NumberRepresentation::Hexadecimal("fa".into())),
             ] {
                 assert_eq!(
                     number_literal().parse(stream(source, "")).unwrap().0,
-                    Number::new(*value, Position::fake())
+                    Number::new(value, Position::fake())
                 );
             }
         }
@@ -2839,7 +3088,10 @@ mod tests {
                         BinaryOperation::new(
                             BinaryOperator::Add,
                             Variable::new("x", Position::fake()),
-                            Number::new(42.0, Position::fake()),
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("42".into()),
+                                Position::fake(),
+                            ),
                             Position::fake(),
                         ),
                         "x",
@@ -2890,13 +3142,19 @@ mod tests {
                         types::None::new(Position::fake()),
                         vec![
                             MapEntry::new(
-                                Number::new(1.0, Position::fake()),
+                                Number::new(
+                                    NumberRepresentation::FloatingPoint("1".into()),
+                                    Position::fake(),
+                                ),
                                 None::new(Position::fake()),
                                 Position::fake(),
                             )
                             .into(),
                             MapEntry::new(
-                                Number::new(2.0, Position::fake()),
+                                Number::new(
+                                    NumberRepresentation::FloatingPoint("2".into()),
+                                    Position::fake(),
+                                ),
                                 None::new(Position::fake()),
                                 Position::fake(),
                             )
@@ -2983,5 +3241,146 @@ mod tests {
         assert!(comment().parse(stream("#", "")).is_ok());
         assert!(comment().parse(stream("#\n", "")).is_ok());
         assert!(comment().parse(stream("#x\n", "")).is_ok());
+    }
+
+    mod comments {
+        use super::*;
+        use pretty_assertions::assert_eq;
+
+        #[test]
+        fn parse_comment() {
+            assert_eq!(
+                comments().parse(stream("#foo", "")).unwrap().0,
+                vec![Comment::new("foo", Position::fake())]
+            );
+        }
+
+        #[test]
+        fn parse_comment_after_space() {
+            assert_eq!(
+                comments().parse(stream(" #foo", "")).unwrap().0,
+                vec![Comment::new("foo", Position::fake())]
+            );
+        }
+
+        #[test]
+        fn parse_comment_before_space() {
+            assert_eq!(
+                comments().parse(stream("#foo\n #bar", "")).unwrap().0,
+                vec![
+                    Comment::new("foo", Position::fake()),
+                    Comment::new("bar", Position::fake())
+                ]
+            );
+        }
+
+        #[test]
+        fn parse_comment_before_newlines() {
+            assert_eq!(
+                comments().parse(stream("#foo\n\n", "")).unwrap().0,
+                vec![Comment::new("foo", Position::fake())]
+            );
+        }
+
+        #[test]
+        fn parse_two_line_comments() {
+            assert_eq!(
+                comments()
+                    .parse(stream(
+                        indoc!(
+                            "
+                            #foo
+                            #bar
+                            "
+                        ),
+                        ""
+                    ))
+                    .unwrap()
+                    .0,
+                vec![
+                    Comment::new("foo", Position::fake()),
+                    Comment::new("bar", Position::fake())
+                ]
+            );
+        }
+
+        #[test]
+        fn parse_comment_after_identifier() {
+            assert_eq!(
+                comments().parse(stream("foo#foo", "")).unwrap().0,
+                vec![Comment::new("foo", Position::fake())]
+            );
+        }
+
+        #[test]
+        fn parse_comment_before_identifier() {
+            assert_eq!(
+                comments().parse(stream("#foo\nfoo#bar", "")).unwrap().0,
+                vec![
+                    Comment::new("foo", Position::fake()),
+                    Comment::new("bar", Position::fake())
+                ]
+            );
+        }
+
+        #[test]
+        fn parse_comment_after_keyword() {
+            assert_eq!(
+                comments().parse(stream("if#foo", "")).unwrap().0,
+                vec![Comment::new("foo", Position::fake())]
+            );
+        }
+
+        #[test]
+        fn parse_comment_before_keyword() {
+            assert_eq!(
+                comments().parse(stream("#foo\nif#bar", "")).unwrap().0,
+                vec![
+                    Comment::new("foo", Position::fake()),
+                    Comment::new("bar", Position::fake())
+                ]
+            );
+        }
+
+        #[test]
+        fn parse_comment_after_sign() {
+            assert_eq!(
+                comments().parse(stream("+#foo", "")).unwrap().0,
+                vec![Comment::new("foo", Position::fake())]
+            );
+        }
+
+        #[test]
+        fn parse_comment_before_sign() {
+            assert_eq!(
+                comments().parse(stream("#foo\n+#bar", "")).unwrap().0,
+                vec![
+                    Comment::new("foo", Position::fake()),
+                    Comment::new("bar", Position::fake())
+                ]
+            );
+        }
+
+        #[test]
+        fn parse_comment_after_string() {
+            assert_eq!(
+                comments().parse(stream("\"string\"#foo", "")).unwrap().0,
+                vec![Comment::new("foo", Position::fake())]
+            );
+        }
+
+        #[test]
+        fn parse_comment_before_string() {
+            assert_eq!(
+                comments()
+                    .parse(stream("#foo\n\"string\"#bar", ""))
+                    .unwrap()
+                    .0,
+                vec![
+                    Comment::new("foo", Position::fake()),
+                    Comment::new("bar", Position::fake())
+                ]
+            );
+        }
     }
 }

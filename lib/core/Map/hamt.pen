@@ -197,8 +197,9 @@ index = \(key any, layer number, level number, cfg Configuration) number {
         5 * (level - 1),
       ),
       Bit'ToInteger64(0b11111),
-    )
-  ) + 1
+    ),
+  )
+    + 1
 }
 
 Keys = \(m Hamt) [any] {

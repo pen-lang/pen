@@ -1,5 +1,5 @@
-import 'Map'noValue { NoValue }
 import 'Map'hamt { Hamt }
+import 'Map'noValue { NoValue }
 
 type Map {
   hamt Hamt
@@ -33,7 +33,7 @@ Set = \(map Map, key any, value any) Map {
   Map{
     hamt: u.Hamt,
     size: map.size + if u.Size { 1 } else { 0 },
-    configuration: map.configuration
+    configuration: map.configuration,
   }
 }
 
@@ -43,7 +43,7 @@ Delete = \(map Map, key any) Map {
   Map{
     hamt: u.Hamt,
     size: map.size - if u.Size { 1 } else { 0 },
-    configuration: map.configuration
+    configuration: map.configuration,
   }
 }
 
