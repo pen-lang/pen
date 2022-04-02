@@ -19,16 +19,30 @@ fn generate_section(context: &mut Context, section: &Section, level: usize) {
     generate_text(context, &section.title);
     generate_line(context);
 
-    for text in &section.paragraphs {
+    for paragraph in &section.paragraphs {
         generate_line(context);
-        generate_text(context, text);
-        generate_line(context);
+        generate_paragraph(context, paragraph);
     }
 
     for section in &section.children {
         generate_line(context);
         generate_section(context, section, level + 1);
     }
+}
+
+fn generate_paragraph(context: &mut Context, paragraph: &Paragraph) {
+    match paragraph {
+        Paragraph::Text(text) => generate_text(context, text),
+        Paragraph::Code(string) => {
+            context.outputs.push("```".into());
+            generate_line(context);
+            context.outputs.push(string.trim().into());
+            generate_line(context);
+            context.outputs.push("```".into());
+        }
+    }
+
+    generate_line(context);
 }
 
 fn generate_text(context: &mut Context, text: &Text) {
@@ -62,8 +76,8 @@ mod tests {
             generate(&section(text([normal("foo")]), [], [])),
             indoc!(
                 "
-                    # foo
-                    "
+                # foo
+                "
             )
         );
     }
@@ -73,15 +87,15 @@ mod tests {
         assert_eq!(
             generate(&section(
                 text([normal("foo")]),
-                [text([normal("I'm a programmer.")])],
+                [text([normal("I'm a programmer.")]).into()],
                 []
             )),
             indoc!(
                 "
-                    # foo
+                # foo
 
-                    I'm a programmer.
-                    "
+                I'm a programmer.
+                "
             )
         );
     }
@@ -92,8 +106,8 @@ mod tests {
             generate(&section(
                 text([normal("foo")]),
                 [
-                    text([normal("I'm a programmer.")]),
-                    text([normal("I'm a chef.")])
+                    text([normal("I'm a programmer.")]).into(),
+                    text([normal("I'm a chef.")]).into()
                 ],
                 []
             )),
@@ -114,7 +128,7 @@ mod tests {
         assert_eq!(
             generate(&section(
                 text([normal("foo")]),
-                [text([normal("I'm a "), code("programmer"), normal(".")])],
+                [text([normal("I'm a "), code("programmer"), normal(".")]).into()],
                 []
             )),
             indoc!(
@@ -132,7 +146,7 @@ mod tests {
         assert_eq!(
             generate(&section(
                 text([normal("foo")]),
-                [text([code("I'm a programmer.")])],
+                [text([code("I'm a programmer.")]).into()],
                 []
             )),
             indoc!(
@@ -140,6 +154,34 @@ mod tests {
                 # foo
 
                 `I'm a programmer.`
+                "
+            )
+        );
+    }
+
+    #[test]
+    fn generate_code_block() {
+        assert_eq!(
+            generate(&section(
+                text([normal("foo")]),
+                [code_block(indoc!(
+                    "
+                    fn main() {
+                        hello();
+                    }
+                    "
+                ))],
+                []
+            )),
+            indoc!(
+                "
+                # foo
+
+                ```
+                fn main() {
+                    hello();
+                }
+                ```
                 "
             )
         );
