@@ -8,17 +8,12 @@ pub fn format(check: bool) -> Result<(), Box<dyn Error>> {
     ));
     let infrastructure =
         infrastructure::create(file_path_converter.clone(), &main_package_directory)?;
+    let path = file_path_converter.convert_to_file_path(&main_package_directory)?;
 
     if check {
-        app::package_format_checker::check(
-            &infrastructure,
-            &file_path_converter.convert_to_file_path(&main_package_directory)?,
-        )?;
+        app::package_format_checker::check(&infrastructure, &path)?;
     } else {
-        app::package_formatter::format(
-            &infrastructure,
-            &file_path_converter.convert_to_file_path(&main_package_directory)?,
-        )?;
+        app::package_formatter::format(&infrastructure, &path)?;
     }
 
     Ok(())
