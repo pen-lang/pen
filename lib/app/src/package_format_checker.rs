@@ -5,7 +5,7 @@ use crate::{
 };
 use std::error::Error;
 
-pub fn format(
+pub fn check(
     infrastructure: &Infrastructure,
     package_directory: &FilePath,
 ) -> Result<(), Box<dyn Error>> {
