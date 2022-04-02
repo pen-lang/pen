@@ -1,12 +1,12 @@
-import 'array
-import 'normalFile { NormalFile }
-import 'File'OpenOptions { OpenOptions }
 import 'File'Metadata { Metadata }
+import 'File'OpenOptions { OpenOptions }
 import 'Tcp'AcceptedStream as Tcp
 import 'Tcp'Listener as Tcp
 import 'Tcp'Stream as Tcp
 import 'Udp'Datagram as Udp
 import 'Udp'Socket as Udp
+import 'array
+import 'normalFile { NormalFile }
 
 import foreign "c" _pen_os_read_stdin \() FfiStringResult
 import foreign "c" _pen_os_read_limit_stdin \(number) FfiStringResult
@@ -169,8 +169,8 @@ UnsafeNew = \() Context {
       GetTime: _pen_os_get_time,
       Sleep: _pen_os_sleep,
       RandomNumber: _pen_os_random_number,
-      Exit: _pen_os_exit
-    }
+      Exit: _pen_os_exit,
+    },
   }
 }
 

@@ -6,6 +6,7 @@ mod infrastructure;
 mod main_module_compiler;
 mod main_package_directory_finder;
 mod module_compiler;
+mod module_formatter;
 mod package_builder;
 mod package_creator;
 mod package_formatter;
@@ -58,12 +59,20 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                 ),
         )
         .subcommand(
-            clap::Command::new("format").about("Formats a package").arg(
-                clap::Arg::new("stdin")
-                    .long("stdin")
-                    .takes_value(false)
-                    .help("Formats stdin"),
-            ),
+            clap::Command::new("format")
+                .about("Formats a package")
+                .arg(
+                    clap::Arg::new("check")
+                        .long("check")
+                        .takes_value(false)
+                        .help("Checks if module files are formatted"),
+                )
+                .arg(
+                    clap::Arg::new("stdin")
+                        .long("stdin")
+                        .takes_value(false)
+                        .help("Formats stdin"),
+                ),
         )
         .subcommand(
             clap::Command::new("compile")
@@ -189,7 +198,13 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
             matches.value_of("directory").unwrap(),
             matches.is_present("library"),
         ),
-        ("format", matches) => package_formatter::format(matches.is_present("stdin")),
+        ("format", matches) => {
+            if matches.is_present("stdin") {
+                module_formatter::format()
+            } else {
+                package_formatter::format(matches.is_present("check"))
+            }
+        }
         ("compile", matches) => module_compiler::compile(
             matches.value_of("source file").unwrap(),
             matches.value_of("dependency file").unwrap(),

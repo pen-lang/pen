@@ -1,5 +1,5 @@
-import 'array
 import 'Context { Context }
+import 'array
 
 Read = \(ctx Context, path string) [string] | error {
   r = Context'Inner(ctx).ReadDirectory(path)

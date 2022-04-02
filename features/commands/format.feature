@@ -1,5 +1,5 @@
 Feature: Formatting module files
-  Scenario: Format a package
+  Background:
     Given a file named "pen.json" with:
     """json
     {
@@ -7,7 +7,9 @@ Feature: Formatting module files
       "dependencies": {}
     }
     """
-    And a file named "Foo.pen" with:
+
+  Scenario: Format a package
+    Given a file named "Foo.pen" with:
     """pen
     Foo = \() none {
 
@@ -21,3 +23,14 @@ Feature: Formatting module files
       none
     }
     """
+
+  Scenario: Format a package
+    Given a file named "Foo.pen" with:
+    """pen
+    Foo = \() none {
+
+      none
+    }
+    """
+    When I run `pen format --checked`
+    Then the exit status should not be 0
