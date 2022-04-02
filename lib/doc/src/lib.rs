@@ -3,13 +3,14 @@ mod markdown;
 
 use ast::*;
 use ir::*;
+use ir::build::*;
 
 pub fn generate(path: &ModulePath, module: &Module, comments: &[Comment]) -> String {
     markdown::generate(&compile_module(path, module, comments))
 }
 
 fn compile_module(path: &ModulePath, module: &Module, comments: &[Comment]) -> Section {
-    todo!()
+    section(text([code(format!("{}", path))]), [], [])
 }
 
 #[cfg(test)]
