@@ -1,5 +1,5 @@
-import 'array
 import 'Context { Context }
+import 'array
 
 Arguments = \(ctx Context) [string] {
   array'ConvertToStrings(Context'Inner(ctx).GetArguments())

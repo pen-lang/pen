@@ -1,6 +1,6 @@
 import 'Context { Context }
-import 'File'OpenOptions { OpenOptions }
 import 'File'Metadata { Metadata }
+import 'File'OpenOptions { OpenOptions }
 import 'normalFile { NormalFile }
 
 type File {
@@ -8,7 +8,9 @@ type File {
 }
 
 type stdIn {}
+
 type stdOut {}
+
 type stdErr {}
 
 type specialFile = stdIn | stdOut | stdErr
@@ -39,7 +41,7 @@ Open = \(ctx Context, path string) File | error {
   OpenWithOptions(
     ctx,
     path,
-    OpenOptions{...OpenOptions'Default(), Read: true}
+    OpenOptions{...OpenOptions'Default(), Read: true},
   )
 }
 
