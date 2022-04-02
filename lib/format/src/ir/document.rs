@@ -15,7 +15,7 @@ use std::rc::Rc;
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum Document {
-    Flatten(Rc<Document>),
+    Break(bool, Rc<Document>),
     Indent(Rc<Document>),
     Line(bool),
     LineSuffix(String),

@@ -283,20 +283,18 @@ fn compile_lambda(context: &mut Context, lambda: &Lambda) -> Document {
         if single_line_arguments {
             flatten(arguments)
         } else {
-            sequence([indent(sequence([line(), arguments])), separator])
+            break_(sequence([indent(sequence([line(), arguments])), separator]))
         },
         ") ".into(),
         compile_type(lambda.result_type()),
         " ".into(),
-        if single_line_arguments
-            && lambda.position().line_number()
-                == lambda.body().expression().position().line_number()
-            && !is_broken(&body)
-        {
-            flatten(body)
-        } else {
-            body
-        },
+        flatten_if(
+            single_line_arguments
+                && lambda.position().line_number()
+                    == lambda.body().expression().position().line_number()
+                && !is_broken(&body),
+            body,
+        ),
     ])
 }
 
@@ -391,7 +389,7 @@ fn compile_expression(context: &mut Context, expression: &Expression) -> Documen
                 {
                     flatten(arguments)
                 } else {
-                    sequence([indent(sequence([line(), arguments])), separator])
+                    break_(sequence([indent(sequence([line(), arguments])), separator]))
                 },
                 ")".into(),
             ])
@@ -440,7 +438,7 @@ fn compile_expression(context: &mut Context, expression: &Expression) -> Documen
                 {
                     flatten(elements)
                 } else {
-                    sequence([indent(elements), separator, line()])
+                    break_(sequence([indent(elements), separator, line()]))
                 },
                 "]".into(),
             ])
@@ -465,7 +463,7 @@ fn compile_expression(context: &mut Context, expression: &Expression) -> Documen
                 {
                     flatten(elements)
                 } else {
-                    sequence([indent(elements), line()])
+                    break_(sequence([indent(elements), line()]))
                 },
                 "]".into(),
             ])
@@ -497,7 +495,7 @@ fn compile_expression(context: &mut Context, expression: &Expression) -> Documen
                 {
                     flatten(elements)
                 } else {
-                    sequence([indent(elements), separator, line()])
+                    break_(sequence([indent(elements), separator, line()]))
                 },
                 "}".into(),
             ])
@@ -552,7 +550,7 @@ fn compile_expression(context: &mut Context, expression: &Expression) -> Documen
                 {
                     flatten(elements)
                 } else {
-                    sequence([indent(sequence([line(), elements])), separator])
+                    break_(sequence([indent(sequence([line(), elements])), separator]))
                 },
                 "}".into(),
             ])
@@ -597,18 +595,16 @@ fn compile_if(context: &mut Context, if_: &If) -> Document {
         compile_block(context, if_.else_()),
     ]);
 
-    if if_.branches().len() == 1
-        && !is_broken(&document)
-        && Some(if_.position().line_number())
-            == if_
-                .branches()
-                .get(0)
-                .map(|branch| branch.block().expression().position().line_number())
-    {
-        flatten(document)
-    } else {
-        document
-    }
+    flatten_if(
+        if_.branches().len() == 1
+            && Some(if_.position().line_number())
+                == if_
+                    .branches()
+                    .get(0)
+                    .map(|branch| branch.block().expression().position().line_number())
+            && !is_broken(&document),
+        document,
+    )
 }
 
 fn compile_if_type(context: &mut Context, if_: &IfType) -> Document {
@@ -637,18 +633,16 @@ fn compile_if_type(context: &mut Context, if_: &IfType) -> Document {
         },
     ]);
 
-    if if_.branches().len() + if_.else_().iter().count() <= 2
-        && !is_broken(&document)
-        && Some(if_.position().line_number())
-            == if_
-                .branches()
-                .get(0)
-                .map(|branch| branch.block().expression().position().line_number())
-    {
-        flatten(document)
-    } else {
-        document
-    }
+    flatten_if(
+        if_.branches().len() + if_.else_().iter().count() <= 2
+            && Some(if_.position().line_number())
+                == if_
+                    .branches()
+                    .get(0)
+                    .map(|branch| branch.block().expression().position().line_number())
+            && !is_broken(&document),
+        document,
+    )
 }
 
 fn compile_list_element(context: &mut Context, element: &ListElement) -> Document {
@@ -685,11 +679,10 @@ fn compile_binary_operation(context: &mut Context, operation: &BinaryOperation) 
         ])),
     ]);
 
-    if operation.lhs().position().line_number() == operation.rhs().position().line_number() {
-        flatten(document)
-    } else {
-        document
-    }
+    flatten_if(
+        operation.lhs().position().line_number() == operation.rhs().position().line_number(),
+        document,
+    )
 }
 
 fn compile_operand(

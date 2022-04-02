@@ -14,7 +14,15 @@ pub fn line_suffix(string: impl Into<String>) -> Document {
 }
 
 pub fn flatten(document: impl Into<Document>) -> Document {
-    Document::Flatten(document.into().into())
+    Document::Break(false, document.into().into())
+}
+
+pub fn break_(document: impl Into<Document>) -> Document {
+    Document::Break(true, document.into().into())
+}
+
+pub fn flatten_if(condition: bool, document: impl Into<Document>) -> Document {
+    Document::Break(!condition, document.into().into())
 }
 
 pub fn indent(document: impl Into<Document>) -> Document {

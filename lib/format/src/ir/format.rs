@@ -22,7 +22,7 @@ pub fn format(document: &Document) -> String {
 
 fn format_document(context: &mut Context, document: &Document, level: usize, broken: bool) {
     match document {
-        Document::Flatten(document) => format_document(context, document, level, false),
+        Document::Break(broken, document) => format_document(context, document, level, *broken),
         Document::Indent(document) => format_document(context, document, level + 1, broken),
         Document::Line(hard) => {
             if *hard || broken {
