@@ -10,7 +10,7 @@ pub fn generate(path: &ModulePath, module: &Module, comments: &[Comment]) -> Str
 
 fn compile_module(path: &ModulePath, module: &Module, comments: &[Comment]) -> Section {
     section(
-        text([code(format!("{}", path))]),
+        text([code(path.to_string())]),
         [],
         [
             compile_type_definitions(module.type_definitions(), comments),
