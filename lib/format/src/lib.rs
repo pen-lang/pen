@@ -1781,6 +1781,39 @@ mod tests {
             ))
         }
 
+        #[test]
+        fn format_broken_parent_expression() {
+            assert_eq!(
+                format(
+                    &Call::new(
+                        Variable::new("foo", Position::fake()),
+                        vec![Call::new(
+                            Variable::new("foo", Position::fake()),
+                            vec![Number::new(
+                                NumberRepresentation::FloatingPoint("1".into()),
+                                line_position(2),
+                            )
+                            .into()],
+                            line_position(1),
+                        )
+                        .into()],
+                        Position::fake()
+                    )
+                    .into()
+                ),
+                indoc!(
+                    "
+                    foo(
+                      foo(
+                        1,
+                      ),
+                    )
+                    "
+                )
+                .trim(),
+            );
+        }
+
         mod call {
             use super::*;
 
