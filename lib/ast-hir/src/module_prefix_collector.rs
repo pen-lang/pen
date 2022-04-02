@@ -11,12 +11,16 @@ pub fn calculate(import: &ast::Import) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use position::{test::PositionFake, Position};
 
     #[test]
     fn calculate_prefix_for_internal_module_import() {
         let path = ast::InternalModulePath::new(vec!["Foo".into()]);
 
-        assert_eq!(calculate(&ast::Import::new(path, None, vec![])), "Foo",);
+        assert_eq!(
+            calculate(&ast::Import::new(path, None, vec![], Position::fake())),
+            "Foo",
+        );
     }
 
     #[test]
@@ -25,7 +29,8 @@ mod tests {
             calculate(&ast::Import::new(
                 ast::ExternalModulePath::new("Foo", vec!["Bar".into()]),
                 None,
-                vec![]
+                vec![],
+                Position::fake()
             )),
             "Bar",
         );
@@ -37,7 +42,8 @@ mod tests {
             calculate(&ast::Import::new(
                 ast::InternalModulePath::new(vec!["Foo".into()]),
                 Some("Bar".into()),
-                vec![]
+                vec![],
+                Position::fake()
             )),
             "Bar"
         );

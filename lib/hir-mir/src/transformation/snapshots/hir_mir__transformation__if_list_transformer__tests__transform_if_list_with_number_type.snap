@@ -1,8 +1,7 @@
 ---
 source: lib/hir-mir/src/transformation/if_list_transformer.rs
-assertion_line: 131
-expression: "transform(&IfList::new(Some(types::Number::new(Position::fake()).into()),\n                       Variable::new(\"xs\", Position::fake()), \"x\", \"xs\",\n                       None::new(Position::fake()),\n                       None::new(Position::fake()), Position::fake()),\n          &CompileContext::dummy(Default::default(), Default::default()))"
-
+assertion_line: 129
+expression: "transform(&CompileContext::dummy(Default::default(), Default::default()),\n          &IfList::new(Some(types::Number::new(Position::fake()).into()),\n                       Variable::new(\"xs\", Position::fake()), \"x\", \"xs\",\n                       None::new(Position::fake()),\n                       None::new(Position::fake()), Position::fake()))"
 ---
 Ok(
     IfType(
@@ -19,8 +18,8 @@ Ok(
                                             name: "GenericList",
                                             position: Position {
                                                 path: "",
-                                                line_number: 0,
-                                                column_number: 0,
+                                                line_number: 1,
+                                                column_number: 1,
                                                 line: "",
                                             },
                                         },
@@ -33,8 +32,8 @@ Ok(
                                                 name: "FirstRest",
                                                 position: Position {
                                                     path: "",
-                                                    line_number: 0,
-                                                    column_number: 0,
+                                                    line_number: 1,
+                                                    column_number: 1,
                                                     line: "",
                                                 },
                                             },
@@ -43,24 +42,24 @@ Ok(
                                             None {
                                                 position: Position {
                                                     path: "",
-                                                    line_number: 0,
-                                                    column_number: 0,
+                                                    line_number: 1,
+                                                    column_number: 1,
                                                     line: "",
                                                 },
                                             },
                                         ),
                                         position: Position {
                                             path: "",
-                                            line_number: 0,
-                                            column_number: 0,
+                                            line_number: 1,
+                                            column_number: 1,
                                             line: "",
                                         },
                                     },
                                 ),
                                 position: Position {
                                     path: "",
-                                    line_number: 0,
-                                    column_number: 0,
+                                    line_number: 1,
+                                    column_number: 1,
                                     line: "",
                                 },
                             },
@@ -71,8 +70,8 @@ Ok(
                             name: "deconstruct",
                             position: Position {
                                 path: "",
-                                line_number: 0,
-                                column_number: 0,
+                                line_number: 1,
+                                column_number: 1,
                                 line: "",
                             },
                         },
@@ -83,8 +82,8 @@ Ok(
                                 name: "xs",
                                 position: Position {
                                     path: "",
-                                    line_number: 0,
-                                    column_number: 0,
+                                    line_number: 1,
+                                    column_number: 1,
                                     line: "",
                                 },
                             },
@@ -92,8 +91,8 @@ Ok(
                     ],
                     position: Position {
                         path: "",
-                        line_number: 0,
-                        column_number: 0,
+                        line_number: 1,
+                        column_number: 1,
                         line: "",
                     },
                 },
@@ -105,8 +104,8 @@ Ok(
                             name: "FirstRest",
                             position: Position {
                                 path: "",
-                                line_number: 0,
-                                column_number: 0,
+                                line_number: 1,
+                                column_number: 1,
                                 line: "",
                             },
                         },
@@ -124,16 +123,16 @@ Ok(
                                             Number {
                                                 position: Position {
                                                     path: "",
-                                                    line_number: 0,
-                                                    column_number: 0,
+                                                    line_number: 1,
+                                                    column_number: 1,
                                                     line: "",
                                                 },
                                             },
                                         ),
                                         position: Position {
                                             path: "",
-                                            line_number: 0,
-                                            column_number: 0,
+                                            line_number: 1,
+                                            column_number: 1,
                                             line: "",
                                         },
                                     },
@@ -152,16 +151,16 @@ Ok(
                                                     Any {
                                                         position: Position {
                                                             path: "",
-                                                            line_number: 0,
-                                                            column_number: 0,
+                                                            line_number: 1,
+                                                            column_number: 1,
                                                             line: "",
                                                         },
                                                     },
                                                 ),
                                                 position: Position {
                                                     path: "",
-                                                    line_number: 0,
-                                                    column_number: 0,
+                                                    line_number: 1,
+                                                    column_number: 1,
                                                     line: "",
                                                 },
                                             },
@@ -178,8 +177,8 @@ Ok(
                                                                     name: "FirstRest",
                                                                     position: Position {
                                                                         path: "",
-                                                                        line_number: 0,
-                                                                        column_number: 0,
+                                                                        line_number: 1,
+                                                                        column_number: 1,
                                                                         line: "",
                                                                     },
                                                                 },
@@ -192,24 +191,24 @@ Ok(
                                                                     Any {
                                                                         position: Position {
                                                                             path: "",
-                                                                            line_number: 0,
-                                                                            column_number: 0,
+                                                                            line_number: 1,
+                                                                            column_number: 1,
                                                                             line: "",
                                                                         },
                                                                     },
                                                                 ),
                                                                 position: Position {
                                                                     path: "",
-                                                                    line_number: 0,
-                                                                    column_number: 0,
+                                                                    line_number: 1,
+                                                                    column_number: 1,
                                                                     line: "",
                                                                 },
                                                             },
                                                         ),
                                                         position: Position {
                                                             path: "",
-                                                            line_number: 0,
-                                                            column_number: 0,
+                                                            line_number: 1,
+                                                            column_number: 1,
                                                             line: "",
                                                         },
                                                     },
@@ -220,8 +219,8 @@ Ok(
                                                     name: "first",
                                                     position: Position {
                                                         path: "",
-                                                        line_number: 0,
-                                                        column_number: 0,
+                                                        line_number: 1,
+                                                        column_number: 1,
                                                         line: "",
                                                     },
                                                 },
@@ -232,8 +231,8 @@ Ok(
                                                         name: "$firstRest",
                                                         position: Position {
                                                             path: "",
-                                                            line_number: 0,
-                                                            column_number: 0,
+                                                            line_number: 1,
+                                                            column_number: 1,
                                                             line: "",
                                                         },
                                                     },
@@ -241,8 +240,8 @@ Ok(
                                             ],
                                             position: Position {
                                                 path: "",
-                                                line_number: 0,
-                                                column_number: 0,
+                                                line_number: 1,
+                                                column_number: 1,
                                                 line: "",
                                             },
                                         },
@@ -254,8 +253,8 @@ Ok(
                                                 Number {
                                                     position: Position {
                                                         path: "",
-                                                        line_number: 0,
-                                                        column_number: 0,
+                                                        line_number: 1,
+                                                        column_number: 1,
                                                         line: "",
                                                     },
                                                 },
@@ -273,16 +272,16 @@ Ok(
                                                                             Any {
                                                                                 position: Position {
                                                                                     path: "",
-                                                                                    line_number: 0,
-                                                                                    column_number: 0,
+                                                                                    line_number: 1,
+                                                                                    column_number: 1,
                                                                                     line: "",
                                                                                 },
                                                                             },
                                                                         ),
                                                                         position: Position {
                                                                             path: "",
-                                                                            line_number: 0,
-                                                                            column_number: 0,
+                                                                            line_number: 1,
+                                                                            column_number: 1,
                                                                             line: "",
                                                                         },
                                                                     },
@@ -293,8 +292,8 @@ Ok(
                                                                     name: "x",
                                                                     position: Position {
                                                                         path: "",
-                                                                        line_number: 0,
-                                                                        column_number: 0,
+                                                                        line_number: 1,
+                                                                        column_number: 1,
                                                                         line: "",
                                                                     },
                                                                 },
@@ -302,8 +301,8 @@ Ok(
                                                             arguments: [],
                                                             position: Position {
                                                                 path: "",
-                                                                line_number: 0,
-                                                                column_number: 0,
+                                                                line_number: 1,
+                                                                column_number: 1,
                                                                 line: "",
                                                             },
                                                         },
@@ -314,8 +313,8 @@ Ok(
                                                                 Number {
                                                                     position: Position {
                                                                         path: "",
-                                                                        line_number: 0,
-                                                                        column_number: 0,
+                                                                        line_number: 1,
+                                                                        column_number: 1,
                                                                         line: "",
                                                                     },
                                                                 },
@@ -325,8 +324,8 @@ Ok(
                                                                     name: "$value",
                                                                     position: Position {
                                                                         path: "",
-                                                                        line_number: 0,
-                                                                        column_number: 0,
+                                                                        line_number: 1,
+                                                                        column_number: 1,
                                                                         line: "",
                                                                     },
                                                                 },
@@ -336,24 +335,24 @@ Ok(
                                                     else_: None,
                                                     position: Position {
                                                         path: "",
-                                                        line_number: 0,
-                                                        column_number: 0,
+                                                        line_number: 1,
+                                                        column_number: 1,
                                                         line: "",
                                                     },
                                                 },
                                             ),
                                             position: Position {
                                                 path: "",
-                                                line_number: 0,
-                                                column_number: 0,
+                                                line_number: 1,
+                                                column_number: 1,
                                                 line: "",
                                             },
                                         },
                                     ),
                                     position: Position {
                                         path: "",
-                                        line_number: 0,
-                                        column_number: 0,
+                                        line_number: 1,
+                                        column_number: 1,
                                         line: "",
                                     },
                                 },
@@ -369,8 +368,8 @@ Ok(
                                                 name: "GenericList",
                                                 position: Position {
                                                     path: "",
-                                                    line_number: 0,
-                                                    column_number: 0,
+                                                    line_number: 1,
+                                                    column_number: 1,
                                                     line: "",
                                                 },
                                             },
@@ -387,8 +386,8 @@ Ok(
                                                                     name: "FirstRest",
                                                                     position: Position {
                                                                         path: "",
-                                                                        line_number: 0,
-                                                                        column_number: 0,
+                                                                        line_number: 1,
+                                                                        column_number: 1,
                                                                         line: "",
                                                                     },
                                                                 },
@@ -399,16 +398,16 @@ Ok(
                                                                 name: "GenericList",
                                                                 position: Position {
                                                                     path: "",
-                                                                    line_number: 0,
-                                                                    column_number: 0,
+                                                                    line_number: 1,
+                                                                    column_number: 1,
                                                                     line: "",
                                                                 },
                                                             },
                                                         ),
                                                         position: Position {
                                                             path: "",
-                                                            line_number: 0,
-                                                            column_number: 0,
+                                                            line_number: 1,
+                                                            column_number: 1,
                                                             line: "",
                                                         },
                                                     },
@@ -419,8 +418,8 @@ Ok(
                                                     name: "rest",
                                                     position: Position {
                                                         path: "",
-                                                        line_number: 0,
-                                                        column_number: 0,
+                                                        line_number: 1,
+                                                        column_number: 1,
                                                         line: "",
                                                     },
                                                 },
@@ -431,8 +430,8 @@ Ok(
                                                         name: "$firstRest",
                                                         position: Position {
                                                             path: "",
-                                                            line_number: 0,
-                                                            column_number: 0,
+                                                            line_number: 1,
+                                                            column_number: 1,
                                                             line: "",
                                                         },
                                                     },
@@ -440,8 +439,8 @@ Ok(
                                             ],
                                             position: Position {
                                                 path: "",
-                                                line_number: 0,
-                                                column_number: 0,
+                                                line_number: 1,
+                                                column_number: 1,
                                                 line: "",
                                             },
                                         },
@@ -450,24 +449,24 @@ Ok(
                                         None {
                                             position: Position {
                                                 path: "",
-                                                line_number: 0,
-                                                column_number: 0,
+                                                line_number: 1,
+                                                column_number: 1,
                                                 line: "",
                                             },
                                         },
                                     ),
                                     position: Position {
                                         path: "",
-                                        line_number: 0,
-                                        column_number: 0,
+                                        line_number: 1,
+                                        column_number: 1,
                                         line: "",
                                     },
                                 },
                             ),
                             position: Position {
                                 path: "",
-                                line_number: 0,
-                                column_number: 0,
+                                line_number: 1,
+                                column_number: 1,
                                 line: "",
                             },
                         },
@@ -478,8 +477,8 @@ Ok(
                         None {
                             position: Position {
                                 path: "",
-                                line_number: 0,
-                                column_number: 0,
+                                line_number: 1,
+                                column_number: 1,
                                 line: "",
                             },
                         },
@@ -488,8 +487,8 @@ Ok(
                         None {
                             position: Position {
                                 path: "",
-                                line_number: 0,
-                                column_number: 0,
+                                line_number: 1,
+                                column_number: 1,
                                 line: "",
                             },
                         },
@@ -499,8 +498,8 @@ Ok(
             else_: None,
             position: Position {
                 path: "",
-                line_number: 0,
-                column_number: 0,
+                line_number: 1,
+                column_number: 1,
                 line: "",
             },
         },
