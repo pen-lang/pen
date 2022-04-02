@@ -4,6 +4,7 @@ use std::{error::Error, fmt::Display};
 pub enum ApplicationError {
     Build,
     ContextTypeNotFound,
+    ModuleFilesNotFormatted(Vec<String>),
     ModuleNotFound(String),
     NewContextFunctionNotFound,
     PackageDependencyCycle,
@@ -20,6 +21,13 @@ impl Display for ApplicationError {
             Self::Build => write!(formatter, "build failed"),
             Self::ContextTypeNotFound => {
                 write!(formatter, "context type not found")
+            }
+            Self::ModuleFilesNotFormatted(paths) => {
+                write!(
+                    formatter,
+                    "module files not formatted: {}",
+                    paths.join(", ")
+                )
             }
             Self::ModuleNotFound(module) => {
                 write!(formatter, "module {} not found", module)

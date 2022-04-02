@@ -9,15 +9,20 @@ pub fn format(
     infrastructure: &Infrastructure,
     package_directory: &FilePath,
 ) -> Result<(), Box<dyn Error>> {
-    for paths in module_finder::find(infrastructure, package_directory)? {
-        let path = infrastructure.file_path_displayer.display(&paths);
-        let source = infrastructure.file_system.read_to_string(&paths)?;
-        let formatted_source = module_formatter::format(&source, &path)?;
+    let mut paths = vec![];
 
-        if source != formatted_source {
-            return Err(ApplicationError::Format { path, difference });
+    for path in module_finder::find(infrastructure, package_directory)? {
+        let source = infrastructure.file_system.read_to_string(&path)?;
+        let path = infrastructure.file_path_displayer.display(&path);
+
+        if source != module_formatter::format(&source, &path)? {
+            paths.push(path);
         }
     }
 
-    Ok(())
+    if paths.is_empty() {
+        Ok(())
+    } else {
+        Err(ApplicationError::ModuleFilesNotFormatted(paths).into())
+    }
 }
