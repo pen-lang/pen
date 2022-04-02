@@ -1,4 +1,4 @@
-use ast::*;
+use ast::{analysis::operator_priority, *};
 use position::Position;
 
 #[derive(Clone, Debug)]
@@ -45,21 +45,6 @@ pub fn reduce_operations(
                 )
             }
         }
-    }
-}
-
-fn operator_priority(operator: BinaryOperator) -> usize {
-    match operator {
-        BinaryOperator::Or => 1,
-        BinaryOperator::And => 2,
-        BinaryOperator::Equal
-        | BinaryOperator::NotEqual
-        | BinaryOperator::LessThan
-        | BinaryOperator::LessThanOrEqual
-        | BinaryOperator::GreaterThan
-        | BinaryOperator::GreaterThanOrEqual => 3,
-        BinaryOperator::Add | BinaryOperator::Subtract => 4,
-        BinaryOperator::Multiply | BinaryOperator::Divide => 5,
     }
 }
 
