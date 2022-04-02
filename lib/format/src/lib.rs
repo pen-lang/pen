@@ -266,13 +266,13 @@ fn compile_lambda(context: &mut Context, lambda: &Lambda) -> Document {
                 // TODO Use Argument::position().
                 let position = argument.type_().position();
 
-                sequence([
-                    compile_block_comment(context, position),
-                    argument.name().into(),
-                    " ".into(),
-                    compile_type(argument.type_()),
-                    compile_suffix_comment(context, position),
-                ])
+                compile_line_comment(context, position, |_| {
+                    sequence([
+                        argument.name().into(),
+                        " ".into(),
+                        compile_type(argument.type_()),
+                    ])
+                })
             })
             .intersperse(separator.clone()),
     );
@@ -283,20 +283,18 @@ fn compile_lambda(context: &mut Context, lambda: &Lambda) -> Document {
         if single_line_arguments {
             flatten(arguments)
         } else {
-            sequence([indent(sequence([line(), arguments])), separator])
+            break_(sequence([indent(sequence([line(), arguments])), separator]))
         },
         ") ".into(),
         compile_type(lambda.result_type()),
         " ".into(),
-        if single_line_arguments
-            && lambda.position().line_number()
-                == lambda.body().expression().position().line_number()
-            && !is_broken(&body)
-        {
-            flatten(body)
-        } else {
-            body
-        },
+        flatten_if(
+            single_line_arguments
+                && lambda.position().line_number()
+                    == lambda.body().expression().position().line_number()
+                && !is_broken(&body),
+            body,
+        ),
     ])
 }
 
@@ -337,9 +335,9 @@ fn compile_block(context: &mut Context, block: &Block) -> Document {
         indent(sequence([
             line(),
             statements,
-            compile_block_comment(context, block.expression().position()),
-            compile_expression(context, block.expression()),
-            compile_suffix_comment(context, block.expression().position()),
+            compile_line_comment(context, block.expression().position(), |context| {
+                compile_expression(context, block.expression())
+            }),
         ])),
         line(),
         "}".into(),
@@ -355,7 +353,7 @@ fn compile_statement(context: &mut Context, statement: &Statement) -> Document {
         },
         compile_expression(context, statement.expression()),
         compile_suffix_comment(context, statement.position()),
-        hard_line(),
+        break_(line()),
     ])
 }
 
@@ -369,11 +367,9 @@ fn compile_expression(context: &mut Context, expression: &Expression) -> Documen
                 call.arguments()
                     .iter()
                     .map(|argument| {
-                        sequence([
-                            compile_block_comment(context, argument.position()),
-                            compile_expression(context, argument),
-                            compile_suffix_comment(context, argument.position()),
-                        ])
+                        compile_line_comment(context, argument.position(), |context| {
+                            compile_expression(context, argument)
+                        })
                     })
                     .intersperse(separator.clone()),
             );
@@ -391,7 +387,7 @@ fn compile_expression(context: &mut Context, expression: &Expression) -> Documen
                 {
                     flatten(arguments)
                 } else {
-                    sequence([indent(sequence([line(), arguments])), separator])
+                    break_(sequence([indent(sequence([line(), arguments])), separator]))
                 },
                 ")".into(),
             ])
@@ -418,42 +414,22 @@ fn compile_expression(context: &mut Context, expression: &Expression) -> Documen
         ]),
         Expression::IfType(if_) => compile_if_type(context, if_),
         Expression::Lambda(lambda) => compile_lambda(context, lambda),
-        Expression::List(list) => {
-            let separator = Document::from(",");
-            let elements = sequence(
-                list.elements()
-                    .iter()
-                    .map(|element| sequence([line(), compile_list_element(context, element)]))
-                    .intersperse(separator.clone()),
-            );
-
-            sequence([
-                "[".into(),
-                compile_type(list.type_()),
-                if list.elements().is_empty()
-                    || Some(list.position().line_number())
-                        == list
-                            .elements()
-                            .get(0)
-                            .map(|element| element.position().line_number())
-                        && !is_broken(&elements)
-                {
-                    flatten(elements)
-                } else {
-                    sequence([indent(elements), separator, line()])
-                },
-                "]".into(),
-            ])
-        }
+        Expression::List(list) => compile_list(context, list),
         Expression::ListComprehension(comprehension) => {
             let elements = sequence([
                 line(),
-                compile_expression(context, comprehension.element()),
+                compile_line_comment(context, comprehension.element().position(), |context| {
+                    compile_expression(context, comprehension.element())
+                }),
                 line(),
-                "for ".into(),
-                comprehension.element_name().into(),
-                " in ".into(),
-                compile_expression(context, comprehension.list()),
+                compile_line_comment(context, comprehension.element().position(), |context| {
+                    sequence([
+                        "for ".into(),
+                        comprehension.element_name().into(),
+                        " in ".into(),
+                        compile_expression(context, comprehension.list()),
+                    ])
+                }),
             ]);
 
             sequence([
@@ -465,43 +441,12 @@ fn compile_expression(context: &mut Context, expression: &Expression) -> Documen
                 {
                     flatten(elements)
                 } else {
-                    sequence([indent(elements), line()])
+                    break_(sequence([indent(elements), line()]))
                 },
                 "]".into(),
             ])
         }
-        Expression::Map(map) => {
-            let type_ = sequence([
-                compile_type(map.key_type()),
-                ": ".into(),
-                compile_type(map.value_type()),
-            ]);
-            let separator = Document::from(",");
-            let elements = sequence(
-                map.elements()
-                    .iter()
-                    .map(|element| sequence([line(), compile_map_element(context, element)]))
-                    .intersperse(separator.clone()),
-            );
-
-            sequence([
-                "{".into(),
-                type_,
-                if map.elements().is_empty()
-                    || Some(map.position().line_number())
-                        == map
-                            .elements()
-                            .get(0)
-                            .map(|element| element.position().line_number())
-                        && !is_broken(&elements)
-                {
-                    flatten(elements)
-                } else {
-                    sequence([indent(elements), separator, line()])
-                },
-                "}".into(),
-            ])
-        }
+        Expression::Map(map) => compile_map(context, map),
         Expression::None(_) => "none".into(),
         Expression::Number(number) => match number.value() {
             NumberRepresentation::Binary(string) => "0b".to_owned() + string,
@@ -515,24 +460,19 @@ fn compile_expression(context: &mut Context, expression: &Expression) -> Documen
                 record
                     .record()
                     .map(|record| {
-                        sequence([
-                            compile_block_comment(context, record.position()),
-                            "...".into(),
-                            compile_expression(context, record),
-                            compile_suffix_comment(context, record.position()),
-                        ])
+                        compile_line_comment(context, record.position(), |context| {
+                            sequence(["...".into(), compile_expression(context, record)])
+                        })
                     })
                     .into_iter()
                     .chain(record.fields().iter().map(|field| {
-                        {
+                        compile_line_comment(context, field.position(), |context| {
                             sequence([
-                                compile_block_comment(context, field.position()),
                                 field.name().into(),
                                 ": ".into(),
                                 compile_expression(context, field.expression()),
-                                compile_suffix_comment(context, field.position()),
                             ])
-                        }
+                        })
                     }))
                     .intersperse(separator.clone()),
             );
@@ -552,7 +492,7 @@ fn compile_expression(context: &mut Context, expression: &Expression) -> Documen
                 {
                     flatten(elements)
                 } else {
-                    sequence([indent(sequence([line(), elements])), separator])
+                    break_(sequence([indent(sequence([line(), elements])), separator]))
                 },
                 "}".into(),
             ])
@@ -597,18 +537,16 @@ fn compile_if(context: &mut Context, if_: &If) -> Document {
         compile_block(context, if_.else_()),
     ]);
 
-    if if_.branches().len() == 1
-        && !is_broken(&document)
-        && Some(if_.position().line_number())
-            == if_
-                .branches()
-                .get(0)
-                .map(|branch| branch.block().expression().position().line_number())
-    {
-        flatten(document)
-    } else {
-        document
-    }
+    flatten_if(
+        if_.branches().len() == 1
+            && Some(if_.position().line_number())
+                == if_
+                    .branches()
+                    .get(0)
+                    .map(|branch| branch.block().expression().position().line_number())
+            && !is_broken(&document),
+        document,
+    )
 }
 
 fn compile_if_type(context: &mut Context, if_: &IfType) -> Document {
@@ -637,41 +575,102 @@ fn compile_if_type(context: &mut Context, if_: &IfType) -> Document {
         },
     ]);
 
-    if if_.branches().len() + if_.else_().iter().count() <= 2
-        && !is_broken(&document)
-        && Some(if_.position().line_number())
-            == if_
-                .branches()
-                .get(0)
-                .map(|branch| branch.block().expression().position().line_number())
-    {
-        flatten(document)
-    } else {
-        document
-    }
+    flatten_if(
+        if_.branches().len() + if_.else_().iter().count() <= 2
+            && Some(if_.position().line_number())
+                == if_
+                    .branches()
+                    .get(0)
+                    .map(|branch| branch.block().expression().position().line_number())
+            && !is_broken(&document),
+        document,
+    )
 }
 
-fn compile_list_element(context: &mut Context, element: &ListElement) -> Document {
-    match element {
-        ListElement::Multiple(expression) => {
-            sequence(["...".into(), compile_expression(context, expression)])
-        }
-        ListElement::Single(expression) => compile_expression(context, expression),
-    }
+fn compile_list(context: &mut Context, list: &List) -> Document {
+    let separator = Document::from(",");
+    let elements = sequence(
+        list.elements()
+            .iter()
+            .map(|element| {
+                sequence([
+                    line(),
+                    compile_line_comment(context, element.position(), |context| match element {
+                        ListElement::Multiple(expression) => {
+                            sequence(["...".into(), compile_expression(context, expression)])
+                        }
+                        ListElement::Single(expression) => compile_expression(context, expression),
+                    }),
+                ])
+            })
+            .intersperse(separator.clone()),
+    );
+
+    sequence([
+        "[".into(),
+        compile_type(list.type_()),
+        if list.elements().is_empty()
+            || Some(list.position().line_number())
+                == list
+                    .elements()
+                    .get(0)
+                    .map(|element| element.position().line_number())
+                && !is_broken(&elements)
+        {
+            flatten(elements)
+        } else {
+            break_(sequence([indent(elements), separator, line()]))
+        },
+        "]".into(),
+    ])
 }
 
-fn compile_map_element(context: &mut Context, element: &MapElement) -> Document {
-    match element {
-        MapElement::Map(expression) => {
-            sequence(["...".into(), compile_expression(context, expression)])
-        }
-        MapElement::Insertion(entry) => sequence([
-            compile_expression(context, entry.key()),
-            ": ".into(),
-            compile_expression(context, entry.value()),
-        ]),
-        MapElement::Removal(expression) => compile_expression(context, expression),
-    }
+fn compile_map(context: &mut Context, map: &Map) -> Document {
+    let type_ = sequence([
+        compile_type(map.key_type()),
+        ": ".into(),
+        compile_type(map.value_type()),
+    ]);
+    let separator = Document::from(",");
+    let elements = sequence(
+        map.elements()
+            .iter()
+            .map(|element| {
+                sequence([
+                    line(),
+                    compile_line_comment(context, element.position(), |context| match element {
+                        MapElement::Map(expression) => {
+                            sequence(["...".into(), compile_expression(context, expression)])
+                        }
+                        MapElement::Insertion(entry) => sequence([
+                            compile_expression(context, entry.key()),
+                            ": ".into(),
+                            compile_expression(context, entry.value()),
+                        ]),
+                        MapElement::Removal(expression) => compile_expression(context, expression),
+                    }),
+                ])
+            })
+            .intersperse(separator.clone()),
+    );
+
+    sequence([
+        "{".into(),
+        type_,
+        if map.elements().is_empty()
+            || Some(map.position().line_number())
+                == map
+                    .elements()
+                    .get(0)
+                    .map(|element| element.position().line_number())
+                && !is_broken(&elements)
+        {
+            flatten(elements)
+        } else {
+            break_(sequence([indent(elements), separator, line()]))
+        },
+        "}".into(),
+    ])
 }
 
 fn compile_binary_operation(context: &mut Context, operation: &BinaryOperation) -> Document {
@@ -685,11 +684,10 @@ fn compile_binary_operation(context: &mut Context, operation: &BinaryOperation) 
         ])),
     ]);
 
-    if operation.lhs().position().line_number() == operation.rhs().position().line_number() {
-        flatten(document)
-    } else {
-        document
-    }
+    flatten_if(
+        operation.lhs().position().line_number() == operation.rhs().position().line_number(),
+        document,
+    )
 }
 
 fn compile_operand(
@@ -746,6 +744,18 @@ fn operator_priority(operator: BinaryOperator) -> usize {
     }
 }
 
+fn compile_line_comment(
+    context: &mut Context,
+    position: &Position,
+    document: impl Fn(&mut Context) -> Document,
+) -> Document {
+    sequence([
+        compile_block_comment(context, position),
+        document(context),
+        compile_suffix_comment(context, position),
+    ])
+}
+
 fn compile_suffix_comment(context: &mut Context, position: &Position) -> Document {
     sequence(
         context
@@ -787,7 +797,7 @@ fn compile_all_comments(comments: &[Comment], last_line_number: Option<usize>) -
                 sequence([
                     "#".into(),
                     comment.line().trim_end().into(),
-                    line(),
+                    break_(line()),
                     if comment.position().line_number() + 1 < next_line_number {
                         line()
                     } else {
@@ -1779,6 +1789,39 @@ mod tests {
                 &mut Context::new(comments.to_vec()),
                 expression,
             ))
+        }
+
+        #[test]
+        fn format_broken_parent_expression() {
+            assert_eq!(
+                format(
+                    &Call::new(
+                        Variable::new("foo", Position::fake()),
+                        vec![Call::new(
+                            Variable::new("foo", Position::fake()),
+                            vec![Number::new(
+                                NumberRepresentation::FloatingPoint("1".into()),
+                                line_position(2),
+                            )
+                            .into()],
+                            line_position(1),
+                        )
+                        .into()],
+                        Position::fake()
+                    )
+                    .into()
+                ),
+                indoc!(
+                    "
+                    foo(
+                      foo(
+                        1,
+                      ),
+                    )
+                    "
+                )
+                .trim(),
+            );
         }
 
         mod call {

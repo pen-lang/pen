@@ -1,7 +1,8 @@
 import Core'Number
 import Core'String
-import Os'File
 import Os'Context { Context }
+import Os'File
+
 import 'knapsack { Bag, Item }
 
 main = \(ctx context) none {
