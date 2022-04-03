@@ -15,6 +15,7 @@ struct Context {
     language: String,
 }
 
+// TODO Generate package description in some way. Maybe from README.md?
 pub fn generate(
     package_name: &str,
     modules: &BTreeMap<ModulePath, (Module, Vec<Comment>)>,
