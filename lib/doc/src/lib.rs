@@ -130,7 +130,7 @@ fn compile_block_comment(context: &Context, position: &Position) -> Option<Parag
             text(
                 comments
                     .iter()
-                    .map(|comment| normal(comment.line().trim_end()))
+                    .map(|comment| normal(comment.line().trim()))
                     .intersperse(normal("\n"))
                     .collect::<Vec<_>>(),
             )
@@ -402,6 +402,27 @@ mod tests {
                 generate(
                     &RecordDefinition::new("Foo", vec![], line_position(2)).into(),
                     &[Comment::new("foo", line_position(1))]
+                ),
+                indoc!(
+                    "
+                    # `Foo`
+
+                    foo
+
+                    ```pen
+                    type Foo {}
+                    ```
+                    "
+                )
+            );
+        }
+
+        #[test]
+        fn trim_preceding_spaces() {
+            assert_eq!(
+                generate(
+                    &RecordDefinition::new("Foo", vec![], line_position(2)).into(),
+                    &[Comment::new(" foo", line_position(1))]
                 ),
                 indoc!(
                     "
