@@ -1,6 +1,6 @@
-# `Os` package
+# `OsSync` package
 
-## `Os'Context` module
+## `OsSync'Context` module
 
 ### Types
 
@@ -164,7 +164,7 @@ type FfiUdpDatagramResult {
 \(ctx Context) InnerContext
 ```
 
-## `Os'Directory` module
+## `OsSync'Directory` module
 
 ### Types
 
@@ -190,7 +190,7 @@ No types are defined.
 \(ctx Context, path string) none | error
 ```
 
-## `Os'Environment` module
+## `OsSync'Environment` module
 
 ### Types
 
@@ -210,7 +210,7 @@ No types are defined.
 \(ctx Context, name string) string | error
 ```
 
-## `Os'File` module
+## `OsSync'File` module
 
 ### Types
 
@@ -296,7 +296,7 @@ type File {
 \(ctx Context, path string) Metadata | error
 ```
 
-## `Os'File'Metadata` module
+## `OsSync'File'Metadata` module
 
 ### Types
 
@@ -312,7 +312,7 @@ type Metadata {
 
 No functions are defined.
 
-## `Os'File'OpenOptions` module
+## `OsSync'File'OpenOptions` module
 
 ### Types
 
@@ -337,7 +337,7 @@ type OpenOptions {
 \() OpenOptions
 ```
 
-## `Os'Process` module
+## `OsSync'Process` module
 
 ### Types
 
@@ -351,7 +351,7 @@ No types are defined.
 \(ctx Context, code number) none
 ```
 
-## `Os'Random` module
+## `OsSync'Random` module
 
 ### Types
 
@@ -365,7 +365,7 @@ No types are defined.
 \(ctx Context) number
 ```
 
-## `Os'Tcp` module
+## `OsSync'Tcp` module
 
 ### Types
 
@@ -403,7 +403,7 @@ No types are defined.
 \(ctx Context, s Stream, data string) number | error
 ```
 
-## `Os'Tcp'AcceptedStream` module
+## `OsSync'Tcp'AcceptedStream` module
 
 ### Types
 
@@ -420,7 +420,7 @@ type AcceptedStream {
 
 No functions are defined.
 
-## `Os'Tcp'Listener` module
+## `OsSync'Tcp'Listener` module
 
 ### Types
 
@@ -436,7 +436,7 @@ type Listener {
 
 No functions are defined.
 
-## `Os'Tcp'Stream` module
+## `OsSync'Tcp'Stream` module
 
 ### Types
 
@@ -452,7 +452,7 @@ type Stream {
 
 No functions are defined.
 
-## `Os'Time` module
+## `OsSync'Time` module
 
 ### Types
 
@@ -472,7 +472,7 @@ No types are defined.
 \(ctx Context, milliseconds number) none
 ```
 
-## `Os'Udp` module
+## `OsSync'Udp` module
 
 ### Types
 
@@ -516,7 +516,7 @@ No types are defined.
 \(ctx Context, s Socket, data string, address string) number | error
 ```
 
-## `Os'Udp'Datagram` module
+## `OsSync'Udp'Datagram` module
 
 ### Types
 
@@ -533,7 +533,7 @@ type Datagram {
 
 No functions are defined.
 
-## `Os'Udp'Socket` module
+## `OsSync'Udp'Socket` module
 
 ### Types
 
@@ -549,7 +549,7 @@ type Socket {
 
 No functions are defined.
 
-## `Os'array` module
+## `OsSync'array` module
 
 ### Types
 
@@ -569,7 +569,7 @@ type Array {
 \(xs Array) [string]
 ```
 
-## `Os'normalFile` module
+## `OsSync'normalFile` module
 
 ### Types
 

@@ -1,36 +1,20 @@
-# Test
+# `Test` package
 
-This package provides utility functions and types for testing.
+## `Test'Assert` module
 
-## Install
+### Types
 
-```json
-{
-  "dependencies": {
-    "Test": "pen:///test"
-  }
-}
-```
-
-## `Assert` module
-
-```pen
-import Test'Assert
-```
+No types are defined.
 
 ### Functions
 
 #### `True`
 
-It returns `none` if a given condition is `true`, or returns an error otherwise.
-
 ```pen
-\(boolean) none | error
+\(x boolean) none | error
 ```
 
 #### `Fail`
-
-It always returns an error.
 
 ```pen
 \() error
@@ -38,16 +22,12 @@ It always returns an error.
 
 #### `EqualNumbers`
 
-It returns `none` if given numbers are equal, or returns an error otherwise.
-
 ```pen
-\(number, number) none | error
+\(x number, y number) none | error
 ```
 
 #### `EqualStrings`
 
-It returns `none` if given strings are equal, or returns an error otherwise.
-
 ```pen
-\(string, string) none | error
+\(x string, y string) none | error
 ```

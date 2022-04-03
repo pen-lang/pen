@@ -1,93 +1,544 @@
-# Core
+# `Core` package
 
-This package provides common utility functions and types that are agnostic about platforms.
+## `Core'Bit` module
 
-## Install
+A module for bitwise operations
 
-```json
-{
-  "dependencies": {
-    "Core": "pen:///core"
-  }
-}
-```
+Most functions defined in this module take arguments of 64-bit integers.
+They can be converted from and into an integer represented in IEEE-754 of the
 
-## `Number` module
+### Types
 
-```pen
-import Core'Number
-```
+No types are defined.
 
 ### Functions
 
-#### `String`
+#### `And`
 
-It converts a number to its string representation.
-
-```pen
-\(number) string
-```
-
-#### `Sum`
-
-It calculates a sum of numbers.
+Calculate bitwise "and" given two 64-bit integers.
 
 ```pen
-\([number]) number
+\(x number, y number) number
 ```
 
-## `List` module
+#### `Or`
+
+Calculate bitwise "or" given two 64-bit integers.
 
 ```pen
-import Core'List
+\(x number, y number) number
 ```
+
+#### `Xor`
+
+Calculate bitwise exclusive-"or" given two 64-bit integers.
+
+```pen
+\(x number, y number) number
+```
+
+#### `Not`
+
+Calculate bitwise "not" given two 64-bit integers.
+
+```pen
+\(x number) number
+```
+
+#### `LeftShift`
+
+Calculate unsigned left shift given a 64-bit integer.
+
+```pen
+\(x number, n number) number
+```
+
+#### `RightShift`
+
+Calculate unsigned right shift given a 64-bit integer.
+
+```pen
+\(x number, n number) number
+```
+
+#### `ToInteger64`
+
+Convert an integer in IEEE-754 to a 64-bit integer.
+
+```pen
+\(x number) number
+```
+
+#### `FromInteger64`
+
+Convert a 64-bit integer to an integer in IEEE-754.
+
+```pen
+\(x number) number
+```
+
+## `Core'List` module
+
+### Types
+
+No types are defined.
 
 ### Functions
 
 #### `Length`
 
-It returns a length of a list.
-
 ```pen
-\([any]) number
+\(xs [any]) number
 ```
 
 #### `First`
 
-It returns the first element of a list. If the list is empty, it returns a given fallback value.
-
 ```pen
-\([any], any) any
+\(xs [any], fallback any) any
 ```
 
 #### `Last`
 
-It returns the last element of a list. If the list is empty, it returns a given fallback value.
-
 ```pen
-\([any], any) any
+\(xs [any], fallback any) any
 ```
 
-## `String` module
+#### `ToNumbers`
 
 ```pen
-import Core'String
+\(xs [any]) [number]
 ```
+
+#### `ToStrings`
+
+```pen
+\(xs [any]) [string]
+```
+
+## `Core'Map` module
+
+### Types
+
+#### `Map`
+
+```pen
+type Map {
+  ...
+}
+```
+
+### Functions
+
+#### `New`
+
+```pen
+\(equalKeys \(any, any) boolean, hashKey \(any) number) Map
+```
+
+#### `Size`
+
+```pen
+\(map Map) number
+```
+
+#### `Get`
+
+```pen
+\(map Map, key any, default any) any
+```
+
+#### `Set`
+
+```pen
+\(map Map, key any, value any) Map
+```
+
+#### `Delete`
+
+```pen
+\(map Map, key any) Map
+```
+
+#### `Merge`
+
+```pen
+\(x Map, y Map) Map
+```
+
+#### `Keys`
+
+```pen
+\(map Map) [any]
+```
+
+#### `Values`
+
+```pen
+\(m Map) [any]
+```
+
+## `Core'Map'NumberMap` module
+
+### Types
+
+#### `Map`
+
+```pen
+type Map {
+  ...
+}
+```
+
+### Functions
+
+#### `New`
+
+```pen
+\() Map
+```
+
+#### `Get`
+
+```pen
+\(map Map, key number, default any) any
+```
+
+#### `Set`
+
+```pen
+\(map Map, key number, value any) Map
+```
+
+#### `Delete`
+
+```pen
+\(map Map, key number) Map
+```
+
+#### `Size`
+
+```pen
+\(map Map) number
+```
+
+#### `Merge`
+
+```pen
+\(x Map, y Map) Map
+```
+
+#### `Keys`
+
+```pen
+\(map Map) [number]
+```
+
+#### `Values`
+
+```pen
+\(map Map) [any]
+```
+
+## `Core'Map'StringMap` module
+
+### Types
+
+#### `Map`
+
+```pen
+type Map {
+  ...
+}
+```
+
+### Functions
+
+#### `New`
+
+```pen
+\() Map
+```
+
+#### `Get`
+
+```pen
+\(map Map, key string, default any) any
+```
+
+#### `Set`
+
+```pen
+\(map Map, key string, value any) Map
+```
+
+#### `Delete`
+
+```pen
+\(map Map, key string) Map
+```
+
+#### `Size`
+
+```pen
+\(map Map) number
+```
+
+#### `Merge`
+
+```pen
+\(x Map, y Map) Map
+```
+
+#### `Keys`
+
+```pen
+\(map Map) [string]
+```
+
+#### `Values`
+
+```pen
+\(map Map) [any]
+```
+
+## `Core'Map'StringMap'stringToStringMap` module
+
+### Types
+
+#### `Map`
+
+```pen
+type Map {
+  ...
+}
+```
+
+### Functions
+
+#### `New`
+
+```pen
+\() Map
+```
+
+#### `Get`
+
+```pen
+\(map Map, key string) string | none
+```
+
+#### `Set`
+
+```pen
+\(map Map, key string, value string) Map
+```
+
+#### `Delete`
+
+```pen
+\(map Map, key string) Map
+```
+
+#### `Size`
+
+```pen
+\(map Map) number
+```
+
+#### `Merge`
+
+```pen
+\(x Map, y Map) Map
+```
+
+#### `Keys`
+
+```pen
+\(map Map) [string]
+```
+
+#### `Values`
+
+```pen
+\(map Map) [string]
+```
+
+## `Core'Map'hamt` module
+
+### Types
+
+#### `Configuration`
+
+```pen
+type Configuration {
+  EqualKeys \(any, any) boolean
+  HashKey \(any) number
+}
+```
+
+#### `Update`
+
+```pen
+type Update {
+  Hamt Hamt
+  Size boolean
+}
+```
+
+#### `Entry`
+
+```pen
+type Entry = keyValue | Hamt | none
+```
+
+#### `Hamt`
+
+```pen
+type Hamt {
+  ...
+}
+```
+
+### Functions
+
+#### `New`
+
+```pen
+\() Hamt
+```
+
+#### `Get`
+
+```pen
+\(hamt Hamt, key any, cfg Configuration) any
+```
+
+#### `Set`
+
+```pen
+\(hamt Hamt, key any, value any, cfg Configuration) Update
+```
+
+#### `Delete`
+
+```pen
+\(hamt Hamt, key any, cfg Configuration) Update
+```
+
+#### `Keys`
+
+```pen
+\(m Hamt) [any]
+```
+
+## `Core'Map'noValue` module
+
+### Types
+
+#### `NoValue`
+
+```pen
+type NoValue {}
+```
+
+### Functions
+
+No functions are defined.
+
+## `Core'Number` module
+
+### Types
+
+No types are defined.
+
+### Functions
+
+#### `String`
+
+```pen
+\(x number) string
+```
+
+#### `Sum`
+
+```pen
+\(ns [number]) number
+```
+
+#### `Remainder`
+
+```pen
+\(x number, y number) number
+```
+
+#### `Power`
+
+```pen
+\(x number, y number) number
+```
+
+#### `SquareRoot`
+
+```pen
+\(x number) number
+```
+
+#### `Sequence`
+
+```pen
+\(n number) [number]
+```
+
+#### `Range`
+
+```pen
+\(min number, max number) [number]
+```
+
+#### `IsNan`
+
+```pen
+\(x number) boolean
+```
+
+#### `Ceil`
+
+```pen
+\(x number) number
+```
+
+#### `Floor`
+
+```pen
+\(x number) number
+```
+
+## `Core'String` module
+
+### Types
+
+No types are defined.
 
 ### Functions
 
 #### `Join`
 
-It joins a list of strings into a string.
-
 ```pen
-\([string]) string
+\(ss [string], sep string) string
 ```
 
 #### `Slice`
 
-It slices a string with start and end indexes.
-
 ```pen
-\(string, number, number) string
+\(s string, start number, end number) string
 ```
+
+## `Core'ffi` module
+
+### Types
+
+No types are defined.
+
+### Functions
+
+No functions are defined.

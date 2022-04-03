@@ -3,6 +3,7 @@
 set -ex
 
 base_directory=$(dirname $0)/..
+document_directory=$base_directory/doc/src/references/standard-packages
 
 generate_package_documentation() {
   (
@@ -11,10 +12,10 @@ generate_package_documentation() {
   )
 }
 
-generate_package_documentation lib/core Core
-generate_package_documentation lib/os Os
-generate_package_documentation lib/os-sync OsSync
-generate_package_documentation lib/test Test
+generate_package_documentation lib/core Core >$document_directory/core.md
+generate_package_documentation lib/os Os >$document_directory/os.md
+generate_package_documentation lib/os-sync OsSync >$document_directory/os-sync.md
+generate_package_documentation lib/test Test >$document_directory/test.md
 
 go run github.com/raviqqe/gherkin2markdown \
   $base_directory/features \
