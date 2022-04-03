@@ -8,6 +8,7 @@ use format::{format_function_signature, format_type_definition};
 use ir::{build::*, *};
 use itertools::Itertools;
 use position::Position;
+use std::collections::BTreeMap;
 
 struct Context {
     comments: Vec<Comment>,
@@ -15,24 +16,37 @@ struct Context {
 }
 
 pub fn generate(
-    path: &ModulePath,
-    module: &Module,
-    comments: &[Comment],
+    package_name: &str,
+    modules: &BTreeMap<ModulePath, (Module, Vec<Comment>)>,
     language: &str,
 ) -> String {
-    markdown::generate(&compile_module(
-        &Context {
-            comments: comments.to_vec(),
-            language: language.into(),
-        },
-        path,
-        module,
-    ))
+    markdown::generate(&compile_package(package_name, modules, language))
+}
+
+fn compile_package(
+    package_name: &str,
+    modules: &BTreeMap<ModulePath, (Module, Vec<Comment>)>,
+    language: &str,
+) -> Section {
+    section(
+        text([code(package_name), normal(" package")]),
+        [],
+        modules.iter().map(|(path, (module, comments))| {
+            compile_module(
+                &Context {
+                    comments: comments.to_vec(),
+                    language: language.into(),
+                },
+                path,
+                module,
+            )
+        }),
+    )
 }
 
 fn compile_module(context: &Context, path: &ModulePath, module: &Module) -> Section {
     section(
-        text([code(path.to_string())]),
+        text([code(path.to_string()), normal(" module")]),
         [],
         [
             compile_type_definitions(context, module.type_definitions()),
@@ -150,7 +164,7 @@ mod tests {
                 ),
                 indoc!(
                     "
-                    # `Foo'Bar`
+                    # `Foo'Bar` module
 
                     ## Types
 
