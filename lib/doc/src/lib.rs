@@ -9,25 +9,39 @@ use ir::{build::*, *};
 use itertools::Itertools;
 use position::Position;
 
-// TODO Inject this.
-const LANGUAGE_TAG: &str = "pen";
-
-pub fn generate(path: &ModulePath, module: &Module, comments: &[Comment]) -> String {
-    markdown::generate(&compile_module(path, module, comments))
+struct Context {
+    comments: Vec<Comment>,
+    language: String,
 }
 
-fn compile_module(path: &ModulePath, module: &Module, comments: &[Comment]) -> Section {
+pub fn generate(
+    path: &ModulePath,
+    module: &Module,
+    comments: &[Comment],
+    language: &str,
+) -> String {
+    markdown::generate(&compile_module(
+        &Context {
+            comments: comments.to_vec(),
+            language: language.into(),
+        },
+        path,
+        module,
+    ))
+}
+
+fn compile_module(context: &Context, path: &ModulePath, module: &Module) -> Section {
     section(
         text([code(path.to_string())]),
         [],
         [
-            compile_type_definitions(module.type_definitions(), comments),
-            compile_definitions(module.definitions(), comments),
+            compile_type_definitions(context, module.type_definitions()),
+            compile_definitions(context, module.definitions()),
         ],
     )
 }
 
-fn compile_type_definitions(definitions: &[TypeDefinition], comments: &[Comment]) -> Section {
+fn compile_type_definitions(context: &Context, definitions: &[TypeDefinition]) -> Section {
     section(
         text([normal("Types")]),
         if definitions.is_empty() {
@@ -37,21 +51,24 @@ fn compile_type_definitions(definitions: &[TypeDefinition], comments: &[Comment]
         },
         definitions
             .iter()
-            .map(|definition| compile_type_definition(definition, comments)),
+            .map(|definition| compile_type_definition(context, definition)),
     )
 }
 
-fn compile_type_definition(definition: &TypeDefinition, comments: &[Comment]) -> Section {
+fn compile_type_definition(context: &Context, definition: &TypeDefinition) -> Section {
     section(
         text([code(definition.name())]),
-        compile_block_comment(definition.position(), comments)
+        compile_block_comment(context, definition.position())
             .into_iter()
-            .chain([code_block(LANGUAGE_TAG, format_type_definition(definition))]),
+            .chain([code_block(
+                &context.language,
+                format_type_definition(definition),
+            )]),
         [],
     )
 }
 
-fn compile_definitions(definitions: &[Definition], comments: &[Comment]) -> Section {
+fn compile_definitions(context: &Context, definitions: &[Definition]) -> Section {
     section(
         text([normal("Functions")]),
         if definitions.is_empty() {
@@ -61,25 +78,26 @@ fn compile_definitions(definitions: &[Definition], comments: &[Comment]) -> Sect
         },
         definitions
             .iter()
-            .map(|definition| compile_definition(definition, comments)),
+            .map(|definition| compile_definition(context, definition)),
     )
 }
 
-fn compile_definition(definition: &Definition, comments: &[Comment]) -> Section {
+fn compile_definition(context: &Context, definition: &Definition) -> Section {
     section(
         text([code(definition.name())]),
-        compile_block_comment(definition.position(), comments)
+        compile_block_comment(context, definition.position())
             .into_iter()
             .chain([code_block(
-                LANGUAGE_TAG,
+                &context.language,
                 format_function_signature(definition.lambda()),
             )]),
         [],
     )
 }
 
-fn compile_block_comment(position: &Position, comments: &[Comment]) -> Option<Paragraph> {
-    let comments = &comments[..comments
+fn compile_block_comment(context: &Context, position: &Position) -> Option<Paragraph> {
+    let comments = &context.comments[..context
+        .comments
         .partition_point(|comment| comment.position().line_number() < position.line_number())];
 
     if comments.is_empty() {
@@ -104,6 +122,13 @@ mod tests {
     use indoc::indoc;
     use position::{test::PositionFake, Position};
 
+    fn create_context(comments: &[Comment]) -> Context {
+        Context {
+            comments: comments.to_vec(),
+            language: "pen".into(),
+        }
+    }
+
     fn line_position(line_number: usize) -> Position {
         Position::new("", line_number, 1, "")
     }
@@ -112,7 +137,7 @@ mod tests {
         use super::*;
 
         fn generate(path: &ModulePath, module: &Module, comments: &[Comment]) -> String {
-            markdown::generate(&compile_module(path, module, comments))
+            markdown::generate(&compile_module(&create_context(comments), path, module))
         }
 
         #[test]
@@ -144,7 +169,10 @@ mod tests {
         use super::*;
 
         fn generate(definition: &TypeDefinition, comments: &[Comment]) -> String {
-            markdown::generate(&compile_type_definition(definition, comments))
+            markdown::generate(&compile_type_definition(
+                &create_context(comments),
+                definition,
+            ))
         }
 
         #[test]
@@ -191,7 +219,7 @@ mod tests {
         use super::*;
 
         fn generate(definition: &Definition, comments: &[Comment]) -> String {
-            markdown::generate(&compile_definition(definition, comments))
+            markdown::generate(&compile_definition(&create_context(comments), definition))
         }
 
         #[test]
@@ -229,7 +257,10 @@ mod tests {
         use super::*;
 
         fn generate(definition: &TypeDefinition, comments: &[Comment]) -> String {
-            markdown::generate(&compile_type_definition(definition, comments))
+            markdown::generate(&compile_type_definition(
+                &create_context(comments),
+                definition,
+            ))
         }
 
         #[test]
