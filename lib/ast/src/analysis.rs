@@ -1,10 +1,17 @@
-use crate::BinaryOperator;
+use crate::{BinaryOperator, RecordDefinition};
 
 pub fn is_name_public(name: &str) -> bool {
     name.chars()
         .next()
         .map(|character| character.is_ascii_uppercase())
         .unwrap_or_default()
+}
+
+pub fn is_record_open(definition: &RecordDefinition) -> bool {
+    definition
+        .fields()
+        .iter()
+        .all(|field| is_name_public(field.name()))
 }
 
 pub fn operator_priority(operator: BinaryOperator) -> usize {

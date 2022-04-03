@@ -156,3 +156,16 @@ pub fn resolve_package_test_information_file(
 pub fn resolve_test_executable_file(output_directory: &FilePath) -> FilePath {
     resolve_test_directory(output_directory).join(&FilePath::new(["test"]))
 }
+
+pub fn resolve_module_path_components(
+    package_directory: &FilePath,
+    module_file_path: &FilePath,
+) -> Vec<String> {
+    module_file_path
+        .relative_to(package_directory)
+        .unwrap()
+        .with_extension("")
+        .components()
+        .map(From::from)
+        .collect()
+}

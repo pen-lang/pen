@@ -57,6 +57,22 @@ pub fn format(module: &Module, comments: &[Comment]) -> String {
     )
 }
 
+pub fn format_type_definition(definition: &TypeDefinition) -> String {
+    ir::format(&compile_type_definition(
+        &mut Context::new(vec![]),
+        definition,
+    ))
+}
+
+pub fn format_function_signature(lambda: &Lambda) -> String {
+    ir::format(&compile_signature(
+        &mut Context::new(vec![]),
+        lambda.arguments(),
+        lambda.result_type(),
+        lambda.position(),
+    ))
+}
+
 fn compile_imports(context: &mut Context, imports: &[&Import]) -> Document {
     sequence(
         imports
@@ -250,17 +266,34 @@ fn compile_type(type_: &Type) -> Document {
 }
 
 fn compile_lambda(context: &mut Context, lambda: &Lambda) -> Document {
-    let single_line_arguments = lambda.arguments().is_empty()
-        || Some(lambda.position().line_number())
-            == lambda
-                .arguments()
-                .get(0)
-                .map(|argument| argument.type_().position().line_number());
+    sequence([
+        compile_signature(
+            context,
+            lambda.arguments(),
+            lambda.result_type(),
+            lambda.position(),
+        ),
+        " ".into(),
+        flatten_if(
+            are_arguments_flat(lambda.arguments(), lambda.position())
+                && lambda.position().line_number()
+                    == lambda.body().expression().position().line_number(),
+            compile_block(context, lambda.body()),
+        ),
+    ])
+}
+
+fn compile_signature(
+    context: &mut Context,
+    arguments: &[Argument],
+    result_type: &Type,
+    position: &Position,
+) -> Document {
+    let flat = are_arguments_flat(arguments, position);
     let separator = sequence([",".into(), line()]);
 
     let arguments = sequence(
-        lambda
-            .arguments()
+        arguments
             .iter()
             .map(|argument| {
                 // TODO Use Argument::position().
@@ -276,26 +309,25 @@ fn compile_lambda(context: &mut Context, lambda: &Lambda) -> Document {
             })
             .intersperse(separator.clone()),
     );
-    let body = compile_block(context, lambda.body());
 
     sequence([
         "\\(".into(),
-        if single_line_arguments {
+        if flat {
             flatten(arguments)
         } else {
             break_(sequence([indent(sequence([line(), arguments])), separator]))
         },
         ") ".into(),
-        compile_type(lambda.result_type()),
-        " ".into(),
-        flatten_if(
-            single_line_arguments
-                && lambda.position().line_number()
-                    == lambda.body().expression().position().line_number()
-                && !is_broken(&body),
-            body,
-        ),
+        compile_type(result_type),
     ])
+}
+
+fn are_arguments_flat(arguments: &[Argument], position: &Position) -> bool {
+    arguments.is_empty()
+        || Some(position.line_number())
+            == arguments
+                .get(0)
+                .map(|argument| argument.type_().position().line_number())
 }
 
 fn compile_block(context: &mut Context, block: &Block) -> Document {
@@ -543,8 +575,7 @@ fn compile_if(context: &mut Context, if_: &If) -> Document {
                 == if_
                     .branches()
                     .get(0)
-                    .map(|branch| branch.block().expression().position().line_number())
-            && !is_broken(&document),
+                    .map(|branch| branch.block().expression().position().line_number()),
         document,
     )
 }
@@ -581,8 +612,7 @@ fn compile_if_type(context: &mut Context, if_: &IfType) -> Document {
                 == if_
                     .branches()
                     .get(0)
-                    .map(|branch| branch.block().expression().position().line_number())
-            && !is_broken(&document),
+                    .map(|branch| branch.block().expression().position().line_number()),
         document,
     )
 }
