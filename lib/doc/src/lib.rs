@@ -27,9 +27,9 @@ fn compile_type_definitions(definitions: &[TypeDefinition], comments: &[Comment]
     section(
         text([normal("Types")]),
         if definitions.is_empty() {
-            vec![text([normal("No types are defined.")]).into()]
+            Some(text([normal("No types are defined.")]).into())
         } else {
-            vec![]
+            None
         },
         definitions
             .iter()
@@ -56,9 +56,9 @@ fn compile_definitions(definitions: &[Definition], comments: &[Comment]) -> Sect
     section(
         text([normal("Functions")]),
         if definitions.is_empty() {
-            vec![text([normal("No functions are defined.")]).into()]
+            Some(text([normal("No functions are defined.")]).into())
         } else {
-            vec![]
+            None
         },
         definitions
             .iter()
