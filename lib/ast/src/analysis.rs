@@ -1,4 +1,4 @@
-use crate::{BinaryOperator, RecordDefinition};
+use crate::{BinaryOperator, ModulePath, RecordDefinition};
 
 pub fn is_name_public(name: &str) -> bool {
     name.chars()
@@ -12,6 +12,15 @@ pub fn is_record_open(definition: &RecordDefinition) -> bool {
         .fields()
         .iter()
         .all(|field| is_name_public(field.name()))
+}
+
+pub fn is_module_path_public(path: &ModulePath) -> bool {
+    match path {
+        ModulePath::External(path) => path.components(),
+        ModulePath::Internal(path) => path.components(),
+    }
+    .iter()
+    .all(|component| is_name_public(component))
 }
 
 pub fn operator_priority(operator: BinaryOperator) -> usize {

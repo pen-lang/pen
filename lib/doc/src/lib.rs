@@ -32,16 +32,19 @@ fn compile_package(
     section(
         text([code(package_name), normal(" package")]),
         [],
-        modules.iter().map(|(path, (module, comments))| {
-            compile_module(
-                &Context {
-                    comments: comments.to_vec(),
-                    language: language.into(),
-                },
-                path,
-                module,
-            )
-        }),
+        modules
+            .iter()
+            .filter(|(path, _)| ast::analysis::is_module_path_public(path))
+            .map(|(path, (module, comments))| {
+                compile_module(
+                    &Context {
+                        comments: comments.to_vec(),
+                        language: language.into(),
+                    },
+                    path,
+                    module,
+                )
+            }),
     )
 }
 
@@ -289,6 +292,29 @@ mod tests {
                     ### Functions
 
                     No functions are defined.
+                    "
+                )
+            );
+        }
+
+        #[test]
+        fn skip_private_module() {
+            assert_eq!(
+                generate_package(
+                    "Foo",
+                    &[(
+                        ExternalModulePath::new("Foo", vec!["bar".into()]).into(),
+                        (
+                            Module::new(vec![], vec![], vec![], vec![], Position::fake()),
+                            Default::default()
+                        )
+                    )]
+                    .into_iter()
+                    .collect(),
+                ),
+                indoc!(
+                    "
+                    # `Foo` package
                     "
                 )
             );
