@@ -13,32 +13,32 @@ import foreign "c" _pen_core_bit_right_shift \(number, number) number
 import foreign "c" _pen_core_bit_to_integer_64 \(number) number
 import foreign "c" _pen_core_bit_from_integer_64 \(number) number
 
-# Calcualte bitwise "and" given two 64-bit integers.
+# Calculate bitwise "and" given two 64-bit integers.
 And = \(x number, y number) number {
   _pen_core_bit_and(x, y)
 }
 
-# Calcualte bitwise "or" given two 64-bit integers.
+# Calculate bitwise "or" given two 64-bit integers.
 Or = \(x number, y number) number {
   _pen_core_bit_or(x, y)
 }
 
-# Calcualte bitwise exclusive-"or" given two 64-bit integers.
+# Calculate bitwise exclusive-"or" given two 64-bit integers.
 Xor = \(x number, y number) number {
   _pen_core_bit_xor(x, y)
 }
 
-# Calcualte bitwise "not" given two 64-bit integers.
+# Calculate bitwise "not" given two 64-bit integers.
 Not = \(x number) number {
   _pen_core_bit_not(x)
 }
 
-# Calcualte unsigned left shift given a 64-bit integer.
+# Calculate unsigned left shift given a 64-bit integer.
 LeftShift = \(x number, n number) number {
   _pen_core_bit_left_shift(x, n)
 }
 
-# Calcualte unsigned right shift given a 64-bit integer.
+# Calculate unsigned right shift given a 64-bit integer.
 RightShift = \(x number, n number) number {
   _pen_core_bit_right_shift(x, n)
 }

@@ -20,14 +20,14 @@ Items are ordered by priority.
 - [x] List comprehension
 - [x] Multiple system packages
 - [x] Map type
-- [ ] Code formatter
-- [ ] Documentation generator
-- [ ] Vector type
+- [x] Code formatter
+- [x] Documentation generator
 - [ ] Serialization / deserialization
 - [ ] Mutable state
   - [ ] Thread safety
 - [ ] IDE/editor support
   - [ ] Language server
+- [ ] Vector type
 - [ ] Process management
 - [ ] Web browser interface
 - [ ] Self-hosting!?
