@@ -4,7 +4,7 @@ mod ir;
 mod markdown;
 
 use ast::*;
-use format::format_function_signature;
+use format::{format_function_signature, format_type_definition};
 use ir::{build::*, *};
 use itertools::Itertools;
 use position::Position;
@@ -42,18 +42,13 @@ fn compile_type_definitions(definitions: &[TypeDefinition], comments: &[Comment]
 }
 
 fn compile_type_definition(definition: &TypeDefinition, comments: &[Comment]) -> Section {
-    match definition {
-        TypeDefinition::RecordDefinition(definition) => section(
-            text([code(definition.name())]),
-            compile_block_comment(definition.position(), comments),
-            [],
-        ),
-        TypeDefinition::TypeAlias(alias) => section(
-            text([code(alias.name())]),
-            compile_block_comment(alias.position(), comments),
-            [],
-        ),
-    }
+    section(
+        text([code(definition.name())]),
+        compile_block_comment(definition.position(), comments)
+            .into_iter()
+            .chain([code_block(LANGUAGE_TAG, format_type_definition(definition))]),
+        [],
+    )
 }
 
 fn compile_definitions(definitions: &[Definition], comments: &[Comment]) -> Section {
@@ -162,6 +157,10 @@ mod tests {
                 indoc!(
                     "
                     # `Foo`
+
+                    ```pen
+                    type Foo {}
+                    ```
                     "
                 )
             );
@@ -178,6 +177,10 @@ mod tests {
                 indoc!(
                     "
                     # `Foo`
+
+                    ```pen
+                    type Foo = none
+                    ```
                     "
                 )
             );
@@ -241,6 +244,10 @@ mod tests {
                     # `Foo`
 
                     foo
+
+                    ```pen
+                    type Foo {}
+                    ```
                     "
                 )
             );
@@ -258,6 +265,10 @@ mod tests {
                     # `Foo`
 
                     foo
+
+                    ```pen
+                    type Foo {}
+                    ```
                     "
                 )
             );
@@ -279,6 +290,10 @@ mod tests {
 
                     foo
                     bar
+
+                    ```pen
+                    type Foo {}
+                    ```
                     "
                 )
             );
@@ -302,6 +317,10 @@ mod tests {
                     foo
 
                     bar
+
+                    ```pen
+                    type Foo {}
+                    ```
                     "
                 )
             );
