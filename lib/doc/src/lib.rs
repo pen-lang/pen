@@ -79,19 +79,19 @@ fn compile_block_comment(position: &Position, comments: &[Comment]) -> Option<Pa
         .partition_point(|comment| comment.position().line_number() < position.line_number())];
 
     if comments.is_empty() {
-        return None;
-    }
-
-    Some(
-        text(
-            comments
-                .iter()
-                .map(|comment| normal(comment.line().trim_end()))
-                .intersperse(normal("\n"))
-                .collect::<Vec<_>>(),
+        None
+    } else {
+        Some(
+            text(
+                comments
+                    .iter()
+                    .map(|comment| normal(comment.line().trim_end()))
+                    .intersperse(normal("\n"))
+                    .collect::<Vec<_>>(),
+            )
+            .into(),
         )
-        .into(),
-    )
+    }
 }
 
 #[cfg(test)]
