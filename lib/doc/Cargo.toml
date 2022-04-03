@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 ast = { path = "../ast" }
+format = { path = "../format" }
 itertools = "0.10"
 position = { path = "../position" }
 

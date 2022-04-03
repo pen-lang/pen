@@ -188,6 +188,7 @@ name = "doc"
 version = "0.1.0"
 dependencies = [
  "ast",
+ "format",
  "indoc",
  "itertools",
  "position",

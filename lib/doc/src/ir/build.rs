@@ -15,8 +15,11 @@ pub fn section(
     }
 }
 
-pub fn code_block(string: impl Into<String>) -> Paragraph {
-    Paragraph::Code(string.into())
+pub fn code_block(language: impl Into<String>, string: impl Into<String>) -> Paragraph {
+    Paragraph::Code {
+        language: language.into(),
+        code: string.into(),
+    }
 }
 
 pub fn text(spans: impl IntoIterator<Item = Span>) -> Text {

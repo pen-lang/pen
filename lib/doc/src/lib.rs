@@ -4,9 +4,13 @@ mod ir;
 mod markdown;
 
 use ast::*;
+use format::format_signature;
 use ir::{build::*, *};
 use itertools::Itertools;
 use position::Position;
+
+// TODO Inject this.
+const LANGUAGE_TAG: &str = "pen";
 
 pub fn generate(path: &ModulePath, module: &Module, comments: &[Comment]) -> String {
     markdown::generate(&compile_module(path, module, comments))
@@ -69,7 +73,12 @@ fn compile_definitions(definitions: &[Definition], comments: &[Comment]) -> Sect
 fn compile_definition(definition: &Definition, comments: &[Comment]) -> Section {
     section(
         text([code(definition.name())]),
-        compile_block_comment(definition.position(), comments),
+        compile_block_comment(definition.position(), comments)
+            .into_iter()
+            .chain([code_block(
+                LANGUAGE_TAG,
+                format_signature(definition.lambda()),
+            )]),
         [],
     )
 }
@@ -203,6 +212,10 @@ mod tests {
                 indoc!(
                     "
                     # `Foo`
+
+                    ```pen
+                    \\() none
+                    ```
                     "
                 )
             );

@@ -8,7 +8,7 @@ pub struct Section {
 #[derive(Clone, Debug, PartialEq)]
 pub enum Paragraph {
     Text(Text),
-    Code(String),
+    Code { language: String, code: String },
 }
 
 #[derive(Clone, Debug, PartialEq)]
