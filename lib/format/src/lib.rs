@@ -57,6 +57,13 @@ pub fn format(module: &Module, comments: &[Comment]) -> String {
     )
 }
 
+pub fn format_type_definition(definition: &TypeDefinition) -> String {
+    ir::format(&compile_type_definition(
+        &mut Context::new(vec![]),
+        definition,
+    ))
+}
+
 pub fn format_function_signature(lambda: &Lambda) -> String {
     ir::format(&compile_signature(
         &mut Context::new(vec![]),
