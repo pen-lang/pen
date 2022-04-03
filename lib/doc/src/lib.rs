@@ -147,15 +147,125 @@ mod tests {
     use indoc::indoc;
     use position::{test::PositionFake, Position};
 
+    const TEST_LANGUAGE: &str = "pen";
+
     fn create_context(comments: &[Comment]) -> Context {
         Context {
             comments: comments.to_vec(),
-            language: "pen".into(),
+            language: TEST_LANGUAGE.into(),
         }
     }
 
     fn line_position(line_number: usize) -> Position {
         Position::new("", line_number, 1, "")
+    }
+
+    mod package {
+        use super::*;
+
+        fn generate_package(
+            package_name: &str,
+            modules: &BTreeMap<ModulePath, (Module, Vec<Comment>)>,
+        ) -> String {
+            generate(package_name, modules, TEST_LANGUAGE)
+        }
+
+        #[test]
+        fn generate_empty() {
+            assert_eq!(
+                generate_package("Foo", &Default::default(),),
+                indoc!(
+                    "
+                    # `Foo` package
+                    "
+                )
+            );
+        }
+
+        #[test]
+        fn generate_module() {
+            assert_eq!(
+                generate_package(
+                    "Foo",
+                    &[(
+                        ExternalModulePath::new("Foo", vec!["Bar".into()]).into(),
+                        (
+                            Module::new(vec![], vec![], vec![], vec![], Position::fake()),
+                            Default::default()
+                        )
+                    )]
+                    .into_iter()
+                    .collect(),
+                ),
+                indoc!(
+                    "
+                    # `Foo` package
+
+                    ## `Foo'Bar` module
+
+                    ### Types
+
+                    No types are defined.
+
+                    ### Functions
+
+                    No functions are defined.
+                    "
+                )
+            );
+        }
+
+        #[test]
+        fn generate_modules() {
+            assert_eq!(
+                generate_package(
+                    "Foo",
+                    &[
+                        (
+                            ExternalModulePath::new("Foo", vec!["Bar".into()]).into(),
+                            (
+                                Module::new(vec![], vec![], vec![], vec![], Position::fake()),
+                                Default::default()
+                            )
+                        ),
+                        (
+                            ExternalModulePath::new("Foo", vec!["Baz".into()]).into(),
+                            (
+                                Module::new(vec![], vec![], vec![], vec![], Position::fake()),
+                                Default::default()
+                            )
+                        )
+                    ]
+                    .into_iter()
+                    .collect(),
+                ),
+                indoc!(
+                    "
+                    # `Foo` package
+
+                    ## `Foo'Bar` module
+
+                    ### Types
+
+                    No types are defined.
+
+                    ### Functions
+
+                    No functions are defined.
+
+                    ## `Foo'Baz` module
+
+                    ### Types
+
+                    No types are defined.
+
+                    ### Functions
+
+                    No functions are defined.
+                    "
+                )
+            );
+        }
     }
 
     mod module {
