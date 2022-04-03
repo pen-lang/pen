@@ -274,16 +274,12 @@ fn compile_lambda(context: &mut Context, lambda: &Lambda) -> Document {
             lambda.position(),
         ),
         " ".into(),
-        {
-            let body = compile_block(context, lambda.body());
-
-            flatten_if(
-                are_arguments_flat(lambda.arguments(), lambda.position())
-                    && lambda.position().line_number()
-                        == lambda.body().expression().position().line_number(),
-                body,
-            )
-        },
+        flatten_if(
+            are_arguments_flat(lambda.arguments(), lambda.position())
+                && lambda.position().line_number()
+                    == lambda.body().expression().position().line_number(),
+            compile_block(context, lambda.body()),
+        ),
     ])
 }
 
