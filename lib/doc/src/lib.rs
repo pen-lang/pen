@@ -157,6 +157,56 @@ mod tests {
                 )
             );
         }
+
+        #[test]
+        fn generate_type_alias() {
+            assert_eq!(
+                generate(
+                    &TypeAlias::new("Foo", types::None::new(Position::fake()), Position::fake())
+                        .into(),
+                    &[]
+                ),
+                indoc!(
+                    "
+                    # `Foo`
+                    "
+                )
+            );
+        }
+    }
+
+    mod definition {
+        use super::*;
+
+        fn generate(definition: &Definition, comments: &[Comment]) -> String {
+            markdown::generate(&compile_definition(definition, comments))
+        }
+
+        #[test]
+        fn generate_definition() {
+            assert_eq!(
+                generate(
+                    &Definition::new(
+                        "Foo",
+                        Lambda::new(
+                            vec![],
+                            types::None::new(Position::fake()),
+                            Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                            Position::fake()
+                        ),
+                        None,
+                        Position::fake()
+                    )
+                    .into(),
+                    &[]
+                ),
+                indoc!(
+                    "
+                    # `Foo`
+                    "
+                )
+            );
+        }
     }
 
     mod comment {
