@@ -4,7 +4,7 @@ mod ir;
 mod markdown;
 
 use ast::*;
-use format::format_signature;
+use format::format_function_signature;
 use ir::{build::*, *};
 use itertools::Itertools;
 use position::Position;
@@ -77,7 +77,7 @@ fn compile_definition(definition: &Definition, comments: &[Comment]) -> Section 
             .into_iter()
             .chain([code_block(
                 LANGUAGE_TAG,
-                format_signature(definition.lambda()),
+                format_function_signature(definition.lambda()),
             )]),
         [],
     )

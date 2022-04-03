@@ -57,7 +57,7 @@ pub fn format(module: &Module, comments: &[Comment]) -> String {
     )
 }
 
-pub fn format_signature(lambda: &Lambda) -> String {
+pub fn format_function_signature(lambda: &Lambda) -> String {
     ir::format(&compile_signature(
         &mut Context::new(vec![]),
         lambda.arguments(),
