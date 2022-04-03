@@ -36,7 +36,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                 .short('v')
                 .long("verbose")
                 .global(true)
-                .help("Uses verbose output"),
+                .help("Use verbose output"),
         )
         .subcommand(
             clap::Command::new("build")
@@ -51,12 +51,12 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                     clap::Arg::new("library")
                         .short('l')
                         .long("library")
-                        .help("Creates a library package instead of an application one"),
+                        .help("Create a library package instead of an application one"),
                 )
                 .arg(
                     clap::Arg::new("directory")
                         .required(true)
-                        .help("Sets a package directory"),
+                        .help("Set a package directory"),
                 ),
         )
         .subcommand(
@@ -66,13 +66,13 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                     clap::Arg::new("check")
                         .long("check")
                         .takes_value(false)
-                        .help("Checks if module files are formatted"),
+                        .help("Check if module files are formatted"),
                 )
                 .arg(
                     clap::Arg::new("stdin")
                         .long("stdin")
                         .takes_value(false)
-                        .help("Formats stdin"),
+                        .help("Format stdin"),
                 ),
         )
         .subcommand(
@@ -82,7 +82,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                     clap::Arg::new("name")
                         .takes_value(true)
                         .required(true)
-                        .help("Sets a package name"),
+                        .help("Set a package name"),
                 ),
         )
         .subcommand(
@@ -296,5 +296,5 @@ fn build_target_triple_argument() -> clap::Arg<'static> {
         .short('t')
         .long("target")
         .takes_value(true)
-        .help("Sets a target triple")
+        .help("Set a target triple")
 }
