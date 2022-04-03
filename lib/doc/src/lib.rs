@@ -110,9 +110,26 @@ fn compile_definition(context: &Context, definition: &Definition) -> Section {
 }
 
 fn compile_block_comment(context: &Context, position: &Position) -> Option<Paragraph> {
-    let comments = &context.comments[..context
+    let end = context
         .comments
-        .partition_point(|comment| comment.position().line_number() < position.line_number())];
+        .partition_point(|comment| comment.position().line_number() < position.line_number());
+    let comments = &context.comments[..end];
+    let start = if comments.is_empty() {
+        0
+    } else {
+        let mut start = comments.len() - 1;
+
+        for index in (1..comments.len()).rev() {
+            if comments[index - 1].position().line_number()
+                == comments[index].position().line_number() - 1
+            {
+                start = index - 1;
+            }
+        }
+
+        start
+    };
+    let comments = &comments[start..];
 
     if comments.is_empty() {
         None
@@ -360,6 +377,30 @@ mod tests {
                     # `Foo`
 
                     foo
+
+                    bar
+
+                    ```pen
+                    type Foo {}
+                    ```
+                    "
+                )
+            );
+        }
+
+        #[test]
+        fn skip_comment() {
+            assert_eq!(
+                generate(
+                    &RecordDefinition::new("Foo", vec![], line_position(4)).into(),
+                    &[
+                        Comment::new("foo", line_position(1)),
+                        Comment::new("bar", line_position(3))
+                    ]
+                ),
+                indoc!(
+                    "
+                    # `Foo`
 
                     bar
 
