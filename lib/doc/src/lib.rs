@@ -117,12 +117,10 @@ fn compile_block_comment(context: &Context, position: &Position) -> Option<Parag
         .rposition(|comment| comment.position().line_number() == position.line_number() - 1)?;
     let comments = &context.comments[..end + 1];
     let comments = &comments[(1..comments.len())
-        .rev()
-        .skip_while(|&index| {
+        .rfind(|&index| {
             comments[index - 1].position().line_number()
-                == comments[index].position().line_number() - 1
+                != comments[index].position().line_number() - 1
         })
-        .next()
         .unwrap_or_default()..];
 
     if comments.is_empty() {

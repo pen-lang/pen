@@ -7,10 +7,7 @@ pub fn section(
 ) -> Section {
     Section {
         title: title.into(),
-        paragraphs: paragraphs
-            .into_iter()
-            .map(|paragraph| paragraph.into())
-            .collect(),
+        paragraphs: paragraphs.into_iter().collect(),
         children: children.into_iter().collect(),
     }
 }

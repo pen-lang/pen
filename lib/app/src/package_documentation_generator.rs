@@ -17,7 +17,7 @@ pub fn generate(
         &module_finder::find(infrastructure, package_directory)?
             .iter()
             .map(|path| -> Result<_, Box<dyn Error>> {
-                let source = infrastructure.file_system.read_to_string(&path)?;
+                let source = infrastructure.file_system.read_to_string(path)?;
 
                 Ok((
                     ast::ExternalModulePath::new(
@@ -26,7 +26,7 @@ pub fn generate(
                     )
                     .into(),
                     {
-                        let path = infrastructure.file_path_displayer.display(&path);
+                        let path = infrastructure.file_path_displayer.display(path);
 
                         (parse(&source, &path)?, parse_comments(&source, &path)?)
                     },
