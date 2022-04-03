@@ -170,8 +170,8 @@ fn compile_first_block_comment(
 
     let comments = &comments[..(0..comments.len() - 1)
         .find(|&index| {
-            comments[index - 1].position().line_number()
-                != comments[index].position().line_number() - 1
+            comments[index].position().line_number() + 1
+                != comments[index + 1].position().line_number()
         })
         .unwrap_or(comments.len())];
 
