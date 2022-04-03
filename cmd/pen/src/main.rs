@@ -81,6 +81,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                 .arg(
                     clap::Arg::new("name")
                         .takes_value(true)
+                        .required(true)
                         .help("Sets a package name"),
                 ),
         )
