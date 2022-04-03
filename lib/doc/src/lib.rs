@@ -513,7 +513,6 @@ mod tests {
 
     mod type_definition {
         use ast::types::RecordField;
-
         use super::*;
 
         fn generate(definition: &TypeDefinition, comments: &[Comment]) -> String {
