@@ -273,8 +273,7 @@ fn compile_lambda(context: &mut Context, lambda: &Lambda) -> Document {
             flatten_if(
                 are_arguments_flat(lambda.arguments(), lambda.position())
                     && lambda.position().line_number()
-                        == lambda.body().expression().position().line_number()
-                    && !is_broken(&body),
+                        == lambda.body().expression().position().line_number(),
                 body,
             )
         },
@@ -573,8 +572,7 @@ fn compile_if(context: &mut Context, if_: &If) -> Document {
                 == if_
                     .branches()
                     .get(0)
-                    .map(|branch| branch.block().expression().position().line_number())
-            && !is_broken(&document),
+                    .map(|branch| branch.block().expression().position().line_number()),
         document,
     )
 }
@@ -611,8 +609,7 @@ fn compile_if_type(context: &mut Context, if_: &IfType) -> Document {
                 == if_
                     .branches()
                     .get(0)
-                    .map(|branch| branch.block().expression().position().line_number())
-            && !is_broken(&document),
+                    .map(|branch| branch.block().expression().position().line_number()),
         document,
     )
 }
