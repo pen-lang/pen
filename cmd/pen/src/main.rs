@@ -9,6 +9,7 @@ mod module_compiler;
 mod module_formatter;
 mod package_builder;
 mod package_creator;
+mod package_documentation_generator;
 mod package_formatter;
 mod package_test_information_compiler;
 mod prelude_module_compiler;
@@ -72,6 +73,15 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                         .long("stdin")
                         .takes_value(false)
                         .help("Formats stdin"),
+                ),
+        )
+        .subcommand(
+            clap::Command::new("document")
+                .about("Generates documentation for a package")
+                .arg(
+                    clap::Arg::new("name")
+                        .takes_value(true)
+                        .help("Sets a package name"),
                 ),
         )
         .subcommand(
@@ -204,6 +214,9 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
             } else {
                 package_formatter::format(matches.is_present("check"))
             }
+        }
+        ("document", matches) => {
+            package_documentation_generator::generate(matches.value_of("name").unwrap())
         }
         ("compile", matches) => module_compiler::compile(
             matches.value_of("source file").unwrap(),

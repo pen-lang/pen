@@ -27,6 +27,7 @@ dependencies = [
  "ast",
  "ast_hir",
  "bincode",
+ "doc",
  "fmm",
  "fmm-llvm",
  "fnv",
