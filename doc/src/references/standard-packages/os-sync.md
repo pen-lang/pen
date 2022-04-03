@@ -548,39 +548,3 @@ type Socket {
 ### Functions
 
 No functions are defined.
-
-## `OsSync'array` module
-
-### Types
-
-#### `Array`
-
-```pen
-type Array {
-  ...
-}
-```
-
-### Functions
-
-#### `ConvertToStrings`
-
-```pen
-\(xs Array) [string]
-```
-
-## `OsSync'normalFile` module
-
-### Types
-
-#### `NormalFile`
-
-```pen
-type NormalFile {
-  ...
-}
-```
-
-### Functions
-
-No functions are defined.
