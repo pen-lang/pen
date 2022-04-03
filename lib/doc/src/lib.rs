@@ -48,12 +48,38 @@ fn compile_package(
 fn compile_module(context: &Context, path: &ModulePath, module: &Module) -> Section {
     section(
         text([code(path.to_string()), normal(" module")]),
-        [],
+        compile_first_block_comment(context, get_first_child_position(module)),
         [
             compile_type_definitions(context, module.type_definitions()),
             compile_definitions(context, module.definitions()),
         ],
     )
+}
+
+fn get_first_child_position(module: &Module) -> Option<&Position> {
+    module
+        .imports()
+        .iter()
+        .map(|import| import.position())
+        .chain(
+            module
+                .foreign_imports()
+                .iter()
+                .map(|import| import.position()),
+        )
+        .chain(
+            module
+                .type_definitions()
+                .iter()
+                .map(|definition| definition.position()),
+        )
+        .chain(
+            module
+                .definitions()
+                .iter()
+                .map(|definition| definition.position()),
+        )
+        .next()
 }
 
 fn compile_type_definitions(context: &Context, definitions: &[TypeDefinition]) -> Section {
@@ -128,20 +154,32 @@ fn compile_definition(context: &Context, definition: &Definition) -> Section {
     )
 }
 
-fn compile_last_block_comment(context: &Context, position: &Position) -> Option<Paragraph> {
-    let end = context
-        .comments
-        .iter()
-        .rposition(|comment| comment.position().line_number() == position.line_number() - 1)?;
-    let comments = &context.comments[..end + 1];
-    let comments = &comments[(1..comments.len())
-        .rfind(|&index| {
+fn compile_first_block_comment(
+    context: &Context,
+    position: Option<&Position>,
+) -> Option<Paragraph> {
+    let comments = &context.comments;
+
+    if comments
+        .get(0)
+        .map(|comment| comment.position().line_number())
+        != Some(1)
+    {
+        return None;
+    }
+
+    let comments = &comments[..(0..comments.len() - 1)
+        .find(|&index| {
             comments[index - 1].position().line_number()
                 != comments[index].position().line_number() - 1
         })
-        .unwrap_or_default()..];
+        .unwrap_or(comments.len())];
 
-    if comments.is_empty() {
+    if comments
+        .last()
+        .map(|comment| comment.position().line_number() + 1)
+        == position.map(|position| position.line_number())
+    {
         None
     } else {
         Some(
@@ -155,6 +193,31 @@ fn compile_last_block_comment(context: &Context, position: &Position) -> Option<
             .into(),
         )
     }
+}
+
+fn compile_last_block_comment(context: &Context, position: &Position) -> Option<Paragraph> {
+    let end = context
+        .comments
+        .iter()
+        .rposition(|comment| comment.position().line_number() == position.line_number() - 1)?;
+    let comments = &context.comments[..end + 1];
+    let comments = &comments[(1..comments.len())
+        .rfind(|&index| {
+            comments[index - 1].position().line_number()
+                != comments[index].position().line_number() - 1
+        })
+        .unwrap_or_default()..];
+
+    Some(
+        text(
+            comments
+                .iter()
+                .map(|comment| normal(comment.line().trim()))
+                .intersperse(normal("\n"))
+                .collect::<Vec<_>>(),
+        )
+        .into(),
+    )
 }
 
 #[cfg(test)]
@@ -306,6 +369,68 @@ mod tests {
                     ## Types
 
                     No types are defined.
+
+                    ## Functions
+
+                    No functions are defined.
+                    "
+                )
+            );
+        }
+
+        #[test]
+        fn generate_module_comment() {
+            assert_eq!(
+                generate(
+                    &ExternalModulePath::new("Foo", vec!["Bar".into()]).into(),
+                    &Module::new(vec![], vec![], vec![], vec![], Position::fake()),
+                    &[Comment::new("foo", line_position(1))]
+                ),
+                indoc!(
+                    "
+                    # `Foo'Bar` module
+
+                    foo
+
+                    ## Types
+
+                    No types are defined.
+
+                    ## Functions
+
+                    No functions are defined.
+                    "
+                )
+            );
+        }
+
+        #[test]
+        fn do_not_duplicate_definition_comment_as_module_comment() {
+            assert_eq!(
+                generate(
+                    &ExternalModulePath::new("Foo", vec!["Bar".into()]).into(),
+                    &Module::new(
+                        vec![],
+                        vec![],
+                        vec![RecordDefinition::new("Foo", vec![], line_position(2)).into()],
+                        vec![],
+                        Position::fake()
+                    ),
+                    &[Comment::new("foo", line_position(1))]
+                ),
+                indoc!(
+                    "
+                    # `Foo'Bar` module
+
+                    ## Types
+
+                    ### `Foo`
+
+                    foo
+
+                    ```pen
+                    type Foo {}
+                    ```
 
                     ## Functions
 
