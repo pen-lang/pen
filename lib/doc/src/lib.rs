@@ -78,7 +78,7 @@ fn compile_type_definitions(context: &Context, definitions: &[TypeDefinition]) -
 fn compile_type_definition(context: &Context, definition: &TypeDefinition) -> Section {
     section(
         text([code(definition.name())]),
-        compile_block_comment(context, definition.position())
+        compile_last_block_comment(context, definition.position())
             .into_iter()
             .chain([code_block(
                 &context.language,
@@ -118,7 +118,7 @@ fn compile_definitions(context: &Context, definitions: &[Definition]) -> Section
 fn compile_definition(context: &Context, definition: &Definition) -> Section {
     section(
         text([code(definition.name())]),
-        compile_block_comment(context, definition.position())
+        compile_last_block_comment(context, definition.position())
             .into_iter()
             .chain([code_block(
                 &context.language,
@@ -128,7 +128,7 @@ fn compile_definition(context: &Context, definition: &Definition) -> Section {
     )
 }
 
-fn compile_block_comment(context: &Context, position: &Position) -> Option<Paragraph> {
+fn compile_last_block_comment(context: &Context, position: &Position) -> Option<Paragraph> {
     let end = context
         .comments
         .iter()
