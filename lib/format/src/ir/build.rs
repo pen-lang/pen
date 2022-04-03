@@ -1,4 +1,4 @@
-use super::Document;
+use super::{utils::is_broken, Document};
 
 pub fn sequence<D: Into<Document>>(iterator: impl IntoIterator<Item = D>) -> Document {
     Document::Sequence(
@@ -22,7 +22,9 @@ pub fn break_(document: impl Into<Document>) -> Document {
 }
 
 pub fn flatten_if(condition: bool, document: impl Into<Document>) -> Document {
-    Document::Break(!condition, document.into().into())
+    let document = document.into();
+
+    Document::Break(!condition || is_broken(&document), document.into())
 }
 
 pub fn indent(document: impl Into<Document>) -> Document {

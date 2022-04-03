@@ -27,6 +27,7 @@ dependencies = [
  "ast",
  "ast_hir",
  "bincode",
+ "doc",
  "fmm",
  "fmm-llvm",
  "fnv",
@@ -182,6 +183,17 @@ name = "diff"
 version = "0.1.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0e25ea47919b1560c4e3b7fe0aaab9becf5b84a10325ddf7db0f0ba5e1026499"
+
+[[package]]
+name = "doc"
+version = "0.1.0"
+dependencies = [
+ "ast",
+ "format",
+ "indoc",
+ "itertools",
+ "position",
+]
 
 [[package]]
 name = "either"

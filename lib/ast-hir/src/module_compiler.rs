@@ -14,10 +14,7 @@ pub fn compile(module: &ast::Module) -> Result<ir::Module, CompileError> {
                     definition.name(),
                     definition.name(),
                     definition.fields().to_vec(),
-                    definition
-                        .fields()
-                        .iter()
-                        .all(|field| ast::analysis::is_name_public(field.name())),
+                    ast::analysis::is_record_open(definition),
                     ast::analysis::is_name_public(definition.name()),
                     false,
                     definition.position().clone(),
