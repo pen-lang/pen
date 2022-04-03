@@ -8,7 +8,7 @@ Feature: Formatting module files
     }
     """
 
-  Scenario: Format a package
+  Scenario: Format module files
     Given a file named "Foo.pen" with:
     """pen
     Foo = \() none {
@@ -24,7 +24,7 @@ Feature: Formatting module files
     }
     """
 
-  Scenario: Format a package
+  Scenario: Check if module files are formatted
     Given a file named "Foo.pen" with:
     """pen
     Foo = \() none {
