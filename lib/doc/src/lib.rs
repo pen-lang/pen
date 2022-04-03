@@ -57,6 +57,11 @@ fn compile_module(context: &Context, path: &ModulePath, module: &Module) -> Sect
 }
 
 fn compile_type_definitions(context: &Context, definitions: &[TypeDefinition]) -> Section {
+    let definitions = definitions
+        .iter()
+        .filter(|definition| ast::analysis::is_name_public(definition.name()))
+        .collect::<Vec<_>>();
+
     section(
         text([normal("Types")]),
         if definitions.is_empty() {
@@ -77,13 +82,26 @@ fn compile_type_definition(context: &Context, definition: &TypeDefinition) -> Se
             .into_iter()
             .chain([code_block(
                 &context.language,
-                format_type_definition(definition),
+                if let TypeDefinition::RecordDefinition(record_definition) = definition {
+                    if ast::analysis::is_record_open(record_definition) {
+                        format_type_definition(definition)
+                    } else {
+                        format!("type {} {{\n  ...\n}}", definition.name())
+                    }
+                } else {
+                    format_type_definition(definition)
+                },
             )]),
         [],
     )
 }
 
 fn compile_definitions(context: &Context, definitions: &[Definition]) -> Section {
+    let definitions = definitions
+        .iter()
+        .filter(|definition| ast::analysis::is_name_public(definition.name()))
+        .collect::<Vec<_>>();
+
     section(
         text([normal("Functions")]),
         if definitions.is_empty() {
@@ -296,9 +314,81 @@ mod tests {
                 )
             );
         }
+
+        #[test]
+        fn hide_private_type_definition() {
+            assert_eq!(
+                generate(
+                    &ExternalModulePath::new("Foo", vec!["Bar".into()]).into(),
+                    &Module::new(
+                        vec![],
+                        vec![],
+                        vec![RecordDefinition::new("foo", vec![], Position::fake()).into()],
+                        vec![],
+                        Position::fake()
+                    ),
+                    &[]
+                ),
+                indoc!(
+                    "
+                    # `Foo'Bar` module
+
+                    ## Types
+
+                    No types are defined.
+
+                    ## Functions
+
+                    No functions are defined.
+                    "
+                )
+            );
+        }
+
+        #[test]
+        fn hide_private_function_definition() {
+            assert_eq!(
+                generate(
+                    &ExternalModulePath::new("Foo", vec!["Bar".into()]).into(),
+                    &Module::new(
+                        vec![],
+                        vec![],
+                        vec![],
+                        vec![Definition::new(
+                            "foo",
+                            Lambda::new(
+                                vec![],
+                                types::None::new(Position::fake()),
+                                Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                                Position::fake()
+                            ),
+                            None,
+                            Position::fake()
+                        )],
+                        Position::fake()
+                    ),
+                    &[]
+                ),
+                indoc!(
+                    "
+                    # `Foo'Bar` module
+
+                    ## Types
+
+                    No types are defined.
+
+                    ## Functions
+
+                    No functions are defined.
+                    "
+                )
+            );
+        }
     }
 
     mod type_definition {
+        use ast::types::RecordField;
+
         use super::*;
 
         fn generate(definition: &TypeDefinition, comments: &[Comment]) -> String {
@@ -309,7 +399,7 @@ mod tests {
         }
 
         #[test]
-        fn generate_record_definition() {
+        fn generate_empty_record_definition() {
             assert_eq!(
                 generate(
                     &RecordDefinition::new("Foo", vec![], Position::fake()).into(),
@@ -321,6 +411,58 @@ mod tests {
 
                     ```pen
                     type Foo {}
+                    ```
+                    "
+                )
+            );
+        }
+
+        #[test]
+        fn generate_open_record_definition() {
+            assert_eq!(
+                generate(
+                    &RecordDefinition::new(
+                        "Foo",
+                        vec![RecordField::new("Bar", types::None::new(Position::fake()))],
+                        Position::fake()
+                    )
+                    .into(),
+                    &[]
+                ),
+                indoc!(
+                    "
+                    # `Foo`
+
+                    ```pen
+                    type Foo {
+                      Bar none
+                    }
+                    ```
+                    "
+                )
+            );
+        }
+
+        #[test]
+        fn generate_closed_record_definition() {
+            assert_eq!(
+                generate(
+                    &RecordDefinition::new(
+                        "Foo",
+                        vec![RecordField::new("bar", types::None::new(Position::fake()))],
+                        Position::fake()
+                    )
+                    .into(),
+                    &[]
+                ),
+                indoc!(
+                    "
+                    # `Foo`
+
+                    ```pen
+                    type Foo {
+                      ...
+                    }
                     ```
                     "
                 )
