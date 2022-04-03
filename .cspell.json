@@ -45,6 +45,7 @@
     "renamer",
     "repr",
     "roadmap",
+    "rposition",
     "rustc",
     "rustup",
     "sccache",
