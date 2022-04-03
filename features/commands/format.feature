@@ -18,7 +18,7 @@ Feature: Formatting module files
     """
     When I successfully run `pen format`
     Then a file named "Foo.pen" should contain exactly:
-    """
+    """pen
     Foo = \() none {
       none
     }
