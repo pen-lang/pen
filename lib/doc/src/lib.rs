@@ -512,8 +512,8 @@ mod tests {
     }
 
     mod type_definition {
-        use ast::types::RecordField;
         use super::*;
+        use ast::types::RecordField;
 
         fn generate(definition: &TypeDefinition, comments: &[Comment]) -> String {
             markdown::generate(&compile_type_definition(
