@@ -55,3 +55,8 @@ export PATH=$PWD/target/release:$PATH
 go run github.com/raviqqe/gherkin2markdown features doc/src/examples
 
 curl -fsSL https://pen-lang.s3.us-west-1.amazonaws.com/icon.svg >doc/src/favicon.svg
+
+(
+  cd doc
+  mdbook build
+)
