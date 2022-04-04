@@ -6,6 +6,7 @@ on:
   pull_request:
 jobs:
   build:
+    # TODO Switch to ubuntu-*. actions-mdbook seems to be broken on Ubuntu right now.
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@main
