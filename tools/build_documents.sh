@@ -4,7 +4,6 @@ set -ex
 
 base_directory=$(dirname $0)/..
 document_directory=$base_directory/doc/src/references/standard-packages
-os_package_description="This package provides types and functions to interact with operating systems."
 
 os_package_description() {
   echo This package provides types and functions to interact with operating systems.
@@ -30,7 +29,7 @@ os_sync_package_description() {
   pen document \
     --name Os \
     --url pen:///os \
-    --description "$os_package_description"
+    --description "$(os_package_description)"
 ) >$document_directory/os.md
 
 (
@@ -38,7 +37,7 @@ os_sync_package_description() {
   pen document \
     --name OsSync \
     --url pen:///os-sync \
-    --description "$os_sync_package_description"
+    --description "$(os_sync_package_description)"
 ) >$document_directory/os-sync.md
 
 (
