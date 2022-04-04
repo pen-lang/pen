@@ -9,6 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@main
+      - run: tools/ci/github/setup.sh
       - run: tools/build_documents.sh
       - uses: peaceiris/actions-mdbook@v1
       - run: cd doc && mdbook build
