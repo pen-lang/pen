@@ -6,8 +6,9 @@ edition = "2021"
 [dependencies]
 ast = { path = "../ast" }
 format = { path = "../format" }
+indoc = "1"
 itertools = "0.10"
 position = { path = "../position" }
 
 [dev-dependencies]
-indoc = "1"
+pretty_assertions = "1"

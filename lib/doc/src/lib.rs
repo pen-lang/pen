@@ -5,46 +5,74 @@ mod markdown;
 
 use ast::*;
 use format::{format_function_signature, format_type_definition};
+use indoc::indoc;
 use ir::{build::*, *};
 use itertools::Itertools;
 use position::Position;
 use std::collections::BTreeMap;
+
+pub struct PackageConfiguration {
+    name: String,
+    url: String,
+    description: String,
+}
 
 struct Context {
     comments: Vec<Comment>,
     language: String,
 }
 
-// TODO Generate package description in some way. Maybe from README.md?
 pub fn generate(
-    package_name: &str,
+    package_configuration: &PackageConfiguration,
     modules: &BTreeMap<ModulePath, (Module, Vec<Comment>)>,
     language: &str,
 ) -> String {
-    markdown::generate(&compile_package(package_name, modules, language))
+    markdown::generate(&compile_package(package_configuration, modules, language))
 }
 
 fn compile_package(
-    package_name: &str,
+    package_configuration: &PackageConfiguration,
     modules: &BTreeMap<ModulePath, (Module, Vec<Comment>)>,
     language: &str,
 ) -> Section {
     section(
-        text([code(package_name), normal(" package")]),
-        [],
-        modules
-            .iter()
-            .filter(|(path, _)| ast::analysis::is_module_path_public(path))
-            .map(|(path, (module, comments))| {
-                compile_module(
-                    &Context {
-                        comments: comments.to_vec(),
-                        language: language.into(),
-                    },
-                    path,
-                    module,
-                )
-            }),
+        text([code(&package_configuration.name), normal(" package")]),
+        [text([normal(&package_configuration.description)]).into()],
+        [section(
+            text([normal("Install")]),
+            [code_block(
+                "json",
+                format!(
+                    indoc!(
+                        "
+                        {{
+                          \"dependencies\": {{
+                            \"{}\": \"{}\"
+                          }} 
+                        }}
+                        "
+                    ),
+                    &package_configuration.name, &package_configuration.url,
+                ),
+            )],
+            [],
+        )]
+        .into_iter()
+        .chain(
+            modules
+                .iter()
+                .filter(|(path, _)| ast::analysis::is_module_path_public(path))
+                .map(|(path, (module, comments))| {
+                    compile_module(
+                        &Context {
+                            comments: comments.to_vec(),
+                            language: language.into(),
+                        },
+                        path,
+                        module,
+                    )
+                }),
+        ),
     )
 }
 
@@ -244,12 +272,21 @@ mod tests {
 
     mod package {
         use super::*;
+        use pretty_assertions::assert_eq;
 
         fn generate_package(
             package_name: &str,
             modules: &BTreeMap<ModulePath, (Module, Vec<Comment>)>,
         ) -> String {
-            generate(package_name, modules, TEST_LANGUAGE)
+            generate(
+                &PackageConfiguration {
+                    name: package_name.into(),
+                    url: "https://foo.com/bar".into(),
+                    description: "This package is cool.".into(),
+                },
+                modules,
+                TEST_LANGUAGE,
+            )
         }
 
         #[test]
@@ -259,6 +296,18 @@ mod tests {
                 indoc!(
                     "
                     # `Foo` package
+
+                    This package is cool.
+
+                    ## Install
+
+                    ```json
+                    {
+                      \"dependencies\": {
+                        \"Foo\": \"https://foo.com/bar\"
+                      } 
+                    }
+                    ```
                     "
                 )
             );
@@ -282,6 +331,18 @@ mod tests {
                 indoc!(
                     "
                     # `Foo` package
+
+                    This package is cool.
+
+                    ## Install
+
+                    ```json
+                    {
+                      \"dependencies\": {
+                        \"Foo\": \"https://foo.com/bar\"
+                      } 
+                    }
+                    ```
 
                     ## `Foo'Bar` module
 
@@ -315,6 +376,18 @@ mod tests {
                 indoc!(
                     "
                     # `Foo` package
+
+                    This package is cool.
+
+                    ## Install
+
+                    ```json
+                    {
+                      \"dependencies\": {
+                        \"Foo\": \"https://foo.com/bar\"
+                      } 
+                    }
+                    ```
                     "
                 )
             );
@@ -347,6 +420,18 @@ mod tests {
                 indoc!(
                     "
                     # `Foo` package
+
+                    This package is cool.
+
+                    ## Install
+
+                    ```json
+                    {
+                      \"dependencies\": {
+                        \"Foo\": \"https://foo.com/bar\"
+                      } 
+                    }
+                    ```
 
                     ## `Foo'Bar` module
 
