@@ -1,7 +1,7 @@
 # This module provides bitwise operations.
 #
 # Most functions defined in this module take arguments of 64-bit integers.
-# They can be converted from and into an integer represented in IEEE-754 of the
+# They can be converted from and into integers represented in IEEE-754 of a
 # `number` type.
 
 import foreign "c" _pen_core_bit_and \(number, number) number
