@@ -12,9 +12,9 @@ use position::Position;
 use std::collections::BTreeMap;
 
 pub struct PackageConfiguration {
-    name: String,
-    url: String,
-    description: String,
+    pub name: String,
+    pub url: String,
+    pub description: String,
 }
 
 struct Context {

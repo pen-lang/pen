@@ -80,9 +80,24 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                 .about("Generates documentation for a package")
                 .arg(
                     clap::Arg::new("name")
+                        .long("name")
                         .takes_value(true)
                         .required(true)
                         .help("Set a package name"),
+                )
+                .arg(
+                    clap::Arg::new("url")
+                        .long("url")
+                        .takes_value(true)
+                        .required(true)
+                        .help("Set a package URL"),
+                )
+                .arg(
+                    clap::Arg::new("description")
+                        .long("description")
+                        .takes_value(true)
+                        .required(true)
+                        .help("Set package description"),
                 ),
         )
         .subcommand(
@@ -216,9 +231,11 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                 package_formatter::format(matches.is_present("check"))
             }
         }
-        ("document", matches) => {
-            package_documentation_generator::generate(matches.value_of("name").unwrap())
-        }
+        ("document", matches) => package_documentation_generator::generate(
+            matches.value_of("name").unwrap(),
+            matches.value_of("url").unwrap(),
+            matches.value_of("description").unwrap(),
+        ),
         ("compile", matches) => module_compiler::compile(
             matches.value_of("source file").unwrap(),
             matches.value_of("dependency file").unwrap(),

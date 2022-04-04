@@ -6,14 +6,16 @@ use crate::{
 use parse::{parse, parse_comments};
 use std::error::Error;
 
+pub type PackageDocumentationConfiguration = doc::PackageConfiguration;
+
 pub fn generate(
     infrastructure: &Infrastructure,
-    package_name: &str,
+    package_configuration: &PackageDocumentationConfiguration,
     package_directory: &FilePath,
     language: &str,
 ) -> Result<String, Box<dyn Error>> {
     Ok(doc::generate(
-        package_name,
+        package_configuration,
         &module_finder::find(infrastructure, package_directory)?
             .iter()
             .map(|path| -> Result<_, Box<dyn Error>> {
@@ -21,7 +23,7 @@ pub fn generate(
 
                 Ok((
                     ast::ExternalModulePath::new(
-                        package_name,
+                        &package_configuration.name,
                         file_path_resolver::resolve_module_path_components(package_directory, path),
                     )
                     .into(),
