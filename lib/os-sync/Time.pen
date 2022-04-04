@@ -1,9 +1,9 @@
-import 'Context { Context }
+import 'Context'context { Context }
 
 Now = \(ctx Context) number {
-  Context'Inner(ctx).GetTime()
+  context'Inner(ctx).GetTime()
 }
 
 Sleep = \(ctx Context, milliseconds number) none {
-  Context'Inner(ctx).Sleep(milliseconds)
+  context'Inner(ctx).Sleep(milliseconds)
 }
