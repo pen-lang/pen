@@ -20,7 +20,7 @@ os_sync_package_description() {
   pen document \
     --name Core \
     --url pen:///core \
-    --description "This package provides common algrorithms and data structures."
+    --description "This package provides common algorithms and data structures."
 ) >$document_directory/core.md
 
 (
