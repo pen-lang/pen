@@ -40,13 +40,13 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         )
         .subcommand(
             clap::Command::new("build")
-                .about("Builds a package")
+                .about("Build a package")
                 .arg(build_target_triple_argument().possible_values(CROSS_COMPILE_TARGETS)),
         )
-        .subcommand(clap::Command::new("test").about("Tests modules in a package"))
+        .subcommand(clap::Command::new("test").about("Test modules in a package"))
         .subcommand(
             clap::Command::new("create")
-                .about("Creates a package")
+                .about("Create a package")
                 .arg(
                     clap::Arg::new("library")
                         .short('l')
@@ -61,7 +61,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         )
         .subcommand(
             clap::Command::new("format")
-                .about("Formats a package")
+                .about("Format a package")
                 .arg(
                     clap::Arg::new("check")
                         .long("check")
@@ -77,7 +77,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         )
         .subcommand(
             clap::Command::new("document")
-                .about("Generates documentation for a package")
+                .about("Generate documentation for a package")
                 .arg(
                     clap::Arg::new("name")
                         .long("name")
@@ -103,7 +103,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         .subcommand(
             clap::Command::new("compile")
                 .hide(true)
-                .about("Compiles a module")
+                .about("Compile a module")
                 .arg(clap::Arg::new("source file").required(true))
                 .arg(clap::Arg::new("dependency file").required(true))
                 .arg(clap::Arg::new("object file").required(true))
@@ -113,7 +113,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         .subcommand(
             clap::Command::new("compile-main")
                 .hide(true)
-                .about("Compiles a main module")
+                .about("Compile a main module")
                 .arg(
                     clap::Arg::new("context interface file")
                         .short('c')
@@ -130,7 +130,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         .subcommand(
             clap::Command::new("compile-prelude")
                 .hide(true)
-                .about("Compiles a prelude module")
+                .about("Compile a prelude module")
                 .arg(clap::Arg::new("source file").required(true))
                 .arg(clap::Arg::new("object file").required(true))
                 .arg(clap::Arg::new("interface file").required(true))
@@ -139,7 +139,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         .subcommand(
             clap::Command::new("compile-test")
                 .hide(true)
-                .about("Compiles a test module")
+                .about("Compile a test module")
                 .arg(clap::Arg::new("source file").required(true))
                 .arg(clap::Arg::new("dependency file").required(true))
                 .arg(clap::Arg::new("object file").required(true))
@@ -149,7 +149,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         .subcommand(
             clap::Command::new("resolve-dependency")
                 .hide(true)
-                .about("Resolves module dependency")
+                .about("Resolve module dependency")
                 .arg(
                     clap::Arg::new("package directory")
                         .short('p')
@@ -180,7 +180,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         .subcommand(
             clap::Command::new("compile-package-test-information")
                 .hide(true)
-                .about("Compiles a package test information")
+                .about("Compile a package test information")
                 .arg(
                     clap::Arg::new("package test information file")
                         .short('o')
@@ -192,7 +192,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         .subcommand(
             clap::Command::new("link-test")
                 .hide(true)
-                .about("Links tests")
+                .about("Link tests")
                 .arg(
                     clap::Arg::new("test file")
                         .short('o')
