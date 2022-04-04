@@ -12,8 +12,7 @@ os_package_description() {
 os_sync_package_description() {
   os_package_description
 
-  echo The package provides similar but synchronous functions differently from
-  echo an '`Os`' package.
+  echo Functions in this package are synchronous differently from an '`Os`' package.
 }
 
 (
