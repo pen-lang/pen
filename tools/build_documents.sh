@@ -4,6 +4,7 @@ set -ex
 
 base_directory=$(dirname $0)/..
 document_directory=$base_directory/doc/src/references/standard-packages
+os_package_description="This package provides types and functions to interact with operating systems."
 
 (
   cd $base_directory/lib/core
@@ -18,7 +19,7 @@ document_directory=$base_directory/doc/src/references/standard-packages
   pen document \
     --name Os \
     --url pen:///os \
-    --description "This package provides operations in operating systems."
+    --description "$os_package_description"
 ) >$document_directory/os.md
 
 (
@@ -26,7 +27,7 @@ document_directory=$base_directory/doc/src/references/standard-packages
   pen document \
     --name OsSync \
     --url pen:///os-sync \
-    --description 'This package provides operations in operating systems. The package provides similar but synchronous functions differently from an `Os` package.'
+    --description "$os_package_description The package provides similar but synchronous functions differently from an \`Os\` package."
 ) >$document_directory/os-sync.md
 
 (
