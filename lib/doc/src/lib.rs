@@ -171,10 +171,10 @@ fn compile_first_block_comment(
         return None;
     }
 
-    let comments = &comments[..(0..comments.len() - 1)
+    let comments = &comments[..(1..comments.len())
         .find(|&index| {
-            comments[index].position().line_number() + 1
-                != comments[index + 1].position().line_number()
+            comments[index - 1].position().line_number() + 1
+                != comments[index].position().line_number()
         })
         .unwrap_or(comments.len())];
 
@@ -411,6 +411,35 @@ mod tests {
                     &ExternalModulePath::new("Foo", vec!["Bar".into()]).into(),
                     &Module::new(vec![], vec![], vec![], vec![], Position::fake()),
                     &[Comment::new("foo", line_position(1))]
+                ),
+                indoc!(
+                    "
+                    # `Foo'Bar` module
+
+                    foo
+
+                    ## Types
+
+                    No types are defined.
+
+                    ## Functions
+
+                    No functions are defined.
+                    "
+                )
+            );
+        }
+
+        #[test]
+        fn skip_module_comment_in_next_block() {
+            assert_eq!(
+                generate(
+                    &ExternalModulePath::new("Foo", vec!["Bar".into()]).into(),
+                    &Module::new(vec![], vec![], vec![], vec![], Position::fake()),
+                    &[
+                        Comment::new("foo", line_position(1)),
+                        Comment::new("bar", line_position(3))
+                    ]
                 ),
                 indoc!(
                     "
