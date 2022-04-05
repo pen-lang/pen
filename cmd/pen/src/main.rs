@@ -1,6 +1,7 @@
 mod application_configuration;
 mod compile_configuration;
 mod dependency_resolver;
+mod documentation_configuration;
 mod file_path_configuration;
 mod infrastructure;
 mod main_module_compiler;
