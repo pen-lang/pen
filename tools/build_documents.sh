@@ -5,7 +5,7 @@ set -ex
 document_directory=doc/src/references/standard-packages
 
 os_package_description() {
-  echo This package provides types and functions to interact with operating systems.
+  echo This package provides an interface for operating systems.
 }
 
 os_sync_package_description() {
