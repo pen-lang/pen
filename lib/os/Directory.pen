@@ -1,7 +1,7 @@
 import 'Context'context { Context }
 import 'array
 
-# Read a directory and returns file paths it contains.
+# Read a directory and return file paths it contains.
 Read = \(ctx Context, path string) [string] | error {
   r = context'Inner(ctx).ReadDirectory(path)
 
