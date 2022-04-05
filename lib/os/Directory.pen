@@ -1,6 +1,7 @@
 import 'Context'context { Context }
 import 'array
 
+# Read a directory and returns file paths it contains.
 Read = \(ctx Context, path string) [string] | error {
   r = context'Inner(ctx).ReadDirectory(path)
 
@@ -11,6 +12,7 @@ Read = \(ctx Context, path string) [string] | error {
   }
 }
 
+# Create a directory at a path.
 Create = \(ctx Context, path string) none | error {
   r = context'Inner(ctx).CreateDirectory(path)
 
@@ -21,6 +23,7 @@ Create = \(ctx Context, path string) none | error {
   }
 }
 
+# Remove a directory at a path.
 Remove = \(ctx Context, path string) none | error {
   r = context'Inner(ctx).RemoveDirectory(path)
 

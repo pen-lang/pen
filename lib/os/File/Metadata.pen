@@ -1,3 +1,4 @@
+# `Metadata` is file metadata.
 type Metadata {
   Size number
 }
