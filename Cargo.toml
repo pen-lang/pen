@@ -31,4 +31,5 @@ exclude = [
 
 [profile.release]
 lto = true
-strip = true
+# TODO Enable this when Dependabot on GitHub supports it.
+# strip = true
