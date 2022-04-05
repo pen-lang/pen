@@ -89,7 +89,7 @@ ReadLimit = \(ctx Context, file File, limit number) string | error {
   }
 }
 
-# Write data into a file.
+# Write data to a file.
 Write = \(ctx Context, file File, data string) number | error {
   inner = context'Inner(ctx)
 
