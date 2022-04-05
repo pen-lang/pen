@@ -12,7 +12,7 @@ Read = \(ctx Context, path string) [string] | error {
   }
 }
 
-# Create a directory at a path.
+# Create a directory.
 Create = \(ctx Context, path string) none | error {
   r = context'Inner(ctx).CreateDirectory(path)
 
@@ -23,7 +23,7 @@ Create = \(ctx Context, path string) none | error {
   }
 }
 
-# Remove a directory at a path.
+# Remove a directory.
 Remove = \(ctx Context, path string) none | error {
   r = context'Inner(ctx).RemoveDirectory(path)
 
