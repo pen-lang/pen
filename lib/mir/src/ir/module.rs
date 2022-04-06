@@ -1,6 +1,6 @@
 use super::{
-    declaration::FunctionDeclaration, definition::FunctionDefinition,
     foreign_declaration::ForeignDeclaration, foreign_definition::ForeignDefinition,
+    function_declaration::FunctionDeclaration, function_definition::FunctionDefinition,
     type_definition::TypeDefinition,
 };
 

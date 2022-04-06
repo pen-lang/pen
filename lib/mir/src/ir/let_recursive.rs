@@ -1,4 +1,4 @@
-use super::{definition::FunctionDefinition, expression::Expression};
+use super::{expression::Expression, function_definition::FunctionDefinition};
 use std::sync::Arc;
 
 // Function definitions in let-recursive expressions are recursive for the
