@@ -73,7 +73,7 @@ fn compile_imports(module: &ir::Module, module_interfaces: &[&interface::Module]
             .iter()
             .flat_map(|interface| interface.declarations())
             .map(|declaration| {
-                ir::Declaration::new(
+                ir::FunctionDeclaration::new(
                     declaration.name(),
                     declaration.type_().clone(),
                     declaration.position().clone(),
@@ -250,7 +250,7 @@ mod tests {
                 &[]
             ),
             ir::Module::empty()
-                .set_declarations(vec![ir::Declaration::new(
+                .set_declarations(vec![ir::FunctionDeclaration::new(
                     "RealBar",
                     types::Function::new(
                         vec![],
@@ -656,7 +656,7 @@ mod tests {
                     &[]
                 ),
                 ir::Module::empty()
-                    .set_declarations(vec![ir::Declaration::new(
+                    .set_declarations(vec![ir::FunctionDeclaration::new(
                         "RealBar",
                         types::Function::new(
                             vec![],

@@ -97,11 +97,11 @@ fn compile_equal_function_definition(type_definition: &TypeDefinition) -> Functi
     )
 }
 
-fn compile_equal_function_declaration(type_definition: &TypeDefinition) -> Declaration {
+fn compile_equal_function_declaration(type_definition: &TypeDefinition) -> FunctionDeclaration {
     let position = type_definition.position();
     let record_type = types::Record::new(type_definition.name(), position.clone());
 
-    Declaration::new(
+    FunctionDeclaration::new(
         record_type_information_compiler::compile_equal_function_name(&record_type),
         types::Function::new(
             vec![record_type.clone().into(), record_type.clone().into()],
@@ -228,7 +228,7 @@ mod tests {
             transform_module(&Module::empty().set_type_definitions(vec![type_definition.clone()])),
             Ok(Module::empty()
                 .set_type_definitions(vec![type_definition])
-                .set_declarations(vec![Declaration::new(
+                .set_declarations(vec![FunctionDeclaration::new(
                     "foo.$equal",
                     types::Function::new(
                         vec![record_type.clone().into(), record_type.into()],

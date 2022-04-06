@@ -61,7 +61,7 @@ pub fn compile_closure_content(
 
 pub fn compile_drop_function(
     context: &Context,
-    definition: &mir::ir::Definition,
+    definition: &mir::ir::FunctionDefinition,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     compile_drop_function_with_builder(
         context,
@@ -87,7 +87,7 @@ pub fn compile_drop_function(
 
 pub fn compile_normal_thunk_drop_function(
     context: &Context,
-    definition: &mir::ir::Definition,
+    definition: &mir::ir::FunctionDefinition,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     compile_drop_function_with_builder(
         context,

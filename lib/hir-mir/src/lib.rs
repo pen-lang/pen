@@ -114,8 +114,8 @@ mod tests {
     use once_cell::sync::Lazy;
     use position::{test::PositionFake, Position};
 
-    static COMBINE_HASH_FUNCTION_DECLARATION: Lazy<Declaration> = Lazy::new(|| {
-        Declaration::new(
+    static COMBINE_HASH_FUNCTION_DECLARATION: Lazy<FunctionDeclaration> = Lazy::new(|| {
+        FunctionDeclaration::new(
             &HASH_CONFIGURATION.combine_function_name,
             types::Function::new(
                 vec![

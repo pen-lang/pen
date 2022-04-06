@@ -102,7 +102,7 @@ pub fn compile_unboxed_record(
 }
 
 pub fn compile_sized_closure(
-    definition: &mir::ir::Definition,
+    definition: &mir::ir::FunctionDefinition,
     types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> fmm::types::Record {
     compile_raw_closure(
@@ -112,7 +112,7 @@ pub fn compile_sized_closure(
 }
 
 pub fn compile_closure_payload(
-    definition: &mir::ir::Definition,
+    definition: &mir::ir::FunctionDefinition,
     types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> fmm::types::Type {
     if definition.is_thunk() {
@@ -123,7 +123,7 @@ pub fn compile_closure_payload(
 }
 
 pub fn compile_thunk_payload(
-    definition: &mir::ir::Definition,
+    definition: &mir::ir::FunctionDefinition,
     types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> fmm::types::Union {
     fmm::types::Union::new(vec![
@@ -154,7 +154,7 @@ fn compile_raw_closure(
 }
 
 pub fn compile_environment(
-    definition: &mir::ir::Definition,
+    definition: &mir::ir::FunctionDefinition,
     types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> fmm::types::Record {
     fmm::types::Record::new(

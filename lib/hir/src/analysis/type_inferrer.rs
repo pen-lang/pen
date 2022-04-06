@@ -641,7 +641,7 @@ mod tests {
 
     #[test]
     fn infer_let_with_call() {
-        let declaration = Declaration::new(
+        let declaration = FunctionDeclaration::new(
             "f",
             types::Function::new(vec![], types::None::new(Position::fake()), Position::fake()),
             Position::fake(),

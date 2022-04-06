@@ -1,4 +1,4 @@
-use super::{definition::Definition, expression::Expression};
+use super::{definition::FunctionDefinition, expression::Expression};
 use std::sync::Arc;
 
 // Function definitions in let-recursive expressions are recursive for the
@@ -18,19 +18,19 @@ use std::sync::Arc;
 //   - e.g. list comprehension
 #[derive(Clone, Debug, PartialEq)]
 pub struct LetRecursive {
-    definition: Arc<Definition>,
+    definition: Arc<FunctionDefinition>,
     expression: Arc<Expression>,
 }
 
 impl LetRecursive {
-    pub fn new(definition: Definition, expression: impl Into<Expression>) -> Self {
+    pub fn new(definition: FunctionDefinition, expression: impl Into<Expression>) -> Self {
         Self {
             definition: definition.into(),
             expression: Arc::new(expression.into()),
         }
     }
 
-    pub fn definition(&self) -> &Definition {
+    pub fn definition(&self) -> &FunctionDefinition {
         &self.definition
     }
 

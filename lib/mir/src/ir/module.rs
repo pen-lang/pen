@@ -1,6 +1,7 @@
 use super::{
-    declaration::Declaration, definition::Definition, foreign_declaration::ForeignDeclaration,
-    foreign_definition::ForeignDefinition, type_definition::TypeDefinition,
+    declaration::FunctionDeclaration, definition::FunctionDefinition,
+    foreign_declaration::ForeignDeclaration, foreign_definition::ForeignDefinition,
+    type_definition::TypeDefinition,
 };
 
 #[derive(Clone, Debug, PartialEq)]
@@ -8,8 +9,8 @@ pub struct Module {
     type_definitions: Vec<TypeDefinition>,
     foreign_declarations: Vec<ForeignDeclaration>,
     foreign_definitions: Vec<ForeignDefinition>,
-    declarations: Vec<Declaration>,
-    definitions: Vec<Definition>,
+    function_declarations: Vec<FunctionDeclaration>,
+    function_definitions: Vec<FunctionDefinition>,
 }
 
 impl Module {
@@ -17,15 +18,15 @@ impl Module {
         type_definitions: Vec<TypeDefinition>,
         foreign_declarations: Vec<ForeignDeclaration>,
         foreign_definitions: Vec<ForeignDefinition>,
-        declarations: Vec<Declaration>,
-        definitions: Vec<Definition>,
+        function_declarations: Vec<FunctionDeclaration>,
+        function_definitions: Vec<FunctionDefinition>,
     ) -> Self {
         Self {
             type_definitions,
             foreign_declarations,
             foreign_definitions,
-            declarations,
-            definitions,
+            function_declarations,
+            function_definitions,
         }
     }
 
@@ -41,11 +42,11 @@ impl Module {
         &self.foreign_definitions
     }
 
-    pub fn declarations(&self) -> &[Declaration] {
-        &self.declarations
+    pub fn function_declarations(&self) -> &[FunctionDeclaration] {
+        &self.function_declarations
     }
 
-    pub fn definitions(&self) -> &[Definition] {
-        &self.definitions
+    pub fn function_definitions(&self) -> &[FunctionDefinition] {
+        &self.function_definitions
     }
 }

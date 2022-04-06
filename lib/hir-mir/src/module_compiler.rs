@@ -88,10 +88,10 @@ fn compile_type_definition(
 }
 
 fn compile_declaration(
-    declaration: &Declaration,
+    declaration: &FunctionDeclaration,
     context: &CompileContext,
-) -> Result<mir::ir::Declaration, CompileError> {
-    Ok(mir::ir::Declaration::new(
+) -> Result<mir::ir::FunctionDeclaration, CompileError> {
+    Ok(mir::ir::FunctionDeclaration::new(
         declaration.name(),
         type_compiler::compile_function(declaration.type_(), context)?,
     ))
@@ -100,14 +100,14 @@ fn compile_declaration(
 fn compile_function_definition(
     definition: &FunctionDefinition,
     context: &CompileContext,
-) -> Result<mir::ir::Definition, CompileError> {
+) -> Result<mir::ir::FunctionDefinition, CompileError> {
     let body = expression_compiler::compile(definition.lambda().body(), context)?;
     let result_type = type_compiler::compile(context, definition.lambda().result_type())?;
 
     Ok(if definition.lambda().arguments().is_empty() {
-        mir::ir::Definition::thunk(definition.name(), body, result_type)
+        mir::ir::FunctionDefinition::thunk(definition.name(), body, result_type)
     } else {
-        mir::ir::Definition::new(
+        mir::ir::FunctionDefinition::new(
             definition.name(),
             definition
                 .lambda()
@@ -171,7 +171,7 @@ mod tests {
                     mir::ir::CallingConvention::Source
                 )],
                 vec![],
-                vec![mir::ir::Definition::new(
+                vec![mir::ir::FunctionDefinition::new(
                     "foo",
                     vec![mir::ir::Argument::new("x", mir::types::Type::None)],
                     mir::ir::Expression::None,
@@ -208,7 +208,7 @@ mod tests {
                     mir::ir::CallingConvention::Target
                 )],
                 vec![],
-                vec![mir::ir::Definition::new(
+                vec![mir::ir::FunctionDefinition::new(
                     "foo",
                     vec![mir::ir::Argument::new("x", mir::types::Type::None)],
                     mir::ir::Expression::None,
