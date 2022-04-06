@@ -2,7 +2,7 @@ import 'Context'context { Context }
 import 'Udp'Datagram { Datagram }
 import 'Udp'Socket { Socket }
 
-# Bind a socket with an address.
+# Bind a socket with a server address.
 Bind = \(ctx Context, address string) Socket | error {
   r = context'Inner(ctx).UdpBind(address)
 
@@ -24,7 +24,7 @@ Connect = \(ctx Context, s Socket, address string) none | error {
   }
 }
 
-# Receive a datagram from an address connected already.
+# Receive a datagram from a connected address.
 Receive = \(ctx Context, s Socket) string | error {
   r = context'Inner(ctx).UdpReceive(s)
 
@@ -46,7 +46,7 @@ ReceiveFrom = \(ctx Context, s Socket) Datagram | error {
   }
 }
 
-# Send a datagram to an address connected already.
+# Send a datagram to a connected address.
 Send = \(ctx Context, s Socket, data string) number | error {
   r = context'Inner(ctx).UdpSend(s, data)
 

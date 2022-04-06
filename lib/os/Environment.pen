@@ -6,7 +6,7 @@ Arguments = \(ctx Context) [string] {
   array'ConvertToStrings(context'Inner(ctx).GetArguments())
 }
 
-# Get an enviroment variable.
+# Get an environment variable.
 Variable = \(ctx Context, name string) string | error {
   r = context'Inner(ctx).GetEnvironmentVariable(name)
 
