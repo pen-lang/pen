@@ -299,7 +299,7 @@ mod tests {
                     )]),
                 &[ImportedModule::new(
                     interface::Module::new(
-                        vec![interface::RecordDefinition::new(
+                        vec![interface::TypeDefinition::new(
                             "RealBar",
                             "Bar",
                             vec![],
@@ -454,7 +454,7 @@ mod tests {
                     .set_definitions(vec![definition.clone()]),
                 &[ImportedModule::new(
                     interface::Module::new(
-                        vec![interface::RecordDefinition::new(
+                        vec![interface::TypeDefinition::new(
                             "RealBar",
                             "Bar",
                             vec![],
@@ -549,7 +549,7 @@ mod tests {
     #[test]
     fn prefer_loose_definition_of_same_type_definition() {
         let create_type_definition = |public| {
-            interface::RecordDefinition::new("Foo", "", vec![], false, public, Position::fake())
+            interface::TypeDefinition::new("Foo", "", vec![], false, public, Position::fake())
         };
 
         assert_eq!(
@@ -705,7 +705,7 @@ mod tests {
                         )]),
                     &[ImportedModule::new(
                         interface::Module::new(
-                            vec![interface::RecordDefinition::new(
+                            vec![interface::TypeDefinition::new(
                                 "RealBar",
                                 "Bar",
                                 vec![],

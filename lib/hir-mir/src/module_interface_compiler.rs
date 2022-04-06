@@ -7,7 +7,7 @@ pub fn compile(module: &ir::Module) -> Result<interface::Module, CompileError> {
             .type_definitions()
             .iter()
             .map(|definition| {
-                interface::RecordDefinition::new(
+                interface::TypeDefinition::new(
                     definition.name(),
                     definition.original_name(),
                     definition.fields().to_vec(),
