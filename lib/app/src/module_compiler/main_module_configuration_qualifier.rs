@@ -22,16 +22,30 @@ fn qualify_context(
     configuration: &MainModuleConfiguration,
 ) -> Result<hir_mir::ContextConfiguration, Box<dyn Error>> {
     Ok(hir_mir::ContextConfiguration {
-        // TODO Support type aliases too.
         context_type_name: context_interface
             .type_definitions()
             .iter()
-            .find(|definition| {
-                definition.original_name() == configuration.system_context_type_name
+            .find_map(|definition| {
+                if definition.original_name() == configuration.system_context_type_name
                     && definition.is_public()
+                {
+                    Some(definition.name())
+                } else {
+                    None
+                }
             })
+            .into_iter()
+            .chain(context_interface.type_aliases().iter().find_map(|alias| {
+                if alias.original_name() == configuration.system_context_type_name
+                    && alias.is_public()
+                {
+                    Some(alias.name())
+                } else {
+                    None
+                }
+            }))
+            .next()
             .ok_or(ApplicationError::ContextTypeNotFound)?
-            .name()
             .into(),
         new_context_function_name: context_interface
             .declarations()
