@@ -118,7 +118,10 @@ fn transform_foreign_declaration(
     )
 }
 
-fn transform_definition(definition: &FunctionDefinition, transform: &impl Fn(&Type) -> Type) -> FunctionDefinition {
+fn transform_definition(
+    definition: &FunctionDefinition,
+    transform: &impl Fn(&Type) -> Type,
+) -> FunctionDefinition {
     FunctionDefinition::new(
         definition.name(),
         definition.original_name(),
