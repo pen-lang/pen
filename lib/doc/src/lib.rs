@@ -5,43 +5,82 @@ mod markdown;
 
 use ast::*;
 use format::{format_function_signature, format_type_definition};
+use indoc::indoc;
 use ir::{build::*, *};
 use itertools::Itertools;
 use position::Position;
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashSet};
 
-struct Context {
-    comments: Vec<Comment>,
-    language: String,
+#[derive(Clone, Debug)]
+pub struct Package {
+    pub name: String,
+    pub url: String,
+    pub description: String,
 }
 
-// TODO Generate package description in some way. Maybe from README.md?
+#[derive(Clone, Debug)]
+pub struct Configuration {
+    pub language: String,
+    pub private_names: HashSet<String>,
+}
+
+#[derive(Clone, Debug)]
+struct Context {
+    comments: Vec<Comment>,
+    configuration: Configuration,
+}
+
 pub fn generate(
-    package_name: &str,
+    package: &Package,
     modules: &BTreeMap<ModulePath, (Module, Vec<Comment>)>,
-    language: &str,
+    configuration: &Configuration,
 ) -> String {
-    markdown::generate(&compile_package(package_name, modules, language))
+    markdown::generate(&compile_package(package, modules, configuration))
 }
 
 fn compile_package(
-    package_name: &str,
+    package: &Package,
     modules: &BTreeMap<ModulePath, (Module, Vec<Comment>)>,
-    language: &str,
+    configuration: &Configuration,
 ) -> Section {
     section(
-        text([code(package_name), normal(" package")]),
-        [],
-        modules.iter().map(|(path, (module, comments))| {
-            compile_module(
-                &Context {
-                    comments: comments.to_vec(),
-                    language: language.into(),
-                },
-                path,
-                module,
-            )
-        }),
+        text([code(&package.name), normal(" package")]),
+        [text([normal(&package.description)]).into()],
+        [section(
+            text([normal("Install")]),
+            [code_block(
+                "json",
+                format!(
+                    indoc!(
+                        "
+                        {{
+                          \"dependencies\": {{
+                            \"{}\": \"{}\"
+                          }} 
+                        }}
+                        "
+                    ),
+                    &package.name, &package.url,
+                ),
+            )],
+            [],
+        )]
+        .into_iter()
+        .chain(
+            modules
+                .iter()
+                .filter(|(path, _)| ast::analysis::is_module_path_public(path))
+                .map(|(path, (module, comments))| {
+                    compile_module(
+                        &Context {
+                            comments: comments.to_vec(),
+                            configuration: configuration.clone(),
+                        },
+                        path,
+                        module,
+                    )
+                }),
+        ),
     )
 }
 
@@ -85,7 +124,13 @@ fn get_first_child_position(module: &Module) -> Option<&Position> {
 fn compile_type_definitions(context: &Context, definitions: &[TypeDefinition]) -> Section {
     let definitions = definitions
         .iter()
-        .filter(|definition| ast::analysis::is_name_public(definition.name()))
+        .filter(|definition| {
+            ast::analysis::is_name_public(definition.name())
+                && !context
+                    .configuration
+                    .private_names
+                    .contains(definition.name())
+        })
         .collect::<Vec<_>>();
 
     section(
@@ -107,7 +152,7 @@ fn compile_type_definition(context: &Context, definition: &TypeDefinition) -> Se
         compile_last_block_comment(context, definition.position())
             .into_iter()
             .chain([code_block(
-                &context.language,
+                &context.configuration.language,
                 if let TypeDefinition::RecordDefinition(record_definition) = definition {
                     if ast::analysis::is_record_open(record_definition) {
                         format_type_definition(definition)
@@ -125,7 +170,13 @@ fn compile_type_definition(context: &Context, definition: &TypeDefinition) -> Se
 fn compile_definitions(context: &Context, definitions: &[Definition]) -> Section {
     let definitions = definitions
         .iter()
-        .filter(|definition| ast::analysis::is_name_public(definition.name()))
+        .filter(|definition| {
+            ast::analysis::is_name_public(definition.name())
+                && !context
+                    .configuration
+                    .private_names
+                    .contains(definition.name())
+        })
         .collect::<Vec<_>>();
 
     section(
@@ -147,7 +198,7 @@ fn compile_definition(context: &Context, definition: &Definition) -> Section {
         compile_last_block_comment(context, definition.position())
             .into_iter()
             .chain([code_block(
-                &context.language,
+                &context.configuration.language,
                 format_function_signature(definition.lambda()),
             )]),
         [],
@@ -168,10 +219,10 @@ fn compile_first_block_comment(
         return None;
     }
 
-    let comments = &comments[..(0..comments.len() - 1)
+    let comments = &comments[..(1..comments.len())
         .find(|&index| {
-            comments[index - 1].position().line_number()
-                != comments[index].position().line_number() - 1
+            comments[index - 1].position().line_number() + 1
+                != comments[index].position().line_number()
         })
         .unwrap_or(comments.len())];
 
@@ -228,10 +279,17 @@ mod tests {
 
     const TEST_LANGUAGE: &str = "pen";
 
+    fn create_configuration() -> Configuration {
+        Configuration {
+            language: TEST_LANGUAGE.into(),
+            private_names: Default::default(),
+        }
+    }
+
     fn create_context(comments: &[Comment]) -> Context {
         Context {
             comments: comments.to_vec(),
-            language: TEST_LANGUAGE.into(),
+            configuration: create_configuration(),
         }
     }
 
@@ -241,12 +299,21 @@ mod tests {
 
     mod package {
         use super::*;
+        use pretty_assertions::assert_eq;
 
         fn generate_package(
             package_name: &str,
             modules: &BTreeMap<ModulePath, (Module, Vec<Comment>)>,
         ) -> String {
-            generate(package_name, modules, TEST_LANGUAGE)
+            generate(
+                &Package {
+                    name: package_name.into(),
+                    url: "https://foo.com/bar".into(),
+                    description: "This package is cool.".into(),
+                },
+                modules,
+                &create_configuration(),
+            )
         }
 
         #[test]
@@ -256,6 +323,18 @@ mod tests {
                 indoc!(
                     "
                     # `Foo` package
+
+                    This package is cool.
+
+                    ## Install
+
+                    ```json
+                    {
+                      \"dependencies\": {
+                        \"Foo\": \"https://foo.com/bar\"
+                      } 
+                    }
+                    ```
                     "
                 )
             );
@@ -280,6 +359,18 @@ mod tests {
                     "
                     # `Foo` package
 
+                    This package is cool.
+
+                    ## Install
+
+                    ```json
+                    {
+                      \"dependencies\": {
+                        \"Foo\": \"https://foo.com/bar\"
+                      } 
+                    }
+                    ```
+
                     ## `Foo'Bar` module
 
                     ### Types
@@ -289,6 +380,41 @@ mod tests {
                     ### Functions
 
                     No functions are defined.
+                    "
+                )
+            );
+        }
+
+        #[test]
+        fn skip_private_module() {
+            assert_eq!(
+                generate_package(
+                    "Foo",
+                    &[(
+                        ExternalModulePath::new("Foo", vec!["bar".into()]).into(),
+                        (
+                            Module::new(vec![], vec![], vec![], vec![], Position::fake()),
+                            Default::default()
+                        )
+                    )]
+                    .into_iter()
+                    .collect(),
+                ),
+                indoc!(
+                    "
+                    # `Foo` package
+
+                    This package is cool.
+
+                    ## Install
+
+                    ```json
+                    {
+                      \"dependencies\": {
+                        \"Foo\": \"https://foo.com/bar\"
+                      } 
+                    }
+                    ```
                     "
                 )
             );
@@ -322,6 +448,18 @@ mod tests {
                     "
                     # `Foo` package
 
+                    This package is cool.
+
+                    ## Install
+
+                    ```json
+                    {
+                      \"dependencies\": {
+                        \"Foo\": \"https://foo.com/bar\"
+                      } 
+                    }
+                    ```
+
                     ## `Foo'Bar` module
 
                     ### Types
@@ -352,6 +490,28 @@ mod tests {
 
         fn generate(path: &ModulePath, module: &Module, comments: &[Comment]) -> String {
             markdown::generate(&compile_module(&create_context(comments), path, module))
+        }
+
+        fn generate_with_private_names(
+            path: &ModulePath,
+            module: &Module,
+            comments: &[Comment],
+            private_names: &[&str],
+        ) -> String {
+            markdown::generate(&compile_module(
+                &Context {
+                    comments: comments.to_vec(),
+                    configuration: Configuration {
+                        language: TEST_LANGUAGE.into(),
+                        private_names: private_names
+                            .iter()
+                            .map(|string| string.to_string())
+                            .collect(),
+                    },
+                },
+                path,
+                module,
+            ))
         }
 
         #[test]
@@ -385,6 +545,35 @@ mod tests {
                     &ExternalModulePath::new("Foo", vec!["Bar".into()]).into(),
                     &Module::new(vec![], vec![], vec![], vec![], Position::fake()),
                     &[Comment::new("foo", line_position(1))]
+                ),
+                indoc!(
+                    "
+                    # `Foo'Bar` module
+
+                    foo
+
+                    ## Types
+
+                    No types are defined.
+
+                    ## Functions
+
+                    No functions are defined.
+                    "
+                )
+            );
+        }
+
+        #[test]
+        fn skip_module_comment_in_next_block() {
+            assert_eq!(
+                generate(
+                    &ExternalModulePath::new("Foo", vec!["Bar".into()]).into(),
+                    &Module::new(vec![], vec![], vec![], vec![], Position::fake()),
+                    &[
+                        Comment::new("foo", line_position(1)),
+                        Comment::new("bar", line_position(3))
+                    ]
                 ),
                 indoc!(
                     "
@@ -493,6 +682,78 @@ mod tests {
                         Position::fake()
                     ),
                     &[]
+                ),
+                indoc!(
+                    "
+                    # `Foo'Bar` module
+
+                    ## Types
+
+                    No types are defined.
+
+                    ## Functions
+
+                    No functions are defined.
+                    "
+                )
+            );
+        }
+
+        #[test]
+        fn hide_hidden_type_definition() {
+            assert_eq!(
+                generate_with_private_names(
+                    &ExternalModulePath::new("Foo", vec!["Bar".into()]).into(),
+                    &Module::new(
+                        vec![],
+                        vec![],
+                        vec![RecordDefinition::new("Foo", vec![], Position::fake()).into()],
+                        vec![],
+                        Position::fake()
+                    ),
+                    &[],
+                    &["Foo"]
+                ),
+                indoc!(
+                    "
+                    # `Foo'Bar` module
+
+                    ## Types
+
+                    No types are defined.
+
+                    ## Functions
+
+                    No functions are defined.
+                    "
+                )
+            );
+        }
+
+        #[test]
+        fn hide_hidden_function_definition() {
+            assert_eq!(
+                generate_with_private_names(
+                    &ExternalModulePath::new("Foo", vec!["Bar".into()]).into(),
+                    &Module::new(
+                        vec![],
+                        vec![],
+                        vec![],
+                        vec![Definition::new(
+                            "Foo",
+                            Lambda::new(
+                                vec![],
+                                types::None::new(Position::fake()),
+                                Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                                Position::fake()
+                            ),
+                            None,
+                            Position::fake()
+                        )],
+                        Position::fake()
+                    ),
+                    &[],
+                    &["Foo"]
                 ),
                 indoc!(
                     "

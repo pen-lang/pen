@@ -1,9 +1,11 @@
-import 'Context { Context }
+import 'Context'context { Context }
 
+# Fetch a current system time in milliseconds.
 Now = \(ctx Context) number {
-  Context'Inner(ctx).GetTime()
+  context'Inner(ctx).GetTime()
 }
 
+# Pause a current execution context for a given amount of time.
 Sleep = \(ctx Context, milliseconds number) none {
-  Context'Inner(ctx).Sleep(milliseconds)
+  context'Inner(ctx).Sleep(milliseconds)
 }

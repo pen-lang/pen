@@ -1,4 +1,4 @@
-Feature: OS
+Feature: Os
   Background:
     Given a file named "pen.json" with:
     """json

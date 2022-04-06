@@ -1,8 +1,9 @@
-import 'Context { Context }
+import 'Context'context { Context }
 import 'array
 
+# Read a directory and return file paths it contains.
 Read = \(ctx Context, path string) [string] | error {
-  r = Context'Inner(ctx).ReadDirectory(path)
+  r = context'Inner(ctx).ReadDirectory(path)
 
   if r.Error == "" {
     array'ConvertToStrings(r.Paths)
@@ -11,8 +12,9 @@ Read = \(ctx Context, path string) [string] | error {
   }
 }
 
+# Create a directory.
 Create = \(ctx Context, path string) none | error {
-  r = Context'Inner(ctx).CreateDirectory(path)
+  r = context'Inner(ctx).CreateDirectory(path)
 
   if r.Error == "" {
     none
@@ -21,8 +23,9 @@ Create = \(ctx Context, path string) none | error {
   }
 }
 
+# Remove a directory.
 Remove = \(ctx Context, path string) none | error {
-  r = Context'Inner(ctx).RemoveDirectory(path)
+  r = context'Inner(ctx).RemoveDirectory(path)
 
   if r.Error == "" {
     none

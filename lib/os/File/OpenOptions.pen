@@ -1,3 +1,4 @@
+# Options to open a file
 type OpenOptions {
   Append boolean
   Create boolean
@@ -7,6 +8,7 @@ type OpenOptions {
   Write boolean
 }
 
+# Get default options to open a file. They do not include any permission.
 Default = \() OpenOptions {
   OpenOptions{
     Append: false,

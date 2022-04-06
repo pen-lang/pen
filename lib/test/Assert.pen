@@ -1,3 +1,6 @@
+# This module provides a collection of assertion logic for testing.
+
+# Assert that a condition is true.
 True = \(x boolean) none | error {
   if x {
     none
@@ -6,10 +9,13 @@ True = \(x boolean) none | error {
   }
 }
 
+# Fail with an error immediately.
+# This function is useful to make unreachable codes fail.
 Fail = \() error {
   error("assertion failed")
 }
 
+# Check if numbers are equal.
 EqualNumbers = \(x number, y number) none | error {
   if x == y {
     none
@@ -18,6 +24,7 @@ EqualNumbers = \(x number, y number) none | error {
   }
 }
 
+# Check if strings are equal.
 EqualStrings = \(x string, y string) none | error {
   if x == y {
     none

@@ -4,7 +4,7 @@ set -e
 
 llvm_version=13
 
-brew install jq llvm@$llvm_version ninja sccache
+brew install jq llvm@$llvm_version mdbook ninja sccache
 
 llvm_prefix=$(brew --prefix)/opt/llvm@$llvm_version
 

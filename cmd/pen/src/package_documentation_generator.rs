@@ -1,13 +1,15 @@
-use crate::{infrastructure, main_package_directory_finder};
+use crate::{
+    documentation_configuration::DOCUMENTATION_CONFIGURATION, infrastructure,
+    main_package_directory_finder,
+};
+use app::package_documentation_generator::PackageDocumentation;
 use std::{
     error::Error,
     io::{stdout, Write},
     sync::Arc,
 };
 
-const LANGUAGE_TAG: &str = "pen";
-
-pub fn generate(package_name: &str) -> Result<(), Box<dyn Error>> {
+pub fn generate(name: &str, url: &str, description: &str) -> Result<(), Box<dyn Error>> {
     let main_package_directory = main_package_directory_finder::find()?;
     let file_path_converter = Arc::new(infra::FilePathConverter::new(
         main_package_directory.clone(),
@@ -16,9 +18,13 @@ pub fn generate(package_name: &str) -> Result<(), Box<dyn Error>> {
     stdout().write_all(
         app::package_documentation_generator::generate(
             &infrastructure::create(file_path_converter.clone(), &main_package_directory)?,
-            package_name,
+            &PackageDocumentation {
+                name: name.into(),
+                url: url.into(),
+                description: description.into(),
+            },
             &file_path_converter.convert_to_file_path(&main_package_directory)?,
-            LANGUAGE_TAG,
+            &DOCUMENTATION_CONFIGURATION,
         )?
         .as_bytes(),
     )?;
