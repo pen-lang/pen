@@ -116,6 +116,9 @@
                         <a href="print.html" title="Print this book" aria-label="Print this book">
                             <i id="print-button" class="fa fa-print"></i>
                         </a>
+                        <a href="https://github.com/pen-lang/pen" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
                     </div>
                 </div>
 
@@ -1078,7 +1081,7 @@ introduce built-in map types.</p>
 <pre><code class="language-pen">\(ctx Context) [string]
 </code></pre>
 <h4 id="variable"><a class="header" href="#variable"><code>Variable</code></a></h4>
-<p>Get an enviroment variable.</p>
+<p>Get an environment variable.</p>
 <pre><code class="language-pen">\(ctx Context, name string) string | error
 </code></pre>
 <h2 id="osfile-module"><a class="header" href="#osfile-module"><code>Os'File</code> module</a></h2>
@@ -1152,6 +1155,14 @@ introduce built-in map types.</p>
 <h3 id="types-14"><a class="header" href="#types-14">Types</a></h3>
 <h4 id="openoptions"><a class="header" href="#openoptions"><code>OpenOptions</code></a></h4>
 <p>Options to open a file</p>
+<ul>
+<li><code>Append</code> allows appending data to the file.</li>
+<li><code>Create</code> creates a new file if the file doesn't exist or opens it otherwise.</li>
+<li><code>CreateNew</code> creates a new file. If the file already exists, it emits an error.</li>
+<li><code>Read</code> allows reading data from the file.</li>
+<li><code>Truncate</code> truncates the file to zero byte.</li>
+<li><code>Write</code> allows writing data to the file.</li>
+</ul>
 <pre><code class="language-pen">type OpenOptions {
   Append boolean
   Create boolean
@@ -1187,23 +1198,29 @@ introduce built-in map types.</p>
 <p>No types are defined.</p>
 <h3 id="functions-17"><a class="header" href="#functions-17">Functions</a></h3>
 <h4 id="bind"><a class="header" href="#bind"><code>Bind</code></a></h4>
+<p>Create a listener bound to a server address.</p>
 <pre><code class="language-pen">\(ctx Context, address string) Listener | error
 </code></pre>
 <h4 id="connect"><a class="header" href="#connect"><code>Connect</code></a></h4>
+<p>Create a stream connected to a peer address.</p>
 <pre><code class="language-pen">\(ctx Context, address string) Stream | error
 </code></pre>
 <h4 id="accept"><a class="header" href="#accept"><code>Accept</code></a></h4>
+<p>Accept a client connection and create its stream.</p>
 <pre><code class="language-pen">\(ctx Context, l Listener) AcceptedStream | error
 </code></pre>
 <h4 id="receive"><a class="header" href="#receive"><code>Receive</code></a></h4>
+<p>Receive data from a peer through a stream with a size limit in bytes.</p>
 <pre><code class="language-pen">\(ctx Context, s Stream, limit number) string | error
 </code></pre>
 <h4 id="send"><a class="header" href="#send"><code>Send</code></a></h4>
+<p>Send data to a peer through a stream.</p>
 <pre><code class="language-pen">\(ctx Context, s Stream, data string) number | error
 </code></pre>
 <h2 id="ostcpacceptedstream-module"><a class="header" href="#ostcpacceptedstream-module"><code>Os'Tcp'AcceptedStream</code> module</a></h2>
 <h3 id="types-18"><a class="header" href="#types-18">Types</a></h3>
 <h4 id="acceptedstream"><a class="header" href="#acceptedstream"><code>AcceptedStream</code></a></h4>
+<p>A TCP stream accepted on a server with a client address</p>
 <pre><code class="language-pen">type AcceptedStream {
   Stream Stream
   Address string
@@ -1214,6 +1231,7 @@ introduce built-in map types.</p>
 <h2 id="ostcplistener-module"><a class="header" href="#ostcplistener-module"><code>Os'Tcp'Listener</code> module</a></h2>
 <h3 id="types-19"><a class="header" href="#types-19">Types</a></h3>
 <h4 id="listener"><a class="header" href="#listener"><code>Listener</code></a></h4>
+<p>A TCP listener to listen for client connections</p>
 <pre><code class="language-pen">type Listener {
   ...
 }
@@ -1223,6 +1241,7 @@ introduce built-in map types.</p>
 <h2 id="ostcpstream-module"><a class="header" href="#ostcpstream-module"><code>Os'Tcp'Stream</code> module</a></h2>
 <h3 id="types-20"><a class="header" href="#types-20">Types</a></h3>
 <h4 id="stream"><a class="header" href="#stream"><code>Stream</code></a></h4>
+<p>A TCP stream</p>
 <pre><code class="language-pen">type Stream {
   ...
 }
@@ -1246,7 +1265,7 @@ introduce built-in map types.</p>
 <p>No types are defined.</p>
 <h3 id="functions-22"><a class="header" href="#functions-22">Functions</a></h3>
 <h4 id="bind-1"><a class="header" href="#bind-1"><code>Bind</code></a></h4>
-<p>Bind a socket with an address.</p>
+<p>Bind a socket with a server address.</p>
 <pre><code class="language-pen">\(ctx Context, address string) Socket | error
 </code></pre>
 <h4 id="connect-1"><a class="header" href="#connect-1"><code>Connect</code></a></h4>
@@ -1254,7 +1273,7 @@ introduce built-in map types.</p>
 <pre><code class="language-pen">\(ctx Context, s Socket, address string) none | error
 </code></pre>
 <h4 id="receive-1"><a class="header" href="#receive-1"><code>Receive</code></a></h4>
-<p>Receive a datagram from an address connected already.</p>
+<p>Receive a datagram from a connected address.</p>
 <pre><code class="language-pen">\(ctx Context, s Socket) string | error
 </code></pre>
 <h4 id="receivefrom"><a class="header" href="#receivefrom"><code>ReceiveFrom</code></a></h4>
@@ -1262,7 +1281,7 @@ introduce built-in map types.</p>
 <pre><code class="language-pen">\(ctx Context, s Socket) Datagram | error
 </code></pre>
 <h4 id="send-1"><a class="header" href="#send-1"><code>Send</code></a></h4>
-<p>Send a datagram to an address connected already.</p>
+<p>Send a datagram to a connected address.</p>
 <pre><code class="language-pen">\(ctx Context, s Socket, data string) number | error
 </code></pre>
 <h4 id="sendto"><a class="header" href="#sendto"><code>SendTo</code></a></h4>
@@ -3312,6 +3331,7 @@ Self-hosting!?</li>
         <script src="book.js" type="text/javascript" charset="utf-8"></script>
 
         <!-- Custom JS scripts -->
+        <script type="text/javascript" src="theme/custom-highlight.js"></script>
         <script type="text/javascript">
         window.addEventListener('load', function() {
             window.setTimeout(window.print, 100);
