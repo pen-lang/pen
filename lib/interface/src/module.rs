@@ -1,27 +1,27 @@
-use super::{Declaration, TypeAlias, TypeDefinition};
+use super::{FunctionDeclaration, RecordDefinition, TypeAlias};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct Module {
-    type_definitions: Vec<TypeDefinition>,
+    type_definitions: Vec<RecordDefinition>,
     type_aliases: Vec<TypeAlias>,
-    declarations: Vec<Declaration>,
+    function_declarations: Vec<FunctionDeclaration>,
 }
 
 impl Module {
     pub fn new(
-        type_definitions: Vec<TypeDefinition>,
+        type_definitions: Vec<RecordDefinition>,
         type_aliases: Vec<TypeAlias>,
-        declarations: Vec<Declaration>,
+        declarations: Vec<FunctionDeclaration>,
     ) -> Self {
         Self {
             type_definitions,
             type_aliases,
-            declarations,
+            function_declarations: declarations,
         }
     }
 
-    pub fn type_definitions(&self) -> &[TypeDefinition] {
+    pub fn type_definitions(&self) -> &[RecordDefinition] {
         &self.type_definitions
     }
 
@@ -29,7 +29,7 @@ impl Module {
         &self.type_aliases
     }
 
-    pub fn declarations(&self) -> &[Declaration] {
-        &self.declarations
+    pub fn function_declarations(&self) -> &[FunctionDeclaration] {
+        &self.function_declarations
     }
 }

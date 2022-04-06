@@ -7,7 +7,7 @@ pub fn compile(module: &ir::Module) -> Result<interface::Module, CompileError> {
             .type_definitions()
             .iter()
             .map(|definition| {
-                interface::TypeDefinition::new(
+                interface::RecordDefinition::new(
                     definition.name(),
                     definition.original_name(),
                     definition.fields().to_vec(),
@@ -35,7 +35,7 @@ pub fn compile(module: &ir::Module) -> Result<interface::Module, CompileError> {
             .iter()
             .filter_map(|definition| {
                 if definition.is_public() {
-                    Some(interface::Declaration::new(
+                    Some(interface::FunctionDeclaration::new(
                         definition.name(),
                         definition.original_name(),
                         type_extractor::extract_from_lambda(definition.lambda()),

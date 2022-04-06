@@ -3,7 +3,7 @@ use position::Position;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
-pub struct TypeDefinition {
+pub struct RecordDefinition {
     name: String,
     original_name: String,
     fields: Vec<types::RecordField>,
@@ -12,7 +12,7 @@ pub struct TypeDefinition {
     position: Position,
 }
 
-impl TypeDefinition {
+impl RecordDefinition {
     pub fn new(
         name: impl Into<String>,
         original_name: impl Into<String>,

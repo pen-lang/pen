@@ -48,7 +48,7 @@ fn qualify_context(
             .ok_or(ApplicationError::ContextTypeNotFound)?
             .into(),
         new_context_function_name: context_interface
-            .declarations()
+            .function_declarations()
             .iter()
             .find(|definition| {
                 definition.original_name() == configuration.new_system_context_function_name
