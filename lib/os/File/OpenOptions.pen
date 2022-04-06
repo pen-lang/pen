@@ -1,3 +1,4 @@
+# Options to open a file.
 type OpenOptions {
   Append boolean
   Create boolean

@@ -1,5 +1,6 @@
 import 'Context'context { Context }
 
+# Generate a random number in a range of [0, 1).
 Number = \(ctx Context) number {
   context'Inner(ctx).RandomNumber()
 }
