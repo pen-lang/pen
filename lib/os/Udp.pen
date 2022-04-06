@@ -2,6 +2,7 @@ import 'Context'context { Context }
 import 'Udp'Datagram { Datagram }
 import 'Udp'Socket { Socket }
 
+# Bind a socket with an address.
 Bind = \(ctx Context, address string) Socket | error {
   r = context'Inner(ctx).UdpBind(address)
 
@@ -12,6 +13,7 @@ Bind = \(ctx Context, address string) Socket | error {
   }
 }
 
+# Connect a socket to a peer address.
 Connect = \(ctx Context, s Socket, address string) none | error {
   r = context'Inner(ctx).UdpConnect(s, address)
 
@@ -22,6 +24,7 @@ Connect = \(ctx Context, s Socket, address string) none | error {
   }
 }
 
+# Receive a datagram from an address connected already.
 Receive = \(ctx Context, s Socket) string | error {
   r = context'Inner(ctx).UdpReceive(s)
 
@@ -32,6 +35,7 @@ Receive = \(ctx Context, s Socket) string | error {
   }
 }
 
+# Receive a datagram from any address.
 ReceiveFrom = \(ctx Context, s Socket) Datagram | error {
   r = context'Inner(ctx).UdpReceiveFrom(s)
 
@@ -42,6 +46,7 @@ ReceiveFrom = \(ctx Context, s Socket) Datagram | error {
   }
 }
 
+# Send a datagram to an address connected already.
 Send = \(ctx Context, s Socket, data string) number | error {
   r = context'Inner(ctx).UdpSend(s, data)
 
@@ -52,6 +57,7 @@ Send = \(ctx Context, s Socket, data string) number | error {
   }
 }
 
+# Send a datagram to a specified address.
 SendTo = \(ctx Context, s Socket, data string, address string) number | error {
   r = context'Inner(ctx).UdpSendTo(s, data, address)
 
