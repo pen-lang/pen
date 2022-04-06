@@ -71,7 +71,7 @@ fn compile_imports(module: &ir::Module, module_interfaces: &[&interface::Module]
         module.foreign_declarations().to_vec(),
         module_interfaces
             .iter()
-            .flat_map(|interface| interface.declarations())
+            .flat_map(|interface| interface.function_declarations())
             .map(|declaration| {
                 ir::FunctionDeclaration::new(
                     declaration.name(),
@@ -99,7 +99,7 @@ fn rename_variables(
             .flat_map(|module| {
                 module
                     .interface()
-                    .declarations()
+                    .function_declarations()
                     .iter()
                     .map(|declaration| {
                         (
@@ -120,7 +120,7 @@ fn rename_variables(
                     .collect::<Vec<_>>()
             })
             .chain(prelude_module_interfaces.iter().flat_map(|module| {
-                module.declarations().iter().map(|declaration| {
+                module.function_declarations().iter().map(|declaration| {
                     (
                         declaration.original_name().into(),
                         declaration.name().into(),
@@ -233,7 +233,7 @@ mod tests {
                     interface::Module::new(
                         vec![],
                         vec![],
-                        vec![interface::Declaration::new(
+                        vec![interface::FunctionDeclaration::new(
                             "RealBar",
                             "Bar",
                             types::Function::new(
@@ -639,7 +639,7 @@ mod tests {
                         interface::Module::new(
                             vec![],
                             vec![],
-                            vec![interface::Declaration::new(
+                            vec![interface::FunctionDeclaration::new(
                                 "RealBar",
                                 "Bar",
                                 types::Function::new(

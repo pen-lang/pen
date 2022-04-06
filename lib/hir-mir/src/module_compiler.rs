@@ -54,7 +54,7 @@ pub fn compile(context: &CompileContext, module: &Module) -> Result<mir::ir::Mod
         module
             .function_declarations()
             .iter()
-            .map(|declaration| compile_declaration(declaration, context))
+            .map(|declaration| compile_function_declaration(declaration, context))
             .collect::<Result<_, _>>()?,
         module
             .function_definitions()
@@ -87,7 +87,7 @@ fn compile_type_definition(
     ))
 }
 
-fn compile_declaration(
+fn compile_function_declaration(
     declaration: &FunctionDeclaration,
     context: &CompileContext,
 ) -> Result<mir::ir::FunctionDeclaration, CompileError> {

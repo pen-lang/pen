@@ -2,12 +2,12 @@ mod calls;
 mod closures;
 mod configuration;
 mod context;
-mod declarations;
 mod entry_functions;
 mod error;
 mod expressions;
 mod foreign_declarations;
 mod foreign_definitions;
+mod function_declarations;
 mod function_definitions;
 mod records;
 mod reference_count;
@@ -18,11 +18,11 @@ mod yield_;
 
 pub use configuration::Configuration;
 use context::Context;
-use declarations::compile_declaration;
 pub use error::CompileError;
 use fnv::FnvHashMap;
 use foreign_declarations::compile_foreign_declaration;
 use foreign_definitions::compile_foreign_definition;
+use function_declarations::compile_function_declaration;
 use function_definitions::compile_function_definition;
 use type_information::compile_type_information_global_variable;
 use yield_::compile_yield_function_declaration;
@@ -54,7 +54,7 @@ pub fn compile(
     }
 
     for declaration in module.function_declarations() {
-        compile_declaration(&context, declaration);
+        compile_function_declaration(&context, declaration);
     }
 
     let global_variables = compile_global_variables(&module, context.types())?;

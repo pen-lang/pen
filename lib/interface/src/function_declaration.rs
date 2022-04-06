@@ -3,14 +3,14 @@ use position::Position;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
-pub struct Declaration {
+pub struct FunctionDeclaration {
     name: String,
     original_name: String,
     type_: types::Function,
     position: Position,
 }
 
-impl Declaration {
+impl FunctionDeclaration {
     pub fn new(
         name: impl Into<String>,
         original_name: impl Into<String>,
