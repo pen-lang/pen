@@ -108,14 +108,14 @@ mod tests {
     };
     use hir::{
         analysis::AnalysisError,
-        test::{DefinitionFake, ModuleFake, TypeDefinitionFake},
+        test::{FunctionDefinitionFake, ModuleFake, TypeDefinitionFake},
         types,
     };
     use once_cell::sync::Lazy;
     use position::{test::PositionFake, Position};
 
-    static COMBINE_HASH_FUNCTION_DECLARATION: Lazy<Declaration> = Lazy::new(|| {
-        Declaration::new(
+    static COMBINE_HASH_FUNCTION_DECLARATION: Lazy<FunctionDeclaration> = Lazy::new(|| {
+        FunctionDeclaration::new(
             &HASH_CONFIGURATION.combine_function_name,
             types::Function::new(
                 vec![
@@ -145,64 +145,72 @@ mod tests {
 
     #[test]
     fn compile_boolean() -> Result<(), CompileError> {
-        compile_module(&Module::empty().set_definitions(vec![Definition::fake(
-            "x",
-            Lambda::new(
-                vec![],
-                types::Boolean::new(Position::fake()),
-                Boolean::new(false, Position::fake()),
-                Position::fake(),
-            ),
-            false,
-        )]))?;
+        compile_module(
+            &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                "x",
+                Lambda::new(
+                    vec![],
+                    types::Boolean::new(Position::fake()),
+                    Boolean::new(false, Position::fake()),
+                    Position::fake(),
+                ),
+                false,
+            )]),
+        )?;
 
         Ok(())
     }
 
     #[test]
     fn compile_none() -> Result<(), CompileError> {
-        compile_module(&Module::empty().set_definitions(vec![Definition::fake(
-            "x",
-            Lambda::new(
-                vec![],
-                types::None::new(Position::fake()),
-                None::new(Position::fake()),
-                Position::fake(),
-            ),
-            false,
-        )]))?;
+        compile_module(
+            &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                "x",
+                Lambda::new(
+                    vec![],
+                    types::None::new(Position::fake()),
+                    None::new(Position::fake()),
+                    Position::fake(),
+                ),
+                false,
+            )]),
+        )?;
 
         Ok(())
     }
 
     #[test]
     fn compile_number() -> Result<(), CompileError> {
-        compile_module(&Module::empty().set_definitions(vec![Definition::fake(
-            "x",
-            Lambda::new(
-                vec![],
-                types::Number::new(Position::fake()),
-                Number::new(42.0, Position::fake()),
-                Position::fake(),
-            ),
-            false,
-        )]))?;
+        compile_module(
+            &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                "x",
+                Lambda::new(
+                    vec![],
+                    types::Number::new(Position::fake()),
+                    Number::new(42.0, Position::fake()),
+                    Position::fake(),
+                ),
+                false,
+            )]),
+        )?;
 
         Ok(())
     }
 
     #[test]
     fn compile_string() -> Result<(), CompileError> {
-        compile_module(&Module::empty().set_definitions(vec![Definition::fake(
-            "x",
-            Lambda::new(
-                vec![],
-                types::ByteString::new(Position::fake()),
-                ByteString::new("foo", Position::fake()),
-                Position::fake(),
-            ),
-            false,
-        )]))?;
+        compile_module(
+            &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                "x",
+                Lambda::new(
+                    vec![],
+                    types::ByteString::new(Position::fake()),
+                    ByteString::new("foo", Position::fake()),
+                    Position::fake(),
+                ),
+                false,
+            )]),
+        )?;
 
         Ok(())
     }
@@ -224,7 +232,7 @@ mod tests {
                     false,
                 )])
                 .set_declarations(vec![COMBINE_HASH_FUNCTION_DECLARATION.clone()])
-                .set_definitions(vec![Definition::fake(
+                .set_definitions(vec![FunctionDefinition::fake(
                     "x",
                     Lambda::new(
                         vec![],
@@ -263,7 +271,7 @@ mod tests {
                     false,
                 )])
                 .set_declarations(vec![COMBINE_HASH_FUNCTION_DECLARATION.clone()])
-                .set_definitions(vec![Definition::fake(
+                .set_definitions(vec![FunctionDefinition::fake(
                     "x",
                     Lambda::new(
                         vec![Argument::new("r", reference_type)],
@@ -284,7 +292,7 @@ mod tests {
 
     #[test]
     fn fail_to_compile_duplicate_function_names() {
-        let definition = Definition::fake(
+        let definition = FunctionDefinition::fake(
             "x",
             Lambda::new(
                 vec![],
@@ -313,7 +321,7 @@ mod tests {
                         false,
                         false
                     )])
-                    .set_definitions(vec![Definition::fake(
+                    .set_definitions(vec![FunctionDefinition::fake(
                         "x",
                         Lambda::new(
                             vec![Argument::new(

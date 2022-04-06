@@ -89,7 +89,7 @@ mod tests {
     use super::*;
     use crate::{
         analysis::type_collector,
-        test::{DefinitionFake, ModuleFake, TypeDefinitionFake},
+        test::{FunctionDefinitionFake, ModuleFake, TypeDefinitionFake},
         types,
     };
     use position::{test::PositionFake, Position};
@@ -121,7 +121,7 @@ mod tests {
                     false,
                     false,
                 )])
-                .set_definitions(vec![Definition::fake(
+                .set_definitions(vec![FunctionDefinition::fake(
                     "x",
                     Lambda::new(
                         vec![],
@@ -160,7 +160,7 @@ mod tests {
                     false,
                     true,
                 )])
-                .set_definitions(vec![Definition::fake(
+                .set_definitions(vec![FunctionDefinition::fake(
                     "x",
                     Lambda::new(
                         vec![],
@@ -198,7 +198,7 @@ mod tests {
                     false,
                     false,
                 )])
-                .set_definitions(vec![Definition::fake(
+                .set_definitions(vec![FunctionDefinition::fake(
                     "x",
                     Lambda::new(
                         vec![Argument::new("x", record_type.clone())],
@@ -234,7 +234,7 @@ mod tests {
                     false,
                     true,
                 )])
-                .set_definitions(vec![Definition::fake(
+                .set_definitions(vec![FunctionDefinition::fake(
                     "x",
                     Lambda::new(
                         vec![Argument::new("x", record_type.clone())],
@@ -269,7 +269,7 @@ mod tests {
                     false,
                     false,
                 )])
-                .set_definitions(vec![Definition::fake(
+                .set_definitions(vec![FunctionDefinition::fake(
                     "x",
                     Lambda::new(
                         vec![Argument::new("x", record_type.clone())],
@@ -309,7 +309,7 @@ mod tests {
                     false,
                     true,
                 )])
-                .set_definitions(vec![Definition::fake(
+                .set_definitions(vec![FunctionDefinition::fake(
                     "x",
                     Lambda::new(
                         vec![Argument::new("x", record_type.clone())],
@@ -349,7 +349,7 @@ mod tests {
                     false,
                     true,
                 )])
-                .set_definitions(vec![Definition::fake(
+                .set_definitions(vec![FunctionDefinition::fake(
                     "x",
                     Lambda::new(
                         vec![],

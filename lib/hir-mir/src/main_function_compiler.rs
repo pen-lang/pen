@@ -14,7 +14,7 @@ pub fn compile(
     main_module_configuration: &MainModuleConfiguration,
 ) -> Result<Module, CompileError> {
     let main_function_definition = module
-        .definitions()
+        .function_definitions()
         .iter()
         .find(|definition| {
             definition.original_name() == main_module_configuration.source_main_function_name
@@ -52,7 +52,7 @@ pub fn compile(
             Ok((
                 key.clone(),
                 module
-                    .declarations()
+                    .function_declarations()
                     .iter()
                     .find(|definition| definition.name() == configuration.new_context_function_name)
                     .ok_or_else(|| {
@@ -76,12 +76,12 @@ pub fn compile(
             .collect(),
         module.type_aliases().to_vec(),
         module.foreign_declarations().to_vec(),
-        module.declarations().to_vec(),
+        module.function_declarations().to_vec(),
         module
-            .definitions()
+            .function_definitions()
             .iter()
             .cloned()
-            .chain([Definition::new(
+            .chain([FunctionDefinition::new(
                 main_module_configuration
                     .object_main_function_name
                     .to_owned()

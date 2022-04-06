@@ -32,9 +32,9 @@ pub fn format(module: &Module, comments: &[Comment]) -> String {
             ),
             sequence(
                 module
-                    .definitions()
+                    .function_definitions()
                     .iter()
-                    .map(|definition| compile_definition(context, definition))
+                    .map(|definition| compile_function_definition(context, definition))
                     .intersperse(line()),
             ),
             compile_remaining_block_comment(context),
@@ -199,7 +199,7 @@ fn compile_type_alias(context: &mut Context, alias: &TypeAlias) -> Document {
     ])
 }
 
-fn compile_definition(context: &mut Context, definition: &Definition) -> Document {
+fn compile_function_definition(context: &mut Context, definition: &FunctionDefinition) -> Document {
     sequence([
         compile_block_comment(context, definition.position()),
         if let Some(export) = definition.foreign_export() {
@@ -1223,7 +1223,7 @@ mod tests {
                     vec![],
                     vec![],
                     vec![],
-                    vec![Definition::new(
+                    vec![FunctionDefinition::new(
                         "foo",
                         Lambda::new(
                             vec![],
@@ -1242,7 +1242,7 @@ mod tests {
 
         #[test]
         fn format_multiple() {
-            let definition = Definition::new(
+            let definition = FunctionDefinition::new(
                 "foo",
                 Lambda::new(
                     vec![],
@@ -1279,7 +1279,7 @@ mod tests {
                     vec![],
                     vec![],
                     vec![],
-                    vec![Definition::new(
+                    vec![FunctionDefinition::new(
                         "foo",
                         Lambda::new(
                             vec![Argument::new("x", types::None::new(Position::fake()))],
@@ -1303,7 +1303,7 @@ mod tests {
                     vec![],
                     vec![],
                     vec![],
-                    vec![Definition::new(
+                    vec![FunctionDefinition::new(
                         "foo",
                         Lambda::new(
                             vec![],
@@ -1342,7 +1342,7 @@ mod tests {
                     vec![],
                     vec![],
                     vec![],
-                    vec![Definition::new(
+                    vec![FunctionDefinition::new(
                         "foo",
                         Lambda::new(
                             vec![],
@@ -1383,7 +1383,7 @@ mod tests {
                     vec![],
                     vec![],
                     vec![],
-                    vec![Definition::new(
+                    vec![FunctionDefinition::new(
                         "foo",
                         Lambda::new(
                             vec![],
@@ -1407,7 +1407,7 @@ mod tests {
                     vec![],
                     vec![],
                     vec![],
-                    vec![Definition::new(
+                    vec![FunctionDefinition::new(
                         "foo",
                         Lambda::new(
                             vec![],
@@ -1598,7 +1598,7 @@ mod tests {
                     vec![],
                     vec![],
                     vec![],
-                    vec![Definition::new(
+                    vec![FunctionDefinition::new(
                         "foo",
                         Lambda::new(
                             vec![],
@@ -3494,7 +3494,7 @@ mod tests {
                         vec![],
                         vec![],
                         vec![],
-                        vec![Definition::new(
+                        vec![FunctionDefinition::new(
                             "foo",
                             Lambda::new(
                                 vec![],

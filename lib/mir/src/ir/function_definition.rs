@@ -2,7 +2,7 @@ use super::{argument::Argument, expression::Expression};
 use crate::types::{self, Type};
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct Definition {
+pub struct FunctionDefinition {
     name: String,
     // Environment is inferred on module creation and this field is used just
     // as its cache.  So it must be safe to clone definitions inside a
@@ -15,7 +15,7 @@ pub struct Definition {
     is_thunk: bool,
 }
 
-impl Definition {
+impl FunctionDefinition {
     pub fn new(
         name: impl Into<String>,
         arguments: Vec<Argument>,

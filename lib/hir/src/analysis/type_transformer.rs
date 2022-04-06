@@ -22,9 +22,9 @@ pub fn transform(module: &Module, transform: impl Fn(&Type) -> Type) -> Module {
             .iter()
             .map(|declaration| transform_foreign_declaration(declaration, &transform))
             .collect(),
-        module.declarations().to_vec(),
+        module.function_declarations().to_vec(),
         module
-            .definitions()
+            .function_definitions()
             .iter()
             .map(|definition| transform_definition(definition, &transform))
             .collect(),
@@ -118,8 +118,11 @@ fn transform_foreign_declaration(
     )
 }
 
-fn transform_definition(definition: &Definition, transform: &impl Fn(&Type) -> Type) -> Definition {
-    Definition::new(
+fn transform_definition(
+    definition: &FunctionDefinition,
+    transform: &impl Fn(&Type) -> Type,
+) -> FunctionDefinition {
+    FunctionDefinition::new(
         definition.name(),
         definition.original_name(),
         transform_lambda(definition.lambda(), transform),

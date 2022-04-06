@@ -136,11 +136,11 @@ pub fn compile(
                 ),
                 mir::ir::Variable::new(&context.configuration()?.list_type.lazy_function_name),
                 vec![mir::ir::LetRecursive::new(
-                    mir::ir::Definition::new(
+                    mir::ir::FunctionDefinition::new(
                         CLOSURE_NAME,
                         vec![],
                         mir::ir::LetRecursive::new(
-                            mir::ir::Definition::new(
+                            mir::ir::FunctionDefinition::new(
                                 CLOSURE_NAME,
                                 vec![mir::ir::Argument::new(LIST_NAME, list_type.clone())],
                                 compile(
@@ -275,7 +275,7 @@ pub fn compile(
             const THUNK_NAME: &str = "$thunk";
 
             mir::ir::LetRecursive::new(
-                mir::ir::Definition::thunk(
+                mir::ir::FunctionDefinition::thunk(
                     THUNK_NAME,
                     compile(thunk.expression())?,
                     type_compiler::compile(
@@ -355,7 +355,7 @@ fn compile_lambda(
     const CLOSURE_NAME: &str = "$closure";
 
     Ok(mir::ir::LetRecursive::new(
-        mir::ir::Definition::new(
+        mir::ir::FunctionDefinition::new(
             CLOSURE_NAME,
             lambda
                 .arguments()
@@ -578,7 +578,7 @@ fn compile_spawn_operation(
             type_compiler::compile_spawn_function(),
             mir::ir::Variable::new(MODULE_LOCAL_SPAWN_FUNCTION_NAME),
             vec![mir::ir::LetRecursive::new(
-                mir::ir::Definition::thunk(
+                mir::ir::FunctionDefinition::thunk(
                     ANY_THUNK_NAME,
                     compile(
                         &TypeCoercion::new(
@@ -597,7 +597,7 @@ fn compile_spawn_operation(
             .into()],
         ),
         mir::ir::LetRecursive::new(
-            mir::ir::Definition::new(
+            mir::ir::FunctionDefinition::new(
                 THUNK_NAME,
                 vec![],
                 compile(
@@ -1291,7 +1291,7 @@ mod tests {
                         type_compiler::compile_spawn_function(),
                         mir::ir::Variable::new(MODULE_LOCAL_SPAWN_FUNCTION_NAME),
                         vec![mir::ir::LetRecursive::new(
-                            mir::ir::Definition::thunk(
+                            mir::ir::FunctionDefinition::thunk(
                                 "$any_thunk",
                                 mir::ir::Variant::new(
                                     mir::types::Type::Number,
@@ -1304,7 +1304,7 @@ mod tests {
                         .into()]
                     ),
                     mir::ir::LetRecursive::new(
-                        mir::ir::Definition::new(
+                        mir::ir::FunctionDefinition::new(
                             "$thunk",
                             vec![],
                             mir::ir::Case::new(
@@ -1351,7 +1351,7 @@ mod tests {
                         type_compiler::compile_spawn_function(),
                         mir::ir::Variable::new(MODULE_LOCAL_SPAWN_FUNCTION_NAME),
                         vec![mir::ir::LetRecursive::new(
-                            mir::ir::Definition::thunk(
+                            mir::ir::FunctionDefinition::thunk(
                                 "$any_thunk",
                                 mir::ir::Variable::new("x"),
                                 mir::types::Type::Variant
@@ -1361,7 +1361,7 @@ mod tests {
                         .into()]
                     ),
                     mir::ir::LetRecursive::new(
-                        mir::ir::Definition::new(
+                        mir::ir::FunctionDefinition::new(
                             "$thunk",
                             vec![],
                             mir::ir::Call::new(

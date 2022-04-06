@@ -2,7 +2,7 @@ use super::{lambda::Lambda, ForeignDefinitionConfiguration};
 use position::Position;
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct Definition {
+pub struct FunctionDefinition {
     name: String,
     original_name: String,
     lambda: Lambda,
@@ -11,7 +11,7 @@ pub struct Definition {
     position: Position,
 }
 
-impl Definition {
+impl FunctionDefinition {
     pub fn new(
         name: impl Into<String>,
         original_name: impl Into<String>,

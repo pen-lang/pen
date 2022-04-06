@@ -1,6 +1,6 @@
 use super::{
-    definition::Definition, type_definition::TypeDefinition, Declaration, ForeignDeclaration,
-    TypeAlias,
+    function_definition::FunctionDefinition, type_definition::TypeDefinition, ForeignDeclaration,
+    FunctionDeclaration, TypeAlias,
 };
 use position::Position;
 
@@ -9,8 +9,8 @@ pub struct Module {
     type_definitions: Vec<TypeDefinition>,
     type_aliases: Vec<TypeAlias>,
     foreign_declarations: Vec<ForeignDeclaration>,
-    declarations: Vec<Declaration>,
-    definitions: Vec<Definition>,
+    function_declarations: Vec<FunctionDeclaration>,
+    function_definitions: Vec<FunctionDefinition>,
     position: Position,
 }
 
@@ -19,16 +19,16 @@ impl Module {
         type_definitions: Vec<TypeDefinition>,
         type_aliases: Vec<TypeAlias>,
         foreign_declarations: Vec<ForeignDeclaration>,
-        declarations: Vec<Declaration>,
-        definitions: Vec<Definition>,
+        function_declarations: Vec<FunctionDeclaration>,
+        function_definitions: Vec<FunctionDefinition>,
         position: Position,
     ) -> Self {
         Self {
             type_definitions,
             type_aliases,
             foreign_declarations,
-            declarations,
-            definitions,
+            function_declarations,
+            function_definitions,
             position,
         }
     }
@@ -45,12 +45,12 @@ impl Module {
         &self.foreign_declarations
     }
 
-    pub fn declarations(&self) -> &[Declaration] {
-        &self.declarations
+    pub fn function_declarations(&self) -> &[FunctionDeclaration] {
+        &self.function_declarations
     }
 
-    pub fn definitions(&self) -> &[Definition] {
-        &self.definitions
+    pub fn function_definitions(&self) -> &[FunctionDefinition] {
+        &self.function_definitions
     }
 
     pub fn position(&self) -> &Position {

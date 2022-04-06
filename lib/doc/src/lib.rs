@@ -90,7 +90,7 @@ fn compile_module(context: &Context, path: &ModulePath, module: &Module) -> Sect
         compile_first_block_comment(context, get_first_child_position(module)),
         [
             compile_type_definitions(context, module.type_definitions()),
-            compile_definitions(context, module.definitions()),
+            compile_function_definitions(context, module.function_definitions()),
         ],
     )
 }
@@ -114,7 +114,7 @@ fn get_first_child_position(module: &Module) -> Option<&Position> {
         )
         .chain(
             module
-                .definitions()
+                .function_definitions()
                 .iter()
                 .map(|definition| definition.position()),
         )
@@ -167,7 +167,7 @@ fn compile_type_definition(context: &Context, definition: &TypeDefinition) -> Se
     )
 }
 
-fn compile_definitions(context: &Context, definitions: &[Definition]) -> Section {
+fn compile_function_definitions(context: &Context, definitions: &[FunctionDefinition]) -> Section {
     let definitions = definitions
         .iter()
         .filter(|definition| {
@@ -188,11 +188,11 @@ fn compile_definitions(context: &Context, definitions: &[Definition]) -> Section
         },
         definitions
             .iter()
-            .map(|definition| compile_definition(context, definition)),
+            .map(|definition| compile_function_definition(context, definition)),
     )
 }
 
-fn compile_definition(context: &Context, definition: &Definition) -> Section {
+fn compile_function_definition(context: &Context, definition: &FunctionDefinition) -> Section {
     section(
         text([code(definition.name())]),
         compile_last_block_comment(context, definition.position())
@@ -668,7 +668,7 @@ mod tests {
                         vec![],
                         vec![],
                         vec![],
-                        vec![Definition::new(
+                        vec![FunctionDefinition::new(
                             "foo",
                             Lambda::new(
                                 vec![],
@@ -739,7 +739,7 @@ mod tests {
                         vec![],
                         vec![],
                         vec![],
-                        vec![Definition::new(
+                        vec![FunctionDefinition::new(
                             "Foo",
                             Lambda::new(
                                 vec![],
@@ -878,15 +878,18 @@ mod tests {
     mod definition {
         use super::*;
 
-        fn generate(definition: &Definition, comments: &[Comment]) -> String {
-            markdown::generate(&compile_definition(&create_context(comments), definition))
+        fn generate(definition: &FunctionDefinition, comments: &[Comment]) -> String {
+            markdown::generate(&compile_function_definition(
+                &create_context(comments),
+                definition,
+            ))
         }
 
         #[test]
         fn generate_definition() {
             assert_eq!(
                 generate(
-                    &Definition::new(
+                    &FunctionDefinition::new(
                         "Foo",
                         Lambda::new(
                             vec![],

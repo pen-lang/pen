@@ -171,7 +171,7 @@ fn calling_convention<'a>() -> impl Parser<Stream<'a>, Output = CallingConventio
         })
 }
 
-fn definition<'a>() -> impl Parser<Stream<'a>, Output = Definition> {
+fn definition<'a>() -> impl Parser<Stream<'a>, Output = FunctionDefinition> {
     (
         optional(foreign_export()),
         position(),
@@ -180,7 +180,7 @@ fn definition<'a>() -> impl Parser<Stream<'a>, Output = Definition> {
         lambda(),
     )
         .map(|(foreign_export, position, name, _, lambda)| {
-            Definition::new(name, lambda, foreign_export, position)
+            FunctionDefinition::new(name, lambda, foreign_export, position)
         })
         .expected("definition")
 }
@@ -990,7 +990,7 @@ mod tests {
                     vec![],
                     vec![],
                     vec![],
-                    vec![Definition::new(
+                    vec![FunctionDefinition::new(
                         "x",
                         Lambda::new(
                             vec![Argument::new("x", types::Number::new(Position::fake()))],
@@ -1024,7 +1024,7 @@ mod tests {
                     vec![],
                     vec![],
                     vec![
-                        Definition::new(
+                        FunctionDefinition::new(
                             "x",
                             Lambda::new(
                                 vec![Argument::new("x", types::Number::new(Position::fake()))],
@@ -1042,7 +1042,7 @@ mod tests {
                             None,
                             Position::fake()
                         ),
-                        Definition::new(
+                        FunctionDefinition::new(
                             "y",
                             Lambda::new(
                                 vec![Argument::new("y", types::Number::new(Position::fake()))],
@@ -1301,7 +1301,7 @@ mod tests {
                     .parse(stream("x=\\(x number)number{42}", ""))
                     .unwrap()
                     .0,
-                Definition::new(
+                FunctionDefinition::new(
                     "x",
                     Lambda::new(
                         vec![Argument::new("x", types::Number::new(Position::fake()))],
@@ -1329,7 +1329,7 @@ mod tests {
                     .parse(stream("foreign x=\\(x number)number{42}", ""))
                     .unwrap()
                     .0,
-                Definition::new(
+                FunctionDefinition::new(
                     "x",
                     Lambda::new(
                         vec![Argument::new("x", types::Number::new(Position::fake()))],
@@ -1357,7 +1357,7 @@ mod tests {
                     .parse(stream("foreign \"c\" x=\\(x number)number{42}", ""))
                     .unwrap()
                     .0,
-                Definition::new(
+                FunctionDefinition::new(
                     "x",
                     Lambda::new(
                         vec![Argument::new("x", types::Number::new(Position::fake()))],
@@ -1385,7 +1385,7 @@ mod tests {
                     .parse(stream("importA = \\() number { 42 }", ""))
                     .unwrap()
                     .0,
-                Definition::new(
+                FunctionDefinition::new(
                     "importA",
                     Lambda::new(
                         vec![],

@@ -37,7 +37,7 @@ pub fn compile(context: &CompileContext, module: &Module) -> Result<mir::ir::Mod
             }))
             .collect::<Result<_, _>>()?,
         module
-            .definitions()
+            .function_definitions()
             .iter()
             .flat_map(|definition| {
                 definition
@@ -52,14 +52,14 @@ pub fn compile(context: &CompileContext, module: &Module) -> Result<mir::ir::Mod
             })
             .collect(),
         module
-            .declarations()
+            .function_declarations()
             .iter()
             .map(|declaration| compile_declaration(declaration, context))
             .collect::<Result<_, _>>()?,
         module
-            .definitions()
+            .function_definitions()
             .iter()
-            .map(|definition| compile_definition(definition, context))
+            .map(|definition| compile_function_definition(definition, context))
             .collect::<Result<Vec<_>, CompileError>>()?,
     ))
 }
@@ -88,26 +88,26 @@ fn compile_type_definition(
 }
 
 fn compile_declaration(
-    declaration: &Declaration,
+    declaration: &FunctionDeclaration,
     context: &CompileContext,
-) -> Result<mir::ir::Declaration, CompileError> {
-    Ok(mir::ir::Declaration::new(
+) -> Result<mir::ir::FunctionDeclaration, CompileError> {
+    Ok(mir::ir::FunctionDeclaration::new(
         declaration.name(),
         type_compiler::compile_function(declaration.type_(), context)?,
     ))
 }
 
-fn compile_definition(
-    definition: &Definition,
+fn compile_function_definition(
+    definition: &FunctionDefinition,
     context: &CompileContext,
-) -> Result<mir::ir::Definition, CompileError> {
+) -> Result<mir::ir::FunctionDefinition, CompileError> {
     let body = expression_compiler::compile(definition.lambda().body(), context)?;
     let result_type = type_compiler::compile(context, definition.lambda().result_type())?;
 
     Ok(if definition.lambda().arguments().is_empty() {
-        mir::ir::Definition::thunk(definition.name(), body, result_type)
+        mir::ir::FunctionDefinition::thunk(definition.name(), body, result_type)
     } else {
-        mir::ir::Definition::new(
+        mir::ir::FunctionDefinition::new(
             definition.name(),
             definition
                 .lambda()
@@ -147,19 +147,21 @@ mod tests {
     #[test]
     fn compile_foreign_definition() {
         assert_eq!(
-            compile_module(&Module::empty().set_definitions(vec![Definition::new(
-                "foo",
-                "bar",
-                Lambda::new(
-                    vec![Argument::new("x", types::None::new(Position::fake()))],
-                    types::None::new(Position::fake()),
-                    None::new(Position::fake()),
+            compile_module(
+                &Module::empty().set_definitions(vec![FunctionDefinition::new(
+                    "foo",
+                    "bar",
+                    Lambda::new(
+                        vec![Argument::new("x", types::None::new(Position::fake()))],
+                        types::None::new(Position::fake()),
+                        None::new(Position::fake()),
+                        Position::fake(),
+                    ),
+                    ForeignDefinitionConfiguration::new(CallingConvention::Native).into(),
+                    false,
                     Position::fake(),
-                ),
-                ForeignDefinitionConfiguration::new(CallingConvention::Native).into(),
-                false,
-                Position::fake(),
-            )])),
+                )])
+            ),
             Ok(mir::ir::Module::new(
                 vec![],
                 vec![spawn_function_declaration_compiler::compile(
@@ -171,7 +173,7 @@ mod tests {
                     mir::ir::CallingConvention::Source
                 )],
                 vec![],
-                vec![mir::ir::Definition::new(
+                vec![mir::ir::FunctionDefinition::new(
                     "foo",
                     vec![mir::ir::Argument::new("x", mir::types::Type::None)],
                     mir::ir::Expression::None,
@@ -184,19 +186,21 @@ mod tests {
     #[test]
     fn compile_foreign_definition_with_c_calling_convention() {
         assert_eq!(
-            compile_module(&Module::empty().set_definitions(vec![Definition::new(
-                "foo",
-                "bar",
-                Lambda::new(
-                    vec![Argument::new("x", types::None::new(Position::fake()))],
-                    types::None::new(Position::fake()),
-                    None::new(Position::fake()),
+            compile_module(
+                &Module::empty().set_definitions(vec![FunctionDefinition::new(
+                    "foo",
+                    "bar",
+                    Lambda::new(
+                        vec![Argument::new("x", types::None::new(Position::fake()))],
+                        types::None::new(Position::fake()),
+                        None::new(Position::fake()),
+                        Position::fake(),
+                    ),
+                    ForeignDefinitionConfiguration::new(CallingConvention::C).into(),
+                    false,
                     Position::fake(),
-                ),
-                ForeignDefinitionConfiguration::new(CallingConvention::C).into(),
-                false,
-                Position::fake(),
-            )])),
+                )])
+            ),
             Ok(mir::ir::Module::new(
                 vec![],
                 vec![spawn_function_declaration_compiler::compile(
@@ -208,7 +212,7 @@ mod tests {
                     mir::ir::CallingConvention::Target
                 )],
                 vec![],
-                vec![mir::ir::Definition::new(
+                vec![mir::ir::FunctionDefinition::new(
                     "foo",
                     vec![mir::ir::Argument::new("x", mir::types::Type::None)],
                     mir::ir::Expression::None,
