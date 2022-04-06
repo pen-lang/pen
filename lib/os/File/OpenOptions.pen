@@ -1,4 +1,11 @@
 # Options to open a file
+#
+# - `Append` allows appending data to the file.
+# - `Create` creates a new file if the file doesn't exist or opens it otherwise.
+# - `CreateNew` creates a new file. If the file already exists, it emits an error.
+# - `Read` allows reading data from the file.
+# - `Truncate` truncates the file to zero byte.
+# - `Write` allows writing data to the file.
 type OpenOptions {
   Append boolean
   Create boolean
