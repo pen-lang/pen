@@ -18,6 +18,10 @@ Feature: Generating documentation for a package
     """
     When I run the following script:
     """sh
-    pen document Foo > Foo.md
+    pen document \
+      --name Foo \
+      --url https://github.com/foo/foo \
+      --description "This package is cool." \
+      > Foo.md
     """
     Then a file named "Foo.md" should contain "`Foo` package"
