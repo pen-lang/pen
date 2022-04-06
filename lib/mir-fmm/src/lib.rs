@@ -19,7 +19,7 @@ mod yield_;
 pub use configuration::Configuration;
 use context::Context;
 use declarations::compile_declaration;
-use definitions::compile_definition;
+use definitions::compile_function_definition;
 pub use error::CompileError;
 use fnv::FnvHashMap;
 use foreign_declarations::compile_foreign_declaration;
@@ -60,7 +60,7 @@ pub fn compile(
     let global_variables = compile_global_variables(&module, context.types())?;
 
     for definition in module.definitions() {
-        compile_definition(&context, definition, &global_variables)?;
+        compile_function_definition(&context, definition, &global_variables)?;
     }
 
     let function_types = module

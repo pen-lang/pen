@@ -37,7 +37,7 @@ pub fn compile(context: &CompileContext, module: &Module) -> Result<mir::ir::Mod
             }))
             .collect::<Result<_, _>>()?,
         module
-            .definitions()
+            .function_definitions()
             .iter()
             .flat_map(|definition| {
                 definition
@@ -52,14 +52,14 @@ pub fn compile(context: &CompileContext, module: &Module) -> Result<mir::ir::Mod
             })
             .collect(),
         module
-            .declarations()
+            .function_declarations()
             .iter()
             .map(|declaration| compile_declaration(declaration, context))
             .collect::<Result<_, _>>()?,
         module
-            .definitions()
+            .function_definitions()
             .iter()
-            .map(|definition| compile_definition(definition, context))
+            .map(|definition| compile_function_definition(definition, context))
             .collect::<Result<Vec<_>, CompileError>>()?,
     ))
 }
@@ -97,8 +97,8 @@ fn compile_declaration(
     ))
 }
 
-fn compile_definition(
-    definition: &Definition,
+fn compile_function_definition(
+    definition: &FunctionDefinition,
     context: &CompileContext,
 ) -> Result<mir::ir::Definition, CompileError> {
     let body = expression_compiler::compile(definition.lambda().body(), context)?;
@@ -147,7 +147,7 @@ mod tests {
     #[test]
     fn compile_foreign_definition() {
         assert_eq!(
-            compile_module(&Module::empty().set_definitions(vec![Definition::new(
+            compile_module(&Module::empty().set_definitions(vec![FunctionDefinition::new(
                 "foo",
                 "bar",
                 Lambda::new(
@@ -184,7 +184,7 @@ mod tests {
     #[test]
     fn compile_foreign_definition_with_c_calling_convention() {
         assert_eq!(
-            compile_module(&Module::empty().set_definitions(vec![Definition::new(
+            compile_module(&Module::empty().set_definitions(vec![FunctionDefinition::new(
                 "foo",
                 "bar",
                 Lambda::new(

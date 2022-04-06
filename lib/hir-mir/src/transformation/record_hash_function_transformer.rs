@@ -43,13 +43,13 @@ pub fn transform(context: &CompileContext, module: &Module) -> Result<Module, Co
         module.type_aliases().to_vec(),
         module.foreign_declarations().to_vec(),
         module
-            .declarations()
+            .function_declarations()
             .iter()
             .cloned()
             .chain(function_declarations)
             .collect(),
         module
-            .definitions()
+            .function_definitions()
             .iter()
             .cloned()
             .chain(function_definitions)
@@ -61,14 +61,14 @@ pub fn transform(context: &CompileContext, module: &Module) -> Result<Module, Co
 fn compile_hash_function_definition(
     context: &CompileContext,
     type_definition: &TypeDefinition,
-) -> Result<Definition, CompileError> {
+) -> Result<FunctionDefinition, CompileError> {
     let position = type_definition.position();
     let record_type = types::Record::new(type_definition.name(), position.clone());
     let function_name = record_type_information_compiler::compile_hash_function_name(&record_type);
     let hash_type = compile_hash_type(position);
     let configuration = &context.configuration()?.map_type.hash;
 
-    Ok(Definition::new(
+    Ok(FunctionDefinition::new(
         &function_name,
         &function_name,
         Lambda::new(
@@ -183,7 +183,7 @@ mod tests {
             transform_module(&Module::empty().set_type_definitions(vec![type_definition.clone()])),
             Ok(Module::empty()
                 .set_type_definitions(vec![type_definition])
-                .set_definitions(vec![Definition::new(
+                .set_definitions(vec![FunctionDefinition::new(
                     "foo.$hash",
                     "foo.$hash",
                     Lambda::new(

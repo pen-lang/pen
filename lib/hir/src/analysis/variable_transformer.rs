@@ -5,9 +5,9 @@ pub fn transform(module: &Module, transform: &dyn Fn(&Variable) -> Expression) -
         module.type_definitions().to_vec(),
         module.type_aliases().to_vec(),
         module.foreign_declarations().to_vec(),
-        module.declarations().to_vec(),
+        module.function_declarations().to_vec(),
         module
-            .definitions()
+            .function_definitions()
             .iter()
             .map(|definition| transform_definition(definition, transform))
             .collect(),
@@ -16,10 +16,10 @@ pub fn transform(module: &Module, transform: &dyn Fn(&Variable) -> Expression) -
 }
 
 fn transform_definition(
-    definition: &Definition,
+    definition: &FunctionDefinition,
     transform: &dyn Fn(&Variable) -> Expression,
-) -> Definition {
-    Definition::new(
+) -> FunctionDefinition {
+    FunctionDefinition::new(
         definition.name(),
         definition.original_name(),
         transform_lambda(definition.lambda(), transform),
@@ -320,7 +320,7 @@ fn transform_operation(
 mod tests {
     use super::*;
     use crate::{
-        test::{DefinitionFake, ModuleFake},
+        test::{FunctionDefinitionFake, ModuleFake},
         types,
     };
     use position::{test::PositionFake, Position};
@@ -330,7 +330,7 @@ mod tests {
     fn transform_variable() {
         assert_eq!(
             transform(
-                &Module::empty().set_definitions(vec![Definition::fake(
+                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
                     "x",
                     Lambda::new(
                         vec![],
@@ -346,7 +346,7 @@ mod tests {
                     variable.clone().into()
                 }
             ),
-            Module::empty().set_definitions(vec![Definition::fake(
+            Module::empty().set_definitions(vec![FunctionDefinition::fake(
                 "x",
                 Lambda::new(
                     vec![],
@@ -361,7 +361,7 @@ mod tests {
 
     #[test]
     fn do_not_transform_variable_shadowed_by_argument() {
-        let module = Module::empty().set_definitions(vec![Definition::fake(
+        let module = Module::empty().set_definitions(vec![FunctionDefinition::fake(
             "x",
             Lambda::new(
                 vec![Argument::new("x", types::None::new(Position::fake()))],
@@ -384,7 +384,7 @@ mod tests {
 
     #[test]
     fn do_not_transform_variable_shadowed_by_statement() {
-        let module = Module::empty().set_definitions(vec![Definition::fake(
+        let module = Module::empty().set_definitions(vec![FunctionDefinition::fake(
             "x",
             Lambda::new(
                 vec![],
@@ -413,7 +413,7 @@ mod tests {
 
     #[test]
     fn do_not_transform_shadowed_variable_in_let() {
-        let module = Module::empty().set_definitions(vec![Definition::fake(
+        let module = Module::empty().set_definitions(vec![FunctionDefinition::fake(
             "x",
             Lambda::new(
                 vec![],
@@ -442,7 +442,7 @@ mod tests {
 
     #[test]
     fn do_not_transform_shadowed_variable_in_list_comprehension() {
-        let module = Module::empty().set_definitions(vec![Definition::fake(
+        let module = Module::empty().set_definitions(vec![FunctionDefinition::fake(
             "x",
             Lambda::new(
                 vec![],

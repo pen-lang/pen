@@ -12,7 +12,7 @@ pub fn validate(context: &CompileContext, module: &Module) -> Result<(), Compile
         validate_foreign_declaration(context, declaration)?;
     }
 
-    for definition in module.definitions() {
+    for definition in module.function_definitions() {
         validate_definition(context, definition)?;
     }
 
@@ -40,7 +40,7 @@ fn validate_foreign_declaration(
 
 fn validate_definition(
     context: &CompileContext,
-    definition: &Definition,
+    definition: &FunctionDefinition,
 ) -> Result<(), CompileError> {
     if definition.foreign_definition_configuration().is_none() {
         return Ok(());
@@ -125,19 +125,21 @@ mod tests {
     #[test]
     fn fail_to_validate_definition_argument() {
         assert_eq!(
-            validate_module(&Module::empty().set_definitions(vec![Definition::new(
-                "f",
-                "f",
-                Lambda::new(
-                    vec![Argument::new("x", types::Any::new(Position::fake()))],
-                    types::None::new(Position::fake()),
-                    None::new(Position::fake()),
+            validate_module(
+                &Module::empty().set_definitions(vec![FunctionDefinition::new(
+                    "f",
+                    "f",
+                    Lambda::new(
+                        vec![Argument::new("x", types::Any::new(Position::fake()))],
+                        types::None::new(Position::fake()),
+                        None::new(Position::fake()),
+                        Position::fake(),
+                    ),
+                    Some(ForeignDefinitionConfiguration::new(CallingConvention::C)),
+                    false,
                     Position::fake(),
-                ),
-                Some(ForeignDefinitionConfiguration::new(CallingConvention::C)),
-                false,
-                Position::fake(),
-            )])),
+                )])
+            ),
             Err(CompileError::VariantTypeInFfi(Position::fake()))
         );
     }
@@ -145,19 +147,21 @@ mod tests {
     #[test]
     fn fail_to_validate_definition_return_value() {
         assert_eq!(
-            validate_module(&Module::empty().set_definitions(vec![Definition::new(
-                "f",
-                "f",
-                Lambda::new(
-                    vec![],
-                    types::Any::new(Position::fake()),
-                    None::new(Position::fake()),
+            validate_module(
+                &Module::empty().set_definitions(vec![FunctionDefinition::new(
+                    "f",
+                    "f",
+                    Lambda::new(
+                        vec![],
+                        types::Any::new(Position::fake()),
+                        None::new(Position::fake()),
+                        Position::fake(),
+                    ),
+                    Some(ForeignDefinitionConfiguration::new(CallingConvention::C)),
+                    false,
                     Position::fake(),
-                ),
-                Some(ForeignDefinitionConfiguration::new(CallingConvention::C)),
-                false,
-                Position::fake(),
-            )])),
+                )])
+            ),
             Err(CompileError::VariantTypeInFfi(Position::fake()))
         );
     }
@@ -165,19 +169,21 @@ mod tests {
     #[test]
     fn validate_non_foreign_definition() {
         assert_eq!(
-            validate_module(&Module::empty().set_definitions(vec![Definition::new(
-                "f",
-                "f",
-                Lambda::new(
-                    vec![],
-                    types::Any::new(Position::fake()),
-                    None::new(Position::fake()),
+            validate_module(
+                &Module::empty().set_definitions(vec![FunctionDefinition::new(
+                    "f",
+                    "f",
+                    Lambda::new(
+                        vec![],
+                        types::Any::new(Position::fake()),
+                        None::new(Position::fake()),
+                        Position::fake(),
+                    ),
+                    None,
+                    false,
                     Position::fake(),
-                ),
-                None,
-                false,
-                Position::fake(),
-            )])),
+                )])
+            ),
             Ok(())
         );
     }
