@@ -22,6 +22,7 @@ exclude = [
   "cmd/test",
   "examples",
   "lib/core",
+  "lib/flag",
   "lib/prelude",
   "lib/os",
   "lib/os-sync",
