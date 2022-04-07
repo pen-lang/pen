@@ -13,11 +13,12 @@ run apt update --fix-missing && apt install -y \
 	software-properties-common \
 	wget
 run curl -fsSL https://apt.llvm.org/llvm.sh | bash /dev/stdin 14
+run useradd -mG sudo penguin
+
+user penguin
+
 run curl --proto =https --tlsv1.2 -sSf https://sh.rustup.rs | sh /dev/stdin -y
 run . ~/.cargo/env && cargo install sccache turtle-build
-
-run useradd -mG sudo penguin
-user penguin
 
 copy . /home/penguin/pen
 
