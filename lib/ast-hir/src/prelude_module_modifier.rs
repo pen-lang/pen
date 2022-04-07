@@ -32,12 +32,12 @@ pub fn modify(module: &Module) -> Module {
             })
             .collect(),
         module.foreign_declarations().to_vec(),
-        module.declarations().to_vec(),
+        module.function_declarations().to_vec(),
         module
-            .definitions()
+            .function_definitions()
             .iter()
             .map(|definition| {
-                Definition::new(
+                FunctionDefinition::new(
                     definition.name(),
                     definition.original_name(),
                     definition.lambda().clone(),

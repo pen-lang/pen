@@ -8,7 +8,7 @@ const CLOSURE_NAME: &str = "_closure";
 
 pub fn compile(
     context: &Context,
-    definition: &mir::ir::Definition,
+    definition: &mir::ir::FunctionDefinition,
     global: bool,
     variables: &FnvHashMap<String, fmm::build::TypedExpression>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
@@ -21,7 +21,7 @@ pub fn compile(
 
 fn compile_non_thunk(
     context: &Context,
-    definition: &mir::ir::Definition,
+    definition: &mir::ir::FunctionDefinition,
     global: bool,
     variables: &FnvHashMap<String, fmm::build::TypedExpression>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
@@ -43,7 +43,7 @@ fn compile_non_thunk(
 
 fn compile_thunk(
     context: &Context,
-    definition: &mir::ir::Definition,
+    definition: &mir::ir::FunctionDefinition,
     global: bool,
     variables: &FnvHashMap<String, fmm::build::TypedExpression>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
@@ -60,7 +60,7 @@ fn compile_thunk(
 fn compile_body(
     context: &Context,
     instruction_builder: &fmm::build::InstructionBuilder,
-    definition: &mir::ir::Definition,
+    definition: &mir::ir::FunctionDefinition,
     global: bool,
     variables: &FnvHashMap<String, fmm::build::TypedExpression>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
@@ -117,7 +117,7 @@ fn compile_body(
 
 fn compile_initial_thunk_entry(
     context: &Context,
-    definition: &mir::ir::Definition,
+    definition: &mir::ir::FunctionDefinition,
     global: bool,
     normal_entry_function: fmm::build::TypedExpression,
     lock_entry_function: fmm::build::TypedExpression,
@@ -224,7 +224,7 @@ fn compile_initial_thunk_entry(
 
 fn compile_normal_thunk_entry(
     context: &Context,
-    definition: &mir::ir::Definition,
+    definition: &mir::ir::FunctionDefinition,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     context.module_builder().define_anonymous_function(
         compile_arguments(definition, context.types()),
@@ -238,7 +238,7 @@ fn compile_normal_thunk_entry(
 
 fn compile_locked_thunk_entry(
     context: &Context,
-    definition: &mir::ir::Definition,
+    definition: &mir::ir::FunctionDefinition,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     let entry_function_name = context.module_builder().generate_name();
     let entry_function = fmm::build::variable(
@@ -295,7 +295,7 @@ fn compile_locked_thunk_entry(
 
 fn compile_normal_body(
     instruction_builder: &fmm::build::InstructionBuilder,
-    definition: &mir::ir::Definition,
+    definition: &mir::ir::FunctionDefinition,
     types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::ir::Block, CompileError> {
     let value = reference_count::clone_expression(
@@ -316,21 +316,21 @@ fn compile_normal_body(
 }
 
 fn compile_entry_function_pointer(
-    definition: &mir::ir::Definition,
+    definition: &mir::ir::FunctionDefinition,
     types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     closures::compile_entry_function_pointer(compile_closure_pointer(definition.type_(), types)?)
 }
 
 fn compile_drop_function_pointer(
-    definition: &mir::ir::Definition,
+    definition: &mir::ir::FunctionDefinition,
     types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     closures::compile_drop_function_pointer(compile_closure_pointer(definition.type_(), types)?)
 }
 
 fn compile_arguments(
-    definition: &mir::ir::Definition,
+    definition: &mir::ir::FunctionDefinition,
     types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> Vec<fmm::ir::Argument> {
     [fmm::ir::Argument::new(
@@ -352,14 +352,14 @@ fn compile_argument_variables(arguments: &[fmm::ir::Argument]) -> Vec<fmm::build
 }
 
 fn compile_thunk_value_pointer(
-    definition: &mir::ir::Definition,
+    definition: &mir::ir::FunctionDefinition,
     types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     Ok(fmm::build::union_address(compile_payload_pointer(definition, types)?, 1)?.into())
 }
 
 fn compile_environment_pointer(
-    definition: &mir::ir::Definition,
+    definition: &mir::ir::FunctionDefinition,
     types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     let payload_pointer = compile_payload_pointer(definition, types)?;
@@ -372,7 +372,7 @@ fn compile_environment_pointer(
 }
 
 fn compile_payload_pointer(
-    definition: &mir::ir::Definition,
+    definition: &mir::ir::FunctionDefinition,
     types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     closures::compile_payload_pointer(fmm::build::bit_cast(
@@ -411,11 +411,11 @@ mod tests {
 
         compile(
             &context,
-            &mir::ir::Definition::new(
+            &mir::ir::FunctionDefinition::new(
                 "f",
                 vec![],
                 mir::ir::LetRecursive::new(
-                    mir::ir::Definition::new(
+                    mir::ir::FunctionDefinition::new(
                         "g",
                         vec![],
                         mir::ir::Call::new(

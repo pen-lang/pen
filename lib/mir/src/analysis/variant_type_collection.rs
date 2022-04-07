@@ -3,13 +3,13 @@ use fnv::FnvHashSet;
 
 pub fn collect_variant_types(module: &Module) -> FnvHashSet<Type> {
     module
-        .definitions()
+        .function_definitions()
         .iter()
         .flat_map(collect_from_definition)
         .collect()
 }
 
-fn collect_from_definition(definition: &Definition) -> FnvHashSet<Type> {
+fn collect_from_definition(definition: &FunctionDefinition) -> FnvHashSet<Type> {
     collect_from_expression(definition.body())
 }
 
@@ -100,7 +100,7 @@ mod tests {
                 vec![],
                 vec![],
                 vec![],
-                vec![Definition::new(
+                vec![FunctionDefinition::new(
                     "f",
                     vec![],
                     Case::new(Variant::new(Type::Number, Variable::new("x")), vec![], None),
@@ -119,7 +119,7 @@ mod tests {
                 vec![],
                 vec![],
                 vec![],
-                vec![Definition::new(
+                vec![FunctionDefinition::new(
                     "f",
                     vec![Argument::new("x", Type::Variant)],
                     TryOperation::new(
@@ -143,7 +143,7 @@ mod tests {
                 vec![],
                 vec![],
                 vec![],
-                vec![Definition::new(
+                vec![FunctionDefinition::new(
                     "f",
                     vec![Argument::new("x", Type::Variant)],
                     TryOperation::new(

@@ -1,3 +1,6 @@
+# This module provides common list operations.
+
+# Calculate a length of a list.
 Length = \(xs [any]) number {
   lengthRecursive(xs, 0)
 }
@@ -10,6 +13,7 @@ lengthRecursive = \(xs [any], n number) number {
   }
 }
 
+# Get the first element in a list. If a list is empty, it returns a fallback value.
 First = \(xs [any], fallback any) any {
   if [x, ..._] = xs {
     x()
@@ -18,6 +22,7 @@ First = \(xs [any], fallback any) any {
   }
 }
 
+# Get the last element in a list. If a list is empty, it returns a fallback value.
 Last = \(xs [any], fallback any) any {
   if [x, ...xs] = xs {
     last(xs, x)
@@ -34,6 +39,7 @@ last = \(xs [any], x \() any) any {
   }
 }
 
+# Convert a list of an `any` type to one of a `number` type skipping non-`number` types.
 ToNumbers = \(xs [any]) [number] {
   if [x, ...xs] = xs {
     if x = x() as number {
@@ -46,6 +52,7 @@ ToNumbers = \(xs [any]) [number] {
   }
 }
 
+# Convert a list of an `any` type to one of a `string` type skipping non-`string` types.
 ToStrings = \(xs [any]) [string] {
   if [x, ...xs] = xs {
     if x = x() as string {
@@ -55,5 +62,18 @@ ToStrings = \(xs [any]) [string] {
     }
   } else {
     [string]
+  }
+}
+
+# Convert a list of an `any` type to one of a `boolean` type skipping non-`boolean` types.
+ToBooleans = \(xs [any]) [boolean] {
+  if [x, ...xs] = xs {
+    if x = x() as boolean {
+      [boolean x, ...ToBooleans(xs)]
+    } else {
+      ToBooleans(xs)
+    }
+  } else {
+    [boolean]
   }
 }

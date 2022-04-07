@@ -11,7 +11,7 @@ mod string_compiler;
 use error::CompileError;
 use fnv::FnvHashMap;
 use hir::{
-    analysis::{definition_qualifier, type_qualifier},
+    analysis::{function_definition_qualifier, type_qualifier},
     ir,
 };
 use imported_module::ImportedModule;
@@ -39,7 +39,7 @@ pub fn compile(
     let module = module_compiler::compile(module)?;
     let module = import_compiler::compile(&module, &imported_modules, prelude_module_interfaces);
 
-    let module = definition_qualifier::qualify(&module, prefix);
+    let module = function_definition_qualifier::qualify(&module, prefix);
     let module = type_qualifier::qualify(&module, prefix);
 
     Ok(module)
@@ -47,7 +47,7 @@ pub fn compile(
 
 pub fn compile_prelude(module: &ast::Module, prefix: &str) -> Result<ir::Module, CompileError> {
     let module = module_compiler::compile(module)?;
-    let module = definition_qualifier::qualify(&module, prefix);
+    let module = function_definition_qualifier::qualify(&module, prefix);
     let module = type_qualifier::qualify(&module, prefix);
     let module = prelude_module_modifier::modify(&module);
 

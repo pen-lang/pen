@@ -32,13 +32,13 @@ fn check_functions(module: &Module) -> Result<(), TypeCheckError> {
         .map(|declaration| declaration.name())
         .chain(
             module
-                .declarations()
+                .function_declarations()
                 .iter()
                 .map(|declaration| declaration.name()),
         )
         .chain(
             module
-                .definitions()
+                .function_definitions()
                 .iter()
                 .map(|definition| definition.name()),
         )
@@ -93,13 +93,13 @@ mod tests {
             vec![],
             vec![],
             vec![
-                Definition::new(
+                FunctionDefinition::new(
                     "f",
                     vec![Argument::new("x", Type::Number)],
                     Variable::new("x"),
                     Type::Number,
                 ),
-                Definition::new(
+                FunctionDefinition::new(
                     "f",
                     vec![Argument::new("x", Type::Number)],
                     Variable::new("x"),
@@ -126,7 +126,7 @@ mod tests {
             )],
             vec![],
             vec![],
-            vec![Definition::new(
+            vec![FunctionDefinition::new(
                 "f",
                 vec![Argument::new("x", Type::Number)],
                 Variable::new("x"),
@@ -146,11 +146,11 @@ mod tests {
             vec![],
             vec![],
             vec![],
-            vec![Declaration::new(
+            vec![FunctionDeclaration::new(
                 "f",
                 types::Function::new(vec![Type::Number], Type::Number),
             )],
-            vec![Definition::new(
+            vec![FunctionDefinition::new(
                 "f",
                 vec![Argument::new("x", Type::Number)],
                 Variable::new("x"),

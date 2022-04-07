@@ -1,3 +1,4 @@
+# A TCP listener to listen for client connections
 type Listener {
   inner any
 }

@@ -1,6 +1,6 @@
-import 'Context { Context }
-import 'File'OpenOptions { OpenOptions }
+import 'Context'context { Context }
 import 'File'Metadata { Metadata }
+import 'File'OpenOptions { OpenOptions }
 import 'normalFile { NormalFile }
 
 type File {
@@ -8,7 +8,9 @@ type File {
 }
 
 type stdIn {}
+
 type stdOut {}
+
 type stdErr {}
 
 type specialFile = stdIn | stdOut | stdErr
@@ -26,7 +28,7 @@ StdErr = \() File {
 }
 
 OpenWithOptions = \(ctx Context, path string, opt OpenOptions) File | error {
-  r = Context'Inner(ctx).OpenFile(path, opt)
+  r = context'Inner(ctx).OpenFile(path, opt)
 
   if r.Error == "" {
     File{inner: r.File}
@@ -39,19 +41,19 @@ Open = \(ctx Context, path string) File | error {
   OpenWithOptions(
     ctx,
     path,
-    OpenOptions{...OpenOptions'Default(), Read: true}
+    OpenOptions{...OpenOptions'Default(), Read: true},
   )
 }
 
 Read = \(ctx Context, file File) string | error {
   r = if f = file.inner as stdIn {
-    Context'Inner(ctx).ReadStdIn()
+    context'Inner(ctx).ReadStdIn()
   } else if stdOut {
     error("cannot read from stdout")
   } else if stdErr {
     error("cannot read from stderr")
   } else if NormalFile {
-    Context'Inner(ctx).ReadFile(f)
+    context'Inner(ctx).ReadFile(f)
   }?
 
   if r.Error == "" {
@@ -63,13 +65,13 @@ Read = \(ctx Context, file File) string | error {
 
 ReadLimit = \(ctx Context, file File, limit number) string | error {
   r = if f = file.inner as stdIn {
-    Context'Inner(ctx).ReadLimitStdIn(limit)
+    context'Inner(ctx).ReadLimitStdIn(limit)
   } else if stdOut {
     error("cannot read from stdout")
   } else if stdErr {
     error("cannot read from stderr")
   } else if NormalFile {
-    Context'Inner(ctx).ReadLimitFile(f, limit)
+    context'Inner(ctx).ReadLimitFile(f, limit)
   }?
 
   if r.Error == "" {
@@ -80,7 +82,7 @@ ReadLimit = \(ctx Context, file File, limit number) string | error {
 }
 
 Write = \(ctx Context, file File, data string) number | error {
-  inner = Context'Inner(ctx)
+  inner = context'Inner(ctx)
 
   r = if f = file.inner as stdIn {
     error("cannot write to stdin")
@@ -100,7 +102,7 @@ Write = \(ctx Context, file File, data string) number | error {
 }
 
 Copy = \(ctx Context, src string, dest string) none | error {
-  r = Context'Inner(ctx).CopyFile(src, dest)
+  r = context'Inner(ctx).CopyFile(src, dest)
 
   if r.Error == "" {
     none
@@ -110,7 +112,7 @@ Copy = \(ctx Context, src string, dest string) none | error {
 }
 
 Move = \(ctx Context, src string, dest string) none | error {
-  r = Context'Inner(ctx).MoveFile(src, dest)
+  r = context'Inner(ctx).MoveFile(src, dest)
 
   if r.Error == "" {
     none
@@ -120,7 +122,7 @@ Move = \(ctx Context, src string, dest string) none | error {
 }
 
 Remove = \(ctx Context, path string) none | error {
-  r = Context'Inner(ctx).RemoveFile(path)
+  r = context'Inner(ctx).RemoveFile(path)
 
   if r.Error == "" {
     none
@@ -130,7 +132,7 @@ Remove = \(ctx Context, path string) none | error {
 }
 
 Metadata = \(ctx Context, path string) Metadata | error {
-  r = Context'Inner(ctx).Metadata(path)
+  r = context'Inner(ctx).Metadata(path)
 
   if r.Error == "" {
     r.Metadata

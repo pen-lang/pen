@@ -85,7 +85,7 @@ fn find_in_case(case: &Case) -> FnvHashSet<String> {
         .collect()
 }
 
-fn find_in_definition(definition: &Definition) -> FnvHashSet<String> {
+fn find_in_definition(definition: &FunctionDefinition) -> FnvHashSet<String> {
     find_in_expression(definition.body())
         .into_iter()
         .filter(|variable| {

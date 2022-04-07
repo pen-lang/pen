@@ -1,4 +1,6 @@
-use super::{definition::Definition, type_definition::TypeDefinition, ForeignImport, Import};
+use super::{
+    function_definition::FunctionDefinition, type_definition::TypeDefinition, ForeignImport, Import,
+};
 use position::Position;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -6,7 +8,7 @@ pub struct Module {
     imports: Vec<Import>,
     foreign_imports: Vec<ForeignImport>,
     type_definitions: Vec<TypeDefinition>,
-    definitions: Vec<Definition>,
+    function_definitions: Vec<FunctionDefinition>,
     position: Position,
 }
 
@@ -15,14 +17,14 @@ impl Module {
         imports: Vec<Import>,
         foreign_imports: Vec<ForeignImport>,
         type_definitions: Vec<TypeDefinition>,
-        definitions: Vec<Definition>,
+        function_definitions: Vec<FunctionDefinition>,
         position: Position,
     ) -> Self {
         Self {
             imports,
             foreign_imports,
             type_definitions,
-            definitions,
+            function_definitions,
             position,
         }
     }
@@ -39,8 +41,8 @@ impl Module {
         &self.type_definitions
     }
 
-    pub fn definitions(&self) -> &[Definition] {
-        &self.definitions
+    pub fn function_definitions(&self) -> &[FunctionDefinition] {
+        &self.function_definitions
     }
 
     pub fn position(&self) -> &Position {

@@ -3,14 +3,14 @@ use crate::ir::*;
 use fnv::{FnvHashMap, FnvHashSet};
 
 pub fn validate(module: &Module) -> Result<(), ReferenceCountError> {
-    for definition in module.definitions() {
+    for definition in module.function_definitions() {
         validate_global_definition(definition)?;
     }
 
     Ok(())
 }
 
-fn validate_global_definition(definition: &Definition) -> Result<(), ReferenceCountError> {
+fn validate_global_definition(definition: &FunctionDefinition) -> Result<(), ReferenceCountError> {
     validate_definition_body(
         definition.body(),
         collect_definition_local_variables(definition)
@@ -20,7 +20,7 @@ fn validate_global_definition(definition: &Definition) -> Result<(), ReferenceCo
     )
 }
 
-fn validate_local_definition(definition: &Definition) -> Result<(), ReferenceCountError> {
+fn validate_local_definition(definition: &FunctionDefinition) -> Result<(), ReferenceCountError> {
     validate_definition_body(
         definition.body(),
         [definition.name().into()]
@@ -31,7 +31,7 @@ fn validate_local_definition(definition: &Definition) -> Result<(), ReferenceCou
     )
 }
 
-fn collect_definition_local_variables(definition: &Definition) -> FnvHashSet<String> {
+fn collect_definition_local_variables(definition: &FunctionDefinition) -> FnvHashSet<String> {
     definition
         .environment()
         .iter()
@@ -257,7 +257,12 @@ mod tests {
             vec![],
             vec![],
             vec![],
-            vec![Definition::new("f", vec![], Expression::None, Type::None)],
+            vec![FunctionDefinition::new(
+                "f",
+                vec![],
+                Expression::None,
+                Type::None,
+            )],
         ))
         .unwrap();
     }
@@ -269,7 +274,7 @@ mod tests {
             vec![],
             vec![],
             vec![],
-            vec![Definition::new(
+            vec![FunctionDefinition::new(
                 "f",
                 vec![Argument::new("x", Type::Number)],
                 CloneVariables::new(
@@ -293,7 +298,7 @@ mod tests {
             vec![],
             vec![],
             vec![],
-            vec![Definition::new(
+            vec![FunctionDefinition::new(
                 "f",
                 vec![Argument::new("x", Type::None)],
                 DropVariables::new(
@@ -314,7 +319,7 @@ mod tests {
                 vec![],
                 vec![],
                 vec![],
-                vec![Definition::new(
+                vec![FunctionDefinition::new(
                     "f",
                     vec![Argument::new("x", Type::None)],
                     Expression::None,
@@ -334,7 +339,7 @@ mod tests {
             vec![],
             vec![],
             vec![],
-            vec![Definition::new(
+            vec![FunctionDefinition::new(
                 "f",
                 vec![Argument::new("x", Type::None)],
                 Variable::new("x"),
@@ -351,7 +356,7 @@ mod tests {
             vec![],
             vec![],
             vec![],
-            vec![Definition::new(
+            vec![FunctionDefinition::new(
                 "f",
                 vec![Argument::new("x", Type::None)],
                 Let::new("y", Type::None, Variable::new("x"), Variable::new("y")),
@@ -369,7 +374,7 @@ mod tests {
                 vec![],
                 vec![],
                 vec![],
-                vec![Definition::new(
+                vec![FunctionDefinition::new(
                     "f",
                     vec![Argument::new("x", Type::None)],
                     Let::new("y", Type::None, Variable::new("x"), Expression::None),
@@ -387,7 +392,7 @@ mod tests {
             vec![],
             vec![],
             vec![],
-            vec![Definition::new(
+            vec![FunctionDefinition::new(
                 "f",
                 vec![Argument::new("x", Type::None)],
                 Let::new("x", Type::None, Variable::new("x"), Variable::new("x")),
@@ -405,7 +410,7 @@ mod tests {
                 vec![],
                 vec![],
                 vec![],
-                vec![Definition::new(
+                vec![FunctionDefinition::new(
                     "f",
                     vec![Argument::new("x", Type::None)],
                     Let::new("x", Type::None, Variable::new("x"), Expression::None),
@@ -423,11 +428,11 @@ mod tests {
             vec![],
             vec![],
             vec![],
-            vec![Definition::new(
+            vec![FunctionDefinition::new(
                 "f",
                 vec![Argument::new("x", Type::None)],
                 LetRecursive::new(
-                    Definition::with_options(
+                    FunctionDefinition::with_options(
                         "g",
                         vec![Argument::new("x", Type::None)],
                         vec![],
@@ -456,11 +461,11 @@ mod tests {
                 vec![],
                 vec![],
                 vec![],
-                vec![Definition::new(
+                vec![FunctionDefinition::new(
                     "f",
                     vec![Argument::new("x", Type::None)],
                     LetRecursive::new(
-                        Definition::with_options(
+                        FunctionDefinition::with_options(
                             "g",
                             vec![Argument::new("x", Type::None)],
                             vec![],
@@ -490,11 +495,11 @@ mod tests {
                 vec![],
                 vec![],
                 vec![],
-                vec![Definition::new(
+                vec![FunctionDefinition::new(
                     "f",
                     vec![Argument::new("x", Type::None)],
                     LetRecursive::new(
-                        Definition::with_options(
+                        FunctionDefinition::with_options(
                             "g",
                             vec![Argument::new("x", Type::None)],
                             vec![],
@@ -520,7 +525,7 @@ mod tests {
             vec![],
             vec![],
             vec![],
-            vec![Definition::new(
+            vec![FunctionDefinition::new(
                 "f",
                 vec![Argument::new("x", Type::None)],
                 If::new(
@@ -542,7 +547,7 @@ mod tests {
                 vec![],
                 vec![],
                 vec![],
-                vec![Definition::new(
+                vec![FunctionDefinition::new(
                     "f",
                     vec![Argument::new("x", Type::None)],
                     If::new(
@@ -567,7 +572,7 @@ mod tests {
             vec![],
             vec![],
             vec![],
-            vec![Definition::new(
+            vec![FunctionDefinition::new(
                 "f",
                 vec![Argument::new("x", Type::Variant)],
                 Case::new(
@@ -589,7 +594,7 @@ mod tests {
                 vec![],
                 vec![],
                 vec![],
-                vec![Definition::new(
+                vec![FunctionDefinition::new(
                     "f",
                     vec![Argument::new("x", Type::Variant)],
                     Case::new(
@@ -611,7 +616,7 @@ mod tests {
             vec![],
             vec![],
             vec![],
-            vec![Definition::new(
+            vec![FunctionDefinition::new(
                 "f",
                 vec![Argument::new("x", Type::Variant)],
                 Case::new(
@@ -633,7 +638,7 @@ mod tests {
                 vec![],
                 vec![],
                 vec![],
-                vec![Definition::new(
+                vec![FunctionDefinition::new(
                     "f",
                     vec![Argument::new("x", Type::Variant)],
                     Case::new(
@@ -655,7 +660,7 @@ mod tests {
             vec![],
             vec![],
             vec![],
-            vec![Definition::new(
+            vec![FunctionDefinition::new(
                 "f",
                 vec![Argument::new("x", Type::Variant)],
                 Case::new(
@@ -677,7 +682,7 @@ mod tests {
                 vec![],
                 vec![],
                 vec![],
-                vec![Definition::new(
+                vec![FunctionDefinition::new(
                     "f",
                     vec![Argument::new("x", Type::Variant)],
                     Case::new(
@@ -699,7 +704,7 @@ mod tests {
             vec![],
             vec![],
             vec![],
-            vec![Definition::new(
+            vec![FunctionDefinition::new(
                 "f",
                 vec![Argument::new("x", Type::Variant)],
                 Case::new(
@@ -724,7 +729,7 @@ mod tests {
                 vec![],
                 vec![],
                 vec![],
-                vec![Definition::new(
+                vec![FunctionDefinition::new(
                     "f",
                     vec![Argument::new("x", Type::Variant)],
                     Case::new(
@@ -749,7 +754,7 @@ mod tests {
             vec![],
             vec![],
             vec![],
-            vec![Definition::new(
+            vec![FunctionDefinition::new(
                 "f",
                 vec![Argument::new("x", Type::Variant)],
                 Case::new(
@@ -773,7 +778,7 @@ mod tests {
             vec![],
             vec![],
             vec![],
-            vec![Definition::new(
+            vec![FunctionDefinition::new(
                 "f",
                 vec![Argument::new("x", Type::Variant)],
                 TryOperation::new(
@@ -796,7 +801,7 @@ mod tests {
                 vec![],
                 vec![],
                 vec![],
-                vec![Definition::new(
+                vec![FunctionDefinition::new(
                     "f",
                     vec![Argument::new("x", Type::Variant)],
                     TryOperation::new(
@@ -820,7 +825,7 @@ mod tests {
                 vec![],
                 vec![],
                 vec![],
-                vec![Definition::new(
+                vec![FunctionDefinition::new(
                     "f",
                     vec![Argument::new("x", Type::Variant)],
                     TryOperation::new(
@@ -849,7 +854,7 @@ mod tests {
                 vec![],
                 vec![],
                 vec![],
-                vec![Definition::new(
+                vec![FunctionDefinition::new(
                     "f",
                     vec![Argument::new("x", Type::Variant)],
                     TryOperation::new(
@@ -875,7 +880,7 @@ mod tests {
                 vec![],
                 vec![],
                 vec![],
-                vec![Definition::new(
+                vec![FunctionDefinition::new(
                     "f",
                     vec![Argument::new("x", Type::Variant)],
                     TryOperation::new(
@@ -902,8 +907,8 @@ mod tests {
                 vec![],
                 vec![],
                 vec![
-                    Definition::new("f", vec![], Expression::None, Type::None,),
-                    Definition::new(
+                    FunctionDefinition::new("f", vec![], Expression::None, Type::None,),
+                    FunctionDefinition::new(
                         "g",
                         vec![],
                         Call::new(

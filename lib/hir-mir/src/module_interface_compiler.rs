@@ -31,11 +31,11 @@ pub fn compile(module: &ir::Module) -> Result<interface::Module, CompileError> {
             })
             .collect(),
         module
-            .definitions()
+            .function_definitions()
             .iter()
             .filter_map(|definition| {
                 if definition.is_public() {
-                    Some(interface::Declaration::new(
+                    Some(interface::FunctionDeclaration::new(
                         definition.name(),
                         definition.original_name(),
                         type_extractor::extract_from_lambda(definition.lambda()),
@@ -53,7 +53,7 @@ pub fn compile(module: &ir::Module) -> Result<interface::Module, CompileError> {
 mod tests {
     use super::*;
     use hir::{
-        test::{DefinitionFake, ModuleFake},
+        test::{FunctionDefinitionFake, ModuleFake},
         types,
     };
     use position::{test::PositionFake, Position};
@@ -70,7 +70,7 @@ mod tests {
     fn compile_without_private_declaration() {
         assert_eq!(
             compile(
-                &ir::Module::empty().set_definitions(vec![ir::Definition::fake(
+                &ir::Module::empty().set_definitions(vec![ir::FunctionDefinition::fake(
                     "foo",
                     ir::Lambda::new(
                         vec![],

@@ -14,10 +14,7 @@ pub fn compile(module: &ast::Module) -> Result<ir::Module, CompileError> {
                     definition.name(),
                     definition.name(),
                     definition.fields().to_vec(),
-                    definition
-                        .fields()
-                        .iter()
-                        .all(|field| ast::analysis::is_name_public(field.name())),
+                    ast::analysis::is_record_open(definition),
                     ast::analysis::is_name_public(definition.name()),
                     false,
                     definition.position().clone(),
@@ -55,16 +52,18 @@ pub fn compile(module: &ast::Module) -> Result<ir::Module, CompileError> {
             .collect(),
         vec![],
         module
-            .definitions()
+            .function_definitions()
             .iter()
-            .map(compile_definition)
+            .map(compile_function_definition)
             .collect::<Result<_, _>>()?,
         module.position().clone(),
     ))
 }
 
-fn compile_definition(definition: &ast::Definition) -> Result<ir::Definition, CompileError> {
-    Ok(ir::Definition::new(
+fn compile_function_definition(
+    definition: &ast::FunctionDefinition,
+) -> Result<ir::FunctionDefinition, CompileError> {
+    Ok(ir::FunctionDefinition::new(
         definition.name(),
         definition.name(),
         compile_lambda(definition.lambda())?,
@@ -427,7 +426,7 @@ mod tests {
                     )
                     .into()
                 ],
-                vec![ast::Definition::new(
+                vec![ast::FunctionDefinition::new(
                     "Foo3",
                     ast::Lambda::new(
                         vec![],
@@ -458,7 +457,7 @@ mod tests {
                     false,
                     Position::fake()
                 )])
-                .set_definitions(vec![ir::Definition::new(
+                .set_definitions(vec![ir::FunctionDefinition::new(
                     "Foo3",
                     "Foo3",
                     ir::Lambda::new(

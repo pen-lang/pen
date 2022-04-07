@@ -12,7 +12,7 @@ pub fn qualify(module: &Module, prefix: &str) -> Module {
                 prefix.to_owned() + declaration.name(),
             )
         })
-        .chain(module.definitions().iter().map(|definition| {
+        .chain(module.function_definitions().iter().map(|definition| {
             (
                 definition.name().into(),
                 prefix.to_owned() + definition.name(),
@@ -37,12 +37,12 @@ pub fn qualify(module: &Module, prefix: &str) -> Module {
                     )
                 })
                 .collect(),
-            module.declarations().to_vec(),
+            module.function_declarations().to_vec(),
             module
-                .definitions()
+                .function_definitions()
                 .iter()
                 .map(|definition| {
-                    Definition::new(
+                    FunctionDefinition::new(
                         names[definition.name()].clone(),
                         definition.original_name(),
                         definition.lambda().clone(),
@@ -62,7 +62,7 @@ pub fn qualify(module: &Module, prefix: &str) -> Module {
 mod tests {
     use super::*;
     use crate::{
-        test::{DefinitionFake, ModuleFake},
+        test::{FunctionDefinitionFake, ModuleFake},
         types,
     };
     use position::{test::PositionFake, Position};
@@ -72,7 +72,7 @@ mod tests {
     fn qualify_definition() {
         assert_eq!(
             qualify(
-                &Module::empty().set_definitions(vec![Definition::fake(
+                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
                     "x",
                     Lambda::new(
                         vec![],
@@ -84,7 +84,7 @@ mod tests {
                 )],),
                 "foo."
             ),
-            Module::empty().set_definitions(vec![Definition::fake(
+            Module::empty().set_definitions(vec![FunctionDefinition::fake(
                 "foo.x",
                 Lambda::new(
                     vec![],
@@ -101,7 +101,7 @@ mod tests {
     fn qualify_variable() {
         assert_eq!(
             qualify(
-                &Module::empty().set_definitions(vec![Definition::fake(
+                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
                     "x",
                     Lambda::new(
                         vec![],
@@ -113,7 +113,7 @@ mod tests {
                 )],),
                 "foo."
             ),
-            Module::empty().set_definitions(vec![Definition::fake(
+            Module::empty().set_definitions(vec![FunctionDefinition::fake(
                 "foo.x",
                 Lambda::new(
                     vec![],
@@ -130,7 +130,7 @@ mod tests {
     fn do_not_qualify_variable_shadowed_by_argument() {
         assert_eq!(
             qualify(
-                &Module::empty().set_definitions(vec![Definition::fake(
+                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
                     "x",
                     Lambda::new(
                         vec![Argument::new("x", types::None::new(Position::fake()))],
@@ -142,7 +142,7 @@ mod tests {
                 )],),
                 "foo."
             ),
-            Module::empty().set_definitions(vec![Definition::fake(
+            Module::empty().set_definitions(vec![FunctionDefinition::fake(
                 "foo.x",
                 Lambda::new(
                     vec![Argument::new("x", types::None::new(Position::fake()))],
@@ -159,7 +159,7 @@ mod tests {
     fn do_not_qualify_variable_shadowed_by_statement() {
         assert_eq!(
             qualify(
-                &Module::empty().set_definitions(vec![Definition::fake(
+                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
                     "x",
                     Lambda::new(
                         vec![],
@@ -177,7 +177,7 @@ mod tests {
                 )],),
                 "foo."
             ),
-            Module::empty().set_definitions(vec![Definition::fake(
+            Module::empty().set_definitions(vec![FunctionDefinition::fake(
                 "foo.x",
                 Lambda::new(
                     vec![],

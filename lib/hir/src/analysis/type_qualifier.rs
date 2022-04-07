@@ -63,8 +63,8 @@ pub fn qualify(module: &Module, prefix: &str) -> Module {
                 })
                 .collect(),
             module.foreign_declarations().to_vec(),
-            module.declarations().to_vec(),
-            module.definitions().to_vec(),
+            module.function_declarations().to_vec(),
+            module.function_definitions().to_vec(),
             module.position().clone(),
         ),
         |type_| match type_ {
