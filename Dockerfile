@@ -21,7 +21,7 @@ run git clone https://github.com/Homebrew/brew ~/.homebrew
 run ~/.homebrew/bin/brew shellenv >> ~/.profile
 run . ~/.profile && brew install hello
 
-run curl --proto =https --tlsv1.2 -sSf https://sh.rustup.rs | sh /dev/stdin -y
+run curl -fsSL https://sh.rustup.rs | sh /dev/stdin -y
 run . ~/.cargo/env && cargo install mdbook sccache turtle-build
 
 copy . /home/penguin/pen
