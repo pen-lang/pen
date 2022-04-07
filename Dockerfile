@@ -19,10 +19,10 @@ user penguin
 
 run git clone https://github.com/Homebrew/brew ~/.homebrew
 run ~/.homebrew/bin/brew shellenv >> ~/.profile
-run . ~/.profile && brew install sccache
+run . ~/.profile && brew install ruby
 
 run curl --proto =https --tlsv1.2 -sSf https://sh.rustup.rs | sh /dev/stdin -y
-run . ~/.cargo/env && cargo install turtle-build
+run . ~/.cargo/env && cargo install mdbook sccache turtle-build
 
 copy . /home/penguin/pen
 
@@ -31,3 +31,10 @@ env PEN_ROOT=/home/penguin/pen
 env PATH="/usr/lib/llvm-14/bin:$PATH"
 
 workdir /home/penguin/pen
+
+run tools/build.sh
+run tools/lint.sh
+run tools/format.sh
+run tools/unit_test.sh
+run tools/integration_test.sh
+run tools/build_documents.sh
