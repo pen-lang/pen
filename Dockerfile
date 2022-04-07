@@ -22,7 +22,7 @@ run ~/.homebrew/bin/brew shellenv >> ~/.profile
 run . ~/.profile && brew install hello
 
 run curl -fsSL https://sh.rustup.rs | sh /dev/stdin -y
-run . ~/.cargo/env && cargo install mdbook sccache turtle-build
+run . ~/.profile && cargo install mdbook sccache turtle-build
 
 copy . /home/penguin/pen
 
@@ -32,9 +32,9 @@ env PATH="/usr/lib/llvm-14/bin:$PATH"
 
 workdir /home/penguin/pen
 
-run tools/build.sh
-run tools/lint.sh
-run tools/format.sh
-run tools/unit_test.sh
-run tools/integration_test.sh
-run tools/build_documents.sh
+run . ~/.profile && tools/build.sh
+run . ~/.profile && tools/lint.sh
+run . ~/.profile && tools/format.sh
+run . ~/.profile && tools/unit_test.sh
+run . ~/.profile && tools/integration_test.sh
+run . ~/.profile && tools/build_documents.sh
