@@ -25,6 +25,7 @@ copy . /home/penguin/pen
 workdir /home/penguin/pen
 
 env LLVM_SYS_130_PREFIX=/usr/lib/llvm-14
-
 env PEN_ROOT=/root/pen
 env PATH="/usr/lib/llvm-14/bin:$PATH"
+
+run curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh | bash /dev/stdin
