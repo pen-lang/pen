@@ -1,4 +1,5 @@
+# UDP datagram
 type Datagram {
-	Data string
-	Address string
+  Data string
+  Address string
 }

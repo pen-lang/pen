@@ -2,9 +2,9 @@ use super::error::CompileError;
 use crate::{closures, context::Context, entry_functions, types};
 use fnv::FnvHashMap;
 
-pub fn compile_definition(
+pub fn compile_function_definition(
     context: &Context,
-    definition: &mir::ir::Definition,
+    definition: &mir::ir::FunctionDefinition,
     global_variables: &FnvHashMap<String, fmm::build::TypedExpression>,
 ) -> Result<(), CompileError> {
     context.module_builder().define_variable(

@@ -19,7 +19,7 @@ pub fn compile(
     let position = module.position();
 
     let definitions = module
-        .definitions()
+        .function_definitions()
         .iter()
         .filter(|definition| definition.is_public())
         .collect::<Vec<_>>();
@@ -29,9 +29,9 @@ pub fn compile(
             module.type_definitions().to_vec(),
             module.type_aliases().to_vec(),
             module.foreign_declarations().to_vec(),
-            module.declarations().to_vec(),
+            module.function_declarations().to_vec(),
             module
-                .definitions()
+                .function_definitions()
                 .iter()
                 .cloned()
                 .chain(
@@ -40,7 +40,7 @@ pub fn compile(
                         .map(|definition| {
                             let position = definition.position();
 
-                            Ok(Definition::new(
+                            Ok(FunctionDefinition::new(
                                 definition.name().to_owned() + TEST_FUNCTION_WRAPPER_SUFFIX,
                                 compile_foreign_name(definition.name(), configuration),
                                 Lambda::new(

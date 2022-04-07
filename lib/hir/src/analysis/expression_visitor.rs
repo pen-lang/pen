@@ -1,12 +1,12 @@
 use crate::ir::*;
 
 pub fn visit(module: &Module, mut visit: impl FnMut(&Expression)) {
-    for definition in module.definitions() {
+    for definition in module.function_definitions() {
         visit_definition(definition, &mut visit);
     }
 }
 
-fn visit_definition(definition: &Definition, visit: &mut impl FnMut(&Expression)) {
+fn visit_definition(definition: &FunctionDefinition, visit: &mut impl FnMut(&Expression)) {
     visit_lambda(definition.lambda(), visit)
 }
 

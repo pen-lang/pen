@@ -2,14 +2,14 @@ use super::{foreign_export::ForeignExport, lambda::Lambda};
 use position::Position;
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct Definition {
+pub struct FunctionDefinition {
     name: String,
     lambda: Lambda,
     foreign_export: Option<ForeignExport>,
     position: Position,
 }
 
-impl Definition {
+impl FunctionDefinition {
     pub fn new(
         name: impl Into<String>,
         lambda: Lambda,

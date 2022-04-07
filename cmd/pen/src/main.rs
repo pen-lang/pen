@@ -1,13 +1,16 @@
 mod application_configuration;
 mod compile_configuration;
 mod dependency_resolver;
+mod documentation_configuration;
 mod file_path_configuration;
 mod infrastructure;
 mod main_module_compiler;
 mod main_package_directory_finder;
 mod module_compiler;
+mod module_formatter;
 mod package_builder;
 mod package_creator;
+mod package_documentation_generator;
 mod package_formatter;
 mod package_test_information_compiler;
 mod prelude_module_compiler;
@@ -34,41 +37,74 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                 .short('v')
                 .long("verbose")
                 .global(true)
-                .help("Uses verbose output"),
+                .help("Use verbose output"),
         )
         .subcommand(
             clap::Command::new("build")
-                .about("Builds a package")
+                .about("Build a package")
                 .arg(build_target_triple_argument().possible_values(CROSS_COMPILE_TARGETS)),
         )
-        .subcommand(clap::Command::new("test").about("Tests modules in a package"))
+        .subcommand(clap::Command::new("test").about("Test modules in a package"))
         .subcommand(
             clap::Command::new("create")
-                .about("Creates a package")
+                .about("Create a package")
                 .arg(
                     clap::Arg::new("library")
                         .short('l')
                         .long("library")
-                        .help("Creates a library package instead of an application one"),
+                        .help("Create a library package instead of an application one"),
                 )
                 .arg(
                     clap::Arg::new("directory")
                         .required(true)
-                        .help("Sets a package directory"),
+                        .help("Set a package directory"),
                 ),
         )
         .subcommand(
-            clap::Command::new("format").about("Formats a package").arg(
-                clap::Arg::new("stdin")
-                    .long("stdin")
-                    .takes_value(false)
-                    .help("Formats stdin"),
-            ),
+            clap::Command::new("format")
+                .about("Format a package")
+                .arg(
+                    clap::Arg::new("check")
+                        .long("check")
+                        .takes_value(false)
+                        .help("Check if module files are formatted"),
+                )
+                .arg(
+                    clap::Arg::new("stdin")
+                        .long("stdin")
+                        .takes_value(false)
+                        .help("Format stdin"),
+                ),
+        )
+        .subcommand(
+            clap::Command::new("document")
+                .about("Generate documentation for a package")
+                .arg(
+                    clap::Arg::new("name")
+                        .long("name")
+                        .takes_value(true)
+                        .required(true)
+                        .help("Set a package name"),
+                )
+                .arg(
+                    clap::Arg::new("url")
+                        .long("url")
+                        .takes_value(true)
+                        .required(true)
+                        .help("Set a package URL"),
+                )
+                .arg(
+                    clap::Arg::new("description")
+                        .long("description")
+                        .takes_value(true)
+                        .required(true)
+                        .help("Set package description"),
+                ),
         )
         .subcommand(
             clap::Command::new("compile")
                 .hide(true)
-                .about("Compiles a module")
+                .about("Compile a module")
                 .arg(clap::Arg::new("source file").required(true))
                 .arg(clap::Arg::new("dependency file").required(true))
                 .arg(clap::Arg::new("object file").required(true))
@@ -78,7 +114,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         .subcommand(
             clap::Command::new("compile-main")
                 .hide(true)
-                .about("Compiles a main module")
+                .about("Compile a main module")
                 .arg(
                     clap::Arg::new("context interface file")
                         .short('c')
@@ -95,7 +131,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         .subcommand(
             clap::Command::new("compile-prelude")
                 .hide(true)
-                .about("Compiles a prelude module")
+                .about("Compile a prelude module")
                 .arg(clap::Arg::new("source file").required(true))
                 .arg(clap::Arg::new("object file").required(true))
                 .arg(clap::Arg::new("interface file").required(true))
@@ -104,7 +140,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         .subcommand(
             clap::Command::new("compile-test")
                 .hide(true)
-                .about("Compiles a test module")
+                .about("Compile a test module")
                 .arg(clap::Arg::new("source file").required(true))
                 .arg(clap::Arg::new("dependency file").required(true))
                 .arg(clap::Arg::new("object file").required(true))
@@ -114,7 +150,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         .subcommand(
             clap::Command::new("resolve-dependency")
                 .hide(true)
-                .about("Resolves module dependency")
+                .about("Resolve module dependency")
                 .arg(
                     clap::Arg::new("package directory")
                         .short('p')
@@ -145,7 +181,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         .subcommand(
             clap::Command::new("compile-package-test-information")
                 .hide(true)
-                .about("Compiles a package test information")
+                .about("Compile a package test information")
                 .arg(
                     clap::Arg::new("package test information file")
                         .short('o')
@@ -157,7 +193,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         .subcommand(
             clap::Command::new("link-test")
                 .hide(true)
-                .about("Links tests")
+                .about("Link tests")
                 .arg(
                     clap::Arg::new("test file")
                         .short('o')
@@ -189,7 +225,18 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
             matches.value_of("directory").unwrap(),
             matches.is_present("library"),
         ),
-        ("format", matches) => package_formatter::format(matches.is_present("stdin")),
+        ("format", matches) => {
+            if matches.is_present("stdin") {
+                module_formatter::format()
+            } else {
+                package_formatter::format(matches.is_present("check"))
+            }
+        }
+        ("document", matches) => package_documentation_generator::generate(
+            matches.value_of("name").unwrap(),
+            matches.value_of("url").unwrap(),
+            matches.value_of("description").unwrap(),
+        ),
         ("compile", matches) => module_compiler::compile(
             matches.value_of("source file").unwrap(),
             matches.value_of("dependency file").unwrap(),
@@ -267,5 +314,5 @@ fn build_target_triple_argument() -> clap::Arg<'static> {
         .short('t')
         .long("target")
         .takes_value(true)
-        .help("Sets a target triple")
+        .help("Set a target triple")
 }

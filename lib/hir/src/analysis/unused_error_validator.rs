@@ -45,7 +45,7 @@ mod tests {
     use super::*;
     use crate::{
         analysis::type_collector,
-        test::{DefinitionFake, ModuleFake, TypeDefinitionFake},
+        test::{FunctionDefinitionFake, ModuleFake, TypeDefinitionFake},
         types::{self, Type},
     };
     use once_cell::sync::Lazy;
@@ -75,7 +75,7 @@ mod tests {
             validate_module(
                 &Module::empty()
                     .set_type_definitions(vec![ERROR_TYPE_DEFINITION.clone()])
-                    .set_definitions(vec![Definition::fake(
+                    .set_definitions(vec![FunctionDefinition::fake(
                         "f",
                         Lambda::new(
                             vec![],
@@ -102,7 +102,7 @@ mod tests {
             validate_module(
                 &Module::empty()
                     .set_type_definitions(vec![ERROR_TYPE_DEFINITION.clone()])
-                    .set_definitions(vec![Definition::fake(
+                    .set_definitions(vec![FunctionDefinition::fake(
                         "f",
                         Lambda::new(
                             vec![],
@@ -129,7 +129,7 @@ mod tests {
             validate_module(
                 &Module::empty()
                     .set_type_definitions(vec![ERROR_TYPE_DEFINITION.clone()])
-                    .set_definitions(vec![Definition::fake(
+                    .set_definitions(vec![FunctionDefinition::fake(
                         "f",
                         Lambda::new(
                             vec![Argument::new("x", ERROR_TYPE.clone())],
@@ -162,7 +162,7 @@ mod tests {
             validate_module(
                 &Module::empty()
                     .set_type_definitions(vec![ERROR_TYPE_DEFINITION.clone()])
-                    .set_definitions(vec![Definition::fake(
+                    .set_definitions(vec![FunctionDefinition::fake(
                         "f",
                         Lambda::new(
                             vec![Argument::new("x", result_type.clone())],

@@ -4,6 +4,7 @@ members = [
   "lib/app",
   "lib/ast",
   "lib/ast-hir",
+  "lib/doc",
   "lib/ffi",
   "lib/ffi-macro",
   "lib/format",
@@ -30,4 +31,5 @@ exclude = [
 
 [profile.release]
 lto = true
-strip = true
+# TODO Enable this when Dependabot on GitHub supports it.
+# strip = true

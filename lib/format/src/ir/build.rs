@@ -1,4 +1,4 @@
-use super::Document;
+use super::{utils::is_broken, Document};
 
 pub fn sequence<D: Into<Document>>(iterator: impl IntoIterator<Item = D>) -> Document {
     Document::Sequence(
@@ -14,7 +14,17 @@ pub fn line_suffix(string: impl Into<String>) -> Document {
 }
 
 pub fn flatten(document: impl Into<Document>) -> Document {
-    Document::Flatten(document.into().into())
+    Document::Break(false, document.into().into())
+}
+
+pub fn break_(document: impl Into<Document>) -> Document {
+    Document::Break(true, document.into().into())
+}
+
+pub fn flatten_if(condition: bool, document: impl Into<Document>) -> Document {
+    let document = document.into();
+
+    Document::Break(!condition || is_broken(&document), document.into())
 }
 
 pub fn indent(document: impl Into<Document>) -> Document {
@@ -22,11 +32,7 @@ pub fn indent(document: impl Into<Document>) -> Document {
 }
 
 pub const fn line() -> Document {
-    Document::Line(false)
-}
-
-pub const fn hard_line() -> Document {
-    Document::Line(true)
+    Document::Line
 }
 
 pub fn empty() -> Document {

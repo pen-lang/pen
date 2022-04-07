@@ -4,7 +4,7 @@ use fnv::FnvHashMap;
 
 pub fn create(module: &Module) -> FnvHashMap<String, Type> {
     module
-        .declarations()
+        .function_declarations()
         .iter()
         .map(|declaration| {
             (
@@ -18,7 +18,7 @@ pub fn create(module: &Module) -> FnvHashMap<String, Type> {
                 .iter()
                 .map(|declaration| (declaration.name().into(), declaration.type_().clone())),
         )
-        .chain(module.definitions().iter().map(|definition| {
+        .chain(module.function_definitions().iter().map(|definition| {
             (
                 definition.name().into(),
                 type_extractor::extract_from_lambda(definition.lambda()).into(),

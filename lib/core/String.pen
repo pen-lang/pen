@@ -1,10 +1,14 @@
+# This module provides common string operations.
+
 import foreign "c" _pen_join_strings \([string], string) string
 import foreign "c" _pen_slice_string \(string, number, number) string
 
-Join = \(ss [string], sep string) string {
-  _pen_join_strings(ss, sep)
+# Join strings with a separator.
+Join = \(strings [string], separator string) string {
+  _pen_join_strings(strings, separator)
 }
 
+# Slice a string with inclusive start and end indexes.
 Slice = \(s string, start number, end number) string {
   _pen_slice_string(s, start, end)
 }

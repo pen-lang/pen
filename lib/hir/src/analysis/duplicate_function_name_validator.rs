@@ -6,7 +6,7 @@ use position::Position;
 pub fn validate(module: &Module) -> Result<(), AnalysisError> {
     let mut definitions = FnvHashMap::<&str, &Position>::default();
 
-    for definition in module.definitions() {
+    for definition in module.function_definitions() {
         if let Some(&position) = definitions.get(definition.name()) {
             return Err(AnalysisError::DuplicateFunctionNames(
                 position.clone(),
@@ -24,14 +24,14 @@ pub fn validate(module: &Module) -> Result<(), AnalysisError> {
 mod tests {
     use super::*;
     use crate::{
-        test::{DefinitionFake, ModuleFake},
+        test::{FunctionDefinitionFake, ModuleFake},
         types,
     };
     use position::{test::PositionFake, Position};
 
     #[test]
     fn validate_module() {
-        let definition = Definition::fake(
+        let definition = FunctionDefinition::fake(
             "x",
             Lambda::new(
                 vec![],
