@@ -16,8 +16,8 @@ run curl -fsSL https://apt.llvm.org/llvm.sh | bash /dev/stdin 14
 run curl --proto =https --tlsv1.2 -sSf https://sh.rustup.rs | sh /dev/stdin -y
 run . ~/.cargo/env && cargo install sccache turtle-build
 
-RUN useradd -mG sudo penguin
-USER penguin
+run useradd -mG sudo penguin
+user penguin
 
 copy . /home/penguin/pen
 
