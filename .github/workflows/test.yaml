@@ -28,6 +28,7 @@ jobs:
     runs-on: ubuntu-latest
     container: ghcr.io/pen-lang/ci:main
     steps:
+      - run: sudo chown -R penguin:penguin /__w
       - uses: actions/checkout@v2
       - run: tools/ci/github/setup.sh
       - run: tools/unit_test.sh
