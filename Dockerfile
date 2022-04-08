@@ -34,7 +34,7 @@ workdir /home/penguin/pen
 
 run . ~/.profile && tools/build.sh
 run . ~/.profile && tools/lint.sh
-run . ~/.profile && tools/format.sh
+run . ~/.profile && tools/format.sh --check
 run . ~/.profile && tools/unit_test.sh
 run . ~/.profile && tools/integration_test.sh
 run . ~/.profile && tools/build_documents.sh
