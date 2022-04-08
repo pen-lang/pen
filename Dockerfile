@@ -14,13 +14,7 @@ run apt update --fix-missing && apt install -y \
 	wget
 run curl -fsSL https://apt.llvm.org/llvm.sh | bash /dev/stdin 14
 
-run useradd -m penguin
-# For GitHub Actions
-run mkdir /__w
-run chown -R penguin:penguin /__w
-
-user penguin
-workdir /home/penguin
+workdir /root
 shell ["bash", "-lc"]
 
 run git clone https://github.com/Homebrew/brew ~/.homebrew
