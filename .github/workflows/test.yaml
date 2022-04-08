@@ -25,6 +25,7 @@ jobs:
           name: build-${{ matrix.os }}
           path: target/release/pen
   unit_test:
+  runs-on: ubuntu-latest
     container:
       image: ghcr.io/pen-lang/ci
     steps:
