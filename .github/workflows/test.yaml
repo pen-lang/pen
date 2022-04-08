@@ -26,7 +26,11 @@ jobs:
           path: target/release/pen
   unit_test:
     runs-on: ubuntu-latest
-    container: ghcr.io/pen-lang/ci:main
+    container:
+      image: ghcr.io/pen-lang/ci:main
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.github_token }}
     steps:
       - uses: actions/checkout@v2
       - run: tools/ci/github/setup.sh
