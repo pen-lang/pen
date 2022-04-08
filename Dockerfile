@@ -24,11 +24,11 @@ run . ~/.profile && brew install hello
 run curl -fsSL https://sh.rustup.rs | sh /dev/stdin -y
 run . ~/.profile && cargo install mdbook sccache turtle-build
 
-copy . /home/penguin/pen
-
 env LLVM_SYS_130_PREFIX=/usr/lib/llvm-14
 env PEN_ROOT=/home/penguin/pen
 env PATH="/usr/lib/llvm-14/bin:$PATH"
+
+copy --chown=penguin:penguin . /home/penguin/pen
 
 workdir /home/penguin/pen
 
