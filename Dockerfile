@@ -15,6 +15,10 @@ run apt update --fix-missing && apt install -y \
 run curl -fsSL https://apt.llvm.org/llvm.sh | bash /dev/stdin 14
 
 run useradd -m penguin
+# For GitHub Actions
+run mkdir /__w
+run chown -R penguin:penguin /__w
+
 user penguin
 workdir /home/penguin
 shell ["bash", "-lc"]
@@ -28,3 +32,4 @@ run cargo install mdbook sccache turtle-build
 
 env LLVM_SYS_130_PREFIX=/usr/lib/llvm-14
 env PATH="/usr/lib/llvm-14/bin:$PATH"
+
