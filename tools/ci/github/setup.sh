@@ -6,7 +6,7 @@ llvm_version=13
 
 brew install jq mdbook ninja sccache
 
-if [ $(uname) = Linux]; then
+if [ $(uname) = Linux ]; then
   curl -fsSL https://apt.llvm.org/llvm.sh | bash /dev/stdin 14
   llvm_prefix=/usr/lib/llvm-14
 else
