@@ -11,13 +11,12 @@ run apt update --fix-missing && apt install -y \
 	ruby-bundler \
 	ruby-dev \
 	software-properties-common \
+	sudo \
 	wget
 run curl -fsSL https://apt.llvm.org/llvm.sh | bash /dev/stdin 14
 
-run useradd -m penguin
-# For GitHub Actions
-run mkdir /__w
-run chown -R penguin:penguin /__w
+run useradd -mG sudo penguin
+run echo '%sudo ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
 
 user penguin
 workdir /home/penguin
