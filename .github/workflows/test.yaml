@@ -25,10 +25,8 @@ jobs:
           name: build-${{ matrix.os }}
           path: target/release/pen
   unit_test:
-    runs-on: ubuntu-latest
-    container: ghcr.io/pen-lang/ci:main
+    runs-on: ubuntu-18.04
     steps:
-      - run: sudo rm -rf /__w
       - uses: actions/checkout@v2
       - run: tools/ci/github/setup.sh
       - run: tools/unit_test.sh
