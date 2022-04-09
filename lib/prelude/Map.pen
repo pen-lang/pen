@@ -294,7 +294,7 @@ _equalHamts = \(ctx _mapContext, h1 _hamt, h2 _hamt, i number) boolean {
 
     if e1 = _getEntry(h1, i) as _keyValue {
       if e2 = _getEntry(h2, i) as _keyValue {
-        ctx.equalKeys(e1, e2) & ctx.equalValues(e1.value, e2.value) & rest()
+        ctx.equalKeys(e1.key, e2.key) & ctx.equalValues(e1.value, e2.value) & rest()
       } else {
         false
       }
