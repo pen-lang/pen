@@ -3,7 +3,13 @@ import Test'Assert
 
 import 'knapsack { Bag, Item }
 
-PickItemMoreValuableAndSameCost = \() none | error {
+PackNothing = \() none | error {
+  is = knapsack'Pack(Bag{Capacity: 0}, [Item])
+
+  Assert'True(Number'Sum([number i().Value for i in is]) == 0)
+}
+
+PackItemMoreValuableAndSameCost = \() none | error {
   is = knapsack'Pack(
     Bag{Capacity: 1},
     [Item
