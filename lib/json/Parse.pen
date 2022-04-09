@@ -3,6 +3,7 @@ import Core'Number
 import Core'String
 import Core'String'Byte
 import Core'String'Byte'View { View }
+
 import 'Value { Value }
 
 import foreign "c" _pen_json_parse_number \(string) number
@@ -22,6 +23,16 @@ type arrayResult {
   input View
 }
 
+type objectResult {
+  entries [objectEntry]
+  input View
+}
+
+type objectEntry {
+  key string
+  value Value
+}
+
 result = \(v Value, i View) result {
   result{value: v, input: i}
 }
@@ -32,6 +43,10 @@ stringResult = \(s string, i View) stringResult {
 
 arrayResult = \(vs [Value], i View) arrayResult {
   arrayResult{array: vs, input: i}
+}
+
+objectResult = \(vs [objectEntry], i View) objectResult {
+  objectResult{entries: vs, input: i}
 }
 
 Parse = \(s string) Value | error {
@@ -191,6 +206,7 @@ array = \(v View) result | error {
 
 arrayElements = \(v View, vs [Value]) arrayResult | error {
   if r = value(v) as result {
+    # TODO Optimize appending list elements.
     vs = [Value ...vs, r.value]
     v = blank(r.input)
 
@@ -211,7 +227,53 @@ arrayElements = \(v View, vs [Value]) arrayResult | error {
 }
 
 object = \(v View) result | error {
-  error("TODO")
+  if View'HasPrefix(v, "{") {
+    r = objectEntries(View'Seek(v, 1), [objectEntry])?
+    v = blank(r.input)
+
+    if View'HasPrefix(v, "}") {
+      result(Value'New(entriesToMap(r.entries)), View'Seek(v, 1))
+    } else {
+      error("} expected")
+    }
+  } else {
+    error("{ expected")
+  }
+}
+
+objectEntries = \(v View, es [objectEntry]) objectResult | error {
+  if r = string_(v) as result {
+    k = if v = Value'Raw(r.value) as string { v } else { error("unexpected non-string key") }?
+    v = blank(r.input)
+    v = if View'HasPrefix(v, ":") { View'Seek(v, 1) } else { error(": expected") }?
+    r = value(v)?
+
+    # TODO Optimize appending list elements.
+    es = [objectEntry ...es, objectEntry{key: k, value: r.value}]
+    v = blank(r.input)
+
+    if View'HasPrefix(v, ",") {
+      v = blank(View'Seek(v, 1))
+
+      if View'HasPrefix(v, "]") {
+        error("unexpected ]")
+      } else {
+        objectEntries(v, es)
+      }
+    } else {
+      objectResult(es, r.input)
+    }
+  } else {
+    objectResult(es, v)
+  }
+}
+
+entriesToMap = \(es [objectEntry]) {string: Value} {
+  if [e, ...es] = es {
+    {string: Value e().key: e().value, ...entriesToMap(es)}
+  } else {
+    {string: Value}
+  }
 }
 
 blank = \(v View) View {

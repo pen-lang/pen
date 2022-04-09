@@ -1,4 +1,5 @@
 import Test'Assert
+
 import 'Parse { Parse }
 import 'Value { Value }
 
@@ -74,6 +75,16 @@ ParseNestedArray = \() none | error {
 
 FailToParseTrailingCommaInArray = \() none | error {
   Assert'Error(Parse("[0,]"))
+}
+
+ParseObject = \() none | error {
+  Assert'True(Parse("{}")? == Value'New({string: Value}))?
+  Assert'True(Parse("{\"\": null}")? == Value'New({string: Value "": Value'New(none)}))?
+
+  Assert'True(
+    Parse("{\"foo\": null, \"bar\": null}")?
+      == Value'New({string: Value "foo": Value'New(none), "bar": Value'New(none)}),
+  )?
 }
 
 SkipSpace = \() none | error {
