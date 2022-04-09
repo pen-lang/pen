@@ -11,19 +11,23 @@ run apt update --fix-missing && apt install -y \
 	ruby-bundler \
 	ruby-dev \
 	software-properties-common \
+	sudo \
 	wget
 run curl -fsSL https://apt.llvm.org/llvm.sh | bash /dev/stdin 14
-run curl --proto =https --tlsv1.2 -sSf https://sh.rustup.rs | sh /dev/stdin -y
-run . ~/.cargo/env && cargo install sccache turtle-build
 
-copy . /root/pen
+run useradd -mG sudo penguin
+run echo '%sudo ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
 
-workdir /root/pen
+user penguin
+workdir /home/penguin
+shell ["bash", "-lc"]
+
+run git clone https://github.com/Homebrew/brew ~/.homebrew
+run ~/.homebrew/bin/brew shellenv >> ~/.profile
+run brew install hello
+
+run curl -fsSL https://sh.rustup.rs | sh /dev/stdin -y
+run cargo install mdbook sccache turtle-build
 
 env LLVM_SYS_130_PREFIX=/usr/lib/llvm-14
-
-run . ~/.cargo/env && cargo build
-run . ~/.cargo/env && cargo install --locked --path cmd/pen
-
-env PEN_ROOT=/root/pen
 env PATH="/usr/lib/llvm-14/bin:$PATH"
