@@ -1,0 +1,22 @@
+import Core'Number
+import Test'Assert
+
+import 'knapsack { Bag, Item }
+
+PackNothing = \() none | error {
+  is = knapsack'Pack(Bag{Capacity: 0}, [Item])
+
+  Assert'True(Number'Sum([number i().Value for i in is]) == 0)
+}
+
+PackItemMoreValuableAndSameCost = \() none | error {
+  is = knapsack'Pack(
+    Bag{Capacity: 1},
+    [Item
+      Item{Cost: 1, Value: 1},
+      Item{Cost: 1, Value: 2},
+    ],
+  )
+
+  Assert'True(Number'Sum([number i().Value for i in is]) == 2)
+}
