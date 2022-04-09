@@ -5,7 +5,7 @@ Any = \(bs [boolean]) boolean {
     } else {
       Any(bs)
     }
-  } else  {
+  } else {
     false
   }
 }
@@ -13,11 +13,11 @@ Any = \(bs [boolean]) boolean {
 All = \(bs [boolean]) boolean {
   if [b, ...bs] = bs {
     if b() {
-      All(bs) 
+      All(bs)
     } else {
       false
     }
-  } else  {
+  } else {
     true
   }
 }

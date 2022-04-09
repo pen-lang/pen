@@ -55,5 +55,3 @@ Slice = \(v View, start number, end number) View {
 ToString = \(v View) string {
   _pen_core_view_to_string(v.value, v.start, v.end)
 }
-
-
