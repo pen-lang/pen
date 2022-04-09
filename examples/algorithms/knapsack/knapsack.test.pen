@@ -1,0 +1,13 @@
+import Test'Assert
+
+Foo = \() none | error {
+  is = knapsack'Pack(
+    Bag{Capacity: 1},
+    [Item
+      Item{Cost: 1, Value: 1},
+      Item{Cost: 1, Value: 2},
+    ],
+  )
+
+  Assert'True(Number'Sum([number i.Value for i in is]) == 2)
+}
