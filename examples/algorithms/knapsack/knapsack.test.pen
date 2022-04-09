@@ -12,5 +12,5 @@ PickItemMoreValuableAndSameCost = \() none | error {
     ],
   )
 
-  Assert'True(Number'Sum([number i.Value for i in is]) == 2)
+  Assert'True(Number'Sum([number i().Value for i in is]) == 2)
 }
