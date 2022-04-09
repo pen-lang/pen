@@ -48,8 +48,8 @@ jobs:
           - ubuntu-18.04
           # TODO Enable integration tests on macOS.
           # - macos-latest
-        index: [0, 1, 2, 3]
-        total: [4]
+        index: [0, 1, 2, 3, 4, 5, 6, 7]
+        total: [8]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
