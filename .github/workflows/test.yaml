@@ -42,7 +42,6 @@ jobs:
           fail_ci_if_error: true
   integration_test:
     needs: build
-    if: ${{ github.ref == 'refs/heads/main' || contains(github.event.pull_request.labels.*.name, 'integration-test') }}
     strategy:
       matrix:
         os:
