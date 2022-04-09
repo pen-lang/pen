@@ -1,6 +1,9 @@
+import Core'Number
 import Test'Assert
 
-Foo = \() none | error {
+import 'knapsack { Bag, Item }
+
+PickItemMoreValuableAndSameCost = \() none | error {
   is = knapsack'Pack(
     Bag{Capacity: 1},
     [Item
