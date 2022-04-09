@@ -77,8 +77,11 @@ FailToParseTrailingCommaInArray = \() none | error {
   Assert'Error(Parse("[0,]"))
 }
 
+ParseEmptyObject = \() none | error {
+  Assert'True(Parse("{}")? == Value'New({string: Value}))
+}
+
 ParseObject = \() none | error {
-  Assert'True(Parse("{}")? == Value'New({string: Value}))?
   Assert'True(Parse("{\"\": null}")? == Value'New({string: Value "": Value'New(none)}))?
 
   Assert'True(
