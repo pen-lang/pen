@@ -176,8 +176,6 @@ _setKeyValue = \(
   }
 
   if e = _getEntry(hamt, i) as _keyValue {
-    # TODO Remove a useless function call below of workaround for a bug in LLVM 13.0.0.
-    _pen_prelude_hash_number(42)
     if ctx.equalKeys(e.key, key) {
       update(_keyValue{key: key, value: value}, false)
     } else {
@@ -220,8 +218,6 @@ _deleteKey = \(ctx _mapContext, hamt _hamt, key any, layer number, level number)
   }
 
   if e = _getEntry(hamt, i) as _keyValue {
-    # TODO Remove a useless function call below of workaround for a bug in LLVM 13.0.0.
-    _pen_prelude_hash_number(42)
     if ctx.equalKeys(e.key, key) {
       update(none, true)
     } else {
