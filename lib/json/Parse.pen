@@ -207,7 +207,7 @@ array = \(v View) result | error {
 
 arrayElements = \(v View, vs [Value]) arrayResult | error {
   if r = value(v) as result {
-    # TODO Optimize appending list elements.
+    # TODO Optimize appending list elements. This is O(n^2).
     vs = [Value ...vs, r.value]
     v = blank(r.input)
 
@@ -251,7 +251,7 @@ objectEntries = \(v View, es [objectEntry]) objectResult | error {
     v = if View'HasPrefix(v, ":") { View'Seek(v, 1) } else { error(": expected") }?
     r = value(v)?
 
-    # TODO Optimize appending list elements.
+    # TODO Optimize appending list elements. This is O(n^2).
     es = [objectEntry ...es, objectEntry{key: k, value: r.value}]
     v = blank(r.input)
 
