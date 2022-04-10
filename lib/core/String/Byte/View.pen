@@ -1,5 +1,5 @@
 # This module provides views of strings as byte arrays.
-# By using those views, you apply operations to strigns without copying them.
+# By using those views, you apply operations to strings without copying them.
 
 import 'Number
 import 'String'Byte
