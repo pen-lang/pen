@@ -372,6 +372,12 @@ _iterateHamt = \(h _hamt, i number, rest \() _mapIterator | none) _mapIterator |
   }
 }
 
+_mapIteratorKey = \(i _mapIterator) any { i.key }
+
+_mapIteratorValue = \(i _mapIterator) any { i.value }
+
+_mapIteratorRest = \(i _mapIterator) _mapIterator | none { i.rest() }
+
 _hamtIndex = \(ctx _mapContext, key any, layer number, level number) number {
   _pen_prelude_hash_to_index(ctx.hashKey(key), layer, level)
 }
