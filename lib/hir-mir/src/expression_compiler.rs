@@ -1019,6 +1019,122 @@ mod tests {
                 .into())
             );
         }
+
+        #[test]
+        fn compile_map_branch() {
+            let context = CompileContext::dummy(Default::default(), Default::default());
+            let map_type = types::Map::new(
+                types::None::new(Position::fake()),
+                types::None::new(Position::fake()),
+                Position::fake(),
+            );
+            let concrete_map_type =
+                type_compiler::compile_concrete_map(&map_type, context.types()).unwrap();
+
+            assert_eq!(
+                compile(
+                    &IfType::new(
+                        "y",
+                        Variable::new("x", Position::fake()),
+                        vec![IfTypeBranch::new(
+                            map_type,
+                            Variable::new("y", Position::fake()),
+                        )],
+                        None,
+                        Position::fake(),
+                    )
+                    .into(),
+                    &context,
+                ),
+                Ok(mir::ir::Case::new(
+                    mir::ir::Variable::new("x"),
+                    vec![mir::ir::Alternative::new(
+                        concrete_map_type.clone(),
+                        "y",
+                        mir::ir::Let::new(
+                            "y",
+                            mir::types::Record::new(
+                                &context.configuration().unwrap().map_type.map_type_name
+                            ),
+                            mir::ir::RecordField::new(
+                                concrete_map_type,
+                                0,
+                                mir::ir::Variable::new("y")
+                            ),
+                            mir::ir::Variable::new("y")
+                        ),
+                    )],
+                    None
+                )
+                .into())
+            );
+        }
+
+        #[test]
+        fn compile_union_branch_including_map() {
+            let context = CompileContext::dummy(Default::default(), Default::default());
+            let map_type = types::Map::new(
+                types::None::new(Position::fake()),
+                types::None::new(Position::fake()),
+                Position::fake(),
+            );
+            let concrete_map_type =
+                type_compiler::compile_concrete_map(&map_type, context.types()).unwrap();
+
+            assert_eq!(
+                compile(
+                    &IfType::new(
+                        "y",
+                        Variable::new("x", Position::fake()),
+                        vec![IfTypeBranch::new(
+                            types::Union::new(
+                                map_type,
+                                types::None::new(Position::fake()),
+                                Position::fake()
+                            ),
+                            Variable::new("y", Position::fake()),
+                        )],
+                        None,
+                        Position::fake(),
+                    )
+                    .into(),
+                    &context,
+                ),
+                Ok(mir::ir::Case::new(
+                    mir::ir::Variable::new("x"),
+                    vec![
+                        mir::ir::Alternative::new(
+                            concrete_map_type.clone(),
+                            "y",
+                            mir::ir::Let::new(
+                                "y",
+                                mir::types::Type::Variant,
+                                mir::ir::Variant::new(
+                                    concrete_map_type,
+                                    mir::ir::Variable::new("y")
+                                ),
+                                mir::ir::Variable::new("y")
+                            ),
+                        ),
+                        mir::ir::Alternative::new(
+                            mir::types::Type::None,
+                            "y",
+                            mir::ir::Let::new(
+                                "y",
+                                mir::types::Type::Variant,
+                                mir::ir::Variant::new(
+                                    mir::types::Type::None,
+                                    mir::ir::Variable::new("y")
+                                ),
+                                mir::ir::Variable::new("y")
+                            ),
+                        ),
+                    ],
+                    None
+                )
+                .into())
+            );
+        }
     }
 
     mod records {
