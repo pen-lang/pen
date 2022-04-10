@@ -1,13 +1,16 @@
+# JSON value
 type Value {
   raw raw
 }
 
 type raw = boolean | none | number | string | [Value] | {string: Value}
 
+# Create a JSON value.
 New = \(r raw) Value {
   Value{raw: r}
 }
 
+# Get an internal value.
 Raw = \(v Value) raw {
   v.raw
 }
