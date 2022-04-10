@@ -330,6 +330,7 @@ fn infer_expression(
             map.position().clone(),
         )
         .into(),
+        Expression::MapIterationComprehension(_) => todo!(),
         Expression::Operation(operation) => match operation {
             Operation::Arithmetic(operation) => ArithmeticOperation::new(
                 operation.operator(),

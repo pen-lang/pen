@@ -340,6 +340,7 @@ fn check_expression(
             )
             .into()
         }
+        Expression::MapIterationComprehension(_) => todo!(),
         Expression::None(none) => types::None::new(none.position().clone()).into(),
         Expression::Number(number) => types::Number::new(number.position().clone()).into(),
         Expression::Operation(operation) => check_operation(context, operation, variables)?,
