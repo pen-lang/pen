@@ -220,7 +220,7 @@ arrayElements = \(v View, vs [Value]) arrayResult | error {
         arrayElements(v, vs)
       }
     } else {
-      arrayResult(vs, r.input)
+      arrayResult(vs, v)
     }
   } else {
     arrayResult(vs, v)
