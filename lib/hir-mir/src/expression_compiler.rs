@@ -404,6 +404,13 @@ fn compile_alternatives(
                     &compiled_member_type,
                     &type_compiler::compile_concrete_list(list_type, context.types())?,
                 ),
+                Type::Map(map_type) => compile_generic_type_alternative(
+                    name,
+                    &expression,
+                    &type_,
+                    &compiled_member_type,
+                    &type_compiler::compile_concrete_map(map_type, context.types())?,
+                ),
                 _ => mir::ir::Alternative::new(compiled_member_type.clone(), name, {
                     if type_.is_union() {
                         mir::ir::Let::new(
