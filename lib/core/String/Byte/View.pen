@@ -7,7 +7,7 @@ import 'String'Byte
 import foreign "c" _pen_core_view_has_prefix \(string, number, number, string) boolean
 import foreign "c" _pen_core_view_to_string \(string, number, number) string
 
-# View of a string
+# A view of a string
 type View {
   value string
   start number
