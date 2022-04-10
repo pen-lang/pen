@@ -165,19 +165,23 @@
 <h2 id="jsonvalue-module"><a class="header" href="#jsonvalue-module"><code>Json'Value</code> module</a></h2>
 <h3 id="types-1"><a class="header" href="#types-1">Types</a></h3>
 <h4 id="value"><a class="header" href="#value"><code>Value</code></a></h4>
-<p>JSON value</p>
+<p>A JSON value</p>
 <pre><code class="language-pen">type Value {
-  ...
+  # ...
 }
+</code></pre>
+<h4 id="raw"><a class="header" href="#raw"><code>Raw</code></a></h4>
+<p>A raw JSON value represented by built-in types</p>
+<pre><code class="language-pen">type Raw = boolean | none | number | string | [Value] | {string: Value}
 </code></pre>
 <h3 id="functions-1"><a class="header" href="#functions-1">Functions</a></h3>
 <h4 id="new"><a class="header" href="#new"><code>New</code></a></h4>
 <p>Create a JSON value.</p>
-<pre><code class="language-pen">\(r raw) Value
+<pre><code class="language-pen">\(r Raw) Value
 </code></pre>
-<h4 id="raw"><a class="header" href="#raw"><code>Raw</code></a></h4>
+<h4 id="raw-1"><a class="header" href="#raw-1"><code>Raw</code></a></h4>
 <p>Get an internal value.</p>
-<pre><code class="language-pen">\(v Value) raw
+<pre><code class="language-pen">\(v Value) Raw
 </code></pre>
 
                     </main>

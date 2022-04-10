@@ -243,7 +243,7 @@ introduce built-in map types.</p>
 <h3 id="types-3"><a class="header" href="#types-3">Types</a></h3>
 <h4 id="map"><a class="header" href="#map"><code>Map</code></a></h4>
 <pre><code class="language-pen">type Map {
-  ...
+  # ...
 }
 </code></pre>
 <h3 id="functions-3"><a class="header" href="#functions-3">Functions</a></h3>
@@ -275,7 +275,7 @@ introduce built-in map types.</p>
 <h3 id="types-4"><a class="header" href="#types-4">Types</a></h3>
 <h4 id="map-1"><a class="header" href="#map-1"><code>Map</code></a></h4>
 <pre><code class="language-pen">type Map {
-  ...
+  # ...
 }
 </code></pre>
 <h3 id="functions-4"><a class="header" href="#functions-4">Functions</a></h3>
@@ -307,7 +307,7 @@ introduce built-in map types.</p>
 <h3 id="types-5"><a class="header" href="#types-5">Types</a></h3>
 <h4 id="map-2"><a class="header" href="#map-2"><code>Map</code></a></h4>
 <pre><code class="language-pen">type Map {
-  ...
+  # ...
 }
 </code></pre>
 <h3 id="functions-5"><a class="header" href="#functions-5">Functions</a></h3>
@@ -373,11 +373,11 @@ introduce built-in map types.</p>
 <pre><code class="language-pen">\(x number) boolean
 </code></pre>
 <h4 id="ceil"><a class="header" href="#ceil"><code>Ceil</code></a></h4>
-<p>Calculate a ceil value of a number.</p>
+<p>Calculate a ceil value.</p>
 <pre><code class="language-pen">\(x number) number
 </code></pre>
 <h4 id="floor"><a class="header" href="#floor"><code>Floor</code></a></h4>
-<p>Calculate a floor value of a number.</p>
+<p>Calculate a floor value.</p>
 <pre><code class="language-pen">\(x number) number
 </code></pre>
 <h4 id="nan"><a class="header" href="#nan"><code>Nan</code></a></h4>
@@ -389,11 +389,11 @@ introduce built-in map types.</p>
 <pre><code class="language-pen">\() number
 </code></pre>
 <h4 id="minimum"><a class="header" href="#minimum"><code>Minimum</code></a></h4>
-<p>Calculate a minimum of two numbers.</p>
+<p>Calculate a minimum.</p>
 <pre><code class="language-pen">\(x number, y number) number
 </code></pre>
 <h4 id="maximum"><a class="header" href="#maximum"><code>Maximum</code></a></h4>
-<p>Calculate a maximum of two numbers.</p>
+<p>Calculate a maximum.</p>
 <pre><code class="language-pen">\(x number, y number) number
 </code></pre>
 <h2 id="corestring-module"><a class="header" href="#corestring-module"><code>Core'String</code> module</a></h2>
@@ -406,7 +406,7 @@ introduce built-in map types.</p>
 <pre><code class="language-pen">\(strings [string], separator string) string
 </code></pre>
 <h2 id="corestringbyte-module"><a class="header" href="#corestringbyte-module"><code>Core'String'Byte</code> module</a></h2>
-<p>This module provides functions for strings as byte arrays.</p>
+<p>This module provides operations for strings as byte arrays.</p>
 <h3 id="types-8"><a class="header" href="#types-8">Types</a></h3>
 <p>No types are defined.</p>
 <h3 id="functions-8"><a class="header" href="#functions-8">Functions</a></h3>
@@ -420,12 +420,12 @@ introduce built-in map types.</p>
 </code></pre>
 <h2 id="corestringbyteview-module"><a class="header" href="#corestringbyteview-module"><code>Core'String'Byte'View</code> module</a></h2>
 <p>This module provides views of strings as byte arrays.
-By using those views, you apply operations to strings without copying them.</p>
+By using those views, you can apply operations to strings without copying them.</p>
 <h3 id="types-9"><a class="header" href="#types-9">Types</a></h3>
 <h4 id="view"><a class="header" href="#view"><code>View</code></a></h4>
 <p>A view of a string</p>
 <pre><code class="language-pen">type View {
-  ...
+  # ...
 }
 </code></pre>
 <h3 id="functions-9"><a class="header" href="#functions-9">Functions</a></h3>
@@ -466,13 +466,17 @@ By using those views, you apply operations to strings without copying them.</p>
 <pre><code class="language-pen">\(v View) string
 </code></pre>
 <h2 id="corestringutf8-module"><a class="header" href="#corestringutf8-module"><code>Core'String'Utf8</code> module</a></h2>
-<p>This module provides functions for strings in UTF-8.</p>
+<p>This module provides operations for strings encoded in UTF-8.</p>
 <h3 id="types-10"><a class="header" href="#types-10">Types</a></h3>
 <p>No types are defined.</p>
 <h3 id="functions-10"><a class="header" href="#functions-10">Functions</a></h3>
-<h4 id="join-1"><a class="header" href="#join-1"><code>Join</code></a></h4>
-<p>Join strings with a separator.</p>
-<pre><code class="language-pen">\(strings [string], separator string) string
+<h4 id="length-3"><a class="header" href="#length-3"><code>Length</code></a></h4>
+<p>Return a length of a string.</p>
+<pre><code class="language-pen">\(s string) number
+</code></pre>
+<h4 id="slice-2"><a class="header" href="#slice-2"><code>Slice</code></a></h4>
+<p>Slice a string.</p>
+<pre><code class="language-pen">\(s string, start number, end number) string
 </code></pre>
 
                     </main>
