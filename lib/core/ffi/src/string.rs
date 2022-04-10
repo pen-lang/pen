@@ -1,4 +1,5 @@
 use alloc::vec;
+use core::str;
 
 #[repr(C)]
 struct FirstRest {
@@ -33,6 +34,16 @@ fn _pen_core_join_strings(
         string.extend(unsafe { _pen_core_to_string(first_rest.first.clone().into()) }.as_slice());
         list = first_rest.rest.clone();
     }
+}
+
+#[ffi::bindgen]
+fn _pen_core_utf8_length(string: ffi::ByteString) -> ffi::Number {
+    if let Ok(string) = str::from_utf8(string.as_slice()) {
+        string.chars().count() as f64
+    } else {
+        f64::NAN
+    }
+    .into()
 }
 
 #[ffi::bindgen]
