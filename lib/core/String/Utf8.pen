@@ -1,4 +1,4 @@
-# This module provides common string operations.
+# This module provides functions for strings in UTF-8.
 
 import foreign "c" _pen_core_join_strings \([string], string) string
 

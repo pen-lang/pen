@@ -1,0 +1,14 @@
+# This module provides functions for strings as byte arrays.
+
+import foreign "c" _pen_core_byte_length \(string) number
+import foreign "c" _pen_core_byte_slice \(string, number, number) string
+
+# Return a length of a string.
+Length = \(s string) number {
+  _pen_core_byte_length(s)
+}
+
+# Slice a string.
+Slice = \(s string, start number, end number) string {
+  _pen_core_byte_slice(s, start, end)
+}

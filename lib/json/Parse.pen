@@ -1,0 +1,286 @@
+import Core'Boolean
+import Core'Number
+import Core'String
+import Core'String'Byte
+import Core'String'Byte'View { View }
+
+import 'Value { Value }
+
+import foreign "c" _pen_json_parse_number \(string) number
+
+type result {
+  value Value
+  input View
+}
+
+type stringResult {
+  string_ string
+  input View
+}
+
+type arrayResult {
+  array [Value]
+  input View
+}
+
+type objectResult {
+  entries [objectEntry]
+  input View
+}
+
+type objectEntry {
+  key string
+  value Value
+}
+
+result = \(v Value, i View) result {
+  result{value: v, input: i}
+}
+
+stringResult = \(s string, i View) stringResult {
+  stringResult{string_: s, input: i}
+}
+
+arrayResult = \(vs [Value], i View) arrayResult {
+  arrayResult{array: vs, input: i}
+}
+
+objectResult = \(vs [objectEntry], i View) objectResult {
+  objectResult{entries: vs, input: i}
+}
+
+# Parse a string into a JSON value.
+Parse = \(s string) Value | error {
+  r = value(View'New(s))?
+
+  if View'Length(blank(r.input)) == 0 {
+    r.value
+  } else {
+    error("unexpected character")
+  }
+}
+
+value = \(v View) result | error {
+  v = blank(v)
+
+  if View'HasPrefix(v, "n") {
+    null(v)
+  } else if View'HasPrefix(v, "t") {
+    true_(v)
+  } else if View'HasPrefix(v, "f") {
+    false_(v)
+  } else if View'HasPrefix(v, "\"") {
+    string_(v)
+  } else if View'HasPrefix(v, "[") {
+    array(v)
+  } else if View'HasPrefix(v, "{") {
+    object(v)
+  } else {
+    number_(v)
+  }
+}
+
+null = \(v View) result | error {
+  s = "null"
+
+  if View'HasPrefix(v, s) {
+    result(Value'New(none), View'Seek(v, Byte'Length(s)))
+  } else {
+    error("null expected")
+  }
+}
+
+true_ = \(v View) result | error {
+  s = "true"
+
+  if View'HasPrefix(v, s) {
+    result(Value'New(true), View'Seek(v, Byte'Length(s)))
+  } else {
+    error("true expected")
+  }
+}
+
+false_ = \(v View) result | error {
+  s = "false"
+
+  if View'HasPrefix(v, s) {
+    result(Value'New(false), View'Seek(v, Byte'Length(s)))
+  } else {
+    error("false expected")
+  }
+}
+
+string_ = \(v View) result | error {
+  r = stringCharacters(View'Seek(v, 1), [string])?
+
+  result(Value'New(r.string_), View'Seek(r.input, 1))
+}
+
+stringCharacters = \(v View, ss [string]) stringResult | error {
+  if View'HasPrefix(v, "\"") {
+    stringResult(String'Join(ss, ""), v)
+  } else {
+    r = stringCharacter(v)?
+
+    # TODO Optimize appending string elements.
+    stringCharacters(r.input, [string ...ss, r.string_])
+  }
+}
+
+stringCharacter = \(v View) stringResult | error {
+  if View'HasPrefix(v, "\\\"") {
+    stringResult("\"", View'Seek(v, 2))
+  } else if View'Length(v) == 0 {
+    error("unexpected end of string")
+  } else {
+    stringResult(Byte'Slice(View'ToString(v), 1, 1), View'Seek(v, 1))
+  }
+}
+
+number_ = \(v View) result | error {
+  i = View'Start(v)
+
+  v = if View'HasPrefix(v, "-") { View'Seek(v, 1) } else { v }
+  v = integer(v)?
+  v = if View'HasPrefix(v, ".") { digits(View'Seek(v, 1)) } else { v }
+
+  result(
+    Value'New(_pen_json_parse_number(Byte'Slice(View'Viewee(v), i, View'Start(v) - 1))),
+    v,
+  )
+}
+
+integer = \(v View) View | error {
+  if w = nonZeroDigit(v) as View {
+    digits(w)
+  } else {
+    if View'HasPrefix(v, "0") {
+      View'Seek(v, 1)
+    } else {
+      error("number expected")
+    }
+  }
+}
+
+digits = \(v View) View {
+  if w = digit(v) as View {
+    digits(w)
+  } else {
+    v
+  }
+}
+
+digit = \(v View) View | none {
+  if w = nonZeroDigit(v) as View {
+    w
+  } else {
+    if View'HasPrefix(v, "0") {
+      View'Seek(v, 1)
+    } else {
+      none
+    }
+  }
+}
+
+nonZeroDigit = \(v View) View | none {
+  if Boolean'Any([boolean View'HasPrefix(v, Number'String(n())) for n in Number'Range(1, 9)]) {
+    View'Seek(v, 1)
+  } else {
+    none
+  }
+}
+
+array = \(v View) result | error {
+  if View'HasPrefix(v, "[") {
+    r = arrayElements(View'Seek(v, 1), [Value])?
+    v = blank(r.input)
+
+    if View'HasPrefix(v, "]") {
+      result(Value'New(r.array), View'Seek(v, 1))
+    } else {
+      error("] expected")
+    }
+  } else {
+    error("array expected")
+  }
+}
+
+arrayElements = \(v View, vs [Value]) arrayResult | error {
+  if r = value(v) as result {
+    # TODO Optimize appending list elements.
+    vs = [Value ...vs, r.value]
+    v = blank(r.input)
+
+    if View'HasPrefix(v, ",") {
+      v = blank(View'Seek(v, 1))
+
+      if View'HasPrefix(v, "]") {
+        error("unexpected ]")
+      } else {
+        arrayElements(v, vs)
+      }
+    } else {
+      arrayResult(vs, r.input)
+    }
+  } else {
+    arrayResult(vs, v)
+  }
+}
+
+object = \(v View) result | error {
+  if View'HasPrefix(v, "{") {
+    r = objectEntries(View'Seek(v, 1), [objectEntry])?
+    v = blank(r.input)
+
+    if View'HasPrefix(v, "}") {
+      result(Value'New(entriesToMap(r.entries)), View'Seek(v, 1))
+    } else {
+      error("} expected")
+    }
+  } else {
+    error("{ expected")
+  }
+}
+
+objectEntries = \(v View, es [objectEntry]) objectResult | error {
+  if r = string_(v) as result {
+    k = if v = Value'Raw(r.value) as string { v } else { error("unexpected non-string key") }?
+    v = blank(r.input)
+    v = if View'HasPrefix(v, ":") { View'Seek(v, 1) } else { error(": expected") }?
+    r = value(v)?
+
+    # TODO Optimize appending list elements.
+    es = [objectEntry ...es, objectEntry{key: k, value: r.value}]
+    v = blank(r.input)
+
+    if View'HasPrefix(v, ",") {
+      v = blank(View'Seek(v, 1))
+
+      if View'HasPrefix(v, "]") {
+        error("unexpected ]")
+      } else {
+        objectEntries(v, es)
+      }
+    } else {
+      objectResult(es, r.input)
+    }
+  } else {
+    objectResult(es, v)
+  }
+}
+
+entriesToMap = \(es [objectEntry]) {string: Value} {
+  if [e, ...es] = es {
+    {string: Value e().key: e().value, ...entriesToMap(es)}
+  } else {
+    {string: Value}
+  }
+}
+
+blank = \(v View) View {
+  if View'HasPrefix(v, " ") | View'HasPrefix(v, "\t") | View'HasPrefix(v, "\n") {
+    blank(View'Seek(v, 1))
+  } else {
+    v
+  }
+}

@@ -1,0 +1,70 @@
+# This module provides views of strings as byte arrays.
+# By using those views, you apply operations to strings without copying them.
+
+import 'Number
+import 'String'Byte
+
+import foreign "c" _pen_core_view_has_prefix \(string, number, number, string) boolean
+import foreign "c" _pen_core_view_to_string \(string, number, number) string
+
+# A view of a string
+type View {
+  value string
+  start number
+  end number
+}
+
+# Create a view of a string.
+New = \(s string) View {
+  View{
+    value: s,
+    start: 1,
+    end: Byte'Length(s),
+  }
+}
+
+# Get an original string.
+Viewee = \(v View) string {
+  v.value
+}
+
+# Get a start index of a view.
+Start = \(v View) number {
+  v.start
+}
+
+# Get an end index of a view.
+End = \(v View) number {
+  v.end
+}
+
+# Check if a string has a prefix.
+HasPrefix = \(v View, s string) boolean {
+  _pen_core_view_has_prefix(v.value, v.start, v.end, s)
+}
+
+# Get a length of a view.
+Length = \(v View) number {
+  v.end - v.start + 1
+}
+
+# Move a start index forward.
+Seek = \(v View, n number) View {
+  Slice(v, n + 1, Number'Infinity())
+}
+
+# Slice a view.
+Slice = \(v View, start number, end number) View {
+  e = Number'Minimum(v.start + end - 1, v.end)
+
+  View{
+    value: v.value,
+    start: Number'Minimum(v.start + start - 1, e + 1),
+    end: e,
+  }
+}
+
+# Convert a view into a string.
+ToString = \(v View) string {
+  _pen_core_view_to_string(v.value, v.start, v.end)
+}

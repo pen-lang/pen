@@ -1,0 +1,27 @@
+# This module provides common boolean operations.
+
+# Return true if any of given booleans are true or false otherwise.
+Any = \(bs [boolean]) boolean {
+  if [b, ...bs] = bs {
+    if b() {
+      true
+    } else {
+      Any(bs)
+    }
+  } else {
+    false
+  }
+}
+
+# Return true if all of given booleans are true or false otherwise.
+All = \(bs [boolean]) boolean {
+  if [b, ...bs] = bs {
+    if b() {
+      All(bs)
+    } else {
+      false
+    }
+  } else {
+    true
+  }
+}

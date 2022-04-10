@@ -1,0 +1,43 @@
+import Test'Assert
+
+import 'String'Byte'View
+
+HasPrefix = \() none | error {
+  Assert'True(View'HasPrefix(View'New("foo"), "foo"))
+}
+
+HasPrefixInMiddle = \() none | error {
+  Assert'True(View'HasPrefix(View'Seek(View'New("foo"), 1), "oo"))
+}
+
+Length = \() none | error {
+  Assert'True(View'Length(View'New("foo")) == 3)
+}
+
+ToString = \() none | error {
+  Assert'True(View'ToString(View'New("foo")) == "foo")
+}
+
+Seek = \() none | error {
+  Assert'True(View'ToString(View'Seek(View'New("foo"), 1)) == "oo")
+}
+
+SeekToBeforeEnd = \() none | error {
+  Assert'True(View'ToString(View'Seek(View'New("foo"), 2)) == "o")
+}
+
+SeekToEnd = \() none | error {
+  Assert'True(View'ToString(View'Seek(View'New("foo"), 3)) == "")
+}
+
+Slice = \() none | error {
+  Assert'True(View'ToString(View'Slice(View'New("hello"), 2, 4)) == "ell")
+}
+
+SliceBeforeEnd = \() none | error {
+  Assert'True(View'ToString(View'Slice(View'New("hello"), 5, 5)) == "o")
+}
+
+SliceToEnd = \() none | error {
+  Assert'True(View'ToString(View'Slice(View'New("hello"), 6, 5)) == "")
+}
