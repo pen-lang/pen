@@ -243,8 +243,10 @@ object = \(v View) result | error {
 }
 
 objectEntries = \(v View, es [objectEntry]) objectResult | error {
+  v = blank(v)
+
   if r = string_(v) as result {
-    k = if v = Value'Raw(r.value) as string { v } else { error("unexpected non-string key") }?
+    k = if k = Value'Raw(r.value) as string { k } else { error("unexpected non-string key") }?
     v = blank(r.input)
     v = if View'HasPrefix(v, ":") { View'Seek(v, 1) } else { error(": expected") }?
     r = value(v)?

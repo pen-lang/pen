@@ -81,12 +81,26 @@ ParseEmptyObject = \() none | error {
   Assert'True(Parse("{}")? == Value'New({string: Value}))
 }
 
-ParseObject = \() none | error {
-  Assert'True(Parse("{\"\": null}")? == Value'New({string: Value "": Value'New(none)}))?
+ParseObjectWithEntry = \() none | error {
+  Assert'True(Parse("{\"\": null}")? == Value'New({string: Value "": Value'New(none)}))
+}
 
+ParseObjectWithTwoEntries = \() none | error {
   Assert'True(
     Parse("{\"foo\": null, \"bar\": null}")?
       == Value'New({string: Value "foo": Value'New(none), "bar": Value'New(none)}),
+  )
+}
+
+ParseObjectWithSpaces = \() none | error {
+  Assert'True(
+    Parse("{ \"foo\" : null , \"bar\" : null }")?
+      == Value'New(
+        {string: Value
+          "foo": Value'New(none),
+          "bar": Value'New(none),
+        },
+      ),
   )?
 }
 
