@@ -71,6 +71,7 @@ pub fn transform(context: &CompileContext, if_: &IfList) -> Result<Expression, C
                                     vec![],
                                     element_type.clone(),
                                     downcast_compiler::compile(
+                                        context,
                                         &any_type,
                                         element_type,
                                         &Call::new(
@@ -80,7 +81,6 @@ pub fn transform(context: &CompileContext, if_: &IfList) -> Result<Expression, C
                                             position.clone(),
                                         )
                                         .into(),
-                                        context,
                                     )?,
                                     position.clone(),
                                 ),
