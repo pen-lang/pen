@@ -1,3 +1,4 @@
+# Return true if any of given booleans are true or false otherwise.
 Any = \(bs [boolean]) boolean {
   if [b, ...bs] = bs {
     if b() {
@@ -10,6 +11,7 @@ Any = \(bs [boolean]) boolean {
   }
 }
 
+# Return true if all of given booleans are true or false otherwise.
 All = \(bs [boolean]) boolean {
   if [b, ...bs] = bs {
     if b() {
