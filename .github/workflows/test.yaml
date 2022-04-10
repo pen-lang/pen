@@ -42,10 +42,12 @@ jobs:
           fail_ci_if_error: true
   feature_list:
     runs-on: ubuntu-latest
+    outputs:
+      features: ${{ steps.features.outputs.features }}
     steps:
       - uses: actions/checkout@v2
-      - run: echo ::set-output name=tomato::cabbage
-      - run: echo ::set-output name=features::"$(ls features/**/*.feature | jq -Rsc 'split("\n")[:-1]')"
+      - id: features
+        run: echo ::set-output name=features::"$(ls features/**/*.feature | jq -Rsc 'split("\n")[:-1]')"
   feature_test:
     needs:
       - build
