@@ -101,7 +101,7 @@ fn compile_function_definition(
     definition: &FunctionDefinition,
     context: &CompileContext,
 ) -> Result<mir::ir::FunctionDefinition, CompileError> {
-    let body = expression_compiler::compile(definition.lambda().body(), context)?;
+    let body = expression_compiler::compile(context, definition.lambda().body())?;
     let result_type = type_compiler::compile(context, definition.lambda().result_type())?;
 
     Ok(if definition.lambda().arguments().is_empty() {

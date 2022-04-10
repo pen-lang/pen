@@ -25,10 +25,10 @@ use hir::{
 };
 
 pub fn compile(
-    expression: &Expression,
     context: &CompileContext,
+    expression: &Expression,
 ) -> Result<mir::ir::Expression, CompileError> {
-    let compile = |expression| compile(expression, context);
+    let compile = |expression| compile(context, expression);
 
     Ok(match expression {
         Expression::Boolean(boolean) => mir::ir::Expression::Boolean(boolean.value()),
@@ -119,107 +119,12 @@ pub fn compile(
             &context.configuration()?.list_type,
         ))?,
         Expression::ListComprehension(comprehension) => {
-            const CLOSURE_NAME: &str = "$loop";
-            const LIST_NAME: &str = "$list";
-
-            let position = comprehension.position();
-            let input_element_type = comprehension
-                .input_type()
-                .ok_or_else(|| AnalysisError::TypeNotInferred(position.clone()))?;
-            let output_element_type = comprehension.output_type();
-            let list_type = type_compiler::compile_list(context)?;
-
-            mir::ir::Call::new(
-                mir::types::Function::new(
-                    vec![mir::types::Function::new(vec![], list_type.clone()).into()],
-                    list_type.clone(),
-                ),
-                mir::ir::Variable::new(&context.configuration()?.list_type.lazy_function_name),
-                vec![mir::ir::LetRecursive::new(
-                    mir::ir::FunctionDefinition::new(
-                        CLOSURE_NAME,
-                        vec![],
-                        mir::ir::LetRecursive::new(
-                            mir::ir::FunctionDefinition::new(
-                                CLOSURE_NAME,
-                                vec![mir::ir::Argument::new(LIST_NAME, list_type.clone())],
-                                compile(
-                                    &IfList::new(
-                                        Some(input_element_type.clone()),
-                                        Variable::new(LIST_NAME, position.clone()),
-                                        comprehension.element_name(),
-                                        LIST_NAME,
-                                        List::new(
-                                            output_element_type.clone(),
-                                            vec![
-                                                ListElement::Single(
-                                                    comprehension.element().clone(),
-                                                ),
-                                                ListElement::Multiple(
-                                                    Call::new(
-                                                        Some(
-                                                            types::Function::new(
-                                                                vec![types::List::new(
-                                                                    input_element_type.clone(),
-                                                                    position.clone(),
-                                                                )
-                                                                .into()],
-                                                                types::List::new(
-                                                                    output_element_type.clone(),
-                                                                    position.clone(),
-                                                                ),
-                                                                position.clone(),
-                                                            )
-                                                            .into(),
-                                                        ),
-                                                        Variable::new(
-                                                            CLOSURE_NAME,
-                                                            position.clone(),
-                                                        ),
-                                                        vec![Variable::new(
-                                                            LIST_NAME,
-                                                            position.clone(),
-                                                        )
-                                                        .into()],
-                                                        position.clone(),
-                                                    )
-                                                    .into(),
-                                                ),
-                                            ],
-                                            position.clone(),
-                                        ),
-                                        List::new(
-                                            output_element_type.clone(),
-                                            vec![],
-                                            position.clone(),
-                                        ),
-                                        position.clone(),
-                                    )
-                                    .into(),
-                                )?,
-                                list_type.clone(),
-                            ),
-                            mir::ir::Call::new(
-                                mir::types::Function::new(
-                                    vec![list_type.clone().into()],
-                                    list_type.clone(),
-                                ),
-                                mir::ir::Variable::new(CLOSURE_NAME),
-                                vec![compile(comprehension.list())?],
-                            ),
-                        ),
-                        list_type,
-                    ),
-                    mir::ir::Variable::new(CLOSURE_NAME),
-                )
-                .into()],
-            )
-            .into()
+            compile_list_comprehension(context, comprehension)?
         }
         Expression::Map(map) => compile(&map_literal_transformer::transform(context, map)?)?,
         Expression::None(_) => mir::ir::Expression::None,
         Expression::Number(number) => mir::ir::Expression::Number(number.value()),
-        Expression::Operation(operation) => compile_operation(operation, context)?,
+        Expression::Operation(operation) => compile_operation(context, operation)?,
         Expression::RecordConstruction(construction) => {
             let field_types = record_field_resolver::resolve(
                 construction.type_(),
@@ -367,7 +272,7 @@ fn compile_lambda(
                     ))
                 })
                 .collect::<Result<_, _>>()?,
-            compile(lambda.body(), context)?,
+            compile(context, lambda.body())?,
             type_compiler::compile(context, lambda.result_type())?,
         ),
         mir::ir::Variable::new(CLOSURE_NAME),
@@ -382,7 +287,7 @@ fn compile_alternatives(
     context: &CompileContext,
 ) -> Result<Vec<mir::ir::Alternative>, CompileError> {
     let type_ = type_canonicalizer::canonicalize(type_, context.types())?;
-    let expression = compile(expression, context)?;
+    let expression = compile(context, expression)?;
 
     union_type_member_calculator::calculate(&type_, context.types())?
         .into_iter()
@@ -462,11 +367,103 @@ fn compile_generic_type_alternative(
     })
 }
 
-fn compile_operation(
-    operation: &Operation,
+fn compile_list_comprehension(
     context: &CompileContext,
+    comprehension: &ListComprehension,
 ) -> Result<mir::ir::Expression, CompileError> {
-    let compile = |expression| compile(expression, context);
+    let compile = |expression| compile(context, expression);
+
+    const CLOSURE_NAME: &str = "$loop";
+    const LIST_NAME: &str = "$list";
+
+    let position = comprehension.position();
+    let input_element_type = comprehension
+        .input_type()
+        .ok_or_else(|| AnalysisError::TypeNotInferred(position.clone()))?;
+    let output_element_type = comprehension.output_type();
+    let list_type = type_compiler::compile_list(context)?;
+
+    Ok(mir::ir::Call::new(
+        mir::types::Function::new(
+            vec![mir::types::Function::new(vec![], list_type.clone()).into()],
+            list_type.clone(),
+        ),
+        mir::ir::Variable::new(&context.configuration()?.list_type.lazy_function_name),
+        vec![mir::ir::LetRecursive::new(
+            mir::ir::FunctionDefinition::new(
+                CLOSURE_NAME,
+                vec![],
+                mir::ir::LetRecursive::new(
+                    mir::ir::FunctionDefinition::new(
+                        CLOSURE_NAME,
+                        vec![mir::ir::Argument::new(LIST_NAME, list_type.clone())],
+                        compile(
+                            &IfList::new(
+                                Some(input_element_type.clone()),
+                                Variable::new(LIST_NAME, position.clone()),
+                                comprehension.element_name(),
+                                LIST_NAME,
+                                List::new(
+                                    output_element_type.clone(),
+                                    vec![
+                                        ListElement::Single(comprehension.element().clone()),
+                                        ListElement::Multiple(
+                                            Call::new(
+                                                Some(
+                                                    types::Function::new(
+                                                        vec![types::List::new(
+                                                            input_element_type.clone(),
+                                                            position.clone(),
+                                                        )
+                                                        .into()],
+                                                        types::List::new(
+                                                            output_element_type.clone(),
+                                                            position.clone(),
+                                                        ),
+                                                        position.clone(),
+                                                    )
+                                                    .into(),
+                                                ),
+                                                Variable::new(CLOSURE_NAME, position.clone()),
+                                                vec![Variable::new(LIST_NAME, position.clone())
+                                                    .into()],
+                                                position.clone(),
+                                            )
+                                            .into(),
+                                        ),
+                                    ],
+                                    position.clone(),
+                                ),
+                                List::new(output_element_type.clone(), vec![], position.clone()),
+                                position.clone(),
+                            )
+                            .into(),
+                        )?,
+                        list_type.clone(),
+                    ),
+                    mir::ir::Call::new(
+                        mir::types::Function::new(
+                            vec![list_type.clone().into()],
+                            list_type.clone(),
+                        ),
+                        mir::ir::Variable::new(CLOSURE_NAME),
+                        vec![compile(comprehension.list())?],
+                    ),
+                ),
+                list_type,
+            ),
+            mir::ir::Variable::new(CLOSURE_NAME),
+        )
+        .into()],
+    )
+    .into())
+}
+
+fn compile_operation(
+    context: &CompileContext,
+    operation: &Operation,
+) -> Result<mir::ir::Expression, CompileError> {
+    let compile = |expression| compile(context, expression);
 
     Ok(match operation {
         Operation::Arithmetic(operation) => mir::ir::ArithmeticOperation::new(
@@ -588,6 +585,7 @@ fn compile_spawn_operation(
                 mir::ir::FunctionDefinition::thunk(
                     ANY_THUNK_NAME,
                     compile(
+                        context,
                         &TypeCoercion::new(
                             result_type.clone(),
                             any_type.clone(),
@@ -595,7 +593,6 @@ fn compile_spawn_operation(
                             body.position().clone(),
                         )
                         .into(),
-                        context,
                     )?,
                     type_compiler::compile(context, &any_type)?,
                 ),
@@ -608,7 +605,9 @@ fn compile_spawn_operation(
                 THUNK_NAME,
                 vec![],
                 compile(
+                    context,
                     &downcast_compiler::compile(
+                        context,
                         &any_type,
                         result_type,
                         &Call::new(
@@ -618,9 +617,7 @@ fn compile_spawn_operation(
                             position.clone(),
                         )
                         .into(),
-                        context,
                     )?,
-                    context,
                 )?,
                 type_compiler::compile(context, result_type)?,
             ),
@@ -653,7 +650,7 @@ fn compile_record_fields(
                         .ok_or_else(|| AnalysisError::RecordFieldUnknown(field.position().clone()))?
                         .type_(),
                 )?,
-                compile(field.expression(), context)?,
+                compile(context, field.expression())?,
                 compile_record_fields(
                     &fields[1..],
                     field_types,
@@ -684,8 +681,8 @@ mod tests {
 
     fn compile_expression(expression: &Expression) -> Result<mir::ir::Expression, CompileError> {
         compile(
-            expression,
             &CompileContext::dummy(Default::default(), Default::default()),
+            expression,
         )
     }
 
@@ -877,6 +874,7 @@ mod tests {
 
             assert_eq!(
                 compile(
+                    &context,
                     &IfType::new(
                         "y",
                         Variable::new("x", Position::fake()),
@@ -888,7 +886,6 @@ mod tests {
                         Position::fake(),
                     )
                     .into(),
-                    &context,
                 ),
                 Ok(mir::ir::Case::new(
                     mir::ir::Variable::new("x"),
@@ -921,6 +918,7 @@ mod tests {
 
             assert_eq!(
                 compile(
+                    &context,
                     &IfType::new(
                         "y",
                         Variable::new("x", Position::fake()),
@@ -932,7 +930,6 @@ mod tests {
                         Position::fake(),
                     )
                     .into(),
-                    &context,
                 ),
                 Ok(mir::ir::Case::new(
                     mir::ir::Variable::new("x"),
@@ -967,6 +964,7 @@ mod tests {
 
             assert_eq!(
                 compile(
+                    &context,
                     &IfType::new(
                         "y",
                         Variable::new("x", Position::fake()),
@@ -982,7 +980,6 @@ mod tests {
                         Position::fake(),
                     )
                     .into(),
-                    &context,
                 ),
                 Ok(mir::ir::Case::new(
                     mir::ir::Variable::new("x"),
@@ -1033,6 +1030,7 @@ mod tests {
 
             assert_eq!(
                 compile(
+                    &context,
                     &IfType::new(
                         "y",
                         Variable::new("x", Position::fake()),
@@ -1044,7 +1042,6 @@ mod tests {
                         Position::fake(),
                     )
                     .into(),
-                    &context,
                 ),
                 Ok(mir::ir::Case::new(
                     mir::ir::Variable::new("x"),
@@ -1083,6 +1080,7 @@ mod tests {
 
             assert_eq!(
                 compile(
+                    &context,
                     &IfType::new(
                         "y",
                         Variable::new("x", Position::fake()),
@@ -1098,7 +1096,6 @@ mod tests {
                         Position::fake(),
                     )
                     .into(),
-                    &context,
                 ),
                 Ok(mir::ir::Case::new(
                     mir::ir::Variable::new("x"),
@@ -1145,16 +1142,6 @@ mod tests {
         fn compile_record_construction() {
             assert_eq!(
                 compile(
-                    &RecordConstruction::new(
-                        types::Record::new("r", Position::fake()),
-                        vec![RecordField::new(
-                            "x",
-                            None::new(Position::fake()),
-                            Position::fake()
-                        )],
-                        Position::fake()
-                    )
-                    .into(),
                     &CompileContext::dummy(
                         Default::default(),
                         [(
@@ -1167,6 +1154,16 @@ mod tests {
                         .into_iter()
                         .collect()
                     ),
+                    &RecordConstruction::new(
+                        types::Record::new("r", Position::fake()),
+                        vec![RecordField::new(
+                            "x",
+                            None::new(Position::fake()),
+                            Position::fake()
+                        )],
+                        Position::fake()
+                    )
+                    .into(),
                 ),
                 Ok(mir::ir::Let::new(
                     "$x",
@@ -1185,6 +1182,18 @@ mod tests {
         fn compile_record_construction_with_two_fields() {
             assert_eq!(
                 compile(
+                    &CompileContext::dummy(
+                        Default::default(),
+                        [(
+                            "r".into(),
+                            vec![
+                                types::RecordField::new("x", types::Number::new(Position::fake())),
+                                types::RecordField::new("y", types::None::new(Position::fake()))
+                            ]
+                        )]
+                        .into_iter()
+                        .collect()
+                    ),
                     &RecordConstruction::new(
                         types::Record::new("r", Position::fake()),
                         vec![
@@ -1198,18 +1207,6 @@ mod tests {
                         Position::fake()
                     )
                     .into(),
-                    &CompileContext::dummy(
-                        Default::default(),
-                        [(
-                            "r".into(),
-                            vec![
-                                types::RecordField::new("x", types::Number::new(Position::fake())),
-                                types::RecordField::new("y", types::None::new(Position::fake()))
-                            ]
-                        )]
-                        .into_iter()
-                        .collect()
-                    ),
                 ),
                 Ok(mir::ir::Let::new(
                     "$x",
@@ -1236,16 +1233,16 @@ mod tests {
         fn compile_singleton_record_construction() {
             assert_eq!(
                 compile(
+                    &CompileContext::dummy(
+                        Default::default(),
+                        [("r".into(), vec![])].into_iter().collect()
+                    ),
                     &RecordConstruction::new(
                         types::Record::new("r", Position::fake()),
                         vec![],
                         Position::fake()
                     )
                     .into(),
-                    &CompileContext::dummy(
-                        Default::default(),
-                        [("r".into(), vec![])].into_iter().collect()
-                    ),
                 ),
                 Ok(mir::ir::Record::new(mir::types::Record::new("r"), vec![]).into())
             );
@@ -1255,18 +1252,18 @@ mod tests {
         fn compile_record_construction_with_reference_type() {
             assert_eq!(
                 compile(
-                    &RecordConstruction::new(
-                        types::Reference::new("r", Position::fake()),
-                        vec![],
-                        Position::fake()
-                    )
-                    .into(),
                     &CompileContext::dummy(
                         [("r".into(), types::Record::new("r", Position::fake()).into())]
                             .into_iter()
                             .collect(),
                         [("r".into(), vec![])].into_iter().collect()
                     ),
+                    &RecordConstruction::new(
+                        types::Reference::new("r", Position::fake()),
+                        vec![],
+                        Position::fake()
+                    )
+                    .into(),
                 ),
                 Ok(mir::ir::Record::new(mir::types::Record::new("r"), vec![]).into())
             );
@@ -1283,12 +1280,6 @@ mod tests {
 
             assert_eq!(
                 compile(
-                    &TryOperation::new(
-                        Some(types::None::new(Position::fake()).into()),
-                        Variable::new("x", Position::fake()),
-                        Position::fake(),
-                    )
-                    .into(),
                     &CompileContext::dummy(
                         [(
                             "error".into(),
@@ -1298,6 +1289,12 @@ mod tests {
                         .collect(),
                         Default::default()
                     ),
+                    &TryOperation::new(
+                        Some(types::None::new(Position::fake()).into()),
+                        Variable::new("x", Position::fake()),
+                        Position::fake(),
+                    )
+                    .into(),
                 ),
                 Ok(mir::ir::Case::new(
                     mir::ir::TryOperation::new(
@@ -1323,6 +1320,15 @@ mod tests {
 
             assert_eq!(
                 compile(
+                    &CompileContext::dummy(
+                        [(
+                            "error".into(),
+                            types::Record::new("error", Position::fake()).into()
+                        )]
+                        .into_iter()
+                        .collect(),
+                        Default::default()
+                    ),
                     &TryOperation::new(
                         Some(
                             types::Union::new(
@@ -1336,15 +1342,6 @@ mod tests {
                         Position::fake(),
                     )
                     .into(),
-                    &CompileContext::dummy(
-                        [(
-                            "error".into(),
-                            types::Record::new("error", Position::fake()).into()
-                        )]
-                        .into_iter()
-                        .collect(),
-                        Default::default()
-                    ),
                 ),
                 Ok(mir::ir::Case::new(
                     mir::ir::TryOperation::new(

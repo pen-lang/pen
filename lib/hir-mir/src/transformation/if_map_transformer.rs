@@ -56,10 +56,10 @@ pub fn transform(context: &CompileContext, if_: &IfMap) -> Result<Expression, Co
                 Some(if_.name().into()),
                 Some(value_type.clone()),
                 downcast_compiler::compile(
+                    context,
                     &any_type,
                     value_type,
                     &Variable::new(if_.name(), position.clone()).into(),
-                    context,
                 )?,
                 if_.then().clone(),
                 position.clone(),
