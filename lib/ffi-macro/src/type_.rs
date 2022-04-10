@@ -41,7 +41,7 @@ fn generate_type(attributes: &AttributeArgs, type_: &ItemStruct) -> Result<Token
                 ptr::read(&payload as *const u64 as *const T)
             }
 
-            #[allow(clippy::forget_copy)]
+            #[allow(clippy::forget_copy, clippy::forget_non_drop)]
             extern "C" fn clone(x: u64) -> u64 {
                 let x = unsafe { transmute_from_payload::<#type_name>(x) };
                 let payload = unsafe { transmute_into_payload(x.clone()) };

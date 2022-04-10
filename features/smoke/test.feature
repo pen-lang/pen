@@ -58,7 +58,7 @@ Feature: Testing
     import Os'File
 
     Foo = \() none | error {
-      File'Write
+      _ = File'Write
 
       none
     }
@@ -69,9 +69,9 @@ Feature: Testing
   Scenario: Run tests without a Test package
     Given a file named "pen.json" with:
     """json
-    { 
+    {
       "type": "library",
-      "dependencies": {} 
+      "dependencies": {}
     }
     """
     And a file named "Foo.test.pen" with:
