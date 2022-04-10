@@ -1,3 +1,5 @@
+# This module provides common boolean operations.
+
 # Return true if any of given booleans are true or false otherwise.
 Any = \(bs [boolean]) boolean {
   if [b, ...bs] = bs {
