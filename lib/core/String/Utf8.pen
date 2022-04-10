@@ -2,7 +2,7 @@
 
 import foreign "c" _pen_core_join_strings \([string], string) string
 
-# Join strings with a separator
+# Join strings with a separator.
 Join = \(strings [string], separator string) string {
   _pen_core_join_strings(strings, separator)
 }
