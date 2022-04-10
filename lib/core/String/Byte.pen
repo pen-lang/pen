@@ -3,7 +3,7 @@
 import foreign "c" _pen_core_byte_length \(string) number
 import foreign "c" _pen_core_byte_slice \(string, number, number) string
 
-# Retrun a length of a string.
+# Return a length of a string.
 Length = \(s string) number {
   _pen_core_byte_length(s)
 }
