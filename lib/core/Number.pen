@@ -72,14 +72,17 @@ Floor = \(x number) number {
   _pen_core_floor(x)
 }
 
+# NaN
 Nan = \() number {
   _pen_core_nan()
 }
 
+# Infinity
 Infinity = \() number {
   _pen_core_infinity()
 }
 
+# Calculate a minimum of two numbers.
 Minimum = \(x number, y number) number {
   if IsNan(x) | IsNan(y) {
     Nan()
@@ -90,6 +93,7 @@ Minimum = \(x number, y number) number {
   }
 }
 
+# Calculate a maximum of two numbers.
 Maximum = \(x number, y number) number {
   if IsNan(x) | IsNan(y) {
     Nan()
