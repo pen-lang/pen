@@ -22,6 +22,12 @@ type _mapContext {
   hashValue \(any) number
 }
 
+type _mapIterator {
+  key any
+  value any
+  rest \() _mapIterator | none
+}
+
 type _hamtUpdate {
   hamt _hamt
   size boolean
@@ -338,6 +344,30 @@ _hashHamt = \(ctx _mapContext, h _hamt, index number, hash number) number {
       )
     } else if none {
       _hashHamt(ctx, h, index + 1, hash)
+    }
+  }
+}
+
+_iterateMap = \(x _map) _mapIterator | none {
+  _iterateHamt(x.hamt, 1, \() _mapIterator | none { none })
+}
+
+_iterateHamt = \(h _hamt, i number, rest \() _mapIterator | none) _mapIterator | none {
+  if i > 32 {
+    none
+  } else {
+    rest = \() _mapIterator | none { _iterateHamt(h, i + 1, rest) }
+
+    if e = _getEntry(h, i) as _keyValue {
+      _mapIterator{
+        key: e.key,
+        value: e.value,
+        rest: rest,
+      }
+    } else if _hamt {
+      _iterateHamt(e, 1, rest)
+    } else if none {
+      rest()
     }
   }
 }
