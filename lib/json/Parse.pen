@@ -49,6 +49,7 @@ objectResult = \(vs [objectEntry], i View) objectResult {
   objectResult{entries: vs, input: i}
 }
 
+# Parse a string into a JSON value.
 Parse = \(s string) Value | error {
   r = value(View'New(s))?
 
