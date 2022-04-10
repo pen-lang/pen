@@ -1,4 +1,4 @@
-# This module provides functions for strings as byte arrays.
+# This module provides operations for strings as byte arrays.
 
 import foreign "c" _pen_core_byte_length \(string) number
 import foreign "c" _pen_core_byte_slice \(string, number, number) string

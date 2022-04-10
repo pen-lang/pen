@@ -62,12 +62,12 @@ IsNan = \(x number) boolean {
   _pen_core_is_nan(x)
 }
 
-# Calculate a ceil value of a number.
+# Calculate a ceil value.
 Ceil = \(x number) number {
   _pen_core_ceil(x)
 }
 
-# Calculate a floor value of a number.
+# Calculate a floor value.
 Floor = \(x number) number {
   _pen_core_floor(x)
 }
@@ -82,7 +82,7 @@ Infinity = \() number {
   _pen_core_infinity()
 }
 
-# Calculate a minimum of two numbers.
+# Calculate a minimum.
 Minimum = \(x number, y number) number {
   if IsNan(x) | IsNan(y) {
     Nan()
@@ -93,7 +93,7 @@ Minimum = \(x number, y number) number {
   }
 }
 
-# Calculate a maximum of two numbers.
+# Calculate a maximum.
 Maximum = \(x number, y number) number {
   if IsNan(x) | IsNan(y) {
     Nan()

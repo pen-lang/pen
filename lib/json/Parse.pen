@@ -207,7 +207,7 @@ array = \(v View) result | error {
 
 arrayElements = \(v View, vs [Value]) arrayResult | error {
   if r = value(v) as result {
-    # TODO Optimize appending list elements.
+    # TODO Optimize appending list elements. This is O(n^2).
     vs = [Value ...vs, r.value]
     v = blank(r.input)
 
@@ -220,7 +220,7 @@ arrayElements = \(v View, vs [Value]) arrayResult | error {
         arrayElements(v, vs)
       }
     } else {
-      arrayResult(vs, r.input)
+      arrayResult(vs, v)
     }
   } else {
     arrayResult(vs, v)
@@ -243,13 +243,15 @@ object = \(v View) result | error {
 }
 
 objectEntries = \(v View, es [objectEntry]) objectResult | error {
+  v = blank(v)
+
   if r = string_(v) as result {
-    k = if v = Value'Raw(r.value) as string { v } else { error("unexpected non-string key") }?
+    k = if k = Value'Raw(r.value) as string { k } else { error("unexpected non-string key") }?
     v = blank(r.input)
     v = if View'HasPrefix(v, ":") { View'Seek(v, 1) } else { error(": expected") }?
     r = value(v)?
 
-    # TODO Optimize appending list elements.
+    # TODO Optimize appending list elements. This is O(n^2).
     es = [objectEntry ...es, objectEntry{key: k, value: r.value}]
     v = blank(r.input)
 
