@@ -133,8 +133,6 @@ set = \(hamt Hamt, key any, value any, layer number, level number, cfg Configura
   }
 
   if e = getEntry(hamt, i) as keyValue {
-    # TODO Remove a debug function call below of workaround for a bug in LLVM 13.0.0.
-    debug("pen: hack to preserve proper stack values")
     if cfg.EqualKeys(e.key, key) {
       update(keyValue{key: key, value: value}, false)
     } else {
@@ -169,8 +167,6 @@ delete = \(hamt Hamt, key any, layer number, level number, cfg Configuration) Up
   }
 
   if e = getEntry(hamt, i) as keyValue {
-    # TODO Remove a debug function call below of workaround for a bug in LLVM 13.0.0.
-    debug("pen: hack to preserve proper stack values")
     if cfg.EqualKeys(e.key, key) {
       update(none, true)
     } else {

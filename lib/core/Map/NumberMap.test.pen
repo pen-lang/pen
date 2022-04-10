@@ -1,4 +1,5 @@
 import Test'Assert
+
 import 'Map'NumberMap
 
 get = \(m NumberMap'Map, k number) number | none {
@@ -9,10 +10,9 @@ get = \(m NumberMap'Map, k number) number | none {
   }
 }
 
-# TODO Enable this test when LLVM is upgraded to 14.
-#TestMapSet = \() none | error {
-#  k = 42
-#  v = 2045
-#
-#  Assert'True(get(NumberMap'Set(NumberMap'New(), k, v), k) == v)
-#}
+TestMapSet = \() none | error {
+  k = 42
+  v = 2045
+
+  Assert'True(get(NumberMap'Set(NumberMap'New(), k, v), k) == v)
+}
