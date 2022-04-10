@@ -69,7 +69,7 @@ jobs:
       - run: tools/integration_test.sh ${{ matrix.feature }}
   integration_test:
     runs-on: ubuntu-latest
-    needs: feature_tests
+    needs: feature_test
     if: ${{ always() }}
     steps:
       - run: test ${{ needs.feature_tests.result }} = success
