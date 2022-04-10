@@ -11,7 +11,7 @@ use crate::{
 pub use compile_configuration::{
     CompileConfiguration, ConcurrencyConfiguration, ErrorTypeConfiguration, FmmConfiguration,
     HashConfiguration, HirConfiguration, ListTypeConfiguration, MapTypeConfiguration,
-    MirConfiguration, StringTypeConfiguration,
+    MapTypeIterationConfiguration, MirConfiguration, StringTypeConfiguration,
 };
 use fnv::FnvHashMap;
 use std::{collections::BTreeMap, error::Error};
