@@ -157,7 +157,7 @@ fn compile_type_definition(context: &Context, definition: &TypeDefinition) -> Se
                     if ast::analysis::is_record_open(record_definition) {
                         format_type_definition(definition)
                     } else {
-                        format!("type {} {{\n  ...\n}}", definition.name())
+                        format!("type {} {{\n  # ...\n}}", definition.name())
                     }
                 } else {
                     format_type_definition(definition)
@@ -846,7 +846,7 @@ mod tests {
 
                     ```pen
                     type Foo {
-                      ...
+                      # ...
                     }
                     ```
                     "
