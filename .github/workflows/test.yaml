@@ -44,6 +44,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - run: echo ::set-output name=tomato::cabbage
       - run: echo ::set-output name=features::"$(ls features/**/*.feature | jq -Rsc 'split("\n")[:-1]')"
   feature_test:
     needs:
