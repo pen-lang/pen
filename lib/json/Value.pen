@@ -1,17 +1,17 @@
 # A JSON value
 type Value {
-  raw raw
+  raw Raw
 }
 
 # A raw JSON value represented by built-in types
 type Raw = boolean | none | number | string | [Value] | {string: Value}
 
 # Create a JSON value.
-New = \(r raw) Value {
+New = \(r Raw) Value {
   Value{raw: r}
 }
 
 # Get an internal value.
-Raw = \(v Value) raw {
+Raw = \(v Value) Raw {
   v.raw
 }
