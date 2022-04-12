@@ -340,7 +340,37 @@ fn check_expression(
             )
             .into()
         }
-        Expression::MapIterationComprehension(_) => todo!(),
+        Expression::MapIterationComprehension(comprehension) => {
+            let position = comprehension.position();
+            let key_type = comprehension
+                .key_type()
+                .ok_or_else(|| AnalysisError::TypeNotInferred(position.clone()))?;
+            let value_type = comprehension
+                .value_type()
+                .ok_or_else(|| AnalysisError::TypeNotInferred(position.clone()))?;
+
+            check_subsumption(
+                &check_expression(
+                    comprehension.element(),
+                    &variables
+                        .clone()
+                        .into_iter()
+                        .chain([
+                            (comprehension.key_name().into(), key_type.clone()),
+                            (comprehension.value_name().into(), value_type.clone()),
+                        ])
+                        .collect(),
+                )?,
+                comprehension.element_type(),
+            )?;
+
+            check_subsumption(
+                &check_expression(comprehension.map(), variables)?,
+                &types::Map::new(key_type.clone(), value_type.clone(), position.clone()).into(),
+            )?;
+
+            types::List::new(comprehension.element_type().clone(), position.clone()).into()
+        }
         Expression::None(none) => types::None::new(none.position().clone()).into(),
         Expression::Number(number) => types::Number::new(number.position().clone()).into(),
         Expression::Operation(operation) => check_operation(context, operation, variables)?,
@@ -2570,6 +2600,93 @@ mod tests {
                     Position::fake()
                 )),
             );
+        }
+
+        #[test]
+        fn check_map_iteration_comprehension_with_keys() {
+            let key_type = types::Number::new(Position::fake());
+            let value_type = types::None::new(Position::fake());
+
+            check_module(
+                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                    "f",
+                    Lambda::new(
+                        vec![],
+                        types::List::new(key_type.clone(), Position::fake()),
+                        MapIterationComprehension::new(
+                            Some(key_type.clone().into()),
+                            Some(value_type.clone().into()),
+                            key_type.clone(),
+                            Variable::new("k", Position::fake()),
+                            "k",
+                            "v",
+                            Map::new(key_type, value_type, vec![], Position::fake()),
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    ),
+                    false,
+                )]),
+            )
+            .unwrap();
+        }
+
+        #[test]
+        fn check_map_iteration_comprehension_with_values() {
+            let key_type = types::Number::new(Position::fake());
+            let value_type = types::None::new(Position::fake());
+
+            check_module(
+                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                    "f",
+                    Lambda::new(
+                        vec![],
+                        types::List::new(value_type.clone(), Position::fake()),
+                        MapIterationComprehension::new(
+                            Some(key_type.clone().into()),
+                            Some(value_type.clone().into()),
+                            value_type.clone(),
+                            Variable::new("v", Position::fake()),
+                            "k",
+                            "v",
+                            Map::new(key_type, value_type, vec![], Position::fake()),
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    ),
+                    false,
+                )]),
+            )
+            .unwrap();
+        }
+
+        #[test]
+        fn fail_to_check_element_in_map_iteration_comprehension() {
+            let key_type = types::Number::new(Position::fake());
+            let value_type = types::None::new(Position::fake());
+
+            check_module(
+                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                    "f",
+                    Lambda::new(
+                        vec![],
+                        types::List::new(key_type.clone(), Position::fake()),
+                        MapIterationComprehension::new(
+                            Some(key_type.clone().into()),
+                            Some(value_type.clone().into()),
+                            key_type.clone(),
+                            Variable::new("k", Position::fake()),
+                            "k",
+                            "v",
+                            Map::new(key_type, value_type, vec![], Position::fake()),
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    ),
+                    false,
+                )]),
+            )
+            .unwrap();
         }
     }
 
