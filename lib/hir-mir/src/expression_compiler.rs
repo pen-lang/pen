@@ -492,10 +492,9 @@ fn compile_map_iteration_comprehension(
                         mir::ir::Variable::new(definition.name()),
                         vec![mir::ir::Call::new(
                             mir::types::Function::new(
-                                vec![map_type.clone().into()],
+                                vec![map_type.into()],
                                 mir::types::Type::Variant,
-                            )
-                            .into(),
+                            ),
                             mir::ir::Variable::new(
                                 &context
                                     .configuration()?
@@ -584,14 +583,14 @@ fn compile_map_iteration_function_definition(
                         Some(key_type.clone()),
                         compile_key_value_function_call(
                             &iteration_configuration.key_function_name,
-                            &key_type,
+                            key_type,
                         )?,
                         Let::new(
                             Some(comprehension.value_name().into()),
                             Some(value_type.clone()),
                             compile_key_value_function_call(
                                 &iteration_configuration.value_function_name,
-                                &value_type,
+                                value_type,
                             )?,
                             List::new(
                                 element_type.clone(),
