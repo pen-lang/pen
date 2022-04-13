@@ -1,9 +1,8 @@
 use super::{
-    boolean::Boolean, call::Call, if_::If, if_list::IfList, if_type::IfType, list::List,
-    none::None, number::Number, record::Record, string::ByteString, variable::Variable,
-    BinaryOperation, Lambda, ListComprehension, RecordDeconstruction, UnaryOperation,
+    if_list::IfList, BinaryOperation, Boolean, ByteString, Call, If, IfMap, IfType, Lambda, List,
+    ListComprehension, Map, MapIterationComprehension, None, Number, Record, RecordDeconstruction,
+    SpawnOperation, UnaryOperation, Variable,
 };
-use crate::{IfMap, Map, SpawnOperation};
 use position::Position;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -19,6 +18,7 @@ pub enum Expression {
     List(List),
     ListComprehension(ListComprehension),
     Map(Map),
+    MapIterationComprehension(MapIterationComprehension),
     None(None),
     Number(Number),
     Record(Record),
@@ -43,6 +43,7 @@ impl Expression {
             Self::List(list) => list.position(),
             Self::ListComprehension(comprehension) => comprehension.position(),
             Self::Map(map) => map.position(),
+            Self::MapIterationComprehension(comprehension) => comprehension.position(),
             Self::None(none) => none.position(),
             Self::Number(number) => number.position(),
             Self::Record(record) => record.position(),
@@ -124,6 +125,12 @@ impl From<ListComprehension> for Expression {
 impl From<Map> for Expression {
     fn from(map: Map) -> Self {
         Self::Map(map)
+    }
+}
+
+impl From<MapIterationComprehension> for Expression {
+    fn from(comprehension: MapIterationComprehension) -> Self {
+        Self::MapIterationComprehension(comprehension)
     }
 }
 
