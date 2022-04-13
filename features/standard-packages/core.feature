@@ -46,13 +46,13 @@ Feature: Core
     When I run `pen build`
     Then the exit status should be 0
 
-  Scenario: Slice a string
+  Scenario: Slice a string as bytes
     Given a file named "Foo.pen" with:
     """pen
-    import Core'String
+    import Core'String'Byte
 
     f = \() string {
-      String'Slice("foo", 1, 2)
+      Byte'Slice("foo", 1, 2)
     }
     """
     When I run `pen build`

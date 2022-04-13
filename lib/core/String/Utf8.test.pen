@@ -1,0 +1,27 @@
+import Test'Assert
+
+import 'String'Utf8
+
+LengthEmpty = \() none | error {
+  Assert'True(Utf8'Length("") == 0)
+}
+
+LengthEmoji = \() none | error {
+  Assert'True(Utf8'Length("😄") == 1)
+}
+
+LengthTwoEmojis = \() none | error {
+  Assert'True(Utf8'Length("😄🗿") == 2)
+}
+
+SliceStart = \() none | error {
+  Assert'True(Utf8'Slice("🗿😄🐶", 1, 2) == "🗿😄")
+}
+
+SliceMiddle = \() none | error {
+  Assert'True(Utf8'Slice("🗿😄🐶", 2, 2) == "😄")
+}
+
+SliceEnd = \() none | error {
+  Assert'True(Utf8'Slice("🗿😄🐶", 2, 3) == "😄🐶")
+}

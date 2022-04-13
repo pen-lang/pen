@@ -7,6 +7,8 @@ import foreign "c" _pen_core_square_root \(number) number
 import foreign "c" _pen_core_is_nan \(number) boolean
 import foreign "c" _pen_core_ceil \(number) number
 import foreign "c" _pen_core_floor \(number) number
+import foreign "c" _pen_core_nan \() number
+import foreign "c" _pen_core_infinity \() number
 
 # Convert a number into its string representation.
 String = \(x number) string {
@@ -60,12 +62,44 @@ IsNan = \(x number) boolean {
   _pen_core_is_nan(x)
 }
 
-# Calculate a ceil value of a number.
+# Calculate a ceil value.
 Ceil = \(x number) number {
   _pen_core_ceil(x)
 }
 
-# Calculate a floor value of a number.
+# Calculate a floor value.
 Floor = \(x number) number {
   _pen_core_floor(x)
+}
+
+# NaN
+Nan = \() number {
+  _pen_core_nan()
+}
+
+# Infinity
+Infinity = \() number {
+  _pen_core_infinity()
+}
+
+# Calculate a minimum.
+Minimum = \(x number, y number) number {
+  if IsNan(x) | IsNan(y) {
+    Nan()
+  } else if x < y {
+    x
+  } else {
+    y
+  }
+}
+
+# Calculate a maximum.
+Maximum = \(x number, y number) number {
+  if IsNan(x) | IsNan(y) {
+    Nan()
+  } else if x > y {
+    x
+  } else {
+    y
+  }
 }

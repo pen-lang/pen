@@ -18,7 +18,7 @@
   - [Standard packages](references/standard-packages/README.md)
     - [`Core`](references/standard-packages/core.md)
     - [`Os`](references/standard-packages/os.md)
-    - [`OsSync`](references/standard-packages/os-sync.md)
+    - [`Json`](references/standard-packages/json.md)
     - [`Test`](references/standard-packages/test.md)
 - [Examples](examples/README.md)
   - [Types](examples/types/README.md)

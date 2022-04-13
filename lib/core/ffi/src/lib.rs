@@ -6,3 +6,4 @@ mod bit;
 mod hamt;
 mod number;
 mod string;
+mod view;
