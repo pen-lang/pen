@@ -49,6 +49,13 @@ pub static COMPILE_CONFIGURATION: Lazy<Arc<app::module_compiler::CompileConfigur
                         list_hash_function_name: "_hashList".into(),
                         map_hash_function_name: "_hashMap".into(),
                     },
+                    iteration: app::module_compiler::MapTypeIterationConfiguration {
+                        iterator_type_name: "_mapIterator".into(),
+                        iterate_function_name: "_iterateMap".into(),
+                        key_function_name: "_mapIteratorKey".into(),
+                        value_function_name: "_mapIteratorValue".into(),
+                        rest_function_name: "_mapIteratorRest".into(),
+                    },
                 },
                 string_type: app::module_compiler::StringTypeConfiguration {
                     equal_function_name: "_equalStrings".into(),

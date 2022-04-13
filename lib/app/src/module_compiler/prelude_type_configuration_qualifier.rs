@@ -65,6 +65,10 @@ fn qualify_map_type_configuration(
         delete_function_name: prelude_prefix.to_owned() + &configuration.delete_function_name,
         set_function_name: prelude_prefix.to_owned() + &configuration.set_function_name,
         hash: qualify_hash_configuration(&configuration.hash, prelude_prefix),
+        iteration: qualify_map_type_iteration_configuration(
+            &configuration.iteration,
+            prelude_prefix,
+        ),
     }
 }
 
@@ -80,5 +84,18 @@ fn qualify_hash_configuration(
             + &configuration.string_hash_function_name,
         list_hash_function_name: prelude_prefix.to_owned() + &configuration.list_hash_function_name,
         map_hash_function_name: prelude_prefix.to_owned() + &configuration.map_hash_function_name,
+    }
+}
+
+fn qualify_map_type_iteration_configuration(
+    configuration: &hir_mir::MapTypeIterationConfiguration,
+    prelude_prefix: &str,
+) -> hir_mir::MapTypeIterationConfiguration {
+    hir_mir::MapTypeIterationConfiguration {
+        iterator_type_name: prelude_prefix.to_owned() + &configuration.iterator_type_name,
+        iterate_function_name: prelude_prefix.to_owned() + &configuration.iterate_function_name,
+        key_function_name: prelude_prefix.to_owned() + &configuration.key_function_name,
+        value_function_name: prelude_prefix.to_owned() + &configuration.value_function_name,
+        rest_function_name: prelude_prefix.to_owned() + &configuration.rest_function_name,
     }
 }
