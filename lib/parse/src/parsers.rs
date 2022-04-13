@@ -772,20 +772,33 @@ fn list_element<'a>() -> impl Parser<Stream<'a>, Output = ListElement> {
     ))
 }
 
-fn list_comprehension<'a>() -> impl Parser<Stream<'a>, Output = ListComprehension> {
+fn list_comprehension<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
     (
         attempt((position(), sign("["), type_(), expression(), keyword("for"))),
         identifier(),
+        optional(sign(",").with(identifier())),
         keyword("in"),
         expression(),
         sign("]"),
     )
         .map(
-            |((position, _, type_, element, _), element_name, _, list, _)| {
-                ListComprehension::new(type_, element, element_name, list, position)
+            |((position, _, type_, element, _), element_name, value_name, _, iterator, _)| {
+                if let Some(value_name) = value_name {
+                    MapIterationComprehension::new(
+                        type_,
+                        element,
+                        element_name,
+                        value_name,
+                        iterator,
+                        position,
+                    )
+                    .into()
+                } else {
+                    ListComprehension::new(type_, element, element_name, iterator, position).into()
+                }
             },
         )
-        .expected("list literal")
+        .expected("list comprehension")
 }
 
 fn map_literal<'a>() -> impl Parser<Stream<'a>, Output = Map> {
@@ -3102,7 +3115,7 @@ mod tests {
             ] {
                 assert_eq!(
                     list_comprehension().parse(stream(source, "")).unwrap().0,
-                    target
+                    target.into()
                 );
             }
         }
@@ -3187,6 +3200,25 @@ mod tests {
             ] {
                 assert_eq!(expression().parse(stream(source, "")).unwrap().0, target);
             }
+        }
+
+        #[test]
+        fn parse_map_iteration_comprehension() {
+            assert_eq!(
+                list_comprehension()
+                    .parse(stream("[none v for k, v in xs]", ""))
+                    .unwrap()
+                    .0,
+                MapIterationComprehension::new(
+                    types::None::new(Position::fake()),
+                    Variable::new("v", Position::fake()),
+                    "k",
+                    "v",
+                    Variable::new("xs", Position::fake()),
+                    Position::fake(),
+                )
+                .into()
+            );
         }
     }
 

@@ -1,7 +1,6 @@
 ---
 source: lib/parse/src/parsers.rs
-assertion_line: 2144
-expression: "expression().parse(stream(source,\n                          \"\")).map_err(|error|\n                                           ParseError::new(source, \"\",\n                                                           error)).err()"
+expression: "expression().parse(stream(source,\n                \"\")).map_err(|error| ParseError::new(source, \"\", error)).err()"
 ---
 Some(
     ParseError {
@@ -23,6 +22,7 @@ Some(
             "if expression",
             "function expression",
             "record literal",
+            "list comprehension",
             "list literal",
             "map literal",
             "boolean literal",
