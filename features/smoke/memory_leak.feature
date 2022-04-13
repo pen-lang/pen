@@ -11,24 +11,6 @@ Feature: Memory leak
     }
     """
 
-  Scenario: Run an infinite loop
-    Given a file named "main.pen" with:
-    """pen
-    import Os'Context { Context }
-
-    f = \(_ none) none {
-      f(none)
-    }
-
-    main = \(ctx context) none {
-      f(none)
-
-      none
-    }
-    """
-    When I successfully run `pen build`
-    Then I successfully run `check_memory_leak_in_loop.sh ./app`
-
   Scenario: Run hello world
     Given a file named "main.pen" with:
     """pen
