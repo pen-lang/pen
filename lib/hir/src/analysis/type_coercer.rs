@@ -1917,7 +1917,7 @@ mod tests {
                     Position::fake(),
                 );
                 let list_type = types::List::new(union_type.clone(), Position::fake());
-                let empty_list = Map::new(
+                let empty_map = Map::new(
                     types::None::new(Position::fake()),
                     types::None::new(Position::fake()),
                     vec![],
@@ -1938,7 +1938,7 @@ mod tests {
                                     None::new(Position::fake()),
                                     "k",
                                     "v",
-                                    empty_list.clone(),
+                                    empty_map.clone(),
                                     Position::fake(),
                                 ),
                                 Position::fake(),
@@ -1964,7 +1964,7 @@ mod tests {
                                     ),
                                     "k",
                                     "v",
-                                    empty_list,
+                                    empty_map,
                                     Position::fake(),
                                 ),
                                 Position::fake(),
@@ -1983,7 +1983,7 @@ mod tests {
                     Position::fake(),
                 );
                 let list_type = types::List::new(union_type.clone(), Position::fake());
-                let empty_list = Map::new(
+                let empty_map = Map::new(
                     types::None::new(Position::fake()),
                     types::None::new(Position::fake()),
                     vec![],
@@ -2004,7 +2004,7 @@ mod tests {
                                     Variable::new("k", Position::fake()),
                                     "k",
                                     "v",
-                                    empty_list.clone(),
+                                    empty_map.clone(),
                                     Position::fake(),
                                 ),
                                 Position::fake(),
@@ -2030,7 +2030,7 @@ mod tests {
                                     ),
                                     "k",
                                     "v",
-                                    empty_list,
+                                    empty_map,
                                     Position::fake(),
                                 ),
                                 Position::fake(),
@@ -2049,7 +2049,7 @@ mod tests {
                     Position::fake(),
                 );
                 let list_type = types::List::new(union_type.clone(), Position::fake());
-                let empty_list = Map::new(
+                let empty_map = Map::new(
                     types::None::new(Position::fake()),
                     types::None::new(Position::fake()),
                     vec![],
@@ -2070,7 +2070,7 @@ mod tests {
                                     Variable::new("v", Position::fake()),
                                     "k",
                                     "v",
-                                    empty_list.clone(),
+                                    empty_map.clone(),
                                     Position::fake(),
                                 ),
                                 Position::fake(),
@@ -2096,7 +2096,7 @@ mod tests {
                                     ),
                                     "k",
                                     "v",
-                                    empty_list,
+                                    empty_map,
                                     Position::fake(),
                                 ),
                                 Position::fake(),
