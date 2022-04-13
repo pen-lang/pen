@@ -91,3 +91,23 @@ Feature: Map
     """
     When I successfully run `pen build`
     Then the exit status should be 0
+
+  Scenario: Iterate map keys
+    Given a file named "Foo.pen" with:
+    """pen
+    f = \(xs {string: number}) [string] {
+      [string k for k, _ in xs]
+    }
+    """
+    When I successfully run `pen build`
+    Then the exit status should be 0
+
+  Scenario: Iterate map values
+    Given a file named "Foo.pen" with:
+    """pen
+    f = \(xs {string: number}) [number] {
+      [number v for _, v in xs]
+    }
+    """
+    When I successfully run `pen build`
+    Then the exit status should be 0
