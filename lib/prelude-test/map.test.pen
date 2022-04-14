@@ -74,6 +74,13 @@ SetManyKeys = \() none | error {
   assertKeys(xs, ks)
 }
 
+SetVeryManyKeys = \() none | error {
+  ks = Number'Sequence(1024)
+  xs = numberSet(ks)
+
+  assertKeys(xs, ks)
+}
+
 IterateKey = \() none | error {
   Assert'True(
     Number'Sum([number k for k, _ in {number: none 1: none}]) == 1,
@@ -88,6 +95,15 @@ Iterate2Keys = \() none | error {
 
 IterateManyKeys = \() none | error {
   ks = Number'Sequence(42)
+
+  Assert'True(
+    Number'Sum([number k for k, _ in numberSet(ks)])
+      == Number'Sum(ks),
+  )
+}
+
+IterateVeryManyKeys = \() none | error {
+  ks = Number'Sequence(1024)
 
   Assert'True(
     Number'Sum([number k for k, _ in numberSet(ks)])
