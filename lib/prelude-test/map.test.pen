@@ -67,6 +67,21 @@ Set4Keys = \() none | error {
   )
 }
 
+RemoveKey = \() none | error {
+  Assert'True(
+    Number'Sum(
+      [number
+        k
+        for k, _ in {number: none
+          1: none,
+          1,
+        }
+      ],
+    )
+      == 0,
+  )
+}
+
 Merge2Maps = \() none | error {
   Assert'True(
     Number'Sum(
