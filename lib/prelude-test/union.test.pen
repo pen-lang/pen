@@ -1,0 +1,9 @@
+import Test'Assert
+
+DowncastUnionToList = \() none | error {
+  x = if true { [none] } else { none }
+
+  Assert'True(
+    if x = x as [none] { true } else if none { false },
+  )
+}
