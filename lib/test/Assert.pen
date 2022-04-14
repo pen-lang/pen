@@ -23,21 +23,3 @@ Error = \(x any) none | error {
 Fail = \() error {
   error("assertion failed")
 }
-
-# Check if numbers are equal.
-EqualNumbers = \(x number, y number) none | error {
-  if x == y {
-    none
-  } else {
-    error("numbers are not equal")
-  }
-}
-
-# Check if strings are equal.
-EqualStrings = \(x string, y string) none | error {
-  if x == y {
-    none
-  } else {
-    error("strings are not equal")
-  }
-}
