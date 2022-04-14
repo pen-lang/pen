@@ -67,6 +67,22 @@ Set4Keys = \() none | error {
   )
 }
 
+SetManyKeys = \() none | error {
+  ks = Number'Sequence(42)
+  xs = numberSet(ks)
+
+  assertKeys(xs, ks)
+}
+
+IterateManyKeys = \() none | error {
+  ks = Number'Sequence(42)
+
+  Assert'True(
+    Number'Sum([number k for k, _ in numberSet(ks)])
+      == Number'Sum(ks),
+  )
+}
+
 Set3KeysWith0 = \() none | error {
   Assert'True(
     Number'Sum(
@@ -127,4 +143,24 @@ Merge3Maps = \() none | error {
     )
       == 6,
   )
+}
+
+assertKeys = \(xs {number: none}, ks [number]) none | error {
+  if [k, ...ks] = ks {
+    if _ = xs[k()] {
+      assertKeys(xs, ks)
+    } else {
+      error("oh no")
+    }
+  } else {
+    none
+  }
+}
+
+numberSet = \(xs [number]) {number: none} {
+  if [x, ...xs] = xs {
+    {number: none x(): none, ...numberSet(xs)}
+  } else {
+    {number: none}
+  }
 }
