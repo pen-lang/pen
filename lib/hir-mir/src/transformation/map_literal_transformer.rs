@@ -90,9 +90,14 @@ fn transform_map(
         .into(),
         // TODO Optimize cases where only a single element of MapElement::Map
         // exists when we pass context functions dynamically.
-        [element, ..] => {
-            let rest_expression =
-                transform_map(context, key_type, value_type, &elements[1..], position)?;
+        [.., element] => {
+            let rest_expression = transform_map(
+                context,
+                key_type,
+                value_type,
+                &elements[..elements.len() - 1],
+                position,
+            )?;
 
             match element {
                 MapElement::Insertion(entry) => Call::new(

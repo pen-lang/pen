@@ -24,6 +24,7 @@ exclude = [
   "lib/core",
   "lib/json",
   "lib/prelude",
+  "lib/prelude-test",
   "lib/os",
   "lib/os-sync",
   "lib/test",

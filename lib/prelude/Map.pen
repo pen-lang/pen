@@ -354,7 +354,7 @@ _iterateMap = \(x _map) _mapIterator | none {
 
 _iterateHamt = \(h _hamt, i number, rest \() _mapIterator | none) _mapIterator | none {
   if i > 32 {
-    none
+    rest()
   } else {
     rest = \() _mapIterator | none { _iterateHamt(h, i + 1, rest) }
 
