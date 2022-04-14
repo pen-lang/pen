@@ -20,8 +20,6 @@ SetKey = \() none | error {
 }
 
 Set2Keys = \() none | error {
-  xs = {number: none 1: none}
-
   Assert'True(
     Number'Sum(
       [number
@@ -37,8 +35,6 @@ Set2Keys = \() none | error {
 }
 
 Set3Keys = \() none | error {
-  xs = {number: none 1: none}
-
   Assert'True(
     Number'Sum(
       [number
@@ -55,8 +51,6 @@ Set3Keys = \() none | error {
 }
 
 Set4Keys = \() none | error {
-  xs = {number: none 1: none}
-
   Assert'True(
     Number'Sum(
       [number
@@ -73,9 +67,7 @@ Set4Keys = \() none | error {
   )
 }
 
-Set2Maps = \() none | error {
-  xs = {number: none 1: none}
-
+Merge2Maps = \() none | error {
   Assert'True(
     Number'Sum(
       [number
@@ -87,5 +79,21 @@ Set2Maps = \() none | error {
       ],
     )
       == 3,
+  )
+}
+
+Merge3Maps = \() none | error {
+  Assert'True(
+    Number'Sum(
+      [number
+        k
+        for k, _ in {number: none
+          ...{number: none 1: none},
+          ...{number: none 2: none},
+          ...{number: none 3: none},
+        }
+      ],
+    )
+      == 6,
   )
 }
