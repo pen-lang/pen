@@ -10,9 +10,10 @@ Feature: Standard packages
     And I successfully run `pen_test_on_linux.sh`
 
     Examples:
-      | package |
-      | core    |
-      | json    |
-      | os      |
-      | os-sync |
-      | test    |
+      | package      |
+      | core         |
+      | json         |
+      | os           |
+      | os-sync      |
+      | prelude-test |
+      | test         |
