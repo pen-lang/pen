@@ -1,0 +1,91 @@
+import Core'Number
+import Test'Assert
+
+SetNoKey = \() none | error {
+  Assert'True(Number'Sum([number k for k, _ in {number: none}]) == 0)
+}
+
+SetKey = \() none | error {
+  Assert'True(
+    Number'Sum(
+      [number
+        k
+        for k, _ in {number: none
+          1: none,
+        }
+      ],
+    )
+      == 1,
+  )
+}
+
+Set2Keys = \() none | error {
+  xs = {number: none 1: none}
+
+  Assert'True(
+    Number'Sum(
+      [number
+        k
+        for k, _ in {number: none
+          1: none,
+          2: none,
+        }
+      ],
+    )
+      == 3,
+  )
+}
+
+Set3Keys = \() none | error {
+  xs = {number: none 1: none}
+
+  Assert'True(
+    Number'Sum(
+      [number
+        k
+        for k, _ in {number: none
+          1: none,
+          2: none,
+          3: none,
+        }
+      ],
+    )
+      == 6,
+  )
+}
+
+Set4Keys = \() none | error {
+  xs = {number: none 1: none}
+
+  Assert'True(
+    Number'Sum(
+      [number
+        k
+        for k, _ in {number: none
+          1: none,
+          2: none,
+          3: none,
+          4: none,
+        }
+      ],
+    )
+      == 10,
+  )
+}
+
+Set2Maps = \() none | error {
+  xs = {number: none 1: none}
+
+  Assert'True(
+    Number'Sum(
+      [number
+        k
+        for k, _ in {number: none
+          ...{number: none 1: none},
+          ...{number: none 2: none},
+        }
+      ],
+    )
+      == 3,
+  )
+}
