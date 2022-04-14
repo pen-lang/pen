@@ -160,9 +160,17 @@
 <pre><code class="language-pen">import Test'Assert
 
 Foo = \() none | error {
-  Assert'True(true)?
+  Assert'True(true)
+}
+</code></pre>
+<p><em>When</em> I run <code>pen test</code></p>
+<p><em>Then</em> the exit status should be 0.</p>
+<h2 id="check-if-a-value-is-an-error"><a class="header" href="#check-if-a-value-is-an-error">Check if a value is an error</a></h2>
+<p><em>Given</em> a file named &quot;foo.test.pen&quot; with:</p>
+<pre><code class="language-pen">import Test'Assert
 
-  none
+Foo = \() none | error {
+  Assert'Error(error(none))
 }
 </code></pre>
 <p><em>When</em> I run <code>pen test</code></p>
@@ -172,37 +180,11 @@ Foo = \() none | error {
 <pre><code class="language-pen">import Test'Assert
 
 Foo = \() none | error {
-  Assert'Fail()?
-
-  none
+  Assert'Fail()
 }
 </code></pre>
 <p><em>When</em> I run <code>pen test</code></p>
 <p><em>Then</em> the exit status should be 1.</p>
-<h2 id="check-if-numbers-are-equal"><a class="header" href="#check-if-numbers-are-equal">Check if numbers are equal</a></h2>
-<p><em>Given</em> a file named &quot;foo.test.pen&quot; with:</p>
-<pre><code class="language-pen">import Test'Assert
-
-Foo = \() none | error {
-  Assert'EqualNumbers(42, 42)?
-
-  none
-}
-</code></pre>
-<p><em>When</em> I run <code>pen test</code></p>
-<p><em>Then</em> the exit status should be 0.</p>
-<h2 id="check-if-strings-are-equal"><a class="header" href="#check-if-strings-are-equal">Check if strings are equal</a></h2>
-<p><em>Given</em> a file named &quot;foo.test.pen&quot; with:</p>
-<pre><code class="language-pen">import Test'Assert
-
-Foo = \() none | error {
-  Assert'EqualStrings(&quot;foo&quot;, &quot;foo&quot;)?
-
-  none
-}
-</code></pre>
-<p><em>When</em> I run <code>pen test</code></p>
-<p><em>Then</em> the exit status should be 0.</p>
 
                     </main>
 
