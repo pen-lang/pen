@@ -1,20 +1,21 @@
 import Test'Assert
+
 import 'arguments
 
 ParseNoArgument = \() none | error {
   args = arguments'Parse([string])
 
-  Assert'EqualStrings(args.Message, "yes")
+  Assert'True(args.Message == "yes")
 }
 
 ParseOneArgument = \() none | error {
   args = arguments'Parse([string "foo"])
 
-  Assert'EqualStrings(args.Message, "foo")
+  Assert'True(args.Message == "foo")
 }
 
 ParseTwoArgument = \() none | error {
   args = arguments'Parse([string "foo", "bar"])
 
-  Assert'EqualStrings(args.Message, "foo bar")
+  Assert'True(args.Message == "foo bar")
 }
