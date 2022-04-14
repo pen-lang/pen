@@ -20,3 +20,37 @@ PackItemMoreValuableAndSameCost = \() none | error {
 
   Assert'True(Number'Sum([number i().Value for i in is]) == 2)
 }
+
+PackTwoItems = \() none | error {
+  is = knapsack'Pack(
+    Bag{Capacity: 2},
+    [Item Item{Cost: 1, Value: 1}],
+  )
+
+  Assert'True(Number'Sum([number i().Value for i in is]) == 2)
+}
+
+RemoveSmallValueItem = \() none | error {
+  is = knapsack'Pack(
+    Bag{Capacity: 2},
+    [Item
+      Item{Cost: 1, Value: 1},
+      Item{Cost: 1, Value: 2},
+    ],
+  )
+
+  Assert'True(Number'Sum([number i().Value for i in is]) == 4)
+}
+
+PackDiamond = \() none | error {
+  is = knapsack'Pack(
+    Bag{Capacity: 3},
+    [Item
+      Item{Cost: 1, Value: 1},
+      Item{Cost: 1, Value: 2},
+      Item{Cost: 3, Value: 42},
+    ],
+  )
+
+  Assert'True(Number'Sum([number i().Value for i in is]) == 42)
+}
