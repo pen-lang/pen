@@ -67,6 +67,22 @@ Set4Keys = \() none | error {
   )
 }
 
+Set3KeysWith0 = \() none | error {
+  Assert'True(
+    Number'Sum(
+      [number
+        k
+        for k, _ in {number: none
+          0: none,
+          1: none,
+          2: none,
+        }
+      ],
+    )
+      == 3,
+  )
+}
+
 RemoveKey = \() none | error {
   Assert'True(
     Number'Sum(
