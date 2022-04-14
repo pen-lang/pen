@@ -21,7 +21,7 @@ Feature: Function
           0
         } else {
           # This should have no effect. But it gets into an infinite loop
-          # because it's actually calling the innermost closure!
+          # when it's actually calling the innermost closure!
           f(x - 1)
 
           0
