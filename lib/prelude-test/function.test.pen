@@ -1,0 +1,31 @@
+nestedFunction = \(x number) \() number {
+  \() number {
+    if x == 0 {
+      0
+    } else {
+      # This should have no effect. But it gets into an infinite loop
+      # when it's actually calling the innermost closure due to a compiler bug!
+      nestedFunction(x - 1)
+
+      0
+    }
+  }
+}
+
+CallNestedFunction = \() none | error {
+  nestedFunction(1)()
+
+  none
+}
+
+functionWithShadowedVariable = \() [none] {
+  x = [none]
+
+  [none \(x none) none { x }(none)]
+}
+
+ShadowVariableByClosureInListComprehension = \() none | error {
+  functionWithShadowedVariable()
+
+  none
+}
