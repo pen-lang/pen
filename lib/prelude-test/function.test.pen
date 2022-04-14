@@ -5,7 +5,7 @@ nestedFunction = \(x number) \() number {
     } else {
       # This should have no effect. But it gets into an infinite loop
       # when it's actually calling the innermost closure due to a compiler bug!
-      f(x - 1)
+      nestedFunction(x - 1)
 
       0
     }
@@ -25,7 +25,7 @@ functionWithShadowedVariable = \() [none] {
 }
 
 ShadowVariableByClosureInListComprehension = \() none | error {
-  f()
+  functionWithShadowedVariable()
 
   none
 }

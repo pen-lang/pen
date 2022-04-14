@@ -7,3 +7,11 @@ DowncastUnionToList = \() none | error {
     if x = x as [none] { true } else if none { false },
   )
 }
+
+DowncastUnionToMap = \() none | error {
+  x = if true { {none: none} } else { none }
+
+  Assert'True(
+    if x = x as {none: none} { true } else if none { false },
+  )
+}
