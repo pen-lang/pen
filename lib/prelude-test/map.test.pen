@@ -74,6 +74,18 @@ SetManyKeys = \() none | error {
   assertKeys(xs, ks)
 }
 
+IterateKey = \() none | error {
+  Assert'True(
+    Number'Sum([number k for k, _ in {number: none 1: none}]) == 1,
+  )
+}
+
+Iterate2Keys = \() none | error {
+  Assert'True(
+    Number'Sum([number k for k, _ in {number: none 1: none, 2: none}]) == 3,
+  )
+}
+
 IterateManyKeys = \() none | error {
   ks = Number'Sequence(42)
 
@@ -143,6 +155,70 @@ Merge3Maps = \() none | error {
     )
       == 6,
   )
+}
+
+GetKey = \() none | error {
+  xs = {string: number "foo": 42}
+
+  Assert'True(if x = xs["foo"] { x == 42 } else { false })
+}
+
+Get2Keys = \() none | error {
+  xs = {string: number "foo": 0, "bar": 1}
+
+  Assert'True(if x = xs["foo"] { x == 0 } else { false })?
+  Assert'True(if x = xs["bar"] { x == 1 } else { false })
+}
+
+Get3Keys = \() none | error {
+  xs = {string: number "foo": 0, "bar": 1, "baz": 2}
+
+  Assert'True(if x = xs["foo"] { x == 0 } else { false })?
+  Assert'True(if x = xs["bar"] { x == 1 } else { false })?
+  Assert'True(if x = xs["baz"] { x == 2 } else { false })
+}
+
+GetUnionKeys = \() none | error {
+  xs = {string | none: none "foo": none, none: none}
+
+  Assert'True(if x = xs["foo"] { true } else { false })?
+  Assert'True(if x = xs[none] { true } else { false })
+}
+
+FailToGetKey = \() none | error {
+  xs = {string: number "foo": 42}
+
+  Assert'True(!if x = xs["bar"] { true } else { false })
+}
+
+GetKeyInMergedMap = \() none | error {
+  xs = {string: number
+    ...{string: number "foo": 1},
+    ...{string: number "bar": 2},
+  }
+
+  Assert'True(if x = xs["foo"] { x == 1 } else { false })?
+  Assert'True(if x = xs["bar"] { x == 2 } else { false })
+}
+
+CompareMaps = \() none | error {
+  Assert'True({string: number "foo": 1} == {string: number "foo": 1})
+}
+
+CompareMapsWithDifferentKeys = \() none | error {
+  Assert'True({string: none "foo": none} != {string: none "bar": none})
+}
+
+CompareMapsWithDifferentValues = \() none | error {
+  Assert'True({string: number "foo": 1} != {string: number "foo": 2})
+}
+
+CompareMapsWithMultipleKeys = \() none | error {
+  Assert'True({string: number "foo": 1, "bar": 2} == {string: number "foo": 1, "bar": 2})
+}
+
+CompareMapsWithMultipleDifferentKeys = \() none | error {
+  Assert'True({string: number "foo": 1, "bar": 2} != {string: number "foo": 1, "baz": 2})
 }
 
 assertKeys = \(xs {number: none}, ks [number]) none | error {
