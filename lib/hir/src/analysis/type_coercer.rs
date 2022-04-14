@@ -370,6 +370,38 @@ fn transform_expression(
             map.position().clone(),
         )
         .into(),
+        Expression::MapIterationComprehension(comprehension) => {
+            let position = comprehension.position();
+            let key_type = comprehension
+                .key_type()
+                .ok_or_else(|| AnalysisError::TypeNotInferred(position.clone()))?;
+            let value_type = comprehension
+                .value_type()
+                .ok_or_else(|| AnalysisError::TypeNotInferred(position.clone()))?;
+
+            MapIterationComprehension::new(
+                comprehension.key_type().cloned(),
+                comprehension.value_type().cloned(),
+                comprehension.element_type().clone(),
+                transform_and_coerce_expression(
+                    comprehension.element(),
+                    comprehension.element_type(),
+                    &variables
+                        .clone()
+                        .into_iter()
+                        .chain([
+                            (comprehension.key_name().into(), key_type.clone()),
+                            (comprehension.value_name().into(), value_type.clone()),
+                        ])
+                        .collect(),
+                )?,
+                comprehension.key_name(),
+                comprehension.value_name(),
+                transform_expression(comprehension.map(), variables)?,
+                position.clone(),
+            )
+            .into()
+        }
         Expression::Operation(operation) => match operation {
             Operation::Arithmetic(operation) => ArithmeticOperation::new(
                 operation.operator(),
@@ -1871,6 +1903,209 @@ mod tests {
                     )])
                 )
             );
+        }
+
+        mod iteration {
+            use super::*;
+            use pretty_assertions::assert_eq;
+
+            #[test]
+            fn coerce_element() {
+                let union_type = types::Union::new(
+                    types::Number::new(Position::fake()),
+                    types::None::new(Position::fake()),
+                    Position::fake(),
+                );
+                let list_type = types::List::new(union_type.clone(), Position::fake());
+                let empty_map = Map::new(
+                    types::None::new(Position::fake()),
+                    types::None::new(Position::fake()),
+                    vec![],
+                    Position::fake(),
+                );
+
+                assert_eq!(
+                    coerce_module(&Module::empty().set_definitions(vec![
+                        FunctionDefinition::fake(
+                            "f",
+                            Lambda::new(
+                                vec![],
+                                list_type.clone(),
+                                MapIterationComprehension::new(
+                                    Some(types::None::new(Position::fake()).into()),
+                                    Some(types::None::new(Position::fake()).into()),
+                                    union_type.clone(),
+                                    None::new(Position::fake()),
+                                    "k",
+                                    "v",
+                                    empty_map.clone(),
+                                    Position::fake(),
+                                ),
+                                Position::fake(),
+                            ),
+                            false,
+                        )
+                    ],)),
+                    Ok(
+                        Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                            "f",
+                            Lambda::new(
+                                vec![],
+                                list_type,
+                                MapIterationComprehension::new(
+                                    Some(types::None::new(Position::fake()).into()),
+                                    Some(types::None::new(Position::fake()).into()),
+                                    union_type.clone(),
+                                    TypeCoercion::new(
+                                        types::None::new(Position::fake()),
+                                        union_type,
+                                        None::new(Position::fake()),
+                                        Position::fake(),
+                                    ),
+                                    "k",
+                                    "v",
+                                    empty_map,
+                                    Position::fake(),
+                                ),
+                                Position::fake(),
+                            ),
+                            false,
+                        )],)
+                    )
+                );
+            }
+
+            #[test]
+            fn coerce_element_with_key() {
+                let union_type = types::Union::new(
+                    types::Number::new(Position::fake()),
+                    types::None::new(Position::fake()),
+                    Position::fake(),
+                );
+                let list_type = types::List::new(union_type.clone(), Position::fake());
+                let empty_map = Map::new(
+                    types::None::new(Position::fake()),
+                    types::None::new(Position::fake()),
+                    vec![],
+                    Position::fake(),
+                );
+
+                assert_eq!(
+                    coerce_module(&Module::empty().set_definitions(vec![
+                        FunctionDefinition::fake(
+                            "f",
+                            Lambda::new(
+                                vec![],
+                                list_type.clone(),
+                                MapIterationComprehension::new(
+                                    Some(types::None::new(Position::fake()).into()),
+                                    Some(types::None::new(Position::fake()).into()),
+                                    union_type.clone(),
+                                    Variable::new("k", Position::fake()),
+                                    "k",
+                                    "v",
+                                    empty_map.clone(),
+                                    Position::fake(),
+                                ),
+                                Position::fake(),
+                            ),
+                            false,
+                        )
+                    ],)),
+                    Ok(
+                        Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                            "f",
+                            Lambda::new(
+                                vec![],
+                                list_type,
+                                MapIterationComprehension::new(
+                                    Some(types::None::new(Position::fake()).into()),
+                                    Some(types::None::new(Position::fake()).into()),
+                                    union_type.clone(),
+                                    TypeCoercion::new(
+                                        types::None::new(Position::fake()),
+                                        union_type,
+                                        Variable::new("k", Position::fake()),
+                                        Position::fake(),
+                                    ),
+                                    "k",
+                                    "v",
+                                    empty_map,
+                                    Position::fake(),
+                                ),
+                                Position::fake(),
+                            ),
+                            false,
+                        )],)
+                    )
+                );
+            }
+
+            #[test]
+            fn coerce_element_with_value() {
+                let union_type = types::Union::new(
+                    types::Number::new(Position::fake()),
+                    types::None::new(Position::fake()),
+                    Position::fake(),
+                );
+                let list_type = types::List::new(union_type.clone(), Position::fake());
+                let empty_map = Map::new(
+                    types::None::new(Position::fake()),
+                    types::None::new(Position::fake()),
+                    vec![],
+                    Position::fake(),
+                );
+
+                assert_eq!(
+                    coerce_module(&Module::empty().set_definitions(vec![
+                        FunctionDefinition::fake(
+                            "f",
+                            Lambda::new(
+                                vec![],
+                                list_type.clone(),
+                                MapIterationComprehension::new(
+                                    Some(types::None::new(Position::fake()).into()),
+                                    Some(types::None::new(Position::fake()).into()),
+                                    union_type.clone(),
+                                    Variable::new("v", Position::fake()),
+                                    "k",
+                                    "v",
+                                    empty_map.clone(),
+                                    Position::fake(),
+                                ),
+                                Position::fake(),
+                            ),
+                            false,
+                        )
+                    ],)),
+                    Ok(
+                        Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                            "f",
+                            Lambda::new(
+                                vec![],
+                                list_type,
+                                MapIterationComprehension::new(
+                                    Some(types::None::new(Position::fake()).into()),
+                                    Some(types::None::new(Position::fake()).into()),
+                                    union_type.clone(),
+                                    TypeCoercion::new(
+                                        types::None::new(Position::fake()),
+                                        union_type,
+                                        Variable::new("v", Position::fake()),
+                                        Position::fake(),
+                                    ),
+                                    "k",
+                                    "v",
+                                    empty_map,
+                                    Position::fake(),
+                                ),
+                                Position::fake(),
+                            ),
+                            false,
+                        )],)
+                    )
+                );
+            }
         }
     }
 }
