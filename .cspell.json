@@ -43,7 +43,6 @@
     "optarg",
     "optind",
     "petgraph",
-    "positionals",
     "raviqqe",
     "realloc",
     "renamer",

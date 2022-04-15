@@ -1,29 +1,39 @@
+import Core'Number
 import Core'String
 import Core'String'Byte
 
-type FlagSet {
-  Flags {string: string}
-  Positionals [string]
+type Set {
+  Named {string: string}
+  Positional [string]
 }
 
 prefix = \() string { "-" }
 
-Parse = \(ss [string]) {string: string} {
+Parse = \(ss [string]) Set | error {
   parse(ss, {string: string})
 }
 
-parse = \(ss [string], fs {string: string}) FlagSet {
-  if [k, ...ss] = ss {
-    if String'HasPrefix(k(), prefix()) {
+parse = \(ss [string], ns {string: string}) Set | error {
+  if [s, ...ss] = ss {
+    if Byte'HasPrefix(s(), prefix()) {
       if [v, ...ss] = ss {
-        {string: string String'Slice(k(), Byte'Length(prefix()), Byte'Length(k())): v()}
+        parse(
+          ss,
+          {string: string
+            Byte'Slice(
+              s(),
+              Byte'Length(prefix()) + 1,
+              Number'Infinity(),
+            ): v(),
+          },
+        )
       } else {
         error("flag value missing")
       }
     } else {
-      {string: string}
+      Set{Named: ns, Positional: [string s(), ...ss]}
     }
   } else {
-    {string: string}
+    Set{Named: ns, Positional: ss}
   }
 }

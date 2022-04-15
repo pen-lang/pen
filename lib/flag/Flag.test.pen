@@ -1,0 +1,13 @@
+import Test'Assert
+
+import 'Flag
+
+ParseNone = \() none | error {
+  Assert'True(
+    Flag'Parse([string])?
+      == Flag'Set{
+        Named: {string: string},
+        Positional: [string],
+      },
+  )
+}

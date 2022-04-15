@@ -2,7 +2,7 @@
 # By using those views, you can apply operations to strings without copying them.
 
 import 'Number
-import 'String'Byte
+import 'String'Byte'common
 
 import foreign "c" _pen_core_view_has_prefix \(string, number, number, string) boolean
 import foreign "c" _pen_core_view_to_string \(string, number, number) string
@@ -19,7 +19,7 @@ New = \(s string) View {
   View{
     value: s,
     start: 1,
-    end: Byte'Length(s),
+    end: common'Length(s),
   }
 }
 
