@@ -6,7 +6,7 @@ import Core'String'Byte'View { View }
 
 import 'Value { Value }
 
-import foreign "c" _pen_json_parse_number \(string) number
+import foreign "c" _pen_json_decode_number \(string) number
 
 type result {
   value Value
@@ -49,8 +49,8 @@ objectResult = \(vs [objectEntry], i View) objectResult {
   objectResult{entries: vs, input: i}
 }
 
-# Parse a string into a JSON value.
-Parse = \(s string) Value | error {
+# Decode a string into a JSON value.
+Decode = \(s string) Value | error {
   r = value(View'New(s))?
 
   if View'Length(blank(r.input)) == 0 {
@@ -145,7 +145,7 @@ number_ = \(v View) result | error {
   v = if View'HasPrefix(v, ".") { digits(View'Seek(v, 1)) } else { v }
 
   result(
-    Value'New(_pen_json_parse_number(Byte'Slice(View'Viewee(v), i, View'Start(v) - 1))),
+    Value'New(_pen_json_decode_number(Byte'Slice(View'Viewee(v), i, View'Start(v) - 1))),
     v,
   )
 }

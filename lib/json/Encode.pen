@@ -2,21 +2,21 @@ import Core'String
 
 import 'Value { Value }
 
-import foreign "c" _pen_json_stringify_number \(number) string
+import foreign "c" _pen_json_encode_number \(number) string
 
 type objectEntry {
   key string
   value Value
 }
 
-# Stringify a JSON value.
-Stringify = \(v Value) string {
+# Encode a JSON value.
+Encode = \(v Value) string {
   String'Join(value(v), "")
 }
 
 value = \(v Value) [string] {
   if v = Value'Raw(v) as number {
-    [string _pen_json_stringify_number(v)]
+    [string _pen_json_encode_number(v)]
   } else if boolean {
     [string if v { "true" } else { "false" }]
   } else if none {
