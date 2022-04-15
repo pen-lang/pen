@@ -19,7 +19,7 @@ value = \(v Value) [string] {
   } else if string {
     [string "\"", v, "\""]
   } else if [Value] {
-    [string "[", "]"]
+    array(v)
   } else if {string: Value} {
     [string "<not implemented>"]
   }

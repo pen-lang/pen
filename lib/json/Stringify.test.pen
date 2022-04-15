@@ -1,7 +1,7 @@
 import Test'Assert
 
 import 'Stringify { Stringify }
-import 'Value
+import 'Value { Value }
 
 StringifyNull = \() none | error {
   Assert'True(Stringify(Value'New(none)) == "null")
@@ -24,3 +24,33 @@ StringifyString = \() none | error {
 }
 
 # TODO Escape special characters in strings.
+
+StringifyArrayWithNoElement = \() none | error {
+  Assert'True(Stringify(Value'New([Value])) == "[]")
+}
+
+StringifyArrayWithElement = \() none | error {
+  Assert'True(Stringify(Value'New([Value Value'New(1)])) == "[1]")
+}
+
+StringifyArrayWith2Elements = \() none | error {
+  Assert'True(
+    Stringify(Value'New([Value Value'New(1), Value'New(2)]))
+      == "[1,2]",
+  )
+}
+
+StringifyArrayWith3Elements = \() none | error {
+  Assert'True(
+    Stringify(
+      Value'New(
+        [Value
+          Value'New(1),
+          Value'New(2),
+          Value'New(3),
+        ],
+      ),
+    )
+      == "[1,2,3]",
+  )
+}
