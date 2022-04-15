@@ -1,0 +1,102 @@
+import Test'Assert
+
+import 'Encode { Encode }
+import 'Value { Value }
+
+EncodeNull = \() none | error {
+  Assert'True(Encode(Value'New(none)) == "null")
+}
+
+EncodeNumber = \() none | error {
+  Assert'True(Encode(Value'New(42)) == "42")
+}
+
+EncodeTrue = \() none | error {
+  Assert'True(Encode(Value'New(true)) == "true")
+}
+
+EncodeFalse = \() none | error {
+  Assert'True(Encode(Value'New(false)) == "false")
+}
+
+EncodeString = \() none | error {
+  Assert'True(Encode(Value'New("foo")) == "\"foo\"")
+}
+
+# TODO Escape special characters in strings.
+
+EncodeArrayWithNoElement = \() none | error {
+  Assert'True(Encode(Value'New([Value])) == "[]")
+}
+
+EncodeArrayWithElement = \() none | error {
+  Assert'True(Encode(Value'New([Value Value'New(1)])) == "[1]")
+}
+
+EncodeArrayWith2Elements = \() none | error {
+  Assert'True(
+    Encode(Value'New([Value Value'New(1), Value'New(2)]))
+      == "[1,2]",
+  )
+}
+
+EncodeArrayWith3Elements = \() none | error {
+  Assert'True(
+    Encode(
+      Value'New(
+        [Value
+          Value'New(1),
+          Value'New(2),
+          Value'New(3),
+        ],
+      ),
+    )
+      == "[1,2,3]",
+  )
+}
+
+EncodeObjectWithNoEntry = \() none | error {
+  Assert'True(Encode(Value'New({string: Value})) == "{}")
+}
+
+EncodeObjectWithEntry = \() none | error {
+  Assert'True(
+    Encode(
+      Value'New(
+        {string: Value
+          "foo": Value'New(1),
+        },
+      ),
+    )
+      == "{\"foo\":1}",
+  )
+}
+
+EncodeObjectWith2Entries = \() none | error {
+  Assert'True(
+    Encode(
+      Value'New(
+        {string: Value
+          "foo": Value'New(1),
+          "bar": Value'New(2),
+        },
+      ),
+    )
+      == "{\"bar\":2,\"foo\":1}",
+  )
+}
+
+EncodeObjectWith3Entries = \() none | error {
+  Assert'True(
+    Encode(
+      Value'New(
+        {string: Value
+          "foo": Value'New(1),
+          "bar": Value'New(2),
+          "baz": Value'New(3),
+        },
+      ),
+    )
+      == "{\"bar\":2,\"baz\":3,\"foo\":1}",
+  )
+}
