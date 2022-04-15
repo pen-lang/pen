@@ -10,12 +10,6 @@ pub struct ByteString {
 }
 
 impl ByteString {
-    pub fn empty() -> Self {
-        Self {
-            buffer: ArcBuffer::new(0),
-        }
-    }
-
     pub fn as_slice(&self) -> &[u8] {
         self.buffer.as_slice()
     }
