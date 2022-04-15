@@ -1,0 +1,5 @@
+import 'Context'context
+
+type Context = context'Context
+
+UnsafeNew = \() Context { context'New() }
