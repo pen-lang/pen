@@ -1,7 +1,15 @@
+# This module provides command-line flag parsing.
+#
+# The flags have the following formats:
+#
+# - `-foo bar`: a named flag of a key `foo` with a value `bar`
+# - `foo`: a positional flag of a value `foo`
+
 import Core'Number
 import Core'String
 import Core'String'Byte
 
+# A set of flags
 type Set {
   Named {string: string}
   Positional [string]
@@ -11,6 +19,7 @@ prefix = \() string { "-" }
 
 separator = \() string { "--" }
 
+# Parse flags.
 Parse = \(ss [string]) Set | error {
   parse(ss, {string: string})
 }
