@@ -78,7 +78,7 @@ mod tests {
 
     #[test]
     fn equal_empty_strings() {
-        let string = ffi::ByteString::empty();
+        let string = ffi::ByteString::default();
 
         assert_eq!(_pen_equal_strings(string.clone(), string), true.into());
     }
@@ -92,7 +92,7 @@ mod tests {
 
     #[test]
     fn not_equal_one_byte_strings() {
-        let one = ffi::ByteString::empty();
+        let one = ffi::ByteString::default();
         let other = vec![0u8].into();
 
         assert_eq!(_pen_equal_strings(one, other), false.into());
