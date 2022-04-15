@@ -60,7 +60,7 @@ pub fn compile(
             if_.branches()
                 .iter()
                 .map(|branch| {
-                    compile_alternatives(if_.name(), branch.type_(), branch.expression(), context)
+                    compile_alternatives(context, if_.name(), branch.type_(), branch.expression())
                 })
                 .collect::<Result<Vec<_>, CompileError>>()?
                 .into_iter()
@@ -72,10 +72,10 @@ pub fn compile(
                         context.types(),
                     )? {
                         compile_alternatives(
+                            context,
                             if_.name(),
                             branch.type_().unwrap(),
                             branch.expression(),
-                            context,
                         )?
                     } else {
                         vec![]
@@ -102,7 +102,7 @@ pub fn compile(
             },
         )
         .into(),
-        Expression::Lambda(lambda) => compile_lambda(lambda, context)?,
+        Expression::Lambda(lambda) => compile_lambda(context, lambda)?,
         Expression::Let(let_) => mir::ir::Let::new(
             let_.name().unwrap_or_default(),
             type_compiler::compile(
@@ -139,21 +139,16 @@ pub fn compile(
                 .into_record()
                 .unwrap();
 
-            compile_record_fields(
-                construction.fields(),
-                field_types,
-                &|fields| {
-                    mir::ir::Record::new(
-                        record_type.clone(),
-                        field_types
-                            .iter()
-                            .map(|field_type| fields[field_type.name()].clone())
-                            .collect(),
-                    )
-                    .into()
-                },
-                context,
-            )?
+            compile_record_fields(context, construction.fields(), field_types, &|fields| {
+                mir::ir::Record::new(
+                    record_type.clone(),
+                    field_types
+                        .iter()
+                        .map(|field_type| fields[field_type.name()].clone())
+                        .collect(),
+                )
+                .into()
+            })?
         }
         Expression::RecordDeconstruction(deconstruction) => {
             let type_ = deconstruction.type_().unwrap();
@@ -257,8 +252,8 @@ pub fn compile(
 }
 
 fn compile_lambda(
-    lambda: &hir::ir::Lambda,
     context: &CompileContext,
+    lambda: &hir::ir::Lambda,
 ) -> Result<mir::ir::Expression, CompileError> {
     const CLOSURE_NAME: &str = "$closure";
 
@@ -284,10 +279,10 @@ fn compile_lambda(
 }
 
 fn compile_alternatives(
+    context: &CompileContext,
     name: &str,
     type_: &Type,
     expression: &Expression,
-    context: &CompileContext,
 ) -> Result<Vec<mir::ir::Alternative>, CompileError> {
     let type_ = type_canonicalizer::canonicalize(type_, context.types())?;
     let expression = compile(context, expression)?;
@@ -670,7 +665,7 @@ fn compile_operation(
             compile(operation.rhs())?,
         )
         .into(),
-        Operation::Spawn(operation) => compile_spawn_operation(operation, context)?,
+        Operation::Spawn(operation) => compile_spawn_operation(context, operation)?,
         Operation::Boolean(operation) => {
             compile(&boolean_operation_transformer::transform(operation))?
         }
@@ -743,10 +738,10 @@ fn compile_operation(
                     mir::ir::Variant::new(error_type, mir::ir::Variable::new("$error")),
                 ),
                 compile_alternatives(
+                    context,
                     "$success",
                     success_type,
                     &Variable::new("$success", operation.position().clone()).into(),
-                    context,
                 )?,
                 None,
             )
@@ -756,8 +751,8 @@ fn compile_operation(
 }
 
 fn compile_spawn_operation(
-    operation: &SpawnOperation,
     context: &CompileContext,
+    operation: &SpawnOperation,
 ) -> Result<mir::ir::Expression, CompileError> {
     const ANY_THUNK_NAME: &str = "$any_thunk";
     const THUNK_NAME: &str = "$thunk";
@@ -821,12 +816,12 @@ fn compile_spawn_operation(
 }
 
 fn compile_record_fields(
+    context: &CompileContext,
     fields: &[RecordField],
     field_types: &[types::RecordField],
     convert_fields_to_expression: &dyn Fn(
         &FnvHashMap<String, mir::ir::Expression>,
     ) -> mir::ir::Expression,
-    context: &CompileContext,
 ) -> Result<mir::ir::Expression, CompileError> {
     Ok(match fields {
         [] => convert_fields_to_expression(&Default::default()),
@@ -844,23 +839,18 @@ fn compile_record_fields(
                         .type_(),
                 )?,
                 compile(context, field.expression())?,
-                compile_record_fields(
-                    &fields[1..],
-                    field_types,
-                    &|fields| {
-                        convert_fields_to_expression(
-                            &fields
-                                .clone()
-                                .into_iter()
-                                .chain([(
-                                    field.name().into(),
-                                    mir::ir::Variable::new(field_name.clone()).into(),
-                                )])
-                                .collect(),
-                        )
-                    },
-                    context,
-                )?,
+                compile_record_fields(context, &fields[1..], field_types, &|fields| {
+                    convert_fields_to_expression(
+                        &fields
+                            .clone()
+                            .into_iter()
+                            .chain([(
+                                field.name().into(),
+                                mir::ir::Variable::new(field_name.clone()).into(),
+                            )])
+                            .collect(),
+                    )
+                })?,
             )
             .into()
         }
