@@ -9,7 +9,7 @@ use core::str;
 fn _pen_json_decode_number(string: ffi::ByteString) -> ffi::Number {
     str::from_utf8(string.as_slice())
         .unwrap_or("")
-        .decode::<f64>()
+        .parse::<f64>()
         .unwrap_or(f64::NAN)
         .into()
 }
