@@ -1,21 +1,14 @@
 # This module provides operations for strings as byte arrays.
 
-import 'String'Byte'View
-import 'String'Byte'common
-
+import foreign "c" _pen_core_byte_length \(string) number
 import foreign "c" _pen_core_byte_slice \(string, number, number) string
 
 # Return a length of a string.
 Length = \(s string) number {
-  common'Length(s)
+  _pen_core_byte_length(s)
 }
 
 # Slice a string.
 Slice = \(s string, start number, end number) string {
   _pen_core_byte_slice(s, start, end)
-}
-
-# Check if a string has a prefix.
-HasPrefix = \(s string, prefix string) boolean {
-  View'HasPrefix(View'New(s), prefix)
 }

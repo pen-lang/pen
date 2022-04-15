@@ -19,7 +19,7 @@ parse = \(ss [string], ns {string: string}) Set | error {
   if [s, ...ss] = ss {
     if s() == separator() {
       Set{Named: ns, Positional: ss}
-    } else if Byte'HasPrefix(s(), prefix()) {
+    } else if String'HasPrefix(s(), prefix()) {
       if [v, ...ss] = ss {
         parse(
           ss,

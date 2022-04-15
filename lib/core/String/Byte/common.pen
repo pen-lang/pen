@@ -1,5 +1,0 @@
-import foreign "c" _pen_core_byte_length \(string) number
-
-Length = \(s string) number {
-  _pen_core_byte_length(s)
-}
