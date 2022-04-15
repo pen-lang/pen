@@ -18,4 +18,5 @@ fi
 
 cd $(dirname $0)/ffi
 cargo build --release --quiet --target $target
+# spell-checker: disable-next-line
 cp target/$target/release/libjson.a $1
