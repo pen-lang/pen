@@ -479,6 +479,39 @@ fn compile_expression(context: &mut Context, expression: &Expression) -> Documen
             ])
         }
         Expression::Map(map) => compile_map(context, map),
+        Expression::MapIterationComprehension(comprehension) => {
+            let elements = sequence([
+                line(),
+                compile_line_comment(context, comprehension.element().position(), |context| {
+                    compile_expression(context, comprehension.element())
+                }),
+                line(),
+                compile_line_comment(context, comprehension.element().position(), |context| {
+                    sequence([
+                        "for ".into(),
+                        comprehension.key_name().into(),
+                        ", ".into(),
+                        comprehension.value_name().into(),
+                        " in ".into(),
+                        compile_expression(context, comprehension.map()),
+                    ])
+                }),
+            ]);
+
+            sequence([
+                "[".into(),
+                compile_type(comprehension.element_type()),
+                if comprehension.position().line_number()
+                    == comprehension.element().position().line_number()
+                    && !is_broken(&elements)
+                {
+                    flatten(elements)
+                } else {
+                    break_(sequence([indent(elements), line()]))
+                },
+                "]".into(),
+            ])
+        }
         Expression::None(_) => "none".into(),
         Expression::Number(number) => match number.value() {
             NumberRepresentation::Binary(string) => "0b".to_owned() + string,
@@ -3011,6 +3044,50 @@ mod tests {
                         "
                     )
                     .trim(),
+                );
+            }
+
+            #[test]
+            fn format_comprehension() {
+                assert_eq!(
+                    format(
+                        &MapIterationComprehension::new(
+                            types::None::new(Position::fake()),
+                            None::new(Position::fake()),
+                            "k",
+                            "v",
+                            Variable::new("xs", Position::fake()),
+                            Position::fake()
+                        )
+                        .into()
+                    ),
+                    "[none none for k, v in xs]"
+                );
+            }
+
+            #[test]
+            fn format_multi_line_comprehension() {
+                assert_eq!(
+                    format(
+                        &MapIterationComprehension::new(
+                            types::None::new(Position::fake()),
+                            None::new(line_position(2)),
+                            "k",
+                            "v",
+                            Variable::new("xs", Position::fake()),
+                            line_position(1)
+                        )
+                        .into()
+                    ),
+                    indoc!(
+                        "
+                        [none
+                          none
+                          for k, v in xs
+                        ]
+                        "
+                    )
+                    .trim()
                 );
             }
         }

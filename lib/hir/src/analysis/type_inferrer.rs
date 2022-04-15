@@ -330,6 +330,36 @@ fn infer_expression(
             map.position().clone(),
         )
         .into(),
+        Expression::MapIterationComprehension(comprehension) => {
+            let map = infer_expression(comprehension.map(), variables)?;
+            let map_type = type_canonicalizer::canonicalize_map(
+                &type_extractor::extract_from_expression(context, &map, variables)?,
+                context.types(),
+            )?
+            .ok_or_else(|| AnalysisError::MapExpected(comprehension.map().position().clone()))?;
+
+            MapIterationComprehension::new(
+                Some(map_type.key().clone()),
+                Some(map_type.value().clone()),
+                comprehension.element_type().clone(),
+                infer_expression(
+                    comprehension.element(),
+                    &variables
+                        .clone()
+                        .into_iter()
+                        .chain([
+                            (comprehension.key_name().into(), map_type.key().clone()),
+                            (comprehension.value_name().into(), map_type.value().clone()),
+                        ])
+                        .collect(),
+                )?,
+                comprehension.key_name(),
+                comprehension.value_name(),
+                map,
+                comprehension.position().clone(),
+            )
+            .into()
+        }
         Expression::Operation(operation) => match operation {
             Operation::Arithmetic(operation) => ArithmeticOperation::new(
                 operation.operator(),
@@ -777,6 +807,77 @@ mod tests {
                             ),
                             "x",
                             List::new(element_type, vec![], Position::fake()),
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    ),
+                    false,
+                )],)
+            )
+        );
+    }
+
+    #[test]
+    fn infer_map_comprehension() {
+        let key_type = types::None::new(Position::fake());
+        let value_type = types::None::new(Position::fake());
+        let element_type = types::None::new(Position::fake());
+        let list_type = types::List::new(element_type.clone(), Position::fake());
+        let empty_map = Map::new(
+            key_type.clone(),
+            value_type.clone(),
+            vec![],
+            Position::fake(),
+        );
+
+        assert_eq!(
+            infer_module(
+                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                    "f",
+                    Lambda::new(
+                        vec![],
+                        list_type.clone(),
+                        MapIterationComprehension::new(
+                            None,
+                            None,
+                            element_type.clone(),
+                            Let::new(
+                                Some("x".into()),
+                                None,
+                                Variable::new("k", Position::fake()),
+                                Variable::new("x", Position::fake()),
+                                Position::fake(),
+                            ),
+                            "k",
+                            "v",
+                            empty_map.clone(),
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    ),
+                    false,
+                )])
+            ),
+            Ok(
+                Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                    "f",
+                    Lambda::new(
+                        vec![],
+                        list_type,
+                        MapIterationComprehension::new(
+                            Some(key_type.clone().into()),
+                            Some(value_type.clone().into()),
+                            element_type.clone(),
+                            Let::new(
+                                Some("x".into()),
+                                Some(key_type.clone().into()),
+                                Variable::new("k", Position::fake()),
+                                Variable::new("x", Position::fake()),
+                                Position::fake(),
+                            ),
+                            "k",
+                            "v",
+                            empty_map,
                             Position::fake(),
                         ),
                         Position::fake(),

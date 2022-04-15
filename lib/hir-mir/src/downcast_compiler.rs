@@ -10,10 +10,10 @@ use hir::{
 const VALUE_NAME: &str = "$value";
 
 pub fn compile(
+    context: &CompileContext,
     from: &Type,
     to: &Type,
     expression: &Expression,
-    context: &CompileContext,
 ) -> Result<Expression, CompileError> {
     let position = expression.position();
     let from = type_canonicalizer::canonicalize(from, context.types())?;
@@ -58,10 +58,10 @@ mod tests {
         expression: &Expression,
     ) -> Result<Expression, CompileError> {
         compile(
+            &CompileContext::dummy(Default::default(), Default::default()),
             from,
             to,
             expression,
-            &CompileContext::dummy(Default::default(), Default::default()),
         )
     }
 

@@ -22,6 +22,12 @@ type _mapContext {
   hashValue \(any) number
 }
 
+type _mapIterator {
+  key any
+  value any
+  rest \() _mapIterator | none
+}
+
 type _hamtUpdate {
   hamt _hamt
   size boolean
@@ -341,6 +347,36 @@ _hashHamt = \(ctx _mapContext, h _hamt, index number, hash number) number {
     }
   }
 }
+
+_iterateMap = \(x _map) _mapIterator | none {
+  _iterateHamt(x.hamt, 1, \() _mapIterator | none { none })
+}
+
+_iterateHamt = \(h _hamt, i number, rest \() _mapIterator | none) _mapIterator | none {
+  if i > 32 {
+    rest()
+  } else {
+    rest = \() _mapIterator | none { _iterateHamt(h, i + 1, rest) }
+
+    if e = _getEntry(h, i) as _keyValue {
+      _mapIterator{
+        key: e.key,
+        value: e.value,
+        rest: rest,
+      }
+    } else if _hamt {
+      _iterateHamt(e, 1, rest)
+    } else if none {
+      rest()
+    }
+  }
+}
+
+_mapIteratorKey = \(i _mapIterator) any { i.key }
+
+_mapIteratorValue = \(i _mapIterator) any { i.value }
+
+_mapIteratorRest = \(i _mapIterator) _mapIterator | none { i.rest() }
 
 _hamtIndex = \(ctx _mapContext, key any, layer number, level number) number {
   _pen_prelude_hash_to_index(ctx.hashKey(key), layer, level)

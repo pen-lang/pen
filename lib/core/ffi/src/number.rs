@@ -36,6 +36,16 @@ fn _pen_core_floor(number: ffi::Number) -> ffi::Number {
     f64::from(number).floor().into()
 }
 
+#[ffi::bindgen]
+fn _pen_core_nan() -> ffi::Number {
+    f64::NAN.into()
+}
+
+#[ffi::bindgen]
+fn _pen_core_infinity() -> ffi::Number {
+    f64::INFINITY.into()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

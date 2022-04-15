@@ -1,0 +1,50 @@
+import Test'Assert
+import 'Boolean
+
+AnyNone = \() none | error {
+  Assert'True(!Boolean'Any([boolean]))
+}
+
+AnyTrue = \() none | error {
+  Assert'True(Boolean'Any([boolean true]))
+}
+
+AnyFalse = \() none | error {
+  Assert'True(!Boolean'Any([boolean false]))
+}
+
+AnyTrueFalse = \() none | error {
+  Assert'True(Boolean'Any([boolean true, false]))
+}
+
+AnyFalseTrue = \() none | error {
+  Assert'True(Boolean'Any([boolean false, true]))
+}
+
+AnyTwoFalse = \() none | error {
+  Assert'True(!Boolean'Any([boolean false, false]))
+}
+
+AllNone = \() none | error {
+  Assert'True(Boolean'All([boolean]))
+}
+
+AllTrue = \() none | error {
+  Assert'True(Boolean'All([boolean true]))
+}
+
+AllFalse = \() none | error {
+  Assert'True(!Boolean'All([boolean false]))
+}
+
+AllTwoTrue = \() none | error {
+  Assert'True(Boolean'All([boolean true, true]))
+}
+
+AllTrueFalse = \() none | error {
+  Assert'True(!Boolean'All([boolean true, false]))
+}
+
+AllFalseTrue = \() none | error {
+  Assert'True(!Boolean'All([boolean false, true]))
+}

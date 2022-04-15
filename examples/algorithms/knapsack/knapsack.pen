@@ -1,4 +1,3 @@
-import Core'Map'NumberMap { Map }
 import Core'Number
 import Core'String
 
@@ -14,13 +13,13 @@ type Bag {
 # TODO Test this.
 Pack = \(b Bag, is [Item]) [Item] {
   packItems(
-    NumberMap'Set(NumberMap'New(), 0, [Item]),
+    {number: [Item] 0: [Item]},
     b,
     is,
   )
 }
 
-packItems = \(states Map, b Bag, is [Item]) [Item] {
+packItems = \(states {number: [Item]}, b Bag, is [Item]) [Item] {
   if [i, ...is] = is {
     packItems(
       packItem(b, i(), states, 0),
@@ -29,29 +28,29 @@ packItems = \(states Map, b Bag, is [Item]) [Item] {
     )
   } else {
     best(
-      [[Item] if x = x() as [Item] { x } else { [Item] } for x in NumberMap'Values(states)],
+      [[Item] v for _, v in states],
       [Item],
     )
   }
 }
 
-packItem = \(b Bag, i Item, states Map, cost number) Map {
+packItem = \(b Bag, i Item, states {number: [Item]}, cost number) {number: [Item]} {
   newCost = cost + i.Cost
 
   if newCost > b.Capacity {
     states
   } else {
-    states = if is = NumberMap'Get(states, cost, none) as [Item] {
+    states = if is = states[cost] {
       is = [Item i, ...is]
 
-      if js = NumberMap'Get(states, newCost, none) as [Item] {
+      if js = states[newCost] {
         if totalValue(is) > totalValue(js) {
-          NumberMap'Set(states, newCost, is)
+          {number: [Item] ...states, newCost: is}
         } else {
           states
         }
       } else {
-        NumberMap'Set(states, newCost, is)
+        {number: [Item] ...states, newCost: is}
       }
     } else {
       states

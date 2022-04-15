@@ -37,12 +37,12 @@ export PATH=$PWD/target/release:$PATH
 ) >$document_directory/os.md
 
 (
-  cd lib/os-sync
+  cd lib/json
   pen document \
-    --name OsSync \
-    --url pen:///os-sync \
-    --description "$(os_sync_package_description)"
-) >$document_directory/os-sync.md
+    --name Json \
+    --url pen:///json \
+    --description "This package provides a JSON parser."
+) >$document_directory/json.md
 
 (
   cd lib/test

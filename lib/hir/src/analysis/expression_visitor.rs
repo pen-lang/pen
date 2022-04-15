@@ -82,6 +82,10 @@ fn visit_expression(expression: &Expression, visit: &mut impl FnMut(&Expression)
                 }
             }
         }
+        Expression::MapIterationComprehension(comprehension) => {
+            visit_expression(comprehension.element());
+            visit_expression(comprehension.map());
+        }
         Expression::Operation(operation) => match operation {
             Operation::Arithmetic(operation) => {
                 visit_expression(operation.lhs());

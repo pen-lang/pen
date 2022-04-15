@@ -314,6 +314,19 @@ fn compile_expression(expression: &ast::Expression) -> Result<ir::Expression, Co
             map.position().clone(),
         )
         .into(),
+        ast::Expression::MapIterationComprehension(comprehension) => {
+            ir::MapIterationComprehension::new(
+                None,
+                None,
+                comprehension.element_type().clone(),
+                compile_expression(comprehension.element())?,
+                comprehension.key_name(),
+                comprehension.value_name(),
+                compile_expression(comprehension.map())?,
+                comprehension.position().clone(),
+            )
+            .into()
+        }
         ast::Expression::None(none) => ir::None::new(none.position().clone()).into(),
         ast::Expression::Number(number) => {
             ir::Number::new(number_compiler::compile(number)?, number.position().clone()).into()
