@@ -23,6 +23,7 @@ exclude = [
   "examples",
   "lib/core",
   "lib/flag",
+  "lib/http",
   "lib/json",
   "lib/prelude",
   "lib/prelude-test",

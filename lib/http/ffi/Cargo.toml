@@ -1,0 +1,12 @@
+[package]
+name = "http"
+version = "0.1.0"
+publish = false
+edition = "2021"
+
+[lib]
+crate-type = ["staticlib"]
+
+[dependencies]
+ffi = { package = "pen-ffi", version = "0.3" }
+hyper = "0.14"
