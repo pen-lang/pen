@@ -4,6 +4,8 @@
 #
 # - `-foo bar`: a named flag of a key `foo` with a value `bar`
 # - `foo`: a positional flag of a value `foo`
+#
+# Named flags and positional flags are separated by `--` optionally.
 
 import Core'Number
 import Core'String
