@@ -1,0 +1,32 @@
+import Test'Assert
+
+import 'Number
+import 'String'Byte
+
+LengthEmpty = \() none | error {
+  Assert'True(Byte'Length("") == 0)
+}
+
+Length1 = \() none | error {
+  Assert'True(Byte'Length("a") == 1)
+}
+
+Length2 = \() none | error {
+  Assert'True(Byte'Length("ho") == 2)
+}
+
+SliceStart = \() none | error {
+  Assert'True(Byte'Slice("abc", 1, 2) == "ab")
+}
+
+SliceMiddle = \() none | error {
+  Assert'True(Byte'Slice("abc", 2, 2) == "b")
+}
+
+SliceEnd = \() none | error {
+  Assert'True(Byte'Slice("abc", 2, 3) == "bc")
+}
+
+SliceInfinity = \() none | error {
+  Assert'True(Byte'Slice("abc", 2, Number'Infinity()) == "bc")
+}
