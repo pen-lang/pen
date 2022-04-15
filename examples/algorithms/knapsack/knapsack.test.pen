@@ -30,6 +30,15 @@ PackTwoItems = \() none | error {
   Assert'True(Number'Sum([number i().Value for i in is]) == 2)
 }
 
+PackThreeItems = \() none | error {
+  is = knapsack'Pack(
+    Bag{Capacity: 3},
+    [Item Item{Cost: 1, Value: 1}],
+  )
+
+  Assert'True(Number'Sum([number i().Value for i in is]) == 3)
+}
+
 RemoveSmallValueItem = \() none | error {
   is = knapsack'Pack(
     Bag{Capacity: 2},
