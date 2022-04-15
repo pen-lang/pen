@@ -154,16 +154,24 @@
   } 
 }
 </code></pre>
-<h2 id="jsonparse-module"><a class="header" href="#jsonparse-module"><code>Json'Parse</code> module</a></h2>
+<h2 id="jsondecode-module"><a class="header" href="#jsondecode-module"><code>Json'Decode</code> module</a></h2>
 <h3 id="types"><a class="header" href="#types">Types</a></h3>
 <p>No types are defined.</p>
 <h3 id="functions"><a class="header" href="#functions">Functions</a></h3>
-<h4 id="parse"><a class="header" href="#parse"><code>Parse</code></a></h4>
-<p>Parse a string into a JSON value.</p>
+<h4 id="decode"><a class="header" href="#decode"><code>Decode</code></a></h4>
+<p>Decode a string into a JSON value.</p>
 <pre><code class="language-pen">\(s string) Value | error
 </code></pre>
-<h2 id="jsonvalue-module"><a class="header" href="#jsonvalue-module"><code>Json'Value</code> module</a></h2>
+<h2 id="jsonencode-module"><a class="header" href="#jsonencode-module"><code>Json'Encode</code> module</a></h2>
 <h3 id="types-1"><a class="header" href="#types-1">Types</a></h3>
+<p>No types are defined.</p>
+<h3 id="functions-1"><a class="header" href="#functions-1">Functions</a></h3>
+<h4 id="encode"><a class="header" href="#encode"><code>Encode</code></a></h4>
+<p>Encode a JSON value.</p>
+<pre><code class="language-pen">\(v Value) string
+</code></pre>
+<h2 id="jsonvalue-module"><a class="header" href="#jsonvalue-module"><code>Json'Value</code> module</a></h2>
+<h3 id="types-2"><a class="header" href="#types-2">Types</a></h3>
 <h4 id="value"><a class="header" href="#value"><code>Value</code></a></h4>
 <p>A JSON value</p>
 <pre><code class="language-pen">type Value {
@@ -174,7 +182,7 @@
 <p>A raw JSON value represented by built-in types</p>
 <pre><code class="language-pen">type Raw = boolean | none | number | string | [Value] | {string: Value}
 </code></pre>
-<h3 id="functions-1"><a class="header" href="#functions-1">Functions</a></h3>
+<h3 id="functions-2"><a class="header" href="#functions-2">Functions</a></h3>
 <h4 id="new"><a class="header" href="#new"><code>New</code></a></h4>
 <p>Create a JSON value.</p>
 <pre><code class="language-pen">\(r Raw) Value

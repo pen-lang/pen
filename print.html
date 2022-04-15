@@ -1351,16 +1351,24 @@ By using those views, you can apply operations to strings without copying them.<
   } 
 }
 </code></pre>
-<h2 id="jsonparse-module"><a class="header" href="#jsonparse-module"><code>Json'Parse</code> module</a></h2>
+<h2 id="jsondecode-module"><a class="header" href="#jsondecode-module"><code>Json'Decode</code> module</a></h2>
 <h3 id="types-27"><a class="header" href="#types-27">Types</a></h3>
 <p>No types are defined.</p>
 <h3 id="functions-27"><a class="header" href="#functions-27">Functions</a></h3>
-<h4 id="parse-1"><a class="header" href="#parse-1"><code>Parse</code></a></h4>
-<p>Parse a string into a JSON value.</p>
+<h4 id="decode"><a class="header" href="#decode"><code>Decode</code></a></h4>
+<p>Decode a string into a JSON value.</p>
 <pre><code class="language-pen">\(s string) Value | error
 </code></pre>
-<h2 id="jsonvalue-module"><a class="header" href="#jsonvalue-module"><code>Json'Value</code> module</a></h2>
+<h2 id="jsonencode-module"><a class="header" href="#jsonencode-module"><code>Json'Encode</code> module</a></h2>
 <h3 id="types-28"><a class="header" href="#types-28">Types</a></h3>
+<p>No types are defined.</p>
+<h3 id="functions-28"><a class="header" href="#functions-28">Functions</a></h3>
+<h4 id="encode"><a class="header" href="#encode"><code>Encode</code></a></h4>
+<p>Encode a JSON value.</p>
+<pre><code class="language-pen">\(v Value) string
+</code></pre>
+<h2 id="jsonvalue-module"><a class="header" href="#jsonvalue-module"><code>Json'Value</code> module</a></h2>
+<h3 id="types-29"><a class="header" href="#types-29">Types</a></h3>
 <h4 id="value"><a class="header" href="#value"><code>Value</code></a></h4>
 <p>A JSON value</p>
 <pre><code class="language-pen">type Value {
@@ -1371,7 +1379,7 @@ By using those views, you can apply operations to strings without copying them.<
 <p>A raw JSON value represented by built-in types</p>
 <pre><code class="language-pen">type Raw = boolean | none | number | string | [Value] | {string: Value}
 </code></pre>
-<h3 id="functions-28"><a class="header" href="#functions-28">Functions</a></h3>
+<h3 id="functions-29"><a class="header" href="#functions-29">Functions</a></h3>
 <h4 id="new-1"><a class="header" href="#new-1"><code>New</code></a></h4>
 <p>Create a JSON value.</p>
 <pre><code class="language-pen">\(r Raw) Value
@@ -1391,9 +1399,9 @@ By using those views, you can apply operations to strings without copying them.<
 </code></pre>
 <h2 id="testassert-module"><a class="header" href="#testassert-module"><code>Test'Assert</code> module</a></h2>
 <p>This module provides a collection of assertion logic for testing.</p>
-<h3 id="types-29"><a class="header" href="#types-29">Types</a></h3>
+<h3 id="types-30"><a class="header" href="#types-30">Types</a></h3>
 <p>No types are defined.</p>
-<h3 id="functions-29"><a class="header" href="#functions-29">Functions</a></h3>
+<h3 id="functions-30"><a class="header" href="#functions-30">Functions</a></h3>
 <h4 id="true"><a class="header" href="#true"><code>True</code></a></h4>
 <p>Assert that a condition is true.</p>
 <pre><code class="language-pen">\(x boolean) none | error
@@ -1409,7 +1417,7 @@ This function is useful to make unreachable codes fail.</p>
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="examples-1"><a class="header" href="#examples-1">Examples</a></h1>
 <p>These are examples on how to use the language, its command line tools, and libraries.</p>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="types-30"><a class="header" href="#types-30">Types</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="types-31"><a class="header" href="#types-31">Types</a></h1>
 <p>These are examples on how to use types and their values in the language.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="number-2"><a class="header" href="#number-2">Number</a></h1>
 <h2 id="background"><a class="header" href="#background">Background</a></h2>
