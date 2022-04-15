@@ -1,0 +1,26 @@
+import Test'Assert
+
+import 'Stringify { Stringify }
+import 'Value
+
+StringifyNull = \() none | error {
+  Assert'True(Stringify(Value'New(none)) == "null")
+}
+
+StringifyNumber = \() none | error {
+  Assert'True(Stringify(Value'New(42)) == "42")
+}
+
+StringifyTrue = \() none | error {
+  Assert'True(Stringify(Value'New(true)) == "true")
+}
+
+StringifyFalse = \() none | error {
+  Assert'True(Stringify(Value'New(false)) == "false")
+}
+
+StringifyString = \() none | error {
+  Assert'True(Stringify(Value'New("foo")) == "\"foo\"")
+}
+
+# TODO Escape special characters in strings.

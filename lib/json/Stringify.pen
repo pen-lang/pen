@@ -1,0 +1,42 @@
+import Core'String
+
+import 'Value { Value }
+
+import foreign "c" _pen_json_stringify_number \(number) string
+
+# Stringify a JSON value.
+Stringify = \(v Value) string {
+  String'Join(value(v), "")
+}
+
+value = \(v Value) [string] {
+  if v = Value'Raw(v) as number {
+    [string _pen_json_stringify_number(v)]
+  } else if boolean {
+    [string if v { "true" } else { "false" }]
+  } else if none {
+    [string "null"]
+  } else if string {
+    [string "\"", v, "\""]
+  } else if [Value] {
+    [string "[", "]"]
+  } else if {string: Value} {
+    [string "<not implemented>"]
+  }
+}
+
+array = \(vs [Value]) [string] {
+  if [_, ...ss] = arrayElements(vs) {
+    [string "[", ...ss, "]"]
+  } else {
+    [string "[", "]"]
+  }
+}
+
+arrayElements = \(vs [Value]) [string] {
+  if [v, ...vs] = vs {
+    [string ",", ...value(v()), ...arrayElements(vs)]
+  } else {
+    [string]
+  }
+}

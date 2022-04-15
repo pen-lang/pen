@@ -2,6 +2,7 @@
 
 extern crate alloc;
 
+use alloc::string::ToString;
 use core::str;
 
 #[ffi::bindgen]
@@ -11,6 +12,11 @@ fn _pen_json_parse_number(string: ffi::ByteString) -> ffi::Number {
         .parse::<f64>()
         .unwrap_or(f64::NAN)
         .into()
+}
+
+#[ffi::bindgen]
+fn _pen_json_stringify_number(number: ffi::Number) -> ffi::ByteString {
+    f64::from(number).to_string().into()
 }
 
 #[cfg(test)]
