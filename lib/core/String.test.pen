@@ -17,3 +17,15 @@ JoinTwoStringsWithSeparator = \() none | error {
 JoinThreeStringsWithSeparator = \() none | error {
   Assert'True(String'Join([string "foo", "bar", "baz"], ",") == "foo,bar,baz")
 }
+
+HasPrefix = \() none | error {
+  Assert'True(String'HasPrefix("foobar", "foo"))
+}
+
+HasNoPrefix = \() none | error {
+  Assert'True(!String'HasPrefix("bar", "foo"))
+}
+
+HasNoPrefixWithSubString = \() none | error {
+  Assert'True(!String'HasPrefix("fo", "foo"))
+}

@@ -1,5 +1,6 @@
 import Test'Assert
 
+import 'Number
 import 'String'Utf8
 
 LengthEmpty = \() none | error {
@@ -24,4 +25,8 @@ SliceMiddle = \() none | error {
 
 SliceEnd = \() none | error {
   Assert'True(Utf8'Slice("🗿😄🐶", 2, 3) == "😄🐶")
+}
+
+SliceInfinity = \() none | error {
+  Assert'True(Utf8'Slice("🗿😄🐶", 2, Number'Infinity()) == "😄🐶")
 }

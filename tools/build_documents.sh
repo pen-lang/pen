@@ -29,6 +29,14 @@ export PATH=$PWD/target/release:$PATH
 ) >$document_directory/core.md
 
 (
+  cd lib/flag
+  pen document \
+    --name Flag \
+    --url pen:///flag \
+    --description "This package provides command-line flag parsing."
+) >$document_directory/flag.md
+
+(
   cd lib/os
   pen document \
     --name Os \
