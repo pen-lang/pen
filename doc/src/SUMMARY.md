@@ -18,6 +18,7 @@
   - [Standard packages](references/standard-packages/README.md)
     - [`Core`](references/standard-packages/core.md)
     - [`Os`](references/standard-packages/os.md)
+    - [`Flag`](references/standard-packages/flag.md)
     - [`Json`](references/standard-packages/json.md)
     - [`Test`](references/standard-packages/test.md)
 - [Examples](examples/README.md)
