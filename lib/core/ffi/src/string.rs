@@ -67,7 +67,7 @@ fn _pen_core_byte_slice(
     end: ffi::Number,
 ) -> ffi::ByteString {
     let start = f64::from(start) as usize;
-    let end = f64::from(end) as usize;
+    let end = f64::from(end).min(string.as_slice().len() as f64) as usize;
 
     if start > end || start > string.as_slice().len() || end == 0 {
         "".into()

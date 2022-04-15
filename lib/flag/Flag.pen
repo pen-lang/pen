@@ -9,17 +9,22 @@ type Set {
 
 prefix = \() string { "-" }
 
+separator = \() string { "--" }
+
 Parse = \(ss [string]) Set | error {
   parse(ss, {string: string})
 }
 
 parse = \(ss [string], ns {string: string}) Set | error {
   if [s, ...ss] = ss {
-    if Byte'HasPrefix(s(), prefix()) {
+    if s() == separator() {
+      Set{Named: ns, Positional: ss}
+    } else if Byte'HasPrefix(s(), prefix()) {
       if [v, ...ss] = ss {
         parse(
           ss,
           {string: string
+            ...ns,
             Byte'Slice(
               s(),
               Byte'Length(prefix()) + 1,
