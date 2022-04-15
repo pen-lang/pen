@@ -10,10 +10,6 @@ pub struct ByteString {
 }
 
 impl ByteString {
-    pub fn new(buffer: ArcBuffer) -> Self {
-        Self { buffer }
-    }
-
     pub fn empty() -> Self {
         Self {
             buffer: ArcBuffer::new(0),
