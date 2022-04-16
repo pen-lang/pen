@@ -1,19 +1,17 @@
+// Note that this macro should not be called for non-thunk closures.
 #[macro_export]
 macro_rules! call {
     (fn($($argument_type:ty),*) -> $result_type:ty, $closure:expr, $($argument:expr),*) => {
         async {
             use core::{intrinsics::transmute, task::Poll};
             use futures::future::poll_fn;
-            use $crate::{
-                cps,
-                Arc, Closure,
-            };
+            use $crate::{cps, Arc, Closure};
 
             type AsyncStack = cps::AsyncStack<$result_type>;
 
-            type StepFunction = cps::StepFunction<$result_type, $result_type>;
-
             type ContinuationFunction = cps::ContinuationFunction<$result_type, $result_type>;
+
+            type Trampoline = cps::Trampoline<$result_type, $result_type>;
 
             type InitialStepFunction<C> = extern "C" fn(
                 stack: &mut AsyncStack,
@@ -30,7 +28,7 @@ macro_rules! call {
 
             const INITIAL_STACK_CAPACITY: usize = 64;
 
-            let mut trampoline: Option<(StepFunction, ContinuationFunction)> = None;
+            let mut trampoline: Option<Trampoline> = None;
             let mut stack = AsyncStack::new(INITIAL_STACK_CAPACITY);
 
             poll_fn(move |context| {
@@ -98,7 +96,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn convert_closure() {
+    async fn convert_one_argument_closure() {
         let value = 42.0;
 
         assert_eq!(
@@ -123,7 +121,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn convert_2_arity_closure() {
+    async fn convert_two_argument_closure() {
         assert_eq!(
             call!(
                 fn(Number, Number) -> Number,
