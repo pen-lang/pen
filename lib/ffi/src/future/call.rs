@@ -144,19 +144,19 @@ mod tests {
         continue_: ContinuationFunction<TestResult, TestResult>,
         _closure: Arc<Closure<()>>,
     ) -> cps::Result {
+        fn step(
+            stack: &mut AsyncStack<TestResult>,
+            continue_: ContinuationFunction<TestResult, TestResult>,
+        ) -> cps::Result {
+            continue_(stack, 42.0.into())
+        }
+
         stack.suspend(step, continue_, ready(())).unwrap();
 
         // Wake immediately as we are waiting for nothing!
         stack.context().unwrap().waker().wake_by_ref();
 
         cps::Result::new()
-    }
-
-    fn step(
-        stack: &mut AsyncStack<TestResult>,
-        continue_: ContinuationFunction<TestResult, TestResult>,
-    ) -> cps::Result {
-        continue_(stack, 42.0.into())
     }
 
     #[tokio::test]
