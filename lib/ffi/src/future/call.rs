@@ -37,10 +37,9 @@ macro_rules! call {
                         step(stack, continue_);
                     } else {
                         unsafe {
-                            let entry_function = transmute::<_, InitialStepFunction<_>>(
+                            transmute::<_, InitialStepFunction<_>>(
                                 $closure.entry_function(),
-                            );
-                            entry_function(stack, resolve, $closure.clone(), $($argument),*);
+                            )(stack, resolve, $closure.clone(), $($argument),*);
                         }
                     }
                 });
