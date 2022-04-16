@@ -9,6 +9,6 @@ crate-type = ["staticlib"]
 
 [dependencies]
 ffi = { package = "pen-ffi", version = "0.3" }
-hyper = { version = "0.14", features = ["full"] }
+hyper = { version = "0.14", features = ["client", "http1", "server", "tcp"] }
 # TODO Do we need this or should we specify minor and patch versions too?
 tokio = { version = "1", features = ["full"] }
