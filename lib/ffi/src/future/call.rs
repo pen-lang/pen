@@ -7,6 +7,8 @@ macro_rules! call {
             use futures::future::poll_fn;
             use $crate::{cps, Arc, Closure};
 
+            const INITIAL_STACK_CAPACITY: usize = 64;
+
             type AsyncStack = cps::AsyncStack<$result_type>;
 
             type ContinuationFunction = cps::ContinuationFunction<$result_type, $result_type>;
@@ -25,8 +27,6 @@ macro_rules! call {
 
                 cps::Result::new()
             }
-
-            const INITIAL_STACK_CAPACITY: usize = 64;
 
             let mut trampoline: Option<Trampoline> = None;
             let mut stack = AsyncStack::new(INITIAL_STACK_CAPACITY);
