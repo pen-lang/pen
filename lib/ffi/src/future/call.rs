@@ -62,6 +62,7 @@ mod tests {
         cps::{self, AsyncStack, ContinuationFunction},
         Arc, Closure, Number,
     };
+    use core::future::ready;
 
     extern "C" fn thunk_entry_function(
         stack: &mut AsyncStack,
@@ -130,6 +131,43 @@ mod tests {
                 )),
                 40.0.into(),
                 2.0.into()
+            )
+            .await,
+            42.0.into()
+        );
+    }
+
+    type TestResult = Number;
+
+    extern "C" fn closure_entry_function_with_suspension(
+        stack: &mut AsyncStack<TestResult>,
+        continue_: ContinuationFunction<TestResult, TestResult>,
+        _closure: Arc<Closure<()>>,
+    ) -> cps::Result {
+        stack.suspend(step, continue_, ready(())).unwrap();
+
+        // Wake immediately as we are waiting for nothing!
+        stack.context().unwrap().waker().wake_by_ref();
+
+        cps::Result::new()
+    }
+
+    fn step(
+        stack: &mut AsyncStack<TestResult>,
+        continue_: ContinuationFunction<TestResult, TestResult>,
+    ) -> cps::Result {
+        continue_(stack, 42.0.into())
+    }
+
+    #[tokio::test]
+    async fn call_closure_with_suspension() {
+        assert_eq!(
+            call!(
+                fn() -> Number,
+                Arc::new(Closure::new(
+                    closure_entry_function_with_suspension as *const u8,
+                    ()
+                )),
             )
             .await,
             42.0.into()
