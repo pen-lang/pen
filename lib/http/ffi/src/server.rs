@@ -3,19 +3,22 @@ use core::str;
 use std::error::Error;
 
 #[ffi::bindgen]
-fn _pen_http_server_serve(
+async fn _pen_http_server_serve(
     address: ffi::ByteString,
     callback: ffi::Arc<ffi::Closure>,
 ) -> ffi::ByteString {
-    match serve(address, callback) {
+    match serve(address, callback).await {
         Ok(_) => ffi::ByteString::default(),
         Err(error) => error.to_string().into(),
     }
 }
 
-fn serve(address: ffi::ByteString, callback: ffi::Arc<ffi::Closure>) -> Result<(), Box<dyn Error>> {
-    hyper::Server::try_bind(&str::from_utf8(address.as_slice())?.parse()?)?.serve(
-        hyper::service::make_service_fn(|_| {
+async fn serve(
+    address: ffi::ByteString,
+    callback: ffi::Arc<ffi::Closure>,
+) -> Result<(), Box<dyn Error>> {
+    hyper::Server::try_bind(&str::from_utf8(address.as_slice())?.parse()?)?
+        .serve(hyper::service::make_service_fn(|_| {
             let callback = callback.clone();
 
             async {
@@ -55,8 +58,8 @@ fn serve(address: ffi::ByteString, callback: ffi::Arc<ffi::Closure>) -> Result<(
                     },
                 ))
             }
-        }),
-    );
+        }))
+        .await?;
 
     Ok(())
 }

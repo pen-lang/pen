@@ -1,7 +1,7 @@
 import 'Request { Request }
 import 'Response { Response }
 
-import foreign "c" _pen_http_server_serve \(string, \(Request) Response) string
+import foreign _pen_http_server_serve \(string, \(Request) Response) string
 
 type Context {
   inner Inner
