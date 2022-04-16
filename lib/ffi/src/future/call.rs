@@ -28,6 +28,7 @@ macro_rules! call {
                 cps::Result::new()
             }
 
+            let closure = $closure;
             let mut trampoline: Option<Trampoline> = None;
             let mut stack = AsyncStack::new(INITIAL_STACK_CAPACITY);
 
@@ -38,8 +39,8 @@ macro_rules! call {
                     } else {
                         unsafe {
                             transmute::<_, InitialStepFunction<_>>(
-                                $closure.entry_function(),
-                            )(stack, resolve, $closure.clone(), $($argument),*);
+                                closure.entry_function(),
+                            )(stack, resolve, closure.clone(), $($argument),*);
                         }
                     }
                 });
