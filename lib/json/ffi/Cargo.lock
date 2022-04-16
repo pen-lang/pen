@@ -112,9 +112,9 @@ checksum = "308cc39be01b73d0d18f82a0e7b2a3df85245f84af96fdddc5d202d27e47b86a"
 
 [[package]]
 name = "pen-ffi"
-version = "0.3.48"
+version = "0.3.50"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d6a34c5f57ccfe0415544cb84da3718c2c2e93a108042196b249e7e6aad8cb60"
+checksum = "b7ed55d7472625df53f379fa709ccbdfeb3eada7699bef92e26a6dad57276933"
 dependencies = [
  "futures",
  "pen-ffi-macro",
