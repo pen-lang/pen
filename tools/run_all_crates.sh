@@ -13,7 +13,8 @@ for directory in \
   lib/core/ffi \
   lib/http/ffi \
   lib/json/ffi \
-  lib/os/ffi \
+  lib/os/ffi/application \
+  lib/os/ffi/library \
   lib/os-sync/ffi \
   lib/prelude/ffi; do
   (
