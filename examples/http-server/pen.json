@@ -1,0 +1,7 @@
+{
+  "type": "application",
+  "dependencies": {
+    "Http": "pen:///http",
+    "Os": "pen:///os"
+  }
+}

@@ -1,0 +1,23 @@
+import Http'Request { Request }
+import Http'Response { Response }
+import Http'Server
+import Os'File
+import Os'Process
+
+main = \(ctx context) none {
+  _ = File'Write(ctx.Os, File'StdOut(), "Serving now!\n")
+
+  if e = Server'Serve(
+    ctx.Http,
+    "127.0.0.1:8080",
+    serve,
+  ) as none {
+    none
+  } else {
+    Process'Exit(ctx.Os, 1)
+  }
+}
+
+serve = \(r Request) Response {
+  Response{Status: 200, Body: "Hello, world!"}
+}

@@ -10,3 +10,4 @@ crate-type = ["staticlib"]
 [dependencies]
 ffi = { package = "pen-ffi", version = "0.3" }
 hyper = { version = "0.14", features = ["full"] }
+tokio = { version = "1", features = ["full"] }
