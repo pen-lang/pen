@@ -1,6 +1,8 @@
 {
   "type": "application",
   "dependencies": {
+    "Core": "pen:///core",
+    "Flag": "pen:///flag",
     "Http": "pen:///http",
     "Os": "pen:///os"
   }
