@@ -111,4 +111,31 @@ mod tests {
             value.into()
         );
     }
+
+    extern "C" fn closure_2_arity_entry_function(
+        stack: &mut AsyncStack,
+        continue_: ContinuationFunction<Number>,
+        _closure: Arc<Closure<()>>,
+        x: Number,
+        y: Number,
+    ) -> cps::Result {
+        continue_(stack, (f64::from(x) + f64::from(y)).into())
+    }
+
+    #[tokio::test]
+    async fn convert_2_arity_closure() {
+        assert_eq!(
+            call!(
+                fn(Number, Number) -> Number,
+                Arc::new(Closure::new(
+                    closure_2_arity_entry_function as *const u8,
+                    ()
+                )),
+                40.0.into(),
+                2.0.into()
+            )
+            .await,
+            42.0.into()
+        );
+    }
 }
