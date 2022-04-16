@@ -1,7 +1,7 @@
 // Note that this macro should not be called for non-thunk closures.
 #[macro_export]
 macro_rules! call {
-    (fn($($argument_type:ty),*) -> $result_type:ty, $closure:expr, $($argument:expr),*) => {
+    (fn($($argument_type:ty),*) -> $result_type:ty, $closure:expr, $($argument:expr),* $(,)?) => {
         async {
             use core::{intrinsics::transmute, task::Poll};
             use futures::future::poll_fn;
@@ -103,7 +103,7 @@ mod tests {
             call!(
                 fn(Number) -> Number,
                 Arc::new(Closure::new(closure_entry_function as *const u8, ())),
-                value.into()
+                value.into(),
             )
             .await,
             value.into()
@@ -130,7 +130,7 @@ mod tests {
                     ()
                 )),
                 40.0.into(),
-                2.0.into()
+                2.0.into(),
             )
             .await,
             42.0.into()
