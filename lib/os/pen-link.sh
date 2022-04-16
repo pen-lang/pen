@@ -51,7 +51,7 @@ cd $ffi_directory
 
 cargo build --release --quiet $target_option
 
-binary=../target/$target/release/os-app
+binary=target/$target/release/os-app
 
 if [ -r $binary.wasm ]; then
   binary=$binary.wasm

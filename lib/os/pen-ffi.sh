@@ -19,4 +19,4 @@ fi
 cd $(dirname $0)/ffi/library
 cargo build --release --quiet --target $target
 # spell-checker: disable-next-line
-cp ../target/$target/release/libos.a $1
+cp target/$target/release/libos.a $1
