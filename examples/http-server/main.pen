@@ -8,9 +8,15 @@ import Os'File
 import Os'Process
 
 main = \(ctx context) none {
-  if _ = run(ctx) as none {
+  if e = run(ctx) as none {
     none
   } else {
+    _ = File'Write(
+      ctx.Os,
+      File'StdOut(),
+      String'Join([string if s = source(e) as string { s } else { "unknown error" }, "\n"], ""),
+    )
+
     Process'Exit(ctx.Os, 1)
   }
 }
