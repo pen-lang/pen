@@ -8,7 +8,15 @@ fi
 
 root_directory=$(dirname $0)/..
 
-for directory in . lib/core/ffi lib/json/ffi lib/os/ffi lib/os-sync/ffi lib/prelude/ffi; do
+for directory in \
+  . \
+  lib/core/ffi \
+  lib/http/ffi \
+  lib/json/ffi \
+  lib/os/ffi/application \
+  lib/os/ffi/library \
+  lib/os-sync/ffi \
+  lib/prelude/ffi; do
   (
     cd $root_directory/$directory
     "$@"

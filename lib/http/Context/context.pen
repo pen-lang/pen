@@ -1,0 +1,28 @@
+import 'Request { Request }
+import 'Response { Response }
+
+import foreign _pen_http_server_serve \(string, \(Request) Response) string
+
+type Context {
+  inner Inner
+}
+
+type Inner {
+  Serve \(string, \(Request) Response) none | error
+}
+
+New = \() Context {
+  Context{
+    inner: Inner{
+      Serve: \(address string, callback \(Request) Response) none | error {
+        e = _pen_http_server_serve(address, callback)
+
+        if e == "" { none } else { error(e) }
+      },
+    },
+  }
+}
+
+Inner = \(ctx Context) Inner {
+  ctx.inner
+}

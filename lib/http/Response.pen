@@ -1,0 +1,5 @@
+# An HTTP response
+type Response {
+  Status number
+  Body string
+}

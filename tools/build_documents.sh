@@ -37,12 +37,12 @@ export PATH=$PWD/target/release:$PATH
 ) >$document_directory/flag.md
 
 (
-  cd lib/os
+  cd lib/http
   pen document \
-    --name Os \
-    --url pen:///os \
-    --description "$(os_package_description)"
-) >$document_directory/os.md
+    --name Http \
+    --url pen:///http \
+    --description "This package provides HTTP client and server."
+) >$document_directory/http.md
 
 (
   cd lib/json
@@ -51,6 +51,14 @@ export PATH=$PWD/target/release:$PATH
     --url pen:///json \
     --description "This package provides a JSON parser."
 ) >$document_directory/json.md
+
+(
+  cd lib/os
+  pen document \
+    --name Os \
+    --url pen:///os \
+    --description "$(os_package_description)"
+) >$document_directory/os.md
 
 (
   cd lib/test

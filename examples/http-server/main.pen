@@ -1,0 +1,39 @@
+import Core'String
+import Flag'Flag
+import Http'Request { Request }
+import Http'Response { Response }
+import Http'Server
+import Os'Environment
+import Os'File
+import Os'Process
+
+main = \(ctx context) none {
+  if e = run(ctx) as none {
+    none
+  } else {
+    _ = File'Write(
+      ctx.Os,
+      File'StdOut(),
+      String'Join([string if s = source(e) as string { s } else { "unknown error" }, "\n"], ""),
+    )
+
+    Process'Exit(ctx.Os, 1)
+  }
+}
+
+run = \(ctx context) none | error {
+  f = Flag'Parse(Environment'Arguments(ctx.Os))?
+  a = if s = f.Named["address"] {
+    s
+  } else {
+    "127.0.0.1:8080"
+  }
+
+  File'Write(ctx.Os, File'StdOut(), String'Join([string "Serving at ", a, "\n"], ""))?
+
+  Server'Serve(ctx.Http, a, serve)
+}
+
+serve = \(r Request) Response {
+  Response{Status: 200, Body: r.Body}
+}

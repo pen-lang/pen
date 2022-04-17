@@ -1,0 +1,4 @@
+# An HTTP request
+type Request {
+  Body string
+}

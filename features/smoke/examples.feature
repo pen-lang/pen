@@ -18,6 +18,7 @@ Feature: Examples
       | console               |
       | echo                  |
       | hello-world           |
+      | http-server           |
       | life-game             |
       | ls                    |
       | tcp-client            |
