@@ -43,9 +43,7 @@ macro_rules! call {
                 if let Some(initialize) = initialize.take() {
                     stack.run_with_context(context, initialize);
                 } else if let Some((step, continue_)) = trampoline {
-                    stack.run_with_context(context, |stack| {
-                        step(stack, continue_)
-                    });
+                    stack.run_with_context(context, |stack| step(stack, continue_));
                 } else {
                     unreachable!()
                 }
