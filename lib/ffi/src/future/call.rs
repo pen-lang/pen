@@ -45,7 +45,7 @@ macro_rules! call {
                 } else if let Some((step, continue_)) = trampoline.take() {
                     stack.run_with_context(context, |stack| step(stack, continue_));
                 } else {
-                    unreachable!()
+                    unreachable!("suspension did not fill trampoline functions")
                 }
 
                 if let Some(value) = stack.resolved_value() {
