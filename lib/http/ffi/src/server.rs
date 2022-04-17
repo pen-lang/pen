@@ -27,12 +27,17 @@ async fn serve(
                         let callback = callback.clone();
 
                         async move {
+                            let request = request;
                             let callback = callback.clone();
+
+                            let method = request.method().to_string();
+                            let uri = request.uri().to_string();
                             let body = hyper::body::to_bytes(request.into_body()).await?;
+
                             let raw = ffi::call!(
                                 fn(ffi::Arc<Request>) -> ffi::Arc<Response>,
                                 callback,
-                                Request::new(body.to_vec()).into()
+                                Request::new(method, uri, body.to_vec()).into()
                             )
                             .await;
 

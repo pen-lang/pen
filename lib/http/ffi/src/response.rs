@@ -7,6 +7,13 @@ pub struct Response {
 }
 
 impl Response {
+    pub fn new(status: impl Into<ffi::Number>, body: impl Into<ffi::ByteString>) -> Self {
+        Self {
+            status: status.into(),
+            body: body.into(),
+        }
+    }
+
     pub fn status(&self) -> ffi::Number {
         self.status
     }
