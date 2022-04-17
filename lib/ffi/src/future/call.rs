@@ -42,7 +42,7 @@ macro_rules! call {
             poll_fn(move |context| {
                 if let Some(initialize) = initialize.take() {
                     stack.run_with_context(context, initialize);
-                } else if let Some((step, continue_)) = trampoline {
+                } else if let Some((step, continue_)) = trampoline.take() {
                     stack.run_with_context(context, |stack| step(stack, continue_));
                 } else {
                     unreachable!()
