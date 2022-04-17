@@ -28,22 +28,27 @@ macro_rules! call {
                 cps::Result::new()
             }
 
-            let closure = $closure;
+            // Move closure and arguments into an initializer function.
+            let mut initialize = Some(|stack: &mut AsyncStack| unsafe {
+                let closure = $closure;
+
+                transmute::<_, InitialStepFunction<_>>(
+                    closure.entry_function(),
+                )(stack, resolve, closure, $($argument),*);
+            });
             let mut trampoline: Option<Trampoline> = None;
             let mut stack = AsyncStack::new(INITIAL_STACK_CAPACITY);
 
             poll_fn(move |context| {
-                stack.run_with_context(context, |stack| {
-                    if let Some((step, continue_)) = trampoline {
-                        step(stack, continue_);
-                    } else {
-                        unsafe {
-                            transmute::<_, InitialStepFunction<_>>(
-                                closure.entry_function(),
-                            )(stack, resolve, closure.clone(), $($argument),*);
-                        }
-                    }
-                });
+                if let Some(initialize) = initialize.take() {
+                    stack.run_with_context(context, initialize);
+                } else if let Some((step, continue_)) = trampoline {
+                    stack.run_with_context(context, |stack| {
+                        step(stack, continue_)
+                    });
+                } else {
+                    unreachable!()
+                }
 
                 if let Some(value) = stack.resolved_value() {
                     value.into()
@@ -65,7 +70,7 @@ pub mod __private {
 mod tests {
     use crate::{
         cps::{self, AsyncStack, ContinuationFunction},
-        Arc, Closure, Number,
+        Arc, ByteString, Closure, Number,
     };
     use core::future::ready;
 
@@ -78,7 +83,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn convert_thunk() {
+    async fn call_thunk() {
         let value = 42.0;
 
         assert_eq!(
@@ -101,7 +106,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn convert_one_argument_closure() {
+    async fn call_one_argument_closure() {
         let value = 42.0;
 
         assert_eq!(
@@ -126,7 +131,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn convert_two_argument_closure() {
+    async fn call_two_argument_closure() {
         assert_eq!(
             call!(
                 fn(Number, Number) -> Number,
@@ -176,6 +181,51 @@ mod tests {
             )
             .await,
             42.0.into()
+        );
+    }
+
+    extern "C" fn closure_entry_function_with_string(
+        stack: &mut AsyncStack,
+        continue_: ContinuationFunction<ByteString>,
+        _closure: Arc<Closure<()>>,
+        x: ByteString,
+    ) -> cps::Result {
+        continue_(stack, x)
+    }
+
+    #[tokio::test]
+    async fn move_argument() {
+        let value = "foo";
+
+        assert_eq!(
+            call!(
+                fn(ByteString) -> ByteString,
+                Arc::new(Closure::new(
+                    closure_entry_function_with_string as *const u8,
+                    ()
+                )),
+                value.into(),
+            )
+            .await,
+            value.into()
+        );
+    }
+
+    #[tokio::test]
+    async fn move_argument_in_closure() {
+        let value = ByteString::from("foo");
+
+        assert_eq!(
+            call!(
+                fn(ByteString) -> ByteString,
+                Arc::new(Closure::new(
+                    closure_entry_function_with_string as *const u8,
+                    ()
+                )),
+                value.clone(),
+            )
+            .await,
+            value
         );
     }
 }
