@@ -1,4 +1,4 @@
-# This module provides a low-level HTTP server.
+# This module provides an HTTP server.
 
 import 'Context'context { Context }
 import 'Request { Request }

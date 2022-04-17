@@ -1,6 +1,6 @@
 #[ffi::any]
 #[repr(C)]
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct Response {
     status: ffi::Number,
     body: ffi::ByteString,
