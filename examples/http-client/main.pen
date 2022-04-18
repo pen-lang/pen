@@ -1,0 +1,76 @@
+import Core'String
+import Flag'Flag
+import Http'Client
+import Http'Request { Request }
+import Http'Response { Response }
+import Os'Environment
+import Os'File
+import Os'Process
+
+type arguments {
+  method string
+  uri string
+  body string
+}
+
+defaultMethod = \() string { "GET" }
+
+main = \(ctx context) none {
+  if e = run(ctx) as none {
+    none
+  } else {
+    _ = File'Write(
+      ctx.Os,
+      File'StdOut(),
+      String'Join([string if s = source(e) as string { s } else { "unknown error" }, "\n"], ""),
+    )
+
+    Process'Exit(ctx.Os, 1)
+  }
+}
+
+run = \(ctx context) none | error {
+  args = arguments(Flag'Parse(Environment'Arguments(ctx.Os))?)?
+
+  r = Client'Send(
+    ctx.Http,
+    Request{
+      Method: args.method,
+      Uri: args.uri,
+      Body: args.body,
+    },
+  )?
+
+  File'Write(
+    ctx.Os,
+    File'StdOut(),
+    String'Join(
+      [string
+        r.Body,
+        "\n",
+      ],
+      "",
+    ),
+  )?
+  none
+}
+
+arguments = \(f Flag'Set) arguments | error {
+  if [m, ...ss] = f.Positional {
+    if [u, ...ss] = ss {
+      arguments{
+        method: m(),
+        uri: u(),
+        body: if [b, ..._] = ss {
+          b()
+        } else {
+          ""
+        },
+      }
+    } else {
+      error("uri missing")
+    }
+  } else {
+    error("method missing")
+  }
+}

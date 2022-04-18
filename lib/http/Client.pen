@@ -1,0 +1,10 @@
+# This module provides an HTTP client.
+
+import 'Context'context { Context }
+import 'Request { Request }
+import 'Response { Response }
+
+# Send an HTTP request.
+Send = \(ctx Context, r Request) Response | error {
+  context'Inner(ctx).Send(r)
+}

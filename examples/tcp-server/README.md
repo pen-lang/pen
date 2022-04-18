@@ -1,6 +1,6 @@
 # TCP server
 
-A TCP server which echos received messages
+A TCP server that echos received messages
 
 ## Usage
 

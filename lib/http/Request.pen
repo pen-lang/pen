@@ -1,4 +1,6 @@
 # An HTTP request
 type Request {
+  Method string
+  Uri string
   Body string
 }
