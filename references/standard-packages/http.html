@@ -154,26 +154,37 @@
   } 
 }
 </code></pre>
-<h2 id="httpcontext-module"><a class="header" href="#httpcontext-module"><code>Http'Context</code> module</a></h2>
+<h2 id="httpclient-module"><a class="header" href="#httpclient-module"><code>Http'Client</code> module</a></h2>
+<p>This module provides an HTTP client.</p>
 <h3 id="types"><a class="header" href="#types">Types</a></h3>
+<p>No types are defined.</p>
+<h3 id="functions"><a class="header" href="#functions">Functions</a></h3>
+<h4 id="send"><a class="header" href="#send"><code>Send</code></a></h4>
+<p>Send an HTTP request.</p>
+<pre><code class="language-pen">\(ctx Context, r Request) Response | error
+</code></pre>
+<h2 id="httpcontext-module"><a class="header" href="#httpcontext-module"><code>Http'Context</code> module</a></h2>
+<h3 id="types-1"><a class="header" href="#types-1">Types</a></h3>
 <h4 id="context"><a class="header" href="#context"><code>Context</code></a></h4>
 <p>An HTTP context</p>
 <pre><code class="language-pen">type Context = context'Context
 </code></pre>
-<h3 id="functions"><a class="header" href="#functions">Functions</a></h3>
+<h3 id="functions-1"><a class="header" href="#functions-1">Functions</a></h3>
 <p>No functions are defined.</p>
 <h2 id="httprequest-module"><a class="header" href="#httprequest-module"><code>Http'Request</code> module</a></h2>
-<h3 id="types-1"><a class="header" href="#types-1">Types</a></h3>
+<h3 id="types-2"><a class="header" href="#types-2">Types</a></h3>
 <h4 id="request"><a class="header" href="#request"><code>Request</code></a></h4>
 <p>An HTTP request</p>
 <pre><code class="language-pen">type Request {
+  Method string
+  Uri string
   Body string
 }
 </code></pre>
-<h3 id="functions-1"><a class="header" href="#functions-1">Functions</a></h3>
+<h3 id="functions-2"><a class="header" href="#functions-2">Functions</a></h3>
 <p>No functions are defined.</p>
 <h2 id="httpresponse-module"><a class="header" href="#httpresponse-module"><code>Http'Response</code> module</a></h2>
-<h3 id="types-2"><a class="header" href="#types-2">Types</a></h3>
+<h3 id="types-3"><a class="header" href="#types-3">Types</a></h3>
 <h4 id="response"><a class="header" href="#response"><code>Response</code></a></h4>
 <p>An HTTP response</p>
 <pre><code class="language-pen">type Response {
@@ -181,13 +192,13 @@
   Body string
 }
 </code></pre>
-<h3 id="functions-2"><a class="header" href="#functions-2">Functions</a></h3>
+<h3 id="functions-3"><a class="header" href="#functions-3">Functions</a></h3>
 <p>No functions are defined.</p>
 <h2 id="httpserver-module"><a class="header" href="#httpserver-module"><code>Http'Server</code> module</a></h2>
-<p>This module provides a low-level HTTP server.</p>
-<h3 id="types-3"><a class="header" href="#types-3">Types</a></h3>
+<p>This module provides an HTTP server.</p>
+<h3 id="types-4"><a class="header" href="#types-4">Types</a></h3>
 <p>No types are defined.</p>
-<h3 id="functions-3"><a class="header" href="#functions-3">Functions</a></h3>
+<h3 id="functions-4"><a class="header" href="#functions-4">Functions</a></h3>
 <h4 id="serve"><a class="header" href="#serve"><code>Serve</code></a></h4>
 <p>Run an HTTP service.</p>
 <pre><code class="language-pen">\(ctx Context, address string, callback \(Request) Response) none | error
