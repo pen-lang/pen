@@ -26,10 +26,7 @@ async fn serve(
                     move |request: hyper::Request<hyper::Body>| {
                         let callback = callback.clone();
 
-                        async move {
-                            let request = request;
-                            let callback = callback.clone();
-
+                        async {
                             let method = request.method().to_string();
                             let uri = request.uri().to_string();
                             let body = hyper::body::to_bytes(request.into_body()).await?;
