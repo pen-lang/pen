@@ -1625,7 +1625,7 @@ mod tests {
         }
 
         #[test]
-        fn format_multi_line_try_operation_with_one_blank_line() {
+        fn format_multi_line_statement_with_one_blank_line() {
             assert_eq!(
                 format(&Block::new(
                     vec![Statement::new(
