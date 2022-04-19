@@ -356,7 +356,7 @@ fn statement_with_result<'a>() -> impl Parser<Stream<'a>, Output = Statement> {
 
 fn statement_without_result<'a>() -> impl Parser<Stream<'a>, Output = Statement> {
     (position(), expression())
-        .map(|(position, expression)| Statement::new(None, expression.clone(), position))
+        .map(|(position, expression)| Statement::new(None, expression, position))
 }
 
 fn expression<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
