@@ -46,7 +46,9 @@ pub fn validate(context: &AnalysisContext, module: &Module) -> Result<(), Analys
                         .ok_or_else(|| AnalysisError::RecordExpected(update.position().clone()))?;
 
                 if !open_records.contains(record_type.name()) {
-                    return Err(AnalysisError::RecordFieldPrivate(update.position().clone()));
+                    return Err(AnalysisError::RecordFieldPrivate(
+                        update.fields()[0].position().clone(),
+                    ));
                 }
             }
             _ => {}
