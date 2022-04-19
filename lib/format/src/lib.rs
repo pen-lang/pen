@@ -1625,40 +1625,6 @@ mod tests {
         }
 
         #[test]
-        fn format_multi_line_statement_with_one_blank_line() {
-            assert_eq!(
-                format(&Block::new(
-                    vec![Statement::new(
-                        None,
-                        UnaryOperation::new(
-                            UnaryOperator::Try,
-                            Call::new(
-                                Variable::new("f", Position::fake()),
-                                vec![Variable::new("x", line_position(2)).into()],
-                                Position::fake()
-                            ),
-                            line_position(1)
-                        ),
-                        line_position(3)
-                    )],
-                    None::new(line_position(5)),
-                    Position::fake()
-                )),
-                indoc!(
-                    "
-                    {
-                      f(
-                        x,
-                      )?
-
-                      none
-                    }
-                    "
-                )
-            );
-        }
-
-        #[test]
         fn format_statement_with_trimmed_blank_line() {
             assert_eq!(
                 format_module(&Module::new(
