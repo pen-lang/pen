@@ -12,7 +12,8 @@ pub fn compile(module: &ir::Module) -> Result<interface::Module, CompileError> {
                     definition.original_name(),
                     definition.fields().to_vec(),
                     definition.is_open(),
-                    definition.is_public() && !definition.is_external(),
+                    definition.is_public(),
+                    definition.is_external(),
                     definition.position().clone(),
                 )
             })
@@ -25,7 +26,8 @@ pub fn compile(module: &ir::Module) -> Result<interface::Module, CompileError> {
                     alias.name(),
                     alias.original_name(),
                     alias.type_().clone(),
-                    alias.is_public() && !alias.is_external(),
+                    alias.is_public(),
+                    alias.is_external(),
                     alias.position().clone(),
                 )
             })

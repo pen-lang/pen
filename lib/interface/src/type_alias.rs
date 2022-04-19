@@ -8,6 +8,7 @@ pub struct TypeAlias {
     original_name: String,
     type_: Type,
     public: bool,
+    external: bool,
     position: Position,
 }
 
@@ -17,6 +18,7 @@ impl TypeAlias {
         original_name: impl Into<String>,
         type_: impl Into<Type>,
         public: bool,
+        external: bool,
         position: Position,
     ) -> Self {
         Self {
@@ -24,6 +26,7 @@ impl TypeAlias {
             original_name: original_name.into(),
             type_: type_.into(),
             public,
+            external,
             position,
         }
     }
@@ -42,6 +45,10 @@ impl TypeAlias {
 
     pub fn is_public(&self) -> bool {
         self.public
+    }
+
+    pub fn is_external(&self) -> bool {
+        self.external
     }
 
     pub fn position(&self) -> &Position {

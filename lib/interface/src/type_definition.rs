@@ -9,6 +9,7 @@ pub struct TypeDefinition {
     fields: Vec<types::RecordField>,
     open: bool,
     public: bool,
+    external: bool,
     position: Position,
 }
 
@@ -19,6 +20,7 @@ impl TypeDefinition {
         fields: Vec<types::RecordField>,
         open: bool,
         public: bool,
+        external: bool,
         position: Position,
     ) -> Self {
         Self {
@@ -27,6 +29,7 @@ impl TypeDefinition {
             fields,
             open,
             public,
+            external,
             position,
         }
     }
@@ -49,6 +52,10 @@ impl TypeDefinition {
 
     pub fn is_public(&self) -> bool {
         self.public
+    }
+
+    pub fn is_external(&self) -> bool {
+        self.external
     }
 
     pub fn position(&self) -> &Position {
