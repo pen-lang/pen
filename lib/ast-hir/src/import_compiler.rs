@@ -711,6 +711,7 @@ mod tests {
                                 vec![],
                                 false,
                                 true,
+                                false,
                                 Position::fake()
                             )],
                             vec![],
@@ -789,6 +790,7 @@ mod tests {
                                 "Bar",
                                 types::None::new(Position::fake()),
                                 true,
+                                false,
                                 Position::fake(),
                             )],
                             vec![]
