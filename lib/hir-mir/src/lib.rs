@@ -44,8 +44,8 @@ pub fn compile_main(
     let module =
         main_function_compiler::compile(module, context.types(), main_module_configuration)?;
     let (module, _) = compile_module(
-        &module,
         &CompileContext::new(&module, compile_configuration.clone().into()),
+        &module,
     )?;
 
     Ok(module)
@@ -56,15 +56,15 @@ pub fn compile(
     compile_configuration: &CompileConfiguration,
 ) -> Result<(mir::ir::Module, interface::Module), CompileError> {
     compile_module(
-        module,
         &CompileContext::new(module, compile_configuration.clone().into()),
+        module,
     )
 }
 
 pub fn compile_prelude(
     module: &Module,
 ) -> Result<(mir::ir::Module, interface::Module), CompileError> {
-    compile_module(module, &CompileContext::new(module, None))
+    compile_module(&CompileContext::new(module, None), module)
 }
 
 pub fn compile_test(
