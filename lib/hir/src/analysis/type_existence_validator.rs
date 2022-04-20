@@ -67,7 +67,7 @@ fn collect_existent_records(module: &Module) -> FnvHashSet<&str> {
         .type_definitions()
         .iter()
         .filter(|definition| !definition.is_external() || definition.is_public())
-        .map(|definition| definition.name().into())
+        .map(|definition| definition.name())
         .collect()
 }
 
