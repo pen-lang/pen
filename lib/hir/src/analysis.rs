@@ -39,11 +39,7 @@ pub use error::AnalysisError;
 pub fn analyze(context: &AnalysisContext, module: &Module) -> Result<Module, AnalysisError> {
     duplicate_function_name_validator::validate(module)?;
     duplicate_type_name_validator::validate(module)?;
-    type_existence_validator::validate(
-        module,
-        &context.types().keys().cloned().collect(),
-        &context.records().keys().cloned().collect(),
-    )?;
+    type_existence_validator::validate(module)?;
     recursive_type_alias_validator::validate(module)?;
 
     let module = type_inferrer::infer(context, module)?;

@@ -12,8 +12,8 @@ const MESSAGE_VARIABLE_NAME: &str = "$message";
 const NON_STRING_TEST_ERROR_MESSAGE: &str = "<non-string test error>";
 
 pub fn compile(
-    module: &Module,
     context: &CompileContext,
+    module: &Module,
     configuration: &TestModuleConfiguration,
 ) -> Result<(Module, test_info::Module), CompileError> {
     let position = module.position();

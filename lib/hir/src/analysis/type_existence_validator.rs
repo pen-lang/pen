@@ -3,11 +3,10 @@ use crate::{analysis::type_transformer, ir::*, types::Type};
 use fnv::FnvHashSet;
 use std::cell::RefCell;
 
-pub fn validate(
-    module: &Module,
-    types: &FnvHashSet<String>,
-    records: &FnvHashSet<String>,
-) -> Result<(), AnalysisError> {
+pub fn validate(module: &Module) -> Result<(), AnalysisError> {
+    let types = collect_existent_types(module);
+    let records = collect_existent_records(module);
+
     for type_ in &collect_types(module) {
         match type_ {
             Type::Record(record) => {
@@ -47,6 +46,31 @@ fn collect_types(module: &Module) -> Vec<Type> {
     types.into_inner()
 }
 
+fn collect_existent_types(module: &Module) -> FnvHashSet<&str> {
+    module
+        .type_definitions()
+        .iter()
+        .filter(|definition| !definition.is_external() || definition.is_public())
+        .map(|definition| definition.name())
+        .chain(
+            module
+                .type_aliases()
+                .iter()
+                .filter(|alias| !alias.is_external() || alias.is_public())
+                .map(|alias| alias.name()),
+        )
+        .collect()
+}
+
+fn collect_existent_records(module: &Module) -> FnvHashSet<&str> {
+    module
+        .type_definitions()
+        .iter()
+        .filter(|definition| !definition.is_external() || definition.is_public())
+        .map(|definition| definition.name().into())
+        .collect()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -59,16 +83,12 @@ mod tests {
     #[test]
     fn fail_to_validate_non_existent_reference_type_in_type_alias() {
         assert_eq!(
-            validate(
-                &Module::empty().set_type_aliases(vec![TypeAlias::fake(
-                    "x",
-                    types::Reference::new("foo", Position::fake()),
-                    false,
-                    false
-                )]),
-                &Default::default(),
-                &Default::default(),
-            ),
+            validate(&Module::empty().set_type_aliases(vec![TypeAlias::fake(
+                "x",
+                types::Reference::new("foo", Position::fake()),
+                false,
+                false
+            )]),),
             Err(AnalysisError::TypeNotFound(types::Reference::new(
                 "foo",
                 Position::fake()
@@ -79,16 +99,12 @@ mod tests {
     #[test]
     fn fail_to_validate_non_existent_reference_type_in_type_definition() {
         assert_eq!(
-            validate(
-                &Module::empty().set_type_aliases(vec![TypeAlias::fake(
-                    "x",
-                    types::Reference::new("foo", Position::fake()),
-                    false,
-                    false
-                )]),
-                &Default::default(),
-                &Default::default(),
-            ),
+            validate(&Module::empty().set_type_aliases(vec![TypeAlias::fake(
+                "x",
+                types::Reference::new("foo", Position::fake()),
+                false,
+                false
+            )]),),
             Err(AnalysisError::TypeNotFound(types::Reference::new(
                 "foo",
                 Position::fake()
@@ -110,8 +126,6 @@ mod tests {
                     false,
                     false
                 )]),
-                &Default::default(),
-                &Default::default(),
             ),
             Err(AnalysisError::RecordNotFound(types::Record::new(
                 "foo",
@@ -123,18 +137,40 @@ mod tests {
     #[test]
     fn fail_to_validate_reference_type_to_private_external_type_alias() {
         assert_eq!(
+            validate(&Module::empty().set_type_aliases(vec![
+                TypeAlias::fake("Foo", types::None::new(Position::fake()), false, true),
+                TypeAlias::fake(
+                    "Bar",
+                    types::Reference::new("Foo", Position::fake()),
+                    false,
+                    false
+                )
+            ]),),
+            Err(AnalysisError::TypeNotFound(types::Reference::new(
+                "Foo",
+                Position::fake()
+            )))
+        );
+    }
+
+    #[test]
+    fn fail_to_validate_reference_type_to_private_external_record_definition() {
+        assert_eq!(
             validate(
-                &Module::empty().set_type_aliases(vec![
-                    TypeAlias::fake("Foo", types::None::new(Position::fake()), false, true),
-                    TypeAlias::fake(
+                &Module::empty()
+                    .set_type_definitions(vec![TypeDefinition::fake(
+                        "Foo",
+                        vec![],
+                        false,
+                        false,
+                        true
+                    )])
+                    .set_type_aliases(vec![TypeAlias::fake(
                         "Bar",
                         types::Reference::new("Foo", Position::fake()),
                         false,
                         false
-                    )
-                ]),
-                &Default::default(),
-                &Default::default(),
+                    )]),
             ),
             Err(AnalysisError::TypeNotFound(types::Reference::new(
                 "Foo",
