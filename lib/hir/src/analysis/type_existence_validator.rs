@@ -119,4 +119,27 @@ mod tests {
             )))
         );
     }
+
+    #[test]
+    fn fail_to_validate_reference_type_to_private_external_type_alias() {
+        assert_eq!(
+            validate(
+                &Module::empty().set_type_aliases(vec![
+                    TypeAlias::fake("Foo", types::None::new(Position::fake()), false, true),
+                    TypeAlias::fake(
+                        "Bar",
+                        types::Reference::new("Foo", Position::fake()),
+                        false,
+                        false
+                    )
+                ]),
+                &Default::default(),
+                &Default::default(),
+            ),
+            Err(AnalysisError::TypeNotFound(types::Reference::new(
+                "Foo",
+                Position::fake()
+            )))
+        );
+    }
 }
