@@ -178,4 +178,30 @@ mod tests {
             )))
         );
     }
+
+    #[test]
+    fn fail_to_validate_record_type_to_private_external_record_definition() {
+        assert_eq!(
+            validate(
+                &Module::empty()
+                    .set_type_definitions(vec![TypeDefinition::fake(
+                        "Foo",
+                        vec![],
+                        false,
+                        false,
+                        true
+                    )])
+                    .set_type_aliases(vec![TypeAlias::fake(
+                        "Bar",
+                        types::Record::new("Foo", Position::fake()),
+                        false,
+                        false
+                    )]),
+            ),
+            Err(AnalysisError::RecordNotFound(types::Record::new(
+                "Foo",
+                Position::fake()
+            )))
+        );
+    }
 }
