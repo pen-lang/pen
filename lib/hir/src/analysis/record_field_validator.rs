@@ -84,6 +84,8 @@ fn collect_open_records(type_definitions: &[TypeDefinition]) -> FnvHashSet<Strin
         .collect()
 }
 
+// TODO Remove publicity check?
+// https://github.com/pen-lang/pen/issues/853
 fn is_record_open(definition: &TypeDefinition) -> bool {
     !definition.is_external() || definition.is_public() && definition.is_open()
 }

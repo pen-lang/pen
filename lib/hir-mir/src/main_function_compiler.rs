@@ -1,16 +1,11 @@
 use super::{error::CompileError, main_module_configuration::MainModuleConfiguration};
 use fnv::FnvHashMap;
-use hir::{
-    analysis::type_resolver,
-    ir::*,
-    types::{self, Type},
-};
+use hir::{ir::*, types};
 
 const MAIN_FUNCTION_WRAPPER_SUFFIX: &str = ":wrapper";
 
 pub fn compile(
     module: &Module,
-    types: &FnvHashMap<String, Type>,
     main_module_configuration: &MainModuleConfiguration,
 ) -> Result<Module, CompileError> {
     let main_function_definition = module
@@ -32,10 +27,7 @@ pub fn compile(
             .map(|(key, configuration)| {
                 Ok(types::RecordField::new(
                     key,
-                    type_resolver::resolve(
-                        &types::Reference::new(&configuration.context_type_name, position.clone()),
-                        types,
-                    )?,
+                    types::Reference::new(&configuration.context_type_name, position.clone()),
                 ))
             })
             .collect::<Result<Vec<_>, CompileError>>()?,

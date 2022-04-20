@@ -40,12 +40,10 @@ pub fn compile_main(
     compile_configuration: &CompileConfiguration,
     main_module_configuration: &MainModuleConfiguration,
 ) -> Result<mir::ir::Module, CompileError> {
-    let context = CompileContext::new(module, compile_configuration.clone().into());
-    let module =
-        main_function_compiler::compile(module, context.types(), main_module_configuration)?;
+    let module = main_function_compiler::compile(module, main_module_configuration)?;
     let (module, _) = compile_module(
-        &module,
         &CompileContext::new(&module, compile_configuration.clone().into()),
+        &module,
     )?;
 
     Ok(module)
@@ -56,15 +54,15 @@ pub fn compile(
     compile_configuration: &CompileConfiguration,
 ) -> Result<(mir::ir::Module, interface::Module), CompileError> {
     compile_module(
-        module,
         &CompileContext::new(module, compile_configuration.clone().into()),
+        module,
     )
 }
 
 pub fn compile_prelude(
     module: &Module,
 ) -> Result<(mir::ir::Module, interface::Module), CompileError> {
-    compile_module(module, &CompileContext::new(module, None))
+    compile_module(&CompileContext::new(module, None), module)
 }
 
 pub fn compile_test(
@@ -75,15 +73,15 @@ pub fn compile_test(
     let context = CompileContext::new(module, compile_configuration.clone().into());
 
     let (module, test_information) =
-        test_function_compiler::compile(module, &context, test_module_configuration)?;
-    let (module, _) = compile_module(&module, &context)?;
+        test_function_compiler::compile(&context, module, test_module_configuration)?;
+    let (module, _) = compile_module(&context, &module)?;
 
     Ok((module, test_information))
 }
 
 fn compile_module(
-    module: &Module,
     context: &CompileContext,
+    module: &Module,
 ) -> Result<(mir::ir::Module, interface::Module), CompileError> {
     let module = hir::analysis::analyze(context.analysis(), module)?;
     let module = record_equal_function_transformer::transform(context, &module)?;

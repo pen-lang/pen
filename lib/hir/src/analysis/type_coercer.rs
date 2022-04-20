@@ -21,13 +21,13 @@ pub fn coerce_types(context: &AnalysisContext, module: &Module) -> Result<Module
         module
             .function_definitions()
             .iter()
-            .map(|definition| transform_definition(context, definition, &variables))
+            .map(|definition| transform_function_definition(context, definition, &variables))
             .collect::<Result<_, _>>()?,
         module.position().clone(),
     ))
 }
 
-fn transform_definition(
+fn transform_function_definition(
     context: &AnalysisContext,
     definition: &FunctionDefinition,
     variables: &FnvHashMap<String, Type>,
