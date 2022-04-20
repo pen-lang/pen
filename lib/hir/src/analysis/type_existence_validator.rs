@@ -4,8 +4,8 @@ use fnv::FnvHashSet;
 use std::cell::RefCell;
 
 pub fn validate(module: &Module) -> Result<(), AnalysisError> {
-    let types = collect_existent_types(module);
     let records = collect_existent_records(module);
+    let types = collect_existent_types(module, &records);
 
     for type_ in &collect_types(module) {
         match type_ {
@@ -46,12 +46,13 @@ fn collect_types(module: &Module) -> Vec<Type> {
     types.into_inner()
 }
 
-fn collect_existent_types(module: &Module) -> FnvHashSet<&str> {
-    module
-        .type_definitions()
+fn collect_existent_types<'a>(
+    module: &'a Module,
+    records: &'a FnvHashSet<&str>,
+) -> FnvHashSet<&'a str> {
+    records
         .iter()
-        .filter(|definition| !definition.is_external() || definition.is_public())
-        .map(|definition| definition.name())
+        .copied()
         .chain(
             module
                 .type_aliases()
