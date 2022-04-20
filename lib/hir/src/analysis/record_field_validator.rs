@@ -18,8 +18,10 @@ pub fn validate(context: &AnalysisContext, module: &Module) -> Result<(), Analys
                         })?;
 
                 if !open_records.contains(record_type.name()) {
+                    // We never panic on indexing the first field because
+                    // records with no fields are always open.
                     return Err(AnalysisError::RecordFieldPrivate(
-                        construction.position().clone(),
+                        construction.fields()[0].position().clone(),
                     ));
                 }
             }
@@ -44,7 +46,9 @@ pub fn validate(context: &AnalysisContext, module: &Module) -> Result<(), Analys
                         .ok_or_else(|| AnalysisError::RecordExpected(update.position().clone()))?;
 
                 if !open_records.contains(record_type.name()) {
-                    return Err(AnalysisError::RecordFieldPrivate(update.position().clone()));
+                    return Err(AnalysisError::RecordFieldPrivate(
+                        update.fields()[0].position().clone(),
+                    ));
                 }
             }
             _ => {}
