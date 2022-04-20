@@ -9,13 +9,13 @@ pub fn transform(module: &Module, transform: &dyn Fn(&Variable) -> Expression) -
         module
             .function_definitions()
             .iter()
-            .map(|definition| transform_definition(definition, transform))
+            .map(|definition| transform_function_definition(definition, transform))
             .collect(),
         module.position().clone(),
     )
 }
 
-fn transform_definition(
+fn transform_function_definition(
     definition: &FunctionDefinition,
     transform: &dyn Fn(&Variable) -> Expression,
 ) -> FunctionDefinition {
