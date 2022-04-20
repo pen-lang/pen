@@ -305,6 +305,7 @@ mod tests {
                             vec![],
                             false,
                             true,
+                            false,
                             Position::fake()
                         )],
                         vec![],
@@ -383,6 +384,7 @@ mod tests {
                             "Bar",
                             types::None::new(Position::fake()),
                             true,
+                            false,
                             Position::fake(),
                         )],
                         vec![]
@@ -460,6 +462,7 @@ mod tests {
                             vec![],
                             false,
                             false,
+                            false,
                             Position::fake()
                         )],
                         vec![],
@@ -523,6 +526,7 @@ mod tests {
                             "Bar",
                             types::None::new(Position::fake()),
                             false,
+                            false,
                             Position::fake(),
                         )],
                         vec![]
@@ -549,7 +553,15 @@ mod tests {
     #[test]
     fn prefer_loose_definition_of_same_type_definition() {
         let create_type_definition = |public| {
-            interface::TypeDefinition::new("Foo", "", vec![], false, public, Position::fake())
+            interface::TypeDefinition::new(
+                "Foo",
+                "",
+                vec![],
+                false,
+                public,
+                false,
+                Position::fake(),
+            )
         };
 
         assert_eq!(
@@ -587,6 +599,7 @@ mod tests {
                 "",
                 types::None::new(Position::fake()),
                 public,
+                false,
                 Position::fake(),
             )
         };
