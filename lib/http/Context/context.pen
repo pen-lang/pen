@@ -1,9 +1,9 @@
-import 'Context'ffiHeaders { FfiHeaders }
+import 'Context'ffiHeaderMap { FfiHeaderMap }
 import 'Request { Request }
 import 'Response { Response }
 
-import foreign _pen_http_client_send \(string, string, FfiHeaders, string) ffiResponseResult
-import foreign _pen_http_server_serve \(string, \(string, string, FfiHeaders, string) ffiResponse) string
+import foreign _pen_http_client_send \(string, string, FfiHeaderMap, string) ffiResponseResult
+import foreign _pen_http_server_serve \(string, \(string, string, FfiHeaderMap, string) ffiResponse) string
 
 type Context {
   inner Inner
@@ -31,7 +31,7 @@ New = \() Context {
         r = _pen_http_client_send(
           r.Method,
           r.Uri,
-          ffiHeaders'New(r.Headers),
+          ffiHeaderMap'New(r.Headers),
           r.Body,
         )
 
@@ -46,12 +46,12 @@ New = \() Context {
       Serve: \(address string, callback \(Request) Response) none | error {
         e = _pen_http_server_serve(
           address,
-          \(m string, u string, hs FfiHeaders, b string) ffiResponse {
+          \(m string, u string, hs FfiHeaderMap, b string) ffiResponse {
             r = callback(
               Request{
                 Method: m,
                 Uri: u,
-                Headers: ffiHeaders'ToMap(hs),
+                Headers: ffiHeaderMap'ToMap(hs),
                 Body: b,
               },
             )
