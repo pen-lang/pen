@@ -33,7 +33,7 @@ async fn _pen_http_client_send(
 async fn send_request(
     method: ffi::ByteString,
     uri: ffi::ByteString,
-    headers: ffi::Arc<HeaderMap>,
+    _headers: ffi::Arc<HeaderMap>,
     body: ffi::ByteString,
 ) -> Result<ffi::Arc<Response>, Box<dyn Error>> {
     let response = hyper::Client::new()
