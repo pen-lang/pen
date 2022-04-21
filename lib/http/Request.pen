@@ -2,5 +2,6 @@
 type Request {
   Method string
   Uri string
+  Headers {string: string}
   Body string
 }
