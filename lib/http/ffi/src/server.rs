@@ -1,4 +1,4 @@
-use crate::header_map::HeaderMap;
+use crate::{header_map::HeaderMap, response::Response};
 use core::str;
 use std::error::Error;
 
@@ -45,9 +45,10 @@ async fn serve(
                                     ffi::ByteString,
                                 ) -> ffi::Arc<Response>,
                                 callback,
-                                method,
-                                uri,
-                                body.to_vec()
+                                method.into(),
+                                uri.into(),
+                                HeaderMap::new(),
+                                body.to_vec().into()
                             )
                             .await;
 

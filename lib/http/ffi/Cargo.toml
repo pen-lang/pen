@@ -1,5 +1,5 @@
 [package]
-name = "http"
+name = "pen-http"
 version = "0.1.0"
 publish = false
 edition = "2021"

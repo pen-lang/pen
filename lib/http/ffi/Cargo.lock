@@ -138,15 +138,6 @@ dependencies = [
 
 [[package]]
 name = "http"
-version = "0.1.0"
-dependencies = [
- "hyper",
- "pen-ffi",
- "tokio",
-]
-
-[[package]]
-name = "http"
 version = "0.2.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "31f4c6746584866f0feabcc69893c5b51beef3831656a968ed7ae254cdc4fd03"
@@ -163,7 +154,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1ff4f84919677303da5f147645dbea6b1881f368d03ac84e1dc09031ebd7b2c6"
 dependencies = [
  "bytes",
- "http 0.2.6",
+ "http",
  "pin-project-lite",
 ]
 
@@ -189,7 +180,7 @@ dependencies = [
  "futures-channel",
  "futures-core",
  "futures-util",
- "http 0.2.6",
+ "http",
  "http-body",
  "httparse",
  "httpdate",
@@ -335,6 +326,15 @@ dependencies = [
  "convert_case",
  "quote",
  "syn",
+]
+
+[[package]]
+name = "pen-http"
+version = "0.1.0"
+dependencies = [
+ "hyper",
+ "pen-ffi",
+ "tokio",
 ]
 
 [[package]]
