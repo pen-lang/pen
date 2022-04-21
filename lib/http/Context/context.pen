@@ -1,13 +1,8 @@
 import 'Request { Request }
 import 'Response { Response }
 
-import foreign _pen_http_client_send \(Request) FfiResponse
-import foreign _pen_http_server_serve \(string, \(Request) Response) string
-
-type FfiResponse {
-  response Response
-  error string
-}
+import foreign _pen_http_client_send \(string, string, ffiHeaders, string) ffiResponseResult
+import foreign _pen_http_server_serve \(string, \(string, string, ffiHeaders, string) ffiResponse) string
 
 type Context {
   inner Inner
@@ -18,21 +13,59 @@ type Inner {
   Serve \(string, \(Request) Response) none | error
 }
 
+type ffiHeaders {
+  headers any
+}
+
+type ffiResponse {
+  status number
+  body string
+}
+
+type ffiResponseResult {
+  response ffiResponse
+  error string
+}
+
 New = \() Context {
   Context{
     inner: Inner{
       Send: \(r Request) Response | error {
-        r = _pen_http_client_send(r)
+        r = _pen_http_client_send(
+          r.Method,
+          r.Uri,
+          ffiHeaders{headers: r.Headers},
+          r.Body,
+        )
 
         if r.error == "" {
-          r.response
+          r = r.response
+
+          Response{Status: r.status, Body: r.body}
         } else {
           error(r.error)
         }
       },
       Serve: \(address string, callback \(Request) Response) none | error {
-        e = _pen_http_server_serve(address, callback)
+        e = _pen_http_server_serve(
+          address,
+          \(m string, u string, hs ffiHeaders, b string) ffiResponse {
+            r = callback(
+              Request{
+                Method: m,
+                Uri: u,
+                Headers: if hs = hs.headers as {string: string} {
+                  hs
+                } else {
+                  {string: string}
+                },
+                Body: b,
+              },
+            )
 
+            ffiResponse{status: r.Status, body: r.Body}
+          },
+        )
         if e == "" { none } else { error(e) }
       },
     },
