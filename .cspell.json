@@ -22,6 +22,7 @@
     "deserialization",
     "displayer",
     "dyndep",
+    "ffi",
     "foo",
     "getopts",
     "hamt",
