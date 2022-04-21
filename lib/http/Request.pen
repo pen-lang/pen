@@ -5,11 +5,3 @@ type Request {
   Headers {string: string}
   Body string
 }
-
-foreign "c" _pen_http_header_value = \(headers {string: string}, name string) string {
-  if h = headers[name] {
-    h
-  } else {
-    ""
-  }
-}

@@ -1,0 +1,23 @@
+type FfiHeaders {
+  headers any
+}
+
+New = \(hs {string: string}) FfiHeaders {
+  FfiHeaders{headers: hs}
+}
+
+ToMap = \(h FfiHeaders) {string: string} {
+  if hs = h.headers as {string: string} {
+    hs
+  } else {
+    {string: string}
+  }
+}
+
+foreign "c" _pen_http_header_value = \(headers {string: string}, name string) string {
+  if h = headers[name] {
+    h
+  } else {
+    ""
+  }
+}
