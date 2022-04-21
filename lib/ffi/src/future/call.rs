@@ -1,7 +1,10 @@
 // Note that this macro should not be called for non-thunk closures.
 #[macro_export]
 macro_rules! call {
-    (fn($($argument_type:ty),*) -> $result_type:ty, $closure:expr, $($argument:expr),* $(,)?) => {
+    (fn($($argument_type:ty),* $(,)?) -> $result_type:ty, $closure:expr) => {
+        call!(fn($($argument_type),*) -> $result_type, $closure,)
+    };
+    (fn($($argument_type:ty),* $(,)?) -> $result_type:ty, $closure:expr, $($argument:expr),* $(,)?) => {
         async {
             use core::{intrinsics::transmute, task::Poll};
             use $crate::future::__private::poll_fn;
