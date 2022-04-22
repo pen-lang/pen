@@ -33,14 +33,28 @@ async fn _pen_http_client_send(
 async fn send_request(
     method: ffi::ByteString,
     uri: ffi::ByteString,
-    _headers: ffi::Arc<HeaderMap>,
+    headers: ffi::Arc<HeaderMap>,
     body: ffi::ByteString,
 ) -> Result<ffi::Arc<Response>, Box<dyn Error>> {
+    let mut builder = Some(
+        hyper::Request::builder()
+            .method(hyper::Method::from_bytes(method.as_slice())?)
+            .uri(uri.as_slice()),
+    );
+
+    HeaderMap::iterate(&headers, |key: ffi::ByteString, value: ffi::ByteString| {
+        builder = Some(
+            builder
+                .take()
+                .unwrap()
+                .header(key.as_slice(), value.as_slice()),
+        );
+    });
+
     let response = hyper::Client::new()
         .request(
-            hyper::Request::builder()
-                .method(hyper::Method::from_bytes(method.as_slice())?)
-                .uri(uri.as_slice())
+            builder
+                .unwrap()
                 .body(hyper::Body::from(body.as_slice().to_vec()))?,
         )
         .await?;

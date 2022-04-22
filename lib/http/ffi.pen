@@ -1,0 +1,25 @@
+type firstRest {
+  ok boolean
+  first any
+  rest [any]
+}
+
+type box {
+  value any
+}
+
+foreign "c" _pen_http_first_rest = \(xs [any]) firstRest {
+  if [x, ...xs] = xs {
+    firstRest{ok: true, first: x(), rest: xs}
+  } else {
+    firstRest{ok: false, first: none, rest: [any]}
+  }
+}
+
+foreign "c" _pen_http_to_string = \(x box) string {
+  if x = x.value as string {
+    x
+  } else {
+    ""
+  }
+}
