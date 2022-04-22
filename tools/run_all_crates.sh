@@ -6,24 +6,22 @@ if [ $# -eq 0 ]; then
   exit 1
 fi
 
-root_directory=$(dirname $0)/..
+package_ffi_directories() {
+  for file in $(find packages -name Cargo.lock); do
+    dirname $file
+  done
+}
 
-for directory in \
-  . \
-  packages/core/ffi \
-  packages/http/ffi \
-  packages/json/ffi \
-  packages/os/ffi/application \
-  packages/os/ffi/library \
-  packages/os-sync/ffi \
-  packages/prelude/ffi; do
+cd $(dirname $0)/..
+
+for directory in . $(package_ffi_directories); do
   (
-    cd $root_directory/$directory
+    cd $directory
     "$@"
   )
 done
 
 (
-  cd $root_directory/cmd/test
+  cd cmd/test
   PEN_ARCHIVE_FILES= "$@"
 )
