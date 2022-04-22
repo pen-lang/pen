@@ -7,6 +7,7 @@ pub const NINJA_DYNAMIC_DEPENDENCY_FILE_EXTENSION: &str = "ninja";
 
 pub const LANGUAGE_ROOT_SCHEME: &str = "pen";
 pub const LANGUAGE_ROOT_ENVIRONMENT_VARIABLE: &str = "PEN_ROOT";
+pub const PACKAGES_DIRECTORY: &str = "lib";
 
 pub const DEFAULT_SYSTEM_PACKAGE_NAME: &str = "Os";
 pub const DEFAULT_SYSTEM_PACKAGE_URL: &str = "pen:///os";
