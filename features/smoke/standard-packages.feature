@@ -2,7 +2,7 @@ Feature: Standard packages
   Scenario Outline: Build and test standard packages
     Given I run the following script:
     """
-    cp -r $PEN_ROOT/lib .
+    cp -r $PEN_ROOT/packages .
     """
     When I cd to "packages/<package>"
     Then I successfully run `pen format --check`
