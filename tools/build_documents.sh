@@ -21,7 +21,7 @@ tools/build.sh
 export PATH=$PWD/target/release:$PATH
 
 (
-  cd lib/core
+  cd packages/core
   pen document \
     --name Core \
     --url pen:///core \
@@ -29,7 +29,7 @@ export PATH=$PWD/target/release:$PATH
 ) >$document_directory/core.md
 
 (
-  cd lib/flag
+  cd packages/flag
   pen document \
     --name Flag \
     --url pen:///flag \
@@ -37,7 +37,7 @@ export PATH=$PWD/target/release:$PATH
 ) >$document_directory/flag.md
 
 (
-  cd lib/http
+  cd packages/http
   pen document \
     --name Http \
     --url pen:///http \
@@ -45,7 +45,7 @@ export PATH=$PWD/target/release:$PATH
 ) >$document_directory/http.md
 
 (
-  cd lib/json
+  cd packages/json
   pen document \
     --name Json \
     --url pen:///json \
@@ -53,7 +53,7 @@ export PATH=$PWD/target/release:$PATH
 ) >$document_directory/json.md
 
 (
-  cd lib/os
+  cd packages/os
   pen document \
     --name Os \
     --url pen:///os \
@@ -61,7 +61,7 @@ export PATH=$PWD/target/release:$PATH
 ) >$document_directory/os.md
 
 (
-  cd lib/test
+  cd packages/test
   pen document \
     --name Test \
     --url pen:///test \

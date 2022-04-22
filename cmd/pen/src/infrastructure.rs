@@ -2,6 +2,7 @@ use crate::file_path_configuration::{
     BIT_CODE_FILE_EXTENSION, BUILD_CONFIGURATION_FILENAME, DEPENDENCY_FILE_EXTENSION,
     FFI_BUILD_SCRIPT_BASENAME, FILE_PATH_CONFIGURATION, LANGUAGE_ROOT_ENVIRONMENT_VARIABLE,
     LANGUAGE_ROOT_SCHEME, LINK_SCRIPT_BASENAME, NINJA_DYNAMIC_DEPENDENCY_FILE_EXTENSION,
+    PACKAGES_DIRECTORY,
 };
 use std::{error::Error, path::Path, sync::Arc};
 
@@ -29,6 +30,7 @@ pub fn create(
             file_path_converter.clone(),
             LANGUAGE_ROOT_SCHEME,
             LANGUAGE_ROOT_ENVIRONMENT_VARIABLE,
+            PACKAGES_DIRECTORY,
         )),
         file_system: file_system.clone(),
         file_path_displayer: Arc::new(infra::FilePathDisplayer::new(

@@ -10,13 +10,13 @@ root_directory=$(dirname $0)/..
 
 for directory in \
   . \
-  lib/core/ffi \
-  lib/http/ffi \
-  lib/json/ffi \
-  lib/os/ffi/application \
-  lib/os/ffi/library \
-  lib/os-sync/ffi \
-  lib/prelude/ffi; do
+  packages/core/ffi \
+  packages/http/ffi \
+  packages/json/ffi \
+  packages/os/ffi/application \
+  packages/os/ffi/library \
+  packages/os-sync/ffi \
+  packages/prelude/ffi; do
   (
     cd $root_directory/$directory
     "$@"
