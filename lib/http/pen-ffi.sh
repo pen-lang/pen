@@ -19,4 +19,4 @@ fi
 cd $(dirname $0)/ffi
 cargo build --release --quiet --target $target
 # spell-checker: disable-next-line
-cp target/$target/release/libhttp.a $1
+cp target/$target/release/libpen_http.a $1

@@ -1,4 +1,4 @@
-use crate::{request::Request, response::Response};
+use crate::{header_map::HeaderMap, response::Response};
 use std::error::Error;
 
 #[ffi::any]
@@ -10,8 +10,13 @@ struct ResponseResult {
 }
 
 #[ffi::bindgen]
-async fn _pen_http_client_send(request: ffi::Arc<Request>) -> ffi::Arc<ResponseResult> {
-    match send_request(request).await {
+async fn _pen_http_client_send(
+    method: ffi::ByteString,
+    uri: ffi::ByteString,
+    headers: ffi::Arc<HeaderMap>,
+    body: ffi::ByteString,
+) -> ffi::Arc<ResponseResult> {
+    match send_request(method, uri, headers, body).await {
         Ok(response) => ResponseResult {
             response,
             error: ffi::ByteString::default(),
@@ -25,13 +30,32 @@ async fn _pen_http_client_send(request: ffi::Arc<Request>) -> ffi::Arc<ResponseR
     }
 }
 
-async fn send_request(request: ffi::Arc<Request>) -> Result<ffi::Arc<Response>, Box<dyn Error>> {
+async fn send_request(
+    method: ffi::ByteString,
+    uri: ffi::ByteString,
+    headers: ffi::Arc<HeaderMap>,
+    body: ffi::ByteString,
+) -> Result<ffi::Arc<Response>, Box<dyn Error>> {
+    let mut builder = Some(
+        hyper::Request::builder()
+            .method(hyper::Method::from_bytes(method.as_slice())?)
+            .uri(uri.as_slice()),
+    );
+
+    HeaderMap::iterate(&headers, |key, value| {
+        builder = Some(
+            builder
+                .take()
+                .unwrap()
+                .header(key.as_slice(), value.as_slice()),
+        );
+    });
+
     let response = hyper::Client::new()
         .request(
-            hyper::Request::builder()
-                .method(hyper::Method::from_bytes(request.method().as_slice())?)
-                .uri(request.uri().as_slice())
-                .body(hyper::Body::from(request.body().as_slice().to_vec()))?,
+            builder
+                .unwrap()
+                .body(hyper::Body::from(body.as_slice().to_vec()))?,
         )
         .await?;
 

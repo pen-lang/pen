@@ -1,4 +1,4 @@
-use crate::{request::Request, response::Response};
+use crate::{header_map::HeaderMap, response::Response};
 use core::str;
 use std::error::Error;
 
@@ -29,12 +29,26 @@ async fn serve(
                         async {
                             let method = request.method().to_string();
                             let uri = request.uri().to_string();
+                            let mut headers = HeaderMap::new();
+
+                            for (key, value) in request.headers() {
+                                headers = HeaderMap::set(&headers, key.as_str(), value.as_bytes());
+                            }
+
                             let body = hyper::body::to_bytes(request.into_body()).await?;
 
                             let raw = ffi::call!(
-                                fn(ffi::Arc<Request>) -> ffi::Arc<Response>,
+                                fn(
+                                    ffi::ByteString,
+                                    ffi::ByteString,
+                                    ffi::Arc<HeaderMap>,
+                                    ffi::ByteString,
+                                ) -> ffi::Arc<Response>,
                                 callback,
-                                Request::new(method, uri, body.to_vec()).into()
+                                method.into(),
+                                uri.into(),
+                                HeaderMap::new(),
+                                body.to_vec().into()
                             )
                             .await;
 

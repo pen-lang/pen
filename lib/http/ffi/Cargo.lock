@@ -138,15 +138,6 @@ dependencies = [
 
 [[package]]
 name = "http"
-version = "0.1.0"
-dependencies = [
- "hyper",
- "pen-ffi",
- "tokio",
-]
-
-[[package]]
-name = "http"
 version = "0.2.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "31f4c6746584866f0feabcc69893c5b51beef3831656a968ed7ae254cdc4fd03"
@@ -163,7 +154,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1ff4f84919677303da5f147645dbea6b1881f368d03ac84e1dc09031ebd7b2c6"
 dependencies = [
  "bytes",
- "http 0.2.6",
+ "http",
  "pin-project-lite",
 ]
 
@@ -189,7 +180,7 @@ dependencies = [
  "futures-channel",
  "futures-core",
  "futures-util",
- "http 0.2.6",
+ "http",
  "http-body",
  "httparse",
  "httpdate",
@@ -216,9 +207,9 @@ checksum = "e2abad23fbc42b3700f2f279844dc832adb2b2eb069b2df918f455c4e18cc646"
 
 [[package]]
 name = "libc"
-version = "0.2.123"
+version = "0.2.124"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cb691a747a7ab48abc15c5b42066eaafde10dc427e3b6ee2a1cf43db04c763bd"
+checksum = "21a41fed9d98f27ab1c6d161da622a4fa35e8a54a8adc24bbf3ddd0ef70b0e50"
 
 [[package]]
 name = "lock_api"
@@ -318,9 +309,9 @@ dependencies = [
 
 [[package]]
 name = "pen-ffi"
-version = "0.3.53"
+version = "0.3.54"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "15f7bf009315b7c608c3e02225228bce9b79ffcf387d74bdf7a592e5982e6729"
+checksum = "2c087b8a56a238a13558badcf4712b5df059ff9f0e0bc1a0d7ac96fd4094f19f"
 dependencies = [
  "futures",
  "pen-ffi-macro",
@@ -335,6 +326,15 @@ dependencies = [
  "convert_case",
  "quote",
  "syn",
+]
+
+[[package]]
+name = "pen-http"
+version = "0.1.0"
+dependencies = [
+ "hyper",
+ "pen-ffi",
+ "tokio",
 ]
 
 [[package]]

@@ -37,6 +37,7 @@ run = \(ctx context) none | error {
     Request{
       Method: args.method,
       Uri: args.uri,
+      Headers: {string: string},
       Body: args.body,
     },
   )?

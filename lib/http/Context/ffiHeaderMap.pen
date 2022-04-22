@@ -1,0 +1,47 @@
+type FfiHeaderMap {
+  headers any
+}
+
+New = \(hs {string: string}) FfiHeaderMap {
+  FfiHeaderMap{headers: hs}
+}
+
+ToMap = \(h FfiHeaderMap) {string: string} {
+  if hs = h.headers as {string: string} {
+    hs
+  } else {
+    {string: string}
+  }
+}
+
+foreign "c" _pen_http_header_map_get = \(m FfiHeaderMap, key string) string {
+  if hs = m.headers as {string: string} {
+    if h = hs[key] {
+      h
+    } else {
+      ""
+    }
+  } else {
+    ""
+  }
+}
+
+foreign "c" _pen_http_header_map_create = \() FfiHeaderMap {
+  New({string: string})
+}
+
+foreign "c" _pen_http_header_map_set = \(m FfiHeaderMap, name string, value string) FfiHeaderMap {
+  if hs = m.headers as {string: string} {
+    New({string: string ...hs, name: value})
+  } else {
+    New({string: string})
+  }
+}
+
+foreign "c" _pen_http_header_map_keys = \(m FfiHeaderMap) [any] {
+  if hs = m.headers as {string: string} {
+    [any k for k, _ in hs]
+  } else {
+    [any]
+  }
+}
