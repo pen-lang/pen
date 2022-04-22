@@ -16,7 +16,7 @@ members = [
   "lib/mir-fmm",
   "lib/parse",
   "lib/position",
-  "lib/test-info",
+  "lib/test",
 ]
 exclude = ["cmd/test", "examples", "packages", "tmp"]
 

@@ -43,7 +43,7 @@ dependencies = [
  "regex",
  "serde",
  "serde_json",
- "test-info",
+ "test",
  "url",
 ]
 
@@ -431,7 +431,7 @@ dependencies = [
  "once_cell",
  "position",
  "pretty_assertions",
- "test-info",
+ "test",
 ]
 
 [[package]]
@@ -474,7 +474,7 @@ dependencies = [
  "serde",
  "serde_json",
  "termcolor",
- "test-info",
+ "test",
  "url",
  "which",
 ]
@@ -976,7 +976,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "test-info"
+name = "test"
 version = "0.1.0"
 dependencies = [
  "position",

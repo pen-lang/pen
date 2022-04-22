@@ -10,7 +10,7 @@ hir = { path = "../hir" }
 interface = { path = "../interface" }
 mir = { path = "../mir" }
 position = { path = "../position" }
-test-info = { path = "../test-info" }
+test = { path = "../test" }
 
 [dev-dependencies]
 insta = "1"

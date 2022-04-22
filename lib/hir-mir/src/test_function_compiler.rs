@@ -15,7 +15,7 @@ pub fn compile(
     context: &CompileContext,
     module: &Module,
     configuration: &TestModuleConfiguration,
-) -> Result<(Module, test_info::Module), CompileError> {
+) -> Result<(Module, test::Module), CompileError> {
     let position = module.position();
 
     let definitions = module
@@ -111,12 +111,12 @@ pub fn compile(
                 .collect(),
             position.clone(),
         ),
-        test_info::Module::new(
+        test::Module::new(
             module.position().path(),
             definitions
                 .iter()
                 .map(|definition| {
-                    test_info::Function::new(
+                    test::Function::new(
                         definition.original_name(),
                         compile_foreign_name(definition.name(), configuration),
                         definition.position().clone(),

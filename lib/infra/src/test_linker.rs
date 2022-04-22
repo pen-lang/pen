@@ -26,7 +26,7 @@ impl TestLinker {
 
     fn format_main_rs(
         &self,
-        package_test_information: &test_info::Package,
+        package_test_information: &test::Package,
     ) -> Result<String, Box<dyn Error>> {
         Ok(format!(
             r#"
@@ -61,7 +61,7 @@ impl TestLinker {
 
     fn format_tests(
         &self,
-        package_test_information: &test_info::Package,
+        package_test_information: &test::Package,
     ) -> Result<String, Box<dyn Error>> {
         Ok(package_test_information
             .modules()
@@ -106,7 +106,7 @@ impl TestLinker {
 impl app::infra::TestLinker for TestLinker {
     fn link(
         &self,
-        package_test_information: &test_info::Package,
+        package_test_information: &test::Package,
         archive_files: &[app::infra::FilePath],
         test_file: &app::infra::FilePath,
         test_directory: &app::infra::FilePath,

@@ -11,7 +11,7 @@ pub fn compile(
 ) -> Result<(), Box<dyn Error>> {
     infrastructure.file_system.write(
         package_test_information_file,
-        &package_test_information_serializer::serialize(&test_info::Package::new(
+        &package_test_information_serializer::serialize(&test::Package::new(
             module_test_information_files
                 .iter()
                 .map(|file| {

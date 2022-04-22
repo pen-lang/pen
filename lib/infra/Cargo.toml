@@ -11,6 +11,6 @@ regex = "1"
 serde = { version = "1", features = ["derive", "rc"] }
 serde_json = "1"
 termcolor = "1"
-test-info = { path = "../test-info" }
+test = { path = "../test" }
 url = "2"
 which = "4"
