@@ -42,7 +42,7 @@ async fn send_request(
             .uri(uri.as_slice()),
     );
 
-    HeaderMap::iterate(&headers, |key: ffi::ByteString, value: ffi::ByteString| {
+    HeaderMap::iterate(&headers, |key, value| {
         builder = Some(
             builder
                 .take()
