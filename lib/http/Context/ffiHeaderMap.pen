@@ -37,3 +37,11 @@ foreign "c" _pen_http_header_map_set = \(m FfiHeaderMap, name string, value stri
     New({string: string})
   }
 }
+
+foreign "c" _pen_http_header_map_keys = \(m FfiHeaderMap) [any] {
+  if hs = m.headers as {string: string} {
+    [any k for k, _ in hs]
+  } else {
+    [any]
+  }
+}
