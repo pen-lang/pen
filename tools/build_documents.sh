@@ -4,14 +4,14 @@ set -ex
 
 document_directory=doc/src/references/standard-packages
 
-os_package_description() {
-  echo This package provides an interface for operating systems.
-}
-
-os_sync_package_description() {
-  os_package_description
-
-  echo Functions in this package are synchronous differently from an '`Os`' package.
+build_package_document() {
+  (
+    cd packages/$1
+    pen document \
+      --name $2 \
+      --url pen:///$1 \
+      --description "$3"
+  ) >$document_directory/$1.md
 }
 
 cd $(dirname $0)/..
@@ -20,59 +20,39 @@ tools/build.sh
 
 export PATH=$PWD/target/release:$PATH
 
-(
-  cd packages/core
-  pen document \
-    --name Core \
-    --url pen:///core \
-    --description "This package provides common algorithms and data structures."
-) >$document_directory/core.md
+build_package_document \
+  core \
+  Core \
+  "This package provides common algorithms and data structures."
 
-(
-  cd packages/flag
-  pen document \
-    --name Flag \
-    --url pen:///flag \
-    --description "This package provides command-line flag parsing."
-) >$document_directory/flag.md
+build_package_document \
+  flag \
+  Flag \
+  "This package provides command-line flag parsing."
 
-(
-  cd packages/http
-  pen document \
-    --name Http \
-    --url pen:///http \
-    --description "This package provides HTTP client and server."
-) >$document_directory/http.md
+build_package_document \
+  http \
+  Http \
+  "This package provides HTTP client and server."
 
-(
-  cd packages/json
-  pen document \
-    --name Json \
-    --url pen:///json \
-    --description "This package provides a JSON parser."
-) >$document_directory/json.md
+build_package_document \
+  json \
+  Json \
+  "This package provides a JSON parser."
 
-(
-  cd packages/os
-  pen document \
-    --name Os \
-    --url pen:///os \
-    --description "$(os_package_description)"
-) >$document_directory/os.md
+build_package_document \
+  os \
+  Os \
+  "This package provides an interface for operating systems."
 
-(
-  cd packages/test
-  pen document \
-    --name Test \
-    --url pen:///test \
-    --description "This package provides test utilities."
-) >$document_directory/test.md
+build_package_document \
+  test \
+  Test \
+  "This package provides test utilities."
 
 go run github.com/raviqqe/gherkin2markdown features doc/src/examples
 
 curl -fsSL https://pen-lang.s3.us-west-1.amazonaws.com/icon.svg >doc/src/favicon.svg
 
-(
-  cd doc
-  mdbook build
-)
+cd doc
+mdbook build
