@@ -4,7 +4,7 @@ Feature: Standard packages
     """
     cp -r $PEN_ROOT/lib .
     """
-    When I cd to "lib/<package>"
+    When I cd to "packages/<package>"
     Then I successfully run `pen format --check`
     And I successfully run `pen build`
     And I successfully run `pen_test_on_linux.sh`
