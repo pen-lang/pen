@@ -43,10 +43,23 @@ impl HeaderMap {
         unsafe { _pen_http_header_map_set(this.clone(), key.into(), value.into()) }
     }
 
-    pub fn iterate(
+    pub async fn iterate(
         this: &ffi::Arc<Self>,
         mut callback: impl FnMut(ffi::ByteString, ffi::ByteString),
     ) {
+        Self::try_iterate(this, |key, value| -> Result<(), ()> {
+            callback(key, value);
+
+            Ok(())
+        })
+        .await
+        .unwrap();
+    }
+
+    pub async fn try_iterate<E>(
+        this: &ffi::Arc<Self>,
+        mut callback: impl FnMut(ffi::ByteString, ffi::ByteString) -> Result<(), E>,
+    ) -> Result<(), E> {
         let mut list = unsafe { _pen_http_header_map_keys(this.clone()) };
 
         loop {
@@ -57,9 +70,11 @@ impl HeaderMap {
             }
 
             let key = unsafe { _pen_http_to_string(first_rest.first.clone().into()) };
-            callback(key.clone(), Self::get(this, key));
+            callback(key.clone(), Self::get(this, key))?;
 
             list = first_rest.rest.clone();
         }
+
+        Ok(())
     }
 }
