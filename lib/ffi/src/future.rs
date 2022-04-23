@@ -1,4 +1,5 @@
 mod call;
+mod call_function;
 mod from_closure;
 mod from_function;
 mod to_closure;

@@ -1,4 +1,4 @@
-use crate::{cps, Any, Arc, Boolean, BoxAny, ByteString, Closure};
+use crate::{call_function, cps, Any, Arc, Boolean, BoxAny, ByteString, Closure};
 
 #[pen_ffi_macro::any(crate = "crate")]
 #[repr(C)]
@@ -44,13 +44,17 @@ impl List {
         mut callback: impl FnMut(Any) -> Result<(), E>,
     ) -> Result<(), E> {
         loop {
-            let first_rest = unsafe { _pen_ffi_list_first_rest(list.clone()) };
+            let first_rest = call_function!(
+                fn(Arc<List>) -> Arc<FirstRest>,
+                _pen_ffi_list_first_rest,
+                list.clone(),
+            )
+            .await;
 
             if !bool::from(first_rest.ok) {
                 break;
             }
 
-            let key = unsafe { _pen_ffi_any_to_string(first_rest.first.clone().into()) };
             callback(first_rest.first.clone())?;
 
             list = first_rest.rest.clone();
