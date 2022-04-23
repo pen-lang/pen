@@ -1,4 +1,4 @@
-use crate::{call_function, cps, Any, Arc, Boolean, Closure};
+use crate::{call_function, import, Any, Arc, Boolean, Closure};
 
 #[pen_ffi_macro::any(crate = "crate")]
 #[repr(C)]
@@ -15,11 +15,10 @@ struct FirstRest {
 }
 
 extern "C" {
-    fn _pen_ffi_list_first_rest(
-        stack: &mut cps::AsyncStack<Arc<FirstRest>>,
-        continuation: cps::ContinuationFunction<Arc<FirstRest>, Arc<FirstRest>>,
-        list: Arc<List>,
-    ) -> cps::Result;
+    import!(
+        _pen_ffi_list_first_rest,
+        fn(list: Arc<List>) -> Arc<FirstRest>
+    );
 }
 
 impl List {

@@ -1,5 +1,5 @@
 use super::{any::Any, arc::Arc};
-use crate::{call_function, cps, ByteString};
+use crate::{call_function, import, ByteString};
 use core::ops::Deref;
 
 #[repr(C)]
@@ -13,11 +13,7 @@ struct BoxAnyInner {
 }
 
 extern "C" {
-    fn _pen_ffi_any_to_string(
-        stack: &mut cps::AsyncStack<ByteString>,
-        continuation: cps::ContinuationFunction<ByteString, ByteString>,
-        value: BoxAny,
-    ) -> cps::Result;
+    import!(_pen_ffi_any_to_string, fn(any: BoxAny) -> ByteString);
 }
 
 impl BoxAny {
