@@ -7,10 +7,8 @@ macro_rules! call {
     (fn($($argument_type:ty),* $(,)?) -> $result_type:ty, $closure:expr, $($argument:expr),* $(,)?) => {
         async {
             use core::{intrinsics::transmute, task::Poll};
-            use $crate::future::__private::poll_fn;
+            use $crate::future::__private::{INITIAL_STACK_CAPACITY, poll_fn};
             use $crate::{cps, Arc, Closure};
-
-            const INITIAL_STACK_CAPACITY: usize = 64;
 
             type AsyncStack = cps::AsyncStack<$result_type>;
 
@@ -32,12 +30,12 @@ macro_rules! call {
             }
 
             // Move closure and arguments into an initializer function.
-            let mut initialize = Some(|stack: &mut AsyncStack| unsafe {
+            let mut initialize = Some(|stack: &mut AsyncStack| {
                 let closure = $closure;
 
-                transmute::<_, InitialStepFunction<_>>(
-                    closure.entry_function(),
-                )(stack, resolve, closure, $($argument),*);
+                (unsafe {
+                    transmute::<_, InitialStepFunction<_>>(closure.entry_function())
+                })(stack, resolve, closure, $($argument),*);
             });
             let mut trampoline: Option<Trampoline> = None;
             let mut stack = AsyncStack::new(INITIAL_STACK_CAPACITY);
@@ -61,10 +59,6 @@ macro_rules! call {
             .await
         }
     };
-}
-
-pub mod __private {
-    pub use futures::future::poll_fn;
 }
 
 #[cfg(test)]

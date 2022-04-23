@@ -7,21 +7,16 @@ mod utilities;
 use std::time::Duration;
 use tokio::time::sleep;
 
-type ContinuationFunction = ffi::cps::ContinuationFunction<ffi::None, ffi::None>;
-
 #[cfg(not(test))]
 #[link(name = "main")]
 extern "C" {
-    fn _pen_main(
-        stack: &mut ffi::cps::AsyncStack<ffi::None>,
-        continuation: ContinuationFunction,
-    ) -> ffi::cps::Result;
+    ffi::import!(_pen_main, fn() -> ffi::None);
 }
 
 #[cfg(test)]
 extern "C" fn _pen_main(
     _: &mut ffi::cps::AsyncStack<ffi::None>,
-    _: ContinuationFunction,
+    _: ffi::cps::ContinuationFunction<ffi::None, ffi::None>,
 ) -> ffi::cps::Result {
     ffi::cps::Result::new()
 }
