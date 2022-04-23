@@ -62,18 +62,11 @@ impl HeaderMap {
     ) -> Result<(), E> {
         let mut list = unsafe { _pen_http_header_map_keys(this.clone()) };
 
-        loop {
-            let first_rest = unsafe { _pen_http_first_rest(list.clone()) };
+        ffi::List::try_iterate(unsafe { _pen_http_header_map_keys(this.clone()) }, |key| {
+            let key = ffi::BoxAny::from(key.into()).to_string();
 
-            if !bool::from(first_rest.ok) {
-                break;
-            }
-
-            let key = unsafe { _pen_http_to_string(first_rest.first.clone().into()) };
-            callback(key.clone(), Self::get(this, key))?;
-
-            list = first_rest.rest.clone();
-        }
+            callback(key.clone(), Self::get(this, key))
+        })?;
 
         Ok(())
     }
