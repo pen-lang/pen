@@ -39,7 +39,11 @@ New = \() Context {
         if r.error == "" {
           r = r.response
 
-          Response{Status: r.status, Headers: {string: string}, Body: r.body}
+          Response{
+            Status: r.status,
+            Headers: ffiHeaderMap'ToMap(r.headers),
+            Body: r.body,
+          }
         } else {
           error(r.error)
         }
