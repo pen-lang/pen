@@ -26,7 +26,7 @@ impl Response {
         self.status
     }
 
-    pub fn header_map(&self) -> ffi::Arc<HeaderMap> {
+    pub fn headers(&self) -> ffi::Arc<HeaderMap> {
         self.headers.clone()
     }
 

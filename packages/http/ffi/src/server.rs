@@ -66,7 +66,7 @@ async fn serve(
                                     *response.status_mut() = status;
 
                                     HeaderMap::try_iterate(
-                                        &headers,
+                                        &raw.headers(),
                                         |key, value| -> Result<(), BoxError> {
                                             response.headers_mut().insert(
                                                 HeaderName::from_bytes(key.as_slice())?,
