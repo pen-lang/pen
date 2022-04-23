@@ -18,9 +18,7 @@ pub async fn from_function<T>(initial_step: InitialStepFunction<T>) -> T {
             if let Some((step, continue_)) = trampoline {
                 step(stack, continue_);
             } else {
-                unsafe {
-                    initial_step(stack, resolve);
-                }
+                unsafe { initial_step(stack, resolve) };
             }
         });
 

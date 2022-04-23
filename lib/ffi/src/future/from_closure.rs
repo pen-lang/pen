@@ -14,6 +14,7 @@ type InitialStepFunction<T, V> = extern "C" fn(
 const INITIAL_STACK_CAPACITY: usize = 64;
 
 pub async fn from_closure<T, V>(closure: Arc<Closure<T>>) -> V {
+    let mut closure = Some(closure);
     let mut trampoline: Option<(StepFunction<(), V>, ContinuationFunction<(), V>)> = None;
     let mut stack = AsyncStack::new(INITIAL_STACK_CAPACITY);
 
@@ -22,11 +23,11 @@ pub async fn from_closure<T, V>(closure: Arc<Closure<T>>) -> V {
             if let Some((step, continue_)) = trampoline {
                 step(stack, continue_);
             } else {
-                unsafe {
-                    let entry_function =
-                        transmute::<_, InitialStepFunction<V, T>>(closure.entry_function());
-                    entry_function(stack, resolve, closure.clone());
-                }
+                let closure = closure.take().unwrap();
+                let entry_function =
+                    unsafe { transmute::<_, InitialStepFunction<V, T>>(closure.entry_function()) };
+
+                entry_function(stack, resolve, closure);
             }
         });
 
