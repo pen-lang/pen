@@ -43,12 +43,11 @@ async fn send_request(
     );
 
     HeaderMap::iterate(&headers, |key, value| {
-        builder = Some(
-            builder
-                .take()
-                .unwrap()
-                .header(key.as_slice(), value.as_slice()),
-        );
+        builder = builder
+            .take()
+            .unwrap()
+            .header(key.as_slice(), value.as_slice())
+            .into();
     });
 
     let response = hyper::Client::new()

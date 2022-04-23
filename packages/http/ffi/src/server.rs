@@ -55,39 +55,31 @@ async fn serve(
                             )
                             .await;
 
-                            Ok::<_, BoxError>(
-                                if let Ok(status) =
-                                    hyper::StatusCode::from_u16(f64::from(raw.status()) as u16)
-                                {
-                                    let mut response = hyper::Response::new(hyper::Body::from(
-                                        raw.body().as_slice().to_vec(),
-                                    ));
+                            let mut builder = Some(hyper::Response::builder().status(
+                                hyper::StatusCode::from_u16(f64::from(raw.status()) as u16)?,
+                            ));
 
-                                    *response.status_mut() = status;
+                            HeaderMap::try_iterate(
+                                &raw.headers(),
+                                |key, value| -> Result<(), BoxError> {
+                                    builder = builder
+                                        .take()
+                                        .unwrap()
+                                        .header(
+                                            HeaderName::from_bytes(key.as_slice())?,
+                                            HeaderValue::from_bytes(value.as_slice())?,
+                                        )
+                                        .into();
 
-                                    HeaderMap::try_iterate(
-                                        &raw.headers(),
-                                        |key, value| -> Result<(), BoxError> {
-                                            response.headers_mut().insert(
-                                                HeaderName::from_bytes(key.as_slice())?,
-                                                HeaderValue::from_bytes(value.as_slice())?,
-                                            );
-
-                                            Ok(())
-                                        },
-                                    )?;
-
-                                    response
-                                } else {
-                                    let mut response = hyper::Response::new(hyper::Body::from(
-                                        "Invalid status code",
-                                    ));
-
-                                    *response.status_mut() =
-                                        hyper::StatusCode::INTERNAL_SERVER_ERROR;
-
-                                    response
+                                    Ok(())
                                 },
+                            )?;
+
+                            Ok::<_, BoxError>(
+                                builder
+                                    .take()
+                                    .unwrap()
+                                    .body(hyper::Body::from(raw.body().as_slice().to_vec()))?,
                             )
                         }
                     },
