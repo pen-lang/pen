@@ -1,6 +1,9 @@
 use crate::{header_map::HeaderMap, response::Response};
 use core::str;
+use hyper::header::{HeaderName, HeaderValue};
 use std::error::Error;
+
+type BoxError = Box<dyn Error + Send + Sync + 'static>;
 
 #[ffi::bindgen]
 async fn _pen_http_server_serve(
@@ -22,7 +25,7 @@ async fn serve(
             let callback = callback.clone();
 
             async {
-                Ok::<_, hyper::Error>(hyper::service::service_fn(
+                Ok::<_, BoxError>(hyper::service::service_fn(
                     move |request: hyper::Request<hyper::Body>| {
                         let callback = callback.clone();
 
@@ -52,21 +55,37 @@ async fn serve(
                             )
                             .await;
 
-                            Ok::<_, hyper::Error>(
+                            Ok::<_, BoxError>(
                                 if let Ok(status) =
                                     hyper::StatusCode::from_u16(f64::from(raw.status()) as u16)
                                 {
                                     let mut response = hyper::Response::new(hyper::Body::from(
                                         raw.body().as_slice().to_vec(),
                                     ));
+
                                     *response.status_mut() = status;
+
+                                    HeaderMap::try_iterate(
+                                        &headers,
+                                        |key, value| -> Result<(), BoxError> {
+                                            response.headers_mut().insert(
+                                                HeaderName::from_bytes(key.as_slice())?,
+                                                HeaderValue::from_bytes(value.as_slice())?,
+                                            );
+
+                                            Ok(())
+                                        },
+                                    )?;
+
                                     response
                                 } else {
                                     let mut response = hyper::Response::new(hyper::Body::from(
                                         "Invalid status code",
                                     ));
+
                                     *response.status_mut() =
                                         hyper::StatusCode::INTERNAL_SERVER_ERROR;
+
                                     response
                                 },
                             )
