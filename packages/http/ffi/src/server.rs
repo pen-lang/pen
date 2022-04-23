@@ -40,7 +40,7 @@ async fn serve(
 
                             let body = hyper::body::to_bytes(request.into_body()).await?;
 
-                            let raw = ffi::call!(
+                            let response = ffi::call!(
                                 fn(
                                     ffi::ByteString,
                                     ffi::ByteString,
@@ -56,11 +56,11 @@ async fn serve(
                             .await;
 
                             let mut builder = Some(hyper::Response::builder().status(
-                                hyper::StatusCode::from_u16(f64::from(raw.status()) as u16)?,
+                                hyper::StatusCode::from_u16(f64::from(response.status()) as u16)?,
                             ));
 
                             HeaderMap::try_iterate(
-                                &raw.headers(),
+                                &response.headers(),
                                 |key, value| -> Result<(), BoxError> {
                                     builder = builder
                                         .take()
@@ -80,7 +80,7 @@ async fn serve(
                                 builder
                                     .take()
                                     .unwrap()
-                                    .body(hyper::Body::from(raw.body().as_slice().to_vec()))?,
+                                    .body(hyper::Body::from(response.body().as_slice().to_vec()))?,
                             )
                         }
                     },
