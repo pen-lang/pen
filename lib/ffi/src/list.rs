@@ -1,4 +1,4 @@
-use crate::{call_function, cps, Any, Arc, Boolean, BoxAny, ByteString, Closure};
+use crate::{call_function, cps, Any, Arc, Boolean, Closure};
 
 #[pen_ffi_macro::any(crate = "crate")]
 #[repr(C)]
@@ -19,12 +19,6 @@ extern "C" {
         stack: &mut cps::AsyncStack<Arc<FirstRest>>,
         continuation: cps::ContinuationFunction<Arc<FirstRest>, Arc<FirstRest>>,
         list: Arc<List>,
-    ) -> cps::Result;
-
-    fn _pen_ffi_any_to_string(
-        stack: &mut cps::AsyncStack<ByteString>,
-        continuation: cps::ContinuationFunction<ByteString, ByteString>,
-        value: BoxAny,
     ) -> cps::Result;
 }
 
