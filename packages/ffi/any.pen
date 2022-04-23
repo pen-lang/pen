@@ -1,0 +1,11 @@
+type box {
+  value any
+}
+
+foreign _pen_ffi_any_to_string = \(x box) string {
+  if x = x.value as string {
+    x
+  } else {
+    ""
+  }
+}
