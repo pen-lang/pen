@@ -50,7 +50,7 @@ async fn serve(
                                 callback,
                                 method.into(),
                                 uri.into(),
-                                HeaderMap::new(),
+                                headers,
                                 body.to_vec().into()
                             )
                             .await;
