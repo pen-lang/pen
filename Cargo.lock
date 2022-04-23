@@ -708,7 +708,7 @@ dependencies = [
 
 [[package]]
 name = "pen-ffi"
-version = "0.3.54"
+version = "0.3.55"
 dependencies = [
  "futures",
  "pen-ffi-macro",
