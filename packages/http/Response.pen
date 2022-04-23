@@ -1,5 +1,6 @@
 # An HTTP response
 type Response {
   Status number
+  Headers {string: string}
   Body string
 }

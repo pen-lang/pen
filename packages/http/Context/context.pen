@@ -38,7 +38,7 @@ New = \() Context {
         if r.error == "" {
           r = r.response
 
-          Response{Status: r.status, Body: r.body}
+          Response{Status: r.status, Headers: {string: string}, Body: r.body}
         } else {
           error(r.error)
         }
