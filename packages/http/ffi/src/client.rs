@@ -48,7 +48,8 @@ async fn send_request(
             .unwrap()
             .header(key.as_slice(), value.as_slice())
             .into();
-    });
+    })
+    .await;
 
     let response = hyper::Client::new()
         .request(

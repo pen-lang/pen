@@ -43,7 +43,7 @@ impl HeaderMap {
         unsafe { _pen_http_header_map_set(this.clone(), key.into(), value.into()) }
     }
 
-    pub fn iterate(
+    pub async fn iterate(
         this: &ffi::Arc<Self>,
         mut callback: impl FnMut(ffi::ByteString, ffi::ByteString),
     ) {
@@ -52,10 +52,11 @@ impl HeaderMap {
 
             Ok(())
         })
+        .await
         .unwrap();
     }
 
-    pub fn try_iterate<E>(
+    pub async fn try_iterate<E>(
         this: &ffi::Arc<Self>,
         mut callback: impl FnMut(ffi::ByteString, ffi::ByteString) -> Result<(), E>,
     ) -> Result<(), E> {

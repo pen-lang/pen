@@ -73,7 +73,8 @@ async fn serve(
 
                                     Ok(())
                                 },
-                            )?;
+                            )
+                            .await?;
 
                             Ok::<_, BoxError>(
                                 builder
