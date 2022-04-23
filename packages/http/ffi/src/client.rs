@@ -3,7 +3,7 @@ use std::error::Error;
 
 #[ffi::any]
 #[repr(C)]
-#[derive(Clone, Debug)]
+#[derive(Clone)]
 struct ResponseResult {
     response: ffi::Arc<Response>,
     error: ffi::ByteString,
@@ -43,13 +43,13 @@ async fn send_request(
     );
 
     HeaderMap::iterate(&headers, |key, value| {
-        builder = Some(
-            builder
-                .take()
-                .unwrap()
-                .header(key.as_slice(), value.as_slice()),
-        );
-    });
+        builder = builder
+            .take()
+            .unwrap()
+            .header(key.as_slice(), value.as_slice())
+            .into();
+    })
+    .await;
 
     let response = hyper::Client::new()
         .request(
@@ -58,9 +58,15 @@ async fn send_request(
                 .body(hyper::Body::from(body.as_slice().to_vec()))?,
         )
         .await?;
+    let mut headers = HeaderMap::new();
+
+    for (key, value) in response.headers() {
+        headers = HeaderMap::set(&headers, key.as_str(), value.as_bytes());
+    }
 
     Ok(Response::new(
         response.status().as_u16() as f64,
+        headers,
         hyper::body::to_bytes(response.into_body()).await?.to_vec(),
     )
     .into())

@@ -35,5 +35,9 @@ run = \(ctx context) none | error {
 }
 
 serve = \(r Request) Response {
-  Response{Status: 200, Body: r.Body}
+  Response{
+    Status: 200,
+    Headers: r.Headers,
+    Body: r.Body,
+  }
 }
