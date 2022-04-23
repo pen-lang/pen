@@ -16,6 +16,7 @@ type Inner {
 
 type ffiResponse {
   status number
+  headers FfiHeaderMap
   body string
 }
 
@@ -56,7 +57,11 @@ New = \() Context {
               },
             )
 
-            ffiResponse{status: r.Status, body: r.Body}
+            ffiResponse{
+              status: r.Status,
+              headers: ffiHeaderMap'New(r.Headers),
+              body: r.Body,
+            }
           },
         )
         if e == "" { none } else { error(e) }
