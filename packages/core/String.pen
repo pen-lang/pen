@@ -1,11 +1,31 @@
 # This module provides common string operations.
 
 import foreign "c" _pen_core_string_has_prefix \(string, string) boolean
-import foreign _pen_core_string_join \([string], string) string
+import foreign "c" _pen_core_string_builder_create \() stringBuilder
+import foreign "c" _pen_core_string_builder_append \(stringBuilder, string) stringBuilder
+import foreign "c" _pen_core_string_builder_build \(stringBuilder, string) string
+
+type stringBuilder {
+  value any
+}
 
 # Join strings with a separator.
 Join = \(strings [string], separator string) string {
-  _pen_core_string_join(strings, separator)
+  _pen_core_string_builder_build(
+    appendStrings(_pen_core_string_builder_create(), strings),
+    separator,
+  )
+}
+
+appendStrings = \(b stringBuilder, ss [string]) stringBuilder {
+  if [s, ...ss] = ss {
+    appendStrings(
+      _pen_core_string_builder_append(b, s()),
+      ss,
+    )
+  } else {
+    b
+  }
 }
 
 # Check if a string has a prefix.
