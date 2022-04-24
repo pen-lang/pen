@@ -1,8 +1,8 @@
-type box {
+type _box {
   value any
 }
 
-foreign _pen_ffi_any_to_string = \(x box) string {
+foreign _pen_ffi_any_to_string = \(x _box) string {
   if x = x.value as string {
     x
   } else {
