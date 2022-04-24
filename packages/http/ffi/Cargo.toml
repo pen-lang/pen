@@ -9,6 +9,7 @@ crate-type = ["staticlib"]
 
 [dependencies]
 ffi = { package = "pen-ffi", version = "0.3" }
+futures = "0.3"
 hyper = { version = "0.14", features = ["client", "http1", "server", "tcp"] }
 # We need specify tokio version explicitly to make this compatible with the Os package.
 tokio = { version = "1", features = ["full"] }

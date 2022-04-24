@@ -2,6 +2,7 @@ mod call;
 mod call_function;
 mod from_closure;
 mod from_function;
+pub mod stream;
 mod to_closure;
 
 pub use from_closure::*;

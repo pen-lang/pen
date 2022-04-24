@@ -14,6 +14,12 @@ type _firstRest {
   rest _anyList
 }
 
+type _ffiFirstRest {
+  ok boolean
+  first \() any
+  rest _anyList
+}
+
 _first = \(fr _firstRest) \() any {
   fr.first
 }
@@ -111,5 +117,13 @@ _hashNode = \(f \(any) number, node \() _node | none, h number) number {
     )
   } else {
     h
+  }
+}
+
+foreign _pen_ffi_list_first_rest = \(xs _anyList) _ffiFirstRest {
+  if fr = _firstRest(xs) as _firstRest {
+    _ffiFirstRest{ok: true, first: fr.first, rest: fr.rest}
+  } else {
+    _ffiFirstRest{ok: false, first: \() any { none }, rest: _emptyList()}
   }
 }

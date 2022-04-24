@@ -12,7 +12,6 @@ Feature: Standard packages
     Examples:
       | package      |
       | core         |
-      | ffi          |
       | http         |
       | json         |
       | os           |

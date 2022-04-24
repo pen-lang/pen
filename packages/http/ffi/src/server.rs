@@ -1,5 +1,6 @@
 use crate::{header_map::HeaderMap, response::Response};
 use core::str;
+use futures::stream::StreamExt;
 use hyper::header::{HeaderName, HeaderValue};
 use std::error::Error;
 
@@ -35,7 +36,7 @@ async fn serve(
                             let mut headers = HeaderMap::new();
 
                             for (key, value) in request.headers() {
-                                headers = HeaderMap::set(&headers, key.as_str(), value.as_bytes());
+                                headers = HeaderMap::set(headers, key.as_str(), value.as_bytes());
                             }
 
                             let body = hyper::body::to_bytes(request.into_body()).await?;
@@ -59,22 +60,26 @@ async fn serve(
                                 hyper::StatusCode::from_u16(f64::from(response.status()) as u16)?,
                             ));
 
-                            HeaderMap::try_iterate(
-                                &response.headers(),
-                                |key, value| -> Result<(), BoxError> {
-                                    builder = builder
-                                        .take()
-                                        .unwrap()
-                                        .header(
-                                            HeaderName::from_bytes(key.as_slice())?,
-                                            HeaderValue::from_bytes(value.as_slice())?,
-                                        )
-                                        .into();
+                            let keys =
+                                ffi::future::stream::from_list(HeaderMap::keys(response.headers()));
 
-                                    Ok(())
-                                },
-                            )
-                            .await?;
+                            futures::pin_mut!(keys);
+
+                            while let Some(key) = keys.next().await {
+                                let key = ffi::BoxAny::from(key).to_string().await;
+
+                                builder = builder
+                                    .take()
+                                    .unwrap()
+                                    .header(
+                                        HeaderName::from_bytes(key.as_slice())?,
+                                        HeaderValue::from_bytes(
+                                            HeaderMap::get(response.headers(), key.clone())
+                                                .as_slice(),
+                                        )?,
+                                    )
+                                    .into();
+                            }
 
                             Ok::<_, BoxError>(
                                 builder
