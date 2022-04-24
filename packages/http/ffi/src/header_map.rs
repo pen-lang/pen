@@ -22,7 +22,7 @@ impl HeaderMap {
     }
 
     pub fn get(this: ffi::Arc<Self>, key: impl Into<ffi::ByteString>) -> ffi::ByteString {
-        unsafe { _pen_http_header_map_get(this.clone(), key.into()) }
+        unsafe { _pen_http_header_map_get(this, key.into()) }
     }
 
     pub fn set(
@@ -30,7 +30,7 @@ impl HeaderMap {
         key: impl Into<ffi::ByteString>,
         value: impl Into<ffi::ByteString>,
     ) -> ffi::Arc<Self> {
-        unsafe { _pen_http_header_map_set(this.clone(), key.into(), value.into()) }
+        unsafe { _pen_http_header_map_set(this, key.into(), value.into()) }
     }
 
     pub fn keys(this: ffi::Arc<Self>) -> ffi::Arc<ffi::List> {
