@@ -1,39 +1,29 @@
-use alloc::vec;
+use alloc::boxed::Box;
+use alloc::vec::Vec;
 use core::str;
-
-#[repr(C)]
-struct FirstRest {
-    ok: bool,
-    first: ffi::Any,
-    rest: ffi::Arc<ffi::List>,
-}
-
-extern "C" {
-    fn _pen_core_first_rest(xs: ffi::Arc<ffi::List>) -> ffi::Arc<FirstRest>;
-    fn _pen_core_to_string(xs: ffi::BoxAny) -> ffi::ByteString;
-}
+use futures::stream::StreamExt;
 
 #[ffi::bindgen]
-fn _pen_core_string_join(
-    mut list: ffi::Arc<ffi::List>,
+async fn _pen_core_string_join(
+    list: ffi::Arc<ffi::List>,
     separator: ffi::ByteString,
 ) -> ffi::ByteString {
-    let mut first = true;
-    let mut string = vec![];
+    let elements = ffi::future::stream::from_list(list);
 
-    loop {
-        let first_rest = unsafe { _pen_core_first_rest(list.clone()) };
+    futures::pin_mut!(elements);
 
-        if !first_rest.ok {
-            return string.into();
-        } else if !first {
-            string.extend(separator.as_slice());
-        }
+    let mut strings = Vec::new();
 
-        first = false;
-        string.extend(unsafe { _pen_core_to_string(first_rest.first.clone().into()) }.as_slice());
-        list = first_rest.rest.clone();
+    while let Some(element) = elements.next().await {
+        strings.push(ffi::BoxAny::from(element).to_string().await);
     }
+
+    strings
+        .iter()
+        .map(|string| string.as_slice())
+        .collect::<Vec<_>>()
+        .join(separator.as_slice())
+        .into()
 }
 
 #[ffi::bindgen]

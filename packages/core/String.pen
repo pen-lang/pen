@@ -1,7 +1,7 @@
 # This module provides common string operations.
 
 import foreign "c" _pen_core_string_has_prefix \(string, string) boolean
-import foreign "c" _pen_core_string_join \([string], string) string
+import foreign _pen_core_string_join \([string], string) string
 
 # Join strings with a separator.
 Join = \(strings [string], separator string) string {
