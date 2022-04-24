@@ -1,5 +1,4 @@
-use alloc::boxed::Box;
-use alloc::vec::Vec;
+use alloc::{boxed::Box, vec::Vec};
 use core::str;
 
 const INITIAL_STRING_BUILDER_CAPACITY: usize = 16;
