@@ -16,14 +16,18 @@ impl<T> Arc<T> {
     pub fn new(payload: T) -> Self {
         let mut block = ArcBlock::new(Layout::new::<T>());
 
-        unsafe {
-            write(block.ptr_mut() as *mut T, payload);
-        }
+        unsafe { write(block.ptr_mut() as *mut T, payload) };
 
         Self {
             block,
             phantom: PhantomData::default(),
         }
+    }
+
+    pub fn get_mut(this: &mut Self) -> Option<&mut T> {
+        this.block
+            .get_mut()
+            .map(|pointer| unsafe { &mut *(pointer as *mut T) })
     }
 }
 

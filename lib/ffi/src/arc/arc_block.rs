@@ -39,7 +39,15 @@ impl ArcBlock {
     }
 
     pub fn ptr_mut(&mut self) -> *mut u8 {
-        &self.inner().payload as *const () as *mut u8
+        self.ptr() as *mut u8
+    }
+
+    pub fn get_mut(&mut self) -> Option<*mut u8> {
+        if self.is_counted() && self.inner().count.load(Ordering::Acquire) == INITIAL_COUNT {
+            Some(self.ptr_mut())
+        } else {
+            None
+        }
     }
 
     pub fn is_null(&self) -> bool {
@@ -51,15 +59,13 @@ impl ArcBlock {
     }
 
     fn inner(&self) -> &ArcInner {
-        unsafe { &*self.inner_pointer() }
+        unsafe { &*self.inner_ptr() }
     }
 
-    fn raw_pointer(&self) -> *const u8 {
-        (self.pointer as usize & !1) as *const u8
-    }
+    fn inner_ptr(&self) -> *const ArcInner {
+        let pointer = self.pointer as usize & !1;
 
-    fn inner_pointer(&self) -> *const ArcInner {
-        (unsafe { (self.raw_pointer() as *const usize).offset(-1) }) as *const ArcInner
+        (unsafe { (pointer as *const usize).offset(-1) }) as *const ArcInner
     }
 
     fn inner_layout(layout: Layout) -> Layout {
@@ -81,7 +87,7 @@ impl ArcBlock {
     }
 
     pub fn drop<T>(&mut self) {
-        if self.pointer.is_null() || self.is_static() {
+        if self.is_counted() {
             return;
         }
 
@@ -89,15 +95,19 @@ impl ArcBlock {
             fence(Ordering::Acquire);
 
             unsafe {
-                drop_in_place(self.raw_pointer() as *mut T);
+                drop_in_place(self.ptr() as *mut T);
 
-                // This layout is expected not to be used.
+                // The layout argument is expected not to be used.
                 dealloc(
-                    self.inner_pointer() as *mut u8,
+                    self.inner_ptr() as *mut u8,
                     Layout::from_size_align(1, 1).unwrap(),
                 )
             }
         }
+    }
+
+    fn is_counted(&self) -> bool {
+        self.pointer.is_null() || self.is_static()
     }
 }
 
