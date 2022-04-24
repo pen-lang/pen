@@ -43,7 +43,7 @@ impl ArcBlock {
     }
 
     pub fn get_mut(&mut self) -> Option<*mut u8> {
-        if self.is_counted() && self.inner().count.load(Ordering::Acquire) == INITIAL_COUNT {
+        if !self.is_static() && self.inner().count.load(Ordering::Acquire) == INITIAL_COUNT {
             Some(self.ptr_mut())
         } else {
             None
@@ -55,7 +55,7 @@ impl ArcBlock {
     }
 
     fn is_static(&self) -> bool {
-        self.pointer as usize & 1 == 1
+        self.pointer.is_null() || self.pointer as usize & 1 == 1
     }
 
     fn inner(&self) -> &ArcInner {
@@ -77,7 +77,7 @@ impl ArcBlock {
     }
 
     pub fn clone(&self) -> Self {
-        if !self.pointer.is_null() && !self.is_static() {
+        if !self.is_static() {
             self.inner().count.fetch_add(1, Ordering::Relaxed);
         }
 
@@ -87,7 +87,7 @@ impl ArcBlock {
     }
 
     pub fn drop<T>(&mut self) {
-        if self.is_counted() {
+        if self.is_static() {
             return;
         }
 
@@ -104,10 +104,6 @@ impl ArcBlock {
                 )
             }
         }
-    }
-
-    fn is_counted(&self) -> bool {
-        self.pointer.is_null() || self.is_static()
     }
 }
 

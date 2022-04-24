@@ -134,4 +134,13 @@ mod tests {
     fn implement_send_and_sync() {
         drop_send_and_sync(Arc::new(()));
     }
+
+    #[test]
+    fn get_mut() {
+        let mut arc = Arc::new(0);
+
+        *Arc::get_mut(&mut arc).unwrap() = 42;
+
+        assert_eq!(*arc, 42);
+    }
 }
