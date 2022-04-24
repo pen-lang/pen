@@ -1,4 +1,5 @@
 use crate::{header_map::HeaderMap, response::Response};
+use futures::stream::StreamExt;
 use std::error::Error;
 
 #[ffi::any]
@@ -42,14 +43,22 @@ async fn send_request(
             .uri(uri.as_slice()),
     );
 
-    HeaderMap::iterate(&headers, |key, value| {
+    let keys = ffi::future::stream::from_list(HeaderMap::keys(headers.clone()));
+
+    futures::pin_mut!(keys);
+
+    while let Some(key) = keys.next().await {
+        let key = ffi::BoxAny::from(key).to_string().await;
+
         builder = builder
             .take()
             .unwrap()
-            .header(key.as_slice(), value.as_slice())
+            .header(
+                key.as_slice(),
+                HeaderMap::get(headers.clone(), key.clone()).as_slice(),
+            )
             .into();
-    })
-    .await;
+    }
 
     let response = hyper::Client::new()
         .request(
@@ -61,7 +70,7 @@ async fn send_request(
     let mut headers = HeaderMap::new();
 
     for (key, value) in response.headers() {
-        headers = HeaderMap::set(&headers, key.as_str(), value.as_bytes());
+        headers = HeaderMap::set(headers, key.as_str(), value.as_bytes());
     }
 
     Ok(Response::new(
