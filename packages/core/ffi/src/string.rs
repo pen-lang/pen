@@ -1,3 +1,4 @@
+use alloc::boxed::Box;
 use alloc::vec::Vec;
 use core::str;
 
@@ -11,14 +12,14 @@ struct StringBuilder {
 #[ffi::any]
 #[derive(Clone)]
 struct StringBuilderInner {
-    strings: Vec<ffi::ByteString>,
+    strings: Box<Vec<ffi::ByteString>>,
 }
 
 #[ffi::bindgen]
 fn _pen_core_string_builder_create() -> ffi::Arc<StringBuilder> {
     StringBuilder {
         inner: StringBuilderInner {
-            strings: Vec::with_capacity(INITIAL_STRING_BUILDER_CAPACITY),
+            strings: Vec::with_capacity(INITIAL_STRING_BUILDER_CAPACITY).into(),
         }
         .into(),
     }
