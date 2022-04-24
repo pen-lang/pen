@@ -89,6 +89,18 @@ fn generate_type(attributes: &AttributeArgs, type_: &ItemStruct) -> Result<Token
                     }
                 }
             }
+
+            impl<'a> TryFrom<&'a mut #crate_path::Any> for &'a mut #type_name {
+                type Error = ();
+
+                fn try_from(any: &mut #crate_path::Any) -> Result<Self, ()> {
+                    if ptr::eq(any.type_information(), &TYPE_INFORMATION) {
+                        Ok(unsafe { mem::transmute(any.payload()) })
+                    } else {
+                        Err(())
+                    }
+                }
+            }
         }
     }
     .into())
