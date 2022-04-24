@@ -33,7 +33,6 @@ checksum = "fb4a24b1aaf0fd0ce8b45161144d6f42cd91677fd5940fd431183eb023b3a2b8"
 name = "core"
 version = "0.1.0"
 dependencies = [
- "futures",
  "pen-ffi",
  "siphasher",
 ]
