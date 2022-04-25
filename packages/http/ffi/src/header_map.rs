@@ -1,6 +1,4 @@
-#[ffi::any]
 #[repr(C)]
-#[derive(Clone)]
 pub struct HeaderMap {
     headers: ffi::Any,
 }
