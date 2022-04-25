@@ -13,10 +13,8 @@ macro_rules! call_function {
 
             type Trampoline = cps::Trampoline<$result_type, $result_type>;
 
-            extern "C" fn resolve(stack: &mut AsyncStack, value: $result_type) -> cps::Result {
+            extern "C" fn resolve(stack: &mut AsyncStack, value: $result_type) {
                 stack.resolve(value);
-
-                cps::Result::new()
             }
 
             // Move arguments into an initializer function.
