@@ -21,9 +21,9 @@ macro_rules! call {
                 continuation: ContinuationFunction,
                 closure: Arc<Closure<C>>,
                 $($argument_type),*
-            ) ;
+            );
 
-            extern "C" fn resolve(stack: &mut AsyncStack, value: $result_type)  {
+            extern "C" fn resolve(stack: &mut AsyncStack, value: $result_type) {
                 stack.resolve(value);
             }
 
