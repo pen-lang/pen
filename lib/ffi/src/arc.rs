@@ -16,14 +16,18 @@ impl<T> Arc<T> {
     pub fn new(payload: T) -> Self {
         let mut block = ArcBlock::new(Layout::new::<T>());
 
-        unsafe {
-            write(block.ptr_mut() as *mut T, payload);
-        }
+        unsafe { write(block.ptr_mut() as *mut T, payload) };
 
         Self {
             block,
             phantom: PhantomData::default(),
         }
+    }
+
+    pub fn get_mut(this: &mut Self) -> Option<&mut T> {
+        this.block
+            .get_mut()
+            .map(|pointer| unsafe { &mut *(pointer as *mut T) })
     }
 }
 
@@ -129,5 +133,14 @@ mod tests {
     #[test]
     fn implement_send_and_sync() {
         drop_send_and_sync(Arc::new(()));
+    }
+
+    #[test]
+    fn get_mut() {
+        let mut arc = Arc::new(0);
+
+        *Arc::get_mut(&mut arc).unwrap() = 42;
+
+        assert_eq!(*arc, 42);
     }
 }

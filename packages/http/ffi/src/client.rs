@@ -2,7 +2,6 @@ use crate::{header_map::HeaderMap, response::Response};
 use futures::stream::StreamExt;
 use std::error::Error;
 
-#[ffi::any]
 #[repr(C)]
 #[derive(Clone)]
 struct ResponseResult {

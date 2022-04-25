@@ -26,8 +26,16 @@ fn generate_type(attributes: &AttributeArgs, type_: &ItemStruct) -> Result<Token
         #type_
 
         mod #module_name {
-            use core::{mem, ptr};
+            use core::{alloc::Layout, mem, ptr};
             use super::#type_name;
+
+            #[test]
+            fn type_size() {
+                assert!(
+                    Layout::new::<#type_name>().size() <= Layout::new::<*const u8>().size(),
+                    "type size too large",
+                );
+            }
 
             unsafe fn transmute_into_payload<T: Send + Sync>(data: T) -> u64 {
                 let mut payload = 0;
@@ -82,6 +90,18 @@ fn generate_type(attributes: &AttributeArgs, type_: &ItemStruct) -> Result<Token
                 type Error = ();
 
                 fn try_from(any: &#crate_path::Any) -> Result<Self, ()> {
+                    if ptr::eq(any.type_information(), &TYPE_INFORMATION) {
+                        Ok(unsafe { mem::transmute(any.payload()) })
+                    } else {
+                        Err(())
+                    }
+                }
+            }
+
+            impl<'a> TryFrom<&'a mut #crate_path::Any> for &'a mut #type_name {
+                type Error = ();
+
+                fn try_from(any: &mut #crate_path::Any) -> Result<Self, ()> {
                     if ptr::eq(any.type_information(), &TYPE_INFORMATION) {
                         Ok(unsafe { mem::transmute(any.payload()) })
                     } else {

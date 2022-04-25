@@ -1,8 +1,6 @@
 use crate::header_map::HeaderMap;
 
-#[ffi::any]
 #[repr(C)]
-#[derive(Clone)]
 pub struct Response {
     status: ffi::Number,
     headers: ffi::Arc<HeaderMap>,

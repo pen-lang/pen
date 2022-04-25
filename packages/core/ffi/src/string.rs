@@ -1,39 +1,59 @@
-use alloc::vec;
+use alloc::{boxed::Box, vec::Vec};
 use core::str;
 
+const INITIAL_STRING_BUILDER_CAPACITY: usize = 16;
+
 #[repr(C)]
-struct FirstRest {
-    ok: bool,
-    first: ffi::Any,
-    rest: ffi::Arc<ffi::List>,
+struct StringBuilder {
+    inner: ffi::Any,
 }
 
-extern "C" {
-    fn _pen_core_first_rest(xs: ffi::Arc<ffi::List>) -> ffi::Arc<FirstRest>;
-    fn _pen_core_to_string(xs: ffi::BoxAny) -> ffi::ByteString;
+#[ffi::any]
+#[derive(Clone)]
+struct StringBuilderInner {
+    #[allow(clippy::box_collection)]
+    strings: Box<Vec<ffi::ByteString>>,
 }
 
 #[ffi::bindgen]
-fn _pen_core_string_join(
-    mut list: ffi::Arc<ffi::List>,
+fn _pen_core_string_builder_create() -> ffi::Arc<StringBuilder> {
+    StringBuilder {
+        inner: StringBuilderInner {
+            strings: Vec::with_capacity(INITIAL_STRING_BUILDER_CAPACITY).into(),
+        }
+        .into(),
+    }
+    .into()
+}
+
+#[ffi::bindgen]
+fn _pen_core_string_builder_append(
+    mut builder: ffi::Arc<StringBuilder>,
+    string: ffi::ByteString,
+) -> ffi::Arc<StringBuilder> {
+    if let Some(builder) = ffi::Arc::get_mut(&mut builder) {
+        let inner: &mut StringBuilderInner = (&mut builder.inner).try_into().unwrap();
+
+        inner.strings.push(string);
+    }
+
+    builder
+}
+
+#[ffi::bindgen]
+fn _pen_core_string_builder_build(
+    builder: ffi::Arc<StringBuilder>,
     separator: ffi::ByteString,
 ) -> ffi::ByteString {
-    let mut first = true;
-    let mut string = vec![];
+    let inner: &StringBuilderInner = (&builder.inner).try_into().unwrap();
 
-    loop {
-        let first_rest = unsafe { _pen_core_first_rest(list.clone()) };
-
-        if !first_rest.ok {
-            return string.into();
-        } else if !first {
-            string.extend(separator.as_slice());
-        }
-
-        first = false;
-        string.extend(unsafe { _pen_core_to_string(first_rest.first.clone().into()) }.as_slice());
-        list = first_rest.rest.clone();
-    }
+    inner
+        .strings
+        .iter()
+        .map(|string| string.as_slice())
+        .collect::<Vec<_>>()
+        .join(separator.as_slice())
+        .into()
 }
 
 #[ffi::bindgen]
