@@ -11,6 +11,7 @@ struct StringBuilder {
 #[ffi::any]
 #[derive(Clone)]
 struct StringBuilderInner {
+    #[allow(clippy::box_collection)]
     strings: Box<Vec<ffi::ByteString>>,
 }
 
