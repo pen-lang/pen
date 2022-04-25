@@ -54,7 +54,7 @@ fn generate_function(attributes: &AttributeArgs, function: &ItemFn) -> Result<To
             stack: &mut #crate_path::cps::AsyncStack<()>,
             continue_: #crate_path::cps::ContinuationFunction<#output_type, ()>,
             #arguments
-        ) -> #crate_path::cps::Result {
+        ) {
             use core::{future::Future, pin::Pin, task::Poll};
 
             type OutputFuture = Pin<Box<dyn Future<Output = #output_type>>>;
@@ -70,7 +70,7 @@ fn generate_function(attributes: &AttributeArgs, function: &ItemFn) -> Result<To
                 stack: &mut #crate_path::cps::AsyncStack<()>,
                 continue_: #crate_path::cps::ContinuationFunction<#output_type, ()>,
                 mut future: OutputFuture,
-            ) -> #crate_path::cps::Result {
+            ) {
                 match future.as_mut().poll(stack.context().unwrap()) {
                     Poll::Ready(value) => {
                         stack.trampoline(continue_, value).unwrap();
@@ -79,14 +79,12 @@ fn generate_function(attributes: &AttributeArgs, function: &ItemFn) -> Result<To
                         stack.suspend(resume, continue_, future).unwrap();
                     }
                 }
-
-                #crate_path::cps::Result::new()
             }
 
             fn resume(
                 stack: &mut #crate_path::cps::AsyncStack<()>,
                 continue_: #crate_path::cps::ContinuationFunction<#output_type, ()>,
-            ) -> #crate_path::cps::Result {
+            ) {
                 let future = stack.restore().unwrap();
                 poll(stack, continue_, future)
             }

@@ -1,5 +1,4 @@
 use super::{async_stack_action::AsyncStackAction, CpsError, Stack};
-use crate::cps;
 use alloc::{vec, vec::Vec};
 use core::{
     future::Future,
@@ -9,9 +8,9 @@ use core::{
 };
 
 pub type StepFunction<T, V = ()> =
-    fn(stack: &mut AsyncStack<V>, continuation: ContinuationFunction<T, V>) -> cps::Result;
+    fn(stack: &mut AsyncStack<V>, continuation: ContinuationFunction<T, V>);
 
-pub type ContinuationFunction<T, V = ()> = extern "C" fn(&mut AsyncStack<V>, T) -> cps::Result;
+pub type ContinuationFunction<T, V = ()> = extern "C" fn(&mut AsyncStack<V>, T);
 
 pub type Trampoline<T, V> = (StepFunction<T, V>, ContinuationFunction<T, V>);
 
@@ -93,10 +92,7 @@ impl<V> AsyncStack<V> {
         self.validate_action(AsyncStackAction::Suspend)?;
         self.push_next_actions(&[AsyncStackAction::Resume, AsyncStackAction::Suspend]);
 
-        fn step<T, V>(
-            stack: &mut AsyncStack<V>,
-            continue_: ContinuationFunction<T, V>,
-        ) -> cps::Result {
+        fn step<T, V>(stack: &mut AsyncStack<V>, continue_: ContinuationFunction<T, V>) {
             let value = stack.pop::<T>();
 
             continue_(stack, value)
@@ -203,13 +199,9 @@ mod tests {
 
     type TestResult = usize;
 
-    fn step(_: &mut AsyncStack, _: ContinuationFunction<TestResult, ()>) -> cps::Result {
-        cps::Result::new()
-    }
+    fn step(_: &mut AsyncStack, _: ContinuationFunction<TestResult, ()>) {}
 
-    extern "C" fn continue_(_: &mut AsyncStack, _: TestResult) -> cps::Result {
-        cps::Result::new()
-    }
+    extern "C" fn continue_(_: &mut AsyncStack, _: TestResult) {}
 
     #[allow(dead_code)]
     extern "C" {
@@ -277,10 +269,8 @@ mod tests {
 
         let mut stack = Stack::new(TEST_CAPACITY);
 
-        extern "C" fn continue_(stack: &mut Stack, value: usize) -> cps::Result {
+        extern "C" fn continue_(stack: &mut Stack, value: usize) {
             stack.resolve(value);
-
-            cps::Result::new()
         }
 
         let waker = create_waker();

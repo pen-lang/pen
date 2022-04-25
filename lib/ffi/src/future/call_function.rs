@@ -13,10 +13,8 @@ macro_rules! call_function {
 
             type Trampoline = cps::Trampoline<$result_type, $result_type>;
 
-            extern "C" fn resolve(stack: &mut AsyncStack, value: $result_type) -> cps::Result {
+            extern "C" fn resolve(stack: &mut AsyncStack, value: $result_type) {
                 stack.resolve(value);
-
-                cps::Result::new()
             }
 
             // Move arguments into an initializer function.
@@ -53,7 +51,7 @@ macro_rules! call_function {
 #[cfg(test)]
 mod tests {
     use crate::{
-        cps::{self, AsyncStack, ContinuationFunction},
+        cps::{AsyncStack, ContinuationFunction},
         ByteString, Number,
     };
     use core::future::ready;
@@ -61,7 +59,7 @@ mod tests {
     unsafe extern "C" fn get_number(
         stack: &mut AsyncStack<Number>,
         continue_: ContinuationFunction<Number, Number>,
-    ) -> cps::Result {
+    ) {
         continue_(stack, 42.0.into())
     }
 
@@ -77,7 +75,7 @@ mod tests {
         stack: &mut AsyncStack<Number>,
         continue_: ContinuationFunction<Number, Number>,
         x: Number,
-    ) -> cps::Result {
+    ) {
         continue_(stack, x)
     }
 
@@ -96,7 +94,7 @@ mod tests {
         continue_: ContinuationFunction<Number, Number>,
         x: Number,
         y: Number,
-    ) -> cps::Result {
+    ) {
         continue_(stack, (f64::from(x) + f64::from(y)).into())
     }
 
@@ -117,11 +115,8 @@ mod tests {
     unsafe extern "C" fn get_number_with_suspension(
         stack: &mut AsyncStack<Number>,
         continue_: ContinuationFunction<Number, Number>,
-    ) -> cps::Result {
-        fn step(
-            stack: &mut AsyncStack<Number>,
-            continue_: ContinuationFunction<Number, Number>,
-        ) -> cps::Result {
+    ) {
+        fn step(stack: &mut AsyncStack<Number>, continue_: ContinuationFunction<Number, Number>) {
             continue_(stack, 42.0.into())
         }
 
@@ -129,8 +124,6 @@ mod tests {
 
         // Wake immediately as we are waiting for nothing!
         stack.context().unwrap().waker().wake_by_ref();
-
-        cps::Result::new()
     }
 
     #[tokio::test]
@@ -145,7 +138,7 @@ mod tests {
         stack: &mut AsyncStack<ByteString>,
         continue_: ContinuationFunction<ByteString, ByteString>,
         x: ByteString,
-    ) -> cps::Result {
+    ) {
         continue_(stack, x)
     }
 

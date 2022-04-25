@@ -5,6 +5,6 @@ macro_rules! import {
             stack: &mut $crate::cps::AsyncStack<$result_type>,
             continue_: $crate::cps::ContinuationFunction<$result_type, $result_type>,
             $($argument_name: $argument_type),*
-        ) -> $crate::cps::Result;
+        );
     };
 }

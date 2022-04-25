@@ -1,5 +1,5 @@
 use crate::{
-    cps::{self, AsyncStack, ContinuationFunction, StepFunction},
+    cps::{AsyncStack, ContinuationFunction, StepFunction},
     Arc, Closure,
 };
 use core::{intrinsics::transmute, task::Poll};
@@ -9,7 +9,7 @@ type InitialStepFunction<T, V> = extern "C" fn(
     stack: &mut AsyncStack<T>,
     continuation: ContinuationFunction<T, T>,
     closure: Arc<Closure<V>>,
-) -> cps::Result;
+);
 
 const INITIAL_STACK_CAPACITY: usize = 64;
 
@@ -41,10 +41,8 @@ pub async fn from_closure<T, V>(closure: Arc<Closure<T>>) -> V {
     .await
 }
 
-extern "C" fn resolve<T>(stack: &mut AsyncStack<T>, value: T) -> cps::Result {
+extern "C" fn resolve<T>(stack: &mut AsyncStack<T>, value: T) {
     stack.resolve(value);
-
-    cps::Result::new()
 }
 
 #[cfg(test)]
@@ -56,7 +54,7 @@ mod tests {
         stack: &mut AsyncStack,
         continue_: ContinuationFunction<Number>,
         closure: Arc<Closure<f64>>,
-    ) -> cps::Result {
+    ) {
         unsafe { continue_(stack, (*closure.payload()).into()) }
     }
 

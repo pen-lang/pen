@@ -7,7 +7,7 @@ if [ $# -eq 0 ]; then
 fi
 
 package_ffi_directories() {
-  for file in $(find packages -name Cargo.lock); do
+  for file in $(git ls-files 'packages/**/Cargo.lock'); do
     dirname $file
   done
 }

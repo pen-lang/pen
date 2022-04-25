@@ -1,5 +1,5 @@
 use crate::{
-    cps::{self, AsyncStack, ContinuationFunction},
+    cps::{AsyncStack, ContinuationFunction},
     Arc, Closure,
 };
 use alloc::boxed::Box;
@@ -24,7 +24,7 @@ extern "C" fn get_result<O, F: Future<Output = O>>(
     stack: &mut AsyncStack,
     continue_: ContinuationFunction<O>,
     closure: Arc<Closure<Option<Pin<Box<F>>>>>,
-) -> cps::Result {
+) {
     poll(
         stack,
         continue_,
@@ -34,10 +34,7 @@ extern "C" fn get_result<O, F: Future<Output = O>>(
     )
 }
 
-fn resume<O, F: Future<Output = O>>(
-    stack: &mut AsyncStack,
-    continue_: ContinuationFunction<O>,
-) -> cps::Result {
+fn resume<O, F: Future<Output = O>>(stack: &mut AsyncStack, continue_: ContinuationFunction<O>) {
     let future = stack.restore::<Pin<Box<F>>>().unwrap();
 
     poll(stack, continue_, future)
@@ -47,7 +44,7 @@ fn poll<O, F: Future<Output = O>>(
     stack: &mut AsyncStack,
     continue_: ContinuationFunction<O>,
     mut future: Pin<Box<F>>,
-) -> cps::Result {
+) {
     match future.as_mut().poll(stack.context().unwrap()) {
         Poll::Ready(value) => {
             stack.trampoline(continue_, value).unwrap();
@@ -56,6 +53,4 @@ fn poll<O, F: Future<Output = O>>(
             stack.suspend(resume::<O, F>, continue_, future).unwrap();
         }
     }
-
-    cps::Result::new()
 }
