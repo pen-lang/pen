@@ -17,8 +17,7 @@ extern "C" {
 extern "C" fn _pen_main(
     _: &mut ffi::cps::AsyncStack<ffi::None>,
     _: ffi::cps::ContinuationFunction<ffi::None, ffi::None>,
-) -> ffi::cps::Result {
-    ffi::cps::Result::new()
+) {
 }
 
 #[tokio::main]

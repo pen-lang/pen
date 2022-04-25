@@ -11,16 +11,15 @@ const INITIAL_STACK_CAPACITY: usize = 256;
 extern "C" {
     fn _pen_main(
         stack: *mut ffi::cps::Stack,
-        continuation: extern "C" fn(*mut ffi::cps::Stack, ffi::None) -> ffi::cps::Result,
-    ) -> ffi::cps::Result;
+        continuation: extern "C" fn(*mut ffi::cps::Stack, ffi::None),
+    );
 }
 
 #[cfg(test)]
 unsafe extern "C" fn _pen_main(
     _: *mut ffi::cps::Stack,
-    _: extern "C" fn(*mut ffi::cps::Stack, ffi::None) -> ffi::cps::Result,
-) -> ffi::cps::Result {
-    ffi::cps::Result::new()
+    _: extern "C" fn(*mut ffi::cps::Stack, ffi::None),
+) {
 }
 
 fn main() {
@@ -29,6 +28,6 @@ fn main() {
     unsafe { _pen_main(&mut stack, do_nothing) };
 }
 
-extern "C" fn do_nothing(_: *mut ffi::cps::Stack, _: ffi::None) -> ffi::cps::Result {
+extern "C" fn do_nothing(_: *mut ffi::cps::Stack, _: ffi::None) {
     Default::default()
 }
