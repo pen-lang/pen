@@ -26,8 +26,16 @@ fn generate_type(attributes: &AttributeArgs, type_: &ItemStruct) -> Result<Token
         #type_
 
         mod #module_name {
-            use core::{mem, ptr};
+            use core::{alloc::Layout, mem, ptr};
             use super::#type_name;
+
+            #[test]
+            fn type_size() {
+                assert!(
+                    Layout::new::<#type_name>().size() <= Layout::new::<*const u8>().size(),
+                    "type size too large",
+                );
+            }
 
             unsafe fn transmute_into_payload<T: Send + Sync>(data: T) -> u64 {
                 let mut payload = 0;
