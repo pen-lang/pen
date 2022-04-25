@@ -199,13 +199,9 @@ mod tests {
 
     type TestResult = usize;
 
-    fn step(_: &mut AsyncStack, _: ContinuationFunction<TestResult, ()>) -> cps::Result {
-        cps::Result::new()
-    }
+    fn step(_: &mut AsyncStack, _: ContinuationFunction<TestResult, ()>) {}
 
-    extern "C" fn continue_(_: &mut AsyncStack, _: TestResult) -> cps::Result {
-        cps::Result::new()
-    }
+    extern "C" fn continue_(_: &mut AsyncStack, _: TestResult) {}
 
     #[allow(dead_code)]
     extern "C" {
@@ -273,10 +269,8 @@ mod tests {
 
         let mut stack = Stack::new(TEST_CAPACITY);
 
-        extern "C" fn continue_(stack: &mut Stack, value: usize) -> cps::Result {
+        extern "C" fn continue_(stack: &mut Stack, value: usize) {
             stack.resolve(value);
-
-            cps::Result::new()
         }
 
         let waker = create_waker();

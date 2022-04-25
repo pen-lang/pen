@@ -21,12 +21,10 @@ macro_rules! call {
                 continuation: ContinuationFunction,
                 closure: Arc<Closure<C>>,
                 $($argument_type),*
-            ) -> cps::Result;
+            ) ;
 
-            extern "C" fn resolve(stack: &mut AsyncStack, value: $result_type) -> cps::Result {
+            extern "C" fn resolve(stack: &mut AsyncStack, value: $result_type)  {
                 stack.resolve(value);
-
-                cps::Result::new()
             }
 
             // Move closure and arguments into an initializer function.
@@ -64,7 +62,7 @@ macro_rules! call {
 #[cfg(test)]
 mod tests {
     use crate::{
-        cps::{self, AsyncStack, ContinuationFunction},
+        cps::{AsyncStack, ContinuationFunction},
         Arc, ByteString, Closure, Number,
     };
     use core::future::ready;
@@ -73,7 +71,7 @@ mod tests {
         stack: &mut AsyncStack,
         continue_: ContinuationFunction<Number>,
         closure: Arc<Closure<f64>>,
-    ) -> cps::Result {
+    ) {
         continue_(stack, unsafe { *closure.payload() }.into())
     }
 
@@ -96,7 +94,7 @@ mod tests {
         continue_: ContinuationFunction<Number>,
         _closure: Arc<Closure<()>>,
         x: Number,
-    ) -> cps::Result {
+    ) {
         continue_(stack, x)
     }
 
@@ -121,7 +119,7 @@ mod tests {
         _closure: Arc<Closure<()>>,
         x: Number,
         y: Number,
-    ) -> cps::Result {
+    ) {
         continue_(stack, (f64::from(x) + f64::from(y)).into())
     }
 
@@ -148,11 +146,11 @@ mod tests {
         stack: &mut AsyncStack<TestResult>,
         continue_: ContinuationFunction<TestResult, TestResult>,
         _closure: Arc<Closure<()>>,
-    ) -> cps::Result {
+    ) {
         fn step(
             stack: &mut AsyncStack<TestResult>,
             continue_: ContinuationFunction<TestResult, TestResult>,
-        ) -> cps::Result {
+        ) {
             continue_(stack, 42.0.into())
         }
 
@@ -160,8 +158,6 @@ mod tests {
 
         // Wake immediately as we are waiting for nothing!
         stack.context().unwrap().waker().wake_by_ref();
-
-        cps::Result::new()
     }
 
     #[tokio::test]
@@ -184,7 +180,7 @@ mod tests {
         continue_: ContinuationFunction<ByteString>,
         _closure: Arc<Closure<()>>,
         x: ByteString,
-    ) -> cps::Result {
+    ) {
         continue_(stack, x)
     }
 
