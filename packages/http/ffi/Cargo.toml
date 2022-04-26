@@ -18,4 +18,4 @@ hyper = { version = "0.14", features = [
   "tcp",
 ] }
 # We need specify tokio version explicitly to make this compatible with the Os package.
-tokio = { version = "1", features = ["full"] }
+tokio = { version = "1", features = ["full", "test-util", "tracing"] }
