@@ -14,3 +14,4 @@ rand = "0.8"
 # Feature flags of tokio must match the ones in the application crate for its
 # object files to be considered from the same crate.
 tokio = { version = "1", features = ["full"] }
+tokio-util = "0.7"
