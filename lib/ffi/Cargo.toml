@@ -22,6 +22,7 @@ tokio = { "version" = "1", "features" = ["full"] }
 # This feature enables client libraries to use the exactly same rutnime of Tokio 
 # in resulting binaries.
 # Otherwise, we might instantiate two different versions of Tokio runtimes there.
-# For example, we might have multiple different global variables of async contexts 
-# in TLS, which fails asynchronous function calls.
+# For example, we might have multiple global variables of async contexts named 
+# with different symbols in TLS, which fails asynchronous function calls due to 
+# uninitialized contexts.
 runtime = ["tokio", "tokio-util"]
