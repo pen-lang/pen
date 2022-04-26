@@ -1,7 +1,7 @@
 [package]
 name = "pen-ffi"
 description = "FFI library for Pen programming language"
-version = "0.3.60"
+version = "0.3.61"
 publish = true
 edition = "2021"
 license = "MIT"
@@ -12,6 +12,17 @@ repository = "https://github.com/pen-lang/pen"
 async-stream = "0.3"
 futures = "0.3"
 pen-ffi-macro = { version = "0.1", path = "../ffi-macro" }
+tokio = { version = "1", features = ["full"], optional = true }
+tokio-util = { version = "0.7", features = ["codec"], optional = true }
 
 [dev-dependencies]
-tokio = { "version" = "1", "features" = ["macros", "rt", "rt-multi-thread"] }
+tokio = { "version" = "1", "features" = ["full"] }
+
+[features]
+# This feature enables client libraries to use the exactly same rutnime of Tokio 
+# in resulting binaries.
+# Otherwise, we might instantiate two different versions of Tokio runtimes there.
+# For example, we might have multiple global variables of async contexts named 
+# with different symbols in TLS, which fails asynchronous function calls due to 
+# uninitialized contexts.
+runtime = ["tokio", "tokio-util"]
