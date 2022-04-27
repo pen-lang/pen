@@ -1,6 +1,4 @@
-use std::error::Error;
-use std::str;
-use std::time::Duration;
+use std::{error::Error, str, time::Duration};
 
 #[repr(C)]
 struct PoolOptions {
