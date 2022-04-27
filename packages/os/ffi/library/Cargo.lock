@@ -255,7 +255,6 @@ dependencies = [
  "pen-ffi",
  "rand",
  "tokio",
- "tokio-util",
 ]
 
 [[package]]
@@ -290,6 +289,8 @@ dependencies = [
  "async-stream",
  "futures",
  "pen-ffi-macro",
+ "tokio",
+ "tokio-util",
 ]
 
 [[package]]
