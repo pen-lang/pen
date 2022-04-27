@@ -1,0 +1,15 @@
+type Context {
+  inner Inner
+}
+
+type Inner {}
+
+New = \() Context {
+  Context{
+    inner: Inner{},
+  }
+}
+
+Inner = \(ctx Context) Inner {
+  ctx.inner
+}
