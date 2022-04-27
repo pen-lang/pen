@@ -373,6 +373,8 @@ dependencies = [
  "async-stream",
  "futures",
  "pen-ffi-macro",
+ "tokio",
+ "tokio-util",
 ]
 
 [[package]]
