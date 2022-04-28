@@ -170,14 +170,14 @@ fn parse_output_type(function: &ItemFn, crate_path: &Path) -> Box<Type> {
     }
 }
 
-fn get_argument_names(function: &ItemFn) -> Vec<&Box<Pat>> {
+fn get_argument_names(function: &ItemFn) -> Vec<&Pat> {
     function
         .sig
         .inputs
         .iter()
         .filter_map(|input| match input {
             FnArg::Receiver(_) => None,
-            FnArg::Typed(arg) => Some(&arg.pat),
+            FnArg::Typed(arg) => Some(arg.pat.as_ref()),
         })
         .collect::<Vec<_>>()
 }
