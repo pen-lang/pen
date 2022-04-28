@@ -8,12 +8,7 @@ struct PoolOptions {
 }
 
 #[repr(C)]
-struct PoolResult {
-    pool: ffi::Arc<Pool>,
-    error: ffi::ByteString,
-}
-
-#[repr(C)]
+#[derive(Default)]
 struct Pool {
     inner: ffi::Any,
 }
@@ -27,26 +22,6 @@ struct PoolInner {
 
 #[ffi::bindgen]
 async fn _pen_sql_create_pool(
-    uri: ffi::ByteString,
-    options: ffi::Arc<PoolOptions>,
-) -> ffi::Arc<PoolResult> {
-    match create_pool(uri, options).await {
-        Ok(pool) => PoolResult {
-            pool,
-            error: Default::default(),
-        },
-        Err(error) => PoolResult {
-            pool: Pool {
-                inner: ffi::None::new().into(),
-            }
-            .into(),
-            error: error.to_string().into(),
-        },
-    }
-    .into()
-}
-
-async fn create_pool(
     uri: ffi::ByteString,
     options: ffi::Arc<PoolOptions>,
 ) -> Result<ffi::Arc<Pool>, Box<dyn Error>> {
