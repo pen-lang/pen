@@ -42,3 +42,29 @@ fn none_result_function() -> Result<(), String> {
 async fn async_none_result_function() -> Result<(), String> {
     Ok(())
 }
+
+#[bindgen(crate = "pen_ffi")]
+fn mut_argument_function(mut x: f64) -> f64 {
+    x += 42.0;
+    x
+}
+
+#[bindgen(crate = "pen_ffi")]
+async fn async_mut_argument_function(mut x: f64) -> f64 {
+    x += 42.0;
+    x
+}
+
+#[bindgen(crate = "pen_ffi")]
+fn mut_argument_none_function(mut x: f64) {
+    x += 42.0;
+
+    println!("{}", x);
+}
+
+#[bindgen(crate = "pen_ffi")]
+async fn async_mut_argument_none_function(mut x: f64) {
+    x += 42.0;
+
+    println!("{}", x);
+}
