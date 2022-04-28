@@ -1,4 +1,4 @@
-use crate::{ByteString, None};
+use crate::{Arc, ByteString, None};
 use alloc::string::ToString;
 use core::fmt::Display;
 
@@ -48,5 +48,11 @@ impl<E: Display> From<core::result::Result<(), E>> for Result<None> {
 impl<T: Default, E: Display> From<core::result::Result<T, E>> for Result<T> {
     fn from(result: core::result::Result<T, E>) -> Self {
         Self::from_result(result, || Default::default())
+    }
+}
+
+impl<T: Default, E: Display> From<core::result::Result<T, E>> for Arc<Result<T>> {
+    fn from(result: core::result::Result<T, E>) -> Self {
+        Result::from_result(result, || Default::default()).into()
     }
 }

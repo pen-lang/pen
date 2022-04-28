@@ -2,7 +2,8 @@ use crate::utilities::parse_crate_path;
 use proc_macro::TokenStream;
 use quote::quote;
 use syn::{
-    parse_macro_input, parse_quote, AttributeArgs, FnArg, ItemFn, Path, ReturnType, Stmt, Type,
+    parse_macro_input, parse_quote, AttributeArgs, FnArg, Ident, ItemFn, Pat, Path, PathArguments,
+    PathSegment, ReturnType, Type,
 };
 
 pub fn generate_binding(attributes: TokenStream, item: TokenStream) -> TokenStream {
@@ -35,18 +36,28 @@ fn generate_function(attributes: &AttributeArgs, function: &ItemFn) -> Result<To
 
     let function_name = &function.sig.ident;
     let arguments = &function.sig.inputs;
-    let argument_names = function
-        .sig
-        .inputs
-        .iter()
-        .filter_map(|input| match input {
-            FnArg::Receiver(_) => None,
-            FnArg::Typed(arg) => Some(&arg.pat),
-        })
-        .collect::<Vec<_>>();
+    let argument_names = get_argument_names(function);
     let output_type = parse_output_type(function, &crate_path);
-    let statements = parse_statements(function, &crate_path);
     let attributes = &function.attrs;
+
+    let statements = &function.block.stmts;
+    let statements = if is_default_return_type(function) {
+        quote! {
+            #(#statements);*;
+
+            #crate_path::None::default()
+        }
+    } else {
+        let original_output_type = &function.sig.output;
+
+        quote! {
+            async fn run(#arguments) #original_output_type {
+                #(#statements);*
+            }
+
+            run(#(#argument_names),*).await.into()
+        }
+    };
 
     Ok(quote! {
         #[no_mangle]
@@ -61,7 +72,7 @@ fn generate_function(attributes: &AttributeArgs, function: &ItemFn) -> Result<To
 
             #(#attributes)*
             async fn create_future(#arguments) -> #output_type {
-                #(#statements);*
+                #statements
             }
 
             let mut future: OutputFuture = Box::pin(create_future(#(#argument_names),*));
@@ -98,15 +109,34 @@ fn generate_function(attributes: &AttributeArgs, function: &ItemFn) -> Result<To
 fn generate_sync_function(function: &ItemFn, crate_path: &Path) -> TokenStream {
     let function_name = &function.sig.ident;
     let arguments = &function.sig.inputs;
+    let argument_names = get_argument_names(function);
     let output_type = parse_output_type(function, crate_path);
-    let statements = parse_statements(function, crate_path);
     let attributes = &function.attrs;
+
+    let statements = &function.block.stmts;
+    let statements = if is_default_return_type(function) {
+        quote! {
+            #(#statements);*;
+
+            #crate_path::None::default()
+        }
+    } else {
+        let original_output_type = &function.sig.output;
+
+        quote! {
+            fn run(#arguments) #original_output_type {
+                #(#statements);*
+            }
+
+            run(#(#argument_names),*).into()
+        }
+    };
 
     quote! {
         #(#attributes)*
         #[no_mangle]
         extern "C" fn #function_name(#arguments) -> #output_type {
-            #(#statements);*
+            #statements
         }
     }
     .into()
@@ -115,16 +145,43 @@ fn generate_sync_function(function: &ItemFn, crate_path: &Path) -> TokenStream {
 fn parse_output_type(function: &ItemFn, crate_path: &Path) -> Box<Type> {
     match &function.sig.output {
         ReturnType::Default => parse_quote!(#crate_path::None),
-        ReturnType::Type(_, type_) => type_.clone(),
+        ReturnType::Type(_, type_) => match type_.as_ref() {
+            Type::Path(path) => {
+                if let Some(PathSegment {
+                    ident,
+                    arguments: PathArguments::AngleBracketed(arguments),
+                }) = path.path.segments.first()
+                {
+                    let result_ident: Ident = parse_quote!(Result);
+
+                    if ident == &result_ident {
+                        let value_type = &arguments.args.first();
+
+                        parse_quote!(#crate_path::Arc<#crate_path::extra::Result<#value_type>>)
+                    } else {
+                        type_.clone()
+                    }
+                } else {
+                    type_.clone()
+                }
+            }
+            _ => type_.clone(),
+        },
     }
 }
 
-fn parse_statements(function: &ItemFn, crate_path: &Path) -> impl Iterator<Item = Stmt> {
-    function.block.stmts.clone().into_iter().chain(
-        if matches!(function.sig.output, ReturnType::Default) {
-            Some(Stmt::Expr(parse_quote!(#crate_path::None::new())))
-        } else {
-            None
-        },
-    )
+fn get_argument_names(function: &ItemFn) -> Vec<&Box<Pat>> {
+    function
+        .sig
+        .inputs
+        .iter()
+        .filter_map(|input| match input {
+            FnArg::Receiver(_) => None,
+            FnArg::Typed(arg) => Some(&arg.pat),
+        })
+        .collect::<Vec<_>>()
+}
+
+fn is_default_return_type(function: &ItemFn) -> bool {
+    matches!(function.sig.output, ReturnType::Default)
 }
