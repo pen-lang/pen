@@ -17,4 +17,5 @@ Feature: Standard packages
       | os           |
       | os-sync      |
       | prelude-test |
+      | sql          |
       | test         |
