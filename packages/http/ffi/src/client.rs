@@ -2,35 +2,8 @@ use crate::{header_map::HeaderMap, response::Response};
 use futures::stream::StreamExt;
 use std::error::Error;
 
-#[repr(C)]
-#[derive(Clone)]
-struct ResponseResult {
-    response: ffi::Arc<Response>,
-    error: ffi::ByteString,
-}
-
 #[ffi::bindgen]
 async fn _pen_http_client_send(
-    method: ffi::ByteString,
-    uri: ffi::ByteString,
-    headers: ffi::Arc<HeaderMap>,
-    body: ffi::ByteString,
-) -> ffi::Arc<ResponseResult> {
-    match send_request(method, uri, headers, body).await {
-        Ok(response) => ResponseResult {
-            response,
-            error: ffi::ByteString::default(),
-        }
-        .into(),
-        Err(error) => ResponseResult {
-            response: Default::default(),
-            error: error.to_string().into(),
-        }
-        .into(),
-    }
-}
-
-async fn send_request(
     method: ffi::ByteString,
     uri: ffi::ByteString,
     headers: ffi::Arc<HeaderMap>,

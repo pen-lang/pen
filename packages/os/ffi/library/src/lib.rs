@@ -6,7 +6,6 @@ mod file;
 mod open_file_options;
 mod process;
 mod random;
-mod result;
 mod stdio;
 mod string_array;
 mod tcp;
