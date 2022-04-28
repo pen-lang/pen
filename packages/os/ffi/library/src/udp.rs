@@ -1,4 +1,4 @@
-use crate::{error::OsError, result::FfiResult};
+use crate::error::OsError;
 use std::{str, sync::Arc};
 use tokio::{
     net,
@@ -53,11 +53,7 @@ pub struct UdpDatagram {
 }
 
 #[ffi::bindgen]
-async fn _pen_os_udp_bind(address: ffi::ByteString) -> ffi::Arc<FfiResult<ffi::Arc<UdpSocket>>> {
-    ffi::Arc::new(bind(address).await.into())
-}
-
-async fn bind(address: ffi::ByteString) -> Result<ffi::Arc<UdpSocket>, OsError> {
+async fn _pen_os_udp_bind(address: ffi::ByteString) -> Result<ffi::Arc<UdpSocket>, OsError> {
     Ok(UdpSocket::new(
         net::UdpSocket::bind(str::from_utf8(address.as_slice())?).await?,
     ))
@@ -67,11 +63,7 @@ async fn bind(address: ffi::ByteString) -> Result<ffi::Arc<UdpSocket>, OsError> 
 async fn _pen_os_udp_connect(
     socket: ffi::Arc<UdpSocket>,
     address: ffi::ByteString,
-) -> ffi::Arc<FfiResult<ffi::None>> {
-    ffi::Arc::new(connect(socket, address).await.into())
-}
-
-async fn connect(socket: ffi::Arc<UdpSocket>, address: ffi::ByteString) -> Result<(), OsError> {
+) -> Result<(), OsError> {
     socket
         .lock()
         .await
@@ -82,11 +74,7 @@ async fn connect(socket: ffi::Arc<UdpSocket>, address: ffi::ByteString) -> Resul
 }
 
 #[ffi::bindgen]
-async fn _pen_os_udp_receive(socket: ffi::Arc<UdpSocket>) -> ffi::Arc<FfiResult<ffi::ByteString>> {
-    ffi::Arc::new(receive(socket).await.into())
-}
-
-async fn receive(socket: ffi::Arc<UdpSocket>) -> Result<ffi::ByteString, OsError> {
+async fn _pen_os_udp_receive(socket: ffi::Arc<UdpSocket>) -> Result<ffi::ByteString, OsError> {
     let mut buffer = vec![0; MAX_UDP_PAYLOAD_SIZE];
     let size = socket.lock().await.recv(&mut buffer).await?;
 
@@ -98,11 +86,7 @@ async fn receive(socket: ffi::Arc<UdpSocket>) -> Result<ffi::ByteString, OsError
 #[ffi::bindgen]
 async fn _pen_os_udp_receive_from(
     socket: ffi::Arc<UdpSocket>,
-) -> ffi::Arc<FfiResult<ffi::Arc<UdpDatagram>>> {
-    ffi::Arc::new(receive_from(socket).await.into())
-}
-
-async fn receive_from(socket: ffi::Arc<UdpSocket>) -> Result<ffi::Arc<UdpDatagram>, OsError> {
+) -> Result<ffi::Arc<UdpDatagram>, OsError> {
     let mut buffer = vec![0; MAX_UDP_PAYLOAD_SIZE];
     let (size, address) = socket.lock().await.recv_from(&mut buffer).await?;
 
@@ -119,11 +103,7 @@ async fn receive_from(socket: ffi::Arc<UdpSocket>) -> Result<ffi::Arc<UdpDatagra
 async fn _pen_os_udp_send(
     socket: ffi::Arc<UdpSocket>,
     data: ffi::ByteString,
-) -> ffi::Arc<FfiResult<ffi::Number>> {
-    ffi::Arc::new(send(socket, data).await.into())
-}
-
-async fn send(socket: ffi::Arc<UdpSocket>, data: ffi::ByteString) -> Result<ffi::Number, OsError> {
+) -> Result<ffi::Number, OsError> {
     let size = socket.lock().await.send(data.as_slice()).await?;
 
     Ok((size as f64).into())
@@ -131,14 +111,6 @@ async fn send(socket: ffi::Arc<UdpSocket>, data: ffi::ByteString) -> Result<ffi:
 
 #[ffi::bindgen]
 async fn _pen_os_udp_send_to(
-    socket: ffi::Arc<UdpSocket>,
-    data: ffi::ByteString,
-    address: ffi::ByteString,
-) -> ffi::Arc<FfiResult<ffi::Number>> {
-    ffi::Arc::new(send_to(socket, data, address).await.into())
-}
-
-async fn send_to(
     socket: ffi::Arc<UdpSocket>,
     data: ffi::ByteString,
     address: ffi::ByteString,

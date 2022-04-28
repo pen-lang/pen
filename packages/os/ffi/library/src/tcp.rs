@@ -1,4 +1,4 @@
-use crate::{error::OsError, result::FfiResult};
+use crate::error::OsError;
 use std::{str, sync::Arc};
 use tokio::{
     io::{AsyncReadExt, AsyncWriteExt},
@@ -91,22 +91,14 @@ pub struct TcpAcceptedStream {
 }
 
 #[ffi::bindgen]
-async fn _pen_os_tcp_bind(address: ffi::ByteString) -> ffi::Arc<FfiResult<ffi::Arc<TcpListener>>> {
-    ffi::Arc::new(bind(address).await.into())
-}
-
-async fn bind(address: ffi::ByteString) -> Result<ffi::Arc<TcpListener>, OsError> {
+async fn _pen_os_tcp_bind(address: ffi::ByteString) -> Result<ffi::Arc<TcpListener>, OsError> {
     Ok(TcpListener::new(
         net::TcpListener::bind(str::from_utf8(address.as_slice())?).await?,
     ))
 }
 
 #[ffi::bindgen]
-async fn _pen_os_tcp_connect(address: ffi::ByteString) -> ffi::Arc<FfiResult<ffi::Arc<TcpStream>>> {
-    ffi::Arc::new(connect(address).await.into())
-}
-
-async fn connect(address: ffi::ByteString) -> Result<ffi::Arc<TcpStream>, OsError> {
+async fn _pen_os_tcp_connect(address: ffi::ByteString) -> Result<ffi::Arc<TcpStream>, OsError> {
     Ok(TcpStream::new(
         net::TcpStream::connect(str::from_utf8(address.as_slice())?).await?,
     ))
@@ -115,11 +107,7 @@ async fn connect(address: ffi::ByteString) -> Result<ffi::Arc<TcpStream>, OsErro
 #[ffi::bindgen]
 async fn _pen_os_tcp_accept(
     listener: ffi::Arc<TcpListener>,
-) -> ffi::Arc<FfiResult<ffi::Arc<TcpAcceptedStream>>> {
-    ffi::Arc::new(accept(listener).await.into())
-}
-
-async fn accept(listener: ffi::Arc<TcpListener>) -> Result<ffi::Arc<TcpAcceptedStream>, OsError> {
+) -> Result<ffi::Arc<TcpAcceptedStream>, OsError> {
     let (stream, address) = listener.lock().await.accept().await?;
 
     Ok(TcpAcceptedStream {
@@ -131,13 +119,6 @@ async fn accept(listener: ffi::Arc<TcpListener>) -> Result<ffi::Arc<TcpAcceptedS
 
 #[ffi::bindgen]
 async fn _pen_os_tcp_receive(
-    socket: ffi::Arc<TcpStream>,
-    limit: ffi::Number,
-) -> ffi::Arc<FfiResult<ffi::ByteString>> {
-    ffi::Arc::new(receive(socket, limit).await.into())
-}
-
-async fn receive(
     socket: ffi::Arc<TcpStream>,
     limit: ffi::Number,
 ) -> Result<ffi::ByteString, OsError> {
@@ -153,10 +134,6 @@ async fn receive(
 async fn _pen_os_tcp_send(
     socket: ffi::Arc<TcpStream>,
     data: ffi::ByteString,
-) -> ffi::Arc<FfiResult<ffi::Number>> {
-    ffi::Arc::new(send(socket, data).await.into())
-}
-
-async fn send(socket: ffi::Arc<TcpStream>, data: ffi::ByteString) -> Result<ffi::Number, OsError> {
+) -> Result<ffi::Number, OsError> {
     Ok((socket.lock().await.write(data.as_slice()).await? as f64).into())
 }

@@ -255,7 +255,6 @@ dependencies = [
  "pen-ffi",
  "rand",
  "tokio",
- "tokio-util",
 ]
 
 [[package]]
@@ -283,20 +282,22 @@ dependencies = [
 
 [[package]]
 name = "pen-ffi"
-version = "0.3.61"
+version = "0.3.63"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f4b8aad40cf725f46e5de7e5017a481e948d4c2d8c3e3474809078b135cb6aea"
+checksum = "1b55af9033ddbcac545da15797b8c58efab55d3404b086c3ec7e7292738f01e1"
 dependencies = [
  "async-stream",
  "futures",
  "pen-ffi-macro",
+ "tokio",
+ "tokio-util",
 ]
 
 [[package]]
 name = "pen-ffi-macro"
-version = "0.1.28"
+version = "0.1.30"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "97f0c58f0bb286fddea35e98ba252462d8133ebeb97d329449d104a6cc9977bf"
+checksum = "3e12e7e1d18a37a5337edcf2519e78508b1d32ea8da398a1aa5e540fb3a9433d"
 dependencies = [
  "convert_case",
  "quote",
@@ -428,9 +429,9 @@ dependencies = [
 
 [[package]]
 name = "tokio"
-version = "1.17.0"
+version = "1.18.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2af73ac49756f3f7c01172e34a23e5d0216f6c32333757c2c61feb2bbff5a5ee"
+checksum = "0f48b6d60512a392e34dbf7fd456249fd2de3c83669ab642e021903f4015185b"
 dependencies = [
  "bytes",
  "libc",
@@ -485,9 +486,9 @@ dependencies = [
 
 [[package]]
 name = "tracing-attributes"
-version = "0.1.20"
+version = "0.1.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2e65ce065b4b5c53e73bb28912318cb8c9e9ad3921f1d669eb0e68b4c8143a2b"
+checksum = "cc6b8ad3567499f98a1db7a752b07a7c8c7c7c34c332ec00effb2b0027974b7c"
 dependencies = [
  "proc-macro2",
  "quote",
