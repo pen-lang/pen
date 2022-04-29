@@ -762,6 +762,7 @@ dependencies = [
 name = "pen-http"
 version = "0.1.0"
 dependencies = [
+ "futures",
  "pen-ffi",
  "sqlx",
 ]
