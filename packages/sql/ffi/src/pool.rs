@@ -27,7 +27,7 @@ impl Pool {
         }
     }
 
-    pub fn into_inner(&self) -> &AnyPool {
+    pub fn as_inner(&self) -> &AnyPool {
         let pool: &PoolInner = TryFrom::try_from(&self.inner).unwrap();
 
         &pool.pool
@@ -76,7 +76,7 @@ async fn _pen_sql_pool_query(
         query = query.bind(str::from_utf8(string.as_slice())?.to_owned());
     }
 
-    let _rows = pool.into_inner().fetch_all(query).await?;
+    let _rows = pool.as_inner().fetch_all(query).await?;
 
     todo!()
 }
