@@ -770,7 +770,7 @@ dependencies = [
 
 [[package]]
 name = "pen-ffi"
-version = "0.3.65"
+version = "0.3.66"
 dependencies = [
  "async-stream",
  "futures",
