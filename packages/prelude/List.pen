@@ -1,5 +1,9 @@
 import foreign "c" _pen_prelude_combine_hashes \(number, number) number
 
+type _boxElement {
+  value any
+}
+
 type _anyList {
   node \() _node | none
 }
@@ -124,8 +128,8 @@ foreign "c" _pen_ffi_list_create = \() _anyList {
   _emptyList()
 }
 
-foreign "c" _pen_ffi_list_prepend = \(x \() any, xs _anyList) _anyList {
-  _prependToList(x, xs)
+foreign "c" _pen_ffi_list_prepend = \(x _boxElement, xs _anyList) _anyList {
+  _prependToList(\() any { x.value }, xs)
 }
 
 foreign _pen_ffi_list_first_rest = \(xs _anyList) _ffiFirstRest {
