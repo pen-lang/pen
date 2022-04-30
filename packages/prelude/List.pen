@@ -120,6 +120,14 @@ _hashNode = \(f \(any) number, node \() _node | none, h number) number {
   }
 }
 
+foreign _pen_ffi_list_create = \() _anyList {
+  _emptyList()
+}
+
+foreign _pen_ffi_list_prepend = \(x \() any, xs _anyList) _anyList {
+  _prependToList(x, xs)
+}
+
 foreign _pen_ffi_list_first_rest = \(xs _anyList) _ffiFirstRest {
   if fr = _firstRest(xs) as _firstRest {
     _ffiFirstRest{ok: true, first: fr.first, rest: fr.rest}
