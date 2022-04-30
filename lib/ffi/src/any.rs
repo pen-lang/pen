@@ -1,3 +1,16 @@
+use crate::{Boolean, BoxAny, ByteString, Number};
+
+extern "C" {
+    fn _pen_ffi_any_is_boolean(any: BoxAny) -> Boolean;
+    fn _pen_ffi_any_is_none(any: BoxAny) -> Boolean;
+    fn _pen_ffi_any_is_number(any: BoxAny) -> Boolean;
+    fn _pen_ffi_any_is_string(any: BoxAny) -> Boolean;
+
+    fn _pen_ffi_any_to_boolean(any: BoxAny) -> Boolean;
+    fn _pen_ffi_any_to_number(any: BoxAny) -> Number;
+    fn _pen_ffi_any_to_string(any: BoxAny) -> ByteString;
+}
+
 #[repr(C)]
 pub struct Any {
     type_information: &'static TypeInformation,
@@ -18,6 +31,46 @@ impl Any {
 
     pub fn payload(&self) -> &u64 {
         &self.payload
+    }
+
+    pub fn is_boolean(&self) -> bool {
+        unsafe { _pen_ffi_any_is_boolean(self.clone().into()) }.into()
+    }
+
+    pub fn is_none(&self) -> bool {
+        unsafe { _pen_ffi_any_is_none(self.clone().into()) }.into()
+    }
+
+    pub fn is_number(&self) -> bool {
+        unsafe { _pen_ffi_any_is_number(self.clone().into()) }.into()
+    }
+
+    pub fn is_string(&self) -> bool {
+        unsafe { _pen_ffi_any_is_string(self.clone().into()) }.into()
+    }
+
+    pub fn to_boolean(&self) -> Option<Boolean> {
+        if self.is_boolean() {
+            Some(unsafe { _pen_ffi_any_to_boolean(self.clone().into()) })
+        } else {
+            None
+        }
+    }
+
+    pub fn to_number(&self) -> Option<Number> {
+        if self.is_number() {
+            Some(unsafe { _pen_ffi_any_to_number(self.clone().into()) })
+        } else {
+            None
+        }
+    }
+
+    pub fn to_string(&self) -> Option<ByteString> {
+        if self.is_string() {
+            Some(unsafe { _pen_ffi_any_to_string(self.clone().into()) })
+        } else {
+            None
+        }
     }
 }
 

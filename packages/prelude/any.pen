@@ -2,7 +2,23 @@ type _box {
   value any
 }
 
-foreign _pen_ffi_any_to_boolean = \(x _box) boolean {
+foreign "c" _pen_ffi_any_is_boolean = \(x _box) boolean {
+  if x = x.value as boolean { true } else { false }
+}
+
+foreign "c" _pen_ffi_any_is_none = \(x _box) boolean {
+  if x = x.value as none { true } else { false }
+}
+
+foreign "c" _pen_ffi_any_is_number = \(x _box) boolean {
+  if x = x.value as number { true } else { false }
+}
+
+foreign "c" _pen_ffi_any_is_string = \(x _box) boolean {
+  if x = x.value as string { true } else { false }
+}
+
+foreign "c" _pen_ffi_any_to_boolean = \(x _box) boolean {
   if x = x.value as boolean {
     x
   } else {
@@ -10,7 +26,7 @@ foreign _pen_ffi_any_to_boolean = \(x _box) boolean {
   }
 }
 
-foreign _pen_ffi_any_to_number = \(x _box) number {
+foreign "c" _pen_ffi_any_to_number = \(x _box) number {
   if x = x.value as number {
     x
   } else {
@@ -18,26 +34,10 @@ foreign _pen_ffi_any_to_number = \(x _box) number {
   }
 }
 
-foreign _pen_ffi_any_to_string = \(x _box) string {
+foreign "c" _pen_ffi_any_to_string = \(x _box) string {
   if x = x.value as string {
     x
   } else {
     ""
   }
-}
-
-foreign _pen_ffi_any_is_boolean = \(x _box) boolean {
-  if x = x.value as boolean { true } else { false }
-}
-
-foreign _pen_ffi_any_is_none = \(x _box) boolean {
-  if x = x.value as none { true } else { false }
-}
-
-foreign _pen_ffi_any_is_number = \(x _box) boolean {
-  if x = x.value as number { true } else { false }
-}
-
-foreign _pen_ffi_any_is_string = \(x _box) boolean {
-  if x = x.value as string { true } else { false }
 }
