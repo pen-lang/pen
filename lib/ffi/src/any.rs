@@ -1,4 +1,4 @@
-use crate::{Boolean, BoxAny, ByteString, Number};
+use crate::{Boolean, BoxAny, ByteString, None, Number};
 
 extern "C" {
     fn _pen_ffi_any_is_boolean(any: BoxAny) -> Boolean;
@@ -53,46 +53,6 @@ impl Any {
     pub fn is_string(&self) -> bool {
         unsafe { _pen_ffi_any_is_string(self.clone().into()) }.into()
     }
-
-    pub fn to_boolean(&self) -> Option<Boolean> {
-        if self.is_boolean() {
-            Some(unsafe { _pen_ffi_any_to_boolean(self.clone().into()) })
-        } else {
-            None
-        }
-    }
-
-    pub fn to_number(&self) -> Option<Number> {
-        if self.is_number() {
-            Some(unsafe { _pen_ffi_any_to_number(self.clone().into()) })
-        } else {
-            None
-        }
-    }
-
-    pub fn to_string(&self) -> Option<ByteString> {
-        if self.is_string() {
-            Some(unsafe { _pen_ffi_any_to_string(self.clone().into()) })
-        } else {
-            None
-        }
-    }
-
-    pub fn from_boolean(value: Boolean) -> Self {
-        unsafe { _pen_ffi_any_from_boolean(value) }.into()
-    }
-
-    pub fn from_none() -> Self {
-        unsafe { _pen_ffi_any_from_none() }.into()
-    }
-
-    pub fn from_number(value: Number) -> Self {
-        unsafe { _pen_ffi_any_from_number(value) }.into()
-    }
-
-    pub fn from_string(value: ByteString) -> Self {
-        unsafe { _pen_ffi_any_from_string(value) }.into()
-    }
 }
 
 impl Clone for Any {
@@ -116,13 +76,69 @@ pub struct TypeInformation {
     pub drop: extern "C" fn(u64),
 }
 
-#[pen_ffi_macro::any(crate = "crate")]
-#[derive(Clone, Default)]
-struct Dummy {}
-
 impl Default for Any {
     fn default() -> Self {
-        Dummy::default().into()
+        None::default().into()
+    }
+}
+
+impl From<Boolean> for Any {
+    fn from(value: Boolean) -> Self {
+        unsafe { _pen_ffi_any_from_boolean(value) }.into()
+    }
+}
+
+impl From<None> for Any {
+    fn from(_: None) -> Self {
+        unsafe { _pen_ffi_any_from_none() }.into()
+    }
+}
+
+impl From<Number> for Any {
+    fn from(value: Number) -> Self {
+        unsafe { _pen_ffi_any_from_number(value) }.into()
+    }
+}
+
+impl From<ByteString> for Any {
+    fn from(value: ByteString) -> Self {
+        unsafe { _pen_ffi_any_from_string(value) }.into()
+    }
+}
+
+impl TryFrom<Any> for Boolean {
+    type Error = ();
+
+    fn try_from(value: Any) -> Result<Self, ()> {
+        if value.is_boolean() {
+            Ok(unsafe { _pen_ffi_any_to_boolean(value.into()) })
+        } else {
+            Err(())
+        }
+    }
+}
+
+impl TryFrom<Any> for Number {
+    type Error = ();
+
+    fn try_from(value: Any) -> Result<Self, ()> {
+        if value.is_number() {
+            Ok(unsafe { _pen_ffi_any_to_number(value.into()) })
+        } else {
+            Err(())
+        }
+    }
+}
+
+impl TryFrom<Any> for ByteString {
+    type Error = ();
+
+    fn try_from(value: Any) -> Result<Self, ()> {
+        if value.is_string() {
+            Ok(unsafe { _pen_ffi_any_to_string(value.into()) })
+        } else {
+            Err(())
+        }
     }
 }
 
