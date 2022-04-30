@@ -1,4 +1,3 @@
-#[pen_ffi_macro::any(crate = "crate")]
 #[repr(transparent)]
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct Number {

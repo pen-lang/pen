@@ -32,3 +32,9 @@ impl From<Any> for BoxAny {
         Self::new(x)
     }
 }
+
+impl From<BoxAny> for Any {
+    fn from(x: BoxAny) -> Self {
+        x.inner.value.clone()
+    }
+}
