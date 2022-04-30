@@ -1,5 +1,5 @@
 use futures::{pin_mut, StreamExt};
-use sqlx::Executor;
+use sqlx::{Column, Executor, Row};
 use std::{error::Error, str, time::Duration};
 
 type AnyPool = sqlx::Pool<sqlx::Any>;
@@ -61,19 +61,29 @@ async fn _pen_sql_pool_query(
     pool: ffi::Arc<Pool>,
     query: ffi::ByteString,
     arguments: ffi::Arc<ffi::List>,
-) -> Result<ffi::Arc<Pool>, Box<dyn Error>> {
+) -> Result<ffi::Arc<ffi::List>, Box<dyn Error>> {
     let mut query = sqlx::query::<sqlx::Any>(str::from_utf8(query.as_slice())?);
     let arguments = ffi::future::stream::from_list(arguments);
 
     pin_mut!(arguments);
 
     while let Some(argument) = arguments.next().await {
-        let string = ffi::BoxAny::from(argument).to_string().await;
+        let string = ffi::ByteString::try_from(argument).unwrap_or_default();
 
         query = query.bind(str::from_utf8(string.as_slice())?.to_owned());
     }
 
-    let _rows = pool.as_inner().fetch_all(query).await?;
+    let rows = ffi::List::new();
 
-    todo!()
+    for row in pool.as_inner().fetch_all(query).await? {
+        let columns = ffi::List::new();
+
+        for column in row.columns() {
+            columns = ffi::List::prepend(columns, row.try_get(column.name())?);
+        }
+
+        rows = ffi::List::prepend(rows, columns);
+    }
+
+    Ok(rows)
 }
