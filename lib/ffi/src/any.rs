@@ -144,8 +144,6 @@ impl TryFrom<Any> for ByteString {
 
 #[cfg(test)]
 mod tests {
-    use crate::None;
-
     use super::*;
 
     mod box_ {
@@ -264,10 +262,18 @@ mod tests {
         }
     }
 
-    fn drop_send_and_sync(_: impl Send + Sync) {}
+    mod send_sync {
+        use super::*;
 
-    #[test]
-    fn implement_send_and_sync() {
-        drop_send_and_sync(Any::from(None::new()));
+        #[pen_ffi_macro::any(crate = "crate")]
+        #[derive(Clone, Default)]
+        struct Dummy {}
+
+        fn drop_send_and_sync(_: impl Send + Sync) {}
+
+        #[test]
+        fn implement_send_and_sync() {
+            drop_send_and_sync(Any::from(Dummy::default()));
+        }
     }
 }
