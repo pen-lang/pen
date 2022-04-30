@@ -20,7 +20,7 @@ async fn _pen_http_client_send(
     futures::pin_mut!(keys);
 
     while let Some(key) = keys.next().await {
-        let key = key.to_string().unwrap_or_default();
+        let key = ffi::ByteString::try_from(key).unwrap_or_default();
 
         builder = builder
             .take()
