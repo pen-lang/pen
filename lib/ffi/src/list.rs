@@ -21,3 +21,9 @@ impl List {
         unsafe { _pen_ffi_list_prepend(x.into().into(), this) }
     }
 }
+
+impl Default for Arc<List> {
+    fn default() -> Self {
+        List::new()
+    }
+}
