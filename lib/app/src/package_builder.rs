@@ -14,6 +14,7 @@ pub fn build(
     output_directory: &FilePath,
     target_triple: Option<&str>,
     prelude_package_url: &url::Url,
+    ffi_package_url: &url::Url,
     application_configuration: &ApplicationConfiguration,
 ) -> Result<(), Box<dyn Error>> {
     let child_build_script_files = [package_build_script_compiler::compile_modules(
@@ -33,6 +34,7 @@ pub fn build(
         )?
         .iter()
         .chain([prelude_package_url])
+        .chain([ffi_package_url])
         .map(|url| {
             file_path_resolver::resolve_external_package_build_script_file(
                 output_directory,
