@@ -120,11 +120,11 @@ _hashNode = \(f \(any) number, node \() _node | none, h number) number {
   }
 }
 
-foreign _pen_ffi_list_create = \() _anyList {
+foreign "c" _pen_ffi_list_create = \() _anyList {
   _emptyList()
 }
 
-foreign _pen_ffi_list_prepend = \(x \() any, xs _anyList) _anyList {
+foreign "c" _pen_ffi_list_prepend = \(x \() any, xs _anyList) _anyList {
   _prependToList(x, xs)
 }
 
