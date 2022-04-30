@@ -4,9 +4,6 @@ use std::{error::Error, str, time::Duration};
 
 type AnyPool = sqlx::Pool<sqlx::Any>;
 
-type AnyQuery<'a> =
-    sqlx::query::Query<'a, sqlx::Any, <sqlx::Any as sqlx::database::HasArguments<'a>>::Arguments>;
-
 #[repr(C)]
 struct PoolOptions {
     min_connections: ffi::Number,
