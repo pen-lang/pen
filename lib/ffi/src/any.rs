@@ -9,6 +9,11 @@ extern "C" {
     fn _pen_ffi_any_to_boolean(any: BoxAny) -> Boolean;
     fn _pen_ffi_any_to_number(any: BoxAny) -> Number;
     fn _pen_ffi_any_to_string(any: BoxAny) -> ByteString;
+
+    fn _pen_ffi_any_from_boolean(value: Boolean) -> BoxAny;
+    fn _pen_ffi_any_from_none() -> BoxAny;
+    fn _pen_ffi_any_from_number(value: Number) -> BoxAny;
+    fn _pen_ffi_any_from_string(value: ByteString) -> BoxAny;
 }
 
 #[repr(C)]
@@ -71,6 +76,22 @@ impl Any {
         } else {
             None
         }
+    }
+
+    pub fn from_boolean(value: Boolean) -> Self {
+        unsafe { _pen_ffi_any_from_boolean(value) }.into()
+    }
+
+    pub fn from_none() -> Self {
+        unsafe { _pen_ffi_any_from_none() }.into()
+    }
+
+    pub fn from_number(value: Number) -> Self {
+        unsafe { _pen_ffi_any_from_number(value) }.into()
+    }
+
+    pub fn from_string(value: ByteString) -> Self {
+        unsafe { _pen_ffi_any_from_string(value) }.into()
     }
 }
 
