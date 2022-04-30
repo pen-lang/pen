@@ -41,3 +41,19 @@ foreign "c" _pen_ffi_any_to_string = \(x _box) string {
     ""
   }
 }
+
+foreign "c" _pen_ffi_any_from_boolean = \(x boolean) _box {
+  _box{value: x}
+}
+
+foreign "c" _pen_ffi_any_from_none = \() _box {
+  _box{value: none}
+}
+
+foreign "c" _pen_ffi_any_from_number = \(x number) _box {
+  _box{value: x}
+}
+
+foreign "c" _pen_ffi_any_from_string = \(x string) _box {
+  _box{value: x}
+}
