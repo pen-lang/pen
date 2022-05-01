@@ -73,13 +73,16 @@ async fn _pen_sql_pool_query(
         query = query.bind(str::from_utf8(string.as_slice())?.to_owned());
     }
 
-    let rows = ffi::List::new();
+    let mut rows = ffi::List::new();
 
     for row in pool.as_inner().fetch_all(query).await? {
-        let columns = ffi::List::new();
+        let mut columns = ffi::List::new();
 
         for column in row.columns() {
-            columns = ffi::List::prepend(columns, row.try_get(column.name())?);
+            columns = ffi::List::prepend(
+                columns,
+                ffi::ByteString::from(row.try_get::<String, _>(column.name())?),
+            );
         }
 
         rows = ffi::List::prepend(rows, columns);
