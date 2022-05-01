@@ -1,6 +1,8 @@
 use crate::{
     application_configuration::APPLICATION_CONFIGURATION,
-    file_path_configuration::{DEFAULT_TARGET_DIRECTORY, OUTPUT_DIRECTORY, PRELUDE_PACKAGE_URL},
+    file_path_configuration::{
+        DEFAULT_TARGET_DIRECTORY, FFI_PACKAGE_URL, OUTPUT_DIRECTORY, PRELUDE_PACKAGE_URL,
+    },
     infrastructure, main_package_directory_finder,
 };
 use std::sync::Arc;
@@ -22,6 +24,7 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
         &main_package_directory,
         &output_directory,
         &url::Url::parse(PRELUDE_PACKAGE_URL)?,
+        &url::Url::parse(FFI_PACKAGE_URL)?,
     )?;
 
     app::test_runner::run(
@@ -29,6 +32,7 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
         &main_package_directory,
         &output_directory,
         &url::Url::parse(PRELUDE_PACKAGE_URL)?,
+        &url::Url::parse(FFI_PACKAGE_URL)?,
         &APPLICATION_CONFIGURATION,
     )?;
 

@@ -1,7 +1,9 @@
 use super::main_package_directory_finder;
 use crate::{
     application_configuration::APPLICATION_CONFIGURATION,
-    file_path_configuration::{DEFAULT_TARGET_DIRECTORY, OUTPUT_DIRECTORY, PRELUDE_PACKAGE_URL},
+    file_path_configuration::{
+        DEFAULT_TARGET_DIRECTORY, FFI_PACKAGE_URL, OUTPUT_DIRECTORY, PRELUDE_PACKAGE_URL,
+    },
     infrastructure,
 };
 use std::{error::Error, sync::Arc};
@@ -29,6 +31,7 @@ pub fn build(target_triple: Option<&str>, verbose: bool) -> Result<(), Box<dyn E
         &main_package_directory,
         &output_directory,
         &url::Url::parse(PRELUDE_PACKAGE_URL)?,
+        &url::Url::parse(FFI_PACKAGE_URL)?,
     )?;
 
     if verbose {
@@ -41,6 +44,7 @@ pub fn build(target_triple: Option<&str>, verbose: bool) -> Result<(), Box<dyn E
         &output_directory,
         target_triple,
         &url::Url::parse(PRELUDE_PACKAGE_URL)?,
+        &url::Url::parse(FFI_PACKAGE_URL)?,
         &APPLICATION_CONFIGURATION,
     )
 }
