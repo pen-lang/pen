@@ -5,7 +5,7 @@ type boxAny {
 type firstRest {
   ok boolean
   first \() any
-  rest _anyList
+  rest [any]
 }
 
 foreign "c" _pen_ffi_list_create = \() [any] {
@@ -17,9 +17,9 @@ foreign "c" _pen_ffi_list_prepend = \(x boxAny, xs [any]) [any] {
 }
 
 foreign _pen_ffi_list_first_rest = \(xs [any]) firstRest {
-  if fr = _firstRest(xs) as _firstRest {
-    firstRest{ok: true, first: fr.first, rest: fr.rest}
+  if [x, ...xs] = xs {
+    firstRest{ok: true, first: x, rest: xs}
   } else {
-    firstRest{ok: false, first: \() any { none }, rest: _emptyList()}
+    firstRest{ok: false, first: \() any { none }, rest: [any]}
   }
 }
