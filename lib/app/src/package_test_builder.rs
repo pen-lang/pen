@@ -12,6 +12,7 @@ pub fn build(
     main_package_directory: &FilePath,
     output_directory: &FilePath,
     prelude_package_url: &url::Url,
+    ffi_package_url: &url::Url,
     application_configuration: &ApplicationConfiguration,
 ) -> Result<(), Box<dyn Error>> {
     let child_build_script_files = [
@@ -31,6 +32,7 @@ pub fn build(
             main_package_directory,
             output_directory,
             prelude_package_url,
+            ffi_package_url,
         )?,
     ]
     .into_iter()
@@ -43,7 +45,7 @@ pub fn build(
             )?,
         )?
         .iter()
-        .chain([prelude_package_url])
+        .chain([prelude_package_url, ffi_package_url])
         .map(|url| {
             file_path_resolver::resolve_external_package_build_script_file(
                 output_directory,

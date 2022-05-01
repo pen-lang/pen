@@ -11,6 +11,7 @@ pub fn run(
     main_package_directory: &FilePath,
     output_directory: &FilePath,
     prelude_package_url: &url::Url,
+    ffi_package_url: &url::Url,
     application_configuration: &ApplicationConfiguration,
 ) -> Result<(), Box<dyn Error>> {
     package_test_builder::build(
@@ -18,6 +19,7 @@ pub fn run(
         main_package_directory,
         output_directory,
         prelude_package_url,
+        ffi_package_url,
         application_configuration,
     )?;
 
