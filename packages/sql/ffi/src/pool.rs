@@ -96,7 +96,7 @@ async fn _pen_sql_pool_query(
                     ffi::Boolean::from(boolean).into()
                 } else if let Ok(number) = row.try_get::<f64, _>(column.name()) {
                     ffi::Number::from(number).into()
-                } else if let Ok(string) = row.try_get::<String, _>(column.name()) {
+                } else if let Ok(string) = row.try_get::<&str, _>(column.name()) {
                     ffi::Any::from(ffi::ByteString::from(string))
                 } else {
                     return Err(SqlError::TypeNotSupported.into());
