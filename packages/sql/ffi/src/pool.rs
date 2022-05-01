@@ -1,6 +1,6 @@
 use crate::error::SqlError;
 use futures::{pin_mut, StreamExt};
-use sqlx::{Column, Executor, Row, ValueRef};
+use sqlx::{Executor, Row, ValueRef};
 use std::{error::Error, str, time::Duration};
 
 type AnyPool = sqlx::Pool<sqlx::Any>;
@@ -84,25 +84,25 @@ async fn _pen_sql_pool_query(
 
     let mut rows = ffi::List::new();
 
-    for row in pool.as_inner().fetch_all(query).await? {
+    for row in pool.as_inner().fetch_all(query).await?.iter().rev() {
         let mut columns = ffi::List::new();
 
-        for column in row.columns() {
+        for index in (0..row.columns().len()).rev() {
             columns = ffi::List::prepend(
                 columns,
-                if row.try_get_raw(column.name())?.is_null() {
+                if row.try_get_raw(index)?.is_null() {
                     ffi::None::default().into()
-                } else if let Ok(boolean) = row.try_get::<bool, _>(column.name()) {
+                } else if let Ok(boolean) = row.try_get::<bool, _>(index) {
                     ffi::Boolean::from(boolean).into()
-                } else if let Ok(number) = row.try_get::<i32, _>(column.name()) {
+                } else if let Ok(number) = row.try_get::<i32, _>(index) {
                     ffi::Number::from(number as f64).into()
-                } else if let Ok(number) = row.try_get::<i64, _>(column.name()) {
+                } else if let Ok(number) = row.try_get::<i64, _>(index) {
                     ffi::Number::from(number as f64).into()
-                } else if let Ok(number) = row.try_get::<f32, _>(column.name()) {
+                } else if let Ok(number) = row.try_get::<f32, _>(index) {
                     ffi::Number::from(number as f64).into()
-                } else if let Ok(number) = row.try_get::<f64, _>(column.name()) {
+                } else if let Ok(number) = row.try_get::<f64, _>(index) {
                     ffi::Number::from(number).into()
-                } else if let Ok(string) = row.try_get::<&str, _>(column.name()) {
+                } else if let Ok(string) = row.try_get::<&str, _>(index) {
                     ffi::Any::from(ffi::ByteString::from(string))
                 } else {
                     return Err(SqlError::TypeNotSupported.into());
