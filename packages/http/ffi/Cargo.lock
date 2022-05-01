@@ -289,9 +289,9 @@ dependencies = [
 
 [[package]]
 name = "memchr"
-version = "2.4.1"
+version = "2.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "308cc39be01b73d0d18f82a0e7b2a3df85245f84af96fdddc5d202d27e47b86a"
+checksum = "2dffe52ecf27772e601905b7522cb4ef790d2cc203488bbd0e2fe85fcb74566d"
 
 [[package]]
 name = "mio"
@@ -366,9 +366,9 @@ dependencies = [
 
 [[package]]
 name = "pen-ffi"
-version = "0.3.67"
+version = "0.3.68"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ebf198b588fe0106e490096b7108235d92f2ad892a6308a7829f422a6db5b3a0"
+checksum = "36cf0d2805052561253dee29e94965dd11cffed838fd9c81de05be44fb8970d8"
 dependencies = [
  "async-stream",
  "futures",

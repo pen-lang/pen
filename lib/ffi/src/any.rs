@@ -1,17 +1,20 @@
-use crate::{Boolean, BoxAny, ByteString, None, Number};
+use crate::{Arc, Boolean, BoxAny, ByteString, List, None, Number};
 
 extern "C" {
     fn _pen_ffi_any_is_boolean(any: BoxAny) -> Boolean;
     fn _pen_ffi_any_is_none(any: BoxAny) -> Boolean;
+    fn _pen_ffi_any_is_list(any: BoxAny) -> Boolean;
     fn _pen_ffi_any_is_number(any: BoxAny) -> Boolean;
     fn _pen_ffi_any_is_string(any: BoxAny) -> Boolean;
 
     fn _pen_ffi_any_to_boolean(any: BoxAny) -> Boolean;
+    fn _pen_ffi_any_to_list(any: BoxAny) -> Arc<List>;
     fn _pen_ffi_any_to_number(any: BoxAny) -> Number;
     fn _pen_ffi_any_to_string(any: BoxAny) -> ByteString;
 
     fn _pen_ffi_any_from_boolean(value: Boolean) -> BoxAny;
     fn _pen_ffi_any_from_none() -> BoxAny;
+    fn _pen_ffi_any_from_list(value: Arc<List>) -> BoxAny;
     fn _pen_ffi_any_from_number(value: Number) -> BoxAny;
     fn _pen_ffi_any_from_string(value: ByteString) -> BoxAny;
 }
@@ -44,6 +47,10 @@ impl Any {
 
     pub fn is_none(&self) -> bool {
         unsafe { _pen_ffi_any_is_none(self.clone().into()) }.into()
+    }
+
+    pub fn is_list(&self) -> bool {
+        unsafe { _pen_ffi_any_is_list(self.clone().into()) }.into()
     }
 
     pub fn is_number(&self) -> bool {
@@ -94,6 +101,12 @@ impl From<None> for Any {
     }
 }
 
+impl From<Arc<List>> for Any {
+    fn from(value: Arc<List>) -> Self {
+        unsafe { _pen_ffi_any_from_list(value) }.into()
+    }
+}
+
 impl From<Number> for Any {
     fn from(value: Number) -> Self {
         unsafe { _pen_ffi_any_from_number(value) }.into()
@@ -112,6 +125,18 @@ impl TryFrom<Any> for Boolean {
     fn try_from(value: Any) -> Result<Self, ()> {
         if value.is_boolean() {
             Ok(unsafe { _pen_ffi_any_to_boolean(value.into()) })
+        } else {
+            Err(())
+        }
+    }
+}
+
+impl TryFrom<Any> for Arc<List> {
+    type Error = ();
+
+    fn try_from(value: Any) -> Result<Self, ()> {
+        if value.is_list() {
+            Ok(unsafe { _pen_ffi_any_to_list(value.into()) })
         } else {
             Err(())
         }
