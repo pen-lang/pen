@@ -10,6 +10,10 @@ foreign "c" _pen_ffi_any_is_none = \(x boxAny) boolean {
   if x = x.value as none { true } else { false }
 }
 
+foreign "c" _pen_ffi_any_is_list = \(x boxAny) boolean {
+  if x = x.value as [any] { true } else { false }
+}
+
 foreign "c" _pen_ffi_any_is_number = \(x boxAny) boolean {
   if x = x.value as number { true } else { false }
 }
@@ -23,6 +27,14 @@ foreign "c" _pen_ffi_any_to_boolean = \(x boxAny) boolean {
     x
   } else {
     false
+  }
+}
+
+foreign "c" _pen_ffi_any_to_list = \(x boxAny) [any] {
+  if x = x.value as [any] {
+    x
+  } else {
+    [any]
   }
 }
 
@@ -48,6 +60,10 @@ foreign "c" _pen_ffi_any_from_boolean = \(x boolean) boxAny {
 
 foreign "c" _pen_ffi_any_from_none = \() boxAny {
   boxAny{value: none}
+}
+
+foreign "c" _pen_ffi_any_from_list = \(x [any]) boxAny {
+  boxAny{value: x}
 }
 
 foreign "c" _pen_ffi_any_from_number = \(x number) boxAny {
