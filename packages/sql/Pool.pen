@@ -1,0 +1,24 @@
+import 'Context'context { Context }
+import 'Pool'Options { Options }
+import 'Pool'pool
+import 'Value { Value }
+
+type Pool = pool'Pool
+
+New = \(context Context, uri string, options Options) Pool | error {
+  context'Inner(context).CreatePool(uri, options)
+}
+
+Query = \(context Context, pool Pool, query string, arguments [Value]) [[Value]] | error {
+  if x = context'Inner(context).QueryPool(pool, query, [any x for x in arguments]) as error {
+    x
+  } else {
+    [[Value]
+      [Value
+        if c = c() as Value { c } else { none }
+        for c in r()
+      ]
+      for r in x
+    ]
+  }
+}
