@@ -1,5 +1,6 @@
+use crate::error::SqlError;
 use futures::{pin_mut, StreamExt};
-use sqlx::{Column, Executor, Row};
+use sqlx::{Column, Executor, Row, ValueRef};
 use std::{error::Error, str, time::Duration};
 
 type AnyPool = sqlx::Pool<sqlx::Any>;
@@ -68,9 +69,15 @@ async fn _pen_sql_pool_query(
     pin_mut!(arguments);
 
     while let Some(argument) = arguments.next().await {
-        let string = ffi::ByteString::try_from(argument).unwrap_or_default();
-
-        query = query.bind(str::from_utf8(string.as_slice())?.to_owned());
+        if let Ok(string) = ffi::ByteString::try_from(argument.clone()) {
+            query = query.bind(str::from_utf8(string.as_slice())?.to_owned());
+        } else if let Ok(number) = ffi::Number::try_from(argument.clone()) {
+            query = query.bind(f64::from(number));
+        } else if argument.is_none() {
+            query = query.bind(None::<f64>);
+        } else {
+            return Err(SqlError::TypeNotSupported.into());
+        }
     }
 
     let mut rows = ffi::List::new();
@@ -81,7 +88,15 @@ async fn _pen_sql_pool_query(
         for column in row.columns() {
             columns = ffi::List::prepend(
                 columns,
-                ffi::ByteString::from(row.try_get::<String, _>(column.name())?),
+                if let Ok(string) = row.try_get::<String, _>(column.name()) {
+                    ffi::Any::from(ffi::ByteString::from(string))
+                } else if let Ok(number) = row.try_get::<f64, _>(column.name()) {
+                    ffi::Number::from(number).into()
+                } else if row.try_get_raw(column.name())?.is_null() {
+                    ffi::None::default().into()
+                } else {
+                    return Err(SqlError::TypeNotSupported.into());
+                },
             );
         }
 
