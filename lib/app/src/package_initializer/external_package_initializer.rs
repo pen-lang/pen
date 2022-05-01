@@ -16,24 +16,8 @@ pub fn initialize_dependencies(
         .dependencies()
         .values()
     {
-        initialize_recursively(infrastructure, url, output_directory)?;
+        initialize(infrastructure, url, output_directory)?;
     }
-
-    Ok(())
-}
-
-fn initialize_recursively(
-    infrastructure: &Infrastructure,
-    package_url: &url::Url,
-    output_directory: &FilePath,
-) -> Result<(), Box<dyn Error>> {
-    initialize(infrastructure, package_url, output_directory)?;
-
-    initialize_dependencies(
-        infrastructure,
-        &file_path_resolver::resolve_package_directory(output_directory, package_url),
-        output_directory,
-    )?;
 
     Ok(())
 }
@@ -59,6 +43,12 @@ pub fn initialize(
             package_url,
             &infrastructure.file_path_configuration,
         ),
+    )?;
+
+    initialize_dependencies(
+        infrastructure,
+        &file_path_resolver::resolve_package_directory(output_directory, package_url),
+        output_directory,
     )?;
 
     Ok(())
