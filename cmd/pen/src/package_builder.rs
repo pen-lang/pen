@@ -31,6 +31,7 @@ pub fn build(target_triple: Option<&str>, verbose: bool) -> Result<(), Box<dyn E
         &main_package_directory,
         &output_directory,
         &url::Url::parse(PRELUDE_PACKAGE_URL)?,
+        &url::Url::parse(FFI_PACKAGE_URL)?,
     )?;
 
     if verbose {

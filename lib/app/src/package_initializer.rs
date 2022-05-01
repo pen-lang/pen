@@ -12,10 +12,16 @@ pub fn initialize(
     package_directory: &FilePath,
     output_directory: &FilePath,
     prelude_package_url: &url::Url,
+    ffi_package_url: &url::Url,
 ) -> Result<(), Box<dyn Error>> {
     initialize_prelude(infrastructure, prelude_package_url, output_directory)?;
+    external_package_initializer::initialize(infrastructure, ffi_package_url, output_directory)?;
 
-    external_package_initializer::initialize(infrastructure, package_directory, output_directory)?;
+    external_package_initializer::initialize_dependencies(
+        infrastructure,
+        package_directory,
+        output_directory,
+    )?;
 
     Ok(())
 }
