@@ -1,0 +1,25 @@
+type boxAny {
+  value any
+}
+
+type firstRest {
+  ok boolean
+  first \() any
+  rest _anyList
+}
+
+foreign "c" _pen_ffi_list_create = \() [any] {
+  [any]
+}
+
+foreign "c" _pen_ffi_list_prepend = \(x boxAny, xs [any]) [any] {
+  [any x.value, ...xs]
+}
+
+foreign _pen_ffi_list_first_rest = \(xs [any]) firstRest {
+  if fr = _firstRest(xs) as _firstRest {
+    firstRest{ok: true, first: fr.first, rest: fr.rest}
+  } else {
+    firstRest{ok: false, first: \() any { none }, rest: _emptyList()}
+  }
+}

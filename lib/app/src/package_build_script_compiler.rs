@@ -166,6 +166,7 @@ pub fn compile_application(
     main_package_directory: &FilePath,
     output_directory: &FilePath,
     prelude_package_url: &url::Url,
+    ffi_package_url: &url::Url,
     application_configuration: &ApplicationConfiguration,
 ) -> Result<FilePath, Box<dyn Error>> {
     let external_package_configurations = external_package_configuration_reader::read_all(
@@ -209,11 +210,12 @@ pub fn compile_application(
                         })
                         .collect::<Vec<_>>(),
                 )
-                .chain([file_path_resolver::resolve_external_package_archive_file(
+                .chain(resolve_default_package_archive_files(
+                    infrastructure,
                     output_directory,
                     prelude_package_url,
-                    &infrastructure.file_path_configuration,
-                )])
+                    ffi_package_url,
+                ))
                 .collect::<Vec<_>>(),
                 &main_package_directory.join(&FilePath::new([
                     &application_configuration.application_filename
@@ -230,6 +232,7 @@ pub fn compile_test(
     main_package_directory: &FilePath,
     output_directory: &FilePath,
     prelude_package_url: &url::Url,
+    ffi_package_url: &url::Url,
 ) -> Result<FilePath, Box<dyn Error>> {
     let build_script_file = file_path_resolver::resolve_special_build_script_file(
         output_directory,
@@ -271,11 +274,12 @@ pub fn compile_test(
                     })
                     .collect::<Vec<_>>(),
                 )
-                .chain([file_path_resolver::resolve_external_package_archive_file(
+                .chain(resolve_default_package_archive_files(
+                    infrastructure,
                     output_directory,
                     prelude_package_url,
-                    &infrastructure.file_path_configuration,
-                )])
+                    ffi_package_url,
+                ))
                 .collect::<Vec<_>>(),
                 &file_path_resolver::resolve_package_test_information_file(
                     output_directory,
@@ -351,4 +355,22 @@ pub fn compile_prelude(
     )?;
 
     Ok(())
+}
+
+fn resolve_default_package_archive_files(
+    infrastructure: &Infrastructure,
+    output_directory: &FilePath,
+    prelude_package_url: &url::Url,
+    ffi_package_url: &url::Url,
+) -> Vec<FilePath> {
+    [prelude_package_url, ffi_package_url]
+        .into_iter()
+        .map(|url| {
+            file_path_resolver::resolve_external_package_archive_file(
+                output_directory,
+                &url,
+                &infrastructure.file_path_configuration,
+            )
+        })
+        .collect()
 }

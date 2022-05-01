@@ -33,7 +33,7 @@ pub fn build(
             )?,
         )?
         .iter()
-        .chain([prelude_package_url])
+        .chain([prelude_package_url, ffi_package_url])
         .chain([ffi_package_url])
         .map(|url| {
             file_path_resolver::resolve_external_package_build_script_file(
@@ -55,6 +55,7 @@ pub fn build(
                 main_package_directory,
                 output_directory,
                 prelude_package_url,
+                ffi_package_url,
                 application_configuration,
             )?)
         } else {

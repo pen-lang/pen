@@ -32,6 +32,7 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
         &main_package_directory,
         &output_directory,
         &url::Url::parse(PRELUDE_PACKAGE_URL)?,
+        &url::Url::parse(FFI_PACKAGE_URL)?,
         &APPLICATION_CONFIGURATION,
     )?;
 
