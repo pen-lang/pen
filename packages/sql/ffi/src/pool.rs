@@ -94,6 +94,12 @@ async fn _pen_sql_pool_query(
                     ffi::None::default().into()
                 } else if let Ok(boolean) = row.try_get::<bool, _>(column.name()) {
                     ffi::Boolean::from(boolean).into()
+                } else if let Ok(number) = row.try_get::<i32, _>(column.name()) {
+                    ffi::Number::from(number as f64).into()
+                } else if let Ok(number) = row.try_get::<i64, _>(column.name()) {
+                    ffi::Number::from(number as f64).into()
+                } else if let Ok(number) = row.try_get::<f32, _>(column.name()) {
+                    ffi::Number::from(number as f64).into()
                 } else if let Ok(number) = row.try_get::<f64, _>(column.name()) {
                     ffi::Number::from(number).into()
                 } else if let Ok(string) = row.try_get::<&str, _>(column.name()) {
