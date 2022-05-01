@@ -40,7 +40,7 @@ run = \(ctx context) none | error {
     },
   )?
 
-  xss = Pool'Query(ctx.Sql, p, "select 42;", [Value])?
+  xss = Pool'Query(ctx.Sql, p, args.query, [Value])?
 
   File'Write(
     ctx.Os,
