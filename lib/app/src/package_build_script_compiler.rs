@@ -368,7 +368,7 @@ fn resolve_default_package_archive_files(
         .map(|url| {
             file_path_resolver::resolve_external_package_archive_file(
                 output_directory,
-                &url,
+                url,
                 &infrastructure.file_path_configuration,
             )
         })
