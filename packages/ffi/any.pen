@@ -1,24 +1,24 @@
-type _box {
+type boxAny {
   value any
 }
 
-foreign "c" _pen_ffi_any_is_boolean = \(x _box) boolean {
+foreign "c" _pen_ffi_any_is_boolean = \(x boxAny) boolean {
   if x = x.value as boolean { true } else { false }
 }
 
-foreign "c" _pen_ffi_any_is_none = \(x _box) boolean {
+foreign "c" _pen_ffi_any_is_none = \(x boxAny) boolean {
   if x = x.value as none { true } else { false }
 }
 
-foreign "c" _pen_ffi_any_is_number = \(x _box) boolean {
+foreign "c" _pen_ffi_any_is_number = \(x boxAny) boolean {
   if x = x.value as number { true } else { false }
 }
 
-foreign "c" _pen_ffi_any_is_string = \(x _box) boolean {
+foreign "c" _pen_ffi_any_is_string = \(x boxAny) boolean {
   if x = x.value as string { true } else { false }
 }
 
-foreign "c" _pen_ffi_any_to_boolean = \(x _box) boolean {
+foreign "c" _pen_ffi_any_to_boolean = \(x boxAny) boolean {
   if x = x.value as boolean {
     x
   } else {
@@ -26,7 +26,7 @@ foreign "c" _pen_ffi_any_to_boolean = \(x _box) boolean {
   }
 }
 
-foreign "c" _pen_ffi_any_to_number = \(x _box) number {
+foreign "c" _pen_ffi_any_to_number = \(x boxAny) number {
   if x = x.value as number {
     x
   } else {
@@ -34,7 +34,7 @@ foreign "c" _pen_ffi_any_to_number = \(x _box) number {
   }
 }
 
-foreign "c" _pen_ffi_any_to_string = \(x _box) string {
+foreign "c" _pen_ffi_any_to_string = \(x boxAny) string {
   if x = x.value as string {
     x
   } else {
@@ -42,18 +42,18 @@ foreign "c" _pen_ffi_any_to_string = \(x _box) string {
   }
 }
 
-foreign "c" _pen_ffi_any_from_boolean = \(x boolean) _box {
-  _box{value: x}
+foreign "c" _pen_ffi_any_from_boolean = \(x boolean) boxAny {
+  boxAny{value: x}
 }
 
-foreign "c" _pen_ffi_any_from_none = \() _box {
-  _box{value: none}
+foreign "c" _pen_ffi_any_from_none = \() boxAny {
+  boxAny{value: none}
 }
 
-foreign "c" _pen_ffi_any_from_number = \(x number) _box {
-  _box{value: x}
+foreign "c" _pen_ffi_any_from_number = \(x number) boxAny {
+  boxAny{value: x}
 }
 
-foreign "c" _pen_ffi_any_from_string = \(x string) _box {
-  _box{value: x}
+foreign "c" _pen_ffi_any_from_string = \(x string) boxAny {
+  boxAny{value: x}
 }
