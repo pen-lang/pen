@@ -71,6 +71,8 @@ async fn _pen_sql_pool_query(
     while let Some(argument) = arguments.next().await {
         if argument.is_none() {
             query = query.bind(None::<f64>);
+        } else if let Ok(boolean) = ffi::Boolean::try_from(argument.clone()) {
+            query = query.bind(bool::from(boolean));
         } else if let Ok(number) = ffi::Number::try_from(argument.clone()) {
             query = query.bind(f64::from(number));
         } else if let Ok(string) = ffi::ByteString::try_from(argument.clone()) {
@@ -90,6 +92,8 @@ async fn _pen_sql_pool_query(
                 columns,
                 if row.try_get_raw(column.name())?.is_null() {
                     ffi::None::default().into()
+                } else if let Ok(boolean) = row.try_get::<bool, _>(column.name()) {
+                    ffi::Boolean::from(boolean).into()
                 } else if let Ok(number) = row.try_get::<f64, _>(column.name()) {
                     ffi::Number::from(number).into()
                 } else if let Ok(string) = row.try_get::<String, _>(column.name()) {
