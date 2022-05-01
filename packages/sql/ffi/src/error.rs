@@ -1,5 +1,7 @@
-use std::error::Error;
-use std::fmt::{self, Display, Formatter};
+use std::{
+    error::Error,
+    fmt::{self, Display, Formatter},
+};
 
 #[derive(Clone, Debug)]
 pub enum SqlError {
