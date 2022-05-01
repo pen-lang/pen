@@ -363,7 +363,7 @@ fn resolve_default_package_archive_files(
     prelude_package_url: &url::Url,
     ffi_package_url: &url::Url,
 ) -> Vec<FilePath> {
-    [prelude_package_url, ffi_package_url]
+    [ffi_package_url, prelude_package_url]
         .into_iter()
         .map(|url| {
             file_path_resolver::resolve_external_package_archive_file(
