@@ -1,0 +1,9 @@
+{
+  "type": "application",
+  "dependencies": {
+    "Core": "pen:///core",
+    "Flag": "pen:///flag",
+    "Sql": "pen:///sql",
+    "Os": "pen:///os"
+  }
+}
