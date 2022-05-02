@@ -2,15 +2,21 @@ import 'Pool'Options { Options }
 import 'Pool'pool { Pool }
 
 import foreign _pen_sql_pool_create \(string, Options) poolResult
-import foreign _pen_sql_pool_query \(Pool, string, [any]) rowsResult
+import foreign _pen_sql_pool_query \(Pool, string, [any]) listResult
+import foreign _pen_sql_pool_execute \(Pool, string, [any]) numberResult
 
 type poolResult {
   pool Pool
   error string
 }
 
-type rowsResult {
-  rows [any]
+type listResult {
+  list [any]
+  error string
+}
+
+type numberResult {
+  value number
   error string
 }
 
@@ -21,6 +27,7 @@ type Context {
 type Inner {
   CreatePool \(string, Options) Pool | error
   QueryPool \(Pool, string, [any]) [[any]] | error
+  ExecutePool \(Pool, string, [any]) number | error
 }
 
 New = \() Context {
@@ -39,7 +46,16 @@ New = \() Context {
         r = _pen_sql_pool_query(pool, query, arguments)
 
         if r.error == "" {
-          [[any] if r = r() as [any] { r } else { [any] } for r in r.rows]
+          [[any] if r = r() as [any] { r } else { [any] } for r in r.list]
+        } else {
+          error(r.error)
+        }
+      },
+      ExecutePool: \(pool Pool, query string, arguments [any]) number | error {
+        r = _pen_sql_pool_execute(pool, query, arguments)
+
+        if r.error == "" {
+          r.value
         } else {
           error(r.error)
         }
