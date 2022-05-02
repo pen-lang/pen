@@ -1,0 +1,6 @@
+import 'Context'context
+
+# A SQL context
+type Context = context'Context
+
+UnsafeNew = \() Context { context'New() }

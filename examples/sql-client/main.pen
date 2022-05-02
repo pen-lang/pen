@@ -1,0 +1,83 @@
+import Core'Number
+import Core'String
+import Flag'Flag
+import Os'Environment
+import Os'File
+import Os'Process
+import Sql'Pool
+import Sql'Pool'Options { Options }
+import Sql'Value { Value }
+
+type arguments {
+  uri string
+  query string
+}
+
+main = \(ctx context) none {
+  if e = run(ctx) as none {
+    none
+  } else {
+    _ = File'Write(
+      ctx.Os,
+      File'StdOut(),
+      String'Join([string if s = source(e) as string { s } else { "unknown error" }, "\n"], ""),
+    )
+
+    Process'Exit(ctx.Os, 1)
+  }
+}
+
+run = \(ctx context) none | error {
+  args = arguments(Flag'Parse(Environment'Arguments(ctx.Os))?)?
+
+  p = Pool'New(
+    ctx.Sql,
+    args.uri,
+    Options{
+      MinConnections: 1,
+      MaxConnections: 1,
+      ConnectTimeout: 1000,
+    },
+  )?
+
+  xss = Pool'Query(ctx.Sql, p, args.query, [Value])?
+
+  File'Write(
+    ctx.Os,
+    File'StdOut(),
+    String'Join(
+      [string
+        String'Join([string valueString(x()) for x in xs()], ", ")
+        for xs in xss
+      ],
+      "\n",
+    ),
+  )?
+  File'Write(ctx.Os, File'StdOut(), "\n")?
+
+  none
+}
+
+arguments = \(f Flag'Set) arguments | error {
+  if [u, ...ss] = f.Positional {
+    if [q, ...ss] = ss {
+      arguments{uri: u(), query: q()}
+    } else {
+      error("query missing")
+    }
+  } else {
+    error("uri missing")
+  }
+}
+
+valueString = \(v Value) string {
+  if v = v as boolean {
+    if v { "true" } else { "false" }
+  } else if number {
+    Number'String(v)
+  } else if string {
+    String'Join([string "'", v, "'"], "")
+  } else if none {
+    "null"
+  }
+}

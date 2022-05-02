@@ -1,0 +1,53 @@
+import 'Pool'Options { Options }
+import 'Pool'pool { Pool }
+
+import foreign _pen_sql_pool_create \(string, Options) poolResult
+import foreign _pen_sql_pool_query \(Pool, string, [any]) rowsResult
+
+type poolResult {
+  pool Pool
+  error string
+}
+
+type rowsResult {
+  rows [any]
+  error string
+}
+
+type Context {
+  inner Inner
+}
+
+type Inner {
+  CreatePool \(string, Options) Pool | error
+  QueryPool \(Pool, string, [any]) [[any]] | error
+}
+
+New = \() Context {
+  Context{
+    inner: Inner{
+      CreatePool: \(uri string, options Options) Pool | error {
+        r = _pen_sql_pool_create(uri, options)
+
+        if r.error == "" {
+          r.pool
+        } else {
+          error(r.error)
+        }
+      },
+      QueryPool: \(pool Pool, query string, arguments [any]) [[any]] | error {
+        r = _pen_sql_pool_query(pool, query, arguments)
+
+        if r.error == "" {
+          [[any] if r = r() as [any] { r } else { [any] } for r in r.rows]
+        } else {
+          error(r.error)
+        }
+      },
+    },
+  }
+}
+
+Inner = \(ctx Context) Inner {
+  ctx.inner
+}

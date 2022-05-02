@@ -55,6 +55,7 @@
     "rustup",
     "sccache",
     "siphasher",
+    "sqlx",
     "srcdep",
     "subninja",
     "subtyping",

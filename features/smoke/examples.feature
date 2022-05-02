@@ -12,15 +12,17 @@ Feature: Examples
     Examples:
       | example               |
       | algorithms/fizz-buzz  |
-      | algorithms/quick-sort |
       | algorithms/knapsack   |
+      | algorithms/quick-sort |
       | cat                   |
       | console               |
       | echo                  |
       | hello-world           |
+      | http-client           |
       | http-server           |
       | life-game             |
       | ls                    |
+      | sql-client            |
       | tcp-client            |
       | tcp-server            |
       | udp-client            |
