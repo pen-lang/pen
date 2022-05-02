@@ -14,5 +14,6 @@ sqlx = { git = "https://github.com/raviqqe/sqlx", branch = "bug/any-type-info", 
   "any",
   "mysql",
   "postgres",
+  "sqlite",
   "runtime-tokio-rustls",
 ] }
