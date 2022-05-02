@@ -1,7 +1,7 @@
 [package]
 name = "pen-ffi"
 description = "FFI library for Pen programming language"
-version = "0.3.68"
+version = "0.3.69"
 publish = true
 edition = "2021"
 license = "MIT"
@@ -13,7 +13,7 @@ async-stream = "0.3"
 futures = "0.3"
 pen-ffi-macro = { version = "0.1", path = "../ffi-macro" }
 tokio = { version = "1", features = ["full"], optional = true }
-tokio-util = { version = "0.7", features = ["codec"], optional = true }
+tokio-util = { version = "0.7", features = ["full"], optional = true }
 
 [dev-dependencies]
 tokio = { "version" = "1", "features" = ["full"] }

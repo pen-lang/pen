@@ -770,7 +770,7 @@ dependencies = [
 
 [[package]]
 name = "pen-ffi"
-version = "0.3.68"
+version = "0.3.69"
 dependencies = [
  "async-stream",
  "futures",
@@ -1126,8 +1126,11 @@ checksum = "0edfdeb067411dba2044da6d1cb2df793dd35add7888d73c16e3381ded401764"
 dependencies = [
  "bytes",
  "futures-core",
+ "futures-io",
  "futures-sink",
+ "futures-util",
  "pin-project-lite",
+ "slab",
  "tokio",
  "tracing",
 ]
