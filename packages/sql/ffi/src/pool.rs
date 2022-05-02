@@ -66,11 +66,15 @@ async fn _pen_sql_pool_query(
     query: ffi::ByteString,
     arguments: ffi::Arc<ffi::List>,
 ) -> Result<ffi::Arc<ffi::List>, Box<dyn Error>> {
-    let query = build_query(&query, arguments).await?;
-
     let mut rows = ffi::List::new();
 
-    for row in pool.as_inner().fetch_all(query).await?.iter().rev() {
+    for row in pool
+        .as_inner()
+        .fetch_all(build_query(&query, arguments).await?)
+        .await?
+        .iter()
+        .rev()
+    {
         let mut columns = ffi::List::new();
 
         for index in (0..row.columns().len()).rev() {
