@@ -17,7 +17,7 @@ main = \(ctx context) none {
   } else {
     _ = File'Write(
       ctx.Os,
-      File'StdOut(),
+      File'StdErr(),
       String'Join([string if s = source(e) as string { s } else { "unknown error" }, "\n"], ""),
     )
 
