@@ -46,6 +46,11 @@ build_package_document \
   "This package provides an interface for operating systems."
 
 build_package_document \
+  sql \
+  Sql \
+  "This package provides a SQL database client."
+
+build_package_document \
   test \
   Test \
   "This package provides test utilities."
