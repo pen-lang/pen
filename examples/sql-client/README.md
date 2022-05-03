@@ -1,6 +1,6 @@
 # SQL client
 
-A SQL client to run a query
+A SQL database client to run a query
 
 ## Usage
 
