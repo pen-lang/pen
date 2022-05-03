@@ -3,7 +3,7 @@ use futures::Stream;
 
 extern "C" {
     import!(
-        _pen_ffi_list_first_rest,
+        pen_ffi_list_first_rest,
         fn(list: Arc<List>) -> Arc<FirstRest>
     );
 }
@@ -29,7 +29,7 @@ pub fn from_list(list: Arc<List>) -> impl Stream<Item = Any> {
 async fn get_first_rest(list: Arc<List>) -> Arc<FirstRest> {
     call_function!(
         fn(Arc<List>) -> Arc<FirstRest>,
-        _pen_ffi_list_first_rest,
+        pen_ffi_list_first_rest,
         list.clone(),
     )
     .await
