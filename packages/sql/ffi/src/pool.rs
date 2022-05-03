@@ -5,6 +5,9 @@ use std::{error::Error, str, time::Duration};
 
 type AnyPool = sqlx::Pool<sqlx::Any>;
 
+type AnyQuery<'a> =
+    sqlx::query::Query<'a, sqlx::Any, <sqlx::Any as sqlx::database::HasArguments<'a>>::Arguments>;
+
 #[repr(C)]
 struct PoolOptions {
     min_connections: ffi::Number,
@@ -63,28 +66,15 @@ async fn _pen_sql_pool_query(
     query: ffi::ByteString,
     arguments: ffi::Arc<ffi::List>,
 ) -> Result<ffi::Arc<ffi::List>, Box<dyn Error>> {
-    let mut query = sqlx::query::<sqlx::Any>(str::from_utf8(query.as_slice())?);
-    let arguments = ffi::future::stream::from_list(arguments);
-
-    pin_mut!(arguments);
-
-    while let Some(argument) = arguments.next().await {
-        if argument.is_none() {
-            query = query.bind(None::<f64>);
-        } else if let Ok(boolean) = ffi::Boolean::try_from(argument.clone()) {
-            query = query.bind(bool::from(boolean));
-        } else if let Ok(number) = ffi::Number::try_from(argument.clone()) {
-            query = query.bind(f64::from(number));
-        } else if let Ok(string) = ffi::ByteString::try_from(argument.clone()) {
-            query = query.bind(str::from_utf8(string.as_slice())?.to_owned());
-        } else {
-            return Err(SqlError::TypeNotSupported.into());
-        }
-    }
-
     let mut rows = ffi::List::new();
 
-    for row in pool.as_inner().fetch_all(query).await?.iter().rev() {
+    for row in pool
+        .as_inner()
+        .fetch_all(build_query(&query, arguments).await?)
+        .await?
+        .iter()
+        .rev()
+    {
         let mut columns = ffi::List::new();
 
         for index in (0..row.columns().len()).rev() {
@@ -114,4 +104,44 @@ async fn _pen_sql_pool_query(
     }
 
     Ok(rows)
+}
+
+#[ffi::bindgen]
+async fn _pen_sql_pool_execute(
+    pool: ffi::Arc<Pool>,
+    query: ffi::ByteString,
+    arguments: ffi::Arc<ffi::List>,
+) -> Result<ffi::Number, Box<dyn Error>> {
+    Ok((pool
+        .as_inner()
+        .execute(build_query(&query, arguments).await?)
+        .await?
+        .rows_affected() as f64)
+        .into())
+}
+
+async fn build_query(
+    query: &ffi::ByteString,
+    arguments: ffi::Arc<ffi::List>,
+) -> Result<AnyQuery<'_>, Box<dyn Error>> {
+    let mut query = sqlx::query::<sqlx::Any>(str::from_utf8(query.as_slice())?);
+    let arguments = ffi::future::stream::from_list(arguments);
+
+    pin_mut!(arguments);
+
+    while let Some(argument) = arguments.next().await {
+        if argument.is_none() {
+            query = query.bind(None::<f64>);
+        } else if let Ok(boolean) = ffi::Boolean::try_from(argument.clone()) {
+            query = query.bind(bool::from(boolean));
+        } else if let Ok(number) = ffi::Number::try_from(argument.clone()) {
+            query = query.bind(f64::from(number));
+        } else if let Ok(string) = ffi::ByteString::try_from(argument.clone()) {
+            query = query.bind(str::from_utf8(string.as_slice())?.to_owned());
+        } else {
+            return Err(SqlError::TypeNotSupported.into());
+        }
+    }
+
+    Ok(query)
 }

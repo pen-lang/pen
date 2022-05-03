@@ -11,7 +11,7 @@ New = \(context Context, uri string, options Options) Pool | error {
   context'Inner(context).CreatePool(uri, options)
 }
 
-# Run a query.
+# Run a query and return its rows.
 Query = \(context Context, pool Pool, query string, arguments [Value]) [[Value]] | error {
   if x = context'Inner(context).QueryPool(pool, query, [any x for x in arguments]) as error {
     x
@@ -24,4 +24,9 @@ Query = \(context Context, pool Pool, query string, arguments [Value]) [[Value]]
       for r in x
     ]
   }
+}
+
+# Run a query and return a number of affected rows.
+Execute = \(context Context, pool Pool, query string, arguments [Value]) number | error {
+  context'Inner(context).ExecutePool(pool, query, [any x for x in arguments])
 }
