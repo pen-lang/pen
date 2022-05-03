@@ -1,5 +1,6 @@
 import Core'Number
 import Core'String
+import Os'Context as Os
 import Os'Environment
 import Os'File
 import Os'Process
@@ -8,6 +9,7 @@ import Sql'Pool'Options { Options }
 import Sql'Value { Value }
 
 import 'arguments { Arguments }
+import 'command
 
 main = \(ctx context) none {
   if e = run(ctx) as none {
@@ -36,20 +38,26 @@ run = \(ctx context) none | error {
     },
   )?
 
-  xss = Pool'Query(ctx.Sql, p, args.Query, [Value])?
+  if _ = args.Command as command'Query {
+    xss = Pool'Query(ctx.Sql, p, args.Query, [Value])?
 
-  File'Write(
-    ctx.Os,
-    File'StdOut(),
-    String'Join(
-      [string
-        String'Join([string valueString(x()) for x in xs()], ", ")
-        for xs in xss
-      ],
-      "\n",
-    ),
-  )?
-  File'Write(ctx.Os, File'StdOut(), "\n")?
+    print(
+      ctx.Os,
+      String'Join(
+        [string
+          String'Join([string valueString(x()) for x in xs()], ", ")
+          for xs in xss
+        ],
+        "\n",
+      ),
+    )?
+  } else if command'Execute {
+    n = Pool'Execute(ctx.Sql, p, args.Query, [Value])?
+
+    print(ctx.Os, Number'String(n))?
+  }
+
+  print(ctx.Os, "\n")?
 
   none
 }
@@ -64,4 +72,10 @@ valueString = \(v Value) string {
   } else if none {
     "null"
   }
+}
+
+print = \(ctx Os'Context, s string) none | error {
+  File'Write(ctx, File'StdOut(), s)?
+
+  none
 }
