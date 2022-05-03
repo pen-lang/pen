@@ -1,0 +1,35 @@
+import Flag'Flag
+
+import 'command { Command }
+
+type Arguments {
+  Command Command
+  Uri string
+  Query string
+}
+
+Parse = \(args [string]) Arguments | error {
+  f = Flag'Parse(args)?
+
+  if [c, ...ss] = f.Positional {
+    c = if c() == "query" {
+      command'Query{}
+    } else if c() == "execute" {
+      command'Execute{}
+    } else {
+      error("unknown command")
+    }?
+
+    if [u, ...ss] = ss {
+      if [q, ...ss] = ss {
+        Arguments{Command: c, Uri: u(), Query: q()}
+      } else {
+        error("query missing")
+      }
+    } else {
+      error("uri missing")
+    }
+  } else {
+    error("command missing")
+  }
+}

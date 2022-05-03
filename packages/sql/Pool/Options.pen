@@ -1,3 +1,4 @@
+# Connection pool options
 type Options {
   MinConnections number
   MaxConnections number
