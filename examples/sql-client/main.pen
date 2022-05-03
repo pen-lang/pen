@@ -1,6 +1,5 @@
 import Core'Number
 import Core'String
-import Flag'Flag
 import Os'Environment
 import Os'File
 import Os'Process
@@ -8,10 +7,7 @@ import Sql'Pool
 import Sql'Pool'Options { Options }
 import Sql'Value { Value }
 
-type arguments {
-  uri string
-  query string
-}
+import 'arguments { Arguments }
 
 main = \(ctx context) none {
   if e = run(ctx) as none {
@@ -28,11 +24,11 @@ main = \(ctx context) none {
 }
 
 run = \(ctx context) none | error {
-  args = arguments(Flag'Parse(Environment'Arguments(ctx.Os))?)?
+  args = arguments'Parse(Environment'Arguments(ctx.Os))?
 
   p = Pool'New(
     ctx.Sql,
-    args.uri,
+    args.Uri,
     Options{
       MinConnections: 1,
       MaxConnections: 1,
@@ -40,7 +36,7 @@ run = \(ctx context) none | error {
     },
   )?
 
-  xss = Pool'Query(ctx.Sql, p, args.query, [Value])?
+  xss = Pool'Query(ctx.Sql, p, args.Query, [Value])?
 
   File'Write(
     ctx.Os,
@@ -56,18 +52,6 @@ run = \(ctx context) none | error {
   File'Write(ctx.Os, File'StdOut(), "\n")?
 
   none
-}
-
-arguments = \(f Flag'Set) arguments | error {
-  if [u, ...ss] = f.Positional {
-    if [q, ...ss] = ss {
-      arguments{uri: u(), query: q()}
-    } else {
-      error("query missing")
-    }
-  } else {
-    error("uri missing")
-  }
 }
 
 valueString = \(v Value) string {

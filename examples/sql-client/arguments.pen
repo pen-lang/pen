@@ -1,0 +1,24 @@
+import Flag'Flag
+
+type Arguments {
+  Uri string
+  Query string
+}
+
+Parse = \(args [string]) Arguments | error {
+  f = Flag'Parse(args)?
+
+  if [c, ...ss] = f.Positional {
+    if [u, ...ss] = ss {
+      if [q, ...ss] = ss {
+        Arguments{Uri: u(), Query: q()}
+      } else {
+        error("query missing")
+      }
+    } else {
+      error("uri missing")
+    }
+  } else {
+    error("command missing")
+  }
+}
