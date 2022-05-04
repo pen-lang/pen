@@ -363,7 +363,6 @@ impl NinjaBuildScriptCompiler {
                     object_files,
                     archive_file,
                     &ffi_archive_file,
-                    package_directory,
                     package_name,
                 )?)
                 .collect()
@@ -396,7 +395,6 @@ impl NinjaBuildScriptCompiler {
         object_files: &[&FilePath],
         archive_file: &FilePath,
         ffi_archive_file: &FilePath,
-        package_directory: &FilePath,
         package_name: Option<&str>,
     ) -> Result<Vec<String>, Box<dyn Error>> {
         let ffi_archive_file = self
