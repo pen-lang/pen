@@ -74,6 +74,7 @@ mod tests {
                 "",
                 &Default::default(),
                 &[],
+                &[],
             ),
             Ok(ir::Module::empty()),
         );
@@ -99,6 +100,7 @@ mod tests {
                 ),
                 "",
                 &Default::default(),
+                &[],
                 &[],
             ),
             Err(CompileError::ModuleNotFound(path.into())),

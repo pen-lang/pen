@@ -214,7 +214,10 @@ mod tests {
 
     #[test]
     fn compile_empty_module() {
-        assert_eq!(compile(&ir::Module::empty(), &[], &[]), ir::Module::empty());
+        assert_eq!(
+            compile(&ir::Module::empty(), &[], &[], &[]),
+            ir::Module::empty()
+        );
     }
 
     #[test]
@@ -249,7 +252,8 @@ mod tests {
                     "Bar",
                     Default::default(),
                 )],
-                &[]
+                &[],
+                &[],
             ),
             ir::Module::empty()
                 .set_declarations(vec![ir::FunctionDeclaration::new(
@@ -315,7 +319,8 @@ mod tests {
                     "Bar",
                     Default::default()
                 )],
-                &[]
+                &[],
+                &[],
             ),
             ir::Module::empty()
                 .set_type_definitions(vec![
@@ -392,7 +397,8 @@ mod tests {
                     "Bar",
                     Default::default()
                 )],
-                &[]
+                &[],
+                &[],
             ),
             ir::Module::empty()
                 .set_type_definitions(vec![ir::TypeDefinition::fake(
@@ -470,7 +476,8 @@ mod tests {
                     "Bar",
                     Default::default()
                 )],
-                &[]
+                &[],
+                &[],
             ),
             ir::Module::empty()
                 .set_type_definitions(vec![
@@ -533,6 +540,7 @@ mod tests {
                     Default::default()
                 )],
                 &[],
+                &[],
             ),
             ir::Module::empty()
                 .set_type_definitions(vec![type_definition])
@@ -569,6 +577,7 @@ mod tests {
                         Default::default()
                     )
                 ],
+                &[],
                 &[],
             ),
             ir::Module::empty().set_type_definitions(vec![ir::TypeDefinition::fake(
@@ -608,6 +617,7 @@ mod tests {
                         Default::default()
                     )
                 ],
+                &[],
                 &[],
             ),
             ir::Module::empty().set_type_aliases(vec![ir::TypeAlias::fake(
@@ -655,7 +665,8 @@ mod tests {
                         "Bar",
                         ["Bar".into()].into_iter().collect()
                     )],
-                    &[]
+                    &[],
+                    &[],
                 ),
                 ir::Module::empty()
                     .set_declarations(vec![ir::FunctionDeclaration::new(
@@ -721,7 +732,8 @@ mod tests {
                         "Bar",
                         ["Bar".into()].into_iter().collect()
                     )],
-                    &[]
+                    &[],
+                    &[],
                 ),
                 ir::Module::empty()
                     .set_type_definitions(vec![
@@ -798,7 +810,8 @@ mod tests {
                         "Bar",
                         ["Bar".into()].into_iter().collect()
                     )],
-                    &[]
+                    &[],
+                    &[],
                 ),
                 ir::Module::empty()
                     .set_type_definitions(vec![ir::TypeDefinition::fake(
