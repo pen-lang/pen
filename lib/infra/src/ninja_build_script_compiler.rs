@@ -69,16 +69,16 @@ impl NinjaBuildScriptCompiler {
             ),
             "rule compile",
             "  command = pen compile --target $target $in $out",
-            "  description = compiling module of $source_file",
+            "  description = compiling module $module_name $in_package_name",
             "rule compile_main",
             "  command = pen compile-main --target $target \
                  $context_options $in $out",
-            "  description = compiling module of $source_file",
+            "  description = compiling module $module_name",
             "rule compile_prelude",
             "  command = pen compile-prelude --target $target $in $out",
             "rule compile_test",
             "  command = pen compile-test --target $target $in $out",
-            "  description = compiling module of $source_file",
+            "  description = compiling test module $module_name",
             "rule compile_package_test_information",
             "  command = pen compile-package-test-information -o $out $in",
             "rule llc",
@@ -151,8 +151,16 @@ impl NinjaBuildScriptCompiler {
                         ninja_dependency_file.display()
                     ),
                     format!("  dyndep = {}", ninja_dependency_file.display()),
-                    format!("  source_file = {}", target.source_file()),
                     format!("  srcdep = {}", target.source_file()),
+                    format!("  module_name = {}", target.source().module_name()),
+                    format!(
+                        "  in_package_name = {}",
+                        target
+                            .source()
+                            .package_name()
+                            .map(|name| "in ".to_owned() + name)
+                            .unwrap_or_default()
+                    ),
                     format!(
                         "build {}: llc {}",
                         object_file.display(),

@@ -5,7 +5,8 @@ use crate::{
     common::file_path_resolver,
     external_package_configuration_reader, external_package_topological_sorter,
     infra::{FilePath, Infrastructure, MainModuleTarget},
-    prelude_interface_file_finder, system_package_finder, ApplicationConfiguration,
+    module_target_source_resolver, prelude_interface_file_finder, system_package_finder,
+    ApplicationConfiguration,
 };
 use std::error::Error;
 
@@ -58,6 +59,7 @@ pub fn compile_modules(
     let (main_module_targets, module_targets) = module_target_collector::collect_module_targets(
         infrastructure,
         package_directory,
+        None,
         output_directory,
     )?
     .into_iter()
@@ -108,6 +110,11 @@ pub fn compile_modules(
                                 )
                             })
                             .collect(),
+                            module_target_source_resolver::resolve(
+                                None,
+                                package_directory,
+                                target.source_file(),
+                            ),
                         ))
                     })
                     .transpose()?
@@ -310,6 +317,7 @@ pub fn compile_external(
                 &module_target_collector::collect_module_targets(
                     infrastructure,
                     &package_directory,
+                    Some(package_url),
                     output_directory,
                 )?,
                 &file_path_resolver::resolve_external_package_archive_file(
@@ -342,6 +350,7 @@ pub fn compile_prelude(
                 &module_target_collector::collect_module_targets(
                     infrastructure,
                     &package_directory,
+                    Some(package_url),
                     output_directory,
                 )?,
                 &file_path_resolver::resolve_external_package_archive_file(
