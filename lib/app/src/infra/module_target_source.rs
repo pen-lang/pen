@@ -6,7 +6,7 @@ pub struct ModuleTargetSource {
 impl ModuleTargetSource {
     pub fn new(package_name: Option<String>, module_name: impl Into<String>) -> Self {
         Self {
-            package_name: package_name.into(),
+            package_name,
             module_name: module_name.into(),
         }
     }
