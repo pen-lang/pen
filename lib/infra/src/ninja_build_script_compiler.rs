@@ -98,7 +98,7 @@ impl NinjaBuildScriptCompiler {
             ),
             "rule resolve_dependency",
             &resolve_dependency_command,
-            "  description = resolving dependency of $source_file",
+            "  description = resolving dependency of module $module_name $in_package_name",
             "rule compile_ffi",
             "  command = $in -t $target $out",
             "  description = compiling FFI module in $package_directory",
@@ -153,14 +153,7 @@ impl NinjaBuildScriptCompiler {
                     format!("  dyndep = {}", ninja_dependency_file.display()),
                     format!("  srcdep = {}", target.source_file()),
                     format!("  module_name = {}", target.source().module_name()),
-                    format!(
-                        "  in_package_name = {}",
-                        target
-                            .source()
-                            .package_name()
-                            .map(|name| "in ".to_owned() + name)
-                            .unwrap_or_default()
-                    ),
+                    self.format_in_package_name_variable(target.source()),
                     format!(
                         "build {}: llc {}",
                         object_file.display(),
@@ -175,6 +168,7 @@ impl NinjaBuildScriptCompiler {
                     &ninja_dependency_file,
                     &package_directory,
                     target.source_file(),
+                    target.source(),
                 ))
             })
             .collect())
@@ -214,7 +208,7 @@ impl NinjaBuildScriptCompiler {
                         ninja_dependency_file.display()
                     ),
                     format!("  dyndep = {}", ninja_dependency_file.display()),
-                    format!("  source_file = {}", target.source_file()),
+                    format!("  module_name = {}", target.source().module_name()),
                     format!("  srcdep = {}", target.source_file()),
                     format!(
                         "build {}: llc {}",
@@ -230,6 +224,7 @@ impl NinjaBuildScriptCompiler {
                     &ninja_dependency_file,
                     &package_directory,
                     target.source_file(),
+                    target.source(),
                 ))
             })
             .collect())
@@ -283,7 +278,7 @@ impl NinjaBuildScriptCompiler {
                     .join(" ")
             ),
             format!("  dyndep = {}", ninja_dependency_file.display()),
-            format!("  source_file = {}", target.source_file()),
+            format!("  module_name = {}", target.source().module_name()),
             format!("  srcdep = {}", target.source_file()),
             format!(
                 "build {}: llc {}",
@@ -302,6 +297,7 @@ impl NinjaBuildScriptCompiler {
                     .file_path_converter
                     .convert_to_os_path(package_directory),
                 target.source_file(),
+                target.source(),
             ),
         )
         .collect())
@@ -315,6 +311,7 @@ impl NinjaBuildScriptCompiler {
         ninja_dependency_file: &std::path::Path,
         package_directory: &std::path::Path,
         original_source_file: &FilePath,
+        target_source: &app::infra::ModuleTargetSource,
     ) -> Vec<String> {
         vec![
             format!(
@@ -325,7 +322,8 @@ impl NinjaBuildScriptCompiler {
             ),
             format!("  package_directory = {}", package_directory.display()),
             format!("  object_file = {}", bit_code_file.display()),
-            format!("  source_file = {}", original_source_file),
+            format!("  module_name = {}", target_source.module_name()),
+            self.format_in_package_name_variable(target_source),
             format!("  srcdep = {}", original_source_file),
         ]
     }
@@ -446,6 +444,16 @@ impl NinjaBuildScriptCompiler {
             [script] => Ok(script.into()),
             _ => Err(InfrastructureError::MultipleLinkScripts(scripts).into()),
         }
+    }
+
+    fn format_in_package_name_variable(&self, source: &app::infra::ModuleTargetSource) -> String {
+        format!(
+            "  in_package_name = {}",
+            source
+                .package_name()
+                .map(|name| "in ".to_owned() + name)
+                .unwrap_or_default()
+        )
     }
 }
 
