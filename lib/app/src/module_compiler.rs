@@ -131,7 +131,7 @@ fn compile_to_hir(
     infrastructure: &Infrastructure,
     source_file: &FilePath,
     dependency_file: &FilePath,
-    extra_prelude_interfaces: &[interface::Module],
+    context_interfaces: &[interface::Module],
 ) -> Result<hir::ir::Module, Box<dyn Error>> {
     let (interface_files, prelude_interface_files) = dependency_serializer::deserialize(
         &infrastructure.file_system.read_to_vec(dependency_file)?,
@@ -164,8 +164,8 @@ fn compile_to_hir(
             .map(|file| {
                 interface_serializer::deserialize(&infrastructure.file_system.read_to_vec(file)?)
             })
-            .chain(extra_prelude_interfaces.iter().cloned().map(Ok))
             .collect::<Result<Vec<_>, _>>()?,
+        context_interfaces,
     )?)
 }
 
