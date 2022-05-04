@@ -6,7 +6,7 @@ use app::infra::FilePath;
 use std::{collections::BTreeMap, error::Error, path::PathBuf, sync::Arc};
 
 const FFI_ARCHIVE_DIRECTORY: &str = "ffi";
-const AR_DESCRIPTION: &str = "  description = archiving package of $package_directory";
+const AR_DESCRIPTION: &str = "  description = archiving package $package_name";
 
 pub struct NinjaBuildScriptCompiler {
     file_path_converter: Arc<FilePathConverter>,
@@ -101,7 +101,7 @@ impl NinjaBuildScriptCompiler {
             "  description = resolving dependency of module $module_name $in_package_name",
             "rule compile_ffi",
             "  command = $in -t $target $out",
-            "  description = compiling FFI module in $package_directory",
+            "  description = compiling FFI module $in_package_name",
             "rule ar",
             &format!("  command = {} crs $out $in", ar.display()),
             AR_DESCRIPTION,
@@ -153,7 +153,7 @@ impl NinjaBuildScriptCompiler {
                     format!("  dyndep = {}", ninja_dependency_file.display()),
                     format!("  srcdep = {}", target.source_file()),
                     format!("  module_name = {}", target.source().module_name()),
-                    self.format_in_package_name_variable(target.source()),
+                    self.format_in_package_name_variable(target.source().package_name()),
                     format!(
                         "build {}: llc {}",
                         object_file.display(),
@@ -324,7 +324,7 @@ impl NinjaBuildScriptCompiler {
             format!("  package_directory = {}", package_directory.display()),
             format!("  object_file = {}", bit_code_file.display()),
             format!("  module_name = {}", target_source.module_name()),
-            self.format_in_package_name_variable(target_source),
+            self.format_in_package_name_variable(target_source.package_name()),
             format!("  srcdep = {}", original_source_file),
         ]
     }
@@ -334,6 +334,7 @@ impl NinjaBuildScriptCompiler {
         object_files: &[&FilePath],
         archive_file: &FilePath,
         package_directory: &FilePath,
+        package_name: Option<&str>,
     ) -> Result<Vec<String>, Box<dyn Error>> {
         Ok(
             if let Some(script) = package_script_finder::find(
@@ -355,7 +356,7 @@ impl NinjaBuildScriptCompiler {
                             .display(),
                         script.display()
                     ),
-                    format!("  package_directory = {}", package_directory),
+                    self.format_in_package_name_variable(package_name),
                 ]
                 .into_iter()
                 .chain(self.compile_archive_with_ffi(
@@ -366,7 +367,7 @@ impl NinjaBuildScriptCompiler {
                 )?)
                 .collect()
             } else {
-                self.compile_archive_without_ffi(object_files, archive_file, package_directory)?
+                self.compile_archive_without_ffi(object_files, archive_file, package_name)?
             },
         )
     }
@@ -375,7 +376,7 @@ impl NinjaBuildScriptCompiler {
         &self,
         object_files: &[&FilePath],
         archive_file: &FilePath,
-        package_directory: &FilePath,
+        package_name: Option<&str>,
     ) -> Result<Vec<String>, Box<dyn Error>> {
         Ok(vec![
             format!(
@@ -385,7 +386,7 @@ impl NinjaBuildScriptCompiler {
                     .display(),
                 self.join_paths(object_files)
             ),
-            format!("  package_directory = {}", package_directory),
+            format!("  package_name = {}", package_name.unwrap_or_default()),
         ])
     }
 
@@ -447,11 +448,10 @@ impl NinjaBuildScriptCompiler {
         }
     }
 
-    fn format_in_package_name_variable(&self, source: &app::infra::ModuleTargetSource) -> String {
+    fn format_in_package_name_variable(&self, package_name: Option<&str>) -> String {
         format!(
             "  in_package_name = {}",
-            source
-                .package_name()
+            package_name
                 .map(|name| "in ".to_owned() + name)
                 .unwrap_or_default()
         )
@@ -512,6 +512,7 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
                         .collect::<Vec<_>>(),
                     archive_file,
                     package_directory,
+                    None,
                 )?,
             )
             .collect::<Vec<_>>()
@@ -524,7 +525,6 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
         module_targets: &[app::infra::TestModuleTarget],
         archive_file: &FilePath,
         package_test_information_file: &FilePath,
-        package_directory: &FilePath,
     ) -> Result<String, Box<dyn Error>> {
         Ok(self
             .compile_test_module_targets(module_targets)?
@@ -536,7 +536,7 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
                         .map(|target| target.object_file())
                         .collect::<Vec<_>>(),
                     archive_file,
-                    package_directory,
+                    None,
                 )?,
             )
             .chain([format!(
@@ -561,6 +561,7 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
         module_targets: &[app::infra::ModuleTarget],
         archive_file: &FilePath,
         package_directory: &FilePath,
+        package_name: &str,
     ) -> Result<String, Box<dyn Error>> {
         Ok(self
             .compile_module_targets(module_targets)?
@@ -573,6 +574,7 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
                         .collect::<Vec<_>>(),
                     archive_file,
                     package_directory,
+                    Some(package_name),
                 )?,
             )
             .collect::<Vec<_>>()
@@ -661,6 +663,7 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
         module_targets: &[app::infra::ModuleTarget],
         archive_file: &FilePath,
         package_directory: &FilePath,
+        package_name: &str,
     ) -> Result<String, Box<dyn Error>> {
         Ok(module_targets
             .iter()
@@ -698,6 +701,7 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
                         .collect::<Vec<_>>(),
                     archive_file,
                     package_directory,
+                    Some(package_name),
                 )?,
             )
             .collect::<Vec<_>>()

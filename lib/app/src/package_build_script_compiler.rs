@@ -5,8 +5,8 @@ use crate::{
     common::file_path_resolver,
     external_package_configuration_reader, external_package_topological_sorter,
     infra::{FilePath, Infrastructure, MainModuleTarget},
-    module_target_source_resolver, prelude_interface_file_finder, system_package_finder,
-    ApplicationConfiguration,
+    module_target_source_resolver, package_name_formatter, prelude_interface_file_finder,
+    system_package_finder, ApplicationConfiguration,
 };
 use std::error::Error;
 
@@ -160,7 +160,6 @@ pub fn compile_test_modules(
                     output_directory,
                     &infrastructure.file_path_configuration,
                 ),
-                package_directory,
             )?
             .as_bytes(),
     )?;
@@ -326,6 +325,7 @@ pub fn compile_external(
                     &infrastructure.file_path_configuration,
                 ),
                 &package_directory,
+                &package_name_formatter::format(package_url),
             )?
             .as_bytes(),
     )?;
@@ -359,6 +359,7 @@ pub fn compile_prelude(
                     &infrastructure.file_path_configuration,
                 ),
                 &package_directory,
+                &package_name_formatter::format(package_url),
             )?
             .as_bytes(),
     )?;

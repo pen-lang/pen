@@ -18,6 +18,7 @@ pub mod package_documentation_generator;
 pub mod package_format_checker;
 pub mod package_formatter;
 pub mod package_initializer;
+mod package_name_formatter;
 mod package_test_builder;
 pub mod package_test_information_compiler;
 mod prelude_interface_file_finder;
