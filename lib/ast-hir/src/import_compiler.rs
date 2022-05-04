@@ -12,6 +12,7 @@ pub fn compile(
     module: &ir::Module,
     imported_modules: &[ImportedModule],
     prelude_module_interfaces: &[interface::Module],
+    context_module_interfaces: &[interface::Module],
 ) -> ir::Module {
     let module = compile_imports(
         module,
@@ -19,6 +20,7 @@ pub fn compile(
             .iter()
             .map(|module| module.interface())
             .chain(prelude_module_interfaces)
+            .chain(context_module_interfaces)
             .collect::<Vec<_>>(),
     );
 

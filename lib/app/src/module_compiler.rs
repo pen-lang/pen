@@ -164,8 +164,8 @@ fn compile_to_hir(
             .map(|file| {
                 interface_serializer::deserialize(&infrastructure.file_system.read_to_vec(file)?)
             })
-            .chain(context_interfaces.iter().cloned().map(Ok))
             .collect::<Result<Vec<_>, _>>()?,
+        context_interfaces,
     )?)
 }
 
