@@ -11,7 +11,7 @@ New = \(r Raw) Value {
   Value{raw: r}
 }
 
-# Get an internal value.
+# Get a raw value.
 Raw = \(v Value) Raw {
   v.raw
 }
