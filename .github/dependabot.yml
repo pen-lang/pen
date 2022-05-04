@@ -9,19 +9,35 @@ updates:
     schedule:
       interval: daily
   - package-ecosystem: cargo
-    directory: /lib/core/ffi
+    directory: /packages/core/ffi
     schedule:
       interval: daily
   - package-ecosystem: cargo
-    directory: /lib/prelude/ffi
+    directory: /packages/http/ffi
     schedule:
       interval: daily
   - package-ecosystem: cargo
-    directory: /lib/os/ffi
+    directory: /packages/json/ffi
     schedule:
       interval: daily
   - package-ecosystem: cargo
-    directory: /lib/os-sync/ffi
+    directory: /packages/os/ffi/application
+    schedule:
+      interval: daily
+  - package-ecosystem: cargo
+    directory: /packages/os/ffi/library
+    schedule:
+      interval: daily
+  - package-ecosystem: cargo
+    directory: /packages/os-sync/ffi
+    schedule:
+      interval: daily
+  - package-ecosystem: cargo
+    directory: /packages/prelude/ffi
+    schedule:
+      interval: daily
+  - package-ecosystem: cargo
+    directory: /packages/sql/ffi
     schedule:
       interval: daily
   - package-ecosystem: gomod
