@@ -364,6 +364,7 @@ impl NinjaBuildScriptCompiler {
                     archive_file,
                     &ffi_archive_file,
                     package_directory,
+                    Some(package_name),
                 )?)
                 .collect()
             } else {
@@ -396,6 +397,7 @@ impl NinjaBuildScriptCompiler {
         archive_file: &FilePath,
         ffi_archive_file: &FilePath,
         package_directory: &FilePath,
+        package_name: Option<&str>,
     ) -> Result<Vec<String>, Box<dyn Error>> {
         let ffi_archive_file = self
             .file_path_converter
@@ -413,7 +415,7 @@ impl NinjaBuildScriptCompiler {
             ),
             format!("  ffi_archive_file = {}", ffi_archive_file.display()),
             format!("  object_files = {}", &object_files),
-            format!("  package_directory = {}", package_directory),
+            format!("  package_name = {}", package_name.unwrap_or_default()),
         ])
     }
 
