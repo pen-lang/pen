@@ -303,6 +303,7 @@ impl NinjaBuildScriptCompiler {
         .collect())
     }
 
+    #[allow(clippy::too_many_arguments)]
     fn compile_dependency(
         &self,
         source_file: &std::path::Path,
