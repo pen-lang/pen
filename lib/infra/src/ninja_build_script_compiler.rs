@@ -364,7 +364,7 @@ impl NinjaBuildScriptCompiler {
                     archive_file,
                     &ffi_archive_file,
                     package_directory,
-                    Some(package_name),
+                    package_name,
                 )?)
                 .collect()
             } else {
