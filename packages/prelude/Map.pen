@@ -257,8 +257,8 @@ _getSingleEntry = \(h _hamt, i number, e _entry) _entry {
   }
 }
 
-_mergeMaps = \(x _map, y _map) _map {
-  _mergeHamt(x, y.hamt, 1)
+_mergeMaps = \(ctx _mapContext, x _map, y _map) _map {
+  _mergeHamt(ctx, x, y.hamt, 1)
 }
 
 _mergeHamt = \(ctx _mapContext, m _map, h _hamt, i number) _map {
@@ -266,10 +266,11 @@ _mergeHamt = \(ctx _mapContext, m _map, h _hamt, i number) _map {
     m
   } else {
     _mergeHamt(
+      ctx,
       if e = _getEntry(h, i) as _keyValue {
         _setMap(ctx, m, e.key, e.value)
       } else if _hamt {
-        _mergeHamt(m, e, 1)
+        _mergeHamt(ctx, m, e, 1)
       } else if none {
         m
       },
