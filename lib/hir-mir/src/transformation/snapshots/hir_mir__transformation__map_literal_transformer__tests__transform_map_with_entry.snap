@@ -11,6 +11,17 @@ Ok(
                         arguments: [
                             Reference(
                                 Reference {
+                                    name: "mapContext",
+                                    position: Position {
+                                        path: "",
+                                        line_number: 1,
+                                        column_number: 1,
+                                        line: "",
+                                    },
+                                },
+                            ),
+                            Reference(
+                                Reference {
                                     name: "GenericMap",
                                     position: Position {
                                         path: "",
