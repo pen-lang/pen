@@ -14,7 +14,7 @@ main = \(ctx context) none {
     _ = File'Write(
       ctx.Os,
       File'StdOut(),
-      String'Join([string if s = source(e) as string { s } else { "unknown error" }, "\n"], ""),
+      String'Concatenate([string if s = source(e) as string { s } else { "unknown error" }, "\n"]),
     )
 
     Process'Exit(ctx.Os, 1)
@@ -29,7 +29,7 @@ run = \(ctx context) none | error {
     "127.0.0.1:8080"
   }
 
-  File'Write(ctx.Os, File'StdOut(), String'Join([string "Serving at ", a, "\n"], ""))?
+  File'Write(ctx.Os, File'StdOut(), String'Concatenate([string "Serving at ", a, "\n"]))?
 
   Server'Serve(ctx.Http, a, serve)
 }

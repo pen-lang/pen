@@ -18,9 +18,10 @@ main = \(ctx context) none {
     _ = File'Write(
       ctx.Os,
       File'StdErr(),
-      String'Join([string if s = source(e) as string { s } else { "unknown error" }, "\n"], ""),
+      String'Concatenate(
+        [string if s = source(e) as string { s } else { "unknown error" }, "\n"],
+      ),
     )
-
     Process'Exit(ctx.Os, 1)
   }
 }
@@ -68,7 +69,7 @@ valueString = \(v Value) string {
   } else if number {
     Number'String(v)
   } else if string {
-    String'Join([string "'", v, "'"], "")
+    String'Concatenate([string "'", v, "'"])
   } else if none {
     "null"
   }

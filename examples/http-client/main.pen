@@ -22,7 +22,7 @@ main = \(ctx context) none {
     _ = File'Write(
       ctx.Os,
       File'StdOut(),
-      String'Join([string if s = source(e) as string { s } else { "unknown error" }, "\n"], ""),
+      String'Concatenate([string if s = source(e) as string { s } else { "unknown error" }, "\n"]),
     )
 
     Process'Exit(ctx.Os, 1)
@@ -42,17 +42,7 @@ run = \(ctx context) none | error {
     },
   )?
 
-  File'Write(
-    ctx.Os,
-    File'StdOut(),
-    String'Join(
-      [string
-        r.Body,
-        "\n",
-      ],
-      "",
-    ),
-  )?
+  File'Write(ctx.Os, File'StdOut(), String'Concatenate([string r.Body, "\n"]))?
 
   none
 }

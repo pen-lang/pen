@@ -130,14 +130,16 @@ Initialize = \(ctx Context, rows number, columns number) [[boolean]] {
 }
 
 Render = \(rs [[boolean]]) string {
-  String'Join(
+  String'Concatenate(
     [string
-      ...[string
-        String'Join([string if x() { "o" } else { "." } for x in r()], "")
-        for r in rs
-      ],
-      "",
+      String'Join(
+        [string
+          String'Concatenate([string if x() { "o" } else { "." } for x in r()])
+          for r in rs
+        ],
+        "\n",
+      ),
+      "\n",
     ],
-    "\n",
   )
 }
