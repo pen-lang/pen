@@ -1,4 +1,4 @@
-use super::super::error::CompileError;
+use super::{super::error::CompileError, map_context_transformer};
 use crate::{context::CompileContext, transformation::record_type_information_compiler};
 use hir::{
     analysis::{
@@ -92,7 +92,7 @@ fn transform_equal_operation(
             )
             .into()
         }
-        Type::Map(_) => {
+        Type::Map(map_type) => {
             let any_map_type = types::Reference::new(
                 &context.configuration()?.map_type.map_type_name,
                 position.clone(),
@@ -111,7 +111,16 @@ fn transform_equal_operation(
                     &context.configuration()?.map_type.equal_function_name,
                     position.clone(),
                 ),
-                vec![lhs.clone(), rhs.clone()],
+                vec![
+                    map_context_transformer::transform(
+                        context,
+                        map_type.key(),
+                        map_type.value(),
+                        position,
+                    )?,
+                    lhs.clone(),
+                    rhs.clone(),
+                ],
                 position.clone(),
             )
             .into()
