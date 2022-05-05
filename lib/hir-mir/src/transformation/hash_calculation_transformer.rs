@@ -1,4 +1,6 @@
-use super::record_type_information_compiler;
+use super::{
+    collection_type_transformer, map_context_transformer, record_type_information_compiler,
+};
 use crate::{context::CompileContext, CompileError};
 use hir::{
     analysis::{
@@ -34,11 +36,7 @@ pub fn transform(
                 types::Function::new(
                     vec![
                         compile_any_function_type(position).into(),
-                        types::Reference::new(
-                            &configuration.list_type.list_type_name,
-                            position.clone(),
-                        )
-                        .into(),
+                        collection_type_transformer::transform_list(context, position)?,
                     ],
                     types::Number::new(position.clone()),
                     position.clone(),
@@ -56,14 +54,13 @@ pub fn transform(
             position.clone(),
         )
         .into(),
-        Type::Map(_) => Call::new(
+        Type::Map(map_type) => Call::new(
             Some(
                 types::Function::new(
-                    vec![types::Reference::new(
-                        &configuration.map_type.map_type_name,
-                        position.clone(),
-                    )
-                    .into()],
+                    vec![
+                        collection_type_transformer::transform_map_context(context, position)?,
+                        collection_type_transformer::transform_map(context, position)?,
+                    ],
                     types::Number::new(position.clone()),
                     position.clone(),
                 )
@@ -73,7 +70,15 @@ pub fn transform(
                 &configuration.map_type.hash.map_hash_function_name,
                 position.clone(),
             ),
-            vec![value.clone()],
+            vec![
+                map_context_transformer::transform(
+                    context,
+                    map_type.key(),
+                    map_type.value(),
+                    position,
+                )?,
+                value.clone(),
+            ],
             position.clone(),
         )
         .into(),

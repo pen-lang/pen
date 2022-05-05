@@ -5,6 +5,8 @@ use hir::{
 };
 use position::Position;
 
+use super::collection_type_transformer;
+
 pub fn transform(list: &List, configuration: &ListTypeConfiguration) -> Expression {
     transform_list(
         list.type_(),
@@ -22,7 +24,7 @@ fn transform_list(
 ) -> Expression {
     let rest_expression = || transform_list(type_, &elements[1..], position, configuration);
     let any_list_type =
-        types::Reference::new(configuration.list_type_name.clone(), position.clone());
+        collection_type_transformer::transform_list_from_configuration(configuration, position);
 
     match elements {
         [] => Call::new(
@@ -45,12 +47,7 @@ fn transform_list(
                 .into(),
             ),
             Variable::new(&configuration.lazy_function_name, position.clone()),
-            vec![Thunk::new(
-                Some(any_list_type.into()),
-                expression.clone(),
-                position.clone(),
-            )
-            .into()],
+            vec![Thunk::new(Some(any_list_type), expression.clone(), position.clone()).into()],
             position.clone(),
         )
         .into(),
@@ -60,7 +57,7 @@ fn transform_list(
                     vec![
                         types::Function::new(vec![], any_list_type.clone(), position.clone())
                             .into(),
-                        any_list_type.clone().into(),
+                        any_list_type.clone(),
                     ],
                     any_list_type.clone(),
                     position.clone(),
@@ -69,12 +66,7 @@ fn transform_list(
             ),
             Variable::new(&configuration.concatenate_function_name, position.clone()),
             vec![
-                Thunk::new(
-                    Some(any_list_type.into()),
-                    expression.clone(),
-                    position.clone(),
-                )
-                .into(),
+                Thunk::new(Some(any_list_type), expression.clone(), position.clone()).into(),
                 rest_expression(),
             ],
             position.clone(),
@@ -90,7 +82,7 @@ fn transform_list(
                             position.clone(),
                         )
                         .into(),
-                        any_list_type.clone().into(),
+                        any_list_type.clone(),
                     ],
                     any_list_type,
                     position.clone(),

@@ -543,8 +543,8 @@ mod tests {
                         vec![],
                         types::None::new(Position::fake()),
                         IfMap::new(
-                            Some(map_type.key().clone().into()),
-                            Some(map_type.value().clone().into()),
+                            Some(map_type.key().clone()),
+                            Some(map_type.value().clone()),
                             "x",
                             Map::new(
                                 map_type.key().clone(),

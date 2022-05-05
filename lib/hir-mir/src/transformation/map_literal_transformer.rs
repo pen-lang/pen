@@ -1,7 +1,6 @@
-use super::{equal_operation_transformer, hash_calculation_transformer};
+use super::{collection_type_transformer, map_context_transformer};
 use crate::{context::CompileContext, CompileError};
 use hir::{
-    analysis::type_comparability_checker,
     ir::*,
     types::{self, Type},
 };
@@ -25,66 +24,15 @@ fn transform_map(
     position: &Position,
 ) -> Result<Expression, CompileError> {
     let configuration = &context.configuration()?.map_type;
-    let any_map_type = types::Reference::new(configuration.map_type_name.clone(), position.clone());
-    let any_type = Type::from(types::Any::new(position.clone()));
-    let equal_function_type = Type::from(types::Function::new(
-        vec![any_type.clone(), any_type.clone()],
-        types::Boolean::new(position.clone()),
-        position.clone(),
-    ));
-    let hash_function_type = Type::from(types::Function::new(
-        vec![any_type],
-        types::Number::new(position.clone()),
-        position.clone(),
-    ));
+    let map_context_type = collection_type_transformer::transform_map_context(context, position)?;
+    let any_map_type = collection_type_transformer::transform_map(context, position)?;
+    let map_context = map_context_transformer::transform(context, key_type, value_type, position)?;
 
     Ok(match elements {
         [] => Call::new(
-            Some(
-                types::Function::new(
-                    vec![
-                        equal_function_type.clone(),
-                        hash_function_type.clone(),
-                        equal_function_type,
-                        hash_function_type,
-                    ],
-                    any_map_type,
-                    position.clone(),
-                )
-                .into(),
-            ),
+            Some(types::Function::new(vec![], any_map_type, position.clone()).into()),
             Variable::new(&configuration.empty_function_name, position.clone()),
-            [
-                equal_operation_transformer::transform_any_function(context, key_type, position)?
-                    .into(),
-                hash_calculation_transformer::transform_any_function(context, key_type, position)?
-                    .into(),
-            ]
-            .into_iter()
-            .chain(
-                if type_comparability_checker::check(
-                    value_type,
-                    context.types(),
-                    context.records(),
-                )? {
-                    [
-                        equal_operation_transformer::transform_any_function(
-                            context, value_type, position,
-                        )?
-                        .into(),
-                        hash_calculation_transformer::transform_any_function(
-                            context, value_type, position,
-                        )?
-                        .into(),
-                    ]
-                } else {
-                    [
-                        compile_fake_equal_function(position).into(),
-                        compile_fake_hash_function(position).into(),
-                    ]
-                },
-            )
-            .collect(),
+            vec![],
             position.clone(),
         )
         .into(),
@@ -104,7 +52,8 @@ fn transform_map(
                     Some(
                         types::Function::new(
                             vec![
-                                any_map_type.clone().into(),
+                                map_context_type,
+                                any_map_type.clone(),
                                 types::Any::new(position.clone()).into(),
                                 types::Any::new(position.clone()).into(),
                             ],
@@ -115,6 +64,7 @@ fn transform_map(
                     ),
                     Variable::new(&configuration.set_function_name, position.clone()),
                     vec![
+                        map_context,
                         rest_expression,
                         TypeCoercion::new(
                             key_type.clone(),
@@ -137,14 +87,14 @@ fn transform_map(
                 MapElement::Map(expression) => Call::new(
                     Some(
                         types::Function::new(
-                            vec![any_map_type.clone().into(), any_map_type.clone().into()],
+                            vec![map_context_type, any_map_type.clone(), any_map_type.clone()],
                             any_map_type,
                             position.clone(),
                         )
                         .into(),
                     ),
                     Variable::new(&configuration.merge_function_name, position.clone()),
-                    vec![expression.clone(), rest_expression],
+                    vec![map_context, expression.clone(), rest_expression],
                     position.clone(),
                 )
                 .into(),
@@ -152,7 +102,8 @@ fn transform_map(
                     Some(
                         types::Function::new(
                             vec![
-                                any_map_type.clone().into(),
+                                map_context_type,
+                                any_map_type.clone(),
                                 types::Any::new(position.clone()).into(),
                             ],
                             any_map_type,
@@ -162,6 +113,7 @@ fn transform_map(
                     ),
                     Variable::new(&configuration.delete_function_name, position.clone()),
                     vec![
+                        map_context,
                         rest_expression,
                         TypeCoercion::new(
                             key_type.clone(),
@@ -177,27 +129,6 @@ fn transform_map(
             }
         }
     })
-}
-
-fn compile_fake_equal_function(position: &Position) -> Lambda {
-    Lambda::new(
-        vec![
-            Argument::new("", types::Any::new(position.clone())),
-            Argument::new("", types::Any::new(position.clone())),
-        ],
-        types::Boolean::new(position.clone()),
-        Boolean::new(false, position.clone()),
-        position.clone(),
-    )
-}
-
-fn compile_fake_hash_function(position: &Position) -> Lambda {
-    Lambda::new(
-        vec![Argument::new("", types::Any::new(position.clone()))],
-        types::Number::new(position.clone()),
-        Number::new(0.0, position.clone()),
-        position.clone(),
-    )
 }
 
 #[cfg(test)]

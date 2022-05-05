@@ -1,4 +1,4 @@
-use super::super::error::CompileError;
+use super::{super::error::CompileError, collection_type_transformer};
 use crate::{context::CompileContext, downcast_compiler};
 use hir::{
     analysis::{type_equality_checker, AnalysisError},
@@ -15,7 +15,7 @@ pub fn transform(context: &CompileContext, if_: &IfList) -> Result<Expression, C
     let element_type = if_
         .type_()
         .ok_or_else(|| AnalysisError::TypeNotInferred(position.clone()))?;
-    let any_list_type = types::Reference::new(&configuration.list_type_name, position.clone());
+    let any_list_type = collection_type_transformer::transform_list(context, position)?;
     let first_rest_type =
         types::Reference::new(&configuration.first_rest_type_name, position.clone());
     let none_type = types::None::new(position.clone());
@@ -27,7 +27,7 @@ pub fn transform(context: &CompileContext, if_: &IfList) -> Result<Expression, C
         Call::new(
             Some(
                 types::Function::new(
-                    vec![any_list_type.clone().into()],
+                    vec![any_list_type.clone()],
                     types::Union::new(first_rest_type.clone(), none_type.clone(), position.clone()),
                     position.clone(),
                 )
@@ -91,7 +91,7 @@ pub fn transform(context: &CompileContext, if_: &IfList) -> Result<Expression, C
                     },
                     Let::new(
                         Some(if_.rest_name().into()),
-                        Some(any_list_type.clone().into()),
+                        Some(any_list_type.clone()),
                         Call::new(
                             Some(
                                 types::Function::new(

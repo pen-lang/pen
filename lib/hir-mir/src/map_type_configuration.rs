@@ -4,7 +4,9 @@ use once_cell::sync::Lazy;
 #[cfg(test)]
 pub static MAP_TYPE_CONFIGURATION: Lazy<MapTypeConfiguration> =
     Lazy::new(|| MapTypeConfiguration {
-        delete_function_name: "removeMap".into(),
+        context_function_name: "newMapContext".into(),
+        context_type_name: "mapContext".into(),
+        delete_function_name: "deleteMap".into(),
         empty_function_name: "emptyMap".into(),
         empty_type_name: "notFound".into(),
         equal_function_name: "equalMaps".into(),
@@ -37,6 +39,8 @@ pub static MAP_TYPE_ITERATION_CONFIGURATION: Lazy<MapTypeIterationConfiguration>
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct MapTypeConfiguration {
+    pub context_function_name: String,
+    pub context_type_name: String,
     pub delete_function_name: String,
     pub empty_function_name: String,
     pub empty_type_name: String,

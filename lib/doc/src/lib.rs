@@ -899,8 +899,7 @@ mod tests {
                         ),
                         None,
                         Position::fake()
-                    )
-                    .into(),
+                    ),
                     &[]
                 ),
                 indoc!(

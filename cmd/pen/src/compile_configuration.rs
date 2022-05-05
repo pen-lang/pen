@@ -34,6 +34,8 @@ pub static COMPILE_CONFIGURATION: Lazy<Arc<app::module_compiler::CompileConfigur
                     first_rest_type_name: "_firstRest".into(),
                 },
                 map_type: app::module_compiler::MapTypeConfiguration {
+                    context_function_name: "_newMapContext".into(),
+                    context_type_name: "_mapContext".into(),
                     empty_function_name: "_newMap".into(),
                     empty_type_name: "_empty".into(),
                     equal_function_name: "_equalMaps".into(),
