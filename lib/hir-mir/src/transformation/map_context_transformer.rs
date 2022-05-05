@@ -91,3 +91,30 @@ fn compile_fake_hash_function(position: &Position) -> Lambda {
         position.clone(),
     )
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use position::test::PositionFake;
+
+    #[test]
+    fn transform_none_key_and_none_value() {
+        insta::assert_debug_snapshot!(transform(
+            &CompileContext::dummy(Default::default(), Default::default()),
+            &types::None::new(Position::fake()).into(),
+            &types::None::new(Position::fake()).into(),
+            &Position::fake()
+        ));
+    }
+
+    #[test]
+    fn transform_function_value() {
+        insta::assert_debug_snapshot!(transform(
+            &CompileContext::dummy(Default::default(), Default::default()),
+            &types::None::new(Position::fake()).into(),
+            &types::Function::new(vec![], types::None::new(Position::fake()), Position::fake())
+                .into(),
+            &Position::fake()
+        ));
+    }
+}
