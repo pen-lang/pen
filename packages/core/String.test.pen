@@ -15,7 +15,7 @@ ConcatenateTwoStrings = \() none | error {
 }
 
 ConcatenateThreeStrings = \() none | error {
-  Assert'True(String'Concatenate([string "foo", "bar", "baz"]) == "foobarbaz")
+  Assert'True(String'Concatenate([string "lan", "gua", "ge"]) == "language")
 }
 
 JoinEmpty = \() none | error {
