@@ -71,12 +71,21 @@ type _hamt {
 
 _maxLevel = \() number { 60 / 5 }
 
-_newMap = \(
-  equalKeys \(any, any) boolean,
-  hashKey \(any) number,
-  equalValues \(any, any) boolean,
-  hashValue \(any) number,
-) _map {
+_newMapContext = \(
+  ek \(any, any) boolean,
+  hk \(any) number,
+  ev \(any, any) boolean,
+  hv \(any) number,
+) _mapContext {
+  _mapContext{
+    equalKeys: ek,
+    equalValues: ev,
+    hashKey: hk,
+    hashValue: hv,
+  }
+}
+
+_newMap = \() _map {
   _map{hamt: _newHamt(), size: 0}
 }
 
