@@ -1,8 +1,7 @@
+use super::hash_calculation_transformer;
 use crate::{context::CompileContext, transformation::equal_operation_transformer, CompileError};
 use hir::{analysis::type_comparability_checker, ir::*, types, types::Type};
 use position::Position;
-
-use super::hash_calculation_transformer;
 
 pub fn compile(
     context: &CompileContext,
