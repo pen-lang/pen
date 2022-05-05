@@ -1,7 +1,7 @@
 use crate::{
     common::file_path_resolver,
     infra::{FilePath, Infrastructure, TestModuleTarget},
-    test_module_finder,
+    module_target_source_resolver, test_module_finder,
 };
 use std::error::Error;
 
@@ -26,6 +26,7 @@ pub fn collect(
                     source_file,
                     &infrastructure.file_path_configuration,
                 ),
+                module_target_source_resolver::resolve(None, package_directory, source_file),
             )
         })
         .collect::<Vec<_>>())
