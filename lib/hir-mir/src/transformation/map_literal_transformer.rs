@@ -55,7 +55,7 @@ fn transform_map(
                     Some(
                         types::Function::new(
                             vec![
-                                map_context_type.clone(),
+                                map_context_type,
                                 any_map_type.clone().into(),
                                 types::Any::new(position.clone()).into(),
                                 types::Any::new(position.clone()).into(),
@@ -67,7 +67,7 @@ fn transform_map(
                     ),
                     Variable::new(&configuration.set_function_name, position.clone()),
                     vec![
-                        map_context.clone(),
+                        map_context,
                         rest_expression,
                         TypeCoercion::new(
                             key_type.clone(),
@@ -91,7 +91,7 @@ fn transform_map(
                     Some(
                         types::Function::new(
                             vec![
-                                map_context_type.clone(),
+                                map_context_type,
                                 any_map_type.clone().into(),
                                 any_map_type.clone().into(),
                             ],
@@ -101,7 +101,7 @@ fn transform_map(
                         .into(),
                     ),
                     Variable::new(&configuration.merge_function_name, position.clone()),
-                    vec![map_context.clone(), expression.clone(), rest_expression],
+                    vec![map_context, expression.clone(), rest_expression],
                     position.clone(),
                 )
                 .into(),
@@ -109,7 +109,7 @@ fn transform_map(
                     Some(
                         types::Function::new(
                             vec![
-                                map_context_type.clone(),
+                                map_context_type,
                                 any_map_type.clone().into(),
                                 types::Any::new(position.clone()).into(),
                             ],
@@ -120,7 +120,7 @@ fn transform_map(
                     ),
                     Variable::new(&configuration.delete_function_name, position.clone()),
                     vec![
-                        map_context.clone(),
+                        map_context,
                         rest_expression,
                         TypeCoercion::new(
                             key_type.clone(),
