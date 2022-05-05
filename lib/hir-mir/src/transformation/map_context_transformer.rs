@@ -3,7 +3,7 @@ use crate::{context::CompileContext, transformation::equal_operation_transformer
 use hir::{analysis::type_comparability_checker, ir::*, types, types::Type};
 use position::Position;
 
-pub fn compile(
+pub fn transform(
     context: &CompileContext,
     key_type: &Type,
     value_type: &Type,
