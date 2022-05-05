@@ -1,3 +1,4 @@
+use super::ModuleTargetSource;
 use crate::infra::FilePath;
 
 pub struct TestModuleTarget {
@@ -5,6 +6,7 @@ pub struct TestModuleTarget {
     source_file: FilePath,
     object_file: FilePath,
     test_information_file: FilePath,
+    source: ModuleTargetSource,
 }
 
 impl TestModuleTarget {
@@ -13,12 +15,14 @@ impl TestModuleTarget {
         source_file: FilePath,
         object_file: FilePath,
         test_information_file: FilePath,
+        source: ModuleTargetSource,
     ) -> Self {
         Self {
             package_directory,
             source_file,
             object_file,
             test_information_file,
+            source,
         }
     }
 
@@ -36,5 +40,9 @@ impl TestModuleTarget {
 
     pub fn test_information_file(&self) -> &FilePath {
         &self.test_information_file
+    }
+
+    pub fn source(&self) -> &ModuleTargetSource {
+        &self.source
     }
 }

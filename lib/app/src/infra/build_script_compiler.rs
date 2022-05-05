@@ -23,7 +23,6 @@ pub trait BuildScriptCompiler {
         module_targets: &[TestModuleTarget],
         archive_file: &FilePath,
         package_test_information_file: &FilePath,
-        package_directory: &FilePath,
     ) -> Result<String, Box<dyn Error>>;
 
     fn compile_application(
@@ -45,6 +44,7 @@ pub trait BuildScriptCompiler {
         module_targets: &[ModuleTarget],
         archive_file: &FilePath,
         package_directory: &FilePath,
+        package_name: &str,
     ) -> Result<String, Box<dyn Error>>;
 
     fn compile_prelude_package(
@@ -52,5 +52,6 @@ pub trait BuildScriptCompiler {
         module_targets: &[ModuleTarget],
         archive_file: &FilePath,
         package_directory: &FilePath,
+        package_name: &str,
     ) -> Result<String, Box<dyn Error>>;
 }
