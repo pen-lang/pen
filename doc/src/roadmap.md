@@ -26,9 +26,9 @@ Items are ordered by priority.
   - [ ] Language server
 - [ ] Reflection
 - [ ] Serialization / deserialization
+- [ ] Process management
 - [ ] Mutable state
   - [ ] Thread safety
 - [ ] Vector type
-- [ ] Process management
 - [ ] Web browser interface
 - [ ] Self-hosting!?
