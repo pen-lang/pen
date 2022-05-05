@@ -1,4 +1,4 @@
-use super::record_type_information_compiler;
+use super::{map_context_transformer, record_type_information_compiler};
 use crate::{context::CompileContext, CompileError};
 use hir::{
     analysis::{
@@ -56,7 +56,7 @@ pub fn transform(
             position.clone(),
         )
         .into(),
-        Type::Map(_) => Call::new(
+        Type::Map(map_type) => Call::new(
             Some(
                 types::Function::new(
                     vec![types::Reference::new(
@@ -73,7 +73,15 @@ pub fn transform(
                 &configuration.map_type.hash.map_hash_function_name,
                 position.clone(),
             ),
-            vec![value.clone()],
+            vec![
+                map_context_transformer::transform(
+                    context,
+                    map_type.key(),
+                    map_type.value(),
+                    position,
+                )?,
+                value.clone(),
+            ],
             position.clone(),
         )
         .into(),
