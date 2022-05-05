@@ -1,7 +1,6 @@
 ---
 source: lib/hir-mir/src/transformation/map_literal_transformer.rs
-assertion_line: 231
-expression: "transform(&CompileContext::dummy(Default::default(), Default::default()),\n          &Map::new(types::None::new(Position::fake()),\n                    types::None::new(Position::fake()),\n                    vec![MapEntry ::\n                         new(None :: new(Position :: fake()), None ::\n                             new(Position :: fake()), Position ::\n                             fake()).into()], Position::fake()))"
+expression: "transform(&CompileContext::dummy(Default::default(), Default::default()),\n    &Map::new(types::None::new(Position::fake()),\n            types::None::new(Position::fake()),\n            vec![MapEntry ::\n                new(None :: new(Position :: fake()), None ::\n                new(Position :: fake()), Position :: fake()).into()],\n            Position::fake()))"
 ---
 Ok(
     Call(
@@ -231,7 +230,7 @@ Ok(
                                     ],
                                     result: Reference(
                                         Reference {
-                                            name: "GenericMap",
+                                            name: "mapContext",
                                             position: Position {
                                                 path: "",
                                                 line_number: 1,
@@ -251,7 +250,7 @@ Ok(
                         ),
                         function: Variable(
                             Variable {
-                                name: "emptyMap",
+                                name: "newMapContext",
                                 position: Position {
                                     path: "",
                                     line_number: 1,
@@ -694,6 +693,52 @@ Ok(
                                 },
                             ),
                         ],
+                        position: Position {
+                            path: "",
+                            line_number: 1,
+                            column_number: 1,
+                            line: "",
+                        },
+                    },
+                ),
+                Call(
+                    Call {
+                        function_type: Some(
+                            Function(
+                                Function {
+                                    arguments: [],
+                                    result: Reference(
+                                        Reference {
+                                            name: "GenericMap",
+                                            position: Position {
+                                                path: "",
+                                                line_number: 1,
+                                                column_number: 1,
+                                                line: "",
+                                            },
+                                        },
+                                    ),
+                                    position: Position {
+                                        path: "",
+                                        line_number: 1,
+                                        column_number: 1,
+                                        line: "",
+                                    },
+                                },
+                            ),
+                        ),
+                        function: Variable(
+                            Variable {
+                                name: "emptyMap",
+                                position: Position {
+                                    path: "",
+                                    line_number: 1,
+                                    column_number: 1,
+                                    line: "",
+                                },
+                            },
+                        ),
+                        arguments: [],
                         position: Position {
                             path: "",
                             line_number: 1,
