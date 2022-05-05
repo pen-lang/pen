@@ -22,11 +22,12 @@ Items are ordered by priority.
 - [x] Map type
 - [x] Code formatter
 - [x] Documentation generator
+- [ ] IDE/editor support
+  - [ ] Language server
+- [ ] Reflection
 - [ ] Serialization / deserialization
 - [ ] Mutable state
   - [ ] Thread safety
-- [ ] IDE/editor support
-  - [ ] Language server
 - [ ] Vector type
 - [ ] Process management
 - [ ] Web browser interface
