@@ -1,4 +1,4 @@
-use super::{map_context_transformer, collection_type_transformer};
+use super::{collection_type_transformer, map_context_transformer};
 use crate::{context::CompileContext, CompileError};
 use hir::{
     ir::*,

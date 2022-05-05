@@ -1,4 +1,4 @@
-use super::{hash_calculation_transformer, collection_type_transformer};
+use super::{collection_type_transformer, hash_calculation_transformer};
 use crate::{context::CompileContext, transformation::equal_operation_transformer, CompileError};
 use hir::{analysis::type_comparability_checker, ir::*, types, types::Type};
 use position::Position;

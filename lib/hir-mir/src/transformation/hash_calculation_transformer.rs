@@ -1,4 +1,6 @@
-use super::{map_context_transformer, record_type_information_compiler, collection_type_transformer};
+use super::{
+    collection_type_transformer, map_context_transformer, record_type_information_compiler,
+};
 use crate::{context::CompileContext, CompileError};
 use hir::{
     analysis::{
