@@ -27,7 +27,7 @@ pub fn transform(context: &CompileContext, if_: &IfList) -> Result<Expression, C
         Call::new(
             Some(
                 types::Function::new(
-                    vec![any_list_type.clone().into()],
+                    vec![any_list_type.clone()],
                     types::Union::new(first_rest_type.clone(), none_type.clone(), position.clone()),
                     position.clone(),
                 )
@@ -91,7 +91,7 @@ pub fn transform(context: &CompileContext, if_: &IfList) -> Result<Expression, C
                     },
                     Let::new(
                         Some(if_.rest_name().into()),
-                        Some(any_list_type.clone().into()),
+                        Some(any_list_type.clone()),
                         Call::new(
                             Some(
                                 types::Function::new(

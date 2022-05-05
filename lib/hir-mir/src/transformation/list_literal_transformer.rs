@@ -47,12 +47,7 @@ fn transform_list(
                 .into(),
             ),
             Variable::new(&configuration.lazy_function_name, position.clone()),
-            vec![Thunk::new(
-                Some(any_list_type.into()),
-                expression.clone(),
-                position.clone(),
-            )
-            .into()],
+            vec![Thunk::new(Some(any_list_type), expression.clone(), position.clone()).into()],
             position.clone(),
         )
         .into(),
@@ -62,7 +57,7 @@ fn transform_list(
                     vec![
                         types::Function::new(vec![], any_list_type.clone(), position.clone())
                             .into(),
-                        any_list_type.clone().into(),
+                        any_list_type.clone(),
                     ],
                     any_list_type.clone(),
                     position.clone(),
@@ -71,12 +66,7 @@ fn transform_list(
             ),
             Variable::new(&configuration.concatenate_function_name, position.clone()),
             vec![
-                Thunk::new(
-                    Some(any_list_type.into()),
-                    expression.clone(),
-                    position.clone(),
-                )
-                .into(),
+                Thunk::new(Some(any_list_type), expression.clone(), position.clone()).into(),
                 rest_expression(),
             ],
             position.clone(),
@@ -92,7 +82,7 @@ fn transform_list(
                             position.clone(),
                         )
                         .into(),
-                        any_list_type.clone().into(),
+                        any_list_type.clone(),
                     ],
                     any_list_type,
                     position.clone(),

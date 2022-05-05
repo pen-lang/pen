@@ -104,7 +104,7 @@ mod tests {
         #[test]
         fn format_broken_group() {
             assert_eq!(
-                format(&create_group().into()),
+                format(&create_group()),
                 indoc!(
                     "
                     {

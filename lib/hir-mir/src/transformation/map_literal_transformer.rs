@@ -53,7 +53,7 @@ fn transform_map(
                         types::Function::new(
                             vec![
                                 map_context_type,
-                                any_map_type.clone().into(),
+                                any_map_type.clone(),
                                 types::Any::new(position.clone()).into(),
                                 types::Any::new(position.clone()).into(),
                             ],
@@ -87,11 +87,7 @@ fn transform_map(
                 MapElement::Map(expression) => Call::new(
                     Some(
                         types::Function::new(
-                            vec![
-                                map_context_type,
-                                any_map_type.clone().into(),
-                                any_map_type.clone().into(),
-                            ],
+                            vec![map_context_type, any_map_type.clone(), any_map_type.clone()],
                             any_map_type,
                             position.clone(),
                         )
@@ -107,7 +103,7 @@ fn transform_map(
                         types::Function::new(
                             vec![
                                 map_context_type,
-                                any_map_type.clone().into(),
+                                any_map_type.clone(),
                                 types::Any::new(position.clone()).into(),
                             ],
                             any_map_type,

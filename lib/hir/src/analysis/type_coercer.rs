@@ -988,7 +988,7 @@ mod tests {
                             Variable::new("xs", Position::fake()),
                             TypeCoercion::new(
                                 types::Boolean::new(Position::fake()),
-                                union_type.clone(),
+                                union_type,
                                 Boolean::new(true, Position::fake()),
                                 Position::fake(),
                             ),

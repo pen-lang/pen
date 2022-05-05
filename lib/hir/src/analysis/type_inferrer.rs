@@ -866,11 +866,11 @@ mod tests {
                         list_type,
                         MapIterationComprehension::new(
                             Some(key_type.clone().into()),
-                            Some(value_type.clone().into()),
-                            element_type.clone(),
+                            Some(value_type.into()),
+                            element_type,
                             Let::new(
                                 Some("x".into()),
-                                Some(key_type.clone().into()),
+                                Some(key_type.into()),
                                 Variable::new("k", Position::fake()),
                                 Variable::new("x", Position::fake()),
                                 Position::fake(),

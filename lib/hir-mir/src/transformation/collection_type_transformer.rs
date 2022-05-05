@@ -3,7 +3,10 @@ use hir::types::{self, Type};
 use position::Position;
 
 pub fn transform_list(context: &CompileContext, position: &Position) -> Result<Type, CompileError> {
-    Ok(transform_list_from_configuration(&context.configuration()?.list_type, position).into())
+    Ok(transform_list_from_configuration(
+        &context.configuration()?.list_type,
+        position,
+    ))
 }
 
 pub fn transform_list_from_configuration(

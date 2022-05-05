@@ -68,8 +68,8 @@ fn transform_equal_operation(
                     types::Function::new(
                         vec![
                             compile_any_function_type(position).into(),
-                            any_list_type.clone().into(),
-                            any_list_type.into(),
+                            any_list_type.clone(),
+                            any_list_type,
                         ],
                         types::Boolean::new(position.clone()),
                         position.clone(),
@@ -97,8 +97,8 @@ fn transform_equal_operation(
                     types::Function::new(
                         vec![
                             collection_type_transformer::transform_map_context(context, position)?,
-                            any_map_type.clone().into(),
-                            any_map_type.into(),
+                            any_map_type.clone(),
+                            any_map_type,
                         ],
                         types::Boolean::new(position.clone()),
                         position.clone(),

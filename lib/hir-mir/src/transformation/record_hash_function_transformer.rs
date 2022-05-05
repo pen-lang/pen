@@ -146,7 +146,7 @@ mod tests {
     use position::{test::PositionFake, Position};
     use pretty_assertions::assert_eq;
 
-    static HASH_TYPE: Lazy<Type> = Lazy::new(|| compile_hash_type(&Position::fake()).into());
+    static HASH_TYPE: Lazy<Type> = Lazy::new(|| compile_hash_type(&Position::fake()));
     static COMBINE_HASH_FUNCTION_TYPE: Lazy<Type> = Lazy::new(|| {
         types::Function::new(
             vec![HASH_TYPE.clone(), HASH_TYPE.clone()],
@@ -187,7 +187,7 @@ mod tests {
                     "foo.$hash",
                     "foo.$hash",
                     Lambda::new(
-                        vec![Argument::new(RECORD_NAME, record_type.clone()),],
+                        vec![Argument::new(RECORD_NAME, record_type),],
                         HASH_TYPE.clone(),
                         Call::new(
                             Some(COMBINE_HASH_FUNCTION_TYPE.clone()),
