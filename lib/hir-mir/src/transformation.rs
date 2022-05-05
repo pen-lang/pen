@@ -4,6 +4,7 @@ mod hash_calculation_transformer;
 pub mod if_list_transformer;
 pub mod if_map_transformer;
 pub mod list_literal_transformer;
+mod map_context_transformer;
 pub mod map_literal_transformer;
 pub mod not_equal_operation_transformer;
 pub mod record_equal_function_transformer;
