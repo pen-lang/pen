@@ -59,11 +59,18 @@ pub fn transform(
         Type::Map(map_type) => Call::new(
             Some(
                 types::Function::new(
-                    vec![types::Reference::new(
-                        &configuration.map_type.map_type_name,
-                        position.clone(),
-                    )
-                    .into()],
+                    vec![
+                        types::Reference::new(
+                            &configuration.map_type.context_type_name,
+                            position.clone(),
+                        )
+                        .into(),
+                        types::Reference::new(
+                            &configuration.map_type.map_type_name,
+                            position.clone(),
+                        )
+                        .into(),
+                    ],
                     types::Number::new(position.clone()),
                     position.clone(),
                 )

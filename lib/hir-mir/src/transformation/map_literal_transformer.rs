@@ -24,7 +24,11 @@ fn transform_map(
     position: &Position,
 ) -> Result<Expression, CompileError> {
     let configuration = &context.configuration()?.map_type;
-    let any_map_type = types::Reference::new(configuration.map_type_name.clone(), position.clone());
+    let map_context_type = Type::from(types::Reference::new(
+        &configuration.context_type_name,
+        position.clone(),
+    ));
+    let any_map_type = types::Reference::new(&configuration.map_type_name, position.clone());
     let map_context = map_context_transformer::transform(context, key_type, value_type, position)?;
 
     Ok(match elements {
@@ -51,6 +55,7 @@ fn transform_map(
                     Some(
                         types::Function::new(
                             vec![
+                                map_context_type.clone(),
                                 any_map_type.clone().into(),
                                 types::Any::new(position.clone()).into(),
                                 types::Any::new(position.clone()).into(),
@@ -85,7 +90,11 @@ fn transform_map(
                 MapElement::Map(expression) => Call::new(
                     Some(
                         types::Function::new(
-                            vec![any_map_type.clone().into(), any_map_type.clone().into()],
+                            vec![
+                                map_context_type.clone(),
+                                any_map_type.clone().into(),
+                                any_map_type.clone().into(),
+                            ],
                             any_map_type,
                             position.clone(),
                         )
@@ -100,6 +109,7 @@ fn transform_map(
                     Some(
                         types::Function::new(
                             vec![
+                                map_context_type.clone(),
                                 any_map_type.clone().into(),
                                 types::Any::new(position.clone()).into(),
                             ],

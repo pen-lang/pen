@@ -101,7 +101,15 @@ fn transform_equal_operation(
             Call::new(
                 Some(
                     types::Function::new(
-                        vec![any_map_type.clone().into(), any_map_type.into()],
+                        vec![
+                            types::Reference::new(
+                                &context.configuration()?.map_type.context_type_name,
+                                position.clone(),
+                            )
+                            .into(),
+                            any_map_type.clone().into(),
+                            any_map_type.into(),
+                        ],
                         types::Boolean::new(position.clone()),
                         position.clone(),
                     )

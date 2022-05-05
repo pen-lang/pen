@@ -24,6 +24,8 @@ pub fn transform(context: &CompileContext, if_: &IfMap) -> Result<Expression, Co
             Some(
                 types::Function::new(
                     vec![
+                        types::Reference::new(&configuration.context_type_name, position.clone())
+                            .into(),
                         types::Reference::new(&configuration.map_type_name, position.clone())
                             .into(),
                         any_type.clone(),
