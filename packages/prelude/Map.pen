@@ -5,7 +5,6 @@ import foreign "c" _pen_prelude_hash_to_index \(number, number, number) number
 type _map {
   hamt _hamt
   size number
-  context _mapContext
 }
 
 type _empty {}
@@ -78,16 +77,7 @@ _newMap = \(
   equalValues \(any, any) boolean,
   hashValue \(any) number,
 ) _map {
-  _map{
-    hamt: _newHamt(),
-    size: 0,
-    context: _mapContext{
-      equalKeys: equalKeys,
-      hashKey: hashKey,
-      equalValues: equalValues,
-      hashValue: hashValue,
-    },
-  }
+  _map{hamt: _newHamt(), size: 0}
 }
 
 _newHamt = \() _hamt {
@@ -128,10 +118,11 @@ _newHamt = \() _hamt {
 }
 
 _getMap = \(
+  ctx _mapContext,
   map _map,
   key any,
 ) any {
-  _getValue(map.context, map.hamt, key, 1, 1)
+  _getValue(ctx, map.hamt, key, 1, 1)
 }
 
 # A layer is composed of a tree of HAMT and used to re-hash keys.
@@ -155,16 +146,16 @@ _getValue = \(ctx _mapContext, hamt _hamt, key any, layer number, level number) 
 }
 
 _setMap = \(
+  ctx _mapContext,
   map _map,
   key any,
   value any,
 ) _map {
-  u = _setKeyValue(map.context, map.hamt, key, value, 1, 1)
+  u = _setKeyValue(ctx, map.hamt, key, value, 1, 1)
 
   _map{
     hamt: u.hamt,
     size: map.size + if u.size { 1 } else { 0 },
-    context: map.context,
   }
 }
 
@@ -205,15 +196,15 @@ _setKeyValue = \(
 }
 
 _deleteMap = \(
+  ctx _mapContext,
   map _map,
   key any,
 ) _map {
-  u = _deleteKey(map.context, map.hamt, key, 1, 1)
+  u = _deleteKey(ctx, map.hamt, key, 1, 1)
 
   _map{
     hamt: u.hamt,
     size: map.size - if u.size { 1 } else { 0 },
-    context: map.context,
   }
 }
 
@@ -270,13 +261,13 @@ _mergeMaps = \(x _map, y _map) _map {
   _mergeHamt(x, y.hamt, 1)
 }
 
-_mergeHamt = \(m _map, h _hamt, i number) _map {
+_mergeHamt = \(ctx _mapContext, m _map, h _hamt, i number) _map {
   if i > 32 {
     m
   } else {
     _mergeHamt(
       if e = _getEntry(h, i) as _keyValue {
-        _setMap(m, e.key, e.value)
+        _setMap(ctx, m, e.key, e.value)
       } else if _hamt {
         _mergeHamt(m, e, 1)
       } else if none {
@@ -288,8 +279,8 @@ _mergeHamt = \(m _map, h _hamt, i number) _map {
   }
 }
 
-_equalMaps = \(x _map, y _map) boolean {
-  x.size == y.size & _equalHamts(x.context, x.hamt, y.hamt, 1)
+_equalMaps = \(ctx _mapContext, x _map, y _map) boolean {
+  x.size == y.size & _equalHamts(ctx, x.hamt, y.hamt, 1)
 }
 
 _equalHamts = \(ctx _mapContext, h1 _hamt, h2 _hamt, i number) boolean {
@@ -320,10 +311,10 @@ _equalHamts = \(ctx _mapContext, h1 _hamt, h2 _hamt, i number) boolean {
   }
 }
 
-_hashMap = \(m _map) number {
+_hashMap = \(ctx _mapContext, m _map) number {
   headerHash = 5
 
-  _hashHamt(m.context, m.hamt, 1, headerHash)
+  _hashHamt(ctx, m.hamt, 1, headerHash)
 }
 
 _hashHamt = \(ctx _mapContext, h _hamt, index number, hash number) number {
