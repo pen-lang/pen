@@ -4,7 +4,7 @@ use once_cell::sync::Lazy;
 #[cfg(test)]
 pub static MAP_TYPE_CONFIGURATION: Lazy<MapTypeConfiguration> =
     Lazy::new(|| MapTypeConfiguration {
-        delete_function_name: "removeMap".into(),
+        delete_function_name: "deleteMap".into(),
         empty_function_name: "emptyMap".into(),
         empty_type_name: "notFound".into(),
         equal_function_name: "equalMaps".into(),
