@@ -1,4 +1,4 @@
-use super::{super::error::CompileError, map_context_transformer};
+use super::{super::error::CompileError, map_context_transformer, collection_type_transformer};
 use crate::{context::CompileContext, transformation::record_type_information_compiler};
 use hir::{
     analysis::{
@@ -61,10 +61,7 @@ fn transform_equal_operation(
         )
         .into(),
         Type::List(list_type) => {
-            let any_list_type = types::Reference::new(
-                &context.configuration()?.list_type.list_type_name,
-                position.clone(),
-            );
+            let any_list_type = collection_type_transformer::transform_list(context, position)?;
 
             Call::new(
                 Some(
@@ -93,20 +90,13 @@ fn transform_equal_operation(
             .into()
         }
         Type::Map(map_type) => {
-            let any_map_type = types::Reference::new(
-                &context.configuration()?.map_type.map_type_name,
-                position.clone(),
-            );
+            let any_map_type = collection_type_transformer::transform_map(context, position)?;
 
             Call::new(
                 Some(
                     types::Function::new(
                         vec![
-                            types::Reference::new(
-                                &context.configuration()?.map_type.context_type_name,
-                                position.clone(),
-                            )
-                            .into(),
+                            collection_type_transformer::transform_map_context(context, position)?,
                             any_map_type.clone().into(),
                             any_map_type.into(),
                         ],

@@ -5,6 +5,8 @@ use hir::{
 };
 use position::Position;
 
+use super::collection_type_transformer;
+
 pub fn transform(list: &List, configuration: &ListTypeConfiguration) -> Expression {
     transform_list(
         list.type_(),
@@ -22,7 +24,7 @@ fn transform_list(
 ) -> Expression {
     let rest_expression = || transform_list(type_, &elements[1..], position, configuration);
     let any_list_type =
-        types::Reference::new(configuration.list_type_name.clone(), position.clone());
+        collection_type_transformer::transform_list_from_configuration(configuration, position);
 
     match elements {
         [] => Call::new(

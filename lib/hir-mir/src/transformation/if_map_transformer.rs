@@ -1,4 +1,4 @@
-use super::{super::error::CompileError, map_context_transformer};
+use super::{super::error::CompileError, map_context_transformer, collection_type_transformer};
 use crate::{context::CompileContext, downcast_compiler};
 use hir::{
     analysis::AnalysisError,
@@ -24,10 +24,8 @@ pub fn transform(context: &CompileContext, if_: &IfMap) -> Result<Expression, Co
             Some(
                 types::Function::new(
                     vec![
-                        types::Reference::new(&configuration.context_type_name, position.clone())
-                            .into(),
-                        types::Reference::new(&configuration.map_type_name, position.clone())
-                            .into(),
+                        collection_type_transformer::transform_map_context(context, position)?,
+                        collection_type_transformer::transform_map(context, position)?,
                         any_type.clone(),
                     ],
                     any_type.clone(),

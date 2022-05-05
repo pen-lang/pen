@@ -1,4 +1,4 @@
-use super::hash_calculation_transformer;
+use super::{hash_calculation_transformer, collection_type_transformer};
 use crate::{context::CompileContext, transformation::equal_operation_transformer, CompileError};
 use hir::{analysis::type_comparability_checker, ir::*, types, types::Type};
 use position::Position;
@@ -10,8 +10,6 @@ pub fn transform(
     position: &Position,
 ) -> Result<Expression, CompileError> {
     let configuration = &context.configuration()?.map_type;
-    let any_map_type =
-        types::Reference::new(configuration.context_type_name.clone(), position.clone());
     let any_type = Type::from(types::Any::new(position.clone()));
     let equal_function_type = Type::from(types::Function::new(
         vec![any_type.clone(), any_type.clone()],
@@ -33,7 +31,7 @@ pub fn transform(
                     equal_function_type,
                     hash_function_type,
                 ],
-                any_map_type,
+                collection_type_transformer::transform_map_context(context, position)?,
                 position.clone(),
             )
             .into(),

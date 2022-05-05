@@ -1,4 +1,4 @@
-use super::{map_context_transformer, record_type_information_compiler};
+use super::{map_context_transformer, record_type_information_compiler, collection_type_transformer};
 use crate::{context::CompileContext, CompileError};
 use hir::{
     analysis::{
@@ -34,11 +34,7 @@ pub fn transform(
                 types::Function::new(
                     vec![
                         compile_any_function_type(position).into(),
-                        types::Reference::new(
-                            &configuration.list_type.list_type_name,
-                            position.clone(),
-                        )
-                        .into(),
+                        collection_type_transformer::transform_list(context, position)?,
                     ],
                     types::Number::new(position.clone()),
                     position.clone(),
@@ -60,16 +56,8 @@ pub fn transform(
             Some(
                 types::Function::new(
                     vec![
-                        types::Reference::new(
-                            &configuration.map_type.context_type_name,
-                            position.clone(),
-                        )
-                        .into(),
-                        types::Reference::new(
-                            &configuration.map_type.map_type_name,
-                            position.clone(),
-                        )
-                        .into(),
+                        collection_type_transformer::transform_map_context(context, position)?,
+                        collection_type_transformer::transform_map(context, position)?,
                     ],
                     types::Number::new(position.clone()),
                     position.clone(),
