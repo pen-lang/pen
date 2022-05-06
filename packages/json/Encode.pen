@@ -11,7 +11,7 @@ type objectEntry {
 
 # Encode a JSON value.
 Encode = \(v Value) string {
-  String'Join(value(v), "")
+  String'Concatenate(value(v))
 }
 
 value = \(v Value) [string] {

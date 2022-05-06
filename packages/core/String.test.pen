@@ -2,6 +2,22 @@ import Test'Assert
 
 import 'String
 
+ConcatenateEmpty = \() none | error {
+  Assert'True(String'Concatenate([string]) == "")
+}
+
+ConcatenateString = \() none | error {
+  Assert'True(String'Concatenate([string "foo"]) == "foo")
+}
+
+ConcatenateTwoStrings = \() none | error {
+  Assert'True(String'Concatenate([string "foo", "bar"]) == "foobar")
+}
+
+ConcatenateThreeStrings = \() none | error {
+  Assert'True(String'Concatenate([string "lan", "gua", "ge"]) == "language")
+}
+
 JoinEmpty = \() none | error {
   Assert'True(String'Join([string], "") == "")
 }

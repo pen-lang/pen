@@ -9,6 +9,11 @@ type stringBuilder {
   value any
 }
 
+# Concatenate strings.
+Concatenate = \(strings [string]) string {
+  Join(strings, "")
+}
+
 # Join strings with a separator.
 Join = \(strings [string], separator string) string {
   _pen_core_string_builder_build(

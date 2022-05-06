@@ -118,7 +118,7 @@ string_ = \(v View) result | error {
 
 stringCharacters = \(v View, ss [string]) stringResult | error {
   if View'HasPrefix(v, "\"") {
-    stringResult(String'Join(ss, ""), v)
+    stringResult(String'Concatenate(ss), v)
   } else {
     r = stringCharacter(v)?
 
