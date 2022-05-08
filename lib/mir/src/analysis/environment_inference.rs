@@ -93,6 +93,7 @@ fn infer_in_expression(
         Expression::LetRecursive(let_) => infer_in_let_recursive(let_, variables).into(),
         Expression::Record(record) => infer_in_record(record, variables).into(),
         Expression::RecordField(field) => infer_in_record_field(field, variables).into(),
+        Expression::ReusedRecord(record) => infer_in_record(record.record(), variables).into(),
         Expression::TryOperation(operation) => infer_in_try_operation(operation, variables).into(),
         Expression::Variant(variant) => infer_in_variant(variant, variables).into(),
         Expression::Boolean(_)

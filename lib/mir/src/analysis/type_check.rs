@@ -183,21 +183,7 @@ fn check_expression(
         }
         Expression::None => Type::None,
         Expression::Number(_) => Type::Number,
-        Expression::Record(record) => {
-            let record_type = types
-                .get(record.type_().name())
-                .ok_or_else(|| TypeCheckError::TypeNotFound(record.type_().clone()))?;
-
-            if record.fields().len() != record_type.fields().len() {
-                return Err(TypeCheckError::WrongFieldCount(record.clone()));
-            }
-
-            for (field, field_type) in record.fields().iter().zip(record_type.fields()) {
-                check_equality(&check_expression(field, variables)?, field_type)?;
-            }
-
-            record.type_().clone().into()
-        }
+        Expression::Record(record) => check_record(record, variables, result_type, types)?,
         Expression::RecordField(field) => {
             check_equality(
                 &check_expression(field.record(), variables)?,
@@ -211,6 +197,9 @@ fn check_expression(
                 .get(field.index())
                 .ok_or_else(|| TypeCheckError::FieldIndexOutOfBounds(field.clone()))?
                 .clone()
+        }
+        Expression::ReusedRecord(record) => {
+            check_record(record.record(), variables, result_type, types)?
         }
         Expression::ByteString(_) => Type::ByteString,
         Expression::TryOperation(operation) => {
@@ -296,6 +285,30 @@ fn check_case(
     }
 
     expression_type.ok_or_else(|| TypeCheckError::NoAlternativeFound(case.clone()))
+}
+
+fn check_record(
+    record: &Record,
+    variables: &FnvHashMap<&str, Type>,
+    result_type: &Type,
+    types: &FnvHashMap<&str, &types::RecordBody>,
+) -> Result<Type, TypeCheckError> {
+    let record_type = types
+        .get(record.type_().name())
+        .ok_or_else(|| TypeCheckError::TypeNotFound(record.type_().clone()))?;
+
+    if record.fields().len() != record_type.fields().len() {
+        return Err(TypeCheckError::WrongFieldCount(record.clone()));
+    }
+
+    for (field, field_type) in record.fields().iter().zip(record_type.fields()) {
+        check_equality(
+            &check_expression(field, variables, result_type, types)?,
+            field_type,
+        )?;
+    }
+
+    Ok(record.type_().clone().into())
 }
 
 fn check_variable(

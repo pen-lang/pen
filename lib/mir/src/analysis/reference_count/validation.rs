@@ -147,12 +147,13 @@ fn move_expression(
         Expression::None => {}
         Expression::Number(_) => {}
         Expression::Record(record) => {
-            for field in record.fields() {
-                move_expression(field, variables)?;
-            }
+            move_record(record, variables)?;
         }
         Expression::RecordField(field) => {
             move_expression(field.record(), variables)?;
+        }
+        Expression::ReusedRecord(record) => {
+            move_record(record.record(), variables)?;
         }
         Expression::TryOperation(operation) => {
             move_expression(operation.operand(), variables)?;
@@ -173,6 +174,17 @@ fn move_expression(
         Expression::Variant(variant) => {
             move_expression(variant.payload(), variables)?;
         }
+    }
+
+    Ok(())
+}
+
+fn move_record(
+    record: &Record,
+    variables: &mut FnvHashMap<String, isize>,
+) -> Result<(), ReferenceCountError> {
+    for field in record.fields() {
+        move_expression(field, variables)?;
     }
 
     Ok(())

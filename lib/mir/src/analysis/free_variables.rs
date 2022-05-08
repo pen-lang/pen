@@ -40,12 +40,9 @@ fn find_in_expression(expression: &Expression) -> FnvHashSet<String> {
                     .filter(|variable| variable != let_.name()),
             )
             .collect(),
-        Expression::Record(record) => record
-            .fields()
-            .iter()
-            .flat_map(find_in_expression)
-            .collect(),
+        Expression::Record(record) => find_in_record(record),
         Expression::RecordField(field) => find_in_expression(field.record()),
+        Expression::ReusedRecord(record) => find_in_record(record.record()),
         Expression::TryOperation(operation) => find_in_expression(operation.operand())
             .into_iter()
             .chain(
@@ -82,6 +79,14 @@ fn find_in_case(case: &Case) -> FnvHashSet<String> {
                         .collect::<FnvHashSet<_>>()
                 }),
         )
+        .collect()
+}
+
+fn find_in_record(record: &Record) -> FnvHashSet<String> {
+    record
+        .fields()
+        .iter()
+        .flat_map(find_in_expression)
         .collect()
 }
 
