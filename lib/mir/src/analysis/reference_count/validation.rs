@@ -114,13 +114,7 @@ fn move_expression(
             move_expression(operation.lhs(), variables)?;
             move_expression(operation.rhs(), variables)?;
         }
-        Expression::DropVariables(drop) => {
-            for name in drop.variables().keys() {
-                drop_variable(name, variables);
-            }
-
-            move_expression(drop.expression(), variables)?;
-        }
+        Expression::DropVariables(drop) => move_drop_variables(drop, variables)?,
         Expression::If(if_) => {
             move_expression(if_.condition(), variables)?;
 
@@ -155,6 +149,7 @@ fn move_expression(
         Expression::ReusedRecord(record) => {
             move_record(record.record(), variables)?;
         }
+        Expression::ReuseVariables(reuse) => move_drop_variables(reuse.drop(), variables)?,
         Expression::TryOperation(operation) => {
             move_expression(operation.operand(), variables)?;
 
@@ -177,6 +172,17 @@ fn move_expression(
     }
 
     Ok(())
+}
+
+fn move_drop_variables(
+    drop: &DropVariables,
+    variables: &mut FnvHashMap<String, isize>,
+) -> Result<(), ReferenceCountError> {
+    for name in drop.variables().keys() {
+        drop_variable(name, variables);
+    }
+
+    move_expression(drop.expression(), variables)
 }
 
 fn move_record(

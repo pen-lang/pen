@@ -115,11 +115,7 @@ fn check_expression(
             Type::Boolean
         }
         Expression::DropVariables(drop) => {
-            for (variable, type_) in drop.variables() {
-                check_equality(&check_variable(&Variable::new(variable), variables)?, type_)?;
-            }
-
-            check_expression(drop.expression(), variables)?
+            check_drop_variables(drop, variables, result_type, types)?
         }
         Expression::Call(call) => {
             check_equality(
@@ -200,6 +196,9 @@ fn check_expression(
         }
         Expression::ReusedRecord(record) => {
             check_record(record.record(), variables, result_type, types)?
+        }
+        Expression::ReuseVariables(reuse) => {
+            check_drop_variables(reuse.drop(), variables, result_type, types)?
         }
         Expression::ByteString(_) => Type::ByteString,
         Expression::TryOperation(operation) => {
@@ -285,6 +284,19 @@ fn check_case(
     }
 
     expression_type.ok_or_else(|| TypeCheckError::NoAlternativeFound(case.clone()))
+}
+
+fn check_drop_variables(
+    drop: &DropVariables,
+    variables: &FnvHashMap<&str, Type>,
+    result_type: &Type,
+    types: &FnvHashMap<&str, &types::RecordBody>,
+) -> Result<Type, TypeCheckError> {
+    for (variable, type_) in drop.variables() {
+        check_equality(&check_variable(&Variable::new(variable), variables)?, type_)?;
+    }
+
+    check_expression(drop.expression(), variables, result_type, types)
 }
 
 fn check_record(

@@ -518,7 +518,8 @@ fn convert_expression(
         | Expression::Number(_) => (expression.clone(), moved_variables.clone()),
         Expression::CloneVariables(_)
         | Expression::DropVariables(_)
-        | Expression::ReusedRecord(_) => {
+        | Expression::ReusedRecord(_)
+        | Expression::ReuseVariables(_) => {
             return Err(ReferenceCountError::ExpressionNotSupported(
                 expression.clone(),
             ));

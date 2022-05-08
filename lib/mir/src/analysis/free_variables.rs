@@ -17,7 +17,7 @@ fn find_in_expression(expression: &Expression) -> FnvHashSet<String> {
             .into_iter()
             .chain(find_in_expression(operation.rhs()))
             .collect(),
-        Expression::DropVariables(drop) => find_in_expression(drop.expression()),
+        Expression::DropVariables(drop) => find_in_drop_variables(drop),
         Expression::Call(call) => find_in_expression(call.function())
             .into_iter()
             .chain(call.arguments().iter().flat_map(find_in_expression))
@@ -43,6 +43,7 @@ fn find_in_expression(expression: &Expression) -> FnvHashSet<String> {
         Expression::Record(record) => find_in_record(record),
         Expression::RecordField(field) => find_in_expression(field.record()),
         Expression::ReusedRecord(record) => find_in_record(record.record()),
+        Expression::ReuseVariables(reuse) => find_in_drop_variables(reuse.drop()),
         Expression::TryOperation(operation) => find_in_expression(operation.operand())
             .into_iter()
             .chain(
@@ -80,6 +81,10 @@ fn find_in_case(case: &Case) -> FnvHashSet<String> {
                 }),
         )
         .collect()
+}
+
+fn find_in_drop_variables(drop: &DropVariables) -> FnvHashSet<String> {
+    find_in_expression(drop.expression())
 }
 
 fn find_in_record(record: &Record) -> FnvHashSet<String> {
