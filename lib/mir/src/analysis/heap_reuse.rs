@@ -1,5 +1,7 @@
+mod heap_block_set;
+
+use self::heap_block_set::HeapBlockSet;
 use crate::{ir::*, types::Type};
-use fnv::FnvHashMap;
 use std::{
     collections::hash_map::DefaultHasher,
     hash::{Hash, Hasher},
@@ -34,75 +36,51 @@ fn convert_definition(definition: &FunctionDefinition) -> FunctionDefinition {
 
 fn convert_expression(
     expression: &Expression,
-    dropped_variables: &FnvHashMap<Type, usize>,
-) -> (Expression, FnvHashMap<Type, usize>) {
+    dropped_blocks: &HeapBlockSet,
+) -> (Expression, HeapBlockSet) {
     match expression {
         Expression::Record(record) => {
             let mut fields = vec![];
-            let mut reused_variables = FnvHashMap::default();
+            let mut reused_blocks = HeapBlockSet::new();
 
             for field in record.fields() {
-                let (expression, variables) = convert_expression(field, &dropped_variables);
+                let (expression, blocks) = convert_expression(field, &dropped_blocks);
 
                 fields.push(expression);
-                reused_variables.extend(variables);
+                reused_blocks.merge(&blocks);
             }
 
             let type_ = record.type_().clone().into();
 
-            if let Some(count) = get_dropped_variable(&dropped_variables, &type_) {
+            if let Some(count) = dropped_blocks.get(&type_) {
                 (
                     ReusedRecord::new(
                         get_reuse_id(&type_, count),
                         Record::new(record.type_().clone(), fields),
                     )
                     .into(),
-                    reused_variables,
+                    reused_blocks,
                 )
             } else {
-                (expression.clone(), reused_variables)
+                (expression.clone(), reused_blocks)
             }
         }
         Expression::DropVariables(drop) => {
-            let mut dropped_variables = dropped_variables.clone();
+            let mut dropped_blocks = dropped_blocks.clone();
 
             for type_ in drop.variables().values() {
-                add_dropped_variable(&mut dropped_variables, type_);
+                dropped_blocks.add(type_);
             }
 
-            let (expression, reused_variables) =
-                convert_expression(drop.expression(), &dropped_variables);
+            let (expression, mut reused_blocks) =
+                convert_expression(drop.expression(), &dropped_blocks);
 
-            (
-                DropVariables::new(drop.variables().clone(), expression).into(),
-                reused_variables,
-            )
+            reused_blocks.difference(&dropped_blocks);
+
+            (todo!(), reused_blocks)
         }
         _ => (expression.clone(), Default::default()),
     }
-}
-
-fn add_dropped_variable(dropped_variables: &mut FnvHashMap<Type, usize>, type_: &Type) {
-    update_dropped_variable(dropped_variables, type_, 1);
-}
-
-fn get_dropped_variable(variables: &FnvHashMap<Type, usize>, type_: &Type) -> Option<usize> {
-    if let Some(&count) = variables.get(type_) {
-        if count > 0 {
-            Some(count)
-        } else {
-            None
-        }
-    } else {
-        None
-    }
-}
-
-fn update_dropped_variable(variables: &mut FnvHashMap<Type, usize>, type_: &Type, count: isize) {
-    variables.insert(
-        type_.clone(),
-        (variables.get(&type_).copied().unwrap_or_default() as isize + count) as usize,
-    );
 }
 
 fn get_reuse_id(type_: &Type, count: usize) -> String {
