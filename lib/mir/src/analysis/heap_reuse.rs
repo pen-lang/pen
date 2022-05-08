@@ -1,5 +1,5 @@
 use crate::{ir::*, types::Type};
-use fnv::{FnvHashMap, FnvHashSet};
+use fnv::FnvHashMap;
 use std::{
     collections::hash_map::DefaultHasher,
     hash::{Hash, Hasher},
@@ -35,32 +35,32 @@ fn convert_definition(definition: &FunctionDefinition) -> FunctionDefinition {
 fn convert_expression(
     expression: &Expression,
     dropped_variables: &FnvHashMap<Type, usize>,
-) -> (Expression, FnvHashMap<String, Type>) {
+) -> (Expression, FnvHashMap<Type, usize>) {
     match expression {
         Expression::Record(record) => {
             let mut fields = vec![];
-            let mut dropped_variables = dropped_variables.clone();
+            let mut reused_variables = FnvHashMap::default();
 
             for field in record.fields() {
                 let (expression, variables) = convert_expression(field, &dropped_variables);
 
                 fields.push(expression);
-                dropped_variables = variables;
+                reused_variables.extend(variables);
             }
 
             let type_ = record.type_().clone().into();
 
-            if let Some(count) = remove_dropped_variable(&mut dropped_variables, &type_) {
+            if let Some(count) = get_dropped_variable(&dropped_variables, &type_) {
                 (
                     ReusedRecord::new(
                         get_reuse_id(&type_, count),
                         Record::new(record.type_().clone(), fields),
                     )
                     .into(),
-                    dropped_variables,
+                    reused_variables,
                 )
             } else {
-                (expression.clone(), dropped_variables)
+                (expression.clone(), reused_variables)
             }
         }
         Expression::DropVariables(drop) => {
@@ -86,11 +86,9 @@ fn add_dropped_variable(dropped_variables: &mut FnvHashMap<Type, usize>, type_: 
     update_dropped_variable(dropped_variables, type_, 1);
 }
 
-fn remove_dropped_variable(variables: &mut FnvHashMap<Type, usize>, type_: &Type) -> Option<usize> {
+fn get_dropped_variable(variables: &FnvHashMap<Type, usize>, type_: &Type) -> Option<usize> {
     if let Some(&count) = variables.get(type_) {
         if count > 0 {
-            update_dropped_variable(variables, type_, -1);
-
             Some(count)
         } else {
             None
