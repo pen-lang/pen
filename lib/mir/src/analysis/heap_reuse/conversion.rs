@@ -147,7 +147,15 @@ fn convert_expression(
                 reused_blocks,
             )
         }
-        Expression::LetRecursive(_) => todo!(),
+        Expression::LetRecursive(let_) => {
+            let (expression, reused_blocks) =
+                convert_expression(let_.expression(), dropped_blocks, &reused_blocks)?;
+
+            (
+                LetRecursive::new(convert_definition(let_.definition())?, expression).into(),
+                reused_blocks,
+            )
+        }
         Expression::Record(record) => {
             let mut fields = vec![];
             let mut reused_blocks = reused_blocks.clone();
