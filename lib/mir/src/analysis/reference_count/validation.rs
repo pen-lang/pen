@@ -146,7 +146,7 @@ fn move_expression(
         Expression::RecordField(field) => {
             move_expression(field.record(), variables)?;
         }
-        Expression::ReusedRecord(record) => {
+        Expression::ReuseRecord(record) => {
             move_record(record.record(), variables)?;
         }
         Expression::RetainVariables(reuse) => move_drop_variables(reuse.drop(), variables)?,

@@ -171,7 +171,7 @@ fn convert_expression(
                 reused_blocks.add(&record.type_().clone().into());
 
                 (
-                    ReusedRecord::new(id, Record::new(record.type_().clone(), fields)).into(),
+                    ReuseRecord::new(id, Record::new(record.type_().clone(), fields)).into(),
                     reused_blocks,
                 )
             } else {
@@ -187,7 +187,7 @@ fn convert_expression(
                 reused_blocks,
             )
         }
-        Expression::ReusedRecord(_) | Expression::RetainVariables(_) => {
+        Expression::ReuseRecord(_) | Expression::RetainVariables(_) => {
             return Err(ReuseError::ExpressionNotSupported)
         }
         Expression::TryOperation(_) => todo!(),
@@ -273,7 +273,7 @@ mod tests {
                     [("x".into(), block_id.clone())].into_iter().collect(),
                     DropVariables::new(
                         drop.variables().clone(),
-                        ReusedRecord::new(block_id, record),
+                        ReuseRecord::new(block_id, record),
                     ),
                 )
                 .into(),
@@ -314,11 +314,11 @@ mod tests {
                     .collect(),
                     DropVariables::new(
                         drop.variables().clone(),
-                        ReusedRecord::new(
+                        ReuseRecord::new(
                             outer_block_id,
                             Record::new(
                                 types::Record::new("a"),
-                                vec![ReusedRecord::new(
+                                vec![ReuseRecord::new(
                                     inner_block_id,
                                     Record::new(
                                         types::Record::new("a"),

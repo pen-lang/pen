@@ -1,12 +1,12 @@
 use super::Record;
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct ReusedRecord {
+pub struct ReuseRecord {
     reuse_id: String,
     record: Record,
 }
 
-impl ReusedRecord {
+impl ReuseRecord {
     pub fn new(reuse_id: impl Into<String>, record: Record) -> Self {
         Self {
             reuse_id: reuse_id.into(),
