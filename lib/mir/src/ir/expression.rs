@@ -23,7 +23,7 @@ pub enum Expression {
     Number(f64),
     Record(Record),
     RecordField(RecordField),
-    ReuseRecord(ReusedRecord),
+    ReuseRecord(ReuseRecord),
     RetainVariables(RetainVariables),
     TryOperation(TryOperation),
     Variable(Variable),
