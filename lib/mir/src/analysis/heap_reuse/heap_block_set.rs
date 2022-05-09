@@ -27,7 +27,7 @@ impl HeapBlockSet {
 
     fn update_count(&mut self, type_: &Type, count: isize) {
         let count =
-            (self.counts.get(&type_).copied().unwrap_or_default() as isize + count) as usize;
+            (self.counts.get(type_).copied().unwrap_or_default() as isize + count) as usize;
 
         if count == 0 {
             self.counts.remove(type_);

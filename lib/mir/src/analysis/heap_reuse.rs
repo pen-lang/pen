@@ -45,9 +45,9 @@ fn convert_expression(
     Ok(match expression {
         Expression::ArithmeticOperation(operation) => {
             let (lhs, reused_blocks) =
-                convert_expression(operation.lhs(), &dropped_blocks, reused_blocks)?;
+                convert_expression(operation.lhs(), dropped_blocks, reused_blocks)?;
             let (rhs, reused_blocks) =
-                convert_expression(operation.rhs(), &dropped_blocks, &reused_blocks)?;
+                convert_expression(operation.rhs(), dropped_blocks, &reused_blocks)?;
 
             (
                 ArithmeticOperation::new(operation.operator(), lhs, rhs).into(),
@@ -58,11 +58,11 @@ fn convert_expression(
             let mut arguments = vec![];
 
             let (function, mut reused_blocks) =
-                convert_expression(call.function(), &dropped_blocks, reused_blocks)?;
+                convert_expression(call.function(), dropped_blocks, reused_blocks)?;
 
             for argument in call.arguments() {
                 let (argument, blocks) =
-                    convert_expression(argument, &dropped_blocks, &reused_blocks)?;
+                    convert_expression(argument, dropped_blocks, &reused_blocks)?;
 
                 arguments.push(argument);
                 reused_blocks = blocks;
@@ -85,9 +85,9 @@ fn convert_expression(
         }
         Expression::ComparisonOperation(operation) => {
             let (lhs, reused_blocks) =
-                convert_expression(operation.lhs(), &dropped_blocks, reused_blocks)?;
+                convert_expression(operation.lhs(), dropped_blocks, reused_blocks)?;
             let (rhs, reused_blocks) =
-                convert_expression(operation.rhs(), &dropped_blocks, &reused_blocks)?;
+                convert_expression(operation.rhs(), dropped_blocks, &reused_blocks)?;
 
             (
                 ComparisonOperation::new(operation.operator(), lhs, rhs).into(),
@@ -104,7 +104,7 @@ fn convert_expression(
             }
 
             let (expression, mut reused_blocks) =
-                convert_expression(drop.expression(), &dropped_blocks, &reused_blocks)?;
+                convert_expression(drop.expression(), &dropped_blocks, reused_blocks)?;
             let mut variables = FnvHashMap::default();
 
             for (name, type_) in drop.variables() {
@@ -157,7 +157,7 @@ fn convert_expression(
 
             for field in record.fields() {
                 let (expression, blocks) =
-                    convert_expression(field, &dropped_blocks, &reused_blocks)?;
+                    convert_expression(field, dropped_blocks, &reused_blocks)?;
 
                 fields.push(expression);
                 reused_blocks = blocks;
@@ -245,7 +245,7 @@ mod tests {
     use pretty_assertions::assert_eq;
 
     fn reuse_in_expression(expression: &Expression) -> (Expression, HeapBlockSet) {
-        convert_expression(&expression, &Default::default(), &Default::default()).unwrap()
+        convert_expression(expression, &Default::default(), &Default::default()).unwrap()
     }
 
     #[test]
