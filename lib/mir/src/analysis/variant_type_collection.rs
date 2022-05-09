@@ -51,7 +51,7 @@ fn collect_from_expression(expression: &Expression) -> FnvHashSet<Type> {
         Expression::Record(record) => collect_from_record(record),
         Expression::RecordField(field) => collect_from_expression(field.record()),
         Expression::ReusedRecord(record) => collect_from_record(record.record()),
-        Expression::ReuseVariables(reuse) => collect_from_drop_variables(reuse.drop()),
+        Expression::RetainVariables(reuse) => collect_from_drop_variables(reuse.drop()),
         Expression::TryOperation(operation) => [operation.type_().clone()]
             .into_iter()
             .chain(collect_from_expression(operation.operand()))

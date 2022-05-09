@@ -197,7 +197,7 @@ fn check_expression(
         Expression::ReusedRecord(record) => {
             check_record(record.record(), variables, result_type, types)?
         }
-        Expression::ReuseVariables(reuse) => {
+        Expression::RetainVariables(reuse) => {
             check_drop_variables(reuse.drop(), variables, result_type, types)?
         }
         Expression::ByteString(_) => Type::ByteString,

@@ -3,7 +3,7 @@ use super::{
     clone_variables::CloneVariables, comparison_operation::ComparisonOperation,
     drop_variables::DropVariables, if_::If, let_::Let, let_recursive::LetRecursive, record::Record,
     record_field::RecordField, try_operation::TryOperation, variable::Variable, variant::Variant,
-    ReuseVariables, ReusedRecord,
+    RetainVariables, ReusedRecord,
 };
 
 #[derive(Clone, Debug, PartialEq)]
@@ -24,7 +24,7 @@ pub enum Expression {
     Record(Record),
     RecordField(RecordField),
     ReusedRecord(ReusedRecord),
-    ReuseVariables(ReuseVariables),
+    RetainVariables(RetainVariables),
     TryOperation(TryOperation),
     Variable(Variable),
     Variant(Variant),
@@ -114,9 +114,9 @@ impl From<ReusedRecord> for Expression {
     }
 }
 
-impl From<ReuseVariables> for Expression {
-    fn from(drop: ReuseVariables) -> Self {
-        Self::ReuseVariables(drop)
+impl From<RetainVariables> for Expression {
+    fn from(drop: RetainVariables) -> Self {
+        Self::RetainVariables(drop)
     }
 }
 
