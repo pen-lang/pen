@@ -149,7 +149,7 @@ fn move_expression(
         Expression::ReuseRecord(record) => {
             move_record(record.record(), variables)?;
         }
-        Expression::RetainVariables(reuse) => move_drop_variables(reuse.drop(), variables)?,
+        Expression::RetainHeap(reuse) => move_drop_variables(reuse.drop(), variables)?,
         Expression::TryOperation(operation) => {
             move_expression(operation.operand(), variables)?;
 

@@ -120,7 +120,7 @@ fn convert_expression(
                 )
             } else {
                 (
-                    RetainVariables::new(
+                    RetainHeap::new(
                         variables,
                         DropVariables::new(drop.variables().clone(), expression),
                     )
@@ -192,7 +192,7 @@ fn convert_expression(
                 reused_blocks,
             )
         }
-        Expression::ReuseRecord(_) | Expression::RetainVariables(_) => {
+        Expression::ReuseRecord(_) | Expression::RetainHeap(_) => {
             return Err(ReuseError::ExpressionNotSupported)
         }
         Expression::TryOperation(_) => todo!(),
@@ -274,7 +274,7 @@ mod tests {
         assert_eq!(
             reuse_in_expression(&drop.clone().into()),
             (
-                RetainVariables::new(
+                RetainHeap::new(
                     [("x".into(), block_id.clone())].into_iter().collect(),
                     DropVariables::new(
                         drop.variables().clone(),
@@ -310,7 +310,7 @@ mod tests {
         assert_eq!(
             reuse_in_expression(&drop.clone().into()),
             (
-                RetainVariables::new(
+                RetainHeap::new(
                     [
                         ("x".into(), outer_block_id.clone()),
                         ("y".into(), inner_block_id.clone())

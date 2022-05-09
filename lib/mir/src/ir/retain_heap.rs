@@ -2,12 +2,12 @@ use super::DropVariables;
 use fnv::FnvHashMap;
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct RetainVariables {
+pub struct RetainHeap {
     variables: FnvHashMap<String, String>,
     drop: DropVariables,
 }
 
-impl RetainVariables {
+impl RetainHeap {
     pub fn new(variables: FnvHashMap<String, String>, drop: DropVariables) -> Self {
         Self { variables, drop }
     }
