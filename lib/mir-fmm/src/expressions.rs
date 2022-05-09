@@ -131,6 +131,8 @@ pub fn compile(
 
             field
         }
+        mir::ir::Expression::RetainVariables(_) => todo!(),
+        mir::ir::Expression::ReuseRecord(_) => todo!(),
         mir::ir::Expression::ByteString(string) => {
             if string.value().is_empty() {
                 fmm::ir::Undefined::new(types::compile_string()).into()

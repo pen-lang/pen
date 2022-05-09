@@ -108,7 +108,7 @@ fn convert_expression(
             let mut variables = FnvHashMap::default();
 
             for (name, type_) in drop.variables() {
-                if reused_blocks.remove(&type_) {
+                if reused_blocks.remove(type_) {
                     variables.insert(
                         name.into(),
                         reuse_block(&dropped_blocks, &reused_blocks, type_).unwrap(),
