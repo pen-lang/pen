@@ -98,7 +98,7 @@ fn convert_expression(
             let mut dropped_blocks = dropped_blocks.clone();
 
             for type_ in drop.variables().values() {
-                if matches!(type_, Type::Record(_)) {
+                if should_reuse_type(type_) {
                     dropped_blocks.add(type_);
                 }
             }
@@ -232,6 +232,10 @@ fn get_type_id(type_: &Type) -> String {
     type_.hash(&mut hasher);
 
     format!("{:x}", hasher.finish())
+}
+
+fn should_reuse_type(type_: &Type) -> bool {
+    matches!(type_, Type::Record(_))
 }
 
 #[cfg(test)]
