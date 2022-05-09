@@ -98,7 +98,9 @@ fn convert_expression(
             let mut dropped_blocks = dropped_blocks.clone();
 
             for type_ in drop.variables().values() {
-                dropped_blocks.add(type_);
+                if matches!(type_, Type::Record(_)) {
+                    dropped_blocks.add(type_);
+                }
             }
 
             let (expression, mut reused_blocks) =
