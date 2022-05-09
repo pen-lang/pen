@@ -149,7 +149,7 @@ fn convert_expression(
         }
         Expression::LetRecursive(let_) => {
             let (expression, reused_blocks) =
-                convert_expression(let_.expression(), dropped_blocks, &reused_blocks)?;
+                convert_expression(let_.expression(), dropped_blocks, reused_blocks)?;
 
             (
                 LetRecursive::new(convert_definition(let_.definition())?, expression).into(),
