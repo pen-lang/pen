@@ -25,13 +25,39 @@ impl HeapBlockSet {
         }
     }
 
-    fn update_count(&mut self, type_: &Type, count: isize) {
-        let count = (self.counts.get(type_).copied().unwrap_or_default() as isize + count) as usize;
+    pub fn difference(&self, other: &Self) -> Self {
+        let mut this = self.clone();
 
-        if count == 0 {
+        for (type_, &count) in &other.counts {
+            this.update_count(type_, -(count as isize));
+        }
+
+        this
+    }
+
+    pub fn max(&self, other: &Self) -> Self {
+        let mut this = self.clone();
+
+        for type_ in self.counts.keys().chain(other.counts.keys()) {
+            this.counts
+                .insert(type_.clone(), self.get(type_).max(other.get(type_)));
+        }
+
+        this
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.counts.values().sum::<usize>() == 0
+    }
+
+    fn update_count(&mut self, type_: &Type, count: isize) {
+        let original_count = self.get(type_) as isize;
+
+        if original_count <= -count {
             self.counts.remove(type_);
         } else {
-            self.counts.insert(type_.clone(), count);
+            self.counts
+                .insert(type_.clone(), (original_count + count) as usize);
         }
     }
 }

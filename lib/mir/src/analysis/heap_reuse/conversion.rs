@@ -129,7 +129,42 @@ fn convert_expression(
                 )
             }
         }
-        Expression::If(_) => todo!(),
+        Expression::If(if_) => {
+            let (condition, reused_blocks) =
+                convert_expression(if_.condition(), &dropped_blocks, reused_blocks)?;
+            let (then_expression, then_blocks) =
+                convert_expression(if_.then(), &dropped_blocks, &reused_blocks)?;
+            let (else_expression, else_blocks) =
+                convert_expression(if_.else_(), &dropped_blocks, &reused_blocks)?;
+
+            (
+                If::new(
+                    condition,
+                    {
+                        let difference = then_blocks.difference(&else_blocks);
+
+                        if difference.is_empty() {
+                            then_expression
+                        } else {
+                            // TODO Discard heap.
+                            then_expression
+                        }
+                    },
+                    {
+                        let difference = else_blocks.difference(&then_blocks);
+
+                        if difference.is_empty() {
+                            else_expression
+                        } else {
+                            // TODO Discard heap.
+                            else_expression
+                        }
+                    },
+                )
+                .into(),
+                then_blocks.max(&else_blocks),
+            )
+        }
         Expression::Let(let_) => {
             let (bound_expression, reused_blocks) =
                 convert_expression(let_.bound_expression(), dropped_blocks, reused_blocks)?;
