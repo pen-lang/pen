@@ -27,6 +27,7 @@ fn collect_from_expression(expression: &Expression) -> FnvHashSet<Type> {
             .cloned()
             .chain(collect_from_expression(operation.rhs()))
             .collect(),
+        Expression::DiscardHeap(discard) => collect_from_expression(discard.expression()),
         Expression::DropVariables(drop) => collect_from_drop_variables(drop),
         Expression::Call(call) => collect_from_expression(call.function())
             .iter()

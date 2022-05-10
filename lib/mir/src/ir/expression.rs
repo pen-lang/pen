@@ -3,7 +3,7 @@ use super::{
     clone_variables::CloneVariables, comparison_operation::ComparisonOperation,
     drop_variables::DropVariables, if_::If, let_::Let, let_recursive::LetRecursive, record::Record,
     record_field::RecordField, try_operation::TryOperation, variable::Variable, variant::Variant,
-    RetainHeap, ReuseRecord,
+    DiscardHeap, RetainHeap, ReuseRecord,
 };
 
 #[derive(Clone, Debug, PartialEq)]
@@ -11,11 +11,12 @@ pub enum Expression {
     ArithmeticOperation(ArithmeticOperation),
     Boolean(bool),
     ByteString(ByteString),
+    Call(Call),
     Case(Case),
     CloneVariables(CloneVariables),
     ComparisonOperation(ComparisonOperation),
+    DiscardHeap(DiscardHeap),
     DropVariables(DropVariables),
-    Call(Call),
     If(If),
     Let(Let),
     LetRecursive(LetRecursive),
@@ -51,6 +52,12 @@ impl From<ComparisonOperation> for Expression {
 impl From<CloneVariables> for Expression {
     fn from(clone: CloneVariables) -> Self {
         Self::CloneVariables(clone)
+    }
+}
+
+impl From<DiscardHeap> for Expression {
+    fn from(discard: DiscardHeap) -> Self {
+        Self::DiscardHeap(discard)
     }
 }
 

@@ -114,6 +114,7 @@ fn check_expression(
 
             Type::Boolean
         }
+        Expression::DiscardHeap(discard) => check_expression(discard.expression(), variables)?,
         Expression::DropVariables(drop) => {
             check_drop_variables(drop, variables, result_type, types)?
         }

@@ -227,9 +227,6 @@ fn convert_expression(
                 reused_blocks,
             )
         }
-        Expression::ReuseRecord(_) | Expression::RetainHeap(_) => {
-            return Err(ReuseError::ExpressionNotSupported)
-        }
         Expression::TryOperation(_) => todo!(),
         Expression::Variant(variant) => {
             let (expression, reused_blocks) =
@@ -245,6 +242,9 @@ fn convert_expression(
         | Expression::None
         | Expression::Number(_)
         | Expression::Variable(_) => (expression.clone(), reused_blocks.clone()),
+        Expression::DiscardHeap(_) | Expression::ReuseRecord(_) | Expression::RetainHeap(_) => {
+            return Err(ReuseError::ExpressionNotSupported)
+        }
     })
 }
 

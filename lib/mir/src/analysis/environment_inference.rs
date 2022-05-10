@@ -86,6 +86,9 @@ fn infer_in_expression(
         Expression::ComparisonOperation(operation) => {
             infer_in_comparison_operation(operation, variables).into()
         }
+        Expression::DiscardHeap(discard) => {
+            infer_in_expression(discard.expression(), variables).into()
+        }
         Expression::DropVariables(drop) => infer_in_drop_variables(drop, variables).into(),
         Expression::Call(call) => infer_in_call(call, variables).into(),
         Expression::If(if_) => infer_in_if(if_, variables).into(),

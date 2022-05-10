@@ -114,6 +114,9 @@ fn move_expression(
             move_expression(operation.lhs(), variables)?;
             move_expression(operation.rhs(), variables)?;
         }
+        Expression::DiscardHeap(discard) => {
+            move_expression(discard.expression(), variables)?;
+        }
         Expression::DropVariables(drop) => move_drop_variables(drop, variables)?,
         Expression::If(if_) => {
             move_expression(if_.condition(), variables)?;

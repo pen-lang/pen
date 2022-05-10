@@ -17,6 +17,7 @@ fn find_in_expression(expression: &Expression) -> FnvHashSet<String> {
             .into_iter()
             .chain(find_in_expression(operation.rhs()))
             .collect(),
+        Expression::DiscardHeap(discard) => find_in_expression(discard.expression()),
         Expression::DropVariables(drop) => find_in_drop_variables(drop),
         Expression::Call(call) => find_in_expression(call.function())
             .into_iter()
