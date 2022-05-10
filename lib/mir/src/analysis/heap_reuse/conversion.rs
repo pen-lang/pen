@@ -131,11 +131,11 @@ fn convert_expression(
         }
         Expression::If(if_) => {
             let (condition, reused_blocks) =
-                convert_expression(if_.condition(), &dropped_blocks, reused_blocks)?;
+                convert_expression(if_.condition(), dropped_blocks, reused_blocks)?;
             let (then_expression, then_blocks) =
-                convert_expression(if_.then(), &dropped_blocks, &reused_blocks)?;
+                convert_expression(if_.then(), dropped_blocks, &reused_blocks)?;
             let (else_expression, else_blocks) =
-                convert_expression(if_.else_(), &dropped_blocks, &reused_blocks)?;
+                convert_expression(if_.else_(), dropped_blocks, &reused_blocks)?;
 
             (
                 If::new(
