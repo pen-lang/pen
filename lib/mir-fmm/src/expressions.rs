@@ -49,6 +49,7 @@ pub fn compile(
         mir::ir::Expression::ComparisonOperation(operation) => {
             compile_comparison_operation(context, instruction_builder, operation, variables)?.into()
         }
+        mir::ir::Expression::DiscardHeap(_) => todo!(),
         mir::ir::Expression::DropVariables(drop) => {
             for (variable, type_) in drop.variables() {
                 reference_count::drop_expression(
