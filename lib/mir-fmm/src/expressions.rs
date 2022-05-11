@@ -168,15 +168,15 @@ pub fn compile(
             compile(
                 retain.drop().expression(),
                 &variables
-                    .iter()
-                    .map(|(name, expression)| (name.clone(), expression.clone()))
+                    .clone()
+                    .into_iter()
                     .chain(retain.variables().iter().map(|(name, block_id)| {
                         (block_id.clone(), reused_variables.remove(name).unwrap())
                     }))
                     .collect(),
             )?
         }
-        mir::ir::Expression::ReuseRecord(_) => todo!(),
+        mir::ir::Expression::ReuseRecord(reuse) => todo!(),
         mir::ir::Expression::ByteString(string) => {
             if string.value().is_empty() {
                 fmm::ir::Undefined::new(types::compile_string()).into()
