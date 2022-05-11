@@ -49,7 +49,16 @@ pub fn compile(
         mir::ir::Expression::ComparisonOperation(operation) => {
             compile_comparison_operation(context, instruction_builder, operation, variables)?.into()
         }
-        mir::ir::Expression::DiscardHeap(_) => todo!(),
+        mir::ir::Expression::DiscardHeap(discard) => {
+            for block_id in discard.blocks() {
+                reference_count::free_heap(
+                    instruction_builder,
+                    fmm::build::variable(block_id, fmm::types::GENERIC_POINTER_TYPE.clone()),
+                )?;
+            }
+
+            compile(discard.expression(), variables)?
+        }
         mir::ir::Expression::DropVariables(drop) => {
             for (variable, type_) in drop.variables() {
                 reference_count::drop_expression(
@@ -132,7 +141,41 @@ pub fn compile(
 
             field
         }
-        mir::ir::Expression::RetainHeap(_) => todo!(),
+        mir::ir::Expression::RetainHeap(retain) => {
+            let mut reused_variables = FnvHashMap::default();
+
+            for (name, type_) in retain.drop().variables() {
+                if retain.variables().contains_key(name) {
+                    reused_variables.insert(
+                        name,
+                        reference_count::drop_or_reuse_expression(
+                            instruction_builder,
+                            &variables[name],
+                            type_,
+                            context.types(),
+                        )?,
+                    );
+                } else {
+                    reference_count::drop_expression(
+                        instruction_builder,
+                        &variables[name],
+                        type_,
+                        context.types(),
+                    )?;
+                }
+            }
+
+            compile(
+                retain.drop().expression(),
+                &variables
+                    .iter()
+                    .map(|(name, expression)| (name.clone(), expression.clone()))
+                    .chain(retain.variables().iter().map(|(name, block_id)| {
+                        (block_id.clone(), reused_variables.remove(name).unwrap())
+                    }))
+                    .collect(),
+            )?
+        }
         mir::ir::Expression::ReuseRecord(_) => todo!(),
         mir::ir::Expression::ByteString(string) => {
             if string.value().is_empty() {

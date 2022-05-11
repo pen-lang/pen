@@ -47,6 +47,7 @@ pub fn compile(
     for definition in module.type_definitions() {
         reference_count::compile_record_clone_function(&context, definition)?;
         reference_count::compile_record_drop_function(&context, definition)?;
+        reference_count::compile_record_drop_or_reuse_function(&context, definition)?;
     }
 
     for declaration in module.foreign_declarations() {
