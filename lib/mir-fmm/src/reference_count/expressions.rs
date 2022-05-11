@@ -95,15 +95,18 @@ pub fn drop_or_reuse_expression(
     };
 
     Ok(match type_ {
-        mir::types::Type::Record(record) => {
-            if types::is_record_boxed(record, types) {
+        mir::types::Type::Record(record_type) => {
+            if types::is_record_boxed(record_type, types) {
                 fmm::build::bit_cast(
                     pointer_type,
                     builder.call(
                         fmm::build::variable(
-                            record_utilities::get_record_drop_or_reuse_function_name(record.name()),
+                            record_utilities::get_record_drop_or_reuse_function_name(
+                                record_type.name(),
+                            ),
                             record_utilities::compile_record_drop_or_reuse_function_type(
-                                record, types,
+                                record_type,
+                                types,
                             ),
                         ),
                         vec![expression.clone()],
