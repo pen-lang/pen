@@ -91,9 +91,7 @@ pub fn drop_or_reuse_expression(
     let drop = || -> Result<_, CompileError> {
         drop_expression(builder, expression, type_, types)?;
 
-        Ok(fmm::build::TypedExpression::from(fmm::ir::Undefined::new(
-            pointer_type.clone(),
-        )))
+        Ok(fmm::ir::Undefined::new(pointer_type.clone()).into())
     };
 
     Ok(match type_ {
