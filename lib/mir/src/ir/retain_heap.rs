@@ -3,6 +3,7 @@ use fnv::FnvHashMap;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct RetainHeap {
+    // a map from variable name to reuse ID
     variables: FnvHashMap<String, String>,
     drop: DropVariables,
 }
