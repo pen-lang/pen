@@ -51,9 +51,22 @@ pub fn compile(
         }
         mir::ir::Expression::DiscardHeap(discard) => {
             for id in discard.ids() {
-                reference_count::free_heap(
-                    instruction_builder,
-                    fmm::build::variable(id, fmm::types::GENERIC_POINTER_TYPE.clone()),
+                let pointer = fmm::build::variable(id, fmm::types::GENERIC_POINTER_TYPE.clone());
+
+                instruction_builder.if_(
+                    fmm::build::comparison_operation(
+                        fmm::ir::ComparisonOperator::Equal,
+                        pointer.clone(),
+                        fmm::ir::Undefined::new(pointer.type_().clone()),
+                    )?,
+                    |builder| -> Result<_, CompileError> {
+                        Ok(builder.branch(fmm::ir::VOID_VALUE.clone()))
+                    },
+                    |builder| {
+                        reference_count::free_heap(instruction_builder, pointer.clone())?;
+
+                        Ok(builder.branch(fmm::ir::VOID_VALUE.clone()))
+                    },
                 )?;
             }
 
