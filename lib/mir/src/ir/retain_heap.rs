@@ -4,17 +4,17 @@ use fnv::FnvHashMap;
 #[derive(Clone, Debug, PartialEq)]
 pub struct RetainHeap {
     // a map from variable name to reuse ID
-    variables: FnvHashMap<String, String>,
+    ids: FnvHashMap<String, String>,
     drop: DropVariables,
 }
 
 impl RetainHeap {
-    pub fn new(variables: FnvHashMap<String, String>, drop: DropVariables) -> Self {
-        Self { variables, drop }
+    pub fn new(ids: FnvHashMap<String, String>, drop: DropVariables) -> Self {
+        Self { ids, drop }
     }
 
-    pub fn variables(&self) -> &FnvHashMap<String, String> {
-        &self.variables
+    pub fn ids(&self) -> &FnvHashMap<String, String> {
+        &self.ids
     }
 
     pub fn drop(&self) -> &DropVariables {

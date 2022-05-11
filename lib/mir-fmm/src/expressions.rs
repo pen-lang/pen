@@ -50,7 +50,7 @@ pub fn compile(
             compile_comparison_operation(context, instruction_builder, operation, variables)?.into()
         }
         mir::ir::Expression::DiscardHeap(discard) => {
-            for id in discard.blocks() {
+            for id in discard.ids() {
                 reference_count::free_heap(
                     instruction_builder,
                     fmm::build::variable(id, fmm::types::GENERIC_POINTER_TYPE.clone()),
@@ -124,7 +124,7 @@ pub fn compile(
             let mut reused_variables = FnvHashMap::default();
 
             for (name, type_) in retain.drop().variables() {
-                if retain.variables().contains_key(name) {
+                if retain.ids().contains_key(name) {
                     reused_variables.insert(
                         name,
                         reference_count::drop_or_reuse_expression(
@@ -149,9 +149,12 @@ pub fn compile(
                 &variables
                     .clone()
                     .into_iter()
-                    .chain(retain.variables().iter().map(|(name, id)| {
-                        (id.clone(), reused_variables.remove(name).unwrap())
-                    }))
+                    .chain(
+                        retain
+                            .ids()
+                            .iter()
+                            .map(|(name, id)| (id.clone(), reused_variables.remove(name).unwrap())),
+                    )
                     .collect(),
             )?
         }

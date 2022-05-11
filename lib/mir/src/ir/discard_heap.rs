@@ -4,20 +4,20 @@ use std::sync::Arc;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct DiscardHeap {
-    blocks: FnvHashSet<String>,
+    ids: FnvHashSet<String>,
     expression: Arc<Expression>,
 }
 
 impl DiscardHeap {
-    pub fn new(blocks: FnvHashSet<String>, expression: impl Into<Expression>) -> Self {
+    pub fn new(ids: FnvHashSet<String>, expression: impl Into<Expression>) -> Self {
         Self {
-            blocks,
+            ids,
             expression: expression.into().into(),
         }
     }
 
-    pub fn blocks(&self) -> &FnvHashSet<String> {
-        &self.blocks
+    pub fn ids(&self) -> &FnvHashSet<String> {
+        &self.ids
     }
 
     pub fn expression(&self) -> &Expression {
