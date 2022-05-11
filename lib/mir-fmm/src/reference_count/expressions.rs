@@ -87,11 +87,12 @@ pub fn drop_or_reuse_expression(
     type_: &mir::types::Type,
     types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
+    let pointer_type = fmm::types::GENERIC_POINTER_TYPE.clone();
     let drop = || -> Result<_, CompileError> {
         drop_expression(builder, expression, type_, types)?;
 
         Ok(fmm::build::TypedExpression::from(fmm::ir::Undefined::new(
-            fmm::types::GENERIC_POINTER_TYPE.clone(),
+            pointer_type.clone(),
         )))
     };
 
@@ -99,7 +100,7 @@ pub fn drop_or_reuse_expression(
         mir::types::Type::Record(record) => {
             if types::is_record_boxed(record, types) {
                 fmm::build::bit_cast(
-                    fmm::types::GENERIC_POINTER_TYPE.clone(),
+                    pointer_type,
                     builder.call(
                         fmm::build::variable(
                             record_utilities::get_record_drop_or_reuse_function_name(record.name()),
