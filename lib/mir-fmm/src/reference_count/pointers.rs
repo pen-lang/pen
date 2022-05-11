@@ -25,7 +25,7 @@ pub fn drop_pointer(
 ) -> Result<(), CompileError> {
     if_heap_pointer(builder, pointer, |builder| {
         builder.if_(
-            drop_and_compare_count(builder, pointer)?,
+            decrement_and_compare_count(builder, pointer)?,
             |builder| -> Result<_, CompileError> {
                 builder.fence(fmm::ir::AtomicOrdering::Acquire);
 
@@ -64,7 +64,7 @@ pub fn drop_or_reuse_pointer(
 
     if_heap_pointer(builder, pointer, |builder| {
         builder.if_(
-            drop_and_compare_count(builder, pointer)?,
+            decrement_and_compare_count(builder, pointer)?,
             |builder| -> Result<_, CompileError> {
                 builder.fence(fmm::ir::AtomicOrdering::Acquire);
 
@@ -83,7 +83,7 @@ pub fn drop_or_reuse_pointer(
     Ok(builder.load(result_pointer)?)
 }
 
-fn drop_and_compare_count(
+fn decrement_and_compare_count(
     builder: &fmm::build::InstructionBuilder,
     pointer: &fmm::build::TypedExpression,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
