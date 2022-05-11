@@ -50,6 +50,10 @@ impl HeapBlockSet {
         self.counts.values().sum::<usize>() == 0
     }
 
+    pub fn iter(&self) -> impl Iterator<Item = (&Type, &usize)> + '_ {
+        self.counts.iter()
+    }
+
     fn update_count(&mut self, type_: &Type, count: isize) {
         let original_count = self.get(type_) as isize;
 

@@ -1,6 +1,6 @@
 use super::{error::ReuseError, heap_block_set::HeapBlockSet};
 use crate::{ir::*, types::Type};
-use fnv::FnvHashMap;
+use fnv::{FnvHashMap, FnvHashSet};
 use std::{
     collections::hash_map::DefaultHasher,
     hash::{Hash, Hasher},
@@ -136,33 +136,16 @@ fn convert_expression(
                 convert_expression(if_.then(), dropped_blocks, &reused_blocks)?;
             let (else_expression, else_blocks) =
                 convert_expression(if_.else_(), dropped_blocks, &reused_blocks)?;
+            let total_blocks = then_blocks.max(&else_blocks);
 
             (
                 If::new(
                     condition,
-                    {
-                        let difference = then_blocks.difference(&else_blocks);
-
-                        if difference.is_empty() {
-                            then_expression
-                        } else {
-                            // TODO Discard heap.
-                            then_expression
-                        }
-                    },
-                    {
-                        let difference = else_blocks.difference(&then_blocks);
-
-                        if difference.is_empty() {
-                            else_expression
-                        } else {
-                            // TODO Discard heap.
-                            else_expression
-                        }
-                    },
+                    convert_branch(then_expression, &then_blocks, &total_blocks, dropped_blocks),
+                    convert_branch(else_expression, &else_blocks, &total_blocks, dropped_blocks),
                 )
                 .into(),
-                then_blocks.max(&else_blocks),
+                total_blocks,
             )
         }
         Expression::Let(let_) => {
@@ -246,6 +229,31 @@ fn convert_expression(
             return Err(ReuseError::ExpressionNotSupported)
         }
     })
+}
+
+fn convert_branch(
+    expression: Expression,
+    branch_blocks: &HeapBlockSet,
+    total_blocks: &HeapBlockSet,
+    dropped_blocks: &HeapBlockSet,
+) -> Expression {
+    let difference = total_blocks.difference(&branch_blocks);
+
+    if difference.is_empty() {
+        expression
+    } else {
+        let mut reused_blocks = branch_blocks.clone();
+        let mut ids = FnvHashSet::default();
+
+        for (type_, &count) in difference.iter() {
+            for _ in 0..count {
+                ids.insert(reuse_block(dropped_blocks, &reused_blocks, type_).unwrap());
+                reused_blocks.add(type_);
+            }
+        }
+
+        DiscardHeap::new(ids, expression).into()
+    }
 }
 
 fn reuse_block(
@@ -371,5 +379,109 @@ mod tests {
                 Default::default()
             ),
         );
+    }
+
+    mod if_ {
+        use super::*;
+        use pretty_assertions::assert_eq;
+
+        #[test]
+        fn reuse_record() {
+            let record = Record::new(types::Record::new("a"), vec![Expression::Number(42.0)]);
+            let id = get_id(&record.type_().clone().into(), 1);
+            let drop = DropVariables::new(
+                [("x".into(), record.type_().clone().into())]
+                    .into_iter()
+                    .collect(),
+                If::new(Expression::Boolean(true), record.clone(), record.clone()),
+            );
+
+            assert_eq!(
+                reuse_in_expression(&drop.clone().into()),
+                (
+                    RetainHeap::new(
+                        [("x".into(), id.clone())].into_iter().collect(),
+                        DropVariables::new(
+                            drop.variables().clone(),
+                            If::new(
+                                Expression::Boolean(true),
+                                ReuseRecord::new(id.clone(), record.clone()),
+                                ReuseRecord::new(id, record)
+                            )
+                        ),
+                    )
+                    .into(),
+                    Default::default()
+                ),
+            );
+        }
+
+        #[test]
+        fn reuse_record_only_in_then() {
+            let record = Record::new(types::Record::new("a"), vec![Expression::Number(42.0)]);
+            let id = get_id(&record.type_().clone().into(), 1);
+            let drop = DropVariables::new(
+                [("x".into(), record.type_().clone().into())]
+                    .into_iter()
+                    .collect(),
+                If::new(Expression::Boolean(true), record.clone(), Expression::None),
+            );
+
+            assert_eq!(
+                reuse_in_expression(&drop.clone().into()),
+                (
+                    RetainHeap::new(
+                        [("x".into(), id.clone())].into_iter().collect(),
+                        DropVariables::new(
+                            drop.variables().clone(),
+                            If::new(
+                                Expression::Boolean(true),
+                                ReuseRecord::new(id.clone(), record.clone()),
+                                DiscardHeap::new(
+                                    [id.clone()].into_iter().collect(),
+                                    Expression::None
+                                )
+                            )
+                        ),
+                    )
+                    .into(),
+                    Default::default()
+                ),
+            );
+        }
+
+        #[test]
+        fn reuse_record_only_in_else() {
+            let record = Record::new(types::Record::new("a"), vec![Expression::Number(42.0)]);
+            let id = get_id(&record.type_().clone().into(), 1);
+            let drop = DropVariables::new(
+                [("x".into(), record.type_().clone().into())]
+                    .into_iter()
+                    .collect(),
+                If::new(Expression::Boolean(true), Expression::None, record.clone()),
+            );
+
+            assert_eq!(
+                reuse_in_expression(&drop.clone().into()),
+                (
+                    RetainHeap::new(
+                        [("x".into(), id.clone())].into_iter().collect(),
+                        DropVariables::new(
+                            drop.variables().clone(),
+                            If::new(
+                                Expression::Boolean(true),
+                                DiscardHeap::new(
+                                    [id.clone()].into_iter().collect(),
+                                    Expression::None
+                                ),
+                                ReuseRecord::new(id.clone(), record.clone()),
+                            )
+                        ),
+                    )
+                    .into(),
+                    Default::default()
+                ),
+            );
+        }
     }
 }
