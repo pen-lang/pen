@@ -33,10 +33,7 @@ pub fn drop_pointer(
 
                 heap::free_heap(
                     &builder,
-                    fmm::build::bit_cast(
-                        fmm::types::Pointer::new(fmm::types::GENERIC_POINTER_TYPE.clone()),
-                        pointer.clone(),
-                    ),
+                    fmm::build::bit_cast(fmm::types::GENERIC_POINTER_TYPE.clone(), pointer.clone()),
                 )?;
 
                 Ok(builder.branch(fmm::ir::VOID_VALUE.clone()))
