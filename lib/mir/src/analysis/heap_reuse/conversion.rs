@@ -311,10 +311,7 @@ mod tests {
             (
                 RetainHeap::new(
                     [("x".into(), id.clone())].into_iter().collect(),
-                    DropVariables::new(
-                        drop.variables().clone(),
-                        ReuseRecord::new(id, record),
-                    ),
+                    DropVariables::new(drop.variables().clone(), ReuseRecord::new(id, record)),
                 )
                 .into(),
                 Default::default()
