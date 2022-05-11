@@ -2,20 +2,15 @@ use super::{super::error::CompileError, heap};
 
 pub fn clone_pointer(
     builder: &fmm::build::InstructionBuilder,
-    expression: &fmm::build::TypedExpression,
+    pointer: &fmm::build::TypedExpression,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    if_heap_pointer(builder, expression, |builder| {
-        builder.atomic_operation(
-            fmm::ir::AtomicOperator::Add,
-            get_counter_pointer(expression)?,
-            fmm::ir::Primitive::PointerInteger(1),
-            fmm::ir::AtomicOrdering::Relaxed,
-        )?;
+    if_heap_pointer(builder, pointer, |builder| {
+        increment_count(&builder, pointer, fmm::ir::AtomicOrdering::Relaxed)?;
 
         Ok(())
     })?;
 
-    Ok(expression.clone())
+    Ok(pointer.clone())
 }
 
 pub fn drop_pointer(
@@ -63,7 +58,7 @@ pub fn drop_or_reuse_pointer(
         builder.if_(
             decrement_and_compare_count(builder, pointer)?,
             |builder| -> Result<_, CompileError> {
-                builder.fence(fmm::ir::AtomicOrdering::Acquire);
+                increment_count(&builder, pointer, fmm::ir::AtomicOrdering::Acquire)?;
 
                 drop_content(&builder)?;
 
@@ -78,6 +73,21 @@ pub fn drop_or_reuse_pointer(
     })?;
 
     Ok(builder.load(result_pointer)?)
+}
+
+fn increment_count(
+    builder: &fmm::build::InstructionBuilder,
+    pointer: &fmm::build::TypedExpression,
+    ordering: fmm::ir::AtomicOrdering,
+) -> Result<(), CompileError> {
+    builder.atomic_operation(
+        fmm::ir::AtomicOperator::Add,
+        get_counter_pointer(pointer)?,
+        fmm::ir::Primitive::PointerInteger(1),
+        ordering,
+    )?;
+
+    Ok(())
 }
 
 fn decrement_and_compare_count(
