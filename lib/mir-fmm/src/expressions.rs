@@ -50,10 +50,10 @@ pub fn compile(
             compile_comparison_operation(context, instruction_builder, operation, variables)?.into()
         }
         mir::ir::Expression::DiscardHeap(discard) => {
-            for block_id in discard.blocks() {
+            for id in discard.blocks() {
                 reference_count::free_heap(
                     instruction_builder,
-                    fmm::build::variable(block_id, fmm::types::GENERIC_POINTER_TYPE.clone()),
+                    fmm::build::variable(id, fmm::types::GENERIC_POINTER_TYPE.clone()),
                 )?;
             }
 
@@ -149,15 +149,15 @@ pub fn compile(
                 &variables
                     .clone()
                     .into_iter()
-                    .chain(retain.variables().iter().map(|(name, block_id)| {
-                        (block_id.clone(), reused_variables.remove(name).unwrap())
+                    .chain(retain.variables().iter().map(|(name, id)| {
+                        (id.clone(), reused_variables.remove(name).unwrap())
                     }))
                     .collect(),
             )?
         }
         mir::ir::Expression::ReuseRecord(reuse) => {
             let pointer_type = fmm::types::GENERIC_POINTER_TYPE.clone();
-            let pointer = fmm::build::variable(reuse.block_id(), pointer_type.clone());
+            let pointer = fmm::build::variable(reuse.id(), pointer_type.clone());
 
             instruction_builder.if_(
                 fmm::build::comparison_operation(

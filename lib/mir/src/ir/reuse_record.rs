@@ -2,20 +2,20 @@ use super::Record;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct ReuseRecord {
-    block_id: String,
+    id: String,
     record: Record,
 }
 
 impl ReuseRecord {
-    pub fn new(block_id: impl Into<String>, record: Record) -> Self {
+    pub fn new(id: impl Into<String>, record: Record) -> Self {
         Self {
-            block_id: block_id.into(),
+            id: id.into(),
             record,
         }
     }
 
-    pub fn block_id(&self) -> &str {
-        &self.block_id
+    pub fn id(&self) -> &str {
+        &self.id
     }
 
     pub fn record(&self) -> &Record {

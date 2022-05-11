@@ -256,13 +256,13 @@ fn reuse_block(
     let count = dropped_blocks.get(type_) - reused_blocks.get(type_);
 
     if count > 0 {
-        Some(get_block_id(type_, count))
+        Some(get_id(type_, count))
     } else {
         None
     }
 }
 
-fn get_block_id(type_: &Type, count: usize) -> String {
+fn get_id(type_: &Type, count: usize) -> String {
     format!("{}-{}", get_type_id(type_), count)
 }
 
@@ -298,7 +298,7 @@ mod tests {
     #[test]
     fn reuse_record() {
         let record = Record::new(types::Record::new("a"), vec![Expression::Number(42.0)]);
-        let block_id = get_block_id(&record.type_().clone().into(), 1);
+        let id = get_id(&record.type_().clone().into(), 1);
         let drop = DropVariables::new(
             [("x".into(), record.type_().clone().into())]
                 .into_iter()
@@ -310,10 +310,10 @@ mod tests {
             reuse_in_expression(&drop.clone().into()),
             (
                 RetainHeap::new(
-                    [("x".into(), block_id.clone())].into_iter().collect(),
+                    [("x".into(), id.clone())].into_iter().collect(),
                     DropVariables::new(
                         drop.variables().clone(),
-                        ReuseRecord::new(block_id, record),
+                        ReuseRecord::new(id, record),
                     ),
                 )
                 .into(),
@@ -329,8 +329,8 @@ mod tests {
             vec![Record::new(types::Record::new("a"), vec![Expression::Number(42.0)]).into()],
         );
 
-        let outer_block_id = get_block_id(&record.type_().clone().into(), 1);
-        let inner_block_id = get_block_id(&record.type_().clone().into(), 2);
+        let outer_id = get_id(&record.type_().clone().into(), 1);
+        let inner_id = get_id(&record.type_().clone().into(), 2);
 
         let drop = DropVariables::new(
             [
@@ -347,19 +347,19 @@ mod tests {
             (
                 RetainHeap::new(
                     [
-                        ("x".into(), outer_block_id.clone()),
-                        ("y".into(), inner_block_id.clone())
+                        ("x".into(), outer_id.clone()),
+                        ("y".into(), inner_id.clone())
                     ]
                     .into_iter()
                     .collect(),
                     DropVariables::new(
                         drop.variables().clone(),
                         ReuseRecord::new(
-                            outer_block_id,
+                            outer_id,
                             Record::new(
                                 types::Record::new("a"),
                                 vec![ReuseRecord::new(
-                                    inner_block_id,
+                                    inner_id,
                                     Record::new(
                                         types::Record::new("a"),
                                         vec![Expression::Number(42.0)]
