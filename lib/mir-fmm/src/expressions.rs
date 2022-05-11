@@ -169,18 +169,18 @@ pub fn compile(
                     fmm::ir::Undefined::new(pointer_type.clone()),
                 )?,
                 |builder| -> Result<_, CompileError> {
-                    Ok(builder.branch(compile_boxed_record_with_pointer(
+                    Ok(builder.branch(compile_record(
                         context,
                         &builder,
-                        pointer.clone(),
                         reuse.record(),
                         variables,
                     )?))
                 },
                 |builder| {
-                    Ok(builder.branch(compile_record(
+                    Ok(builder.branch(compile_boxed_record_with_pointer(
                         context,
                         &builder,
+                        pointer.clone(),
                         reuse.record(),
                         variables,
                     )?))
