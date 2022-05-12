@@ -105,7 +105,9 @@ fn convert_expression(
             let mut variables = FnvHashMap::default();
 
             for (name, type_) in drop.variables() {
-                if reused_blocks.remove(type_) {
+                if reused_blocks.get(type_) > 0 {
+                    reused_blocks.remove(type_);
+
                     variables.insert(
                         name.into(),
                         reuse_block(&dropped_blocks, &reused_blocks, type_).unwrap(),
@@ -136,7 +138,9 @@ fn convert_expression(
                 convert_expression(if_.then(), dropped_blocks, &reused_blocks)?;
             let (else_expression, else_blocks) =
                 convert_expression(if_.else_(), dropped_blocks, &reused_blocks)?;
-            let total_blocks = then_blocks.max(&else_blocks);
+            let mut total_blocks = then_blocks.clone();
+
+            total_blocks.max(&else_blocks);
 
             (
                 If::new(
