@@ -179,7 +179,7 @@ pub fn compile(
                 fmm::build::comparison_operation(
                     fmm::ir::ComparisonOperator::Equal,
                     pointer.clone(),
-                    fmm::ir::Undefined::new(pointer_type.clone()),
+                    fmm::ir::Undefined::new(pointer_type),
                 )?,
                 |builder| -> Result<_, CompileError> {
                     Ok(builder.branch(compile_record(
@@ -522,7 +522,6 @@ fn compile_record(
             record,
             variables,
         )?
-        .into()
     } else {
         compile_unboxed_record(context, builder, record, variables)?.into()
     })

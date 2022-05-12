@@ -101,7 +101,7 @@ fn convert_expression(
                     alternatives
                         .into_iter()
                         .map(|(expression, blocks)| {
-                            convert_branch(expression, &blocks, &total_blocks, &dropped_blocks)
+                            convert_branch(expression, &blocks, &total_blocks, dropped_blocks)
                         })
                         .zip(case.alternatives())
                         .map(|(expression, alternative)| {
@@ -116,7 +116,7 @@ fn convert_expression(
                         case.default_alternative().map(|alternative| {
                             DefaultAlternative::new(
                                 alternative.name(),
-                                convert_branch(expression, &blocks, &total_blocks, &dropped_blocks),
+                                convert_branch(expression, &blocks, &total_blocks, dropped_blocks),
                             )
                         })
                     }),
@@ -311,7 +311,7 @@ fn convert_branch(
     dropped_blocks: &HeapBlockSet,
 ) -> Expression {
     let difference = total_blocks
-        .difference(&branch_blocks)
+        .difference(branch_blocks)
         .collect::<FnvHashMap<_, _>>();
 
     if difference.is_empty() {
@@ -511,9 +511,9 @@ mod tests {
                             drop.variables().clone(),
                             If::new(
                                 Expression::Boolean(true),
-                                ReuseRecord::new(id.clone(), record.clone()),
+                                ReuseRecord::new(id.clone(), record),
                                 DiscardHeap::new(
-                                    [id.clone()].into_iter().collect(),
+                                    [id].into_iter().collect(),
                                     Expression::None
                                 )
                             )
@@ -549,7 +549,7 @@ mod tests {
                                     [id.clone()].into_iter().collect(),
                                     Expression::None
                                 ),
-                                ReuseRecord::new(id.clone(), record.clone()),
+                                ReuseRecord::new(id, record),
                             )
                         ),
                     )
@@ -605,7 +605,7 @@ mod tests {
                                 ),
                             );
 
-                            If::new(Expression::Boolean(true), reuse.clone(), reuse.clone())
+                            If::new(Expression::Boolean(true), reuse.clone(), reuse)
                         }),
                     )
                     .into(),
@@ -662,9 +662,9 @@ mod tests {
 
                             If::new(
                                 Expression::Boolean(true),
-                                reuse.clone(),
+                                reuse,
                                 DiscardHeap::new(
-                                    [outer_id.clone(), inner_id.clone()].into_iter().collect(),
+                                    [outer_id, inner_id].into_iter().collect(),
                                     Expression::None,
                                 ),
                             )
@@ -694,7 +694,7 @@ mod tests {
                 If::new(
                     Expression::Boolean(true),
                     nested_record.clone(),
-                    record.clone(),
+                    record,
                 ),
             );
 
@@ -710,7 +710,7 @@ mod tests {
                         .collect(),
                         DropVariables::new(drop.variables().clone(), {
                             let reuse = ReuseRecord::new(
-                                inner_id.clone(),
+                                inner_id,
                                 Record::new(
                                     types::Record::new("a"),
                                     vec![Expression::Number(42.0)],
@@ -726,7 +726,7 @@ mod tests {
                                         vec![reuse.clone().into()],
                                     ),
                                 ),
-                                DiscardHeap::new([outer_id.clone()].into_iter().collect(), reuse),
+                                DiscardHeap::new([outer_id].into_iter().collect(), reuse),
                             )
                         }),
                     )
@@ -768,7 +768,7 @@ mod tests {
                                 vec![Alternative::new(
                                     Type::None,
                                     "z",
-                                    ReuseRecord::new(id, record.clone())
+                                    ReuseRecord::new(id, record)
                                 )],
                                 None,
                             )
@@ -816,7 +816,7 @@ mod tests {
                                     Alternative::new(
                                         Type::None,
                                         "z",
-                                        ReuseRecord::new(id, record.clone())
+                                        ReuseRecord::new(id, record)
                                     )
                                 ],
                                 None,
@@ -860,7 +860,7 @@ mod tests {
                                     Alternative::new(
                                         Type::None,
                                         "z",
-                                        ReuseRecord::new(id.clone(), record.clone())
+                                        ReuseRecord::new(id.clone(), record)
                                     ),
                                     Alternative::new(
                                         Type::None,
@@ -924,11 +924,11 @@ mod tests {
                                 Variable::new("y"),
                                 {
                                     let reuse = ReuseRecord::new(
-                                        outer_id.clone(),
+                                        outer_id,
                                         Record::new(
                                             types::Record::new("a"),
                                             vec![ReuseRecord::new(
-                                                inner_id.clone(),
+                                                inner_id,
                                                 Record::new(
                                                     types::Record::new("a"),
                                                     vec![Expression::Number(42.0)],
@@ -940,7 +940,7 @@ mod tests {
 
                                     vec![
                                         Alternative::new(Type::None, "z", reuse.clone()),
-                                        Alternative::new(Type::None, "z", reuse.clone()),
+                                        Alternative::new(Type::None, "z", reuse),
                                     ]
                                 },
                                 None,
@@ -1141,7 +1141,7 @@ mod tests {
                                 Some(DefaultAlternative::new(
                                     "z",
                                     DiscardHeap::new(
-                                        [id.clone()].into_iter().collect(),
+                                        [id].into_iter().collect(),
                                         Expression::None
                                     )
                                 )),
