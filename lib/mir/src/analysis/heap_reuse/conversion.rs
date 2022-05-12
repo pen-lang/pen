@@ -138,8 +138,8 @@ fn convert_expression(
                 convert_expression(if_.then(), dropped_blocks, &reused_blocks)?;
             let (else_expression, else_blocks) =
                 convert_expression(if_.else_(), dropped_blocks, &reused_blocks)?;
-            let mut total_blocks = then_blocks.clone();
 
+            let mut total_blocks = then_blocks.clone();
             total_blocks.max(&else_blocks);
 
             (
@@ -214,7 +214,22 @@ fn convert_expression(
                 reused_blocks,
             )
         }
-        Expression::TryOperation(_) => todo!(),
+        Expression::TryOperation(operation) => {
+            let (operand, reused_blocks) =
+                convert_expression(operation.operand(), dropped_blocks, reused_blocks)?;
+
+            (
+                TryOperation::new(
+                    operand,
+                    operation.name(),
+                    operation.type_().clone(),
+                    // Ignore a then expression for simplicity.
+                    operation.then().clone(),
+                )
+                .into(),
+                reused_blocks,
+            )
+        }
         Expression::Variant(variant) => {
             let (expression, reused_blocks) =
                 convert_expression(variant.payload(), dropped_blocks, reused_blocks)?;
