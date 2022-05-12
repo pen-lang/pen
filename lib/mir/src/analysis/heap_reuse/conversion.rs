@@ -512,10 +512,7 @@ mod tests {
                             If::new(
                                 Expression::Boolean(true),
                                 ReuseRecord::new(id.clone(), record),
-                                DiscardHeap::new(
-                                    [id].into_iter().collect(),
-                                    Expression::None
-                                )
+                                DiscardHeap::new([id].into_iter().collect(), Expression::None)
                             )
                         ),
                     )
@@ -691,11 +688,7 @@ mod tests {
                 ]
                 .into_iter()
                 .collect(),
-                If::new(
-                    Expression::Boolean(true),
-                    nested_record.clone(),
-                    record,
-                ),
+                If::new(Expression::Boolean(true), nested_record.clone(), record),
             );
 
             assert_eq!(
@@ -813,11 +806,7 @@ mod tests {
                                         "z",
                                         ReuseRecord::new(id.clone(), record.clone())
                                     ),
-                                    Alternative::new(
-                                        Type::None,
-                                        "z",
-                                        ReuseRecord::new(id, record)
-                                    )
+                                    Alternative::new(Type::None, "z", ReuseRecord::new(id, record))
                                 ],
                                 None,
                             )
@@ -1140,10 +1129,7 @@ mod tests {
                                 )],
                                 Some(DefaultAlternative::new(
                                     "z",
-                                    DiscardHeap::new(
-                                        [id].into_iter().collect(),
-                                        Expression::None
-                                    )
+                                    DiscardHeap::new([id].into_iter().collect(), Expression::None)
                                 )),
                             )
                         ),
