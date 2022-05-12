@@ -237,7 +237,9 @@ fn convert_branch(
     total_blocks: &HeapBlockSet,
     dropped_blocks: &HeapBlockSet,
 ) -> Expression {
-    let difference = total_blocks.difference(&branch_blocks);
+    let difference = total_blocks
+        .difference(&branch_blocks)
+        .collect::<FnvHashMap<_, _>>();
 
     if difference.is_empty() {
         expression
@@ -245,7 +247,7 @@ fn convert_branch(
         let mut reused_blocks = branch_blocks.clone();
         let mut ids = FnvHashSet::default();
 
-        for (type_, &count) in difference.iter() {
+        for (type_, count) in difference {
             for _ in 0..count {
                 ids.insert(reuse_block(dropped_blocks, &reused_blocks, type_).unwrap());
                 reused_blocks.add(type_);

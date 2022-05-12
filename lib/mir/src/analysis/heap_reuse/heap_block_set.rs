@@ -25,14 +25,15 @@ impl HeapBlockSet {
         }
     }
 
-    pub fn difference(&self, other: &Self) -> Self {
-        let mut this = self.clone();
-
-        for (type_, &count) in &other.counts {
-            this.update_count(type_, -(count as isize));
-        }
-
-        this
+    pub fn difference<'a>(&'a self, other: &'a Self) -> impl Iterator<Item = (&Type, usize)> + 'a {
+        self.counts
+            .iter()
+            .filter_map(|(type_, count)| {
+                count
+                    .checked_sub(other.get(type_))
+                    .map(|count| (type_, count))
+            })
+            .filter(|(_, count)| *count > 0)
     }
 
     pub fn max(&self, other: &Self) -> Self {
@@ -44,14 +45,6 @@ impl HeapBlockSet {
         }
 
         this
-    }
-
-    pub fn is_empty(&self) -> bool {
-        self.counts.values().sum::<usize>() == 0
-    }
-
-    pub fn iter(&self) -> impl Iterator<Item = (&Type, &usize)> + '_ {
-        self.counts.iter()
     }
 
     fn update_count(&mut self, type_: &Type, count: isize) {
