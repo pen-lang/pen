@@ -70,7 +70,61 @@ fn convert_expression(
                 reused_blocks,
             )
         }
-        Expression::Case(_) => todo!(),
+        Expression::Case(case) => {
+            let (argument, reused_blocks) =
+                convert_expression(case.argument(), dropped_blocks, reused_blocks)?;
+
+            let mut total_blocks = HeapBlockSet::default();
+            let mut alternatives = vec![];
+
+            for alternative in case.alternatives() {
+                let (expression, reused_blocks) =
+                    convert_expression(alternative.expression(), dropped_blocks, &reused_blocks)?;
+
+                total_blocks.max(&reused_blocks);
+                alternatives.push((expression, reused_blocks));
+            }
+
+            let mut default_alternative = None;
+
+            if let Some(alternative) = case.default_alternative() {
+                let (expression, reused_blocks) =
+                    convert_expression(alternative.expression(), dropped_blocks, &reused_blocks)?;
+
+                total_blocks.max(&reused_blocks);
+                default_alternative = Some((expression, reused_blocks));
+            }
+
+            (
+                Case::new(
+                    argument,
+                    alternatives
+                        .into_iter()
+                        .map(|(expression, blocks)| {
+                            convert_branch(expression, &blocks, &total_blocks, &dropped_blocks)
+                        })
+                        .zip(case.alternatives())
+                        .map(|(expression, alternative)| {
+                            Alternative::new(
+                                alternative.type_().clone(),
+                                alternative.name(),
+                                expression,
+                            )
+                        })
+                        .collect(),
+                    default_alternative.and_then(|(expression, blocks)| {
+                        case.default_alternative().map(|alternative| {
+                            DefaultAlternative::new(
+                                alternative.name(),
+                                convert_branch(expression, &blocks, &total_blocks, &dropped_blocks),
+                            )
+                        })
+                    }),
+                )
+                .into(),
+                total_blocks,
+            )
+        }
         Expression::CloneVariables(clone) => {
             let (expression, reused_blocks) =
                 convert_expression(clone.expression(), dropped_blocks, reused_blocks)?;
@@ -675,6 +729,302 @@ mod tests {
                                 DiscardHeap::new([outer_id.clone()].into_iter().collect(), reuse),
                             )
                         }),
+                    )
+                    .into(),
+                    Default::default()
+                ),
+            );
+        }
+    }
+
+    mod case {
+        use super::*;
+        use pretty_assertions::assert_eq;
+
+        #[test]
+        fn reuse_record_in_alternative() {
+            let record = Record::new(types::Record::new("a"), vec![Expression::Number(42.0)]);
+            let id = get_id(&record.type_().clone().into(), 1);
+            let drop = DropVariables::new(
+                [("x".into(), record.type_().clone().into())]
+                    .into_iter()
+                    .collect(),
+                Case::new(
+                    Variable::new("y"),
+                    vec![Alternative::new(Type::None, "z", record.clone())],
+                    None,
+                ),
+            );
+
+            assert_eq!(
+                reuse_in_expression(&drop.clone().into()),
+                (
+                    RetainHeap::new(
+                        [("x".into(), id.clone())].into_iter().collect(),
+                        DropVariables::new(
+                            drop.variables().clone(),
+                            Case::new(
+                                Variable::new("y"),
+                                vec![Alternative::new(
+                                    Type::None,
+                                    "z",
+                                    ReuseRecord::new(id, record.clone())
+                                )],
+                                None,
+                            )
+                        ),
+                    )
+                    .into(),
+                    Default::default()
+                ),
+            );
+        }
+
+        #[test]
+        fn reuse_record_in_alternatives() {
+            let record = Record::new(types::Record::new("a"), vec![Expression::Number(42.0)]);
+            let id = get_id(&record.type_().clone().into(), 1);
+            let drop = DropVariables::new(
+                [("x".into(), record.type_().clone().into())]
+                    .into_iter()
+                    .collect(),
+                Case::new(
+                    Variable::new("y"),
+                    vec![
+                        Alternative::new(Type::None, "z", record.clone()),
+                        Alternative::new(Type::None, "z", record.clone()),
+                    ],
+                    None,
+                ),
+            );
+
+            assert_eq!(
+                reuse_in_expression(&drop.clone().into()),
+                (
+                    RetainHeap::new(
+                        [("x".into(), id.clone())].into_iter().collect(),
+                        DropVariables::new(
+                            drop.variables().clone(),
+                            Case::new(
+                                Variable::new("y"),
+                                vec![
+                                    Alternative::new(
+                                        Type::None,
+                                        "z",
+                                        ReuseRecord::new(id.clone(), record.clone())
+                                    ),
+                                    Alternative::new(
+                                        Type::None,
+                                        "z",
+                                        ReuseRecord::new(id, record.clone())
+                                    )
+                                ],
+                                None,
+                            )
+                        ),
+                    )
+                    .into(),
+                    Default::default()
+                ),
+            );
+        }
+
+        #[test]
+        fn reuse_record_in_one_of_alternatives() {
+            let record = Record::new(types::Record::new("a"), vec![Expression::Number(42.0)]);
+            let id = get_id(&record.type_().clone().into(), 1);
+            let drop = DropVariables::new(
+                [("x".into(), record.type_().clone().into())]
+                    .into_iter()
+                    .collect(),
+                Case::new(
+                    Variable::new("y"),
+                    vec![
+                        Alternative::new(Type::None, "z", record.clone()),
+                        Alternative::new(Type::None, "z", Expression::None),
+                    ],
+                    None,
+                ),
+            );
+
+            assert_eq!(
+                reuse_in_expression(&drop.clone().into()),
+                (
+                    RetainHeap::new(
+                        [("x".into(), id.clone())].into_iter().collect(),
+                        DropVariables::new(
+                            drop.variables().clone(),
+                            Case::new(
+                                Variable::new("y"),
+                                vec![
+                                    Alternative::new(
+                                        Type::None,
+                                        "z",
+                                        ReuseRecord::new(id.clone(), record.clone())
+                                    ),
+                                    Alternative::new(
+                                        Type::None,
+                                        "z",
+                                        DiscardHeap::new(
+                                            [id].into_iter().collect(),
+                                            Expression::None
+                                        )
+                                    )
+                                ],
+                                None,
+                            )
+                        ),
+                    )
+                    .into(),
+                    Default::default()
+                ),
+            );
+        }
+
+        #[test]
+        fn reuse_nested_records_in_alternatives() {
+            let record = Record::new(
+                types::Record::new("a"),
+                vec![Record::new(types::Record::new("a"), vec![Expression::Number(42.0)]).into()],
+            );
+
+            let outer_id = get_id(&record.type_().clone().into(), 1);
+            let inner_id = get_id(&record.type_().clone().into(), 2);
+
+            let drop = DropVariables::new(
+                [
+                    ("x".into(), record.type_().clone().into()),
+                    ("y".into(), record.type_().clone().into()),
+                ]
+                .into_iter()
+                .collect(),
+                Case::new(
+                    Variable::new("y"),
+                    vec![
+                        Alternative::new(Type::None, "z", record.clone()),
+                        Alternative::new(Type::None, "z", record.clone()),
+                    ],
+                    None,
+                ),
+            );
+
+            assert_eq!(
+                reuse_in_expression(&drop.clone().into()),
+                (
+                    RetainHeap::new(
+                        [
+                            ("x".into(), outer_id.clone()),
+                            ("y".into(), inner_id.clone())
+                        ]
+                        .into_iter()
+                        .collect(),
+                        DropVariables::new(
+                            drop.variables().clone(),
+                            Case::new(
+                                Variable::new("y"),
+                                {
+                                    let reuse = ReuseRecord::new(
+                                        outer_id.clone(),
+                                        Record::new(
+                                            types::Record::new("a"),
+                                            vec![ReuseRecord::new(
+                                                inner_id.clone(),
+                                                Record::new(
+                                                    types::Record::new("a"),
+                                                    vec![Expression::Number(42.0)],
+                                                ),
+                                            )
+                                            .into()],
+                                        ),
+                                    );
+
+                                    vec![
+                                        Alternative::new(Type::None, "z", reuse.clone()),
+                                        Alternative::new(Type::None, "z", reuse.clone()),
+                                    ]
+                                },
+                                None,
+                            )
+                        ),
+                    )
+                    .into(),
+                    Default::default()
+                ),
+            );
+        }
+
+        #[test]
+        fn reuse_nested_records_only_in_one_of_alternatives() {
+            let record = Record::new(
+                types::Record::new("a"),
+                vec![Record::new(types::Record::new("a"), vec![Expression::Number(42.0)]).into()],
+            );
+
+            let outer_id = get_id(&record.type_().clone().into(), 1);
+            let inner_id = get_id(&record.type_().clone().into(), 2);
+
+            let drop = DropVariables::new(
+                [
+                    ("x".into(), record.type_().clone().into()),
+                    ("y".into(), record.type_().clone().into()),
+                ]
+                .into_iter()
+                .collect(),
+                Case::new(
+                    Variable::new("y"),
+                    vec![
+                        Alternative::new(Type::None, "z", record.clone()),
+                        Alternative::new(Type::None, "z", Expression::None),
+                    ],
+                    None,
+                ),
+            );
+
+            assert_eq!(
+                reuse_in_expression(&drop.clone().into()),
+                (
+                    RetainHeap::new(
+                        [
+                            ("x".into(), outer_id.clone()),
+                            ("y".into(), inner_id.clone())
+                        ]
+                        .into_iter()
+                        .collect(),
+                        DropVariables::new(
+                            drop.variables().clone(),
+                            Case::new(
+                                Variable::new("y"),
+                                vec![
+                                    Alternative::new(
+                                        Type::None,
+                                        "z",
+                                        ReuseRecord::new(
+                                            outer_id.clone(),
+                                            Record::new(
+                                                types::Record::new("a"),
+                                                vec![ReuseRecord::new(
+                                                    inner_id.clone(),
+                                                    Record::new(
+                                                        types::Record::new("a"),
+                                                        vec![Expression::Number(42.0)],
+                                                    ),
+                                                )
+                                                .into()],
+                                            ),
+                                        ),
+                                    ),
+                                    Alternative::new(
+                                        Type::None,
+                                        "z",
+                                        DiscardHeap::new(
+                                            [outer_id, inner_id].into_iter().collect(),
+                                            Expression::None
+                                        )
+                                    ),
+                                ],
+                                None,
+                            )
+                        ),
                     )
                     .into(),
                     Default::default()
