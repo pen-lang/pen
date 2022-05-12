@@ -12,11 +12,17 @@ impl HeapBlockSet {
     }
 
     pub fn add(&mut self, type_: &Type) {
-        self.update_count(type_, 1);
+        self.counts.insert(type_.clone(), self.get(type_) + 1);
     }
 
     pub fn remove(&mut self, type_: &Type) {
-        self.update_count(type_, -1);
+        let count = self.get(type_);
+
+        if count == 1 {
+            self.counts.remove(type_);
+        } else {
+            self.counts.insert(type_.clone(), count - 1);
+        }
     }
 
     pub fn difference<'a>(&'a self, other: &'a Self) -> impl Iterator<Item = (&Type, usize)> + 'a {
@@ -34,17 +40,6 @@ impl HeapBlockSet {
         for type_ in other.counts.keys() {
             self.counts
                 .insert(type_.clone(), self.get(type_).max(other.get(type_)));
-        }
-    }
-
-    fn update_count(&mut self, type_: &Type, count: isize) {
-        let original_count = self.get(type_) as isize;
-
-        if original_count <= -count {
-            self.counts.remove(type_);
-        } else {
-            self.counts
-                .insert(type_.clone(), (original_count + count) as usize);
         }
     }
 }
