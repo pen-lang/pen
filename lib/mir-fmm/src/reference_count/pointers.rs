@@ -5,9 +5,7 @@ pub fn clone_pointer(
     pointer: &fmm::build::TypedExpression,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     if_heap_pointer(builder, pointer, |builder| {
-        increment_count(builder, pointer, fmm::ir::AtomicOrdering::Relaxed)?;
-
-        Ok(())
+        increment_count(builder, pointer, fmm::ir::AtomicOrdering::Relaxed)
     })?;
 
     Ok(pointer.clone())
