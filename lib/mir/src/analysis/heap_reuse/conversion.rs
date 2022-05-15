@@ -207,10 +207,10 @@ fn convert_expression(
             )
         }
         Expression::Let(let_) => {
-            let (bound_expression, reused_blocks) =
-                convert_expression(let_.bound_expression(), dropped_blocks, reused_blocks)?;
             let (expression, reused_blocks) =
-                convert_expression(let_.expression(), dropped_blocks, &reused_blocks)?;
+                convert_expression(let_.expression(), dropped_blocks, reused_blocks)?;
+            let (bound_expression, reused_blocks) =
+                convert_expression(let_.bound_expression(), dropped_blocks, &reused_blocks)?;
 
             (
                 Let::new(
@@ -454,6 +454,92 @@ mod tests {
                 Default::default()
             ),
         );
+    }
+
+    mod let_ {
+        use super::*;
+        use pretty_assertions::assert_eq;
+
+        #[test]
+        fn reuse_record() {
+            let record_type = types::Record::new("a");
+            let record = Record::new(record_type.clone(), vec![Expression::Number(42.0)]);
+            let id = get_id(&record.type_().clone().into(), 1);
+            let drop = DropVariables::new(
+                [("x".into(), record.type_().clone().into())]
+                    .into_iter()
+                    .collect(),
+                Let::new("y", record_type.clone(), record.clone(), Expression::None),
+            );
+
+            assert_eq!(
+                reuse_in_expression(&drop.clone().into()),
+                (
+                    RetainHeap::new(
+                        [("x".into(), id.clone())].into_iter().collect(),
+                        DropVariables::new(
+                            drop.variables().clone(),
+                            Let::new(
+                                "y",
+                                record_type.clone(),
+                                ReuseRecord::new(id, record),
+                                Expression::None
+                            ),
+                        ),
+                    )
+                    .into(),
+                    Default::default()
+                ),
+            );
+        }
+
+        #[test]
+        fn reuse_record_with_nested_drops() {
+            let record_type = types::Record::new("a");
+            let record = Record::new(record_type.clone(), vec![Expression::Number(42.0)]);
+            let id = get_id(&record.type_().clone().into(), 1);
+            let drop = DropVariables::new(
+                [("x".into(), record.type_().clone().into())]
+                    .into_iter()
+                    .collect(),
+                Let::new(
+                    "y",
+                    record_type.clone(),
+                    record.clone(),
+                    DropVariables::new(
+                        [("y".into(), record.type_().clone().into())]
+                            .into_iter()
+                            .collect(),
+                        Expression::None,
+                    ),
+                ),
+            );
+
+            assert_eq!(
+                reuse_in_expression(&drop.clone().into()),
+                (
+                    RetainHeap::new(
+                        [("x".into(), id.clone())].into_iter().collect(),
+                        DropVariables::new(
+                            drop.variables().clone(),
+                            Let::new(
+                                "y",
+                                record_type.clone(),
+                                ReuseRecord::new(id, record.clone()),
+                                DropVariables::new(
+                                    [("y".into(), record.type_().clone().into())]
+                                        .into_iter()
+                                        .collect(),
+                                    Expression::None,
+                                )
+                            ),
+                        ),
+                    )
+                    .into(),
+                    Default::default()
+                ),
+            );
+        }
     }
 
     mod if_ {
