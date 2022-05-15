@@ -52,7 +52,7 @@ pub fn compile(
         }
         mir::ir::Expression::DiscardHeap(discard) => {
             for id in discard.ids() {
-                let pointer = fmm::build::variable(id, fmm::types::GENERIC_POINTER_TYPE.clone());
+                let pointer = variables[id].clone();
 
                 instruction_builder.if_(
                     pointers::equal(
@@ -173,7 +173,7 @@ pub fn compile(
         }
         mir::ir::Expression::ReuseRecord(reuse) => {
             let pointer_type = fmm::types::GENERIC_POINTER_TYPE.clone();
-            let pointer = fmm::build::variable(reuse.id(), pointer_type.clone());
+            let pointer = variables[reuse.id()].clone();
 
             instruction_builder.if_(
                 pointers::equal(pointer.clone(), fmm::ir::Undefined::new(pointer_type))?,
@@ -525,7 +525,13 @@ fn compile_boxed_record_with_pointer(
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     let unboxed = compile_unboxed_record(context, builder, record, variables)?;
 
-    builder.store(unboxed, pointer.clone());
+    builder.store(
+        unboxed.clone(),
+        fmm::build::bit_cast(
+            fmm::types::Pointer::new(unboxed.type_().clone()),
+            pointer.clone(),
+        ),
+    );
 
     Ok(fmm::build::bit_cast(
         types::compile_record(record.type_(), context.types()),
