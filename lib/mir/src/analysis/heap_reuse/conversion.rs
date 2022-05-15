@@ -207,10 +207,10 @@ fn convert_expression(
             )
         }
         Expression::Let(let_) => {
-            let (expression, reused_blocks) =
-                convert_expression(let_.expression(), dropped_blocks, reused_blocks)?;
             let (bound_expression, reused_blocks) =
-                convert_expression(let_.bound_expression(), dropped_blocks, &reused_blocks)?;
+                convert_expression(let_.bound_expression(), dropped_blocks, reused_blocks)?;
+            let (expression, reused_blocks) =
+                convert_expression(let_.expression(), dropped_blocks, &reused_blocks)?;
 
             (
                 Let::new(
