@@ -1,6 +1,7 @@
 use super::error::CompileError;
 use crate::{
-    calls, closures, context::Context, entry_functions, records, reference_count, types, variants,
+    calls, closures, context::Context, entry_functions, pointers, records, reference_count, types,
+    variants,
 };
 use fnv::FnvHashMap;
 
@@ -54,8 +55,7 @@ pub fn compile(
                 let pointer = fmm::build::variable(id, fmm::types::GENERIC_POINTER_TYPE.clone());
 
                 instruction_builder.if_(
-                    fmm::build::comparison_operation(
-                        fmm::ir::ComparisonOperator::Equal,
+                    pointers::compare_pointers(
                         pointer.clone(),
                         fmm::ir::Undefined::new(pointer.type_().clone()),
                     )?,
@@ -176,11 +176,7 @@ pub fn compile(
             let pointer = fmm::build::variable(reuse.id(), pointer_type.clone());
 
             instruction_builder.if_(
-                fmm::build::comparison_operation(
-                    fmm::ir::ComparisonOperator::Equal,
-                    pointer.clone(),
-                    fmm::ir::Undefined::new(pointer_type),
-                )?,
+                pointers::compare_pointers(pointer.clone(), fmm::ir::Undefined::new(pointer_type))?,
                 |builder| -> Result<_, CompileError> {
                     Ok(builder.branch(compile_record(
                         context,
@@ -353,16 +349,9 @@ fn compile_tag_comparison(
     argument: &fmm::build::TypedExpression,
     type_: &mir::types::Type,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    Ok(fmm::build::comparison_operation(
-        fmm::ir::ComparisonOperator::Equal,
-        fmm::build::bit_cast(
-            fmm::types::Primitive::PointerInteger,
-            instruction_builder.deconstruct_record(argument.clone(), 0)?,
-        ),
-        fmm::build::bit_cast(
-            fmm::types::Primitive::PointerInteger,
-            variants::compile_tag(type_),
-        ),
+    Ok(pointers::compare_pointers(
+        instruction_builder.deconstruct_record(argument.clone(), 0)?,
+        variants::compile_tag(type_),
     )?
     .into())
 }

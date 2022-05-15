@@ -9,6 +9,7 @@ mod foreign_declarations;
 mod foreign_definitions;
 mod function_declarations;
 mod function_definitions;
+mod pointers;
 mod records;
 mod reference_count;
 mod type_information;
