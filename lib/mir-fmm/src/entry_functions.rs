@@ -253,7 +253,7 @@ fn compile_locked_thunk_entry(
         arguments.clone(),
         |instruction_builder| {
             instruction_builder.if_(
-                pointers::compare_pointers(
+                pointers::equal(
                     instruction_builder.atomic_load(
                         compile_entry_function_pointer(definition, context.types())?,
                         fmm::ir::AtomicOrdering::Acquire,

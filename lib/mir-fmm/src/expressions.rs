@@ -55,7 +55,7 @@ pub fn compile(
                 let pointer = fmm::build::variable(id, fmm::types::GENERIC_POINTER_TYPE.clone());
 
                 instruction_builder.if_(
-                    pointers::compare_pointers(
+                    pointers::equal(
                         pointer.clone(),
                         fmm::ir::Undefined::new(pointer.type_().clone()),
                     )?,
@@ -176,7 +176,7 @@ pub fn compile(
             let pointer = fmm::build::variable(reuse.id(), pointer_type.clone());
 
             instruction_builder.if_(
-                pointers::compare_pointers(pointer.clone(), fmm::ir::Undefined::new(pointer_type))?,
+                pointers::equal(pointer.clone(), fmm::ir::Undefined::new(pointer_type))?,
                 |builder| -> Result<_, CompileError> {
                     Ok(builder.branch(compile_record(
                         context,
@@ -349,7 +349,7 @@ fn compile_tag_comparison(
     argument: &fmm::build::TypedExpression,
     type_: &mir::types::Type,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    Ok(pointers::compare_pointers(
+    Ok(pointers::equal(
         instruction_builder.deconstruct_record(argument.clone(), 0)?,
         variants::compile_tag(type_),
     )?

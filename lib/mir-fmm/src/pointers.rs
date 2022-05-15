@@ -1,4 +1,4 @@
-pub fn compare_pointers(
+pub fn equal(
     lhs: impl Into<fmm::build::TypedExpression>,
     rhs: impl Into<fmm::build::TypedExpression>,
 ) -> Result<fmm::build::TypedExpression, fmm::build::BuildError> {
