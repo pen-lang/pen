@@ -36,8 +36,7 @@ pub fn compile(
 
     let module = mir::analysis::infer_environment(module);
     let module = mir::analysis::count_references(&module)?;
-    // TODO
-    // let module = mir::analysis::reuse_heap(&module)?;
+    let module = mir::analysis::reuse_heap(&module)?;
 
     mir::analysis::check_types(&module)?;
 
