@@ -21,8 +21,7 @@ pub fn convert(module: &Module) -> Result<Module, ReuseError> {
 }
 
 fn convert_definition(definition: &FunctionDefinition) -> Result<FunctionDefinition, ReuseError> {
-    let (expression, _) =
-        convert_expression(definition.body(), &Default::default(), &Default::default())?;
+    let (expression, _) = convert_expression(definition.body(), &Default::default())?;
 
     Ok(FunctionDefinition::with_options(
         definition.name(),
@@ -37,14 +36,13 @@ fn convert_definition(definition: &FunctionDefinition) -> Result<FunctionDefinit
 fn convert_expression(
     expression: &Expression,
     dropped_blocks: &HeapBlockSet,
-    reused_blocks: &HeapBlockSet,
 ) -> Result<(Expression, HeapBlockSet), ReuseError> {
     Ok(match expression {
         Expression::ArithmeticOperation(operation) => {
-            let (lhs, reused_blocks) =
-                convert_expression(operation.lhs(), dropped_blocks, reused_blocks)?;
-            let (rhs, reused_blocks) =
-                convert_expression(operation.rhs(), dropped_blocks, &reused_blocks)?;
+            let (lhs, mut reused_blocks) = convert_expression(operation.lhs(), dropped_blocks)?;
+            let (rhs, blocks) = convert_expression(operation.rhs(), dropped_blocks)?;
+
+            reused_blocks.merge(&blocks);
 
             (
                 ArithmeticOperation::new(operation.operator(), lhs, rhs).into(),
@@ -55,14 +53,13 @@ fn convert_expression(
             let mut arguments = vec![];
 
             let (function, mut reused_blocks) =
-                convert_expression(call.function(), dropped_blocks, reused_blocks)?;
+                convert_expression(call.function(), dropped_blocks)?;
 
             for argument in call.arguments() {
-                let (argument, blocks) =
-                    convert_expression(argument, dropped_blocks, &reused_blocks)?;
+                let (argument, blocks) = convert_expression(argument, dropped_blocks)?;
 
                 arguments.push(argument);
-                reused_blocks = blocks;
+                reused_blocks.merge(&blocks);
             }
 
             (
@@ -71,28 +68,27 @@ fn convert_expression(
             )
         }
         Expression::Case(case) => {
-            let (argument, reused_blocks) =
-                convert_expression(case.argument(), dropped_blocks, reused_blocks)?;
-
-            let mut total_blocks = HeapBlockSet::default();
+            let (argument, mut reused_blocks) =
+                convert_expression(case.argument(), dropped_blocks)?;
+            let mut alternative_blocks = HeapBlockSet::default();
             let mut alternatives = vec![];
 
             for alternative in case.alternatives() {
-                let (expression, reused_blocks) =
-                    convert_expression(alternative.expression(), dropped_blocks, &reused_blocks)?;
+                let (expression, blocks) =
+                    convert_expression(alternative.expression(), dropped_blocks)?;
 
-                total_blocks.max(&reused_blocks);
-                alternatives.push((expression, reused_blocks));
+                alternative_blocks.max(&blocks);
+                alternatives.push((expression, blocks));
             }
 
             let mut default_alternative = None;
 
             if let Some(alternative) = case.default_alternative() {
-                let (expression, reused_blocks) =
-                    convert_expression(alternative.expression(), dropped_blocks, &reused_blocks)?;
+                let (expression, blocks) =
+                    convert_expression(alternative.expression(), dropped_blocks)?;
 
-                total_blocks.max(&reused_blocks);
-                default_alternative = Some((expression, reused_blocks));
+                alternative_blocks.max(&blocks);
+                default_alternative = Some((expression, blocks));
             }
 
             (
@@ -101,7 +97,7 @@ fn convert_expression(
                     alternatives
                         .into_iter()
                         .map(|(expression, blocks)| {
-                            convert_branch(expression, &blocks, &total_blocks, dropped_blocks)
+                            convert_branch(expression, &blocks, &alternative_blocks, dropped_blocks)
                         })
                         .zip(case.alternatives())
                         .map(|(expression, alternative)| {
@@ -116,18 +112,26 @@ fn convert_expression(
                         case.default_alternative().map(|alternative| {
                             DefaultAlternative::new(
                                 alternative.name(),
-                                convert_branch(expression, &blocks, &total_blocks, dropped_blocks),
+                                convert_branch(
+                                    expression,
+                                    &blocks,
+                                    &alternative_blocks,
+                                    dropped_blocks,
+                                ),
                             )
                         })
                     }),
                 )
                 .into(),
-                total_blocks,
+                {
+                    reused_blocks.merge(&alternative_blocks);
+                    reused_blocks
+                },
             )
         }
         Expression::CloneVariables(clone) => {
             let (expression, reused_blocks) =
-                convert_expression(clone.expression(), dropped_blocks, reused_blocks)?;
+                convert_expression(clone.expression(), dropped_blocks)?;
 
             (
                 CloneVariables::new(clone.variables().clone(), expression).into(),
@@ -135,10 +139,10 @@ fn convert_expression(
             )
         }
         Expression::ComparisonOperation(operation) => {
-            let (lhs, reused_blocks) =
-                convert_expression(operation.lhs(), dropped_blocks, reused_blocks)?;
-            let (rhs, reused_blocks) =
-                convert_expression(operation.rhs(), dropped_blocks, &reused_blocks)?;
+            let (lhs, mut reused_blocks) = convert_expression(operation.lhs(), dropped_blocks)?;
+            let (rhs, blocks) = convert_expression(operation.rhs(), dropped_blocks)?;
+
+            reused_blocks.merge(&blocks);
 
             (
                 ComparisonOperation::new(operation.operator(), lhs, rhs).into(),
@@ -155,7 +159,7 @@ fn convert_expression(
             }
 
             let (expression, mut reused_blocks) =
-                convert_expression(drop.expression(), &dropped_blocks, reused_blocks)?;
+                convert_expression(drop.expression(), &dropped_blocks)?;
             let mut variables = FnvHashMap::default();
 
             for (name, type_) in drop.variables() {
@@ -186,31 +190,43 @@ fn convert_expression(
             }
         }
         Expression::If(if_) => {
-            let (condition, reused_blocks) =
-                convert_expression(if_.condition(), dropped_blocks, reused_blocks)?;
-            let (then_expression, then_blocks) =
-                convert_expression(if_.then(), dropped_blocks, &reused_blocks)?;
-            let (else_expression, else_blocks) =
-                convert_expression(if_.else_(), dropped_blocks, &reused_blocks)?;
+            let (condition, mut reused_blocks) =
+                convert_expression(if_.condition(), dropped_blocks)?;
+            let (then_expression, then_blocks) = convert_expression(if_.then(), dropped_blocks)?;
+            let (else_expression, else_blocks) = convert_expression(if_.else_(), dropped_blocks)?;
 
-            let mut total_blocks = then_blocks.clone();
-            total_blocks.max(&else_blocks);
+            let mut branch_blocks = then_blocks.clone();
+            branch_blocks.max(&else_blocks);
 
             (
                 If::new(
                     condition,
-                    convert_branch(then_expression, &then_blocks, &total_blocks, dropped_blocks),
-                    convert_branch(else_expression, &else_blocks, &total_blocks, dropped_blocks),
+                    convert_branch(
+                        then_expression,
+                        &then_blocks,
+                        &branch_blocks,
+                        dropped_blocks,
+                    ),
+                    convert_branch(
+                        else_expression,
+                        &else_blocks,
+                        &branch_blocks,
+                        dropped_blocks,
+                    ),
                 )
                 .into(),
-                total_blocks,
+                {
+                    reused_blocks.merge(&branch_blocks);
+                    reused_blocks
+                },
             )
         }
         Expression::Let(let_) => {
-            let (bound_expression, reused_blocks) =
-                convert_expression(let_.bound_expression(), dropped_blocks, reused_blocks)?;
-            let (expression, reused_blocks) =
-                convert_expression(let_.expression(), dropped_blocks, &reused_blocks)?;
+            let (bound_expression, mut reused_blocks) =
+                convert_expression(let_.bound_expression(), dropped_blocks)?;
+            let (expression, blocks) = convert_expression(let_.expression(), dropped_blocks)?;
+
+            reused_blocks.merge(&blocks);
 
             (
                 Let::new(
@@ -225,7 +241,7 @@ fn convert_expression(
         }
         Expression::LetRecursive(let_) => {
             let (expression, reused_blocks) =
-                convert_expression(let_.expression(), dropped_blocks, reused_blocks)?;
+                convert_expression(let_.expression(), dropped_blocks)?;
 
             (
                 LetRecursive::new(convert_definition(let_.definition())?, expression).into(),
@@ -234,14 +250,13 @@ fn convert_expression(
         }
         Expression::Record(record) => {
             let mut fields = vec![];
-            let mut reused_blocks = reused_blocks.clone();
+            let mut reused_blocks = HeapBlockSet::default();
 
             for field in record.fields() {
-                let (expression, blocks) =
-                    convert_expression(field, dropped_blocks, &reused_blocks)?;
+                let (expression, blocks) = convert_expression(field, dropped_blocks)?;
 
                 fields.push(expression);
-                reused_blocks = blocks;
+                reused_blocks.merge(&blocks);
             }
 
             if let Some(id) = reuse_block(
@@ -260,8 +275,7 @@ fn convert_expression(
             }
         }
         Expression::RecordField(field) => {
-            let (expression, reused_blocks) =
-                convert_expression(field.record(), dropped_blocks, reused_blocks)?;
+            let (expression, reused_blocks) = convert_expression(field.record(), dropped_blocks)?;
 
             (
                 RecordField::new(field.type_().clone(), field.index(), expression).into(),
@@ -269,8 +283,7 @@ fn convert_expression(
             )
         }
         Expression::TryOperation(operation) => {
-            let (operand, reused_blocks) =
-                convert_expression(operation.operand(), dropped_blocks, reused_blocks)?;
+            let (operand, reused_blocks) = convert_expression(operation.operand(), dropped_blocks)?;
 
             (
                 TryOperation::new(
@@ -286,7 +299,7 @@ fn convert_expression(
         }
         Expression::Variant(variant) => {
             let (expression, reused_blocks) =
-                convert_expression(variant.payload(), dropped_blocks, reused_blocks)?;
+                convert_expression(variant.payload(), dropped_blocks)?;
 
             (
                 Variant::new(variant.type_().clone(), expression).into(),
@@ -297,7 +310,7 @@ fn convert_expression(
         | Expression::ByteString(_)
         | Expression::None
         | Expression::Number(_)
-        | Expression::Variable(_) => (expression.clone(), reused_blocks.clone()),
+        | Expression::Variable(_) => (expression.clone(), Default::default()),
         Expression::DiscardHeap(_) | Expression::ReuseRecord(_) | Expression::RetainHeap(_) => {
             return Err(ReuseError::ExpressionNotSupported)
         }
@@ -368,7 +381,7 @@ mod tests {
     use pretty_assertions::assert_eq;
 
     fn reuse_in_expression(expression: &Expression) -> (Expression, HeapBlockSet) {
-        convert_expression(expression, &Default::default(), &Default::default()).unwrap()
+        convert_expression(expression, &Default::default()).unwrap()
     }
 
     #[test]
@@ -481,7 +494,7 @@ mod tests {
                             drop.variables().clone(),
                             Let::new(
                                 "y",
-                                record_type.clone(),
+                                record_type,
                                 ReuseRecord::new(id, record),
                                 Expression::None
                             ),
@@ -524,7 +537,7 @@ mod tests {
                             drop.variables().clone(),
                             Let::new(
                                 "y",
-                                record_type.clone(),
+                                record_type,
                                 ReuseRecord::new(id, record.clone()),
                                 DropVariables::new(
                                     [("y".into(), record.type_().clone().into())]

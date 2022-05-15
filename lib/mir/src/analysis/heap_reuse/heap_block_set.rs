@@ -25,6 +25,12 @@ impl HeapBlockSet {
         }
     }
 
+    pub fn merge(&mut self, blocks: &Self) {
+        for (type_, count) in &blocks.counts {
+            self.counts.insert(type_.clone(), self.get(type_) + count);
+        }
+    }
+
     pub fn difference<'a>(&'a self, other: &'a Self) -> impl Iterator<Item = (&Type, usize)> + 'a {
         self.counts
             .iter()
