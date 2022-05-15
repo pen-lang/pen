@@ -352,8 +352,7 @@ fn compile_tag_comparison(
     Ok(pointers::equal(
         instruction_builder.deconstruct_record(argument.clone(), 0)?,
         variants::compile_tag(type_),
-    )?
-    .into())
+    )?)
 }
 
 fn compile_let(
