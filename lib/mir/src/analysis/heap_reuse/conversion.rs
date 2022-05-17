@@ -275,7 +275,7 @@ fn convert_expression(
             }
         }
         Expression::RecordField(field) => {
-            // TODO Retain a droppped record.
+            // TODO Retain a dropped record.
             let (expression, reused_blocks) = convert_expression(field.record(), dropped_blocks)?;
 
             (
