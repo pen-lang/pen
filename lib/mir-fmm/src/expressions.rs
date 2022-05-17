@@ -105,18 +105,34 @@ pub fn compile(
         mir::ir::Expression::Record(record) => {
             compile_record(context, instruction_builder, record, variables)?
         }
-        mir::ir::Expression::RecordField(field) => reference_count::clone_expression(
-            instruction_builder,
-            &records::get_record_field(
+        mir::ir::Expression::RecordField(field) => {
+            let record_type = field.type_().clone();
+            let field_index = field.index();
+
+            let record = compile(field.record(), variables)?;
+            let field = records::get_record_field(
                 instruction_builder,
-                &compile(field.record(), variables)?,
+                &record,
                 field.type_(),
                 field.index(),
                 context.types(),
-            )?,
-            &context.types()[field.type_().name()].fields()[field.index()],
-            context.types(),
-        )?,
+            )?;
+
+            let field = reference_count::clone_expression(
+                instruction_builder,
+                &field,
+                &context.types()[record_type.name()].fields()[field_index],
+                context.types(),
+            )?;
+            reference_count::drop_expression(
+                instruction_builder,
+                &record,
+                &record_type.into(),
+                context.types(),
+            )?;
+
+            field
+        }
         mir::ir::Expression::RetainHeap(retain) => {
             let mut reused_variables = FnvHashMap::default();
 
