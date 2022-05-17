@@ -27,7 +27,8 @@ fn collect_from_expression(expression: &Expression) -> FnvHashSet<Type> {
             .cloned()
             .chain(collect_from_expression(operation.rhs()))
             .collect(),
-        Expression::DropVariables(drop) => collect_from_expression(drop.expression()),
+        Expression::DiscardHeap(discard) => collect_from_expression(discard.expression()),
+        Expression::DropVariables(drop) => collect_from_drop_variables(drop),
         Expression::Call(call) => collect_from_expression(call.function())
             .iter()
             .cloned()
@@ -48,12 +49,10 @@ fn collect_from_expression(expression: &Expression) -> FnvHashSet<Type> {
             .into_iter()
             .chain(collect_from_expression(let_.expression()))
             .collect(),
-        Expression::Record(record) => record
-            .fields()
-            .iter()
-            .flat_map(collect_from_expression)
-            .collect(),
+        Expression::Record(record) => collect_from_record(record),
         Expression::RecordField(field) => collect_from_expression(field.record()),
+        Expression::ReuseRecord(record) => collect_from_record(record.record()),
+        Expression::RetainHeap(reuse) => collect_from_drop_variables(reuse.drop()),
         Expression::TryOperation(operation) => [operation.type_().clone()]
             .into_iter()
             .chain(collect_from_expression(operation.operand()))
@@ -84,6 +83,18 @@ fn collect_from_case(case: &Case) -> FnvHashSet<Type> {
                 .map(|alternative| collect_from_expression(alternative.expression()))
                 .unwrap_or_default(),
         )
+        .collect()
+}
+
+fn collect_from_drop_variables(drop: &DropVariables) -> FnvHashSet<Type> {
+    collect_from_expression(drop.expression())
+}
+
+fn collect_from_record(record: &Record) -> FnvHashSet<Type> {
+    record
+        .fields()
+        .iter()
+        .flat_map(collect_from_expression)
         .collect()
 }
 

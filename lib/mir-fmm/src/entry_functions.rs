@@ -1,6 +1,7 @@
 use super::error::CompileError;
 use crate::{
-    closures, context::Context, expressions, reference_count, types, yield_::YIELD_FUNCTION_TYPE,
+    closures, context::Context, expressions, pointers, reference_count, types,
+    yield_::YIELD_FUNCTION_TYPE,
 };
 use fnv::FnvHashMap;
 
@@ -252,19 +253,12 @@ fn compile_locked_thunk_entry(
         arguments.clone(),
         |instruction_builder| {
             instruction_builder.if_(
-                fmm::build::comparison_operation(
-                    fmm::ir::ComparisonOperator::Equal,
-                    fmm::build::bit_cast(
-                        fmm::types::Primitive::PointerInteger,
-                        instruction_builder.atomic_load(
-                            compile_entry_function_pointer(definition, context.types())?,
-                            fmm::ir::AtomicOrdering::Acquire,
-                        )?,
-                    ),
-                    fmm::build::bit_cast(
-                        fmm::types::Primitive::PointerInteger,
-                        entry_function.clone(),
-                    ),
+                pointers::equal(
+                    instruction_builder.atomic_load(
+                        compile_entry_function_pointer(definition, context.types())?,
+                        fmm::ir::AtomicOrdering::Acquire,
+                    )?,
+                    entry_function.clone(),
                 )?,
                 |instruction_builder| {
                     instruction_builder.call(

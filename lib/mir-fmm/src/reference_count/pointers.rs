@@ -2,39 +2,23 @@ use super::{super::error::CompileError, heap};
 
 pub fn clone_pointer(
     builder: &fmm::build::InstructionBuilder,
-    expression: &fmm::build::TypedExpression,
+    pointer: &fmm::build::TypedExpression,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    if_heap_pointer(builder, expression, |builder| {
-        builder.atomic_operation(
-            fmm::ir::AtomicOperator::Add,
-            get_counter_pointer(expression)?,
-            fmm::ir::Primitive::PointerInteger(1),
-            fmm::ir::AtomicOrdering::Relaxed,
-        )?;
-
-        Ok(())
+    if_heap_pointer(builder, pointer, |builder| {
+        increment_count(builder, pointer, fmm::ir::AtomicOrdering::Relaxed)
     })?;
 
-    Ok(expression.clone())
+    Ok(pointer.clone())
 }
 
 pub fn drop_pointer(
     builder: &fmm::build::InstructionBuilder,
-    expression: &fmm::build::TypedExpression,
+    pointer: &fmm::build::TypedExpression,
     drop_content: impl Fn(&fmm::build::InstructionBuilder) -> Result<(), CompileError>,
 ) -> Result<(), CompileError> {
-    if_heap_pointer(builder, expression, |builder| {
+    if_heap_pointer(builder, pointer, |builder| {
         builder.if_(
-            fmm::build::comparison_operation(
-                fmm::ir::ComparisonOperator::Equal,
-                builder.atomic_operation(
-                    fmm::ir::AtomicOperator::Subtract,
-                    get_counter_pointer(expression)?,
-                    fmm::ir::Primitive::PointerInteger(1),
-                    fmm::ir::AtomicOrdering::Release,
-                )?,
-                fmm::ir::Primitive::PointerInteger(heap::INITIAL_COUNT as i64),
-            )?,
+            decrement_and_compare_count(builder, pointer)?,
             |builder| -> Result<_, CompileError> {
                 builder.fence(fmm::ir::AtomicOrdering::Acquire);
 
@@ -42,10 +26,7 @@ pub fn drop_pointer(
 
                 heap::free_heap(
                     &builder,
-                    fmm::build::bit_cast(
-                        fmm::types::Pointer::new(fmm::types::Primitive::Integer8),
-                        expression.clone(),
-                    ),
+                    fmm::build::bit_cast(fmm::types::GENERIC_POINTER_TYPE.clone(), pointer.clone()),
                 )?;
 
                 Ok(builder.branch(fmm::ir::VOID_VALUE.clone()))
@@ -57,6 +38,71 @@ pub fn drop_pointer(
     })?;
 
     Ok(())
+}
+
+pub fn drop_or_reuse_pointer(
+    builder: &fmm::build::InstructionBuilder,
+    pointer: &fmm::build::TypedExpression,
+    drop_content: impl Fn(&fmm::build::InstructionBuilder) -> Result<(), CompileError>,
+) -> Result<fmm::build::TypedExpression, CompileError> {
+    let result_pointer = builder.allocate_stack(pointer.type_().clone());
+
+    builder.store(
+        fmm::ir::Undefined::new(pointer.type_().clone()),
+        result_pointer.clone(),
+    );
+
+    if_heap_pointer(builder, pointer, |builder| {
+        builder.if_(
+            decrement_and_compare_count(builder, pointer)?,
+            |builder| -> Result<_, CompileError> {
+                increment_count(&builder, pointer, fmm::ir::AtomicOrdering::Acquire)?;
+
+                drop_content(&builder)?;
+
+                builder.store(pointer.clone(), result_pointer.clone());
+
+                Ok(builder.branch(fmm::ir::VOID_VALUE.clone()))
+            },
+            |builder| Ok(builder.branch(fmm::ir::VOID_VALUE.clone())),
+        )?;
+
+        Ok(())
+    })?;
+
+    Ok(builder.load(result_pointer)?)
+}
+
+fn increment_count(
+    builder: &fmm::build::InstructionBuilder,
+    pointer: &fmm::build::TypedExpression,
+    ordering: fmm::ir::AtomicOrdering,
+) -> Result<(), CompileError> {
+    builder.atomic_operation(
+        fmm::ir::AtomicOperator::Add,
+        get_counter_pointer(pointer)?,
+        fmm::ir::Primitive::PointerInteger(1),
+        ordering,
+    )?;
+
+    Ok(())
+}
+
+fn decrement_and_compare_count(
+    builder: &fmm::build::InstructionBuilder,
+    pointer: &fmm::build::TypedExpression,
+) -> Result<fmm::build::TypedExpression, CompileError> {
+    Ok(fmm::build::comparison_operation(
+        fmm::ir::ComparisonOperator::Equal,
+        builder.atomic_operation(
+            fmm::ir::AtomicOperator::Subtract,
+            get_counter_pointer(pointer)?,
+            fmm::ir::Primitive::PointerInteger(1),
+            fmm::ir::AtomicOrdering::Release,
+        )?,
+        fmm::ir::Primitive::PointerInteger(heap::INITIAL_COUNT as i64),
+    )?
+    .into())
 }
 
 pub fn compile_tagged_pointer(

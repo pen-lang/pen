@@ -516,7 +516,11 @@ fn convert_expression(
         | Expression::ByteString(_)
         | Expression::None
         | Expression::Number(_) => (expression.clone(), moved_variables.clone()),
-        Expression::CloneVariables(_) | Expression::DropVariables(_) => {
+        Expression::CloneVariables(_)
+        | Expression::DiscardHeap(_)
+        | Expression::DropVariables(_)
+        | Expression::ReuseRecord(_)
+        | Expression::RetainHeap(_) => {
             return Err(ReferenceCountError::ExpressionNotSupported(
                 expression.clone(),
             ));

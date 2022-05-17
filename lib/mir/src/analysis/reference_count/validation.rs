@@ -114,13 +114,10 @@ fn move_expression(
             move_expression(operation.lhs(), variables)?;
             move_expression(operation.rhs(), variables)?;
         }
-        Expression::DropVariables(drop) => {
-            for name in drop.variables().keys() {
-                drop_variable(name, variables);
-            }
-
-            move_expression(drop.expression(), variables)?;
+        Expression::DiscardHeap(discard) => {
+            move_expression(discard.expression(), variables)?;
         }
+        Expression::DropVariables(drop) => move_drop_variables(drop, variables)?,
         Expression::If(if_) => {
             move_expression(if_.condition(), variables)?;
 
@@ -147,13 +144,15 @@ fn move_expression(
         Expression::None => {}
         Expression::Number(_) => {}
         Expression::Record(record) => {
-            for field in record.fields() {
-                move_expression(field, variables)?;
-            }
+            move_record(record, variables)?;
         }
         Expression::RecordField(field) => {
             move_expression(field.record(), variables)?;
         }
+        Expression::ReuseRecord(record) => {
+            move_record(record.record(), variables)?;
+        }
+        Expression::RetainHeap(reuse) => move_drop_variables(reuse.drop(), variables)?,
         Expression::TryOperation(operation) => {
             move_expression(operation.operand(), variables)?;
 
@@ -173,6 +172,28 @@ fn move_expression(
         Expression::Variant(variant) => {
             move_expression(variant.payload(), variables)?;
         }
+    }
+
+    Ok(())
+}
+
+fn move_drop_variables(
+    drop: &DropVariables,
+    variables: &mut FnvHashMap<String, isize>,
+) -> Result<(), ReferenceCountError> {
+    for name in drop.variables().keys() {
+        drop_variable(name, variables);
+    }
+
+    move_expression(drop.expression(), variables)
+}
+
+fn move_record(
+    record: &Record,
+    variables: &mut FnvHashMap<String, isize>,
+) -> Result<(), ReferenceCountError> {
+    for field in record.fields() {
+        move_expression(field, variables)?;
     }
 
     Ok(())

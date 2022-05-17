@@ -9,6 +9,7 @@ mod foreign_declarations;
 mod foreign_definitions;
 mod function_declarations;
 mod function_definitions;
+mod pointers;
 mod records;
 mod reference_count;
 mod type_information;
@@ -35,6 +36,7 @@ pub fn compile(
 
     let module = mir::analysis::infer_environment(module);
     let module = mir::analysis::count_references(&module)?;
+    let module = mir::analysis::reuse_heap(&module)?;
 
     mir::analysis::check_types(&module)?;
 
@@ -47,6 +49,7 @@ pub fn compile(
     for definition in module.type_definitions() {
         reference_count::compile_record_clone_function(&context, definition)?;
         reference_count::compile_record_drop_function(&context, definition)?;
+        reference_count::compile_record_drop_or_reuse_function(&context, definition)?;
     }
 
     for declaration in module.foreign_declarations() {

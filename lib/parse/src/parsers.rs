@@ -2414,12 +2414,10 @@ mod tests {
         fn parse_prefix_operator() {
             assert!(prefix_operator().parse(stream("", "")).is_err());
 
-            for (source, expected) in &[("!", UnaryOperator::Not)] {
-                assert_eq!(
-                    prefix_operator().parse(stream(source, "")).unwrap().0,
-                    *expected
-                );
-            }
+            assert_eq!(
+                prefix_operator().parse(stream("!", "")).unwrap().0,
+                UnaryOperator::Not
+            );
         }
 
         #[test]
