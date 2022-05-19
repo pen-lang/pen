@@ -55,7 +55,7 @@ pub fn compile_record_clone_function(
         },
         fmm_record_type.clone(),
         fmm::types::CallingConvention::Target,
-        fmm::ir::Linkage::Weak,
+        fmm::ir::Linkage::Internal,
     )?;
 
     Ok(())
@@ -89,7 +89,7 @@ pub fn compile_record_drop_function(
         },
         fmm::types::VOID_TYPE.clone(),
         fmm::types::CallingConvention::Target,
-        fmm::ir::Linkage::Weak,
+        fmm::ir::Linkage::Internal,
     )?;
 
     Ok(())

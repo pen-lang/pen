@@ -31,7 +31,7 @@ pub fn compile_variant_clone_function(
         },
         types::compile_variant_payload(),
         fmm::types::CallingConvention::Target,
-        fmm::ir::Linkage::Weak,
+        fmm::ir::Linkage::Internal,
     )
 }
 
@@ -64,6 +64,6 @@ pub fn compile_variant_drop_function(
         },
         fmm::types::VOID_TYPE.clone(),
         fmm::types::CallingConvention::Target,
-        fmm::ir::Linkage::Weak,
+        fmm::ir::Linkage::Internal,
     )
 }
