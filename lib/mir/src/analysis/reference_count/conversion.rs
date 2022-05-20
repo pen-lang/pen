@@ -1,9 +1,18 @@
 use super::error::ReferenceCountError;
-use crate::{ir::*, types::Type};
+use crate::{
+    ir::*,
+    types::{self, Type},
+};
 use fnv::{FnvHashMap, FnvHashSet};
 
 // Closure environments need to be inferred before reference counting.
 pub fn convert_module(module: &Module) -> Result<Module, ReferenceCountError> {
+    let types = module
+        .type_definitions()
+        .iter()
+        .map(|definition| (definition.name(), definition.type_()))
+        .collect::<FnvHashMap<_, _>>();
+
     Ok(Module::new(
         module.type_definitions().to_vec(),
         module.foreign_declarations().to_vec(),
@@ -12,7 +21,7 @@ pub fn convert_module(module: &Module) -> Result<Module, ReferenceCountError> {
         module
             .function_definitions()
             .iter()
-            .map(|definition| convert_definition(definition, true))
+            .map(|definition| convert_definition(definition, true, &types))
             .collect::<Result<_, _>>()?,
     ))
 }
@@ -20,6 +29,7 @@ pub fn convert_module(module: &Module) -> Result<Module, ReferenceCountError> {
 fn convert_definition(
     definition: &FunctionDefinition,
     global: bool,
+    types: &FnvHashMap<&str, &types::RecordBody>,
 ) -> Result<FunctionDefinition, ReferenceCountError> {
     // Backend is expected to clone a function itself and its free variables at the
     // very beginning of the function.
@@ -38,8 +48,12 @@ fn convert_definition(
     )
     .collect();
 
-    let (expression, moved_variables) =
-        convert_expression(definition.body(), &owned_variables, &Default::default())?;
+    let (expression, moved_variables) = convert_expression(
+        definition.body(),
+        &owned_variables,
+        &Default::default(),
+        types,
+    )?;
 
     Ok(FunctionDefinition::with_options(
         definition.name(),
@@ -71,7 +85,12 @@ fn convert_expression(
     expression: &Expression,
     owned_variables: &FnvHashMap<String, Type>,
     moved_variables: &FnvHashSet<String>,
+    types: &FnvHashMap<&str, &types::RecordBody>,
 ) -> Result<(Expression, FnvHashSet<String>), ReferenceCountError> {
+    let convert_expression = |expression, owned_variables: &_, moved_variables: &_| {
+        convert_expression(expression, owned_variables, moved_variables, types)
+    };
+
     Ok(match expression {
         Expression::ArithmeticOperation(operation) => {
             let (rhs, moved_variables) =
@@ -390,7 +409,7 @@ fn convert_expression(
             (
                 clone_variables(
                     LetRecursive::new(
-                        convert_definition(let_.definition(), false)?,
+                        convert_definition(let_.definition(), false, types)?,
                         if expression_moved_variables.contains(let_.definition().name()) {
                             expression
                         } else {
@@ -450,9 +469,12 @@ fn convert_expression(
                         type_.clone(),
                         RecordField::new(type_.clone(), field.index(), Variable::new(RECORD_NAME)),
                         CloneVariables::new(
-                            [(FIELD_NAME.into(), types[type_.name()])]
-                                .into_iter()
-                                .collect(),
+                            [(
+                                FIELD_NAME.into(),
+                                types[type_.name()].fields()[field.index()].clone(),
+                            )]
+                            .into_iter()
+                            .collect(),
                             DropVariables::new(
                                 [(RECORD_NAME.into(), type_.clone().into())]
                                     .into_iter()
@@ -611,6 +633,26 @@ mod tests {
     use crate::types::{self, Type};
     use pretty_assertions::assert_eq;
 
+    fn convert_definition(
+        definition: &FunctionDefinition,
+        global: bool,
+    ) -> Result<FunctionDefinition, ReferenceCountError> {
+        super::convert_definition(definition, global, &Default::default())
+    }
+
+    fn convert_expression(
+        expression: &Expression,
+        owned_variables: &FnvHashMap<String, Type>,
+        moved_variables: &FnvHashSet<String>,
+    ) -> Result<(Expression, FnvHashSet<String>), ReferenceCountError> {
+        super::convert_expression(
+            expression,
+            owned_variables,
+            moved_variables,
+            &Default::default(),
+        )
+    }
+
     #[test]
     fn convert_record() {
         assert_eq!(
@@ -645,14 +687,16 @@ mod tests {
     #[test]
     fn convert_record_field() {
         let record_type = types::Record::new("a");
+        let record_body_type = types::RecordBody::new(vec![Type::Number]);
 
         assert_eq!(
-            convert_expression(
+            super::convert_expression(
                 &RecordField::new(record_type.clone(), 0, Variable::new("x")).into(),
                 &[("x".into(), record_type.clone().into())]
                     .into_iter()
                     .collect(),
-                &Default::default()
+                &Default::default(),
+                &[("a", &record_body_type)].into_iter().collect(),
             )
             .unwrap(),
             (
@@ -664,11 +708,14 @@ mod tests {
                         "$f",
                         record_type.clone(),
                         RecordField::new(types::Record::new("a"), 0, Variable::new("$r")),
-                        DropVariables::new(
-                            [("$r".into(), record_type.clone().into())]
-                                .into_iter()
-                                .collect(),
-                            Variable::new("$f")
+                        CloneVariables::new(
+                            [("$f".into(), Type::Number)].into_iter().collect(),
+                            DropVariables::new(
+                                [("$r".into(), record_type.clone().into())]
+                                    .into_iter()
+                                    .collect(),
+                                Variable::new("$f")
+                            )
                         ),
                     )
                 )
