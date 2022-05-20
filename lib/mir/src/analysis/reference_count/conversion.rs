@@ -433,11 +433,36 @@ fn convert_expression(
             )
         }
         Expression::RecordField(field) => {
+            const RECORD_NAME: &str = "$r";
+            const FIELD_NAME: &str = "$f";
+
             let (record, moved_variables) =
                 convert_expression(field.record(), owned_variables, moved_variables)?;
+            let type_ = field.type_();
 
             (
-                RecordField::new(field.type_().clone(), field.index(), record).into(),
+                Let::new(
+                    RECORD_NAME,
+                    type_.clone(),
+                    record,
+                    Let::new(
+                        FIELD_NAME,
+                        type_.clone(),
+                        RecordField::new(type_.clone(), field.index(), Variable::new(RECORD_NAME)),
+                        CloneVariables::new(
+                            [(FIELD_NAME.into(), types[type_.name()])]
+                                .into_iter()
+                                .collect(),
+                            DropVariables::new(
+                                [(RECORD_NAME.into(), type_.clone().into())]
+                                    .into_iter()
+                                    .collect(),
+                                Variable::new(FIELD_NAME),
+                            ),
+                        ),
+                    ),
+                )
+                .into(),
                 moved_variables,
             )
         }
@@ -584,6 +609,7 @@ fn should_clone_variable(
 mod tests {
     use super::*;
     use crate::types::{self, Type};
+    use pretty_assertions::assert_eq;
 
     #[test]
     fn convert_record() {
@@ -609,6 +635,42 @@ mod tests {
                         .into(),
                         Variable::new("x").into()
                     ]
+                )
+                .into(),
+                ["x".into()].into_iter().collect()
+            ),
+        );
+    }
+
+    #[test]
+    fn convert_record_field() {
+        let record_type = types::Record::new("a");
+
+        assert_eq!(
+            convert_expression(
+                &RecordField::new(record_type.clone(), 0, Variable::new("x")).into(),
+                &[("x".into(), record_type.clone().into())]
+                    .into_iter()
+                    .collect(),
+                &Default::default()
+            )
+            .unwrap(),
+            (
+                Let::new(
+                    "$r",
+                    record_type.clone(),
+                    Variable::new("x"),
+                    Let::new(
+                        "$f",
+                        record_type.clone(),
+                        RecordField::new(types::Record::new("a"), 0, Variable::new("$r")),
+                        DropVariables::new(
+                            [("$r".into(), record_type.clone().into())]
+                                .into_iter()
+                                .collect(),
+                            Variable::new("$f")
+                        ),
+                    )
                 )
                 .into(),
                 ["x".into()].into_iter().collect()
@@ -1420,6 +1482,7 @@ mod tests {
 
     mod if_ {
         use super::*;
+        use pretty_assertions::assert_eq;
 
         #[test]
         fn convert_if() {
