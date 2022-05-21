@@ -81,6 +81,7 @@ pub use record_construction::*;
 pub use record_deconstruction::*;
 pub use record_field::*;
 pub use record_update::*;
+pub use record_update::*;
 pub use spawn_operation::*;
 pub use string::*;
 pub use thunk::*;

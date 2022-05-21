@@ -1,4 +1,4 @@
-use super::{expression::Expression, RecordField};
+use super::{Expression, RecordField};
 use crate::types::Type;
 use position::Position;
 use std::sync::Arc;
@@ -20,7 +20,7 @@ impl RecordUpdate {
     ) -> Self {
         Self {
             type_: type_.into(),
-            record: Arc::new(record.into()),
+            record: record.into().into(),
             fields,
             position,
         }
