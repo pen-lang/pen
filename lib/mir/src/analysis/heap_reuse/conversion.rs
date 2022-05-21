@@ -282,7 +282,22 @@ fn convert_expression(
                 reused_blocks,
             )
         }
-        Expression::RecordUpdate(_) => todo!(),
+        Expression::RecordUpdate(update) => {
+            let (record, mut reused_blocks) = convert_expression(update.record(), dropped_blocks)?;
+            let mut fields = vec![];
+
+            for field in update.fields() {
+                let (expression, blocks) = convert_expression(field.expression(), dropped_blocks)?;
+
+                fields.push(RecordUpdateField::new(field.index(), expression));
+                reused_blocks.merge(&blocks);
+            }
+
+            (
+                RecordUpdate::new(update.type_().clone(), record, fields).into(),
+                reused_blocks,
+            )
+        }
         Expression::TryOperation(operation) => {
             let (operand, reused_blocks) = convert_expression(operation.operand(), dropped_blocks)?;
 
