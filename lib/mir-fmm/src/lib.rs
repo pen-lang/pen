@@ -827,6 +827,50 @@ mod tests {
             use super::*;
 
             #[test]
+            fn compile_with_empty_record() {
+                let record_type = mir::types::Record::new("foo");
+
+                compile_module(&create_module_with_type_definitions(
+                    vec![mir::ir::TypeDefinition::new(
+                        "foo",
+                        mir::types::RecordBody::new(vec![]),
+                    )],
+                    vec![mir::ir::FunctionDefinition::new(
+                        "f",
+                        vec![],
+                        mir::ir::RecordUpdate::new(
+                            record_type.clone(),
+                            mir::ir::Record::new(record_type.clone(), vec![]),
+                            vec![],
+                        ),
+                        record_type,
+                    )],
+                ));
+            }
+
+            #[test]
+            fn compile_record_with_1_field() {
+                let record_type = mir::types::Record::new("foo");
+
+                compile_module(&create_module_with_type_definitions(
+                    vec![mir::ir::TypeDefinition::new(
+                        "foo",
+                        mir::types::RecordBody::new(vec![mir::types::Type::Number]),
+                    )],
+                    vec![mir::ir::FunctionDefinition::new(
+                        "f",
+                        vec![],
+                        mir::ir::RecordUpdate::new(
+                            record_type.clone(),
+                            mir::ir::Record::new(record_type.clone(), vec![42.0.into()]),
+                            vec![mir::ir::RecordUpdateField::new(0, 0.0)],
+                        ),
+                        record_type,
+                    )],
+                ));
+            }
+
+            #[test]
             fn compile_with_1_field() {
                 let record_type = mir::types::Record::new("foo");
 
