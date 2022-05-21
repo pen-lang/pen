@@ -9,8 +9,6 @@ mod variants;
 pub use expressions::*;
 pub use functions::*;
 pub use heap::*;
-pub use pointers::{
-    compile_tagged_pointer, compile_untagged_pointer, drop_pointer, is_pointer_owned,
-};
+pub use pointers::{compile_tagged_pointer, compile_untagged_pointer, is_pointer_owned};
 pub use records::*;
 pub use variants::*;
