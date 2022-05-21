@@ -1,28 +1,28 @@
 use super::{Expression, RecordUpdateField};
-use crate::types::Type;
+use crate::types;
 use std::sync::Arc;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct RecordUpdate {
-    type_: Type,
+    type_: types::Record,
     record: Arc<Expression>,
     fields: Vec<RecordUpdateField>,
 }
 
 impl RecordUpdate {
     pub fn new(
-        type_: impl Into<Type>,
+        type_: types::Record,
         record: impl Into<Expression>,
         fields: Vec<RecordUpdateField>,
     ) -> Self {
         Self {
-            type_: type_.into(),
+            type_,
             record: record.into().into(),
             fields,
         }
     }
 
-    pub fn type_(&self) -> &Type {
+    pub fn type_(&self) -> &types::Record {
         &self.type_
     }
 
