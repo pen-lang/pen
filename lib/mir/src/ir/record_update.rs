@@ -7,7 +7,6 @@ pub struct RecordUpdate {
     type_: Type,
     record: Arc<Expression>,
     fields: Vec<RecordField>,
-    position: Position,
 }
 
 impl RecordUpdate {
@@ -15,13 +14,11 @@ impl RecordUpdate {
         type_: impl Into<Type>,
         record: impl Into<Expression>,
         fields: Vec<RecordField>,
-        position: Position,
     ) -> Self {
         Self {
             type_: type_.into(),
             record: record.into().into(),
             fields,
-            position,
         }
     }
 
@@ -35,9 +32,5 @@ impl RecordUpdate {
 
     pub fn fields(&self) -> &[RecordField] {
         &self.fields
-    }
-
-    pub fn position(&self) -> &Position {
-        &self.position
     }
 }
