@@ -186,17 +186,17 @@ pub fn compile(
                 instruction_builder.if_(
                     reference_count::is_pointer_owned(instruction_builder, &record)?,
                     |builder| -> Result<_, CompileError> {
-                        Ok(builder.branch(compile_boxed_record_with_pointer(
+                        Ok(builder.branch(compile_boxed_record(
                             &builder,
                             record.clone(),
-                            compile_unboxed(false)?.into(),
+                            compile_unboxed(false)?,
                         )?))
                     },
                     |builder| {
-                        let updated_record = compile_boxed_record_with_pointer(
+                        let updated_record = compile_boxed_record(
                             &builder,
                             allocate_record_heap(context, &builder, update.type_())?,
-                            compile_unboxed(true)?.into(),
+                            compile_unboxed(true)?,
                         )?;
 
                         reference_count::drop_expression(
@@ -265,11 +265,10 @@ pub fn compile(
                         Ok(builder.branch(compile_record(&builder)?))
                     },
                     |builder| {
-                        Ok(builder.branch(compile_boxed_record_with_pointer(
+                        Ok(builder.branch(compile_boxed_record(
                             &builder,
                             pointer.clone(),
-                            compile_unboxed_record(context, &builder, reuse.record(), variables)?
-                                .into(),
+                            compile_unboxed_record(context, &builder, reuse.record(), variables)?,
                         )?))
                     },
                 )?
@@ -581,10 +580,10 @@ fn compile_record(
     variables: &FnvHashMap<String, fmm::build::TypedExpression>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     Ok(if types::is_record_boxed(record.type_(), context.types()) {
-        compile_boxed_record_with_pointer(
+        compile_boxed_record(
             builder,
             allocate_record_heap(context, builder, record.type_())?,
-            compile_unboxed_record(context, builder, record, variables)?.into(),
+            compile_unboxed_record(context, builder, record, variables)?,
         )?
     } else {
         compile_unboxed_record(context, builder, record, variables)?.into()
@@ -602,11 +601,14 @@ fn allocate_record_heap(
     )
 }
 
-fn compile_boxed_record_with_pointer(
+fn compile_boxed_record(
     builder: &fmm::build::InstructionBuilder,
-    pointer: fmm::build::TypedExpression,
-    unboxed_record: fmm::build::TypedExpression,
+    pointer: impl Into<fmm::build::TypedExpression>,
+    unboxed_record: impl Into<fmm::build::TypedExpression>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
+    let unboxed_record = unboxed_record.into();
+    let pointer = pointer.into();
+
     builder.store(
         unboxed_record.clone(),
         fmm::build::bit_cast(
