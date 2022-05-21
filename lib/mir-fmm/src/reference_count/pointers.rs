@@ -163,8 +163,8 @@ pub fn compile_untagged_pointer(
 fn if_heap_pointer(
     builder: &fmm::build::InstructionBuilder,
     pointer: &fmm::build::TypedExpression,
-    then: impl Fn(fmm::build::InstructionBuilder) -> Result<fmm::ir::Block, CompileError>,
-    else_: impl Fn(fmm::build::InstructionBuilder) -> Result<fmm::ir::Block, CompileError>,
+    ref then: impl Fn(fmm::build::InstructionBuilder) -> Result<fmm::ir::Block, CompileError>,
+    ref else_: impl Fn(fmm::build::InstructionBuilder) -> Result<fmm::ir::Block, CompileError>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     builder.if_(
         fmm::build::comparison_operation(
@@ -172,14 +172,8 @@ fn if_heap_pointer(
             fmm::build::bit_cast(fmm::types::Primitive::PointerInteger, pointer.clone()),
             fmm::ir::Undefined::new(fmm::types::Primitive::PointerInteger),
         )?,
-        |builder| {
-            Ok(builder.branch(builder.if_(
-                is_heap_pointer(pointer)?,
-                |builder| then(builder),
-                |builder| else_(builder),
-            )?))
-        },
-        |builder| else_(builder),
+        |builder| Ok(builder.branch(builder.if_(is_heap_pointer(pointer)?, then, else_)?)),
+        else_,
     )
 }
 
