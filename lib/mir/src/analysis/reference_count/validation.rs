@@ -147,7 +147,6 @@ fn move_expression(
             move_record(record, variables)?;
         }
         Expression::RecordField(field) => {
-            // TODO
             move_expression(field.record(), variables)?;
         }
         Expression::ReuseRecord(record) => {
