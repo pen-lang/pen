@@ -49,6 +49,7 @@ fn convert_expression(
                 reused_blocks,
             )
         }
+        Expression::BorrowRecordField(_) => todo!(),
         Expression::Call(call) => {
             let mut arguments = vec![];
 

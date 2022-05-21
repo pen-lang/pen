@@ -3,13 +3,14 @@ use super::{
     clone_variables::CloneVariables, comparison_operation::ComparisonOperation,
     drop_variables::DropVariables, if_::If, let_::Let, let_recursive::LetRecursive, record::Record,
     record_field::RecordField, try_operation::TryOperation, variable::Variable, variant::Variant,
-    DiscardHeap, RetainHeap, ReuseRecord,
+    BorrowRecordField, DiscardHeap, RetainHeap, ReuseRecord,
 };
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum Expression {
     ArithmeticOperation(ArithmeticOperation),
     Boolean(bool),
+    BorrowRecordField(BorrowRecordField),
     ByteString(ByteString),
     Call(Call),
     Case(Case),
@@ -40,6 +41,12 @@ impl From<ArithmeticOperation> for Expression {
 impl From<bool> for Expression {
     fn from(bool: bool) -> Self {
         Self::Boolean(bool)
+    }
+}
+
+impl From<BorrowRecordField> for Expression {
+    fn from(field: BorrowRecordField) -> Self {
+        Self::BorrowRecordField(field)
     }
 }
 

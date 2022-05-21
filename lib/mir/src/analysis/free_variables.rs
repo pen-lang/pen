@@ -11,6 +11,7 @@ fn find_in_expression(expression: &Expression) -> FnvHashSet<String> {
             .into_iter()
             .chain(find_in_expression(operation.rhs()))
             .collect(),
+        Expression::BorrowRecordField(_) => todo!(),
         Expression::Case(case) => find_in_case(case),
         Expression::CloneVariables(clone) => find_in_expression(clone.expression()),
         Expression::ComparisonOperation(operation) => find_in_expression(operation.lhs())

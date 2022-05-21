@@ -70,6 +70,7 @@ fn move_expression(
             move_expression(operation.rhs(), variables)?;
         }
         Expression::Boolean(_) => {}
+        Expression::BorrowRecordField(_) => todo!(),
         Expression::ByteString(_) => {}
         Expression::Call(call) => {
             move_expression(call.function(), variables)?;

@@ -20,6 +20,7 @@ fn collect_from_expression(expression: &Expression) -> FnvHashSet<Type> {
             .cloned()
             .chain(collect_from_expression(operation.rhs()))
             .collect(),
+        Expression::BorrowRecordField(_) => todo!(),
         Expression::Case(case) => collect_from_case(case),
         Expression::CloneVariables(clone) => collect_from_expression(clone.expression()),
         Expression::ComparisonOperation(operation) => collect_from_expression(operation.lhs())

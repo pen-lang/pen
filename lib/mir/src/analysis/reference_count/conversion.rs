@@ -103,6 +103,7 @@ fn convert_expression(
                 moved_variables,
             )
         }
+        Expression::BorrowRecordField(_) => todo!(),
         Expression::Case(case) => {
             let (default_alternative, default_alternative_moved_variables) =
                 if let Some(alternative) = case.default_alternative() {

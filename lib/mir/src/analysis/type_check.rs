@@ -94,6 +94,7 @@ fn check_expression(
             Type::Number
         }
         Expression::Boolean(_) => Type::Boolean,
+        Expression::BorrowRecordField(_) => todo!(),
         Expression::Case(case) => check_case(case, variables, result_type, types)?,
         Expression::CloneVariables(clone) => {
             for (variable, type_) in clone.variables() {

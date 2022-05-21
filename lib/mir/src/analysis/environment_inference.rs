@@ -81,6 +81,7 @@ fn infer_in_expression(
         Expression::ArithmeticOperation(operation) => {
             infer_in_arithmetic_operation(operation, variables).into()
         }
+        Expression::BorrowRecordField(_) => todo!(),
         Expression::Case(case) => infer_in_case(case, variables).into(),
         Expression::CloneVariables(clone) => infer_in_clone_variables(clone, variables).into(),
         Expression::ComparisonOperation(operation) => {
