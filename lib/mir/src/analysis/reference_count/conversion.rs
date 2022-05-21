@@ -461,27 +461,22 @@ fn convert_expression(
             let type_ = field.type_();
 
             (
-                Let::new(
+                BorrowRecordField::new(
+                    RecordField::new(field.type_().clone(), field.index(), record),
                     RECORD_NAME,
-                    type_.clone(),
-                    record,
-                    Let::new(
-                        FIELD_NAME,
-                        type_.clone(),
-                        RecordField::new(type_.clone(), field.index(), Variable::new(RECORD_NAME)),
-                        CloneVariables::new(
-                            [(
-                                FIELD_NAME.into(),
-                                types[type_.name()].fields()[field.index()].clone(),
-                            )]
-                            .into_iter()
-                            .collect(),
-                            DropVariables::new(
-                                [(RECORD_NAME.into(), type_.clone().into())]
-                                    .into_iter()
-                                    .collect(),
-                                Variable::new(FIELD_NAME),
-                            ),
+                    FIELD_NAME,
+                    CloneVariables::new(
+                        [(
+                            FIELD_NAME.into(),
+                            types[type_.name()].fields()[field.index()].clone(),
+                        )]
+                        .into_iter()
+                        .collect(),
+                        DropVariables::new(
+                            [(RECORD_NAME.into(), type_.clone().into())]
+                                .into_iter()
+                                .collect(),
+                            Variable::new(FIELD_NAME),
                         ),
                     ),
                 )
