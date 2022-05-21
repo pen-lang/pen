@@ -441,7 +441,24 @@ fn convert_expression(
                 moved_variables,
             )
         }
-        Expression::RecordUpdate(_) => todo!(),
+        Expression::RecordUpdate(update) => {
+            let (record, mut moved_variables) =
+                convert_expression(update.record(), owned_variables, moved_variables)?;
+            let mut fields = vec![];
+
+            for field in update.fields() {
+                let (expression, field_moved_variables) =
+                    convert_expression(update.record(), owned_variables, &moved_variables)?;
+
+                fields.push(RecordUpdateField::new(field.index(), expression));
+                moved_variables = field_moved_variables;
+            }
+
+            (
+                RecordUpdate::new(update.type_().clone(), record, fields).into(),
+                moved_variables,
+            )
+        }
         Expression::TryOperation(operation) => {
             let (then, then_moved_variables) =
                 convert_expression(operation.then(), owned_variables, &Default::default())?;
