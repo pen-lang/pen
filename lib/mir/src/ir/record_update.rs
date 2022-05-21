@@ -1,6 +1,5 @@
 use super::{Expression, RecordField};
 use crate::types::Type;
-use position::Position;
 use std::sync::Arc;
 
 #[derive(Clone, Debug, PartialEq)]
