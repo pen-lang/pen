@@ -133,6 +133,7 @@ pub fn compile(
 
             field
         }
+        mir::ir::Expression::RecordUpdate(_) => todo!(),
         mir::ir::Expression::RetainHeap(retain) => {
             let mut reused_variables = FnvHashMap::default();
 

@@ -282,6 +282,7 @@ fn convert_expression(
                 reused_blocks,
             )
         }
+        Expression::RecordUpdate(_) => todo!(),
         Expression::TryOperation(operation) => {
             let (operand, reused_blocks) = convert_expression(operation.operand(), dropped_blocks)?;
 

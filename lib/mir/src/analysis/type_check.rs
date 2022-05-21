@@ -195,6 +195,7 @@ fn check_expression(
                 .ok_or_else(|| TypeCheckError::FieldIndexOutOfBounds(field.clone()))?
                 .clone()
         }
+        Expression::RecordUpdate(_) => todo!(),
         Expression::ReuseRecord(record) => {
             check_record(record.record(), variables, result_type, types)?
         }
