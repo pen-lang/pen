@@ -163,9 +163,12 @@ pub fn compile_untagged_pointer(
 fn if_heap_pointer(
     builder: &fmm::build::InstructionBuilder,
     pointer: &fmm::build::TypedExpression,
-    ref then: impl Fn(fmm::build::InstructionBuilder) -> Result<fmm::ir::Block, CompileError>,
-    ref else_: impl Fn(fmm::build::InstructionBuilder) -> Result<fmm::ir::Block, CompileError>,
+    then: impl Fn(fmm::build::InstructionBuilder) -> Result<fmm::ir::Block, CompileError>,
+    else_: impl Fn(fmm::build::InstructionBuilder) -> Result<fmm::ir::Block, CompileError>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
+    let then = &then;
+    let else_ = &else_;
+
     builder.if_(
         fmm::build::comparison_operation(
             fmm::ir::ComparisonOperator::NotEqual,
