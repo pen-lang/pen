@@ -90,7 +90,7 @@ pub fn compile(
                 .arguments()
                 .iter()
                 .map(|argument| compile(argument, variables))
-                .collect::<Result<Vec<_>, CompileError>>()?,
+                .collect::<Result<Vec<_>, _>>()?,
         )?,
         mir::ir::Expression::If(if_) => compile_if(context, instruction_builder, if_, variables)?,
         mir::ir::Expression::Let(let_) => {
