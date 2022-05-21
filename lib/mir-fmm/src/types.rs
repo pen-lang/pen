@@ -72,7 +72,7 @@ pub fn compile_record(
     types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> fmm::types::Type {
     if is_record_boxed(record, types) {
-        fmm::types::Pointer::new(fmm::types::Record::new(vec![])).into()
+        compile_boxed_record()
     } else {
         compile_unboxed_record(record, types).into()
     }
@@ -86,6 +86,10 @@ pub fn is_record_boxed(
     types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> bool {
     !types[record.name()].fields().is_empty()
+}
+
+pub fn compile_boxed_record() -> fmm::types::Type {
+    fmm::types::Pointer::new(fmm::types::Record::new(vec![])).into()
 }
 
 pub fn compile_unboxed_record(
