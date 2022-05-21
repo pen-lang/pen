@@ -823,6 +823,102 @@ mod tests {
             }
         }
 
+        mod record_update {
+            use super::*;
+
+            #[test]
+            fn compile_with_1_field() {
+                let record_type = mir::types::Record::new("foo");
+
+                compile_module(&create_module_with_type_definitions(
+                    vec![mir::ir::TypeDefinition::new(
+                        "foo",
+                        mir::types::RecordBody::new(vec![
+                            mir::types::Type::Number,
+                            mir::types::Type::Boolean,
+                        ]),
+                    )],
+                    vec![mir::ir::FunctionDefinition::new(
+                        "f",
+                        vec![],
+                        mir::ir::RecordUpdate::new(
+                            record_type.clone(),
+                            mir::ir::Record::new(
+                                record_type.clone(),
+                                vec![42.0.into(), true.into()],
+                            ),
+                            vec![mir::ir::RecordUpdateField::new(1, false)],
+                        ),
+                        record_type,
+                    )],
+                ));
+            }
+
+            #[test]
+            fn compile_with_2_fields() {
+                let record_type = mir::types::Record::new("foo");
+
+                compile_module(&create_module_with_type_definitions(
+                    vec![mir::ir::TypeDefinition::new(
+                        "foo",
+                        mir::types::RecordBody::new(vec![
+                            mir::types::Type::Number,
+                            mir::types::Type::Boolean,
+                            mir::types::Type::None,
+                        ]),
+                    )],
+                    vec![mir::ir::FunctionDefinition::new(
+                        "f",
+                        vec![],
+                        mir::ir::RecordUpdate::new(
+                            record_type.clone(),
+                            mir::ir::Record::new(
+                                record_type.clone(),
+                                vec![42.0.into(), true.into(), mir::ir::Expression::None],
+                            ),
+                            vec![
+                                mir::ir::RecordUpdateField::new(1, false),
+                                mir::ir::RecordUpdateField::new(2, mir::ir::Expression::None),
+                            ],
+                        ),
+                        record_type,
+                    )],
+                ));
+            }
+
+            #[test]
+            fn compile_with_swapped_2_fields() {
+                let record_type = mir::types::Record::new("foo");
+
+                compile_module(&create_module_with_type_definitions(
+                    vec![mir::ir::TypeDefinition::new(
+                        "foo",
+                        mir::types::RecordBody::new(vec![
+                            mir::types::Type::Number,
+                            mir::types::Type::Boolean,
+                            mir::types::Type::None,
+                        ]),
+                    )],
+                    vec![mir::ir::FunctionDefinition::new(
+                        "f",
+                        vec![],
+                        mir::ir::RecordUpdate::new(
+                            record_type.clone(),
+                            mir::ir::Record::new(
+                                record_type.clone(),
+                                vec![42.0.into(), true.into(), mir::ir::Expression::None],
+                            ),
+                            vec![
+                                mir::ir::RecordUpdateField::new(2, mir::ir::Expression::None),
+                                mir::ir::RecordUpdateField::new(1, false),
+                            ],
+                        ),
+                        record_type,
+                    )],
+                ));
+            }
+        }
+
         mod variants {
             use super::*;
 

@@ -448,7 +448,7 @@ fn convert_expression(
 
             for field in update.fields() {
                 let (expression, variables) =
-                    convert_expression(update.record(), owned_variables, &moved_variables)?;
+                    convert_expression(field.expression(), owned_variables, &moved_variables)?;
 
                 fields.push(RecordUpdateField::new(field.index(), expression));
                 moved_variables = variables;
