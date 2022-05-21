@@ -203,7 +203,7 @@ mod tests {
         ));
     }
 
-    mod foreign_declarations {
+    mod foreign_declaration {
         use super::*;
 
         #[test]
@@ -267,7 +267,7 @@ mod tests {
         }
     }
 
-    mod foreign_definitions {
+    mod foreign_definition {
         use super::*;
 
         #[test]
@@ -355,7 +355,7 @@ mod tests {
         }
     }
 
-    mod declarations {
+    mod declaration {
         use super::*;
 
         #[test]
@@ -396,7 +396,7 @@ mod tests {
         }
     }
 
-    mod definitions {
+    mod definition {
         use super::*;
 
         #[test]
@@ -452,7 +452,7 @@ mod tests {
         }
     }
 
-    mod expressions {
+    mod expression {
         use super::*;
 
         #[test]
@@ -605,7 +605,7 @@ mod tests {
             ]));
         }
 
-        mod cases {
+        mod case {
             use super::*;
 
             #[test]
@@ -701,7 +701,7 @@ mod tests {
             }
         }
 
-        mod records {
+        mod record {
             use super::*;
 
             #[test]
@@ -780,7 +780,7 @@ mod tests {
             }
         }
 
-        mod record_fields {
+        mod record_field {
             use super::*;
 
             #[test]
@@ -919,7 +919,7 @@ mod tests {
             }
         }
 
-        mod variants {
+        mod variant {
             use super::*;
 
             #[test]
