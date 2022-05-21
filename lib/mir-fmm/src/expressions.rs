@@ -273,7 +273,7 @@ pub fn compile(
                     },
                 )?
             } else {
-                compile_record(instruction_builder)?.into()
+                compile_record(instruction_builder)?
             }
         }
         mir::ir::Expression::ByteString(string) => {
