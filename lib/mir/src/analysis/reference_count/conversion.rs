@@ -447,11 +447,11 @@ fn convert_expression(
             let mut fields = vec![];
 
             for field in update.fields() {
-                let (expression, field_moved_variables) =
+                let (expression, variables) =
                     convert_expression(update.record(), owned_variables, &moved_variables)?;
 
                 fields.push(RecordUpdateField::new(field.index(), expression));
-                moved_variables = field_moved_variables;
+                moved_variables = variables;
             }
 
             (
