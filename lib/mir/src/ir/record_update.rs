@@ -1,4 +1,4 @@
-use super::{Expression, RecordField};
+use super::{Expression, RecordUpdateField};
 use crate::types::Type;
 use std::sync::Arc;
 
@@ -6,14 +6,14 @@ use std::sync::Arc;
 pub struct RecordUpdate {
     type_: Type,
     record: Arc<Expression>,
-    fields: Vec<RecordField>,
+    fields: Vec<RecordUpdateField>,
 }
 
 impl RecordUpdate {
     pub fn new(
         type_: impl Into<Type>,
         record: impl Into<Expression>,
-        fields: Vec<RecordField>,
+        fields: Vec<RecordUpdateField>,
     ) -> Self {
         Self {
             type_: type_.into(),
@@ -30,7 +30,7 @@ impl RecordUpdate {
         &self.record
     }
 
-    pub fn fields(&self) -> &[RecordField] {
+    pub fn fields(&self) -> &[RecordUpdateField] {
         &self.fields
     }
 }
