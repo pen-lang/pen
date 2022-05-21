@@ -9,10 +9,7 @@ use super::{
 use crate::{
     concurrency_configuration::MODULE_LOCAL_SPAWN_FUNCTION_NAME,
     downcast_compiler,
-    transformation::{
-        if_map_transformer, list_literal_transformer, map_literal_transformer,
-        record_update_transformer,
-    },
+    transformation::{if_map_transformer, list_literal_transformer, map_literal_transformer},
 };
 use fnv::FnvHashMap;
 use hir::{
@@ -170,9 +167,31 @@ pub fn compile(
             )
             .into()
         }
-        Expression::RecordUpdate(update) => {
-            compile(&record_update_transformer::transform(update, context)?)?
-        }
+        Expression::RecordUpdate(update) => mir::ir::RecordUpdate::new(
+            type_compiler::compile(context, update.type_())?
+                .into_record()
+                .unwrap(),
+            compile(update.record())?,
+            update
+                .fields()
+                .iter()
+                .map(|field| -> Result<_, CompileError> {
+                    Ok(mir::ir::RecordUpdateField::new(
+                        record_field_resolver::resolve(
+                            update.type_(),
+                            update.position(),
+                            context.types(),
+                            context.records(),
+                        )?
+                        .iter()
+                        .position(|field_type| field_type.name() == field.name())
+                        .unwrap(),
+                        compile(field.expression())?,
+                    ))
+                })
+                .collect::<Result<_, _>>()?,
+        )
+        .into(),
         Expression::String(string) => mir::ir::ByteString::new(string.value()).into(),
         Expression::Thunk(thunk) => {
             const THUNK_NAME: &str = "$thunk";
