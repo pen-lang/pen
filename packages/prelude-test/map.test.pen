@@ -251,7 +251,7 @@ assertKeys = \(xs {number: none}, ks [number]) none | error {
 
 numberSet = \(xs [number]) {number: none} {
   if [x, ...xs] = xs {
-    {number: none x(): none, ...numberSet(xs)}
+    {number: none ...numberSet(xs), x(): none}
   } else {
     {number: none}
   }
