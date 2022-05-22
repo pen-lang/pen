@@ -1,5 +1,5 @@
 ---
-source: lib/hir-mir/src/transformation/map_context_transformer.rs
+source: lib/hir-mir/src/transformation/map_context.rs
 expression: "transform(&CompileContext::dummy(Default::default(), Default::default()),\n    &types::None::new(Position::fake()).into(),\n    &types::Function::new(vec![], types::None::new(Position::fake()),\n                Position::fake()).into(), &Position::fake())"
 ---
 Ok(

@@ -1,4 +1,4 @@
-use super::{super::error::CompileError, collection_type_transformer};
+use super::{super::error::CompileError, collection_type};
 use crate::{context::CompileContext, downcast};
 use hir::{
     analysis::{type_equality_checker, AnalysisError},
@@ -15,7 +15,7 @@ pub fn transform(context: &CompileContext, if_: &IfList) -> Result<Expression, C
     let element_type = if_
         .type_()
         .ok_or_else(|| AnalysisError::TypeNotInferred(position.clone()))?;
-    let any_list_type = collection_type_transformer::transform_list(context, position)?;
+    let any_list_type = collection_type::transform_list(context, position)?;
     let first_rest_type =
         types::Reference::new(&configuration.first_rest_type_name, position.clone());
     let none_type = types::None::new(position.clone());

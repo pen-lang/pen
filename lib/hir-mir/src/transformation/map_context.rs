@@ -1,5 +1,5 @@
-use super::{collection_type_transformer, hash_calculation_transformer};
-use crate::{context::CompileContext, transformation::equal_operation_transformer, CompileError};
+use super::{collection_type, hash_calculation};
+use crate::{context::CompileContext, transformation::equal_operation, CompileError};
 use hir::{analysis::type_comparability_checker, ir::*, types, types::Type};
 use position::Position;
 
@@ -31,30 +31,22 @@ pub fn transform(
                     equal_function_type,
                     hash_function_type,
                 ],
-                collection_type_transformer::transform_map_context(context, position)?,
+                collection_type::transform_map_context(context, position)?,
                 position.clone(),
             )
             .into(),
         ),
         Variable::new(&configuration.context_function_name, position.clone()),
         [
-            equal_operation_transformer::transform_any_function(context, key_type, position)?
-                .into(),
-            hash_calculation_transformer::transform_any_function(context, key_type, position)?
-                .into(),
+            equal_operation::transform_any_function(context, key_type, position)?.into(),
+            hash_calculation::transform_any_function(context, key_type, position)?.into(),
         ]
         .into_iter()
         .chain(
             if type_comparability_checker::check(value_type, context.types(), context.records())? {
                 [
-                    equal_operation_transformer::transform_any_function(
-                        context, value_type, position,
-                    )?
-                    .into(),
-                    hash_calculation_transformer::transform_any_function(
-                        context, value_type, position,
-                    )?
-                    .into(),
+                    equal_operation::transform_any_function(context, value_type, position)?.into(),
+                    hash_calculation::transform_any_function(context, value_type, position)?.into(),
                 ]
             } else {
                 [

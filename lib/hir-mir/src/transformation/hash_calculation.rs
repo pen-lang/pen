@@ -1,6 +1,4 @@
-use super::{
-    collection_type_transformer, map_context_transformer, record_type_information_compiler,
-};
+use super::{collection_type, map_context, record_type_information};
 use crate::{context::CompileContext, CompileError};
 use hir::{
     analysis::{
@@ -36,7 +34,7 @@ pub fn transform(
                 types::Function::new(
                     vec![
                         compile_any_function_type(position).into(),
-                        collection_type_transformer::transform_list(context, position)?,
+                        collection_type::transform_list(context, position)?,
                     ],
                     types::Number::new(position.clone()),
                     position.clone(),
@@ -58,8 +56,8 @@ pub fn transform(
             Some(
                 types::Function::new(
                     vec![
-                        collection_type_transformer::transform_map_context(context, position)?,
-                        collection_type_transformer::transform_map(context, position)?,
+                        collection_type::transform_map_context(context, position)?,
+                        collection_type::transform_map(context, position)?,
                     ],
                     types::Number::new(position.clone()),
                     position.clone(),
@@ -71,12 +69,7 @@ pub fn transform(
                 position.clone(),
             ),
             vec![
-                map_context_transformer::transform(
-                    context,
-                    map_type.key(),
-                    map_type.value(),
-                    position,
-                )?,
+                map_context::transform(context, map_type.key(), map_type.value(), position)?,
                 value.clone(),
             ],
             position.clone(),
@@ -95,7 +88,7 @@ pub fn transform(
             }
 
             compile_concrete_hash_function_call(
-                record_type_information_compiler::compile_hash_function_name(record_type),
+                record_type_information::compile_hash_function_name(record_type),
                 value,
                 type_,
                 position,
@@ -299,7 +292,7 @@ mod tests {
                     .into(),
                 ),
                 Variable::new(
-                    record_type_information_compiler::compile_hash_function_name(&record_type),
+                    record_type_information::compile_hash_function_name(&record_type),
                     Position::fake(),
                 ),
                 vec![Variable::new("x", Position::fake()).into()],

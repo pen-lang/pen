@@ -1,4 +1,4 @@
-use super::{collection_type_transformer, map_context_transformer};
+use super::{collection_type, map_context};
 use crate::{context::CompileContext, CompileError};
 use hir::{
     ir::*,
@@ -24,9 +24,9 @@ fn transform_map(
     position: &Position,
 ) -> Result<Expression, CompileError> {
     let configuration = &context.configuration()?.map_type;
-    let map_context_type = collection_type_transformer::transform_map_context(context, position)?;
-    let any_map_type = collection_type_transformer::transform_map(context, position)?;
-    let map_context = map_context_transformer::transform(context, key_type, value_type, position)?;
+    let map_context_type = collection_type::transform_map_context(context, position)?;
+    let any_map_type = collection_type::transform_map(context, position)?;
+    let map_context = map_context::transform(context, key_type, value_type, position)?;
 
     Ok(match elements {
         [] => Call::new(

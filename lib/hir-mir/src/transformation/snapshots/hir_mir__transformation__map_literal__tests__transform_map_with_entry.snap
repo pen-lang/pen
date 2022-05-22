@@ -1,5 +1,5 @@
 ---
-source: lib/hir-mir/src/transformation/map_literal_transformer.rs
+source: lib/hir-mir/src/transformation/map_literal.rs
 expression: "transform(&CompileContext::dummy(Default::default(), Default::default()),\n    &Map::new(types::None::new(Position::fake()),\n            types::None::new(Position::fake()),\n            vec![MapEntry ::\n                new(None :: new(Position :: fake()), None ::\n                new(Position :: fake()), Position :: fake()).into()],\n            Position::fake()))"
 ---
 Ok(

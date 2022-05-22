@@ -1,15 +1,15 @@
 use super::{
     context::CompileContext,
     transformation::{
-        boolean_operation_transformer, equal_operation_transformer, if_list_transformer,
-        not_equal_operation_transformer,
+        boolean_operation, equal_operation, if_list,
+        not_equal_operation,
     },
     type_, CompileError,
 };
 use crate::{
     concurrency_configuration::MODULE_LOCAL_SPAWN_FUNCTION_NAME,
     downcast,
-    transformation::{if_map_transformer, list_literal_transformer, map_literal_transformer},
+    transformation::{if_map, list_literal, map_literal},
 };
 use fnv::FnvHashMap;
 use hir::{
@@ -50,8 +50,8 @@ pub fn compile(
             compile(if_.else_())?,
         )
         .into(),
-        Expression::IfList(if_) => compile(&if_list_transformer::transform(context, if_)?)?,
-        Expression::IfMap(if_) => compile(&if_map_transformer::transform(context, if_)?)?,
+        Expression::IfList(if_) => compile(&if_list::transform(context, if_)?)?,
+        Expression::IfMap(if_) => compile(&if_map::transform(context, if_)?)?,
         Expression::IfType(if_) => mir::ir::Case::new(
             compile(if_.argument())?,
             if_.branches()
@@ -111,14 +111,14 @@ pub fn compile(
             compile(let_.expression())?,
         )
         .into(),
-        Expression::List(list) => compile(&list_literal_transformer::transform(
+        Expression::List(list) => compile(&list_literal::transform(
             list,
             &context.configuration()?.list_type,
         ))?,
         Expression::ListComprehension(comprehension) => {
             compile_list_comprehension(context, comprehension)?
         }
-        Expression::Map(map) => compile(&map_literal_transformer::transform(context, map)?)?,
+        Expression::Map(map) => compile(&map_literal::transform(context, map)?)?,
         Expression::MapIterationComprehension(comprehension) => {
             compile_map_iteration_comprehension(context, comprehension)?
         }
@@ -686,7 +686,7 @@ fn compile_operation(
         .into(),
         Operation::Spawn(operation) => compile_spawn_operation(context, operation)?,
         Operation::Boolean(operation) => {
-            compile(&boolean_operation_transformer::transform(operation))?
+            compile(&boolean_operation::transform(operation))?
         }
         Operation::Equality(operation) => match operation.operator() {
             EqualityOperator::Equal => {
@@ -713,11 +713,11 @@ fn compile_operation(
                         vec![compile(operation.lhs())?, compile(operation.rhs())?],
                     )
                     .into(),
-                    _ => compile(&equal_operation_transformer::transform(context, operation)?)?,
+                    _ => compile(&equal_operation::transform(context, operation)?)?,
                 }
             }
             EqualityOperator::NotEqual => {
-                compile(&not_equal_operation_transformer::transform(operation))?
+                compile(&not_equal_operation::transform(operation))?
             }
         },
         Operation::Not(operation) => {

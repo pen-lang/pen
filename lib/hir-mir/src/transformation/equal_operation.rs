@@ -1,5 +1,5 @@
-use super::{super::error::CompileError, collection_type_transformer, map_context_transformer};
-use crate::{context::CompileContext, transformation::record_type_information_compiler};
+use super::{super::error::CompileError, collection_type, map_context};
+use crate::{context::CompileContext, transformation::record_type_information};
 use hir::{
     analysis::{
         type_canonicalizer, type_comparability_checker, type_equality_checker, type_resolver,
@@ -61,7 +61,7 @@ fn transform_equal_operation(
         )
         .into(),
         Type::List(list_type) => {
-            let any_list_type = collection_type_transformer::transform_list(context, position)?;
+            let any_list_type = collection_type::transform_list(context, position)?;
 
             Call::new(
                 Some(
@@ -90,13 +90,13 @@ fn transform_equal_operation(
             .into()
         }
         Type::Map(map_type) => {
-            let any_map_type = collection_type_transformer::transform_map(context, position)?;
+            let any_map_type = collection_type::transform_map(context, position)?;
 
             Call::new(
                 Some(
                     types::Function::new(
                         vec![
-                            collection_type_transformer::transform_map_context(context, position)?,
+                            collection_type::transform_map_context(context, position)?,
                             any_map_type.clone(),
                             any_map_type,
                         ],
@@ -110,12 +110,7 @@ fn transform_equal_operation(
                     position.clone(),
                 ),
                 vec![
-                    map_context_transformer::transform(
-                        context,
-                        map_type.key(),
-                        map_type.value(),
-                        position,
-                    )?,
+                    map_context::transform(context, map_type.key(), map_type.value(), position)?,
                     lhs.clone(),
                     rhs.clone(),
                 ],
@@ -147,7 +142,7 @@ fn transform_equal_operation(
                     .into(),
                 ),
                 Variable::new(
-                    record_type_information_compiler::compile_equal_function_name(record_type),
+                    record_type_information::compile_equal_function_name(record_type),
                     position.clone(),
                 ),
                 vec![lhs.clone(), rhs.clone()],
@@ -397,7 +392,7 @@ mod tests {
                     .into(),
                 ),
                 Variable::new(
-                    record_type_information_compiler::compile_equal_function_name(&record_type),
+                    record_type_information::compile_equal_function_name(&record_type),
                     Position::fake(),
                 ),
                 vec![

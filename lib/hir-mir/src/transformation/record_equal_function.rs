@@ -1,6 +1,4 @@
-use crate::{
-    context::CompileContext, transformation::record_type_information_compiler, CompileError,
-};
+use crate::{context::CompileContext, transformation::record_type_information, CompileError};
 use hir::{analysis::type_comparability_checker, ir::*, types};
 
 const LHS_NAME: &str = "$lhs";
@@ -50,7 +48,7 @@ fn compile_equal_function_definition(type_definition: &TypeDefinition) -> Functi
     let position = type_definition.position();
     let record_type = types::Record::new(type_definition.name(), position.clone());
 
-    let function_name = record_type_information_compiler::compile_equal_function_name(&record_type);
+    let function_name = record_type_information::compile_equal_function_name(&record_type);
 
     FunctionDefinition::new(
         &function_name,
@@ -102,7 +100,7 @@ fn compile_equal_function_declaration(type_definition: &TypeDefinition) -> Funct
     let record_type = types::Record::new(type_definition.name(), position.clone());
 
     FunctionDeclaration::new(
-        record_type_information_compiler::compile_equal_function_name(&record_type),
+        record_type_information::compile_equal_function_name(&record_type),
         types::Function::new(
             vec![record_type.clone().into(), record_type.clone().into()],
             types::Boolean::new(position.clone()),

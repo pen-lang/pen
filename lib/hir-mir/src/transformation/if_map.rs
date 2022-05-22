@@ -1,4 +1,4 @@
-use super::{super::error::CompileError, collection_type_transformer, map_context_transformer};
+use super::{super::error::CompileError, collection_type, map_context};
 use crate::{context::CompileContext, downcast};
 use hir::{
     analysis::AnalysisError,
@@ -24,8 +24,8 @@ pub fn transform(context: &CompileContext, if_: &IfMap) -> Result<Expression, Co
             Some(
                 types::Function::new(
                     vec![
-                        collection_type_transformer::transform_map_context(context, position)?,
-                        collection_type_transformer::transform_map(context, position)?,
+                        collection_type::transform_map_context(context, position)?,
+                        collection_type::transform_map(context, position)?,
                         any_type.clone(),
                     ],
                     any_type.clone(),
@@ -35,7 +35,7 @@ pub fn transform(context: &CompileContext, if_: &IfMap) -> Result<Expression, Co
             ),
             Variable::new(&configuration.get_function_name, position.clone()),
             vec![
-                map_context_transformer::transform(context, key_type, value_type, position)?,
+                map_context::transform(context, key_type, value_type, position)?,
                 if_.map().clone(),
                 TypeCoercion::new(
                     key_type.clone(),

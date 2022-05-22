@@ -33,7 +33,7 @@ pub use map_type_configuration::{
 };
 pub use string_type_configuration::StringTypeConfiguration;
 pub use test_module_configuration::TestModuleConfiguration;
-use transformation::{record_equal_function_transformer, record_hash_function_transformer};
+use transformation::{record_equal_function, record_hash_function};
 
 pub fn compile_main(
     module: &Module,
@@ -84,8 +84,8 @@ fn compile_module(
     module: &Module,
 ) -> Result<(mir::ir::Module, interface::Module), CompileError> {
     let module = hir::analysis::analyze(context.analysis(), module)?;
-    let module = record_equal_function_transformer::transform(context, &module)?;
-    let module = record_hash_function_transformer::transform(context, &module)?;
+    let module = record_equal_function::transform(context, &module)?;
+    let module = record_hash_function::transform(context, &module)?;
     ffi_variant_type_validator::validate(context, &module)?;
 
     Ok((

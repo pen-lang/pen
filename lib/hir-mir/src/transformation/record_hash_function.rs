@@ -1,7 +1,5 @@
-use super::hash_calculation_transformer;
-use crate::{
-    context::CompileContext, transformation::record_type_information_compiler, CompileError,
-};
+use super::hash_calculation;
+use crate::{context::CompileContext, transformation::record_type_information, CompileError};
 use hir::{
     analysis::type_comparability_checker,
     ir::*,
@@ -64,7 +62,7 @@ fn compile_hash_function_definition(
 ) -> Result<FunctionDefinition, CompileError> {
     let position = type_definition.position();
     let record_type = types::Record::new(type_definition.name(), position.clone());
-    let function_name = record_type_information_compiler::compile_hash_function_name(&record_type);
+    let function_name = record_type_information::compile_hash_function_name(&record_type);
     let hash_type = compile_hash_type(position);
     let configuration = &context.configuration()?.map_type.hash;
 
@@ -92,7 +90,7 @@ fn compile_hash_function_definition(
                         Variable::new(&configuration.combine_function_name, position.clone()),
                         vec![
                             expression?,
-                            hash_calculation_transformer::transform(
+                            hash_calculation::transform(
                                 context,
                                 &RecordDeconstruction::new(
                                     Some(record_type.clone().into()),
@@ -123,7 +121,7 @@ fn compile_hash_function_declaration(type_definition: &TypeDefinition) -> Functi
     let record_type = types::Record::new(type_definition.name(), position.clone());
 
     FunctionDeclaration::new(
-        record_type_information_compiler::compile_hash_function_name(&record_type),
+        record_type_information::compile_hash_function_name(&record_type),
         types::Function::new(
             vec![record_type.clone().into()],
             compile_hash_type(position),
