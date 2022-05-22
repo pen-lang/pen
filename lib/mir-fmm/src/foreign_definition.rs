@@ -1,4 +1,4 @@
-use crate::{calls, context::Context, types, CompileError};
+use crate::{call, context::Context, types, CompileError};
 
 pub fn compile_foreign_definition(
     context: &Context,
@@ -22,7 +22,7 @@ pub fn compile_foreign_definition(
         definition.foreign_name(),
         arguments.clone(),
         |instruction_builder| -> Result<_, CompileError> {
-            Ok(instruction_builder.return_(calls::compile(
+            Ok(instruction_builder.return_(call::compile(
                 &instruction_builder,
                 global_variable,
                 &arguments

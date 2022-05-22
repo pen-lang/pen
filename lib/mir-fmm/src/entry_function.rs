@@ -1,6 +1,6 @@
 use super::error::CompileError;
 use crate::{
-    closures, context::Context, expressions, pointers, reference_count, types,
+    closure, context::Context, expression, pointers, reference_count, types,
     yield_::YIELD_FUNCTION_TYPE,
 };
 use fnv::FnvHashMap;
@@ -67,7 +67,7 @@ fn compile_body(
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     let environment_pointer = compile_environment_pointer(definition, context.types())?;
 
-    expressions::compile(
+    expression::compile(
         context,
         instruction_builder,
         definition.body(),
@@ -185,7 +185,7 @@ fn compile_initial_thunk_entry(
                     );
 
                     instruction_builder.store(
-                        closures::compile_normal_thunk_drop_function(context, definition)?,
+                        closure::compile_normal_thunk_drop_function(context, definition)?,
                         compile_drop_function_pointer(definition, context.types())?,
                     );
 
@@ -313,14 +313,14 @@ fn compile_entry_function_pointer(
     definition: &mir::ir::FunctionDefinition,
     types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    closures::compile_entry_function_pointer(compile_closure_pointer(definition.type_(), types)?)
+    closure::compile_entry_function_pointer(compile_closure_pointer(definition.type_(), types)?)
 }
 
 fn compile_drop_function_pointer(
     definition: &mir::ir::FunctionDefinition,
     types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    closures::compile_drop_function_pointer(compile_closure_pointer(definition.type_(), types)?)
+    closure::compile_drop_function_pointer(compile_closure_pointer(definition.type_(), types)?)
 }
 
 fn compile_arguments(
@@ -369,7 +369,7 @@ fn compile_payload_pointer(
     definition: &mir::ir::FunctionDefinition,
     types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    closures::compile_payload_pointer(fmm::build::bit_cast(
+    closure::compile_payload_pointer(fmm::build::bit_cast(
         fmm::types::Pointer::new(types::compile_sized_closure(definition, types)),
         compile_untyped_closure_pointer(),
     ))

@@ -14,11 +14,11 @@ pub fn compile_variant_clone_function(
             types::compile_variant_payload(),
         )],
         |builder| -> Result<_, CompileError> {
-            Ok(builder.return_(crate::variants::compile_boxed_payload(
+            Ok(builder.return_(crate::variant::compile_boxed_payload(
                 &builder,
                 &expressions::clone_expression(
                     &builder,
-                    &crate::variants::compile_unboxed_payload(
+                    &crate::variant::compile_unboxed_payload(
                         &builder,
                         &fmm::build::variable(ARGUMENT_NAME, types::compile_variant_payload()),
                         type_,
@@ -50,7 +50,7 @@ pub fn compile_variant_drop_function(
 
             expressions::drop_expression(
                 &builder,
-                &crate::variants::compile_unboxed_payload(
+                &crate::variant::compile_unboxed_payload(
                     &builder,
                     &payload,
                     type_,

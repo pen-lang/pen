@@ -1,5 +1,5 @@
 use super::error::CompileError;
-use crate::{closures, context::Context, entry_functions, types};
+use crate::{closure, context::Context, entry_function, types};
 use fnv::FnvHashMap;
 
 pub fn compile_function_definition(
@@ -9,9 +9,9 @@ pub fn compile_function_definition(
 ) -> Result<(), CompileError> {
     context.module_builder().define_variable(
         definition.name(),
-        closures::compile_closure_content(
-            entry_functions::compile(context, definition, true, global_variables)?,
-            closures::compile_drop_function(context, definition)?,
+        closure::compile_closure_content(
+            entry_function::compile(context, definition, true, global_variables)?,
+            closure::compile_drop_function(context, definition)?,
             fmm::ir::Undefined::new(types::compile_closure_payload(definition, context.types())),
         ),
         definition.is_thunk(),

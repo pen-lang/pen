@@ -1,7 +1,6 @@
 ---
-source: lib/mir-fmm/src/entry_functions.rs
-expression: "fmm::analysis::format_module(&module_builder.as_module())"
-
+source: lib/mir-fmm/src/entry_function.rs
+expression: "fmm::analysis::format_module(&context.module_builder().as_module())"
 ---
 (module
   (function _fmm_2 _closure

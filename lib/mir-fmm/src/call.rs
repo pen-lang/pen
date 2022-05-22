@@ -1,11 +1,11 @@
-use crate::{closures, types, CompileError};
+use crate::{closure, types, CompileError};
 
 pub fn compile(
     instruction_builder: &fmm::build::InstructionBuilder,
     closure_pointer: &fmm::build::TypedExpression,
     arguments: &[fmm::build::TypedExpression],
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    let entry_function_pointer = closures::compile_entry_function_pointer(closure_pointer.clone())?;
+    let entry_function_pointer = closure::compile_entry_function_pointer(closure_pointer.clone())?;
 
     Ok(instruction_builder.call(
         if arguments.is_empty() {

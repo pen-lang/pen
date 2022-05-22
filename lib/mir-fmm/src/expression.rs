@@ -1,7 +1,7 @@
 use super::error::CompileError;
 use crate::{
-    calls, closures, context::Context, entry_functions, pointers, records, reference_count, types,
-    variants,
+    call, closure, context::Context, entry_function, pointers, records, reference_count, types,
+    variant,
 };
 use fnv::FnvHashMap;
 
@@ -83,7 +83,7 @@ pub fn compile(
 
             compile(drop.expression(), variables)?
         }
-        mir::ir::Expression::Call(call) => calls::compile(
+        mir::ir::Expression::Call(call) => call::compile(
             instruction_builder,
             &compile(call.function(), variables)?,
             &call
@@ -311,8 +311,8 @@ pub fn compile(
         }
         mir::ir::Expression::Variable(variable) => variables[variable.name()].clone(),
         mir::ir::Expression::Variant(variant) => fmm::build::record(vec![
-            variants::compile_tag(variant.type_()),
-            variants::compile_boxed_payload(
+            variant::compile_tag(variant.type_()),
+            variant::compile_boxed_payload(
                 instruction_builder,
                 &compile(variant.payload(), variables)?,
             )?,
@@ -394,7 +394,7 @@ fn compile_alternatives(
                         .into_iter()
                         .chain([(
                             alternative.name().into(),
-                            variants::compile_unboxed_payload(
+                            variant::compile_unboxed_payload(
                                 &instruction_builder,
                                 &instruction_builder.deconstruct_record(argument.clone(), 1)?,
                                 alternative.type_(),
@@ -431,7 +431,7 @@ fn compile_tag_comparison(
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     Ok(pointers::equal(
         instruction_builder.deconstruct_record(argument.clone(), 0)?,
-        variants::compile_tag(type_),
+        variant::compile_tag(type_),
     )?)
 }
 
@@ -469,9 +469,9 @@ fn compile_let_recursive(
     )?;
 
     instruction_builder.store(
-        closures::compile_closure_content(
-            entry_functions::compile(context, let_.definition(), false, variables)?,
-            closures::compile_drop_function(context, let_.definition())?,
+        closure::compile_closure_content(
+            entry_function::compile(context, let_.definition(), false, variables)?,
+            closure::compile_drop_function(context, let_.definition())?,
             {
                 let environment = fmm::build::record(
                     let_.definition()
@@ -655,7 +655,7 @@ fn compile_try_operation(
                     .into_iter()
                     .chain([(
                         operation.name().into(),
-                        variants::compile_unboxed_payload(
+                        variant::compile_unboxed_payload(
                             &instruction_builder,
                             &instruction_builder.deconstruct_record(operand.clone(), 1)?,
                             operation.type_(),
