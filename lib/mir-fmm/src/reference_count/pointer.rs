@@ -32,7 +32,7 @@ pub fn drop(
 
                     drop_content(&builder)?;
 
-                    heap::free_heap(
+                    heap::free(
                         &builder,
                         fmm::build::bit_cast(
                             fmm::types::GENERIC_POINTER_TYPE.clone(),

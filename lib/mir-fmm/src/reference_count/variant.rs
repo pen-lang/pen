@@ -3,7 +3,7 @@ use crate::{context::Context, type_};
 
 const ARGUMENT_NAME: &str = "_payload";
 
-pub fn compile_variant_clone_function(
+pub fn compile_clone_function(
     context: &Context,
     type_: &mir::types::Type,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
@@ -16,7 +16,7 @@ pub fn compile_variant_clone_function(
         |builder| -> Result<_, CompileError> {
             Ok(builder.return_(crate::variant::compile_boxed_payload(
                 &builder,
-                &expression::clone_expression(
+                &expression::clone(
                     &builder,
                     &crate::variant::compile_unboxed_payload(
                         &builder,
@@ -35,7 +35,7 @@ pub fn compile_variant_clone_function(
     )
 }
 
-pub fn compile_variant_drop_function(
+pub fn compile_drop_function(
     context: &Context,
     type_: &mir::types::Type,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
@@ -48,7 +48,7 @@ pub fn compile_variant_drop_function(
         |builder| -> Result<_, CompileError> {
             let payload = fmm::build::variable(ARGUMENT_NAME, type_::compile_variant_payload());
 
-            expression::drop_expression(
+            expression::drop(
                 &builder,
                 &crate::variant::compile_unboxed_payload(
                     &builder,

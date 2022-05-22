@@ -10,8 +10,8 @@ pub fn compile_type_information_global_variable(
     context.module_builder().define_variable(
         type_::compile_type_id(type_),
         fmm::build::record(vec![
-            reference_count::compile_variant_clone_function(context, type_)?,
-            reference_count::compile_variant_drop_function(context, type_)?,
+            reference_count::variant::compile_clone_function(context, type_)?,
+            reference_count::variant::compile_drop_function(context, type_)?,
         ]),
         false,
         fmm::ir::Linkage::Weak,

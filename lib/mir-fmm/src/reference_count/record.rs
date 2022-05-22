@@ -7,7 +7,7 @@ use fnv::FnvHashMap;
 
 const ARGUMENT_NAME: &str = "_record";
 
-pub fn compile_record_clone_function(
+pub fn compile_clone_function(
     context: &Context,
     definition: &mir::ir::TypeDefinition,
 ) -> Result<(), CompileError> {
@@ -34,7 +34,7 @@ pub fn compile_record_clone_function(
                             .iter()
                             .enumerate()
                             .map(|(index, type_)| {
-                                expression::clone_expression(
+                                expression::clone(
                                     &builder,
                                     &crate::record::get_record_field(
                                         &builder,
@@ -61,7 +61,7 @@ pub fn compile_record_clone_function(
     Ok(())
 }
 
-pub fn compile_record_drop_function(
+pub fn compile_drop_function(
     context: &Context,
     definition: &mir::ir::TypeDefinition,
 ) -> Result<(), CompileError> {
@@ -95,7 +95,7 @@ pub fn compile_record_drop_function(
     Ok(())
 }
 
-pub fn compile_record_drop_or_reuse_function(
+pub fn compile_drop_or_reuse_function(
     context: &Context,
     definition: &mir::ir::TypeDefinition,
 ) -> Result<(), CompileError> {
@@ -137,7 +137,7 @@ fn drop_record_fields(
     types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> Result<(), CompileError> {
     for (index, type_) in types[record_type.name()].fields().iter().enumerate() {
-        expression::drop_expression(
+        expression::drop(
             builder,
             &crate::record::get_record_field(builder, record, record_type, index, types)?,
             type_,
