@@ -4,11 +4,11 @@ use super::{
         boolean_operation_transformer, equal_operation_transformer, if_list_transformer,
         not_equal_operation_transformer,
     },
-    type_compiler, CompileError,
+    type_, CompileError,
 };
 use crate::{
     concurrency_configuration::MODULE_LOCAL_SPAWN_FUNCTION_NAME,
-    downcast_compiler,
+    downcast,
     transformation::{if_map_transformer, list_literal_transformer, map_literal_transformer},
 };
 use fnv::FnvHashMap;
@@ -30,7 +30,7 @@ pub fn compile(
     Ok(match expression {
         Expression::Boolean(boolean) => mir::ir::Expression::Boolean(boolean.value()),
         Expression::Call(call) => mir::ir::Call::new(
-            type_compiler::compile(
+            type_::compile(
                 context,
                 call.function_type()
                     .ok_or_else(|| AnalysisError::TypeNotInferred(call.position().clone()))?,
@@ -102,7 +102,7 @@ pub fn compile(
         Expression::Lambda(lambda) => compile_lambda(context, lambda)?,
         Expression::Let(let_) => mir::ir::Let::new(
             let_.name().unwrap_or_default(),
-            type_compiler::compile(
+            type_::compile(
                 context,
                 let_.type_()
                     .ok_or_else(|| AnalysisError::TypeNotInferred(let_.position().clone()))?,
@@ -132,7 +132,7 @@ pub fn compile(
                 context.types(),
                 context.records(),
             )?;
-            let record_type = type_compiler::compile(context, construction.type_())?
+            let record_type = type_::compile(context, construction.type_())?
                 .into_record()
                 .unwrap();
 
@@ -151,7 +151,7 @@ pub fn compile(
             let type_ = deconstruction.type_().unwrap();
 
             mir::ir::RecordField::new(
-                type_compiler::compile(context, type_)?
+                type_::compile(context, type_)?
                     .into_record()
                     .unwrap(),
                 record_field_resolver::resolve(
@@ -168,7 +168,7 @@ pub fn compile(
             .into()
         }
         Expression::RecordUpdate(update) => mir::ir::RecordUpdate::new(
-            type_compiler::compile(context, update.type_())?
+            type_::compile(context, update.type_())?
                 .into_record()
                 .unwrap(),
             compile(update.record())?,
@@ -200,7 +200,7 @@ pub fn compile(
                 mir::ir::FunctionDefinition::thunk(
                     THUNK_NAME,
                     compile(thunk.expression())?,
-                    type_compiler::compile(
+                    type_::compile(
                         context,
                         thunk.type_().ok_or_else(|| {
                             AnalysisError::TypeNotInferred(thunk.position().clone())
@@ -222,11 +222,11 @@ pub fn compile(
                 | Type::Number(_)
                 | Type::Record(_)
                 | Type::String(_) => {
-                    mir::ir::Variant::new(type_compiler::compile(context, &from)?, argument).into()
+                    mir::ir::Variant::new(type_::compile(context, &from)?, argument).into()
                 }
                 Type::Function(function_type) => {
                     let concrete_type =
-                        type_compiler::compile_concrete_function(function_type, context.types())?;
+                        type_::compile_concrete_function(function_type, context.types())?;
 
                     mir::ir::Variant::new(
                         concrete_type.clone(),
@@ -239,7 +239,7 @@ pub fn compile(
                         argument
                     } else {
                         let concrete_type =
-                            type_compiler::compile_concrete_list(list_type, context.types())?;
+                            type_::compile_concrete_list(list_type, context.types())?;
 
                         mir::ir::Variant::new(
                             concrete_type.clone(),
@@ -253,7 +253,7 @@ pub fn compile(
                         argument
                     } else {
                         let concrete_type =
-                            type_compiler::compile_concrete_map(map_type, context.types())?;
+                            type_::compile_concrete_map(map_type, context.types())?;
 
                         mir::ir::Variant::new(
                             concrete_type.clone(),
@@ -285,12 +285,12 @@ fn compile_lambda(
                 .map(|argument| -> Result<_, CompileError> {
                     Ok(mir::ir::Argument::new(
                         argument.name(),
-                        type_compiler::compile(context, argument.type_())?,
+                        type_::compile(context, argument.type_())?,
                     ))
                 })
                 .collect::<Result<_, _>>()?,
             compile(context, lambda.body())?,
-            type_compiler::compile(context, lambda.result_type())?,
+            type_::compile(context, lambda.result_type())?,
         ),
         mir::ir::Variable::new(CLOSURE_NAME),
     )
@@ -309,7 +309,7 @@ fn compile_alternatives(
     union_type_member_calculator::calculate(&type_, context.types())?
         .into_iter()
         .map(|member_type| {
-            let compiled_member_type = type_compiler::compile(context, &member_type)?;
+            let compiled_member_type = type_::compile(context, &member_type)?;
 
             Ok(match &member_type {
                 Type::Function(function_type) => compile_generic_type_alternative(
@@ -317,21 +317,21 @@ fn compile_alternatives(
                     &expression,
                     &type_,
                     &compiled_member_type,
-                    &type_compiler::compile_concrete_function(function_type, context.types())?,
+                    &type_::compile_concrete_function(function_type, context.types())?,
                 ),
                 Type::List(list_type) => compile_generic_type_alternative(
                     name,
                     &expression,
                     &type_,
                     &compiled_member_type,
-                    &type_compiler::compile_concrete_list(list_type, context.types())?,
+                    &type_::compile_concrete_list(list_type, context.types())?,
                 ),
                 Type::Map(map_type) => compile_generic_type_alternative(
                     name,
                     &expression,
                     &type_,
                     &compiled_member_type,
-                    &type_compiler::compile_concrete_map(map_type, context.types())?,
+                    &type_::compile_concrete_map(map_type, context.types())?,
                 ),
                 _ => mir::ir::Alternative::new(compiled_member_type.clone(), name, {
                     if type_.is_union() {
@@ -398,7 +398,7 @@ fn compile_list_comprehension(
         .input_type()
         .ok_or_else(|| AnalysisError::TypeNotInferred(position.clone()))?;
     let output_element_type = comprehension.output_type();
-    let list_type = type_compiler::compile_list(context)?;
+    let list_type = type_::compile_list(context)?;
 
     Ok(mir::ir::Call::new(
         mir::types::Function::new(
@@ -482,8 +482,8 @@ fn compile_map_iteration_comprehension(
 ) -> Result<mir::ir::Expression, CompileError> {
     const CLOSURE_NAME: &str = "$loop";
 
-    let list_type = type_compiler::compile_list(context)?;
-    let map_type = type_compiler::compile_map(context)?;
+    let list_type = type_::compile_list(context)?;
+    let map_type = type_::compile_map(context)?;
     let definition = compile_map_iteration_function_definition(context, comprehension)?;
 
     Ok(mir::ir::Call::new(
@@ -558,7 +558,7 @@ fn compile_map_iteration_function_definition(
     );
     let iterator_variable = Variable::new(ITERATOR_NAME, position.clone());
     let compile_key_value_function_call = |name, type_| {
-        downcast_compiler::compile(
+        downcast::compile(
             context,
             &any_type,
             type_,
@@ -662,7 +662,7 @@ fn compile_map_iteration_function_definition(
             )
             .into(),
         )?,
-        type_compiler::compile_list(context)?,
+        type_::compile_list(context)?,
     ))
 }
 
@@ -740,7 +740,7 @@ fn compile_operation(
             let success_type = operation
                 .type_()
                 .ok_or_else(|| AnalysisError::TypeNotInferred(operation.position().clone()))?;
-            let error_type = type_compiler::compile(
+            let error_type = type_::compile(
                 context,
                 &types::Reference::new(
                     &context.configuration()?.error_type.error_type_name,
@@ -784,9 +784,9 @@ fn compile_spawn_operation(
 
     Ok(mir::ir::Let::new(
         ANY_THUNK_NAME,
-        type_compiler::compile(context, &thunk_type)?,
+        type_::compile(context, &thunk_type)?,
         mir::ir::Call::new(
-            type_compiler::compile_spawn_function(),
+            type_::compile_spawn_function(),
             mir::ir::Variable::new(MODULE_LOCAL_SPAWN_FUNCTION_NAME),
             vec![mir::ir::LetRecursive::new(
                 mir::ir::FunctionDefinition::thunk(
@@ -801,7 +801,7 @@ fn compile_spawn_operation(
                         )
                         .into(),
                     )?,
-                    type_compiler::compile(context, &any_type)?,
+                    type_::compile(context, &any_type)?,
                 ),
                 mir::ir::Variable::new(ANY_THUNK_NAME),
             )
@@ -813,7 +813,7 @@ fn compile_spawn_operation(
                 vec![],
                 compile(
                     context,
-                    &downcast_compiler::compile(
+                    &downcast::compile(
                         context,
                         &any_type,
                         result_type,
@@ -826,7 +826,7 @@ fn compile_spawn_operation(
                         .into(),
                     )?,
                 )?,
-                type_compiler::compile(context, result_type)?,
+                type_::compile(context, result_type)?,
             ),
             mir::ir::Variable::new(THUNK_NAME),
         ),
@@ -849,7 +849,7 @@ fn compile_record_fields(
 
             mir::ir::Let::new(
                 field_name.clone(),
-                type_compiler::compile(
+                type_::compile(
                     context,
                     field_types
                         .iter()
@@ -1072,7 +1072,7 @@ mod tests {
             let function_type =
                 types::Function::new(vec![], types::None::new(Position::fake()), Position::fake());
             let concrete_function_type =
-                type_compiler::compile_concrete_function(&function_type, context.types()).unwrap();
+                type_::compile_concrete_function(&function_type, context.types()).unwrap();
 
             assert_eq!(
                 compile(
@@ -1096,7 +1096,7 @@ mod tests {
                         "y",
                         mir::ir::Let::new(
                             "y",
-                            type_compiler::compile_function(&function_type, &context).unwrap(),
+                            type_::compile_function(&function_type, &context).unwrap(),
                             mir::ir::RecordField::new(
                                 concrete_function_type,
                                 0,
@@ -1116,7 +1116,7 @@ mod tests {
             let context = CompileContext::dummy(Default::default(), Default::default());
             let list_type = types::List::new(types::None::new(Position::fake()), Position::fake());
             let concrete_list_type =
-                type_compiler::compile_concrete_list(&list_type, context.types()).unwrap();
+                type_::compile_concrete_list(&list_type, context.types()).unwrap();
 
             assert_eq!(
                 compile(
@@ -1162,7 +1162,7 @@ mod tests {
             let context = CompileContext::dummy(Default::default(), Default::default());
             let list_type = types::List::new(types::None::new(Position::fake()), Position::fake());
             let concrete_list_type =
-                type_compiler::compile_concrete_list(&list_type, context.types()).unwrap();
+                type_::compile_concrete_list(&list_type, context.types()).unwrap();
 
             assert_eq!(
                 compile(
@@ -1228,7 +1228,7 @@ mod tests {
                 Position::fake(),
             );
             let concrete_map_type =
-                type_compiler::compile_concrete_map(&map_type, context.types()).unwrap();
+                type_::compile_concrete_map(&map_type, context.types()).unwrap();
 
             assert_eq!(
                 compile(
@@ -1278,7 +1278,7 @@ mod tests {
                 Position::fake(),
             );
             let concrete_map_type =
-                type_compiler::compile_concrete_map(&map_type, context.types()).unwrap();
+                type_::compile_concrete_map(&map_type, context.types()).unwrap();
 
             assert_eq!(
                 compile(
@@ -1610,7 +1610,7 @@ mod tests {
                     "$any_thunk",
                     mir::types::Function::new(vec![], mir::types::Type::Variant),
                     mir::ir::Call::new(
-                        type_compiler::compile_spawn_function(),
+                        type_::compile_spawn_function(),
                         mir::ir::Variable::new(MODULE_LOCAL_SPAWN_FUNCTION_NAME),
                         vec![mir::ir::LetRecursive::new(
                             mir::ir::FunctionDefinition::thunk(
@@ -1670,7 +1670,7 @@ mod tests {
                     "$any_thunk",
                     mir::types::Function::new(vec![], mir::types::Type::Variant),
                     mir::ir::Call::new(
-                        type_compiler::compile_spawn_function(),
+                        type_::compile_spawn_function(),
                         mir::ir::Variable::new(MODULE_LOCAL_SPAWN_FUNCTION_NAME),
                         vec![mir::ir::LetRecursive::new(
                             mir::ir::FunctionDefinition::thunk(

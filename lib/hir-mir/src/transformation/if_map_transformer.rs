@@ -1,5 +1,5 @@
 use super::{super::error::CompileError, collection_type_transformer, map_context_transformer};
-use crate::{context::CompileContext, downcast_compiler};
+use crate::{context::CompileContext, downcast};
 use hir::{
     analysis::AnalysisError,
     ir::*,
@@ -56,7 +56,7 @@ pub fn transform(context: &CompileContext, if_: &IfMap) -> Result<Expression, Co
             Let::new(
                 Some(if_.name().into()),
                 Some(value_type.clone()),
-                downcast_compiler::compile(
+                downcast::compile(
                     context,
                     &any_type,
                     value_type,

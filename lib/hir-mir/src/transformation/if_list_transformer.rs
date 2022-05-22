@@ -1,5 +1,5 @@
 use super::{super::error::CompileError, collection_type_transformer};
-use crate::{context::CompileContext, downcast_compiler};
+use crate::{context::CompileContext, downcast};
 use hir::{
     analysis::{type_equality_checker, AnalysisError},
     ir::*,
@@ -70,7 +70,7 @@ pub fn transform(context: &CompileContext, if_: &IfList) -> Result<Expression, C
                                 Lambda::new(
                                     vec![],
                                     element_type.clone(),
-                                    downcast_compiler::compile(
+                                    downcast::compile(
                                         context,
                                         &any_type,
                                         element_type,

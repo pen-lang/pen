@@ -1,6 +1,5 @@
 use crate::{
-    concurrency_configuration::MODULE_LOCAL_SPAWN_FUNCTION_NAME, type_compiler,
-    ConcurrencyConfiguration,
+    concurrency_configuration::MODULE_LOCAL_SPAWN_FUNCTION_NAME, type_, ConcurrencyConfiguration,
 };
 
 pub fn compile(
@@ -9,7 +8,7 @@ pub fn compile(
     mir::ir::ForeignDeclaration::new(
         MODULE_LOCAL_SPAWN_FUNCTION_NAME,
         &concurrency_configuration.spawn_function_name,
-        type_compiler::compile_spawn_function(),
+        type_::compile_spawn_function(),
         mir::ir::CallingConvention::Target,
     )
 }

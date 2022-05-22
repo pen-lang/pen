@@ -1,8 +1,7 @@
 use super::{
-    context::CompileContext, expression_compiler, generic_type_definition_compiler, type_compiler,
-    CompileError,
+    context::CompileContext, expression, generic_type_definition, type_, CompileError,
 };
-use crate::spawn_function_declaration_compiler;
+use crate::spawn_function_declaration;
 use hir::{analysis::AnalysisError, ir::*};
 
 pub fn compile(context: &CompileContext, module: &Module) -> Result<mir::ir::Module, CompileError> {
@@ -13,7 +12,7 @@ pub fn compile(context: &CompileContext, module: &Module) -> Result<mir::ir::Mod
             .map(|type_definition| compile_type_definition(type_definition, context))
             .collect::<Result<Vec<_>, _>>()?
             .into_iter()
-            .chain(generic_type_definition_compiler::compile(module, context)?)
+            .chain(generic_type_definition::compile(module, context)?)
             .collect(),
         module
             .foreign_declarations()
@@ -22,7 +21,7 @@ pub fn compile(context: &CompileContext, module: &Module) -> Result<mir::ir::Mod
                 Ok(mir::ir::ForeignDeclaration::new(
                     declaration.name(),
                     declaration.foreign_name(),
-                    type_compiler::compile(context, declaration.type_())?
+                    type_::compile(context, declaration.type_())?
                         .into_function()
                         .ok_or_else(|| {
                             AnalysisError::FunctionExpected(declaration.position().clone())
@@ -31,7 +30,7 @@ pub fn compile(context: &CompileContext, module: &Module) -> Result<mir::ir::Mod
                 ))
             })
             .chain(context.configuration().ok().map(|configuration| {
-                Ok(spawn_function_declaration_compiler::compile(
+                Ok(spawn_function_declaration::compile(
                     &configuration.concurrency,
                 ))
             }))
@@ -81,7 +80,7 @@ fn compile_type_definition(
             type_definition
                 .fields()
                 .iter()
-                .map(|field| type_compiler::compile(context, field.type_()))
+                .map(|field| type_::compile(context, field.type_()))
                 .collect::<Result<_, _>>()?,
         ),
     ))
@@ -93,7 +92,7 @@ fn compile_function_declaration(
 ) -> Result<mir::ir::FunctionDeclaration, CompileError> {
     Ok(mir::ir::FunctionDeclaration::new(
         declaration.name(),
-        type_compiler::compile_function(declaration.type_(), context)?,
+        type_::compile_function(declaration.type_(), context)?,
     ))
 }
 
@@ -101,8 +100,8 @@ fn compile_function_definition(
     definition: &FunctionDefinition,
     context: &CompileContext,
 ) -> Result<mir::ir::FunctionDefinition, CompileError> {
-    let body = expression_compiler::compile(context, definition.lambda().body())?;
-    let result_type = type_compiler::compile(context, definition.lambda().result_type())?;
+    let body = expression::compile(context, definition.lambda().body())?;
+    let result_type = type_::compile(context, definition.lambda().result_type())?;
 
     Ok(if definition.lambda().arguments().is_empty() {
         mir::ir::FunctionDefinition::thunk(definition.name(), body, result_type)
@@ -116,7 +115,7 @@ fn compile_function_definition(
                 .map(|argument| -> Result<_, CompileError> {
                     Ok(mir::ir::Argument::new(
                         argument.name(),
-                        type_compiler::compile(context, argument.type_())?,
+                        type_::compile(context, argument.type_())?,
                     ))
                 })
                 .collect::<Result<_, _>>()?,
@@ -164,7 +163,7 @@ mod tests {
             ),
             Ok(mir::ir::Module::new(
                 vec![],
-                vec![spawn_function_declaration_compiler::compile(
+                vec![spawn_function_declaration::compile(
                     &CONCURRENCY_CONFIGURATION
                 )],
                 vec![mir::ir::ForeignDefinition::new(
@@ -203,7 +202,7 @@ mod tests {
             ),
             Ok(mir::ir::Module::new(
                 vec![],
-                vec![spawn_function_declaration_compiler::compile(
+                vec![spawn_function_declaration::compile(
                     &CONCURRENCY_CONFIGURATION
                 )],
                 vec![mir::ir::ForeignDefinition::new(
