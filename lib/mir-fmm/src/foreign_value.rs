@@ -11,20 +11,19 @@ pub fn convert_to_foreign(
 
     Ok(match type_ {
         mir::types::Type::Record(record_type) => {
-            if type_::is_record_boxed(record_type, types) {
+            if type_::is_record_boxed(record_type, types)
+                == type_::is_foreign_record_boxed(record_type, types)
+            {
                 value.clone()
+            } else if !type_::is_record_boxed(record_type, types)
+                && type_::is_foreign_record_boxed(record_type, types)
+            {
+                box_(builder, value)
             } else {
-                todo!()
+                return Err(CompileError::UnboxedForeignRecord);
             }
         }
-        mir::types::Type::Variant => {
-            let unboxed = fmm::build::record(vec![value]);
-            let pointer = builder.allocate_heap(fmm::build::size_of(unboxed.type_().clone()));
-
-            builder.store(unboxed, pointer.clone());
-
-            pointer
-        }
+        mir::types::Type::Variant => box_(builder, value),
         mir::types::Type::Boolean
         | mir::types::Type::ByteString
         | mir::types::Type::Function(_)
@@ -43,23 +42,45 @@ pub fn convert_from_foreign(
 
     Ok(match type_ {
         mir::types::Type::Record(record_type) => {
-            if type_::is_record_boxed(record_type, types) {
-                todo!()
+            if type_::is_record_boxed(record_type, types)
+                == type_::is_foreign_record_boxed(record_type, types)
+            {
+                value.clone()
+            } else if !type_::is_record_boxed(record_type, types)
+                && type_::is_foreign_record_boxed(record_type, types)
+            {
+                unbox(builder, value)?
             } else {
-                todo!()
+                return Err(CompileError::UnboxedForeignRecord);
             }
         }
-        mir::types::Type::Variant => {
-            let unboxed = builder.load(value.clone())?;
-
-            builder.free_heap(value);
-
-            unboxed
-        }
+        mir::types::Type::Variant => unbox(builder, value)?,
         mir::types::Type::Boolean
         | mir::types::Type::ByteString
         | mir::types::Type::Function(_)
         | mir::types::Type::None
         | mir::types::Type::Number => value.clone(),
     })
+}
+
+fn box_(
+    builder: &fmm::build::InstructionBuilder,
+    unboxed: fmm::build::TypedExpression,
+) -> fmm::build::TypedExpression {
+    let pointer = builder.allocate_heap(fmm::build::size_of(unboxed.type_().clone()));
+
+    builder.store(unboxed, pointer.clone());
+
+    pointer
+}
+
+fn unbox(
+    builder: &fmm::build::InstructionBuilder,
+    pointer: fmm::build::TypedExpression,
+) -> Result<fmm::build::TypedExpression, CompileError> {
+    let unboxed = builder.load(pointer.clone())?;
+
+    builder.free_heap(pointer);
+
+    Ok(unboxed)
 }

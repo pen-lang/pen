@@ -78,10 +78,14 @@ pub fn compile_record(
     }
 }
 
-// We can potentially optimize record type representation by unboxing small
-// records. But we don't currently because that requires implementation of the
-// same unboxing logic in FFI.
 pub fn is_record_boxed(
+    record: &mir::types::Record,
+    types: &FnvHashMap<String, mir::types::RecordBody>,
+) -> bool {
+    !types[record.name()].fields().is_empty()
+}
+
+pub fn is_foreign_record_boxed(
     record: &mir::types::Record,
     types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> bool {

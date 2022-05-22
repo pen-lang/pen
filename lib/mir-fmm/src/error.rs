@@ -10,6 +10,7 @@ pub enum CompileError {
     NestedVariant,
     ReferenceCount(mir::analysis::ReferenceCountError),
     TypeCheck(mir::analysis::TypeCheckError),
+    UnboxedForeignRecord,
 }
 
 impl Display for CompileError {
