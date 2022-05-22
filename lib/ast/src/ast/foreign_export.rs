@@ -1,6 +1,6 @@
 use crate::CallingConvention;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct ForeignExport {
     calling_convention: CallingConvention,
 }

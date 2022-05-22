@@ -1,6 +1,6 @@
 use super::calling_convention::CallingConvention;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct ForeignDefinitionConfiguration {
     calling_convention: CallingConvention,
 }

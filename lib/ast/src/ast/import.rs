@@ -1,7 +1,7 @@
 use super::module_path::ModulePath;
 use position::Position;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Import {
     module_path: ModulePath,
     prefix: Option<String>,

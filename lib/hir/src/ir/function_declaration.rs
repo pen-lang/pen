@@ -2,7 +2,7 @@ use crate::types;
 use position::Position;
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+#[derive(Clone, Debug, Deserialize, PartialEq, Eq, Serialize)]
 pub struct FunctionDeclaration {
     name: String,
     type_: types::Function,

@@ -441,6 +441,24 @@ fn convert_expression(
                 moved_variables,
             )
         }
+        Expression::RecordUpdate(update) => {
+            let (record, mut moved_variables) =
+                convert_expression(update.record(), owned_variables, moved_variables)?;
+            let mut fields = vec![];
+
+            for field in update.fields() {
+                let (expression, variables) =
+                    convert_expression(field.expression(), owned_variables, &moved_variables)?;
+
+                fields.push(RecordUpdateField::new(field.index(), expression));
+                moved_variables = variables;
+            }
+
+            (
+                RecordUpdate::new(update.type_().clone(), record, fields).into(),
+                moved_variables,
+            )
+        }
         Expression::TryOperation(operation) => {
             let (then, then_moved_variables) =
                 convert_expression(operation.then(), owned_variables, &Default::default())?;
@@ -1420,6 +1438,7 @@ mod tests {
 
     mod if_ {
         use super::*;
+        use pretty_assertions::assert_eq;
 
         #[test]
         fn convert_if() {

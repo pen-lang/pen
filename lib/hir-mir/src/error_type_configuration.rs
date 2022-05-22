@@ -8,7 +8,7 @@ pub static ERROR_TYPE_CONFIGURATION: Lazy<ErrorTypeConfiguration> =
         source_function_name: "source".into(),
     });
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct ErrorTypeConfiguration {
     pub error_type_name: String,
     pub source_function_name: String,

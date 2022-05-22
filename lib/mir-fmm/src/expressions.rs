@@ -11,9 +11,8 @@ pub fn compile(
     expression: &mir::ir::Expression,
     variables: &FnvHashMap<String, fmm::build::TypedExpression>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    let compile = |expression, variables: &FnvHashMap<_, _>| {
-        compile(context, instruction_builder, expression, variables)
-    };
+    let compile =
+        |expression, variables: &_| compile(context, instruction_builder, expression, variables);
 
     Ok(match expression {
         mir::ir::Expression::ArithmeticOperation(operation) => {
@@ -91,7 +90,7 @@ pub fn compile(
                 .arguments()
                 .iter()
                 .map(|argument| compile(argument, variables))
-                .collect::<Result<Vec<_>, CompileError>>()?,
+                .collect::<Result<Vec<_>, _>>()?,
         )?,
         mir::ir::Expression::If(if_) => compile_if(context, instruction_builder, if_, variables)?,
         mir::ir::Expression::Let(let_) => {
@@ -132,6 +131,87 @@ pub fn compile(
             )?;
 
             field
+        }
+        mir::ir::Expression::RecordUpdate(update) => {
+            let record = compile(update.record(), variables)?;
+            let record_body_type = &context.types()[update.type_().name()];
+            let fields = update
+                .fields()
+                .iter()
+                .map(|field| Ok((field.index(), compile(field.expression(), variables)?)))
+                .collect::<Result<FnvHashMap<_, _>, CompileError>>()?;
+
+            let compile_unboxed = |builder: &_, clone: bool| -> Result<_, CompileError> {
+                Ok(fmm::build::record(
+                    record_body_type
+                        .fields()
+                        .iter()
+                        .enumerate()
+                        .map(|(index, field_type)| -> Result<_, CompileError> {
+                            let field = records::get_record_field(
+                                builder,
+                                &record,
+                                update.type_(),
+                                index,
+                                context.types(),
+                            )?;
+
+                            Ok(if let Some(expression) = fields.get(&index) {
+                                if !clone {
+                                    reference_count::drop_expression(
+                                        builder,
+                                        &field,
+                                        field_type,
+                                        context.types(),
+                                    )?;
+                                }
+
+                                expression.clone()
+                            } else if clone {
+                                reference_count::clone_expression(
+                                    builder,
+                                    &field,
+                                    field_type,
+                                    context.types(),
+                                )?
+                            } else {
+                                field
+                            })
+                        })
+                        .collect::<Result<_, _>>()?,
+                ))
+            };
+
+            if types::is_record_boxed(update.type_(), context.types()) {
+                instruction_builder.if_(
+                    reference_count::is_pointer_owned(instruction_builder, &record)?,
+                    |builder| -> Result<_, CompileError> {
+                        Ok(builder.branch(compile_boxed_record(
+                            &builder,
+                            record.clone(),
+                            compile_unboxed(&builder, false)?,
+                        )?))
+                    },
+                    |builder| {
+                        let updated_record = compile_boxed_record(
+                            &builder,
+                            allocate_record_heap(context, &builder, update.type_())?,
+                            compile_unboxed(&builder, true)?,
+                        )?;
+
+                        reference_count::drop_expression(
+                            &builder,
+                            &record,
+                            &update.type_().clone().into(),
+                            context.types(),
+                        )?;
+
+                        Ok(builder.branch(updated_record))
+                    },
+                )?
+            } else {
+                compile_unboxed(instruction_builder, false)?.into()
+            }
         }
         mir::ir::Expression::RetainHeap(retain) => {
             let mut reused_variables = FnvHashMap::default();
@@ -175,26 +255,26 @@ pub fn compile(
             let pointer_type = fmm::types::GENERIC_POINTER_TYPE.clone();
             let pointer = variables[reuse.id()].clone();
 
-            instruction_builder.if_(
-                pointers::equal(pointer.clone(), fmm::ir::Undefined::new(pointer_type))?,
-                |builder| -> Result<_, CompileError> {
-                    Ok(builder.branch(compile_record(
-                        context,
-                        &builder,
-                        reuse.record(),
-                        variables,
-                    )?))
-                },
-                |builder| {
-                    Ok(builder.branch(compile_boxed_record_with_pointer(
-                        context,
-                        &builder,
-                        pointer.clone(),
-                        reuse.record(),
-                        variables,
-                    )?))
-                },
-            )?
+            let compile_record =
+                |builder: &_| compile_record(context, builder, reuse.record(), variables);
+
+            if types::is_record_boxed(reuse.record().type_(), context.types()) {
+                instruction_builder.if_(
+                    pointers::equal(pointer.clone(), fmm::ir::Undefined::new(pointer_type))?,
+                    |builder| -> Result<_, CompileError> {
+                        Ok(builder.branch(compile_record(&builder)?))
+                    },
+                    |builder| {
+                        Ok(builder.branch(compile_boxed_record(
+                            &builder,
+                            pointer.clone(),
+                            compile_unboxed_record(context, &builder, reuse.record(), variables)?,
+                        )?))
+                    },
+                )?
+            } else {
+                compile_record(instruction_builder)?
+            }
         }
         mir::ir::Expression::ByteString(string) => {
             if string.value().is_empty() {
@@ -500,43 +580,44 @@ fn compile_record(
     variables: &FnvHashMap<String, fmm::build::TypedExpression>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     Ok(if types::is_record_boxed(record.type_(), context.types()) {
-        compile_boxed_record_with_pointer(
-            context,
+        compile_boxed_record(
             builder,
-            reference_count::allocate_heap(
-                builder,
-                types::compile_unboxed_record(record.type_(), context.types()),
-            )?,
-            record,
-            variables,
+            allocate_record_heap(context, builder, record.type_())?,
+            compile_unboxed_record(context, builder, record, variables)?,
         )?
     } else {
         compile_unboxed_record(context, builder, record, variables)?.into()
     })
 }
 
-fn compile_boxed_record_with_pointer(
+fn allocate_record_heap(
     context: &Context,
     builder: &fmm::build::InstructionBuilder,
-    pointer: fmm::build::TypedExpression,
-    record: &mir::ir::Record,
-    variables: &FnvHashMap<String, fmm::build::TypedExpression>,
+    record_type: &mir::types::Record,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    let unboxed = compile_unboxed_record(context, builder, record, variables)?;
+    reference_count::allocate_heap(
+        builder,
+        types::compile_unboxed_record(record_type, context.types()),
+    )
+}
+
+fn compile_boxed_record(
+    builder: &fmm::build::InstructionBuilder,
+    pointer: impl Into<fmm::build::TypedExpression>,
+    unboxed_record: impl Into<fmm::build::TypedExpression>,
+) -> Result<fmm::build::TypedExpression, CompileError> {
+    let unboxed_record = unboxed_record.into();
+    let pointer = pointer.into();
 
     builder.store(
-        unboxed.clone(),
+        unboxed_record.clone(),
         fmm::build::bit_cast(
-            fmm::types::Pointer::new(unboxed.type_().clone()),
+            fmm::types::Pointer::new(unboxed_record.type_().clone()),
             pointer.clone(),
         ),
     );
 
-    Ok(fmm::build::bit_cast(
-        types::compile_record(record.type_(), context.types()),
-        pointer,
-    )
-    .into())
+    Ok(fmm::build::bit_cast(types::compile_boxed_record(), pointer).into())
 }
 
 fn compile_unboxed_record(

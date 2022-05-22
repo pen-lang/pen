@@ -5,18 +5,18 @@ pub struct Section {
     pub children: Vec<Section>,
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Paragraph {
     Text(Text),
     Code { language: String, code: String },
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Text {
     pub spans: Vec<Span>,
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Span {
     Normal(String),
     Code(String),
