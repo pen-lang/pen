@@ -1,4 +1,4 @@
-use crate::{number_compiler, string_compiler};
+use crate::{number, string};
 
 use super::error::CompileError;
 use hir::{ir, types};
@@ -329,7 +329,7 @@ fn compile_expression(expression: &ast::Expression) -> Result<ir::Expression, Co
         }
         ast::Expression::None(none) => ir::None::new(none.position().clone()).into(),
         ast::Expression::Number(number) => {
-            ir::Number::new(number_compiler::compile(number)?, number.position().clone()).into()
+            ir::Number::new(number::compile(number)?, number.position().clone()).into()
         }
         ast::Expression::Record(record) => {
             let type_ = types::Reference::new(record.type_name(), record.position().clone());
@@ -357,11 +357,9 @@ fn compile_expression(expression: &ast::Expression) -> Result<ir::Expression, Co
                 ir::RecordConstruction::new(type_, fields, record.position().clone()).into()
             }
         }
-        ast::Expression::String(string) => ir::ByteString::new(
-            string_compiler::compile(string.value()),
-            string.position().clone(),
-        )
-        .into(),
+        ast::Expression::String(string) => {
+            ir::ByteString::new(string::compile(string.value()), string.position().clone()).into()
+        }
         ast::Expression::UnaryOperation(operation) => {
             let operand = compile_expression(operation.expression())?;
 

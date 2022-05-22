@@ -1,4 +1,4 @@
-use super::name_qualifier;
+use super::name;
 use crate::imported_module::ImportedModule;
 use fnv::FnvHashMap;
 use hir::{
@@ -111,10 +111,7 @@ fn rename_variables(
                             {
                                 declaration.original_name().into()
                             } else {
-                                name_qualifier::qualify(
-                                    module.prefix(),
-                                    declaration.original_name(),
-                                )
+                                name::qualify(module.prefix(), declaration.original_name())
                             },
                             declaration.name().into(),
                         )
@@ -160,7 +157,7 @@ fn rename_types(
                         if module.unqualified_names().contains(original_name) {
                             original_name.into()
                         } else {
-                            name_qualifier::qualify(module.prefix(), original_name)
+                            name::qualify(module.prefix(), original_name)
                         },
                         name.into(),
                     )

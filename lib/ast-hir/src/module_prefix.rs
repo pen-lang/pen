@@ -1,4 +1,4 @@
-pub fn calculate(import: &ast::Import) -> String {
+pub fn compile(import: &ast::Import) -> String {
     import.prefix().map(String::from).unwrap_or_else(|| {
         match import.module_path() {
             ast::ModulePath::External(path) => path.components().last().unwrap(),
@@ -18,7 +18,7 @@ mod tests {
         let path = ast::InternalModulePath::new(vec!["Foo".into()]);
 
         assert_eq!(
-            calculate(&ast::Import::new(path, None, vec![], Position::fake())),
+            compile(&ast::Import::new(path, None, vec![], Position::fake())),
             "Foo",
         );
     }
@@ -26,7 +26,7 @@ mod tests {
     #[test]
     fn calculate_prefix_for_external_module_import() {
         assert_eq!(
-            calculate(&ast::Import::new(
+            compile(&ast::Import::new(
                 ast::ExternalModulePath::new("Foo", vec!["Bar".into()]),
                 None,
                 vec![],
@@ -39,7 +39,7 @@ mod tests {
     #[test]
     fn calculate_prefix_for_import_with_custom_prefix() {
         assert_eq!(
-            calculate(&ast::Import::new(
+            compile(&ast::Import::new(
                 ast::InternalModulePath::new(vec!["Foo".into()]),
                 Some("Bar".into()),
                 vec![],
