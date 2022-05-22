@@ -3,7 +3,7 @@ use super::super::error::CompileError;
 pub(super) const COUNT_TYPE: fmm::types::Primitive = fmm::types::Primitive::PointerInteger;
 pub(super) const INITIAL_COUNT: usize = 0;
 
-pub fn allocate_heap(
+pub fn allocate(
     builder: &fmm::build::InstructionBuilder,
     type_: impl Into<fmm::types::Type>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
@@ -27,7 +27,7 @@ pub fn allocate_heap(
     Ok(fmm::build::record_address(pointer, 1)?.into())
 }
 
-pub fn free_heap(
+pub fn free(
     builder: &fmm::build::InstructionBuilder,
     pointer: impl Into<fmm::build::TypedExpression>,
 ) -> Result<(), CompileError> {
