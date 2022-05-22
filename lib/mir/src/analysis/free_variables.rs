@@ -43,6 +43,15 @@ fn find_in_expression(expression: &Expression) -> FnvHashSet<String> {
             .collect(),
         Expression::Record(record) => find_in_record(record),
         Expression::RecordField(field) => find_in_expression(field.record()),
+        Expression::RecordUpdate(update) => find_in_expression(update.record())
+            .into_iter()
+            .chain(
+                update
+                    .fields()
+                    .iter()
+                    .flat_map(|field| find_in_expression(field.expression())),
+            )
+            .collect(),
         Expression::ReuseRecord(record) => find_in_record(record.record()),
         Expression::RetainHeap(reuse) => find_in_drop_variables(reuse.drop()),
         Expression::TryOperation(operation) => find_in_expression(operation.operand())

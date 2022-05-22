@@ -195,6 +195,25 @@ fn check_expression(
                 .ok_or_else(|| TypeCheckError::FieldIndexOutOfBounds(field.clone()))?
                 .clone()
         }
+        Expression::RecordUpdate(update) => {
+            let record_type = types
+                .get(update.type_().name())
+                .ok_or_else(|| TypeCheckError::TypeNotFound(update.type_().clone()))?;
+
+            check_equality(
+                &check_expression(update.record(), variables)?,
+                &update.type_().clone().into(),
+            )?;
+
+            for field in update.fields() {
+                check_equality(
+                    &check_expression(field.expression(), variables)?,
+                    &record_type.fields()[field.index()],
+                )?;
+            }
+
+            update.type_().clone().into()
+        }
         Expression::ReuseRecord(record) => {
             check_record(record.record(), variables, result_type, types)?
         }

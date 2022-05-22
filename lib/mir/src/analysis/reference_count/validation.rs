@@ -149,6 +149,13 @@ fn move_expression(
         Expression::RecordField(field) => {
             move_expression(field.record(), variables)?;
         }
+        Expression::RecordUpdate(update) => {
+            move_expression(update.record(), variables)?;
+
+            for field in update.fields() {
+                move_expression(field.expression(), variables)?;
+            }
+        }
         Expression::ReuseRecord(record) => {
             move_record(record.record(), variables)?;
         }
