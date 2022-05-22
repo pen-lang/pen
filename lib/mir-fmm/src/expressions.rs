@@ -141,7 +141,7 @@ pub fn compile(
                 .map(|field| Ok((field.index(), compile(field.expression(), variables)?)))
                 .collect::<Result<FnvHashMap<_, _>, CompileError>>()?;
 
-            let compile_unboxed = |clone: bool| -> Result<_, CompileError> {
+            let compile_unboxed = |builder: &_, clone: bool| -> Result<_, CompileError> {
                 Ok(fmm::build::record(
                     record_body_type
                         .fields()
@@ -149,7 +149,7 @@ pub fn compile(
                         .enumerate()
                         .map(|(index, field_type)| -> Result<_, CompileError> {
                             let field = records::get_record_field(
-                                instruction_builder,
+                                builder,
                                 &record,
                                 update.type_(),
                                 index,
@@ -159,7 +159,7 @@ pub fn compile(
                             Ok(if let Some(expression) = fields.get(&index) {
                                 if !clone {
                                     reference_count::drop_expression(
-                                        instruction_builder,
+                                        builder,
                                         &field,
                                         field_type,
                                         context.types(),
@@ -169,7 +169,7 @@ pub fn compile(
                                 expression.clone()
                             } else if clone {
                                 reference_count::clone_expression(
-                                    instruction_builder,
+                                    builder,
                                     &field,
                                     field_type,
                                     context.types(),
@@ -189,14 +189,14 @@ pub fn compile(
                         Ok(builder.branch(compile_boxed_record(
                             &builder,
                             record.clone(),
-                            compile_unboxed(false)?,
+                            compile_unboxed(&builder, false)?,
                         )?))
                     },
                     |builder| {
                         let updated_record = compile_boxed_record(
                             &builder,
                             allocate_record_heap(context, &builder, update.type_())?,
-                            compile_unboxed(true)?,
+                            compile_unboxed(&builder, true)?,
                         )?;
 
                         reference_count::drop_expression(
@@ -210,7 +210,7 @@ pub fn compile(
                     },
                 )?
             } else {
-                compile_unboxed(false)?.into()
+                compile_unboxed(instruction_builder, false)?.into()
             }
         }
         mir::ir::Expression::RetainHeap(retain) => {
