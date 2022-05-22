@@ -1,4 +1,4 @@
-use crate::{types, CompileError};
+use crate::{type_, CompileError};
 use fnv::FnvHashMap;
 
 pub fn convert_to_foreign(
@@ -11,7 +11,7 @@ pub fn convert_to_foreign(
 
     Ok(match type_ {
         mir::types::Type::Record(record_type) => {
-            if types::is_record_boxed(record_type, types) {
+            if type_::is_record_boxed(record_type, types) {
                 value.clone()
             } else {
                 todo!()
@@ -43,7 +43,7 @@ pub fn convert_from_foreign(
 
     Ok(match type_ {
         mir::types::Type::Record(record_type) => {
-            if types::is_record_boxed(record_type, types) {
+            if type_::is_record_boxed(record_type, types) {
                 todo!()
             } else {
                 todo!()
