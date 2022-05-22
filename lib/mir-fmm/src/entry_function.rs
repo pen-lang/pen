@@ -1,6 +1,6 @@
 use super::error::CompileError;
 use crate::{
-    closure, context::Context, expression, pointers, reference_count, types,
+    closure, context::Context, expression, pointer, reference_count, type_,
     yield_::YIELD_FUNCTION_TYPE,
 };
 use fnv::FnvHashMap;
@@ -37,7 +37,7 @@ fn compile_non_thunk(
                 variables,
             )?))
         },
-        types::compile(definition.result_type(), context.types()),
+        type_::compile(definition.result_type(), context.types()),
         fmm::types::CallingConvention::Source,
     )
 }
@@ -108,7 +108,7 @@ fn compile_body(
                     argument.name().into(),
                     fmm::build::variable(
                         argument.name(),
-                        types::compile(argument.type_(), context.types()),
+                        type_::compile(argument.type_(), context.types()),
                     ),
                 )
             }))
@@ -139,7 +139,7 @@ fn compile_initial_thunk_entry(
                     entry_function_pointer.clone(),
                     fmm::build::variable(
                         &entry_function_name,
-                        types::compile_entry_function(definition.type_(), context.types()),
+                        type_::compile_entry_function(definition.type_(), context.types()),
                     ),
                     lock_entry_function.clone(),
                     fmm::ir::AtomicOrdering::Acquire,
@@ -217,7 +217,7 @@ fn compile_initial_thunk_entry(
 
             Ok(instruction_builder.unreachable())
         },
-        types::compile(definition.result_type(), context.types()),
+        type_::compile(definition.result_type(), context.types()),
         fmm::types::CallingConvention::Source,
         fmm::ir::Linkage::Internal,
     )
@@ -232,7 +232,7 @@ fn compile_normal_thunk_entry(
         |instruction_builder| {
             compile_normal_body(&instruction_builder, definition, context.types())
         },
-        types::compile(definition.result_type(), context.types()),
+        type_::compile(definition.result_type(), context.types()),
         fmm::types::CallingConvention::Source,
     )
 }
@@ -244,7 +244,7 @@ fn compile_locked_thunk_entry(
     let entry_function_name = context.module_builder().generate_name();
     let entry_function = fmm::build::variable(
         &entry_function_name,
-        types::compile_entry_function(definition.type_(), context.types()),
+        type_::compile_entry_function(definition.type_(), context.types()),
     );
     let arguments = compile_arguments(definition, context.types());
 
@@ -253,7 +253,7 @@ fn compile_locked_thunk_entry(
         arguments.clone(),
         |instruction_builder| {
             instruction_builder.if_(
-                pointers::equal(
+                pointer::equal(
                     instruction_builder.atomic_load(
                         compile_entry_function_pointer(definition, context.types())?,
                         fmm::ir::AtomicOrdering::Acquire,
@@ -281,7 +281,7 @@ fn compile_locked_thunk_entry(
 
             Ok(instruction_builder.unreachable())
         },
-        types::compile(definition.result_type(), context.types()),
+        type_::compile(definition.result_type(), context.types()),
         fmm::types::CallingConvention::Source,
         fmm::ir::Linkage::Internal,
     )
@@ -329,11 +329,11 @@ fn compile_arguments(
 ) -> Vec<fmm::ir::Argument> {
     [fmm::ir::Argument::new(
         CLOSURE_NAME,
-        types::compile_untyped_closure_pointer(),
+        type_::compile_untyped_closure_pointer(),
     )]
     .into_iter()
     .chain(definition.arguments().iter().map(|argument| {
-        fmm::ir::Argument::new(argument.name(), types::compile(argument.type_(), types))
+        fmm::ir::Argument::new(argument.name(), type_::compile(argument.type_(), types))
     }))
     .collect()
 }
@@ -370,7 +370,7 @@ fn compile_payload_pointer(
     types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     closure::compile_payload_pointer(fmm::build::bit_cast(
-        fmm::types::Pointer::new(types::compile_sized_closure(definition, types)),
+        fmm::types::Pointer::new(type_::compile_sized_closure(definition, types)),
         compile_untyped_closure_pointer(),
     ))
 }
@@ -380,14 +380,14 @@ fn compile_closure_pointer(
     types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, fmm::build::BuildError> {
     Ok(fmm::build::bit_cast(
-        fmm::types::Pointer::new(types::compile_unsized_closure(function_type, types)),
+        fmm::types::Pointer::new(type_::compile_unsized_closure(function_type, types)),
         compile_untyped_closure_pointer(),
     )
     .into())
 }
 
 fn compile_untyped_closure_pointer() -> fmm::build::TypedExpression {
-    fmm::build::variable(CLOSURE_NAME, types::compile_untyped_closure_pointer())
+    fmm::build::variable(CLOSURE_NAME, type_::compile_untyped_closure_pointer())
 }
 
 #[cfg(test)]
@@ -428,7 +428,7 @@ mod tests {
                 "f".into(),
                 fmm::build::TypedExpression::new(
                     fmm::ir::Variable::new("f"),
-                    fmm::types::Pointer::new(types::compile_unsized_closure(
+                    fmm::types::Pointer::new(type_::compile_unsized_closure(
                         &function_type,
                         &Default::default(),
                     )),

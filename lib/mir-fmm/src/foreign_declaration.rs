@@ -1,7 +1,7 @@
 use crate::{
     closure,
     context::Context,
-    types::{self, FUNCTION_ARGUMENT_OFFSET},
+    type_::{self, FUNCTION_ARGUMENT_OFFSET},
 };
 
 pub fn compile_foreign_declaration(
@@ -12,7 +12,7 @@ pub fn compile_foreign_declaration(
         declaration.name(),
         closure::compile_closure_content(
             compile_entry_function(context, declaration)?,
-            fmm::ir::Undefined::new(types::compile_closure_drop_function()),
+            fmm::ir::Undefined::new(type_::compile_closure_drop_function()),
             fmm::build::record(vec![]),
         ),
         false,
@@ -29,7 +29,7 @@ fn compile_entry_function(
 ) -> Result<fmm::build::TypedExpression, fmm::build::BuildError> {
     let arguments = [fmm::ir::Argument::new(
         "_closure",
-        types::compile_untyped_closure_pointer(),
+        type_::compile_untyped_closure_pointer(),
     )]
     .into_iter()
     .chain(
@@ -41,13 +41,13 @@ fn compile_entry_function(
             .map(|(index, type_)| {
                 fmm::ir::Argument::new(
                     format!("arg_{}", index),
-                    types::compile(type_, context.types()),
+                    type_::compile(type_, context.types()),
                 )
             }),
     )
     .collect::<Vec<_>>();
 
-    let foreign_function_type = types::compile_foreign_function(
+    let foreign_function_type = type_::compile_foreign_function(
         declaration.type_(),
         declaration.calling_convention(),
         context.types(),

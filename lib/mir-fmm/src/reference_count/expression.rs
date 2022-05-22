@@ -1,9 +1,9 @@
 use super::{super::error::CompileError, function, pointer, record_utilities};
 use crate::{
+    type_,
     type_information::{
         TYPE_INFORMATION_CLONE_FUNCTION_FIELD_INDEX, TYPE_INFORMATION_DROP_FUNCTION_FIELD_INDEX,
     },
-    types,
     variant::{VARIANT_PAYLOAD_FIELD_INDEX, VARIANT_TAG_FIELD_INDEX},
 };
 use fnv::FnvHashMap;
@@ -96,7 +96,7 @@ pub fn drop_or_reuse_expression(
 
     Ok(match type_ {
         mir::types::Type::Record(record_type) => {
-            if types::is_record_boxed(record_type, types) {
+            if type_::is_record_boxed(record_type, types) {
                 fmm::build::bit_cast(
                     pointer_type,
                     builder.call(

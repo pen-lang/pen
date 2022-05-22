@@ -1,4 +1,4 @@
-use crate::{closure, types, CompileError};
+use crate::{closure, type_, CompileError};
 
 pub fn compile(
     instruction_builder: &fmm::build::InstructionBuilder,
@@ -17,7 +17,7 @@ pub fn compile(
             instruction_builder.load(entry_function_pointer)?
         },
         [fmm::build::bit_cast(
-            types::compile_untyped_closure_pointer(),
+            type_::compile_untyped_closure_pointer(),
             closure_pointer.clone(),
         )
         .into()]

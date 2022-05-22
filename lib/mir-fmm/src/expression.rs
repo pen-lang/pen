@@ -1,6 +1,6 @@
 use super::error::CompileError;
 use crate::{
-    call, closure, context::Context, entry_function, pointers, records, reference_count, types,
+    call, closure, context::Context, entry_function, pointer, record, reference_count, type_,
     variant,
 };
 use fnv::FnvHashMap;
@@ -54,7 +54,7 @@ pub fn compile(
                 let pointer = variables[id].clone();
 
                 instruction_builder.if_(
-                    pointers::equal(
+                    pointer::equal(
                         pointer.clone(),
                         fmm::ir::Undefined::new(pointer.type_().clone()),
                     )?,
@@ -99,7 +99,7 @@ pub fn compile(
         mir::ir::Expression::LetRecursive(let_) => {
             compile_let_recursive(context, instruction_builder, let_, variables)?
         }
-        mir::ir::Expression::None => fmm::ir::Undefined::new(types::compile_none()).into(),
+        mir::ir::Expression::None => fmm::ir::Undefined::new(type_::compile_none()).into(),
         mir::ir::Expression::Number(number) => fmm::ir::Primitive::Float64(*number).into(),
         mir::ir::Expression::Record(record) => {
             compile_record(context, instruction_builder, record, variables)?
@@ -109,7 +109,7 @@ pub fn compile(
             let field_index = field.index();
 
             let record = compile(field.record(), variables)?;
-            let field = records::get_record_field(
+            let field = record::get_record_field(
                 instruction_builder,
                 &record,
                 field.type_(),
@@ -148,7 +148,7 @@ pub fn compile(
                         .iter()
                         .enumerate()
                         .map(|(index, field_type)| -> Result<_, CompileError> {
-                            let field = records::get_record_field(
+                            let field = record::get_record_field(
                                 builder,
                                 &record,
                                 update.type_(),
@@ -182,7 +182,7 @@ pub fn compile(
                 ))
             };
 
-            if types::is_record_boxed(update.type_(), context.types()) {
+            if type_::is_record_boxed(update.type_(), context.types()) {
                 instruction_builder.if_(
                     reference_count::is_pointer_owned(instruction_builder, &record)?,
                     |builder| -> Result<_, CompileError> {
@@ -258,9 +258,9 @@ pub fn compile(
             let compile_record =
                 |builder: &_| compile_record(context, builder, reuse.record(), variables);
 
-            if types::is_record_boxed(reuse.record().type_(), context.types()) {
+            if type_::is_record_boxed(reuse.record().type_(), context.types()) {
                 instruction_builder.if_(
-                    pointers::equal(pointer.clone(), fmm::ir::Undefined::new(pointer_type))?,
+                    pointer::equal(pointer.clone(), fmm::ir::Undefined::new(pointer_type))?,
                     |builder| -> Result<_, CompileError> {
                         Ok(builder.branch(compile_record(&builder)?))
                     },
@@ -278,11 +278,11 @@ pub fn compile(
         }
         mir::ir::Expression::ByteString(string) => {
             if string.value().is_empty() {
-                fmm::ir::Undefined::new(types::compile_string()).into()
+                fmm::ir::Undefined::new(type_::compile_string()).into()
             } else {
                 reference_count::compile_tagged_pointer(
                     &fmm::build::bit_cast(
-                        types::compile_string(),
+                        type_::compile_string(),
                         context.module_builder().define_anonymous_variable(
                             fmm::build::record(
                                 [
@@ -429,7 +429,7 @@ fn compile_tag_comparison(
     argument: &fmm::build::TypedExpression,
     type_: &mir::types::Type,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    Ok(pointers::equal(
+    Ok(pointer::equal(
         instruction_builder.deconstruct_record(argument.clone(), 0)?,
         variant::compile_tag(type_),
     )?)
@@ -465,7 +465,7 @@ fn compile_let_recursive(
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     let closure_pointer = reference_count::allocate_heap(
         instruction_builder,
-        types::compile_sized_closure(let_.definition(), context.types()),
+        type_::compile_sized_closure(let_.definition(), context.types()),
     )?;
 
     instruction_builder.store(
@@ -483,7 +483,7 @@ fn compile_let_recursive(
 
                 if let_.definition().is_thunk() {
                     fmm::build::TypedExpression::from(fmm::ir::Union::new(
-                        types::compile_thunk_payload(let_.definition(), context.types()),
+                        type_::compile_thunk_payload(let_.definition(), context.types()),
                         0,
                         environment,
                     ))
@@ -505,7 +505,7 @@ fn compile_let_recursive(
             .chain([(
                 let_.definition().name().into(),
                 fmm::build::bit_cast(
-                    fmm::types::Pointer::new(types::compile_unsized_closure(
+                    fmm::types::Pointer::new(type_::compile_unsized_closure(
                         let_.definition().type_(),
                         context.types(),
                     )),
@@ -579,7 +579,7 @@ fn compile_record(
     record: &mir::ir::Record,
     variables: &FnvHashMap<String, fmm::build::TypedExpression>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    Ok(if types::is_record_boxed(record.type_(), context.types()) {
+    Ok(if type_::is_record_boxed(record.type_(), context.types()) {
         compile_boxed_record(
             builder,
             allocate_record_heap(context, builder, record.type_())?,
@@ -597,7 +597,7 @@ fn allocate_record_heap(
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     reference_count::allocate_heap(
         builder,
-        types::compile_unboxed_record(record_type, context.types()),
+        type_::compile_unboxed_record(record_type, context.types()),
     )
 }
 
@@ -617,7 +617,7 @@ fn compile_boxed_record(
         ),
     );
 
-    Ok(fmm::build::bit_cast(types::compile_boxed_record(), pointer).into())
+    Ok(fmm::build::bit_cast(type_::compile_boxed_record(), pointer).into())
 }
 
 fn compile_unboxed_record(

@@ -1,4 +1,4 @@
-use crate::{error::CompileError, types};
+use crate::{error::CompileError, type_};
 use fnv::FnvHashMap;
 
 pub fn get_record_field(
@@ -9,9 +9,9 @@ pub fn get_record_field(
     types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     Ok(builder.deconstruct_record(
-        if types::is_record_boxed(type_, types) {
+        if type_::is_record_boxed(type_, types) {
             builder.load(fmm::build::bit_cast(
-                fmm::types::Pointer::new(types::compile_unboxed_record(type_, types)),
+                fmm::types::Pointer::new(type_::compile_unboxed_record(type_, types)),
                 record.clone(),
             ))?
         } else {

@@ -1,11 +1,11 @@
-use crate::{types, CompileError};
+use crate::{type_, CompileError};
 use fnv::FnvHashMap;
 
 pub const VARIANT_TAG_FIELD_INDEX: usize = 0;
 pub const VARIANT_PAYLOAD_FIELD_INDEX: usize = 1;
 
 pub fn compile_tag(type_: &mir::types::Type) -> fmm::build::TypedExpression {
-    fmm::build::variable(types::compile_type_id(type_), types::compile_variant_tag())
+    fmm::build::variable(type_::compile_type_id(type_), type_::compile_variant_tag())
 }
 
 pub fn compile_boxed_payload(
@@ -14,7 +14,7 @@ pub fn compile_boxed_payload(
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     Ok(compile_union_bit_cast(
         builder,
-        types::compile_variant_payload(),
+        type_::compile_variant_payload(),
         payload.clone(),
     )?)
 }
@@ -27,7 +27,7 @@ pub fn compile_unboxed_payload(
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     Ok(compile_union_bit_cast(
         builder,
-        types::compile(type_, types),
+        type_::compile(type_, types),
         payload.clone(),
     )?)
 }

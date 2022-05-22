@@ -1,4 +1,4 @@
-use super::{reference_count, types, CompileError};
+use super::{reference_count, type_, CompileError};
 use crate::context::Context;
 use once_cell::sync::Lazy;
 
@@ -67,7 +67,7 @@ pub fn compile_drop_function(
         context,
         |builder, environment_pointer| -> Result<_, CompileError> {
             let environment = builder.load(fmm::build::bit_cast(
-                fmm::types::Pointer::new(types::compile_environment(definition, context.types())),
+                fmm::types::Pointer::new(type_::compile_environment(definition, context.types())),
                 environment_pointer.clone(),
             ))?;
 
@@ -96,7 +96,7 @@ pub fn compile_normal_thunk_drop_function(
                 builder,
                 &builder.load(fmm::build::union_address(
                     fmm::build::bit_cast(
-                        fmm::types::Pointer::new(types::compile_closure_payload(
+                        fmm::types::Pointer::new(type_::compile_closure_payload(
                             definition,
                             context.types(),
                         )),
@@ -129,7 +129,7 @@ fn compile_drop_function_with_builder(
             compile_body(
                 &builder,
                 &compile_payload_pointer(fmm::build::bit_cast(
-                    fmm::types::Pointer::new(types::compile_unsized_closure(
+                    fmm::types::Pointer::new(type_::compile_unsized_closure(
                         &DUMMY_FUNCTION_TYPE,
                         context.types(),
                     )),

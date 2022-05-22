@@ -1,4 +1,4 @@
-use crate::{call, context::Context, types, CompileError};
+use crate::{call, context::Context, type_, CompileError};
 
 pub fn compile_foreign_definition(
     context: &Context,
@@ -6,7 +6,7 @@ pub fn compile_foreign_definition(
     function_type: &mir::types::Function,
     global_variable: &fmm::build::TypedExpression,
 ) -> Result<(), CompileError> {
-    let foreign_function_type = types::compile_foreign_function(
+    let foreign_function_type = type_::compile_foreign_function(
         function_type,
         definition.calling_convention(),
         context.types(),

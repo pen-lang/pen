@@ -1,5 +1,5 @@
 use super::{
-    super::{error::CompileError, types},
+    super::{error::CompileError, type_},
     expression, pointer, record_utilities,
 };
 use crate::context::Context;
@@ -12,7 +12,7 @@ pub fn compile_record_clone_function(
     definition: &mir::ir::TypeDefinition,
 ) -> Result<(), CompileError> {
     let record_type = mir::types::Record::new(definition.name());
-    let fmm_record_type = types::compile_record(&record_type, context.types());
+    let fmm_record_type = type_::compile_record(&record_type, context.types());
 
     context.module_builder().define_function(
         record_utilities::get_record_clone_function_name(definition.name()),
@@ -24,7 +24,7 @@ pub fn compile_record_clone_function(
             let record = fmm::build::variable(ARGUMENT_NAME, fmm_record_type.clone());
 
             Ok(
-                builder.return_(if types::is_record_boxed(&record_type, context.types()) {
+                builder.return_(if type_::is_record_boxed(&record_type, context.types()) {
                     pointer::clone_pointer(&builder, &record)?
                 } else {
                     fmm::build::record(
@@ -36,7 +36,7 @@ pub fn compile_record_clone_function(
                             .map(|(index, type_)| {
                                 expression::clone_expression(
                                     &builder,
-                                    &crate::records::get_record_field(
+                                    &crate::record::get_record_field(
                                         &builder,
                                         &record,
                                         &record_type,
@@ -66,7 +66,7 @@ pub fn compile_record_drop_function(
     definition: &mir::ir::TypeDefinition,
 ) -> Result<(), CompileError> {
     let record_type = mir::types::Record::new(definition.name());
-    let fmm_record_type = types::compile_record(&record_type, context.types());
+    let fmm_record_type = type_::compile_record(&record_type, context.types());
 
     context.module_builder().define_function(
         record_utilities::get_record_drop_function_name(definition.name()),
@@ -77,7 +77,7 @@ pub fn compile_record_drop_function(
         |builder| -> Result<_, CompileError> {
             let record = fmm::build::variable(ARGUMENT_NAME, fmm_record_type.clone());
 
-            if types::is_record_boxed(&record_type, context.types()) {
+            if type_::is_record_boxed(&record_type, context.types()) {
                 pointer::drop_pointer(&builder, &record, |builder| {
                     drop_record_fields(builder, &record, &record_type, context.types())
                 })?;
@@ -101,11 +101,11 @@ pub fn compile_record_drop_or_reuse_function(
 ) -> Result<(), CompileError> {
     let record_type = mir::types::Record::new(definition.name());
 
-    if !types::is_record_boxed(&record_type, context.types()) {
+    if !type_::is_record_boxed(&record_type, context.types()) {
         return Ok(());
     }
 
-    let fmm_record_type = types::compile_record(&record_type, context.types());
+    let fmm_record_type = type_::compile_record(&record_type, context.types());
 
     context.module_builder().define_function(
         record_utilities::get_record_drop_or_reuse_function_name(definition.name()),
@@ -139,7 +139,7 @@ fn drop_record_fields(
     for (index, type_) in types[record_type.name()].fields().iter().enumerate() {
         expression::drop_expression(
             builder,
-            &crate::records::get_record_field(builder, record, record_type, index, types)?,
+            &crate::record::get_record_field(builder, record, record_type, index, types)?,
             type_,
             types,
         )?;

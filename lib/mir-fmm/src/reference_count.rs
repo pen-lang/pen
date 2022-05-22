@@ -1,7 +1,7 @@
 mod expression;
 mod function;
 mod heap;
-mod pointer;
+pub mod pointer;
 mod record;
 mod record_utilities;
 mod variant;
