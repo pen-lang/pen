@@ -14,7 +14,7 @@ pub fn convert_to_foreign(
             if type_::is_record_boxed(record_type, types)
                 == type_::is_foreign_record_boxed(record_type, types)
             {
-                value.clone()
+                value
             } else if !type_::is_record_boxed(record_type, types)
                 && type_::is_foreign_record_boxed(record_type, types)
             {
@@ -28,7 +28,7 @@ pub fn convert_to_foreign(
         | mir::types::Type::ByteString
         | mir::types::Type::Function(_)
         | mir::types::Type::None
-        | mir::types::Type::Number => value.clone(),
+        | mir::types::Type::Number => value,
     })
 }
 
@@ -45,7 +45,7 @@ pub fn convert_from_foreign(
             if type_::is_record_boxed(record_type, types)
                 == type_::is_foreign_record_boxed(record_type, types)
             {
-                value.clone()
+                value
             } else if !type_::is_record_boxed(record_type, types)
                 && type_::is_foreign_record_boxed(record_type, types)
             {
@@ -59,7 +59,7 @@ pub fn convert_from_foreign(
         | mir::types::Type::ByteString
         | mir::types::Type::Function(_)
         | mir::types::Type::None
-        | mir::types::Type::Number => value.clone(),
+        | mir::types::Type::Number => value,
     })
 }
 
