@@ -1,0 +1,368 @@
+---
+source: lib/hir-mir/src/transformation/if_list.rs
+assertion_line: 145
+expression: "transform(&CompileContext::dummy(Default::default(), Default::default()),\n          &IfList::new(Some(types::Any::new(Position::fake()).into()),\n                       Variable::new(\"xs\", Position::fake()), \"x\", \"xs\",\n                       None::new(Position::fake()),\n                       None::new(Position::fake()), Position::fake()))"
+---
+Ok(
+    IfType(
+        IfType {
+            name: "$firstRest",
+            argument: Call(
+                Call {
+                    function_type: Some(
+                        Function(
+                            Function {
+                                arguments: [
+                                    Reference(
+                                        Reference {
+                                            name: "GenericList",
+                                            position: Position {
+                                                path: "",
+                                                line_number: 1,
+                                                column_number: 1,
+                                                line: "",
+                                            },
+                                        },
+                                    ),
+                                ],
+                                result: Union(
+                                    Union {
+                                        lhs: Reference(
+                                            Reference {
+                                                name: "FirstRest",
+                                                position: Position {
+                                                    path: "",
+                                                    line_number: 1,
+                                                    column_number: 1,
+                                                    line: "",
+                                                },
+                                            },
+                                        ),
+                                        rhs: None(
+                                            None {
+                                                position: Position {
+                                                    path: "",
+                                                    line_number: 1,
+                                                    column_number: 1,
+                                                    line: "",
+                                                },
+                                            },
+                                        ),
+                                        position: Position {
+                                            path: "",
+                                            line_number: 1,
+                                            column_number: 1,
+                                            line: "",
+                                        },
+                                    },
+                                ),
+                                position: Position {
+                                    path: "",
+                                    line_number: 1,
+                                    column_number: 1,
+                                    line: "",
+                                },
+                            },
+                        ),
+                    ),
+                    function: Variable(
+                        Variable {
+                            name: "deconstruct",
+                            position: Position {
+                                path: "",
+                                line_number: 1,
+                                column_number: 1,
+                                line: "",
+                            },
+                        },
+                    ),
+                    arguments: [
+                        Variable(
+                            Variable {
+                                name: "xs",
+                                position: Position {
+                                    path: "",
+                                    line_number: 1,
+                                    column_number: 1,
+                                    line: "",
+                                },
+                            },
+                        ),
+                    ],
+                    position: Position {
+                        path: "",
+                        line_number: 1,
+                        column_number: 1,
+                        line: "",
+                    },
+                },
+            ),
+            branches: [
+                IfTypeBranch {
+                    type_: Reference(
+                        Reference {
+                            name: "FirstRest",
+                            position: Position {
+                                path: "",
+                                line_number: 1,
+                                column_number: 1,
+                                line: "",
+                            },
+                        },
+                    ),
+                    expression: Let(
+                        Let {
+                            name: Some(
+                                "x",
+                            ),
+                            type_: Some(
+                                Function(
+                                    Function {
+                                        arguments: [],
+                                        result: Any(
+                                            Any {
+                                                position: Position {
+                                                    path: "",
+                                                    line_number: 1,
+                                                    column_number: 1,
+                                                    line: "",
+                                                },
+                                            },
+                                        ),
+                                        position: Position {
+                                            path: "",
+                                            line_number: 1,
+                                            column_number: 1,
+                                            line: "",
+                                        },
+                                    },
+                                ),
+                            ),
+                            bound_expression: Call(
+                                Call {
+                                    function_type: Some(
+                                        Function(
+                                            Function {
+                                                arguments: [
+                                                    Reference(
+                                                        Reference {
+                                                            name: "FirstRest",
+                                                            position: Position {
+                                                                path: "",
+                                                                line_number: 1,
+                                                                column_number: 1,
+                                                                line: "",
+                                                            },
+                                                        },
+                                                    ),
+                                                ],
+                                                result: Function(
+                                                    Function {
+                                                        arguments: [],
+                                                        result: Any(
+                                                            Any {
+                                                                position: Position {
+                                                                    path: "",
+                                                                    line_number: 1,
+                                                                    column_number: 1,
+                                                                    line: "",
+                                                                },
+                                                            },
+                                                        ),
+                                                        position: Position {
+                                                            path: "",
+                                                            line_number: 1,
+                                                            column_number: 1,
+                                                            line: "",
+                                                        },
+                                                    },
+                                                ),
+                                                position: Position {
+                                                    path: "",
+                                                    line_number: 1,
+                                                    column_number: 1,
+                                                    line: "",
+                                                },
+                                            },
+                                        ),
+                                    ),
+                                    function: Variable(
+                                        Variable {
+                                            name: "first",
+                                            position: Position {
+                                                path: "",
+                                                line_number: 1,
+                                                column_number: 1,
+                                                line: "",
+                                            },
+                                        },
+                                    ),
+                                    arguments: [
+                                        Variable(
+                                            Variable {
+                                                name: "$firstRest",
+                                                position: Position {
+                                                    path: "",
+                                                    line_number: 1,
+                                                    column_number: 1,
+                                                    line: "",
+                                                },
+                                            },
+                                        ),
+                                    ],
+                                    position: Position {
+                                        path: "",
+                                        line_number: 1,
+                                        column_number: 1,
+                                        line: "",
+                                    },
+                                },
+                            ),
+                            expression: Let(
+                                Let {
+                                    name: Some(
+                                        "xs",
+                                    ),
+                                    type_: Some(
+                                        Reference(
+                                            Reference {
+                                                name: "GenericList",
+                                                position: Position {
+                                                    path: "",
+                                                    line_number: 1,
+                                                    column_number: 1,
+                                                    line: "",
+                                                },
+                                            },
+                                        ),
+                                    ),
+                                    bound_expression: Call(
+                                        Call {
+                                            function_type: Some(
+                                                Function(
+                                                    Function {
+                                                        arguments: [
+                                                            Reference(
+                                                                Reference {
+                                                                    name: "FirstRest",
+                                                                    position: Position {
+                                                                        path: "",
+                                                                        line_number: 1,
+                                                                        column_number: 1,
+                                                                        line: "",
+                                                                    },
+                                                                },
+                                                            ),
+                                                        ],
+                                                        result: Reference(
+                                                            Reference {
+                                                                name: "GenericList",
+                                                                position: Position {
+                                                                    path: "",
+                                                                    line_number: 1,
+                                                                    column_number: 1,
+                                                                    line: "",
+                                                                },
+                                                            },
+                                                        ),
+                                                        position: Position {
+                                                            path: "",
+                                                            line_number: 1,
+                                                            column_number: 1,
+                                                            line: "",
+                                                        },
+                                                    },
+                                                ),
+                                            ),
+                                            function: Variable(
+                                                Variable {
+                                                    name: "rest",
+                                                    position: Position {
+                                                        path: "",
+                                                        line_number: 1,
+                                                        column_number: 1,
+                                                        line: "",
+                                                    },
+                                                },
+                                            ),
+                                            arguments: [
+                                                Variable(
+                                                    Variable {
+                                                        name: "$firstRest",
+                                                        position: Position {
+                                                            path: "",
+                                                            line_number: 1,
+                                                            column_number: 1,
+                                                            line: "",
+                                                        },
+                                                    },
+                                                ),
+                                            ],
+                                            position: Position {
+                                                path: "",
+                                                line_number: 1,
+                                                column_number: 1,
+                                                line: "",
+                                            },
+                                        },
+                                    ),
+                                    expression: None(
+                                        None {
+                                            position: Position {
+                                                path: "",
+                                                line_number: 1,
+                                                column_number: 1,
+                                                line: "",
+                                            },
+                                        },
+                                    ),
+                                    position: Position {
+                                        path: "",
+                                        line_number: 1,
+                                        column_number: 1,
+                                        line: "",
+                                    },
+                                },
+                            ),
+                            position: Position {
+                                path: "",
+                                line_number: 1,
+                                column_number: 1,
+                                line: "",
+                            },
+                        },
+                    ),
+                },
+                IfTypeBranch {
+                    type_: None(
+                        None {
+                            position: Position {
+                                path: "",
+                                line_number: 1,
+                                column_number: 1,
+                                line: "",
+                            },
+                        },
+                    ),
+                    expression: None(
+                        None {
+                            position: Position {
+                                path: "",
+                                line_number: 1,
+                                column_number: 1,
+                                line: "",
+                            },
+                        },
+                    ),
+                },
+            ],
+            else_: None,
+            position: Position {
+                path: "",
+                line_number: 1,
+                column_number: 1,
+                line: "",
+            },
+        },
+    ),
+)

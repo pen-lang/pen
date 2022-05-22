@@ -1,5 +1,5 @@
 mod error;
-mod names;
+mod name;
 
 use crate::{
     ir::*,
@@ -9,7 +9,7 @@ pub use error::TypeCheckError;
 use fnv::FnvHashMap;
 
 pub fn check_types(module: &Module) -> Result<(), TypeCheckError> {
-    names::check_names(module)?;
+    name::check_names(module)?;
 
     let types = module
         .type_definitions()

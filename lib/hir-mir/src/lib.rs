@@ -1,24 +1,24 @@
 mod compile_configuration;
 mod concurrency_configuration;
 mod context;
-mod downcast_compiler;
+mod downcast;
 mod error;
 mod error_type_configuration;
-mod expression_compiler;
+mod expression;
 mod ffi_variant_type_validator;
-mod generic_type_definition_compiler;
+mod generic_type_definition;
 mod list_type_configuration;
-mod main_function_compiler;
+mod main_function;
 mod main_module_configuration;
 mod map_type_configuration;
-mod module_compiler;
-mod module_interface_compiler;
-mod spawn_function_declaration_compiler;
+mod module;
+mod module_interface;
+mod spawn_function_declaration;
 mod string_type_configuration;
-mod test_function_compiler;
+mod test_function;
 mod test_module_configuration;
 mod transformation;
-mod type_compiler;
+mod type_;
 
 pub use compile_configuration::CompileConfiguration;
 pub use concurrency_configuration::ConcurrencyConfiguration;
@@ -33,14 +33,14 @@ pub use map_type_configuration::{
 };
 pub use string_type_configuration::StringTypeConfiguration;
 pub use test_module_configuration::TestModuleConfiguration;
-use transformation::{record_equal_function_transformer, record_hash_function_transformer};
+use transformation::{record_equal_function, record_hash_function};
 
 pub fn compile_main(
     module: &Module,
     compile_configuration: &CompileConfiguration,
     main_module_configuration: &MainModuleConfiguration,
 ) -> Result<mir::ir::Module, CompileError> {
-    let module = main_function_compiler::compile(module, main_module_configuration)?;
+    let module = main_function::compile(module, main_module_configuration)?;
     let (module, _) = compile_module(
         &CompileContext::new(&module, compile_configuration.clone().into()),
         &module,
@@ -73,7 +73,7 @@ pub fn compile_test(
     let context = CompileContext::new(module, compile_configuration.clone().into());
 
     let (module, test_information) =
-        test_function_compiler::compile(&context, module, test_module_configuration)?;
+        test_function::compile(&context, module, test_module_configuration)?;
     let (module, _) = compile_module(&context, &module)?;
 
     Ok((module, test_information))
@@ -84,17 +84,17 @@ fn compile_module(
     module: &Module,
 ) -> Result<(mir::ir::Module, interface::Module), CompileError> {
     let module = hir::analysis::analyze(context.analysis(), module)?;
-    let module = record_equal_function_transformer::transform(context, &module)?;
-    let module = record_hash_function_transformer::transform(context, &module)?;
+    let module = record_equal_function::transform(context, &module)?;
+    let module = record_hash_function::transform(context, &module)?;
     ffi_variant_type_validator::validate(context, &module)?;
 
     Ok((
         {
-            let module = module_compiler::compile(context, &module)?;
+            let module = module::compile(context, &module)?;
             mir::analysis::check_types(&module)?;
             module
         },
-        module_interface_compiler::compile(&module)?,
+        module_interface::compile(&module)?,
     ))
 }
 
