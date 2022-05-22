@@ -1,12 +1,12 @@
 mod error;
-mod import_compiler;
+mod import;
 mod imported_module;
-mod module_compiler;
-mod module_prefix_collector;
-mod name_qualifier;
-mod number_compiler;
-mod prelude_module_modifier;
-mod string_compiler;
+mod module;
+mod module_prefix;
+mod name;
+mod number;
+mod prelude_module;
+mod string;
 
 use error::CompileError;
 use fnv::FnvHashMap;
@@ -32,13 +32,13 @@ pub fn compile(
                     .get(import.module_path())
                     .ok_or_else(|| CompileError::ModuleNotFound(import.module_path().clone()))?
                     .clone(),
-                module_prefix_collector::calculate(import),
+                module_prefix::compile(import),
                 import.unqualified_names().iter().cloned().collect(),
             ))
         })
         .collect::<Result<Vec<_>, _>>()?;
-    let module = module_compiler::compile(module)?;
-    let module = import_compiler::compile(
+    let module = module::compile(module)?;
+    let module = import::compile(
         &module,
         &imported_modules,
         prelude_module_interfaces,
@@ -52,10 +52,10 @@ pub fn compile(
 }
 
 pub fn compile_prelude(module: &ast::Module, prefix: &str) -> Result<ir::Module, CompileError> {
-    let module = module_compiler::compile(module)?;
+    let module = module::compile(module)?;
     let module = function_definition_qualifier::qualify(&module, prefix);
     let module = type_qualifier::qualify(&module, prefix);
-    let module = prelude_module_modifier::modify(&module);
+    let module = prelude_module::modify(&module);
 
     Ok(module)
 }

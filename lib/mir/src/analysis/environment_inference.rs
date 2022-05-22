@@ -1,4 +1,4 @@
-use super::free_variables::find_free_variables;
+use super::free_variable::find_free_variables;
 use crate::{ir::*, types::Type};
 use fnv::FnvHashMap;
 

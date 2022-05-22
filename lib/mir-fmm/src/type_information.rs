@@ -1,4 +1,4 @@
-use crate::{context::Context, error::CompileError, reference_count, types};
+use crate::{context::Context, error::CompileError, reference_count, type_};
 
 pub const TYPE_INFORMATION_CLONE_FUNCTION_FIELD_INDEX: usize = 0;
 pub const TYPE_INFORMATION_DROP_FUNCTION_FIELD_INDEX: usize = 1;
@@ -8,7 +8,7 @@ pub fn compile_type_information_global_variable(
     type_: &mir::types::Type,
 ) -> Result<(), CompileError> {
     context.module_builder().define_variable(
-        types::compile_type_id(type_),
+        type_::compile_type_id(type_),
         fmm::build::record(vec![
             reference_count::compile_variant_clone_function(context, type_)?,
             reference_count::compile_variant_drop_function(context, type_)?,

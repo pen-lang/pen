@@ -1,30 +1,30 @@
-mod calls;
-mod closures;
+mod call;
+mod closure;
 mod configuration;
 mod context;
-mod entry_functions;
+mod entry_function;
 mod error;
-mod expressions;
-mod foreign_declarations;
-mod foreign_definitions;
-mod function_declarations;
-mod function_definitions;
-mod pointers;
-mod records;
+mod expression;
+mod foreign_declaration;
+mod foreign_definition;
+mod function_declaration;
+mod function_definition;
+mod pointer;
+mod record;
 mod reference_count;
+mod type_;
 mod type_information;
-mod types;
-mod variants;
+mod variant;
 mod yield_;
 
 pub use configuration::Configuration;
 use context::Context;
 pub use error::CompileError;
 use fnv::FnvHashMap;
-use foreign_declarations::compile_foreign_declaration;
-use foreign_definitions::compile_foreign_definition;
-use function_declarations::compile_function_declaration;
-use function_definitions::compile_function_definition;
+use foreign_declaration::compile_foreign_declaration;
+use foreign_definition::compile_foreign_definition;
+use function_declaration::compile_function_declaration;
+use function_definition::compile_function_definition;
 use type_information::compile_type_information_global_variable;
 use yield_::compile_yield_function_declaration;
 
@@ -110,7 +110,7 @@ fn compile_global_variables(
                 declaration.name().into(),
                 fmm::build::variable(
                     declaration.name(),
-                    fmm::types::Pointer::new(types::compile_unsized_closure(
+                    fmm::types::Pointer::new(type_::compile_unsized_closure(
                         declaration.type_(),
                         types,
                     )),
@@ -122,7 +122,7 @@ fn compile_global_variables(
                 declaration.name().into(),
                 fmm::build::variable(
                     declaration.name(),
-                    fmm::types::Pointer::new(types::compile_unsized_closure(
+                    fmm::types::Pointer::new(type_::compile_unsized_closure(
                         declaration.type_(),
                         types,
                     )),
@@ -133,19 +133,19 @@ fn compile_global_variables(
             (
                 definition.name().into(),
                 fmm::build::bit_cast(
-                    fmm::types::Pointer::new(types::compile_unsized_closure(
+                    fmm::types::Pointer::new(type_::compile_unsized_closure(
                         definition.type_(),
                         types,
                     )),
                     fmm::build::variable(
                         definition.name(),
-                        fmm::types::Pointer::new(types::compile_sized_closure(definition, types)),
+                        fmm::types::Pointer::new(type_::compile_sized_closure(definition, types)),
                     ),
                 )
                 .into(),
             )
         }))
-        .map(|(name, expression)| Ok((name, reference_count::compile_tagged_pointer(&expression)?)))
+        .map(|(name, expression)| Ok((name, reference_count::pointer::tag_as_static(&expression)?)))
         .collect::<Result<_, _>>()
 }
 

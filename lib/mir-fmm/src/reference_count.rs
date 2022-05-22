@@ -1,14 +1,13 @@
-mod expressions;
-mod functions;
+mod expression;
+mod function;
 mod heap;
-mod pointers;
+pub mod pointer;
+mod record;
 mod record_utilities;
-mod records;
-mod variants;
+mod variant;
 
-pub use expressions::*;
-pub use functions::*;
+pub use expression::*;
+pub use function::*;
 pub use heap::*;
-pub use pointers::{compile_tagged_pointer, compile_untagged_pointer, is_pointer_owned};
-pub use records::*;
-pub use variants::*;
+pub use record::*;
+pub use variant::*;
