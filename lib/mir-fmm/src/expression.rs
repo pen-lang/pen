@@ -184,7 +184,7 @@ pub fn compile(
 
             if type_::is_record_boxed(update.type_(), context.types()) {
                 instruction_builder.if_(
-                    reference_count::is_owned(instruction_builder, &record)?,
+                    reference_count::pointer::is_owned(instruction_builder, &record)?,
                     |builder| -> Result<_, CompileError> {
                         Ok(builder.branch(compile_boxed_record(
                             &builder,
@@ -280,7 +280,7 @@ pub fn compile(
             if string.value().is_empty() {
                 fmm::ir::Undefined::new(type_::compile_string()).into()
             } else {
-                reference_count::tag_as_static(
+                reference_count::pointer::tag_as_static(
                     &fmm::build::bit_cast(
                         type_::compile_string(),
                         context.module_builder().define_anonymous_variable(
