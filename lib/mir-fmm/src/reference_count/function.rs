@@ -5,14 +5,14 @@ pub fn clone_function(
     builder: &fmm::build::InstructionBuilder,
     closure_pointer: &fmm::build::TypedExpression,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    pointer::clone_pointer(builder, closure_pointer)
+    pointer::clone(builder, closure_pointer)
 }
 
 pub fn drop_function(
     builder: &fmm::build::InstructionBuilder,
     closure_pointer: &fmm::build::TypedExpression,
 ) -> Result<(), CompileError> {
-    pointer::drop_pointer(builder, closure_pointer, |builder| {
+    pointer::drop(builder, closure_pointer, |builder| {
         builder.call(
             closure::compile_load_drop_function(builder, closure_pointer.clone())?,
             vec![fmm::build::bit_cast(

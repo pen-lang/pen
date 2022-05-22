@@ -1,6 +1,6 @@
 use super::{super::error::CompileError, heap};
 
-pub fn clone_pointer(
+pub fn clone(
     builder: &fmm::build::InstructionBuilder,
     pointer: &fmm::build::TypedExpression,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
@@ -16,7 +16,7 @@ pub fn clone_pointer(
     )
 }
 
-pub fn drop_pointer(
+pub fn drop(
     builder: &fmm::build::InstructionBuilder,
     pointer: &fmm::build::TypedExpression,
     drop_content: impl Fn(&fmm::build::InstructionBuilder) -> Result<(), CompileError>,
@@ -51,7 +51,7 @@ pub fn drop_pointer(
     Ok(())
 }
 
-pub fn drop_or_reuse_pointer(
+pub fn drop_or_reuse(
     builder: &fmm::build::InstructionBuilder,
     pointer: &fmm::build::TypedExpression,
     drop_content: impl Fn(&fmm::build::InstructionBuilder) -> Result<(), CompileError>,
@@ -78,7 +78,7 @@ pub fn drop_or_reuse_pointer(
     )
 }
 
-pub fn is_pointer_owned(
+pub fn is_owned(
     builder: &fmm::build::InstructionBuilder,
     pointer: &fmm::build::TypedExpression,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
@@ -132,7 +132,7 @@ fn decrement_and_compare_count(
     .into())
 }
 
-pub fn compile_tagged_pointer(
+pub fn tag_as_static(
     pointer: &fmm::build::TypedExpression,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     Ok(fmm::build::bit_cast(
@@ -146,7 +146,7 @@ pub fn compile_tagged_pointer(
     .into())
 }
 
-pub fn compile_untagged_pointer(
+pub fn untag(
     pointer: &fmm::build::TypedExpression,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     Ok(fmm::build::bit_cast(

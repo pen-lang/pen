@@ -25,7 +25,7 @@ pub fn compile_record_clone_function(
 
             Ok(
                 builder.return_(if type_::is_record_boxed(&record_type, context.types()) {
-                    pointer::clone_pointer(&builder, &record)?
+                    pointer::clone(&builder, &record)?
                 } else {
                     fmm::build::record(
                         definition
@@ -78,7 +78,7 @@ pub fn compile_record_drop_function(
             let record = fmm::build::variable(ARGUMENT_NAME, fmm_record_type.clone());
 
             if type_::is_record_boxed(&record_type, context.types()) {
-                pointer::drop_pointer(&builder, &record, |builder| {
+                pointer::drop(&builder, &record, |builder| {
                     drop_record_fields(builder, &record, &record_type, context.types())
                 })?;
             } else {
@@ -116,11 +116,11 @@ pub fn compile_record_drop_or_reuse_function(
         |builder| -> Result<_, CompileError> {
             let record = fmm::build::variable(ARGUMENT_NAME, fmm_record_type.clone());
 
-            Ok(builder.return_(pointer::drop_or_reuse_pointer(
-                &builder,
-                &record,
-                |builder| drop_record_fields(builder, &record, &record_type, context.types()),
-            )?))
+            Ok(
+                builder.return_(pointer::drop_or_reuse(&builder, &record, |builder| {
+                    drop_record_fields(builder, &record, &record_type, context.types())
+                })?),
+            )
         },
         fmm_record_type.clone(),
         fmm::types::CallingConvention::Target,

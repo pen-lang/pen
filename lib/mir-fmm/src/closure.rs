@@ -12,21 +12,13 @@ static DUMMY_FUNCTION_TYPE: Lazy<mir::types::Function> = Lazy::new(|| {
 pub fn compile_entry_function_pointer(
     closure_pointer: impl Into<fmm::build::TypedExpression>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    Ok(fmm::build::record_address(
-        reference_count::compile_untagged_pointer(&closure_pointer.into())?,
-        0,
-    )?
-    .into())
+    Ok(fmm::build::record_address(reference_count::untag(&closure_pointer.into())?, 0)?.into())
 }
 
 pub fn compile_drop_function_pointer(
     closure_pointer: impl Into<fmm::build::TypedExpression>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    Ok(fmm::build::record_address(
-        reference_count::compile_untagged_pointer(&closure_pointer.into())?,
-        1,
-    )?
-    .into())
+    Ok(fmm::build::record_address(reference_count::untag(&closure_pointer.into())?, 1)?.into())
 }
 
 pub fn compile_load_drop_function(
@@ -39,11 +31,7 @@ pub fn compile_load_drop_function(
 pub fn compile_payload_pointer(
     closure_pointer: impl Into<fmm::build::TypedExpression>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    Ok(fmm::build::record_address(
-        reference_count::compile_untagged_pointer(&closure_pointer.into())?,
-        2,
-    )?
-    .into())
+    Ok(fmm::build::record_address(reference_count::untag(&closure_pointer.into())?, 2)?.into())
 }
 
 pub fn compile_closure_content(

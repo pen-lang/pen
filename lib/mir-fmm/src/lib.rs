@@ -145,7 +145,7 @@ fn compile_global_variables(
                 .into(),
             )
         }))
-        .map(|(name, expression)| Ok((name, reference_count::compile_tagged_pointer(&expression)?)))
+        .map(|(name, expression)| Ok((name, reference_count::pointer::tag_as_static(&expression)?)))
         .collect::<Result<_, _>>()
 }
 

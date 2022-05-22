@@ -15,7 +15,7 @@ pub fn clone_expression(
     types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     Ok(match type_ {
-        mir::types::Type::ByteString => pointer::clone_pointer(builder, expression)?,
+        mir::types::Type::ByteString => pointer::clone(builder, expression)?,
         mir::types::Type::Function(_) => function::clone_function(builder, expression)?,
         mir::types::Type::Record(record) => builder.call(
             fmm::build::variable(
@@ -53,7 +53,7 @@ pub fn drop_expression(
     types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> Result<(), CompileError> {
     match type_ {
-        mir::types::Type::ByteString => pointer::drop_pointer(builder, expression, |_| Ok(()))?,
+        mir::types::Type::ByteString => pointer::drop(builder, expression, |_| Ok(()))?,
         mir::types::Type::Function(_) => function::drop_function(builder, expression)?,
         mir::types::Type::Record(record) => {
             builder.call(
