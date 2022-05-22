@@ -1,7 +1,7 @@
 use super::{FunctionDeclaration, TypeAlias, TypeDefinition};
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+#[derive(Clone, Debug, Deserialize, PartialEq, Eq, Serialize)]
 pub struct Module {
     type_definitions: Vec<TypeDefinition>,
     type_aliases: Vec<TypeAlias>,

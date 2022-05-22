@@ -11,12 +11,12 @@ pub enum Paragraph {
     Code { language: String, code: String },
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Text {
     pub spans: Vec<Span>,
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Span {
     Normal(String),
     Code(String),

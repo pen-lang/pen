@@ -37,7 +37,7 @@ pub static MAP_TYPE_ITERATION_CONFIGURATION: Lazy<MapTypeIterationConfiguration>
         rest_function_name: "_mapIteratorRest".into(),
     });
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct MapTypeConfiguration {
     pub context_function_name: String,
     pub context_type_name: String,
@@ -53,7 +53,7 @@ pub struct MapTypeConfiguration {
     pub iteration: MapTypeIterationConfiguration,
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct HashConfiguration {
     pub combine_function_name: String,
     pub number_hash_function_name: String,
@@ -62,7 +62,7 @@ pub struct HashConfiguration {
     pub map_hash_function_name: String,
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct MapTypeIterationConfiguration {
     pub iterator_type_name: String,
     pub iterate_function_name: String,

@@ -1,6 +1,6 @@
 use crate::types;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct FunctionDeclaration {
     name: String,
     type_: types::Function,
