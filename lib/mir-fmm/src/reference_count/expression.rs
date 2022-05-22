@@ -8,7 +8,7 @@ use crate::{
 };
 use fnv::FnvHashMap;
 
-pub fn clone_expression(
+pub fn clone(
     builder: &fmm::build::InstructionBuilder,
     expression: &fmm::build::TypedExpression,
     type_: &mir::types::Type,
@@ -16,7 +16,7 @@ pub fn clone_expression(
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     Ok(match type_ {
         mir::types::Type::ByteString => pointer::clone(builder, expression)?,
-        mir::types::Type::Function(_) => function::clone_function(builder, expression)?,
+        mir::types::Type::Function(_) => function::clone(builder, expression)?,
         mir::types::Type::Record(record) => builder.call(
             fmm::build::variable(
                 record_utilities::get_record_clone_function_name(record.name()),
@@ -46,7 +46,7 @@ pub fn clone_expression(
     })
 }
 
-pub fn drop_expression(
+pub fn drop(
     builder: &fmm::build::InstructionBuilder,
     expression: &fmm::build::TypedExpression,
     type_: &mir::types::Type,
@@ -54,7 +54,7 @@ pub fn drop_expression(
 ) -> Result<(), CompileError> {
     match type_ {
         mir::types::Type::ByteString => pointer::drop(builder, expression, |_| Ok(()))?,
-        mir::types::Type::Function(_) => function::drop_function(builder, expression)?,
+        mir::types::Type::Function(_) => function::drop(builder, expression)?,
         mir::types::Type::Record(record) => {
             builder.call(
                 fmm::build::variable(
@@ -81,7 +81,7 @@ pub fn drop_expression(
     Ok(())
 }
 
-pub fn drop_or_reuse_expression(
+pub fn drop_or_reuse(
     builder: &fmm::build::InstructionBuilder,
     expression: &fmm::build::TypedExpression,
     type_: &mir::types::Type,
@@ -89,7 +89,7 @@ pub fn drop_or_reuse_expression(
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     let pointer_type = fmm::types::GENERIC_POINTER_TYPE.clone();
     let drop = || -> Result<_, CompileError> {
-        drop_expression(builder, expression, type_, types)?;
+        drop(builder, expression, type_, types)?;
 
         Ok(fmm::ir::Undefined::new(pointer_type.clone()).into())
     };

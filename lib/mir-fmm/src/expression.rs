@@ -34,7 +34,7 @@ pub fn compile(
                         .map(|(variable, type_)| {
                             Ok((
                                 variable.into(),
-                                reference_count::clone_expression(
+                                reference_count::clone(
                                     instruction_builder,
                                     &variables[variable],
                                     type_,
@@ -62,7 +62,7 @@ pub fn compile(
                         Ok(builder.branch(fmm::ir::VOID_VALUE.clone()))
                     },
                     |builder| {
-                        reference_count::free_heap(instruction_builder, pointer.clone())?;
+                        reference_count::heap::free(instruction_builder, pointer.clone())?;
 
                         Ok(builder.branch(fmm::ir::VOID_VALUE.clone()))
                     },
@@ -73,7 +73,7 @@ pub fn compile(
         }
         mir::ir::Expression::DropVariables(drop) => {
             for (variable, type_) in drop.variables() {
-                reference_count::drop_expression(
+                reference_count::drop(
                     instruction_builder,
                     &variables[variable],
                     type_,
@@ -117,13 +117,13 @@ pub fn compile(
                 context.types(),
             )?;
 
-            let field = reference_count::clone_expression(
+            let field = reference_count::clone(
                 instruction_builder,
                 &field,
                 &context.types()[record_type.name()].fields()[field_index],
                 context.types(),
             )?;
-            reference_count::drop_expression(
+            reference_count::drop(
                 instruction_builder,
                 &record,
                 &record_type.into(),
@@ -158,7 +158,7 @@ pub fn compile(
 
                             Ok(if let Some(expression) = fields.get(&index) {
                                 if !clone {
-                                    reference_count::drop_expression(
+                                    reference_count::drop(
                                         builder,
                                         &field,
                                         field_type,
@@ -168,7 +168,7 @@ pub fn compile(
 
                                 expression.clone()
                             } else if clone {
-                                reference_count::clone_expression(
+                                reference_count::clone(
                                     builder,
                                     &field,
                                     field_type,
@@ -199,7 +199,7 @@ pub fn compile(
                             compile_unboxed(&builder, true)?,
                         )?;
 
-                        reference_count::drop_expression(
+                        reference_count::drop(
                             &builder,
                             &record,
                             &update.type_().clone().into(),
@@ -220,7 +220,7 @@ pub fn compile(
                 if retain.ids().contains_key(name) {
                     reused_variables.insert(
                         name,
-                        reference_count::drop_or_reuse_expression(
+                        reference_count::drop_or_reuse(
                             instruction_builder,
                             &variables[name],
                             type_,
@@ -228,7 +228,7 @@ pub fn compile(
                         )?,
                     );
                 } else {
-                    reference_count::drop_expression(
+                    reference_count::drop(
                         instruction_builder,
                         &variables[name],
                         type_,
@@ -463,7 +463,7 @@ fn compile_let_recursive(
     let_: &mir::ir::LetRecursive,
     variables: &FnvHashMap<String, fmm::build::TypedExpression>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    let closure_pointer = reference_count::allocate_heap(
+    let closure_pointer = reference_count::heap::allocate(
         instruction_builder,
         type_::compile_sized_closure(let_.definition(), context.types()),
     )?;
@@ -595,7 +595,7 @@ fn allocate_record_heap(
     builder: &fmm::build::InstructionBuilder,
     record_type: &mir::types::Record,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    reference_count::allocate_heap(
+    reference_count::heap::allocate(
         builder,
         type_::compile_unboxed_record(record_type, context.types()),
     )

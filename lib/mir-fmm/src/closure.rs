@@ -69,7 +69,7 @@ pub fn compile_drop_function(
             ))?;
 
             for (index, free_variable) in definition.environment().iter().enumerate() {
-                reference_count::drop_expression(
+                reference_count::drop(
                     builder,
                     &builder.deconstruct_record(environment.clone(), index)?,
                     free_variable.type_(),
@@ -89,7 +89,7 @@ pub fn compile_normal_thunk_drop_function(
     compile_drop_function_with_builder(
         context,
         |builder, environment_pointer| -> Result<_, CompileError> {
-            reference_count::drop_expression(
+            reference_count::drop(
                 builder,
                 &builder.load(fmm::build::union_address(
                     fmm::build::bit_cast(

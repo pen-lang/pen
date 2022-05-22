@@ -1,14 +1,14 @@
 use super::{super::error::CompileError, pointer};
 use crate::closure;
 
-pub fn clone_function(
+pub fn clone(
     builder: &fmm::build::InstructionBuilder,
     closure_pointer: &fmm::build::TypedExpression,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     pointer::clone(builder, closure_pointer)
 }
 
-pub fn drop_function(
+pub fn drop(
     builder: &fmm::build::InstructionBuilder,
     closure_pointer: &fmm::build::TypedExpression,
 ) -> Result<(), CompileError> {

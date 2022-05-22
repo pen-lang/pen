@@ -82,7 +82,7 @@ fn compile_body(
                     .map(|(index, free_variable)| -> Result<_, CompileError> {
                         Ok((
                             free_variable.name().into(),
-                            reference_count::clone_expression(
+                            reference_count::clone(
                                 instruction_builder,
                                 &instruction_builder.load(fmm::build::record_address(
                                     environment_pointer.clone(),
@@ -146,7 +146,7 @@ fn compile_initial_thunk_entry(
                     fmm::ir::AtomicOrdering::Relaxed,
                 ),
                 |instruction_builder| -> Result<_, CompileError> {
-                    let closure = reference_count::clone_expression(
+                    let closure = reference_count::clone(
                         &instruction_builder,
                         &compile_closure_pointer(definition.type_(), context.types())?,
                         &definition.type_().clone().into(),
@@ -163,7 +163,7 @@ fn compile_initial_thunk_entry(
                     // bodies rather than cloning them.
                     // See also https://github.com/pen-lang/pen/issues/295.
                     for (index, free_variable) in definition.environment().iter().enumerate() {
-                        reference_count::drop_expression(
+                        reference_count::drop(
                             &instruction_builder,
                             &instruction_builder.load(fmm::build::record_address(
                                 environment_pointer.clone(),
@@ -175,7 +175,7 @@ fn compile_initial_thunk_entry(
                     }
 
                     instruction_builder.store(
-                        reference_count::clone_expression(
+                        reference_count::clone(
                             &instruction_builder,
                             &value,
                             definition.result_type(),
@@ -195,7 +195,7 @@ fn compile_initial_thunk_entry(
                         fmm::ir::AtomicOrdering::Release,
                     );
 
-                    reference_count::drop_expression(
+                    reference_count::drop(
                         &instruction_builder,
                         &closure,
                         &definition.type_().clone().into(),
@@ -292,14 +292,14 @@ fn compile_normal_body(
     definition: &mir::ir::FunctionDefinition,
     types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::ir::Block, CompileError> {
-    let value = reference_count::clone_expression(
+    let value = reference_count::clone(
         instruction_builder,
         &instruction_builder.load(compile_thunk_value_pointer(definition, types)?)?,
         definition.result_type(),
         types,
     )?;
 
-    reference_count::drop_expression(
+    reference_count::drop(
         instruction_builder,
         &compile_closure_pointer(definition.type_(), types)?,
         &definition.type_().clone().into(),
