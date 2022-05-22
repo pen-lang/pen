@@ -1,4 +1,4 @@
-use super::{super::error::CompileError, expressions};
+use super::{super::error::CompileError, expression};
 use crate::{context::Context, types};
 
 const ARGUMENT_NAME: &str = "_payload";
@@ -16,7 +16,7 @@ pub fn compile_variant_clone_function(
         |builder| -> Result<_, CompileError> {
             Ok(builder.return_(crate::variant::compile_boxed_payload(
                 &builder,
-                &expressions::clone_expression(
+                &expression::clone_expression(
                     &builder,
                     &crate::variant::compile_unboxed_payload(
                         &builder,
@@ -48,7 +48,7 @@ pub fn compile_variant_drop_function(
         |builder| -> Result<_, CompileError> {
             let payload = fmm::build::variable(ARGUMENT_NAME, types::compile_variant_payload());
 
-            expressions::drop_expression(
+            expression::drop_expression(
                 &builder,
                 &crate::variant::compile_unboxed_payload(
                     &builder,

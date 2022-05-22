@@ -1,4 +1,4 @@
-use super::{super::error::CompileError, functions, pointers, record_utilities};
+use super::{super::error::CompileError, function, pointer, record_utilities};
 use crate::{
     type_information::{
         TYPE_INFORMATION_CLONE_FUNCTION_FIELD_INDEX, TYPE_INFORMATION_DROP_FUNCTION_FIELD_INDEX,
@@ -15,8 +15,8 @@ pub fn clone_expression(
     types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     Ok(match type_ {
-        mir::types::Type::ByteString => pointers::clone_pointer(builder, expression)?,
-        mir::types::Type::Function(_) => functions::clone_function(builder, expression)?,
+        mir::types::Type::ByteString => pointer::clone_pointer(builder, expression)?,
+        mir::types::Type::Function(_) => function::clone_function(builder, expression)?,
         mir::types::Type::Record(record) => builder.call(
             fmm::build::variable(
                 record_utilities::get_record_clone_function_name(record.name()),
@@ -53,8 +53,8 @@ pub fn drop_expression(
     types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> Result<(), CompileError> {
     match type_ {
-        mir::types::Type::ByteString => pointers::drop_pointer(builder, expression, |_| Ok(()))?,
-        mir::types::Type::Function(_) => functions::drop_function(builder, expression)?,
+        mir::types::Type::ByteString => pointer::drop_pointer(builder, expression, |_| Ok(()))?,
+        mir::types::Type::Function(_) => function::drop_function(builder, expression)?,
         mir::types::Type::Record(record) => {
             builder.call(
                 fmm::build::variable(

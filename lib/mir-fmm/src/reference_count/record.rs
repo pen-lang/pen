@@ -1,6 +1,6 @@
 use super::{
     super::{error::CompileError, types},
-    expressions, pointers, record_utilities,
+    expression, pointer, record_utilities,
 };
 use crate::context::Context;
 use fnv::FnvHashMap;
@@ -25,7 +25,7 @@ pub fn compile_record_clone_function(
 
             Ok(
                 builder.return_(if types::is_record_boxed(&record_type, context.types()) {
-                    pointers::clone_pointer(&builder, &record)?
+                    pointer::clone_pointer(&builder, &record)?
                 } else {
                     fmm::build::record(
                         definition
@@ -34,7 +34,7 @@ pub fn compile_record_clone_function(
                             .iter()
                             .enumerate()
                             .map(|(index, type_)| {
-                                expressions::clone_expression(
+                                expression::clone_expression(
                                     &builder,
                                     &crate::records::get_record_field(
                                         &builder,
@@ -78,7 +78,7 @@ pub fn compile_record_drop_function(
             let record = fmm::build::variable(ARGUMENT_NAME, fmm_record_type.clone());
 
             if types::is_record_boxed(&record_type, context.types()) {
-                pointers::drop_pointer(&builder, &record, |builder| {
+                pointer::drop_pointer(&builder, &record, |builder| {
                     drop_record_fields(builder, &record, &record_type, context.types())
                 })?;
             } else {
@@ -116,7 +116,7 @@ pub fn compile_record_drop_or_reuse_function(
         |builder| -> Result<_, CompileError> {
             let record = fmm::build::variable(ARGUMENT_NAME, fmm_record_type.clone());
 
-            Ok(builder.return_(pointers::drop_or_reuse_pointer(
+            Ok(builder.return_(pointer::drop_or_reuse_pointer(
                 &builder,
                 &record,
                 |builder| drop_record_fields(builder, &record, &record_type, context.types()),
@@ -137,7 +137,7 @@ fn drop_record_fields(
     types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> Result<(), CompileError> {
     for (index, type_) in types[record_type.name()].fields().iter().enumerate() {
-        expressions::drop_expression(
+        expression::drop_expression(
             builder,
             &crate::records::get_record_field(builder, record, record_type, index, types)?,
             type_,
