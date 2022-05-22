@@ -16,7 +16,7 @@ pub static LIST_TYPE_CONFIGURATION: Lazy<ListTypeConfiguration> =
         first_rest_type_name: "FirstRest".into(),
     });
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct ListTypeConfiguration {
     pub empty_list_function_name: String,
     pub concatenate_function_name: String,

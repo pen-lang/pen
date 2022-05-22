@@ -1,6 +1,6 @@
 use super::CallingConvention;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct ForeignDefinition {
     name: String,
     foreign_name: String,

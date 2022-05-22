@@ -1,6 +1,6 @@
 use position::Position;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct ByteString {
     value: String, // UTF-8 representation of byte string
     position: Position,

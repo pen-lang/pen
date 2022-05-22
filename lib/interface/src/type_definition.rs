@@ -2,7 +2,7 @@ use hir::types;
 use position::Position;
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+#[derive(Clone, Debug, Deserialize, PartialEq, Eq, Serialize)]
 pub struct TypeDefinition {
     name: String,
     original_name: String,

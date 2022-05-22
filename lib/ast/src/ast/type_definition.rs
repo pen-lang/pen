@@ -1,7 +1,7 @@
 use super::{RecordDefinition, TypeAlias};
 use position::Position;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum TypeDefinition {
     RecordDefinition(RecordDefinition),
     TypeAlias(TypeAlias),

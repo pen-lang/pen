@@ -5,7 +5,7 @@ use std::{
     num::{ParseFloatError, ParseIntError},
 };
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum CompileError {
     ModuleNotFound(ast::ModulePath),
     ParseFloat {

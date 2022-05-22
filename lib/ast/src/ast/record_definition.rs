@@ -1,7 +1,7 @@
 use crate::types;
 use position::Position;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct RecordDefinition {
     name: String,
     fields: Vec<types::RecordField>,

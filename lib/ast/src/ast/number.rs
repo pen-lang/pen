@@ -1,7 +1,7 @@
 use crate::NumberRepresentation;
 use position::Position;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Number {
     value: NumberRepresentation,
     position: Position,

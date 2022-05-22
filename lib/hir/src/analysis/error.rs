@@ -5,7 +5,7 @@ use std::{
     fmt::{self, Display, Formatter},
 };
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum AnalysisError {
     AnyTypeBranch(Position),
     DuplicateFunctionNames(Position, Position),
