@@ -1,9 +1,6 @@
 use super::{
     context::CompileContext,
-    transformation::{
-        boolean_operation, equal_operation, if_list,
-        not_equal_operation,
-    },
+    transformation::{boolean_operation, equal_operation, if_list, not_equal_operation},
     type_, CompileError,
 };
 use crate::{
@@ -151,9 +148,7 @@ pub fn compile(
             let type_ = deconstruction.type_().unwrap();
 
             mir::ir::RecordField::new(
-                type_::compile(context, type_)?
-                    .into_record()
-                    .unwrap(),
+                type_::compile(context, type_)?.into_record().unwrap(),
                 record_field_resolver::resolve(
                     type_,
                     deconstruction.position(),
@@ -252,8 +247,7 @@ pub fn compile(
                     if to.is_map() {
                         argument
                     } else {
-                        let concrete_type =
-                            type_::compile_concrete_map(map_type, context.types())?;
+                        let concrete_type = type_::compile_concrete_map(map_type, context.types())?;
 
                         mir::ir::Variant::new(
                             concrete_type.clone(),
@@ -685,9 +679,7 @@ fn compile_operation(
         )
         .into(),
         Operation::Spawn(operation) => compile_spawn_operation(context, operation)?,
-        Operation::Boolean(operation) => {
-            compile(&boolean_operation::transform(operation))?
-        }
+        Operation::Boolean(operation) => compile(&boolean_operation::transform(operation))?,
         Operation::Equality(operation) => match operation.operator() {
             EqualityOperator::Equal => {
                 match type_canonicalizer::canonicalize(
@@ -716,9 +708,7 @@ fn compile_operation(
                     _ => compile(&equal_operation::transform(context, operation)?)?,
                 }
             }
-            EqualityOperator::NotEqual => {
-                compile(&not_equal_operation::transform(operation))?
-            }
+            EqualityOperator::NotEqual => compile(&not_equal_operation::transform(operation))?,
         },
         Operation::Not(operation) => {
             mir::ir::If::new(compile(operation.expression())?, false, true).into()

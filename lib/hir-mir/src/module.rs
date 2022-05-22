@@ -1,6 +1,4 @@
-use super::{
-    context::CompileContext, expression, generic_type_definition, type_, CompileError,
-};
+use super::{context::CompileContext, expression, generic_type_definition, type_, CompileError};
 use crate::spawn_function_declaration;
 use hir::{analysis::AnalysisError, ir::*};
 

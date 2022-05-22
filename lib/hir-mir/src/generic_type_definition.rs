@@ -26,11 +26,9 @@ fn compile_type_definition(
     Ok(match type_ {
         Type::Function(function_type) => Some(mir::ir::TypeDefinition::new(
             type_::compile_concrete_function_name(function_type, context.types())?,
-            mir::types::RecordBody::new(vec![type_::compile_function(
-                function_type,
-                context,
-            )?
-            .into()]),
+            mir::types::RecordBody::new(vec![
+                type_::compile_function(function_type, context)?.into()
+            ]),
         )),
         Type::List(list_type) => Some(mir::ir::TypeDefinition::new(
             type_::compile_concrete_list_name(list_type, context.types())?,
@@ -156,8 +154,7 @@ mod tests {
                 &context,
             ),
             Ok(vec![mir::ir::TypeDefinition::new(
-                type_::compile_concrete_function_name(&function_type, context.types())
-                    .unwrap(),
+                type_::compile_concrete_function_name(&function_type, context.types()).unwrap(),
                 mir::types::RecordBody::new(vec![type_::compile_function(
                     &function_type,
                     &context
@@ -572,8 +569,7 @@ mod tests {
                     .into()]),
                 ),
                 mir::ir::TypeDefinition::new(
-                    type_::compile_concrete_list_name(&value_type, context.types())
-                        .unwrap(),
+                    type_::compile_concrete_list_name(&value_type, context.types()).unwrap(),
                     mir::types::RecordBody::new(vec![mir::types::Record::new(
                         &context.configuration().unwrap().list_type.list_type_name
                     )
@@ -617,8 +613,7 @@ mod tests {
                     .into()]),
                 ),
                 mir::ir::TypeDefinition::new(
-                    type_::compile_concrete_list_name(&value_type, context.types())
-                        .unwrap(),
+                    type_::compile_concrete_list_name(&value_type, context.types()).unwrap(),
                     mir::types::RecordBody::new(vec![mir::types::Record::new(
                         &context.configuration().unwrap().list_type.list_type_name
                     )
