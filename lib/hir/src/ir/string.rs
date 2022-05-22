@@ -1,6 +1,6 @@
 use position::Position;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct ByteString {
     value: Vec<u8>,
     position: Position,

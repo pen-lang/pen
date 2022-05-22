@@ -1,7 +1,7 @@
 use super::async_stack_action::AsyncStackAction;
 use core::fmt::{self, Display, Formatter};
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum CpsError {
     MissingContext,
     UnexpectedAsyncStackAction(Option<AsyncStackAction>),
