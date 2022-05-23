@@ -8,14 +8,14 @@ pub fn compile_tag(type_: &mir::types::Type) -> fmm::build::TypedExpression {
     fmm::build::variable(type_::compile_id(type_), type_::compile_variant_tag())
 }
 
-pub fn extract_tag(
+pub fn get_tag(
     builder: &fmm::build::InstructionBuilder,
     expression: &fmm::build::TypedExpression,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     Ok(builder.deconstruct_record(expression.clone(), VARIANT_TAG_FIELD_INDEX)?)
 }
 
-pub fn extract_payload(
+pub fn get_payload(
     builder: &fmm::build::InstructionBuilder,
     expression: &fmm::build::TypedExpression,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
@@ -70,7 +70,7 @@ pub fn downcast(
         builder,
         &bit_cast_from_opaque_payload(
             builder,
-            &extract_payload(builder, variant)?,
+            &get_payload(builder, variant)?,
             type_,
             context.types(),
         )?,

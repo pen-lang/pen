@@ -25,7 +25,7 @@ pub fn clone(
             vec![expression.clone()],
         )?,
         mir::types::Type::Variant => {
-            let tag = variant::extract_tag(builder, expression)?;
+            let tag = variant::get_tag(builder, expression)?;
 
             fmm::build::record(vec![
                 tag.clone(),
@@ -34,7 +34,7 @@ pub fn clone(
                         builder.load(tag)?,
                         TYPE_INFORMATION_CLONE_FUNCTION_FIELD_INDEX,
                     )?,
-                    vec![variant::extract_payload(builder, expression)?],
+                    vec![variant::get_payload(builder, expression)?],
                 )?,
             ])
             .into()
@@ -66,10 +66,10 @@ pub fn drop(
         mir::types::Type::Variant => {
             builder.call(
                 builder.deconstruct_record(
-                    builder.load(variant::extract_tag(builder, expression)?)?,
+                    builder.load(variant::get_tag(builder, expression)?)?,
                     TYPE_INFORMATION_DROP_FUNCTION_FIELD_INDEX,
                 )?,
-                vec![variant::extract_payload(builder, expression)?],
+                vec![variant::get_payload(builder, expression)?],
             )?;
         }
         mir::types::Type::Boolean | mir::types::Type::None | mir::types::Type::Number => {}
