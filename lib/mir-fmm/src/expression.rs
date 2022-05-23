@@ -394,11 +394,11 @@ fn compile_alternatives(
                         .into_iter()
                         .chain([(
                             alternative.name().into(),
-                            variant::compile_unboxed_payload(
+                            variant::extract_unboxed_payload(
+                                context,
                                 &instruction_builder,
-                                &variant::extract_payload(&instruction_builder, &argument)?,
+                                &argument,
                                 alternative.type_(),
-                                context.types(),
                             )?,
                         )])
                         .collect(),
@@ -655,11 +655,11 @@ fn compile_try_operation(
                     .into_iter()
                     .chain([(
                         operation.name().into(),
-                        variant::compile_unboxed_payload(
+                        variant::extract_unboxed_payload(
+                            context,
                             &instruction_builder,
-                            &variant::extract_payload(&instruction_builder, &operand)?,
+                            &operand,
                             operation.type_(),
-                            context.types(),
                         )?,
                     )])
                     .collect(),

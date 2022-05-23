@@ -1,4 +1,4 @@
-use crate::{type_, CompileError};
+use crate::{context::Context, type_, CompileError};
 use fnv::FnvHashMap;
 
 const VARIANT_TAG_FIELD_INDEX: usize = 0;
@@ -43,6 +43,20 @@ pub fn compile_unboxed_payload(
         builder,
         type_::compile(type_, types),
         payload.clone(),
+    )?)
+}
+
+pub fn extract_unboxed_payload(
+    context: &Context,
+    builder: &fmm::build::InstructionBuilder,
+    variant: &fmm::build::TypedExpression,
+    type_: &mir::types::Type,
+) -> Result<fmm::build::TypedExpression, CompileError> {
+    Ok(compile_unboxed_payload(
+        &builder,
+        &extract_payload(&builder, &variant)?,
+        type_,
+        context.types(),
     )?)
 }
 
