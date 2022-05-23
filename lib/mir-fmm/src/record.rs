@@ -7,7 +7,7 @@ pub fn get_field(
     record_type: &mir::types::Record,
     field_index: usize,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    Ok(get_unboxed_field(
+    get_unboxed_field(
         builder,
         &if type_::is_record_boxed(record_type, context.types()) {
             load_boxed(context, builder, record, record_type)?
@@ -15,7 +15,7 @@ pub fn get_field(
             record.clone()
         },
         field_index,
-    )?)
+    )
 }
 
 pub fn get_unboxed_field(

@@ -10,7 +10,7 @@ pub fn clone_boxed(
     builder: &fmm::build::InstructionBuilder,
     record: &fmm::build::TypedExpression,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    Ok(pointer::clone(&builder, record)?)
+    pointer::clone(builder, record)
 }
 
 fn clone_unboxed(
@@ -26,8 +26,8 @@ fn clone_unboxed(
             .enumerate()
             .map(|(index, type_)| {
                 expression::clone(
-                    &builder,
-                    &record::get_unboxed_field(&builder, record, index)?,
+                    builder,
+                    &record::get_unboxed_field(builder, record, index)?,
                     type_,
                     context.types(),
                 )
@@ -43,12 +43,12 @@ pub fn drop_boxed(
     record: &fmm::build::TypedExpression,
     record_type: &mir::types::Record,
 ) -> Result<(), CompileError> {
-    pointer::drop(&builder, &record, |builder| {
+    pointer::drop(builder, record, |builder| {
         drop_unboxed(
             context,
             builder,
-            &record::load_boxed(context, builder, &record, &record_type)?,
-            &record_type,
+            &record::load_boxed(context, builder, record, record_type)?,
+            record_type,
         )
     })?;
 
@@ -68,7 +68,7 @@ fn drop_unboxed(
     {
         expression::drop(
             builder,
-            &record::get_unboxed_field(&builder, record, index)?,
+            &record::get_unboxed_field(builder, record, index)?,
             type_,
             context.types(),
         )?;
