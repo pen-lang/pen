@@ -1,5 +1,5 @@
 use super::{super::error::CompileError, expression};
-use crate::{context::Context, type_};
+use crate::{context::Context, type_, variant};
 
 const ARGUMENT_NAME: &str = "_payload";
 
@@ -14,11 +14,11 @@ pub fn compile_clone_function(
             type_::compile_variant_payload(),
         )],
         |builder| -> Result<_, CompileError> {
-            Ok(builder.return_(crate::variant::compile_boxed_payload(
+            Ok(builder.return_(variant::compile_boxed_payload(
                 &builder,
                 &expression::clone(
                     &builder,
-                    &crate::variant::compile_unboxed_payload(
+                    &variant::compile_unboxed_payload(
                         &builder,
                         &fmm::build::variable(ARGUMENT_NAME, type_::compile_variant_payload()),
                         type_,
@@ -50,12 +50,7 @@ pub fn compile_drop_function(
 
             expression::drop(
                 &builder,
-                &crate::variant::compile_unboxed_payload(
-                    &builder,
-                    &payload,
-                    type_,
-                    context.types(),
-                )?,
+                &variant::compile_unboxed_payload(&builder, &payload, type_, context.types())?,
                 type_,
                 context.types(),
             )?;
