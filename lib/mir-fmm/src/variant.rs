@@ -46,6 +46,19 @@ pub fn bit_cast_from_opaque_payload(
     )?)
 }
 
+pub fn upcast(
+    context: &Context,
+    builder: &fmm::build::InstructionBuilder,
+    value: &fmm::build::TypedExpression,
+    type_: &mir::types::Type,
+) -> Result<fmm::build::TypedExpression, CompileError> {
+    Ok(fmm::build::record(vec![
+        compile_tag(type_),
+        bit_cast_to_opaque_payload(builder, &box_payload(context, builder, value, type_)?)?,
+    ])
+    .into())
+}
+
 pub fn downcast(
     context: &Context,
     builder: &fmm::build::InstructionBuilder,
@@ -65,7 +78,7 @@ pub fn downcast(
     )
 }
 
-pub fn box_payload(
+fn box_payload(
     context: &Context,
     builder: &fmm::build::InstructionBuilder,
     value: &fmm::build::TypedExpression,
