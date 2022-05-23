@@ -1,3 +1,5 @@
+pub mod foreign;
+
 use fnv::FnvHashMap;
 
 pub const FUNCTION_ARGUMENT_OFFSET: usize = 1;
@@ -79,13 +81,6 @@ pub fn compile_record(
 }
 
 pub fn is_record_boxed(
-    record: &mir::types::Record,
-    types: &FnvHashMap<String, mir::types::RecordBody>,
-) -> bool {
-    !types[record.name()].fields().is_empty()
-}
-
-pub fn is_foreign_record_boxed(
     record: &mir::types::Record,
     types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> bool {
@@ -195,22 +190,6 @@ pub fn compile_entry_function(
 // We can't type this strongly as F-- doesn't support recursive types.
 pub fn compile_untyped_closure_pointer() -> fmm::types::Pointer {
     fmm::types::Pointer::new(fmm::types::Record::new(vec![]))
-}
-
-pub fn compile_foreign_function(
-    function: &mir::types::Function,
-    calling_convention: mir::ir::CallingConvention,
-    types: &FnvHashMap<String, mir::types::RecordBody>,
-) -> fmm::types::Function {
-    fmm::types::Function::new(
-        function
-            .arguments()
-            .iter()
-            .map(|type_| compile(type_, types))
-            .collect(),
-        compile(function.result(), types),
-        compile_calling_convention(calling_convention),
-    )
 }
 
 fn compile_calling_convention(

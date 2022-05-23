@@ -12,15 +12,11 @@ pub fn convert_to_foreign(
     Ok(match type_ {
         mir::types::Type::Record(record_type) => {
             if type_::is_record_boxed(record_type, types)
-                == type_::is_foreign_record_boxed(record_type, types)
+                == type_::foreign::is_record_boxed(record_type, types)
             {
                 value
-            } else if !type_::is_record_boxed(record_type, types)
-                && type_::is_foreign_record_boxed(record_type, types)
-            {
-                box_::box_(builder, value)?
             } else {
-                return Err(CompileError::UnboxedRecord);
+                box_::box_(builder, value)?
             }
         }
         mir::types::Type::Variant => box_::box_(builder, value)?,
@@ -43,15 +39,11 @@ pub fn convert_from_foreign(
     Ok(match type_ {
         mir::types::Type::Record(record_type) => {
             if type_::is_record_boxed(record_type, types)
-                == type_::is_foreign_record_boxed(record_type, types)
+                == type_::foreign::is_record_boxed(record_type, types)
             {
                 value
-            } else if !type_::is_record_boxed(record_type, types)
-                && type_::is_foreign_record_boxed(record_type, types)
-            {
-                box_::unbox(builder, value, type_, types)?
             } else {
-                return Err(CompileError::UnboxedRecord);
+                box_::unbox(builder, value, type_, types)?
             }
         }
         mir::types::Type::Variant => box_::unbox(builder, value, type_, types)?,

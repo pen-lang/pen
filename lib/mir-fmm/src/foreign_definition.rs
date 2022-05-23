@@ -6,7 +6,7 @@ pub fn compile_foreign_definition(
     function_type: &mir::types::Function,
     global_variable: &fmm::build::TypedExpression,
 ) -> Result<(), CompileError> {
-    let foreign_function_type = type_::compile_foreign_function(
+    let foreign_function_type = type_::foreign::compile_function(
         function_type,
         definition.calling_convention(),
         context.types(),

@@ -49,7 +49,7 @@ fn compile_entry_function(
     )
     .collect::<Vec<_>>();
 
-    let foreign_function_type = type_::compile_foreign_function(
+    let foreign_function_type = type_::foreign::compile_function(
         declaration.type_(),
         declaration.calling_convention(),
         context.types(),
