@@ -10,7 +10,7 @@ pub fn get_field(
     get_unboxed_field(
         builder,
         &if type_::is_record_boxed(record_type, context.types()) {
-            load_boxed(context, builder, record, record_type)?
+            load(context, builder, record, record_type)?
         } else {
             record.clone()
         },
@@ -26,7 +26,7 @@ pub fn get_unboxed_field(
     Ok(builder.deconstruct_record(record.clone(), field_index)?)
 }
 
-pub fn load_boxed(
+pub fn load(
     context: &Context,
     builder: &fmm::build::InstructionBuilder,
     record: &fmm::build::TypedExpression,

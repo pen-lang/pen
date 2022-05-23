@@ -1,4 +1,4 @@
-use super::{super::error::CompileError, expression};
+use super::{super::error::CompileError, expression, pointer};
 use crate::{context::Context, type_, variant};
 
 const ARGUMENT_NAME: &str = "_payload";
@@ -14,19 +14,20 @@ pub fn compile_clone_function(
             type_::compile_variant_payload(),
         )],
         |builder| -> Result<_, CompileError> {
-            Ok(builder.return_(variant::compile_boxed_payload(
+            let payload = variant::bit_cast_from_opaque_payload(
                 &builder,
-                &expression::clone(
-                    &builder,
-                    &variant::compile_unboxed_payload(
-                        &builder,
-                        &fmm::build::variable(ARGUMENT_NAME, type_::compile_variant_payload()),
-                        type_,
-                        context.types(),
-                    )?,
-                    type_,
-                    context.types(),
-                )?,
+                &fmm::build::variable(ARGUMENT_NAME, type_::compile_variant_payload()),
+                type_,
+                context.types(),
+            )?;
+
+            Ok(builder.return_(variant::bit_cast_to_opaque_payload(
+                &builder,
+                &if type_::variant::should_box_payload(type_, context.types())? {
+                    pointer::clone(&builder, &payload)?
+                } else {
+                    expression::clone(&builder, &payload, type_, context.types())?
+                },
             )?))
         },
         type_::compile_variant_payload(),
@@ -46,14 +47,25 @@ pub fn compile_drop_function(
             type_::compile_variant_payload(),
         )],
         |builder| -> Result<_, CompileError> {
-            let payload = fmm::build::variable(ARGUMENT_NAME, type_::compile_variant_payload());
-
-            expression::drop(
+            let payload = variant::bit_cast_from_opaque_payload(
                 &builder,
-                &variant::compile_unboxed_payload(&builder, &payload, type_, context.types())?,
+                &fmm::build::variable(ARGUMENT_NAME, type_::compile_variant_payload()),
                 type_,
                 context.types(),
             )?;
+
+            if type_::variant::should_box_payload(type_, context.types())? {
+                pointer::drop(&builder, &payload, |builder| {
+                    expression::drop(
+                        &builder,
+                        &builder.load(payload.clone())?,
+                        type_,
+                        context.types(),
+                    )
+                })?
+            } else {
+                expression::drop(&builder, &payload, type_, context.types())?;
+            }
 
             Ok(builder.return_(fmm::ir::VOID_VALUE.clone()))
         },

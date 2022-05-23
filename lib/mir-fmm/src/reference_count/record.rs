@@ -47,7 +47,7 @@ pub fn drop_boxed(
         drop_unboxed(
             context,
             builder,
-            &record::load_boxed(context, builder, record, record_type)?,
+            &record::load(context, builder, record, record_type)?,
             record_type,
         )
     })?;
@@ -167,7 +167,7 @@ pub fn compile_drop_or_reuse_function(
                     drop_unboxed(
                         context,
                         builder,
-                        &record::load_boxed(context, builder, &record, &record_type)?,
+                        &record::load(context, builder, &record, &record_type)?,
                         &record_type,
                     )
                 })?),

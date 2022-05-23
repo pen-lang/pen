@@ -1,30 +1,37 @@
-use crate::type_;
+use crate::{type_, CompileError};
 use fnv::FnvHashMap;
 
-pub fn compile(
+pub fn compile_payload(
     type_: &mir::types::Type,
     types: &FnvHashMap<String, mir::types::RecordBody>,
-) -> fmm::types::Type {
-    match type_ {
-        mir::types::Type::Record(record_type) => {
-            let type_ = type_::compile_record(record_type, types);
+) -> Result<fmm::types::Type, CompileError> {
+    let fmm_type = type_::compile(type_, types);
 
-            if type_::is_record_boxed(record_type, types) == is_record_boxed(record_type, types) {
-                type_
-            } else {
-                fmm::types::Pointer::new(type_).into()
-            }
+    Ok(if should_box_payload(type_, types)? {
+        fmm::types::Pointer::new(fmm_type.clone()).into()
+    } else {
+        fmm_type
+    })
+}
+
+pub fn should_box_payload(
+    type_: &mir::types::Type,
+    types: &FnvHashMap<String, mir::types::RecordBody>,
+) -> Result<bool, CompileError> {
+    Ok(match type_ {
+        mir::types::Type::Record(record_type) => {
+            type_::is_record_boxed(record_type, types) != is_record_boxed(record_type, types)
         }
-        mir::types::Type::Variant => fmm::types::Pointer::new(type_::compile_variant()).into(),
+        mir::types::Type::Variant => return Err(CompileError::NestedVariant),
         mir::types::Type::Boolean
         | mir::types::Type::ByteString
         | mir::types::Type::Function(_)
         | mir::types::Type::None
-        | mir::types::Type::Number => type_::compile(type_, types),
-    }
+        | mir::types::Type::Number => false,
+    })
 }
 
-pub fn is_record_boxed(
+fn is_record_boxed(
     record: &mir::types::Record,
     types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> bool {

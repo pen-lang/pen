@@ -27,9 +27,7 @@ pub fn unbox(
     let unboxed = reference_count::clone(builder, &load(builder)?, type_, types)?;
 
     reference_count::pointer::drop(builder, &pointer, |builder| {
-        reference_count::drop(builder, &load(builder)?, type_, types)?;
-
-        Ok(())
+        reference_count::drop(builder, &load(builder)?, type_, types)
     })?;
 
     Ok(unboxed)

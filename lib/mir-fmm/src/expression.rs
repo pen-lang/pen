@@ -312,9 +312,14 @@ pub fn compile(
         mir::ir::Expression::Variable(variable) => variables[variable.name()].clone(),
         mir::ir::Expression::Variant(variant) => fmm::build::record(vec![
             variant::compile_tag(variant.type_()),
-            variant::compile_boxed_payload(
+            variant::bit_cast_to_opaque_payload(
                 instruction_builder,
-                &compile(variant.payload(), variables)?,
+                &variant::box_payload(
+                    context,
+                    instruction_builder,
+                    &compile(variant.payload(), variables)?,
+                    variant.type_(),
+                )?,
             )?,
         ])
         .into(),
