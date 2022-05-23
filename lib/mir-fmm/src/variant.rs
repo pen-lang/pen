@@ -26,7 +26,7 @@ pub fn compile_boxed_payload(
     builder: &fmm::build::InstructionBuilder,
     payload: &fmm::build::TypedExpression,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    Ok(compile_union_bit_cast(
+    Ok(compile_payload_bit_cast(
         builder,
         type_::compile_variant_payload(),
         payload.clone(),
@@ -39,14 +39,14 @@ pub fn compile_unboxed_payload(
     type_: &mir::types::Type,
     types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    Ok(compile_union_bit_cast(
+    Ok(compile_payload_bit_cast(
         builder,
         type_::compile(type_, types),
         payload.clone(),
     )?)
 }
 
-fn compile_union_bit_cast(
+fn compile_payload_bit_cast(
     builder: &fmm::build::InstructionBuilder,
     to_type: impl Into<fmm::types::Type>,
     argument: impl Into<fmm::build::TypedExpression>,
