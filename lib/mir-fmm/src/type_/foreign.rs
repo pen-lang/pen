@@ -9,9 +9,7 @@ pub fn compile(
         mir::types::Type::Record(record_type) => {
             let type_ = type_::compile_record(record_type, types);
 
-            if type_::is_record_boxed(record_type, types)
-                == type_::foreign::is_record_boxed(record_type, types)
-            {
+            if type_::is_record_boxed(record_type, types) == is_record_boxed(record_type, types) {
                 type_
             } else {
                 fmm::types::Pointer::new(type_).into()
