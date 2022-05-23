@@ -4,7 +4,7 @@ use crate::{
     type_information::{
         TYPE_INFORMATION_CLONE_FUNCTION_FIELD_INDEX, TYPE_INFORMATION_DROP_FUNCTION_FIELD_INDEX,
     },
-    variant::{VARIANT_PAYLOAD_FIELD_INDEX, VARIANT_TAG_FIELD_INDEX},
+    variant,
 };
 use fnv::FnvHashMap;
 
@@ -25,7 +25,7 @@ pub fn clone(
             vec![expression.clone()],
         )?,
         mir::types::Type::Variant => {
-            let tag = builder.deconstruct_record(expression.clone(), VARIANT_TAG_FIELD_INDEX)?;
+            let tag = variant::extract_tag(builder, expression)?;
 
             fmm::build::record(vec![
                 tag.clone(),
@@ -34,8 +34,7 @@ pub fn clone(
                         builder.load(tag)?,
                         TYPE_INFORMATION_CLONE_FUNCTION_FIELD_INDEX,
                     )?,
-                    vec![builder
-                        .deconstruct_record(expression.clone(), VARIANT_PAYLOAD_FIELD_INDEX)?],
+                    vec![variant::extract_payload(builder, expression)?],
                 )?,
             ])
             .into()
@@ -67,12 +66,10 @@ pub fn drop(
         mir::types::Type::Variant => {
             builder.call(
                 builder.deconstruct_record(
-                    builder.load(
-                        builder.deconstruct_record(expression.clone(), VARIANT_TAG_FIELD_INDEX)?,
-                    )?,
+                    variant::extract_tag(builder, expression)?,
                     TYPE_INFORMATION_DROP_FUNCTION_FIELD_INDEX,
                 )?,
-                vec![builder.deconstruct_record(expression.clone(), VARIANT_PAYLOAD_FIELD_INDEX)?],
+                vec![variant::extract_payload(builder, expression)?],
             )?;
         }
         mir::types::Type::Boolean | mir::types::Type::None | mir::types::Type::Number => {}
