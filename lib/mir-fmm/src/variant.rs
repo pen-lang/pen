@@ -46,7 +46,7 @@ pub fn bit_cast_from_opaque_payload(
     )?)
 }
 
-pub fn extract_unboxed_payload(
+pub fn downcast(
     context: &Context,
     builder: &fmm::build::InstructionBuilder,
     variant: &fmm::build::TypedExpression,

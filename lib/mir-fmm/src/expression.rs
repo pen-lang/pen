@@ -399,7 +399,7 @@ fn compile_alternatives(
                         .into_iter()
                         .chain([(
                             alternative.name().into(),
-                            variant::extract_unboxed_payload(
+                            variant::downcast(
                                 context,
                                 &instruction_builder,
                                 &argument,
@@ -660,7 +660,7 @@ fn compile_try_operation(
                     .into_iter()
                     .chain([(
                         operation.name().into(),
-                        variant::extract_unboxed_payload(
+                        variant::downcast(
                             context,
                             &instruction_builder,
                             &operand,
