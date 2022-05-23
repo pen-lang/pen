@@ -8,7 +8,7 @@ pub fn compile_clone_function(
     type_: &mir::types::Type,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     context.module_builder().define_function(
-        format!("variant_clone_{}", type_::compile_type_id(type_)),
+        format!("variant_clone_{}", type_::compile_id(type_)),
         vec![fmm::ir::Argument::new(
             ARGUMENT_NAME,
             type_::compile_variant_payload(),
@@ -40,7 +40,7 @@ pub fn compile_drop_function(
     type_: &mir::types::Type,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     context.module_builder().define_function(
-        format!("variant_drop_{}", type_::compile_type_id(type_)),
+        format!("variant_drop_{}", type_::compile_id(type_)),
         vec![fmm::ir::Argument::new(
             ARGUMENT_NAME,
             type_::compile_variant_payload(),

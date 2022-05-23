@@ -8,7 +8,7 @@ pub fn compile_type_information_global_variable(
     type_: &mir::types::Type,
 ) -> Result<(), CompileError> {
     context.module_builder().define_variable(
-        type_::compile_type_id(type_),
+        type_::compile_id(type_),
         fmm::build::record(vec![
             reference_count::variant::compile_clone_function(context, type_)?,
             reference_count::variant::compile_drop_function(context, type_)?,
