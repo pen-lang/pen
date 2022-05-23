@@ -2,8 +2,7 @@ use super::{
     super::{error::CompileError, type_},
     expression, pointer, record_utilities,
 };
-use crate::context::Context;
-use crate::record;
+use crate::{context::Context, record};
 
 const ARGUMENT_NAME: &str = "_record";
 
