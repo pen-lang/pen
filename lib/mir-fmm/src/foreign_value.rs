@@ -9,22 +9,10 @@ pub fn convert_to_foreign(
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     let value = value.into();
 
-    Ok(match type_ {
-        mir::types::Type::Record(record_type) => {
-            if type_::is_record_boxed(record_type, types)
-                == type_::foreign::is_record_boxed(record_type, types)
-            {
-                value
-            } else {
-                box_::box_(builder, value)?
-            }
-        }
-        mir::types::Type::Variant => box_::box_(builder, value)?,
-        mir::types::Type::Boolean
-        | mir::types::Type::ByteString
-        | mir::types::Type::Function(_)
-        | mir::types::Type::None
-        | mir::types::Type::Number => value,
+    Ok(if type_::foreign::should_box_payload(type_, types) {
+        box_::box_(builder, value)?
+    } else {
+        value
     })
 }
 
@@ -36,21 +24,9 @@ pub fn convert_from_foreign(
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     let value = value.into();
 
-    Ok(match type_ {
-        mir::types::Type::Record(record_type) => {
-            if type_::is_record_boxed(record_type, types)
-                == type_::foreign::is_record_boxed(record_type, types)
-            {
-                value
-            } else {
-                box_::unbox(builder, value, type_, types)?
-            }
-        }
-        mir::types::Type::Variant => box_::unbox(builder, value, type_, types)?,
-        mir::types::Type::Boolean
-        | mir::types::Type::ByteString
-        | mir::types::Type::Function(_)
-        | mir::types::Type::None
-        | mir::types::Type::Number => value,
+    Ok(if type_::foreign::should_box_payload(type_, types) {
+        box_::unbox(builder, value, type_, types)?
+    } else {
+        value
     })
 }

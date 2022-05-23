@@ -5,22 +5,12 @@ pub fn compile(
     type_: &mir::types::Type,
     types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> fmm::types::Type {
-    match type_ {
-        mir::types::Type::Record(record_type) => {
-            let type_ = type_::compile_record(record_type, types);
+    let fmm_type = type_::compile(type_, types);
 
-            if type_::is_record_boxed(record_type, types) == is_record_boxed(record_type, types) {
-                type_
-            } else {
-                fmm::types::Pointer::new(type_).into()
-            }
-        }
-        mir::types::Type::Variant => fmm::types::Pointer::new(type_::compile_variant()).into(),
-        mir::types::Type::Boolean
-        | mir::types::Type::ByteString
-        | mir::types::Type::Function(_)
-        | mir::types::Type::None
-        | mir::types::Type::Number => type_::compile(type_, types),
+    if should_box_payload(type_, types) {
+        fmm::types::Pointer::new(fmm_type).into()
+    } else {
+        fmm_type
     }
 }
 
@@ -40,7 +30,24 @@ pub fn compile_function(
     )
 }
 
-pub fn is_record_boxed(
+pub fn should_box_payload(
+    type_: &mir::types::Type,
+    types: &FnvHashMap<String, mir::types::RecordBody>,
+) -> bool {
+    match type_ {
+        mir::types::Type::Record(record_type) => {
+            type_::is_record_boxed(record_type, types) != is_record_boxed(record_type, types)
+        }
+        mir::types::Type::Variant => true,
+        mir::types::Type::Boolean
+        | mir::types::Type::ByteString
+        | mir::types::Type::Function(_)
+        | mir::types::Type::None
+        | mir::types::Type::Number => false,
+    }
+}
+
+fn is_record_boxed(
     record: &mir::types::Record,
     types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> bool {
