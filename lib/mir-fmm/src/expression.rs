@@ -109,12 +109,12 @@ pub fn compile(
             let field_index = field.index();
 
             let record = compile(field.record(), variables)?;
-            let field = record::get_record_field(
+            let field = record::get_field(
+                context,
                 instruction_builder,
                 &record,
                 field.type_(),
                 field.index(),
-                context.types(),
             )?;
 
             let field = reference_count::clone(
@@ -148,12 +148,12 @@ pub fn compile(
                         .iter()
                         .enumerate()
                         .map(|(index, field_type)| -> Result<_, CompileError> {
-                            let field = record::get_record_field(
+                            let field = record::get_field(
+                                context,
                                 builder,
                                 &record,
                                 update.type_(),
                                 index,
-                                context.types(),
                             )?;
 
                             Ok(if let Some(expression) = fields.get(&index) {
