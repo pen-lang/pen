@@ -20,7 +20,7 @@ pub fn convert_to_foreign(
             {
                 box_::box_(builder, value)?
             } else {
-                return Err(CompileError::UnboxedForeignRecord);
+                return Err(CompileError::UnboxedRecord);
             }
         }
         mir::types::Type::Variant => box_::box_(builder, value)?,
@@ -51,7 +51,7 @@ pub fn convert_from_foreign(
             {
                 box_::unbox(builder, value, type_, types)?
             } else {
-                return Err(CompileError::UnboxedForeignRecord);
+                return Err(CompileError::UnboxedRecord);
             }
         }
         mir::types::Type::Variant => box_::unbox(builder, value, type_, types)?,
