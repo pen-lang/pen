@@ -66,7 +66,7 @@ pub fn drop(
         mir::types::Type::Variant => {
             builder.call(
                 builder.deconstruct_record(
-                    variant::extract_tag(builder, expression)?,
+                    builder.load(variant::extract_tag(builder, expression)?)?,
                     TYPE_INFORMATION_DROP_FUNCTION_FIELD_INDEX,
                 )?,
                 vec![variant::extract_payload(builder, expression)?],
