@@ -155,6 +155,14 @@ fn compile_global_variables(
 mod tests {
     use super::*;
     use crate::configuration::CONFIGURATION;
+    use once_cell::sync::Lazy;
+
+    static FOREIGN_UNBOXED_RECORD_DEFINITION: Lazy<mir::ir::TypeDefinition> = Lazy::new(|| {
+        mir::ir::TypeDefinition::new(
+            "a",
+            mir::types::RecordBody::new(vec![mir::types::Type::Number]),
+        )
+    });
 
     fn compile_module(module: &mir::ir::Module) {
         let module = compile(module, &CONFIGURATION).unwrap();
@@ -267,6 +275,76 @@ mod tests {
                 vec![],
             ));
         }
+
+        #[test]
+        fn compile_with_variant_argument() {
+            compile_module(&mir::ir::Module::new(
+                vec![],
+                vec![mir::ir::ForeignDeclaration::new(
+                    "f",
+                    "g",
+                    mir::types::Function::new(
+                        vec![mir::types::Type::Variant],
+                        mir::types::Type::None,
+                    ),
+                    mir::ir::CallingConvention::Target,
+                )],
+                vec![],
+                vec![],
+                vec![],
+            ));
+        }
+
+        #[test]
+        fn compile_with_variant_result() {
+            compile_module(&mir::ir::Module::new(
+                vec![],
+                vec![mir::ir::ForeignDeclaration::new(
+                    "f",
+                    "g",
+                    mir::types::Function::new(vec![], mir::types::Type::Variant),
+                    mir::ir::CallingConvention::Target,
+                )],
+                vec![],
+                vec![],
+                vec![],
+            ));
+        }
+
+        #[test]
+        fn compile_with_unboxed_record_argument() {
+            compile_module(&mir::ir::Module::new(
+                vec![FOREIGN_UNBOXED_RECORD_DEFINITION.clone()],
+                vec![mir::ir::ForeignDeclaration::new(
+                    "f",
+                    "g",
+                    mir::types::Function::new(
+                        vec![mir::types::Record::new("a").into()],
+                        mir::types::Type::None,
+                    ),
+                    mir::ir::CallingConvention::Target,
+                )],
+                vec![],
+                vec![],
+                vec![],
+            ));
+        }
+
+        #[test]
+        fn compile_with_unboxed_record_result() {
+            compile_module(&mir::ir::Module::new(
+                vec![FOREIGN_UNBOXED_RECORD_DEFINITION.clone()],
+                vec![mir::ir::ForeignDeclaration::new(
+                    "f",
+                    "g",
+                    mir::types::Function::new(vec![], mir::types::Record::new("a")),
+                    mir::ir::CallingConvention::Target,
+                )],
+                vec![],
+                vec![],
+                vec![],
+            ));
+        }
     }
 
     mod foreign_definition {
@@ -352,6 +430,91 @@ mod tests {
                     vec![mir::ir::Argument::new("x", mir::types::Type::Number)],
                     mir::ir::Variable::new("x"),
                     mir::types::Type::Number,
+                )],
+            ));
+        }
+
+        #[test]
+        fn compile_with_variant_argument() {
+            compile_module(&mir::ir::Module::new(
+                vec![],
+                vec![],
+                vec![mir::ir::ForeignDefinition::new(
+                    "f",
+                    "g",
+                    mir::ir::CallingConvention::Target,
+                )],
+                vec![],
+                vec![mir::ir::FunctionDefinition::new(
+                    "f",
+                    vec![mir::ir::Argument::new("x", mir::types::Type::Variant)],
+                    mir::ir::Expression::None,
+                    mir::types::Type::None,
+                )],
+            ));
+        }
+
+        #[test]
+        fn compile_with_variant_result() {
+            compile_module(&mir::ir::Module::new(
+                vec![],
+                vec![],
+                vec![mir::ir::ForeignDefinition::new(
+                    "f",
+                    "g",
+                    mir::ir::CallingConvention::Target,
+                )],
+                vec![],
+                vec![mir::ir::FunctionDefinition::new(
+                    "f",
+                    vec![],
+                    mir::ir::Variant::new(mir::types::Type::None, mir::ir::Expression::None),
+                    mir::types::Type::Variant,
+                )],
+            ));
+        }
+
+        #[test]
+        fn compile_with_unboxed_record_argument() {
+            compile_module(&mir::ir::Module::new(
+                vec![FOREIGN_UNBOXED_RECORD_DEFINITION.clone()],
+                vec![],
+                vec![mir::ir::ForeignDefinition::new(
+                    "f",
+                    "g",
+                    mir::ir::CallingConvention::Target,
+                )],
+                vec![],
+                vec![mir::ir::FunctionDefinition::new(
+                    "f",
+                    vec![mir::ir::Argument::new("x", mir::types::Record::new("a"))],
+                    mir::ir::Expression::None,
+                    mir::types::Type::None,
+                )],
+            ));
+        }
+
+        #[test]
+        fn compile_with_unboxed_record_result() {
+            let record_type = mir::types::Record::new("a");
+
+            compile_module(&mir::ir::Module::new(
+                vec![FOREIGN_UNBOXED_RECORD_DEFINITION.clone()],
+                vec![],
+                vec![mir::ir::ForeignDefinition::new(
+                    "f",
+                    "g",
+                    mir::ir::CallingConvention::Target,
+                )],
+                vec![],
+                vec![mir::ir::FunctionDefinition::new(
+                    "f",
+                    vec![],
+                    mir::ir::Record::new(
+                        record_type.clone(),
+                        vec![mir::ir::Expression::Number(42.0)],
+                    ),
+                    mir::types::Record::new("a"),
                 )],
             ));
         }

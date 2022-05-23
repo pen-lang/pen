@@ -49,12 +49,6 @@ fn compile_entry_function(
     )
     .collect::<Vec<_>>();
 
-    let foreign_function_type = type_::foreign::compile_function(
-        declaration.type_(),
-        declaration.calling_convention(),
-        context.types(),
-    );
-
     context.module_builder().define_anonymous_function(
         arguments.clone(),
         |instruction_builder| {
@@ -64,7 +58,12 @@ fn compile_entry_function(
                     instruction_builder.call(
                         context.module_builder().declare_function(
                             declaration.foreign_name(),
-                            foreign_function_type.clone(),
+                            type_::foreign::compile_function(
+                                declaration.type_(),
+                                declaration.calling_convention(),
+                                context.types(),
+                            )
+                            .clone(),
                         ),
                         arguments[FUNCTION_ARGUMENT_OFFSET..]
                             .iter()
@@ -84,7 +83,7 @@ fn compile_entry_function(
                 )?),
             )
         },
-        foreign_function_type.result().clone(),
+        type_::compile(declaration.type_().result(), context.types()),
         fmm::types::CallingConvention::Source,
     )
 }
