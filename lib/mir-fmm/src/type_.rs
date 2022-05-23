@@ -1,4 +1,5 @@
 pub mod foreign;
+pub mod variant;
 
 use fnv::FnvHashMap;
 
