@@ -8,7 +8,7 @@ pub fn compile_payload(
     let fmm_type = type_::compile(type_, types);
 
     Ok(if should_box_payload(type_, types)? {
-        fmm::types::Pointer::new(fmm_type.clone()).into()
+        fmm::types::Pointer::new(fmm_type).into()
     } else {
         fmm_type
     })

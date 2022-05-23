@@ -312,7 +312,7 @@ pub fn compile(
         mir::ir::Expression::Variable(variable) => variables[variable.name()].clone(),
         mir::ir::Expression::Variant(variant) => variant::upcast(
             context,
-            &instruction_builder,
+            instruction_builder,
             &compile(variant.payload(), variables)?,
             variant.type_(),
         )?,

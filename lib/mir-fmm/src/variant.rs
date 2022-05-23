@@ -69,8 +69,8 @@ pub fn downcast(
         context,
         builder,
         &bit_cast_from_opaque_payload(
-            &builder,
-            &extract_payload(&builder, &variant)?,
+            builder,
+            &extract_payload(builder, variant)?,
             type_,
             context.types(),
         )?,

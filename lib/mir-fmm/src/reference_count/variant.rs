@@ -57,7 +57,7 @@ pub fn compile_drop_function(
             if type_::variant::should_box_payload(type_, context.types())? {
                 pointer::drop(&builder, &payload, |builder| {
                     expression::drop(
-                        &builder,
+                        builder,
                         &builder.load(payload.clone())?,
                         type_,
                         context.types(),
