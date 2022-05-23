@@ -396,7 +396,7 @@ fn compile_alternatives(
                             alternative.name().into(),
                             variant::compile_unboxed_payload(
                                 &instruction_builder,
-                                &instruction_builder.deconstruct_record(argument.clone(), 1)?,
+                                &variant::extract_payload(&instruction_builder, &argument)?,
                                 alternative.type_(),
                                 context.types(),
                             )?,
@@ -657,7 +657,7 @@ fn compile_try_operation(
                         operation.name().into(),
                         variant::compile_unboxed_payload(
                             &instruction_builder,
-                            &instruction_builder.deconstruct_record(operand.clone(), 1)?,
+                            &variant::extract_payload(&instruction_builder, &operand)?,
                             operation.type_(),
                             context.types(),
                         )?,
