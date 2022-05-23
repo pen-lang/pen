@@ -26,7 +26,7 @@ pub fn bit_cast_to_opaque_payload(
     builder: &fmm::build::InstructionBuilder,
     payload: &fmm::build::TypedExpression,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    Ok(compile_payload_bit_cast(
+    Ok(bit_cast_payload(
         builder,
         type_::compile_variant_payload(),
         payload.clone(),
@@ -39,7 +39,7 @@ pub fn bit_cast_from_opaque_payload(
     type_: &mir::types::Type,
     types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    Ok(compile_payload_bit_cast(
+    Ok(bit_cast_payload(
         builder,
         type_::variant::compile_payload(type_, types)?,
         payload.clone(),
@@ -108,7 +108,7 @@ fn unbox_payload(
     )
 }
 
-fn compile_payload_bit_cast(
+fn bit_cast_payload(
     builder: &fmm::build::InstructionBuilder,
     to_type: impl Into<fmm::types::Type>,
     argument: impl Into<fmm::build::TypedExpression>,
