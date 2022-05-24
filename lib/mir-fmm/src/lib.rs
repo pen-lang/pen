@@ -164,6 +164,13 @@ mod tests {
         )
     });
 
+    static VARIANT_UNBOXED_RECORD_DEFINITION: Lazy<mir::ir::TypeDefinition> = Lazy::new(|| {
+        mir::ir::TypeDefinition::new(
+            "a",
+            mir::types::RecordBody::new(vec![mir::types::Type::Number, mir::types::Type::Number]),
+        )
+    });
+
     fn compile_module(module: &mir::ir::Module) {
         let module = compile(module, &CONFIGURATION).unwrap();
 
@@ -196,10 +203,10 @@ mod tests {
     }
 
     fn create_module_with_type_definitions(
-        variant_definitions: Vec<mir::ir::TypeDefinition>,
+        type_definitions: Vec<mir::ir::TypeDefinition>,
         definitions: Vec<mir::ir::FunctionDefinition>,
     ) -> mir::ir::Module {
-        mir::ir::Module::new(variant_definitions, vec![], vec![], vec![], definitions)
+        mir::ir::Module::new(type_definitions, vec![], vec![], vec![], definitions)
     }
 
     #[test]
@@ -864,6 +871,29 @@ mod tests {
                     ),
                 ]));
             }
+
+            #[test]
+            fn compile_unboxed_large_record() {
+                let record_type = mir::types::Record::new("a");
+
+                compile_module(&create_module_with_type_definitions(
+                    vec![VARIANT_UNBOXED_RECORD_DEFINITION.clone()],
+                    vec![mir::ir::FunctionDefinition::new(
+                        "f",
+                        vec![mir::ir::Argument::new("x", mir::types::Type::Variant)],
+                        mir::ir::Case::new(
+                            mir::ir::Variable::new("x"),
+                            vec![mir::ir::Alternative::new(
+                                record_type.clone(),
+                                "y",
+                                mir::ir::Variable::new("y"),
+                            )],
+                            None,
+                        ),
+                        record_type,
+                    )],
+                ));
+            }
         }
 
         mod record {
@@ -1196,6 +1226,21 @@ mod tests {
                             mir::types::Type::ByteString,
                             mir::ir::ByteString::new("foo"),
                         ),
+                        mir::types::Type::Variant,
+                    )],
+                ));
+            }
+
+            #[test]
+            fn compile_unboxed_large_record() {
+                let record_type = mir::types::Record::new("a");
+
+                compile_module(&create_module_with_type_definitions(
+                    vec![VARIANT_UNBOXED_RECORD_DEFINITION.clone()],
+                    vec![mir::ir::FunctionDefinition::new(
+                        "f",
+                        vec![mir::ir::Argument::new("x", record_type.clone())],
+                        mir::ir::Variant::new(record_type, mir::ir::Variable::new("x")),
                         mir::types::Type::Variant,
                     )],
                 ));
