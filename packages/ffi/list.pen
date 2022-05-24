@@ -1,7 +1,3 @@
-type boxAny {
-  value any
-}
-
 type firstRest {
   ok boolean
   first \() any
@@ -12,8 +8,8 @@ foreign "c" pen_ffi_list_create = \() [any] {
   [any]
 }
 
-foreign "c" pen_ffi_list_prepend = \(x boxAny, xs [any]) [any] {
-  [any x.value, ...xs]
+foreign "c" pen_ffi_list_prepend = \(x any, xs [any]) [any] {
+  [any x, ...xs]
 }
 
 foreign pen_ffi_list_first_rest = \(xs [any]) firstRest {
