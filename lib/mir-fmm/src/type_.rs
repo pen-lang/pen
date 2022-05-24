@@ -81,12 +81,17 @@ pub fn compile_record(
     }
 }
 
-// TODO
 pub fn is_record_boxed(
     record: &mir::types::Record,
     types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> bool {
-    !types[record.name()].fields().is_empty()
+    let body_type = &types[record.name()];
+
+    body_type.fields().len() > 2
+        || body_type
+            .fields()
+            .iter()
+            .any(|type_| matches!(type_, mir::types::Type::Record(_)))
 }
 
 pub fn compile_boxed_record() -> fmm::types::Type {

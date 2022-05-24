@@ -31,10 +31,18 @@ pub fn should_box_payload(
     })
 }
 
-// TODO
 fn is_record_boxed(
     record: &mir::types::Record,
     types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> bool {
-    !types[record.name()].fields().is_empty()
+    let body_type = &types[record.name()];
+
+    body_type.fields().len() > 1
+        || body_type.fields().iter().any(|type_| {
+            // Variants always take two words.
+            matches!(
+                type_,
+                mir::types::Type::Record(_) | mir::types::Type::Variant
+            )
+        })
 }
