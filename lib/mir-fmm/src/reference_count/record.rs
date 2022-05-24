@@ -2,8 +2,7 @@ use super::{
     super::{error::CompileError, type_},
     expression, pointer, record_utilities,
 };
-use crate::context::Context;
-use fnv::FnvHashMap;
+use crate::{context::Context, record};
 
 const ARGUMENT_NAME: &str = "_record";
 
@@ -25,31 +24,9 @@ pub fn compile_clone_function(
 
             Ok(
                 builder.return_(if type_::is_record_boxed(&record_type, context.types()) {
-                    pointer::clone(&builder, &record)?
+                    clone_boxed(&builder, &record)?
                 } else {
-                    fmm::build::record(
-                        definition
-                            .type_()
-                            .fields()
-                            .iter()
-                            .enumerate()
-                            .map(|(index, type_)| {
-                                expression::clone(
-                                    &builder,
-                                    &crate::record::get_record_field(
-                                        &builder,
-                                        &record,
-                                        &record_type,
-                                        index,
-                                        context.types(),
-                                    )?,
-                                    type_,
-                                    context.types(),
-                                )
-                            })
-                            .collect::<Result<_, _>>()?,
-                    )
-                    .into()
+                    clone_unboxed(context, &builder, &record, &record_type)?
                 }),
             )
         },
@@ -78,11 +55,9 @@ pub fn compile_drop_function(
             let record = fmm::build::variable(ARGUMENT_NAME, fmm_record_type.clone());
 
             if type_::is_record_boxed(&record_type, context.types()) {
-                pointer::drop(&builder, &record, |builder| {
-                    drop_record_fields(builder, &record, &record_type, context.types())
-                })?;
+                drop_boxed(context, &builder, &record, &record_type)?
             } else {
-                drop_record_fields(&builder, &record, &record_type, context.types())?;
+                drop_unboxed(context, &builder, &record, &record_type)?;
             }
 
             Ok(builder.return_(fmm::ir::VOID_VALUE.clone()))
@@ -118,7 +93,12 @@ pub fn compile_drop_or_reuse_function(
 
             Ok(
                 builder.return_(pointer::drop_or_reuse(&builder, &record, |builder| {
-                    drop_record_fields(builder, &record, &record_type, context.types())
+                    drop_unboxed(
+                        context,
+                        builder,
+                        &record::load(context, builder, &record, &record_type)?,
+                        &record_type,
+                    )
                 })?),
             )
         },
@@ -130,18 +110,71 @@ pub fn compile_drop_or_reuse_function(
     Ok(())
 }
 
-fn drop_record_fields(
+fn clone_boxed(
+    builder: &fmm::build::InstructionBuilder,
+    record: &fmm::build::TypedExpression,
+) -> Result<fmm::build::TypedExpression, CompileError> {
+    pointer::clone(builder, record)
+}
+
+fn clone_unboxed(
+    context: &Context,
     builder: &fmm::build::InstructionBuilder,
     record: &fmm::build::TypedExpression,
     record_type: &mir::types::Record,
-    types: &FnvHashMap<String, mir::types::RecordBody>,
+) -> Result<fmm::build::TypedExpression, CompileError> {
+    Ok(fmm::build::record(
+        context.types()[record_type.name()]
+            .fields()
+            .iter()
+            .enumerate()
+            .map(|(index, type_)| {
+                expression::clone(
+                    builder,
+                    &record::get_unboxed_field(builder, record, index)?,
+                    type_,
+                    context.types(),
+                )
+            })
+            .collect::<Result<_, _>>()?,
+    )
+    .into())
+}
+
+fn drop_boxed(
+    context: &Context,
+    builder: &fmm::build::InstructionBuilder,
+    record: &fmm::build::TypedExpression,
+    record_type: &mir::types::Record,
 ) -> Result<(), CompileError> {
-    for (index, type_) in types[record_type.name()].fields().iter().enumerate() {
+    pointer::drop(builder, record, |builder| {
+        drop_unboxed(
+            context,
+            builder,
+            &record::load(context, builder, record, record_type)?,
+            record_type,
+        )
+    })?;
+
+    Ok(())
+}
+
+fn drop_unboxed(
+    context: &Context,
+    builder: &fmm::build::InstructionBuilder,
+    record: &fmm::build::TypedExpression,
+    record_type: &mir::types::Record,
+) -> Result<(), CompileError> {
+    for (index, type_) in context.types()[record_type.name()]
+        .fields()
+        .iter()
+        .enumerate()
+    {
         expression::drop(
             builder,
-            &crate::record::get_record_field(builder, record, record_type, index, types)?,
+            &record::get_unboxed_field(builder, record, index)?,
             type_,
-            types,
+            context.types(),
         )?;
     }
 

@@ -1,3 +1,6 @@
+pub mod foreign;
+pub mod variant;
+
 use fnv::FnvHashMap;
 
 pub const FUNCTION_ARGUMENT_OFFSET: usize = 1;
@@ -63,7 +66,7 @@ pub fn compile_variant_payload() -> fmm::types::Primitive {
     fmm::types::Primitive::Integer64
 }
 
-pub fn compile_type_id(type_: &mir::types::Type) -> String {
+pub fn compile_id(type_: &mir::types::Type) -> String {
     format!("{:?}", type_)
 }
 
@@ -78,9 +81,7 @@ pub fn compile_record(
     }
 }
 
-// We can potentially optimize record type representation by unboxing small
-// records. But we don't currently because that requires implementation of the
-// same unboxing logic in FFI.
+// TODO
 pub fn is_record_boxed(
     record: &mir::types::Record,
     types: &FnvHashMap<String, mir::types::RecordBody>,
@@ -191,22 +192,6 @@ pub fn compile_entry_function(
 // We can't type this strongly as F-- doesn't support recursive types.
 pub fn compile_untyped_closure_pointer() -> fmm::types::Pointer {
     fmm::types::Pointer::new(fmm::types::Record::new(vec![]))
-}
-
-pub fn compile_foreign_function(
-    function: &mir::types::Function,
-    calling_convention: mir::ir::CallingConvention,
-    types: &FnvHashMap<String, mir::types::RecordBody>,
-) -> fmm::types::Function {
-    fmm::types::Function::new(
-        function
-            .arguments()
-            .iter()
-            .map(|type_| compile(type_, types))
-            .collect(),
-        compile(function.result(), types),
-        compile_calling_convention(calling_convention),
-    )
 }
 
 fn compile_calling_convention(

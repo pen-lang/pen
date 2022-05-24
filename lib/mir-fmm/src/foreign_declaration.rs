@@ -1,13 +1,15 @@
 use crate::{
     closure,
     context::Context,
+    foreign_value,
     type_::{self, FUNCTION_ARGUMENT_OFFSET},
+    CompileError,
 };
 
 pub fn compile_foreign_declaration(
     context: &Context,
     declaration: &mir::ir::ForeignDeclaration,
-) -> Result<(), fmm::build::BuildError> {
+) -> Result<(), CompileError> {
     context.module_builder().define_variable(
         declaration.name(),
         closure::compile_closure_content(
@@ -26,7 +28,7 @@ pub fn compile_foreign_declaration(
 fn compile_entry_function(
     context: &Context,
     declaration: &mir::ir::ForeignDeclaration,
-) -> Result<fmm::build::TypedExpression, fmm::build::BuildError> {
+) -> Result<fmm::build::TypedExpression, CompileError> {
     let arguments = [fmm::ir::Argument::new(
         "_closure",
         type_::compile_untyped_closure_pointer(),
@@ -47,32 +49,40 @@ fn compile_entry_function(
     )
     .collect::<Vec<_>>();
 
-    let foreign_function_type = type_::compile_foreign_function(
-        declaration.type_(),
-        declaration.calling_convention(),
-        context.types(),
-    );
-
     context.module_builder().define_anonymous_function(
         arguments.clone(),
         |instruction_builder| {
-            Ok(instruction_builder.return_(
-                instruction_builder.call(
-                    context.module_builder().declare_function(
-                        declaration.foreign_name(),
-                        foreign_function_type.clone(),
-                    ),
-                    arguments
-                        .iter()
-                        .skip(FUNCTION_ARGUMENT_OFFSET)
-                        .map(|argument| {
-                            fmm::build::variable(argument.name(), argument.type_().clone())
-                        })
-                        .collect(),
-                )?,
-            ))
+            Ok(
+                instruction_builder.return_(foreign_value::convert_from_foreign(
+                    &instruction_builder,
+                    instruction_builder.call(
+                        context.module_builder().declare_function(
+                            declaration.foreign_name(),
+                            type_::foreign::compile_function(
+                                declaration.type_(),
+                                declaration.calling_convention(),
+                                context.types(),
+                            ),
+                        ),
+                        arguments[FUNCTION_ARGUMENT_OFFSET..]
+                            .iter()
+                            .zip(declaration.type_().arguments())
+                            .map(|(argument, type_)| {
+                                foreign_value::convert_to_foreign(
+                                    &instruction_builder,
+                                    fmm::build::variable(argument.name(), argument.type_().clone()),
+                                    type_,
+                                    context.types(),
+                                )
+                            })
+                            .collect::<Result<_, _>>()?,
+                    )?,
+                    declaration.type_().result(),
+                    context.types(),
+                )?),
+            )
         },
-        foreign_function_type.result().clone(),
+        type_::compile(declaration.type_().result(), context.types()),
         fmm::types::CallingConvention::Source,
     )
 }

@@ -109,12 +109,12 @@ pub fn compile(
             let field_index = field.index();
 
             let record = compile(field.record(), variables)?;
-            let field = record::get_record_field(
+            let field = record::get_field(
+                context,
                 instruction_builder,
                 &record,
                 field.type_(),
                 field.index(),
-                context.types(),
             )?;
 
             let field = reference_count::clone(
@@ -148,12 +148,12 @@ pub fn compile(
                         .iter()
                         .enumerate()
                         .map(|(index, field_type)| -> Result<_, CompileError> {
-                            let field = record::get_record_field(
+                            let field = record::get_field(
+                                context,
                                 builder,
                                 &record,
                                 update.type_(),
                                 index,
-                                context.types(),
                             )?;
 
                             Ok(if let Some(expression) = fields.get(&index) {
@@ -310,14 +310,12 @@ pub fn compile(
             compile_try_operation(context, instruction_builder, operation, variables)?
         }
         mir::ir::Expression::Variable(variable) => variables[variable.name()].clone(),
-        mir::ir::Expression::Variant(variant) => fmm::build::record(vec![
-            variant::compile_tag(variant.type_()),
-            variant::compile_boxed_payload(
-                instruction_builder,
-                &compile(variant.payload(), variables)?,
-            )?,
-        ])
-        .into(),
+        mir::ir::Expression::Variant(variant) => variant::upcast(
+            context,
+            instruction_builder,
+            &compile(variant.payload(), variables)?,
+            variant.type_(),
+        )?,
     })
 }
 
@@ -394,11 +392,11 @@ fn compile_alternatives(
                         .into_iter()
                         .chain([(
                             alternative.name().into(),
-                            variant::compile_unboxed_payload(
+                            variant::downcast(
+                                context,
                                 &instruction_builder,
-                                &instruction_builder.deconstruct_record(argument.clone(), 1)?,
+                                &argument,
                                 alternative.type_(),
-                                context.types(),
                             )?,
                         )])
                         .collect(),
@@ -655,11 +653,11 @@ fn compile_try_operation(
                     .into_iter()
                     .chain([(
                         operation.name().into(),
-                        variant::compile_unboxed_payload(
+                        variant::downcast(
+                            context,
                             &instruction_builder,
-                            &instruction_builder.deconstruct_record(operand.clone(), 1)?,
+                            &operand,
                             operation.type_(),
-                            context.types(),
                         )?,
                     )])
                     .collect(),

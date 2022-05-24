@@ -5,7 +5,6 @@ mod downcast;
 mod error;
 mod error_type_configuration;
 mod expression;
-mod ffi_variant_type_validator;
 mod generic_type_definition;
 mod list_type_configuration;
 mod main_function;
@@ -86,7 +85,6 @@ fn compile_module(
     let module = hir::analysis::analyze(context.analysis(), module)?;
     let module = record_equal_function::transform(context, &module)?;
     let module = record_hash_function::transform(context, &module)?;
-    ffi_variant_type_validator::validate(context, &module)?;
 
     Ok((
         {
