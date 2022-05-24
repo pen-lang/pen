@@ -87,7 +87,7 @@ pub fn is_record_boxed(
 ) -> bool {
     let body_type = &types[record.name()];
 
-    body_type.fields().len() > 2
+    body_type.fields().len() > 1
         || body_type
             .fields()
             .iter()
