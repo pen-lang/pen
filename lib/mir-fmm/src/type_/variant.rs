@@ -31,6 +31,7 @@ pub fn should_box_payload(
     })
 }
 
+// TODO
 fn is_record_boxed(
     record: &mir::types::Record,
     types: &FnvHashMap<String, mir::types::RecordBody>,
