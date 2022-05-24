@@ -87,6 +87,9 @@ pub fn is_record_boxed(
 ) -> bool {
     let body_type = &types[record.name()];
 
+    // Unbox small records.
+    // TODO Try unboxing 2-field records.
+    // TODO Check recursivity.
     body_type.fields().len() > 1
         || body_type
             .fields()

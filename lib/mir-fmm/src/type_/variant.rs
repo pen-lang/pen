@@ -31,6 +31,7 @@ pub fn should_box_payload(
     })
 }
 
+// Box records to stuff them into one word.
 fn is_record_boxed(
     record: &mir::types::Record,
     types: &FnvHashMap<String, mir::types::RecordBody>,
