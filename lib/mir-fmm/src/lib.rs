@@ -517,10 +517,7 @@ mod tests {
                 vec![mir::ir::FunctionDefinition::new(
                     "f",
                     vec![],
-                    mir::ir::Record::new(
-                        record_type.clone(),
-                        vec![mir::ir::Expression::Number(42.0)],
-                    ),
+                    mir::ir::Record::new(record_type, vec![mir::ir::Expression::Number(42.0)]),
                     mir::types::Record::new("a"),
                 )],
             ));
