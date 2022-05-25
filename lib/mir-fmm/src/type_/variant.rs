@@ -20,6 +20,10 @@ pub fn should_box_payload(
 ) -> Result<bool, CompileError> {
     Ok(match type_ {
         mir::types::Type::Record(record_type) => {
+            if type_::is_record_boxed(record_type, types) && !is_record_boxed(record_type, types) {
+                return Err(CompileError::UnboxedRecord);
+            }
+
             type_::is_record_boxed(record_type, types) != is_record_boxed(record_type, types)
         }
         mir::types::Type::Variant => return Err(CompileError::NestedVariant),

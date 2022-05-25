@@ -62,7 +62,7 @@ fn compile_entry_function(
                                 declaration.type_(),
                                 declaration.calling_convention(),
                                 context.types(),
-                            ),
+                            )?,
                         ),
                         arguments[FUNCTION_ARGUMENT_OFFSET..]
                             .iter()
