@@ -9,7 +9,7 @@ pub fn convert_to_foreign(
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     let value = value.into();
 
-    Ok(if type_::foreign::should_box_payload(type_, types) {
+    Ok(if type_::foreign::should_box_payload(type_, types)? {
         box_::box_(builder, value)?
     } else {
         value
@@ -24,7 +24,7 @@ pub fn convert_from_foreign(
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     let value = value.into();
 
-    Ok(if type_::foreign::should_box_payload(type_, types) {
+    Ok(if type_::foreign::should_box_payload(type_, types)? {
         box_::unbox(builder, value, type_, types)?
     } else {
         value

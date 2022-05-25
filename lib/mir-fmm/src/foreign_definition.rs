@@ -10,7 +10,7 @@ pub fn compile_foreign_definition(
         function_type,
         definition.calling_convention(),
         context.types(),
-    );
+    )?;
     let arguments = foreign_function_type
         .arguments()
         .iter()

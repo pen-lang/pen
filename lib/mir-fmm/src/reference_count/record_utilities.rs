@@ -2,15 +2,15 @@ use super::super::type_;
 use fnv::FnvHashMap;
 
 pub fn get_record_clone_function_name(name: &str) -> String {
-    format!("mir_clone_{}", name)
+    format!("mir_clone:{}", name)
 }
 
 pub fn get_record_drop_function_name(name: &str) -> String {
-    format!("mir_drop_{}", name)
+    format!("mir_drop:{}", name)
 }
 
 pub fn get_record_drop_or_reuse_function_name(name: &str) -> String {
-    format!("mir_drop_or_reuse_{}", name)
+    format!("mir_drop_or_reuse:{}", name)
 }
 
 pub fn compile_record_clone_function_type(

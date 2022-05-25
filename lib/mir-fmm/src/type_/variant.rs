@@ -20,6 +20,10 @@ pub fn should_box_payload(
 ) -> Result<bool, CompileError> {
     Ok(match type_ {
         mir::types::Type::Record(record_type) => {
+            if type_::is_record_boxed(record_type, types) && !is_record_boxed(record_type, types) {
+                return Err(CompileError::UnboxedRecord);
+            }
+
             type_::is_record_boxed(record_type, types) != is_record_boxed(record_type, types)
         }
         mir::types::Type::Variant => return Err(CompileError::NestedVariant),
@@ -31,10 +35,13 @@ pub fn should_box_payload(
     })
 }
 
-// TODO
+// Box records to stuff them into one word.
 fn is_record_boxed(
     record: &mir::types::Record,
     types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> bool {
-    !types[record.name()].fields().is_empty()
+    let body_type = &types[record.name()];
+
+    // TODO
+    !body_type.fields().is_empty()
 }
