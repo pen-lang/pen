@@ -256,7 +256,7 @@ checksum = "279fb028e20b3c4c320317955b77c5e0c9701f05a1d309905d6fc702cdc5053e"
 [[package]]
 name = "fmm"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#cf99ea5e5497efe6bd24971e37ad35467960b0de"
+source = "git+https://github.com/raviqqe/fmm?branch=main#8aeebaa14a57470fe365a9e271b822872a4c6eb4"
 dependencies = [
  "fnv",
  "hamt",
@@ -268,7 +268,7 @@ dependencies = [
 [[package]]
 name = "fmm-c"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#cf99ea5e5497efe6bd24971e37ad35467960b0de"
+source = "git+https://github.com/raviqqe/fmm?branch=main#8aeebaa14a57470fe365a9e271b822872a4c6eb4"
 dependencies = [
  "fmm",
  "fnv",
@@ -278,7 +278,7 @@ dependencies = [
 [[package]]
 name = "fmm-llvm"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#cf99ea5e5497efe6bd24971e37ad35467960b0de"
+source = "git+https://github.com/raviqqe/fmm?branch=main#8aeebaa14a57470fe365a9e271b822872a4c6eb4"
 dependencies = [
  "fmm",
  "hamt",
@@ -676,9 +676,9 @@ dependencies = [
 
 [[package]]
 name = "once_cell"
-version = "1.11.0"
+version = "1.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7b10983b38c53aebdf33f542c6275b0f58a238129d00c4ae0e6fb59738d783ca"
+checksum = "7709cef83f0c1f58f666e746a08b21e0085f7440fa6a29cc194d68aac97a4225"
 
 [[package]]
 name = "os_str_bytes"
