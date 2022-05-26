@@ -45,6 +45,9 @@ fn is_record_boxed(
     body_type.fields().len() > 1
         || body_type.fields().iter().any(|type_| {
             // Variants always take two words.
-            matches!(type_, mir::types::Type::Variant)
+            matches!(
+                type_,
+                mir::types::Type::Record(_) | mir::types::Type::Variant
+            )
         })
 }
