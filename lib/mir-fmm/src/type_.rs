@@ -81,11 +81,12 @@ pub fn compile_record(
     }
 }
 
+// Box large records. This logic needs to be simple because we also use the
+// same logic for FFI.
 pub fn is_record_boxed(
     record: &mir::types::Record,
     types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> bool {
-    // Unbox small records.
     // TODO Try unboxing 2-field records. That needs recursivity check.
     types[record.name()].fields().len() > 1
 }

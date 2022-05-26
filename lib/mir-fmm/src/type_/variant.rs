@@ -35,19 +35,17 @@ pub fn should_box_payload(
     })
 }
 
-// Box records to stuff them into one word.
+// Box large records to stuff them into one word.
 fn is_record_boxed(
     record: &mir::types::Record,
     types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> bool {
     let body_type = &types[record.name()];
 
+    // Variants always take two words.
     body_type.fields().len() > 1
-        || body_type.fields().iter().any(|type_| {
-            // Variants always take two words.
-            matches!(
-                type_,
-                mir::types::Type::Record(_) | mir::types::Type::Variant
-            )
-        })
+        || body_type
+            .fields()
+            .iter()
+            .any(|type_| matches!(type_, mir::types::Type::Variant))
 }
