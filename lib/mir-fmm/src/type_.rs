@@ -87,7 +87,7 @@ pub fn is_record_boxed(
     record: &mir::types::Record,
     types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> bool {
-    // TODO Try unboxing 2-field records. That needs recursivity check.
+    // TODO Try unboxing 2-field records. That requires recursivity check.
     types[record.name()].fields().len() > 1
 }
 
