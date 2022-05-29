@@ -1,9 +1,9 @@
 # Summary
 
 - [Introduction](README.md)
+  - [Install](introduction/install.md)
+  - [Getting started](introduction/getting-started.md)
 - [Guides](guides/README.md)
-  - [Getting started](guides/getting-started.md)
-  - [Install](guides/install.md)
   - [Testing](guides/testing.md)
   - [Concurrency and parallelism](guides/concurrency-and-parallelism.md)
   - [Coding style](guides/coding-style.md)
