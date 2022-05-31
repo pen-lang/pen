@@ -1,5 +1,9 @@
 use super::{super::error::CompileError, heap};
 
+const STATIC_BIT_MASK: usize = 0b1;
+const SYNC_BIT_MASK: usize = 0b10;
+const POINTER_MASK: usize = STATIC_BIT_MASK && SYNC_BIT_MASK;
+
 pub fn clone(
     builder: &fmm::build::InstructionBuilder,
     pointer: &fmm::build::TypedExpression,
@@ -154,7 +158,7 @@ pub fn untag(
         fmm::build::bitwise_operation(
             fmm::ir::BitwiseOperator::And,
             fmm::build::bit_cast(fmm::types::Primitive::PointerInteger, pointer.clone()),
-            fmm::build::bitwise_not_operation(fmm::ir::Primitive::PointerInteger(1))?,
+            fmm::build::bitwise_not_operation(fmm::ir::Primitive::PointerInteger(POINTER_MASK))?,
         )?,
     )
     .into())
