@@ -1,5 +1,5 @@
 <!DOCTYPE HTML>
-<html lang="en" class="sidebar-visible no-js light">
+<html lang="en" class="sidebar-visible no-js rust">
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
@@ -11,8 +11,11 @@
   data-domain="pen-lang.org"
   src="https://plausible.io/js/plausible.js"
 ></script>
+<style>
+  code { border-radius: 3px; }
+</style>
         <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
-        <meta name="description" content="">
+        <meta name="description" content="The programming language for scalable development">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="theme-color" content="#ffffff" />
 
@@ -36,7 +39,7 @@
         <!-- Provide site root to javascript -->
         <script type="text/javascript">
             var path_to_root = "";
-            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "rust";
         </script>
 
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
@@ -62,7 +65,7 @@
             if (theme === null || theme === undefined) { theme = default_theme; }
             var html = document.querySelector('html');
             html.classList.remove('no-js')
-            html.classList.remove('light')
+            html.classList.remove('rust')
             html.classList.add(theme);
             html.classList.add('js');
         </script>
@@ -99,8 +102,8 @@
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
-                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
-                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust (default)</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
@@ -170,10 +173,10 @@ main = \(ctx context) none {
 }
 </code></pre>
 <h2 id="install"><a class="header" href="#install">Install</a></h2>
-<p>See <a href="https://pen-lang.org/guides/install.html">Install</a>.</p>
+<p>See <a href="https://pen-lang.org/introduction/install.html">Install</a>.</p>
 <h2 id="documentation"><a class="header" href="#documentation">Documentation</a></h2>
 <ul>
-<li><a href="https://pen-lang.org/guides/getting-started.html">Getting started</a></li>
+<li><a href="https://pen-lang.org/introduction/getting-started.html">Getting started</a></li>
 <li><a href="https://pen-lang.org/references/language/syntax.html">Language reference</a></li>
 <li>Code examples
 <ul>
@@ -3089,7 +3092,7 @@ f = \(x number) number {
 <table><thead><tr><th>Argument</th><th>Required</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>-t &lt;target&gt;</code></td><td>No</td><td>Custom target triple of builds</td></tr>
 </tbody></table>
-<p>One of examples in practice is <a href="https://github.com/pen-lang/pen/blob/main/lib/core/pen-ffi.sh">a <code>pen-ffi.sh</code> file in the <code>Core</code> library</a>.</p>
+<p>One of examples in practice is <a href="https://github.com/pen-lang/pen/blob/main/packages/core/pen-ffi.sh">a <code>pen-ffi.sh</code> file in the <code>Core</code> library</a>.</p>
 <h2 id="native-calling-convention-in-pen"><a class="header" href="#native-calling-convention-in-pen">Native calling convention in Pen</a></h2>
 <blockquote>
 <p>WIP</p>
@@ -3166,7 +3169,7 @@ Print = \(s string) none {
 </tbody></table>
 <p>At the liking phase, compiled main functions are available under a symbol named <code>_pen_main</code> with the language's native calling convention.</p>
 <h2 id="examples-4"><a class="header" href="#examples-4">Examples</a></h2>
-<p><a href="https://github.com/pen-lang/pen/tree/main/lib/os">The <code>Os</code> standard package</a> is an example of system packages.</p>
+<p><a href="https://github.com/pen-lang/pen/tree/main/packages/os">The <code>Os</code> standard package</a> is an example of system packages.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="roadmap"><a class="header" href="#roadmap">Roadmap</a></h1>
 <p>Items are ordered by priority.</p>
 <ul>
@@ -3242,7 +3245,7 @@ Self-hosting!?</li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="the-zen"><a class="header" href="#the-zen">The Zen</a></h1>
 <ul>
-<li>Integrated values over spontaneous values</li>
+<li>Steady value over momentary value</li>
 <li>Beautiful is better than ugly.</li>
 <li>Explicit is better than implicit.</li>
 <li>Simple is better than complex.</li>
