@@ -92,4 +92,4 @@ At the liking phase, compiled main functions are available under a symbol named 
 
 ## Examples
 
-[The `Os` standard package](https://github.com/pen-lang/pen/tree/main/lib/os) is an example of system packages.
+[The `Os` standard package](https://github.com/pen-lang/pen/tree/main/packages/os) is an example of system packages.
