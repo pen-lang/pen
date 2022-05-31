@@ -1,6 +1,6 @@
 # The Zen
 
-- Steady value over spontaneous value
+- Steady value over momentary value
 - Beautiful is better than ugly.
 - Explicit is better than implicit.
 - Simple is better than complex.
