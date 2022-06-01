@@ -200,7 +200,7 @@ fn get_counter_pointer(
 ) -> Result<fmm::build::TypedExpression, fmm::build::BuildError> {
     Ok(fmm::build::pointer_address(
         fmm::build::bit_cast(
-            fmm::types::Pointer::new(heap::COUNT_TYPE),
+            fmm::types::Pointer::new(heap::COUNT_TYPE.clone()),
             heap_pointer.clone(),
         ),
         fmm::ir::Primitive::PointerInteger(-1),
