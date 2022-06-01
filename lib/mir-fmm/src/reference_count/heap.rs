@@ -1,13 +1,12 @@
 use super::super::error::CompileError;
 use once_cell::sync::Lazy;
 
-pub(super) static HEADER_TYPE: Lazy<fmm::types::Record> = Lazy::new(|| {
-    fmm::types::Record::new(vec![
-        fmm::types::Primitive::Integer32.into(), // count
-        fmm::types::Primitive::Integer32.into(), // tag
-    ])
-});
+const COUNT_TYPE: fmm::types::Primitive = fmm::types::Primitive::Integer32;
+const TAG_TYPE: fmm::types::Primitive = fmm::types::Primitive::Integer32;
 pub(super) const INITIAL_COUNT: usize = 0;
+
+pub(super) static HEADER_TYPE: Lazy<fmm::types::Record> =
+    Lazy::new(|| fmm::types::Record::new(vec![COUNT_TYPE.into(), TAG_TYPE.into()]));
 
 pub fn allocate(
     builder: &fmm::build::InstructionBuilder,
