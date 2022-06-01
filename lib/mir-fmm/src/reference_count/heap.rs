@@ -1,7 +1,7 @@
 use super::super::error::CompileError;
 use once_cell::sync::Lazy;
 
-pub(super) static COUNT_TYPE: Lazy<fmm::types::Record> = Lazy::new(|| {
+pub(super) static HEADER_TYPE: Lazy<fmm::types::Record> = Lazy::new(|| {
     fmm::types::Record::new(vec![
         fmm::types::Primitive::Integer32.into(), // count
         fmm::types::Primitive::Integer32.into(), // tag
@@ -16,11 +16,11 @@ pub fn allocate(
     let type_ = type_.into();
     let pointer = fmm::build::bit_cast(
         fmm::types::Pointer::new(fmm::types::Record::new(vec![
-            COUNT_TYPE.clone().into(),
+            HEADER_TYPE.clone().into(),
             type_.clone(),
         ])),
         builder.allocate_heap(fmm::build::size_of(fmm::types::Record::new(vec![
-            COUNT_TYPE.clone().into(),
+            HEADER_TYPE.clone().into(),
             type_,
         ]))),
     );
