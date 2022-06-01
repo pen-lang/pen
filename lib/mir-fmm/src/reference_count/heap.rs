@@ -1,6 +1,6 @@
 use super::super::error::CompileError;
 
-pub(super) const COUNT_TYPE: fmm::types::Primitive = fmm::types::Primitive::PointerInteger;
+pub(super) const COUNT_TYPE: fmm::types::Primitive = fmm::types::Primitive::Integer64;
 pub(super) const INITIAL_COUNT: usize = 0;
 
 pub fn allocate(
