@@ -15,7 +15,7 @@ expression: "fmm::analysis::format_module(&context.module_builder().as_module())
   (function _fmm_0 _closure
     (block
       (allocate-heap (size-of record) _fmm_1)
-      (store 0 (record-address (bit-cast _fmm_1) 0))
+      (store (record 0 0) (record-address (bit-cast _fmm_1) 0))
       (store (record _fmm_2 _fmm_5 (record)) (record-address (bit-cast _fmm_1) 1))
       (atomic-load (record-address (bit-cast (bit& (bit-cast (bit-cast (record-address (bit-cast _fmm_1) 1))) (bit! 1))) 0) _fmm_7)
       (call _fmm_7 (bit-cast (bit-cast (record-address (bit-cast _fmm_1) 1))) _fmm_8)
