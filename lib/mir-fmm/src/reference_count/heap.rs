@@ -2,6 +2,7 @@ use super::{super::error::CompileError, count};
 use once_cell::sync::Lazy;
 
 const TAG_TYPE: fmm::types::Primitive = fmm::types::Primitive::Integer32;
+const EMPTY_TAG: fmm::ir::Primitive = fmm::ir::Primitive::Integer32(0);
 
 static HEADER_TYPE: Lazy<fmm::types::Record> =
     Lazy::new(|| fmm::types::Record::new(vec![count::compile_type().into(), TAG_TYPE.into()]));
@@ -23,7 +24,7 @@ pub fn allocate(
     );
 
     builder.store(
-        count::compile_initial(),
+        fmm::build::record(vec![count::compile_initial().into(), EMPTY_TAG.into()]),
         fmm::build::record_address(pointer.clone(), 0)?,
     );
 
