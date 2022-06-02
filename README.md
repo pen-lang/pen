@@ -32,11 +32,11 @@ main = \(ctx context) none {
 
 ## Install
 
-See [Install](https://pen-lang.org/guides/install.html).
+See [Install](https://pen-lang.org/introduction/install.html).
 
 ## Documentation
 
-- [Getting started](https://pen-lang.org/guides/getting-started.html)
+- [Getting started](https://pen-lang.org/introduction/getting-started.html)
 - [Language reference][syntax]
 - Code examples
   - [Applications and libraries](https://github.com/pen-lang/pen/tree/main/examples)

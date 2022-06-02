@@ -256,7 +256,7 @@ checksum = "279fb028e20b3c4c320317955b77c5e0c9701f05a1d309905d6fc702cdc5053e"
 [[package]]
 name = "fmm"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#8aeebaa14a57470fe365a9e271b822872a4c6eb4"
+source = "git+https://github.com/raviqqe/fmm?branch=main#c7544b824e7f624011258139e95ee98c3b9e450a"
 dependencies = [
  "fnv",
  "hamt",
@@ -268,7 +268,7 @@ dependencies = [
 [[package]]
 name = "fmm-c"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#8aeebaa14a57470fe365a9e271b822872a4c6eb4"
+source = "git+https://github.com/raviqqe/fmm?branch=main#c7544b824e7f624011258139e95ee98c3b9e450a"
 dependencies = [
  "fmm",
  "fnv",
@@ -278,7 +278,7 @@ dependencies = [
 [[package]]
 name = "fmm-llvm"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#8aeebaa14a57470fe365a9e271b822872a4c6eb4"
+source = "git+https://github.com/raviqqe/fmm?branch=main#c7544b824e7f624011258139e95ee98c3b9e450a"
 dependencies = [
  "fmm",
  "hamt",
@@ -500,7 +500,7 @@ dependencies = [
 [[package]]
 name = "inkwell"
 version = "0.1.0"
-source = "git+https://github.com/TheDan64/inkwell?branch=master#02fb7045f7a952c80bc983e19093c62c6ccffe3d"
+source = "git+https://github.com/TheDan64/inkwell?branch=master#df15bd63980d4e0b3231178a652368318a2b3179"
 dependencies = [
  "either",
  "inkwell_internals",
@@ -513,7 +513,7 @@ dependencies = [
 [[package]]
 name = "inkwell_internals"
 version = "0.5.0"
-source = "git+https://github.com/TheDan64/inkwell?branch=master#02fb7045f7a952c80bc983e19093c62c6ccffe3d"
+source = "git+https://github.com/TheDan64/inkwell?branch=master#df15bd63980d4e0b3231178a652368318a2b3179"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -522,9 +522,9 @@ dependencies = [
 
 [[package]]
 name = "insta"
-version = "1.14.0"
+version = "1.14.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "689960f187c43c01650c805fb6bc6f55ab944499d86d4ffe9474ad78991d8e94"
+checksum = "bcc3e639bcba360d9237acabd22014c16f3df772db463b7446cd81b070714767"
 dependencies = [
  "console",
  "once_cell",
@@ -783,9 +783,9 @@ dependencies = [
 
 [[package]]
 name = "petgraph"
-version = "0.6.1"
+version = "0.6.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "51b305cc4569dd4e8765bab46261f67ef5d4d11a4b6e745100ee5dad8948b46c"
+checksum = "e6d5014253a1331579ce62aa67443b4a658c5e7dd03d4bc6d302b94474888143"
 dependencies = [
  "fixedbitset",
  "indexmap",
