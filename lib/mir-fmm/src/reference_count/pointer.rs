@@ -1,4 +1,4 @@
-use super::{super::error::CompileError, heap};
+use super::{super::error::CompileError, count, heap};
 
 pub fn clone(
     builder: &fmm::build::InstructionBuilder,
@@ -88,12 +88,11 @@ pub fn is_owned(
         |builder| {
             Ok(builder.branch(fmm::build::comparison_operation(
                 fmm::ir::ComparisonOperator::Equal,
-                // TODO Does this actually need to be atomic?
                 builder.atomic_load(
-                    get_counter_pointer(pointer)?,
+                    heap::get_counter_pointer(pointer)?,
                     fmm::ir::AtomicOrdering::Relaxed,
                 )?,
-                fmm::ir::Primitive::PointerInteger(heap::INITIAL_COUNT as i64),
+                count::compile_initial(),
             )?))
         },
         |builder| Ok(builder.branch(fmm::ir::Primitive::Boolean(false))),
@@ -107,8 +106,8 @@ fn increment_count(
 ) -> Result<(), CompileError> {
     builder.atomic_operation(
         fmm::ir::AtomicOperator::Add,
-        get_counter_pointer(pointer)?,
-        fmm::ir::Primitive::PointerInteger(1),
+        heap::get_counter_pointer(pointer)?,
+        count::compile(1),
         ordering,
     )?;
 
@@ -123,11 +122,11 @@ fn decrement_and_compare_count(
         fmm::ir::ComparisonOperator::Equal,
         builder.atomic_operation(
             fmm::ir::AtomicOperator::Subtract,
-            get_counter_pointer(pointer)?,
-            fmm::ir::Primitive::PointerInteger(1),
+            heap::get_counter_pointer(pointer)?,
+            count::compile(1),
             fmm::ir::AtomicOrdering::Release,
         )?,
-        fmm::ir::Primitive::PointerInteger(heap::INITIAL_COUNT as i64),
+        count::compile_initial(),
     )?
     .into())
 }
@@ -191,22 +190,6 @@ fn is_heap_pointer(
             fmm::ir::Primitive::PointerInteger(1),
         )?,
         fmm::ir::Primitive::PointerInteger(1),
-    )?
-    .into())
-}
-
-fn get_counter_pointer(
-    heap_pointer: &fmm::build::TypedExpression,
-) -> Result<fmm::build::TypedExpression, fmm::build::BuildError> {
-    Ok(fmm::build::record_address(
-        fmm::build::pointer_address(
-            fmm::build::bit_cast(
-                fmm::types::Pointer::new(heap::HEADER_TYPE.clone()),
-                heap_pointer.clone(),
-            ),
-            fmm::ir::Primitive::PointerInteger(-1),
-        )?,
-        0,
     )?
     .into())
 }

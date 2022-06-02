@@ -1,3 +1,4 @@
+mod count;
 mod expression;
 pub mod function;
 pub mod heap;
