@@ -2,10 +2,11 @@ use alloc::alloc::{alloc, dealloc};
 use core::{
     alloc::Layout,
     ptr::{drop_in_place, null},
-    sync::atomic::{fence, AtomicUsize, Ordering},
+    sync::atomic::{fence, AtomicU32, Ordering},
 };
 
-const INITIAL_COUNT: usize = 0;
+const INITIAL_COUNT: u32 = 0;
+const EMPTY_TAG: u32 = 0;
 
 #[derive(Debug)]
 #[repr(C)]
@@ -13,9 +14,16 @@ pub struct ArcBlock {
     pointer: *const u8,
 }
 
+#[derive(Debug)]
+#[repr(C)]
+struct ArcHeader {
+    count: AtomicU32,
+    tag: u32,
+}
+
 #[repr(C)]
 struct ArcInner {
-    count: AtomicUsize,
+    header: ArcHeader,
     payload: (),
 }
 
@@ -26,7 +34,10 @@ impl ArcBlock {
         } else {
             let pointer = unsafe { &mut *(alloc(Self::inner_layout(layout)) as *mut ArcInner) };
 
-            pointer.count = AtomicUsize::new(INITIAL_COUNT);
+            pointer.header = ArcHeader {
+                count: AtomicU32::new(INITIAL_COUNT),
+                tag: EMPTY_TAG,
+            };
 
             Self {
                 pointer: &pointer.payload as *const () as *const u8,
@@ -43,7 +54,7 @@ impl ArcBlock {
     }
 
     pub fn get_mut(&mut self) -> Option<*mut u8> {
-        if !self.is_static() && self.inner().count.load(Ordering::Acquire) == INITIAL_COUNT {
+        if !self.is_static() && self.inner().header.count.load(Ordering::Acquire) == INITIAL_COUNT {
             Some(self.ptr_mut())
         } else {
             None
@@ -69,7 +80,7 @@ impl ArcBlock {
     }
 
     fn inner_layout(layout: Layout) -> Layout {
-        Layout::new::<AtomicUsize>()
+        Layout::new::<ArcHeader>()
             .extend(layout)
             .unwrap()
             .0
@@ -78,7 +89,7 @@ impl ArcBlock {
 
     pub fn clone(&self) -> Self {
         if !self.is_static() {
-            self.inner().count.fetch_add(1, Ordering::Relaxed);
+            self.inner().header.count.fetch_add(1, Ordering::Relaxed);
         }
 
         Self {
@@ -91,7 +102,7 @@ impl ArcBlock {
             return;
         }
 
-        if self.inner().count.fetch_sub(1, Ordering::Release) == INITIAL_COUNT {
+        if self.inner().header.count.fetch_sub(1, Ordering::Release) == INITIAL_COUNT {
             fence(Ordering::Acquire);
 
             unsafe {
