@@ -809,7 +809,7 @@ fn compile_spawn_operation(
                         &any_type,
                         result_type,
                         &Call::new(
-                            Some(thunk_type.clone()),
+                            Some(thunk_type),
                             Variable::new(ANY_THUNK_NAME, position.clone()),
                             vec![],
                             position.clone(),
@@ -1688,7 +1688,7 @@ mod tests {
                             "$thunk",
                             vec![],
                             mir::ir::Call::new(
-                                thunk_type.clone(),
+                                thunk_type,
                                 mir::ir::Variable::new("$any_thunk"),
                                 vec![]
                             ),
