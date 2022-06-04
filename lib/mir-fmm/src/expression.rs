@@ -99,6 +99,7 @@ pub fn compile(
         mir::ir::Expression::LetRecursive(let_) => {
             compile_let_recursive(context, instruction_builder, let_, variables)?
         }
+        mir::ir::Expression::MarkSync(_) => todo!(),
         mir::ir::Expression::None => fmm::ir::Undefined::new(type_::compile_none()).into(),
         mir::ir::Expression::Number(number) => fmm::ir::Primitive::Float64(*number).into(),
         mir::ir::Expression::Record(record) => {
