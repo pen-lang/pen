@@ -178,7 +178,13 @@ fn check_expression(
                     .collect(),
             )?
         }
-        Expression::MarkSync(mark) => check_expression(mark.expression(), variables)?,
+        Expression::MarkSync(mark) => {
+            let type_ = check_expression(mark.expression(), variables)?;
+
+            check_equality(&type_, mark.type_())?;
+
+            type_
+        }
         Expression::None => Type::None,
         Expression::Number(_) => Type::Number,
         Expression::Record(record) => check_record(record, variables, result_type, types)?,
@@ -827,6 +833,42 @@ mod tests {
                     )
                 ])),
                 Err(TypeCheckError::VariantInVariant(_))
+            ));
+        }
+    }
+
+    mod mark_sync {
+        use super::*;
+
+        #[test]
+        fn check() {
+            assert_eq!(
+                check_types(&create_module_from_definitions(vec![
+                    FunctionDefinition::with_environment(
+                        "f",
+                        vec![],
+                        vec![Argument::new("x", Type::Number)],
+                        MarkSync::new(Type::Number, 42.0),
+                        Type::Number
+                    )
+                ],)),
+                Ok(())
+            );
+        }
+
+        #[test]
+        fn fail_to_check() {
+            assert!(matches!(
+                check_types(&create_module_from_definitions(vec![
+                    FunctionDefinition::with_environment(
+                        "f",
+                        vec![],
+                        vec![Argument::new("x", Type::Number)],
+                        MarkSync::new(Type::None, 42.0),
+                        Type::Number
+                    )
+                ],)),
+                Err(TypeCheckError::TypesNotMatched(_, _))
             ));
         }
     }
