@@ -1584,6 +1584,8 @@ mod tests {
 
         #[test]
         fn compile_spawn_operation() {
+            let thunk_type = mir::types::Function::new(vec![], mir::types::Type::Variant);
+
             assert_eq!(
                 compile_expression(
                     &SpawnOperation::new(
@@ -1599,7 +1601,7 @@ mod tests {
                 ),
                 Ok(mir::ir::Let::new(
                     "$any_thunk",
-                    mir::types::Function::new(vec![], mir::types::Type::Variant),
+                    thunk_type.clone(),
                     mir::ir::Call::new(
                         type_::compile_spawn_function(),
                         mir::ir::Variable::new(MODULE_LOCAL_SPAWN_FUNCTION_NAME),
@@ -1612,7 +1614,10 @@ mod tests {
                                 ),
                                 mir::types::Type::Variant
                             ),
-                            mir::ir::Variable::new("$any_thunk"),
+                            mir::ir::MarkSync::new(
+                                thunk_type.clone(),
+                                mir::ir::Variable::new("$any_thunk")
+                            ),
                         )
                         .into()]
                     ),
@@ -1622,7 +1627,7 @@ mod tests {
                             vec![],
                             mir::ir::Case::new(
                                 mir::ir::Call::new(
-                                    mir::types::Function::new(vec![], mir::types::Type::Variant),
+                                    thunk_type,
                                     mir::ir::Variable::new("$any_thunk"),
                                     vec![]
                                 ),
@@ -1644,6 +1649,8 @@ mod tests {
 
         #[test]
         fn compile_spawn_operation_with_any_type() {
+            let thunk_type = mir::types::Function::new(vec![], mir::types::Type::Variant);
+
             assert_eq!(
                 compile_expression(
                     &SpawnOperation::new(
@@ -1659,7 +1666,7 @@ mod tests {
                 ),
                 Ok(mir::ir::Let::new(
                     "$any_thunk",
-                    mir::types::Function::new(vec![], mir::types::Type::Variant),
+                    thunk_type.clone(),
                     mir::ir::Call::new(
                         type_::compile_spawn_function(),
                         mir::ir::Variable::new(MODULE_LOCAL_SPAWN_FUNCTION_NAME),
@@ -1669,7 +1676,10 @@ mod tests {
                                 mir::ir::Variable::new("x"),
                                 mir::types::Type::Variant
                             ),
-                            mir::ir::Variable::new("$any_thunk"),
+                            mir::ir::MarkSync::new(
+                                thunk_type.clone(),
+                                mir::ir::Variable::new("$any_thunk")
+                            ),
                         )
                         .into()]
                     ),
@@ -1678,7 +1688,7 @@ mod tests {
                             "$thunk",
                             vec![],
                             mir::ir::Call::new(
-                                mir::types::Function::new(vec![], mir::types::Type::Variant),
+                                thunk_type.clone(),
                                 mir::ir::Variable::new("$any_thunk"),
                                 vec![]
                             ),
