@@ -3,7 +3,7 @@ use super::{
     clone_variables::CloneVariables, comparison_operation::ComparisonOperation,
     drop_variables::DropVariables, if_::If, let_::Let, let_recursive::LetRecursive, record::Record,
     record_field::RecordField, try_operation::TryOperation, variable::Variable, variant::Variant,
-    DiscardHeap, RecordUpdate, RetainHeap, ReuseRecord,
+    DiscardHeap, MarkSync, RecordUpdate, RetainHeap, ReuseRecord,
 };
 
 #[derive(Clone, Debug, PartialEq)]
@@ -20,6 +20,7 @@ pub enum Expression {
     If(If),
     Let(Let),
     LetRecursive(LetRecursive),
+    MarkSync(MarkSync),
     None,
     Number(f64),
     Record(Record),
@@ -41,6 +42,24 @@ impl From<ArithmeticOperation> for Expression {
 impl From<bool> for Expression {
     fn from(bool: bool) -> Self {
         Self::Boolean(bool)
+    }
+}
+
+impl From<ByteString> for Expression {
+    fn from(string: ByteString) -> Self {
+        Self::ByteString(string)
+    }
+}
+
+impl From<Call> for Expression {
+    fn from(call: Call) -> Self {
+        Self::Call(call)
+    }
+}
+
+impl From<Case> for Expression {
+    fn from(case: Case) -> Self {
+        Self::Case(case)
     }
 }
 
@@ -68,9 +87,9 @@ impl From<DropVariables> for Expression {
     }
 }
 
-impl From<Call> for Expression {
-    fn from(call: Call) -> Self {
-        Self::Call(call)
+impl From<f64> for Expression {
+    fn from(number: f64) -> Self {
+        Self::Number(number)
     }
 }
 
@@ -92,15 +111,9 @@ impl From<Let> for Expression {
     }
 }
 
-impl From<f64> for Expression {
-    fn from(number: f64) -> Self {
-        Self::Number(number)
-    }
-}
-
-impl From<ByteString> for Expression {
-    fn from(string: ByteString) -> Self {
-        Self::ByteString(string)
+impl From<MarkSync> for Expression {
+    fn from(mark: MarkSync) -> Self {
+        Self::MarkSync(mark)
     }
 }
 
@@ -149,11 +162,5 @@ impl From<Variable> for Expression {
 impl From<Variant> for Expression {
     fn from(variant: Variant) -> Self {
         Self::Variant(variant)
-    }
-}
-
-impl From<Case> for Expression {
-    fn from(case: Case) -> Self {
-        Self::Case(case)
     }
 }

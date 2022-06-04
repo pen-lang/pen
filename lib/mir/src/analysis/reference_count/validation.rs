@@ -141,6 +141,9 @@ fn move_expression(
 
             validate_let_like(let_.definition().name(), let_.expression(), variables)?;
         }
+        Expression::MarkSync(mark) => {
+            move_expression(mark.expression(), variables)?;
+        }
         Expression::None => {}
         Expression::Number(_) => {}
         Expression::Record(record) => {

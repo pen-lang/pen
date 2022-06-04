@@ -178,6 +178,7 @@ fn check_expression(
                     .collect(),
             )?
         }
+        Expression::MarkSync(mark) => check_expression(mark.expression(), variables)?,
         Expression::None => Type::None,
         Expression::Number(_) => Type::Number,
         Expression::Record(record) => check_record(record, variables, result_type, types)?,

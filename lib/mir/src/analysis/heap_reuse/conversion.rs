@@ -248,6 +248,15 @@ fn convert_expression(
                 reused_blocks,
             )
         }
+        Expression::MarkSync(mark) => {
+            let (expression, reused_blocks) =
+                convert_expression(mark.expression(), dropped_blocks)?;
+
+            (
+                MarkSync::new(mark.type_().clone(), expression).into(),
+                reused_blocks,
+            )
+        }
         Expression::Record(record) => {
             let mut fields = vec![];
             let mut reused_blocks = HeapBlockSet::default();
