@@ -771,10 +771,11 @@ fn compile_spawn_operation(
     let result_type = operation.function().result_type();
     let any_type = Type::from(types::Any::new(position.clone()));
     let thunk_type = types::Function::new(vec![], any_type.clone(), position.clone()).into();
+    let mir_thunk_type = type_::compile(context, &thunk_type)?;
 
     Ok(mir::ir::Let::new(
         ANY_THUNK_NAME,
-        type_::compile(context, &thunk_type)?,
+        mir_thunk_type.clone(),
         mir::ir::Call::new(
             type_::compile_spawn_function(),
             mir::ir::Variable::new(MODULE_LOCAL_SPAWN_FUNCTION_NAME),
@@ -793,7 +794,7 @@ fn compile_spawn_operation(
                     )?,
                     type_::compile(context, &any_type)?,
                 ),
-                mir::ir::Variable::new(ANY_THUNK_NAME),
+                mir::ir::MarkSync::new(mir_thunk_type, mir::ir::Variable::new(ANY_THUNK_NAME)),
             )
             .into()],
         ),
