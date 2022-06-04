@@ -99,7 +99,9 @@ pub fn compile(
         mir::ir::Expression::LetRecursive(let_) => {
             compile_let_recursive(context, instruction_builder, let_, variables)?
         }
-        mir::ir::Expression::MarkSync(_) => todo!(),
+        mir::ir::Expression::MarkSync(mark) => {
+            compile_mark_sync(context, instruction_builder, mark, variables)?
+        }
         mir::ir::Expression::None => fmm::ir::Undefined::new(type_::compile_none()).into(),
         mir::ir::Expression::Number(number) => fmm::ir::Primitive::Float64(*number).into(),
         mir::ir::Expression::Record(record) => {
@@ -326,7 +328,7 @@ fn compile_if(
     if_: &mir::ir::If,
     variables: &FnvHashMap<String, fmm::build::TypedExpression>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    let compile = |instruction_builder: &fmm::build::InstructionBuilder, expression| {
+    let compile = |instruction_builder: &_, expression| {
         compile(context, instruction_builder, expression, variables)
     };
 
@@ -514,6 +516,16 @@ fn compile_let_recursive(
             )])
             .collect(),
     )
+}
+
+fn compile_mark_sync(
+    context: &Context,
+    instruction_builder: &fmm::build::InstructionBuilder,
+    mark: &mir::ir::MarkSync,
+    variables: &FnvHashMap<String, fmm::build::TypedExpression>,
+) -> Result<fmm::build::TypedExpression, CompileError> {
+    // TODO
+    compile(context, instruction_builder, mark.expression(), variables)
 }
 
 fn compile_arithmetic_operation(
