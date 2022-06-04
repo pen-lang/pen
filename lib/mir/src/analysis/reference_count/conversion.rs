@@ -419,7 +419,10 @@ fn convert_expression(
             let (expression, moved_variables) =
                 convert_expression(mark.expression(), owned_variables, moved_variables)?;
 
-            (MarkSync::new(expression).into(), moved_variables)
+            (
+                MarkSync::new(mark.type_().clone(), expression).into(),
+                moved_variables,
+            )
         }
         Expression::Record(record) => {
             let (fields, moved_variables) = record.fields().iter().rev().fold(

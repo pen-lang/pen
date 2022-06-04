@@ -252,7 +252,10 @@ fn convert_expression(
             let (expression, reused_blocks) =
                 convert_expression(mark.expression(), dropped_blocks)?;
 
-            (MarkSync::new(expression).into(), reused_blocks)
+            (
+                MarkSync::new(mark.type_().clone(), expression).into(),
+                reused_blocks,
+            )
         }
         Expression::Record(record) => {
             let mut fields = vec![];
