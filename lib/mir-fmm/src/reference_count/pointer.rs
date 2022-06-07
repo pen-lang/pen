@@ -1,5 +1,8 @@
 use super::{super::error::CompileError, count, heap};
 
+// Reference counts are negative for synchronized memory blocks and otherwise positive.
+// References to static memory blocks are tagged.
+
 pub fn clone(
     builder: &fmm::build::InstructionBuilder,
     pointer: &fmm::build::TypedExpression,
@@ -8,7 +11,35 @@ pub fn clone(
         builder,
         pointer,
         |builder| {
-            increment_count(&builder, pointer, fmm::ir::AtomicOrdering::Relaxed)?;
+            let count_pointer = heap::get_counter_pointer(pointer)?;
+            let count =
+                builder.atomic_load(count_pointer.clone(), fmm::ir::AtomicOrdering::Relaxed)?;
+
+            builder.if_(
+                is_count_synchronized(&count)?,
+                |builder| -> Result<_, CompileError> {
+                    builder.atomic_operation(
+                        fmm::ir::AtomicOperator::Subtract,
+                        count_pointer.clone(),
+                        count::compile(1),
+                        fmm::ir::AtomicOrdering::Relaxed,
+                    )?;
+
+                    Ok(builder.branch(fmm::ir::VOID_VALUE.clone()))
+                },
+                |builder| {
+                    builder.store(
+                        fmm::build::arithmetic_operation(
+                            fmm::ir::ArithmeticOperator::Add,
+                            count.clone(),
+                            count::compile(1),
+                        )?,
+                        count_pointer.clone(),
+                    );
+
+                    Ok(builder.branch(fmm::ir::VOID_VALUE.clone()))
+                },
+            )?;
 
             Ok(builder.branch(pointer.clone()))
         },
@@ -25,8 +56,34 @@ pub fn drop(
         builder,
         pointer,
         |builder| {
-            Ok(builder.branch(builder.if_(
-                decrement_and_compare_count(&builder, pointer)?,
+            let count_pointer = heap::get_counter_pointer(pointer)?;
+            let count =
+                builder.atomic_load(count_pointer.clone(), fmm::ir::AtomicOrdering::Relaxed)?;
+
+            builder.if_(
+                is_count_initial(&builder.if_(
+                    is_count_synchronized(&count)?,
+                    |builder| -> Result<_, CompileError> {
+                        Ok(builder.branch(builder.atomic_operation(
+                            fmm::ir::AtomicOperator::Add,
+                            count_pointer.clone(),
+                            count::compile(1),
+                            fmm::ir::AtomicOrdering::Release,
+                        )?))
+                    },
+                    |builder| {
+                        builder.store(
+                            fmm::build::arithmetic_operation(
+                                fmm::ir::ArithmeticOperator::Subtract,
+                                count.clone(),
+                                count::compile(1),
+                            )?,
+                            count_pointer.clone(),
+                        );
+
+                        Ok(builder.branch(count.clone()))
+                    },
+                )?)?,
                 |builder| -> Result<_, CompileError> {
                     builder.fence(fmm::ir::AtomicOrdering::Acquire);
 
@@ -43,7 +100,9 @@ pub fn drop(
                     Ok(builder.branch(fmm::ir::VOID_VALUE.clone()))
                 },
                 |builder| Ok(builder.branch(fmm::ir::VOID_VALUE.clone())),
-            )?))
+            )?;
+
+            Ok(builder.branch(fmm::ir::VOID_VALUE.clone()))
         },
         |builder| Ok(builder.branch(fmm::ir::VOID_VALUE.clone())),
     )?;
@@ -121,46 +180,32 @@ pub fn is_synchronized(
         builder,
         pointer,
         |builder| {
-            Ok(builder.branch(fmm::build::comparison_operation(
-                fmm::ir::ComparisonOperator::LessThan,
-                builder.atomic_load(
-                    heap::get_counter_pointer(pointer)?,
-                    fmm::ir::AtomicOrdering::Relaxed,
-                )?,
-                count::compile_initial(),
-            )?))
+            Ok(builder.branch(is_count_synchronized(&builder.atomic_load(
+                heap::get_counter_pointer(pointer)?,
+                fmm::ir::AtomicOrdering::Relaxed,
+            )?)?))
         },
         |builder| Ok(builder.branch(fmm::ir::Primitive::Boolean(true))),
     )
 }
 
-fn increment_count(
-    builder: &fmm::build::InstructionBuilder,
-    pointer: &fmm::build::TypedExpression,
-    ordering: fmm::ir::AtomicOrdering,
-) -> Result<(), CompileError> {
-    builder.atomic_operation(
-        fmm::ir::AtomicOperator::Add,
-        heap::get_counter_pointer(pointer)?,
-        count::compile(1),
-        ordering,
-    )?;
-
-    Ok(())
+fn is_count_synchronized(
+    count: &fmm::build::TypedExpression,
+) -> Result<fmm::build::TypedExpression, CompileError> {
+    Ok(fmm::build::comparison_operation(
+        fmm::ir::ComparisonOperator::LessThan,
+        count.clone(),
+        count::compile_initial(),
+    )?
+    .into())
 }
 
-fn decrement_and_compare_count(
-    builder: &fmm::build::InstructionBuilder,
-    pointer: &fmm::build::TypedExpression,
+fn is_count_initial(
+    count: &fmm::build::TypedExpression,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     Ok(fmm::build::comparison_operation(
         fmm::ir::ComparisonOperator::Equal,
-        builder.atomic_operation(
-            fmm::ir::AtomicOperator::Subtract,
-            heap::get_counter_pointer(pointer)?,
-            count::compile(1),
-            fmm::ir::AtomicOrdering::Release,
-        )?,
+        count.clone(),
         count::compile_initial(),
     )?
     .into())
