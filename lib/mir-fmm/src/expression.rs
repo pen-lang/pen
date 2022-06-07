@@ -49,28 +49,6 @@ pub fn compile(
         mir::ir::Expression::ComparisonOperation(operation) => {
             compile_comparison_operation(context, instruction_builder, operation, variables)?.into()
         }
-        mir::ir::Expression::DiscardHeap(discard) => {
-            for id in discard.ids() {
-                let pointer = variables[id].clone();
-
-                instruction_builder.if_(
-                    pointer::equal(
-                        pointer.clone(),
-                        fmm::ir::Undefined::new(pointer.type_().clone()),
-                    )?,
-                    |builder| -> Result<_, CompileError> {
-                        Ok(builder.branch(fmm::ir::VOID_VALUE.clone()))
-                    },
-                    |builder| {
-                        reference_count::heap::free(instruction_builder, pointer.clone())?;
-
-                        Ok(builder.branch(fmm::ir::VOID_VALUE.clone()))
-                    },
-                )?;
-            }
-
-            compile(discard.expression(), variables)?
-        }
         mir::ir::Expression::DropVariables(drop) => {
             for (variable, type_) in drop.variables() {
                 reference_count::drop(
@@ -214,69 +192,6 @@ pub fn compile(
                 )?
             } else {
                 compile_unboxed(instruction_builder, false)?.into()
-            }
-        }
-        mir::ir::Expression::RetainHeap(retain) => {
-            let mut reused_variables = FnvHashMap::default();
-
-            for (name, type_) in retain.drop().variables() {
-                if retain.ids().contains_key(name) {
-                    reused_variables.insert(
-                        name,
-                        reference_count::drop_or_reuse(
-                            instruction_builder,
-                            &variables[name],
-                            type_,
-                            context.types(),
-                        )?,
-                    );
-                } else {
-                    reference_count::drop(
-                        instruction_builder,
-                        &variables[name],
-                        type_,
-                        context.types(),
-                    )?;
-                }
-            }
-
-            compile(
-                retain.drop().expression(),
-                &variables
-                    .clone()
-                    .into_iter()
-                    .chain(
-                        retain
-                            .ids()
-                            .iter()
-                            .map(|(name, id)| (id.clone(), reused_variables.remove(name).unwrap())),
-                    )
-                    .collect(),
-            )?
-        }
-        mir::ir::Expression::ReuseRecord(reuse) => {
-            let pointer_type = fmm::types::GENERIC_POINTER_TYPE.clone();
-            let pointer = variables[reuse.id()].clone();
-
-            let compile_record =
-                |builder: &_| compile_record(context, builder, reuse.record(), variables);
-
-            if type_::is_record_boxed(reuse.record().type_(), context.types()) {
-                instruction_builder.if_(
-                    pointer::equal(pointer.clone(), fmm::ir::Undefined::new(pointer_type))?,
-                    |builder| -> Result<_, CompileError> {
-                        Ok(builder.branch(compile_record(&builder)?))
-                    },
-                    |builder| {
-                        Ok(builder.branch(compile_boxed_record(
-                            &builder,
-                            pointer.clone(),
-                            compile_unboxed_record(context, &builder, reuse.record(), variables)?,
-                        )?))
-                    },
-                )?
-            } else {
-                compile_record(instruction_builder)?
             }
         }
         mir::ir::Expression::ByteString(string) => {
