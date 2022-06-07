@@ -99,6 +99,68 @@ pub fn is_owned(
     )
 }
 
+pub fn synchronize(
+    builder: &fmm::build::InstructionBuilder,
+    pointer: &fmm::build::TypedExpression,
+) -> Result<(), CompileError> {
+    if_heap_pointer(
+        builder,
+        pointer,
+        |builder| {
+            let pointer = heap::get_counter_pointer(pointer)?;
+
+            builder.if_(
+                fmm::build::comparison_operation(
+                    fmm::ir::ComparisonOperator::LessThan,
+                    builder.atomic_load(pointer.clone(), fmm::ir::AtomicOrdering::Relaxed)?,
+                    count::compile_initial(),
+                )?,
+                |builder| Ok::<_, CompileError>(builder.branch(fmm::ir::VOID_VALUE.clone())),
+                |builder| {
+                    builder.atomic_store(
+                        fmm::build::arithmetic_operation(
+                            fmm::ir::ArithmeticOperator::Subtract,
+                            count::compile_initial(),
+                            builder
+                                .atomic_load(pointer.clone(), fmm::ir::AtomicOrdering::Relaxed)?,
+                        )?,
+                        pointer.clone(),
+                        fmm::ir::AtomicOrdering::Relaxed,
+                    );
+
+                    Ok(builder.branch(fmm::ir::VOID_VALUE.clone()))
+                },
+            )?;
+
+            Ok(builder.branch(fmm::ir::VOID_VALUE.clone()))
+        },
+        |builder| Ok(builder.branch(fmm::ir::VOID_VALUE.clone())),
+    )?;
+
+    Ok(())
+}
+
+pub fn is_synchronized(
+    builder: &fmm::build::InstructionBuilder,
+    pointer: &fmm::build::TypedExpression,
+) -> Result<fmm::build::TypedExpression, CompileError> {
+    if_heap_pointer(
+        builder,
+        pointer,
+        |builder| {
+            Ok(builder.branch(fmm::build::comparison_operation(
+                fmm::ir::ComparisonOperator::LessThan,
+                builder.atomic_load(
+                    heap::get_counter_pointer(pointer)?,
+                    fmm::ir::AtomicOrdering::Relaxed,
+                )?,
+                count::compile_initial(),
+            )?))
+        },
+        |builder| Ok(builder.branch(fmm::ir::Primitive::Boolean(true))),
+    )
+}
+
 fn increment_count(
     builder: &fmm::build::InstructionBuilder,
     pointer: &fmm::build::TypedExpression,
