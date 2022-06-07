@@ -114,7 +114,6 @@ fn check_expression(
 
             Type::Boolean
         }
-        Expression::DiscardHeap(discard) => check_expression(discard.expression(), variables)?,
         Expression::DropVariables(drop) => {
             check_drop_variables(drop, variables, result_type, types)?
         }
@@ -220,12 +219,6 @@ fn check_expression(
             }
 
             update.type_().clone().into()
-        }
-        Expression::ReuseRecord(record) => {
-            check_record(record.record(), variables, result_type, types)?
-        }
-        Expression::RetainHeap(reuse) => {
-            check_drop_variables(reuse.drop(), variables, result_type, types)?
         }
         Expression::ByteString(_) => Type::ByteString,
         Expression::TryOperation(operation) => {

@@ -51,33 +51,6 @@ pub fn drop(
     Ok(())
 }
 
-pub fn drop_or_reuse(
-    builder: &fmm::build::InstructionBuilder,
-    pointer: &fmm::build::TypedExpression,
-    drop_content: impl Fn(&fmm::build::InstructionBuilder) -> Result<(), CompileError>,
-) -> Result<fmm::build::TypedExpression, CompileError> {
-    let null_pointer = fmm::ir::Undefined::new(pointer.type_().clone());
-
-    if_heap_pointer(
-        builder,
-        pointer,
-        |builder| {
-            Ok(builder.branch(builder.if_(
-                decrement_and_compare_count(&builder, pointer)?,
-                |builder| -> Result<_, CompileError> {
-                    increment_count(&builder, pointer, fmm::ir::AtomicOrdering::Acquire)?;
-
-                    drop_content(&builder)?;
-
-                    Ok(builder.branch(pointer.clone()))
-                },
-                |builder| Ok(builder.branch(null_pointer.clone())),
-            )?))
-        },
-        |builder| Ok(builder.branch(null_pointer.clone())),
-    )
-}
-
 pub fn is_owned(
     builder: &fmm::build::InstructionBuilder,
     pointer: &fmm::build::TypedExpression,

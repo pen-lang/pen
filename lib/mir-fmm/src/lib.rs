@@ -38,7 +38,6 @@ pub fn compile(
 
     let module = mir::analysis::infer_environment(module);
     let module = mir::analysis::count_references(&module)?;
-    let module = mir::analysis::reuse_heap(&module)?;
 
     mir::analysis::check_types(&module)?;
 
@@ -51,7 +50,6 @@ pub fn compile(
     for definition in module.type_definitions() {
         reference_count::record::compile_clone_function(&context, definition)?;
         reference_count::record::compile_drop_function(&context, definition)?;
-        reference_count::record::compile_drop_or_reuse_function(&context, definition)?;
     }
 
     for declaration in module.foreign_declarations() {
