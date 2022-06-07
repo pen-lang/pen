@@ -70,46 +70,6 @@ pub fn compile_drop_function(
     Ok(())
 }
 
-pub fn compile_drop_or_reuse_function(
-    context: &Context,
-    definition: &mir::ir::TypeDefinition,
-) -> Result<(), CompileError> {
-    let record_type = mir::types::Record::new(definition.name());
-
-    if !type_::is_record_boxed(&record_type, context.types()) {
-        return Ok(());
-    }
-
-    let fmm_record_type = type_::compile_record(&record_type, context.types());
-
-    context.module_builder().define_function(
-        record_utilities::get_record_drop_or_reuse_function_name(definition.name()),
-        vec![fmm::ir::Argument::new(
-            ARGUMENT_NAME,
-            fmm_record_type.clone(),
-        )],
-        |builder| -> Result<_, CompileError> {
-            let record = fmm::build::variable(ARGUMENT_NAME, fmm_record_type.clone());
-
-            Ok(
-                builder.return_(pointer::drop_or_reuse(&builder, &record, |builder| {
-                    drop_unboxed(
-                        context,
-                        builder,
-                        &record::load(context, builder, &record, &record_type)?,
-                        &record_type,
-                    )
-                })?),
-            )
-        },
-        fmm_record_type.clone(),
-        fmm::types::CallingConvention::Target,
-        fmm::ir::Linkage::Internal,
-    )?;
-
-    Ok(())
-}
-
 fn clone_boxed(
     builder: &fmm::build::InstructionBuilder,
     record: &fmm::build::TypedExpression,

@@ -3,7 +3,7 @@ use super::{
     clone_variables::CloneVariables, comparison_operation::ComparisonOperation,
     drop_variables::DropVariables, if_::If, let_::Let, let_recursive::LetRecursive, record::Record,
     record_field::RecordField, try_operation::TryOperation, variable::Variable, variant::Variant,
-    DiscardHeap, MarkSync, RecordUpdate, RetainHeap, ReuseRecord,
+    MarkSync, RecordUpdate,
 };
 
 #[derive(Clone, Debug, PartialEq)]
@@ -15,7 +15,6 @@ pub enum Expression {
     Case(Case),
     CloneVariables(CloneVariables),
     ComparisonOperation(ComparisonOperation),
-    DiscardHeap(DiscardHeap),
     DropVariables(DropVariables),
     If(If),
     Let(Let),
@@ -26,8 +25,6 @@ pub enum Expression {
     Record(Record),
     RecordField(RecordField),
     RecordUpdate(RecordUpdate),
-    ReuseRecord(ReuseRecord),
-    RetainHeap(RetainHeap),
     TryOperation(TryOperation),
     Variable(Variable),
     Variant(Variant),
@@ -72,12 +69,6 @@ impl From<ComparisonOperation> for Expression {
 impl From<CloneVariables> for Expression {
     fn from(clone: CloneVariables) -> Self {
         Self::CloneVariables(clone)
-    }
-}
-
-impl From<DiscardHeap> for Expression {
-    fn from(discard: DiscardHeap) -> Self {
-        Self::DiscardHeap(discard)
     }
 }
 
@@ -132,18 +123,6 @@ impl From<RecordField> for Expression {
 impl From<RecordUpdate> for Expression {
     fn from(field: RecordUpdate) -> Self {
         Self::RecordUpdate(field)
-    }
-}
-
-impl From<ReuseRecord> for Expression {
-    fn from(record: ReuseRecord) -> Self {
-        Self::ReuseRecord(record)
-    }
-}
-
-impl From<RetainHeap> for Expression {
-    fn from(drop: RetainHeap) -> Self {
-        Self::RetainHeap(drop)
     }
 }
 
