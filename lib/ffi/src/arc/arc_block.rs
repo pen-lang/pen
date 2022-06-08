@@ -2,10 +2,10 @@ use alloc::alloc::{alloc, dealloc};
 use core::{
     alloc::Layout,
     ptr::{drop_in_place, null},
-    sync::atomic::{fence, AtomicU32, Ordering},
+    sync::atomic::{fence, AtomicI32, Ordering},
 };
 
-const INITIAL_COUNT: u32 = 0;
+const INITIAL_COUNT: i32 = 0;
 const EMPTY_TAG: u32 = 0;
 
 #[derive(Debug)]
@@ -17,7 +17,7 @@ pub struct ArcBlock {
 #[derive(Debug)]
 #[repr(C)]
 struct ArcHeader {
-    count: AtomicU32,
+    count: AtomicI32,
     tag: u32,
 }
 
@@ -35,7 +35,7 @@ impl ArcBlock {
             let pointer = unsafe { &mut *(alloc(Self::inner_layout(layout)) as *mut ArcInner) };
 
             pointer.header = ArcHeader {
-                count: AtomicU32::new(INITIAL_COUNT),
+                count: AtomicI32::new(INITIAL_COUNT),
                 tag: EMPTY_TAG,
             };
 
@@ -89,7 +89,16 @@ impl ArcBlock {
 
     pub fn clone(&self) -> Self {
         if !self.is_static() {
-            self.inner().header.count.fetch_add(1, Ordering::Relaxed);
+            let count = self.inner().header.count.load(Ordering::Relaxed);
+
+            if Self::is_count_synchronized(count) {
+                self.inner().header.count.fetch_sub(1, Ordering::Relaxed);
+            } else {
+                self.inner()
+                    .header
+                    .count
+                    .store(count + 1, Ordering::Relaxed);
+            }
         }
 
         Self {
@@ -102,19 +111,38 @@ impl ArcBlock {
             return;
         }
 
-        if self.inner().header.count.fetch_sub(1, Ordering::Release) == INITIAL_COUNT {
-            fence(Ordering::Acquire);
+        let count = self.inner().header.count.load(Ordering::Relaxed);
 
-            unsafe {
-                drop_in_place(self.ptr() as *mut T);
+        if Self::is_count_synchronized(count) {
+            if self.inner().header.count.fetch_add(1, Ordering::Release) == INITIAL_COUNT {
+                fence(Ordering::Acquire);
 
-                // The layout argument is expected not to be used.
-                dealloc(
-                    self.inner_ptr() as *mut u8,
-                    Layout::from_size_align(1, 1).unwrap(),
-                )
+                self.drop_inner::<T>()
             }
+        } else if count == INITIAL_COUNT {
+            self.drop_inner::<T>()
+        } else {
+            self.inner()
+                .header
+                .count
+                .store(count - 1, Ordering::Relaxed);
         }
+    }
+
+    fn drop_inner<T>(&mut self) {
+        unsafe {
+            drop_in_place(self.ptr() as *mut T);
+
+            // The layout argument is expected not to be used.
+            dealloc(
+                self.inner_ptr() as *mut u8,
+                Layout::from_size_align(1, 1).unwrap(),
+            )
+        }
+    }
+
+    fn is_count_synchronized(count: i32) -> bool {
+        count < 0
     }
 }
 
