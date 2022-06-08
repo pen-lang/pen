@@ -62,7 +62,7 @@ pub fn is_owned(
             Ok(builder.branch(fmm::build::comparison_operation(
                 fmm::ir::ComparisonOperator::Equal,
                 builder.atomic_load(
-                    heap::get_counter_pointer(pointer)?,
+                    heap::get_count_pointer(pointer)?,
                     fmm::ir::AtomicOrdering::Relaxed,
                 )?,
                 count::compile_initial(),
@@ -79,7 +79,7 @@ fn increment_count(
 ) -> Result<(), CompileError> {
     builder.atomic_operation(
         fmm::ir::AtomicOperator::Add,
-        heap::get_counter_pointer(pointer)?,
+        heap::get_count_pointer(pointer)?,
         count::compile(1),
         ordering,
     )?;
@@ -95,7 +95,7 @@ fn decrement_and_compare_count(
         fmm::ir::ComparisonOperator::Equal,
         builder.atomic_operation(
             fmm::ir::AtomicOperator::Subtract,
-            heap::get_counter_pointer(pointer)?,
+            heap::get_count_pointer(pointer)?,
             count::compile(1),
             fmm::ir::AtomicOrdering::Release,
         )?,
