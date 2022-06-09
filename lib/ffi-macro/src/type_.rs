@@ -64,7 +64,7 @@ fn generate_type(attributes: &AttributeArgs, type_: &ItemStruct) -> Result<Token
             }
 
             extern "C" fn synchronize(_: u64) {
-                // Currently, all types in Rust are exepcted to implement Sync.
+                // Currently, all types in Rust are expected to implement Sync.
             }
 
             static TYPE_INFORMATION: #crate_path::TypeInformation =
