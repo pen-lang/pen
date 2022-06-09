@@ -1,5 +1,4 @@
 use core::{
-    intrinsics::transmute,
     ptr::drop_in_place,
     sync::atomic::{AtomicPtr, Ordering},
 };
@@ -51,8 +50,7 @@ extern "C" fn synchronize_closure<T>(_: &mut Closure<T>) {}
 impl<T> Drop for Closure<T> {
     fn drop(&mut self) {
         // TODO Optimize an atomic ordering.
-        let metadata =
-            unsafe { transmute::<_, &ClosureMetadata<T>>(self.metadata.load(Ordering::SeqCst)) };
+        let metadata = unsafe { &*self.metadata.load(Ordering::SeqCst) };
 
         (metadata.drop)(self);
     }
