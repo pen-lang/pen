@@ -441,7 +441,7 @@ fn compile_mark_sync(
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     let value = compile(context, instruction_builder, mark.expression(), variables)?;
 
-    reference_count::sync::mark(instruction_builder, &value, mark.type_())?;
+    reference_count::synchronize(instruction_builder, &value, mark.type_())?;
 
     Ok(value)
 }

@@ -1,7 +1,7 @@
 use super::pointer;
 use crate::CompileError;
 
-pub fn mark(
+pub fn synchronize(
     builder: &fmm::build::InstructionBuilder,
     expression: &fmm::build::TypedExpression,
     type_: &mir::types::Type,
