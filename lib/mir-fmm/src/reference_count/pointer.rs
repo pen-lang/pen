@@ -11,7 +11,7 @@ pub fn clone(
         builder,
         pointer,
         |builder| {
-            let count_pointer = heap::get_counter_pointer(pointer)?;
+            let count_pointer = heap::get_count_pointer(pointer)?;
             let count =
                 builder.atomic_load(count_pointer.clone(), fmm::ir::AtomicOrdering::Relaxed)?;
 
@@ -56,7 +56,7 @@ pub fn drop(
         builder,
         pointer,
         |builder| {
-            let count_pointer = heap::get_counter_pointer(pointer)?;
+            let count_pointer = heap::get_count_pointer(pointer)?;
             let count =
                 builder.atomic_load(count_pointer.clone(), fmm::ir::AtomicOrdering::Relaxed)?;
 
@@ -121,7 +121,7 @@ pub fn is_owned(
             Ok(builder.branch(fmm::build::comparison_operation(
                 fmm::ir::ComparisonOperator::Equal,
                 builder.atomic_load(
-                    heap::get_counter_pointer(pointer)?,
+                    heap::get_count_pointer(pointer)?,
                     fmm::ir::AtomicOrdering::Relaxed,
                 )?,
                 count::compile_initial(),
@@ -139,7 +139,7 @@ pub fn synchronize(
         builder,
         pointer,
         |builder| {
-            let pointer = heap::get_counter_pointer(pointer)?;
+            let pointer = heap::get_count_pointer(pointer)?;
 
             builder.if_(
                 fmm::build::comparison_operation(
@@ -181,7 +181,7 @@ pub fn is_synchronized(
         pointer,
         |builder| {
             Ok(builder.branch(is_count_synchronized(&builder.atomic_load(
-                heap::get_counter_pointer(pointer)?,
+                heap::get_count_pointer(pointer)?,
                 fmm::ir::AtomicOrdering::Relaxed,
             )?)?))
         },

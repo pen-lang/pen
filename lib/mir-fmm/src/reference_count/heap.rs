@@ -46,7 +46,7 @@ pub fn free(
     Ok(())
 }
 
-pub fn get_counter_pointer(
+pub fn get_count_pointer(
     heap_pointer: &fmm::build::TypedExpression,
 ) -> Result<fmm::build::TypedExpression, fmm::build::BuildError> {
     Ok(fmm::build::record_address(
