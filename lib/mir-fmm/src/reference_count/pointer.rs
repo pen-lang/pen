@@ -172,23 +172,6 @@ pub fn synchronize(
     Ok(())
 }
 
-pub fn is_synchronized(
-    builder: &fmm::build::InstructionBuilder,
-    pointer: &fmm::build::TypedExpression,
-) -> Result<fmm::build::TypedExpression, CompileError> {
-    if_heap_pointer(
-        builder,
-        pointer,
-        |builder| {
-            Ok(builder.branch(is_count_synchronized(&builder.atomic_load(
-                heap::get_count_pointer(pointer)?,
-                fmm::ir::AtomicOrdering::Relaxed,
-            )?)?))
-        },
-        |builder| Ok(builder.branch(fmm::ir::Primitive::Boolean(true))),
-    )
-}
-
 fn is_count_synchronized(
     count: &fmm::build::TypedExpression,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
