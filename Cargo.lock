@@ -267,7 +267,7 @@ checksum = "279fb028e20b3c4c320317955b77c5e0c9701f05a1d309905d6fc702cdc5053e"
 [[package]]
 name = "fmm"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#7568009eea03ad347c483caccfccc67162002631"
+source = "git+https://github.com/raviqqe/fmm?branch=main#13fe450a934d4d188b758b17a151cdbe90b0b3b3"
 dependencies = [
  "fnv",
  "hamt",
@@ -279,7 +279,7 @@ dependencies = [
 [[package]]
 name = "fmm-c"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#7568009eea03ad347c483caccfccc67162002631"
+source = "git+https://github.com/raviqqe/fmm?branch=main#13fe450a934d4d188b758b17a151cdbe90b0b3b3"
 dependencies = [
  "fmm",
  "fnv",
@@ -289,7 +289,7 @@ dependencies = [
 [[package]]
 name = "fmm-llvm"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#7568009eea03ad347c483caccfccc67162002631"
+source = "git+https://github.com/raviqqe/fmm?branch=main#13fe450a934d4d188b758b17a151cdbe90b0b3b3"
 dependencies = [
  "fmm",
  "hamt",
@@ -531,7 +531,7 @@ dependencies = [
 [[package]]
 name = "inkwell"
 version = "0.1.0"
-source = "git+https://github.com/TheDan64/inkwell?branch=master#7253f9250d8a5e5e83125f1f6f85ba8b80d12acc"
+source = "git+https://github.com/TheDan64/inkwell?branch=master#064fe096823e82d538a04536064ada7ad7936df5"
 dependencies = [
  "either",
  "inkwell_internals",
@@ -544,7 +544,7 @@ dependencies = [
 [[package]]
 name = "inkwell_internals"
 version = "0.5.0"
-source = "git+https://github.com/TheDan64/inkwell?branch=master#7253f9250d8a5e5e83125f1f6f85ba8b80d12acc"
+source = "git+https://github.com/TheDan64/inkwell?branch=master#064fe096823e82d538a04536064ada7ad7936df5"
 dependencies = [
  "proc-macro2",
  "quote",
