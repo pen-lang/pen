@@ -5,8 +5,6 @@ use core::{
 
 struct ClosureMetadata<T> {
     drop: extern "C" fn(&mut Closure<T>),
-    #[allow(dead_code)]
-    synchronize: extern "C" fn(&mut Closure<T>),
 }
 
 #[repr(C)]
@@ -19,7 +17,6 @@ pub struct Closure<T = ()> {
 impl<T> Closure<T> {
     const METADATA: ClosureMetadata<T> = ClosureMetadata {
         drop: drop_closure::<T>,
-        synchronize: synchronize_closure::<T>,
     };
 
     pub fn new(entry_function: *const u8, payload: T) -> Self {
@@ -43,9 +40,6 @@ impl<T> Closure<T> {
 extern "C" fn drop_closure<T>(closure: &mut Closure<T>) {
     unsafe { drop_in_place(&mut (closure.payload() as *mut T)) }
 }
-
-// All closures created in Rust should implement Sync already.
-extern "C" fn synchronize_closure<T>(_: &mut Closure<T>) {}
 
 impl<T> Drop for Closure<T> {
     fn drop(&mut self) {
