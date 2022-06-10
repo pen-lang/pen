@@ -7,9 +7,8 @@ pub fn clone(
     builder: &fmm::build::InstructionBuilder,
     pointer: &fmm::build::TypedExpression,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    if_heap_pointer(
-        builder,
-        pointer,
+    builder.if_(
+        is_heap_pointer(pointer)?,
         |builder| {
             let count_pointer = heap::get_count_pointer(pointer)?;
             let count =
@@ -57,10 +56,9 @@ pub fn drop(
         heap::free(builder, pointer.clone())
     };
 
-    if_heap_pointer(
-        builder,
-        pointer,
-        |builder| {
+    builder.if_(
+        is_heap_pointer(pointer)?,
+        |builder| -> Result<_, CompileError> {
             let count_pointer = heap::get_count_pointer(pointer)?;
             let count =
                 builder.atomic_load(count_pointer.clone(), fmm::ir::AtomicOrdering::Relaxed)?;
@@ -118,9 +116,8 @@ pub fn is_owned(
     builder: &fmm::build::InstructionBuilder,
     pointer: &fmm::build::TypedExpression,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    if_heap_pointer(
-        builder,
-        pointer,
+    builder.if_(
+        is_heap_pointer(pointer)?,
         |builder| {
             Ok(builder.branch(count::is_initial(&builder.atomic_load(
                 heap::get_count_pointer(pointer)?,
@@ -135,10 +132,9 @@ pub fn synchronize(
     builder: &fmm::build::InstructionBuilder,
     pointer: &fmm::build::TypedExpression,
 ) -> Result<(), CompileError> {
-    if_heap_pointer(
-        builder,
-        pointer,
-        |builder| {
+    builder.if_(
+        is_heap_pointer(pointer)?,
+        |builder| -> Result<_, CompileError> {
             let pointer = heap::get_count_pointer(pointer)?;
 
             builder.if_(
@@ -200,41 +196,25 @@ pub fn untag(
     .into())
 }
 
-fn if_heap_pointer(
-    builder: &fmm::build::InstructionBuilder,
-    pointer: &fmm::build::TypedExpression,
-    then: impl Fn(fmm::build::InstructionBuilder) -> Result<fmm::ir::Block, CompileError>,
-    else_: impl Fn(fmm::build::InstructionBuilder) -> Result<fmm::ir::Block, CompileError>,
-) -> Result<fmm::build::TypedExpression, CompileError> {
-    let then = &then;
-    let else_ = &else_;
-
-    builder.if_(
-        fmm::build::bitwise_operation(
-            fmm::ir::BitwiseOperator::And,
-            fmm::build::comparison_operation(
-                fmm::ir::ComparisonOperator::NotEqual,
-                fmm::build::bit_cast(fmm::types::Primitive::PointerInteger, pointer.clone()),
-                fmm::ir::Undefined::new(fmm::types::Primitive::PointerInteger),
-            )?,
-            is_heap_pointer(pointer)?,
-        )?,
-        then,
-        else_,
-    )
-}
-
 fn is_heap_pointer(
     pointer: &fmm::build::TypedExpression,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    Ok(fmm::build::comparison_operation(
-        fmm::ir::ComparisonOperator::NotEqual,
-        fmm::build::bitwise_operation(
-            fmm::ir::BitwiseOperator::And,
+    Ok(fmm::build::bitwise_operation(
+        fmm::ir::BitwiseOperator::And,
+        fmm::build::comparison_operation(
+            fmm::ir::ComparisonOperator::NotEqual,
             fmm::build::bit_cast(fmm::types::Primitive::PointerInteger, pointer.clone()),
+            fmm::ir::Undefined::new(fmm::types::Primitive::PointerInteger),
+        )?,
+        fmm::build::comparison_operation(
+            fmm::ir::ComparisonOperator::NotEqual,
+            fmm::build::bitwise_operation(
+                fmm::ir::BitwiseOperator::And,
+                fmm::build::bit_cast(fmm::types::Primitive::PointerInteger, pointer.clone()),
+                fmm::ir::Primitive::PointerInteger(1),
+            )?,
             fmm::ir::Primitive::PointerInteger(1),
         )?,
-        fmm::ir::Primitive::PointerInteger(1),
     )?
     .into())
 }
