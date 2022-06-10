@@ -1,5 +1,6 @@
 mod drop;
 pub mod metadata;
+mod sync;
 
 use super::{reference_count, CompileError};
 

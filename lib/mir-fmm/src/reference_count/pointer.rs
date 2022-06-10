@@ -112,22 +112,6 @@ pub fn drop(
     Ok(())
 }
 
-pub fn is_owned(
-    builder: &fmm::build::InstructionBuilder,
-    pointer: &fmm::build::TypedExpression,
-) -> Result<fmm::build::TypedExpression, CompileError> {
-    builder.if_(
-        is_heap(pointer)?,
-        |builder| {
-            Ok(builder.branch(count::is_initial(&builder.atomic_load(
-                heap::get_count_pointer(pointer)?,
-                fmm::ir::AtomicOrdering::Relaxed,
-            )?)?))
-        },
-        |builder| Ok(builder.branch(fmm::ir::Primitive::Boolean(false))),
-    )
-}
-
 pub fn synchronize(
     builder: &fmm::build::InstructionBuilder,
     pointer: &fmm::build::TypedExpression,
@@ -192,6 +176,39 @@ pub fn untag(
         )?,
     )
     .into())
+}
+
+pub fn is_owned(
+    builder: &fmm::build::InstructionBuilder,
+    pointer: &fmm::build::TypedExpression,
+) -> Result<fmm::build::TypedExpression, CompileError> {
+    builder.if_(
+        is_heap(pointer)?,
+        |builder| {
+            Ok(builder.branch(count::is_initial(&builder.atomic_load(
+                heap::get_count_pointer(pointer)?,
+                fmm::ir::AtomicOrdering::Relaxed,
+            )?)?))
+        },
+        |builder| Ok(builder.branch(fmm::ir::Primitive::Boolean(false))),
+    )
+}
+
+pub fn is_synchronized(
+    builder: &fmm::build::InstructionBuilder,
+    pointer: &fmm::build::TypedExpression,
+) -> Result<fmm::build::TypedExpression, CompileError> {
+    builder.if_(
+        is_heap(pointer)?,
+        |builder| {
+            Ok(builder.branch(count::is_initial(&builder.atomic_load(
+                heap::get_count_pointer(pointer)?,
+                fmm::ir::AtomicOrdering::Relaxed,
+            )?)?))
+        },
+        // TODO Can we make this false, for example, using TLS for global varibles?
+        |builder| Ok(builder.branch(fmm::ir::Primitive::Boolean(true))),
+    )
 }
 
 fn is_heap(
