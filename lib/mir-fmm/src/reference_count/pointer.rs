@@ -66,15 +66,13 @@ pub fn drop(
             Ok(builder.branch(builder.if_(
                 count::is_synchronized(&count)?,
                 |builder| -> Result<_, CompileError> {
-                    let count = builder.atomic_operation(
-                        fmm::ir::AtomicOperator::Add,
-                        count_pointer.clone(),
-                        count::compile(1),
-                        fmm::ir::AtomicOrdering::Release,
-                    )?;
-
                     Ok(builder.branch(builder.if_(
-                        count::is_initial(&count)?,
+                        count::is_initial(&builder.atomic_operation(
+                            fmm::ir::AtomicOperator::Add,
+                            count_pointer.clone(),
+                            count::compile(1),
+                            fmm::ir::AtomicOrdering::Release,
+                        )?)?,
                         |builder| -> Result<_, CompileError> {
                             builder.fence(fmm::ir::AtomicOrdering::Acquire);
                             drop_inner(&builder)?;
@@ -85,15 +83,6 @@ pub fn drop(
                     )?))
                 },
                 |builder| {
-                    builder.store(
-                        fmm::build::arithmetic_operation(
-                            fmm::ir::ArithmeticOperator::Subtract,
-                            count.clone(),
-                            count::compile(1),
-                        )?,
-                        count_pointer.clone(),
-                    );
-
                     Ok(builder.branch(builder.if_(
                         count::is_initial(&count)?,
                         |builder| -> Result<_, CompileError> {
@@ -101,7 +90,18 @@ pub fn drop(
 
                             Ok(builder.branch(fmm::ir::VOID_VALUE.clone()))
                         },
-                        |builder| Ok(builder.branch(fmm::ir::VOID_VALUE.clone())),
+                        |builder| {
+                            builder.store(
+                                fmm::build::arithmetic_operation(
+                                    fmm::ir::ArithmeticOperator::Subtract,
+                                    count.clone(),
+                                    count::compile(1),
+                                )?,
+                                count_pointer.clone(),
+                            );
+
+                            Ok(builder.branch(fmm::ir::VOID_VALUE.clone()))
+                        },
                     )?))
                 },
             )?))
