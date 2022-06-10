@@ -30,8 +30,8 @@ pub fn load_metadata(
 
 pub fn store_metadata(
     builder: &fmm::build::InstructionBuilder,
-    metadata: impl Into<fmm::build::TypedExpression>,
     closure_pointer: impl Into<fmm::build::TypedExpression>,
+    metadata: impl Into<fmm::build::TypedExpression>,
 ) -> Result<(), CompileError> {
     builder.store(metadata, get_metadata_pointer(closure_pointer)?);
 
