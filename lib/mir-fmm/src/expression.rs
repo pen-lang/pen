@@ -385,9 +385,9 @@ fn compile_let_recursive(
     )?;
 
     instruction_builder.store(
-        closure::compile_closure_content(
+        closure::compile_content(
             entry_function::compile(context, let_.definition(), false, variables)?,
-            closure::compile_drop_function(context, let_.definition())?,
+            closure::metadata::compile(context, let_.definition())?,
             {
                 let environment = fmm::build::record(
                     let_.definition()
