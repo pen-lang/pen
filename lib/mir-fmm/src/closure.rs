@@ -2,14 +2,11 @@ use super::{reference_count, type_, CompileError};
 use crate::context::Context;
 use once_cell::sync::Lazy;
 
-const DROP_FUNCTION_ARGUMENT_NAME: &str = "_closure";
-const DROP_FUNCTION_ARGUMENT_TYPE: fmm::types::Primitive = fmm::types::Primitive::PointerInteger;
-
 static DUMMY_FUNCTION_TYPE: Lazy<mir::types::Function> = Lazy::new(|| {
     mir::types::Function::new(vec![mir::types::Type::Number], mir::types::Type::Number)
 });
 
-pub fn compile_entry_function_pointer(
+pub fn get_entry_function_pointer(
     closure_pointer: impl Into<fmm::build::TypedExpression>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     Ok(
@@ -18,7 +15,7 @@ pub fn compile_entry_function_pointer(
     )
 }
 
-pub fn compile_drop_function_pointer(
+pub fn get_drop_function_pointer(
     closure_pointer: impl Into<fmm::build::TypedExpression>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     Ok(
@@ -27,14 +24,14 @@ pub fn compile_drop_function_pointer(
     )
 }
 
-pub fn compile_load_drop_function(
+pub fn load_drop_function(
     builder: &fmm::build::InstructionBuilder,
     closure_pointer: impl Into<fmm::build::TypedExpression>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    Ok(builder.load(compile_drop_function_pointer(closure_pointer)?)?)
+    Ok(builder.load(get_drop_function_pointer(closure_pointer)?)?)
 }
 
-pub fn compile_payload_pointer(
+pub fn get_payload_pointer(
     closure_pointer: impl Into<fmm::build::TypedExpression>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     Ok(
@@ -117,20 +114,19 @@ fn compile_drop_function_with_builder(
         &fmm::build::TypedExpression,
     ) -> Result<(), CompileError>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
+    let argument = fmm::ir::Argument::new("_closure", fmm::types::Primitive::PointerInteger);
+
     context.module_builder().define_anonymous_function(
-        vec![fmm::ir::Argument::new(
-            DROP_FUNCTION_ARGUMENT_NAME,
-            DROP_FUNCTION_ARGUMENT_TYPE,
-        )],
+        vec![argument.clone()],
         |builder| -> Result<_, CompileError> {
             compile_body(
                 &builder,
-                &compile_payload_pointer(fmm::build::bit_cast(
+                &get_payload_pointer(fmm::build::bit_cast(
                     fmm::types::Pointer::new(type_::compile_unsized_closure(
                         &DUMMY_FUNCTION_TYPE,
                         context.types(),
                     )),
-                    fmm::build::variable(DROP_FUNCTION_ARGUMENT_NAME, DROP_FUNCTION_ARGUMENT_TYPE),
+                    fmm::build::variable(argument.name(), argument.type_().clone()),
                 ))?,
             )?;
 

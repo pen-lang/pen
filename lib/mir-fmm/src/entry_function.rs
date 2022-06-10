@@ -313,14 +313,14 @@ fn compile_entry_function_pointer(
     definition: &mir::ir::FunctionDefinition,
     types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    closure::compile_entry_function_pointer(compile_closure_pointer(definition.type_(), types)?)
+    closure::get_entry_function_pointer(compile_closure_pointer(definition.type_(), types)?)
 }
 
 fn compile_drop_function_pointer(
     definition: &mir::ir::FunctionDefinition,
     types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    closure::compile_drop_function_pointer(compile_closure_pointer(definition.type_(), types)?)
+    closure::get_drop_function_pointer(compile_closure_pointer(definition.type_(), types)?)
 }
 
 fn compile_arguments(
@@ -369,7 +369,7 @@ fn compile_payload_pointer(
     definition: &mir::ir::FunctionDefinition,
     types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    closure::compile_payload_pointer(fmm::build::bit_cast(
+    closure::get_payload_pointer(fmm::build::bit_cast(
         fmm::types::Pointer::new(type_::compile_sized_closure(definition, types)),
         compile_untyped_closure_pointer(),
     ))
