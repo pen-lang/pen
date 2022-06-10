@@ -54,6 +54,13 @@ pub fn compile_variant_tag() -> fmm::types::Pointer {
         .into(),
         // drop function
         fmm::types::Function::new(
+            vec![payload.clone()],
+            fmm::types::VOID_TYPE.clone(),
+            fmm::types::CallingConvention::Target,
+        )
+        .into(),
+        // synchronize function
+        fmm::types::Function::new(
             vec![payload],
             fmm::types::VOID_TYPE.clone(),
             fmm::types::CallingConvention::Target,
