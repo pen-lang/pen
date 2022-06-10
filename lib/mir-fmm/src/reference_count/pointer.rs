@@ -8,7 +8,7 @@ pub fn clone(
     pointer: &fmm::build::TypedExpression,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     builder.if_(
-        is_heap_pointer(pointer)?,
+        is_heap(pointer)?,
         |builder| {
             let count_pointer = heap::get_count_pointer(pointer)?;
             let count =
@@ -57,7 +57,7 @@ pub fn drop(
     };
 
     builder.if_(
-        is_heap_pointer(pointer)?,
+        is_heap(pointer)?,
         |builder| -> Result<_, CompileError> {
             let count_pointer = heap::get_count_pointer(pointer)?;
             let count =
@@ -117,7 +117,7 @@ pub fn is_owned(
     pointer: &fmm::build::TypedExpression,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     builder.if_(
-        is_heap_pointer(pointer)?,
+        is_heap(pointer)?,
         |builder| {
             Ok(builder.branch(count::is_initial(&builder.atomic_load(
                 heap::get_count_pointer(pointer)?,
@@ -133,7 +133,7 @@ pub fn synchronize(
     pointer: &fmm::build::TypedExpression,
 ) -> Result<(), CompileError> {
     builder.if_(
-        is_heap_pointer(pointer)?,
+        is_heap(pointer)?,
         |builder| -> Result<_, CompileError> {
             let pointer = heap::get_count_pointer(pointer)?;
 
@@ -196,7 +196,7 @@ pub fn untag(
     .into())
 }
 
-fn is_heap_pointer(
+fn is_heap(
     pointer: &fmm::build::TypedExpression,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     Ok(fmm::build::bitwise_operation(
