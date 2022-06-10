@@ -131,8 +131,9 @@ fn compile_initial_thunk_entry(
         &entry_function_name,
         arguments.clone(),
         |instruction_builder| {
+            let closure_pointer = compile_closure_pointer(definition.type_(), context.types())?;
             let entry_function_pointer =
-                compile_entry_function_pointer(definition, context.types())?;
+                closure::get_entry_function_pointer(closure_pointer.clone())?;
 
             instruction_builder.if_(
                 instruction_builder.compare_and_swap(
@@ -148,7 +149,7 @@ fn compile_initial_thunk_entry(
                 |instruction_builder| -> Result<_, CompileError> {
                     let closure = reference_count::clone(
                         &instruction_builder,
-                        &compile_closure_pointer(definition.type_(), context.types())?,
+                        &closure_pointer,
                         &definition.type_().clone().into(),
                         context.types(),
                     )?;
@@ -186,8 +187,8 @@ fn compile_initial_thunk_entry(
 
                     closure::store_metadata(
                         &instruction_builder,
+                        closure_pointer.clone(),
                         closure::metadata::compile_normal_thunk(context, definition)?,
-                        compile_metadata_pointer(definition, context.types())?,
                     )?;
 
                     instruction_builder.atomic_store(
@@ -208,7 +209,7 @@ fn compile_initial_thunk_entry(
                 |instruction_builder| {
                     Ok(instruction_builder.return_(instruction_builder.call(
                         instruction_builder.atomic_load(
-                            compile_entry_function_pointer(definition, context.types())?,
+                            entry_function_pointer.clone(),
                             fmm::ir::AtomicOrdering::Acquire,
                         )?,
                         compile_argument_variables(&arguments),
@@ -256,7 +257,10 @@ fn compile_locked_thunk_entry(
             instruction_builder.if_(
                 pointer::equal(
                     instruction_builder.atomic_load(
-                        compile_entry_function_pointer(definition, context.types())?,
+                        closure::get_entry_function_pointer(compile_closure_pointer(
+                            definition.type_(),
+                            context.types(),
+                        )?)?,
                         fmm::ir::AtomicOrdering::Acquire,
                     )?,
                     entry_function.clone(),
@@ -308,20 +312,6 @@ fn compile_normal_body(
     )?;
 
     Ok(instruction_builder.return_(value))
-}
-
-fn compile_entry_function_pointer(
-    definition: &mir::ir::FunctionDefinition,
-    types: &FnvHashMap<String, mir::types::RecordBody>,
-) -> Result<fmm::build::TypedExpression, CompileError> {
-    closure::get_entry_function_pointer(compile_closure_pointer(definition.type_(), types)?)
-}
-
-fn compile_metadata_pointer(
-    definition: &mir::ir::FunctionDefinition,
-    types: &FnvHashMap<String, mir::types::RecordBody>,
-) -> Result<fmm::build::TypedExpression, CompileError> {
-    closure::get_metadata_pointer(compile_closure_pointer(definition.type_(), types)?)
 }
 
 fn compile_arguments(
