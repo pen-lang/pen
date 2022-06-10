@@ -1,3 +1,5 @@
+mod metadata;
+
 use super::{reference_count, type_, CompileError};
 use crate::context::Context;
 use once_cell::sync::Lazy;
