@@ -33,7 +33,7 @@ pub fn store_metadata(
     metadata: impl Into<fmm::build::TypedExpression>,
     closure_pointer: impl Into<fmm::build::TypedExpression>,
 ) -> Result<(), CompileError> {
-    builder.store(get_metadata_pointer(closure_pointer)?, metadata);
+    builder.store(metadata, get_metadata_pointer(closure_pointer)?);
 
     Ok(())
 }
