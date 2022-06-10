@@ -49,8 +49,7 @@ extern "C" fn synchronize_closure<T>(_: &mut Closure<T>) {}
 
 impl<T> Drop for Closure<T> {
     fn drop(&mut self) {
-        // TODO Optimize an atomic ordering.
-        let metadata = unsafe { &*self.metadata.load(Ordering::SeqCst) };
+        let metadata = unsafe { &*self.metadata.load(Ordering::Relaxed) };
 
         (metadata.drop)(self);
     }
