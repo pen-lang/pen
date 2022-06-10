@@ -16,7 +16,7 @@ pub fn drop(
         builder.call(
             closure::metadata::load_drop_function(
                 builder,
-                closure::load_metadata(builder, closure_pointer.clone())?,
+                builder.load(closure::get_metadata_pointer(closure_pointer.clone())?)?,
             )?,
             vec![fmm::build::bit_cast(
                 fmm::types::Primitive::PointerInteger,

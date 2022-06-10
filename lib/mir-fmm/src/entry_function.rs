@@ -185,11 +185,10 @@ fn compile_initial_thunk_entry(
                         compile_thunk_value_pointer(definition, context.types())?,
                     );
 
-                    closure::store_metadata(
-                        &instruction_builder,
-                        closure_pointer.clone(),
+                    instruction_builder.store(
                         closure::metadata::compile_normal_thunk(context, definition)?,
-                    )?;
+                        closure::get_metadata_pointer(closure_pointer.clone())?,
+                    );
 
                     instruction_builder.atomic_store(
                         normal_entry_function.clone(),
