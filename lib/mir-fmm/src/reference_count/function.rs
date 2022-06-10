@@ -14,7 +14,10 @@ pub fn drop(
 ) -> Result<(), CompileError> {
     pointer::drop(builder, closure_pointer, |builder| {
         builder.call(
-            closure::load_drop_function(builder, closure_pointer.clone())?,
+            closure::metadata::load_drop_function(
+                builder,
+                closure::load_metadata(builder, closure_pointer.clone())?,
+            )?,
             vec![fmm::build::bit_cast(
                 fmm::types::Primitive::PointerInteger,
                 closure_pointer.clone(),

@@ -184,10 +184,11 @@ fn compile_initial_thunk_entry(
                         compile_thunk_value_pointer(definition, context.types())?,
                     );
 
-                    instruction_builder.store(
-                        closure::compile_normal_thunk_drop_function(context, definition)?,
-                        compile_drop_function_pointer(definition, context.types())?,
-                    );
+                    closure::store_metadata(
+                        &instruction_builder,
+                        closure::metadata::compile_normal_thunk(context, definition)?,
+                        compile_metadata_pointer(definition, context.types())?,
+                    )?;
 
                     instruction_builder.atomic_store(
                         normal_entry_function.clone(),
@@ -316,11 +317,11 @@ fn compile_entry_function_pointer(
     closure::get_entry_function_pointer(compile_closure_pointer(definition.type_(), types)?)
 }
 
-fn compile_drop_function_pointer(
+fn compile_metadata_pointer(
     definition: &mir::ir::FunctionDefinition,
     types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    closure::get_drop_function_pointer(compile_closure_pointer(definition.type_(), types)?)
+    closure::get_metadata_pointer(compile_closure_pointer(definition.type_(), types)?)
 }
 
 fn compile_arguments(

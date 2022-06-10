@@ -23,12 +23,12 @@ pub fn compile_normal_thunk(
     ))
 }
 
-pub fn get_drop_function_pointer(
+pub fn load_drop_function(
+    builder: &fmm::build::InstructionBuilder,
     metadata_pointer: impl Into<fmm::build::TypedExpression>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    Ok(fmm::build::record_address(
+    Ok(builder.load(fmm::build::record_address(
         reference_count::pointer::untag(&metadata_pointer.into())?,
         0,
-    )?
-    .into())
+    )?)?)
 }

@@ -1,13 +1,7 @@
 mod drop;
-mod metadata;
+pub mod metadata;
 
-use super::{reference_count, type_, CompileError};
-use crate::context::Context;
-use once_cell::sync::Lazy;
-
-static DUMMY_FUNCTION_TYPE: Lazy<mir::types::Function> = Lazy::new(|| {
-    mir::types::Function::new(vec![mir::types::Type::Number], mir::types::Type::Number)
-});
+use super::{reference_count, CompileError};
 
 pub fn get_entry_function_pointer(
     closure_pointer: impl Into<fmm::build::TypedExpression>,
@@ -18,7 +12,7 @@ pub fn get_entry_function_pointer(
     )
 }
 
-pub fn get_drop_function_pointer(
+pub fn get_metadata_pointer(
     closure_pointer: impl Into<fmm::build::TypedExpression>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     Ok(
@@ -27,11 +21,21 @@ pub fn get_drop_function_pointer(
     )
 }
 
-pub fn load_drop_function(
+pub fn load_metadata(
     builder: &fmm::build::InstructionBuilder,
     closure_pointer: impl Into<fmm::build::TypedExpression>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    Ok(builder.load(get_drop_function_pointer(closure_pointer)?)?)
+    Ok(builder.load(get_metadata_pointer(closure_pointer)?)?)
+}
+
+pub fn store_metadata(
+    builder: &fmm::build::InstructionBuilder,
+    metadata: impl Into<fmm::build::TypedExpression>,
+    closure_pointer: impl Into<fmm::build::TypedExpression>,
+) -> Result<(), CompileError> {
+    builder.store(get_metadata_pointer(closure_pointer)?, metadata);
+
+    Ok(())
 }
 
 pub fn get_payload_pointer(
@@ -43,99 +47,10 @@ pub fn get_payload_pointer(
     )
 }
 
-pub fn compile_closure_content(
+pub fn compile_content(
     entry_function: impl Into<fmm::build::TypedExpression>,
-    drop_function: impl Into<fmm::build::TypedExpression>,
+    metadata: impl Into<fmm::build::TypedExpression>,
     payload: impl Into<fmm::build::TypedExpression>,
 ) -> fmm::build::TypedExpression {
-    fmm::build::record(vec![
-        entry_function.into(),
-        drop_function.into(),
-        payload.into(),
-    ])
-    .into()
-}
-
-pub fn compile_drop_function(
-    context: &Context,
-    definition: &mir::ir::FunctionDefinition,
-) -> Result<fmm::build::TypedExpression, CompileError> {
-    compile_drop_function_with_builder(
-        context,
-        |builder, environment_pointer| -> Result<_, CompileError> {
-            let environment = builder.load(fmm::build::bit_cast(
-                fmm::types::Pointer::new(type_::compile_environment(definition, context.types())),
-                environment_pointer.clone(),
-            ))?;
-
-            for (index, free_variable) in definition.environment().iter().enumerate() {
-                reference_count::drop(
-                    builder,
-                    &builder.deconstruct_record(environment.clone(), index)?,
-                    free_variable.type_(),
-                    context.types(),
-                )?;
-            }
-
-            Ok(())
-        },
-    )
-}
-
-pub fn compile_normal_thunk_drop_function(
-    context: &Context,
-    definition: &mir::ir::FunctionDefinition,
-) -> Result<fmm::build::TypedExpression, CompileError> {
-    compile_drop_function_with_builder(
-        context,
-        |builder, environment_pointer| -> Result<_, CompileError> {
-            reference_count::drop(
-                builder,
-                &builder.load(fmm::build::union_address(
-                    fmm::build::bit_cast(
-                        fmm::types::Pointer::new(type_::compile_closure_payload(
-                            definition,
-                            context.types(),
-                        )),
-                        environment_pointer.clone(),
-                    ),
-                    1,
-                )?)?,
-                definition.result_type(),
-                context.types(),
-            )?;
-
-            Ok(())
-        },
-    )
-}
-
-fn compile_drop_function_with_builder(
-    context: &Context,
-    compile_body: impl Fn(
-        &fmm::build::InstructionBuilder,
-        &fmm::build::TypedExpression,
-    ) -> Result<(), CompileError>,
-) -> Result<fmm::build::TypedExpression, CompileError> {
-    let argument = fmm::ir::Argument::new("_closure", fmm::types::Primitive::PointerInteger);
-
-    context.module_builder().define_anonymous_function(
-        vec![argument.clone()],
-        |builder| -> Result<_, CompileError> {
-            compile_body(
-                &builder,
-                &get_payload_pointer(fmm::build::bit_cast(
-                    fmm::types::Pointer::new(type_::compile_unsized_closure(
-                        &DUMMY_FUNCTION_TYPE,
-                        context.types(),
-                    )),
-                    fmm::build::variable(argument.name(), argument.type_().clone()),
-                ))?,
-            )?;
-
-            Ok(builder.return_(fmm::ir::VOID_VALUE.clone()))
-        },
-        fmm::types::VOID_TYPE.clone(),
-        fmm::types::CallingConvention::Target,
-    )
+    fmm::build::record(vec![entry_function.into(), metadata.into(), payload.into()]).into()
 }

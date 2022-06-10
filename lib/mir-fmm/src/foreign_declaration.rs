@@ -12,7 +12,7 @@ pub fn compile_foreign_declaration(
 ) -> Result<(), CompileError> {
     context.module_builder().define_variable(
         declaration.name(),
-        closure::compile_closure_content(
+        closure::compile_content(
             compile_entry_function(context, declaration)?,
             fmm::ir::Undefined::new(type_::compile_closure_drop_function()),
             fmm::build::record(vec![]),
