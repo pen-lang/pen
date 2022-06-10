@@ -12,15 +12,6 @@ pub fn get_entry_function_pointer(
     )
 }
 
-pub fn get_metadata_pointer(
-    closure_pointer: impl Into<fmm::build::TypedExpression>,
-) -> Result<fmm::build::TypedExpression, CompileError> {
-    Ok(
-        fmm::build::record_address(reference_count::pointer::untag(&closure_pointer.into())?, 1)?
-            .into(),
-    )
-}
-
 pub fn load_metadata(
     builder: &fmm::build::InstructionBuilder,
     closure_pointer: impl Into<fmm::build::TypedExpression>,
@@ -36,6 +27,15 @@ pub fn store_metadata(
     builder.store(metadata, get_metadata_pointer(closure_pointer)?);
 
     Ok(())
+}
+
+fn get_metadata_pointer(
+    closure_pointer: impl Into<fmm::build::TypedExpression>,
+) -> Result<fmm::build::TypedExpression, CompileError> {
+    Ok(
+        fmm::build::record_address(reference_count::pointer::untag(&closure_pointer.into())?, 1)?
+            .into(),
+    )
 }
 
 pub fn get_payload_pointer(
