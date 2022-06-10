@@ -6,6 +6,7 @@ use crate::{context::Context, reference_count, CompileError};
 //
 // - While thunks are evaluated, evaluator threads keep references at least. So
 //   drop functions are never called.
+//   - Also, they are never expected to be dropped during evaluation.
 // - If thunks are already synchronized, we do not call synchronization
 //   functions in closure metadata.
 
