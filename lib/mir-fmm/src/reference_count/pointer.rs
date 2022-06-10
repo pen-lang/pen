@@ -146,10 +146,8 @@ pub fn synchronize(
                 },
                 |builder| {
                     builder.atomic_store(
-                        fmm::build::arithmetic_operation(
-                            fmm::ir::ArithmeticOperator::Subtract,
-                            count::compile_initial(),
-                            builder
+                        count::synchronize(
+                            &builder
                                 .atomic_load(pointer.clone(), fmm::ir::AtomicOrdering::Relaxed)?,
                         )?,
                         pointer.clone(),

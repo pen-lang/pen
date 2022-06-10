@@ -14,6 +14,17 @@ pub const fn compile_type() -> fmm::types::Primitive {
     fmm::types::Primitive::Integer32
 }
 
+pub fn synchronize(
+    count: &fmm::build::TypedExpression,
+) -> Result<fmm::build::TypedExpression, CompileError> {
+    Ok(fmm::build::arithmetic_operation(
+        fmm::ir::ArithmeticOperator::Subtract,
+        compile_initial(),
+        count.clone(),
+    )?
+    .into())
+}
+
 pub fn is_synchronized(
     count: &fmm::build::TypedExpression,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
