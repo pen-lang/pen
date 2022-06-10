@@ -52,6 +52,11 @@ pub fn drop(
     pointer: &fmm::build::TypedExpression,
     drop_content: impl Fn(&fmm::build::InstructionBuilder) -> Result<(), CompileError>,
 ) -> Result<(), CompileError> {
+    let drop_inner = |builder: &_| {
+        drop_content(builder)?;
+        heap::free(builder, pointer.clone())
+    };
+
     if_heap_pointer(
         builder,
         pointer,
@@ -60,49 +65,48 @@ pub fn drop(
             let count =
                 builder.atomic_load(count_pointer.clone(), fmm::ir::AtomicOrdering::Relaxed)?;
 
-            builder.if_(
-                is_count_initial(&builder.if_(
-                    is_count_synchronized(&count)?,
-                    |builder| -> Result<_, CompileError> {
-                        Ok(builder.branch(builder.atomic_operation(
-                            fmm::ir::AtomicOperator::Add,
-                            count_pointer.clone(),
-                            count::compile(1),
-                            fmm::ir::AtomicOrdering::Release,
-                        )?))
-                    },
-                    |builder| {
-                        builder.store(
-                            fmm::build::arithmetic_operation(
-                                fmm::ir::ArithmeticOperator::Subtract,
-                                count.clone(),
-                                count::compile(1),
-                            )?,
-                            count_pointer.clone(),
-                        );
-
-                        Ok(builder.branch(count.clone()))
-                    },
-                )?)?,
+            Ok(builder.branch(builder.if_(
+                is_count_synchronized(&count)?,
                 |builder| -> Result<_, CompileError> {
-                    builder.fence(fmm::ir::AtomicOrdering::Acquire);
-
-                    drop_content(&builder)?;
-
-                    heap::free(
-                        &builder,
-                        fmm::build::bit_cast(
-                            fmm::types::GENERIC_POINTER_TYPE.clone(),
-                            pointer.clone(),
-                        ),
+                    let count = builder.atomic_operation(
+                        fmm::ir::AtomicOperator::Add,
+                        count_pointer.clone(),
+                        count::compile(1),
+                        fmm::ir::AtomicOrdering::Release,
                     )?;
 
-                    Ok(builder.branch(fmm::ir::VOID_VALUE.clone()))
-                },
-                |builder| Ok(builder.branch(fmm::ir::VOID_VALUE.clone())),
-            )?;
+                    Ok(builder.branch(builder.if_(
+                        is_count_initial(&count)?,
+                        |builder| -> Result<_, CompileError> {
+                            builder.fence(fmm::ir::AtomicOrdering::Acquire);
+                            drop_inner(&builder)?;
 
-            Ok(builder.branch(fmm::ir::VOID_VALUE.clone()))
+                            Ok(builder.branch(fmm::ir::VOID_VALUE.clone()))
+                        },
+                        |builder| Ok(builder.branch(fmm::ir::VOID_VALUE.clone())),
+                    )?))
+                },
+                |builder| {
+                    builder.store(
+                        fmm::build::arithmetic_operation(
+                            fmm::ir::ArithmeticOperator::Subtract,
+                            count.clone(),
+                            count::compile(1),
+                        )?,
+                        count_pointer.clone(),
+                    );
+
+                    Ok(builder.branch(builder.if_(
+                        is_count_initial(&count)?,
+                        |builder| -> Result<_, CompileError> {
+                            drop_inner(&builder)?;
+
+                            Ok(builder.branch(fmm::ir::VOID_VALUE.clone()))
+                        },
+                        |builder| Ok(builder.branch(fmm::ir::VOID_VALUE.clone())),
+                    )?))
+                },
+            )?))
         },
         |builder| Ok(builder.branch(fmm::ir::VOID_VALUE.clone())),
     )?;
@@ -118,14 +122,10 @@ pub fn is_owned(
         builder,
         pointer,
         |builder| {
-            Ok(builder.branch(fmm::build::comparison_operation(
-                fmm::ir::ComparisonOperator::Equal,
-                builder.atomic_load(
-                    heap::get_count_pointer(pointer)?,
-                    fmm::ir::AtomicOrdering::Relaxed,
-                )?,
-                count::compile_initial(),
-            )?))
+            Ok(builder.branch(is_count_initial(&builder.atomic_load(
+                heap::get_count_pointer(pointer)?,
+                fmm::ir::AtomicOrdering::Relaxed,
+            )?)?))
         },
         |builder| Ok(builder.branch(fmm::ir::Primitive::Boolean(false))),
     )
@@ -142,12 +142,12 @@ pub fn synchronize(
             let pointer = heap::get_count_pointer(pointer)?;
 
             builder.if_(
-                fmm::build::comparison_operation(
-                    fmm::ir::ComparisonOperator::LessThan,
-                    builder.atomic_load(pointer.clone(), fmm::ir::AtomicOrdering::Relaxed)?,
-                    count::compile_initial(),
+                is_count_synchronized(
+                    &builder.atomic_load(pointer.clone(), fmm::ir::AtomicOrdering::Relaxed)?,
                 )?,
-                |builder| Ok::<_, CompileError>(builder.branch(fmm::ir::VOID_VALUE.clone())),
+                |builder| -> Result<_, CompileError> {
+                    Ok(builder.branch(fmm::ir::VOID_VALUE.clone()))
+                },
                 |builder| {
                     builder.atomic_store(
                         fmm::build::arithmetic_operation(
