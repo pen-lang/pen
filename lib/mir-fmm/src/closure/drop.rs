@@ -1,62 +1,11 @@
-mod drop;
-mod metadata;
-
-use super::{reference_count, type_, CompileError};
-use crate::context::Context;
+use crate::{context::Context, reference_count, type_, CompileError};
 use once_cell::sync::Lazy;
 
 static DUMMY_FUNCTION_TYPE: Lazy<mir::types::Function> = Lazy::new(|| {
     mir::types::Function::new(vec![mir::types::Type::Number], mir::types::Type::Number)
 });
 
-pub fn get_entry_function_pointer(
-    closure_pointer: impl Into<fmm::build::TypedExpression>,
-) -> Result<fmm::build::TypedExpression, CompileError> {
-    Ok(
-        fmm::build::record_address(reference_count::pointer::untag(&closure_pointer.into())?, 0)?
-            .into(),
-    )
-}
-
-pub fn get_drop_function_pointer(
-    closure_pointer: impl Into<fmm::build::TypedExpression>,
-) -> Result<fmm::build::TypedExpression, CompileError> {
-    Ok(
-        fmm::build::record_address(reference_count::pointer::untag(&closure_pointer.into())?, 1)?
-            .into(),
-    )
-}
-
-pub fn load_drop_function(
-    builder: &fmm::build::InstructionBuilder,
-    closure_pointer: impl Into<fmm::build::TypedExpression>,
-) -> Result<fmm::build::TypedExpression, CompileError> {
-    Ok(builder.load(get_drop_function_pointer(closure_pointer)?)?)
-}
-
-pub fn get_payload_pointer(
-    closure_pointer: impl Into<fmm::build::TypedExpression>,
-) -> Result<fmm::build::TypedExpression, CompileError> {
-    Ok(
-        fmm::build::record_address(reference_count::pointer::untag(&closure_pointer.into())?, 2)?
-            .into(),
-    )
-}
-
-pub fn compile_closure_content(
-    entry_function: impl Into<fmm::build::TypedExpression>,
-    drop_function: impl Into<fmm::build::TypedExpression>,
-    payload: impl Into<fmm::build::TypedExpression>,
-) -> fmm::build::TypedExpression {
-    fmm::build::record(vec![
-        entry_function.into(),
-        drop_function.into(),
-        payload.into(),
-    ])
-    .into()
-}
-
-pub fn compile_drop_function(
+pub fn compile(
     context: &Context,
     definition: &mir::ir::FunctionDefinition,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
@@ -82,7 +31,7 @@ pub fn compile_drop_function(
     )
 }
 
-pub fn compile_normal_thunk_drop_function(
+pub fn compile_normal_thunk(
     context: &Context,
     definition: &mir::ir::FunctionDefinition,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
@@ -124,7 +73,7 @@ fn compile_drop_function_with_builder(
         |builder| -> Result<_, CompileError> {
             compile_body(
                 &builder,
-                &get_payload_pointer(fmm::build::bit_cast(
+                &super::get_payload_pointer(fmm::build::bit_cast(
                     fmm::types::Pointer::new(type_::compile_unsized_closure(
                         &DUMMY_FUNCTION_TYPE,
                         context.types(),
