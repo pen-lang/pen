@@ -5,7 +5,7 @@ pub fn compile(
     closure_pointer: &fmm::build::TypedExpression,
     arguments: &[fmm::build::TypedExpression],
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    let entry_function_pointer = closure::compile_entry_function_pointer(closure_pointer.clone())?;
+    let entry_function_pointer = closure::get_entry_function_pointer(closure_pointer.clone())?;
 
     Ok(instruction_builder.call(
         if arguments.is_empty() {
