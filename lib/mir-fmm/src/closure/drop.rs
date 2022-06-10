@@ -1,9 +1,8 @@
 use crate::{context::Context, reference_count, type_, CompileError};
 use once_cell::sync::Lazy;
 
-static DUMMY_FUNCTION_TYPE: Lazy<mir::types::Function> = Lazy::new(|| {
-    mir::types::Function::new(vec![mir::types::Type::Number], mir::types::Type::Number)
-});
+static DUMMY_FUNCTION_TYPE: Lazy<mir::types::Function> =
+    Lazy::new(|| mir::types::Function::new(vec![], mir::types::Type::None));
 
 pub fn compile(
     context: &Context,
