@@ -14,7 +14,7 @@ pub fn compile_foreign_declaration(
         declaration.name(),
         closure::compile_content(
             compile_entry_function(context, declaration)?,
-            fmm::ir::Undefined::new(type_::compile_closure_drop_function()),
+            fmm::ir::Undefined::new(type_::compile_closure_metadata()),
             fmm::build::record(vec![]),
         ),
         false,
