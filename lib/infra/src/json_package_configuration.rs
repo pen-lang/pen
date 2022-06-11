@@ -1,8 +1,10 @@
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 
+// TODO Remove this allow when clippy::use_self's bug is fixed.
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[allow(clippy::use_self)]
 pub enum JsonPackageType {
     Application,
     Library,

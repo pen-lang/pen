@@ -35,8 +35,8 @@ impl From<String> for Document {
     }
 }
 
-impl From<Vec<Document>> for Document {
-    fn from(documents: Vec<Document>) -> Self {
+impl From<Vec<Self>> for Document {
+    fn from(documents: Vec<Self>) -> Self {
         Self::Sequence(documents.into())
     }
 }
