@@ -38,6 +38,37 @@ pub fn compile_clone_function(
     Ok(())
 }
 
+fn clone_boxed(
+    builder: &fmm::build::InstructionBuilder,
+    record: &fmm::build::TypedExpression,
+) -> Result<fmm::build::TypedExpression, CompileError> {
+    pointer::clone(builder, record)
+}
+
+fn clone_unboxed(
+    context: &Context,
+    builder: &fmm::build::InstructionBuilder,
+    record: &fmm::build::TypedExpression,
+    record_type: &mir::types::Record,
+) -> Result<fmm::build::TypedExpression, CompileError> {
+    Ok(fmm::build::record(
+        context.types()[record_type.name()]
+            .fields()
+            .iter()
+            .enumerate()
+            .map(|(index, type_)| {
+                expression::clone(
+                    builder,
+                    &record::get_unboxed_field(builder, record, index)?,
+                    type_,
+                    context.types(),
+                )
+            })
+            .collect::<Result<_, _>>()?,
+    )
+    .into())
+}
+
 pub fn compile_drop_function(
     context: &Context,
     definition: &mir::ir::TypeDefinition,
@@ -68,37 +99,6 @@ pub fn compile_drop_function(
     )?;
 
     Ok(())
-}
-
-fn clone_boxed(
-    builder: &fmm::build::InstructionBuilder,
-    record: &fmm::build::TypedExpression,
-) -> Result<fmm::build::TypedExpression, CompileError> {
-    pointer::clone(builder, record)
-}
-
-fn clone_unboxed(
-    context: &Context,
-    builder: &fmm::build::InstructionBuilder,
-    record: &fmm::build::TypedExpression,
-    record_type: &mir::types::Record,
-) -> Result<fmm::build::TypedExpression, CompileError> {
-    Ok(fmm::build::record(
-        context.types()[record_type.name()]
-            .fields()
-            .iter()
-            .enumerate()
-            .map(|(index, type_)| {
-                expression::clone(
-                    builder,
-                    &record::get_unboxed_field(builder, record, index)?,
-                    type_,
-                    context.types(),
-                )
-            })
-            .collect::<Result<_, _>>()?,
-    )
-    .into())
 }
 
 fn drop_boxed(
