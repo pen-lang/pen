@@ -3,7 +3,7 @@ use super::{
     clone_variables::CloneVariables, comparison_operation::ComparisonOperation,
     drop_variables::DropVariables, if_::If, let_::Let, let_recursive::LetRecursive, record::Record,
     record_field::RecordField, try_operation::TryOperation, variable::Variable, variant::Variant,
-    MarkSync, RecordUpdate,
+    RecordUpdate, Synchronize,
 };
 
 #[derive(Clone, Debug, PartialEq)]
@@ -19,7 +19,7 @@ pub enum Expression {
     If(If),
     Let(Let),
     LetRecursive(LetRecursive),
-    MarkSync(MarkSync),
+    Synchronize(Synchronize),
     None,
     Number(f64),
     Record(Record),
@@ -102,9 +102,9 @@ impl From<Let> for Expression {
     }
 }
 
-impl From<MarkSync> for Expression {
-    fn from(mark: MarkSync) -> Self {
-        Self::MarkSync(mark)
+impl From<Synchronize> for Expression {
+    fn from(mark: Synchronize) -> Self {
+        Self::Synchronize(mark)
     }
 }
 

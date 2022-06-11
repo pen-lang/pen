@@ -77,8 +77,8 @@ pub fn compile(
         mir::ir::Expression::LetRecursive(let_) => {
             compile_let_recursive(context, instruction_builder, let_, variables)?
         }
-        mir::ir::Expression::MarkSync(mark) => {
-            compile_mark_sync(context, instruction_builder, mark, variables)?
+        mir::ir::Expression::Synchronize(mark) => {
+            compile_synchronize(context, instruction_builder, mark, variables)?
         }
         mir::ir::Expression::None => fmm::ir::Undefined::new(type_::compile_none()).into(),
         mir::ir::Expression::Number(number) => fmm::ir::Primitive::Float64(*number).into(),
@@ -433,10 +433,10 @@ fn compile_let_recursive(
     )
 }
 
-fn compile_mark_sync(
+fn compile_synchronize(
     context: &Context,
     instruction_builder: &fmm::build::InstructionBuilder,
-    mark: &mir::ir::MarkSync,
+    mark: &mir::ir::Synchronize,
     variables: &FnvHashMap<String, fmm::build::TypedExpression>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     let value = compile(context, instruction_builder, mark.expression(), variables)?;
