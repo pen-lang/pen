@@ -3,8 +3,8 @@ use std::collections::BTreeMap;
 
 // TODO Remove the allow when clippy::use_self's bug is fixed.
 #[derive(Clone, Debug, Deserialize, Serialize)]
-#[serde(rename_all = "camelCase")]
 #[allow(clippy::use_self)]
+#[serde(rename_all = "camelCase")]
 pub enum JsonPackageType {
     Application,
     Library,
