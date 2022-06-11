@@ -42,18 +42,12 @@ pub fn load_drop_function(
     builder: &fmm::build::InstructionBuilder,
     metadata_pointer: impl Into<fmm::build::TypedExpression>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    Ok(builder.load(fmm::build::record_address(
-        reference_count::pointer::untag(&metadata_pointer.into())?,
-        0,
-    )?)?)
+    Ok(builder.load(fmm::build::record_address(metadata_pointer, 0)?)?)
 }
 
 pub fn load_synchronize_function(
     builder: &fmm::build::InstructionBuilder,
     metadata_pointer: impl Into<fmm::build::TypedExpression>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    Ok(builder.load(fmm::build::record_address(
-        reference_count::pointer::untag(&metadata_pointer.into())?,
-        1,
-    )?)?)
+    Ok(builder.load(fmm::build::record_address(metadata_pointer, 1)?)?)
 }
