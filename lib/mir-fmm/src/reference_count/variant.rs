@@ -96,7 +96,7 @@ pub fn compile_synchronize_function(
             if type_::variant::should_box_payload(type_, context.types())? {
                 pointer::synchronize(&builder, &payload, |builder| {
                     expression::synchronize(
-                        &builder,
+                        builder,
                         &builder.load(payload.clone())?,
                         type_,
                         context.types(),

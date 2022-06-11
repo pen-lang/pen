@@ -177,11 +177,11 @@ fn synchronize_boxed(
     record: &fmm::build::TypedExpression,
     record_type: &mir::types::Record,
 ) -> Result<(), CompileError> {
-    pointer::synchronize(&builder, record, |builder| {
+    pointer::synchronize(builder, record, |builder| {
         synchronize_unboxed(
             context,
-            &builder,
-            &record::load(context, &builder, record, record_type)?,
+            builder,
+            &record::load(context, builder, record, record_type)?,
             record_type,
         )
     })

@@ -127,7 +127,7 @@ pub fn synchronize(
                 count::synchronize(
                     &builder.atomic_load(pointer.clone(), fmm::ir::AtomicOrdering::Relaxed)?,
                 )?,
-                pointer.clone(),
+                pointer,
                 fmm::ir::AtomicOrdering::Relaxed,
             );
 
