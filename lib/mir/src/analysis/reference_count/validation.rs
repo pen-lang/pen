@@ -138,8 +138,8 @@ fn move_expression(
 
             validate_let_like(let_.definition().name(), let_.expression(), variables)?;
         }
-        Expression::Synchronize(mark) => {
-            move_expression(mark.expression(), variables)?;
+        Expression::Synchronize(synchronize) => {
+            move_expression(synchronize.expression(), variables)?;
         }
         Expression::None => {}
         Expression::Number(_) => {}

@@ -48,7 +48,7 @@ fn collect_from_expression(expression: &Expression) -> FnvHashSet<Type> {
             .into_iter()
             .chain(collect_from_expression(let_.expression()))
             .collect(),
-        Expression::Synchronize(mark) => collect_from_expression(mark.expression()),
+        Expression::Synchronize(synchronize) => collect_from_expression(synchronize.expression()),
         Expression::Record(record) => collect_from_record(record),
         Expression::RecordField(field) => collect_from_expression(field.record()),
         Expression::RecordUpdate(update) => collect_from_expression(update.record())

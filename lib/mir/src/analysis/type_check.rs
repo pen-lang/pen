@@ -177,10 +177,10 @@ fn check_expression(
                     .collect(),
             )?
         }
-        Expression::Synchronize(mark) => {
-            let type_ = check_expression(mark.expression(), variables)?;
+        Expression::Synchronize(synchronize) => {
+            let type_ = check_expression(synchronize.expression(), variables)?;
 
-            check_equality(&type_, mark.type_())?;
+            check_equality(&type_, synchronize.type_())?;
 
             type_
         }

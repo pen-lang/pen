@@ -415,12 +415,12 @@ fn convert_expression(
                     .collect::<FnvHashSet<String>>(),
             )
         }
-        Expression::Synchronize(mark) => {
+        Expression::Synchronize(synchronize) => {
             let (expression, moved_variables) =
-                convert_expression(mark.expression(), owned_variables, moved_variables)?;
+                convert_expression(synchronize.expression(), owned_variables, moved_variables)?;
 
             (
-                Synchronize::new(mark.type_().clone(), expression).into(),
+                Synchronize::new(synchronize.type_().clone(), expression).into(),
                 moved_variables,
             )
         }

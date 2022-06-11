@@ -103,8 +103,8 @@ impl From<Let> for Expression {
 }
 
 impl From<Synchronize> for Expression {
-    fn from(mark: Synchronize) -> Self {
-        Self::Synchronize(mark)
+    fn from(synchronize: Synchronize) -> Self {
+        Self::Synchronize(synchronize)
     }
 }
 
