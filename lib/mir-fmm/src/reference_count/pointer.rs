@@ -115,36 +115,26 @@ pub fn drop(
 pub fn synchronize(
     builder: &fmm::build::InstructionBuilder,
     pointer: &fmm::build::TypedExpression,
+    synchronize_content: impl Fn(&fmm::build::InstructionBuilder) -> Result<(), CompileError>,
 ) -> Result<(), CompileError> {
     builder.if_(
-        is_heap(pointer)?,
+        is_synchronized(builder, pointer)?,
+        |builder| Ok(builder.branch(fmm::ir::VOID_VALUE.clone())),
         |builder| -> Result<_, CompileError> {
             let pointer = heap::get_count_pointer(pointer)?;
 
-            builder.if_(
-                count::is_synchronized(
+            builder.atomic_store(
+                count::synchronize(
                     &builder.atomic_load(pointer.clone(), fmm::ir::AtomicOrdering::Relaxed)?,
                 )?,
-                |builder| -> Result<_, CompileError> {
-                    Ok(builder.branch(fmm::ir::VOID_VALUE.clone()))
-                },
-                |builder| {
-                    builder.atomic_store(
-                        count::synchronize(
-                            &builder
-                                .atomic_load(pointer.clone(), fmm::ir::AtomicOrdering::Relaxed)?,
-                        )?,
-                        pointer.clone(),
-                        fmm::ir::AtomicOrdering::Relaxed,
-                    );
+                pointer.clone(),
+                fmm::ir::AtomicOrdering::Relaxed,
+            );
 
-                    Ok(builder.branch(fmm::ir::VOID_VALUE.clone()))
-                },
-            )?;
+            synchronize_content(&builder)?;
 
             Ok(builder.branch(fmm::ir::VOID_VALUE.clone()))
         },
-        |builder| Ok(builder.branch(fmm::ir::VOID_VALUE.clone())),
     )?;
 
     Ok(())
@@ -194,21 +184,19 @@ pub fn is_owned(
     )
 }
 
-pub fn is_synchronized(
+fn is_synchronized(
     builder: &fmm::build::InstructionBuilder,
     pointer: &fmm::build::TypedExpression,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    builder.if_(
-        is_heap(pointer)?,
-        |builder| {
-            Ok(builder.branch(count::is_initial(&builder.atomic_load(
-                heap::get_count_pointer(pointer)?,
-                fmm::ir::AtomicOrdering::Relaxed,
-            )?)?))
-        },
-        // TODO Can we make this false, for example, using TLS for global variables?
-        |builder| Ok(builder.branch(fmm::ir::Primitive::Boolean(true))),
-    )
+    Ok(fmm::build::bitwise_operation(
+        fmm::ir::BitwiseOperator::Or,
+        fmm::build::bitwise_not_operation(is_heap(pointer)?)?,
+        count::is_synchronized(&builder.atomic_load(
+            heap::get_count_pointer(pointer)?,
+            fmm::ir::AtomicOrdering::Relaxed,
+        )?)?,
+    )?
+    .into())
 }
 
 fn is_heap(
@@ -216,11 +204,7 @@ fn is_heap(
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     Ok(fmm::build::bitwise_operation(
         fmm::ir::BitwiseOperator::And,
-        fmm::build::comparison_operation(
-            fmm::ir::ComparisonOperator::NotEqual,
-            fmm::build::bit_cast(fmm::types::Primitive::PointerInteger, pointer.clone()),
-            fmm::ir::Undefined::new(fmm::types::Primitive::PointerInteger),
-        )?,
+        fmm::build::bitwise_not_operation(is_null(pointer)?)?,
         fmm::build::comparison_operation(
             fmm::ir::ComparisonOperator::NotEqual,
             fmm::build::bitwise_operation(
@@ -230,6 +214,17 @@ fn is_heap(
             )?,
             fmm::ir::Primitive::PointerInteger(1),
         )?,
+    )?
+    .into())
+}
+
+fn is_null(
+    pointer: &fmm::build::TypedExpression,
+) -> Result<fmm::build::TypedExpression, CompileError> {
+    Ok(fmm::build::comparison_operation(
+        fmm::ir::ComparisonOperator::Equal,
+        fmm::build::bit_cast(fmm::types::Primitive::PointerInteger, pointer.clone()),
+        fmm::ir::Undefined::new(fmm::types::Primitive::PointerInteger),
     )?
     .into())
 }

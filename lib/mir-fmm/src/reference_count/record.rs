@@ -114,9 +114,7 @@ fn drop_boxed(
             &record::load(context, builder, record, record_type)?,
             record_type,
         )
-    })?;
-
-    Ok(())
+    })
 }
 
 fn drop_unboxed(
@@ -179,24 +177,14 @@ fn synchronize_boxed(
     record: &fmm::build::TypedExpression,
     record_type: &mir::types::Record,
 ) -> Result<(), CompileError> {
-    builder.if_(
-        pointer::is_synchronized(builder, record)?,
-        |builder| -> Result<_, CompileError> { Ok(builder.branch(fmm::ir::VOID_VALUE.clone())) },
-        |builder| {
-            pointer::synchronize(&builder, record)?;
-
-            synchronize_unboxed(
-                context,
-                &builder,
-                &record::load(context, &builder, record, record_type)?,
-                record_type,
-            )?;
-
-            Ok(builder.branch(fmm::ir::VOID_VALUE.clone()))
-        },
-    )?;
-
-    Ok(())
+    pointer::synchronize(&builder, record, |builder| {
+        synchronize_unboxed(
+            context,
+            &builder,
+            &record::load(context, &builder, record, record_type)?,
+            record_type,
+        )
+    })
 }
 
 fn synchronize_unboxed(

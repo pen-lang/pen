@@ -86,7 +86,7 @@ pub fn synchronize(
 ) -> Result<(), CompileError> {
     match type_ {
         mir::types::Type::ByteString => {
-            pointer::synchronize(builder, expression)?;
+            pointer::synchronize(builder, expression, |_| Ok(()))?;
         }
         mir::types::Type::Function(_) => {
             function::synchronize(builder, expression)?;

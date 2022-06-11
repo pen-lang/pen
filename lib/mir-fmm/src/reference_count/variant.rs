@@ -94,24 +94,14 @@ pub fn compile_synchronize_function(
             )?;
 
             if type_::variant::should_box_payload(type_, context.types())? {
-                builder.if_(
-                    pointer::is_synchronized(&builder, &payload)?,
-                    |builder| -> Result<_, CompileError> {
-                        Ok(builder.branch(fmm::ir::VOID_VALUE.clone()))
-                    },
-                    |builder| {
-                        pointer::synchronize(&builder, &payload)?;
-
-                        expression::synchronize(
-                            &builder,
-                            &builder.load(payload.clone())?,
-                            type_,
-                            context.types(),
-                        )?;
-
-                        Ok(builder.branch(fmm::ir::VOID_VALUE.clone()))
-                    },
-                )?;
+                pointer::synchronize(&builder, &payload, |builder| {
+                    expression::synchronize(
+                        &builder,
+                        &builder.load(payload.clone())?,
+                        type_,
+                        context.types(),
+                    )
+                })?;
             } else {
                 expression::synchronize(&builder, &payload, type_, context.types())?;
             }
