@@ -3,7 +3,7 @@ use crate::CompileError;
 const INITIAL_COUNT: isize = 0;
 
 pub const fn compile(count: isize) -> fmm::ir::Primitive {
-    fmm::ir::Primitive::Integer32(count as u32)
+    fmm::ir::Primitive::PointerInteger(count as i64)
 }
 
 pub const fn compile_initial() -> fmm::ir::Primitive {
@@ -11,7 +11,7 @@ pub const fn compile_initial() -> fmm::ir::Primitive {
 }
 
 pub const fn compile_type() -> fmm::types::Primitive {
-    fmm::types::Primitive::Integer32
+    fmm::types::Primitive::PointerInteger
 }
 
 pub fn synchronize(
