@@ -85,7 +85,7 @@ fn box_payload(
     type_: &mir::types::Type,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     Ok(
-        if type_::variant::should_box_payload(type_, context.types())? {
+        if type_::variant::is_payload_boxed(type_, context.types())? {
             box_::box_(builder, value.clone())?
         } else {
             value.clone()
@@ -100,7 +100,7 @@ fn unbox_payload(
     type_: &mir::types::Type,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     Ok(
-        if type_::variant::should_box_payload(type_, context.types())? {
+        if type_::variant::is_payload_boxed(type_, context.types())? {
             box_::unbox(builder, value.clone(), type_, context.types())?
         } else {
             value.clone()

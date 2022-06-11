@@ -23,7 +23,7 @@ pub fn compile_clone_function(
 
             Ok(builder.return_(variant::bit_cast_to_opaque_payload(
                 &builder,
-                &if type_::variant::should_box_payload(type_, context.types())? {
+                &if type_::variant::is_payload_boxed(type_, context.types())? {
                     pointer::clone(&builder, &payload)?
                 } else {
                     expression::clone(&builder, &payload, type_, context.types())?
@@ -54,7 +54,7 @@ pub fn compile_drop_function(
                 context.types(),
             )?;
 
-            if type_::variant::should_box_payload(type_, context.types())? {
+            if type_::variant::is_payload_boxed(type_, context.types())? {
                 pointer::drop(&builder, &payload, |builder| {
                     expression::drop(
                         builder,
@@ -93,7 +93,7 @@ pub fn compile_synchronize_function(
                 context.types(),
             )?;
 
-            if type_::variant::should_box_payload(type_, context.types())? {
+            if type_::variant::is_payload_boxed(type_, context.types())? {
                 pointer::synchronize(&builder, &payload, |builder| {
                     expression::synchronize(
                         builder,
