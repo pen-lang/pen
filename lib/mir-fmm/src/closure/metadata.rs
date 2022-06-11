@@ -1,5 +1,5 @@
 use super::{drop, sync};
-use crate::{context::Context, reference_count, CompileError};
+use crate::{context::Context, CompileError};
 
 // We do not need to compile closure metadata for thunks in the middle of
 // evaluation because of the following reasons.
