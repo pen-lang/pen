@@ -11,7 +11,7 @@ repository = "https://github.com/pen-lang/pen"
 [dependencies]
 async-stream = "0.3"
 futures = "0.3"
-pen-ffi-macro = { version = "0.1", path = "../ffi-macro" }
+pen-ffi-macro = { version = "0.2", path = "../ffi-macro" }
 tokio = { version = "1", features = ["full"], optional = true }
 tokio-util = { version = "0.7", features = ["full"], optional = true }
 
