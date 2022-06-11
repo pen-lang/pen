@@ -40,7 +40,7 @@ fn find_in_expression(expression: &Expression) -> FnvHashSet<String> {
                     .filter(|variable| variable != let_.name()),
             )
             .collect(),
-        Expression::MarkSync(mark) => find_in_expression(mark.expression()),
+        Expression::Synchronize(synchronize) => find_in_expression(synchronize.expression()),
         Expression::Record(record) => find_in_record(record),
         Expression::RecordField(field) => find_in_expression(field.record()),
         Expression::RecordUpdate(update) => find_in_expression(update.record())

@@ -177,10 +177,10 @@ fn check_expression(
                     .collect(),
             )?
         }
-        Expression::MarkSync(mark) => {
-            let type_ = check_expression(mark.expression(), variables)?;
+        Expression::Synchronize(synchronize) => {
+            let type_ = check_expression(synchronize.expression(), variables)?;
 
-            check_equality(&type_, mark.type_())?;
+            check_equality(&type_, synchronize.type_())?;
 
             type_
         }
@@ -830,7 +830,7 @@ mod tests {
         }
     }
 
-    mod mark_sync {
+    mod synchronize {
         use super::*;
 
         #[test]
@@ -841,7 +841,7 @@ mod tests {
                         "f",
                         vec![],
                         vec![Argument::new("x", Type::Number)],
-                        MarkSync::new(Type::Number, 42.0),
+                        Synchronize::new(Type::Number, 42.0),
                         Type::Number
                     )
                 ],)),
@@ -857,7 +857,7 @@ mod tests {
                         "f",
                         vec![],
                         vec![Argument::new("x", Type::Number)],
-                        MarkSync::new(Type::None, 42.0),
+                        Synchronize::new(Type::None, 42.0),
                         Type::Number
                     )
                 ],)),

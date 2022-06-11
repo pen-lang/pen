@@ -794,7 +794,7 @@ fn compile_spawn_operation(
                     )?,
                     type_::compile(context, &any_type)?,
                 ),
-                mir::ir::MarkSync::new(mir_thunk_type, mir::ir::Variable::new(ANY_THUNK_NAME)),
+                mir::ir::Synchronize::new(mir_thunk_type, mir::ir::Variable::new(ANY_THUNK_NAME)),
             )
             .into()],
         ),
@@ -1614,7 +1614,7 @@ mod tests {
                                 ),
                                 mir::types::Type::Variant
                             ),
-                            mir::ir::MarkSync::new(
+                            mir::ir::Synchronize::new(
                                 thunk_type.clone(),
                                 mir::ir::Variable::new("$any_thunk")
                             ),
@@ -1676,7 +1676,7 @@ mod tests {
                                 mir::ir::Variable::new("x"),
                                 mir::types::Type::Variant
                             ),
-                            mir::ir::MarkSync::new(
+                            mir::ir::Synchronize::new(
                                 thunk_type.clone(),
                                 mir::ir::Variable::new("$any_thunk")
                             ),

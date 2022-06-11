@@ -3,12 +3,12 @@ use crate::types::Type;
 use std::sync::Arc;
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct MarkSync {
+pub struct Synchronize {
     type_: Type,
     expression: Arc<Expression>,
 }
 
-impl MarkSync {
+impl Synchronize {
     pub fn new(type_: impl Into<Type>, expression: impl Into<Expression>) -> Self {
         Self {
             type_: type_.into(),
