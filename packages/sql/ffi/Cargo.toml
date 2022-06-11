@@ -8,7 +8,7 @@ edition = "2021"
 crate-type = ["staticlib"]
 
 [dependencies]
-ffi = { package = "pen-ffi", version = "0.4", features = ["runtime"] }
+ffi = { package = "pen-ffi", version = "0.5", features = ["runtime"] }
 futures = "0.3"
 sqlx = { git = "https://github.com/raviqqe/sqlx", branch = "bug/any-type-info", features = [
   "any",

@@ -9,6 +9,10 @@ pub fn get_record_drop_function_name(name: &str) -> String {
     format!("mir_drop:{}", name)
 }
 
+pub fn get_record_synchronize_function_name(name: &str) -> String {
+    format!("mir_synchronize:{}", name)
+}
+
 pub fn compile_record_clone_function_type(
     record: &mir::types::Record,
     types: &FnvHashMap<String, mir::types::RecordBody>,
@@ -23,6 +27,17 @@ pub fn compile_record_clone_function_type(
 }
 
 pub fn compile_record_drop_function_type(
+    record: &mir::types::Record,
+    types: &FnvHashMap<String, mir::types::RecordBody>,
+) -> fmm::types::Function {
+    fmm::types::Function::new(
+        vec![type_::compile_record(record, types)],
+        fmm::types::VOID_TYPE.clone(),
+        fmm::types::CallingConvention::Target,
+    )
+}
+
+pub fn compile_record_synchronize_function_type(
     record: &mir::types::Record,
     types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> fmm::types::Function {
