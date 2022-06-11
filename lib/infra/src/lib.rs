@@ -7,6 +7,8 @@ mod external_package_initializer;
 mod file_path_converter;
 mod file_path_displayer;
 mod file_system;
+// TODO Remove the allow when clippy::use_self's bug is fixed.
+#[allow(clippy::use_self)]
 mod json_package_configuration;
 mod json_package_configuration_reader;
 mod json_package_configuration_writer;
