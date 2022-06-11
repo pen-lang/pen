@@ -82,7 +82,7 @@ pub fn synchronize(
     builder: &fmm::build::InstructionBuilder,
     expression: &fmm::build::TypedExpression,
     type_: &mir::types::Type,
-    _types: &FnvHashMap<String, mir::types::RecordBody>,
+    types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> Result<(), CompileError> {
     match type_ {
         mir::types::Type::ByteString => {
@@ -91,7 +91,15 @@ pub fn synchronize(
         mir::types::Type::Function(_) => {
             function::synchronize(builder, expression)?;
         }
-        mir::types::Type::Record(_) => todo!(),
+        mir::types::Type::Record(record) => {
+            builder.call(
+                fmm::build::variable(
+                    record_utilities::get_record_synchronize_function_name(record.name()),
+                    record_utilities::compile_record_synchronize_function_type(record, types),
+                ),
+                vec![expression.clone()],
+            )?;
+        }
         mir::types::Type::Variant => {
             builder.call(
                 builder.deconstruct_record(

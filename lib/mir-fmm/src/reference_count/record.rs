@@ -140,3 +140,75 @@ fn drop_unboxed(
 
     Ok(())
 }
+
+pub fn compile_synchronize_function(
+    context: &Context,
+    definition: &mir::ir::TypeDefinition,
+) -> Result<(), CompileError> {
+    let record_type = mir::types::Record::new(definition.name());
+    let fmm_record_type = type_::compile_record(&record_type, context.types());
+
+    context.module_builder().define_function(
+        record_utilities::get_record_synchronize_function_name(definition.name()),
+        vec![fmm::ir::Argument::new(
+            ARGUMENT_NAME,
+            fmm_record_type.clone(),
+        )],
+        |builder| -> Result<_, CompileError> {
+            let record = fmm::build::variable(ARGUMENT_NAME, fmm_record_type.clone());
+
+            if type_::is_record_boxed(&record_type, context.types()) {
+                synchronize_boxed(context, &builder, &record, &record_type)?
+            } else {
+                synchronize_unboxed(context, &builder, &record, &record_type)?;
+            }
+
+            Ok(builder.return_(fmm::ir::VOID_VALUE.clone()))
+        },
+        fmm::types::VOID_TYPE.clone(),
+        fmm::types::CallingConvention::Target,
+        fmm::ir::Linkage::Weak,
+    )?;
+
+    Ok(())
+}
+
+fn synchronize_boxed(
+    context: &Context,
+    builder: &fmm::build::InstructionBuilder,
+    record: &fmm::build::TypedExpression,
+    record_type: &mir::types::Record,
+) -> Result<(), CompileError> {
+    pointer::synchronize(builder, record)?;
+
+    synchronize_unboxed(
+        context,
+        builder,
+        &record::load(context, builder, record, record_type)?,
+        record_type,
+    )?;
+
+    Ok(())
+}
+
+fn synchronize_unboxed(
+    context: &Context,
+    builder: &fmm::build::InstructionBuilder,
+    record: &fmm::build::TypedExpression,
+    record_type: &mir::types::Record,
+) -> Result<(), CompileError> {
+    for (index, type_) in context.types()[record_type.name()]
+        .fields()
+        .iter()
+        .enumerate()
+    {
+        expression::synchronize(
+            builder,
+            &record::get_unboxed_field(builder, record, index)?,
+            type_,
+            context.types(),
+        )?;
+    }
+
+    Ok(())
+}
