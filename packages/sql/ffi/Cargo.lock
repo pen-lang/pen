@@ -1117,7 +1117,7 @@ dependencies = [
 [[package]]
 name = "sqlx"
 version = "0.5.12"
-source = "git+https://github.com/raviqqe/sqlx?branch=bug/any-type-info#a2845c74c5e545351f3f0f2fa6851e7f23a60621"
+source = "git+https://github.com/raviqqe/sqlx?branch=bug/any-type-info#4891a45156426d22a481ebb973908d594676190a"
 dependencies = [
  "sqlx-core",
  "sqlx-macros",
@@ -1126,7 +1126,7 @@ dependencies = [
 [[package]]
 name = "sqlx-core"
 version = "0.5.12"
-source = "git+https://github.com/raviqqe/sqlx?branch=bug/any-type-info#a2845c74c5e545351f3f0f2fa6851e7f23a60621"
+source = "git+https://github.com/raviqqe/sqlx?branch=bug/any-type-info#4891a45156426d22a481ebb973908d594676190a"
 dependencies = [
  "ahash",
  "atoi",
@@ -1184,7 +1184,7 @@ dependencies = [
 [[package]]
 name = "sqlx-macros"
 version = "0.5.12"
-source = "git+https://github.com/raviqqe/sqlx?branch=bug/any-type-info#a2845c74c5e545351f3f0f2fa6851e7f23a60621"
+source = "git+https://github.com/raviqqe/sqlx?branch=bug/any-type-info#4891a45156426d22a481ebb973908d594676190a"
 dependencies = [
  "dotenv",
  "either",
@@ -1202,7 +1202,7 @@ dependencies = [
 [[package]]
 name = "sqlx-rt"
 version = "0.5.12"
-source = "git+https://github.com/raviqqe/sqlx?branch=bug/any-type-info#a2845c74c5e545351f3f0f2fa6851e7f23a60621"
+source = "git+https://github.com/raviqqe/sqlx?branch=bug/any-type-info#4891a45156426d22a481ebb973908d594676190a"
 dependencies = [
  "once_cell",
  "tokio",

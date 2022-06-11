@@ -9,5 +9,5 @@ name = "prelude"
 crate-type = ["staticlib"]
 
 [dependencies]
-ffi = { package = "pen-ffi", "version" = "0.3" }
+ffi = { package = "pen-ffi", "version" = "*" }
 siphasher = "0.3"
