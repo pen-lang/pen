@@ -206,7 +206,7 @@ pub fn is_synchronized(
                 fmm::ir::AtomicOrdering::Relaxed,
             )?)?))
         },
-        // TODO Can we make this false, for example, using TLS for global varibles?
+        // TODO Can we make this false, for example, using TLS for global variables?
         |builder| Ok(builder.branch(fmm::ir::Primitive::Boolean(true))),
     )
 }
