@@ -63,8 +63,12 @@ fn generate_type(attributes: &AttributeArgs, type_: &ItemStruct) -> Result<Token
                 unsafe { transmute_from_payload::<#type_name>(x) };
             }
 
+            extern "C" fn synchronize(_: u64) {
+                // Currently, all types in Rust are expected to implement Sync.
+            }
+
             static TYPE_INFORMATION: #crate_path::TypeInformation =
-                #crate_path::TypeInformation { clone, drop };
+                #crate_path::TypeInformation { clone, drop, synchronize };
 
             impl From<#type_name> for #crate_path::Any {
                 fn from(x: #type_name) -> Self {

@@ -439,8 +439,11 @@ fn compile_mark_sync(
     mark: &mir::ir::MarkSync,
     variables: &FnvHashMap<String, fmm::build::TypedExpression>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    // TODO
-    compile(context, instruction_builder, mark.expression(), variables)
+    let value = compile(context, instruction_builder, mark.expression(), variables)?;
+
+    reference_count::synchronize(instruction_builder, &value, mark.type_(), context.types())?;
+
+    Ok(value)
 }
 
 fn compile_arithmetic_operation(
