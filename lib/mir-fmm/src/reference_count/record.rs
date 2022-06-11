@@ -179,13 +179,21 @@ fn synchronize_boxed(
     record: &fmm::build::TypedExpression,
     record_type: &mir::types::Record,
 ) -> Result<(), CompileError> {
-    pointer::synchronize(builder, record)?;
+    builder.if_(
+        pointer::is_synchronized(builder, record)?,
+        |builder| -> Result<_, CompileError> { Ok(builder.branch(fmm::ir::VOID_VALUE.clone())) },
+        |builder| {
+            pointer::synchronize(&builder, record)?;
 
-    synchronize_unboxed(
-        context,
-        builder,
-        &record::load(context, builder, record, record_type)?,
-        record_type,
+            synchronize_unboxed(
+                context,
+                &builder,
+                &record::load(context, &builder, record, record_type)?,
+                record_type,
+            )?;
+
+            Ok(builder.branch(fmm::ir::VOID_VALUE.clone()))
+        },
     )?;
 
     Ok(())
