@@ -2,6 +2,7 @@ use super::{super::error::CompileError, function, pointer, record_utilities};
 use crate::{
     type_information::{
         TYPE_INFORMATION_CLONE_FUNCTION_FIELD_INDEX, TYPE_INFORMATION_DROP_FUNCTION_FIELD_INDEX,
+        TYPE_INFORMATION_SYNCHRONIZE_FUNCTION_FIELD_INDEX,
     },
     variant,
 };
@@ -91,7 +92,15 @@ pub fn synchronize(
             function::synchronize(builder, expression)?;
         }
         mir::types::Type::Record(_) => todo!(),
-        mir::types::Type::Variant => todo!(),
+        mir::types::Type::Variant => {
+            builder.call(
+                builder.deconstruct_record(
+                    builder.load(variant::get_tag(builder, expression)?)?,
+                    TYPE_INFORMATION_SYNCHRONIZE_FUNCTION_FIELD_INDEX,
+                )?,
+                vec![variant::get_payload(builder, expression)?],
+            )?;
+        }
         mir::types::Type::Boolean | mir::types::Type::None | mir::types::Type::Number => {}
     }
 
