@@ -137,7 +137,7 @@ A map literal contains its key and value types and key-value pairs as expression
 {string: number "foo": 1, "bar": 2}
 ```
 
-You can create new maps from existing ones by spreading elements of the old ones prefixed by `...` into the new ones.
+You can create new maps from existing ones by spreading entries of the old ones prefixed by `...` into the new ones.
 
 ```pen
 {string: number ...map, "foo": 1}
