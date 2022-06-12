@@ -183,6 +183,8 @@ pub fn is_owned(
     )
 }
 
+// Heap blocks are synchronized always by their owners before references are
+// shared with other threads. So an ordering to load counts can be relaxed.
 fn is_synchronized(
     builder: &fmm::build::InstructionBuilder,
     pointer: &fmm::build::TypedExpression,
