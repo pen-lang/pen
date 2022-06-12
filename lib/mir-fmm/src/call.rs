@@ -13,7 +13,7 @@ pub fn compile(
             // to make thunk update thread-safe.
             //
             // Relaxed ordering should be fine here since entry functions themselves should
-            // guarantee memory operation ordering..
+            // guarantee memory operation ordering.
             instruction_builder
                 .atomic_load(entry_function_pointer, fmm::ir::AtomicOrdering::Relaxed)?
         } else {
