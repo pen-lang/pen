@@ -84,10 +84,8 @@ fn collect_open_records(type_definitions: &[TypeDefinition]) -> FnvHashSet<Strin
         .collect()
 }
 
-// TODO Remove publicity check?
-// https://github.com/pen-lang/pen/issues/853
 fn is_record_open(definition: &TypeDefinition) -> bool {
-    !definition.is_external() || definition.is_public() && definition.is_open()
+    !definition.is_external() || definition.is_open()
 }
 
 #[cfg(test)]
@@ -338,23 +336,26 @@ mod tests {
         .unwrap();
     }
 
+    fn external_private_open_record_definition() -> TypeDefinition {
+        TypeDefinition::fake(
+            "r",
+            vec![types::RecordField::new(
+                "x",
+                types::None::new(Position::fake()),
+            )],
+            true,
+            false,
+            true,
+        )
+    }
+
     #[test]
-    #[should_panic]
-    fn fail_to_validate_record_construction_with_external_private_record() {
+    fn validate_record_construction_with_external_private_open_record() {
         let record_type = types::Record::new("r", Position::fake());
 
         validate_module(
             &Module::empty()
-                .set_type_definitions(vec![TypeDefinition::fake(
-                    "r",
-                    vec![types::RecordField::new(
-                        "x",
-                        types::None::new(Position::fake()),
-                    )],
-                    true,
-                    false,
-                    true,
-                )])
+                .set_type_definitions(vec![external_private_open_record_definition()])
                 .set_definitions(vec![FunctionDefinition::fake(
                     "x",
                     Lambda::new(
@@ -367,6 +368,32 @@ mod tests {
                                 None::new(Position::fake()),
                                 Position::fake(),
                             )],
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    ),
+                    false,
+                )]),
+        )
+        .unwrap();
+    }
+
+    #[test]
+    fn validate_record_deconstruction_with_external_private_open_record() {
+        let record_type = types::Record::new("r", Position::fake());
+
+        validate_module(
+            &Module::empty()
+                .set_type_definitions(vec![external_private_open_record_definition()])
+                .set_definitions(vec![FunctionDefinition::fake(
+                    "x",
+                    Lambda::new(
+                        vec![Argument::new("r", record_type.clone())],
+                        types::None::new(Position::fake()),
+                        RecordDeconstruction::new(
+                            Some(record_type.into()),
+                            Variable::new("r", Position::fake()),
+                            "x",
                             Position::fake(),
                         ),
                         Position::fake(),
