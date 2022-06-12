@@ -59,7 +59,7 @@ impl<T> Drop for Closure<T> {
 mod tests {
     use super::*;
     use crate::Arc;
-    use core::ptr::null;
+    use core::{ptr::null, sync::atomic::AtomicBool};
 
     fn spawn<T: Send + 'static>(_: impl (FnOnce() -> T) + Send + 'static) {}
 
@@ -70,5 +70,24 @@ mod tests {
         spawn(move || {
             closure.entry_function();
         });
+    }
+
+    #[test]
+    fn drop_environment() {
+        struct Foo {}
+
+        static FLAG: AtomicBool = AtomicBool::new(false);
+
+        impl Drop for Foo {
+            fn drop(&mut self) {
+                FLAG.store(true, Ordering::SeqCst);
+            }
+        }
+
+        let closure = Arc::new(Closure::new(null(), Foo {}));
+
+        drop(closure);
+
+        assert!(FLAG.load(Ordering::SeqCst));
     }
 }
