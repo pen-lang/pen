@@ -12,9 +12,7 @@ impl<T, F: Future<Output = T>> From<F> for Arc<Closure> {
 }
 
 pub fn to_closure<O, F: Future<Output = O>>(future: F) -> Arc<Closure> {
-    // Specify a concrete environment type to keep proper type information
-    // after transmuting the closure later.
-    let closure = Arc::new(Closure::<Option<Pin<Box<dyn Future<Output = O>>>>>::new(
+    let closure = Arc::new(Closure::new(
         get_result::<O, F> as *const u8,
         Some(Box::pin(future)),
     ));
