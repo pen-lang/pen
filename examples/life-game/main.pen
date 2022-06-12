@@ -10,9 +10,9 @@ import Os'Time
 
 import 'lifeGame
 
-rows = \() number { 20 }
+rows = \() number { 40 }
 
-columns = \() number { 40 }
+columns = \() number { 80 }
 
 main = \(ctx context) none {
   if e = run(ctx.Os) as none {

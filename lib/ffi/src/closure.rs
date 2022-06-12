@@ -1,5 +1,6 @@
 use core::{
-    ptr::drop_in_place,
+    mem::ManuallyDrop,
+    ops::Deref,
     sync::atomic::{AtomicPtr, Ordering},
 };
 
@@ -13,7 +14,7 @@ struct ClosureMetadata<T> {
 pub struct Closure<T = ()> {
     entry_function: AtomicPtr<u8>,
     metadata: AtomicPtr<ClosureMetadata<T>>,
-    payload: T,
+    payload: ManuallyDrop<T>,
 }
 
 impl<T> Closure<T> {
@@ -26,7 +27,7 @@ impl<T> Closure<T> {
         Self {
             entry_function: AtomicPtr::new(entry_function as *mut u8),
             metadata: AtomicPtr::new(&Self::METADATA as *const _ as *mut _),
-            payload,
+            payload: ManuallyDrop::new(payload),
         }
     }
 
@@ -36,12 +37,12 @@ impl<T> Closure<T> {
     }
 
     pub fn payload(&self) -> *const T {
-        &self.payload
+        self.payload.deref()
     }
 }
 
 extern "C" fn drop_closure<T>(closure: &mut Closure<T>) {
-    unsafe { drop_in_place(&mut (closure.payload() as *mut T)) }
+    unsafe { ManuallyDrop::drop(&mut closure.payload) }
 }
 
 // All closures created in Rust should implement Sync already.
@@ -59,7 +60,8 @@ impl<T> Drop for Closure<T> {
 mod tests {
     use super::*;
     use crate::Arc;
-    use core::ptr::null;
+    use alloc::boxed::Box;
+    use core::{ptr::null, sync::atomic::AtomicBool};
 
     fn spawn<T: Send + 'static>(_: impl (FnOnce() -> T) + Send + 'static) {}
 
@@ -70,5 +72,27 @@ mod tests {
         spawn(move || {
             closure.entry_function();
         });
+    }
+
+    #[test]
+    fn drop_payload() {
+        struct Foo {}
+
+        static FLAG: AtomicBool = AtomicBool::new(false);
+
+        impl Drop for Foo {
+            fn drop(&mut self) {
+                FLAG.store(true, Ordering::SeqCst);
+            }
+        }
+
+        Arc::new(Closure::new(null(), Foo {}));
+
+        assert!(FLAG.load(Ordering::SeqCst));
+    }
+
+    #[test]
+    fn drop_boxed_payload() {
+        Closure::new(null(), Box::new(42.0));
     }
 }
