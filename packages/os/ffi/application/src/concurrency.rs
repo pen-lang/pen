@@ -36,9 +36,8 @@ fn _pen_spawn(closure: ffi::Arc<ffi::Closure>) -> ffi::Arc<ffi::Closure> {
     let future = spawn_and_unwrap(ffi::future::from_closure(closure)).shared();
 
     let (sender, _) = FUTURE_CHANNEL.deref();
-    sender
-        .send(Box::pin(future.clone()))
-        .unwrap_or_else(|_| panic!("failed to send future to sink"));
+    // Ignore send errors due to channel close.
+    sender.send(Box::pin(future.clone())).unwrap_or_else(|_| {});
 
     ffi::future::to_closure(future)
 }
@@ -56,13 +55,19 @@ pub async fn resolve_futures() {
     let (_, receiver) = FUTURE_CHANNEL.deref();
     let mut receiver = receiver.lock().await;
 
-    while !SHOULD_STOP.load(Ordering::Relaxed) {
+    loop {
         select! {
-            Some(future) = receiver.recv() => {
-                future.await;
+            future = receiver.recv() => {
+                if let Some(future) = future {
+                    future.await;
+                } else {
+                    break;
+                }
             },
             _ = sleep(STOP_CHECK_INTERVAL) => {
-                continue;
+                if SHOULD_STOP.load(Ordering::Relaxed) {
+                    receiver.close();
+                }
             }
         }
     }
