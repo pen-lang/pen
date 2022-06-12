@@ -1,4 +1,4 @@
-Feature: Memory leak
+Feature: Language
   Background:
     Given a file named "pen.json" with:
     """json
