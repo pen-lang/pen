@@ -86,9 +86,7 @@ mod tests {
             }
         }
 
-        let closure = Arc::new(Closure::new(null(), Foo {}));
-
-        drop(closure);
+        Arc::new(Closure::new(null(), Foo {}));
 
         assert!(FLAG.load(Ordering::SeqCst));
     }
