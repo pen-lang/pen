@@ -245,6 +245,7 @@ checksum = "7709cef83f0c1f58f666e746a08b21e0085f7440fa6a29cc194d68aac97a4225"
 name = "os-app"
 version = "0.1.0"
 dependencies = [
+ "futures",
  "once_cell",
  "pen-ffi",
  "tokio",
