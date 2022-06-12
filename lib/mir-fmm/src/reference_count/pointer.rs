@@ -123,12 +123,11 @@ pub fn synchronize(
         |builder| -> Result<_, CompileError> {
             let pointer = heap::get_count_pointer(pointer)?;
 
-            builder.atomic_store(
+            builder.store(
                 count::synchronize(
                     &builder.atomic_load(pointer.clone(), fmm::ir::AtomicOrdering::Relaxed)?,
                 )?,
                 pointer,
-                fmm::ir::AtomicOrdering::Relaxed,
             );
 
             synchronize_content(&builder)?;

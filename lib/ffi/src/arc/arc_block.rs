@@ -2,11 +2,10 @@ use alloc::alloc::{alloc, dealloc};
 use core::{
     alloc::Layout,
     ptr::{drop_in_place, null},
-    sync::atomic::{fence, AtomicI32, Ordering},
+    sync::atomic::{fence, AtomicIsize, Ordering},
 };
 
-const INITIAL_COUNT: i32 = 0;
-const EMPTY_TAG: u32 = 0;
+const INITIAL_COUNT: isize = 0;
 
 #[derive(Debug)]
 #[repr(C)]
@@ -14,16 +13,9 @@ pub struct ArcBlock {
     pointer: *const u8,
 }
 
-#[derive(Debug)]
-#[repr(C)]
-struct ArcHeader {
-    count: AtomicI32,
-    tag: u32,
-}
-
 #[repr(C)]
 struct ArcInner {
-    header: ArcHeader,
+    count: AtomicIsize,
     payload: (),
 }
 
@@ -34,10 +26,7 @@ impl ArcBlock {
         } else {
             let pointer = unsafe { &mut *(alloc(Self::inner_layout(layout)) as *mut ArcInner) };
 
-            pointer.header = ArcHeader {
-                count: AtomicI32::new(INITIAL_COUNT),
-                tag: EMPTY_TAG,
-            };
+            pointer.count = AtomicIsize::new(INITIAL_COUNT);
 
             Self {
                 pointer: &pointer.payload as *const () as *const u8,
@@ -54,7 +43,7 @@ impl ArcBlock {
     }
 
     pub fn get_mut(&mut self) -> Option<*mut u8> {
-        if !self.is_static() && self.inner().header.count.load(Ordering::Acquire) == INITIAL_COUNT {
+        if !self.is_static() && self.inner().count.load(Ordering::Acquire) == INITIAL_COUNT {
             Some(self.ptr_mut())
         } else {
             None
@@ -80,7 +69,7 @@ impl ArcBlock {
     }
 
     fn inner_layout(layout: Layout) -> Layout {
-        Layout::new::<ArcHeader>()
+        Layout::new::<AtomicIsize>()
             .extend(layout)
             .unwrap()
             .0
@@ -89,15 +78,12 @@ impl ArcBlock {
 
     pub fn clone(&self) -> Self {
         if !self.is_static() {
-            let count = self.inner().header.count.load(Ordering::Relaxed);
+            let count = self.inner().count.load(Ordering::Relaxed);
 
             if Self::is_count_synchronized(count) {
-                self.inner().header.count.fetch_sub(1, Ordering::Relaxed);
+                self.inner().count.fetch_sub(1, Ordering::Relaxed);
             } else {
-                self.inner()
-                    .header
-                    .count
-                    .store(count + 1, Ordering::Relaxed);
+                self.inner().count.store(count + 1, Ordering::Relaxed);
             }
         }
 
@@ -111,10 +97,10 @@ impl ArcBlock {
             return;
         }
 
-        let count = self.inner().header.count.load(Ordering::Relaxed);
+        let count = self.inner().count.load(Ordering::Relaxed);
 
         if Self::is_count_synchronized(count) {
-            if self.inner().header.count.fetch_add(1, Ordering::Release) == INITIAL_COUNT {
+            if self.inner().count.fetch_add(1, Ordering::Release) == INITIAL_COUNT {
                 fence(Ordering::Acquire);
 
                 self.drop_inner::<T>()
@@ -122,10 +108,7 @@ impl ArcBlock {
         } else if count == INITIAL_COUNT {
             self.drop_inner::<T>()
         } else {
-            self.inner()
-                .header
-                .count
-                .store(count - 1, Ordering::Relaxed);
+            self.inner().count.store(count - 1, Ordering::Relaxed);
         }
     }
 
@@ -141,7 +124,7 @@ impl ArcBlock {
         }
     }
 
-    fn is_count_synchronized(count: i32) -> bool {
+    fn is_count_synchronized(count: isize) -> bool {
         count < 0
     }
 }
