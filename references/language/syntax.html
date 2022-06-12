@@ -297,6 +297,9 @@ foo{x: 0} == foo{x: 1}
 <p>It iterates over elements in a given list and generates a new list with elements of a given expression.</p>
 <pre><code class="language-pen">[number f(x) for x in xs]
 </code></pre>
+<p>You can also iterate keys and values in a map.</p>
+<pre><code class="language-pen">[number f(key, value) for key, value in map]
+</code></pre>
 <h3 id="concurrency"><a class="header" href="#concurrency">Concurrency</a></h3>
 <h4 id="go-expression"><a class="header" href="#go-expression"><code>go</code> expression</a></h4>
 <p>It executes a function concurrently. Its returned value is a future represented as a function that returns a result of the executed function.</p>

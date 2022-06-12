@@ -202,7 +202,7 @@ false
 }
 </code></pre>
 <h2 id="lists"><a class="header" href="#lists">Lists</a></h2>
-<p>It is a list of values. Its element type is put between <code>[</code> and <code>]</code>.</p>
+<p>It is a list of values. Its type contains an element type between <code>[</code> and <code>]</code>.</p>
 <pre><code class="language-pen">[number]
 </code></pre>
 <h3 id="literals-5"><a class="header" href="#literals-5">Literals</a></h3>
@@ -215,6 +215,22 @@ false
 <pre><code class="language-pen">[number x, ...xs]
 </code></pre>
 <p>Note that <strong>expressions within list literals are evaluated lazily</strong>; they are evaluated only if their values are required.</p>
+<h2 id="maps"><a class="header" href="#maps">Maps</a></h2>
+<p>It is a map from keys to values. Its type contains key and value types between <code>{</code> and <code>}</code> separated by <code>:</code>.</p>
+<pre><code class="language-pen">{string: number}
+</code></pre>
+<h3 id="literals-6"><a class="header" href="#literals-6">Literals</a></h3>
+<p>A map literal contains its key and value types and key-value pairs as expressions.</p>
+<pre><code class="language-pen">{string: number}
+{string: number &quot;foo&quot;: 1}
+{string: number &quot;foo&quot;: 1, &quot;bar&quot;: 2}
+</code></pre>
+<p>You can create new maps from existing ones by spreading elements of the old ones prefixed by <code>...</code> into the new ones.</p>
+<pre><code class="language-pen">{string: number ...map, &quot;foo&quot;: 1}
+</code></pre>
+<p>You can also delete a key from a map omitting its value.</p>
+<pre><code class="language-pen">{string: number ...map, &quot;foo&quot;}
+</code></pre>
 <h2 id="records"><a class="header" href="#records">Records</a></h2>
 <p>It combines multiple types into a single type. Each field of a record type is composed of its name and type.</p>
 <p>Fields are not accessible outside modules where they are defined by default.</p>
@@ -229,7 +245,7 @@ false
   Age number
 }
 </code></pre>
-<h3 id="literals-6"><a class="header" href="#literals-6">Literals</a></h3>
+<h3 id="literals-7"><a class="header" href="#literals-7">Literals</a></h3>
 <p>Record values are constructed using record literals containing their field names and values separated by commas.</p>
 <pre><code class="language-pen">person{name: &quot;foo&quot;, age: 42}
 </code></pre>
