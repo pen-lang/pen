@@ -95,7 +95,7 @@ Functions represent not only pure computation but may also execute side effects,
 
 ## Lists
 
-It is a list of values. Its element type is put between `[` and `]`.
+It is a list of values. Its type contains an element type between `[` and `]`.
 
 ```pen
 [number]
@@ -118,6 +118,36 @@ You can create new lists from existing ones by spreading elements of the old one
 ```
 
 Note that **expressions within list literals are evaluated lazily**; they are evaluated only if their values are required.
+
+## Maps
+
+It is a map from keys to values. Its type contains key and value types between `{` and `}` separated by `:`.
+
+```pen
+{string: number}
+```
+
+### Literals
+
+A map literal contains its key and value types and key-value pairs as expressions.
+
+```pen
+{string: number}
+{string: number "foo": 1}
+{string: number "foo": 1, "bar": 2}
+```
+
+You can create new maps from existing ones by spreading elements of the old ones prefixed by `...` into the new ones.
+
+```pen
+{string: number ...map, "foo": 1}
+```
+
+You can also delete a key from a map omitting its value.
+
+```pen
+{string: number ...map, "foo"}
+```
 
 ## Records
 
