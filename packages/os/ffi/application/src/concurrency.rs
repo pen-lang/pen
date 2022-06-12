@@ -37,7 +37,7 @@ fn _pen_spawn(closure: ffi::Arc<ffi::Closure>) -> ffi::Arc<ffi::Closure> {
 
     let (sender, _) = FUTURE_CHANNEL.deref();
     // Ignore send errors due to channel close.
-    sender.send(Box::pin(future.clone())).unwrap_or_else(|_| {});
+    sender.send(Box::pin(future.clone())).unwrap_or(());
 
     ffi::future::to_closure(future)
 }
