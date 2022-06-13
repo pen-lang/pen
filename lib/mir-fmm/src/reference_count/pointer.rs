@@ -174,6 +174,11 @@ pub fn is_owned(
         |builder| {
             Ok(builder.branch(count::is_initial(&builder.atomic_load(
                 heap::get_count_pointer(pointer)?,
+                // TODO Should this ordering be acquire to synchronize with drops' release?
+                // If so, it's better to check if references are synchronized first to omit
+                // unnecessary acquire fences.
+                //
+                // However, Koka also uses a relaxed ordering somehow. So I leave it for now...
                 fmm::ir::AtomicOrdering::Relaxed,
             )?)?))
         },
