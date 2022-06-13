@@ -5,7 +5,8 @@ use core::{
     sync::atomic::{fence, AtomicIsize, Ordering},
 };
 
-const INITIAL_COUNT: isize = 0;
+const UNIQUE_COUNT: isize = 0;
+const SYNCHRONIZED_UNIQUE_COUNT: isize = -1;
 
 #[derive(Debug)]
 #[repr(C)]
@@ -26,7 +27,7 @@ impl ArcBlock {
         } else {
             let pointer = unsafe { &mut *(alloc(Self::inner_layout(layout)) as *mut ArcInner) };
 
-            pointer.count = AtomicIsize::new(INITIAL_COUNT);
+            pointer.count = AtomicIsize::new(UNIQUE_COUNT);
 
             Self {
                 pointer: &pointer.payload as *const () as *const u8,
@@ -43,7 +44,7 @@ impl ArcBlock {
     }
 
     pub fn get_mut(&mut self) -> Option<*mut u8> {
-        if !self.is_static() && self.inner().count.load(Ordering::Acquire) == INITIAL_COUNT {
+        if !self.is_static() && self.inner().count.load(Ordering::Acquire) == UNIQUE_COUNT {
             Some(self.ptr_mut())
         } else {
             None
@@ -100,12 +101,12 @@ impl ArcBlock {
         let count = self.inner().count.load(Ordering::Relaxed);
 
         if Self::is_count_synchronized(count) {
-            if self.inner().count.fetch_add(1, Ordering::Release) == INITIAL_COUNT {
+            if self.inner().count.fetch_add(1, Ordering::Release) == SYNCHRONIZED_UNIQUE_COUNT {
                 fence(Ordering::Acquire);
 
                 self.drop_inner::<T>()
             }
-        } else if count == INITIAL_COUNT {
+        } else if count == UNIQUE_COUNT {
             self.drop_inner::<T>()
         } else {
             self.inner().count.store(count - 1, Ordering::Relaxed);
