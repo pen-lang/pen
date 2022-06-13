@@ -165,23 +165,22 @@ pub fn untag(
     .into())
 }
 
-pub fn is_owned(
+pub fn is_unique(
     builder: &fmm::build::InstructionBuilder,
     pointer: &fmm::build::TypedExpression,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
+    // An atomic ordering here needs to be acquire to synchronize with release by
+    // drops and make a block ready for memory operations.
+    //
+    // Arc::get_mut() in Rust uses an acquire ordering too. However, Koka uses a
+    // relaxed ordering for the same uniqueness check. So I might be missing some
+    // invariant that leads to potential optimization.
     builder.if_(
         is_heap(pointer)?,
         |builder| {
             Ok(builder.branch(count::is_initial(&builder.atomic_load(
                 heap::get_count_pointer(pointer)?,
-                // TODO Should this ordering be acquire to synchronize with drops' release?
-                // If so, it's better to check if references are synchronized first to omit
-                // unnecessary acquire fences.
-                //
-                // However, Koka also uses a relaxed ordering somehow. So I leave it for now...
-                // Rust's Arc::make_mut() uses an acquire ordering but its comment says it's for
-                // weak count modification.
-                fmm::ir::AtomicOrdering::Relaxed,
+                fmm::ir::AtomicOrdering::Acquire,
             )?)?))
         },
         |builder| Ok(builder.branch(fmm::ir::Primitive::Boolean(false))),

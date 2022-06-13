@@ -165,7 +165,7 @@ pub fn compile(
 
             if type_::is_record_boxed(update.type_(), context.types()) {
                 instruction_builder.if_(
-                    reference_count::pointer::is_owned(instruction_builder, &record)?,
+                    reference_count::pointer::is_unique(instruction_builder, &record)?,
                     |builder| -> Result<_, CompileError> {
                         Ok(builder.branch(compile_boxed_record(
                             &builder,
