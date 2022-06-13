@@ -179,7 +179,8 @@ pub fn is_owned(
                 // unnecessary acquire fences.
                 //
                 // However, Koka also uses a relaxed ordering somehow. So I leave it for now...
-                // Rust's Arc::make_mut() uses an acquire ordering but its comment says it's for weak count modification.
+                // Rust's Arc::make_mut() uses an acquire ordering but its comment says it's for
+                // weak count modification.
                 fmm::ir::AtomicOrdering::Relaxed,
             )?)?))
         },
