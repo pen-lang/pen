@@ -172,7 +172,7 @@ pub fn is_unique(
     builder.if_(
         is_heap(pointer)?,
         |builder| {
-            // This atomic ordering can be relaxed because blocks are never unsynchronized.
+            // This atomic ordering can be relaxed because blocks are never un-synchronized.
             let count = builder.atomic_load(
                 heap::get_count_pointer(pointer)?,
                 fmm::ir::AtomicOrdering::Relaxed,
