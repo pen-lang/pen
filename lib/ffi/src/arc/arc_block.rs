@@ -166,4 +166,6 @@ mod tests {
         arc.clone().drop::<u8>();
         arc.drop::<u8>();
     }
+
+    // TODO Test synchronized drops.
 }
