@@ -11,7 +11,7 @@ pub const fn compile_unique() -> fmm::ir::Primitive {
     compile(UNIQUE_COUNT)
 }
 
-pub const fn compile_synchronized_unique() -> fmm::ir::Primitive {
+const fn compile_synchronized_unique() -> fmm::ir::Primitive {
     compile(SYNCHRONIZED_UNIQUE_COUNT)
 }
 
