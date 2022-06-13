@@ -124,9 +124,7 @@ pub fn synchronize(
             let pointer = heap::get_count_pointer(pointer)?;
 
             builder.store(
-                count::synchronize(
-                    &builder.atomic_load(pointer.clone(), fmm::ir::AtomicOrdering::Relaxed)?,
-                )?,
+                count::synchronize(&builder.load(pointer.clone())?)?,
                 pointer,
             );
 
