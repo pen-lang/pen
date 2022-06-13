@@ -183,10 +183,6 @@ pub fn is_unique(
                 |builder| -> Result<_, CompileError> {
                     // We need a memory fence of an acquire ordering to synchronize with release by
                     // drops and make a block ready for memory operations.
-                    //
-                    // Arc::get_mut() in Rust uses an acquire ordering too. However, Koka uses a
-                    // relaxed ordering for the same uniqueness check. So I might be missing some
-                    // invariant that leads to potential optimization.
                     builder.fence(fmm::ir::AtomicOrdering::Acquire);
 
                     Ok(builder.branch(count::is_synchronized_unique(&count)?))
