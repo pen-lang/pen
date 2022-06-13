@@ -124,9 +124,7 @@ pub fn synchronize(
             let pointer = heap::get_count_pointer(pointer)?;
 
             builder.store(
-                count::synchronize(
-                    &builder.atomic_load(pointer.clone(), fmm::ir::AtomicOrdering::Relaxed)?,
-                )?,
+                count::synchronize(&builder.load(pointer.clone())?)?,
                 pointer,
             );
 
@@ -176,6 +174,13 @@ pub fn is_owned(
         |builder| {
             Ok(builder.branch(count::is_initial(&builder.atomic_load(
                 heap::get_count_pointer(pointer)?,
+                // TODO Should this ordering be acquire to synchronize with drops' release?
+                // If so, it's better to check if references are synchronized first to omit
+                // unnecessary acquire fences.
+                //
+                // However, Koka also uses a relaxed ordering somehow. So I leave it for now...
+                // Rust's Arc::make_mut() uses an acquire ordering but its comment says it's for
+                // weak count modification.
                 fmm::ir::AtomicOrdering::Relaxed,
             )?)?))
         },
@@ -183,6 +188,9 @@ pub fn is_owned(
     )
 }
 
+// Heap blocks are synchronized always by their owners before references are
+// shared with other threads. So an ordering to load counts can always be
+// relaxed.
 fn is_synchronized(
     builder: &fmm::build::InstructionBuilder,
     pointer: &fmm::build::TypedExpression,

@@ -32,8 +32,7 @@ impl<T> Closure<T> {
     }
 
     pub fn entry_function(&self) -> *const u8 {
-        // TODO Optimize an atomic ordering for non-thunk closures.
-        self.entry_function.load(Ordering::SeqCst)
+        self.entry_function.load(Ordering::Relaxed)
     }
 
     pub fn payload(&self) -> *const T {
