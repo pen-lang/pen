@@ -181,7 +181,7 @@ pub fn is_unique(
             Ok(builder.branch(builder.if_(
                 count::is_synchronized(&count)?,
                 |builder| -> Result<_, CompileError> {
-                    // An atomic ordering here needs to be acquire to synchronize with release by
+                    // We need a memory fence of an acquire ordering to synchronize with release by
                     // drops and make a block ready for memory operations.
                     //
                     // Arc::get_mut() in Rust uses an acquire ordering too. However, Koka uses a
