@@ -165,7 +165,7 @@ pub fn untag(
     .into())
 }
 
-pub fn is_owned(
+pub fn is_unique(
     builder: &fmm::build::InstructionBuilder,
     pointer: &fmm::build::TypedExpression,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
