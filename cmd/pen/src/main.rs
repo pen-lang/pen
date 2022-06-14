@@ -259,8 +259,8 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                 &context_options
                     .iter()
                     .step_by(2)
-                    .map(Deref::deref)
-                    .zip(context_options.iter().skip(1).step_by(2).map(Deref::deref))
+                    .copied()
+                    .zip(context_options.iter().skip(1).step_by(2).copied())
                     .collect(),
                 matches.get_one::<String>("target").map(Deref::deref),
             )
