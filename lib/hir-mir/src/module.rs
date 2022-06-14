@@ -131,6 +131,7 @@ mod tests {
         concurrency_configuration::CONCURRENCY_CONFIGURATION,
     };
     use hir::{test::ModuleFake, types};
+    use mir::test::ModuleFake as MirModuleFake;
     use position::{test::PositionFake, Position};
     use pretty_assertions::assert_eq;
 
@@ -159,24 +160,21 @@ mod tests {
                     Position::fake(),
                 )])
             ),
-            Ok(mir::ir::Module::new(
-                vec![],
-                vec![spawn_function_declaration::compile(
+            Ok(mir::ir::Module::empty()
+                .set_set_foreign_declarations(vec![spawn_function_declaration::compile(
                     &CONCURRENCY_CONFIGURATION
-                )],
-                vec![mir::ir::ForeignDefinition::new(
+                )])
+                .set_foreign_definitions(vec![mir::ir::ForeignDefinition::new(
                     "foo",
                     "bar",
                     mir::ir::CallingConvention::Source
-                )],
-                vec![],
-                vec![mir::ir::FunctionDefinition::new(
+                )],)
+                .set_function_definitions(vec![mir::ir::FunctionDefinition::new(
                     "foo",
                     vec![mir::ir::Argument::new("x", mir::types::Type::None)],
                     mir::ir::Expression::None,
                     mir::types::Type::None,
-                )],
-            ))
+                )],))
         );
     }
 
@@ -198,24 +196,21 @@ mod tests {
                     Position::fake(),
                 )])
             ),
-            Ok(mir::ir::Module::new(
-                vec![],
-                vec![spawn_function_declaration::compile(
+            Ok(mir::ir::Module::empty()
+                .set_foreign_declarations(vec![spawn_function_declaration::compile(
                     &CONCURRENCY_CONFIGURATION
-                )],
-                vec![mir::ir::ForeignDefinition::new(
+                )])
+                .set_foreign_definitions(vec![mir::ir::ForeignDefinition::new(
                     "foo",
                     "bar",
                     mir::ir::CallingConvention::Target
-                )],
-                vec![],
-                vec![mir::ir::FunctionDefinition::new(
+                )])
+                .set_function_definitions(vec![mir::ir::FunctionDefinition::new(
                     "foo",
                     vec![mir::ir::Argument::new("x", mir::types::Type::None)],
                     mir::ir::Expression::None,
                     mir::types::Type::None,
-                )],
-            ))
+                )],))
         );
     }
 }
