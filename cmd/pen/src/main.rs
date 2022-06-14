@@ -223,12 +223,12 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         .unwrap()
     {
         ("build", matches) => package_builder::build(
-            matches.get_one::<&str>("target").cloned(),
+            matches.get_one::<String>("target").map(Deref::deref),
             matches.contains_id("verbose"),
         ),
         ("test", _) => test_runner::run(),
         ("create", matches) => package_creator::create(
-            matches.get_one::<&str>("directory").unwrap(),
+            matches.get_one::<String>("directory").unwrap(),
             matches.contains_id("library"),
         ),
         ("format", matches) => {
@@ -239,87 +239,87 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
             }
         }
         ("document", matches) => package_documentation_generator::generate(
-            matches.get_one::<&str>("name").unwrap(),
-            matches.get_one::<&str>("url").unwrap(),
-            matches.get_one::<&str>("description").unwrap(),
+            matches.get_one::<String>("name").unwrap(),
+            matches.get_one::<String>("url").unwrap(),
+            matches.get_one::<String>("description").unwrap(),
         ),
         ("compile", matches) => module_compiler::compile(
-            matches.get_one::<&str>("source file").unwrap(),
-            matches.get_one::<&str>("dependency file").unwrap(),
-            matches.get_one::<&str>("object file").unwrap(),
-            matches.get_one::<&str>("interface file").unwrap(),
-            matches.get_one::<&str>("target").cloned(),
+            matches.get_one::<String>("source file").unwrap(),
+            matches.get_one::<String>("dependency file").unwrap(),
+            matches.get_one::<String>("object file").unwrap(),
+            matches.get_one::<String>("interface file").unwrap(),
+            matches.get_one::<String>("target").map(Deref::deref),
         ),
         ("compile-main", matches) => {
             let context_options = matches
-                .get_many::<&str>("context interface file")
+                .get_many::<String>("context interface file")
                 .unwrap()
                 .map(Deref::deref)
                 .collect::<Vec<_>>();
 
             main_module_compiler::compile(
-                matches.get_one::<&str>("source file").unwrap(),
-                matches.get_one::<&str>("dependency file").unwrap(),
-                matches.get_one::<&str>("object file").unwrap(),
+                matches.get_one::<String>("source file").unwrap(),
+                matches.get_one::<String>("dependency file").unwrap(),
+                matches.get_one::<String>("object file").unwrap(),
                 &context_options
                     .iter()
                     .step_by(2)
-                    .cloned()
-                    .zip(context_options.iter().skip(1).step_by(2).cloned())
+                    .map(Deref::deref)
+                    .zip(context_options.iter().skip(1).step_by(2).map(Deref::deref))
                     .collect(),
-                matches.get_one::<&str>("target").cloned(),
+                matches.get_one::<String>("target").map(Deref::deref),
             )
         }
         ("compile-prelude", matches) => prelude_module_compiler::compile(
-            matches.get_one::<&str>("source file").unwrap(),
-            matches.get_one::<&str>("object file").unwrap(),
-            matches.get_one::<&str>("interface file").unwrap(),
-            matches.get_one::<&str>("target").cloned(),
+            matches.get_one::<String>("source file").unwrap(),
+            matches.get_one::<String>("object file").unwrap(),
+            matches.get_one::<String>("interface file").unwrap(),
+            matches.get_one::<String>("target").map(Deref::deref),
         ),
         ("compile-test", matches) => test_module_compiler::compile(
-            matches.get_one::<&str>("source file").unwrap(),
-            matches.get_one::<&str>("dependency file").unwrap(),
-            matches.get_one::<&str>("object file").unwrap(),
-            matches.get_one::<&str>("test information file").unwrap(),
-            matches.get_one::<&str>("target").cloned(),
+            matches.get_one::<String>("source file").unwrap(),
+            matches.get_one::<String>("dependency file").unwrap(),
+            matches.get_one::<String>("object file").unwrap(),
+            matches.get_one::<String>("test information file").unwrap(),
+            matches.get_one::<String>("target").map(Deref::deref),
         ),
         ("resolve-dependency", matches) => dependency_resolver::resolve(
-            matches.get_one::<&str>("source file").unwrap(),
-            matches.get_one::<&str>("object file").unwrap(),
-            matches.get_one::<&str>("dependency file").unwrap(),
+            matches.get_one::<String>("source file").unwrap(),
+            matches.get_one::<String>("object file").unwrap(),
+            matches.get_one::<String>("dependency file").unwrap(),
             matches
-                .get_one::<&str>("build script dependency file")
+                .get_one::<String>("build script dependency file")
                 .unwrap(),
             &matches
-                .get_many::<&str>("prelude interface file")
+                .get_many::<String>("prelude interface file")
                 .unwrap()
                 .map(Deref::deref)
                 .collect::<Vec<_>>(),
-            &matches.get_one::<&str>("package directory").unwrap(),
-            &matches.get_one::<&str>("output directory").unwrap(),
+            &matches.get_one::<String>("package directory").unwrap(),
+            &matches.get_one::<String>("output directory").unwrap(),
         ),
         ("compile-package-test-information", matches) => {
             package_test_information_compiler::compile(
                 &matches
-                    .get_many::<&str>("test information file")
+                    .get_many::<String>("test information file")
                     .unwrap_or_default()
                     .map(Deref::deref)
                     .collect::<Vec<_>>(),
                 matches
-                    .get_one::<&str>("package test information file")
+                    .get_one::<String>("package test information file")
                     .unwrap(),
             )
         }
         ("link-test", matches) => test_linker::link(
             &matches
-                .get_many::<&str>("archive file")
+                .get_many::<String>("archive file")
                 .unwrap()
                 .map(Deref::deref)
                 .collect::<Vec<_>>(),
             matches
-                .get_one::<&str>("package test information file")
+                .get_one::<String>("package test information file")
                 .unwrap(),
-            matches.get_one::<&str>("test file").unwrap(),
+            matches.get_one::<String>("test file").unwrap(),
         ),
         _ => unreachable!(),
     }
