@@ -40,15 +40,11 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                 .global(true)
                 .help("Use verbose output"),
         )
-        .subcommand(
-            clap::Command::new("build").about("Build a package").arg(
-                build_target_triple_argument()
-                    .value_parser(clap::builder::PossibleValuesParser::new(
-                        CROSS_COMPILE_TARGETS,
-                    ))
-                    .takes_value(true),
-            ),
-        )
+        .subcommand(clap::Command::new("build").about("Build a package").arg(
+            build_target_triple_argument().value_parser(clap::builder::PossibleValuesParser::new(
+                CROSS_COMPILE_TARGETS,
+            )),
+        ))
         .subcommand(clap::Command::new("test").about("Test modules in a package"))
         .subcommand(
             clap::Command::new("create")
