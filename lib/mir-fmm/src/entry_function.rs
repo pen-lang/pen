@@ -236,7 +236,24 @@ fn compile_normal_thunk_entry(
     context.module_builder().define_anonymous_function(
         compile_arguments(definition, context.types()),
         |instruction_builder| {
-            compile_normal_body(&instruction_builder, definition, context.types())
+            instruction_builder.fence(fmm::ir::AtomicOrdering::Acquire);
+
+            let value = reference_count::clone(
+                &instruction_builder,
+                &instruction_builder
+                    .load(compile_thunk_value_pointer(definition, context.types())?)?,
+                definition.result_type(),
+                context.types(),
+            )?;
+
+            reference_count::drop(
+                &instruction_builder,
+                &compile_closure_pointer(definition.type_(), context.types())?,
+                &definition.type_().clone().into(),
+                context.types(),
+            )?;
+
+            Ok(instruction_builder.return_(value))
         },
         type_::compile(definition.result_type(), context.types()),
         fmm::types::CallingConvention::Source,
@@ -276,30 +293,6 @@ fn compile_locked_thunk_entry(
         fmm::types::CallingConvention::Source,
         fmm::ir::Linkage::Internal,
     )
-}
-
-fn compile_normal_body(
-    instruction_builder: &fmm::build::InstructionBuilder,
-    definition: &mir::ir::FunctionDefinition,
-    types: &FnvHashMap<String, mir::types::RecordBody>,
-) -> Result<fmm::ir::Block, CompileError> {
-    instruction_builder.fence(fmm::ir::AtomicOrdering::Acquire);
-
-    let value = reference_count::clone(
-        instruction_builder,
-        &instruction_builder.load(compile_thunk_value_pointer(definition, types)?)?,
-        definition.result_type(),
-        types,
-    )?;
-
-    reference_count::drop(
-        instruction_builder,
-        &compile_closure_pointer(definition.type_(), types)?,
-        &definition.type_().clone().into(),
-        types,
-    )?;
-
-    Ok(instruction_builder.return_(value))
 }
 
 fn compile_arguments(
