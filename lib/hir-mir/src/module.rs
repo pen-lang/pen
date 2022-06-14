@@ -130,8 +130,8 @@ mod tests {
         compile_configuration::COMPILE_CONFIGURATION,
         concurrency_configuration::CONCURRENCY_CONFIGURATION,
     };
-    use hir::{test::ModuleFake, types};
-    use mir::test::ModuleFake as MirModuleFake;
+    use hir::{test::ModuleFake , types};
+    use mir::test::ModuleFake as _;
     use position::{test::PositionFake, Position};
     use pretty_assertions::assert_eq;
 
@@ -161,7 +161,7 @@ mod tests {
                 )])
             ),
             Ok(mir::ir::Module::empty()
-                .set_set_foreign_declarations(vec![spawn_function_declaration::compile(
+                .set_foreign_declarations(vec![spawn_function_declaration::compile(
                     &CONCURRENCY_CONFIGURATION
                 )])
                 .set_foreign_definitions(vec![mir::ir::ForeignDefinition::new(
