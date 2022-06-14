@@ -130,7 +130,7 @@ mod tests {
         compile_configuration::COMPILE_CONFIGURATION,
         concurrency_configuration::CONCURRENCY_CONFIGURATION,
     };
-    use hir::{test::ModuleFake , types};
+    use hir::{test::ModuleFake, types};
     use mir::test::ModuleFake as _;
     use position::{test::PositionFake, Position};
     use pretty_assertions::assert_eq;
