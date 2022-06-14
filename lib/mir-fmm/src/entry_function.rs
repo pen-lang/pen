@@ -1,7 +1,6 @@
 use super::error::CompileError;
 use crate::{
-    closure, context::Context, expression, pointer, reference_count, type_,
-    yield_::YIELD_FUNCTION_TYPE,
+    closure, context::Context, expression, reference_count, type_, yield_::YIELD_FUNCTION_TYPE,
 };
 use fnv::FnvHashMap;
 
@@ -42,6 +41,11 @@ fn compile_non_thunk(
     )
 }
 
+// Entry functions of thunks need to be loaded atomically to make thunk update
+// thread-safe.
+//
+// A relaxed ordering is allowed to load any of those entry functions since they
+// should guarantee memory operation ordering by themselves.
 fn compile_thunk(
     context: &Context,
     definition: &mir::ir::FunctionDefinition,
@@ -206,10 +210,11 @@ fn compile_initial_thunk_entry(
                     Ok(instruction_builder.return_(value))
                 },
                 |instruction_builder| {
+                    // TODO Use an entry function loaded by a CAS instruction above.
                     Ok(instruction_builder.return_(instruction_builder.call(
                         instruction_builder.atomic_load(
                             entry_function_pointer.clone(),
-                            fmm::ir::AtomicOrdering::Acquire,
+                            fmm::ir::AtomicOrdering::Relaxed,
                         )?,
                         compile_argument_variables(&arguments),
                     )?))
@@ -231,7 +236,24 @@ fn compile_normal_thunk_entry(
     context.module_builder().define_anonymous_function(
         compile_arguments(definition, context.types()),
         |instruction_builder| {
-            compile_normal_body(&instruction_builder, definition, context.types())
+            instruction_builder.fence(fmm::ir::AtomicOrdering::Acquire);
+
+            let value = reference_count::clone(
+                &instruction_builder,
+                &instruction_builder
+                    .load(compile_thunk_value_pointer(definition, context.types())?)?,
+                definition.result_type(),
+                context.types(),
+            )?;
+
+            reference_count::drop(
+                &instruction_builder,
+                &compile_closure_pointer(definition.type_(), context.types())?,
+                &definition.type_().clone().into(),
+                context.types(),
+            )?;
+
+            Ok(instruction_builder.return_(value))
         },
         type_::compile(definition.result_type(), context.types()),
         fmm::types::CallingConvention::Source,
@@ -242,75 +264,35 @@ fn compile_locked_thunk_entry(
     context: &Context,
     definition: &mir::ir::FunctionDefinition,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    let entry_function_name = context.module_builder().generate_name();
-    let entry_function = fmm::build::variable(
-        &entry_function_name,
-        type_::compile_entry_function(definition.type_(), context.types()),
-    );
     let arguments = compile_arguments(definition, context.types());
 
     context.module_builder().define_function(
-        &entry_function_name,
+        &context.module_builder().generate_name(),
         arguments.clone(),
         |instruction_builder| {
-            instruction_builder.if_(
-                pointer::equal(
-                    instruction_builder.atomic_load(
-                        closure::get_entry_function_pointer(compile_closure_pointer(
-                            definition.type_(),
-                            context.types(),
-                        )?)?,
-                        fmm::ir::AtomicOrdering::Acquire,
-                    )?,
-                    entry_function.clone(),
-                )?,
-                |instruction_builder| {
-                    instruction_builder.call(
-                        fmm::build::variable(
-                            &context.configuration().yield_function_name,
-                            YIELD_FUNCTION_TYPE.clone(),
-                        ),
-                        vec![],
-                    )?;
-
-                    Ok(instruction_builder.return_(instruction_builder.call(
-                        entry_function.clone(),
-                        compile_argument_variables(&arguments),
-                    )?))
-                },
-                |instruction_builder| {
-                    compile_normal_body(&instruction_builder, definition, context.types())
-                },
+            instruction_builder.call(
+                fmm::build::variable(
+                    &context.configuration().yield_function_name,
+                    YIELD_FUNCTION_TYPE.clone(),
+                ),
+                vec![],
             )?;
 
-            Ok(instruction_builder.unreachable())
+            Ok(instruction_builder.return_(instruction_builder.call(
+                instruction_builder.atomic_load(
+                    closure::get_entry_function_pointer(compile_closure_pointer(
+                        definition.type_(),
+                        context.types(),
+                    )?)?,
+                    fmm::ir::AtomicOrdering::Relaxed,
+                )?,
+                compile_argument_variables(&arguments),
+            )?))
         },
         type_::compile(definition.result_type(), context.types()),
         fmm::types::CallingConvention::Source,
         fmm::ir::Linkage::Internal,
     )
-}
-
-fn compile_normal_body(
-    instruction_builder: &fmm::build::InstructionBuilder,
-    definition: &mir::ir::FunctionDefinition,
-    types: &FnvHashMap<String, mir::types::RecordBody>,
-) -> Result<fmm::ir::Block, CompileError> {
-    let value = reference_count::clone(
-        instruction_builder,
-        &instruction_builder.load(compile_thunk_value_pointer(definition, types)?)?,
-        definition.result_type(),
-        types,
-    )?;
-
-    reference_count::drop(
-        instruction_builder,
-        &compile_closure_pointer(definition.type_(), types)?,
-        &definition.type_().clone().into(),
-        types,
-    )?;
-
-    Ok(instruction_builder.return_(value))
 }
 
 fn compile_arguments(
