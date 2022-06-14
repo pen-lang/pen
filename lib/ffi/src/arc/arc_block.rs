@@ -44,7 +44,7 @@ impl ArcBlock {
     }
 
     pub fn get_mut(&mut self) -> Option<*mut u8> {
-        if !self.is_static() && self.inner().count.load(Ordering::Acquire) == UNIQUE_COUNT {
+        if self.is_unique() {
             Some(self.ptr_mut())
         } else {
             None
@@ -139,6 +139,22 @@ impl ArcBlock {
 
     fn is_count_synchronized(count: isize) -> bool {
         count < 0
+    }
+
+    fn is_unique(&self) -> bool {
+        if self.is_static() {
+            return false;
+        }
+
+        let count = self.inner().count.load(Ordering::Relaxed);
+
+        if Self::is_count_synchronized(count) {
+            fence(Ordering::Acquire);
+
+            count == SYNCHRONIZED_UNIQUE_COUNT
+        } else {
+            count == UNIQUE_COUNT
+        }
     }
 }
 
