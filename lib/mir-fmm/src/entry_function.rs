@@ -259,37 +259,18 @@ fn compile_locked_thunk_entry(
         &entry_function_name,
         arguments.clone(),
         |instruction_builder| {
-            instruction_builder.if_(
-                pointer::equal(
-                    instruction_builder.atomic_load(
-                        closure::get_entry_function_pointer(compile_closure_pointer(
-                            definition.type_(),
-                            context.types(),
-                        )?)?,
-                        fmm::ir::AtomicOrdering::Relaxed,
-                    )?,
-                    entry_function.clone(),
-                )?,
-                |instruction_builder| {
-                    instruction_builder.call(
-                        fmm::build::variable(
-                            &context.configuration().yield_function_name,
-                            YIELD_FUNCTION_TYPE.clone(),
-                        ),
-                        vec![],
-                    )?;
-
-                    Ok(instruction_builder.return_(instruction_builder.call(
-                        entry_function.clone(),
-                        compile_argument_variables(&arguments),
-                    )?))
-                },
-                |instruction_builder| {
-                    compile_normal_body(&instruction_builder, definition, context.types())
-                },
+            instruction_builder.call(
+                fmm::build::variable(
+                    &context.configuration().yield_function_name,
+                    YIELD_FUNCTION_TYPE.clone(),
+                ),
+                vec![],
             )?;
 
-            Ok(instruction_builder.unreachable())
+            Ok(instruction_builder.return_(instruction_builder.call(
+                entry_function.clone(),
+                compile_argument_variables(&arguments),
+            )?))
         },
         type_::compile(definition.result_type(), context.types()),
         fmm::types::CallingConvention::Source,
