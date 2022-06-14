@@ -189,7 +189,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                         .required(true)
                         .takes_value(true),
                 )
-                .arg(clap::Arg::new("test information file").action(clap::ArgAction::Append)),
+                .arg(clap::Arg::new("test information file").multiple_values(true)),
         )
         .subcommand(
             clap::Command::new("link-test")
@@ -209,9 +209,8 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                 )
                 .arg(
                     clap::Arg::new("archive file")
-                        .action(clap::ArgAction::Append)
                         .required(true)
-                        .takes_value(true),
+                        .multiple_values(true),
                 ),
         )
         .get_matches()
