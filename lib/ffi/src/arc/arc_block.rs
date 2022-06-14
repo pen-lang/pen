@@ -125,6 +125,18 @@ impl ArcBlock {
         }
     }
 
+    pub fn synchronize(&self) {
+        if !self.is_static() {
+            let count = self.inner().count.load(Ordering::Relaxed);
+
+            if !Self::is_count_synchronized(count) {
+                self.inner()
+                    .count
+                    .store(SYNCHRONIZED_UNIQUE_COUNT - count, Ordering::Relaxed);
+            }
+        }
+    }
+
     fn is_count_synchronized(count: isize) -> bool {
         count < 0
     }
@@ -162,10 +174,40 @@ mod tests {
 
     #[test]
     fn drop_twice() {
-        let mut arc = ArcBlock::new(Layout::from_size_align(1, 1).unwrap());
-        arc.clone().drop::<u8>();
-        arc.drop::<u8>();
+        let mut block = ArcBlock::new(Layout::from_size_align(1, 1).unwrap());
+        block.clone().drop::<u8>();
+        block.drop::<u8>();
     }
 
-    // TODO Test synchronized drops.
+    mod sync {
+        use super::*;
+
+        #[test]
+        fn synchronize() {
+            let block = ArcBlock::new(Layout::from_size_align(1, 1).unwrap());
+            block.synchronize();
+        }
+
+        #[test]
+        fn clone() {
+            let block = ArcBlock::new(Layout::from_size_align(1, 1).unwrap());
+            block.synchronize();
+            block.clone();
+        }
+
+        #[test]
+        fn drop() {
+            let mut block = ArcBlock::new(Layout::from_size_align(1, 1).unwrap());
+            block.synchronize();
+            block.drop::<u8>();
+        }
+
+        #[test]
+        fn drop_twice() {
+            let mut block = ArcBlock::new(Layout::from_size_align(1, 1).unwrap());
+            block.synchronize();
+            block.clone().drop::<u8>();
+            block.drop::<u8>();
+        }
+    }
 }
