@@ -42,6 +42,11 @@ fn compile_non_thunk(
     )
 }
 
+// Entry functions of thunks need to be loaded atomically to make thunk update
+// thread-safe.
+//
+// A relaxed ordering is allowed to load any of those entry functions since they
+// should guarantee memory operation ordering by themselves.
 fn compile_thunk(
     context: &Context,
     definition: &mir::ir::FunctionDefinition,
@@ -209,7 +214,7 @@ fn compile_initial_thunk_entry(
                     Ok(instruction_builder.return_(instruction_builder.call(
                         instruction_builder.atomic_load(
                             entry_function_pointer.clone(),
-                            fmm::ir::AtomicOrdering::Acquire,
+                            fmm::ir::AtomicOrdering::Relaxed,
                         )?,
                         compile_argument_variables(&arguments),
                     )?))
@@ -296,6 +301,8 @@ fn compile_normal_body(
     definition: &mir::ir::FunctionDefinition,
     types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::ir::Block, CompileError> {
+    instruction_builder.fence(fmm::ir::AtomicOrdering::Acquire);
+
     let value = reference_count::clone(
         instruction_builder,
         &instruction_builder.load(compile_thunk_value_pointer(definition, types)?)?,
