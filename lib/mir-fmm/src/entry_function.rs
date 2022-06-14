@@ -384,14 +384,12 @@ fn compile_untyped_closure_pointer() -> fmm::build::TypedExpression {
 mod tests {
     use super::*;
     use crate::configuration::CONFIGURATION;
+    use mir::test::ModuleFake;
 
     #[test]
     fn do_not_overwrite_global_functions_in_variables() {
         let function_type = mir::types::Function::new(vec![], mir::types::Type::Number);
-        let context = Context::new(
-            &mir::ir::Module::new(vec![], vec![], vec![], vec![], vec![]),
-            CONFIGURATION.clone(),
-        );
+        let context = Context::new(&mir::ir::Module::empty(), CONFIGURATION.clone());
 
         compile(
             &context,
