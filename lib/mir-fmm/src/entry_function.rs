@@ -1,7 +1,6 @@
 use super::error::CompileError;
 use crate::{
-    closure, context::Context, expression, pointer, reference_count, type_,
-    yield_::YIELD_FUNCTION_TYPE,
+    closure, context::Context, expression, reference_count, type_, yield_::YIELD_FUNCTION_TYPE,
 };
 use fnv::FnvHashMap;
 
@@ -248,15 +247,10 @@ fn compile_locked_thunk_entry(
     context: &Context,
     definition: &mir::ir::FunctionDefinition,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    let entry_function_name = context.module_builder().generate_name();
-    let entry_function = fmm::build::variable(
-        &entry_function_name,
-        type_::compile_entry_function(definition.type_(), context.types()),
-    );
     let arguments = compile_arguments(definition, context.types());
 
     context.module_builder().define_function(
-        &entry_function_name,
+        &context.module_builder().generate_name(),
         arguments.clone(),
         |instruction_builder| {
             instruction_builder.call(
@@ -268,7 +262,13 @@ fn compile_locked_thunk_entry(
             )?;
 
             Ok(instruction_builder.return_(instruction_builder.call(
-                entry_function.clone(),
+                instruction_builder.atomic_load(
+                    closure::get_entry_function_pointer(compile_closure_pointer(
+                        definition.type_(),
+                        context.types(),
+                    )?)?,
+                    fmm::ir::AtomicOrdering::Relaxed,
+                )?,
                 compile_argument_variables(&arguments),
             )?))
         },
