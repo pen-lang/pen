@@ -218,11 +218,11 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         .unwrap()
     {
         ("build", matches) => {
-            package_builder::build(matches.value_of("target"), matches.is_present("verbose"))
+            package_builder::build(matches.get_one("target"), matches.is_present("verbose"))
         }
         ("test", _) => test_runner::run(),
         ("create", matches) => package_creator::create(
-            matches.value_of("directory").unwrap(),
+            matches.get_one("directory").unwrap(),
             matches.is_present("library"),
         ),
         ("format", matches) => {
@@ -233,77 +233,77 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
             }
         }
         ("document", matches) => package_documentation_generator::generate(
-            matches.value_of("name").unwrap(),
-            matches.value_of("url").unwrap(),
-            matches.value_of("description").unwrap(),
+            matches.get_one("name").unwrap(),
+            matches.get_one("url").unwrap(),
+            matches.get_one("description").unwrap(),
         ),
         ("compile", matches) => module_compiler::compile(
-            matches.value_of("source file").unwrap(),
-            matches.value_of("dependency file").unwrap(),
-            matches.value_of("object file").unwrap(),
-            matches.value_of("interface file").unwrap(),
-            matches.value_of("target"),
+            matches.get_one("source file").unwrap(),
+            matches.get_one("dependency file").unwrap(),
+            matches.get_one("object file").unwrap(),
+            matches.get_one("interface file").unwrap(),
+            matches.get_one("target"),
         ),
         ("compile-main", matches) => {
             let context_options = matches
-                .values_of("context interface file")
+                .get_many("context interface file")
                 .unwrap()
                 .collect::<Vec<_>>();
 
             main_module_compiler::compile(
-                matches.value_of("source file").unwrap(),
-                matches.value_of("dependency file").unwrap(),
-                matches.value_of("object file").unwrap(),
+                matches.get_one("source file").unwrap(),
+                matches.get_one("dependency file").unwrap(),
+                matches.get_one("object file").unwrap(),
                 &context_options
                     .iter()
                     .step_by(2)
                     .cloned()
                     .zip(context_options.iter().skip(1).step_by(2).cloned())
                     .collect(),
-                matches.value_of("target"),
+                matches.get_one("target"),
             )
         }
         ("compile-prelude", matches) => prelude_module_compiler::compile(
-            matches.value_of("source file").unwrap(),
-            matches.value_of("object file").unwrap(),
-            matches.value_of("interface file").unwrap(),
-            matches.value_of("target"),
+            matches.get_one("source file").unwrap(),
+            matches.get_one("object file").unwrap(),
+            matches.get_one("interface file").unwrap(),
+            matches.get_one("target"),
         ),
         ("compile-test", matches) => test_module_compiler::compile(
-            matches.value_of("source file").unwrap(),
-            matches.value_of("dependency file").unwrap(),
-            matches.value_of("object file").unwrap(),
-            matches.value_of("test information file").unwrap(),
-            matches.value_of("target"),
+            matches.get_one("source file").unwrap(),
+            matches.get_one("dependency file").unwrap(),
+            matches.get_one("object file").unwrap(),
+            matches.get_one("test information file").unwrap(),
+            matches.get_one("target"),
         ),
         ("resolve-dependency", matches) => dependency_resolver::resolve(
-            matches.value_of("source file").unwrap(),
-            matches.value_of("object file").unwrap(),
-            matches.value_of("dependency file").unwrap(),
-            matches.value_of("build script dependency file").unwrap(),
+            matches.get_one("source file").unwrap(),
+            matches.get_one("object file").unwrap(),
+            matches.get_one("dependency file").unwrap(),
+            matches.get_one("build script dependency file").unwrap(),
             &matches
-                .values_of("prelude interface file")
+                .get_many("prelude interface file")
                 .unwrap()
                 .collect::<Vec<_>>(),
-            matches.value_of("package directory").unwrap(),
-            matches.value_of("output directory").unwrap(),
+            matches.get_one("package directory").unwrap(),
+            matches.get_one("output directory").unwrap(),
         ),
         ("compile-package-test-information", matches) => {
             package_test_information_compiler::compile(
                 &matches
-                    .values_of("test information file")
+                    .get_many("test information file")
                     .unwrap_or_default()
                     .collect::<Vec<_>>(),
-                matches.value_of("package test information file").unwrap(),
+                matches.get_one("package test information file").unwrap(),
             )
         }
         ("link-test", matches) => test_linker::link(
             &matches
-                .values_of("archive file")
+                .get_many("archive file")
                 .unwrap()
                 .collect::<Vec<_>>(),
-            matches.value_of("package test information file").unwrap(),
-            matches.value_of("test file").unwrap(),
+            matches.get_one("package test information file").unwrap(),
+            matches.get_one("test file").unwrap(),
         ),
         _ => unreachable!(),
     }
