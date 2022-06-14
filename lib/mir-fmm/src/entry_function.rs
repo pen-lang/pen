@@ -265,7 +265,7 @@ fn compile_locked_thunk_entry(
                             definition.type_(),
                             context.types(),
                         )?)?,
-                        fmm::ir::AtomicOrdering::Acquire,
+                        fmm::ir::AtomicOrdering::Relaxed,
                     )?,
                     entry_function.clone(),
                 )?,
