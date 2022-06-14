@@ -5,7 +5,7 @@ pub trait ModuleFake {
     fn empty() -> Self;
 
     #[must_use]
-    fn set_type_definitions(&self, type_definitions: Vec<TypeDefinition>) -> Self;
+    fn set_type_definitions(&self, definitions: Vec<TypeDefinition>) -> Self;
 
     #[must_use]
     fn set_foreign_declarations(&self, declarations: Vec<ForeignDeclaration>) -> Self;
@@ -14,10 +14,10 @@ pub trait ModuleFake {
     fn set_foreign_definitions(&self, definitions: Vec<ForeignDefinition>) -> Self;
 
     #[must_use]
-    fn set_declarations(&self, declarations: Vec<FunctionDeclaration>) -> Self;
+    fn set_function_declarations(&self, declarations: Vec<FunctionDeclaration>) -> Self;
 
     #[must_use]
-    fn set_definitions(&self, definitions: Vec<FunctionDefinition>) -> Self;
+    fn set_function_definitions(&self, definitions: Vec<FunctionDefinition>) -> Self;
 }
 
 impl ModuleFake for Module {
@@ -25,9 +25,9 @@ impl ModuleFake for Module {
         Self::new(vec![], vec![], vec![], vec![], vec![])
     }
 
-    fn set_type_definitions(&self, type_definitions: Vec<TypeDefinition>) -> Self {
+    fn set_type_definitions(&self, definitions: Vec<TypeDefinition>) -> Self {
         Self::new(
-            type_definitions,
+            definitions,
             self.foreign_declarations().to_vec(),
             self.foreign_definitions().to_vec(),
             self.function_declarations().to_vec(),
@@ -55,7 +55,7 @@ impl ModuleFake for Module {
         )
     }
 
-    fn set_declarations(&self, declarations: Vec<FunctionDeclaration>) -> Self {
+    fn set_function_declarations(&self, declarations: Vec<FunctionDeclaration>) -> Self {
         Self::new(
             self.type_definitions().to_vec(),
             self.foreign_declarations().to_vec(),
@@ -65,7 +65,7 @@ impl ModuleFake for Module {
         )
     }
 
-    fn set_definitions(&self, definitions: Vec<FunctionDefinition>) -> Self {
+    fn set_function_definitions(&self, definitions: Vec<FunctionDefinition>) -> Self {
         Self::new(
             self.type_definitions().to_vec(),
             self.foreign_declarations().to_vec(),
