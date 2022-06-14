@@ -56,28 +56,22 @@ fn check_functions(module: &Module) -> Result<(), TypeCheckError> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::types::{self, Type};
+    use crate::{
+        test::ModuleFake,
+        types::{self, Type},
+    };
 
     #[test]
     fn check_with_empty_modules() {
-        assert_eq!(
-            check_names(&Module::new(vec![], vec![], vec![], vec![], vec![])),
-            Ok(())
-        );
+        assert_eq!(check_names(&Module::empty()), Ok(()));
     }
 
     #[test]
     fn check_duplicate_type_name() {
-        let module = Module::new(
-            vec![
-                TypeDefinition::new("Foo", types::RecordBody::new(vec![])),
-                TypeDefinition::new("Foo", types::RecordBody::new(vec![])),
-            ],
-            vec![],
-            vec![],
-            vec![],
-            vec![],
-        );
+        let module = Module::empty().set_type_definitions(vec![
+            TypeDefinition::new("Foo", types::RecordBody::new(vec![])),
+            TypeDefinition::new("Foo", types::RecordBody::new(vec![])),
+        ]);
 
         assert_eq!(
             check_names(&module),
@@ -87,26 +81,20 @@ mod tests {
 
     #[test]
     fn check_duplicate_function_name_in_definition() {
-        let module = Module::new(
-            vec![],
-            vec![],
-            vec![],
-            vec![],
-            vec![
-                FunctionDefinition::new(
-                    "f",
-                    vec![Argument::new("x", Type::Number)],
-                    Variable::new("x"),
-                    Type::Number,
-                ),
-                FunctionDefinition::new(
-                    "f",
-                    vec![Argument::new("x", Type::Number)],
-                    Variable::new("x"),
-                    Type::Number,
-                ),
-            ],
-        );
+        let module = Module::empty().set_function_definitions(vec![
+            FunctionDefinition::new(
+                "f",
+                vec![Argument::new("x", Type::Number)],
+                Variable::new("x"),
+                Type::Number,
+            ),
+            FunctionDefinition::new(
+                "f",
+                vec![Argument::new("x", Type::Number)],
+                Variable::new("x"),
+                Type::Number,
+            ),
+        ]);
 
         assert_eq!(
             check_names(&module),
@@ -116,23 +104,19 @@ mod tests {
 
     #[test]
     fn check_duplicate_function_name_in_foreign_declaration() {
-        let module = Module::new(
-            vec![],
-            vec![ForeignDeclaration::new(
+        let module = Module::empty()
+            .set_foreign_declarations(vec![ForeignDeclaration::new(
                 "f",
                 "g",
                 types::Function::new(vec![Type::Number], Type::Number),
                 CallingConvention::Target,
-            )],
-            vec![],
-            vec![],
-            vec![FunctionDefinition::new(
+            )])
+            .set_function_definitions(vec![FunctionDefinition::new(
                 "f",
                 vec![Argument::new("x", Type::Number)],
                 Variable::new("x"),
                 Type::Number,
-            )],
-        );
+            )]);
 
         assert_eq!(
             check_names(&module),
@@ -142,21 +126,17 @@ mod tests {
 
     #[test]
     fn check_duplicate_function_name_in_declaration() {
-        let module = Module::new(
-            vec![],
-            vec![],
-            vec![],
-            vec![FunctionDeclaration::new(
+        let module = Module::empty()
+            .set_function_declarations(vec![FunctionDeclaration::new(
                 "f",
                 types::Function::new(vec![Type::Number], Type::Number),
-            )],
-            vec![FunctionDefinition::new(
+            )])
+            .set_function_definitions(vec![FunctionDefinition::new(
                 "f",
                 vec![Argument::new("x", Type::Number)],
                 Variable::new("x"),
                 Type::Number,
-            )],
-        );
+            )]);
 
         assert_eq!(
             check_names(&module),
