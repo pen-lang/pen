@@ -235,25 +235,37 @@ fn compile_normal_thunk_entry(
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     context.module_builder().define_anonymous_function(
         compile_arguments(definition, context.types()),
-        |instruction_builder| {
-            instruction_builder.fence(fmm::ir::AtomicOrdering::Acquire);
+        |builder| {
+            let closure_pointer = compile_closure_pointer(definition.type_(), context.types())?;
+
+            builder.if_(
+                reference_count::pointer::is_synchronized(&builder, &closure_pointer)?,
+                |builder| -> Result<_, CompileError> {
+                    builder.atomic_load(
+                        closure::get_entry_function_pointer(closure_pointer.clone())?,
+                        fmm::ir::AtomicOrdering::Acquire,
+                    )?;
+
+                    Ok(builder.branch(fmm::ir::VOID_VALUE.clone()))
+                },
+                |builder| Ok(builder.branch(fmm::ir::VOID_VALUE.clone())),
+            )?;
 
             let value = reference_count::clone(
-                &instruction_builder,
-                &instruction_builder
-                    .load(compile_thunk_value_pointer(definition, context.types())?)?,
+                &builder,
+                &builder.load(compile_thunk_value_pointer(definition, context.types())?)?,
                 definition.result_type(),
                 context.types(),
             )?;
 
             reference_count::drop(
-                &instruction_builder,
-                &compile_closure_pointer(definition.type_(), context.types())?,
+                &builder,
+                &closure_pointer,
                 &definition.type_().clone().into(),
                 context.types(),
             )?;
 
-            Ok(instruction_builder.return_(value))
+            Ok(builder.return_(value))
         },
         type_::compile(definition.result_type(), context.types()),
         fmm::types::CallingConvention::Source,

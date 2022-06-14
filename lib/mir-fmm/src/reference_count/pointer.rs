@@ -197,7 +197,7 @@ pub fn is_unique(
 // Heap blocks are synchronized always by their owners before references are
 // shared with other threads. So an ordering to load counts can always be
 // relaxed.
-fn is_synchronized(
+pub fn is_synchronized(
     builder: &fmm::build::InstructionBuilder,
     pointer: &fmm::build::TypedExpression,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
