@@ -295,8 +295,8 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                 .unwrap()
                 .map(Deref::deref)
                 .collect::<Vec<_>>(),
-            &matches.get_one::<String>("package directory").unwrap(),
-            &matches.get_one::<String>("output directory").unwrap(),
+            matches.get_one::<String>("package directory").unwrap(),
+            matches.get_one::<String>("output directory").unwrap(),
         ),
         ("compile-package-test-information", matches) => {
             package_test_information_compiler::compile(
