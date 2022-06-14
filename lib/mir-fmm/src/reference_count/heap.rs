@@ -17,7 +17,7 @@ pub fn allocate(
     );
 
     builder.store(
-        count::compile_initial(),
+        count::compile_unique(),
         fmm::build::record_address(pointer.clone(), 0)?,
     );
 

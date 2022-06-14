@@ -29,6 +29,10 @@ impl<T> Arc<T> {
             .get_mut()
             .map(|pointer| unsafe { &mut *(pointer as *mut T) })
     }
+
+    pub fn synchronize(self) {
+        self.block.synchronize()
+    }
 }
 
 impl<T> From<T> for Arc<T> {
