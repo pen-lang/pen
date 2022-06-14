@@ -211,6 +211,7 @@ fn compile_initial_thunk_entry(
                     Ok(instruction_builder.return_(value))
                 },
                 |instruction_builder| {
+                    // TODO Use an entry function loaded by a CAS instruction above.
                     Ok(instruction_builder.return_(instruction_builder.call(
                         instruction_builder.atomic_load(
                             entry_function_pointer.clone(),
