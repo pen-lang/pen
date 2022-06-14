@@ -6,7 +6,6 @@ use std::{
 #[derive(Clone, Debug, PartialEq)]
 pub enum CompileError {
     FmmBuild(fmm::build::BuildError),
-    HeapReuse(mir::analysis::ReuseError),
     NestedVariant,
     ReferenceCount(mir::analysis::ReferenceCountError),
     TypeCheck(mir::analysis::TypeCheckError),
@@ -30,12 +29,6 @@ impl From<fmm::build::BuildError> for CompileError {
 impl From<mir::analysis::ReferenceCountError> for CompileError {
     fn from(error: mir::analysis::ReferenceCountError) -> Self {
         Self::ReferenceCount(error)
-    }
-}
-
-impl From<mir::analysis::ReuseError> for CompileError {
-    fn from(error: mir::analysis::ReuseError) -> Self {
-        Self::HeapReuse(error)
     }
 }
 

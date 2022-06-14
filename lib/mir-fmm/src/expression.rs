@@ -49,28 +49,6 @@ pub fn compile(
         mir::ir::Expression::ComparisonOperation(operation) => {
             compile_comparison_operation(context, instruction_builder, operation, variables)?.into()
         }
-        mir::ir::Expression::DiscardHeap(discard) => {
-            for id in discard.ids() {
-                let pointer = variables[id].clone();
-
-                instruction_builder.if_(
-                    pointer::equal(
-                        pointer.clone(),
-                        fmm::ir::Undefined::new(pointer.type_().clone()),
-                    )?,
-                    |builder| -> Result<_, CompileError> {
-                        Ok(builder.branch(fmm::ir::VOID_VALUE.clone()))
-                    },
-                    |builder| {
-                        reference_count::heap::free(instruction_builder, pointer.clone())?;
-
-                        Ok(builder.branch(fmm::ir::VOID_VALUE.clone()))
-                    },
-                )?;
-            }
-
-            compile(discard.expression(), variables)?
-        }
         mir::ir::Expression::DropVariables(drop) => {
             for (variable, type_) in drop.variables() {
                 reference_count::drop(
@@ -98,6 +76,9 @@ pub fn compile(
         }
         mir::ir::Expression::LetRecursive(let_) => {
             compile_let_recursive(context, instruction_builder, let_, variables)?
+        }
+        mir::ir::Expression::Synchronize(synchronize) => {
+            compile_synchronize(context, instruction_builder, synchronize, variables)?
         }
         mir::ir::Expression::None => fmm::ir::Undefined::new(type_::compile_none()).into(),
         mir::ir::Expression::Number(number) => fmm::ir::Primitive::Float64(*number).into(),
@@ -184,7 +165,7 @@ pub fn compile(
 
             if type_::is_record_boxed(update.type_(), context.types()) {
                 instruction_builder.if_(
-                    reference_count::pointer::is_owned(instruction_builder, &record)?,
+                    reference_count::pointer::is_unique(instruction_builder, &record)?,
                     |builder| -> Result<_, CompileError> {
                         Ok(builder.branch(compile_boxed_record(
                             &builder,
@@ -211,69 +192,6 @@ pub fn compile(
                 )?
             } else {
                 compile_unboxed(instruction_builder, false)?.into()
-            }
-        }
-        mir::ir::Expression::RetainHeap(retain) => {
-            let mut reused_variables = FnvHashMap::default();
-
-            for (name, type_) in retain.drop().variables() {
-                if retain.ids().contains_key(name) {
-                    reused_variables.insert(
-                        name,
-                        reference_count::drop_or_reuse(
-                            instruction_builder,
-                            &variables[name],
-                            type_,
-                            context.types(),
-                        )?,
-                    );
-                } else {
-                    reference_count::drop(
-                        instruction_builder,
-                        &variables[name],
-                        type_,
-                        context.types(),
-                    )?;
-                }
-            }
-
-            compile(
-                retain.drop().expression(),
-                &variables
-                    .clone()
-                    .into_iter()
-                    .chain(
-                        retain
-                            .ids()
-                            .iter()
-                            .map(|(name, id)| (id.clone(), reused_variables.remove(name).unwrap())),
-                    )
-                    .collect(),
-            )?
-        }
-        mir::ir::Expression::ReuseRecord(reuse) => {
-            let pointer_type = fmm::types::GENERIC_POINTER_TYPE.clone();
-            let pointer = variables[reuse.id()].clone();
-
-            let compile_record =
-                |builder: &_| compile_record(context, builder, reuse.record(), variables);
-
-            if type_::is_record_boxed(reuse.record().type_(), context.types()) {
-                instruction_builder.if_(
-                    pointer::equal(pointer.clone(), fmm::ir::Undefined::new(pointer_type))?,
-                    |builder| -> Result<_, CompileError> {
-                        Ok(builder.branch(compile_record(&builder)?))
-                    },
-                    |builder| {
-                        Ok(builder.branch(compile_boxed_record(
-                            &builder,
-                            pointer.clone(),
-                            compile_unboxed_record(context, &builder, reuse.record(), variables)?,
-                        )?))
-                    },
-                )?
-            } else {
-                compile_record(instruction_builder)?
             }
         }
         mir::ir::Expression::ByteString(string) => {
@@ -325,7 +243,7 @@ fn compile_if(
     if_: &mir::ir::If,
     variables: &FnvHashMap<String, fmm::build::TypedExpression>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    let compile = |instruction_builder: &fmm::build::InstructionBuilder, expression| {
+    let compile = |instruction_builder: &_, expression| {
         compile(context, instruction_builder, expression, variables)
     };
 
@@ -467,9 +385,9 @@ fn compile_let_recursive(
     )?;
 
     instruction_builder.store(
-        closure::compile_closure_content(
+        closure::compile_content(
             entry_function::compile(context, let_.definition(), false, variables)?,
-            closure::compile_drop_function(context, let_.definition())?,
+            closure::metadata::compile(context, let_.definition())?,
             {
                 let environment = fmm::build::record(
                     let_.definition()
@@ -513,6 +431,29 @@ fn compile_let_recursive(
             )])
             .collect(),
     )
+}
+
+fn compile_synchronize(
+    context: &Context,
+    instruction_builder: &fmm::build::InstructionBuilder,
+    synchronize: &mir::ir::Synchronize,
+    variables: &FnvHashMap<String, fmm::build::TypedExpression>,
+) -> Result<fmm::build::TypedExpression, CompileError> {
+    let value = compile(
+        context,
+        instruction_builder,
+        synchronize.expression(),
+        variables,
+    )?;
+
+    reference_count::synchronize(
+        instruction_builder,
+        &value,
+        synchronize.type_(),
+        context.types(),
+    )?;
+
+    Ok(value)
 }
 
 fn compile_arithmetic_operation(

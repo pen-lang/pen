@@ -114,7 +114,6 @@ fn check_expression(
 
             Type::Boolean
         }
-        Expression::DiscardHeap(discard) => check_expression(discard.expression(), variables)?,
         Expression::DropVariables(drop) => {
             check_drop_variables(drop, variables, result_type, types)?
         }
@@ -178,6 +177,13 @@ fn check_expression(
                     .collect(),
             )?
         }
+        Expression::Synchronize(synchronize) => {
+            let type_ = check_expression(synchronize.expression(), variables)?;
+
+            check_equality(&type_, synchronize.type_())?;
+
+            type_
+        }
         Expression::None => Type::None,
         Expression::Number(_) => Type::Number,
         Expression::Record(record) => check_record(record, variables, result_type, types)?,
@@ -213,12 +219,6 @@ fn check_expression(
             }
 
             update.type_().clone().into()
-        }
-        Expression::ReuseRecord(record) => {
-            check_record(record.record(), variables, result_type, types)?
-        }
-        Expression::RetainHeap(reuse) => {
-            check_drop_variables(reuse.drop(), variables, result_type, types)?
         }
         Expression::ByteString(_) => Type::ByteString,
         Expression::TryOperation(operation) => {
@@ -826,6 +826,42 @@ mod tests {
                     )
                 ])),
                 Err(TypeCheckError::VariantInVariant(_))
+            ));
+        }
+    }
+
+    mod synchronize {
+        use super::*;
+
+        #[test]
+        fn check() {
+            assert_eq!(
+                check_types(&create_module_from_definitions(vec![
+                    FunctionDefinition::with_environment(
+                        "f",
+                        vec![],
+                        vec![Argument::new("x", Type::Number)],
+                        Synchronize::new(Type::Number, 42.0),
+                        Type::Number
+                    )
+                ],)),
+                Ok(())
+            );
+        }
+
+        #[test]
+        fn fail_to_check() {
+            assert!(matches!(
+                check_types(&create_module_from_definitions(vec![
+                    FunctionDefinition::with_environment(
+                        "f",
+                        vec![],
+                        vec![Argument::new("x", Type::Number)],
+                        Synchronize::new(Type::None, 42.0),
+                        Type::Number
+                    )
+                ],)),
+                Err(TypeCheckError::TypesNotMatched(_, _))
             ));
         }
     }

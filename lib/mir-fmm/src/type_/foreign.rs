@@ -7,7 +7,7 @@ pub fn compile(
 ) -> Result<fmm::types::Type, CompileError> {
     let fmm_type = type_::compile(type_, types);
 
-    Ok(if should_box_payload(type_, types)? {
+    Ok(if is_payload_boxed(type_, types)? {
         fmm::types::Pointer::new(fmm_type).into()
     } else {
         fmm_type
@@ -30,7 +30,7 @@ pub fn compile_function(
     ))
 }
 
-pub fn should_box_payload(
+pub fn is_payload_boxed(
     type_: &mir::types::Type,
     types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> Result<bool, CompileError> {

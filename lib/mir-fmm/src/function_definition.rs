@@ -9,9 +9,9 @@ pub fn compile_function_definition(
 ) -> Result<(), CompileError> {
     context.module_builder().define_variable(
         definition.name(),
-        closure::compile_closure_content(
+        closure::compile_content(
             entry_function::compile(context, definition, true, global_variables)?,
-            closure::compile_drop_function(context, definition)?,
+            closure::metadata::compile(context, definition)?,
             fmm::ir::Undefined::new(type_::compile_closure_payload(definition, context.types())),
         ),
         definition.is_thunk(),

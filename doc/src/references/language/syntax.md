@@ -248,11 +248,17 @@ It iterates over elements in a given list and generates a new list with elements
 [number f(x) for x in xs]
 ```
 
+You can also iterate keys and values in a map.
+
+```pen
+[number f(key, value) for key, value in map]
+```
+
 ### Concurrency
 
 #### `go` expression
 
-It executes a function in parallel. Its returned value is a future represented as a function that returns a result of the executed function.
+It executes a function concurrently. Its returned value is a future represented as a function that returns a result of the executed function.
 
 ```pen
 f = go \() number {

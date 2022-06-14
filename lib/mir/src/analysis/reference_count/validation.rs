@@ -114,9 +114,6 @@ fn move_expression(
             move_expression(operation.lhs(), variables)?;
             move_expression(operation.rhs(), variables)?;
         }
-        Expression::DiscardHeap(discard) => {
-            move_expression(discard.expression(), variables)?;
-        }
         Expression::DropVariables(drop) => move_drop_variables(drop, variables)?,
         Expression::If(if_) => {
             move_expression(if_.condition(), variables)?;
@@ -141,6 +138,9 @@ fn move_expression(
 
             validate_let_like(let_.definition().name(), let_.expression(), variables)?;
         }
+        Expression::Synchronize(synchronize) => {
+            move_expression(synchronize.expression(), variables)?;
+        }
         Expression::None => {}
         Expression::Number(_) => {}
         Expression::Record(record) => {
@@ -156,10 +156,6 @@ fn move_expression(
                 move_expression(field.expression(), variables)?;
             }
         }
-        Expression::ReuseRecord(record) => {
-            move_record(record.record(), variables)?;
-        }
-        Expression::RetainHeap(reuse) => move_drop_variables(reuse.drop(), variables)?,
         Expression::TryOperation(operation) => {
             move_expression(operation.operand(), variables)?;
 

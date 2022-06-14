@@ -1,7 +1,4 @@
-use super::super::error::CompileError;
-
-pub(super) const COUNT_TYPE: fmm::types::Primitive = fmm::types::Primitive::PointerInteger;
-pub(super) const INITIAL_COUNT: usize = 0;
+use super::{super::error::CompileError, count};
 
 pub fn allocate(
     builder: &fmm::build::InstructionBuilder,
@@ -10,17 +7,17 @@ pub fn allocate(
     let type_ = type_.into();
     let pointer = fmm::build::bit_cast(
         fmm::types::Pointer::new(fmm::types::Record::new(vec![
-            COUNT_TYPE.into(),
+            count::compile_type().into(),
             type_.clone(),
         ])),
         builder.allocate_heap(fmm::build::size_of(fmm::types::Record::new(vec![
-            COUNT_TYPE.into(),
+            count::compile_type().into(),
             type_,
         ]))),
     );
 
     builder.store(
-        fmm::ir::Primitive::PointerInteger(INITIAL_COUNT as i64),
+        count::compile_unique(),
         fmm::build::record_address(pointer.clone(), 0)?,
     );
 
@@ -33,14 +30,21 @@ pub fn free(
 ) -> Result<(), CompileError> {
     builder.free_heap(fmm::build::bit_cast(
         fmm::types::GENERIC_POINTER_TYPE.clone(),
-        fmm::build::pointer_address(
-            fmm::build::bit_cast(
-                fmm::types::Pointer::new(fmm::types::Primitive::PointerInteger),
-                pointer,
-            ),
-            fmm::ir::Primitive::PointerInteger(-1),
-        )?,
+        get_count_pointer(&pointer.into())?,
     ));
 
     Ok(())
+}
+
+pub fn get_count_pointer(
+    pointer: &fmm::build::TypedExpression,
+) -> Result<fmm::build::TypedExpression, fmm::build::BuildError> {
+    Ok(fmm::build::pointer_address(
+        fmm::build::bit_cast(
+            fmm::types::Pointer::new(count::compile_type()),
+            pointer.clone(),
+        ),
+        fmm::ir::Primitive::PointerInteger(-1),
+    )?
+    .into())
 }

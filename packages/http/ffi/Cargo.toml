@@ -8,7 +8,7 @@ edition = "2021"
 crate-type = ["staticlib"]
 
 [dependencies]
-ffi = { package = "pen-ffi", version = "0.3", features = ["runtime"] }
+ffi = { package = "pen-ffi", version = "*", features = ["runtime"] }
 futures = "0.3"
 hyper = { version = "0.14", features = [
   "client",

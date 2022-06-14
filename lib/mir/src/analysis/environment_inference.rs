@@ -86,17 +86,17 @@ fn infer_in_expression(
         Expression::ComparisonOperation(operation) => {
             infer_in_comparison_operation(operation, variables).into()
         }
-        Expression::DiscardHeap(discard) => infer_in_expression(discard.expression(), variables),
         Expression::DropVariables(drop) => infer_in_drop_variables(drop, variables).into(),
         Expression::Call(call) => infer_in_call(call, variables).into(),
         Expression::If(if_) => infer_in_if(if_, variables).into(),
         Expression::Let(let_) => infer_in_let(let_, variables).into(),
         Expression::LetRecursive(let_) => infer_in_let_recursive(let_, variables).into(),
+        Expression::Synchronize(synchronize) => {
+            infer_in_expression(synchronize.expression(), variables)
+        }
         Expression::Record(record) => infer_in_record(record, variables).into(),
         Expression::RecordField(field) => infer_in_record_field(field, variables).into(),
         Expression::RecordUpdate(update) => infer_in_record_update(update, variables).into(),
-        Expression::ReuseRecord(record) => infer_in_record(record.record(), variables).into(),
-        Expression::RetainHeap(drop) => infer_in_drop_variables(drop.drop(), variables).into(),
         Expression::TryOperation(operation) => infer_in_try_operation(operation, variables).into(),
         Expression::Variant(variant) => infer_in_variant(variant, variables).into(),
         Expression::Boolean(_)

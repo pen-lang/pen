@@ -54,6 +54,13 @@ pub fn compile_variant_tag() -> fmm::types::Pointer {
         .into(),
         // drop function
         fmm::types::Function::new(
+            vec![payload.clone()],
+            fmm::types::VOID_TYPE.clone(),
+            fmm::types::CallingConvention::Target,
+        )
+        .into(),
+        // synchronize function
+        fmm::types::Function::new(
             vec![payload],
             fmm::types::VOID_TYPE.clone(),
             fmm::types::CallingConvention::Target,
@@ -155,7 +162,7 @@ fn compile_raw_closure(
 ) -> fmm::types::Record {
     fmm::types::Record::new(vec![
         entry_function.into(),
-        compile_closure_drop_function().into(),
+        compile_closure_metadata().into(),
         environment.into(),
     ])
 }
@@ -205,7 +212,23 @@ fn compile_calling_convention(
     }
 }
 
-pub fn compile_closure_drop_function() -> fmm::types::Function {
+pub fn compile_closure_metadata() -> fmm::types::Pointer {
+    fmm::types::Pointer::new(fmm::types::Record::new(vec![
+        compile_closure_drop_function().into(),
+        compile_closure_sync_function().into(),
+    ]))
+}
+
+fn compile_closure_drop_function() -> fmm::types::Function {
+    // The argument is a closure pointer.
+    fmm::types::Function::new(
+        vec![fmm::types::Primitive::PointerInteger.into()],
+        fmm::types::VOID_TYPE.clone(),
+        fmm::types::CallingConvention::Target,
+    )
+}
+
+fn compile_closure_sync_function() -> fmm::types::Function {
     // The argument is a closure pointer.
     fmm::types::Function::new(
         vec![fmm::types::Primitive::PointerInteger.into()],

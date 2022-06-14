@@ -11,7 +11,7 @@ pub enum SqlError {
 impl Display for SqlError {
     fn fmt(&self, formatter: &mut Formatter) -> fmt::Result {
         match self {
-            SqlError::TypeNotSupported => write!(formatter, "type not supported"),
+            Self::TypeNotSupported => write!(formatter, "type not supported"),
         }
     }
 }

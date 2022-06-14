@@ -415,6 +415,15 @@ fn convert_expression(
                     .collect::<FnvHashSet<String>>(),
             )
         }
+        Expression::Synchronize(synchronize) => {
+            let (expression, moved_variables) =
+                convert_expression(synchronize.expression(), owned_variables, moved_variables)?;
+
+            (
+                Synchronize::new(synchronize.type_().clone(), expression).into(),
+                moved_variables,
+            )
+        }
         Expression::Record(record) => {
             let (fields, moved_variables) = record.fields().iter().rev().fold(
                 Ok((vec![], moved_variables.clone())),
@@ -534,11 +543,7 @@ fn convert_expression(
         | Expression::ByteString(_)
         | Expression::None
         | Expression::Number(_) => (expression.clone(), moved_variables.clone()),
-        Expression::CloneVariables(_)
-        | Expression::DiscardHeap(_)
-        | Expression::DropVariables(_)
-        | Expression::ReuseRecord(_)
-        | Expression::RetainHeap(_) => {
+        Expression::CloneVariables(_) | Expression::DropVariables(_) => {
             return Err(ReferenceCountError::ExpressionNotSupported(
                 expression.clone(),
             ));
