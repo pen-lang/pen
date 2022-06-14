@@ -627,15 +627,12 @@ mod tests {
 
     #[test]
     fn check_types_of_declarations() {
-        let module = Module::new(
-            vec![],
-            vec![],
-            vec![],
-            vec![FunctionDeclaration::new(
+        let module = Module::empty()
+            .set_function_declarations(vec![FunctionDeclaration::new(
                 "f",
                 types::Function::new(vec![Type::Number], Type::Number),
-            )],
-            vec![FunctionDefinition::new(
+            )])
+            .set_function_definitions(vec![FunctionDefinition::new(
                 "g",
                 vec![Argument::new("x", Type::Number)],
                 Call::new(
@@ -644,28 +641,23 @@ mod tests {
                     vec![Variable::new("x").into()],
                 ),
                 Type::Number,
-            )],
-        );
+            )]);
         assert_eq!(check_types(&module), Ok(()));
     }
 
     #[test]
     fn fail_to_check_types_of_declarations() {
-        let module = Module::new(
-            vec![],
-            vec![],
-            vec![],
-            vec![FunctionDeclaration::new(
+        let module = Module::empty()
+            .set_function_declarations(vec![FunctionDeclaration::new(
                 "f",
                 types::Function::new(vec![Type::Number], Type::Number),
-            )],
-            vec![FunctionDefinition::new(
+            )])
+            .set_function_definitions(vec![FunctionDefinition::new(
                 "g",
                 vec![Argument::new("x", Type::Number)],
                 Variable::new("f"),
                 Type::Number,
-            )],
-        );
+            )]);
 
         assert!(matches!(
             check_types(&module),
@@ -1067,17 +1059,14 @@ mod tests {
 
         #[test]
         fn check_types_of_foreign_declarations() {
-            let module = Module::new(
-                vec![],
-                vec![ForeignDeclaration::new(
+            let module = Module::empty()
+                .set_foreign_declarations(vec![ForeignDeclaration::new(
                     "f",
                     "g",
                     types::Function::new(vec![Type::Number], Type::Number),
                     CallingConvention::Target,
-                )],
-                vec![],
-                vec![],
-                vec![FunctionDefinition::new(
+                )])
+                .set_function_definitions(vec![FunctionDefinition::new(
                     "g",
                     vec![Argument::new("x", Type::Number)],
                     Call::new(
@@ -1086,30 +1075,26 @@ mod tests {
                         vec![Variable::new("x").into()],
                     ),
                     Type::Number,
-                )],
-            );
+                )]);
+
             assert_eq!(check_types(&module), Ok(()));
         }
 
         #[test]
         fn fail_to_check_types_of_foreign_declarations() {
-            let module = Module::new(
-                vec![],
-                vec![ForeignDeclaration::new(
+            let module = Module::empty()
+                .set_foreign_declarations(vec![ForeignDeclaration::new(
                     "f",
                     "g",
                     types::Function::new(vec![Type::Number], Type::Number),
                     CallingConvention::Target,
-                )],
-                vec![],
-                vec![],
-                vec![FunctionDefinition::new(
+                )])
+                .set_function_definitions(vec![FunctionDefinition::new(
                     "g",
                     vec![Argument::new("x", Type::Number)],
                     Variable::new("f"),
                     Type::Number,
-                )],
-            );
+                )]);
 
             assert!(matches!(
                 check_types(&module),
@@ -1123,34 +1108,34 @@ mod tests {
 
         #[test]
         fn check_types_of_foreign_definition_for_declaration() {
-            let module = Module::new(
-                vec![],
-                vec![],
-                vec![ForeignDefinition::new("f", "g", CallingConvention::Source)],
-                vec![FunctionDeclaration::new(
+            let module = Module::empty()
+                .set_foreign_definitions(vec![ForeignDefinition::new(
+                    "f",
+                    "g",
+                    CallingConvention::Source,
+                )])
+                .set_function_declarations(vec![FunctionDeclaration::new(
                     "f",
                     types::Function::new(vec![Type::Number], Type::Number),
-                )],
-                vec![],
-            );
+                )]);
 
             assert_eq!(check_types(&module), Ok(()));
         }
 
         #[test]
         fn check_types_of_foreign_definition_for_definition() {
-            let module = Module::new(
-                vec![],
-                vec![],
-                vec![ForeignDefinition::new("f", "g", CallingConvention::Source)],
-                vec![],
-                vec![FunctionDefinition::new(
+            let module = Module::empty()
+                .set_foreign_definitions(vec![ForeignDefinition::new(
+                    "f",
+                    "g",
+                    CallingConvention::Source,
+                )])
+                .set_function_definitions(vec![FunctionDefinition::new(
                     "f",
                     vec![Argument::new("x", Type::Number)],
                     Variable::new("x"),
                     Type::Number,
-                )],
-            );
+                )]);
 
             assert_eq!(check_types(&module), Ok(()));
         }
