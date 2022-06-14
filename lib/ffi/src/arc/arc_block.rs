@@ -195,6 +195,19 @@ mod tests {
         block.drop::<u8>();
     }
 
+    #[test]
+    fn get_mut() {
+        let mut block = ArcBlock::new(Layout::from_size_align(1, 1).unwrap());
+        assert!(block.get_mut().is_some());
+    }
+
+    #[test]
+    fn fail_to_get_mut() {
+        let mut block = ArcBlock::new(Layout::from_size_align(1, 1).unwrap());
+        let _ = block.clone();
+        assert!(block.get_mut().is_none());
+    }
+
     mod sync {
         use super::*;
 
@@ -224,6 +237,29 @@ mod tests {
             block.synchronize();
             block.clone().drop::<u8>();
             block.drop::<u8>();
+        }
+
+        #[test]
+        fn get_mut() {
+            let mut block = ArcBlock::new(Layout::from_size_align(1, 1).unwrap());
+            block.synchronize();
+            assert!(block.get_mut().is_some());
+        }
+
+        #[test]
+        fn fail_to_get_mut_synchronizing_unique() {
+            let mut block = ArcBlock::new(Layout::from_size_align(1, 1).unwrap());
+            block.synchronize();
+            let _ = block.clone();
+            assert!(block.get_mut().is_none());
+        }
+
+        #[test]
+        fn fail_to_get_mut_synchronizing_cloned() {
+            let mut block = ArcBlock::new(Layout::from_size_align(1, 1).unwrap());
+            let _ = block.clone();
+            block.synchronize();
+            assert!(block.get_mut().is_none());
         }
     }
 }
