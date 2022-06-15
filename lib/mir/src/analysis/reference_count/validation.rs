@@ -414,29 +414,29 @@ mod tests {
 
     #[test]
     fn validate_let_recursive() {
-        validate(
-            &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
-                "f",
-                vec![Argument::new("x", Type::None)],
-                LetRecursive::new(
-                    FunctionDefinition::with_options(
-                        "g",
-                        vec![Argument::new("x", Type::None)],
-                        vec![],
-                        DropVariables::new(
-                            [("g".into(), types::Function::new(vec![], Type::None).into())]
-                                .into_iter()
-                                .collect(),
-                            Variable::new("x"),
+        validate(&Module::empty().set_function_definitions(vec![
+                FunctionDefinition::new(
+                    "f",
+                    vec![Argument::new("x", Type::None)],
+                    LetRecursive::new(
+                        FunctionDefinition::with_options(
+                            "g",
+                            vec![Argument::new("x", Type::None)],
+                            vec![],
+                            DropVariables::new(
+                                [("g".into(), types::Function::new(vec![], Type::None).into())]
+                                    .into_iter()
+                                    .collect(),
+                                Variable::new("x"),
+                            ),
+                            Type::None,
+                            false,
                         ),
-                        Type::None,
-                        false,
+                        Variable::new("g"),
                     ),
-                    Variable::new("g"),
+                    Type::None,
                 ),
-                Type::None,
-            )]),
-        )
+            ]))
         .unwrap();
     }
 
