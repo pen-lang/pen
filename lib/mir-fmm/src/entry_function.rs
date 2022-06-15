@@ -182,7 +182,7 @@ fn compile_initial_thunk_entry(
 
             let environment_pointer = compile_environment_pointer(definition, context.types())?;
 
-            // TODO Remove these extra drops of free variables when we move them in function
+            // TODO Remove these extra drops of free variables when we move them into function
             // bodies rather than cloning them.
             // See also https://github.com/pen-lang/pen/issues/295.
             for (index, free_variable) in definition.environment().iter().enumerate() {
