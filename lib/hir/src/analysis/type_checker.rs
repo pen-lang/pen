@@ -1216,8 +1216,7 @@ mod tests {
 
         #[test]
         fn check_call() {
-            check_module(
-                &Module::empty().set_definitions(vec![
+            check_module(&Module::empty().set_definitions(vec![
                     FunctionDefinition::fake(
                         "f",
                         Lambda::new(
@@ -1240,15 +1239,13 @@ mod tests {
                         ),
                         false,
                     ),
-                ]),
-            )
+                ]))
             .unwrap()
         }
 
         #[test]
         fn check_call_with_arguments() {
-            check_module(
-                &Module::empty().set_definitions(vec![
+            check_module(&Module::empty().set_definitions(vec![
                     FunctionDefinition::fake(
                         "f",
                         Lambda::new(
@@ -1271,16 +1268,14 @@ mod tests {
                         ),
                         false,
                     ),
-                ]),
-            )
+                ]))
             .unwrap()
         }
 
         #[test]
         #[should_panic]
         fn fail_to_check_call_with_wrong_argument_type() {
-            check_module(
-                &Module::empty().set_definitions(vec![
+            check_module(&Module::empty().set_definitions(vec![
                     FunctionDefinition::fake(
                         "f",
                         Lambda::new(
@@ -1303,16 +1298,14 @@ mod tests {
                         ),
                         false,
                     ),
-                ]),
-            )
+                ]))
             .unwrap()
         }
 
         #[test]
         #[should_panic]
         fn fail_to_check_call_with_wrong_argument_count() {
-            check_module(
-                &Module::empty().set_definitions(vec![
+            check_module(&Module::empty().set_definitions(vec![
                     FunctionDefinition::fake(
                         "f",
                         Lambda::new(
@@ -1335,8 +1328,7 @@ mod tests {
                         ),
                         false,
                     ),
-                ]),
-            )
+                ]))
             .unwrap()
         }
     }
@@ -1440,8 +1432,7 @@ mod tests {
 
         #[test]
         fn check_equality_operation_with_subsumption() {
-            check_module(
-                &Module::empty().set_definitions(vec![
+            check_module(&Module::empty().set_definitions(vec![
                     FunctionDefinition::fake(
                         "x",
                         Lambda::new(
@@ -1465,8 +1456,7 @@ mod tests {
                         ),
                         false,
                     ),
-                ]),
-            )
+                ]))
             .unwrap();
         }
 
@@ -2216,8 +2206,7 @@ mod tests {
         fn check_list_comprehension() {
             let element_type = types::None::new(Position::fake());
 
-            check_module(
-                &Module::empty().set_definitions(vec![
+            check_module(&Module::empty().set_definitions(vec![
                     FunctionDefinition::fake(
                         "f",
                         Lambda::new(
@@ -2247,8 +2236,7 @@ mod tests {
                         ),
                         false,
                     ),
-                ]),
-            )
+                ]))
             .unwrap();
         }
 
@@ -2709,8 +2697,7 @@ mod tests {
         #[test]
         fn check_first_variable() {
             let list_type = types::List::new(types::None::new(Position::fake()), Position::fake());
-            check_module(
-                &Module::empty().set_definitions(vec![
+            check_module(&Module::empty().set_definitions(vec![
                     FunctionDefinition::fake(
                         "x",
                         Lambda::new(
@@ -2741,8 +2728,7 @@ mod tests {
                         ),
                         false,
                     ),
-                ]),
-            )
+                ]))
             .unwrap();
         }
 
@@ -2775,8 +2761,7 @@ mod tests {
         #[test]
         fn check_union_type_result() {
             let list_type = types::List::new(types::None::new(Position::fake()), Position::fake());
-            check_module(
-                &Module::empty().set_definitions(vec![
+            check_module(&Module::empty().set_definitions(vec![
                     FunctionDefinition::fake(
                         "x",
                         Lambda::new(
@@ -2811,8 +2796,7 @@ mod tests {
                         ),
                         false,
                     ),
-                ]),
-            )
+                ]))
             .unwrap();
         }
 

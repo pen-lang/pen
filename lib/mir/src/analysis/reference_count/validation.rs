@@ -414,8 +414,7 @@ mod tests {
 
     #[test]
     fn validate_let_recursive() {
-        validate(
-            &Module::empty().set_function_definitions(vec![
+        validate(&Module::empty().set_function_definitions(vec![
                 FunctionDefinition::new(
                     "f",
                     vec![Argument::new("x", Type::None)],
@@ -437,8 +436,7 @@ mod tests {
                     ),
                     Type::None,
                 ),
-            ]),
-        )
+            ]))
         .unwrap();
     }
 
