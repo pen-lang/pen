@@ -134,89 +134,113 @@ fn compile_initial_thunk_entry(
             let closure_pointer = compile_closure_pointer(definition.type_(), context.types())?;
             let entry_function_pointer =
                 closure::get_entry_function_pointer(closure_pointer.clone())?;
+            let synchronized =
+                reference_count::pointer::is_synchronized(&builder, &closure_pointer)?;
 
             builder.if_(
-                builder.compare_and_swap(
-                    entry_function_pointer.clone(),
-                    fmm::build::variable(
-                        &entry_function_name,
-                        type_::compile_entry_function(definition.type_(), context.types()),
-                    ),
-                    lock_entry_function.clone(),
-                    fmm::ir::AtomicOrdering::Acquire,
-                    fmm::ir::AtomicOrdering::Relaxed,
-                ),
+                synchronized.clone(),
                 |builder| -> Result<_, CompileError> {
-                    let closure = reference_count::clone(
-                        &builder,
-                        &closure_pointer,
-                        &definition.type_().clone().into(),
-                        context.types(),
+                    builder.if_(
+                        builder.compare_and_swap(
+                            entry_function_pointer.clone(),
+                            fmm::build::variable(
+                                &entry_function_name,
+                                type_::compile_entry_function(definition.type_(), context.types()),
+                            ),
+                            lock_entry_function.clone(),
+                            fmm::ir::AtomicOrdering::Acquire,
+                            fmm::ir::AtomicOrdering::Relaxed,
+                        ),
+                        |builder| -> Result<_, CompileError> {
+                            Ok(builder.branch(fmm::ir::VOID_VALUE.clone()))
+                        },
+                        |builder| {
+                            // TODO Use an entry function loaded by a CAS instruction above.
+                            Ok(builder.return_(builder.call(
+                                builder.atomic_load(
+                                    entry_function_pointer.clone(),
+                                    fmm::ir::AtomicOrdering::Relaxed,
+                                )?,
+                                compile_argument_variables(&arguments),
+                            )?))
+                        },
                     )?;
 
-                    let value = compile_body(context, &builder, definition, global, variables)?;
+                    Ok(builder.branch(fmm::ir::VOID_VALUE.clone()))
+                },
+                |builder| Ok(builder.branch(fmm::ir::VOID_VALUE.clone())),
+            )?;
 
-                    let environment_pointer =
-                        compile_environment_pointer(definition, context.types())?;
+            let closure = reference_count::clone(
+                &builder,
+                &closure_pointer,
+                &definition.type_().clone().into(),
+                context.types(),
+            )?;
 
-                    // TODO Remove these extra drops of free variables when we move them in function
-                    // bodies rather than cloning them.
-                    // See also https://github.com/pen-lang/pen/issues/295.
-                    for (index, free_variable) in definition.environment().iter().enumerate() {
-                        reference_count::drop(
-                            &builder,
-                            &builder.load(fmm::build::record_address(
-                                environment_pointer.clone(),
-                                index,
-                            )?)?,
-                            free_variable.type_(),
-                            context.types(),
-                        )?;
-                    }
+            let value = compile_body(context, &builder, definition, global, variables)?;
 
-                    builder.store(
-                        reference_count::clone(
-                            &builder,
-                            &value,
-                            definition.result_type(),
-                            context.types(),
-                        )?,
-                        compile_thunk_value_pointer(definition, context.types())?,
-                    );
+            let environment_pointer = compile_environment_pointer(definition, context.types())?;
 
-                    builder.store(
-                        closure::metadata::compile_normal_thunk(context, definition)?,
-                        closure::get_metadata_pointer(closure_pointer.clone())?,
-                    );
+            // TODO Remove these extra drops of free variables when we move them in function
+            // bodies rather than cloning them.
+            // See also https://github.com/pen-lang/pen/issues/295.
+            for (index, free_variable) in definition.environment().iter().enumerate() {
+                reference_count::drop(
+                    &builder,
+                    &builder.load(fmm::build::record_address(
+                        environment_pointer.clone(),
+                        index,
+                    )?)?,
+                    free_variable.type_(),
+                    context.types(),
+                )?;
+            }
 
+            builder.store(
+                reference_count::clone(
+                    &builder,
+                    &value,
+                    definition.result_type(),
+                    context.types(),
+                )?,
+                compile_thunk_value_pointer(definition, context.types())?,
+            );
+
+            builder.store(
+                closure::metadata::compile_normal_thunk(context, definition)?,
+                closure::get_metadata_pointer(closure_pointer.clone())?,
+            );
+
+            builder.if_(
+                synchronized.clone(),
+                |builder| -> Result<_, CompileError> {
                     builder.atomic_store(
                         normal_entry_function.clone(),
                         entry_function_pointer.clone(),
                         fmm::ir::AtomicOrdering::Release,
                     );
 
-                    reference_count::drop(
-                        &builder,
-                        &closure,
-                        &definition.type_().clone().into(),
-                        context.types(),
-                    )?;
-
-                    Ok(builder.return_(value))
+                    Ok(builder.branch(fmm::ir::VOID_VALUE.clone()))
                 },
                 |builder| {
-                    // TODO Use an entry function loaded by a CAS instruction above.
-                    Ok(builder.return_(builder.call(
-                        builder.atomic_load(
-                            entry_function_pointer.clone(),
-                            fmm::ir::AtomicOrdering::Relaxed,
-                        )?,
-                        compile_argument_variables(&arguments),
-                    )?))
+                    builder.store(
+                        normal_entry_function.clone(),
+                        entry_function_pointer.clone(),
+                    );
+
+                    Ok(builder.branch(fmm::ir::VOID_VALUE.clone()))
                 },
             )?;
 
-            Ok(builder.unreachable())
+            reference_count::drop(
+                &builder,
+                &closure,
+                &definition.type_().clone().into(),
+                context.types(),
+            )?;
+
+            Ok(builder.return_(value))
         },
         type_::compile(definition.result_type(), context.types()),
         fmm::types::CallingConvention::Source,
