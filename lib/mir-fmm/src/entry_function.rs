@@ -171,7 +171,7 @@ fn compile_initial_thunk_entry(
                 |builder| Ok(builder.branch(fmm::ir::VOID_VALUE.clone())),
             )?;
 
-            let closure = reference_count::clone(
+            let closure_pointer = reference_count::clone(
                 &builder,
                 &closure_pointer,
                 &definition.type_().clone().into(),
@@ -235,7 +235,7 @@ fn compile_initial_thunk_entry(
 
             reference_count::drop(
                 &builder,
-                &closure,
+                &closure_pointer,
                 &definition.type_().clone().into(),
                 context.types(),
             )?;
