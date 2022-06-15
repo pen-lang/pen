@@ -213,7 +213,7 @@ fn compile_initial_thunk_entry(
             );
 
             builder.if_(
-                synchronized.clone(),
+                synchronized,
                 |builder| -> Result<_, CompileError> {
                     builder.atomic_store(
                         normal_entry_function.clone(),
