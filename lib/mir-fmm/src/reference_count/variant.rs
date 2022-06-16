@@ -1,6 +1,7 @@
 use super::{super::error::CompileError, expression, pointer};
 use crate::{context::Context, type_, variant};
 
+const FUNCTION_PREFIX: &str = "mir:variant:";
 const ARGUMENT_NAME: &str = "_payload";
 
 pub fn compile_clone_function(
@@ -8,7 +9,7 @@ pub fn compile_clone_function(
     type_: &mir::types::Type,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     context.module_builder().define_function(
-        format!("variant_clone_{}", type_::compile_id(type_)),
+        compile_function_name(type_, "clone"),
         vec![fmm::ir::Argument::new(
             ARGUMENT_NAME,
             type_::compile_variant_payload(),
@@ -41,7 +42,7 @@ pub fn compile_drop_function(
     type_: &mir::types::Type,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     context.module_builder().define_function(
-        format!("variant_drop_{}", type_::compile_id(type_)),
+        compile_function_name(type_, "drop"),
         vec![fmm::ir::Argument::new(
             ARGUMENT_NAME,
             type_::compile_variant_payload(),
@@ -80,7 +81,7 @@ pub fn compile_synchronize_function(
     type_: &mir::types::Type,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     context.module_builder().define_function(
-        format!("variant_synchronize_{}", type_::compile_id(type_)),
+        compile_function_name(type_, "synchronize"),
         vec![fmm::ir::Argument::new(
             ARGUMENT_NAME,
             type_::compile_variant_payload(),
@@ -111,5 +112,14 @@ pub fn compile_synchronize_function(
         fmm::types::VOID_TYPE.clone(),
         fmm::types::CallingConvention::Target,
         fmm::ir::Linkage::Weak,
+    )
+}
+
+fn compile_function_name(type_: &mir::types::Type, operation: &str) -> String {
+    format!(
+        "{}:{}:{}",
+        FUNCTION_PREFIX,
+        operation,
+        type_::compile_id(type_)
     )
 }

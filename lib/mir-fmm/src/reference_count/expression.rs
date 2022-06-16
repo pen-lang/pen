@@ -1,4 +1,4 @@
-use super::{super::error::CompileError, function, pointer, record_utilities};
+use super::{super::error::CompileError, function, pointer, record};
 use crate::{
     type_information::{
         TYPE_INFORMATION_CLONE_FUNCTION_FIELD_INDEX, TYPE_INFORMATION_DROP_FUNCTION_FIELD_INDEX,
@@ -19,8 +19,8 @@ pub fn clone(
         mir::types::Type::Function(_) => function::clone(builder, expression)?,
         mir::types::Type::Record(record) => builder.call(
             fmm::build::variable(
-                record_utilities::get_record_clone_function_name(record.name()),
-                record_utilities::compile_record_clone_function_type(record, types),
+                record::utilities::get_clone_function_name(record.name()),
+                record::utilities::compile_clone_function_type(record, types),
             ),
             vec![expression.clone()],
         )?,
@@ -57,8 +57,8 @@ pub fn drop(
         mir::types::Type::Record(record) => {
             builder.call(
                 fmm::build::variable(
-                    record_utilities::get_record_drop_function_name(record.name()),
-                    record_utilities::compile_record_drop_function_type(record, types),
+                    record::utilities::get_drop_function_name(record.name()),
+                    record::utilities::compile_drop_function_type(record, types),
                 ),
                 vec![expression.clone()],
             )?;
@@ -94,8 +94,8 @@ pub fn synchronize(
         mir::types::Type::Record(record) => {
             builder.call(
                 fmm::build::variable(
-                    record_utilities::get_record_synchronize_function_name(record.name()),
-                    record_utilities::compile_record_synchronize_function_type(record, types),
+                    record::utilities::get_synchronize_function_name(record.name()),
+                    record::utilities::compile_synchronize_function_type(record, types),
                 ),
                 vec![expression.clone()],
             )?;
