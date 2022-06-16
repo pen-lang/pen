@@ -36,8 +36,9 @@ fn transform_map(
             position.clone(),
         )
         .into(),
-        // TODO Optimize cases where only a single element of MapElement::Map
-        // exists when we pass context functions dynamically.
+        // Optimize cases where only a single element of a spread map exists.
+        // This is safe because we pass in context functions dynamically in every map operation.
+        [MapElement::Map(expression)] => expression.clone(),
         [.., element] => {
             let rest_expression = transform_map(
                 context,
@@ -182,14 +183,17 @@ mod tests {
 
     #[test]
     fn transform_map_with_spread_map() {
-        insta::assert_debug_snapshot!(transform(
-            &CompileContext::dummy(Default::default(), Default::default()),
-            &Map::new(
-                types::None::new(Position::fake()),
-                types::None::new(Position::fake()),
-                vec![MapElement::Map(None::new(Position::fake()).into())],
-                Position::fake()
+        assert_eq!(
+            transform(
+                &CompileContext::dummy(Default::default(), Default::default()),
+                &Map::new(
+                    types::None::new(Position::fake()),
+                    types::None::new(Position::fake()),
+                    vec![MapElement::Map(None::new(Position::fake()).into())],
+                    Position::fake()
+                ),
             ),
-        ));
+            Ok(None::new(Position::fake()).into())
+        );
     }
 }
