@@ -1,19 +1,19 @@
-use super::super::type_;
+use crate::type_;
 use fnv::FnvHashMap;
 
-pub fn get_record_clone_function_name(name: &str) -> String {
+pub fn get_clone_function_name(name: &str) -> String {
     format!("mir:clone:{}", name)
 }
 
-pub fn get_record_drop_function_name(name: &str) -> String {
+pub fn get_drop_function_name(name: &str) -> String {
     format!("mir:drop:{}", name)
 }
 
-pub fn get_record_synchronize_function_name(name: &str) -> String {
+pub fn get_synchronize_function_name(name: &str) -> String {
     format!("mir:synchronize:{}", name)
 }
 
-pub fn compile_record_clone_function_type(
+pub fn compile_clone_function_type(
     record: &mir::types::Record,
     types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> fmm::types::Function {
@@ -26,7 +26,7 @@ pub fn compile_record_clone_function_type(
     )
 }
 
-pub fn compile_record_drop_function_type(
+pub fn compile_drop_function_type(
     record: &mir::types::Record,
     types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> fmm::types::Function {
@@ -37,7 +37,7 @@ pub fn compile_record_drop_function_type(
     )
 }
 
-pub fn compile_record_synchronize_function_type(
+pub fn compile_synchronize_function_type(
     record: &mir::types::Record,
     types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> fmm::types::Function {
