@@ -179,4 +179,17 @@ mod tests {
             ),
         ));
     }
+
+    #[test]
+    fn transform_map_with_spread_map() {
+        insta::assert_debug_snapshot!(transform(
+            &CompileContext::dummy(Default::default(), Default::default()),
+            &Map::new(
+                types::None::new(Position::fake()),
+                types::None::new(Position::fake()),
+                vec![MapElement::Map(None::new(Position::fake()).into())],
+                Position::fake()
+            ),
+        ));
+    }
 }
