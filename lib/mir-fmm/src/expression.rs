@@ -115,7 +115,6 @@ pub fn compile(
         }
         mir::ir::Expression::RecordUpdate(update) => {
             let record = compile(update.record(), variables)?;
-            let record_body_type = &context.types()[update.type_().name()];
             let fields = update
                 .fields()
                 .iter()
@@ -124,7 +123,7 @@ pub fn compile(
 
             let compile_unboxed = |builder: &_, clone: bool| -> Result<_, CompileError> {
                 Ok(fmm::build::record(
-                    record_body_type
+                    context.types()[update.type_().name()]
                         .fields()
                         .iter()
                         .enumerate()
