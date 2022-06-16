@@ -10,7 +10,6 @@ type Bag {
   Capacity number
 }
 
-# TODO Test this.
 Pack = \(b Bag, is [Item]) [Item] {
   packItems(
     {number: [Item] 0: [Item]},
