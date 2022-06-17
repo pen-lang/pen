@@ -183,12 +183,16 @@ _setKeyValue = \(
 ) _hamtUpdate {
   _pen_string("_setKeyValue")
   i = _hamtIndex(ctx, key, layer, level)
+
+  e = _getEntry(hamt, i)
+  hamt = _setEntry(hamt, i, none)
+
   update = \(e _entry, size boolean) _hamtUpdate {
     _pen_string("_setKeyValue:update")
     _hamtUpdate{hamt: _setEntry(hamt, i, e), size: size}
   }
 
-  if e = _getEntry(hamt, i) as _keyValue {
+  if e = e as _keyValue {
     if ctx.equalKeys(e.key, key) {
       update(_keyValue{key: key, value: value}, false)
     } else {
