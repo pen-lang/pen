@@ -160,6 +160,7 @@ _setMap = \(
   key any,
   value any,
 ) _map {
+  # Deconstruct a size for optimization.
   s = map.size
   u = _setKeyValue(ctx, map.hamt, key, value, 1, 1)
 
@@ -179,6 +180,7 @@ _setKeyValue = \(
 ) _hamtUpdate {
   i = _hamtIndex(ctx, key, layer, level)
 
+  # Deconstruct an entry and the rest for optimization.
   e = _getEntry(hamt, i)
   hamt = _setEntry(hamt, i, none)
 
