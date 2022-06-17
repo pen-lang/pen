@@ -1,3 +1,5 @@
+#![no_std]
+
 extern crate alloc;
 
 use core::hash::{Hash, Hasher};
@@ -8,35 +10,6 @@ const HASH_MULTIPLIER: u64 = 31;
 #[ffi::bindgen]
 fn _pen_equal_strings(one: ffi::ByteString, other: ffi::ByteString) -> ffi::Boolean {
     (one.as_slice() == other.as_slice()).into()
-}
-
-#[ffi::bindgen]
-fn _pen_count(one: ffi::ByteString) -> ffi::None {
-    unsafe {
-        let p = *std::mem::transmute::<_, *const *const isize>(&one);
-
-        if (std::mem::transmute::<_, usize>(p) & 1) != 0 {
-            dbg!("static");
-        } else {
-            dbg!(*p.offset(-1));
-        }
-    }
-
-    ffi::None::new()
-}
-
-#[ffi::bindgen]
-fn _pen_number(one: ffi::Number) -> ffi::None {
-    dbg!(f64::from(one));
-
-    ffi::None::new()
-}
-
-#[ffi::bindgen]
-fn _pen_string(one: ffi::ByteString) -> ffi::None {
-    dbg!(std::str::from_utf8(one.as_slice()).unwrap());
-
-    ffi::None::new()
 }
 
 #[ffi::bindgen]

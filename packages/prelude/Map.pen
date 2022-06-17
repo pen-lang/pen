@@ -1,9 +1,6 @@
 import foreign "c" _pen_prelude_combine_hashes \(number, number) number
 import foreign "c" _pen_prelude_hash_number \(number) number
 import foreign "c" _pen_prelude_hash_to_index \(number, number, number) number
-import foreign "c" _pen_count \(_hamt) none
-import foreign "c" _pen_number \(number) none
-import foreign "c" _pen_string \(string) none
 
 type _map {
   hamt _hamt
@@ -163,7 +160,6 @@ _setMap = \(
   key any,
   value any,
 ) _map {
-  _pen_string("_setMap")
   s = map.size
   u = _setKeyValue(ctx, map.hamt, key, value, 1, 1)
 
@@ -181,14 +177,12 @@ _setKeyValue = \(
   layer number,
   level number,
 ) _hamtUpdate {
-  _pen_string("_setKeyValue")
   i = _hamtIndex(ctx, key, layer, level)
 
   e = _getEntry(hamt, i)
   hamt = _setEntry(hamt, i, none)
 
   update = \(e _entry, size boolean) _hamtUpdate {
-    _pen_string("_setKeyValue:update")
     _hamtUpdate{hamt: _setEntry(hamt, i, e), size: size}
   }
 
@@ -465,9 +459,7 @@ _getEntry = \(hamt _hamt, index number) _entry {
 }
 
 _setEntry = \(hamt _hamt, index number, entry _entry) _hamt {
-  _pen_string("_setEntry:start")
-  _pen_count(hamt)
-  x = if index == 1 {
+  if index == 1 {
     _hamt{...hamt, entry1: entry}
   } else if index == 2 {
     _hamt{...hamt, entry2: entry}
@@ -534,6 +526,4 @@ _setEntry = \(hamt _hamt, index number, entry _entry) _hamt {
   } else {
     hamt
   }
-  _pen_string("_setEntry:end")
-  x
 }
