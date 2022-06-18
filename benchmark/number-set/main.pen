@@ -1,0 +1,19 @@
+import Core'Number
+import Core'String
+import Os'Context { Context }
+import Os'File
+
+main = \(ctx context) none {
+  n = 100000
+  s = numberSet({number: none}, n)
+
+  none
+}
+
+numberSet = \(s {number: none}, n number) {number: none} {
+  if n == 0 {
+    s
+  } else {
+    numberSet({number: none ...s, n: none}, n - 1)
+  }
+}
