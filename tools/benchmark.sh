@@ -17,22 +17,21 @@ run_packages() {
   done
 }
 
-build() {
-  run_packages pen build
-
+run_rust() {
   (
     cd rust
-    cargo bench --no-run
+    "$@"
   )
+}
+
+build() {
+  run_packages pen build
+  run_rust cargo bench --no-run
 }
 
 run() {
   run_packages hyperfine -w 3 ./app
-
-  (
-    cd rust
-    cargo bench -q
-  )
+  run_rust cargo bench -q
 }
 
 prepare_integration_test $(dirname $PWD/$0)/..
