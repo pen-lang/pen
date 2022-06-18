@@ -9,11 +9,6 @@ pub fn compile(
 
     Ok(instruction_builder.call(
         if arguments.is_empty() {
-            // Entry functions of thunks need to be loaded atomically
-            // to make thunk update thread-safe.
-            //
-            // Relaxed ordering should be fine here since entry functions themselves should
-            // guarantee memory operation ordering.
             instruction_builder
                 .atomic_load(entry_function_pointer, fmm::ir::AtomicOrdering::Relaxed)?
         } else {

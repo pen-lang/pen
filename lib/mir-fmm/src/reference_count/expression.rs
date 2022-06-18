@@ -1,11 +1,5 @@
-use super::{super::error::CompileError, function, pointer, record_utilities};
-use crate::{
-    type_information::{
-        TYPE_INFORMATION_CLONE_FUNCTION_FIELD_INDEX, TYPE_INFORMATION_DROP_FUNCTION_FIELD_INDEX,
-        TYPE_INFORMATION_SYNCHRONIZE_FUNCTION_FIELD_INDEX,
-    },
-    variant,
-};
+use super::{super::error::CompileError, function, pointer, record};
+use crate::{type_information, variant};
 use fnv::FnvHashMap;
 
 pub fn clone(
@@ -19,8 +13,8 @@ pub fn clone(
         mir::types::Type::Function(_) => function::clone(builder, expression)?,
         mir::types::Type::Record(record) => builder.call(
             fmm::build::variable(
-                record_utilities::get_record_clone_function_name(record.name()),
-                record_utilities::compile_record_clone_function_type(record, types),
+                record::utilities::get_clone_function_name(record.name()),
+                record::utilities::compile_clone_function_type(record, types),
             ),
             vec![expression.clone()],
         )?,
@@ -30,10 +24,7 @@ pub fn clone(
             fmm::build::record(vec![
                 tag.clone(),
                 builder.call(
-                    builder.deconstruct_record(
-                        builder.load(tag)?,
-                        TYPE_INFORMATION_CLONE_FUNCTION_FIELD_INDEX,
-                    )?,
+                    type_information::get_clone_function(builder, tag)?,
                     vec![variant::get_payload(builder, expression)?],
                 )?,
             ])
@@ -57,17 +48,17 @@ pub fn drop(
         mir::types::Type::Record(record) => {
             builder.call(
                 fmm::build::variable(
-                    record_utilities::get_record_drop_function_name(record.name()),
-                    record_utilities::compile_record_drop_function_type(record, types),
+                    record::utilities::get_drop_function_name(record.name()),
+                    record::utilities::compile_drop_function_type(record, types),
                 ),
                 vec![expression.clone()],
             )?;
         }
         mir::types::Type::Variant => {
             builder.call(
-                builder.deconstruct_record(
-                    builder.load(variant::get_tag(builder, expression)?)?,
-                    TYPE_INFORMATION_DROP_FUNCTION_FIELD_INDEX,
+                type_information::get_drop_function(
+                    builder,
+                    variant::get_tag(builder, expression)?,
                 )?,
                 vec![variant::get_payload(builder, expression)?],
             )?;
@@ -94,17 +85,17 @@ pub fn synchronize(
         mir::types::Type::Record(record) => {
             builder.call(
                 fmm::build::variable(
-                    record_utilities::get_record_synchronize_function_name(record.name()),
-                    record_utilities::compile_record_synchronize_function_type(record, types),
+                    record::utilities::get_synchronize_function_name(record.name()),
+                    record::utilities::compile_synchronize_function_type(record, types),
                 ),
                 vec![expression.clone()],
             )?;
         }
         mir::types::Type::Variant => {
             builder.call(
-                builder.deconstruct_record(
-                    builder.load(variant::get_tag(builder, expression)?)?,
-                    TYPE_INFORMATION_SYNCHRONIZE_FUNCTION_FIELD_INDEX,
+                type_information::get_synchronize_function(
+                    builder,
+                    variant::get_tag(builder, expression)?,
                 )?,
                 vec![variant::get_payload(builder, expression)?],
             )?;

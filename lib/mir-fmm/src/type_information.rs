@@ -1,10 +1,5 @@
 use crate::{context::Context, error::CompileError, reference_count, type_};
 
-// TODO Replace those with load functions.
-pub const TYPE_INFORMATION_CLONE_FUNCTION_FIELD_INDEX: usize = 0;
-pub const TYPE_INFORMATION_DROP_FUNCTION_FIELD_INDEX: usize = 1;
-pub const TYPE_INFORMATION_SYNCHRONIZE_FUNCTION_FIELD_INDEX: usize = 2;
-
 pub fn compile_type_information_global_variable(
     context: &Context,
     type_: &mir::types::Type,
@@ -22,4 +17,33 @@ pub fn compile_type_information_global_variable(
     );
 
     Ok(())
+}
+
+pub fn get_clone_function(
+    builder: &fmm::build::InstructionBuilder,
+    tag: impl Into<fmm::build::TypedExpression>,
+) -> Result<fmm::build::TypedExpression, CompileError> {
+    get_function(builder, tag, 0)
+}
+
+pub fn get_drop_function(
+    builder: &fmm::build::InstructionBuilder,
+    tag: impl Into<fmm::build::TypedExpression>,
+) -> Result<fmm::build::TypedExpression, CompileError> {
+    get_function(builder, tag, 1)
+}
+
+pub fn get_synchronize_function(
+    builder: &fmm::build::InstructionBuilder,
+    tag: impl Into<fmm::build::TypedExpression>,
+) -> Result<fmm::build::TypedExpression, CompileError> {
+    get_function(builder, tag, 2)
+}
+
+fn get_function(
+    builder: &fmm::build::InstructionBuilder,
+    tag: impl Into<fmm::build::TypedExpression>,
+    index: usize,
+) -> Result<fmm::build::TypedExpression, CompileError> {
+    Ok(builder.deconstruct_record(builder.load(tag)?, index)?)
 }

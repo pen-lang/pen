@@ -24,7 +24,7 @@ pub fn clone(
                         fmm::ir::AtomicOrdering::Relaxed,
                     )?;
 
-                    Ok(builder.branch(fmm::ir::VOID_VALUE.clone()))
+                    Ok(builder.branch(fmm::ir::void_value()))
                 },
                 |builder| {
                     builder.store(
@@ -36,7 +36,7 @@ pub fn clone(
                         count_pointer.clone(),
                     );
 
-                    Ok(builder.branch(fmm::ir::VOID_VALUE.clone()))
+                    Ok(builder.branch(fmm::ir::void_value()))
                 },
             )?;
 
@@ -77,9 +77,9 @@ pub fn drop(
                             builder.fence(fmm::ir::AtomicOrdering::Acquire);
                             drop_inner(&builder)?;
 
-                            Ok(builder.branch(fmm::ir::VOID_VALUE.clone()))
+                            Ok(builder.branch(fmm::ir::void_value()))
                         },
-                        |builder| Ok(builder.branch(fmm::ir::VOID_VALUE.clone())),
+                        |builder| Ok(builder.branch(fmm::ir::void_value())),
                     )?))
                 },
                 |builder| {
@@ -88,7 +88,7 @@ pub fn drop(
                         |builder| -> Result<_, CompileError> {
                             drop_inner(&builder)?;
 
-                            Ok(builder.branch(fmm::ir::VOID_VALUE.clone()))
+                            Ok(builder.branch(fmm::ir::void_value()))
                         },
                         |builder| {
                             builder.store(
@@ -100,13 +100,13 @@ pub fn drop(
                                 count_pointer.clone(),
                             );
 
-                            Ok(builder.branch(fmm::ir::VOID_VALUE.clone()))
+                            Ok(builder.branch(fmm::ir::void_value()))
                         },
                     )?))
                 },
             )?))
         },
-        |builder| Ok(builder.branch(fmm::ir::VOID_VALUE.clone())),
+        |builder| Ok(builder.branch(fmm::ir::void_value())),
     )?;
 
     Ok(())
@@ -119,7 +119,7 @@ pub fn synchronize(
 ) -> Result<(), CompileError> {
     builder.if_(
         is_synchronized(builder, pointer)?,
-        |builder| Ok(builder.branch(fmm::ir::VOID_VALUE.clone())),
+        |builder| Ok(builder.branch(fmm::ir::void_value())),
         |builder| -> Result<_, CompileError> {
             let pointer = heap::get_count_pointer(pointer)?;
 
@@ -130,7 +130,7 @@ pub fn synchronize(
 
             synchronize_content(&builder)?;
 
-            Ok(builder.branch(fmm::ir::VOID_VALUE.clone()))
+            Ok(builder.branch(fmm::ir::void_value()))
         },
     )?;
 
@@ -197,7 +197,7 @@ pub fn is_unique(
 // Heap blocks are synchronized always by their owners before references are
 // shared with other threads. So an ordering to load counts can always be
 // relaxed.
-fn is_synchronized(
+pub fn is_synchronized(
     builder: &fmm::build::InstructionBuilder,
     pointer: &fmm::build::TypedExpression,
 ) -> Result<fmm::build::TypedExpression, CompileError> {

@@ -618,23 +618,25 @@ fn compile_map_iteration_function_definition(
                                                 .into(),
                                             ),
                                             Variable::new(CLOSURE_NAME, position.clone()),
-                                            vec![Call::new(
-                                                Some(
-                                                    types::Function::new(
-                                                        vec![iterator_type.clone()],
-                                                        iterator_or_none_type,
+                                            vec![
+                                                Call::new(
+                                                    Some(
+                                                        types::Function::new(
+                                                            vec![iterator_type.clone()],
+                                                            iterator_or_none_type,
+                                                            position.clone(),
+                                                        )
+                                                        .into(),
+                                                    ),
+                                                    Variable::new(
+                                                        &iteration_configuration.rest_function_name,
                                                         position.clone(),
-                                                    )
-                                                    .into(),
-                                                ),
-                                                Variable::new(
-                                                    &iteration_configuration.rest_function_name,
+                                                    ),
+                                                    vec![iterator_variable.into()],
                                                     position.clone(),
-                                                ),
-                                                vec![iterator_variable.into()],
-                                                position.clone(),
-                                            )
-                                            .into()],
+                                                )
+                                                .into(),
+                                            ],
                                             position.clone(),
                                         )
                                         .into(),

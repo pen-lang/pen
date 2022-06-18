@@ -1,6 +1,8 @@
+pub(super) mod utilities;
+
 use super::{
     super::{error::CompileError, type_},
-    expression, pointer, record_utilities,
+    expression, pointer,
 };
 use crate::{context::Context, record};
 
@@ -14,7 +16,7 @@ pub fn compile_clone_function(
     let fmm_record_type = type_::compile_record(&record_type, context.types());
 
     context.module_builder().define_function(
-        record_utilities::get_record_clone_function_name(definition.name()),
+        utilities::get_clone_function_name(definition.name()),
         vec![fmm::ir::Argument::new(
             ARGUMENT_NAME,
             fmm_record_type.clone(),
@@ -77,7 +79,7 @@ pub fn compile_drop_function(
     let fmm_record_type = type_::compile_record(&record_type, context.types());
 
     context.module_builder().define_function(
-        record_utilities::get_record_drop_function_name(definition.name()),
+        utilities::get_drop_function_name(definition.name()),
         vec![fmm::ir::Argument::new(
             ARGUMENT_NAME,
             fmm_record_type.clone(),
@@ -91,9 +93,9 @@ pub fn compile_drop_function(
                 drop_unboxed(context, &builder, &record, &record_type)?;
             }
 
-            Ok(builder.return_(fmm::ir::VOID_VALUE.clone()))
+            Ok(builder.return_(fmm::ir::void_value()))
         },
-        fmm::types::VOID_TYPE.clone(),
+        fmm::types::void_type(),
         fmm::types::CallingConvention::Target,
         fmm::ir::Linkage::Weak,
     )?;
@@ -147,7 +149,7 @@ pub fn compile_synchronize_function(
     let fmm_record_type = type_::compile_record(&record_type, context.types());
 
     context.module_builder().define_function(
-        record_utilities::get_record_synchronize_function_name(definition.name()),
+        utilities::get_synchronize_function_name(definition.name()),
         vec![fmm::ir::Argument::new(
             ARGUMENT_NAME,
             fmm_record_type.clone(),
@@ -161,9 +163,9 @@ pub fn compile_synchronize_function(
                 synchronize_unboxed(context, &builder, &record, &record_type)?;
             }
 
-            Ok(builder.return_(fmm::ir::VOID_VALUE.clone()))
+            Ok(builder.return_(fmm::ir::void_value()))
         },
-        fmm::types::VOID_TYPE.clone(),
+        fmm::types::void_type(),
         fmm::types::CallingConvention::Target,
         fmm::ir::Linkage::Weak,
     )?;
