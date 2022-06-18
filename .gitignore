@@ -2,7 +2,6 @@
 *.new
 *.tar.*
 .pen
-app
 dhat-*
 target
 tmp

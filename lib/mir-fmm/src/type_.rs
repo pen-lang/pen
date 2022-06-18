@@ -23,7 +23,7 @@ pub fn compile(
 }
 
 pub fn compile_none() -> fmm::types::Type {
-    fmm::types::VOID_TYPE.clone().into()
+    fmm::types::void_type().into()
 }
 
 pub fn compile_string() -> fmm::types::Pointer {
@@ -55,14 +55,14 @@ pub fn compile_variant_tag() -> fmm::types::Pointer {
         // drop function
         fmm::types::Function::new(
             vec![payload.clone()],
-            fmm::types::VOID_TYPE.clone(),
+            fmm::types::void_type(),
             fmm::types::CallingConvention::Target,
         )
         .into(),
         // synchronize function
         fmm::types::Function::new(
             vec![payload],
-            fmm::types::VOID_TYPE.clone(),
+            fmm::types::void_type(),
             fmm::types::CallingConvention::Target,
         )
         .into(),
@@ -223,7 +223,7 @@ fn compile_closure_drop_function() -> fmm::types::Function {
     // The argument is a closure pointer.
     fmm::types::Function::new(
         vec![fmm::types::Primitive::PointerInteger.into()],
-        fmm::types::VOID_TYPE.clone(),
+        fmm::types::void_type(),
         fmm::types::CallingConvention::Target,
     )
 }
@@ -232,7 +232,7 @@ fn compile_closure_sync_function() -> fmm::types::Function {
     // The argument is a closure pointer.
     fmm::types::Function::new(
         vec![fmm::types::Primitive::PointerInteger.into()],
-        fmm::types::VOID_TYPE.clone(),
+        fmm::types::void_type(),
         fmm::types::CallingConvention::Target,
     )
 }
