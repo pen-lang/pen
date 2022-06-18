@@ -1,11 +1,5 @@
-import Core'Number
-import Core'String
-import Os'Context { Context }
-import Os'File
-
 main = \(ctx context) none {
-  n = 100000
-  s = numberSet({number: none}, n)
+  numberSet({number: none}, 100000)
 
   none
 }
