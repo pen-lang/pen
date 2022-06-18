@@ -1,4 +1,4 @@
-use criterion::{criterion_group, criterion_main, Bencher, Criterion};
+use criterion::{black_box, criterion_group, criterion_main, Bencher, Criterion};
 
 const ITERATION_COUNT: usize = 100_000_000;
 
@@ -13,7 +13,7 @@ fn sum(bencher: &mut Bencher) {
         let mut sum = 0.0;
 
         for number in numbers.clone() {
-            sum += number;
+            sum = black_box(sum + number);
         }
 
         let _ = sum;
