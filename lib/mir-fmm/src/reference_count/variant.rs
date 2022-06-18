@@ -68,9 +68,9 @@ pub fn compile_drop_function(
                 expression::drop(&builder, &payload, type_, context.types())?;
             }
 
-            Ok(builder.return_(fmm::ir::VOID_VALUE.clone()))
+            Ok(builder.return_(fmm::ir::void_value()))
         },
-        fmm::types::VOID_TYPE.clone(),
+        fmm::types::void_type(),
         fmm::types::CallingConvention::Target,
         fmm::ir::Linkage::Weak,
     )
@@ -107,9 +107,9 @@ pub fn compile_synchronize_function(
                 expression::synchronize(&builder, &payload, type_, context.types())?;
             }
 
-            Ok(builder.return_(fmm::ir::VOID_VALUE.clone()))
+            Ok(builder.return_(fmm::ir::void_value()))
         },
-        fmm::types::VOID_TYPE.clone(),
+        fmm::types::void_type(),
         fmm::types::CallingConvention::Target,
         fmm::ir::Linkage::Weak,
     )

@@ -29,7 +29,7 @@ pub fn free(
     pointer: impl Into<fmm::build::TypedExpression>,
 ) -> Result<(), CompileError> {
     builder.free_heap(fmm::build::bit_cast(
-        fmm::types::GENERIC_POINTER_TYPE.clone(),
+        fmm::types::generic_pointer_type(),
         get_count_pointer(&pointer.into())?,
     ));
 

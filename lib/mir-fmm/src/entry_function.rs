@@ -1,6 +1,6 @@
 use super::error::CompileError;
 use crate::{
-    closure, context::Context, expression, reference_count, type_, yield_::YIELD_FUNCTION_TYPE,
+    closure, context::Context, expression, reference_count, type_, yield_::yield_function_type,
 };
 use fnv::FnvHashMap;
 
@@ -152,7 +152,7 @@ fn compile_initial_thunk_entry(
                             fmm::ir::AtomicOrdering::Relaxed,
                         ),
                         |builder| -> Result<_, CompileError> {
-                            Ok(builder.branch(fmm::ir::VOID_VALUE.clone()))
+                            Ok(builder.branch(fmm::ir::void_value()))
                         },
                         |builder| {
                             // TODO Use an entry function loaded by a CAS instruction above.
@@ -166,9 +166,9 @@ fn compile_initial_thunk_entry(
                         },
                     )?;
 
-                    Ok(builder.branch(fmm::ir::VOID_VALUE.clone()))
+                    Ok(builder.branch(fmm::ir::void_value()))
                 },
-                |builder| Ok(builder.branch(fmm::ir::VOID_VALUE.clone())),
+                |builder| Ok(builder.branch(fmm::ir::void_value())),
             )?;
 
             let closure_pointer = reference_count::clone(
@@ -221,7 +221,7 @@ fn compile_initial_thunk_entry(
                         fmm::ir::AtomicOrdering::Release,
                     );
 
-                    Ok(builder.branch(fmm::ir::VOID_VALUE.clone()))
+                    Ok(builder.branch(fmm::ir::void_value()))
                 },
                 |builder| {
                     builder.store(
@@ -229,7 +229,7 @@ fn compile_initial_thunk_entry(
                         entry_function_pointer.clone(),
                     );
 
-                    Ok(builder.branch(fmm::ir::VOID_VALUE.clone()))
+                    Ok(builder.branch(fmm::ir::void_value()))
                 },
             )?;
 
@@ -265,9 +265,9 @@ fn compile_normal_thunk_entry(
                         fmm::ir::AtomicOrdering::Acquire,
                     )?;
 
-                    Ok(builder.branch(fmm::ir::VOID_VALUE.clone()))
+                    Ok(builder.branch(fmm::ir::void_value()))
                 },
-                |builder| Ok(builder.branch(fmm::ir::VOID_VALUE.clone())),
+                |builder| Ok(builder.branch(fmm::ir::void_value())),
             )?;
 
             let value = reference_count::clone(
@@ -304,7 +304,7 @@ fn compile_locked_thunk_entry(
             builder.call(
                 fmm::build::variable(
                     &context.configuration().yield_function_name,
-                    YIELD_FUNCTION_TYPE.clone(),
+                    yield_function_type(),
                 ),
                 vec![],
             )?;
