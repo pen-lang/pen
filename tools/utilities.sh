@@ -22,4 +22,6 @@ prepare_integration_test() {
   export PATH=$directory/target/release:$PATH
   export RUSTC_WRAPPER=sccache
   export PEN_ROOT=$directory
+
+  cargo install turtle-build
 }

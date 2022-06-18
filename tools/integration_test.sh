@@ -15,7 +15,6 @@ for target in \
 done
 
 bundler install
-cargo install turtle-build
 
 cd $(dirname $0)/..
 
