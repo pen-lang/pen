@@ -160,11 +160,13 @@ _setMap = \(
   key any,
   value any,
 ) _map {
+  # Deconstruct a size for optimization.
+  s = map.size
   u = _setKeyValue(ctx, map.hamt, key, value, 1, 1)
 
   _map{
     hamt: u.hamt,
-    size: map.size + if u.size { 1 } else { 0 },
+    size: s + if u.size { 1 } else { 0 },
   }
 }
 
@@ -177,11 +179,16 @@ _setKeyValue = \(
   level number,
 ) _hamtUpdate {
   i = _hamtIndex(ctx, key, layer, level)
+
+  # Deconstruct an entry and the rest for optimization.
+  e = _getEntry(hamt, i)
+  hamt = _setEntry(hamt, i, none)
+
   update = \(e _entry, size boolean) _hamtUpdate {
     _hamtUpdate{hamt: _setEntry(hamt, i, e), size: size}
   }
 
-  if e = _getEntry(hamt, i) as _keyValue {
+  if e = e as _keyValue {
     if ctx.equalKeys(e.key, key) {
       update(_keyValue{key: key, value: value}, false)
     } else {
