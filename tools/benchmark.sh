@@ -2,9 +2,11 @@
 
 set -e
 
-export PATH=$PWD/target/release:$PWD/tools:$PATH
-export RUSTC_WRAPPER=sccache
-export PEN_ROOT=$PWD
+. $(dirname $0)/utilities.sh
+
+prepare_language_environment $(dirname $PWD/$0)/..
+
+echo $PEN_ROOT
 
 cd $(dirname $0)/../benchmark
 

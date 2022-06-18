@@ -2,6 +2,10 @@
 
 set -e
 
+. $(dirname $0)/utilities.sh
+
+prepare_language_environment $(dirname $PWD/$0)/..
+
 for target in \
   i686-unknown-linux-musl \
   x86_64-unknown-linux-musl \
@@ -11,13 +15,8 @@ for target in \
 done
 
 bundler install
-
 cargo install turtle-build
 
 cd $(dirname $0)/..
-
-export PATH=$PWD/target/release:$PWD/tools:$PATH
-export RUSTC_WRAPPER=sccache
-export PEN_ROOT=$PWD
 
 cucumber --publish-quiet --strict-undefined "$@"
