@@ -40,7 +40,7 @@ dependencies = [
  "bincode",
  "doc",
  "fmm 0.1.0 (git+https://github.com/raviqqe/fmm?branch=main)",
- "fmm-llvm",
+ "fmm-llvm 0.1.0 (git+https://github.com/raviqqe/fmm?branch=main)",
  "fnv",
  "format",
  "hir",
@@ -296,6 +296,18 @@ dependencies = [
  "fmm 0.1.0 (git+https://github.com/raviqqe/fmm?branch=chore/rc)",
  "fnv",
  "tempfile",
+]
+
+[[package]]
+name = "fmm-llvm"
+version = "0.1.0"
+source = "git+https://github.com/raviqqe/fmm?branch=chore/rc#7b7d27e7a8547b36504c30f95a093d99d7ac8b06"
+dependencies = [
+ "fmm 0.1.0 (git+https://github.com/raviqqe/fmm?branch=chore/rc)",
+ "hamt",
+ "inkwell",
+ "llvm-sys",
+ "once_cell",
 ]
 
 [[package]]
@@ -699,7 +711,7 @@ version = "0.1.0"
 dependencies = [
  "fmm 0.1.0 (git+https://github.com/raviqqe/fmm?branch=chore/rc)",
  "fmm-c",
- "fmm-llvm",
+ "fmm-llvm 0.1.0 (git+https://github.com/raviqqe/fmm?branch=chore/rc)",
  "fnv",
  "insta",
  "mir",

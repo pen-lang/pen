@@ -16,4 +16,4 @@ once_cell = "1"
 insta = "1"
 tempfile = "3"
 fmm-c = { git = "https://github.com/raviqqe/fmm", branch = "chore/rc" }
-fmm-llvm = { git = "https://github.com/raviqqe/fmm", branch = "main" }
+fmm-llvm = { git = "https://github.com/raviqqe/fmm", branch = "chore/rc" }
