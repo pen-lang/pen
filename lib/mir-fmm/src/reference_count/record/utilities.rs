@@ -32,7 +32,7 @@ pub fn compile_drop_function_type(
 ) -> fmm::types::Function {
     fmm::types::Function::new(
         vec![type_::compile_record(record, types)],
-        fmm::types::VOID_TYPE.clone(),
+        fmm::types::void_type(),
         fmm::types::CallingConvention::Target,
     )
 }
@@ -43,7 +43,7 @@ pub fn compile_synchronize_function_type(
 ) -> fmm::types::Function {
     fmm::types::Function::new(
         vec![type_::compile_record(record, types)],
-        fmm::types::VOID_TYPE.clone(),
+        fmm::types::void_type(),
         fmm::types::CallingConvention::Target,
     )
 }

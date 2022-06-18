@@ -212,7 +212,7 @@ fn compile_mir_module(
         &fmm_llvm::compile_to_bit_code(
             &fmm::analysis::transform_to_cps(
                 &mir_fmm::compile(module, &compile_configuration.mir)?,
-                fmm::types::VOID_TYPE.clone(),
+                fmm::types::void_type(),
             )?,
             &compile_configuration.fmm,
             target_triple,
