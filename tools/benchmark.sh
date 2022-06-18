@@ -1,6 +1,6 @@
 #!/bin/sh
 
-set -ex
+set -e
 
 export PATH=$PWD/target/release:$PWD/tools:$PATH
 export RUSTC_WRAPPER=sccache
@@ -12,6 +12,6 @@ for package_file in $(git ls-files | grep pen.json); do
   (
     cd $(dirname $package_file)
     pen build
-    hyperfine ./app
+    hyperfine -w 3 ./app
   )
 done
