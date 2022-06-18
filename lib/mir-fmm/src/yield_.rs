@@ -10,7 +10,7 @@ static YIELD_FUNCTION_TYPE: Lazy<fmm::types::Function> = Lazy::new(|| {
 });
 
 pub fn yield_function_type() -> fmm::types::Function {
-    YIELD_FUNCTION_TYPE.with(|function| (*function).clone())
+    YIELD_FUNCTION_TYPE.clone()
 }
 
 pub fn compile_yield_function_declaration(context: &Context) {
