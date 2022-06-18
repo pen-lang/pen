@@ -22,3 +22,6 @@ for package_file in $(git ls-files | grep pen.json); do
     hyperfine -w 3 ./app
   )
 done
+
+cd rust
+cargo bench
