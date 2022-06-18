@@ -4,7 +4,7 @@ set -e
 
 . $(dirname $0)/utilities.sh
 
-prepare_language_environment $(dirname $PWD/$0)/..
+prepare_integration_test $(dirname $PWD/$0)/..
 
 for target in \
   i686-unknown-linux-musl \

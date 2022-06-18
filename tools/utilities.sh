@@ -16,7 +16,7 @@ prepare_unit_test() {
   export RUST_MIN_STACK=8388608
 }
 
-prepare_language_environment() {
+prepare_integration_test() {
   directory=$1
 
   export PATH=$directory/target/release:$PATH

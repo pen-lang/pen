@@ -4,9 +4,7 @@ set -e
 
 . $(dirname $0)/utilities.sh
 
-prepare_language_environment $(dirname $PWD/$0)/..
-
-echo $PEN_ROOT
+prepare_integration_test $(dirname $PWD/$0)/..
 
 cd $(dirname $0)/../benchmark
 
