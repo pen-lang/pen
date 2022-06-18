@@ -75,9 +75,9 @@ fn compile_with_builder(
                 ))?,
             )?;
 
-            Ok(builder.return_(fmm::ir::VOID_VALUE.clone()))
+            Ok(builder.return_(fmm::ir::void_value()))
         },
-        fmm::types::VOID_TYPE.clone(),
+        fmm::types::void_type(),
         fmm::types::CallingConvention::Target,
     )
 }

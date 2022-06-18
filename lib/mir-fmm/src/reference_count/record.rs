@@ -93,9 +93,9 @@ pub fn compile_drop_function(
                 drop_unboxed(context, &builder, &record, &record_type)?;
             }
 
-            Ok(builder.return_(fmm::ir::VOID_VALUE.clone()))
+            Ok(builder.return_(fmm::ir::void_value()))
         },
-        fmm::types::VOID_TYPE.clone(),
+        fmm::types::void_type(),
         fmm::types::CallingConvention::Target,
         fmm::ir::Linkage::Weak,
     )?;
@@ -163,9 +163,9 @@ pub fn compile_synchronize_function(
                 synchronize_unboxed(context, &builder, &record, &record_type)?;
             }
 
-            Ok(builder.return_(fmm::ir::VOID_VALUE.clone()))
+            Ok(builder.return_(fmm::ir::void_value()))
         },
-        fmm::types::VOID_TYPE.clone(),
+        fmm::types::void_type(),
         fmm::types::CallingConvention::Target,
         fmm::ir::Linkage::Weak,
     )?;
