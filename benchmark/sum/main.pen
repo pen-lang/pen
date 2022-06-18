@@ -1,0 +1,13 @@
+main = \(ctx context) none {
+  sum(0, 100000000)
+
+  none
+}
+
+sum = \(x number, i number) number {
+  if i == 0 {
+    x
+  } else {
+    sum(x + i, i - 1)
+  }
+}
