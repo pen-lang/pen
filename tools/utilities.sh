@@ -19,7 +19,7 @@ prepare_unit_test() {
 prepare_integration_test() {
   directory=$1
 
-  export PATH=$directory/target/release:$PATH
+  export PATH=$directory/target/release:$directory/tools:$PATH
   export RUSTC_WRAPPER=sccache
   export PEN_ROOT=$directory
 
