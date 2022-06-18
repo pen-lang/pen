@@ -2,7 +2,7 @@ use criterion::{criterion_group, criterion_main, Bencher, Criterion};
 use ordered_float::OrderedFloat;
 use std::collections::HashMap;
 
-const INSERT_COUNT: usize = 100000;
+const INSERT_COUNT: usize = 100_000;
 
 fn generate_insert_keys() -> Vec<OrderedFloat<f64>> {
     (0..INSERT_COUNT).map(|key| (key as f64).into()).collect()

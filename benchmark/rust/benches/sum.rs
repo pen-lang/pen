@@ -1,9 +1,9 @@
 use criterion::{criterion_group, criterion_main, Bencher, Criterion};
 
-const ITERATION_COUNT: usize = 100000;
+const ITERATION_COUNT: usize = 100_000_000;
 
-fn generate_numbers() -> Vec<f64> {
-    (0..ITERATION_COUNT).map(|key| (key as f64)).collect()
+fn generate_numbers() -> impl Iterator<Item = f64> + Clone {
+    (0..ITERATION_COUNT).map(|key| (key as f64))
 }
 
 fn sum(bencher: &mut Bencher) {
@@ -12,9 +12,11 @@ fn sum(bencher: &mut Bencher) {
     bencher.iter(|| {
         let mut sum = 0.0;
 
-        for number in &numbers {
+        for number in numbers.clone() {
             sum += number;
         }
+
+        let _ = sum;
     });
 }
 
