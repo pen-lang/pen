@@ -44,26 +44,11 @@ fn std_hash_map_insert(bencher: &mut Bencher) {
     });
 }
 
-fn std_hash_map_update(bencher: &mut Bencher) {
-    let keys = generate_insert_keys();
-
-    bencher.iter(|| {
-        let mut map = HashMap::new();
-
-        for key in &keys {
-            map = map.clone();
-
-            map.insert(key, ());
-        }
-    });
-}
-
 fn benchmark(criterion: &mut Criterion) {
     criterion.bench_function("im_hash_map_insert", im_hash_map_insert);
     criterion.bench_function("im_hash_map_update", im_hash_map_update);
 
     criterion.bench_function("std_hash_map_insert", std_hash_map_insert);
-    criterion.bench_function("std_hash_map_update", std_hash_map_update);
 }
 
 criterion_group!(benchmark_group, benchmark);
