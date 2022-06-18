@@ -1,5 +1,6 @@
 [workspace]
 members = [
+  "benchmark/rust",
   "cmd/pen",
   "lib/app",
   "lib/ast",
