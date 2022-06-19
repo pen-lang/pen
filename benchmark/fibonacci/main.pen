@@ -1,5 +1,5 @@
 main = \(ctx context) none {
-  fibonacci(0, 1000)
+  fibonacci(1000)
 
   none
 }
