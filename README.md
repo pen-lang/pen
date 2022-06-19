@@ -87,6 +87,6 @@ Pen aims to make large-scale software development efficient where a number of pe
 
 ## License
 
-Pen is dual-licensed under [MIT](LICENSE-MIT) and [Apache 2.0](LICENSE-APACHE).
+Pen is dual-licensed under [MIT](https://github.com/pen-lang/pen/blob/main/LICENSE-MIT) and [Apache 2.0](https://github.com/pen-lang/pen/blob/main/LICENSE-APACHE).
 
 [syntax]: https://pen-lang.org/references/language/syntax.html
