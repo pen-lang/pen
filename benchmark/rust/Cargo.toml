@@ -9,6 +9,10 @@ im = "15.1.0"
 ordered-float = "3.0.0"
 
 [[bench]]
+name = "fibonacci"
+harness = false
+
+[[bench]]
 name = "hash_map"
 harness = false
 

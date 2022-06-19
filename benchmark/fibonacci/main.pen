@@ -1,0 +1,15 @@
+main = \(ctx context) none {
+  fibonacci(40)
+
+  none
+}
+
+fibonacci = \(n number) number {
+  if n <= 0 {
+    0
+  } else if n == 1 {
+    1
+  } else {
+    fibonacci(n - 1) + fibonacci(n - 2)
+  }
+}
