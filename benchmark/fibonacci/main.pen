@@ -1,11 +1,11 @@
 main = \(ctx context) none {
-  fibonacci(1000)
+  fibonacci(100)
 
   none
 }
 
 fibonacci = \(n number) number {
-  if n == 0 {
+  if n <= 0 {
     0
   } else if n == 1 {
     1
