@@ -8,7 +8,7 @@ fn sum(bencher: &mut Bencher) {
         let mut sum = 0.0;
 
         while x != 0.0 {
-            sum = black_box(sum + x);
+            sum += black_box(x);
             x -= 1.0;
         }
 
