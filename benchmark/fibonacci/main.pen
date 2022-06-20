@@ -1,5 +1,12 @@
+import Core'Number
+import Os'File
+
 main = \(ctx context) none {
-  fibonacci(40)
+  _ = File'Write(
+    ctx.Os,
+    File'StdOut(),
+    Number'String(fibonacci(40)),
+  )
 
   none
 }
