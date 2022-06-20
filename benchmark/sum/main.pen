@@ -1,5 +1,12 @@
+import Core'Number
+import Os'File
+
 main = \(ctx context) none {
-  sum(0, 100000000)
+  _ = File'Write(
+    ctx.Os,
+    File'StdOut(),
+    Number'String(sum(0, 100000000)),
+  )
 
   none
 }
