@@ -6,7 +6,7 @@ use crate::{
     CompileError,
 };
 
-pub fn compile_foreign_declaration(
+pub fn compile(
     context: &Context,
     declaration: &mir::ir::ForeignDeclaration,
 ) -> Result<(), CompileError> {
