@@ -7,28 +7,30 @@ use super::{reference_count, CompileError};
 pub fn get_entry_function_pointer(
     closure_pointer: impl Into<fmm::build::TypedExpression>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    Ok(
-        fmm::build::record_address(reference_count::pointer::untag(&closure_pointer.into())?, 0)?
-            .into(),
-    )
+    get_field(closure_pointer, 0)
 }
 
 pub fn get_metadata_pointer(
     closure_pointer: impl Into<fmm::build::TypedExpression>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    Ok(
-        fmm::build::record_address(reference_count::pointer::untag(&closure_pointer.into())?, 1)?
-            .into(),
-    )
+    get_field(closure_pointer, 1)
 }
 
 pub fn get_payload_pointer(
     closure_pointer: impl Into<fmm::build::TypedExpression>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    Ok(
-        fmm::build::record_address(reference_count::pointer::untag(&closure_pointer.into())?, 2)?
-            .into(),
-    )
+    get_field(closure_pointer, 2)
+}
+
+fn get_field(
+    closure_pointer: impl Into<fmm::build::TypedExpression>,
+    index: usize,
+) -> Result<fmm::build::TypedExpression, CompileError> {
+    Ok(fmm::build::record_address(
+        reference_count::pointer::untag(&closure_pointer.into())?,
+        index,
+    )?
+    .into())
 }
 
 pub fn compile_content(
