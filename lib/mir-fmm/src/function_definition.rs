@@ -16,7 +16,7 @@ pub fn compile_function_definition(
         ),
         definition.is_thunk(),
         fmm::ir::Linkage::External,
-        None,
+        Some(8),
     );
 
     Ok(())
