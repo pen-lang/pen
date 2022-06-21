@@ -2,7 +2,7 @@ use super::error::CompileError;
 use crate::{closure, context::Context, entry_function, type_};
 use fnv::FnvHashMap;
 
-pub fn compile_function_definition(
+pub fn compile(
     context: &Context,
     definition: &mir::ir::FunctionDefinition,
     global_variables: &FnvHashMap<String, fmm::build::TypedExpression>,

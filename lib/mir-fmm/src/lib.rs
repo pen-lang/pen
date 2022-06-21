@@ -38,7 +38,7 @@ pub fn compile(
     let context = Context::new(&module, configuration.clone());
 
     for type_ in &mir::analysis::collect_variant_types(&module) {
-        type_information::compile_type_information_global_variable(&context, type_)?;
+        type_information::compile_global_variable(&context, type_)?;
     }
 
     for definition in module.type_definitions() {
@@ -48,17 +48,17 @@ pub fn compile(
     }
 
     for declaration in module.foreign_declarations() {
-        foreign_declaration::compile_foreign_declaration(&context, declaration)?;
+        foreign_declaration::compile(&context, declaration)?;
     }
 
     for declaration in module.function_declarations() {
-        function_declaration::compile_function_declaration(&context, declaration);
+        function_declaration::compile(&context, declaration);
     }
 
     let global_variables = compile_global_variables(&module, context.types())?;
 
     for definition in module.function_definitions() {
-        function_definition::compile_function_definition(&context, definition, &global_variables)?;
+        function_definition::compile(&context, definition, &global_variables)?;
     }
 
     let function_types = module
@@ -80,7 +80,7 @@ pub fn compile(
         .collect::<FnvHashMap<_, _>>();
 
     for definition in module.foreign_definitions() {
-        foreign_definition::compile_foreign_definition(
+        foreign_definition::compile(
             &context,
             definition,
             function_types[definition.name()],
@@ -88,7 +88,7 @@ pub fn compile(
         )?;
     }
 
-    yield_::compile_yield_function_declaration(&context);
+    yield_::compile_function_declaration(&context);
 
     Ok(context.module_builder().as_module())
 }
