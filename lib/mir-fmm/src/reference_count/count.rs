@@ -33,32 +33,17 @@ pub fn synchronize(
 pub fn is_synchronized(
     count: &fmm::build::TypedExpression,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    Ok(fmm::build::comparison_operation(
-        fmm::ir::ComparisonOperator::LessThan,
-        count.clone(),
-        compile_unique(),
-    )?
-    .into())
+    Ok(fmm::ir::Primitive::Boolean(true).into())
 }
 
 pub fn is_unique(
     count: &fmm::build::TypedExpression,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    Ok(fmm::build::comparison_operation(
-        fmm::ir::ComparisonOperator::Equal,
-        count.clone(),
-        compile_unique(),
-    )?
-    .into())
+    Ok(fmm::ir::Primitive::Boolean(false).into())
 }
 
 pub fn is_synchronized_unique(
     count: &fmm::build::TypedExpression,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    Ok(fmm::build::comparison_operation(
-        fmm::ir::ComparisonOperator::Equal,
-        count.clone(),
-        compile_synchronized_unique(),
-    )?
-    .into())
+    Ok(fmm::ir::Primitive::Boolean(false).into())
 }

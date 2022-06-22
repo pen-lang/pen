@@ -169,29 +169,7 @@ pub fn is_unique(
     builder: &fmm::build::InstructionBuilder,
     pointer: &fmm::build::TypedExpression,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    builder.if_(
-        is_heap(pointer)?,
-        |builder| {
-            // This atomic ordering can be relaxed because blocks get never un-synchronized.
-            let count = builder.atomic_load(
-                heap::get_count_pointer(pointer)?,
-                fmm::ir::AtomicOrdering::Relaxed,
-            )?;
-
-            Ok(builder.branch(builder.if_(
-                count::is_synchronized(&count)?,
-                |builder| -> Result<_, CompileError> {
-                    // We need a memory fence of an acquire ordering to synchronize with release by
-                    // drops and make a block ready for memory operations.
-                    builder.fence(fmm::ir::AtomicOrdering::Acquire);
-
-                    Ok(builder.branch(count::is_synchronized_unique(&count)?))
-                },
-                |builder| Ok(builder.branch(count::is_unique(&count)?)),
-            )?))
-        },
-        |builder| Ok(builder.branch(fmm::ir::Primitive::Boolean(false))),
-    )
+    Ok(fmm::ir::Primitive::Boolean(false).into())
 }
 
 // Heap blocks are synchronized always by their owners before references are
@@ -201,15 +179,7 @@ pub fn is_synchronized(
     builder: &fmm::build::InstructionBuilder,
     pointer: &fmm::build::TypedExpression,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    Ok(fmm::build::bitwise_operation(
-        fmm::ir::BitwiseOperator::Or,
-        fmm::build::bitwise_not_operation(is_heap(pointer)?)?,
-        count::is_synchronized(&builder.atomic_load(
-            heap::get_count_pointer(pointer)?,
-            fmm::ir::AtomicOrdering::Relaxed,
-        )?)?,
-    )?
-    .into())
+    Ok(fmm::ir::Primitive::Boolean(true).into())
 }
 
 fn is_heap(
