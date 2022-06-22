@@ -10,9 +10,9 @@ import Os'Time
 
 import 'lifeGame
 
-rows = \() number { 40 }
+rows = \() number { 20 }
 
-columns = \() number { 80 }
+columns = \() number { 40 }
 
 main = \(ctx context) none {
   if e = run(ctx.Os) as none {
@@ -26,6 +26,7 @@ main = \(ctx context) none {
 run = \(ctx Context) none | error {
   step(
     ctx,
+    0,
     lifeGame'Initialize(
       lifeGame'NewContext(\() number { Random'Number(ctx) }),
       rows(),
@@ -34,9 +35,15 @@ run = \(ctx Context) none | error {
   )
 }
 
-step = \(ctx Context, rows [[boolean]]) none | error {
+step = \(ctx Context, i number, rows [[boolean]]) none | error {
   File'Write(ctx, File'StdOut(), "\x1bc")?
   File'Write(ctx, File'StdOut(), lifeGame'Render(rows))?
+  File'Write(ctx, File'StdOut(), Number'String(i))?
+  File'Write(ctx, File'StdOut(), "\n")?
 
-  step(ctx, lifeGame'Step(rows)?)
+  if i != 100 {
+    step(ctx, i + 1, lifeGame'Step(rows)?)
+  } else {
+    none
+  }
 }
