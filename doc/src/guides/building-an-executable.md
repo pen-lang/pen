@@ -39,7 +39,7 @@ main = \(ctx context) none {
 }
 ```
 
-The `main.pen` file contains a hello world program. And the `pen.json` configuration file defines a package type of `application` and its dependencies. In this example, it has only one of the `Os` standard package.
+The `main.pen` file contains a program that outputs text, "Hello, world!" in a terminal. And the `pen.json` configuration file defines a package type of `application` and its dependencies. In this example, it has only one of the `Os` standard package.
 
 ## Building a package
 
