@@ -49,7 +49,7 @@ To build the package, you run a `pen build` command in the package's directory.
 pen build
 ```
 
-Then, you will see an executable file named `app` in the directory. Run it to see your first "Hello, world!"
+Then, you will see an executable file named `app` in the directory. Now, you can run it to see its output, "Hello, world!"
 
 ```sh
 > ./app
