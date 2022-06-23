@@ -7,7 +7,8 @@ This page describes how to build an executable file of a program written in Pen.
 
 ## Creating an application package
 
-To create [an _application_ package](/references/language/packages.md#application-packages), you run the `pen create` command with your application's name (`foo` in the example below.)
+[_Application_ packages](/references/language/packages.md#application-packages) are packages compiled into executables.
+To create it, you run the `pen create` command with your application's name (`foo` in the example below.)
 
 ```sh
 pen create foo
