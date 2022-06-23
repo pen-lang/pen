@@ -1,6 +1,6 @@
 # Building an executable
 
-This page describes how to build an executable file of a program written in Pen. It consists of the following steps:
+This page describes how to build an executable of a program written in Pen. It consists of the following steps:
 
 1. Create an _application_ package.
 1. Build the package and generate an executable.
