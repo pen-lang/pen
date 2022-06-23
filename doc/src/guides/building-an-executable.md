@@ -1,13 +1,13 @@
 # Building an executable
 
-This page describes how to build an executable file for a program written in Pen. Building an executable consists of the following steps:
+This page describes how to build an executable file of a program written in Pen. It consists of the following steps:
 
 1. Create an _application_ package.
 1. Build the package and generate an executable.
 
 ## Creating an application package
 
-To create [an _application_ package](/references/language/packages.md#application-packages), run the following command. `foo` can be replaced with any name of your application.
+To create [an _application_ package](/references/language/packages.md#application-packages), you run the `pen create` command with your application's name (`foo` in the example below.)
 
 ```sh
 pen create foo
