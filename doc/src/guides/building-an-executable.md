@@ -54,3 +54,8 @@ Then, you will see an executable file named `app` in the directory. Run it to se
 ```sh
 ./app
 ```
+
+## Next steps
+
+- [Creating a library](creating-a-library.md)
+- [Syntax](/references/language/syntax.md)
