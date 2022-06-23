@@ -43,7 +43,7 @@ The `main.pen` file contains a program that outputs a text, "Hello, world!" in a
 
 ## Building a package
 
-To build the package, you run a `pen build` command in the package directory.
+To build the package, you run a `pen build` command in the package's directory.
 
 ```sh
 pen build
