@@ -28,7 +28,7 @@ Then, you will see an executable file named `app` in the directory. Run it to se
 ./app
 ```
 
-## For more information...
+## Next steps
 
 Now, you can start editing `*.pen` files and build your own application!
 
