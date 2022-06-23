@@ -59,4 +59,4 @@ Hello, world!
 ## Next steps
 
 - [Creating a library](creating-a-library.md)
-- [Syntax](/references/language/syntax.md)
+- [Language syntax](/references/language/syntax.md)
