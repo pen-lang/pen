@@ -30,7 +30,7 @@ main = \(ctx context) none {
 
 `pen.json`:
 
-```
+```json
 {
   "type": "application",
   "dependencies": {
