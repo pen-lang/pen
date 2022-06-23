@@ -10,10 +10,10 @@ This page describes how to create and use a library in Pen. It consists of the f
 ## Creating a library package
 
 [Library packages](/references/language/packages.md#library-packages) are packages imported and used by other packages.
-To create it, you run a `pen create` command with your library's name (e.g. `foo`) in your terminal.
+To create it, you run a `pen create --library` command with your library's name (e.g. `foo`) in your terminal.
 
 ```sh
-pen create foo
+pen create --library foo
 ```
 
 Then, you should see a `foo` directory under your current directory. When you go in there, you should see a `Foo.pen` source file and a `pen.json` file for [package configuration](/references/language/packages.md#package-configuration).
