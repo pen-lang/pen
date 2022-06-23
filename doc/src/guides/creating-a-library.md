@@ -65,5 +65,5 @@ To use the library package, you need to add the package as a dependency in anoth
 
 ## Next steps
 
-- [Creating a library](creating-a-library.md)
+- [Building an executable](building-an-executable.md)
 - [Language syntax](/references/language/syntax.md)

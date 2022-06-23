@@ -58,5 +58,5 @@ Hello, world!
 
 ## Next steps
 
-- [Building an executable](building-an-executable.md)
+- [Creating a library](creating-a-library.md)
 - [Language syntax](/references/language/syntax.md)
