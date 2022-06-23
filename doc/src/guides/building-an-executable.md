@@ -43,7 +43,7 @@ The `main.pen` file contains a program that outputs a text, "Hello, world!" in a
 
 ## Building a package
 
-To build the package, run the following command in the `foo` directory.
+To build the package, you run a `pen build` command in the package directory.
 
 ```sh
 pen build
@@ -52,7 +52,8 @@ pen build
 Then, you will see an executable file named `app` in the directory. Run it to see your first "Hello, world!"
 
 ```sh
-./app
+> ./app
+Hello, world!
 ```
 
 ## Next steps
