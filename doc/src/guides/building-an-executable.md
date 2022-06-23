@@ -58,5 +58,5 @@ Hello, world!
 
 ## Next steps
 
-- [Creating a library](creating-a-library.md)
+- [Creating and using a library](creating-a-library.md)
 - [Language syntax](/references/language/syntax.md)
