@@ -41,7 +41,7 @@ main = \(ctx context) none {
 
 The `main.pen` file contains a program that outputs a text, "Hello, world!" in a terminal. And the `pen.json` configuration file defines a package type of `application` and its dependencies. Here, it has only a dependency of the `Os` standard package.
 
-## Building a package
+## Building a package and generating an executable
 
 To build the package, you run a `pen build` command in the package's directory.
 
