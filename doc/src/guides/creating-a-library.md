@@ -42,7 +42,7 @@ The easiest way to publish your library package is to push the package as a Git 
 ```sh
 git add .
 git commit
-git remote origin add https://github.com/your-name/foo
+git remote add origin ssh://git@github.com/your-name/foo
 git push
 ```
 
