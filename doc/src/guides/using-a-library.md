@@ -25,4 +25,5 @@ To use a library package, you need to add the package as a dependency of another
 ## Next steps
 
 - [Building an executable](building-an-executable.md)
+- [Creating a library](creating-a-library.md)
 - [Language syntax](/references/language/syntax.md)
