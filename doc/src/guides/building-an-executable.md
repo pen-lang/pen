@@ -52,8 +52,7 @@ pen build
 Then, you will see an executable file named `app` in the directory. Now, you can run it to see its output, "Hello, world!"
 
 ```sh
-> ./app
-Hello, world!
+./app # -> Hello, world!
 ```
 
 ## Next steps
