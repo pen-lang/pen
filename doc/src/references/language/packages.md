@@ -6,7 +6,7 @@ Packages are sets of [modules](/references/language/modules.md). Like modules, p
 
 The following entities compose packages.
 
-- Standard packages bundled in [installation](/introduction/install.md) of Pen
+- Standard packages bundled in [installation](/introduction/install.md) of the language
 - Remote repositories managed by version control systems (VCS)
   - Currently, Pen supports only [Git](https://git-scm.com/) as a VCS.
 - Directories with [package configuration files](#package-configuration) on file systems
