@@ -46,6 +46,8 @@ git remote add origin ssh://git@github.com/your-name/foo
 git push
 ```
 
+Now, your package is ready for use by other packages!
+
 ## Next steps
 
 - [Building an executable](building-an-executable.md)
