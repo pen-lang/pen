@@ -2,8 +2,8 @@
 
 This page describes how to use a library in Pen. It consists of the following steps:
 
-1. Modify package configuration in a package where you want to use the library package.
-1. Import functions and types from the library package.
+1. Add a library package as a dependency in a package.
+1. Import functions and types from an added library package.
 
 ## Modifying package configuration
 
