@@ -14,7 +14,7 @@ To create it, you run a `pen create` command with your application's name (e.g. 
 pen create foo
 ```
 
-Then, you should see a `foo` directory under your current directory. When you go in there, you should see a `main.pen` source file and a `pen.json` file for [package configuration](/references/language/packages.md#package-configuration).
+Then, you should see a `foo` directory in your current directory. When you go there, you should see a `main.pen` source file and a `pen.json` file for [package configuration](/references/language/packages.md#package-configuration).
 
 `main.pen`:
 
