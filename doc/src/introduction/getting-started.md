@@ -32,8 +32,8 @@ Then, you will see an executable file named `app` in the directory. Run it to se
 
 Now, you can start editing `*.pen` files and build your own application!
 
+- To use a library package in your package, see []().
 - For more code examples, see [Examples](/examples).
-- To know more about the language's constructs, see [Syntax](/references/language/syntax.md) and [Types](/references/language/types.md).
-- To know how to use the standard packages, see [Standard packages](/references/standard-packages).
-- To know how to add more modules in your package, see [Modules](/references/language/modules.md).
-- To know how to import other packages, see [Packages](/references/language/packages.md).
+- For the language syntax, see [Syntax](/references/language/syntax.md) and [Types](/references/language/types.md).
+- For usage of the standard packages, see [Standard packages](/references/standard-packages).
+- To add more modules in your package, see [Modules](/references/language/modules.md).
