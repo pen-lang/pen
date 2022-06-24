@@ -41,3 +41,4 @@ MyFunction = \(x number, y number) number {
 - [Building an executable](building-an-executable.md)
 - [Creating a library](creating-a-library.md)
 - [Language syntax](/references/language/syntax.md)
+  - [Import statement](/references/language/syntax.md#/import-statement)
