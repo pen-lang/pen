@@ -3,7 +3,7 @@
 This page describes how to build an executable of a program written in Pen. It consists of the following steps:
 
 1. Create an _application_ package.
-1. Build the package and generate an executable.
+1. Build the package into an executable.
 
 ## Creating an application package
 
@@ -41,7 +41,7 @@ main = \(ctx context) none {
 
 In this example, the `main.pen` file contains a program that outputs a text, "Hello, world!" in a terminal. And the `pen.json` configuration file defines a package type of `application` and its dependencies. Here, it has only a dependency of the `Os` [system package](/references/language/packages.md#system-packages).
 
-## Building a package and generating an executable
+## Building a package into an executable
 
 To build the package, you run a `pen build` command in the package's directory.
 
