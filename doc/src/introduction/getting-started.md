@@ -6,13 +6,13 @@ See [Install](install.md).
 
 ## Creating a package
 
-To create your first package, run the following command.
+To create your first package, run the following command in your terminal.
 
 ```sh
 pen create foo
 ```
 
-Then, you should see a `foo` directory under the current directory. When you go to the `foo` directory, you should see a `main.pen` source file and a `pen.json` file for [package configuration](/references/language/packages.md#package-configuration).
+Then, you should see a directory named `foo` in your current directory. When you go into the directory, you should see a `main.pen` source file and a `pen.json` file for [package configuration](/references/language/packages.md#package-configuration).
 
 ## Building a package
 
