@@ -29,6 +29,8 @@ import Foo'Math
 Then, you are ready to use those functions and types with a prefix of the module name! For example, to call a function named `Add` in the `Math` module, you can write `Math'Add(x, y)`.
 
 ```pen
+type MyType = Math'Order
+
 MyFunction = \(x number, y number) number {
   Math'Add(x, y)
 }
