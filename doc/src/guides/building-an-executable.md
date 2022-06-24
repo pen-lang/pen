@@ -58,4 +58,5 @@ Then, you will see an executable file named `app` in the directory. Now, you can
 ## Next steps
 
 - [Creating a library](creating-a-library.md)
+- [Using a library](using-a-library.md)
 - [Language syntax](/references/language/syntax.md)
