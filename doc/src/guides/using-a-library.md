@@ -20,7 +20,7 @@ To use a library package, you need to add the package as a dependency of another
 
 ## Importing functions and types from a library package
 
-To import functions and types from the library package, you use `import` statements in your source with a name of the library package (e.g. `Foo`) and a module name (e.g. `Math`) where functions or types you want to use are defined.
+To import functions and types from the library package, you use `import` statements in your source file with a name of the library package (e.g. `Foo`) and a module name (e.g. `Math`) where functions or types you want to use are defined.
 
 ```pen
 import Foo'Math
