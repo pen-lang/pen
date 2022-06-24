@@ -25,7 +25,7 @@ pen build
 Then, you will see an executable file named `app` in the directory. Run it to see your first "Hello, world!"
 
 ```sh
-./app
+./app # -> Hello, world!
 ```
 
 ## Next steps
