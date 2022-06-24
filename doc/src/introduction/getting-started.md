@@ -34,6 +34,6 @@ Now, you can start editing source files and build your own application in Pen!
 
 - To use other library packages, see [Using a library](/guides/using-a-library.md).
 - For more code examples, see [Examples](/examples).
-- For Pen syntax, see [Syntax](/references/language/syntax.md) and [Types](/references/language/types.md).
+- For the language syntax, see [Syntax](/references/language/syntax.md) and [Types](/references/language/types.md).
 - For usage of the standard packages, see [Standard packages](/references/standard-packages).
 - To add more modules in your package, see [Modules](/references/language/modules.md).

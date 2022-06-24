@@ -1,3 +1,3 @@
 # Language
 
-This chapter describes Pen's constructs and its type, module and package systems.
+This chapter describes the Pen's language constructs, and type, module and package systems.
