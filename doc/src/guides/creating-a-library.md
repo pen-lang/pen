@@ -35,7 +35,7 @@ Add = \(x number, y number) number {
 
 In this example, the `Foo.pen` file contains a `Add` function that adds two numbers. And the `pen.json` configuration file defines a package type of `library` and its dependencies of none.
 
-## Publishing a library package
+## Publishing a package
 
 The easiest way to publish your library package is to push the package as a Git repository onto one of Git repository hosting services, such as [GitHub](https:://github.com).
 
