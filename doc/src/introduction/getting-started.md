@@ -6,7 +6,7 @@ See [Install](install.md).
 
 ## Creating a package
 
-To create your first package, run the following command in your terminal.
+To create your first package, run a `pen create` command with your package's name in your terminal.
 
 ```sh
 pen create foo
@@ -16,7 +16,7 @@ Then, you should see a directory named `foo` in your current directory. When you
 
 ## Building a package
 
-To build the package, run the following command in the `foo` directory.
+To build the package, run a `pen build` command in the `foo` directory.
 
 ```sh
 pen build
