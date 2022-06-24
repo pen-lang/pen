@@ -14,7 +14,7 @@ To create it, you run a `pen create --library` command with your library's name 
 pen create --library foo
 ```
 
-Then, you should see a `foo` directory in your current directory. When you go in there, you should see a `Foo.pen` source file and a `pen.json` file for [package configuration](/references/language/packages.md#package-configuration).
+Then, you should see a `foo` directory in your current directory. When you go there, you should see a `Foo.pen` source file and a `pen.json` file for [package configuration](/references/language/packages.md#package-configuration).
 
 `Foo.pen`:
 
