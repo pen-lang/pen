@@ -32,7 +32,7 @@ Now, you can start editing source files and build your own application in Pen!
 
 ## Next steps
 
-- To use a library package in your package, see [Using a library](/guides/using-a-library.md).
+- To use other library packages, see [Using a library](/guides/using-a-library.md).
 - For more code examples, see [Examples](/examples).
 - For the language syntax, see [Syntax](/references/language/syntax.md) and [Types](/references/language/types.md).
 - For usage of the standard packages, see [Standard packages](/references/standard-packages).
