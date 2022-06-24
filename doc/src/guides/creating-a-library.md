@@ -33,7 +33,7 @@ Add = \(x number, y number) number {
 }
 ```
 
-In this example, the `Foo.pen` file contains a `Add` function that adds two numbers. And the `pen.json` configuration file defines a package type of `library` and its dependencies of none.
+In this example, the `Foo.pen` file contains an `Add` function that adds two numbers. And the `pen.json` configuration file defines a package type of `library` and its dependencies of none.
 
 ## Publishing a package
 
