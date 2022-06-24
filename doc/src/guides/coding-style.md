@@ -1,6 +1,6 @@
 # Coding style
 
-This page describes the common coding style used in programs written in the language.
+This page describes the common coding style used in programs written in Pen.
 
 ## Spacing
 

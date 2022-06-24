@@ -1,3 +1,3 @@
 # Examples
 
-These are examples on how to use the language, its command line tools, and libraries.
+These are examples on how to use Pen, its command line tools, and libraries.

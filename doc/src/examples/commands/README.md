@@ -1,3 +1,3 @@
 # Commands
 
-These are examples on how to use command line tools of the language.
+These are examples on how to use command line tools of Pen.

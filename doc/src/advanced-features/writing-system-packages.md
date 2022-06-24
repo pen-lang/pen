@@ -7,7 +7,7 @@ Using existing system packages covers most use cases in application development.
 
 This page assumes that you have already read [Packages](/references/language/packages.md).
 
-> Caveat: Providing bad system packages which do not conform to conventions can break the ecosystem of the language! In the worst cases, they might make applications malfunction. Please be careful to follow the conventions to keep applications maintainable and portable.
+> Caveat: Providing bad system packages which do not conform to conventions can break the ecosystem of Pen! In the worst cases, they might make applications malfunction. Please be careful to follow the conventions to keep applications maintainable and portable.
 
 ## Functionalities of system packages
 
@@ -88,7 +88,7 @@ The scripts should accept the following command line arguments.
 | `-o <application>` | Yes      | Path of an application file                                    |
 | `<archive>...`     | Yes      | Paths of archive files sorted topologically from main packages |
 
-At the liking phase, compiled main functions are available under a symbol named `_pen_main` with the language's native calling convention.
+At the liking phase, compiled main functions are available under a symbol named `_pen_main` with Pen's native calling convention.
 
 ## Examples
 
