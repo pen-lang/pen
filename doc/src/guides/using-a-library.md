@@ -9,9 +9,9 @@ This page describes how to use a library in Pen. It consists of the following st
 
 To use a library package, you need to add the package as a dependency of another package. To do so, you modify a package configuration file adding a library package's name (e.g. `Foo`) and URL (e.g. `git://github.com/your-name/foo`) in a `dependencies` field like the following example. Note that you need to specify a `git` protocol scheme for library packages published as Git repositories. For other kinds of library packages, see [Package configuration](/references/language/packages.md#package-configuration).
 
-```jsonc
+```json
 {
-  "type": "application", // This can be any package type.
+  "type": "application", // This can be any type.
   "dependencies": {
     "Foo": "git://github.com/your-name/foo"
   }
