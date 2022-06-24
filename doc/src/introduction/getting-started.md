@@ -28,11 +28,11 @@ Then, you will see an executable file named `app` in the directory. Run it to se
 ./app # -> Hello, world!
 ```
 
-## Next steps
-
 Now, you can start editing `*.pen` files and build your own application!
 
-- To use a library package in your package, see []().
+## Next steps
+
+- To use a library package in your package, see [Using a library](/guides/using-a-library.md).
 - For more code examples, see [Examples](/examples).
 - For the language syntax, see [Syntax](/references/language/syntax.md) and [Types](/references/language/types.md).
 - For usage of the standard packages, see [Standard packages](/references/standard-packages).
