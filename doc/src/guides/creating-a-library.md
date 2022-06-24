@@ -3,7 +3,7 @@
 This page describes how to create a library in Pen. It consists of the following steps:
 
 1. Create a _library_ package.
-1. Publish the library package.
+1. Publish the package.
 
 ## Creating a library package
 
