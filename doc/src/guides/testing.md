@@ -1,6 +1,6 @@
 # Testing
 
-This page describes how to write and run unit tests for programs written in the language.
+This page describes how to write and run unit tests for programs written in Pen.
 
 Testing codes consists of the following steps:
 

@@ -1,6 +1,6 @@
 # Types
 
-This page describes different data types in the language.
+This page describes different data types in Pen.
 
 ## Number
 

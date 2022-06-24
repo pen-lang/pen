@@ -1,6 +1,6 @@
 # Syntax
 
-This page describes syntactical constructs of the language. You can compose programs building up those constructs. See also [Types](types.md) about syntax for specific data types.
+This page describes syntax of Pen. You can compose programs building up those language constructs. See also [Types](types.md) about syntax for specific data types.
 
 ## Module
 

@@ -88,7 +88,7 @@ The scripts should accept the following command line arguments.
 | `-o <application>` | Yes      | Path of an application file                                    |
 | `<archive>...`     | Yes      | Paths of archive files sorted topologically from main packages |
 
-At the liking phase, compiled main functions are available under a symbol named `_pen_main` with the language's native calling convention.
+At the liking phase, compiled main functions are available under a symbol named `_pen_main` with Pen's native calling convention.
 
 ## Examples
 
