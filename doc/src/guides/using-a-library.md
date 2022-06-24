@@ -20,7 +20,19 @@ To use a library package, you need to add the package as a dependency of another
 
 ## Importing functions and types from a library package
 
-> WIP
+To import functions and types from the added library package, you use `import` statements with a name of the library package (e.g. `Foo`) and a module name (e.g. `Math`) where the functions or types are defined.
+
+```pen
+import Foo'Math
+```
+
+Then, you are ready to use those functions and types with a prefix of the module name! For example, to call a function named `Add` in the `Math` module, you can write `Math'Add(x, y)`.
+
+```pen
+MyFunction = \(x number, y number) number {
+  Math'Add(x, y)
+}
+```
 
 ## Next steps
 
