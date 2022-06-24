@@ -11,7 +11,7 @@ To use a library package, you need to add the package as a dependency of another
 
 ```jsonc
 {
-  "type": "application", // This can be also `library`.
+  "type": "application", // This can be any package type.
   "dependencies": {
     "Foo": "git://github.com/your-name/foo"
   }
