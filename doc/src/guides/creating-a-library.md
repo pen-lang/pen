@@ -37,7 +37,7 @@ In this example, the `Foo.pen` file contains a `Add` function that adds two numb
 
 ## Publishing a package
 
-The easiest way to publish your library package is to push the package as a Git repository onto one of Git repository hosting services, such as [GitHub](https:://github.com).
+The easiest way to publish your library package is to push the package as a Git repository onto one of Git repository hosting services, such as [GitHub](https://github.com).
 
 ```sh
 git add .
