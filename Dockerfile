@@ -29,5 +29,5 @@ run brew install hello
 run curl -fsSL https://sh.rustup.rs | sh /dev/stdin -y
 run cargo install mdbook sccache turtle-build
 
-env LLVM_SYS_130_PREFIX=/usr/lib/llvm-14
+env LLVM_SYS_140_PREFIX=/usr/lib/llvm-14
 env PATH="/usr/lib/llvm-14/bin:$PATH"
