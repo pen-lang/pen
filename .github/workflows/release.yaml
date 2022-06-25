@@ -42,6 +42,8 @@ jobs:
     needs:
       - tag_check
       - build_asset
+    permissions:
+      contents: write
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v2
@@ -58,8 +60,6 @@ jobs:
           body_path: changes.md
           files: artifacts/**
           fail_on_unmatched_files: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   homebrew:
     needs:
       - tag_check
