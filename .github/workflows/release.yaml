@@ -60,8 +60,6 @@ jobs:
           body_path: changes.md
           files: artifacts/**
           fail_on_unmatched_files: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   homebrew:
     needs:
       - tag_check
