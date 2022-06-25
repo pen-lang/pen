@@ -4,6 +4,7 @@ pub mod duplicate_type_name_validator;
 mod error;
 pub mod expression_visitor;
 pub mod function_definition_qualifier;
+mod impossible_type_validator;
 pub mod module_environment_creator;
 pub mod record_field_resolver;
 pub mod record_field_validator;
