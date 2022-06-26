@@ -39,7 +39,7 @@ fn is_type_recursive(
         Type::Reference(reference) => is_type_recursive(
             context,
             name,
-            &cache,
+            cache,
             &type_resolver::resolve(reference, context.types())?,
         )?,
         Type::Record(record) => {
@@ -51,7 +51,7 @@ fn is_type_recursive(
                         &cache
                             .clone()
                             .into_iter()
-                            .chain([record.name().into()])
+                            .chain([record.name()])
                             .collect(),
                         record_field_resolver::resolve_record(record, context.records())?
                             .iter()
@@ -105,7 +105,7 @@ mod tests {
                 type_collector::collect_records(module),
                 None,
             ),
-            &module,
+            module,
         )
     }
 
