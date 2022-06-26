@@ -1,5 +1,6 @@
 use super::{record_field_resolver, type_resolver, AnalysisContext};
 use crate::{analysis::AnalysisError, ir::*, types::Type};
+use fnv::FnvHashSet;
 use std::convert::identity;
 
 pub fn validate(context: &AnalysisContext, module: &Module) -> Result<(), AnalysisError> {
@@ -17,6 +18,7 @@ fn validate_type_definition(
     if are_any_type_recursive(
         context,
         definition.name(),
+        &FnvHashSet::default(),
         definition.fields().iter().map(|field| field.type_()),
     )? {
         Err(AnalysisError::ImpossibleRecord(
@@ -30,27 +32,35 @@ fn validate_type_definition(
 fn is_type_recursive(
     context: &AnalysisContext,
     name: &str,
+    cache: &FnvHashSet<&str>,
     type_: &Type,
 ) -> Result<bool, AnalysisError> {
     Ok(match type_ {
         Type::Reference(reference) => is_type_recursive(
             context,
             name,
+            &cache,
             &type_resolver::resolve(reference, context.types())?,
         )?,
         Type::Record(record) => {
-            name == record.name()
-                || are_any_type_recursive(
-                    context,
-                    name,
-                    record_field_resolver::resolve_record(record, context.records())?
-                        .iter()
-                        .map(|field| field.type_()),
-                )?
+            !cache.contains(record.name())
+                && (name == record.name()
+                    || are_any_type_recursive(
+                        context,
+                        name,
+                        &cache
+                            .clone()
+                            .into_iter()
+                            .chain([record.name().into()])
+                            .collect(),
+                        record_field_resolver::resolve_record(record, context.records())?
+                            .iter()
+                            .map(|field| field.type_()),
+                    )?)
         }
         Type::Union(union) => [union.lhs(), union.rhs()]
             .into_iter()
-            .map(|type_| is_type_recursive(context, name, type_))
+            .map(|type_| is_type_recursive(context, name, cache, type_))
             .collect::<Result<Vec<_>, _>>()?
             .into_iter()
             .all(identity),
@@ -68,11 +78,12 @@ fn is_type_recursive(
 fn are_any_type_recursive<'a>(
     context: &AnalysisContext,
     name: &str,
+    cache: &FnvHashSet<&str>,
     types: impl IntoIterator<Item = &'a Type>,
 ) -> Result<bool, AnalysisError> {
     Ok(types
         .into_iter()
-        .map(|type_| is_type_recursive(context, name, type_))
+        .map(|type_| is_type_recursive(context, name, cache, type_))
         .collect::<Result<Vec<_>, _>>()?
         .into_iter()
         .any(identity))
@@ -318,5 +329,36 @@ mod tests {
         ]);
 
         assert!(matches!(validate_module(&module), Ok(())));
+    }
+
+    #[test]
+    fn validate_record_with_recursive_record() {
+        let module = Module::empty().set_type_definitions(vec![
+            TypeDefinition::fake(
+                "a",
+                vec![types::RecordField::new(
+                    "x",
+                    types::Record::new("b", Position::fake()),
+                )],
+                false,
+                false,
+                false,
+            ),
+            TypeDefinition::fake(
+                "b",
+                vec![types::RecordField::new(
+                    "x",
+                    types::Record::new("b", Position::fake()),
+                )],
+                false,
+                false,
+                false,
+            ),
+        ]);
+
+        assert!(matches!(
+            validate_module(&module),
+            Err(AnalysisError::ImpossibleRecord(_))
+        ));
     }
 }
