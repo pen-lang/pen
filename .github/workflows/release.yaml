@@ -76,7 +76,7 @@ jobs:
           cp /tmp/pen.rb Formula/pen.rb
       - run: |
           hash=$(curl -fsSL https://github.com/pen-lang/pen/archive/refs/tags/v$version.tar.gz | sha256sum | cut -f 1 -d ' ')
-          sed -i "s/sha256 .*/sha256 '$hash'/" Formula/pen.rb
+          sed -i "s/sha256 .*/sha256 \"$hash\"/" Formula/pen.rb
       - uses: peter-evans/create-pull-request@v4
         with:
           title: Bump version
