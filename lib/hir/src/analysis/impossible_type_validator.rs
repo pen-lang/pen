@@ -203,4 +203,67 @@ mod tests {
 
         assert!(matches!(validate_module(&module), Ok(())));
     }
+
+    #[test]
+    fn validate_mutually_recursive_records() {
+        let module = Module::empty().set_type_definitions(vec![
+            TypeDefinition::fake(
+                "a",
+                vec![types::RecordField::new(
+                    "x",
+                    types::Record::new("b", Position::fake()),
+                )],
+                false,
+                false,
+                false,
+            ),
+            TypeDefinition::fake(
+                "b",
+                vec![types::RecordField::new(
+                    "x",
+                    types::Record::new("a", Position::fake()),
+                )],
+                false,
+                false,
+                false,
+            ),
+        ]);
+
+        assert!(matches!(
+            validate_module(&module),
+            Err(AnalysisError::ImpossibleRecord(_))
+        ));
+    }
+
+    #[test]
+    fn validate_mutually_recursive_records_with_union() {
+        let module = Module::empty().set_type_definitions(vec![
+            TypeDefinition::fake(
+                "a",
+                vec![types::RecordField::new(
+                    "x",
+                    types::Union::new(
+                        types::Record::new("b", Position::fake()),
+                        types::None::new(Position::fake()),
+                        Position::fake(),
+                    ),
+                )],
+                false,
+                false,
+                false,
+            ),
+            TypeDefinition::fake(
+                "b",
+                vec![types::RecordField::new(
+                    "x",
+                    types::Record::new("a", Position::fake()),
+                )],
+                false,
+                false,
+                false,
+            ),
+        ]);
+
+        assert!(matches!(validate_module(&module), Ok(())));
+    }
 }
