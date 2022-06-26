@@ -99,7 +99,36 @@ mod tests {
     }
 
     #[test]
-    fn validate_self_recursive_record_with_one_field() {
+    fn validate_record() {
+        let module = Module::empty().set_type_definitions(vec![TypeDefinition::fake(
+            "a",
+            vec![],
+            false,
+            false,
+            false,
+        )]);
+
+        assert!(matches!(validate_module(&module), Ok(())));
+    }
+
+    #[test]
+    fn validate_record_with_field() {
+        let module = Module::empty().set_type_definitions(vec![TypeDefinition::fake(
+            "a",
+            vec![types::RecordField::new(
+                "x",
+                types::None::new(Position::fake()),
+            )],
+            false,
+            false,
+            false,
+        )]);
+
+        assert!(matches!(validate_module(&module), Ok(())));
+    }
+
+    #[test]
+    fn validate_recursive_record_with_one_field() {
         let module = Module::empty().set_type_definitions(vec![TypeDefinition::fake(
             "a",
             vec![types::RecordField::new(
@@ -115,5 +144,25 @@ mod tests {
             validate_module(&module),
             Err(AnalysisError::ImpossibleRecord(_))
         ));
+    }
+
+    #[test]
+    fn validate_recursive_record_with_two_fields() {
+        let module = Module::empty().set_type_definitions(vec![TypeDefinition::fake(
+            "a",
+            vec![types::RecordField::new(
+                "x",
+                types::Union::new(
+                    types::Record::new("a", Position::fake()),
+                    types::None::new(Position::fake()),
+                    Position::fake(),
+                ),
+            )],
+            false,
+            false,
+            false,
+        )]);
+
+        assert!(matches!(validate_module(&module), Ok(())));
     }
 }
