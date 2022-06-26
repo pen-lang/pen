@@ -139,23 +139,19 @@ impl app::infra::TestLinker for TestLinker {
                 .arg("build")
                 .arg("--release")
                 .current_dir(&main_crate_directory)
-                .envs(
-                    [
-                        (
-                            "PEN_ARCHIVE_FILES",
-                            archive_files
-                                .iter()
-                                .map(|file| {
-                                    self.file_path_converter
-                                        .convert_to_os_path(file)
-                                        .display()
-                                        .to_string()
-                                })
-                                .collect::<Vec<_>>()
-                                .join(":"),
-                        ),
-                    ],
-                ),
+                .envs([(
+                    "PEN_ARCHIVE_FILES",
+                    archive_files
+                        .iter()
+                        .map(|file| {
+                            self.file_path_converter
+                                .convert_to_os_path(file)
+                                .display()
+                                .to_string()
+                        })
+                        .collect::<Vec<_>>()
+                        .join(":"),
+                )]),
         )?;
 
         fs::copy(

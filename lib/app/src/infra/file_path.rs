@@ -44,20 +44,18 @@ impl FilePath {
         if let Some(last) = self.components.last() {
             Self::new(
                 self.components().take(self.components.len() - 1).chain(
-                    [
-                        regex::Regex::new(r"(\..*)?$")
-                            .unwrap()
-                            .replace(
-                                last,
-                                if extension.is_empty() {
-                                    "".into()
-                                } else {
-                                    format!(".{}", extension)
-                                }
-                                .as_str(),
-                            )
-                            .deref(),
-                    ]
+                    [regex::Regex::new(r"(\..*)?$")
+                        .unwrap()
+                        .replace(
+                            last,
+                            if extension.is_empty() {
+                                "".into()
+                            } else {
+                                format!(".{}", extension)
+                            }
+                            .as_str(),
+                        )
+                        .deref()]
                     .into_iter(),
                 ),
             )
