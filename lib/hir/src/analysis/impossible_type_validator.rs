@@ -82,7 +82,7 @@ fn are_any_type_recursive<'a>(
 mod tests {
     use super::{super::type_collector, *};
     use crate::{
-        test::{ModuleFake, TypeDefinitionFake},
+        test::{ModuleFake, TypeAliasFake, TypeDefinitionFake},
         types,
     };
     use position::{test::PositionFake, Position};
@@ -202,6 +202,32 @@ mod tests {
         )]);
 
         assert!(matches!(validate_module(&module), Ok(())));
+    }
+
+    #[test]
+    fn validate_recursive_record_with_reference() {
+        let module = Module::empty()
+            .set_type_definitions(vec![TypeDefinition::fake(
+                "a",
+                vec![types::RecordField::new(
+                    "x",
+                    types::Reference::new("b", Position::fake()),
+                )],
+                false,
+                false,
+                false,
+            )])
+            .set_type_aliases(vec![TypeAlias::fake(
+                "b",
+                types::Reference::new("a", Position::fake()),
+                false,
+                false,
+            )]);
+
+        assert!(matches!(
+            validate_module(&module),
+            Err(AnalysisError::ImpossibleRecord(_))
+        ));
     }
 
     #[test]
