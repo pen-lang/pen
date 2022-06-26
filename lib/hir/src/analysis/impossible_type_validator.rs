@@ -150,6 +150,25 @@ mod tests {
     fn validate_recursive_record_with_two_fields() {
         let module = Module::empty().set_type_definitions(vec![TypeDefinition::fake(
             "a",
+            vec![
+                types::RecordField::new("x", types::Record::new("a", Position::fake())),
+                types::RecordField::new("y", types::Record::new("a", Position::fake())),
+            ],
+            false,
+            false,
+            false,
+        )]);
+
+        assert!(matches!(
+            validate_module(&module),
+            Err(AnalysisError::ImpossibleRecord(_))
+        ));
+    }
+
+    #[test]
+    fn validate_recursive_record_with_union() {
+        let module = Module::empty().set_type_definitions(vec![TypeDefinition::fake(
+            "a",
             vec![types::RecordField::new(
                 "x",
                 types::Union::new(
