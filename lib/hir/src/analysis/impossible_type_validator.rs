@@ -110,6 +110,9 @@ mod tests {
             false,
         )]);
 
-        assert!(matches!(validate_module(&module), Err(_)));
+        assert!(matches!(
+            validate_module(&module),
+            Err(AnalysisError::ImpossibleRecord(_))
+        ));
     }
 }
