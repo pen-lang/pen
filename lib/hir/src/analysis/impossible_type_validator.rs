@@ -48,11 +48,7 @@ fn is_type_recursive(
                     || are_any_type_recursive(
                         context,
                         name,
-                        &cache
-                            .clone()
-                            .into_iter()
-                            .chain([record.name()])
-                            .collect(),
+                        &cache.clone().into_iter().chain([record.name()]).collect(),
                         record_field_resolver::resolve_record(record, context.records())?
                             .iter()
                             .map(|field| field.type_()),
