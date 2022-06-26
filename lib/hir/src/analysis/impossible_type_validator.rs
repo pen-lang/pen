@@ -231,6 +231,33 @@ mod tests {
     }
 
     #[test]
+    fn validate_recursive_record_with_reference_to_union() {
+        let module = Module::empty()
+            .set_type_definitions(vec![TypeDefinition::fake(
+                "a",
+                vec![types::RecordField::new(
+                    "x",
+                    types::Reference::new("b", Position::fake()),
+                )],
+                false,
+                false,
+                false,
+            )])
+            .set_type_aliases(vec![TypeAlias::fake(
+                "b",
+                types::Union::new(
+                    types::Record::new("a", Position::fake()),
+                    types::None::new(Position::fake()),
+                    Position::fake(),
+                ),
+                false,
+                false,
+            )]);
+
+        assert!(matches!(validate_module(&module), Ok(())));
+    }
+
+    #[test]
     fn validate_mutually_recursive_records() {
         let module = Module::empty().set_type_definitions(vec![
             TypeDefinition::fake(
