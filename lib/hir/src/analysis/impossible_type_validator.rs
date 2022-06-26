@@ -80,10 +80,11 @@ fn are_any_type_recursive<'a>(
 
 #[cfg(test)]
 mod tests {
-    use super::super::type_collector;
-    use super::*;
-    use crate::test::{ModuleFake, TypeDefinitionFake};
-    use crate::types;
+    use super::{super::type_collector, *};
+    use crate::{
+        test::{ModuleFake, TypeDefinitionFake},
+        types,
+    };
     use position::{test::PositionFake, Position};
 
     fn validate_module(module: &Module) -> Result<(), AnalysisError> {
