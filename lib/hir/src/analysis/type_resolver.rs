@@ -6,17 +6,9 @@ pub fn resolve(
     reference: &Reference,
     types: &FnvHashMap<String, Type>,
 ) -> Result<Type, AnalysisError> {
-    Ok(resolve_type(&reference.clone().into(), types)?.set_position(reference.position().clone()))
-}
-
-fn resolve_type(type_: &Type, types: &FnvHashMap<String, Type>) -> Result<Type, AnalysisError> {
-    Ok(match type_ {
-        Type::Reference(reference) => resolve_type(
-            types
-                .get(reference.name())
-                .ok_or_else(|| AnalysisError::TypeNotFound(reference.clone()))?,
-            types,
-        )?,
-        _ => type_.clone(),
-    })
+    Ok(types
+        .get(reference.name())
+        .ok_or_else(|| AnalysisError::TypeNotFound(reference.clone()))?
+        .clone()
+        .set_position(reference.position().clone()))
 }

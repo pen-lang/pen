@@ -4,6 +4,7 @@ pub mod duplicate_type_name_validator;
 mod error;
 pub mod expression_visitor;
 pub mod function_definition_qualifier;
+pub mod impossible_type_validator;
 pub mod module_environment_creator;
 pub mod record_field_resolver;
 pub mod record_field_validator;
@@ -41,6 +42,7 @@ pub fn analyze(context: &AnalysisContext, module: &Module) -> Result<Module, Ana
     duplicate_type_name_validator::validate(module)?;
     type_existence_validator::validate(module)?;
     recursive_type_alias_validator::validate(module)?;
+    impossible_type_validator::validate(context, module)?;
 
     let module = type_inferrer::infer(context, module)?;
     type_checker::check_types(context, &module)?;

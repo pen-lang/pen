@@ -12,6 +12,7 @@ pub enum AnalysisError {
     DuplicateTypeNames(Position, Position),
     ErrorTypeUndefined,
     FunctionExpected(Position),
+    ImpossibleRecord(Position),
     InvalidTryOperation(Position),
     ListExpected(Position),
     MapExpected(Position),
@@ -58,6 +59,13 @@ impl Display for AnalysisError {
             }
             Self::FunctionExpected(position) => {
                 write!(formatter, "function expected\n{}", position)
+            }
+            Self::ImpossibleRecord(position) => {
+                write!(
+                    formatter,
+                    "record construction dependent on itself\n{}",
+                    position
+                )
             }
             Self::InvalidTryOperation(position) => {
                 write!(
