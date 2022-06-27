@@ -70,13 +70,14 @@ jobs:
       - uses: actions/checkout@v2
         with:
           repository: pen-lang/homebrew-pen
-      - run: echo version=${{ needs.tag_check.outputs.version }} >> $GITHUB_ENV
       - run: |
-          sed "s/v[[0-9.]*.tar.gz/v$version.tar.gz/" Formula/pen.rb | grep -v revision > /tmp/pen.rb
-          cp /tmp/pen.rb Formula/pen.rb
-      - run: |
+          file=Formula/pen.rb
+          version=${{ needs.tag_check.outputs.version }}
           hash=$(curl -fsSL https://github.com/pen-lang/pen/archive/refs/tags/v$version.tar.gz | sha256sum | cut -f 1 -d ' ')
-          sed -i "s/sha256 .*/sha256 \"$hash\"/" Formula/pen.rb
+
+          sed -i "s/v[[0-9.]*.tar.gz/v$version.tar.gz/" $file
+          sed -i "s/^  sha256 .*/  sha256 \"$hash\"/" $file
+          sed -i /revision/d $file
       - uses: peter-evans/create-pull-request@v4
         with:
           title: Bump version
