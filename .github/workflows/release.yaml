@@ -81,5 +81,4 @@ jobs:
         with:
           title: Bump version
           branch: chore/version
-          labels: release
           token: ${{ secrets.PR_CREATION_TOKEN }}
