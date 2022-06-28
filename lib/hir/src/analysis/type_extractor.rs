@@ -83,51 +83,49 @@ pub fn extract_from_expression(
             )
             .into()
         }
-        Expression::IfType(if_) => {
-            union_type_creator::create(
-                &if_.branches()
-                    .iter()
-                    .map(|branch| {
-                        extract_from_expression(
-                            branch.expression(),
-                            &variables
-                                .clone()
-                                .into_iter()
-                                .chain([(if_.name().into(), branch.type_().clone())])
-                                .collect(),
-                        )
-                    })
-                    .collect::<Result<Vec<_>, _>>()?
-                    .into_iter()
-                    .chain(
-                        if_.else_()
-                            .map(|branch| {
-                                extract_from_expression(
-                                    branch.expression(),
-                                    &variables
-                                        .clone()
-                                        .into_iter()
-                                        .chain([(
-                                            if_.name().into(),
-                                            branch
-                                                .type_()
-                                                .ok_or_else(|| {
-                                                    AnalysisError::TypeNotInferred(
-                                                        branch.position().clone(),
-                                                    )
-                                                })?
-                                                .clone(),
-                                        )])
-                                        .collect(),
-                                )
-                            })
-                            .transpose()?,
+        Expression::IfType(if_) => union_type_creator::create(
+            &if_.branches()
+                .iter()
+                .map(|branch| {
+                    extract_from_expression(
+                        branch.expression(),
+                        &variables
+                            .clone()
+                            .into_iter()
+                            .chain([(if_.name().into(), branch.type_().clone())])
+                            .collect(),
                     )
-                    .collect::<Vec<_>>(),
-                if_.position(),
-            )
-            .unwrap()
-        }
+                })
+                .collect::<Result<Vec<_>, _>>()?
+                .into_iter()
+                .chain(
+                    if_.else_()
+                        .map(|branch| {
+                            extract_from_expression(
+                                branch.expression(),
+                                &variables
+                                    .clone()
+                                    .into_iter()
+                                    .chain([(
+                                        if_.name().into(),
+                                        branch
+                                            .type_()
+                                            .ok_or_else(|| {
+                                                AnalysisError::TypeNotInferred(
+                                                    branch.position().clone(),
+                                                )
+                                            })?
+                                            .clone(),
+                                    )])
+                                    .collect(),
+                            )
+                        })
+                        .transpose()?,
+                )
+                .collect::<Vec<_>>(),
+            if_.position(),
+        )
+        .unwrap(),
         Expression::Lambda(lambda) => extract_from_lambda(lambda).into(),
         Expression::List(list) => {
             types::List::new(list.type_().clone(), list.position().clone()).into()

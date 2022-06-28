@@ -1000,7 +1000,7 @@ dependencies = [
 
 [[package]]
 name = "pen"
-version = "0.3.15"
+version = "0.4.2"
 dependencies = [
  "app",
  "clap 3.2.6",

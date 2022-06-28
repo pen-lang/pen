@@ -42,6 +42,8 @@ jobs:
     needs:
       - tag_check
       - build_asset
+    permissions:
+      contents: write
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v2
@@ -58,8 +60,6 @@ jobs:
           body_path: changes.md
           files: artifacts/**
           fail_on_unmatched_files: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   homebrew:
     needs:
       - tag_check
@@ -70,13 +70,16 @@ jobs:
       - uses: actions/checkout@v2
         with:
           repository: pen-lang/homebrew-pen
-      - run: echo version=${{ needs.tag_check.outputs.version }} >> $GITHUB_ENV
-      - run: sed -i "s/version .*/version '$version'/" Formula/pen.rb
       - run: |
+          file=Formula/pen.rb
+          version=${{ needs.tag_check.outputs.version }}
           hash=$(curl -fsSL https://github.com/pen-lang/pen/archive/refs/tags/v$version.tar.gz | sha256sum | cut -f 1 -d ' ')
-          sed -i "s/sha256 .*/sha256 '$hash'/" Formula/pen.rb
-      - uses: peter-evans/create-pull-request@v3
+
+          sed -i "s/v[[0-9.]*.tar.gz/v$version.tar.gz/" $file
+          sed -i "s/^  sha256 .*/  sha256 \"$hash\"/" $file
+          sed -i /revision/d $file
+      - uses: peter-evans/create-pull-request@v4
         with:
           title: Bump version
-          branch: chore/bump-version
+          branch: chore/version
           token: ${{ secrets.PR_CREATION_TOKEN }}
