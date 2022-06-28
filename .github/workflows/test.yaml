@@ -46,7 +46,8 @@ jobs:
       matrix:
         os:
           - ubuntu-22.04
-          - macos-latest
+          # TODO Enable integration tests on macOS.
+          # - macos-latest
         index: [0, 1, 2, 3, 4, 5, 6, 7]
         total: [8]
     runs-on: ${{ matrix.os }}
