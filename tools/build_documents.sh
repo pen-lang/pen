@@ -59,5 +59,7 @@ go run github.com/raviqqe/gherkin2markdown features doc/src/examples
 
 curl -fsSL https://pen-lang.s3.us-west-1.amazonaws.com/icon.svg >doc/src/favicon.svg
 
+cargo install mdbook-pagetoc
+
 cd doc
 mdbook build
