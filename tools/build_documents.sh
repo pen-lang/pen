@@ -59,5 +59,9 @@ go run github.com/raviqqe/gherkin2markdown features doc/src/examples
 
 curl -fsSL https://pen-lang.s3.us-west-1.amazonaws.com/icon.svg >doc/src/favicon.svg
 
+# TODO Use the original crate after changes are merged.
+# spell-checker: disable-next-line
+cargo install --git https://github.com/raviqqe/mdbook-pagetoc --branch chore/hide-h5
+
 cd doc
 mdbook build
