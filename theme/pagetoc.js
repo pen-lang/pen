@@ -29,10 +29,13 @@ var updateFunction = function() {
     });
 };
 
-const indent = (element, level) => {
-    if (level) {
-        element.style.paddingLeft = `${level * 20}px`;
-    }
+const indentLevels = {
+    H1: 0,
+    H2: 1,
+    H3: 2,
+    H4: 3,
+    H5: 4,
+    H6: 5,
 }
 
 // Populate sidebar on load
@@ -40,23 +43,11 @@ window.addEventListener('load', function() {
     var pagetoc = document.getElementsByClassName("pagetoc")[0];
     var elements = document.getElementsByClassName("header");
     Array.prototype.forEach.call(elements, function(el) {
-        var link = document.createElement("a");
+        const link = document.createElement("a");
+        const indent = indentLevels[el.parentElement.tagName]
 
-        switch (el.parentElement.tagName) {
-            case "H1":
-                break;
-            case "H2":
-                indent(link, 1);
-                break;
-            case "H3":
-                indent(link, 2);
-                break;
-            case "H4":
-                indent(link, 3);
-                break;
-            default:
-                link.style.display = "none";
-                break;
+        if (indent) {
+            link.style.paddingLeft = `${indent * 20}px`;
         }
 
         link.appendChild(document.createTextNode(el.text));
