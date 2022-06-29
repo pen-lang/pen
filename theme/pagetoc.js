@@ -29,31 +29,17 @@ var updateFunction = function() {
     });
 };
 
-const indentLevels = {
-    H1: 0,
-    H2: 1,
-    H3: 2,
-    H4: 3,
-    H5: 4,
-    H6: 5,
-}
-
 // Populate sidebar on load
 window.addEventListener('load', function() {
     var pagetoc = document.getElementsByClassName("pagetoc")[0];
     var elements = document.getElementsByClassName("header");
-    Array.prototype.forEach.call(elements, function(el) {
-        const link = document.createElement("a");
-        const indent = indentLevels[el.parentElement.tagName]
-
-        if (indent) {
-            link.style.paddingLeft = `${indent * 20}px`;
-        }
-
+    Array.prototype.forEach.call(elements, function (el) {
+        var link = document.createElement("a");
         link.appendChild(document.createTextNode(el.text));
         link.href = el.href;
+        link.classList.add("pagetoc-" + el.parentElement.tagName);
         pagetoc.appendChild(link);
-    });
+      });
     updateFunction.call();
 });
 

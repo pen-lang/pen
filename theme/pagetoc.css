@@ -39,4 +39,19 @@
         background: var(--sidebar-bg);
         color: var(--sidebar-fg);
     }
+    .pagetoc .pagetoc-H2 {
+        padding-left: 20px;
+    }
+    .pagetoc .pagetoc-H3 {
+        padding-left: 40px;
+    }
+    .pagetoc .pagetoc-H4 {
+        padding-left: 60px;
+    }
+    .pagetoc .pagetoc-H5 {
+        display: none;
+    }
+    .pagetoc .pagetoc-H6 {
+        display: none;
+    }
 }
