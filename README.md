@@ -75,6 +75,12 @@ Pen aims to make large-scale software development efficient where a number of pe
 - Unit tests are always deterministic and fast.
 - No flaky or slow tests bother developers.
 
+### Security
+
+- No data race
+- No undefined behavior
+- No runtime exception
+
 ### Even more...
 
 - Static typing
