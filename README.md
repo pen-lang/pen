@@ -77,9 +77,9 @@ Pen aims to make large-scale software development efficient where a number of pe
 
 ### Security
 
-- No data race
-- No undefined behavior
 - No runtime exception
+- No undefined behavior
+- No data race
 
 ### Even more...
 
