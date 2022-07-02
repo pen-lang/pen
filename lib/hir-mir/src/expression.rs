@@ -26,6 +26,7 @@ pub fn compile(
 
     Ok(match expression {
         Expression::Boolean(boolean) => mir::ir::Expression::Boolean(boolean.value()),
+        Expression::BuiltInCall(_) => todo!(),
         Expression::Call(call) => mir::ir::Call::new(
             type_::compile(
                 context,
