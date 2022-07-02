@@ -75,6 +75,7 @@ fn infer_expression(
         |expression, variables: &_| infer_expression(context, expression, variables);
 
     Ok(match expression {
+        Expression::BuiltInCall(_) => todo!(),
         Expression::Call(call) => {
             let function = infer_expression(call.function(), variables)?;
 

@@ -91,6 +91,7 @@ fn transform_expression(
     };
 
     Ok(match expression {
+        Expression::BuiltInCall(_) => todo!(),
         Expression::Call(call) => {
             let function_type = type_canonicalizer::canonicalize_function(
                 call.function_type()

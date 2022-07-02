@@ -16,6 +16,11 @@ fn visit_expression(expression: &Expression, visit: &mut impl FnMut(&Expression)
     let mut visit_expression = |expression| visit_expression(expression, visit);
 
     match expression {
+        Expression::BuiltInCall(call) => {
+            for argument in call.arguments() {
+                visit_expression(argument);
+            }
+        }
         Expression::Call(call) => {
             visit_expression(call.function());
 

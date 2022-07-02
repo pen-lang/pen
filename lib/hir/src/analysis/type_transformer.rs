@@ -149,6 +149,13 @@ fn transform_expression(expression: &Expression, transform: &impl Fn(&Type) -> T
     let transform_expression = |expression| transform_expression(expression, transform);
 
     match expression {
+        Expression::BuiltInCall(call) => BuiltInCall::new(
+            call.function_type().map(transform),
+            call.function(),
+            call.arguments().iter().map(transform_expression).collect(),
+            call.position().clone(),
+        )
+        .into(),
         Expression::Call(call) => Call::new(
             call.function_type().map(transform),
             transform_expression(call.function()),
