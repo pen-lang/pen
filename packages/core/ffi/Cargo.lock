@@ -133,9 +133,9 @@ checksum = "2dffe52ecf27772e601905b7522cb4ef790d2cc203488bbd0e2fe85fcb74566d"
 
 [[package]]
 name = "pen-ffi"
-version = "0.6.4"
+version = "0.6.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e762501aa4dfafccbc754ed033c04658286f25c9cbf1f65dd7d6f56f6475f249"
+checksum = "bfe1c76f2b4750111704f5be6d43274918e1cfbbb164dc4d700f5fc23646a685"
 dependencies = [
  "async-stream",
  "futures",
@@ -144,9 +144,9 @@ dependencies = [
 
 [[package]]
 name = "pen-ffi-macro"
-version = "0.2.0"
+version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7ea9d045cc36424e093eeb37838cf90e4019d89e6769785dd00866dfe2cc7252"
+checksum = "13a276f0aa67b4e0f6bb111208086c4a361749f41f6e19628b126c11eb73b3e0"
 dependencies = [
  "convert_case",
  "quote",
