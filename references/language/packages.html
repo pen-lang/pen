@@ -183,10 +183,11 @@
 <p>If you want to write your own system packages, see <a href="/advanced-features/writing-system-packages.html">Writing system packages</a>.</p>
 <h2 id="package-configuration"><a class="header" href="#package-configuration">Package configuration</a></h2>
 <p>Each package has its configuration file named <code>pen.json</code> in a <a href="https://www.json.org/json-en.html">JSON</a> format at its top directory. The JSON file has the following fields.</p>
-<table><thead><tr><th>Name</th><th>Required</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Required</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>type</code></td><td>Yes</td><td>Package type (either <code>application</code>, <code>library</code>, or <code>system</code>)</td></tr>
 <tr><td><code>dependencies</code></td><td>Yes</td><td>Map of package names to their URLs</td></tr>
 </tbody></table>
+</div>
 <p>Package URLs have different protocol schemes depending on where they are located.</p>
 <ul>
 <li>Standard packages: <code>pen</code></li>

@@ -214,11 +214,12 @@ Print = \(s string) none {
 <h3 id="linking-application-files-optional"><a class="header" href="#linking-application-files-optional">Linking application files (optional)</a></h3>
 <p>System packages might have optional script files named <code>pen-link</code> at their top directories. On every build of application packages using the system packages, the script files run given object files specified as command line arguments to link application files. The script files may or may not have file extensions.</p>
 <p>The scripts should accept the following command line arguments.</p>
-<table><thead><tr><th>Argument</th><th>Required</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Argument</th><th>Required</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>-t &lt;target&gt;</code></td><td>No</td><td>Target triple</td></tr>
 <tr><td><code>-o &lt;application&gt;</code></td><td>Yes</td><td>Path of an application file</td></tr>
 <tr><td><code>&lt;archive&gt;...</code></td><td>Yes</td><td>Paths of archive files sorted topologically from main packages</td></tr>
 </tbody></table>
+</div>
 <p>At the liking phase, compiled main functions are available under a symbol named <code>_pen_main</code> with Pen's native calling convention.</p>
 <h2 id="examples"><a class="header" href="#examples">Examples</a></h2>
 <p><a href="https://github.com/pen-lang/pen/tree/main/packages/os">The <code>Os</code> standard package</a> is an example of system packages.</p>

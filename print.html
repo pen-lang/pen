@@ -473,7 +473,7 @@ CheckFoo = \() none | error {
 </code></pre>
 <h2 id="naming-convention"><a class="header" href="#naming-convention">Naming convention</a></h2>
 <p>Naming is important to keep codes consistent. The language currently has the following naming conventions.</p>
-<table><thead><tr><th>Kind</th><th>Case style</th><th>Examples</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Kind</th><th>Case style</th><th>Examples</th></tr></thead><tbody>
 <tr><td>Variables</td><td>Camel case</td><td><code>fooBar</code>, <code>FooBar</code>, <code>i</code>, <code>x</code></td></tr>
 <tr><td>Functions</td><td>Camel case</td><td><code>fooBar</code>, <code>FooBar</code>, <code>f</code>, <code>g</code></td></tr>
 <tr><td>Types</td><td>Camel case</td><td><code>fooBar</code>, <code>FooBar</code></td></tr>
@@ -481,6 +481,7 @@ CheckFoo = \() none | error {
 <tr><td>Module directories</td><td>Camel case</td><td><code>fooBar</code>, <code>FooBar</code></td></tr>
 <tr><td>Packages</td><td>Upper camel case</td><td><code>FooBar</code></td></tr>
 </tbody></table>
+</div>
 <h3 id="global-and-local-names"><a class="header" href="#global-and-local-names">Global and local names</a></h3>
 <p>You should use descriptive names for global functions and types. But, on the other hand, you are encouraged to use abbreviated names for local variables as long as that doesn't incur ambiguity. For example, you might use the following abbreviated names:</p>
 <ul>
@@ -697,7 +698,7 @@ false
 </code></pre>
 <h4 id="escape-sequences"><a class="header" href="#escape-sequences">Escape sequences</a></h4>
 <p>String literals can contain the following escape sequences.</p>
-<table><thead><tr><th>Escape sequence</th><th>Name</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Escape sequence</th><th>Name</th></tr></thead><tbody>
 <tr><td><code>\n</code></td><td>New line</td></tr>
 <tr><td><code>\r</code></td><td>Carriage return</td></tr>
 <tr><td><code>\t</code></td><td>Tab</td></tr>
@@ -705,6 +706,7 @@ false
 <tr><td><code>\\</code></td><td>Backslash</td></tr>
 <tr><td><code>\x9f</code></td><td>Byte</td></tr>
 </tbody></table>
+</div>
 <h2 id="functions"><a class="header" href="#functions">Functions</a></h2>
 <p>A function represents reusable computation with arguments and a result.</p>
 <p>Functions represent not only pure computation but may also execute side effects, such as I/O.</p>
@@ -891,10 +893,11 @@ Blah = \() number {
 <p>If you want to write your own system packages, see <a href="references/language//advanced-features/writing-system-packages.html">Writing system packages</a>.</p>
 <h2 id="package-configuration"><a class="header" href="#package-configuration">Package configuration</a></h2>
 <p>Each package has its configuration file named <code>pen.json</code> in a <a href="https://www.json.org/json-en.html">JSON</a> format at its top directory. The JSON file has the following fields.</p>
-<table><thead><tr><th>Name</th><th>Required</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Required</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>type</code></td><td>Yes</td><td>Package type (either <code>application</code>, <code>library</code>, or <code>system</code>)</td></tr>
 <tr><td><code>dependencies</code></td><td>Yes</td><td>Map of package names to their URLs</td></tr>
 </tbody></table>
+</div>
 <p>Package URLs have different protocol schemes depending on where they are located.</p>
 <ul>
 <li>Standard packages: <code>pen</code></li>
@@ -2533,12 +2536,13 @@ main = \(ctx context) none {
 <p><em>When</em> I run <code>pen build --target &lt;target&gt;</code></p>
 <p><em>Then</em> the exit status should be 0.</p>
 <h3 id="examples-2"><a class="header" href="#examples-2">Examples</a></h3>
-<table><thead><tr><th>target</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>target</th></tr></thead><tbody>
 <tr><td>i686-unknown-linux-musl</td></tr>
 <tr><td>x86_64-unknown-linux-musl</td></tr>
 <tr><td>aarch64-unknown-linux-musl</td></tr>
 <tr><td>wasm32-wasi</td></tr>
 </tbody></table>
+</div>
 <h2 id="cross-build-a-library-package"><a class="header" href="#cross-build-a-library-package">Cross-build a library package</a></h2>
 <p><em>Given</em> a file named &quot;pen.json&quot; with:</p>
 <pre><code class="language-json">{
@@ -2555,13 +2559,13 @@ main = \(ctx context) none {
 <p><em>When</em> I run <code>pen build --target &lt;target&gt;</code></p>
 <p><em>Then</em> the exit status should be 0.</p>
 <h3 id="examples-3"><a class="header" href="#examples-3">Examples</a></h3>
-<table><thead><tr><th>target</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>target</th></tr></thead><tbody>
 <tr><td>i686-unknown-linux-musl</td></tr>
 <tr><td>x86_64-unknown-linux-musl</td></tr>
 <tr><td>aarch64-unknown-linux-musl</td></tr>
 <tr><td>wasm32-wasi</td></tr>
 </tbody></table>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="creating-packages"><a class="header" href="#creating-packages">Creating packages</a></h1>
+</div><div style="break-before: page; page-break-before: always;"></div><h1 id="creating-packages"><a class="header" href="#creating-packages">Creating packages</a></h1>
 <h2 id="create-an-application-package"><a class="header" href="#create-an-application-package">Create an application package</a></h2>
 <p><em>Given</em> I successfully run <code>pen create foo</code></p>
 <p><em>And</em> I cd to &quot;foo&quot;</p>
@@ -3254,9 +3258,10 @@ f = \(x number) number {
 <h2 id="building-libraries-of-foreign-languages"><a class="header" href="#building-libraries-of-foreign-languages">Building libraries of foreign languages</a></h2>
 <p>During builds of your packages, you might want to build libraries of foreign languages so that you can use their functions. If that's your case, you can set up <code>pen-ffi</code> scripts in your packages. The script files run on every build and output absolute paths to <code>.a</code> archive files of your libraries in foreign languages built by the scripts. The script files may or may not have file extensions.</p>
 <p>The <code>pen-ffi</code> scripts should accept the following command line arguments.</p>
-<table><thead><tr><th>Argument</th><th>Required</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Argument</th><th>Required</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>-t &lt;target&gt;</code></td><td>No</td><td>Custom target triple of builds</td></tr>
 </tbody></table>
+</div>
 <p>One of examples in practice is <a href="https://github.com/pen-lang/pen/blob/main/packages/core/pen-ffi.sh">a <code>pen-ffi.sh</code> file in the <code>Core</code> library</a>.</p>
 <h2 id="native-calling-convention-in-pen"><a class="header" href="#native-calling-convention-in-pen">Native calling convention in Pen</a></h2>
 <blockquote>
@@ -3327,11 +3332,12 @@ Print = \(s string) none {
 <h3 id="linking-application-files-optional"><a class="header" href="#linking-application-files-optional">Linking application files (optional)</a></h3>
 <p>System packages might have optional script files named <code>pen-link</code> at their top directories. On every build of application packages using the system packages, the script files run given object files specified as command line arguments to link application files. The script files may or may not have file extensions.</p>
 <p>The scripts should accept the following command line arguments.</p>
-<table><thead><tr><th>Argument</th><th>Required</th><th>Description</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Argument</th><th>Required</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>-t &lt;target&gt;</code></td><td>No</td><td>Target triple</td></tr>
 <tr><td><code>-o &lt;application&gt;</code></td><td>Yes</td><td>Path of an application file</td></tr>
 <tr><td><code>&lt;archive&gt;...</code></td><td>Yes</td><td>Paths of archive files sorted topologically from main packages</td></tr>
 </tbody></table>
+</div>
 <p>At the liking phase, compiled main functions are available under a symbol named <code>_pen_main</code> with Pen's native calling convention.</p>
 <h2 id="examples-4"><a class="header" href="#examples-4">Examples</a></h2>
 <p><a href="https://github.com/pen-lang/pen/tree/main/packages/os">The <code>Os</code> standard package</a> is an example of system packages.</p>
