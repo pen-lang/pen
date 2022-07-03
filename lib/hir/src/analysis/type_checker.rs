@@ -76,16 +76,10 @@ fn check_expression(
 
             match call.function() {
                 BuiltInFunction::Size => {
-                    if let [argument] = call.arguments() {
-                        if !matches!(
-                            type_canonicalizer::canonicalize(
-                                &check_expression(argument, variables)?,
-                                context.types(),
-                            )?,
-                            Type::List(_) | Type::Map(_)
-                        ) {
+                    if let [argument_type] = function_type.arguments() {
+                        if !matches!(argument_type, Type::List(_) | Type::Map(_)) {
                             return Err(AnalysisError::CollectionExpected(
-                                argument.position().clone(),
+                                call.arguments()[0].position().clone(),
                             ));
                         }
                     } else {
