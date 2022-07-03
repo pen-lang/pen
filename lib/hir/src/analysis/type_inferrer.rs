@@ -75,7 +75,36 @@ fn infer_expression(
         |expression, variables: &_| infer_expression(context, expression, variables);
 
     Ok(match expression {
-        Expression::BuiltInCall(_) => todo!(),
+        Expression::BuiltInCall(call) => {
+            let arguments = call
+                .arguments()
+                .iter()
+                .map(|argument| infer_expression(argument, variables))
+                .collect::<Result<Vec<_>, _>>()?;
+            let argument_types = arguments
+                .iter()
+                .map(|argument| {
+                    type_extractor::extract_from_expression(context, argument, variables)
+                })
+                .collect::<Result<_, _>>()?;
+
+            BuiltInCall::new(
+                Some(
+                    types::Function::new(
+                        argument_types,
+                        match call.function() {
+                            BuiltInFunction::Size => types::Number::new(call.position().clone()),
+                        },
+                        call.position().clone(),
+                    )
+                    .into(),
+                ),
+                call.function(),
+                arguments,
+                call.position().clone(),
+            )
+            .into()
+        }
         Expression::Call(call) => {
             let function = infer_expression(call.function(), variables)?;
 
@@ -542,6 +571,55 @@ mod tests {
     #[test]
     fn infer_empty_module() {
         infer_module(&Module::empty()).unwrap();
+    }
+
+    #[test]
+    fn infer_built_in_call() {
+        let list_type = types::List::new(types::None::new(Position::fake()), Position::fake());
+
+        assert_eq!(
+            infer_module(
+                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                    "x",
+                    Lambda::new(
+                        vec![Argument::new("x", list_type.clone())],
+                        types::Number::new(Position::fake()),
+                        BuiltInCall::new(
+                            None,
+                            BuiltInFunction::Size,
+                            vec![Variable::new("x", Position::fake()).into()],
+                            Position::fake()
+                        ),
+                        Position::fake(),
+                    ),
+                    false,
+                )],)
+            ),
+            Ok(
+                Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                    "x",
+                    Lambda::new(
+                        vec![Argument::new("x", list_type.clone())],
+                        types::Number::new(Position::fake()),
+                        BuiltInCall::new(
+                            Some(
+                                types::Function::new(
+                                    vec![list_type.clone().into()],
+                                    types::Number::new(Position::fake()),
+                                    Position::fake()
+                                )
+                                .into()
+                            ),
+                            BuiltInFunction::Size,
+                            vec![Variable::new("x", Position::fake()).into()],
+                            Position::fake()
+                        ),
+                        Position::fake(),
+                    ),
+                    false,
+                )],)
+            )
+        );
     }
 
     #[test]
