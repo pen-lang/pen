@@ -197,16 +197,33 @@ fn compile_expression(expression: &ast::Expression) -> Result<ir::Expression, Co
         ast::Expression::Boolean(boolean) => {
             ir::Boolean::new(boolean.value(), boolean.position().clone()).into()
         }
-        ast::Expression::Call(call) => ir::Call::new(
-            None,
-            compile_expression(call.function())?,
-            call.arguments()
+        ast::Expression::Call(call) => {
+            let arguments = call
+                .arguments()
                 .iter()
                 .map(compile_expression)
-                .collect::<Result<_, _>>()?,
-            call.position().clone(),
-        )
-        .into(),
+                .collect::<Result<_, _>>()?;
+
+            match call.function() {
+                // TODO Invalidate re-definitions of built-in functions?
+                ast::Expression::Variable(variable) if variable.name() == "size" => {
+                    ir::BuiltInCall::new(
+                        None,
+                        ir::BuiltInFunction::Size,
+                        arguments,
+                        call.position().clone(),
+                    )
+                    .into()
+                }
+                _ => ir::Call::new(
+                    None,
+                    compile_expression(call.function())?,
+                    arguments,
+                    call.position().clone(),
+                )
+                .into(),
+            }
+        }
         ast::Expression::RecordDeconstruction(operation) => ir::RecordDeconstruction::new(
             None,
             compile_expression(operation.expression())?,

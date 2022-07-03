@@ -118,10 +118,10 @@ _listSize = \(l _anyList) number {
   _nodeSize(l.node(), 0)
 }
 
-_nodeSize = \(n _node, n number) number {
+_nodeSize = \(n _node | none, s number) number {
   if n = n as _node {
-    _nodeSize(n.rest(), n + 1)
+    _nodeSize(n.rest(), s + 1)
   } else {
-    n
+    s
   }
 }
