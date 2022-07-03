@@ -3278,10 +3278,7 @@ mod tests {
                     &Module::empty().set_definitions(vec![FunctionDefinition::fake(
                         "x",
                         Lambda::new(
-                            vec![Argument::new(
-                                "x",
-                                types::None::new(Position::fake()),
-                            )],
+                            vec![Argument::new("x", types::None::new(Position::fake()),)],
                             types::Number::new(Position::fake()),
                             BuiltInCall::new(
                                 Some(
