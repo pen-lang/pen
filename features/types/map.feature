@@ -111,3 +111,13 @@ Feature: Map
     """
     When I successfully run `pen build`
     Then the exit status should be 0
+
+  Scenario: Get a size of a map
+    Given a file named "Foo.pen" with:
+    """pen
+    f = \(xs {string: number}) number {
+      size(xs)
+    }
+    """
+    When I run `pen build`
+    Then the exit status should be 0
