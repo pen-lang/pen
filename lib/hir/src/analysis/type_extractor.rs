@@ -348,4 +348,74 @@ mod tests {
             )
         );
     }
+
+    mod built_in_call {
+        use super::*;
+        use pretty_assertions::assert_eq;
+
+        #[test]
+        fn extract_from_size() {
+            assert_eq!(
+                extract_from_expression(
+                    &empty_context(),
+                    &BuiltInCall::new(
+                        None,
+                        BuiltInFunction::Size,
+                        vec![List::new(
+                            types::None::new(Position::fake()),
+                            vec![],
+                            Position::fake()
+                        )
+                        .into()],
+                        Position::fake()
+                    )
+                    .into(),
+                    &Default::default(),
+                ),
+                Ok(types::Number::new(Position::fake()).into())
+            );
+        }
+
+        #[test]
+        fn extract_from_spawn() {
+            assert_eq!(
+                extract_from_expression(
+                    &empty_context(),
+                    &BuiltInCall::new(
+                        None,
+                        BuiltInFunction::Spawn,
+                        vec![Lambda::new(
+                            vec![],
+                            types::None::new(Position::fake()),
+                            None::new(Position::fake()),
+                            Position::fake()
+                        )
+                        .into()],
+                        Position::fake()
+                    )
+                    .into(),
+                    &Default::default(),
+                ),
+                Ok(types::Function::new(
+                    vec![],
+                    types::None::new(Position::fake()),
+                    Position::fake()
+                )
+                .into())
+            );
+        }
+
+        #[test]
+        fn fail_to_extract_from_spawn() {
+            assert!(matches!(
+                extract_from_expression(
+                    &empty_context(),
+                    &BuiltInCall::new(None, BuiltInFunction::Spawn, vec![], Position::fake())
+                        .into(),
+                    &Default::default(),
+                ),
+                Err(AnalysisError::WrongArgumentCount(_))
+            ));
+        }
+    }
 }
