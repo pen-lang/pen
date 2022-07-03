@@ -7,7 +7,6 @@ Some(
         message: "unexpected `)`",
         expected: [
             "unary operator",
-            "go",
             "if",
             "\\(",
             "[",
