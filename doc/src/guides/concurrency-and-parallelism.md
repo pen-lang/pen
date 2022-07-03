@@ -2,7 +2,7 @@
 
 Concurrent programs use CPU time efficiently without blocking on I/O or synchronization. And parallel programs leverage multi-core CPUs to compute something in parallel for speed.
 
-Pen provides some bulit-in functions for concurrent and parallel programming. Its `go` built-in function runs a given function concurrently, and possibly in parallel.
+Pen provides some built-in functions for concurrent and parallel programming. Its `go` built-in function runs a given function concurrently, and possibly in parallel.
 
 ```pen
 f = go(\() number {
