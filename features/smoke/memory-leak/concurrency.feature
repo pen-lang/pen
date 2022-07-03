@@ -15,7 +15,7 @@ Feature: Concurrency
     Given a file named "main.pen" with:
     """pen
     main = \(ctx context) none {
-      f = go \() none { none }
+      f = go(\() none { none })
 
       <result>
     }
@@ -40,10 +40,10 @@ Feature: Concurrency
     main = \(ctx context) none {
       x = foo{x: 1, y: 2, z: 3}
 
-      f = go \() none {
+      f = go(\() none {
         _ = x
         none
-      }
+      })
 
       <result>
     }
@@ -62,10 +62,10 @@ Feature: Concurrency
     main = \(ctx context) none {
       x = \() none { none }
 
-      f = go \() none {
+      f = go(\() none {
         _ = x
         none
-      }
+      })
 
       <result>
     }
@@ -95,10 +95,10 @@ Feature: Concurrency
         none
       }
 
-      f = go \() none {
+      f = go(\() none {
         _ = y
         none
-      }
+      })
 
       <result>
     }

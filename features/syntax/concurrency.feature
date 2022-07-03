@@ -14,7 +14,7 @@ Feature: Concurrency
     Given a file named "main.pen" with:
     """pen
     main = \(ctx context) none {
-      f = go \() none { none }
+      f = go(\() none { none })
 
       f()
     }

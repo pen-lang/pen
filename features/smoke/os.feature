@@ -115,7 +115,7 @@ Feature: OS
     import Os'Context { Context }
 
     main = \(ctx context) none {
-      f = go \() none { none }
+      f = go(\() none { none })
 
       f()
     }
