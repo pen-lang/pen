@@ -29,6 +29,7 @@ fn qualify_list_type_configuration(
         rest_function_name: prelude_prefix.to_owned() + &configuration.rest_function_name,
         list_type_name: prelude_prefix.to_owned() + &configuration.list_type_name,
         first_rest_type_name: prelude_prefix.to_owned() + &configuration.first_rest_type_name,
+        size_function_name: prelude_prefix.to_owned() + &configuration.size_function_name,
     }
 }
 
@@ -66,6 +67,7 @@ fn qualify_map_type_configuration(
         empty_type_name: prelude_prefix.to_owned() + &configuration.empty_type_name,
         delete_function_name: prelude_prefix.to_owned() + &configuration.delete_function_name,
         set_function_name: prelude_prefix.to_owned() + &configuration.set_function_name,
+        size_function_name: prelude_prefix.to_owned() + &configuration.size_function_name,
         hash: qualify_hash_configuration(&configuration.hash, prelude_prefix),
         iteration: qualify_map_type_iteration_configuration(
             &configuration.iteration,

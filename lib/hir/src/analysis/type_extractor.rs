@@ -16,6 +16,9 @@ pub fn extract_from_expression(
 
     Ok(match expression {
         Expression::Boolean(boolean) => types::Boolean::new(boolean.position().clone()).into(),
+        Expression::BuiltInCall(call) => match call.function() {
+            BuiltInFunction::Size => types::Number::new(call.position().clone()).into(),
+        },
         Expression::Call(call) => type_canonicalizer::canonicalize_function(
             call.function_type()
                 .ok_or_else(|| AnalysisError::TypeNotInferred(call.position().clone()))?,

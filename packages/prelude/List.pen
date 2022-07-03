@@ -113,3 +113,15 @@ _hashNode = \(f \(any) number, node \() _node | none, h number) number {
     h
   }
 }
+
+_listSize = \(l _anyList) number {
+  _nodeSize(l.node(), 0)
+}
+
+_nodeSize = \(n _node | none, s number) number {
+  if n = n as _node {
+    _nodeSize(n.rest(), s + 1)
+  } else {
+    s
+  }
+}

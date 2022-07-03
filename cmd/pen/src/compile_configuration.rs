@@ -32,6 +32,7 @@ pub static COMPILE_CONFIGURATION: Lazy<Arc<app::module_compiler::CompileConfigur
                     rest_function_name: "_rest".into(),
                     list_type_name: "_anyList".into(),
                     first_rest_type_name: "_firstRest".into(),
+                    size_function_name: "_listSize".into(),
                 },
                 map_type: app::module_compiler::MapTypeConfiguration {
                     context_function_name: "_newMapContext".into(),
@@ -44,6 +45,7 @@ pub static COMPILE_CONFIGURATION: Lazy<Arc<app::module_compiler::CompileConfigur
                     merge_function_name: "_mergeMaps".into(),
                     delete_function_name: "_deleteMap".into(),
                     set_function_name: "_setMap".into(),
+                    size_function_name: "_mapSize".into(),
                     hash: app::module_compiler::HashConfiguration {
                         combine_function_name: "_combineHashes".into(),
                         number_hash_function_name: "_hashNumber".into(),

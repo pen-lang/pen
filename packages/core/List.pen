@@ -1,18 +1,5 @@
 # This module provides common list operations.
 
-# Calculate a length of a list.
-Length = \(xs [any]) number {
-  lengthRecursive(xs, 0)
-}
-
-lengthRecursive = \(xs [any], n number) number {
-  if [_, ...xs] = xs {
-    lengthRecursive(xs, n + 1)
-  } else {
-    n
-  }
-}
-
 # Get the first element in a list. If a list is empty, it returns a fallback value.
 First = \(xs [any], fallback any) any {
   if [x, ..._] = xs {
