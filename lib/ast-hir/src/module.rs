@@ -205,7 +205,6 @@ fn compile_expression(expression: &ast::Expression) -> Result<ir::Expression, Co
                 .collect::<Result<_, _>>()?;
 
             match call.function() {
-                // TODO Invalidate re-definitions of built-in functions?
                 ast::Expression::Variable(variable) if variable.name() == "size" => {
                     ir::BuiltInCall::new(
                         None,
