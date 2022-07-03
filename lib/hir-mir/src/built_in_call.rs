@@ -28,7 +28,7 @@ pub fn compile(
 
     Ok(match call.function() {
         BuiltInFunction::Size => mir::ir::Call::new(
-            type_::compile_function(&function_type, context)?,
+            type_::compile_function(context, &function_type)?,
             match &function_type.arguments()[0] {
                 Type::List(_) => {
                     mir::ir::Variable::new(&context.configuration()?.list_type.size_function_name)

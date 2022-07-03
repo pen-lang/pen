@@ -1089,7 +1089,7 @@ mod tests {
                         "y",
                         mir::ir::Let::new(
                             "y",
-                            type_::compile_function(&function_type, &context).unwrap(),
+                            type_::compile_function(&context, &function_type).unwrap(),
                             mir::ir::RecordField::new(
                                 concrete_function_type,
                                 0,

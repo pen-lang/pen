@@ -9,7 +9,7 @@ pub fn compile(context: &CompileContext, type_: &Type) -> Result<mir::types::Typ
     Ok(
         match type_canonicalizer::canonicalize(type_, context.types())? {
             Type::Boolean(_) => mir::types::Type::Boolean,
-            Type::Function(function) => compile_function(&function, context)?.into(),
+            Type::Function(function) => compile_function(context, &function)?.into(),
             Type::List(_) => compile_list(context)?.into(),
             Type::Map(_) => compile_map(context)?.into(),
             Type::None(_) => mir::types::Type::None,
@@ -23,8 +23,8 @@ pub fn compile(context: &CompileContext, type_: &Type) -> Result<mir::types::Typ
 }
 
 pub fn compile_function(
-    function: &types::Function,
     context: &CompileContext,
+    function: &types::Function,
 ) -> Result<mir::types::Function, CompileError> {
     let compile = |type_| compile(context, type_);
 

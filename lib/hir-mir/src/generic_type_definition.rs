@@ -27,7 +27,7 @@ fn compile_type_definition(
         Type::Function(function_type) => Some(mir::ir::TypeDefinition::new(
             type_::compile_concrete_function_name(function_type, context.types())?,
             mir::types::RecordBody::new(vec![
-                type_::compile_function(function_type, context)?.into()
+                type_::compile_function(context, function_type)?.into()
             ]),
         )),
         Type::List(list_type) => Some(mir::ir::TypeDefinition::new(
@@ -156,8 +156,8 @@ mod tests {
             Ok(vec![mir::ir::TypeDefinition::new(
                 type_::compile_concrete_function_name(&function_type, context.types()).unwrap(),
                 mir::types::RecordBody::new(vec![type_::compile_function(
+                    &context,
                     &function_type,
-                    &context
                 )
                 .unwrap()
                 .into()]),
