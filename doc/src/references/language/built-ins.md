@@ -16,6 +16,17 @@ type error {
 
 ## Functions
 
+### `size`
+
+It calculates a size of a list or a map. It is generic and you can apply it to any types of lists and maps.
+
+Its time complexity is O(n) for lists and O(1) for maps.
+
+```pen
+\(list [a]) number
+\(map {a: b}) number
+```
+
 ### `error`
 
 It creates an error with its source information.
