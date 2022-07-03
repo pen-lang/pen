@@ -576,55 +576,6 @@ mod tests {
     }
 
     #[test]
-    fn infer_built_in_call() {
-        let list_type = types::List::new(types::None::new(Position::fake()), Position::fake());
-
-        assert_eq!(
-            infer_module(
-                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
-                    "x",
-                    Lambda::new(
-                        vec![Argument::new("x", list_type.clone())],
-                        types::Number::new(Position::fake()),
-                        BuiltInCall::new(
-                            None,
-                            BuiltInFunction::Size,
-                            vec![Variable::new("x", Position::fake()).into()],
-                            Position::fake()
-                        ),
-                        Position::fake(),
-                    ),
-                    false,
-                )],)
-            ),
-            Ok(
-                Module::empty().set_definitions(vec![FunctionDefinition::fake(
-                    "x",
-                    Lambda::new(
-                        vec![Argument::new("x", list_type.clone())],
-                        types::Number::new(Position::fake()),
-                        BuiltInCall::new(
-                            Some(
-                                types::Function::new(
-                                    vec![list_type.into()],
-                                    types::Number::new(Position::fake()),
-                                    Position::fake()
-                                )
-                                .into()
-                            ),
-                            BuiltInFunction::Size,
-                            vec![Variable::new("x", Position::fake()).into()],
-                            Position::fake()
-                        ),
-                        Position::fake(),
-                    ),
-                    false,
-                )],)
-            )
-        );
-    }
-
-    #[test]
     fn infer_call() {
         assert_eq!(
             infer_module(
@@ -1765,6 +1716,122 @@ mod tests {
                         ),
                         false,
                     )],)
+                )
+            );
+        }
+    }
+
+    mod built_in_call {
+        use super::*;
+        use pretty_assertions::assert_eq;
+
+        #[test]
+        fn infer_size() {
+            let list_type = types::List::new(types::None::new(Position::fake()), Position::fake());
+
+            assert_eq!(
+                infer_module(
+                    &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                        "x",
+                        Lambda::new(
+                            vec![Argument::new("x", list_type.clone())],
+                            types::Number::new(Position::fake()),
+                            BuiltInCall::new(
+                                None,
+                                BuiltInFunction::Size,
+                                vec![Variable::new("x", Position::fake()).into()],
+                                Position::fake()
+                            ),
+                            Position::fake(),
+                        ),
+                        false,
+                    )],)
+                ),
+                Ok(
+                    Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                        "x",
+                        Lambda::new(
+                            vec![Argument::new("x", list_type.clone())],
+                            types::Number::new(Position::fake()),
+                            BuiltInCall::new(
+                                Some(
+                                    types::Function::new(
+                                        vec![list_type.into()],
+                                        types::Number::new(Position::fake()),
+                                        Position::fake()
+                                    )
+                                    .into()
+                                ),
+                                BuiltInFunction::Size,
+                                vec![Variable::new("x", Position::fake()).into()],
+                                Position::fake()
+                            ),
+                            Position::fake(),
+                        ),
+                        false,
+                    )],)
+                )
+            );
+        }
+
+        #[test]
+        fn infer_spawn() {
+            let function_type =
+                types::Function::new(vec![], types::None::new(Position::fake()), Position::fake());
+
+            assert_eq!(
+                infer_module(
+                    &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                        "x",
+                        Lambda::new(
+                            vec![],
+                            function_type.clone(),
+                            BuiltInCall::new(
+                                None,
+                                BuiltInFunction::Spawn,
+                                vec![Lambda::new(
+                                    vec![],
+                                    types::None::new(Position::fake()),
+                                    None::new(Position::fake()),
+                                    Position::fake(),
+                                )
+                                .into()],
+                                Position::fake()
+                            ),
+                            Position::fake(),
+                        ),
+                        false,
+                    )],)
+                ),
+                Ok(
+                    Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                        "x",
+                        Lambda::new(
+                            vec![],
+                            function_type.clone(),
+                            BuiltInCall::new(
+                                Some(
+                                    types::Function::new(
+                                        vec![function_type.clone().into()],
+                                        function_type,
+                                        Position::fake()
+                                    )
+                                    .into()
+                                ),
+                                BuiltInFunction::Spawn,
+                                vec![Lambda::new(
+                                    vec![],
+                                    types::None::new(Position::fake()),
+                                    None::new(Position::fake()),
+                                    Position::fake(),
+                                )
+                                .into()],
+                                Position::fake()
+                            ),
+                            Position::fake(),
+                        ),
+                        false,
+                    )])
                 )
             );
         }
