@@ -1,12 +1,11 @@
 use super::{
-    context::CompileContext,
-    transformation::{boolean_operation, equal_operation, if_list, not_equal_operation},
-    type_, CompileError,
-};
-use crate::{
+    built_in_call,
     concurrency_configuration::MODULE_LOCAL_SPAWN_FUNCTION_NAME,
+    context::CompileContext,
     downcast,
+    transformation::{boolean_operation, equal_operation, if_list, not_equal_operation},
     transformation::{if_map, list_literal, map_literal},
+    type_, CompileError,
 };
 use fnv::FnvHashMap;
 use hir::{
@@ -26,7 +25,7 @@ pub fn compile(
 
     Ok(match expression {
         Expression::Boolean(boolean) => mir::ir::Expression::Boolean(boolean.value()),
-        Expression::BuiltInCall(_) => todo!(),
+        Expression::BuiltInCall(call) => built_in_call::compile(context, call)?,
         Expression::Call(call) => mir::ir::Call::new(
             type_::compile(
                 context,

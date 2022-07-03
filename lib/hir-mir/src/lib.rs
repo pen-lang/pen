@@ -1,3 +1,4 @@
+mod built_in_call;
 mod compile_configuration;
 mod concurrency_configuration;
 mod context;
