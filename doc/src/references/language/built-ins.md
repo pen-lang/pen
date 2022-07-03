@@ -18,7 +18,7 @@ type error {
 
 ### `size`
 
-It calculates a size of a list or a map. It is generic and you can apply it to any types of lists and maps.
+It calculates a size of a list or a map. It is generic and you can apply it to any list and map types.
 
 Its time complexity is O(n) for lists and O(1) for maps.
 
