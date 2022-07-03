@@ -1,5 +1,9 @@
 use crate::{context::CompileContext, expression, type_, CompileError};
-use hir::{analysis::type_canonicalizer, analysis::AnalysisError, ir::*, types::Type};
+use hir::{
+    analysis::{type_canonicalizer, AnalysisError},
+    ir::*,
+    types::Type,
+};
 
 pub fn compile(
     context: &CompileContext,

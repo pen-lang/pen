@@ -3,8 +3,10 @@ use super::{
     concurrency_configuration::MODULE_LOCAL_SPAWN_FUNCTION_NAME,
     context::CompileContext,
     downcast,
-    transformation::{boolean_operation, equal_operation, if_list, not_equal_operation},
-    transformation::{if_map, list_literal, map_literal},
+    transformation::{
+        boolean_operation, equal_operation, if_list, if_map, list_literal, map_literal,
+        not_equal_operation,
+    },
     type_, CompileError,
 };
 use fnv::FnvHashMap;
