@@ -59,51 +59,58 @@ fn check_expression(
         Expression::Boolean(boolean) => types::Boolean::new(boolean.position().clone()).into(),
         Expression::BuiltInCall(call) => {
             let position = call.position();
+            let function_type = type_canonicalizer::canonicalize_function(
+                call.function_type()
+                    .ok_or_else(|| AnalysisError::TypeNotInferred(position.clone()))?,
+                context.types(),
+            )?
+            .ok_or_else(|| AnalysisError::FunctionExpected(position.clone()))?;
+
+            if call.arguments().len() != function_type.arguments().len() {
+                return Err(AnalysisError::WrongArgumentCount(position.clone()));
+            }
+
+            for (argument, type_) in call.arguments().iter().zip(function_type.arguments()) {
+                check_subsumption(&check_expression(argument, variables)?, type_)?;
+            }
 
             match call.function() {
                 BuiltInFunction::Size => {
                     if let [argument] = call.arguments() {
-                        if matches!(
+                        if !matches!(
                             type_canonicalizer::canonicalize(
                                 &check_expression(argument, variables)?,
                                 context.types(),
                             )?,
                             Type::List(_) | Type::Map(_)
                         ) {
-                            Ok(types::Number::new(position.clone()).into())
-                        } else {
-                            Err(AnalysisError::CollectionExpected(
+                            return Err(AnalysisError::CollectionExpected(
                                 argument.position().clone(),
-                            ))
+                            ));
                         }
                     } else {
-                        Err(AnalysisError::WrongArgumentCount(position.clone()))
-                    }?
+                        return Err(AnalysisError::WrongArgumentCount(position.clone()));
+                    }
                 }
                 BuiltInFunction::Spawn => {
-                    if let [argument] = call.arguments() {
-                        let function_type = type_canonicalizer::canonicalize_function(
-                            &check_expression(argument, variables)?,
+                    if let [argument_type] = function_type.arguments() {
+                        if !type_canonicalizer::canonicalize_function(
+                            argument_type,
                             context.types(),
                         )?
-                        .ok_or_else(|| AnalysisError::FunctionExpected(position.clone()))?;
-
-                        check_subsumption(
-                            &function_type.clone().into(),
-                            call.function_type()
-                                .ok_or_else(|| AnalysisError::TypeNotInferred(position.clone()))?,
-                        )?;
-
-                        if !function_type.arguments().is_empty() {
+                        .ok_or_else(|| AnalysisError::FunctionExpected(position.clone()))?
+                        .arguments()
+                        .is_empty()
+                        {
                             return Err(AnalysisError::SpawnedFunctionArguments(position.clone()));
                         }
-
-                        Ok(function_type.into())
                     } else {
-                        Err(AnalysisError::WrongArgumentCount(position.clone()))
-                    }?
+                        return Err(AnalysisError::WrongArgumentCount(position.clone()));
+                    }
                 }
             }
+
+            function_type.result().clone()
         }
         Expression::Call(call) => {
             let type_ = call
@@ -3348,7 +3355,14 @@ mod tests {
                             vec![],
                             function_type.clone(),
                             BuiltInCall::new(
-                                Some(function_type.into()),
+                                Some(
+                                    types::Function::new(
+                                        vec![function_type.clone().into()],
+                                        function_type,
+                                        Position::fake(),
+                                    )
+                                    .into(),
+                                ),
                                 BuiltInFunction::Spawn,
                                 vec![Lambda::new(
                                     vec![],
@@ -3383,7 +3397,14 @@ mod tests {
                                 vec![],
                                 function_type.clone(),
                                 BuiltInCall::new(
-                                    Some(function_type.into()),
+                                    Some(
+                                        types::Function::new(
+                                            vec![function_type.clone().into()],
+                                            function_type,
+                                            Position::fake()
+                                        )
+                                        .into()
+                                    ),
                                     BuiltInFunction::Spawn,
                                     vec![Lambda::new(
                                         vec![Argument::new(
