@@ -58,24 +58,28 @@ fn check_expression(
     Ok(match expression {
         Expression::Boolean(boolean) => types::Boolean::new(boolean.position().clone()).into(),
         Expression::BuiltInCall(call) => match call.function() {
-            BuiltInFunction::Size => match call.arguments() {
-                [argument] => {
-                    if !matches!(
+            BuiltInFunction::Size => {
+                let position = call.position();
+
+                if let [argument] = call.arguments() {
+                    if matches!(
                         type_canonicalizer::canonicalize(
                             &check_expression(argument, variables)?,
                             context.types(),
                         )?,
                         Type::List(_) | Type::Map(_)
                     ) {
-                        return Err(AnalysisError::CollectionExpected(
-                            call.arguments()[0].position().clone(),
-                        ));
+                        Ok(types::Number::new(position.clone()).into())
+                    } else {
+                        Err(AnalysisError::CollectionExpected(
+                            argument.position().clone(),
+                        ))
                     }
-
-                    types::Number::new(call.position().clone()).into()
-                }
-                _ => return Err(AnalysisError::WrongArgumentCount(call.position().clone())),
-            },
+                } else {
+                    Err(AnalysisError::WrongArgumentCount(position.clone()))
+                }?
+            }
+            BuiltInFunction::Spawn => todo!(),
         },
         Expression::Call(call) => {
             let type_ = call

@@ -76,6 +76,7 @@ fn infer_expression(
 
     Ok(match expression {
         Expression::BuiltInCall(call) => {
+            let position = call.position();
             let arguments = call
                 .arguments()
                 .iter()
@@ -86,22 +87,23 @@ fn infer_expression(
                 .map(|argument| {
                     type_extractor::extract_from_expression(context, argument, variables)
                 })
-                .collect::<Result<_, _>>()?;
+                .collect::<Result<Vec<_>, _>>()?;
+            let result_type = match call.function() {
+                BuiltInFunction::Size => types::Number::new(position.clone()).into(),
+                BuiltInFunction::Spawn => {
+                    if let [argument_type] = &argument_types[..] {
+                        argument_type.clone()
+                    } else {
+                        return Err(AnalysisError::WrongArgumentCount(position.clone()));
+                    }
+                }
+            };
 
             BuiltInCall::new(
-                Some(
-                    types::Function::new(
-                        argument_types,
-                        match call.function() {
-                            BuiltInFunction::Size => types::Number::new(call.position().clone()),
-                        },
-                        call.position().clone(),
-                    )
-                    .into(),
-                ),
+                Some(types::Function::new(argument_types, result_type, position.clone()).into()),
                 call.function(),
                 arguments,
-                call.position().clone(),
+                position.clone(),
             )
             .into()
         }
