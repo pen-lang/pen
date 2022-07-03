@@ -790,6 +790,12 @@ false
 }
 </code></pre>
 <h2 id="functions-1"><a class="header" href="#functions-1">Functions</a></h2>
+<h3 id="size"><a class="header" href="#size"><code>size</code></a></h3>
+<p>It calculates a size of a list or a map. It is generic and you can apply it to any list and map types.</p>
+<p>Its time complexity is O(n) for lists and O(1) for maps.</p>
+<pre><code class="language-pen">\(list [a]) number
+\(map {a: b}) number
+</code></pre>
 <h3 id="error-1"><a class="header" href="#error-1"><code>error</code></a></h3>
 <p>It creates an error with its source information.</p>
 <pre><code class="language-pen">\(info any) error
@@ -1020,10 +1026,6 @@ They can be converted from and into integers represented in IEEE-754 of a
 <h3 id="types-4"><a class="header" href="#types-4">Types</a></h3>
 <p>No types are defined.</p>
 <h3 id="functions-4"><a class="header" href="#functions-4">Functions</a></h3>
-<h4 id="length"><a class="header" href="#length"><code>Length</code></a></h4>
-<p>Calculate a length of a list.</p>
-<pre><code class="language-pen">\(xs [any]) number
-</code></pre>
 <h4 id="first"><a class="header" href="#first"><code>First</code></a></h4>
 <p>Get the first element in a list. If a list is empty, it returns a fallback value.</p>
 <pre><code class="language-pen">\(xs [any], fallback any) any
@@ -1127,7 +1129,7 @@ They can be converted from and into integers represented in IEEE-754 of a
 <h3 id="types-7"><a class="header" href="#types-7">Types</a></h3>
 <p>No types are defined.</p>
 <h3 id="functions-7"><a class="header" href="#functions-7">Functions</a></h3>
-<h4 id="length-1"><a class="header" href="#length-1"><code>Length</code></a></h4>
+<h4 id="length"><a class="header" href="#length"><code>Length</code></a></h4>
 <p>Return a length of a string.</p>
 <pre><code class="language-pen">\(s string) number
 </code></pre>
@@ -1166,7 +1168,7 @@ By using those views, you can apply operations to strings without copying them.<
 <p>Check if a string has a prefix.</p>
 <pre><code class="language-pen">\(v View, s string) boolean
 </code></pre>
-<h4 id="length-2"><a class="header" href="#length-2"><code>Length</code></a></h4>
+<h4 id="length-1"><a class="header" href="#length-1"><code>Length</code></a></h4>
 <p>Get a length of a view.</p>
 <pre><code class="language-pen">\(v View) number
 </code></pre>
@@ -1187,7 +1189,7 @@ By using those views, you can apply operations to strings without copying them.<
 <h3 id="types-9"><a class="header" href="#types-9">Types</a></h3>
 <p>No types are defined.</p>
 <h3 id="functions-9"><a class="header" href="#functions-9">Functions</a></h3>
-<h4 id="length-3"><a class="header" href="#length-3"><code>Length</code></a></h4>
+<h4 id="length-2"><a class="header" href="#length-2"><code>Length</code></a></h4>
 <p>Return a length of a string.</p>
 <pre><code class="language-pen">\(s string) number
 </code></pre>
@@ -2154,6 +2156,14 @@ f = \() number {
 </code></pre>
 <p><em>When</em> I run <code>pen build</code></p>
 <p><em>Then</em> the exit status should be 0.</p>
+<h2 id="get-a-size-of-a-list"><a class="header" href="#get-a-size-of-a-list">Get a size of a list</a></h2>
+<p><em>Given</em> a file named &quot;Foo.pen&quot; with:</p>
+<pre><code class="language-pen">f = \(xs [none]) number {
+  size(xs)
+}
+</code></pre>
+<p><em>When</em> I run <code>pen build</code></p>
+<p><em>Then</em> the exit status should be 0.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="error-3"><a class="header" href="#error-3">Error</a></h1>
 <h2 id="background-8"><a class="header" href="#background-8">Background</a></h2>
 <p><em>Given</em> a file named &quot;pen.json&quot; with:</p>
@@ -2713,18 +2723,6 @@ f = \() string {
 
 f = \() string {
   Byte'Slice(&quot;foo&quot;, 1, 2)
-}
-</code></pre>
-<p><em>When</em> I run <code>pen build</code></p>
-<p><em>Then</em> the exit status should be 0.</p>
-<h2 id="get-a-length-of-a-list"><a class="header" href="#get-a-length-of-a-list">Get a length of a list</a></h2>
-<p><em>Given</em> a file named &quot;Foo.pen&quot; with:</p>
-<pre><code class="language-pen">import Core'List
-
-f = \() number {
-  xs = [none]
-
-  List'Length([any ...xs])
 }
 </code></pre>
 <p><em>When</em> I run <code>pen build</code></p>
