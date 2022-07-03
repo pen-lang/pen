@@ -704,7 +704,7 @@ mod tests {
                 BuiltInCall::new(
                     Some(
                         types::Function::new(
-                            vec![list_type.clone().into()],
+                            vec![list_type.into()],
                             types::Number::new(Position::fake()),
                             Position::fake(),
                         )
