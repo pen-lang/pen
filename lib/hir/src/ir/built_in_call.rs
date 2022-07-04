@@ -1,5 +1,4 @@
-use super::built_in_function::BuiltInFunction;
-use super::expression::Expression;
+use super::{built_in_function::BuiltInFunction, expression::Expression};
 use crate::types::Type;
 use position::Position;
 
