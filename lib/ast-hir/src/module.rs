@@ -115,11 +115,6 @@ fn compile_block(block: &ast::Block) -> Result<ir::Expression, CompileError> {
 
 fn compile_expression(expression: &ast::Expression) -> Result<ir::Expression, CompileError> {
     Ok(match expression {
-        ast::Expression::SpawnOperation(operation) => ir::SpawnOperation::new(
-            compile_lambda(operation.function())?,
-            operation.position().clone(),
-        )
-        .into(),
         ast::Expression::BinaryOperation(operation) => {
             let lhs = compile_expression(operation.lhs())?;
             let rhs = compile_expression(operation.rhs())?;

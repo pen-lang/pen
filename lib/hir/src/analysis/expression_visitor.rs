@@ -96,7 +96,6 @@ fn visit_expression(expression: &Expression, visit: &mut impl FnMut(&Expression)
                 visit_expression(operation.lhs());
                 visit_expression(operation.rhs());
             }
-            Operation::Spawn(operation) => visit_lambda(operation.function(), visit),
             Operation::Boolean(operation) => {
                 visit_expression(operation.lhs());
                 visit_expression(operation.rhs());

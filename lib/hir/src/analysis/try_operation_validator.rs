@@ -107,9 +107,6 @@ fn validate_expression(
                 validate(operation.lhs())?;
                 validate(operation.rhs())?;
             }
-            Operation::Spawn(operation) => {
-                validate_lambda(context, operation.function())?;
-            }
             Operation::Boolean(operation) => {
                 validate(operation.lhs())?;
                 validate(operation.rhs())?;
