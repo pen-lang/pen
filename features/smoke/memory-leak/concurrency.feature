@@ -11,7 +11,7 @@ Feature: Concurrency
     }
     """
 
-  Scenario Outline: Use spawn operation
+  Scenario Outline: Use spawn function
     Given a file named "main.pen" with:
     """pen
     main = \(ctx context) none {
@@ -28,7 +28,7 @@ Feature: Concurrency
       | f()    |
       | none   |
 
-  Scenario Outline: Use spawn operation with a record
+  Scenario Outline: Use spawn function with a record
     Given a file named "main.pen" with:
     """pen
     type foo {
@@ -56,7 +56,7 @@ Feature: Concurrency
       | f()    |
       | none   |
 
-  Scenario Outline: Use spawn operation with a closure
+  Scenario Outline: Use spawn function with a closure
     Given a file named "main.pen" with:
     """pen
     main = \(ctx context) none {
@@ -78,7 +78,7 @@ Feature: Concurrency
       | f()    |
       | none   |
 
-  Scenario Outline: Use spawn operation with a closure with a record
+  Scenario Outline: Use spawn function with a closure with a record
     Given a file named "main.pen" with:
     """pen
     type foo {

@@ -252,7 +252,7 @@ Feature: Language
     When I successfully run `pen build`
     Then I successfully run `check_memory_leak.sh ./app`
 
-  Scenario: Use spawn operation
+  Scenario: Use spawn function
     Given a file named "main.pen" with:
     """pen
     main = \(ctx context) none {
@@ -264,7 +264,7 @@ Feature: Language
     When I successfully run `pen build`
     Then I successfully run `check_memory_leak.sh ./app`
 
-  Scenario: Use spawn operation with a record
+  Scenario: Use spawn function with a record
     Given a file named "main.pen" with:
     """pen
     type foo {
@@ -287,7 +287,7 @@ Feature: Language
     When I successfully run `pen build`
     Then I successfully run `check_memory_leak.sh ./app`
 
-  Scenario: Use spawn operation with a closure
+  Scenario: Use spawn function with a closure
     Given a file named "main.pen" with:
     """pen
     main = \(ctx context) none {
@@ -304,7 +304,7 @@ Feature: Language
     When I successfully run `pen build`
     Then I successfully run `check_memory_leak.sh ./app`
 
-  Scenario: Use spawn operation with a closure with a record
+  Scenario: Use spawn function with a closure with a record
     Given a file named "main.pen" with:
     """pen
     type foo {
