@@ -121,8 +121,7 @@ pub fn compile(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use position::test::PositionFake;
-    use position::Position;
+    use position::{test::PositionFake, Position};
 
     fn compile_call(call: &BuiltInCall) -> Result<mir::ir::Expression, CompileError> {
         compile(
