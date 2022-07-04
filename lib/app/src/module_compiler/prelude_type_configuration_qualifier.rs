@@ -7,8 +7,8 @@ pub fn qualify(
         list_type: qualify_list_type_configuration(&configuration.list_type, prelude_prefix),
         map_type: qualify_map_type_configuration(&configuration.map_type, prelude_prefix),
         string_type: qualify_string_type_configuration(&configuration.string_type, prelude_prefix),
-        spawn_function_name: prelude_prefix.to_owned() + &configuration.spawn_function_name,
-        debug_function_name: prelude_prefix.to_owned() + &configuration.debug_function_name,
+        spawn_function_name: configuration.spawn_function_name.clone(),
+        debug_function_name: configuration.debug_function_name.clone(),
     }
 }
 
