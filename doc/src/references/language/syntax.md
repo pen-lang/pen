@@ -254,18 +254,6 @@ You can also iterate keys and values in a map.
 [number f(key, value) for key, value in map]
 ```
 
-### Concurrency
-
-#### `go` expression
-
-It executes a function concurrently. Its returned value is a future represented as a function that returns a result of the executed function.
-
-```pen
-f = go \() number {
-  ...
-}
-```
-
 ## Comment
 
 Comments start with `#` and end with new-line characters.

@@ -90,7 +90,7 @@ fn compile_function_declaration(
 ) -> Result<mir::ir::FunctionDeclaration, CompileError> {
     Ok(mir::ir::FunctionDeclaration::new(
         declaration.name(),
-        type_::compile_function(declaration.type_(), context)?,
+        type_::compile_function(context, declaration.type_())?,
     ))
 }
 
