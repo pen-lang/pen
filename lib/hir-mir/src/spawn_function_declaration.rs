@@ -1,13 +1,9 @@
-use crate::{
-    concurrency_configuration::MODULE_LOCAL_SPAWN_FUNCTION_NAME, type_, ConcurrencyConfiguration,
-};
+use crate::{concurrency::MODULE_LOCAL_SPAWN_FUNCTION_NAME, type_};
 
-pub fn compile(
-    concurrency_configuration: &ConcurrencyConfiguration,
-) -> mir::ir::ForeignDeclaration {
+pub fn compile(name: &str) -> mir::ir::ForeignDeclaration {
     mir::ir::ForeignDeclaration::new(
         MODULE_LOCAL_SPAWN_FUNCTION_NAME,
-        &concurrency_configuration.spawn_function_name,
+        name,
         type_::compile_spawn_function(),
         mir::ir::CallingConvention::Target,
     )

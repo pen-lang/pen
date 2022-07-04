@@ -66,11 +66,11 @@ pub static COMPILE_CONFIGURATION: Lazy<Arc<app::module_compiler::CompileConfigur
                 },
                 error_type: app::module_compiler::ErrorTypeConfiguration {
                     error_type_name: "error".into(),
+                    error_function_name: "error".into(),
                     source_function_name: "source".into(),
                 },
-                concurrency: app::module_compiler::ConcurrencyConfiguration {
-                    spawn_function_name: "_pen_spawn".into(),
-                },
+                spawn_function_name: "_pen_spawn".into(),
+                debug_function_name: "_pen_debug".into(),
             },
         }
         .into()

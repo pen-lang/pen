@@ -29,7 +29,7 @@ pub fn compile(context: &CompileContext, module: &Module) -> Result<mir::ir::Mod
             })
             .chain(context.configuration().ok().map(|configuration| {
                 Ok(spawn_function_declaration::compile(
-                    &configuration.concurrency,
+                    &configuration.spawn_function_name,
                 ))
             }))
             .collect::<Result<_, _>>()?,
@@ -126,10 +126,7 @@ fn compile_function_definition(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{
-        compile_configuration::COMPILE_CONFIGURATION,
-        concurrency_configuration::CONCURRENCY_CONFIGURATION,
-    };
+    use crate::compile_configuration::COMPILE_CONFIGURATION;
     use hir::{test::ModuleFake, types};
     use mir::test::ModuleFake as _;
     use position::{test::PositionFake, Position};
@@ -162,7 +159,7 @@ mod tests {
             ),
             Ok(mir::ir::Module::empty()
                 .set_foreign_declarations(vec![spawn_function_declaration::compile(
-                    &CONCURRENCY_CONFIGURATION
+                    &COMPILE_CONFIGURATION.spawn_function_name
                 )])
                 .set_foreign_definitions(vec![mir::ir::ForeignDefinition::new(
                     "foo",
@@ -198,7 +195,7 @@ mod tests {
             ),
             Ok(mir::ir::Module::empty()
                 .set_foreign_declarations(vec![spawn_function_declaration::compile(
-                    &CONCURRENCY_CONFIGURATION
+                    &COMPILE_CONFIGURATION.spawn_function_name
                 )])
                 .set_foreign_definitions(vec![mir::ir::ForeignDefinition::new(
                     "foo",

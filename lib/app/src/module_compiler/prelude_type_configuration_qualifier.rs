@@ -7,7 +7,8 @@ pub fn qualify(
         list_type: qualify_list_type_configuration(&configuration.list_type, prelude_prefix),
         map_type: qualify_map_type_configuration(&configuration.map_type, prelude_prefix),
         string_type: qualify_string_type_configuration(&configuration.string_type, prelude_prefix),
-        concurrency: configuration.concurrency.clone(),
+        spawn_function_name: prelude_prefix.to_owned() + &configuration.spawn_function_name,
+        debug_function_name: prelude_prefix.to_owned() + &configuration.debug_function_name,
     }
 }
 
@@ -48,6 +49,7 @@ fn qualify_error_type_configuration(
 ) -> hir_mir::ErrorTypeConfiguration {
     hir_mir::ErrorTypeConfiguration {
         error_type_name: prelude_prefix.to_owned() + &configuration.error_type_name,
+        error_function_name: prelude_prefix.to_owned() + &configuration.error_function_name,
         source_function_name: prelude_prefix.to_owned() + &configuration.source_function_name,
     }
 }

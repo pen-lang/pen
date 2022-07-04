@@ -1,6 +1,6 @@
 mod built_in_call;
 mod compile_configuration;
-mod concurrency_configuration;
+mod concurrency;
 mod context;
 mod downcast;
 mod error;
@@ -21,7 +21,6 @@ mod transformation;
 mod type_;
 
 pub use compile_configuration::CompileConfiguration;
-pub use concurrency_configuration::ConcurrencyConfiguration;
 use context::CompileContext;
 pub use error::CompileError;
 pub use error_type_configuration::ErrorTypeConfiguration;

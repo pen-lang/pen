@@ -1,6 +1,6 @@
 use super::{
     built_in_call,
-    concurrency_configuration::MODULE_LOCAL_SPAWN_FUNCTION_NAME,
+    concurrency::MODULE_LOCAL_SPAWN_FUNCTION_NAME,
     context::CompileContext,
     downcast,
     transformation::{

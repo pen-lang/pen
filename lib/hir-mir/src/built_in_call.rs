@@ -1,6 +1,6 @@
 use crate::{
-    concurrency_configuration::MODULE_LOCAL_SPAWN_FUNCTION_NAME, context::CompileContext, downcast,
-    expression, type_, CompileError,
+    concurrency::MODULE_LOCAL_SPAWN_FUNCTION_NAME, context::CompileContext, downcast, expression,
+    type_, CompileError,
 };
 use hir::{
     analysis::{type_canonicalizer, AnalysisError},
