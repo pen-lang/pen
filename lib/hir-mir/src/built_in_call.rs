@@ -130,12 +130,12 @@ mod tests {
         )
     }
 
-    mod spawn_operation {
+    mod spawn {
         use super::*;
         use pretty_assertions::assert_eq;
 
         #[test]
-        fn compile_spawn_operation() {
+        fn compile() {
             let function_type = types::Function::new(
                 vec![],
                 types::Number::new(Position::fake()),
@@ -227,7 +227,7 @@ mod tests {
         }
 
         #[test]
-        fn compile_spawn_operation_with_any_type() {
+        fn compile_with_any_type() {
             let function_type =
                 types::Function::new(vec![], types::Any::new(Position::fake()), Position::fake());
             let thunk_type = mir::types::Function::new(vec![], mir::types::Type::Variant);
