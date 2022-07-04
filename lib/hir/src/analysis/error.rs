@@ -24,7 +24,7 @@ pub enum AnalysisError {
     RecordFieldUnknown(Position),
     RecordNotFound(Record),
     RecursiveTypeAlias(Position),
-    SpawnOperationArguments(Position),
+    SpawnedFunctionArguments(Position),
     TryOperationInList(Position),
     TypeNotFound(Reference),
     TypeNotInferred(Position),
@@ -112,17 +112,17 @@ impl Display for AnalysisError {
             Self::RecursiveTypeAlias(position) => {
                 write!(formatter, "recursive type alias\n{}", position)
             }
+            Self::SpawnedFunctionArguments(position) => {
+                write!(
+                    formatter,
+                    "function passed to go built-in function cannot have any argument\n{}",
+                    position
+                )
+            }
             Self::TryOperationInList(position) => {
                 write!(
                     formatter,
                     "try operation not allowed in list literal\n{}",
-                    position
-                )
-            }
-            Self::SpawnOperationArguments(position) => {
-                write!(
-                    formatter,
-                    "lambda expression in spawn operation cannot have any argument\n{}",
                     position
                 )
             }

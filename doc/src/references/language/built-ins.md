@@ -52,3 +52,11 @@ Note that behavior of this function can change among system packages. **You may 
 ```pen
 \(message string) none
 ```
+
+### `go`
+
+It executes a function concurrently. Its return value is a future represented as a function that returns a result of the executed function.
+
+```pen
+\(\() a) \() a
+```

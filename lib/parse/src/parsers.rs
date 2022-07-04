@@ -22,7 +22,7 @@ const BUILT_IN_LITERALS: &[&str] = &["false", "none", "true"];
 const BUILT_IN_TYPES: &[&str] = &["any", "boolean", "none", "number", "string"];
 static KEYWORDS: Lazy<Vec<&str>> = Lazy::new(|| {
     [
-        "as", "else", "export", "for", "foreign", "go", "if", "in", "import", "type",
+        "as", "else", "export", "for", "foreign", "if", "in", "import", "type",
     ]
     .iter()
     .chain(BUILT_IN_LITERALS)
@@ -436,11 +436,6 @@ fn prefix_operator<'a>() -> impl Parser<Stream<'a>, Output = UnaryOperator> {
     choice((concrete_prefix_operator("!", UnaryOperator::Not),)).expected("unary operator")
 }
 
-fn spawn_operation<'a>() -> impl Parser<Stream<'a>, Output = SpawnOperation> {
-    (attempt(position().skip(keyword("go"))), lambda())
-        .map(|(position, lambda)| SpawnOperation::new(lambda, position))
-}
-
 fn concrete_prefix_operator<'a>(
     literal: &'static str,
     operator: UnaryOperator,
@@ -500,7 +495,6 @@ fn try_operator<'a>() -> impl Parser<Stream<'a>, Output = SuffixOperator> {
 fn atomic_expression<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
     lazy(|| {
         no_partial(choice((
-            spawn_operation().map(Expression::from),
             if_list().map(Expression::from),
             if_map().map(Expression::from),
             if_type().map(Expression::from),
@@ -2382,32 +2376,6 @@ mod tests {
                     *expected
                 );
             }
-        }
-
-        #[test]
-        fn parse_spawn_operation() {
-            assert_eq!(
-                spawn_operation()
-                    .parse(stream("go \\() number { 42 }", ""))
-                    .unwrap()
-                    .0,
-                SpawnOperation::new(
-                    Lambda::new(
-                        vec![],
-                        types::Number::new(Position::fake()),
-                        Block::new(
-                            vec![],
-                            Number::new(
-                                NumberRepresentation::FloatingPoint("42".into()),
-                                Position::fake()
-                            ),
-                            Position::fake()
-                        ),
-                        Position::fake()
-                    ),
-                    Position::fake()
-                )
-            );
         }
 
         #[test]

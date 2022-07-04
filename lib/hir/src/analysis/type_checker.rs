@@ -57,26 +57,55 @@ fn check_expression(
 
     Ok(match expression {
         Expression::Boolean(boolean) => types::Boolean::new(boolean.position().clone()).into(),
-        Expression::BuiltInCall(call) => match call.function() {
-            BuiltInFunction::Size => match call.arguments() {
-                [argument] => {
-                    if !matches!(
-                        type_canonicalizer::canonicalize(
-                            &check_expression(argument, variables)?,
-                            context.types(),
-                        )?,
-                        Type::List(_) | Type::Map(_)
-                    ) {
-                        return Err(AnalysisError::CollectionExpected(
-                            call.arguments()[0].position().clone(),
-                        ));
-                    }
+        Expression::BuiltInCall(call) => {
+            let position = call.position();
+            let function_type = type_canonicalizer::canonicalize_function(
+                call.function_type()
+                    .ok_or_else(|| AnalysisError::TypeNotInferred(position.clone()))?,
+                context.types(),
+            )?
+            .ok_or_else(|| AnalysisError::FunctionExpected(position.clone()))?;
 
-                    types::Number::new(call.position().clone()).into()
+            if call.arguments().len() != function_type.arguments().len() {
+                return Err(AnalysisError::WrongArgumentCount(position.clone()));
+            }
+
+            for (argument, type_) in call.arguments().iter().zip(function_type.arguments()) {
+                check_subsumption(&check_expression(argument, variables)?, type_)?;
+            }
+
+            match call.function() {
+                BuiltInFunction::Size => {
+                    if let [argument_type] = function_type.arguments() {
+                        if !matches!(argument_type, Type::List(_) | Type::Map(_)) {
+                            return Err(AnalysisError::CollectionExpected(
+                                call.arguments()[0].position().clone(),
+                            ));
+                        }
+                    } else {
+                        return Err(AnalysisError::WrongArgumentCount(position.clone()));
+                    }
                 }
-                _ => return Err(AnalysisError::WrongArgumentCount(call.position().clone())),
-            },
-        },
+                BuiltInFunction::Spawn => {
+                    if let [argument_type] = function_type.arguments() {
+                        if !type_canonicalizer::canonicalize_function(
+                            argument_type,
+                            context.types(),
+                        )?
+                        .ok_or_else(|| AnalysisError::FunctionExpected(position.clone()))?
+                        .arguments()
+                        .is_empty()
+                        {
+                            return Err(AnalysisError::SpawnedFunctionArguments(position.clone()));
+                        }
+                    } else {
+                        return Err(AnalysisError::WrongArgumentCount(position.clone()));
+                    }
+                }
+            }
+
+            function_type.result().clone()
+        }
         Expression::Call(call) => {
             let type_ = call
                 .function_type()
@@ -531,7 +560,7 @@ fn check_operation(
         }
         Operation::Spawn(operation) => {
             if !operation.function().arguments().is_empty() {
-                return Err(AnalysisError::SpawnOperationArguments(
+                return Err(AnalysisError::SpawnedFunctionArguments(
                     operation.position().clone(),
                 ));
             }
@@ -1793,7 +1822,7 @@ mod tests {
                         false,
                     )])
                 ),
-                Err(AnalysisError::SpawnOperationArguments(Position::fake()))
+                Err(AnalysisError::SpawnedFunctionArguments(Position::fake()))
             );
         }
     }
@@ -3269,37 +3298,128 @@ mod tests {
                 )
                 .unwrap();
             }
+
+            #[test]
+            fn fail_to_check_none() {
+                assert!(matches!(
+                    check_module(
+                        &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                            "x",
+                            Lambda::new(
+                                vec![Argument::new("x", types::None::new(Position::fake()),)],
+                                types::Number::new(Position::fake()),
+                                BuiltInCall::new(
+                                    Some(
+                                        types::Function::new(
+                                            vec![types::None::new(Position::fake()).into()],
+                                            types::Number::new(Position::fake()),
+                                            Position::fake(),
+                                        )
+                                        .into(),
+                                    ),
+                                    BuiltInFunction::Size,
+                                    vec![Variable::new("x", Position::fake()).into()],
+                                    Position::fake(),
+                                ),
+                                Position::fake(),
+                            ),
+                            false,
+                        )])
+                    ),
+                    Err(AnalysisError::CollectionExpected(_)),
+                ));
+            }
         }
 
-        #[test]
-        fn fail_to_check_none() {
-            assert!(matches!(
+        mod spawn {
+            use super::*;
+
+            #[test]
+            fn check() {
+                let function_type = types::Function::new(
+                    vec![],
+                    types::None::new(Position::fake()),
+                    Position::fake(),
+                );
+
                 check_module(
                     &Module::empty().set_definitions(vec![FunctionDefinition::fake(
                         "x",
                         Lambda::new(
-                            vec![Argument::new("x", types::None::new(Position::fake()),)],
-                            types::Number::new(Position::fake()),
+                            vec![],
+                            function_type.clone(),
                             BuiltInCall::new(
                                 Some(
                                     types::Function::new(
-                                        vec![types::None::new(Position::fake()).into()],
-                                        types::Number::new(Position::fake()),
+                                        vec![function_type.clone().into()],
+                                        function_type,
                                         Position::fake(),
                                     )
                                     .into(),
                                 ),
-                                BuiltInFunction::Size,
-                                vec![Variable::new("x", Position::fake()).into()],
+                                BuiltInFunction::Spawn,
+                                vec![Lambda::new(
+                                    vec![],
+                                    types::None::new(Position::fake()),
+                                    None::new(Position::fake()),
+                                    Position::fake(),
+                                )
+                                .into()],
                                 Position::fake(),
                             ),
                             Position::fake(),
                         ),
                         false,
-                    )])
-                ),
-                Err(AnalysisError::CollectionExpected(_)),
-            ));
+                    )]),
+                )
+                .unwrap();
+            }
+
+            #[test]
+            fn fail_to_check_with_argument() {
+                let function_type = types::Function::new(
+                    vec![types::None::new(Position::fake()).into()],
+                    types::None::new(Position::fake()),
+                    Position::fake(),
+                );
+
+                assert!(matches!(
+                    check_module(
+                        &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                            "x",
+                            Lambda::new(
+                                vec![],
+                                function_type.clone(),
+                                BuiltInCall::new(
+                                    Some(
+                                        types::Function::new(
+                                            vec![function_type.clone().into()],
+                                            function_type,
+                                            Position::fake()
+                                        )
+                                        .into()
+                                    ),
+                                    BuiltInFunction::Spawn,
+                                    vec![Lambda::new(
+                                        vec![Argument::new(
+                                            "x",
+                                            types::None::new(Position::fake())
+                                        )],
+                                        types::None::new(Position::fake()),
+                                        None::new(Position::fake()),
+                                        Position::fake(),
+                                    )
+                                    .into()],
+                                    Position::fake(),
+                                ),
+                                Position::fake(),
+                            ),
+                            false,
+                        )])
+                    ),
+                    Err(AnalysisError::SpawnedFunctionArguments(_))
+                ));
+            }
         }
     }
 }

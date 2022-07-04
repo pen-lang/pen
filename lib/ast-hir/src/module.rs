@@ -1,6 +1,5 @@
-use crate::{number, string};
-
 use super::error::CompileError;
+use crate::{number, string};
 use hir::{ir, types};
 use position::Position;
 
@@ -202,17 +201,17 @@ fn compile_expression(expression: &ast::Expression) -> Result<ir::Expression, Co
                 .arguments()
                 .iter()
                 .map(compile_expression)
-                .collect::<Result<_, _>>()?;
+                .collect::<Result<Vec<_>, _>>()?;
+            let built_in_call = |function| {
+                ir::BuiltInCall::new(None, function, arguments.clone(), call.position().clone())
+            };
 
             match call.function() {
                 ast::Expression::Variable(variable) if variable.name() == "size" => {
-                    ir::BuiltInCall::new(
-                        None,
-                        ir::BuiltInFunction::Size,
-                        arguments,
-                        call.position().clone(),
-                    )
-                    .into()
+                    built_in_call(ir::BuiltInFunction::Size).into()
+                }
+                ast::Expression::Variable(variable) if variable.name() == "go" => {
+                    built_in_call(ir::BuiltInFunction::Spawn).into()
                 }
                 _ => ir::Call::new(
                     None,
