@@ -558,15 +558,6 @@ fn check_operation(
 
             number_type
         }
-        Operation::Spawn(operation) => {
-            if !operation.function().arguments().is_empty() {
-                return Err(AnalysisError::SpawnedFunctionArguments(
-                    operation.position().clone(),
-                ));
-            }
-
-            check_lambda(context, operation.function(), variables)?.into()
-        }
         Operation::Boolean(operation) => {
             let boolean_type = types::Boolean::new(operation.position().clone()).into();
 
@@ -1761,68 +1752,6 @@ mod tests {
                     Position::fake(),
                     Position::fake()
                 ))
-            );
-        }
-
-        #[test]
-        fn check_spawn_operation() {
-            check_module(
-                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
-                    "f",
-                    Lambda::new(
-                        vec![],
-                        types::Function::new(
-                            vec![],
-                            types::None::new(Position::fake()),
-                            Position::fake(),
-                        ),
-                        SpawnOperation::new(
-                            Lambda::new(
-                                vec![],
-                                types::None::new(Position::fake()),
-                                None::new(Position::fake()),
-                                Position::fake(),
-                            ),
-                            Position::fake(),
-                        ),
-                        Position::fake(),
-                    ),
-                    false,
-                )]),
-            )
-            .unwrap();
-        }
-
-        #[test]
-        fn fail_to_check_spawn_operation() {
-            let none_type = types::None::new(Position::fake());
-
-            assert_eq!(
-                check_module(
-                    &Module::empty().set_definitions(vec![FunctionDefinition::fake(
-                        "f",
-                        Lambda::new(
-                            vec![],
-                            types::Function::new(
-                                vec![none_type.clone().into()],
-                                none_type.clone(),
-                                Position::fake(),
-                            ),
-                            SpawnOperation::new(
-                                Lambda::new(
-                                    vec![Argument::new("x", none_type.clone())],
-                                    none_type,
-                                    None::new(Position::fake()),
-                                    Position::fake(),
-                                ),
-                                Position::fake(),
-                            ),
-                            Position::fake(),
-                        ),
-                        false,
-                    )])
-                ),
-                Err(AnalysisError::SpawnedFunctionArguments(Position::fake()))
             );
         }
     }

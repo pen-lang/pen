@@ -349,11 +349,6 @@ fn transform_operation(operation: &Operation, transform: &impl Fn(&Type) -> Type
             operation.position().clone(),
         )
         .into(),
-        Operation::Spawn(operation) => SpawnOperation::new(
-            transform_lambda(operation.function(), transform),
-            operation.position().clone(),
-        )
-        .into(),
         Operation::Boolean(operation) => BooleanOperation::new(
             operation.operator(),
             transform_expression(operation.lhs()),

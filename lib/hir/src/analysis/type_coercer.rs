@@ -432,11 +432,6 @@ fn transform_expression(
                 operation.position().clone(),
             )
             .into(),
-            Operation::Spawn(operation) => SpawnOperation::new(
-                transform_lambda(operation.function(), variables, context)?,
-                operation.position().clone(),
-            )
-            .into(),
             Operation::Boolean(operation) => BooleanOperation::new(
                 operation.operator(),
                 transform_expression(operation.lhs(), variables)?,

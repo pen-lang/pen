@@ -1,6 +1,5 @@
 use super::{
     built_in_call,
-    concurrency_configuration::MODULE_LOCAL_SPAWN_FUNCTION_NAME,
     context::CompileContext,
     downcast,
     transformation::{
@@ -680,7 +679,6 @@ fn compile_operation(
             compile(operation.rhs())?,
         )
         .into(),
-        Operation::Spawn(operation) => compile_spawn_operation(context, operation)?,
         Operation::Boolean(operation) => compile(&boolean_operation::transform(operation))?,
         Operation::Equality(operation) => match operation.operator() {
             EqualityOperator::Equal => {
@@ -759,72 +757,6 @@ fn compile_operation(
             .into()
         }
     })
-}
-
-fn compile_spawn_operation(
-    context: &CompileContext,
-    operation: &SpawnOperation,
-) -> Result<mir::ir::Expression, CompileError> {
-    const ANY_THUNK_NAME: &str = "$any_thunk";
-    const THUNK_NAME: &str = "$thunk";
-
-    let position = operation.position();
-    let body = operation.function().body();
-    let result_type = operation.function().result_type();
-    let any_type = Type::from(types::Any::new(position.clone()));
-    let thunk_type = types::Function::new(vec![], any_type.clone(), position.clone()).into();
-    let mir_thunk_type = type_::compile(context, &thunk_type)?;
-
-    Ok(mir::ir::Let::new(
-        ANY_THUNK_NAME,
-        mir_thunk_type.clone(),
-        mir::ir::Call::new(
-            type_::compile_spawn_function(),
-            mir::ir::Variable::new(MODULE_LOCAL_SPAWN_FUNCTION_NAME),
-            vec![mir::ir::LetRecursive::new(
-                mir::ir::FunctionDefinition::thunk(
-                    ANY_THUNK_NAME,
-                    compile(
-                        context,
-                        &TypeCoercion::new(
-                            result_type.clone(),
-                            any_type.clone(),
-                            body.clone(),
-                            body.position().clone(),
-                        )
-                        .into(),
-                    )?,
-                    type_::compile(context, &any_type)?,
-                ),
-                mir::ir::Synchronize::new(mir_thunk_type, mir::ir::Variable::new(ANY_THUNK_NAME)),
-            )
-            .into()],
-        ),
-        mir::ir::LetRecursive::new(
-            mir::ir::FunctionDefinition::new(
-                THUNK_NAME,
-                vec![],
-                compile(
-                    context,
-                    &downcast::compile(
-                        context,
-                        &any_type,
-                        result_type,
-                        &Call::new(
-                            Some(thunk_type),
-                            Variable::new(ANY_THUNK_NAME, position.clone()),
-                            vec![],
-                            position.clone(),
-                        )
-                        .into(),
-                    )?,
-                )?,
-                type_::compile(context, result_type)?,
-            ),
-            mir::ir::Variable::new(THUNK_NAME),
-        ),
-    )
-    .into())
 }
 
 fn compile_record_fields(
@@ -1574,130 +1506,6 @@ mod tests {
                         ),
                     ],
                     None
-                )
-                .into())
-            );
-        }
-    }
-
-    mod spawn_operation {
-        use super::*;
-        use pretty_assertions::assert_eq;
-
-        #[test]
-        fn compile_spawn_operation() {
-            let thunk_type = mir::types::Function::new(vec![], mir::types::Type::Variant);
-
-            assert_eq!(
-                compile_expression(
-                    &SpawnOperation::new(
-                        Lambda::new(
-                            vec![],
-                            types::Number::new(Position::fake()),
-                            Number::new(42.0, Position::fake()),
-                            Position::fake()
-                        ),
-                        Position::fake(),
-                    )
-                    .into(),
-                ),
-                Ok(mir::ir::Let::new(
-                    "$any_thunk",
-                    thunk_type.clone(),
-                    mir::ir::Call::new(
-                        type_::compile_spawn_function(),
-                        mir::ir::Variable::new(MODULE_LOCAL_SPAWN_FUNCTION_NAME),
-                        vec![mir::ir::LetRecursive::new(
-                            mir::ir::FunctionDefinition::thunk(
-                                "$any_thunk",
-                                mir::ir::Variant::new(
-                                    mir::types::Type::Number,
-                                    mir::ir::Expression::Number(42.0)
-                                ),
-                                mir::types::Type::Variant
-                            ),
-                            mir::ir::Synchronize::new(
-                                thunk_type.clone(),
-                                mir::ir::Variable::new("$any_thunk")
-                            ),
-                        )
-                        .into()]
-                    ),
-                    mir::ir::LetRecursive::new(
-                        mir::ir::FunctionDefinition::new(
-                            "$thunk",
-                            vec![],
-                            mir::ir::Case::new(
-                                mir::ir::Call::new(
-                                    thunk_type,
-                                    mir::ir::Variable::new("$any_thunk"),
-                                    vec![]
-                                ),
-                                vec![mir::ir::Alternative::new(
-                                    mir::types::Type::Number,
-                                    "$value",
-                                    mir::ir::Variable::new("$value")
-                                )],
-                                None,
-                            ),
-                            mir::types::Type::Number
-                        ),
-                        mir::ir::Variable::new("$thunk"),
-                    ),
-                )
-                .into())
-            );
-        }
-
-        #[test]
-        fn compile_spawn_operation_with_any_type() {
-            let thunk_type = mir::types::Function::new(vec![], mir::types::Type::Variant);
-
-            assert_eq!(
-                compile_expression(
-                    &SpawnOperation::new(
-                        Lambda::new(
-                            vec![],
-                            types::Any::new(Position::fake()),
-                            Variable::new("x", Position::fake()),
-                            Position::fake()
-                        ),
-                        Position::fake(),
-                    )
-                    .into(),
-                ),
-                Ok(mir::ir::Let::new(
-                    "$any_thunk",
-                    thunk_type.clone(),
-                    mir::ir::Call::new(
-                        type_::compile_spawn_function(),
-                        mir::ir::Variable::new(MODULE_LOCAL_SPAWN_FUNCTION_NAME),
-                        vec![mir::ir::LetRecursive::new(
-                            mir::ir::FunctionDefinition::thunk(
-                                "$any_thunk",
-                                mir::ir::Variable::new("x"),
-                                mir::types::Type::Variant
-                            ),
-                            mir::ir::Synchronize::new(
-                                thunk_type.clone(),
-                                mir::ir::Variable::new("$any_thunk")
-                            ),
-                        )
-                        .into()]
-                    ),
-                    mir::ir::LetRecursive::new(
-                        mir::ir::FunctionDefinition::new(
-                            "$thunk",
-                            vec![],
-                            mir::ir::Call::new(
-                                thunk_type,
-                                mir::ir::Variable::new("$any_thunk"),
-                                vec![]
-                            ),
-                            mir::types::Type::Variant
-                        ),
-                        mir::ir::Variable::new("$thunk"),
-                    ),
                 )
                 .into())
             );
