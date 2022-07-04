@@ -452,13 +452,13 @@ CheckFoo = \() none | error {
 <p>To run tests, you can run a <code>pen test</code> command in your package's directory. Then, you should see test results of test functions in test modules. The <code>pen test</code> command exits with a non-zero status code if some tests fail.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="concurrency-and-parallelism"><a class="header" href="#concurrency-and-parallelism">Concurrency and parallelism</a></h1>
 <p>Concurrent programs use CPU time efficiently without blocking on I/O or synchronization. And parallel programs leverage multi-core CPUs to compute something in parallel for speed.</p>
-<p>The language provides simple syntax for concurrent and parallel programming. Its <code>go</code> expression runs a given function concurrently, and possibly in parallel. The expression is composed of the <code>go</code> keyword followed by a function with no argument.</p>
-<pre><code class="language-pen">f = go \() number {
+<p>Pen provides some built-in functions for concurrent and parallel programming. Its <code>go</code> built-in function runs a given function concurrently, and possibly in parallel.</p>
+<pre><code class="language-pen">f = go(\() number {
   computeExpensive(x, y, z)
-}
+})
 </code></pre>
-<p>The <code>go</code> expression returns a function of the type same as the given expression (a.k.a. futures or promises in other languages.) The function returns a resulting value of the function execution.</p>
-<p>The <code>go</code> expression may or may not run a given function immediately depending on its implementation. For example, the standard <code>Os</code> system package runs the given function in parallel if multiple CPU cores are available.</p>
+<p>The <code>go</code> function returns a function of the same type as the given argument (a.k.a. futures or promises in other languages.) The returned function returns a resulting value of the function execution.</p>
+<p>The <code>go</code> function may or may not run a given function immediately depending on its implementation. For example, the standard <code>Os</code> system package runs the given function in parallel if multiple CPU cores are available.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="coding-style"><a class="header" href="#coding-style">Coding style</a></h1>
 <p>This page describes the common coding style of programs written in Pen.</p>
 <h2 id="spacing"><a class="header" href="#spacing">Spacing</a></h2>
@@ -652,13 +652,6 @@ foo{x: 0} == foo{x: 1}
 <p>You can also iterate keys and values in a map.</p>
 <pre><code class="language-pen">[number f(key, value) for key, value in map]
 </code></pre>
-<h3 id="concurrency"><a class="header" href="#concurrency">Concurrency</a></h3>
-<h4 id="go-expression"><a class="header" href="#go-expression"><code>go</code> expression</a></h4>
-<p>It executes a function concurrently. Its returned value is a future represented as a function that returns a result of the executed function.</p>
-<pre><code class="language-pen">f = go \() number {
-  ...
-}
-</code></pre>
 <h2 id="comment"><a class="header" href="#comment">Comment</a></h2>
 <p>Comments start with <code>#</code> and end with new-line characters.</p>
 <pre><code class="language-pen"># This is a comment.
@@ -808,6 +801,10 @@ false
 <p>It prints a debug message given as an argument if a <code>PEN_DEBUG</code> environment variable is set.</p>
 <p>Note that behavior of this function can change among system packages. <strong>You may not even see any messages with system packages whose systems do not have any consoles.</strong></p>
 <pre><code class="language-pen">\(message string) none
+</code></pre>
+<h3 id="go"><a class="header" href="#go"><code>go</code></a></h3>
+<p>It executes a function concurrently. Its return value is a future represented as a function that returns a result of the executed function.</p>
+<pre><code class="language-pen">\(\() a) \() a
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="modules"><a class="header" href="#modules">Modules</a></h1>
 <p>Modules are sets of functions and types. Using modules, you can split large programs into smaller chunks.</p>
