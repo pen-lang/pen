@@ -9,9 +9,9 @@ use crate::{
     test_configuration::TestModuleConfiguration,
 };
 pub use compile_configuration::{
-    CompileConfiguration, ConcurrencyConfiguration, ErrorTypeConfiguration, FmmConfiguration,
-    HashConfiguration, HirConfiguration, ListTypeConfiguration, MapTypeConfiguration,
-    MapTypeIterationConfiguration, MirConfiguration, StringTypeConfiguration,
+    CompileConfiguration, ErrorTypeConfiguration, FmmConfiguration, HashConfiguration,
+    HirConfiguration, ListTypeConfiguration, MapTypeConfiguration, MapTypeIterationConfiguration,
+    MirConfiguration, StringTypeConfiguration,
 };
 use fnv::FnvHashMap;
 use std::{collections::BTreeMap, error::Error};

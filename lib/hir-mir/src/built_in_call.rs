@@ -1,6 +1,8 @@
 use crate::{
-    concurrency_configuration::MODULE_LOCAL_SPAWN_FUNCTION_NAME, context::CompileContext, downcast,
-    expression, type_, CompileError,
+    context::CompileContext,
+    downcast, expression, type_,
+    utility_function_declaration::{LOCAL_DEBUG_FUNCTION_NAME, LOCAL_SPAWN_FUNCTION_NAME},
+    CompileError,
 };
 use hir::{
     analysis::{type_canonicalizer, AnalysisError},
@@ -27,6 +29,20 @@ pub fn compile(
         .collect::<Result<_, _>>()?;
 
     Ok(match call.function() {
+        BuiltInFunction::Debug => mir::ir::Call::new(
+            type_::compile_function(
+                context,
+                &type_canonicalizer::canonicalize_function(
+                    call.function_type()
+                        .ok_or_else(|| AnalysisError::TypeNotInferred(position.clone()))?,
+                    context.types(),
+                )?
+                .ok_or_else(|| AnalysisError::FunctionExpected(position.clone()))?,
+            )?,
+            mir::ir::Variable::new(LOCAL_DEBUG_FUNCTION_NAME),
+            arguments,
+        )
+        .into(),
         BuiltInFunction::Size => mir::ir::Call::new(
             type_::compile_function(context, &function_type)?,
             match &function_type.arguments()[0] {
@@ -61,7 +77,7 @@ pub fn compile(
                 mir_thunk_type.clone(),
                 mir::ir::Call::new(
                     type_::compile_spawn_function(),
-                    mir::ir::Variable::new(MODULE_LOCAL_SPAWN_FUNCTION_NAME),
+                    mir::ir::Variable::new(LOCAL_SPAWN_FUNCTION_NAME),
                     vec![mir::ir::LetRecursive::new(
                         mir::ir::FunctionDefinition::thunk(
                             ANY_THUNK_NAME,
@@ -130,6 +146,34 @@ mod tests {
         )
     }
 
+    #[test]
+    fn compile_debug() {
+        assert_eq!(
+            compile_call(&BuiltInCall::new(
+                Some(
+                    types::Function::new(
+                        vec![types::ByteString::new(Position::fake()).into()],
+                        types::None::new(Position::fake()),
+                        Position::fake()
+                    )
+                    .into()
+                ),
+                BuiltInFunction::Debug,
+                vec![ByteString::new(vec![], Position::fake()).into()],
+                Position::fake(),
+            ),),
+            Ok(mir::ir::Call::new(
+                mir::types::Function::new(
+                    vec![mir::types::Type::ByteString],
+                    mir::types::Type::None
+                ),
+                mir::ir::Variable::new(LOCAL_DEBUG_FUNCTION_NAME),
+                vec![mir::ir::ByteString::new(vec![]).into()],
+            )
+            .into())
+        );
+    }
+
     mod spawn {
         use super::*;
         use pretty_assertions::assert_eq;
@@ -144,34 +188,31 @@ mod tests {
             let thunk_type = mir::types::Function::new(vec![], mir::types::Type::Variant);
 
             assert_eq!(
-                compile_call(
-                    &BuiltInCall::new(
-                        Some(
-                            types::Function::new(
-                                vec![function_type.clone().into()],
-                                function_type,
-                                Position::fake()
-                            )
-                            .into()
-                        ),
-                        BuiltInFunction::Spawn,
-                        vec![Lambda::new(
-                            vec![],
-                            types::Number::new(Position::fake()),
-                            Number::new(42.0, Position::fake()),
+                compile_call(&BuiltInCall::new(
+                    Some(
+                        types::Function::new(
+                            vec![function_type.clone().into()],
+                            function_type,
                             Position::fake()
                         )
-                        .into()],
-                        Position::fake(),
+                        .into()
+                    ),
+                    BuiltInFunction::Spawn,
+                    vec![Lambda::new(
+                        vec![],
+                        types::Number::new(Position::fake()),
+                        Number::new(42.0, Position::fake()),
+                        Position::fake()
                     )
-                    .into(),
-                ),
+                    .into()],
+                    Position::fake(),
+                ),),
                 Ok(mir::ir::Let::new(
                     "$any_thunk",
                     thunk_type.clone(),
                     mir::ir::Call::new(
                         type_::compile_spawn_function(),
-                        mir::ir::Variable::new(MODULE_LOCAL_SPAWN_FUNCTION_NAME),
+                        mir::ir::Variable::new(LOCAL_SPAWN_FUNCTION_NAME),
                         vec![mir::ir::LetRecursive::new(
                             mir::ir::FunctionDefinition::thunk(
                                 "$any_thunk",
@@ -233,34 +274,31 @@ mod tests {
             let thunk_type = mir::types::Function::new(vec![], mir::types::Type::Variant);
 
             assert_eq!(
-                compile_call(
-                    &BuiltInCall::new(
-                        Some(
-                            types::Function::new(
-                                vec![function_type.clone().into()],
-                                function_type,
-                                Position::fake()
-                            )
-                            .into()
-                        ),
-                        BuiltInFunction::Spawn,
-                        vec![Lambda::new(
-                            vec![],
-                            types::Any::new(Position::fake()),
-                            Variable::new("x", Position::fake()),
+                compile_call(&BuiltInCall::new(
+                    Some(
+                        types::Function::new(
+                            vec![function_type.clone().into()],
+                            function_type,
                             Position::fake()
                         )
-                        .into()],
-                        Position::fake(),
+                        .into()
+                    ),
+                    BuiltInFunction::Spawn,
+                    vec![Lambda::new(
+                        vec![],
+                        types::Any::new(Position::fake()),
+                        Variable::new("x", Position::fake()),
+                        Position::fake()
                     )
-                    .into(),
-                ),
+                    .into()],
+                    Position::fake(),
+                ),),
                 Ok(mir::ir::Let::new(
                     "$any_thunk",
                     thunk_type.clone(),
                     mir::ir::Call::new(
                         type_::compile_spawn_function(),
-                        mir::ir::Variable::new(MODULE_LOCAL_SPAWN_FUNCTION_NAME),
+                        mir::ir::Variable::new(LOCAL_SPAWN_FUNCTION_NAME),
                         vec![mir::ir::LetRecursive::new(
                             mir::ir::FunctionDefinition::thunk(
                                 "$any_thunk",

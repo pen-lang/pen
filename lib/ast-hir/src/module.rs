@@ -202,6 +202,9 @@ fn compile_expression(expression: &ast::Expression) -> Result<ir::Expression, Co
             };
 
             match call.function() {
+                ast::Expression::Variable(variable) if variable.name() == "debug" => {
+                    built_in_call(ir::BuiltInFunction::Debug).into()
+                }
                 ast::Expression::Variable(variable) if variable.name() == "size" => {
                     built_in_call(ir::BuiltInFunction::Size).into()
                 }

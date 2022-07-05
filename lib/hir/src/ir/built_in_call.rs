@@ -1,12 +1,6 @@
-use super::expression::Expression;
+use super::{built_in_function::BuiltInFunction, expression::Expression};
 use crate::types::Type;
 use position::Position;
-
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
-pub enum BuiltInFunction {
-    Size,
-    Spawn,
-}
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct BuiltInCall {

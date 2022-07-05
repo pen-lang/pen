@@ -1,5 +1,0 @@
-import foreign "c" _pen_debug \(string) none
-
-debug = \(x string) none {
-  _pen_debug(x)
-}

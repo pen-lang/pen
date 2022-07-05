@@ -19,7 +19,7 @@ members = [
   "lib/position",
   "lib/test-info",
 ]
-exclude = ["benchmark", "cmd/test", "examples", "packages", "tmp"]
+exclude = ["benchmark", "cmd/test", "examples", "packages", "test", "tmp"]
 
 [profile.release]
 lto = true

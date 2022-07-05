@@ -88,19 +88,30 @@ fn infer_expression(
                     type_extractor::extract_from_expression(context, argument, variables)
                 })
                 .collect::<Result<Vec<_>, _>>()?;
-            let result_type = match call.function() {
-                BuiltInFunction::Size => types::Number::new(position.clone()).into(),
-                BuiltInFunction::Spawn => {
-                    if let [argument_type] = &argument_types[..] {
-                        argument_type.clone()
-                    } else {
-                        return Err(AnalysisError::WrongArgumentCount(position.clone()));
-                    }
-                }
-            };
 
             BuiltInCall::new(
-                Some(types::Function::new(argument_types, result_type, position.clone()).into()),
+                Some(
+                    match call.function() {
+                        BuiltInFunction::Debug => types::Function::new(
+                            vec![types::ByteString::new(position.clone()).into()],
+                            types::None::new(position.clone()),
+                            position.clone(),
+                        ),
+                        BuiltInFunction::Size => types::Function::new(
+                            argument_types,
+                            types::Number::new(position.clone()),
+                            position.clone(),
+                        ),
+                        BuiltInFunction::Spawn => {
+                            let result_type = argument_types.first().cloned().ok_or_else(|| {
+                                AnalysisError::WrongArgumentCount(position.clone())
+                            })?;
+
+                            types::Function::new(argument_types, result_type, position.clone())
+                        }
+                    }
+                    .into(),
+                ),
                 call.function(),
                 arguments,
                 position.clone(),

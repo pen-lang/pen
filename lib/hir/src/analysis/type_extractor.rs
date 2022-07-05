@@ -5,6 +5,7 @@ use crate::{
     types::{self, Type},
 };
 use fnv::FnvHashMap;
+use position::Position;
 
 pub fn extract_from_expression(
     context: &AnalysisContext,
@@ -16,28 +17,18 @@ pub fn extract_from_expression(
 
     Ok(match expression {
         Expression::Boolean(boolean) => types::Boolean::new(boolean.position().clone()).into(),
-        Expression::BuiltInCall(call) => {
-            let position = call.position();
-
-            match call.function() {
-                BuiltInFunction::Size => types::Number::new(position.clone()).into(),
-                BuiltInFunction::Spawn => {
-                    if let [argument] = call.arguments() {
-                        extract_from_expression(argument, variables)
-                    } else {
-                        Err(AnalysisError::WrongArgumentCount(position.clone()))
-                    }?
-                }
-            }
-        }
-        Expression::Call(call) => type_canonicalizer::canonicalize_function(
-            call.function_type()
-                .ok_or_else(|| AnalysisError::TypeNotInferred(call.position().clone()))?,
-            context.types(),
-        )?
-        .ok_or_else(|| AnalysisError::FunctionExpected(call.function().position().clone()))?
-        .result()
-        .clone(),
+        Expression::BuiltInCall(call) => extract_from_call_like(
+            context,
+            call.function_type(),
+            call.position(),
+            call.position(),
+        )?,
+        Expression::Call(call) => extract_from_call_like(
+            context,
+            call.function_type(),
+            call.position(),
+            call.function().position(),
+        )?,
         Expression::If(if_) => types::Union::new(
             extract_from_expression(if_.then(), variables)?,
             extract_from_expression(if_.else_(), variables)?,
@@ -227,6 +218,21 @@ pub fn extract_from_expression(
     })
 }
 
+fn extract_from_call_like(
+    context: &AnalysisContext,
+    type_: Option<&Type>,
+    call_position: &Position,
+    function_position: &Position,
+) -> Result<Type, AnalysisError> {
+    Ok(type_canonicalizer::canonicalize_function(
+        type_.ok_or_else(|| AnalysisError::TypeNotInferred(call_position.clone()))?,
+        context.types(),
+    )?
+    .ok_or_else(|| AnalysisError::FunctionExpected(function_position.clone()))?
+    .result()
+    .clone())
+}
+
 pub fn extract_from_lambda(lambda: &Lambda) -> types::Function {
     types::Function::new(
         lambda
@@ -329,7 +335,18 @@ mod tests {
                 extract_from_expression(
                     &empty_context(),
                     &BuiltInCall::new(
-                        None,
+                        Some(
+                            types::Function::new(
+                                vec![types::List::new(
+                                    types::None::new(Position::fake()),
+                                    Position::fake()
+                                )
+                                .into()],
+                                types::Number::new(Position::fake()),
+                                Position::fake()
+                            )
+                            .into()
+                        ),
                         BuiltInFunction::Size,
                         vec![List::new(
                             types::None::new(Position::fake()),
@@ -348,11 +365,21 @@ mod tests {
 
         #[test]
         fn extract_from_spawn() {
+            let function_type =
+                types::Function::new(vec![], types::None::new(Position::fake()), Position::fake());
+
             assert_eq!(
                 extract_from_expression(
                     &empty_context(),
                     &BuiltInCall::new(
-                        None,
+                        Some(
+                            types::Function::new(
+                                vec![function_type.clone().into()],
+                                function_type.clone(),
+                                Position::fake()
+                            )
+                            .into()
+                        ),
                         BuiltInFunction::Spawn,
                         vec![Lambda::new(
                             vec![],
@@ -366,26 +393,8 @@ mod tests {
                     .into(),
                     &Default::default(),
                 ),
-                Ok(types::Function::new(
-                    vec![],
-                    types::None::new(Position::fake()),
-                    Position::fake()
-                )
-                .into())
+                Ok(function_type.into())
             );
-        }
-
-        #[test]
-        fn fail_to_extract_from_spawn() {
-            assert!(matches!(
-                extract_from_expression(
-                    &empty_context(),
-                    &BuiltInCall::new(None, BuiltInFunction::Spawn, vec![], Position::fake())
-                        .into(),
-                    &Default::default(),
-                ),
-                Err(AnalysisError::WrongArgumentCount(_))
-            ));
         }
     }
 }

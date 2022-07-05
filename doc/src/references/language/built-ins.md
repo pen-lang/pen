@@ -32,7 +32,7 @@ Its time complexity is O(n) for lists and O(1) for maps.
 It creates an error with its source information.
 
 ```pen
-\(info any) error
+\(s any) error
 ```
 
 ### `source`
